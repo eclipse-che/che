@@ -12,6 +12,8 @@ package org.eclipse.che.api.workspace.server.model.impl.stack;
 
 import org.eclipse.che.api.workspace.shared.stack.StackComponent;
 
+import javax.persistence.Basic;
+import javax.persistence.Embeddable;
 import java.util.Objects;
 
 /**
@@ -19,10 +21,16 @@ import java.util.Objects;
  *
  * @author Alexander Andrienko
  */
+@Embeddable
 public class StackComponentImpl implements StackComponent {
 
+    @Basic
     private String name;
+
+    @Basic
     private String version;
+
+    public StackComponentImpl() {}
 
     public StackComponentImpl(StackComponent stackComponent) {
         this(stackComponent.getName(), stackComponent.getVersion());

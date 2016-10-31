@@ -29,8 +29,8 @@ import org.testng.annotations.Test;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Arrays;
 
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.git.impl.GitTestUtil.addFile;
 import static org.eclipse.che.git.impl.GitTestUtil.cleanupTestRepo;
 import static org.eclipse.che.git.impl.GitTestUtil.connectToGitRepositoryWithContent;
@@ -68,7 +68,7 @@ public class PullTest {
         GitConnection connection2 = connectionFactory.getConnection(remoteRepo.getAbsolutePath());
         connection2.clone(CloneParams.create(connection.getWorkingDir().getAbsolutePath()));
         addFile(connection, "newfile1", "new file1 content");
-        connection.add(AddParams.create(Arrays.asList(".")));
+        connection.add(AddParams.create(singletonList(".")));
         connection.commit(CommitParams.create("Test commit"));
         //when
         connection2.pull(PullParams.create("origin").withTimeout(-1));
@@ -89,7 +89,7 @@ public class PullTest {
         //add new branch
         connection.checkout(CheckoutParams.create("b1").withCreateNew(true));
         addFile(connection, "newfile1", "new file1 content");
-        connection.add(AddParams.create(Arrays.asList(".")));
+        connection.add(AddParams.create(singletonList(".")));
         connection.commit(CommitParams.create("Test commit"));
         int branchesBefore = connection2.branchList(null).size();
         //when
@@ -108,7 +108,7 @@ public class PullTest {
         String branchName = "remoteBranch";
         connection.checkout(CheckoutParams.create(branchName).withCreateNew(true));
         addFile(connection, "remoteFile", "");
-        connection.add(AddParams.create(Arrays.asList(".")));
+        connection.add(AddParams.create(singletonList(".")));
         connection.commit(CommitParams.create("remote test"));
 
         GitConnection connection2 = connectToGitRepositoryWithContent(connectionFactory, remoteRepo);

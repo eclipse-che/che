@@ -32,6 +32,7 @@ public class WorkspaceImpl implements Workspace {
     private final boolean             temporary;
     private final WorkspaceConfig     config;
 
+
     public WorkspaceImpl(Workspace workspace) {
         id = workspace.getId();
         workspaceRuntime = workspace.getRuntime();

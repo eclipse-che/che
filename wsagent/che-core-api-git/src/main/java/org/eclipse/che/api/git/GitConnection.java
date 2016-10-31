@@ -35,9 +35,9 @@ import org.eclipse.che.api.git.shared.GitUser;
 import org.eclipse.che.api.git.shared.MergeResult;
 import org.eclipse.che.api.git.shared.PullResponse;
 import org.eclipse.che.api.git.shared.PushResponse;
+import org.eclipse.che.api.git.shared.RebaseResponse;
 import org.eclipse.che.api.git.shared.Remote;
 import org.eclipse.che.api.git.shared.RemoteReference;
-import org.eclipse.che.api.git.shared.RebaseResponse;
 import org.eclipse.che.api.git.shared.Revision;
 import org.eclipse.che.api.git.shared.ShowFileContentResponse;
 import org.eclipse.che.api.git.shared.Status;
@@ -133,7 +133,7 @@ public interface GitConnection extends Closeable {
     List<Branch> branchList(BranchListMode listMode) throws GitException;
 
     /**
-     * Show information about files in the index and the working tree
+     * Show information about files in the index and the working tree.
      *
      * @param params
      *         list files params
@@ -278,7 +278,7 @@ public interface GitConnection extends Closeable {
     MergeResult merge(String commit) throws GitException;
 
     /**
-     * Rebase on a branch
+     * Rebase on a branch.
      *
      * @param operation
      *         rebase operation to use
@@ -293,9 +293,9 @@ public interface GitConnection extends Closeable {
      * Move or rename file or directory.
      *
      * @param source
-     *         file that will be moved to target
+     *         file that will be moved or renamed
      * @param target
-     *         file where source will be moved
+     *         new name or destination directory
      * @throws GitException
      *         if any error occurs
      */
@@ -424,7 +424,7 @@ public interface GitConnection extends Closeable {
     void tagDelete(String name) throws GitException;
 
     /**
-     * Get list of available tags.
+     * Returns list of available tags.
      *
      * @param pattern
      *         tag's names pattern
@@ -451,4 +451,13 @@ public interface GitConnection extends Closeable {
 
     /** Set publisher for git output, e.g. for sending git command output to the client side. */
     void setOutputLineConsumerFactory(LineConsumerFactory outputPublisherFactory);
+
+    /**
+     * Get the current branch on the current directory
+     *
+     * @return the name of the branch
+     * @throws GitException
+     *         if any exception occurs
+     */
+    String getCurrentBranch() throws GitException;
 }

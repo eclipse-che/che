@@ -27,8 +27,8 @@ import org.testng.annotations.Test;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.git.impl.GitTestUtil.addFile;
 import static org.eclipse.che.git.impl.GitTestUtil.cleanupTestRepo;
@@ -65,7 +65,7 @@ public class ResetTest {
         fos.flush();
         fos.close();
         String initMessage = connection.log(LogParams.create()).getCommits().get(0).getMessage();
-        connection.add(AddParams.create(new ArrayList<>(Arrays.asList("."))));
+        connection.add(AddParams.create(new ArrayList<>(singletonList("."))));
         connection.commit(CommitParams.create("add file"));
         //when
         connection.reset(ResetParams.create("HEAD^", ResetRequest.ResetType.HARD));
@@ -86,7 +86,7 @@ public class ResetTest {
         fos.flush();
         fos.close();
         String initMessage = connection.log(LogParams.create()).getCommits().get(0).getMessage();
-        connection.add(AddParams.create(new ArrayList<>(Arrays.asList("."))));
+        connection.add(AddParams.create(new ArrayList<>(singletonList("."))));
         connection.commit(CommitParams.create("add file"));
         //when
         connection.reset(ResetParams.create("HEAD^", ResetRequest.ResetType.SOFT));
@@ -108,7 +108,7 @@ public class ResetTest {
         fos.flush();
         fos.close();
         String initMessage = connection.log(LogParams.create()).getCommits().get(0).getMessage();
-        connection.add(AddParams.create(new ArrayList<>(Arrays.asList("."))));
+        connection.add(AddParams.create(new ArrayList<>(singletonList("."))));
         connection.commit(CommitParams.create("add file"));
         //when
         ResetRequest resetRequest = newDto(ResetRequest.class).withCommit("HEAD^");

@@ -350,8 +350,6 @@ public abstract class Window implements IsWidget {
 
         String button();
 
-        String label();
-
         String image();
     }
 

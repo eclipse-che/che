@@ -21,7 +21,7 @@ import java.util.List;
  * @author andrew00x
  */
 @DTO
-public interface PushRequest extends GitRequest {
+public interface PushRequest {
     /** @return list of refspec to push */
     List<String> getRefSpec();
     
@@ -49,4 +49,22 @@ public interface PushRequest extends GitRequest {
     void setTimeout(int timeout);
     
     PushRequest withTimeout(int timeout);
+
+    /** Returns user name for authentication */
+    String getUsername();
+
+    /** Set user name for authentication. */
+    void setUsername(String username);
+
+    /** @return {@link PushRequest} with specified user name for authentication */
+    PushRequest withUsername(String username);
+
+    /** @return password for authentication */
+    String getPassword();
+
+    /** Set password for authentication. */
+    void setPassword(String password);
+
+    /** @return {@link PushRequest} with specified password for authentication */
+    PushRequest withPassword(String password);
 }

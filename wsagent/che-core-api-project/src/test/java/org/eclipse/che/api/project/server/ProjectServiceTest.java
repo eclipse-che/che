@@ -40,11 +40,13 @@ import org.eclipse.che.api.project.shared.dto.MoveOptions;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.project.shared.dto.TreeElement;
 import org.eclipse.che.api.user.server.spi.UserDao;
+import org.eclipse.che.api.vfs.Path;
 import org.eclipse.che.api.vfs.VirtualFile;
 import org.eclipse.che.api.vfs.impl.file.DefaultFileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.FileTreeWatcher;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
+import org.eclipse.che.api.vfs.impl.file.event.detectors.ProjectTreeChangesDetector;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
@@ -81,6 +83,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.nio.file.PathMatcher;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -143,6 +146,8 @@ public class ProjectServiceTest {
     private static final String AND_OPERATOR = "AND";
     private static final String NOT_OPERATOR = "NOT";
 
+    private static final String EXCLUDE_SEARCH_PATH = ".codenvy";
+
     private ProjectManager         pm;
     private ResourceLauncher       launcher;
     private ProjectHandlerRegistry phRegistry;
@@ -152,15 +157,17 @@ public class ProjectServiceTest {
     private List<ProjectConfigDto> projects;
 
     @Mock
-    private UserDao                userDao;
+    private UserDao                    userDao;
     @Mock
-    private WorkspaceDto           usersWorkspaceMock;
+    private WorkspaceDto               usersWorkspaceMock;
     @Mock
-    private WorkspaceConfigDto     workspaceConfigMock;
+    private WorkspaceConfigDto         workspaceConfigMock;
     @Mock
-    private HttpJsonRequestFactory httpJsonRequestFactory;
+    private HttpJsonRequestFactory     httpJsonRequestFactory;
     @Mock
-    private HttpJsonResponse       httpJsonResponse;
+    private HttpJsonResponse           httpJsonResponse;
+    @Mock
+    private ProjectTreeChangesDetector projectTreeChangesDetector;
 
     protected LocalVirtualFileSystemProvider vfsProvider;
 
@@ -191,7 +198,15 @@ public class ProjectServiceTest {
         indexDir.mkdir();
 
         Set<PathMatcher> filters = new HashSet<>();
-        filters.add(path -> true);
+        filters.add(path -> {
+            for (java.nio.file.Path pathElement : path) {
+                if (pathElement == null || EXCLUDE_SEARCH_PATH.equals(pathElement.toString())) {
+                    return true;
+                }
+            }
+            return false;
+        });
+
         FSLuceneSearcherProvider sProvider = new FSLuceneSearcherProvider(indexDir, filters);
 
         vfsProvider = new LocalVirtualFileSystemProvider(root, sProvider);
@@ -224,7 +239,8 @@ public class ProjectServiceTest {
         FileTreeWatcher fileTreeWatcher = new FileTreeWatcher(root, new HashSet<>(), fileWatcherNotificationHandler);
 
         pm = new ProjectManager(vfsProvider, new EventService(), ptRegistry, projectRegistry, phRegistry,
-                                importerRegistry, fileWatcherNotificationHandler, fileTreeWatcher, workspaceHolder);
+                                importerRegistry, fileWatcherNotificationHandler, fileTreeWatcher, workspaceHolder,
+                                projectTreeChangesDetector);
         pm.initWatcher();
 
         HttpJsonRequest httpJsonRequest = mock(HttpJsonRequest.class, new SelfReturningAnswer());
@@ -403,11 +419,12 @@ public class ProjectServiceTest {
 
         phRegistry.register(new CreateProjectHandler() {
             @Override
-            public void onCreateProject(FolderEntry baseFolder, Map<String, AttributeValue> attributes, Map<String, String> options)
+            public void onCreateProject(Path projectPath, Map<String, AttributeValue> attributes, Map<String, String> options)
                     throws ForbiddenException, ConflictException, ServerException {
-                baseFolder.createFolder("a");
-                baseFolder.createFolder("b");
-                baseFolder.createFile("test.txt", "test".getBytes());
+                FolderEntry projectFolder = new FolderEntry(vfsProvider.getVirtualFileSystem().getRoot().createFolder("new_project"));
+                projectFolder.createFolder("a");
+                projectFolder.createFolder("b");
+                projectFolder.createFile("test.txt", "test".getBytes(Charset.defaultCharset()));
             }
 
             @Override
@@ -444,7 +461,7 @@ public class ProjectServiceTest {
                                                       "http://localhost:8080/api/project",
                                                       "http://localhost:8080/api",
                                                       headers,
-                                                      DtoFactory.getInstance().toJson(newProjectConfig).getBytes(),
+                                                      DtoFactory.getInstance().toJson(newProjectConfig).getBytes(Charset.defaultCharset()),
                                                       null);
 
         assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
@@ -507,7 +524,7 @@ public class ProjectServiceTest {
                                                       "http://localhost:8080/api/project/testUpdateProject",
                                                       "http://localhost:8080/api",
                                                       headers,
-                                                      DtoFactory.getInstance().toJson(descriptor).getBytes(),
+                                                      DtoFactory.getInstance().toJson(descriptor).getBytes(Charset.defaultCharset()),
                                                       null);
 
         assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
@@ -549,7 +566,7 @@ public class ProjectServiceTest {
                                                       "http://localhost:8080/api/project/not_project",
                                                       "http://localhost:8080/api",
                                                       headers,
-                                                      DtoFactory.getInstance().toJson(descriptor).getBytes(),
+                                                      DtoFactory.getInstance().toJson(descriptor).getBytes(Charset.defaultCharset()),
                                                       null);
 
         assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
@@ -575,7 +592,7 @@ public class ProjectServiceTest {
                                                       "http://localhost:8080/api/project/my_project_invalid",
                                                       "http://localhost:8080/api",
                                                       headers,
-                                                      DtoFactory.getInstance().toJson(descriptor).getBytes(),
+                                                      DtoFactory.getInstance().toJson(descriptor).getBytes(Charset.defaultCharset()),
                                                       null);
         assertEquals(response.getStatus(), 404);
     }
@@ -607,9 +624,6 @@ public class ProjectServiceTest {
                 return (List <String>)singletonList("checked");
             }
 
-//            @Override
-//            public void setValues(String attributeName, List<String> value) {
-//            }
         };
 
         ProjectTypeDef pt = new ProjectTypeDef("testEstimateProjectPT", "my testEstimateProject type", true, false) {
@@ -709,7 +723,7 @@ public class ProjectServiceTest {
         ZipOutputStream zipOut = new ZipOutputStream(bout);
         zipOut.putNextEntry(new ZipEntry("folder1/"));
         zipOut.putNextEntry(new ZipEntry("folder1/file1.txt"));
-        zipOut.write("to be or not to be".getBytes());
+        zipOut.write("to be or not to be".getBytes(Charset.defaultCharset()));
         zipOut.close();
         final InputStream zip = new ByteArrayInputStream(bout.toByteArray());
         final String importType = "_123_";
@@ -732,7 +746,7 @@ public class ProjectServiceTest {
                       "            \"type\": \"%s\"\n" +
                       "}";
 
-        byte[] b = String.format(json, importType).getBytes();
+        byte[] b = String.format(json, importType).getBytes(Charset.defaultCharset());
         ContainerResponse response = launcher.service(POST,
                                                       "http://localhost:8080/api/project/import/new_project",
                                                       "http://localhost:8080/api", headers, b, null);
@@ -797,7 +811,7 @@ public class ProjectServiceTest {
                                                       "http://localhost:8080/api/project/file/my_project?name=test.txt",
                                                       "http://localhost:8080/api",
                                                       null,
-                                                      myContent.getBytes(),
+                                                      myContent.getBytes(Charset.defaultCharset()),
                                                       null);
         assertEquals(response.getStatus(), 201, "Error: " + response.getEntity());
         ItemReference fileItem = (ItemReference)response.getEntity();
@@ -819,7 +833,7 @@ public class ProjectServiceTest {
     @Test
     public void testGetFileContent() throws Exception {
         String myContent = "to be or not to be";
-        pm.getProject("my_project").getBaseFolder().createFile("test.txt", myContent.getBytes());
+        pm.getProject("my_project").getBaseFolder().createFile("test.txt", myContent.getBytes(Charset.defaultCharset()));
         ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();
         ContainerResponse response = launcher.service(GET,
                                                       "http://localhost:8080/api/project/file/my_project/test.txt",
@@ -832,10 +846,10 @@ public class ProjectServiceTest {
     @Test
     public void testUpdateFileContent() throws Exception {
         String myContent = "<test>hello</test>";
-        pm.getProject("my_project").getBaseFolder().createFile("test.xml", "to be or not to be".getBytes());
+        pm.getProject("my_project").getBaseFolder().createFile("test.xml", "to be or not to be".getBytes(Charset.defaultCharset()));
         ContainerResponse response = launcher.service(PUT,
                                                       "http://localhost:8080/api/project/file/my_project/test.xml",
-                                                      "http://localhost:8080/api", null, myContent.getBytes(), null);
+                                                      "http://localhost:8080/api", null, myContent.getBytes(Charset.defaultCharset()), null);
         assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
         VirtualFileEntry file = pm.getProject("my_project").getBaseFolder().getChild("test.xml");
         Assert.assertTrue(file.isFile());
@@ -890,7 +904,7 @@ public class ProjectServiceTest {
 
     @Test
     public void testDeleteFile() throws Exception {
-        pm.getProject("my_project").getBaseFolder().createFile("test.txt", "to be or not to be".getBytes());
+        pm.getProject("my_project").getBaseFolder().createFile("test.txt", "to be or not to be".getBytes(Charset.defaultCharset()));
         ContainerResponse response = launcher.service(DELETE,
                                                       "http://localhost:8080/api/project/my_project/test.txt",
                                                       "http://localhost:8080/api", null, null, null);
@@ -989,7 +1003,7 @@ public class ProjectServiceTest {
     public void testCopyFile() throws Exception {
         RegisteredProject myProject = pm.getProject("my_project");
         myProject.getBaseFolder().createFolder("a/b/c");
-        ((FolderEntry)myProject.getBaseFolder().getChild("a/b")).createFile("test.txt", "to be or not no be".getBytes());
+        ((FolderEntry)myProject.getBaseFolder().getChild("a/b")).createFile("test.txt", "to be or not no be".getBytes(Charset.defaultCharset()));
         ContainerResponse response = launcher.service(POST,
                                                       "http://localhost:8080/api/project/copy/my_project/a/b/test.txt?to=/my_project/a/b/c",
                                                       "http://localhost:8080/api", null, null, null);
@@ -1004,7 +1018,7 @@ public class ProjectServiceTest {
     public void testCopyFileWithRename() throws Exception {
         RegisteredProject myProject = pm.getProject("my_project");
         myProject.getBaseFolder().createFolder("a/b/c");
-        ((FolderEntry)myProject.getBaseFolder().getChild("a/b")).createFile("test.txt", "to be or not no be".getBytes());
+        ((FolderEntry)myProject.getBaseFolder().getChild("a/b")).createFile("test.txt", "to be or not no be".getBytes(Charset.defaultCharset()));
 
         Map<String, List<String>> headers = new HashMap<>();
         headers.put(CONTENT_TYPE, singletonList(APPLICATION_JSON));
@@ -1016,7 +1030,7 @@ public class ProjectServiceTest {
         ContainerResponse response = launcher.service(POST,
                                                       "http://localhost:8080/api/project/copy/my_project/a/b/test.txt?to=/my_project/a/b/c",
                                                       "http://localhost:8080/api", headers,
-                                                      DtoFactory.getInstance().toJson(descriptor).getBytes(), null);
+                                                      DtoFactory.getInstance().toJson(descriptor).getBytes(Charset.defaultCharset()), null);
         assertEquals(response.getStatus(), 201, "Error: " + response.getEntity());
         assertEquals(response.getHttpHeaders().getFirst("Location"),
                      URI.create("http://localhost:8080/api/project/file/my_project/a/b/c/copyOfTest.txt"));
@@ -1037,8 +1051,8 @@ public class ProjectServiceTest {
         String originContent = "to be or not no be";
         String overwrittenContent = "that is the question";
 
-        ((FolderEntry)myProject.getBaseFolder().getChild("a/b")).createFile(originFileName, originContent.getBytes());
-        ((FolderEntry)myProject.getBaseFolder().getChild("a/b/c")).createFile(destinationFileName, overwrittenContent.getBytes());
+        ((FolderEntry)myProject.getBaseFolder().getChild("a/b")).createFile(originFileName, originContent.getBytes(Charset.defaultCharset()));
+        ((FolderEntry)myProject.getBaseFolder().getChild("a/b/c")).createFile(destinationFileName, overwrittenContent.getBytes(Charset.defaultCharset()));
 
         Map<String, List<String>> headers = new HashMap<>();
         headers.put(CONTENT_TYPE, singletonList(APPLICATION_JSON));
@@ -1050,7 +1064,7 @@ public class ProjectServiceTest {
         ContainerResponse response = launcher.service(POST,
                                                       "http://localhost:8080/api/project/copy/my_project/a/b/" + originFileName + "?to=/my_project/a/b/c",
                                                       "http://localhost:8080/api", headers,
-                                                      DtoFactory.getInstance().toJson(descriptor).getBytes(), null);
+                                                      DtoFactory.getInstance().toJson(descriptor).getBytes(Charset.defaultCharset()), null);
         assertEquals(response.getStatus(), 201, "Error: " + response.getEntity());
         assertEquals(response.getHttpHeaders().getFirst("Location"),
                      URI.create("http://localhost:8080/api/project/file/my_project/a/b/c/" + destinationFileName));
@@ -1079,7 +1093,7 @@ public class ProjectServiceTest {
     public void testCopyFolder() throws Exception {
         RegisteredProject myProject = pm.getProject("my_project");
         myProject.getBaseFolder().createFolder("a/b/c");
-        ((FolderEntry)myProject.getBaseFolder().getChild("a/b")).createFile("test.txt", "to be or not no be".getBytes());
+        ((FolderEntry)myProject.getBaseFolder().getChild("a/b")).createFile("test.txt", "to be or not no be".getBytes(Charset.defaultCharset()));
         ContainerResponse response = launcher.service(POST,
                                                       "http://localhost:8080/api/project/copy/my_project/a/b?to=/my_project/a/b/c",
                                                       "http://localhost:8080/api", null, null, null);
@@ -1094,7 +1108,7 @@ public class ProjectServiceTest {
     public void testCopyFolderWithRename() throws Exception {
         RegisteredProject myProject = pm.getProject("my_project");
         myProject.getBaseFolder().createFolder("a/b/c");
-        ((FolderEntry)myProject.getBaseFolder().getChild("a/b")).createFile("test.txt", "to be or not no be".getBytes());
+        ((FolderEntry)myProject.getBaseFolder().getChild("a/b")).createFile("test.txt", "to be or not no be".getBytes(Charset.defaultCharset()));
 
         // new name for folder
         final String renamedFolder = "renamedFolder";
@@ -1109,7 +1123,7 @@ public class ProjectServiceTest {
         ContainerResponse response = launcher.service(POST,
                                                       "http://localhost:8080/api/project/copy/my_project/a/b?to=/my_project/a/b/c",
                                                       "http://localhost:8080/api", headers,
-                                                      DtoFactory.getInstance().toJson(descriptor).getBytes(), null);
+                                                      DtoFactory.getInstance().toJson(descriptor).getBytes(Charset.defaultCharset()), null);
         assertEquals(response.getStatus(), 201, "Error: " + response.getEntity());
         assertEquals(response.getHttpHeaders().getFirst("Location"),
                      URI.create(
@@ -1134,8 +1148,8 @@ public class ProjectServiceTest {
         // new name for folder
         final String renamedFolder = "renamedFolder";
 
-        ((FolderEntry)myProject.getBaseFolder().getChild("a/b")).createFile(originFileName, originContent.getBytes());
-        ((FolderEntry)myProject.getBaseFolder().getChild("a/b/c")).createFile(destinationFileName, overwrittenContent.getBytes());
+        ((FolderEntry)myProject.getBaseFolder().getChild("a/b")).createFile(originFileName, originContent.getBytes(Charset.defaultCharset()));
+        ((FolderEntry)myProject.getBaseFolder().getChild("a/b/c")).createFile(destinationFileName, overwrittenContent.getBytes(Charset.defaultCharset()));
 
         Map<String, List<String>> headers = new HashMap<>();
         headers.put(CONTENT_TYPE, singletonList(APPLICATION_JSON));
@@ -1147,7 +1161,7 @@ public class ProjectServiceTest {
         ContainerResponse response = launcher.service(POST,
                                                       "http://localhost:8080/api/project/copy/my_project/a/b?to=/my_project/a/b/c",
                                                       "http://localhost:8080/api", headers,
-                                                      DtoFactory.getInstance().toJson(descriptor).getBytes(), null);
+                                                      DtoFactory.getInstance().toJson(descriptor).getBytes(Charset.defaultCharset()), null);
         assertEquals(response.getStatus(), 201, "Error: " + response.getEntity());
         assertEquals(response.getHttpHeaders().getFirst("Location"),
                      URI.create(
@@ -1162,7 +1176,7 @@ public class ProjectServiceTest {
     public void testMoveFile() throws Exception {
         RegisteredProject myProject = pm.getProject("my_project");
         myProject.getBaseFolder().createFolder("a/b/c");
-        ((FolderEntry)myProject.getBaseFolder().getChild("a/b")).createFile("test.txt", "to be or not no be".getBytes());
+        ((FolderEntry)myProject.getBaseFolder().getChild("a/b")).createFile("test.txt", "to be or not no be".getBytes(Charset.defaultCharset()));
         ContainerResponse response = launcher.service(POST,
                                                       "http://localhost:8080/api/project/move/my_project/a/b/test.txt?to=/my_project/a/b/c",
                                                       "http://localhost:8080/api", null, null, null);
@@ -1177,7 +1191,7 @@ public class ProjectServiceTest {
     public void testMoveFileWithRename() throws Exception {
         RegisteredProject myProject = pm.getProject("my_project");
         myProject.getBaseFolder().createFolder("a/b/c");
-        ((FolderEntry)myProject.getBaseFolder().getChild("a/b")).createFile("test.txt", "to be or not no be".getBytes());
+        ((FolderEntry)myProject.getBaseFolder().getChild("a/b")).createFile("test.txt", "to be or not no be".getBytes(Charset.defaultCharset()));
 
         // name for file after move
         final String destinationName = "copyOfTestForMove.txt";
@@ -1192,7 +1206,7 @@ public class ProjectServiceTest {
         ContainerResponse response = launcher.service(POST,
                                                       "http://localhost:8080/api/project/move/my_project/a/b/test.txt?to=/my_project/a/b/c",
                                                       "http://localhost:8080/api", headers,
-                                                      DtoFactory.getInstance().toJson(descriptor).getBytes(), null);
+                                                      DtoFactory.getInstance().toJson(descriptor).getBytes(Charset.defaultCharset()), null);
         assertEquals(response.getStatus(), 201, "Error: " + response.getEntity());
         assertEquals(response.getHttpHeaders().getFirst("Location"),
                      URI.create(
@@ -1205,7 +1219,7 @@ public class ProjectServiceTest {
     public void testRenameFile() throws Exception {
         RegisteredProject myProject = pm.getProject("my_project");
         myProject.getBaseFolder().createFolder("a/b");
-        ((FolderEntry)myProject.getBaseFolder().getChild("a/b")).createFile("test.txt", "to be or not no be".getBytes());
+        ((FolderEntry)myProject.getBaseFolder().getChild("a/b")).createFile("test.txt", "to be or not no be".getBytes(Charset.defaultCharset()));
 
         // name for file after move
         final String destinationName = "copyOfTestForMove.txt";
@@ -1220,7 +1234,7 @@ public class ProjectServiceTest {
         ContainerResponse response = launcher.service(POST,
                                                       "http://localhost:8080/api/project/move/my_project/a/b/test.txt",
                                                       "http://localhost:8080/api", headers,
-                                                      DtoFactory.getInstance().toJson(descriptor).getBytes(), null);
+                                                      DtoFactory.getInstance().toJson(descriptor).getBytes(Charset.defaultCharset()), null);
         assertEquals(response.getStatus(), 201, "Error: " + response.getEntity());
         assertEquals(response.getHttpHeaders().getFirst("Location"),
                      URI.create(
@@ -1242,8 +1256,8 @@ public class ProjectServiceTest {
         String originContent = "to be or not no be";
         String overwrittenContent = "that is the question";
 
-        ((FolderEntry)myProject.getBaseFolder().getChild("a/b")).createFile(originFileName, originContent.getBytes());
-        ((FolderEntry)myProject.getBaseFolder().getChild("a/b/c")).createFile(destinationFileName, overwrittenContent.getBytes());
+        ((FolderEntry)myProject.getBaseFolder().getChild("a/b")).createFile(originFileName, originContent.getBytes(Charset.defaultCharset()));
+        ((FolderEntry)myProject.getBaseFolder().getChild("a/b/c")).createFile(destinationFileName, overwrittenContent.getBytes(Charset.defaultCharset()));
 
         Map<String, List<String>> headers = new HashMap<>();
         headers.put(CONTENT_TYPE, singletonList(APPLICATION_JSON));
@@ -1256,7 +1270,7 @@ public class ProjectServiceTest {
                                                       "http://localhost:8080/api/project/move/my_project/a/b/" + originFileName +
                                                       "?to=/my_project/a/b/c",
                                                       "http://localhost:8080/api", headers,
-                                                      DtoFactory.getInstance().toJson(descriptor).getBytes(), null);
+                                                      DtoFactory.getInstance().toJson(descriptor).getBytes(Charset.defaultCharset()), null);
         assertEquals(response.getStatus(), 201, "Error: " + response.getEntity());
         assertEquals(response.getHttpHeaders().getFirst("Location"),
                      URI.create("http://localhost:8080/api/project/file/my_project/a/b/c/" + destinationFileName));
@@ -1284,7 +1298,7 @@ public class ProjectServiceTest {
     public void testMoveFolder() throws Exception {
         RegisteredProject myProject = pm.getProject("my_project");
         myProject.getBaseFolder().createFolder("a/b/c");
-        ((FolderEntry)myProject.getBaseFolder().getChild("a/b/c")).createFile("test.txt", "to be or not no be".getBytes());
+        ((FolderEntry)myProject.getBaseFolder().getChild("a/b/c")).createFile("test.txt", "to be or not no be".getBytes(Charset.defaultCharset()));
         ContainerResponse response = launcher.service(POST,
                                                       "http://localhost:8080/api/project/move/my_project/a/b/c?to=/my_project/a",
                                                       "http://localhost:8080/api", null, null, null);
@@ -1300,7 +1314,7 @@ public class ProjectServiceTest {
     public void testMoveFolderWithRename() throws Exception {
         RegisteredProject myProject = pm.getProject("my_project");
         myProject.getBaseFolder().createFolder("a/b/c");
-        ((FolderEntry)myProject.getBaseFolder().getChild("a/b")).createFile("test.txt", "to be or not no be".getBytes());
+        ((FolderEntry)myProject.getBaseFolder().getChild("a/b")).createFile("test.txt", "to be or not no be".getBytes(Charset.defaultCharset()));
 
         // new name for folder
         final String renamedFolder = "renamedFolder";
@@ -1315,7 +1329,7 @@ public class ProjectServiceTest {
         ContainerResponse response = launcher.service(POST,
                                                       "http://localhost:8080/api/project/copy/my_project/a/b?to=/my_project/a/b/c",
                                                       "http://localhost:8080/api", headers,
-                                                      DtoFactory.getInstance().toJson(descriptor).getBytes(), null);
+                                                      DtoFactory.getInstance().toJson(descriptor).getBytes(Charset.defaultCharset()), null);
         assertEquals(response.getStatus(), 201, "Error: " + response.getEntity());
         assertEquals(response.getHttpHeaders().getFirst("Location"),
                      URI.create(
@@ -1327,7 +1341,7 @@ public class ProjectServiceTest {
     public void testRenameFolder() throws Exception {
         RegisteredProject myProject = pm.getProject("my_project");
         myProject.getBaseFolder().createFolder("a/b");
-        ((FolderEntry)myProject.getBaseFolder().getChild("a/b")).createFile("test.txt", "to be or not no be".getBytes());
+        ((FolderEntry)myProject.getBaseFolder().getChild("a/b")).createFile("test.txt", "to be or not no be".getBytes(Charset.defaultCharset()));
 
         // new name for folder
         final String renamedFolder = "renamedFolder";
@@ -1342,7 +1356,7 @@ public class ProjectServiceTest {
         ContainerResponse response = launcher.service(POST,
                                                       "http://localhost:8080/api/project/move/my_project/a/b",
                                                       "http://localhost:8080/api", headers,
-                                                      DtoFactory.getInstance().toJson(descriptor).getBytes(), null);
+                                                      DtoFactory.getInstance().toJson(descriptor).getBytes(Charset.defaultCharset()), null);
         assertEquals(response.getStatus(), 201, "Error: " + response.getEntity());
         assertEquals(response.getHttpHeaders().getFirst("Location"),
                      URI.create(
@@ -1366,8 +1380,8 @@ public class ProjectServiceTest {
         // new name for folder
         final String renamedFolder = "renamedFolder";
 
-        ((FolderEntry)myProject.getBaseFolder().getChild("a/b")).createFile(originFileName, originContent.getBytes());
-        ((FolderEntry)myProject.getBaseFolder().getChild("a/b/c")).createFile(destinationFileName, overwritenContent.getBytes());
+        ((FolderEntry)myProject.getBaseFolder().getChild("a/b")).createFile(originFileName, originContent.getBytes(Charset.defaultCharset()));
+        ((FolderEntry)myProject.getBaseFolder().getChild("a/b/c")).createFile(destinationFileName, overwritenContent.getBytes(Charset.defaultCharset()));
 
         Map<String, List<String>> headers = new HashMap<>();
         headers.put(CONTENT_TYPE, singletonList(APPLICATION_JSON));
@@ -1379,7 +1393,7 @@ public class ProjectServiceTest {
         ContainerResponse response = launcher.service(POST,
                                                       "http://localhost:8080/api/project/copy/my_project/a/b?to=/my_project/a/b/c",
                                                       "http://localhost:8080/api", headers,
-                                                      DtoFactory.getInstance().toJson(descriptor).getBytes(), null);
+                                                      DtoFactory.getInstance().toJson(descriptor).getBytes(Charset.defaultCharset()), null);
         assertEquals(response.getStatus(), 201, "Error: " + response.getEntity());
         assertEquals(response.getHttpHeaders().getFirst("Location"),
                      URI.create(
@@ -1396,7 +1410,7 @@ public class ProjectServiceTest {
         ZipOutputStream zipOut = new ZipOutputStream(bout);
         zipOut.putNextEntry(new ZipEntry("folder1/"));
         zipOut.putNextEntry(new ZipEntry("folder1/file1.txt"));
-        zipOut.write("to be or not to be".getBytes());
+        zipOut.write("to be or not to be".getBytes(Charset.defaultCharset()));
         zipOut.close();
         byte[] zip = bout.toByteArray();
         Map<String, List<String>> headers = new HashMap<>();
@@ -1420,7 +1434,7 @@ public class ProjectServiceTest {
         zipOut.putNextEntry(new ZipEntry("folder1/"));
         zipOut.putNextEntry(new ZipEntry("folder1/folder2/"));
         zipOut.putNextEntry(new ZipEntry("folder1/folder2/file1.txt"));
-        zipOut.write("to be or not to be".getBytes());
+        zipOut.write("to be or not to be".getBytes(Charset.defaultCharset()));
         zipOut.close();
         byte[] zip = bout.toByteArray();
         Map<String, List<String>> headers = new HashMap<>();
@@ -1439,7 +1453,7 @@ public class ProjectServiceTest {
     @Test
     public void testExportZip() throws Exception {
         RegisteredProject myProject = pm.getProject("my_project");
-        myProject.getBaseFolder().createFolder("a/b").createFile("test.txt", "hello".getBytes());
+        myProject.getBaseFolder().createFolder("a/b").createFile("test.txt", "hello".getBytes(Charset.defaultCharset()));
         ContainerResponse response = launcher.service(GET,
                                                       "http://localhost:8080/api/project/export/my_project",
                                                       "http://localhost:8080/api", null, null, null);
@@ -1453,7 +1467,7 @@ public class ProjectServiceTest {
         RegisteredProject myProject = pm.getProject("my_project");
         FolderEntry a = myProject.getBaseFolder().createFolder("a");
         a.createFolder("b");
-        a.createFile("test.txt", "test".getBytes());
+        a.createFile("test.txt", "test".getBytes(Charset.defaultCharset()));
         ContainerResponse response = launcher.service(GET,
                                                       "http://localhost:8080/api/project/children/my_project/a",
                                                       "http://localhost:8080/api", null, null, null);
@@ -1472,7 +1486,7 @@ public class ProjectServiceTest {
         RegisteredProject myProject = pm.getProject("my_project");
         FolderEntry a = myProject.getBaseFolder().createFolder("a");
         a.createFolder("b");
-        a.createFile("test.txt", "test".getBytes());
+        a.createFile("test.txt", "test".getBytes(Charset.defaultCharset()));
         ContainerResponse response = launcher.service(GET,
                                                       "http://localhost:8080/api/project/item/my_project/a/b",
                                                       "http://localhost:8080/api", null, null, null);
@@ -1493,7 +1507,7 @@ public class ProjectServiceTest {
     @Test
     public void testGetItemWithoutParentProject() throws Exception {
         FolderEntry a = pm.getProjectsRoot().createFolder("a");
-        a.createFile("test.txt", "test".getBytes());
+        a.createFile("test.txt", "test".getBytes(Charset.defaultCharset()));
         ContainerResponse response = launcher.service(GET,
                                                       "http://localhost:8080/api/project/item/a/test.txt",
                                                       "http://localhost:8080/api", null, null, null);
@@ -1517,7 +1531,7 @@ public class ProjectServiceTest {
         FolderEntry a = myProject.getBaseFolder().createFolder("a");
         a.createFolder("b/c");
         a.createFolder("x/y");
-        a.createFile("test.txt", "test".getBytes());
+        a.createFile("test.txt", "test".getBytes(Charset.defaultCharset()));
         ContainerResponse response = launcher.service(GET,
                                                       "http://localhost:8080/api/project/tree/my_project/a",
                                                       "http://localhost:8080/api", null, null, null);
@@ -1546,7 +1560,7 @@ public class ProjectServiceTest {
         FolderEntry a = myProject.getBaseFolder().createFolder("a");
         a.createFolder("b/c");
         a.createFolder("x/y");
-        a.createFile("test.txt", "test".getBytes());
+        a.createFile("test.txt", "test".getBytes(Charset.defaultCharset()));
         ContainerResponse response = launcher.service(GET,
                                                       "http://localhost:8080/api/project/tree/my_project/a?depth=2",
                                                       "http://localhost:8080/api", null, null, null);
@@ -1579,7 +1593,7 @@ public class ProjectServiceTest {
         RegisteredProject myProject = pm.getProject("my_project");
         FolderEntry a = myProject.getBaseFolder().createFolder("a");
         a.createFolder("b/c");
-        a.createFolder("x").createFile("test.txt", "test".getBytes());
+        a.createFolder("x").createFile("test.txt", "test".getBytes(Charset.defaultCharset()));
         ContainerResponse response = launcher.service(GET,
                                                       "http://localhost:8080/api/project/tree/my_project/a?depth=100&includeFiles=true",
                                                       "http://localhost:8080/api", null, null, null);
@@ -1649,9 +1663,9 @@ public class ProjectServiceTest {
     @Test
     public void testSearchByName() throws Exception {
         RegisteredProject myProject = pm.getProject("my_project");
-        myProject.getBaseFolder().createFolder("a/b").createFile("test.txt", "hello".getBytes());
-        myProject.getBaseFolder().createFolder("x/y").createFile("test.txt", "test".getBytes());
-        myProject.getBaseFolder().createFolder("c").createFile("exclude", "test".getBytes());
+        myProject.getBaseFolder().createFolder("a/b").createFile("test.txt", "hello".getBytes(Charset.defaultCharset()));
+        myProject.getBaseFolder().createFolder("x/y").createFile("test.txt", "test".getBytes(Charset.defaultCharset()));
+        myProject.getBaseFolder().createFolder("c").createFile("exclude", "test".getBytes(Charset.defaultCharset()));
 
         ContainerResponse response = launcher.service(GET,
                                                       "http://localhost:8080/api/project/search/my_project?name=test.txt",
@@ -1671,9 +1685,9 @@ public class ProjectServiceTest {
     @Test
     public void testSearchByText() throws Exception {
         RegisteredProject myProject = pm.getProject("my_project");
-        myProject.getBaseFolder().createFolder("a/b").createFile("test.txt", "hello".getBytes());
-        myProject.getBaseFolder().createFolder("x/y").createFile("__test.txt", "searchhit".getBytes());
-        myProject.getBaseFolder().createFolder("c").createFile("_test", "searchhit".getBytes());
+        myProject.getBaseFolder().createFolder("a/b").createFile("test.txt", "hello".getBytes(Charset.defaultCharset()));
+        myProject.getBaseFolder().createFolder("x/y").createFile("__test.txt", "searchhit".getBytes(Charset.defaultCharset()));
+        myProject.getBaseFolder().createFolder("c").createFile("_test", "searchhit".getBytes(Charset.defaultCharset()));
 
         ContainerResponse response = launcher.service(GET,
                                                       "http://localhost:8080/api/project/search/my_project?text=searchhit",
@@ -1688,6 +1702,26 @@ public class ProjectServiceTest {
 
     @SuppressWarnings("unchecked")
     @Test
+    public void testSearchByTextWhenFileWasNotIndexed() throws Exception {
+        RegisteredProject myProject = pm.getProject("my_project");
+        myProject.getBaseFolder().createFolder("a/b").createFile("test.txt", "hello".getBytes(Charset.defaultCharset()));
+        myProject.getBaseFolder().createFolder("x/y").createFile("__test.txt", "searchhit".getBytes(Charset.defaultCharset()));
+        myProject.getBaseFolder().createFolder(EXCLUDE_SEARCH_PATH).createFile("_test", "searchhit".getBytes(Charset.defaultCharset()));
+
+        ContainerResponse response = launcher.service(GET,
+                                                      "http://localhost:8080/api/project/search/my_project?text=searchhit",
+                                                      "http://localhost:8080/api", null, null, null);
+        assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
+        List<ItemReference> result = (List<ItemReference>)response.getEntity();
+        assertEquals(result.size(), 1);
+        Set<String> paths = new LinkedHashSet<>(1);
+        paths.addAll(result.stream().map(ItemReference::getPath).collect(Collectors.toList()));
+        Assert.assertTrue(paths.contains("/my_project/x/y/__test.txt"));
+        Assert.assertFalse(paths.contains("/my_project/" + EXCLUDE_SEARCH_PATH + "/_test"));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
     public void testSearchParticularSequenceWords() throws Exception {
         String queryToSearch = "?text=" + URL_ENCODED_QUOTES +
                                "To" + URL_ENCODED_SPACE +
@@ -1697,9 +1731,9 @@ public class ProjectServiceTest {
                                "to" + URL_ENCODED_SPACE +
                                "be" + URL_ENCODED_QUOTES;
         RegisteredProject myProject = pm.getProject("my_project");
-        myProject.getBaseFolder().createFolder("x/y").createFile("containsSearchText.txt", "To be or not to be that is the question".getBytes());
-        myProject.getBaseFolder().createFolder("a/b").createFile("test.txt", "Pay attention! To be or to be that is the question".getBytes());
-        myProject.getBaseFolder().createFolder("c").createFile("_test", "Pay attention! To be or to not be that is the question".getBytes());
+        myProject.getBaseFolder().createFolder("x/y").createFile("containsSearchText.txt", "To be or not to be that is the question".getBytes(Charset.defaultCharset()));
+        myProject.getBaseFolder().createFolder("a/b").createFile("test.txt", "Pay attention! To be or to be that is the question".getBytes(Charset.defaultCharset()));
+        myProject.getBaseFolder().createFolder("c").createFile("_test", "Pay attention! To be or to not be that is the question".getBytes(Charset.defaultCharset()));
 
         ContainerResponse response =
                 launcher.service(GET, "http://localhost:8080/api/project/search/my_project" + queryToSearch,
@@ -1721,11 +1755,11 @@ public class ProjectServiceTest {
                                "the" + URL_ENCODED_QUOTES + URL_ENCODED_SPACE + AND_OPERATOR + URL_ENCODED_SPACE +
                                "question" + URL_ENCODED_ASTERISK;
         RegisteredProject myProject = pm.getProject("my_project");
-        myProject.getBaseFolder().createFolder("x/y").createFile("containsSearchText.txt", "To be or not to be that is the question".getBytes());
+        myProject.getBaseFolder().createFolder("x/y").createFile("containsSearchText.txt", "To be or not to be that is the question".getBytes(Charset.defaultCharset()));
         myProject.getBaseFolder().createFolder("a/b")
-                 .createFile("containsSearchTextAlso.txt", "Pay attention! To be or not to be that is the questionS".getBytes());
+                 .createFile("containsSearchTextAlso.txt", "Pay attention! To be or not to be that is the questionS".getBytes(Charset.defaultCharset()));
         myProject.getBaseFolder().createFolder("c")
-                 .createFile("notContainsSearchText", "Pay attention! To be or to not be that is the questEon".getBytes());
+                 .createFile("notContainsSearchText", "Pay attention! To be or to not be that is the questEon".getBytes(Charset.defaultCharset()));
 
         ContainerResponse response =
                 launcher.service(GET,"http://localhost:8080/api/project/search/my_project" + queryToSearch,
@@ -1746,11 +1780,11 @@ public class ProjectServiceTest {
         String queryToSearch = "?text=" +
                                "question" + URL_ENCODED_ASTERISK;
         RegisteredProject myProject = pm.getProject("my_project");
-        myProject.getBaseFolder().createFolder("x/y").createFile("containsSearchText.txt", "To be or not to be that is the question".getBytes());
+        myProject.getBaseFolder().createFolder("x/y").createFile("containsSearchText.txt", "To be or not to be that is the question".getBytes(Charset.defaultCharset()));
         myProject.getBaseFolder().createFolder("a/b")
-                 .createFile("containsSearchTextAlso.txt", "Pay attention! To be or not to be that is the questionS".getBytes());
+                 .createFile("containsSearchTextAlso.txt", "Pay attention! To be or not to be that is the questionS".getBytes(Charset.defaultCharset()));
         myProject.getBaseFolder().createFolder("c")
-                 .createFile("notContainsSearchText", "Pay attention! To be or to not be that is the questEon".getBytes());
+                 .createFile("notContainsSearchText", "Pay attention! To be or to not be that is the questEon".getBytes(Charset.defaultCharset()));
 
         ContainerResponse response =
                 launcher.service(GET, "http://localhost:8080/api/project/search/my_project" + queryToSearch,
@@ -1772,10 +1806,10 @@ public class ProjectServiceTest {
                                "question" + URL_ENCODED_SPACE + NOT_OPERATOR + URL_ENCODED_SPACE + URL_ENCODED_QUOTES +
                                "attention!" + URL_ENCODED_QUOTES;
         RegisteredProject myProject = pm.getProject("my_project");
-        myProject.getBaseFolder().createFolder("x/y").createFile("containsSearchText.txt", "To be or not to be that is the question".getBytes());
+        myProject.getBaseFolder().createFolder("x/y").createFile("containsSearchText.txt", "To be or not to be that is the question".getBytes(Charset.defaultCharset()));
         myProject.getBaseFolder().createFolder("b")
-                 .createFile("notContainsSearchText", "Pay attention! To be or not to be that is the question".getBytes());
-        myProject.getBaseFolder().createFolder("c").createFile("alsoNotContainsSearchText", "To be or to not be that is the ...".getBytes());
+                 .createFile("notContainsSearchText", "Pay attention! To be or not to be that is the question".getBytes(Charset.defaultCharset()));
+        myProject.getBaseFolder().createFolder("c").createFile("alsoNotContainsSearchText", "To be or to not be that is the ...".getBytes(Charset.defaultCharset()));
 
         ContainerResponse response =
                 launcher.service(GET, "http://localhost:8080/api/project/search/my_project" + queryToSearch,
@@ -1804,7 +1838,7 @@ public class ProjectServiceTest {
                                URL_ENCODED_BACKSLASH + ':' + "projectName=test";
         RegisteredProject myProject = pm.getProject("my_project");
         myProject.getBaseFolder().createFolder("x/y")
-                 .createFile("test.txt", "http://localhost:8080/ide/dev6?action=createProject:projectName=test".getBytes());
+                 .createFile("test.txt", "http://localhost:8080/ide/dev6?action=createProject:projectName=test".getBytes(Charset.defaultCharset()));
 
         ContainerResponse response = launcher.service(GET, "http://localhost:8080/api/project/search/my_project" + queryToSearch,
                                                       "http://localhost:8080/api", null, null, null);
@@ -1820,9 +1854,9 @@ public class ProjectServiceTest {
     @Test
     public void testSearchByNameAndText() throws Exception {
         RegisteredProject myProject = pm.getProject("my_project");
-        myProject.getBaseFolder().createFolder("a/b").createFile("test.txt", "test".getBytes());
-        myProject.getBaseFolder().createFolder("x/y").createFile("test.txt", "test".getBytes());
-        myProject.getBaseFolder().createFolder("c").createFile("test", "test".getBytes());
+        myProject.getBaseFolder().createFolder("a/b").createFile("test.txt", "test".getBytes(Charset.defaultCharset()));
+        myProject.getBaseFolder().createFolder("x/y").createFile("test.txt", "test".getBytes(Charset.defaultCharset()));
+        myProject.getBaseFolder().createFolder("c").createFile("test", "test".getBytes(Charset.defaultCharset()));
 
         ContainerResponse response = launcher.service(GET,
                                                       "http://localhost:8080/api/project/search/my_project?text=test&name=test.txt",
@@ -1844,9 +1878,9 @@ public class ProjectServiceTest {
     @Test
     public void testSearchFromWSRoot() throws Exception {
         RegisteredProject myProject = pm.getProject("my_project");
-        myProject.getBaseFolder().createFolder("a/b").createFile("test", "test".getBytes());
-        myProject.getBaseFolder().createFolder("x/y").createFile("test", "test".getBytes());
-        myProject.getBaseFolder().createFolder("c").createFile("test.txt", "test".getBytes());
+        myProject.getBaseFolder().createFolder("a/b").createFile("test", "test".getBytes(Charset.defaultCharset()));
+        myProject.getBaseFolder().createFolder("x/y").createFile("test", "test".getBytes(Charset.defaultCharset()));
+        myProject.getBaseFolder().createFolder("c").createFile("test.txt", "test".getBytes(Charset.defaultCharset()));
 
         ContainerResponse response = launcher.service(GET,
                                                       "http://localhost:8080/api/project/search/?text=test&name=test.txt",

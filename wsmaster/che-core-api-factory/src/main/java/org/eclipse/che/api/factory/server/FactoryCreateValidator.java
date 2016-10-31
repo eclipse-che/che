@@ -13,7 +13,7 @@ package org.eclipse.che.api.factory.server;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.factory.shared.dto.Factory;
+import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 
 /**
  * Interface for validations of factory creation stage.
@@ -35,5 +35,5 @@ public interface FactoryCreateValidator {
      * @throws ForbiddenException
      *         when user have no access rights for factory creation
      */
-    void validateOnCreate(Factory factory) throws BadRequestException, ServerException, ForbiddenException;
+    void validateOnCreate(FactoryDto factory) throws BadRequestException, ServerException, ForbiddenException;
 }

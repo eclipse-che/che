@@ -11,6 +11,7 @@
     <che-workspace-item layout="row"
                         ng-repeat="workspace in dashboardLastWorkspacesController.getWorkspaces() | limitTo:'5'"
                         che-selectable="false"
+                        che-display-labels ="true"
                         che-workspace-item="workspace"></che-workspace-item>
   </che-list>
 </dashboard-panel>

@@ -24,6 +24,8 @@ public class FetchParams {
 
     private List<String> refSpec;
     private String       remote;
+    private String       username;
+    private String       password;
     private int          timeout;
     private boolean      isRemoveDeletedRefs;
 
@@ -31,7 +33,7 @@ public class FetchParams {
     }
 
     /**
-     * Create new {@link FetchParams} instance
+     * Create new {@link FetchParams} instance.
      *
      * @param remote
      *         remote name to fetch
@@ -81,6 +83,28 @@ public class FetchParams {
     /** @see FetchRequest#withTimeout(int) */
     public FetchParams withTimeout(int timeout) {
         this.timeout = timeout;
+        return this;
+    }
+
+    /** Returns user name for authentication. */
+    public String getUsername() {
+        return username;
+    }
+
+    /** Returns {@link FetchParams} with specified user name for authentication. */
+    public FetchParams withUsername(String username) {
+        this.username = username;
+        return this;
+    }
+
+    /** Returns password for authentication. */
+    public String getPassword() {
+        return password;
+    }
+
+    /** Returns {@link FetchParams} with specified password for authentication. */
+    public FetchParams withPassword(String password) {
+        this.password = password;
         return this;
     }
 }

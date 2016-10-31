@@ -34,13 +34,13 @@ public class DiffParams {
     }
 
     /**
-     * Create new {@link DiffParams} instance with empty parameters
+     * Create new {@link DiffParams} instance with empty parameters.
      */
     public static DiffParams create() {
         return new DiffParams();
     }
 
-    /** @return filter of file to show diff. It may be either list of file names or name of directory to show all files under them */
+    /** Returns filter of file to show diff. It may be either list of file names or name of directory to show all files under them. */
     public List<String> getFileFilter() {
         return fileFilter == null ? new ArrayList<>() : fileFilter;
     }
@@ -50,7 +50,7 @@ public class DiffParams {
         return this;
     }
 
-    /** @return type of diff output */
+    /** Returns type of diff output. */
     public DiffType getType() {
         return type;
     }
@@ -60,7 +60,7 @@ public class DiffParams {
         return this;
     }
 
-    /** @return <code>true</code> if renames must not be showing in diff result */
+    /** Returns <code>true</code> if renames must not be showing in diff result. */
     public boolean isNoRenames() {
         return noRenames;
     }
@@ -70,7 +70,7 @@ public class DiffParams {
         return this;
     }
 
-    /** @return limit of showing renames in diff output. This attribute has sense if {@link #noRenames} is <code>false</code> */
+    /** Returns limit of showing renames in diff output. This attribute has sense if {@link #noRenames} is <code>false</code>. */
     public int getRenameLimit() {
         return renameLimit;
     }
@@ -80,7 +80,7 @@ public class DiffParams {
         return this;
     }
 
-    /** @return first commit to view changes */
+    /** Returns first commit to view changes. */
     public String getCommitA() {
         return commitA;
     }
@@ -90,7 +90,7 @@ public class DiffParams {
         return this;
     }
 
-    /** @return second commit to view changes */
+    /** Returns second commit to view changes. */
     public String getCommitB() {
         return commitB;
     }
@@ -101,8 +101,8 @@ public class DiffParams {
     }
 
     /**
-     * @return if <code>false</code> (default) view changes between {@link #commitA} and working tree otherwise between {@link #commitA}
-     * and index
+     * Returns <code>false</code> (default) view changes between {@link #commitA} and working tree otherwise between {@link #commitA}
+     * and index.
      */
     public boolean isCached() {
         return isCached;

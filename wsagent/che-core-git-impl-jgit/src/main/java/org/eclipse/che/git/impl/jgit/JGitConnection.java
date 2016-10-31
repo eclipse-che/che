@@ -57,6 +57,7 @@ import org.eclipse.che.api.git.params.RmParams;
 import org.eclipse.che.api.git.params.TagCreateParams;
 import org.eclipse.che.api.git.shared.AddRequest;
 import org.eclipse.che.api.git.shared.Branch;
+import org.eclipse.che.api.git.shared.DiffCommitFile;
 import org.eclipse.che.api.git.shared.GitUser;
 import org.eclipse.che.api.git.shared.MergeResult;
 import org.eclipse.che.api.git.shared.ProviderInfo;
@@ -71,6 +72,7 @@ import org.eclipse.che.api.git.shared.ShowFileContentResponse;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.git.shared.StatusFormat;
 import org.eclipse.che.api.git.shared.Tag;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.ssh.key.script.SshKeyProvider;
 import org.eclipse.che.commons.proxy.ProxyAuthenticator;
 import org.eclipse.jgit.api.AddCommand;
@@ -100,6 +102,8 @@ import org.eclipse.jgit.api.errors.RefNotFoundException;
 import org.eclipse.jgit.api.errors.DetachedHeadException;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.TransportException;
+import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.lib.BatchingProgressMonitor;
 import org.eclipse.jgit.lib.ConfigConstants;
@@ -132,10 +136,16 @@ import org.eclipse.jgit.transport.SshTransport;
 import org.eclipse.jgit.transport.TrackingRefUpdate;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
+import org.eclipse.jgit.treewalk.CanonicalTreeParser;
+import org.eclipse.jgit.treewalk.EmptyTreeIterator;
 import org.eclipse.jgit.treewalk.TreeWalk;
+import org.eclipse.jgit.treewalk.filter.AndTreeFilter;
+import org.eclipse.jgit.treewalk.filter.PathFilterGroup;
+import org.eclipse.jgit.treewalk.filter.TreeFilter;
 import org.eclipse.jgit.treewalk.filter.PathFilter;
 import org.eclipse.jgit.util.FS;
 import org.eclipse.jgit.util.FileUtils;
+import org.eclipse.jgit.util.io.NullOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -161,6 +171,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
@@ -184,7 +195,6 @@ class JGitConnection implements GitConnection {
     private static final String REBASE_OPERATION_SKIP     = "SKIP";
     private static final String REBASE_OPERATION_CONTINUE = "CONTINUE";
     private static final String REBASE_OPERATION_ABORT    = "ABORT";
-    private static final String ADD_ALL_OPTION            = "all";
 
     // Push Response Constants
     private static final String BRANCH_REFSPEC_SEPERATOR = " -> ";
@@ -219,7 +229,6 @@ class JGitConnection implements GitConnection {
     private static final String ERROR_AUTHENTICATION_REQUIRED = "Authentication is required but no CredentialsProvider has been registered";
     private static final String ERROR_AUTHENTICATION_FAILED   = "fatal: Authentication failed for '%s/'" + lineSeparator();
 
-    private static final String ERROR_BRANCH_LIST_UNSUPPORTED_LIST_MODE = "Unsupported list mode '%s'. Must be either 'a' or 'r'.";
     private static final String ERROR_TAG_DELETE                        = "Could not delete the tag %1$s. An error occurred: %2$s.";
     private static final String ERROR_LOG_NO_HEAD_EXISTS                = "No HEAD exists and no explicit starting revision was specified";
     private static final String ERROR_INIT_FOLDER_MISSING               = "The working folder %s does not exist.";
@@ -256,21 +265,7 @@ class JGitConnection implements GitConnection {
 
     @Override
     public void add(AddParams params) throws GitException {
-        add(params, params.isUpdate());
-
-        // "all" option, when update is false, should run git add with both update true and update false
-        if ((!params.isUpdate()) && params.getAttributes().containsKey(ADD_ALL_OPTION)) {
-            add(params, true);
-        }
-    }
-
-    /*
-     * Perform the "add" according to the add request. isUpdate is always used
-     * as the value for the "update" parameter instead of the value in the
-     * AddRequest.
-     */
-    private void add(AddParams params , boolean isUpdate) throws GitException {
-        AddCommand addCommand = getGit().add().setUpdate(isUpdate);
+        AddCommand addCommand = getGit().add().setUpdate(params.isUpdate());
 
         List<String> filePatterns = params.getFilePattern();
         if (filePatterns.isEmpty()) {
@@ -500,7 +495,7 @@ class JGitConnection implements GitConnection {
                 }
             });
 
-            executeRemoteCommand(remoteUri, cloneCommand);
+            executeRemoteCommand(remoteUri, cloneCommand , params.getUsername(), params.getPassword());
 
             StoredConfig repositoryConfig = getRepository().getConfig();
             GitUser gitUser = getUser();
@@ -575,9 +570,8 @@ class JGitConnection implements GitConnection {
                                                   .setAmend(params.isAmend());
 
             // Check if repository is configured with Gerrit Support
-            String gerritSupportConfigValue = repository.getConfig().getString(
-                    ConfigConstants.CONFIG_GERRIT_SECTION, null,
-                    ConfigConstants.CONFIG_KEY_CREATECHANGEID);
+            String gerritSupportConfigValue = repository.getConfig().getString(ConfigConstants.CONFIG_GERRIT_SECTION, null,
+                                                                               ConfigConstants.CONFIG_KEY_CREATECHANGEID);
             boolean isGerritSupportConfigured = gerritSupportConfigValue != null ? Boolean.valueOf(gerritSupportConfigValue) : false;
             commitCommand.setInsertChangeId(isGerritSupportConfigured);
             RevCommit result = commitCommand.call();
@@ -680,7 +674,7 @@ class JGitConnection implements GitConnection {
             }
             fetchCommand.setRemoveDeletedRefs(params.isRemoveDeletedRefs());
 
-            executeRemoteCommand(remoteUri, fetchCommand);
+            executeRemoteCommand(remoteUri, fetchCommand, params.getUsername(), params.getPassword());
         } catch (GitException | GitAPIException exception) {
             String errorMessage;
             if (exception.getMessage().contains("Invalid remote: ")) {
@@ -714,28 +708,27 @@ class JGitConnection implements GitConnection {
         }
     }
 
+    /** @see org.eclipse.che.api.git.GitConnection#log(LogParams) */
     @Override
     public LogPage log(LogParams params) throws GitException {
         LogCommand logCommand = getGit().log();
         try {
             setRevisionRange(logCommand, params);
-
-            params.getFileFilter().forEach(logCommand::addPath);
-
+            logCommand.setSkip(params.getSkip());
+            logCommand.setMaxCount(params.getMaxCount());
+            List<String> fileFilter = params.getFileFilter();
+            if (fileFilter != null) {
+                fileFilter.forEach(logCommand::addPath);
+            }
+            String filePath = params.getFilePath();
+            if (!isNullOrEmpty(filePath)) {
+                logCommand.addPath(filePath);
+            }
             Iterator<RevCommit> revIterator = logCommand.call().iterator();
             List<Revision> commits = new ArrayList<>();
-
             while (revIterator.hasNext()) {
                 RevCommit commit = revIterator.next();
-                PersonIdent committerIdentity = commit.getCommitterIdent();
-
-                GitUser gitUser = newDto(GitUser.class).withName(committerIdentity.getName())
-                                                       .withEmail(committerIdentity.getEmailAddress());
-
-                Revision revision = newDto(Revision.class).withId(commit.getId().getName())
-                                                          .withMessage(commit.getFullMessage())
-                                                          .withCommitTime(MILLISECONDS.convert(commit.getCommitTime(), SECONDS))
-                                                          .withCommitter(gitUser);
+                Revision revision = getRevision(commit, filePath);
                 commits.add(revision);
             }
             return new LogPage(commits);
@@ -743,13 +736,105 @@ class JGitConnection implements GitConnection {
             String errorMessage = exception.getMessage();
             if (ERROR_LOG_NO_HEAD_EXISTS.equals(errorMessage)) {
                 throw new GitException(errorMessage, ErrorCodes.INIT_COMMIT_WAS_NOT_PERFORMED);
+            } else {
+                LOG.error("Failed to retrieve log. ", exception);
+                throw new GitException(exception);
             }
-            throw new GitException(errorMessage, exception);
         }
     }
 
+    private Revision getRevision(RevCommit commit, String filePath) throws GitAPIException, IOException {
+        List<String> commitParentsList = Stream.of(commit.getParents())
+                                               .map(RevCommit::getName)
+                                               .collect(Collectors.toList());
+
+        return newDto(Revision.class).withId(commit.getId().getName())
+                                     .withMessage(commit.getFullMessage())
+                                     .withCommitTime((long) commit.getCommitTime() * 1000)
+                                     .withCommitter(getCommitCommitter(commit))
+                                     .withAuthor(getCommitAuthor(commit))
+                                     .withBranches(getBranchesOfCommit(commit, ListMode.ALL))
+                                     .withCommitParent(commitParentsList)
+                                     .withDiffCommitFile(getCommitDiffFiles(commit, filePath));
+    }
+
+    private GitUser getCommitCommitter(RevCommit commit) {
+        PersonIdent committerIdentity = commit.getCommitterIdent();
+        return newDto(GitUser.class).withName(committerIdentity.getName())
+                                    .withEmail(committerIdentity.getEmailAddress());
+    }
+
+    private GitUser getCommitAuthor(RevCommit commit) {
+        PersonIdent authorIdentity = commit.getAuthorIdent();
+        return newDto(GitUser.class).withName(authorIdentity.getName())
+                                    .withEmail(authorIdentity.getEmailAddress());
+    }
+
+    private List<Branch>  getBranchesOfCommit(RevCommit commit, ListMode mode) throws GitAPIException {
+        List<Ref> branches = getGit().branchList()
+                                     .setListMode(mode)
+                                     .setContains(commit.getName())
+                                     .call();
+        return branches.stream()
+                       .map(branch -> newDto(Branch.class).withName(branch.getName()))
+                       .collect(Collectors.toList());
+    }
+
+    private List<DiffCommitFile> getCommitDiffFiles(RevCommit revCommit, String pattern) throws IOException {
+        List<DiffEntry> diffs;
+        TreeFilter filter = null;
+        if (!isNullOrEmpty(pattern)) {
+            filter = AndTreeFilter.create(PathFilterGroup.createFromStrings(Collections.singleton(pattern)), TreeFilter.ANY_DIFF);
+        }
+        List<DiffCommitFile> commitFilesList = new ArrayList<>();
+        try (TreeWalk tw = new TreeWalk(repository)){
+            tw.setRecursive(true);
+            // get the current commit parent in order to compare it with the current commit
+            // and to get the list of DiffEntry.
+            if (revCommit.getParentCount() > 0) {
+                RevCommit parent = parseCommit(revCommit.getParent(0));
+                tw.reset(parent.getTree(), revCommit.getTree());
+                if (filter != null) {
+                    tw.setFilter(filter);
+                } else {
+                    tw.setFilter(TreeFilter.ANY_DIFF);
+                }
+                diffs = DiffEntry.scan(tw);
+            } else {
+                // If the current commit has no parents (which means it is the initial commit),
+                // then create an empty tree and compare it to the current commit to get the
+                // list of DiffEntry.
+                try (RevWalk rw = new RevWalk(repository);
+                     DiffFormatter diffFormat = new DiffFormatter(NullOutputStream.INSTANCE)) {
+                    diffFormat.setRepository(repository);
+                    if (filter != null) {
+                        diffFormat.setPathFilter(filter);
+                    }
+                    diffs = diffFormat.scan(new EmptyTreeIterator(), new CanonicalTreeParser(null, rw.getObjectReader(), revCommit.getTree()));
+                }
+            }
+        }
+        if (diffs != null) {
+            commitFilesList.addAll(diffs.stream().map(diff -> newDto(DiffCommitFile.class).withOldPath(diff.getOldPath())
+                                                                                          .withNewPath(diff.getNewPath())
+                                                                                          .withChangeType(diff.getChangeType().name()))
+                                                 .collect(Collectors.toList()));
+        }
+        return commitFilesList;
+    }
+
+    private RevCommit parseCommit(RevCommit revCommit) {
+        try (RevWalk rw = new RevWalk(repository)) {
+            return rw.parseCommit(revCommit);
+        } catch (IOException exception) {
+            LOG.error("Failed to parse commit. ", exception);
+            return revCommit;
+        }
+    }
+
+
     private void setRevisionRange(LogCommand logCommand, LogParams params) throws IOException {
-        if (params != null) {
+        if (params != null && logCommand != null) {
             String revisionRangeSince = params.getRevisionRangeSince();
             String revisionRangeUntil = params.getRevisionRangeUntil();
             if (revisionRangeSince != null && revisionRangeUntil != null) {
@@ -776,7 +861,6 @@ class JGitConnection implements GitConnection {
         } catch (GitAPIException exception) {
             throw new GitException(exception.getMessage(), exception);
         }
-
         return gitUsers;
     }
 
@@ -996,7 +1080,10 @@ class JGitConnection implements GitConnection {
                 fetchCommand.setTimeout(timeout);
             }
 
-            FetchResult fetchResult = (FetchResult)executeRemoteCommand(remoteUri, fetchCommand);
+            FetchResult fetchResult = (FetchResult)executeRemoteCommand(remoteUri,
+                                                                        fetchCommand,
+                                                                        params.getUsername(),
+                                                                        params.getPassword());
 
             Ref remoteBranchRef = fetchResult.getAdvertisedRef(remoteBranch);
             if (remoteBranchRef == null) {
@@ -1064,7 +1151,10 @@ class JGitConnection implements GitConnection {
         }
         try {
             @SuppressWarnings("unchecked")
-            Iterable<PushResult> pushResults = (Iterable<PushResult>)executeRemoteCommand(remoteUri, pushCommand);
+            Iterable<PushResult> pushResults = (Iterable<PushResult>)executeRemoteCommand(remoteUri,
+                                                                                          pushCommand,
+                                                                                          params.getUsername(),
+                                                                                          params.getPassword());
             PushResult pushResult = pushResults.iterator().next();
             String commandOutput = pushResult.getMessages().isEmpty() ? "Successfully pushed to " + remoteUri : pushResult.getMessages();
             Collection<RemoteRefUpdate> refUpdates = pushResult.getRemoteUpdates();
@@ -1500,6 +1590,7 @@ class JGitConnection implements GitConnection {
         this.lineConsumerFactory = lineConsumerFactory;
     }
 
+
     private Git getGit() {
         if (git != null) {
             return git;
@@ -1568,10 +1659,11 @@ class JGitConnection implements GitConnection {
      * @throws UnauthorizedException
      */
     @VisibleForTesting
-    Object executeRemoteCommand(String remoteUrl, TransportCommand command)
+    Object executeRemoteCommand(String remoteUrl, TransportCommand command, @Nullable String username, @Nullable String password)
             throws GitException, GitAPIException, UnauthorizedException {
         File keyDirectory = null;
         UserCredential credentials = null;
+
         try {
             if (GitUrlUtils.isSSH(remoteUrl)) {
                 keyDirectory =  Files.createTempDir();
@@ -1592,23 +1684,29 @@ class JGitConnection implements GitConnection {
                     }
                 };
                 command.setTransportConfigCallback(transport -> {
-                    SshTransport sshTransport = (SshTransport)transport;
-                    sshTransport.setSshSessionFactory(sshSessionFactory);
+                    // If recursive clone is performed and git-module added by http(s) url is present in the cloned project,
+                    // transport will be instance of TransportHttp in the step of cloning this module
+                    if (transport instanceof SshTransport) {
+                        ((SshTransport)transport).setSshSessionFactory(sshSessionFactory);
+                    }
                 });
             } else {
                 if (remoteUrl != null && GIT_URL_WITH_CREDENTIALS_PATTERN.matcher(remoteUrl).matches()) {
-                    String username = remoteUrl.substring(remoteUrl.indexOf("://") + 3, remoteUrl.lastIndexOf(":"));
-                    String password = remoteUrl.substring(remoteUrl.lastIndexOf(":") + 1, remoteUrl.indexOf("@"));
+                    username = remoteUrl.substring(remoteUrl.indexOf("://") + 3, remoteUrl.lastIndexOf(":"));
+                    password = remoteUrl.substring(remoteUrl.lastIndexOf(":") + 1, remoteUrl.indexOf("@"));
                     command.setCredentialsProvider(new UsernamePasswordCredentialsProvider(username, password));
                 } else {
-                    credentials = credentialsLoader.getUserCredential(remoteUrl);
-                    if (credentials != null) {
-                        command.setCredentialsProvider(new UsernamePasswordCredentialsProvider(credentials.getUserName(),
-                                                                                               credentials.getPassword()));
+                    if (username != null && password != null) {
+                        command.setCredentialsProvider(new UsernamePasswordCredentialsProvider(username, password));
+                    } else {
+                        credentials = credentialsLoader.getUserCredential(remoteUrl);
+                        if (credentials != null) {
+                            command.setCredentialsProvider(new UsernamePasswordCredentialsProvider(credentials.getUserName(),
+                                                                                                   credentials.getPassword()));
+                        }
                     }
                 }
             }
-
             ProxyAuthenticator.initAuthenticator(remoteUrl);
             return command.call();
         } catch (GitException | TransportException exception) {
@@ -1635,7 +1733,6 @@ class JGitConnection implements GitConnection {
                     throw new GitException("Can't remove SSH key directory", exception);
                 }
             }
-
             ProxyAuthenticator.resetAuthenticator();
         }
     }
@@ -1685,7 +1782,14 @@ class JGitConnection implements GitConnection {
         return repository;
     }
 
-    private String getCurrentBranch() throws GitException {
+    /**
+     * Get the current branch on the current directory
+     *
+     * @return the name of the branch
+     * @throws GitException
+     *         if any exception occurs
+     */
+    public String getCurrentBranch() throws GitException {
         try {
             return Repository.shortenRefName(repository.exactRef(Constants.HEAD).getLeaf().getName());
         } catch (IOException exception) {

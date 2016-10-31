@@ -33,6 +33,11 @@
   font-size 12px
   cursor pointer
 
+  span:not(.tooltip)
+    max-width 100%
+    white-space nowrap
+    margin-right 5px
+
   & .che-xs-header
     display inline-block
     float left
@@ -95,3 +100,8 @@
     font-size 14px
     line-height 60px
     color $label-info-color
+
+.che-list-item-secondary
+  color $list-action-color
+  line-height 18px
+  padding-right 10px

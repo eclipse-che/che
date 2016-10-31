@@ -18,7 +18,7 @@ import org.eclipse.che.dto.shared.DTO;
  * @author andrew00x
  */
 @DTO
-public interface BranchCreateRequest extends GitRequest {
+public interface BranchCreateRequest {
     /** @return name of branch to be created */
     String getName();
     

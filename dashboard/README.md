@@ -5,35 +5,36 @@ Che Dashboard
 ==============
 
 #Requirements
+- Python `v2.7.x`(`v3.x.x`currently not supported)
+- Node.js `v4.x.x` (`v5.x.x` / `v6.x.x` are currently not supported)
+- npm
+- Bower
+- gulp
+- typings
 
-This  version is using bower and gulp as tools.
+Installation instructions for Node.js and npm can be found on the following [link](https://docs.npmjs.com/getting-started/installing-node). Bower and gulp are CLI utilities which are installed via npm:
+
 ```sh
-$ npm install --global bower gulp
+$ npm install --global bower gulp typings
 ```
 
 #Quick start
 
-Install npm and bower dependencies when you're in the root folder of the user-dashboard v2 branch
-```cd user-dashboard```
-
 ```sh
-$ npm install
+cd che/dashboard
+mvn clean install
 ```
-```sh
-$ bower install
-```
-
 
 ## Running
 In order to run the project, the serve command is used
 ```sh
 $ gulp serve
 ```
-It will launch the server and then the project can be tested on http://localhost:5000
+It will launch the server and then the project can be tested on http://localhost:3000
 
-By default it will use https://www.codenvy.com as remote server.
+By default it will use http://localhost:8080 as a remote server, so make sure that Che is running locally. More details about how to do that can be found on the following [link](https://github.com/eclipse/che/wiki/Development-Workflow#build-and-run---tomcat)  
 
-The argument --server <url> may allow to use another server. (url is for example http://my-server.com)
+The argument `--server <url>` may allow to use another server. (url is for example http://my-server.com)
 
 
 ```sh

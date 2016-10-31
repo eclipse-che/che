@@ -132,4 +132,13 @@ public class TagParams {
         return Objects.hash(image, repository, tag, force);
     }
 
+    @Override
+    public String toString() {
+        return "TagParams{" +
+               "image='" + image + '\'' +
+               ", repository='" + repository + '\'' +
+               ", tag='" + tag + '\'' +
+               ", force=" + force +
+               '}';
+    }
 }

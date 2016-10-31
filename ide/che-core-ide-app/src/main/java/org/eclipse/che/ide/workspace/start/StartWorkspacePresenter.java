@@ -41,9 +41,9 @@ public class StartWorkspacePresenter implements StartWorkspaceView.ActionDelegat
     private final CreateWorkspacePresenter            createWorkspacePresenter;
     private final BrowserQueryFieldRenderer           browserQueryFieldRenderer;
 
-    private WorkspaceDto                   selectedWorkspace;
-    private Callback<Component, Exception> callback;
-    private List<WorkspaceDto>        workspaces;
+    private WorkspaceDto                              selectedWorkspace;
+    private Callback<Component, Exception>            callback;
+    private List<WorkspaceDto>                        workspaces;
 
     @Inject
     public StartWorkspacePresenter(StartWorkspaceView view,
@@ -126,7 +126,6 @@ public class StartWorkspacePresenter implements StartWorkspaceView.ActionDelegat
     @Override
     public void onCreateWorkspaceClicked() {
         view.hide();
-
         createWorkspacePresenter.show(workspaces, callback);
     }
 
@@ -134,9 +133,8 @@ public class StartWorkspacePresenter implements StartWorkspaceView.ActionDelegat
     @Override
     public void onStartWorkspaceClicked() {
         DefaultWorkspaceComponent workspaceComponent = wsComponentProvider.get();
-
         workspaceComponent.startWorkspace(selectedWorkspace, callback);
-
         view.hide();
     }
+
 }

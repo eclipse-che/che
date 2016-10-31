@@ -43,12 +43,17 @@ label.che-input-desktop-label
     position relative
     max-width 100%
 
+    textarea
+      min-width 200px
+      padding-right 30px
+
     input
       min-width 200px
       padding-right 30px
       overflow hidden
       text-overflow ellipsis
       white-space nowrap
+      background-color inherit
 
     .che-input-desktop-hidden-text
       min-width 170px
@@ -67,11 +72,11 @@ label.che-input-desktop-label
     top 13px
 
   input[disabled], input[disabled] + .che-input-icon
-    background-color inherit
     color $disabled-color
 
   input[readonly]
     box-shadow none
+    background-color inherit
 
-    & + .che-input-icon
-      display none
+  input[readonly] + .che-input-icon, input[type="hidden"] + .che-input-icon
+    display none

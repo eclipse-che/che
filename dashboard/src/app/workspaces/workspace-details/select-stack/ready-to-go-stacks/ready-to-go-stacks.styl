@@ -1,0 +1,116 @@
+$che-simple-selector-color = $label-info-color
+
+.create-project-stack-selector .create-project-stack-selected
+  box-shadow 0px 3px 1px -2px rgba(0, 0, 200, 0.14), 0px 2px 2px 0px rgba(0, 0, 200, 0.098), 0px 1px 5px 0px rgba(0, 0, 200, 0.084);
+  color $primary-color
+
+.che-simple-selector
+  outline none
+  height 90px
+  width 260px
+  border-color $form-element-border-color
+  background-color $background-color
+  border-width 2px
+  border-style solid
+  che-border-radius(2px)
+  -webkit-box-shadow 0 1px 1px rgba(0, 0, 0, 0.05)
+  box-shadow 0 1px 1px rgba(0, 0, 0, 0.05)
+  padding-top 16px
+  cursor pointer
+  margin-bottom 20px
+  margin-right 20px
+
+  &:hover
+    background-color $che-simple-selector-color
+    color $background-color
+
+  &:focus
+    outline none
+
+.che-simple-selector .title
+  position relative
+  border 1px solid $che-simple-selector-color
+  border-right none
+  border-left none
+  line-height 22px
+
+.che-simple-selector:hover .title
+  border-color $background-color
+
+.che-simple-selector .title:before
+  position absolute
+  border-top 24px solid transparent
+  border-right 24px solid $che-simple-selector-color
+  content ""
+  left -24px
+  bottom -1px
+
+.che-simple-selector:hover .title:before
+  border-right-color $background-color
+
+.che-simple-selector .title:after
+  position absolute
+  border-top 23px solid transparent
+  border-right 23px solid $background-color
+  content ""
+  left -22px
+  bottom 0
+
+.che-simple-selector:hover .title:after
+  border-right-color $che-simple-selector-color
+
+.che-simple-selector .selector-icon
+  padding 0
+  width 55px
+  height 24px
+  font-size 24px
+  line-height 24px
+  text-align center
+  margin-right 22px
+  filter grayscale(100%)
+
+  &:before
+    color $menu-bg-color
+
+.che-simple-selector .selector-icon img
+  height 24px
+  padding-bottom 1px
+
+.che-simple-selector .cheico-type-blank > img
+    display none
+
+.che-simple-selector .title
+  font-size 12px
+  line-height 22px
+  text-align center
+  text-transform uppercase
+
+.che-simple-selector .description, .che-simple-selector-active .description
+  font-size 12px
+  padding 5px 10px
+  color $label-primary-color
+
+.che-simple-selector-active
+  border-color $primary-color
+  color $primary-color
+
+  &:hover
+    background-color $background-color
+
+.che-simple-selector-active .title, .che-simple-selector-active:hover .title
+  background-color $primary-color
+  color $background-color
+  border-color $primary-color
+  font-weight bold
+
+.che-simple-selector-active .title:before, .che-simple-selector-active:hover .title:before
+  border-right-color $primary-color
+
+.che-simple-selector-active .title:after, .che-simple-selector-active:hover .title:after
+  border-right-color $primary-color
+
+.che-simple-selector-active:hover .selector-icon
+  filter none
+
+.che-simple-selector-active .selector-icon
+  filter none

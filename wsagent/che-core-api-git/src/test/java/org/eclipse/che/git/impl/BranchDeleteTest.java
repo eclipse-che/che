@@ -28,8 +28,8 @@ import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_LOCAL;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.git.impl.GitTestUtil.addFile;
@@ -97,7 +97,7 @@ public class BranchDeleteTest {
         //create new branch and make a commit
         connection.checkout(CheckoutParams.create("newbranch").withCreateNew(true));
         addFile(connection, "newfile", "new file content");
-        connection.add(AddParams.create(Arrays.asList(".")));
+        connection.add(AddParams.create(singletonList(".")));
         connection.commit(CommitParams.create("second commit"));
         connection.checkout(CheckoutParams.create("master"));
 
@@ -127,7 +127,7 @@ public class BranchDeleteTest {
         //create new branch and make a commit
         connection.checkout(CheckoutParams.create("newbranch").withCreateNew(true));
         addFile(connection, "newfile", "new file content");
-        connection.add(AddParams.create(Arrays.asList(".")));
+        connection.add(AddParams.create(singletonList(".")));
         connection.commit(CommitParams.create("second commit"));
         connection.checkout(CheckoutParams.create("master"));
 

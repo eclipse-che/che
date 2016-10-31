@@ -33,31 +33,36 @@ import org.eclipse.che.api.vfs.impl.file.event.HiEventDetector;
 import org.eclipse.che.api.vfs.impl.file.event.HiEventService;
 import org.eclipse.che.api.vfs.impl.file.event.LoEventListener;
 import org.eclipse.che.api.vfs.impl.file.event.LoEventService;
-import org.eclipse.che.api.vfs.impl.file.event.detectors.GitCheckoutHiEventDetector;
-import org.eclipse.che.api.vfs.impl.file.event.detectors.OpenedFileContentUpdateEventDetector;
-import org.eclipse.che.api.vfs.impl.file.event.detectors.PomModifiedHiEventDetector;
+import org.eclipse.che.api.vfs.impl.file.event.detectors.FileStatusDetector;
+import org.eclipse.che.api.vfs.impl.file.event.detectors.FileTrackingOperationReceiver;
+import org.eclipse.che.api.vfs.impl.file.event.detectors.FileTrackingOperationTransmitter;
+import org.eclipse.che.api.vfs.impl.file.event.detectors.ProjectTreeChangesDetector;
 import org.eclipse.che.api.vfs.search.MediaTypeFilter;
 import org.eclipse.che.api.vfs.search.SearcherProvider;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
 
+import java.nio.file.Path;
 import java.nio.file.PathMatcher;
+
+import static com.google.inject.multibindings.Multibinder.newSetBinder;
 
 /**
  * Guice module contains configuration of Project API components.
  *
  * @author gazarenkov
  * @author Artem Zatsarynnyi
+ * @author Dmitry Kuleshov
  */
 public class ProjectApiModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        Multibinder<ProjectImporter> projectImportersMultibinder = Multibinder.newSetBinder(binder(), ProjectImporter.class);
+        Multibinder<ProjectImporter> projectImportersMultibinder = newSetBinder(binder(), ProjectImporter.class);
         projectImportersMultibinder.addBinding().to(ZipProjectImporter.class);
 
-        Multibinder.newSetBinder(binder(), ProjectTypeDef.class).addBinding().to(BaseProjectType.class);
+        newSetBinder(binder(), ProjectTypeDef.class).addBinding().to(BaseProjectType.class);
 
-        Multibinder<ProjectHandler> projectHandlersMultibinder = Multibinder.newSetBinder(binder(), ProjectHandler.class);
+        Multibinder<ProjectHandler> projectHandlersMultibinder = newSetBinder(binder(), ProjectHandler.class);
         projectHandlersMultibinder.addBinding().to(CreateBaseProjectTypeHandler.class);
         projectHandlersMultibinder.addBinding().to(InitBaseProjectTypeHandler.class);
 
@@ -69,21 +74,37 @@ public class ProjectApiModule extends AbstractModule {
         bind(WorkspaceProjectsSyncer.class).to(WorkspaceHolder.class);
 
         // configure VFS
-        Multibinder<VirtualFileFilter> filtersMultibinder = Multibinder.newSetBinder(binder(),
-                                                                                     VirtualFileFilter.class,
-                                                                                     Names.named("vfs.index_filter"));
+        Multibinder<VirtualFileFilter> filtersMultibinder =
+                newSetBinder(binder(), VirtualFileFilter.class, Names.named("vfs.index_filter"));
+
         filtersMultibinder.addBinding().to(MediaTypeFilter.class);
 
-        Multibinder<PathMatcher> pathMatcherMultibinder = Multibinder.newSetBinder(binder(),
-                                                                                   PathMatcher.class,
-                                                                                   Names.named("vfs.index_filter_matcher"));
+        Multibinder<PathMatcher> excludeMatcher = newSetBinder(binder(), PathMatcher.class, Names.named("vfs.index_filter_matcher"));
 
         bind(SearcherProvider.class).to(FSLuceneSearcherProvider.class);
         bind(VirtualFileSystemProvider.class).to(LocalVirtualFileSystemProvider.class);
 
         bind(FileWatcherNotificationHandler.class).to(DefaultFileWatcherNotificationHandler.class);
 
+        configureVfsFilters(excludeMatcher);
         configureVfsEvent();
+    }
+
+    private void configureVfsFilters(Multibinder<PathMatcher> excludeMatcher) {
+        addVfsFilter(excludeMatcher, ".che");
+        addVfsFilter(excludeMatcher, ".codenvy");
+        addVfsFilter(excludeMatcher, ".#");
+    }
+
+    private void addVfsFilter(Multibinder<PathMatcher> excludeMatcher, String filter) {
+        excludeMatcher.addBinding().toInstance(path -> {
+            for (Path pathElement : path) {
+                if (pathElement == null || filter.equals(pathElement.toString())) {
+                    return true;
+                }
+            }
+            return false;
+        });
     }
 
     private void configureVfsEvent() {
@@ -92,17 +113,17 @@ public class ProjectApiModule extends AbstractModule {
         bind(HiEventService.class);
 
         Multibinder<HiEventDetector<?>> highLevelVfsEventDetectorMultibinder =
-                Multibinder.newSetBinder(binder(), new TypeLiteral<HiEventDetector<?>>() {
+                newSetBinder(binder(), new TypeLiteral<HiEventDetector<?>>() {
                 });
 
-        highLevelVfsEventDetectorMultibinder.addBinding().to(PomModifiedHiEventDetector.class);
-        highLevelVfsEventDetectorMultibinder.addBinding().to(GitCheckoutHiEventDetector.class);
-        highLevelVfsEventDetectorMultibinder.addBinding().to(OpenedFileContentUpdateEventDetector.class);
+        highLevelVfsEventDetectorMultibinder.addBinding().to(FileStatusDetector.class);
+        highLevelVfsEventDetectorMultibinder.addBinding().to(ProjectTreeChangesDetector.class);
+
+        bind(FileTrackingOperationTransmitter.class).asEagerSingleton();
 
         MapBinder<String, JsonRpcRequestReceiver> requestReceivers =
                 MapBinder.newMapBinder(binder(), String.class, JsonRpcRequestReceiver.class);
 
-        requestReceivers.addBinding("event:file-opened").to(OpenedFileContentUpdateEventDetector.class);
-        requestReceivers.addBinding("event:file-closed").to(OpenedFileContentUpdateEventDetector.class);
+        requestReceivers.addBinding("track:editor-file").to(FileTrackingOperationReceiver.class);
     }
 }

@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-core-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>4.8.0-SNAPSHOT</version>
+        <version>5.0.0-M7-SNAPSHOT</version>
     </parent>
     <artifactId>che-core-api-core</artifactId>
     <packaging>jar</packaging>
@@ -26,6 +26,10 @@
         <findbugs.failonerror>false</findbugs.failonerror>
     </properties>
     <dependencies>
+        <dependency>
+            <groupId>aopalliance</groupId>
+            <artifactId>aopalliance</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
@@ -128,6 +132,16 @@
         <dependency>
             <groupId>org.everrest</groupId>
             <artifactId>everrest-assured</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-library</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

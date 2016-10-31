@@ -110,7 +110,3 @@
 
     color: completionPopupItemTextColor;
 }
-
-.label span {
-    color: completionPopupItemSubtitleTextColor !important;
-}

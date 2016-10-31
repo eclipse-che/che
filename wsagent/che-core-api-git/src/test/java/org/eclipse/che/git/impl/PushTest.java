@@ -30,7 +30,6 @@ import org.testng.annotations.Test;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Arrays;
 
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.git.impl.GitTestUtil.addFile;
@@ -69,7 +68,7 @@ public class PushTest {
         remoteConnection.clone(CloneParams.create(connection.getWorkingDir().getAbsolutePath())
                                           .withWorkingDir(remoteConnection.getWorkingDir().getAbsolutePath()));
         addFile(remoteConnection, "newfile", "content");
-        remoteConnection.add(AddParams.create(Arrays.asList(".")));
+        remoteConnection.add(AddParams.create(singletonList(".")));
         remoteConnection.commit(CommitParams.create("Fake commit"));
         //when
         remoteConnection.push(PushParams.create("origin")
@@ -90,7 +89,7 @@ public class PushTest {
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
         GitConnection remoteConnection = connectToInitializedGitRepository(connectionFactory, remoteRepo);
         addFile(connection, "README", "README");
-        connection.add(AddParams.create(Arrays.asList(".")));
+        connection.add(AddParams.create(singletonList(".")));
         connection.commit(CommitParams.create("Init commit."));
         //make push
         int branchesBefore = remoteConnection.branchList(null).size();

@@ -10,14 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.api.factory.server.impl;
 
-import org.eclipse.che.api.user.server.spi.PreferenceDao;
-
 /**
  * @author Sergii Kabashniuk
  */
 public class TesterFactoryBaseValidator extends FactoryBaseValidator {
 
-    public TesterFactoryBaseValidator(PreferenceDao preferenceDao) {
-        super(preferenceDao);
+    public TesterFactoryBaseValidator() {
     }
 }

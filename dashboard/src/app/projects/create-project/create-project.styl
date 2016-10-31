@@ -17,8 +17,8 @@ che-button-primary#create-project-button-import button
 
 md-select.create-project-select
   width 100%
-  margin-top 0px
-  margin-bottom 0px
+  margin-top 0
+  margin-bottom 0
 
 .projects-create-project > md-card:first-child .che-panel-content
   padding 0
@@ -34,11 +34,11 @@ md-select.create-project-select
   margin-bottom 10px
   margin-right 24px
   background-color #fff
-  box-shadow 0 2px 6px 0 rgba(0,0,0,0.4)
+  box-shadow 0 2px 6px 0 rgba(0, 0, 0, 0.4)
 
 .create-project-header-button .che-button
   font-size 15px !important
-  box-shadow 0 0 0 0 rgba(0,0,0,0.26) !important
+  box-shadow 0 0 0 0 rgba(0, 0, 0, 0.26) !important
 
 .create-project-minimize-icon
   font-size 40px
@@ -62,8 +62,20 @@ md-select.create-project-select
 .projects-create-project
   padding 0 14px
 
+  md-tabs
+    min-height 185px
+
   .che-label-container-content .create-project-input
     margin -6px 0
 
   .che-label-container-content .create-project-nested-container
     margin -25px 0
+
+  .workspace-environment-name + div
+    margin-top 8px
+
+    .workspace-machine
+      margin-left 45px
+
+      .che-ram-allocation-slider .slider-wrapper
+        margin-bottom -15px

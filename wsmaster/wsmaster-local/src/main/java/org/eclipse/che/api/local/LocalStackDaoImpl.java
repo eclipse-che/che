@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.local;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.ConflictException;
@@ -39,110 +40,91 @@ import static java.util.stream.Collectors.toList;
 /**
  * Implementation local storage for {@link Stack}
  *
+ * <p>The implementation is thread-safe guarded by this instance.
+ * Clients may use instance locking to perform extra, thread-safe operation.
+ *
  * @author Alexander Andrienko
+ * @author Yevhenii Voevodin
  */
 @Singleton
 public class LocalStackDaoImpl implements StackDao {
 
-    private final StackLocalStorage      stackStorage;
-    private final Map<String, StackImpl> stacks;
-    private final ReadWriteLock          lock;
+    @VisibleForTesting
+    final Map<String, StackImpl> stacks;
+
+    private final StackLocalStorage stackStorage;
 
     @Inject
     public LocalStackDaoImpl(StackLocalStorage stackLocalStorage) throws IOException {
         this.stackStorage = stackLocalStorage;
         this.stacks = new LinkedHashMap<>();
-        this.lock = new ReentrantReadWriteLock();
     }
 
     @PostConstruct
-    public void start() {
-        lock.readLock().lock();
+    public synchronized void start() {
         stacks.putAll(stackStorage.loadMap());
-        lock.readLock().unlock();
     }
 
-    @PreDestroy
-    public void stop() throws IOException {
-        lock.writeLock().lock();
+    public synchronized void saveStacks() throws IOException {
         stackStorage.store(stacks);
-        lock.writeLock().unlock();
     }
 
     @Override
-    public void create(StackImpl stack) throws ConflictException, ServerException {
+    public synchronized void create(StackImpl stack) throws ConflictException, ServerException {
         requireNonNull(stack, "Stack required");
-        lock.writeLock().lock();
-        try {
-            if (stacks.containsKey(stack.getId())) {
-                throw new ConflictException(format("Stack with id %s is already exist", stack.getId()));
-            }
-            stacks.put(stack.getId(), stack);
-        } finally {
-            lock.writeLock().unlock();
+        if (stacks.containsKey(stack.getId())) {
+            throw new ConflictException(format("Stack with id %s is already exist", stack.getId()));
         }
+        if (stacks.values()
+                  .stream()
+                  .anyMatch(s -> s.getName().equals(stack.getName()))) {
+            throw new ConflictException(format("Stack with name '%s' already exists", stack.getName()));
+        }
+        stacks.put(stack.getId(), new StackImpl(stack));
     }
 
     @Override
-    public StackImpl getById(String id) throws NotFoundException {
+    public synchronized StackImpl getById(String id) throws NotFoundException {
         requireNonNull(id, "Stack id required");
-        lock.readLock().lock();
-        try {
-            final StackImpl stack = stacks.get(id);
-            if (stack == null) {
-                throw new NotFoundException(format("Stack with id %s was not found", id));
-            }
-            return new StackImpl(stack);
-        } finally {
-            lock.readLock().unlock();
+        final StackImpl stack = stacks.get(id);
+        if (stack == null) {
+            throw new NotFoundException(format("Stack with id %s was not found", id));
         }
+        return new StackImpl(stack);
     }
 
     @Override
-    public void remove(String id) throws ServerException {
+    public synchronized void remove(String id) throws ServerException {
         requireNonNull(id, "Stack id required");
-        lock.writeLock().lock();
-        try {
-            stacks.remove(id);
-        } finally {
-            lock.writeLock().unlock();
-        }
+        stacks.remove(id);
     }
 
     @Override
-    public StackImpl update(StackImpl update) throws NotFoundException, ServerException {
+    public synchronized StackImpl update(StackImpl update) throws NotFoundException, ServerException, ConflictException {
         requireNonNull(update, "Stack required");
         requireNonNull(update.getId(), "Stack id required");
-        lock.writeLock().lock();
-        try {
-            String updateId = update.getId();
-            if (!stacks.containsKey(updateId)) {
-                throw new NotFoundException(format("Stack with id %s was not found", updateId));
-            }
-            stacks.replace(updateId, update);
-            return new StackImpl(update);
-        } finally {
-            lock.writeLock().unlock();
+        String updateId = update.getId();
+        if (!stacks.containsKey(updateId)) {
+            throw new NotFoundException(format("Stack with id %s was not found", updateId));
         }
+        if (stacks.values()
+                  .stream()
+                  .anyMatch(stack -> stack.getName().equals(update.getName()) && !stack.getId().equals(updateId))) {
+            throw new ConflictException(format("Stack with name '%s' already exists", updateId));
+        }
+        stacks.replace(updateId, new StackImpl(update));
+        return new StackImpl(update);
     }
 
     @Override
-    public List<StackImpl> searchStacks(String user, @Nullable List<String> tags, int skipCount, int maxItems) {
-        lock.readLock().lock();
-        try {
-            Stream<StackImpl> stacksStream = stacks.values()
-                                                   .stream()
-                                                   .skip(skipCount)
-                                                   .filter(decoratedStack -> tags == null ||
-                                                                             decoratedStack.getTags().containsAll(tags));
-            if (maxItems != 0) {
-                stacksStream = stacksStream.limit(maxItems);
-            }
-
-            return stacksStream.map(StackImpl::new)
-                               .collect(toList());
-        } finally {
-            lock.readLock().unlock();
+    public synchronized List<StackImpl> searchStacks(String user, @Nullable List<String> tags, int skipCount, int maxItems) {
+        Stream<StackImpl> stream = stacks.values()
+                                         .stream()
+                                         .skip(skipCount)
+                                         .filter(s -> tags == null || s.getTags().containsAll(tags));
+        if (maxItems != 0) {
+            stream = stream.limit(maxItems);
         }
+        return stream.map(StackImpl::new).collect(toList());
     }
 }

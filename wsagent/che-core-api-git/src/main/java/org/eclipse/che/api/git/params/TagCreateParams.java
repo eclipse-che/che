@@ -28,7 +28,7 @@ public class TagCreateParams {
     }
 
     /**
-     * Create new {@link TagCreateParams} instance
+     * Create new {@link TagCreateParams} instance.
      *
      * @param name
      *         tag name

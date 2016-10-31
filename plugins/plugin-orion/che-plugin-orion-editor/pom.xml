@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-orion-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>4.8.0-SNAPSHOT</version>
+        <version>5.0.0-M7-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>che-plugin-orion-editor</artifactId>
@@ -123,10 +123,10 @@
                         <configuration>
                             <patchDirectory>${patches.location}</patchDirectory>
                             <patches>
-                                <patch>built-codeEdit-amd.js.diff</patch>
+                                <patch>fix_linked_mode.diff</patch>
                                 <patch>fix_goto_line.diff</patch>
+                                <patch>fix_scrolling.diff</patch>
                                 <patch>fix_focus.diff</patch>
-                                <patch>embeddedToolingPlugin.js.diff</patch>
                             </patches>
                             <optimizations>false</optimizations>
                             <strictPatching>true</strictPatching>
@@ -160,11 +160,8 @@
                 <configuration>
                     <excludes>
                         <!-- Orion - EPL License -->
-                        <exclude>**/org/eclipse/che/ide/editor/orion/public/built-codeEdit-11.0/**</exclude>
-                        <exclude>**/patches/built-codeEdit-amd.js.diff</exclude>
-                        <exclude>**/patches/fix_goto_line.diff</exclude>
-                        <exclude>**/patches/fix_focus.diff</exclude>
-                        <exclude>**/patches/embeddedToolingPlugin.js.diff</exclude>
+                        <exclude>**/org/eclipse/che/ide/editor/orion/public/built-codeEdit-12.0/**</exclude>
+                        <exclude>**/org/eclipse/che/ide/editor/orion/public/cheJavaHighlightingPlugin/lib/plugin.js</exclude>
                     </excludes>
                 </configuration>
             </plugin>

@@ -33,7 +33,7 @@ public class CheckoutParams {
     }
 
     /**
-     * Create new {@link CheckoutParams} instance
+     * Create new {@link CheckoutParams} instance.
      *
      * @param name
      *         name of the branch to checkout

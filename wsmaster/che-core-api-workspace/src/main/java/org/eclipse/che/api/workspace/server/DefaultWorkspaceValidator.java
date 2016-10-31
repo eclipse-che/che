@@ -11,6 +11,7 @@
 package org.eclipse.che.api.workspace.server;
 
 import org.eclipse.che.api.core.BadRequestException;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.model.workspace.Environment;
 import org.eclipse.che.api.core.model.workspace.Workspace;
@@ -43,13 +44,15 @@ public class DefaultWorkspaceValidator implements WorkspaceValidator {
     }
 
     @Override
-    public void validateWorkspace(Workspace workspace) throws BadRequestException {
+    public void validateWorkspace(Workspace workspace) throws BadRequestException,
+                                                              ServerException {
         validateAttributes(workspace.getAttributes());
         validateConfig(workspace.getConfig());
     }
 
     @Override
-    public void validateConfig(WorkspaceConfig config) throws BadRequestException {
+    public void validateConfig(WorkspaceConfig config) throws BadRequestException,
+                                                              ServerException {
         // configuration object itself
         checkNotNull(config.getName(), "Workspace name required");
         checkArgument(WS_NAME.matcher(config.getName()).matches(),
@@ -61,14 +64,12 @@ public class DefaultWorkspaceValidator implements WorkspaceValidator {
         //environments
         checkArgument(!isNullOrEmpty(config.getDefaultEnv()), "Workspace default environment name required");
         checkNotNull(config.getEnvironments(), "Workspace should contain at least one environment");
-        checkArgument(config.getEnvironments()
-                            .stream()
-                            .anyMatch(env -> config.getDefaultEnv().equals(env.getName())),
+        checkArgument(config.getEnvironments().containsKey(config.getDefaultEnv()),
                       "Workspace default environment configuration required");
 
-        for (Environment environment : config.getEnvironments()) {
+        for (Map.Entry<String, ? extends Environment> envEntry : config.getEnvironments().entrySet()) {
             try {
-                environmentValidator.validate(environment);
+                environmentValidator.validate(envEntry.getKey(), envEntry.getValue());
             } catch (IllegalArgumentException e) {
                 throw new BadRequestException(e.getLocalizedMessage());
             }

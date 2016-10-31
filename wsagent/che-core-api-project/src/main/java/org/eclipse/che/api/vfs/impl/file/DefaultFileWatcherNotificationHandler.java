@@ -24,6 +24,8 @@ import java.io.File;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import static org.eclipse.che.api.vfs.Path.ROOT;
+
 @Singleton
 public class DefaultFileWatcherNotificationHandler implements FileWatcherNotificationHandler {
     private static final Logger LOG = LoggerFactory.getLogger(DefaultFileWatcherNotificationHandler.class);
@@ -74,7 +76,7 @@ public class DefaultFileWatcherNotificationHandler implements FileWatcherNotific
             Path vfsPath = Path.of(subPath);
             VirtualFile virtualFile = virtualFileSystem.getRoot().getChild(vfsPath);
             if (virtualFile == null) {
-                virtualFile = new DeletedLocalVirtualFile(new File(root, subPath), vfsPath, virtualFileSystem, isDir);
+                virtualFile = new DeletedLocalVirtualFile(new File(root, subPath), ROOT.newPath(vfsPath), virtualFileSystem, isDir);
             }
             return virtualFile;
         } catch (ServerException e) {

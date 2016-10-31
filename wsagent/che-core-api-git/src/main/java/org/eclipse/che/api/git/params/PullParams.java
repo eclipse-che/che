@@ -21,13 +21,15 @@ public class PullParams {
 
     private String refSpec;
     private String remote;
+    private String username;
+    private String password;
     private int    timeout;
 
     private PullParams() {
     }
 
     /**
-     * Create new {@link PullParams} instance
+     * Create new {@link PullParams} instance.
      *
      * @param remote
      *         remote name to pull from
@@ -66,6 +68,28 @@ public class PullParams {
     /** @see PullRequest#withTimeout(int) */
     public PullParams withTimeout(int timeout) {
         this.timeout = timeout;
+        return this;
+    }
+
+    /** Returns user name for authentication. */
+    public String getUsername() {
+        return username;
+    }
+
+    /** Returns {@link PullParams} with specified user name for authentication. */
+    public PullParams withUsername(String username) {
+        this.username = username;
+        return this;
+    }
+
+    /** Returns password for authentication. */
+    public String getPassword() {
+        return password;
+    }
+
+    /** Returns {@link PullParams} with specified password for authentication. */
+    public PullParams withPassword(String password) {
+        this.password = password;
         return this;
     }
 }

@@ -63,7 +63,7 @@ public class JschSshClient implements SshClient {
     public JschSshClient(@Assisted SshMachineRecipe sshMachineRecipe,
                          @Assisted Map<String, String> envVars,
                          JSch jsch,
-                         @Named("machine.ssh.connection_timeout_ms") int connectionTimeoutMs) {
+                         @Named("che.workspace.ssh_connection_timeout_ms") int connectionTimeoutMs) {
         this.envVars = envVars;
         this.connectionTimeout = connectionTimeoutMs;
         this.user = JschUserInfoImpl.builder()

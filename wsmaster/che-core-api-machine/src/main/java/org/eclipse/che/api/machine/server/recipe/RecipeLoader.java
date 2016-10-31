@@ -20,7 +20,7 @@ import com.google.inject.Inject;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.machine.server.dao.RecipeDao;
+import org.eclipse.che.api.machine.server.spi.RecipeDao;
 import org.eclipse.che.commons.annotation.Nullable;
 
 import javax.annotation.PostConstruct;
@@ -54,7 +54,9 @@ public class RecipeLoader {
     private final RecipeDao   recipeDao;
 
     @Inject
-    public RecipeLoader(@Nullable @Named("predefined.recipe.path") Set<String> recipesPaths, RecipeDao recipeDao) {
+    @SuppressWarnings("unused")
+    public RecipeLoader(@Nullable @Named("predefined.recipe.path") Set<String> recipesPaths,
+                        RecipeDao recipeDao) {
         this.recipesPaths = firstNonNull(recipesPaths, Collections.<String>emptySet());
         this.recipeDao = recipeDao;
     }

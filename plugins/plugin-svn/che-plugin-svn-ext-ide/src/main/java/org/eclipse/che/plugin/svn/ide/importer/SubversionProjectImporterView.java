@@ -32,8 +32,6 @@ public interface SubversionProjectImporterView extends View<SubversionProjectImp
 
         /** Performs any actions appropriate in response to the user having changed the relative path in the project. */
         void onProjectRelativePathChanged(String relativePath);
-
-        void onCredentialsChanged();
     }
 
     /** Set error marker on project name field. */
@@ -68,16 +66,6 @@ public interface SubversionProjectImporterView extends View<SubversionProjectImp
 
     /** Return custom relative project path. */
     String getProjectRelativePath();
-
-    /** Return user name. */
-    String getUserName();
-
-    /** Return user password. */
-    String getPassword();
-
-    /** Clean username and password fields */
-    void cleanCredentials();
-
     /**
      * Set the enable state of the inputs.
      *

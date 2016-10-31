@@ -368,6 +368,16 @@ a {
     outline: none;
 }
 
+.editorPaneMenuDelimiter {
+    cursor: default;
+}
+
+.editorPaneMenuDelimiter {
+    width: 100%;
+    height: 1px;
+    background-color: popupBorderColor;
+}
+
 .simpleListContainer {
     border: 1px solid rgba(0, 0, 0, 0.2);
 }
@@ -612,6 +622,99 @@ a {
     -webkit-animation-iteration-count: 2;
     animation-iteration-count: 2;
 }
+
+/*********************************************************************************************
+ *
+ * inDown
+ *          is used in org.eclipse.che.ide.ui.loaders.PopupLoaderImpl
+ *
+ *********************************************************************************************/
+
+@-webkit-keyframes inDown {
+    0% {
+        opacity: 0;
+        -webkit-transform: translateY(-50px);
+        transform: translateY(-50px);
+    }
+
+    100% {
+        opacity: 1;
+        -webkit-transform: translateY(0);
+        transform: translateY(0);
+    }
+}
+
+@keyframes inDown {
+    0% {
+        opacity: 0;
+        -webkit-transform: translateY(-50px);
+        -ms-transform: translateY(-50px);
+        transform: translateY(-50px);
+    }
+
+    100% {
+        opacity: 1;
+        -webkit-transform: translateY(0);
+        -ms-transform: translateY(0);
+        transform: translateY(0);
+    }
+}
+
+.inDown {
+    -webkit-animation-name: inDown;
+    animation-name: inDown;
+    -webkit-animation-duration: 0.5s;
+    animation-duration: 0.5s;
+    -webkit-animation-fill-mode: both;
+    animation-fill-mode: both;
+}
+
+/*********************************************************************************************
+ *
+ * outDown
+ *          is used in org.eclipse.che.ide.ui.loaders.PopupLoaderImpl
+ *
+ *********************************************************************************************/
+
+@-webkit-keyframes outDown {
+    0% {
+        opacity: 1;
+        -webkit-transform: translateY(0);
+        transform: translateY(0);
+    }
+
+    100% {
+        opacity: 0;
+        -webkit-transform: translateY(20px);
+        transform: translateY(20px);
+    }
+}
+
+@keyframes outDown {
+    0% {
+        opacity: 1;
+        -webkit-transform: translateY(0);
+        -ms-transform: translateY(0);
+        transform: translateY(0);
+    }
+
+    100% {
+        opacity: 0;
+        -webkit-transform: translateY(20px);
+        -ms-transform: translateY(20px);
+        transform: translateY(20px);
+    }
+}
+
+.outDown {
+    -webkit-animation-name: outDown;
+    animation-name: outDown;
+    -webkit-animation-duration: 0.5s;
+    animation-duration: 0.5s;
+    -webkit-animation-fill-mode: both;
+    animation-fill-mode: both;
+}
+
 
 .createWsTagsPopup {
     /*the same index as in Window*/

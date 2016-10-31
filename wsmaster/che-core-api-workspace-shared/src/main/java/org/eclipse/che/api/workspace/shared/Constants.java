@@ -21,6 +21,7 @@ public final class Constants {
     public static final String AUTO_CREATE_SNAPSHOT           = "auto_snapshot";
     public static final String AUTO_RESTORE_FROM_SNAPSHOT     = "auto_restore";
     public static final String LINK_REL_GET_WORKSPACES        = "get workspaces";
+    public static final String LINK_REL_GET_BY_NAMESPACE      = "get by namespace";
     public static final String LINK_REL_CREATE_WORKSPACE      = "create workspace";
     public static final String LINK_REL_REMOVE_WORKSPACE      = "remove workspace";
     public static final String LINK_REL_START_WORKSPACE       = "start workspace";
@@ -44,6 +45,9 @@ public final class Constants {
     public static final String LINK_REL_DELETE_ICON = "delete icon link";
 
     public static final String LINK_REL_GET_WORKSPACE_EVENTS_CHANNEL = "get workspace events channel";
+
+    public static final String WS_AGENT_PROCESS_NAME          = "CheWsAgent";
+
 
     private Constants() {}
 }

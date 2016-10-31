@@ -26,12 +26,17 @@ import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
+import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectProblemDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.editor.EditorAgent;
+import org.eclipse.che.ide.api.editor.EditorPartPresenter;
+import org.eclipse.che.ide.api.event.ng.DeletedFilesController;
 import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
+import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.ProjectServiceClient;
 import org.eclipse.che.ide.api.project.QueryExpression;
 import org.eclipse.che.ide.api.project.type.ProjectTypeRegistry;
@@ -73,6 +78,7 @@ import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_TO;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.REMOVED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.SYNCHRONIZED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.UPDATED;
+import static org.eclipse.che.ide.util.Arrays.add;
 import static org.eclipse.che.ide.util.Arrays.removeAll;
 import static org.eclipse.che.ide.util.NameUtils.checkFileName;
 import static org.eclipse.che.ide.util.NameUtils.checkFolderName;
@@ -120,13 +126,15 @@ public final class ResourceManager {
 
     private static final Resource[] NO_RESOURCES = new Resource[0];
 
-    private final ProjectServiceClient ps;
-    private final EventBus             eventBus;
-    private final ResourceFactory      resourceFactory;
-    private final PromiseProvider      promises;
-    private final DtoFactory           dtoFactory;
-    private final ProjectTypeRegistry  typeRegistry;
-    private       DevMachine           devMachine;
+    private final ProjectServiceClient   ps;
+    private final EventBus               eventBus;
+    private final EditorAgent            editorAgent;
+    private final DeletedFilesController deletedFilesController;
+    private final ResourceFactory        resourceFactory;
+    private final PromiseProvider        promises;
+    private final DtoFactory             dtoFactory;
+    private final ProjectTypeRegistry    typeRegistry;
+    private       DevMachine             devMachine;
 
     /**
      * Link to the workspace content root. Immutable among the workspace life.
@@ -148,6 +156,8 @@ public final class ResourceManager {
     public ResourceManager(@Assisted DevMachine devMachine,
                            ProjectServiceClient ps,
                            EventBus eventBus,
+                           EditorAgent editorAgent,
+                           DeletedFilesController deletedFilesController,
                            ResourceFactory resourceFactory,
                            PromiseProvider promises,
                            DtoFactory dtoFactory,
@@ -157,6 +167,8 @@ public final class ResourceManager {
         this.devMachine = devMachine;
         this.ps = ps;
         this.eventBus = eventBus;
+        this.editorAgent = editorAgent;
+        this.deletedFilesController = deletedFilesController;
         this.resourceFactory = resourceFactory;
         this.promises = promises;
         this.dtoFactory = dtoFactory;
@@ -304,6 +316,8 @@ public final class ResourceManager {
                         checkState(updatedProject.isPresent(), "Updated resource is not present");
                         checkState(updatedProject.get().isProject(), "Updated resource is not a project");
 
+                        eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(updatedProject.get(), UPDATED)));
+
                         return (Project)updatedProject.get();
                     }
                 });
@@ -401,13 +415,14 @@ public final class ResourceManager {
             @Override
             public Promise<Project> apply(Optional<Resource> resource) throws FunctionException {
 
+                final MutableProjectConfig projectConfig = (MutableProjectConfig)createRequest.getBody();
                 final ProjectConfigDto dto = dtoFactory.createDto(ProjectConfigDto.class)
-                                                       .withName(createRequest.getBody().getName())
+                                                       .withName(projectConfig.getName())
                                                        .withPath(path.toString())
-                                                       .withDescription(createRequest.getBody().getDescription())
-                                                       .withType(createRequest.getBody().getType())
-                                                       .withMixins(createRequest.getBody().getMixins())
-                                                       .withAttributes(createRequest.getBody().getAttributes());
+                                                       .withDescription(projectConfig.getDescription())
+                                                       .withType(projectConfig.getType())
+                                                       .withMixins(projectConfig.getMixins())
+                                                       .withAttributes(projectConfig.getAttributes());
 
 
                 if (resource.isPresent()) {
@@ -420,7 +435,7 @@ public final class ResourceManager {
                     return update(path, createRequest);
                 }
 
-                return ps.createProject(dto).thenPromise(new Function<ProjectConfigDto, Promise<Project>>() {
+                return ps.createProject(dto, projectConfig.getOptions()).thenPromise(new Function<ProjectConfigDto, Promise<Project>>() {
                     @Override
                     public Promise<Project> apply(ProjectConfigDto config) throws FunctionException {
                         final Project newResource = resourceFactory.newProjectImpl(config, ResourceManager.this);
@@ -460,20 +475,27 @@ public final class ResourceManager {
                                                                     .withLocation(sourceStorage.getLocation())
                                                                     .withParameters(sourceStorage.getParameters());
 
-                return ps.importProject(path, sourceStorageDto).then(new Function<Void, Project>() {
+                return ps.importProject(path, sourceStorageDto).thenPromise(new Function<Void, Promise<Project>>() {
                     @Override
-                    public Project apply(Void ignored) throws FunctionException {
+                    public Promise<Project> apply(Void ignored) throws FunctionException {
 
-                        Resource project = resourceFactory.newProjectImpl(importRequest.getBody(), ResourceManager.this);
+                        return ps.getProject(path).then(new Function<ProjectConfigDto, Project>() {
+                            @Override
+                            public Project apply(ProjectConfigDto config) throws FunctionException {
+                                cachedConfigs = add(cachedConfigs, config);
 
-                        checkState(project != null, "Failed to locate imported project's configuration");
+                                Resource project = resourceFactory.newProjectImpl(config, ResourceManager.this);
 
-                        store.register(project);
+                                checkState(project != null, "Failed to locate imported project's configuration");
 
-                        eventBus.fireEvent(new ResourceChangedEvent(
-                                new ResourceDeltaImpl(project, (resource.isPresent() ? UPDATED : ADDED) | DERIVED)));
+                                store.register(project);
 
-                        return (Project)project;
+                                eventBus.fireEvent(new ResourceChangedEvent(
+                                        new ResourceDeltaImpl(project, (resource.isPresent() ? UPDATED : ADDED) | DERIVED)));
+
+                                return (Project)project;
+                            }
+                        });
                     }
                 });
             }
@@ -488,10 +510,18 @@ public final class ResourceManager {
             public Promise<Resource> apply(Optional<Resource> resource) throws FunctionException {
                 checkState(!resource.isPresent() || force, "Cannot create '" + destination.toString() + "'. Resource already exists.");
 
+                if (isResourceOpened(source)) {
+                    deletedFilesController.add(source.getLocation().toString());
+                }
+
                 return ps.move(source.getLocation(), destination.parent(), destination.lastSegment(), force)
                          .thenPromise(new Function<Void, Promise<Resource>>() {
                              @Override
                              public Promise<Resource> apply(Void ignored) throws FunctionException {
+
+                                 if (source.isProject()) {
+                                     return Promises.resolve(source);
+                                 }
 
                                  return findResource(destination, false).then(new Function<Optional<Resource>, Resource>() {
                                      @Override
@@ -563,10 +593,18 @@ public final class ResourceManager {
 
                 store.dispose(resource.getLocation(), !resource.isFile());
 
+                if (isResourceOpened(resource)) {
+                    deletedFilesController.add(resource.getLocation().toString());
+                }
+
                 eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(resource, REMOVED | DERIVED)));
 
                 if (descToRemove != null) {
                     for (Resource toRemove : descToRemove) {
+                        if (isResourceOpened(resource)) {
+                            deletedFilesController.add(toRemove.getLocation().toString());
+                        }
+
                         eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(toRemove, REMOVED | DERIVED)));
                     }
                 }
@@ -803,6 +841,22 @@ public final class ResourceManager {
         });
     }
 
+    private boolean isResourceOpened(final Resource resource) {
+        if (!resource.isFile()) {
+            return false;
+        }
+
+        File file = (File)resource;
+
+        for (EditorPartPresenter editor : editorAgent.getOpenedEditors()) {
+            String editorPath = editor.getEditorInput().getFile().getLocation().toString();
+            if (editorPath.equals(file.getPath())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     private void traverse(TreeElement tree, ResourceVisitor visitor) {
         for (final TreeElement element : tree.getChildren()) {
@@ -1012,6 +1066,25 @@ public final class ResourceManager {
                     }
 
                     eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(intercepted, ADDED | DERIVED)));
+                } else if (delta.getToPath().segmentCount() == 1) {
+                    ps.getProjects().then(new Function<List<ProjectConfigDto>, Void>() {
+                        @Override
+                        public Void apply(List<ProjectConfigDto> updatedConfiguration) throws FunctionException {
+                            cachedConfigs = updatedConfiguration.toArray(new ProjectConfigDto[updatedConfiguration.size()]);
+
+                            for (ProjectConfigDto config : cachedConfigs) {
+                                if (Path.valueOf(config.getPath()).equals(delta.getToPath())) {
+                                    final Project project = resourceFactory.newProjectImpl(config, ResourceManager.this);
+
+                                    store.register(project);
+
+                                    eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(project, ADDED)));
+                                }
+                            }
+
+                            return null;
+                        }
+                    });
                 }
 
                 return null;
@@ -1020,18 +1093,22 @@ public final class ResourceManager {
     }
 
     private Promise<Void> onExternalDeltaUpdated(final ResourceDelta delta) {
+        if (delta.getToPath().segmentCount() == 0) {
+            workspaceRoot.synchronize();
+
+            return null;
+        }
+
         return findResource(delta.getToPath(), true).then(new Function<Optional<Resource>, Void>() {
             @Override
             public Void apply(Optional<Resource> resource) throws FunctionException {
 
                 if (resource.isPresent()) {
-                    Resource intercepted = resource.get();
-
-                    if (!store.getResource(intercepted.getLocation()).isPresent()) {
-                        store.register(intercepted);
+                    if (resource.get() instanceof Container) {
+                        ((Container)resource.get()).synchronize();
+                    } else {
+                        eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(resource.get(), UPDATED | DERIVED)));
                     }
-
-                    eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(intercepted, UPDATED | DERIVED)));
                 }
 
                 return null;
@@ -1056,7 +1133,9 @@ public final class ResourceManager {
 
     protected Promise<Resource[]> search(final Container container, String fileMask, String contentMask) {
         QueryExpression queryExpression = new QueryExpression();
-        queryExpression.setText(contentMask + '*');
+        if (!isNullOrEmpty(contentMask)) {
+            queryExpression.setText(contentMask + '*');
+        }
         if (!isNullOrEmpty(fileMask)) {
             queryExpression.setName(fileMask);
         }

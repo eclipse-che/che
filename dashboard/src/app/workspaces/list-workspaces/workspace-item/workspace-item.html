@@ -42,13 +42,14 @@
            lass="che-list-item-name"
            ng-click="workspaceItemCtrl.redirectToWorkspaceDetails();">
         <span class="che-xs-header noselect" hide-gt-xs>RAM</span>
-        <span class="workspace-consumed-value">{{workspaceItemCtrl.getDefaultEnvironment(workspaceItemCtrl.workspace).machineConfigs[0].limits.ram}} MB</span>
+        <span class="workspace-consumed-value">{{workspaceItemCtrl.getMemoryLimit(workspaceItemCtrl.workspace)}}</span>
       </div>
       <div flex-gt-xs="15"
            class="che-list-item-name"
            ng-click="workspaceItemCtrl.redirectToWorkspaceDetails();">
         <span class="che-xs-header noselect" hide-gt-xs>Projects</span>
-        <span class="che-hover">{{workspaceItemCtrl.workspace.config.projects.length}}</span>
+        <span class="che-hover">{{workspaceItemCtrl.workspace.config.projects.length}}
+          <span ng-if="workspaceItemCtrl.displayLabels"> project<span ng-if="workspaceItemCtrl.workspace.config.projects.length > 1">s</span></span></span>
       </div>
       <div flex-gt-xs="30"
            class="che-list-item-name"

@@ -22,9 +22,13 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
@@ -194,6 +198,27 @@ public class ZipUtils {
         }
     }
 
+    /**
+     * Provides streams to all resources matching {@code filter} criteria inside the archive.
+     *
+     * @param zip
+     *      zip file to get resources from
+     * @param filter
+     *      the search criteria
+     * @throws IOException
+     */
+    public static void getResources(ZipFile zip, Pattern filter, Consumer<InputStream> consumer) throws IOException {
+        Enumeration<? extends ZipEntry> zipEntries = zip.entries();
+        while (zipEntries.hasMoreElements()) {
+            ZipEntry zipEntry = zipEntries.nextElement();
+            final String name = zipEntry.getName();
+            if (filter.matcher(name).matches()) {
+                try (InputStream in = zip.getInputStream(zipEntry)) {
+                    consumer.accept(in);
+                }
+            }
+        }
+    }
 
     /**
      * Checks is specified file is zip file or not. Zip file <a href="http://en.wikipedia.org/wiki/Zip_(file_format)#File_headers">headers

@@ -13,14 +13,13 @@ package org.eclipse.che.ide.extension.machine.client.processes;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
-import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.ui.tree.TreeNodeElement;
 import org.eclipse.che.ide.util.UUID;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
-
 import java.util.Collection;
 
 /**
@@ -50,15 +49,16 @@ public class ProcessTreeNode {
     private       TreeNodeElement<ProcessTreeNode> treeNodeElement;
 
     private boolean                                hasUnreadContent;
+    private boolean                                hasTerminalAgent;
+    private boolean                                hasSSHAgent;
 
     private boolean                                running;
 
-    @Inject
-    public ProcessTreeNode(@Assisted ProcessNodeType type,
-                           @Assisted ProcessTreeNode parent,
-                           @Assisted("data") Object data,
-                           @Assisted SVGResource icon,
-                           @Assisted Collection<ProcessTreeNode> children) {
+    public ProcessTreeNode(ProcessNodeType type,
+                           ProcessTreeNode parent,
+                           Object data,
+                           SVGResource icon,
+                           Collection<ProcessTreeNode> children) {
         this.type = type;
         this.parent = parent;
         this.data = data;
@@ -67,8 +67,14 @@ public class ProcessTreeNode {
 
         switch (type) {
             case MACHINE_NODE:
-                id = ((MachineDto)data).getId();
-                displayName = ((MachineDto)data).getConfig().getName();
+                if (data instanceof MachineEntity) {
+                    MachineEntity machine = (MachineEntity)data;
+                    id = machine.getId();
+                    displayName = machine.getDisplayName();
+                } else {
+                    throw new IllegalArgumentException("Data type is not a machine setting default value");
+                }
+
                 break;
             case COMMAND_NODE:
                 id = data + UUID.uuid();
@@ -136,6 +142,22 @@ public class ProcessTreeNode {
         this.hasUnreadContent = hasUnreadContent;
     }
 
+    public boolean hasTerminalAgent() {
+        return hasTerminalAgent;
+    }
+
+    public void setHasTerminalAgent(boolean hasTerminalAgent) {
+        this.hasTerminalAgent = hasTerminalAgent;
+    }
+
+    public boolean hasSSHAgent() {
+        return hasSSHAgent;
+    }
+
+    public void setHasSSHAgent(boolean hasSSHAgent) {
+        this.hasSSHAgent = hasSSHAgent;
+    }
+
     public boolean isRunning() {
         return running;
     }
@@ -152,11 +174,11 @@ public class ProcessTreeNode {
         ProcessTreeNode that = (ProcessTreeNode)o;
 
         return id.equals(that.id);
-
     }
 
     @Override
     public int hashCode() {
         return id.hashCode();
     }
+
 }

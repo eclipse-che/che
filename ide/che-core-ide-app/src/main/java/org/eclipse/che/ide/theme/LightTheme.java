@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.ide.theme;
 
-import org.eclipse.che.ide.api.theme.Theme;
-
 import com.google.inject.Singleton;
+
+import org.eclipse.che.ide.api.theme.Theme;
 
 /**
  * @author Evgen Vidolob
@@ -30,6 +30,11 @@ public class LightTheme implements Theme {
     @Override
     public String getDescription() {
         return "Light Theme";
+    }
+
+    @Override
+    public String backgroundColor() {
+        return "#D6D6D9";
     }
 
     @Override
@@ -328,6 +333,11 @@ public class LightTheme implements Theme {
     }
 
     @Override
+    public String editorPanelBorderColor() {
+        return tabBorderColor();
+    }
+
+    @Override
     public String getEditorBackgroundColor() {
         return "white";
     }
@@ -475,6 +485,11 @@ public class LightTheme implements Theme {
     @Override
     public String completionPopupItemSubtitleTextColor() {
         return "#909090";
+    }
+
+    @Override
+    public String completionPopupItemHighlightTextColor() {
+        return "#1A68AF";
     }
 
     @Override
@@ -1488,4 +1503,34 @@ public class LightTheme implements Theme {
         return "#e0e0e0";
     }
 
+    /********************************************************************************************
+     *
+     * Popup Loader
+     *
+     ********************************************************************************************/
+
+    @Override
+    public String popupLoaderBackgroundColor() {
+        return "white";
+    }
+
+    @Override
+    public String popupLoaderBorderColor() {
+        return "#466695";
+    }
+
+    @Override
+    public String popupLoaderShadow() {
+        return "0 0 7px rgba(0,0,0,0.2)";
+    }
+
+    @Override
+    public String popupLoaderTitleColor() {
+        return "#353535";
+    }
+
+    @Override
+    public String popupLoaderTextColor() {
+        return "#999999";
+    }
 }

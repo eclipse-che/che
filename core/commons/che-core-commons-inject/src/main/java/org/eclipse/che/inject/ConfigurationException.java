@@ -11,7 +11,7 @@
 package org.eclipse.che.inject;
 
 /**
- * Exception happen during guice configuration faze.
+ * Exception happen during guice configuration phase.
  *
  * @author Sergii Kabashniuk
  */

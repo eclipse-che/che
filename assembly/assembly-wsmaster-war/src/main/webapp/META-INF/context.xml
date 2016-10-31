@@ -13,4 +13,8 @@
 -->
 <Context allowCasualMultipartParsing="true">
     <Valve className="org.apache.catalina.valves.rewrite.RewriteValve"/>
+
+    <ResourceLink global="che"
+                  name="jdbc/che"
+                  type="javax.sql.DataSource"/>
 </Context>

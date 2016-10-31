@@ -13,6 +13,9 @@ package org.eclipse.che.ide.actions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
@@ -23,16 +26,22 @@ import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.dialogs.InputCallback;
 import org.eclipse.che.ide.api.dialogs.InputDialog;
 import org.eclipse.che.ide.api.dialogs.InputValidator;
-import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.editor.EditorAgent;
+import org.eclipse.che.ide.api.editor.EditorPartPresenter;
+import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.RenamingSupport;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.NameUtils;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Collections.singletonList;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.resources.Resource.FILE;
 import static org.eclipse.che.ide.api.resources.Resource.FOLDER;
 import static org.eclipse.che.ide.api.resources.Resource.PROJECT;
@@ -49,6 +58,8 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
 public class RenameItemAction extends AbstractPerspectiveAction {
     private final CoreLocalizationConstant localization;
     private final Set<RenamingSupport>     renamingSupport;
+    private final EditorAgent              editorAgent;
+    private final NotificationManager      notificationManager;
     private final DialogFactory            dialogFactory;
     private final AppContext               appContext;
 
@@ -56,6 +67,8 @@ public class RenameItemAction extends AbstractPerspectiveAction {
     public RenameItemAction(Resources resources,
                             CoreLocalizationConstant localization,
                             Set<RenamingSupport> renamingSupport,
+                            EditorAgent editorAgent,
+                            NotificationManager notificationManager,
                             DialogFactory dialogFactory,
                             AppContext appContext) {
         super(singletonList(PROJECT_PERSPECTIVE_ID),
@@ -65,6 +78,8 @@ public class RenameItemAction extends AbstractPerspectiveAction {
               resources.rename());
         this.localization = localization;
         this.renamingSupport = renamingSupport;
+        this.editorAgent = editorAgent;
+        this.notificationManager = notificationManager;
         this.dialogFactory = dialogFactory;
         this.appContext = appContext;
     }
@@ -101,8 +116,17 @@ public class RenameItemAction extends AbstractPerspectiveAction {
             public void accepted(final String value) {
                 //we shouldn't perform renaming file with the same name
                 if (!value.trim().equals(resourceName)) {
+
+                    closeRelatedEditors(resource);
+
                     final Path destination = resource.getLocation().parent().append(value);
-                    resource.move(destination);
+
+                    resource.move(destination).catchError(new Operation<PromiseError>() {
+                        @Override
+                        public void apply(PromiseError arg) throws OperationException {
+                            notificationManager.notify("", arg.getMessage(), FAIL, EMERGE_MODE);
+                        }
+                    });
                 }
             }
         };
@@ -112,6 +136,20 @@ public class RenameItemAction extends AbstractPerspectiveAction {
                                                                   resource.getName(), 0, selectionLength, inputCallback, null);
         inputDialog.withValidator(validator);
         inputDialog.show();
+    }
+
+    private void closeRelatedEditors(Resource resource) {
+        if (!resource.isProject()) {
+            return;
+        }
+
+        final List<EditorPartPresenter> openedEditors = editorAgent.getOpenedEditors();
+
+        for (EditorPartPresenter editor : openedEditors) {
+            if (resource.getLocation().isPrefixOf(editor.getEditorInput().getFile().getLocation())) {
+                editorAgent.closeEditor(editor);
+            }
+        }
     }
 
     /** {@inheritDoc} */

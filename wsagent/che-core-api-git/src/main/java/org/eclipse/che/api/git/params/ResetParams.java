@@ -31,7 +31,7 @@ public class ResetParams {
     }
 
     /**
-     * Create new {@link ResetParams} instance
+     * Create new {@link ResetParams} instance.
      *
      * @param commit
      *         hash of commit to which current head should be reset

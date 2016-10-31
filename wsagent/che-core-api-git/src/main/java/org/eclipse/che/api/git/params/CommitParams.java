@@ -31,7 +31,7 @@ public class CommitParams {
     }
 
     /**
-     * Create new {@link CommitParams} instance
+     * Create new {@link CommitParams} instance.
      *
      * @param message
      *         commit message

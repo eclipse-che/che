@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.actions.find;
 
-import com.google.gwt.user.client.ui.FlowPanel;
 import elemental.dom.Element;
 import elemental.dom.Node;
 import elemental.html.TableCellElement;
@@ -30,6 +29,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -67,9 +67,9 @@ public class FindActionViewImpl extends PopupPanel implements FindActionView {
 
     private final AutoCompleteResources.Css css;
 
-    private final PresentationFactory       presentationFactory;
+    private final PresentationFactory presentationFactory;
 
-    private final SimpleList.ListEventDelegate<Action> eventDelegate    = new SimpleList.ListEventDelegate<Action>() {
+    private final SimpleList.ListEventDelegate<Action> eventDelegate = new SimpleList.ListEventDelegate<Action>() {
         @Override
         public void onListItemClicked(Element listItemBase, Action itemData) {
             list.getSelectionModel().setSelectedItem(itemData);
@@ -81,7 +81,7 @@ public class FindActionViewImpl extends PopupPanel implements FindActionView {
         }
     };
 
-    private final SimpleList.ListItemRenderer<Action>  listItemRenderer =
+    private final SimpleList.ListItemRenderer<Action> listItemRenderer =
             new SimpleList.ListItemRenderer<Action>() {
                 @Override
                 public void render(Element itemElement, Action itemData) {
@@ -133,24 +133,21 @@ public class FindActionViewImpl extends PopupPanel implements FindActionView {
             };
 
     @UiField
-    TextBox                              nameField;
+    TextBox nameField;
 
     @UiField
-    CheckBox                             includeNonMenu;
+    CheckBox includeNonMenu;
 
-    private ActionDelegate               delegate;
-    private Resources                    resources;
-    private KeyBindingAgent              keyBindingAgent;
-    private ActionManager                actionManager;
-
-    @UiField
-    DockLayoutPanel                      layoutPanel;
+    private ActionDelegate  delegate;
+    private Resources       resources;
+    private KeyBindingAgent keyBindingAgent;
+    private ActionManager   actionManager;
 
     @UiField
-    FlowPanel                            actionsPanel;
+    DockLayoutPanel layoutPanel;
 
     @UiField
-    HTML                                 actionsContainer;
+    FlowPanel actionsPanel;
 
     private SimpleList<Action>           list;
     private Map<Action, String>          actions;
@@ -233,21 +230,29 @@ public class FindActionViewImpl extends PopupPanel implements FindActionView {
     public void showActions(Map<Action, String> actions) {
         this.actions = actions;
 
-        actionsContainer.getElement().setInnerHTML("");
+        actionsPanel.clear();
 
-        TableElement itemHolder = Elements.createTableElement();
+        final TableElement itemHolder = Elements.createTableElement();
         itemHolder.setClassName(css.items());
-        actionsContainer.getElement().appendChild(((com.google.gwt.dom.client.Element) itemHolder));
 
-        list = SimpleList.create((SimpleList.View)actionsContainer.getElement().cast(), (Element)actionsContainer.getElement(), itemHolder,
-                resources.defaultSimpleListCss(), listItemRenderer, eventDelegate);
+        final HTML html = new HTML();
+        html.setStyleName(css.noborder());
+        html.getElement().appendChild(((com.google.gwt.dom.client.Element)itemHolder));
+
+        final HTML container = new HTML();
+        container.setStyleName(css.noborder());
+        container.getElement().appendChild(html.getElement());
+
+        list = SimpleList.create((SimpleList.View)container.getElement().cast(),
+                                 (Element)html.getElement(),
+                                 itemHolder,
+                                 resources.defaultSimpleListCss(),
+                                 listItemRenderer,
+                                 eventDelegate);
 
         list.render(new ArrayList<>(actions.keySet()));
 
-        if (!actions.isEmpty()) {
-            list.getSelectionModel().setSelectedItem(0);
-        }
-
+        actionsPanel.add(container);
         layoutPanel.setWidgetHidden(actionsPanel, false);
         layoutPanel.setHeight("250px");
 
@@ -264,7 +269,6 @@ public class FindActionViewImpl extends PopupPanel implements FindActionView {
     @Override
     public void hideActions() {
         actions = new HashMap<>();
-        actionsContainer.getElement().setInnerHTML("");
 
         layoutPanel.setWidgetHidden(actionsPanel, true);
         layoutPanel.setHeight("60px");

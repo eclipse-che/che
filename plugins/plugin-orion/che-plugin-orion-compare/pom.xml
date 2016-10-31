@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-orion-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>4.8.0-SNAPSHOT</version>
+        <version>5.0.0-M7-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-orion-compare</artifactId>
     <packaging>jar</packaging>
@@ -67,7 +67,7 @@
                 <configuration>
                     <excludes>
                         <!-- Orion - EPL License -->
-                        <exclude>**/orion/public/built-compare-11.0/*</exclude>
+                        <exclude>**/orion/public/built-compare-12.0/*</exclude>
                     </excludes>
                 </configuration>
             </plugin>

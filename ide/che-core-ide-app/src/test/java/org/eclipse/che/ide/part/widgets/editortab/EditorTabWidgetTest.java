@@ -20,6 +20,7 @@ import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
+import org.eclipse.che.ide.api.parts.EditorPartStack;
 import org.eclipse.che.ide.api.parts.EditorTab.ActionDelegate;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.resources.VirtualFile;
@@ -59,6 +60,10 @@ public class EditorTabWidgetTest {
     private FileTypeRegistry     fileTypeRegistry;
     @Mock
     private SVGImage             iconImage;
+    @Mock
+    private EditorPartPresenter  editorPartPresenter;
+    @Mock
+    private EditorPartStack      editorPartStack;
 
     //additional mocks
     @Mock
@@ -76,8 +81,6 @@ public class EditorTabWidgetTest {
     @Mock
     private EventBus                    eventBus;
     @Mock
-    private EditorPartPresenter         editorPartPresenter;
-    @Mock
     private EditorInput                 editorInput;
 
     private EditorTabWidget tab;
@@ -89,7 +92,12 @@ public class EditorTabWidgetTest {
         when(editorPartPresenter.getEditorInput()).thenReturn(editorInput);
         when(editorPartPresenter.getTitleImage()).thenReturn(icon);
 
-        tab = new EditorTabWidget(editorPartPresenter, resources, editorTabContextMenuFactory, eventBus, fileTypeRegistry);
+        tab = new EditorTabWidget(editorPartPresenter,
+                                  editorPartStack,
+                                  resources,
+                                  editorTabContextMenuFactory,
+                                  eventBus,
+                                  fileTypeRegistry);
         tab.setDelegate(delegate);
     }
 
@@ -185,5 +193,12 @@ public class EditorTabWidgetTest {
         tab.update(editorPartPresenter);
 
         assertEquals(tab.getFile(), newFile);
+    }
+
+    @Test
+    public void tabShouldBeReturned() throws Exception {
+        tab.setFile(file);
+
+        assertEquals(file, tab.getFile());
     }
 }

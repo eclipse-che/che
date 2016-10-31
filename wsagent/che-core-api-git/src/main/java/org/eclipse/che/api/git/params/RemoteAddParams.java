@@ -30,7 +30,7 @@ public class RemoteAddParams {
     }
 
     /**
-     * Create new {@link RemoteAddParams} instance
+     * Create new {@link RemoteAddParams} instance.
      *
      * @param name
      *         remote name

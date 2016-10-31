@@ -10,75 +10,54 @@
  *******************************************************************************/
 package org.eclipse.che.api.user.server;
 
-import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.account.spi.AccountValidator;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
-import org.testng.Assert;
-import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 
 /**
  * Tests of {@link UserValidator}.
  *
- * @author Mihail Kuznyetsov
- * @author Yevhenii Voevodin
+ * @author Sergii Leschenko
  */
 @Listeners(MockitoTestNGListener.class)
 public class UserValidatorTest {
 
     @Mock
-    private UserManager userManager;
+    private AccountValidator accountValidator;
 
     @InjectMocks
     private UserValidator userNameValidator;
 
-    @Test(dataProvider = "normalizeNames")
-    public void testNormalizeUserName(String input, String expected) throws Exception {
-        doThrow(NotFoundException.class).when(userManager).getByName(anyString());
+    @Test
+    public void shouldReturnNameNormalizedByAccountValidator() throws Exception {
+        when(accountValidator.normalizeAccountName(anyString(), anyString())).thenReturn("testname");
 
-        Assert.assertEquals(userNameValidator.normalizeUserName(input), expected);
+        assertEquals(userNameValidator.normalizeUserName("toNormalize"), "testname");
+        verify(accountValidator).normalizeAccountName("toNormalize", UserValidator.GENERATED_NAME_PREFIX);
     }
 
+    @Test
+    public void shouldReturnTrueWhenInputIsValidAccountName() throws Exception {
+        when(accountValidator.isValidName(any())).thenReturn(true);
 
-    @Test(dataProvider = "validNames")
-    public void testValidUserName(String input, boolean expected) throws Exception {
-        doThrow(NotFoundException.class).when(userManager).getByName(anyString());
-
-        Assert.assertEquals(userNameValidator.isValidName(input), expected);
+        assertEquals(userNameValidator.isValidName("toTest"), true);
+        verify(accountValidator).isValidName("toTest");
     }
 
-    @DataProvider(name = "normalizeNames")
-    public Object[][] normalizeNames() {
-        return new Object[][] {{"test", "test"},
-                               {"test123", "test123"},
-                               {"test 123", "test123"},
-                               {"test@gmail.com", "testgmailcom"},
-                               {"TEST", "TEST"},
-                               {"test-", "test"},
-                               {"te-st", "test"},
-                               {"-test", "test"},
-                               {"te_st", "test"},
-                               {"te#st", "test"}
-        };
-    }
+    @Test
+    public void shouldReturnFalseWhenInputIsInvalidAccountName() throws Exception {
+        when(accountValidator.isValidName(any())).thenReturn(false);
 
-    @DataProvider(name = "validNames")
-    public Object[][] validNames() {
-        return new Object[][] {{"test", true},
-                               {"test123", true},
-                               {"test 123", false},
-                               {"test@gmail.com", false},
-                               {"TEST", true},
-                               {"test-", false},
-                               {"te-st", false},
-                               {"-test", false},
-                               {"te_st", false},
-                               {"te#st", false}
-        };
+        assertEquals(userNameValidator.isValidName("toTest"), false);
+        verify(accountValidator).isValidName("toTest");
     }
 }

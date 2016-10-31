@@ -14,24 +14,25 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.model.machine.MachineSource;
-import org.eclipse.che.api.machine.shared.dto.LimitsDto;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
+import org.eclipse.che.api.machine.shared.dto.MachineLimitsDto;
 import org.eclipse.che.api.machine.shared.dto.MachineSourceDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.DevMachine;
+import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.machine.MachineManager;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
+import org.eclipse.che.ide.api.machine.events.MachineStateEvent;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.dto.DtoFactory;
 
-import static org.eclipse.che.ide.extension.machine.client.machine.MachineStateEvent.MachineAction.DESTROYED;
+import static org.eclipse.che.ide.api.machine.events.MachineStateEvent.MachineAction.DESTROYED;
 
 /**
  * Manager for machine operations.
@@ -42,11 +43,11 @@ import static org.eclipse.che.ide.extension.machine.client.machine.MachineStateE
 @Singleton
 public class MachineManagerImpl implements MachineManager {
 
-    private final MachineServiceClient    machineServiceClient;
-    private final WorkspaceServiceClient  workspaceServiceClient;
-    private final AppContext              appContext;
-    private final DtoFactory              dtoFactory;
-    private final EventBus                eventBus;
+    private final MachineServiceClient   machineServiceClient;
+    private final WorkspaceServiceClient workspaceServiceClient;
+    private final AppContext             appContext;
+    private final DtoFactory             dtoFactory;
+    private final EventBus               eventBus;
 
     @Inject
     public MachineManagerImpl(final MachineServiceClient machineServiceClient,
@@ -62,7 +63,7 @@ public class MachineManagerImpl implements MachineManager {
     }
 
     @Override
-    public void restartMachine(final Machine machineState) {
+    public void restartMachine(final MachineEntity machineState) {
         destroyMachine(machineState).then(new Operation<Void>() {
             @Override
             public void apply(Void arg) throws OperationException {
@@ -130,7 +131,7 @@ public class MachineManagerImpl implements MachineManager {
                               final boolean isDev,
                               final String machineType) {
 
-        LimitsDto limitsDto = dtoFactory.createDto(LimitsDto.class).withRam(1024);
+        MachineLimitsDto limitsDto = dtoFactory.createDto(MachineLimitsDto.class).withRam(1024);
         if (isDev) {
             limitsDto.withRam(3072);
         }
@@ -145,7 +146,7 @@ public class MachineManagerImpl implements MachineManager {
     }
 
     @Override
-    public Promise<Void> destroyMachine(final Machine machineState) {
+    public Promise<Void> destroyMachine(final MachineEntity machineState) {
         return machineServiceClient.destroyMachine(machineState.getWorkspaceId(),
                                                    machineState.getId()).then(new Operation<Void>() {
             @Override

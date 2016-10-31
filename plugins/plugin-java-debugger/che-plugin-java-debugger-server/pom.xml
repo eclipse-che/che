@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-java-debugger-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>4.8.0-SNAPSHOT</version>
+        <version>5.0.0-M7-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-java-debugger-server</artifactId>
     <packaging>jar</packaging>
@@ -32,6 +32,10 @@
         <dependency>
             <groupId>com.google.inject.extensions</groupId>
             <artifactId>guice-multibindings</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.antlr</groupId>

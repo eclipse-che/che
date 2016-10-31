@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-core-commons-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>4.8.0-SNAPSHOT</version>
+        <version>5.0.0-M7-SNAPSHOT</version>
     </parent>
     <artifactId>che-core-commons-test</artifactId>
     <packaging>jar</packaging>
@@ -44,8 +44,18 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>com.google.inject.extensions</groupId>
+            <artifactId>guice-persist</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>javax.inject</groupId>
             <artifactId>javax.inject</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.persistence</groupId>
+            <artifactId>javax.persistence</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>

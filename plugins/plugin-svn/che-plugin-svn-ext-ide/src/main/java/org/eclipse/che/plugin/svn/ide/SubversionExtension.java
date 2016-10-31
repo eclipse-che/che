@@ -20,7 +20,6 @@ import org.eclipse.che.ide.api.constraints.Anchor;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.plugin.svn.ide.action.AddAction;
-import org.eclipse.che.plugin.svn.ide.action.ChangeCredentialsAction;
 import org.eclipse.che.plugin.svn.ide.action.CleanupAction;
 import org.eclipse.che.plugin.svn.ide.action.CommitAction;
 import org.eclipse.che.plugin.svn.ide.action.CopyAction;
@@ -35,6 +34,7 @@ import org.eclipse.che.plugin.svn.ide.action.RemoveAction;
 import org.eclipse.che.plugin.svn.ide.action.ResolveAction;
 import org.eclipse.che.plugin.svn.ide.action.RevertAction;
 import org.eclipse.che.plugin.svn.ide.action.StatusAction;
+import org.eclipse.che.plugin.svn.ide.action.SwitchAction;
 import org.eclipse.che.plugin.svn.ide.action.UnlockAction;
 import org.eclipse.che.plugin.svn.ide.action.UpdateAction;
 import org.eclipse.che.plugin.svn.ide.action.UpdateToRevisionAction;
@@ -60,7 +60,6 @@ public class SubversionExtension {
     @Inject
     public SubversionExtension(final ActionManager actionManager,
                                final AddAction addAction,
-                               final ChangeCredentialsAction changeCredentialsAction,
                                final CleanupAction cleanupAction,
                                final CommitAction commitAction,
                                final DiffAction diffAction,
@@ -77,12 +76,12 @@ public class SubversionExtension {
                                final StatusAction statusAction,
                                final UnlockAction unlockAction,
                                final UpdateAction updateAction,
+                               final SwitchAction switchAction,
                                final UpdateToRevisionAction updateToRevisionAction,
                                final SubversionExtensionLocalizationConstants constants,
                                final SubversionExtensionResources resources) {
         SVN_GROUP_MAIN_MENU = constants.subversionLabel();
 
-        final Constraints beforeWindow = new Constraints(Anchor.BEFORE, IdeActions.GROUP_HELP);
         final DefaultActionGroup addCommandGroup = new DefaultActionGroup(ADD_COMMAND_GROUP, false, actionManager);
         final DefaultActionGroup mainMenu = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_MAIN_MENU);
         final DefaultActionGroup fileCommandGroup = new DefaultActionGroup(FILE_COMMAND_GROUP, false, actionManager);
@@ -100,7 +99,7 @@ public class SubversionExtension {
 
         // Register action groups
         actionManager.registerAction(SVN_GROUP_MAIN_MENU, svnMenu);
-        mainMenu.add(svnMenu, beforeWindow);
+        mainMenu.add(svnMenu, new Constraints(Anchor.BEFORE, IdeActions.GROUP_PROFILE));
 
         actionManager.registerAction(REMOTE_COMMAND_GROUP, remoteCommandGroup);
         svnMenu.add(remoteCommandGroup);
@@ -136,10 +135,11 @@ public class SubversionExtension {
         remoteCommandGroup.add(diffAction);
 
         // Commands that manage pull and push of changes
+        actionManager.registerAction("SvnSwitch", switchAction);
+        fileCommandGroup.add(switchAction);
         actionManager.registerAction("SvnUpdate", updateAction);
         fileCommandGroup.add(updateAction);
-        actionManager.registerAction("SvnUpdateToRevision",
-                                     updateToRevisionAction);
+        actionManager.registerAction("SvnUpdateToRevision", updateToRevisionAction);
         fileCommandGroup.add(updateToRevisionAction);
         actionManager.registerAction("SvnCommit", commitAction);
         fileCommandGroup.add(commitAction);
@@ -175,9 +175,6 @@ public class SubversionExtension {
         actionManager.registerAction("SvnCleanup", cleanupAction);
         addCommandGroup.add(cleanupAction);
 
-        actionManager.registerAction("SvnChangeCredentials", changeCredentialsAction);
-        credentialsCommandGroup.add(changeCredentialsAction);
-
         //context menu
         DefaultActionGroup contextGroup = new DefaultActionGroup("Subversion", true, actionManager);
         contextGroup.getTemplatePresentation().setDescription("Subversion operation...");
@@ -186,6 +183,7 @@ public class SubversionExtension {
         contextGroup.add(logAction);
         contextGroup.add(diffAction);
         contextGroup.addSeparator();
+        contextGroup.add(switchAction);
         contextGroup.add(updateAction);
         contextGroup.add(commitAction);
         contextGroup.add(resolveAction);

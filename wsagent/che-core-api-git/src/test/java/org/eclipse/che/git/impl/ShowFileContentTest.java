@@ -27,8 +27,8 @@ import org.testng.annotations.Test;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Arrays;
 
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.git.impl.GitTestUtil.addFile;
 import static org.eclipse.che.git.impl.GitTestUtil.cleanupTestRepo;
 import static org.eclipse.che.git.impl.GitTestUtil.connectToInitializedGitRepository;
@@ -58,7 +58,7 @@ public class ShowFileContentTest {
         //create new repository
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
         addFile(connection, "newFile", "new file content");
-        connection.add(AddParams.create(Arrays.asList(".")));
+        connection.add(AddParams.create(singletonList(".")));
         connection.commit(CommitParams.create("Test commit"));
         //when
         final ShowFileContentResponse response = connection.showFileContent("newFile", "HEAD");
@@ -73,7 +73,7 @@ public class ShowFileContentTest {
         //create new repository
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
         addFile(connection, "newFile", "new file content");
-        connection.add(AddParams.create(Arrays.asList(".")));
+        connection.add(AddParams.create(singletonList(".")));
         connection.commit(CommitParams.create("Test commit"));
         connection.branchCreate("new-branch", null);
         //when
@@ -90,7 +90,7 @@ public class ShowFileContentTest {
         //create new repository
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
         addFile(connection, "newfile", "new file content");
-        connection.add(AddParams.create(Arrays.asList(".")));
+        connection.add(AddParams.create(singletonList(".")));
         connection.commit(CommitParams.create("Test commit"));
         //when
         connection.showFileContent("dummyFile", "HEAD");

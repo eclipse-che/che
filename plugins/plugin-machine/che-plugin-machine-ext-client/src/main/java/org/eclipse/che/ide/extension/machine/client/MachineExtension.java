@@ -30,30 +30,34 @@ import org.eclipse.che.ide.api.keybinding.KeyBuilder;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.parts.PartStackType;
+import org.eclipse.che.ide.api.parts.Perspective;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.extension.machine.client.actions.CreateMachineAction;
 import org.eclipse.che.ide.extension.machine.client.actions.CreateSnapshotAction;
 import org.eclipse.che.ide.extension.machine.client.actions.DestroyMachineAction;
 import org.eclipse.che.ide.extension.machine.client.actions.EditCommandsAction;
 import org.eclipse.che.ide.extension.machine.client.actions.ExecuteSelectedCommandAction;
-import org.eclipse.che.ide.extension.machine.client.actions.NewTerminalAction;
 import org.eclipse.che.ide.extension.machine.client.actions.RestartMachineAction;
 import org.eclipse.che.ide.extension.machine.client.actions.RunCommandAction;
 import org.eclipse.che.ide.extension.machine.client.actions.SelectCommandComboBox;
 import org.eclipse.che.ide.extension.machine.client.actions.SwitchPerspectiveAction;
-import org.eclipse.che.ide.extension.machine.client.command.custom.CustomCommandType;
-import org.eclipse.che.ide.extension.machine.client.command.valueproviders.ServerPortProvider;
-import org.eclipse.che.ide.extension.machine.client.machine.MachineStatusNotifier;
+import org.eclipse.che.ide.extension.machine.client.command.macros.ServerPortProvider;
+import org.eclipse.che.ide.extension.machine.client.machine.MachineStatusHandler;
+import org.eclipse.che.ide.extension.machine.client.processes.NewTerminalAction;
 import org.eclipse.che.ide.extension.machine.client.processes.actions.CloseConsoleAction;
 import org.eclipse.che.ide.extension.machine.client.processes.actions.ReRunProcessAction;
 import org.eclipse.che.ide.extension.machine.client.processes.actions.StopProcessAction;
 import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.extension.machine.client.targets.EditTargetsAction;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
+import org.eclipse.che.ide.statepersistance.AppStateManager;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
 
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_CENTER_TOOLBAR;
+import static org.eclipse.che.ide.api.action.IdeActions.GROUP_CONSOLES_TREE_CONTEXT_MENU;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_MAIN_MENU;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RIGHT_TOOLBAR;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RUN;
@@ -78,6 +82,9 @@ public class MachineExtension {
     public static final String GROUP_MACHINES_DROPDOWN = "MachinesSelector";
     public static final String GROUP_MACHINES_LIST     = "MachinesListGroup";
 
+    private final PerspectiveManager        perspectiveManager;
+    private final Provider<AppStateManager> appStateManagerProvider;
+
     @Inject
     public MachineExtension(final MachineResources machineResources,
                             final EventBus eventBus,
@@ -86,28 +93,60 @@ public class MachineExtension {
                             final ProcessesPanelPresenter processesPanelPresenter,
                             final Provider<ServerPortProvider> machinePortProvider,
                             final PerspectiveManager perspectiveManager,
-                            final IconRegistry iconRegistry,
-                            final CustomCommandType arbitraryCommandType,
-                            final Provider<MachineStatusNotifier> machineStatusNotifierProvider,
-                            final ProjectExplorerPresenter projectExplorerPresenter) {
+                            final Provider<MachineStatusHandler> machineStatusHandlerProvider,
+                            final ProjectExplorerPresenter projectExplorerPresenter,
+                            final Provider<AppStateManager> appStateManagerProvider) {
+        this.perspectiveManager = perspectiveManager;
+        this.appStateManagerProvider = appStateManagerProvider;
+
         machineResources.getCss().ensureInjected();
-        machineStatusNotifierProvider.get();
+        machineStatusHandlerProvider.get();
 
         eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
             @Override
             public void onWsAgentStarted(WsAgentStateEvent event) {
+                restoreTerminal();
+
                 machinePortProvider.get();
                 /* Do not show terminal on factories by default */
                 if (appContext.getFactory() == null) {
-                    processesPanelPresenter.newTerminal();
+                    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+                        @Override
+                        public void execute() {
+                            processesPanelPresenter.selectDevMachine();
+                            processesPanelPresenter.newTerminal();
+                        }
+                    });
                     workspaceAgent.openPart(processesPanelPresenter, PartStackType.INFORMATION);
                 }
-
-                workspaceAgent.setActivePart(projectExplorerPresenter);
+                if (!appStateManagerProvider.get().hasStateForWorkspace(appContext.getWorkspaceId())) {
+                    workspaceAgent.setActivePart(projectExplorerPresenter);
+                }
             }
 
             @Override
             public void onWsAgentStopped(WsAgentStateEvent event) {
+            }
+        });
+
+        eventBus.addHandler(WorkspaceStartingEvent.TYPE, new WorkspaceStartingEvent.Handler() {
+            @Override
+            public void onWorkspaceStarting(WorkspaceStartingEvent event) {
+                maximizeTerminal();
+            }
+        });
+
+        eventBus.addHandler(WorkspaceStoppedEvent.TYPE, new WorkspaceStoppedEvent.Handler() {
+            @Override
+            public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
+                Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+                    @Override
+                    public void execute() {
+                        workspaceAgent.setActivePart(projectExplorerPresenter);
+                        processesPanelPresenter.selectDevMachine();
+                        maximizeTerminal();
+                    }
+                });
             }
         });
 
@@ -122,8 +161,31 @@ public class MachineExtension {
                 }
             }
         });
+    }
 
-        iconRegistry.registerIcon(new Icon(arbitraryCommandType.getId() + ".commands.category.icon", machineResources.customCommandType()));
+    /**
+     * Maximizes terminal.
+     */
+    private void maximizeTerminal() {
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                Perspective perspective = perspectiveManager.getActivePerspective();
+                if (perspective != null) {
+                    perspective.maximizeBottomPart();
+                }
+            }
+        });
+    }
+
+    /**
+     * Restores terminal to its default size.
+     */
+    private void restoreTerminal() {
+        Perspective perspective = perspectiveManager.getActivePerspective();
+        if (perspective != null) {
+            perspective.restoreParts();
+        }
     }
 
     @Inject
@@ -211,8 +273,7 @@ public class MachineExtension {
 
 
         // Consoles tree context menu group
-        DefaultActionGroup consolesTreeContextMenu =
-                (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_CONSOLES_TREE_CONTEXT_MENU);
+        DefaultActionGroup consolesTreeContextMenu = (DefaultActionGroup)actionManager.getAction(GROUP_CONSOLES_TREE_CONTEXT_MENU);
 
         consolesTreeContextMenu.add(reRunProcessAction);
         consolesTreeContextMenu.add(stopProcessAction);

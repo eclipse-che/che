@@ -34,6 +34,7 @@ import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.event.FileEvent.FileEventHandler;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
+import org.eclipse.che.ide.api.parts.EditorPartStack;
 import org.eclipse.che.ide.api.parts.EditorTab;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
@@ -89,15 +90,17 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
     private final EditorTabContextMenuFactory editorTabContextMenu;
     private final FileTypeRegistry            fileTypeRegistry;
     private final String                      id;
+    private final EditorPartPresenter         relatedEditorPart;
+    private final EditorPartStack             relatedEditorPartStack;
 
-    private VirtualFile         file;
-    private ActionDelegate      delegate;
-    private boolean             pinned;
-    private SVGResource         icon;
-    private EditorPartPresenter relatedEditorPart;
+    private ActionDelegate delegate;
+    private SVGResource    icon;
+    private boolean        pinned;
+    private VirtualFile    file;
 
     @Inject
     public EditorTabWidget(@Assisted EditorPartPresenter relatedEditorPart,
+                           @Assisted EditorPartStack relatedEditorPartStack,
                            PartStackUIResources resources,
                            EditorTabContextMenuFactory editorTabContextMenu,
                            final EventBus eventBus,
@@ -106,6 +109,7 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
         this.eventBus = eventBus;
         this.fileTypeRegistry = fileTypeRegistry;
         this.relatedEditorPart = relatedEditorPart;
+        this.relatedEditorPartStack = relatedEditorPartStack;
 
         initWidget(UI_BINDER.createAndBindUi(this));
 
@@ -226,7 +230,7 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
         //construct for each editor tab own context menu,
         //that will have store information about selected virtual file and pin state at first step
         //in future maybe we should create another mechanism to associate context menu with initial dto's
-        editorTabContextMenu.newContextMenu(this)
+        editorTabContextMenu.newContextMenu(this, relatedEditorPart, relatedEditorPartStack)
                             .show(event.getNativeEvent().getClientX(), event.getNativeEvent().getClientY());
     }
 
@@ -264,6 +268,11 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
     @Override
     public VirtualFile getFile() {
         return file;
+    }
+
+    @Override
+    public void setFile(VirtualFile file) {
+        this.file = file;
     }
 
     @Override

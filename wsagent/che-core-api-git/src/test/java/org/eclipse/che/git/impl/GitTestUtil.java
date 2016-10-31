@@ -23,12 +23,12 @@ import org.eclipse.che.commons.subject.SubjectImpl;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Arrays;
 
 import static java.nio.file.Files.createDirectories;
 import static java.nio.file.Files.delete;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.write;
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.core.util.LineConsumerFactory.NULL;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
@@ -45,7 +45,7 @@ public class GitTestUtil {
 
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
         addFile(connection, "README.txt", CONTENT);
-        connection.add(AddParams.create(Arrays.asList("README.txt")));
+        connection.add(AddParams.create(singletonList("README.txt")));
         connection.commit(CommitParams.create("Initial commit"));
         return connection;
     }

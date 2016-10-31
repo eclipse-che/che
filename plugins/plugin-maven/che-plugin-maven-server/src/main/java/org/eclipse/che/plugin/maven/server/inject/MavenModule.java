@@ -12,11 +12,14 @@ package org.eclipse.che.plugin.maven.server.inject;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
+import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
 
 import org.eclipse.che.api.project.server.handlers.ProjectHandler;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ValueProviderFactory;
+import org.eclipse.che.api.vfs.impl.file.event.HiEventDetector;
+import org.eclipse.che.plugin.maven.server.PomModifiedHiEventDetector;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.maven.server.MavenTerminal;
 import org.eclipse.che.plugin.maven.server.core.MavenProgressNotifier;
@@ -29,6 +32,7 @@ import org.eclipse.che.plugin.maven.server.projecttype.handler.ArchetypeGenerati
 import org.eclipse.che.plugin.maven.server.projecttype.handler.GeneratorStrategy;
 import org.eclipse.che.plugin.maven.server.projecttype.handler.MavenProjectGenerator;
 import org.eclipse.che.plugin.maven.server.projecttype.handler.MavenProjectInitHandler;
+import org.eclipse.che.plugin.maven.server.projecttype.handler.SimpleGeneratorStrategy;
 import org.eclipse.che.plugin.maven.server.rest.MavenServerService;
 
 import static com.google.inject.multibindings.Multibinder.newSetBinder;
@@ -50,7 +54,9 @@ public class MavenModule extends AbstractModule {
         projectHandlerMultibinder.addBinding().to(MavenProjectGenerator.class);
         projectHandlerMultibinder.addBinding().to(MavenProjectInitHandler.class);
 
-        newSetBinder(binder(), GeneratorStrategy.class).addBinding().to(ArchetypeGenerationStrategy.class);
+        Multibinder<GeneratorStrategy> generatorStrategyMultibinder = newSetBinder(binder(), GeneratorStrategy.class);
+        generatorStrategyMultibinder.addBinding().to(SimpleGeneratorStrategy.class);
+        generatorStrategyMultibinder.addBinding().to(ArchetypeGenerationStrategy.class);
 
         bind(MavenTerminal.class).to(MavenTerminalImpl.class).in(Singleton.class);
         bind(MavenProgressNotifier.class).to(MavenServerNotifier.class).in(Singleton.class);
@@ -58,5 +64,8 @@ public class MavenModule extends AbstractModule {
         bind(MavenServerService.class);
 
         bind(PomChangeListener.class).asEagerSingleton();
+
+        Multibinder.newSetBinder(binder(), new TypeLiteral<HiEventDetector<?>>() {
+        }).addBinding().to(PomModifiedHiEventDetector.class);
     }
 }

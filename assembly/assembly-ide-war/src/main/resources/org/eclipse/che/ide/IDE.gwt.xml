@@ -44,6 +44,7 @@
     <inherits name='org.eclipse.che.ide.ext.web.Web'/>
     <inherits name='org.eclipse.che.plugin.debugger.Debugger'/>
     <inherits name='org.eclipse.che.plugin.gdb.Gdb'/>
+    <inherits name='org.eclipse.che.plugin.nodejsdbg.NodeJsDebugger'/>
     <inherits name='org.eclipse.che.plugin.jdb.JavaDebugger'/>
     <inherits name='org.eclipse.che.ide.extension.machine.Machine'/>
     <inherits name='org.eclipse.che.plugin.maven.Maven'/>
@@ -61,10 +62,13 @@
 
     <inherits name='org.eclipse.che.plugin.product.info.ProductInfo'/>
     <inherits name='org.eclipse.che.plugin.cpp.Cpp'/>
+    <inherits name='org.eclipse.che.plugin.csharp.CSharp'/>
+    <inherits name='org.eclipse.che.plugin.php.Php'/>
     <inherits name='org.eclipse.che.plugin.python.Python'/>
     <inherits name='org.eclipse.che.plugin.java.plain.PlainJava'/>
     <inherits name='org.eclipse.che.plugin.nodejs.NodeJs'/>
     <inherits name='org.eclipse.che.plugin.docker.client.dto.Dto'/>
+    <inherits name='org.eclipse.che.plugin.languageserver.LanguageServer'/>
 
     <inherits name='org.eclipse.che.api.core.Core'/>
     <inherits name='org.eclipse.che.api.core.model.Model'/>
@@ -77,6 +81,7 @@
     <inherits name="org.eclipse.che.api.workspace.Workspace"/>
     <inherits name="org.eclipse.che.api.debug.Debug"/>
     <inherits name="org.eclipse.che.api.ssh.Ssh"/>
+    <inherits name="org.eclipse.che.api.languageserver.LanguageServer"/>
 
     <inherits name="org.eclipse.che.plugin.svn.Subversion"/>
 

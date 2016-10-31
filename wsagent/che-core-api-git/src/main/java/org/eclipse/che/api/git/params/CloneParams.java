@@ -26,6 +26,8 @@ public class CloneParams {
     private String       remoteUrl;
     private String       workingDir;
     private String       remoteName;
+    private String       username;
+    private String       password;
     private int          timeout;
     private boolean      recursive;
 
@@ -33,7 +35,7 @@ public class CloneParams {
     }
 
     /**
-     * Create new {@link CloneParams} instance
+     * Create new {@link CloneParams} instance.
      *
      * @param remoteUrl
      *         remote url to clone from
@@ -115,6 +117,28 @@ public class CloneParams {
     /** @see CloneRequest#isRecursive() */
     public CloneParams withRecursive(boolean recursive) {
         this.recursive = recursive;
+        return this;
+    }
+
+    /** Returns user name for authentication. */
+    public String getUsername() {
+        return username;
+    }
+
+    /** Returns {@link CloneParams} with specified user name for authentication. */
+    public CloneParams withUsername(String username) {
+        this.username = username;
+        return this;
+    }
+
+    /** Returns password for authentication. */
+    public String getPassword() {
+        return password;
+    }
+
+    /** Returns {@link CloneParams} with specified password for authentication. */
+    public CloneParams withPassword(String password) {
+        this.password = password;
         return this;
     }
 }

@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-docker-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>4.8.0-SNAPSHOT</version>
+        <version>5.0.0-M7-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-docker-machine</artifactId>
     <packaging>jar</packaging>
@@ -25,10 +25,6 @@
         <findbugs.failonerror>false</findbugs.failonerror>
     </properties>
     <dependencies>
-        <dependency>
-            <groupId>aopalliance</groupId>
-            <artifactId>aopalliance</artifactId>
-        </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
@@ -80,10 +76,6 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-commons-annotations</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-commons-inject</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>

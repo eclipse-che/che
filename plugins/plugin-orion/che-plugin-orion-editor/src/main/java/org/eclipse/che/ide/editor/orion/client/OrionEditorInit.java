@@ -33,15 +33,18 @@ import org.eclipse.che.ide.api.editor.events.CompletionRequestHandler;
 import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
 import org.eclipse.che.ide.api.editor.events.TextChangeEvent;
 import org.eclipse.che.ide.api.editor.events.TextChangeHandler;
+import org.eclipse.che.ide.api.editor.formatter.ContentFormatter;
 import org.eclipse.che.ide.api.editor.keymap.KeyBinding;
 import org.eclipse.che.ide.api.editor.keymap.KeyBindingAction;
 import org.eclipse.che.ide.api.editor.partition.DocumentPartitioner;
 import org.eclipse.che.ide.api.editor.position.PositionConverter;
 import org.eclipse.che.ide.api.editor.quickfix.QuickAssistAssistant;
 import org.eclipse.che.ide.api.editor.reconciler.Reconciler;
+import org.eclipse.che.ide.api.editor.signature.SignatureHelpProvider;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.text.TypedRegion;
 import org.eclipse.che.ide.api.editor.texteditor.HasKeyBindings;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.util.browser.UserAgent;
 
 import java.util.List;
@@ -90,14 +93,36 @@ public class OrionEditorInit {
         configureAnnotationModel(documentHandle);
         configureCodeAssist(documentHandle);
         configureChangeInterceptors(documentHandle);
+        configureFormatter(textEditor);
+        configureSignatureHelp(textEditor);
         addQuickAssistKeyBinding();
     }
+
 
     public void uninstall() {
         Reconciler reconciler = configuration.getReconciler();
         if (reconciler != null) {
             reconciler.uninstall();
         }
+        SignatureHelpProvider signatureHelpProvider = configuration.getSignatureHelpProvider();
+        if (signatureHelpProvider != null) {
+            signatureHelpProvider.uninstall();
+        }
+    }
+
+    private void configureSignatureHelp(TextEditor textEditor) {
+        SignatureHelpProvider signatureHelpProvider = configuration.getSignatureHelpProvider();
+        if (signatureHelpProvider != null) {
+            signatureHelpProvider.install(textEditor);
+        }
+    }
+
+    private void configureFormatter(OrionEditorPresenter textEditor) {
+        ContentFormatter formatter = configuration.getContentFormatter();
+        if (formatter != null) {
+            formatter.install(textEditor);
+        }
+
     }
 
     /**
@@ -167,8 +192,9 @@ public class OrionEditorInit {
 
             final KeyBindingAction action = new KeyBindingAction() {
                 @Override
-                public void action() {
+                public boolean action() {
                     showCompletion(codeAssistant);
+                    return true;
                 }
             };
             final HasKeyBindings hasKeyBindings = this.textEditor.getHasKeybindings();
@@ -184,8 +210,9 @@ public class OrionEditorInit {
         } else {
             final KeyBindingAction action = new KeyBindingAction() {
                 @Override
-                public void action() {
+                public boolean action() {
                     showCompletion();
+                    return true;
                 }
             };
             final HasKeyBindings hasKeyBindings = this.textEditor.getHasKeybindings();
@@ -248,11 +275,12 @@ public class OrionEditorInit {
         if (this.quickAssist != null) {
             final KeyBindingAction action = new KeyBindingAction() {
                 @Override
-                public void action() {
+                public boolean action() {
                     final PositionConverter positionConverter = textEditor.getPositionConverter();
                     if (positionConverter != null) {
                         textEditor.showQuickAssist();
                     }
+                    return true;
                 }
             };
             final HasKeyBindings hasKeyBindings = this.textEditor.getHasKeybindings();

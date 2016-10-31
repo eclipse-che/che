@@ -12,7 +12,7 @@ package org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine
 
 import com.google.inject.ImplementedBy;
 
-import org.eclipse.che.api.machine.shared.dto.MachineDto;
+import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
 
@@ -49,6 +49,6 @@ public interface MachinePanelView extends View<MachinePanelView.ActionDelegate> 
          * @param selectedMachine
          *         machine which was selected
          */
-        void onMachineSelected(MachineDto selectedMachine);
+        void onMachineSelected(MachineEntity selectedMachine);
     }
 }

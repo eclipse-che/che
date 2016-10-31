@@ -30,7 +30,7 @@ public class RmParams {
     }
 
     /**
-     * Create new {@link RmParams} instance
+     * Create new {@link RmParams} instance.
      *
      * @param items
      *         files to remove

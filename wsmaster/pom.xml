@@ -16,12 +16,11 @@
     <parent>
         <artifactId>che-core-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>4.8.0-SNAPSHOT</version>
+        <version>5.0.0-M7-SNAPSHOT</version>
         <relativePath>../core/pom.xml</relativePath>
     </parent>
-    <groupId>org.eclipse.che.core</groupId>
     <artifactId>che-master-parent</artifactId>
-    <version>4.8.0-SNAPSHOT</version>
+    <version>5.0.0-M7-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Che Master Parent</name>
     <modules>
@@ -33,11 +32,14 @@
         <module>che-core-api-workspace-shared</module>
         <module>che-core-api-workspace</module>
         <module>che-core-api-user-shared</module>
+        <module>che-core-api-account</module>
         <module>che-core-api-user</module>
         <module>che-core-api-factory-shared</module>
         <module>che-core-api-factory</module>
         <module>che-core-api-ssh</module>
         <module>che-core-api-ssh-shared</module>
+        <module>che-core-api-agent</module>
+        <module>che-core-api-agent-shared</module>
         <module>wsmaster-local</module>
     </modules>
 </project>

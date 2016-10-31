@@ -11,7 +11,7 @@
 
 -->
 <che-toolbar che-title="Workspaces" border-none></che-toolbar>
-<che-description che-link-title="Learn more." che-link="https://eclipse-che.readme.io/docs/environments">A workspace is where your projects live and run. Create workspaces from stacks that define projects, runtimes, and commands.</che-description>
+<che-description che-link-title="Learn more." che-link="https://eclipse-che.readme.io/docs/introduction">A workspace is where your projects live and run. Create workspaces from stacks that define projects, runtimes, and commands.</che-description>
 <md-content md-scroll-y flex layout="column" md-theme="maincontent-theme">
   <md-progress-linear md-mode="indeterminate" class="workspaces-list-progress"
                       ng-show="listWorkspacesCtrl.isInfoLoading"></md-progress-linear>
@@ -68,14 +68,15 @@
               ng-repeat="workspace in listWorkspacesCtrl.userWorkspaces | orderBy:[listWorkspacesCtrl.workspaceOrderBy, 'config.name'] | filter:listWorkspacesCtrl.workspaceFilter"
               ng-model="listWorkspacesCtrl.workspacesSelectedStatus[workspace.id]"
               che-selectable="true"
+              che-display-labels="false"
               che-on-checkbox-click="listWorkspacesCtrl.updateSelectedStatus()"
               che-workspace-item="workspace"></che-workspace-item>
     </che-list>
     <div class="che-list-empty">
         <span ng-show="listWorkspacesCtrl.userWorkspaces.length > 0 && (listWorkspacesCtrl.userWorkspaces | filter:listWorkspacesCtrl.workspaceFilter).length === 0">
-          No workspaces found
+          No workspaces found.
         </span>
-      <span ng-show="listWorkspacesCtrl.userWorkspaces.length === 0">There are no workspace yet</span>
+      <span ng-show="listWorkspacesCtrl.userWorkspaces.length === 0">There are no workspaces.</span>
     </div>
   </md-content>
 </md-content>

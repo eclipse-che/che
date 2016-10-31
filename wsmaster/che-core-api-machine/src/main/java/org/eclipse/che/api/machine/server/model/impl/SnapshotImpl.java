@@ -13,40 +13,97 @@ package org.eclipse.che.api.machine.server.model.impl;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.core.model.machine.Snapshot;
+import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.commons.lang.NameGenerator;
 
+import javax.persistence.Basic;
+import javax.persistence.Column;
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.Table;
 import java.util.Objects;
 
-import static java.util.Objects.requireNonNull;
-
 /**
- * Saved state of {@link org.eclipse.che.api.machine.server.spi.Instance}.
+ * Saved state of {@link Instance}.
  *
  * @author Yevhenii Voevodin
  */
+@Entity(name = "Snapshot")
+@NamedQueries(
+        {
+                @NamedQuery(name = "Snapshot.getByMachine",
+                            query = "SELECT snapshot " +
+                                    "FROM Snapshot snapshot " +
+                                    "WHERE snapshot.workspaceId = :workspaceId" +
+                                    "  AND snapshot.envName     = :envName" +
+                                    "  AND snapshot.machineName = :machineName"),
+                @NamedQuery(name = "Snapshot.findSnapshots",
+                            query = "SELECT snapshot " +
+                                    "FROM Snapshot snapshot " +
+                                    "WHERE snapshot.workspaceId = :workspaceId"),
+                @NamedQuery(name = "Snapshot.findByWorkspaceAndEnvironment",
+                            query = "SELECT snapshot " +
+                                    "FROM Snapshot snapshot " +
+                                    "WHERE snapshot.workspaceId = :workspaceId " +
+                                    "  AND snapshot.envName = :envName")
+        }
+)
+@Table(indexes = @Index(columnList = "workspaceId, envName, machineName", unique = true))
 public class SnapshotImpl implements Snapshot {
 
     public static SnapshotBuilder builder() {
         return new SnapshotBuilder();
     }
 
-    private final String  workspaceId;
-    private final String  machineName;
-    private final String  envName;
-    private final String  id;
-    private final String  type;
-    private final String  namespace;
-    private final boolean isDev;
-    private final long    creationDate;
+    @Id
+    private String id;
 
-    private String          description;
+    @Column(nullable = false)
+    private String workspaceId;
+
+    @Column(nullable = false)
+    private String machineName;
+
+    @Column(nullable = false)
+    private String envName;
+
+    @Basic
+    private String type;
+
+    @Basic
+    private boolean isDev;
+
+    @Basic
+    private long creationDate;
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    @Embedded
     private MachineSourceImpl machineSource;
+
+    public SnapshotImpl() {}
 
     public SnapshotImpl(Snapshot snapshot) {
         this(snapshot.getId(),
              snapshot.getType(),
              null,
-             snapshot.getNamespace(),
+             snapshot.getCreationDate(),
+             snapshot.getWorkspaceId(),
+             snapshot.getDescription(),
+             snapshot.isDev(),
+             snapshot.getMachineName(),
+             snapshot.getEnvName());
+    }
+
+    public SnapshotImpl(SnapshotImpl snapshot) {
+        this(snapshot.getId(),
+             snapshot.getType(),
+             snapshot.getMachineSource(),
              snapshot.getCreationDate(),
              snapshot.getWorkspaceId(),
              snapshot.getDescription(),
@@ -58,19 +115,17 @@ public class SnapshotImpl implements Snapshot {
     public SnapshotImpl(String id,
                         String type,
                         MachineSource machineSource,
-                        String namespace,
                         long creationDate,
                         String workspaceId,
                         String description,
                         boolean isDev,
                         String machineName,
                         String envName) {
-        this.id = requireNonNull(id, "Required non-null snapshot id");
-        this.type = requireNonNull(type, "Required non-null snapshot type");
-        this.namespace = requireNonNull(namespace, "Required non-null snapshot namespace");
-        this.workspaceId = requireNonNull(workspaceId, "Required non-null workspace id for snapshot");
-        this.machineName = requireNonNull(machineName, "Required non-null snapshot machine name");
-        this.envName = requireNonNull(envName, "Required non-null environment name for snapshot");
+        this.id = id;
+        this.type = type;
+        this.workspaceId = workspaceId;
+        this.machineName = machineName;
+        this.envName = envName;
         this.machineSource = machineSource != null ? new MachineSourceImpl(machineSource) : null;
         this.description = description;
         this.isDev = isDev;
@@ -82,18 +137,25 @@ public class SnapshotImpl implements Snapshot {
         return id;
     }
 
+    public void setId(String id) {
+        this.id = id;
+    }
+
     @Override
     public String getType() {
         return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public MachineSourceImpl getMachineSource() {
         return machineSource;
     }
 
-    @Override
-    public String getNamespace() {
-        return namespace;
+    public void setMachineSource(MachineSourceImpl machineSource) {
+        this.machineSource = machineSource;
     }
 
     @Override
@@ -101,9 +163,17 @@ public class SnapshotImpl implements Snapshot {
         return creationDate;
     }
 
+    public void setCreationDate(long creationDate) {
+        this.creationDate = creationDate;
+    }
+
     @Override
     public String getWorkspaceId() {
         return workspaceId;
+    }
+
+    public void setWorkspaceId(String workspaceId) {
+        this.workspaceId = workspaceId;
     }
 
     @Override
@@ -111,9 +181,17 @@ public class SnapshotImpl implements Snapshot {
         return machineName;
     }
 
+    public void setMachineName(String machineName) {
+        this.machineName = machineName;
+    }
+
     @Override
     public String getEnvName() {
         return envName;
+    }
+
+    public void setEnvName(String envName) {
+        this.envName = envName;
     }
 
     @Override
@@ -121,17 +199,17 @@ public class SnapshotImpl implements Snapshot {
         return description;
     }
 
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     @Override
     public boolean isDev() {
         return this.isDev;
     }
 
-    public void setMachineSource(MachineSource machineSource) {
-        this.machineSource = machineSource != null ? new MachineSourceImpl(machineSource) : null;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
+    public void setDev(boolean dev) {
+        isDev = dev;
     }
 
     @Override
@@ -148,7 +226,6 @@ public class SnapshotImpl implements Snapshot {
                && Objects.equals(id, snapshot.id)
                && Objects.equals(type, snapshot.type)
                && Objects.equals(machineSource, snapshot.machineSource)
-               && Objects.equals(namespace, snapshot.namespace)
                && Objects.equals(workspaceId, snapshot.workspaceId)
                && Objects.equals(description, snapshot.description)
                && Objects.equals(machineName, snapshot.machineName)
@@ -163,7 +240,6 @@ public class SnapshotImpl implements Snapshot {
         hash = hash * 31 + Objects.hashCode(id);
         hash = hash * 31 + Objects.hashCode(type);
         hash = hash * 31 + Objects.hashCode(machineSource);
-        hash = hash * 31 + Objects.hashCode(namespace);
         hash = hash * 31 + Objects.hashCode(workspaceId);
         hash = hash * 31 + Objects.hashCode(description);
         hash = hash * 31 + Objects.hashCode(machineName);
@@ -177,7 +253,6 @@ public class SnapshotImpl implements Snapshot {
                "id='" + id + '\'' +
                ", type='" + type + '\'' +
                ", machineSource=" + machineSource +
-               ", namespace='" + namespace + '\'' +
                ", creationDate=" + creationDate +
                ", isDev=" + isDev +
                ", description='" + description + '\'' +
@@ -197,7 +272,6 @@ public class SnapshotImpl implements Snapshot {
         private String        envName;
         private String        id;
         private String        type;
-        private String        namespace;
         private String        description;
         private MachineSource machineSource;
         private boolean       isDev;
@@ -239,11 +313,6 @@ public class SnapshotImpl implements Snapshot {
             return this;
         }
 
-        public SnapshotBuilder setNamespace(String namespace) {
-            this.namespace = namespace;
-            return this;
-        }
-
         public SnapshotBuilder setDescription(String description) {
             this.description = description;
             return this;
@@ -270,7 +339,7 @@ public class SnapshotImpl implements Snapshot {
         }
 
         public SnapshotImpl build() {
-            return new SnapshotImpl(id, type, machineSource, namespace, creationDate, workspaceId, description, isDev, machineName, envName);
+            return new SnapshotImpl(id, type, machineSource, creationDate, workspaceId, description, isDev, machineName, envName);
         }
     }
 }

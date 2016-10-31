@@ -28,9 +28,9 @@ import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_LOCAL;
 import static org.eclipse.che.git.impl.GitTestUtil.addFile;
 import static org.eclipse.che.git.impl.GitTestUtil.cleanupTestRepo;
@@ -77,7 +77,7 @@ public class BranchCreateTest {
         //given
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
         addFile(connection, "newfile1", "file 1 content");
-        connection.add(AddParams.create(Arrays.asList(".")));
+        connection.add(AddParams.create(singletonList(".")));
         connection.commit(CommitParams.create("Commit message"));
 
         //change content

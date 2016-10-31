@@ -80,6 +80,8 @@ import org.eclipse.che.ide.api.editor.quickfix.QuickAssistProcessor;
 import org.eclipse.che.ide.api.editor.quickfix.QuickAssistantFactory;
 import org.eclipse.che.ide.api.editor.reconciler.Reconciler;
 import org.eclipse.che.ide.api.editor.reconciler.ReconcilerWithAutoSave;
+import org.eclipse.che.ide.api.editor.signature.SignatureHelp;
+import org.eclipse.che.ide.api.editor.signature.SignatureHelpProvider;
 import org.eclipse.che.ide.api.editor.text.LinearRange;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.text.TextRange;
@@ -97,10 +99,13 @@ import org.eclipse.che.ide.api.editor.texteditor.TextEditorOperations;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditorPartView;
 import org.eclipse.che.ide.api.editor.texteditor.UndoableEditor;
 import org.eclipse.che.ide.api.event.FileContentUpdateEvent;
-import org.eclipse.che.ide.api.event.FileContentUpdateHandler;
+import org.eclipse.che.ide.api.event.ng.DeletedFilesController;
 import org.eclipse.che.ide.api.hotkeys.HasHotKeyItems;
 import org.eclipse.che.ide.api.hotkeys.HotKeyItem;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.parts.EditorPartStack;
+import org.eclipse.che.ide.api.parts.EditorTab;
+import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Resource;
@@ -111,6 +116,8 @@ import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelDataOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelGroupOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelOverlay;
+import org.eclipse.che.ide.editor.orion.client.signature.SignatureHelpView;
+import org.eclipse.che.ide.part.editor.multipart.EditorMultiPartStackPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -119,6 +126,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingStartEvent;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
@@ -151,26 +159,29 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
     private static final String TOGGLE_LINE_BREAKPOINT = "Toggle line breakpoint";
 
     private final CodeAssistantFactory                   codeAssistantFactory;
+    private final DeletedFilesController                 deletedFilesController;
     private final BreakpointManager                      breakpointManager;
     private final BreakpointRendererFactory              breakpointRendererFactory;
     private final DialogFactory                          dialogFactory;
     private final DocumentStorage                        documentStorage;
+    private final EditorMultiPartStackPresenter          editorMultiPartStackPresenter;
     private final EditorLocalizationConstants            constant;
     private final EditorWidgetFactory<OrionEditorWidget> editorWidgetFactory;
     private final EditorInitializePromiseHolder          editorModule;
-    private final TextEditorPartView                     editorView;
-    private final EventBus                               generalEventBus;
-    private final FileTypeIdentifier                     fileTypeIdentifier;
-    private final QuickAssistantFactory                  quickAssistantFactory;
-    private final WorkspaceAgent                         workspaceAgent;
-    private final NotificationManager                    notificationManager;
-    private final AppContext                             appContext;
+    private final TextEditorPartView    editorView;
+    private final EventBus              generalEventBus;
+    private final FileTypeIdentifier    fileTypeIdentifier;
+    private final QuickAssistantFactory quickAssistantFactory;
+    private final WorkspaceAgent        workspaceAgent;
+    private final NotificationManager   notificationManager;
+    private final AppContext            appContext;
+    private final SignatureHelpView     signatureHelpView;
 
     private final AnnotationRendering rendering = new AnnotationRendering();
     private HasKeyBindings           keyBindingsManager;
     private List<EditorUpdateAction> updateActions;
     private TextEditorConfiguration  configuration;
-    private EditorWidget             editorWidget;
+    private OrionEditorWidget        editorWidget;
     private Document                 document;
     private CursorModelWithHandler   cursorModel;
     private QuickAssistAssistant     quickAssistant;
@@ -186,10 +197,12 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
 
     @Inject
     public OrionEditorPresenter(final CodeAssistantFactory codeAssistantFactory,
+                                final DeletedFilesController deletedFilesController,
                                 final BreakpointManager breakpointManager,
                                 final BreakpointRendererFactory breakpointRendererFactory,
                                 final DialogFactory dialogFactory,
                                 final DocumentStorage documentStorage,
+                                final EditorMultiPartStackPresenter editorMultiPartStackPresenter,
                                 final EditorLocalizationConstants constant,
                                 final EditorWidgetFactory<OrionEditorWidget> editorWigetFactory,
                                 final EditorInitializePromiseHolder editorModule,
@@ -199,12 +212,15 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
                                 final QuickAssistantFactory quickAssistantFactory,
                                 final WorkspaceAgent workspaceAgent,
                                 final NotificationManager notificationManager,
-                                final AppContext appContext) {
+                                final AppContext appContext,
+                                final SignatureHelpView signatureHelpView) {
         this.codeAssistantFactory = codeAssistantFactory;
+        this.deletedFilesController = deletedFilesController;
         this.breakpointManager = breakpointManager;
         this.breakpointRendererFactory = breakpointRendererFactory;
         this.dialogFactory = dialogFactory;
         this.documentStorage = documentStorage;
+        this.editorMultiPartStackPresenter = editorMultiPartStackPresenter;
         this.constant = constant;
         this.editorWidgetFactory = editorWigetFactory;
         this.editorModule = editorModule;
@@ -215,6 +231,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
         this.workspaceAgent = workspaceAgent;
         this.notificationManager = notificationManager;
         this.appContext = appContext;
+        this.signatureHelpView = signatureHelpView;
 
         keyBindingsManager = new TemporaryKeyBindingsManager();
 
@@ -284,9 +301,10 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
         });
         this.editorWidget.addKeyBinding(new KeyBinding(true, false, false, false, KeyCodes.KEY_F8, new KeyBindingAction() {
             @Override
-            public void action() {
+            public boolean action() {
                 int currentLine = editorWidget.getDocument().getCursorPosition().getLine();
                 breakpointManager.changeBreakpointState(currentLine);
+                return true;
             }
         }), TOGGLE_LINE_BREAKPOINT);
     }
@@ -311,15 +329,6 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
                         }
                     }
                 });
-
-        this.generalEventBus.addHandler(FileContentUpdateEvent.TYPE, new FileContentUpdateHandler() {
-            @Override
-            public void onFileContentUpdate(final FileContentUpdateEvent event) {
-                if (event.getFilePath() != null && Path.valueOf(event.getFilePath()).equals(document.getFile().getLocation())) {
-                    updateContent();
-                }
-            }
-        });
     }
 
     private void onResourceCreated(ResourceDelta delta) {
@@ -333,6 +342,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
             final Path movedFrom = delta.getFromPath();
 
             if (document.getFile().getLocation().equals(movedFrom)) {
+                deletedFilesController.add(movedFrom.toString());
                 document.setFile((File)resource);
                 input.setFile((File)resource);
             }
@@ -346,8 +356,13 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
                 @Override
                 public void apply(Optional<File> file) throws OperationException {
                     if (file.isPresent()) {
+                        final Path location = document.getFile().getLocation();
+                        deletedFilesController.add(location.toString());
+                        generalEventBus.fireEvent(newFileTrackingStartEvent(file.get().getLocation().toString()));
+
                         document.setFile(file.get());
                         input.setFile(file.get());
+                        updateTabReference(file.get(), location);
 
                         updateContent();
                     }
@@ -355,7 +370,18 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
             });
         }
 
+    }
 
+    private void updateTabReference(File file, Path oldPath) {
+        final PartPresenter activePart = editorMultiPartStackPresenter.getActivePart();
+        final EditorPartStack activePartStack = editorMultiPartStackPresenter.getPartStackByPart(activePart);
+        if (activePartStack == null) {
+            return;
+        }
+        final EditorTab editorTab = activePartStack.getTabByPath(oldPath);
+        if (editorTab != null) {
+            editorTab.setFile(file);
+        }
     }
 
     private void onResourceRemoved(ResourceDelta delta) {
@@ -381,30 +407,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
     }
 
     private void updateContent() {
-        /* -save current cursor and (ideally) viewport
-         * -set editor content which is also expected to
-         *     -reset dirty flag
-         *     -clear history
-         * -restore current cursor position
-         */
-        final TextPosition currentCursor = getCursorPosition();
-        this.documentStorage.getDocument(document.getFile(), new DocumentStorage.DocumentCallback() {
-
-            @Override
-            public void onDocumentReceived(final String content) {
-                editorWidget.setValue(content, new ContentInitializedHandler() {
-                    @Override
-                    public void onContentInitialized() {
-                        document.setCursorPosition(currentCursor);
-                    }
-                });
-            }
-
-            @Override
-            public void onDocumentLoadFailure(final Throwable caught) {
-                displayErrorPanel(constant.editorFileErrorMessage());
-            }
-        });
+        generalEventBus.fireEvent(new FileContentUpdateEvent(document.getFile().getLocation().toString()));
     }
 
     private void displayErrorPanel(final String message) {
@@ -569,7 +572,10 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
 
     @Override
     public void doSave(final AsyncCallback<EditorInput> callback) {
-
+        //If the workspace is stopped we shouldn't try to save a file
+        if (appContext.getDevMachine() == null) {
+            return;
+        }
         this.documentStorage.saveDocument(getEditorInput(), this.document, false, new AsyncCallback<EditorInput>() {
             @Override
             public void onSuccess(EditorInput editorInput) {
@@ -671,6 +677,16 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
     }
 
     @Override
+    public int getTopVisibleLine() {
+        return editorWidget.getTopVisibleLine();
+    }
+
+    @Override
+    public void setTopLine(int line) {
+        editorWidget.setTopLine(line);
+    }
+
+    @Override
     public void refreshEditor() {
         if (this.updateActions != null) {
             for (final EditorUpdateAction action : this.updateActions) {
@@ -763,6 +779,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
     public void editorLostFocus() {
         this.editorView.updateInfoPanelUnfocused(this.document.getLineCount());
         this.isFocused = false;
+        doSave();
     }
 
     @Override
@@ -795,6 +812,12 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
                 return true;
             }
         }
+
+        if (TextEditorOperations.SIGNATURE_HELP == operation) {
+            if (getConfiguration().getSignatureHelpProvider() != null) {
+                return true;
+            }
+        }
         return false;
     }
 
@@ -815,8 +838,21 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
             case TextEditorOperations.QUICK_ASSIST:
                 showQuickAssist();
                 break;
+            case TextEditorOperations.SIGNATURE_HELP:
+                showSignatureHelp();
+                break;
             default:
                 throw new UnsupportedOperationException("Operation code: " + operation + " is not supported!");
+        }
+    }
+
+    private void showSignatureHelp() {
+        //TODO XXX
+        SignatureHelpProvider signatureHelpProvider = getConfiguration().getSignatureHelpProvider();
+        if (document != null && signatureHelpProvider != null) {
+            Promise<Optional<SignatureHelp>> promise = signatureHelpProvider.signatureHelp(document, getCursorOffset());
+            PositionConverter.PixelCoordinates coordinates = getPositionConverter().offsetToPixel(getCursorOffset());
+            signatureHelpView.showSignature(promise, coordinates.getX(), coordinates.getY() - editorWidget.getTextView().getLineHeight());
         }
     }
 
@@ -964,7 +1000,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
 
         @Override
         public void initialized(EditorWidget widget) {
-            editorWidget = widget;
+            editorWidget = (OrionEditorWidget)widget;
             // finish editor initialization
             editorView.setEditorWidget(editorWidget);
 

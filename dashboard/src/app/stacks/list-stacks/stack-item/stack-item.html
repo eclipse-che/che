@@ -1,0 +1,64 @@
+<!--
+
+    Copyright (c) 2015 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<che-list-item flex ng-mouseover="hover=true" ng-mouseout="hover=false">
+  <div flex="100"
+       layout="row"
+       layout-align="start stretch"
+       class="che-list-item-row">
+    <div layout="row"
+         layout-align="start center"
+         class="che-checkbox-area"
+         ng-if="stackItemController.isSelectable === true">
+      <che-list-item-checked ng-show="stackItemController.stack.creator === stackItemController.userId"
+        ng-model="stackItemController.isSelect"
+        che-aria-label-checkbox="Stack {{stackItemController.stack.name}}"
+        ng-click="stackItemController.onCheckboxClick()"></che-list-item-checked>
+    </div>
+    <div flex
+         layout-xs="column" layout-gt-xs="row"
+         layout-align-gt-xs="start center"
+         layout-align-xs="start start"
+         class="che-list-item-details">
+      <div flex-gt-xs="20"
+           class="che-list-item-name"
+           ng-click="stackItemController.redirectToStackDetails();">
+        <span class="che-xs-header noselect" hide-gt-xs>Name</span>
+        <span class="che-hover">{{stackItemController.stack.name}}</span>
+      </div>
+      <div flex-gt-xs="35"
+           class="che-list-item-name"
+           ng-click="stackItemController.redirectToStackDetails();">
+        <span class="che-xs-header noselect" hide-gt-xs>Description</span>
+        <span class="che-hover che-list-item-secondary">{{stackItemController.stack.description}}</span>
+      </div>
+      <div flex-gt-xs="30"
+           class="che-list-item-name"
+           ng-click="stackItemController.redirectToStackDetails();">
+        <span class="che-xs-header noselect" hide-gt-xs>Components</span>
+        <span class="che-hover che-list-item-secondary">{{stackItemController.getComponents(stackItemController.stack)}}</span>
+      </div>
+      <div flex-gt-xs="15">
+        <span class="che-xs-header noselect" hide-gt-xs>Actions</span>
+        <span class="che-list-actions">
+          <a tooltip="Delete Stack" ng-disabled="stackItemController.stack.creator !== stackItemController.userId"
+             ng-click="stackItemController.onDelete(stackItemController.stack);">
+            <span class="fa fa-trash-o"></span>
+          </a>
+          <a tooltip="Duplicate stack" ng-click="stackItemController.onDuplicate(stackItemController.stack);">
+            <span class="fa fa-copy"></span>
+          </a>
+        </span>
+      </div>
+    </div>
+  </div>
+</che-list-item>

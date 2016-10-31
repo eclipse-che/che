@@ -29,7 +29,7 @@ public class LocalStorageFactory {
     private final String pathToStorage;
 
     @Inject
-    public LocalStorageFactory(@Named("che.conf.storage") String pathToStorage) {
+    public LocalStorageFactory(@Named("che.database") String pathToStorage) {
         this.pathToStorage = pathToStorage;
     }
 

@@ -4,6 +4,7 @@
   "logoFile": "che-logo.svg",
   "logoTextFile": "che-logo-text.svg",
   "favicon": "favicon.ico",
+  "loader": "loader.svg",
   "ideResources": "/_app/",
   "helpPath": "https://www.eclipse.org/che/",
   "helpTitle": "Community",

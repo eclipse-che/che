@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.git.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.google.common.io.Files;
 
@@ -27,7 +28,6 @@ import org.testng.annotations.Test;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Arrays;
 
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_REMOTE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
@@ -83,7 +83,7 @@ public class RemoteAddTest {
         //when
         //add remote tracked only to b1 and b3 branches.
         RemoteAddParams params = RemoteAddParams.create("origin", connection.getWorkingDir().getAbsolutePath())
-                                                .withBranches(Arrays.asList("b1", "b3"));
+                                                .withBranches(ImmutableList.of("b1", "b3"));
         connection2.remoteAdd(params);
         //then
         //make pull

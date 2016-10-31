@@ -11,13 +11,12 @@
 package org.eclipse.che.api.local;
 
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.reflect.TypeToken;
 
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.local.storage.LocalStorage;
 import org.eclipse.che.api.local.storage.LocalStorageFactory;
@@ -25,181 +24,144 @@ import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.server.spi.UserDao;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 /**
+ * In-memory implementation of {@link UserDao}.
+ *
+ * <p>The implementation is thread-safe guarded by this instance.
+ * Clients may use instance locking to perform extra, thread-safe operation.
+ *
  * @author Anton Korneta
  * @author Yevhenii Voevodin
  */
 @Singleton
 public class LocalUserDaoImpl implements UserDao {
 
-    @VisibleForTesting
+    public static final String FILENAME = "users.json";
+
     final Map<String, UserImpl> users;
 
-    private final ReadWriteLock rwLock;
-    private final LocalStorage  userStorage;
+    private final LocalStorage userStorage;
 
     @Inject
     public LocalUserDaoImpl(LocalStorageFactory storageFactory) throws IOException {
         this.users = new HashMap<>();
-        rwLock = new ReentrantReadWriteLock();
-        userStorage = storageFactory.create("users.json");
+        userStorage = storageFactory.create(FILENAME);
     }
 
     @Inject
     @PostConstruct
-    public void start(@Named("codenvy.local.infrastructure.users") Set<UserImpl> defaultUsers) {
-        final Map<String, UserImpl> storedUsers = userStorage.loadMap(new TypeToken<Map<String, UserImpl>>() {});
-        rwLock.writeLock().lock();
-        try {
-            final Collection<UserImpl> preloadedUsers = storedUsers.isEmpty() ? defaultUsers : storedUsers.values();
-            for (UserImpl defaultUser : preloadedUsers) {
-                users.put(defaultUser.getId(), new UserImpl(defaultUser));
-            }
-        } finally {
-            rwLock.writeLock().unlock();
-        }
+    public synchronized void start() {
+        users.putAll(userStorage.loadMap(new TypeToken<Map<String, UserImpl>>() {}));
     }
 
-    @PreDestroy
-    public void stop() throws IOException {
-        rwLock.readLock().lock();
-        try {
-            userStorage.store(new HashMap<>(users));
-        } finally {
-            rwLock.readLock().unlock();
-        }
+    public synchronized void saveUsers() throws IOException {
+        userStorage.store(new HashMap<>(users));
     }
 
     @Override
-    public String authenticate(String aliasOrNameOrEmail, String password) throws UnauthorizedException, ServerException {
-        requireNonNull(aliasOrNameOrEmail);
+    public synchronized UserImpl getByAliasAndPassword(String emailOrName, String password) throws ServerException,
+                                                                                                   NotFoundException {
+        requireNonNull(emailOrName);
         requireNonNull(password);
-        rwLock.readLock().lock();
-        try {
-            final Optional<UserImpl> userOpt = users.values()
-                                                    .stream()
-                                                    .filter(user -> user.getName().equals(aliasOrNameOrEmail)
-                                                                    || user.getEmail().equals(aliasOrNameOrEmail)
-                                                                    || user.getAliases().contains(aliasOrNameOrEmail))
-                                                    .findAny();
-            if (!userOpt.isPresent() || !userOpt.get().getPassword().equals(password)) {
-                throw new UnauthorizedException(format("Authentication failed for user '%s'", aliasOrNameOrEmail));
-            }
-            return userOpt.get().getId();
-        } finally {
-            rwLock.readLock().unlock();
+        final Optional<UserImpl> userOpt = users.values()
+                                                .stream()
+                                                .filter(user -> user.getName().equals(emailOrName)
+                                                                || user.getEmail().equals(emailOrName))
+                                                .findAny();
+        if (!userOpt.isPresent() || !userOpt.get().getPassword().equals(password)) {
+            throw new NotFoundException(format("User '%s' doesn't exist", emailOrName));
         }
+        return erasePassword(userOpt.get());
     }
 
     @Override
-    public void create(UserImpl newUser) throws ConflictException {
+    public synchronized void create(UserImpl newUser) throws ConflictException {
         requireNonNull(newUser);
-        rwLock.writeLock().lock();
-        try {
-            if (users.containsKey(newUser.getId())) {
-                throw new ConflictException(format("Couldn't create user, user with id '%s' already exists",
-                                                   newUser.getId()));
-            }
-            checkConflicts(newUser, "create");
-            users.put(newUser.getId(), new UserImpl(newUser));
-        } finally {
-            rwLock.writeLock().unlock();
+        if (users.containsKey(newUser.getId())) {
+            throw new ConflictException(format("Couldn't create user, user with id '%s' already exists",
+                                               newUser.getId()));
         }
+        checkConflicts(newUser, "create");
+        users.put(newUser.getId(), new UserImpl(newUser));
     }
 
     @Override
-    public void update(UserImpl update) throws NotFoundException, ConflictException {
+    public synchronized void update(UserImpl update) throws NotFoundException, ConflictException {
         requireNonNull(update);
-        rwLock.writeLock().lock();
-        try {
-            final UserImpl user = users.get(update.getId());
-            if (user == null) {
-                throw new NotFoundException(format("User with id '%s' doesn't exist", update.getId()));
-            }
-            checkConflicts(update, "update");
-            users.put(update.getId(), new UserImpl(update));
-        } finally {
-            rwLock.writeLock().unlock();
+        final UserImpl user = users.get(update.getId());
+        if (user == null) {
+            throw new NotFoundException(format("User with id '%s' doesn't exist", update.getId()));
         }
+        checkConflicts(update, "update");
+        users.put(update.getId(), new UserImpl(update));
     }
 
     @Override
-    public void remove(String id) {
+    public synchronized void remove(String id) {
         requireNonNull(id);
-        rwLock.writeLock().lock();
-        try {
-            users.remove(id);
-        } finally {
-            rwLock.writeLock().unlock();
-        }
+        users.remove(id);
     }
 
     @Override
-    public UserImpl getByAlias(String alias) throws NotFoundException {
+    public synchronized UserImpl getByAlias(String alias) throws NotFoundException {
         requireNonNull(alias, "Required non-null alias");
-        rwLock.readLock().lock();
-        try {
-            return new UserImpl(find(user -> user.getAliases().contains(alias), "alias", alias));
-        } finally {
-            rwLock.readLock().unlock();
-        }
+        return erasePassword(find(user -> user.getAliases().contains(alias), "alias", alias));
     }
 
     @Override
-    public UserImpl getById(String id) throws NotFoundException {
+    public synchronized UserImpl getById(String id) throws NotFoundException {
         requireNonNull(id, "Required non-null id");
-        rwLock.readLock().lock();
-        try {
-            final User user = users.get(id);
-            if (user == null) {
-                throw new NotFoundException(format("User with id '%s' doesn't exist", id));
-            }
-            return new UserImpl(user);
-        } finally {
-            rwLock.readLock().unlock();
+        final User user = users.get(id);
+        if (user == null) {
+            throw new NotFoundException(format("User with id '%s' doesn't exist", id));
         }
+        return erasePassword(user);
     }
 
     @Override
-    public UserImpl getByName(String name) throws NotFoundException {
+    public synchronized UserImpl getByName(String name) throws NotFoundException {
         requireNonNull(name, "Required non-null name");
-        rwLock.readLock().lock();
-        try {
-            return new UserImpl(find(user -> user.getName().equals(name), "name", name));
-        } finally {
-            rwLock.readLock().unlock();
-        }
+        return erasePassword(find(user -> user.getName().equals(name), "name", name));
     }
 
     @Override
-    public UserImpl getByEmail(String email) throws NotFoundException, ServerException {
+    public synchronized UserImpl getByEmail(String email) throws NotFoundException, ServerException {
         requireNonNull(email, "Required non-null email");
-        rwLock.readLock().lock();
-        try {
-            return new UserImpl(find(user -> user.getEmail().equals(email), "email", email));
-        } finally {
-            rwLock.readLock().unlock();
-        }
+        return erasePassword(find(user -> user.getEmail().equals(email), "email", email));
+    }
+
+    @Override
+    public Page<UserImpl> getAll(int maxItems, long skipCount) throws ServerException {
+        return new Page<>(users.values()
+                               .stream()
+                               .skip(skipCount)
+                               .limit(maxItems)
+                               .map(LocalUserDaoImpl::erasePassword)
+                               .collect(Collectors.toCollection(LinkedHashSet::new)),
+                          skipCount,
+                          maxItems,
+                          users.size());
+    }
+
+    @Override
+    public long getTotalCount() throws ServerException {
+        return users.size();
     }
 
     private void checkConflicts(UserImpl user, String operation) throws ConflictException {
@@ -237,5 +199,14 @@ public class LocalUserDaoImpl implements UserDao {
             throw new NotFoundException(format("User with %s '%s' doesn't exist", subjectName, subject));
         }
         return userOpt.get();
+    }
+
+    // Returns user instance copy without password
+    private static UserImpl erasePassword(User source) {
+        return new UserImpl(source.getId(),
+                            source.getEmail(),
+                            source.getName(),
+                            null,
+                            source.getAliases());
     }
 }

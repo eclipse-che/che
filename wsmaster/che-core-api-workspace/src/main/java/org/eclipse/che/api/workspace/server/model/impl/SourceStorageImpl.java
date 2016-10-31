@@ -12,6 +12,13 @@ package org.eclipse.che.api.workspace.server.model.impl;
 
 import org.eclipse.che.api.core.model.project.SourceStorage;
 
+import javax.persistence.Basic;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -21,11 +28,23 @@ import java.util.Objects;
  *
  * @author Yevhenii Voevodin
  */
+@Entity(name = "SourceStorage")
 public class SourceStorageImpl implements SourceStorage {
 
-    private String              type;
-    private String              location;
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    @Basic
+    private String type;
+
+    @Column(columnDefinition = "TEXT")
+    private String location;
+
+    @ElementCollection(fetch = FetchType.EAGER)
     private Map<String, String> parameters;
+
+    public SourceStorageImpl() {}
 
     public SourceStorageImpl(String type, String location, Map<String, String> parameters) {
         this.type = type;
@@ -40,9 +59,18 @@ public class SourceStorageImpl implements SourceStorage {
         return type;
     }
 
+    public void setType(String type) {
+        this.type = type;
+    }
+
     @Override
     public String getLocation() {
         return location;
+    }
+
+
+    public void setLocation(String location) {
+        this.location = location;
     }
 
     @Override
@@ -51,6 +79,10 @@ public class SourceStorageImpl implements SourceStorage {
             parameters = new HashMap<>();
         }
         return parameters;
+    }
+
+    public void setParameters(Map<String, String> parameters) {
+        this.parameters = parameters;
     }
 
     @Override

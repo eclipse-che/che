@@ -1,5 +1,66 @@
 [
   {
+    "name": "web-java-petclinic",
+    "displayName": "web-java-petclinic",
+    "path": "/web-java-petclinic",
+    "description": "Petclinic app using MySQL as persistent storage",
+    "projectType": "maven",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "java"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/che-samples/web-java-spring-petclinic.git",
+      "parameters": {
+        "branch":"mysql"
+      }
+    },
+    "commands": [
+      {
+        "name": "build",
+        "type": "mvn",
+        "commandLine": "mvn -f ${current.project.path} clean install -DskipTests",
+        "attributes": {
+          "previewUrl": ""
+        }
+      },
+      {
+        "name": "stop tomcat",
+        "type": "custom",
+        "commandLine": "$TOMCAT_HOME/bin/catalina.sh stop",
+        "attributes": {
+          "previewUrl": ""
+        }
+      },
+      {
+        "name": "build and deploy",
+        "type": "mvn",
+        "commandLine": "mvn -f ${current.project.path} clean install -DskipTests && cp ${current.project.path}/target/*.war $TOMCAT_HOME/webapps/ROOT.war && $TOMCAT_HOME/bin/catalina.sh run",
+        "attributes": {
+          "previewUrl": "http://${server.port.8080}"
+        }
+      },
+      {
+        "name": "debug",
+        "type": "mvn",
+        "commandLine": "mvn -f ${current.project.path} clean install -DskipTests && cp ${current.project.path}/target/*.war $TOMCAT_HOME/webapps/ROOT.war && $TOMCAT_HOME/bin/catalina.sh jpda run",
+        "attributes": {
+          "previewUrl": "http://${server.port.8080}"
+        }
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "Java 1.8, Tomcat 8, MySQL 5.7"
+    ]
+  },
+  {
     "name": "che-in-che",
     "displayName": "eclipse-che",
     "path": "/che",
@@ -456,7 +517,7 @@
     "mixins": [],
     "attributes": {
       "language": [
-        "ruby"
+        "javascript"
       ]
     },
     "modules": [],
@@ -479,8 +540,7 @@
     "links": [],
     "category": "Samples",
     "tags": [
-      "nodejs",
-      "javascript"
+      "Node.JS"
     ]
   },
   {
@@ -593,7 +653,7 @@
     "displayName": "web-nodejs-simple",
     "path": "/web-nodejs-simple",
     "description": "Yeoman Starter project.",
-    "projectType": "blank",
+    "projectType": "node-js",
     "mixins": [],
     "attributes": {
       "language": [
@@ -611,7 +671,7 @@
       {
         "name": "install dependencies",
         "type": "custom",
-        "commandLine": "cd ${current.project.path} && npm install --no-bin-links && bower install",
+        "commandLine": "cd ${current.project.path} && npm install && bower install",
         "attributes": {
           "previewUrl": ""
         }
@@ -628,9 +688,7 @@
     "links": [],
     "category": "Samples",
     "tags": [
-      "nodejs",
-      "yeoman",
-      "javascript"
+      "Node.JS"
     ]
   },
   {
@@ -638,7 +696,7 @@
     "displayName": "web-php-simple",
     "path": "/web-php-simple",
     "description": "A hello world PHP script.",
-    "projectType": "blank",
+    "projectType": "php",
     "mixins": [],
     "attributes": {
       "language": [
@@ -690,7 +748,7 @@
     "displayName": "web-php-gae-simple",
     "path": "/web-php-gae-simple",
     "description": "A hello world PHP script to deploy to GAE.",
-    "projectType": "blank",
+    "projectType": "php",
     "mixins": [],
     "attributes": {
       "language": [
@@ -871,10 +929,387 @@
     "links": [],
     "category": "Samples",
     "tags": [
-      "maven",
-      "java",
-	  "javaee",
-	  "jaxrs"
+      "TomEE"
+    ]
+  },
+  {
+    "name": "express",
+    "displayName": "express",
+    "path": "/express",
+    "description": "A simple application created by the express-generator tool. Execute the '1. Create and run project' command to create the sample project.",
+    "projectType": "node-js",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "node.JS"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/bitnami/bitnami-docker-che-blank-sample",
+      "parameters": {
+        "keepVcs": "false"
+      }
+    },
+    "commands": [
+      {
+        "name": "1. Create and run project",
+        "type": "custom",
+        "commandLine": "source /opt/bitnami/stacksmith-utils.sh && print_welcome_page && cd ${current.project.path} && npm install express@4.13.4 && express -f . && cp -rn /bitnami/mongodb/conf ${current.project.path} && npm install mongodb@2.1.18 --save && npm install && counter=0; until nc -z localhost 27017; do counter=$((counter+1)); if [ $counter == 10 ]; then echo \"Error: Couldn't connect to MongoDB.\"; exit 1; fi; echo \"Trying to connect to MongoDB at localhost. Attempt $counter.\"; sleep 5; done; echo \"Connected to MongoDB database. Starting application server.\" && npm start",
+        "attributes": {
+          "previewUrl": "http://${server.port.3000}"
+        }
+      },
+      {
+        "name": "2. Run",
+        "type": "custom",
+        "commandLine": "source /opt/bitnami/stacksmith-utils.sh && print_welcome_page && cd ${current.project.path} && npm start",
+        "attributes": {
+          "previewUrl": "http://${server.port.3000}"
+        }
+      },
+      {
+        "name": "3. Stop",
+        "type": "custom",
+        "commandLine": "source /opt/bitnami/stacksmith-utils.sh && print_welcome_page && cd ${current.project.path} && pkill -u bitnami node && echo \"Web server stopped.\"",
+        "attributes": {}
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "Express"
+    ]
+  },
+  {
+    "name": "swift",
+    "displayName": "swift",
+    "path": "/swift",
+    "description": "A hello world application created by Swift. Execute the '1. Create project' command to create the sample project.",
+    "projectType": "blank",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "swift"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/bitnami/bitnami-docker-che-blank-sample",
+      "parameters": {
+        "keepVcs": "false"
+      }
+    },
+    "commands": [
+      {
+        "name": "1. Create project",
+        "type": "custom",
+        "commandLine": "source /opt/bitnami/stacksmith-utils.sh && print_welcome_page && mkdir ${current.project.path}/app_template && cd ${current.project.path}/app_template && swift-package init --type executable && swift build && echo \"Project built successfully.\"",
+        "attributes": {}
+      },
+      {
+        "name": "2. Run",
+        "type": "custom",
+        "commandLine": "source /opt/bitnami/stacksmith-utils.sh && print_welcome_page && cd ${current.project.path}/app_template && swift build && ./.build/debug/app_template",
+        "attributes": {}
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "Swift"
+    ]
+  },
+  {
+    "name": "laravel",
+    "displayName": "laravel",
+    "path": "/laravel",
+    "description": "A simple application created by Laravel. Execute the '1. Create and run project' command to create the sample project.",
+    "projectType": "php",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "php"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/bitnami/bitnami-docker-che-blank-sample",
+      "parameters": {
+        "keepVcs": "false"
+      }
+    },
+    "commands": [
+      {
+        "name": "1. Create and run project",
+        "type": "custom",
+        "commandLine": "source /opt/bitnami/stacksmith-utils.sh && print_welcome_page && sudo HOME=/root /opt/bitnami/nami/bin/nami start mariadb && cp -a /tmp/laravel-sample/. ${current.project.path} && cd ${current.project.path} && composer update && php artisan migrate && php artisan serve --host=0.0.0.0 --port=3000",
+        "attributes": {
+          "previewUrl": "http://${server.port.3000}/"
+        }
+      },
+      {
+        "name": "2. Run",
+        "type": "custom",
+        "commandLine": "source /opt/bitnami/stacksmith-utils.sh && print_welcome_page && cd ${current.project.path} && php artisan serve --host=0.0.0.0 --port=3000",
+        "attributes": {
+          "previewUrl": "http://${server.port.3000}/"
+        }
+      },
+      {
+        "name": "3. Stop",
+        "type": "custom",
+        "commandLine": "source /opt/bitnami/stacksmith-utils.sh && print_welcome_page && cd ${current.project.path} && pkill -u bitnami php && echo \"Web server stopped.\"",
+        "attributes": {}
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "Laravel"
+    ]
+  },
+  {
+    "name": "rails_app",
+    "displayName": "rails_app",
+    "path": "/rails_app",
+    "description": "A simple application created by Rails. Execute the '1. Create and run project' command to create the sample project.",
+    "projectType": "blank",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "ruby"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/bitnami/bitnami-docker-che-blank-sample",
+      "parameters": {
+        "keepVcs": "false"
+      }
+    },
+    "commands": [
+      {
+        "name": "1. Create and run project",
+        "type": "custom",
+        "commandLine": "source /opt/bitnami/stacksmith-utils.sh && print_welcome_page && sudo HOME=/root /opt/bitnami/nami/bin/nami start mariadb && cd ${current.project.path} && mv README.md README-CHE.md && rails new . --skip-bundle --database mysql && sed -Ei 's/\\s*#\\s*gem(.*)therubyracer/gem\\1therubyracer/' Gemfile && bundle install && bundle exec rails db:create && bundle exec rails db:migrate && bundle exec rails server -b 0.0.0.0 -p 3000",
+        "attributes": {
+          "previewUrl": "http://${server.port.3000}/"
+        }
+      },
+      {
+        "name": "2. Run",
+        "type": "custom",
+        "commandLine": "source /opt/bitnami/stacksmith-utils.sh && print_welcome_page && cd ${current.project.path} && bundle exec rails server -b 0.0.0.0 -p 3000",
+        "attributes": {
+          "previewUrl": "http://${server.port.3000}/"
+        }
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "BitnamiRails"
+    ]
+  },
+  {
+    "name": "codeigniter",
+    "displayName": "codeigniter",
+    "path": "/codeigniter",
+    "description": "A simple application created by Codeigniter. Execute the '1. Create and run project' command to create the sample project.",
+    "projectType": "php",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "php"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/bitnami/bitnami-docker-che-blank-sample",
+      "parameters": {
+        "keepVcs": "false"
+      }
+    },
+    "commands": [
+      {
+        "name": "1. Create and run project",
+        "type": "custom",
+        "commandLine": "source /opt/bitnami/stacksmith-utils.sh && print_welcome_page && sudo HOME=/root /opt/bitnami/nami/bin/nami execute codeigniter createProject --force codeigniter | grep -v undefined && php -S 0.0.0.0:8000 -t ${current.project.path}",
+        "attributes": {
+           "previewUrl": "http://${server.port.8000}/"
+        }
+      },
+      {
+        "name": "2. Run",
+        "type": "custom",
+        "commandLine": "source /opt/bitnami/stacksmith-utils.sh && print_welcome_page && php -S 0.0.0.0:8000 -t ${current.project.path}",
+        "attributes": {
+           "previewUrl": "http://${server.port.8000}/"
+        }
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "CodeIgniter"
+    ]
+  },
+  {
+    "name": "symfony",
+    "displayName": "symfony",
+    "path": "/symfony",
+    "description": "A simple application created by Symfony. Execute the '1. Create and run project' command to create the sample project.",
+    "projectType": "php",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "php"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/bitnami/bitnami-docker-che-blank-sample",
+      "parameters": {
+        "keepVcs": "false"
+      }
+    },
+    "commands": [
+      {
+        "name": "1. Create and run project",
+        "type": "custom",
+        "commandLine": "source /opt/bitnami/stacksmith-utils.sh && print_welcome_page && sudo HOME=/root nami execute symfony createProject --force symfony | grep -v undefined && ln -fs ${current.project.path}/web/app.php ${current.project.path}/web/index.php && php -S 0.0.0.0:8000 -t ${current.project.path}/web",
+        "attributes": {
+           "previewUrl": "http://${server.port.8000}/"
+        }
+      },
+      {
+        "name": "2. Run",
+        "type": "custom",
+        "commandLine": "source /opt/bitnami/stacksmith-utils.sh && print_welcome_page && php -S 0.0.0.0:8000 -t ${current.project.path}/web",
+        "attributes": {
+           "previewUrl": "http://${server.port.8000}/"
+        }
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "Symfony"
+    ]
+  },
+  {
+    "name": "java-play",
+    "displayName": "java-play",
+    "path": "/java-play",
+    "description": "A simple application created by Play. Execute the '1. Create and run project' command to create the sample project.",
+    "projectType": "blank",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "java"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/bitnami/bitnami-docker-che-blank-sample",
+      "parameters": {
+        "keepVcs": "false"
+      }
+    },
+    "commands": [
+      {
+        "name": "1. Create and run project",
+        "type": "custom",
+        "commandLine": "source /opt/bitnami/stacksmith-utils.sh && print_welcome_page && sudo HOME=/root /opt/bitnami/nami/bin/nami execute activator createProject --force $(basename ${current.project.path}) play-java | grep -v undefined && cd ${current.project.path} && /opt/bitnami/activator/bin/activator -Dsbt.log.noformat=true -Doffline=true -Dhttp.host=0.0.0.0 -Dhttp.port=9000 ~run",
+        "attributes": {
+           "previewUrl": "http://${server.port.9000}/"
+        }
+      },
+      {
+        "name": "2. Run",
+        "type": "custom",
+        "commandLine": "source /opt/bitnami/stacksmith-utils.sh && print_welcome_page && cd ${current.project.path} && /opt/bitnami/activator/bin/activator -Doffline=true -Dhttp.host=0.0.0.0 -Dhttp.port=9000 -Dsbt.log.noformat=true ~run",
+        "attributes": {
+           "previewUrl": "http://${server.port.9000}/"
+        }
+      },
+      {
+        "name": "3. Stop",
+        "type": "custom",
+        "commandLine": "source /opt/bitnami/stacksmith-utils.sh && print_welcome_page && cd ${current.project.path} && pkill -u bitnami activator && echo \"Web server stopped.\"",
+        "attributes": {}
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "Play"
+    ]
+  },
+  {
+    "name": "astro-splash",
+    "displayName": "astro-splash",
+    "path": "/astro-splash",
+    "description": "An app that uses the Astronomy Picture of the Day API provided by NASA and the Zend Expressive framework.",
+    "projectType": "php",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "php"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/kaloyan-raev/AstroSplash.git",
+      "parameters": {}
+    },
+    "commands": [
+      {
+        "name": "configure",
+        "type": "custom",
+        "commandLine": "chmod 777 ${current.project.path}/data; echo -e \"<VirtualHost *:80>\n    DocumentRoot ${current.project.path}/public\n    SetEnv APPLICATION_ENV 'development'\n    <Directory ${current.project.path}/public>\n        DirectoryIndex index.php\n        AllowOverride All\n        Require all granted\n    </Directory>\n</VirtualHost>\" | sudo tee /etc/apache2/sites-available/000-default.conf; composer --working-dir=${current.project.path} install && cp /usr/local/zend/etc/php.ini /tmp/update-php.ini && grep -q 'extension=pcntl.so' /tmp/update-php.ini || echo -e \"\nextension=pcntl.so\" | sudo tee -a /tmp/update-php.ini && php -c /tmp/update-php.ini ${current.project.path}/bin/update.php && rm /tmp/update-php.ini",
+        "attributes": {
+          "previewUrl": ""
+        }
+      },
+      {
+        "name": "update images",
+        "type": "custom",
+        "commandLine": "cp /usr/local/zend/etc/php.ini /tmp/update-php.ini && grep -q 'extension=pcntl.so' /tmp/update-php.ini || echo -e \"\nextension=pcntl.so\" | sudo tee -a /tmp/update-php.ini && php -c /tmp/update-php.ini ${current.project.path}/bin/update.php && rm /tmp/update-php.ini",
+        "attributes": {
+          "previewUrl": ""
+        }
+      },
+      {
+        "name": "clean doctrine cache",
+        "type": "custom",
+        "commandLine": "sudo rm -rf ${current.project.path}/data/doctrine-cache",
+        "attributes": {
+          "previewUrl": ""
+        }
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "Zend"
     ]
   }
 ]

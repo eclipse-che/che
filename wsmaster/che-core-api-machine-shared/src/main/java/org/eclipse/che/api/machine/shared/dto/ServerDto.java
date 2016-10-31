@@ -11,6 +11,7 @@
 package org.eclipse.che.api.machine.shared.dto;
 
 import org.eclipse.che.api.core.model.machine.Server;
+import org.eclipse.che.api.core.model.machine.ServerProperties;
 import org.eclipse.che.dto.shared.DTO;
 
 /**
@@ -26,13 +27,6 @@ public interface ServerDto extends Server {
     void setProtocol(String protocol);
 
     ServerDto withProtocol(String protocol);
-
-    @Override
-    String getPath();
-
-    void setPath(String path);
-
-    ServerDto withPath(String path);
 
     @Override
     String getAddress();
@@ -54,4 +48,11 @@ public interface ServerDto extends Server {
     void setRef(String ref);
 
     ServerDto withRef(String ref);
+
+    @Override
+    ServerPropertiesDto getProperties();
+
+    void setProperties(ServerPropertiesDto properties);
+
+    ServerDto withProperties(ServerPropertiesDto properties);
 }

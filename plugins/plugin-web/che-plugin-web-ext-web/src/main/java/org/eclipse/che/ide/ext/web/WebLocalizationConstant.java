@@ -13,15 +13,11 @@ package org.eclipse.che.ide.ext.web;
 import com.google.gwt.i18n.client.Messages;
 
 /**
- * Localization constants. Interface to represent the constants defined in resource bundle:
- * 'WebLocalizationConstant.properties'.
+ * I18n constants for the Web extension.
  *
  * @author Artem Zatsarynnyi
  */
 public interface WebLocalizationConstant extends Messages {
-    /* Actions */
-    @Key("action.newCssFile.id")
-    String newCssFileActionId();
 
     @Key("action.newCssFile.title")
     String newCssFileActionTitle();
@@ -29,17 +25,11 @@ public interface WebLocalizationConstant extends Messages {
     @Key("action.newCssFile.description")
     String newCssFileActionDescription();
 
-    @Key("action.newLessFile.id")
-    String newLessFileActionId();
-
     @Key("action.newLessFile.title")
     String newLessFileActionTitle();
 
     @Key("action.newLessFile.description")
     String newLessFileActionDescription();
-
-    @Key("action.newHtmlFile.id")
-    String newHtmlFileActionId();
 
     @Key("action.newHtmlFile.title")
     String newHtmlFileActionTitle();
@@ -47,12 +37,15 @@ public interface WebLocalizationConstant extends Messages {
     @Key("action.newHtmlFile.description")
     String newHtmlFileActionDescription();
 
-    @Key("action.newJavaScriptFile.id")
-    String newJavaScriptFileActionId();
-
     @Key("action.newJavaScriptFile.title")
     String newJavaScriptFileActionTitle();
 
     @Key("action.newJavaScriptFile.description")
     String newJavaScriptFileActionDescription();
+
+    @Key("action.previewHTML.title")
+    String previewHTMLActionTitle();
+
+    @Key("action.previewHTML.description")
+    String previewHTMLActionDescription();
 }

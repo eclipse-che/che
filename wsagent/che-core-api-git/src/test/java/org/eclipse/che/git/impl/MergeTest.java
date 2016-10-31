@@ -26,9 +26,9 @@ import org.testng.annotations.Test;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.git.impl.GitTestUtil.addFile;
 import static org.eclipse.che.git.impl.GitTestUtil.cleanupTestRepo;
 import static org.eclipse.che.git.impl.GitTestUtil.connectToGitRepositoryWithContent;
@@ -72,7 +72,7 @@ public class MergeTest {
         connection.checkout(CheckoutParams.create(branchName).withCreateNew(true));
         File file = addFile(connection, "t-merge", "aaa\n");
 
-        connection.add(AddParams.create(new ArrayList<>(Arrays.asList("."))));
+        connection.add(AddParams.create(new ArrayList<>(singletonList("."))));
         connection.commit(CommitParams.create("add file in new branch"));
         connection.checkout(CheckoutParams.create("master"));
         //when
@@ -90,12 +90,12 @@ public class MergeTest {
         GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
         connection.checkout(CheckoutParams.create(branchName).withCreateNew(true));
         addFile(connection, "t-merge-conflict", "aaa\n");
-        connection.add(AddParams.create(new ArrayList<>(Arrays.asList("."))));
+        connection.add(AddParams.create(new ArrayList<>(singletonList("."))));
         connection.commit(CommitParams.create("add file in new branch"));
 
         connection.checkout(CheckoutParams.create("master"));
         addFile(connection, "t-merge-conflict", "bbb\n");
-        connection.add(AddParams.create(new ArrayList<>(Arrays.asList("."))));
+        connection.add(AddParams.create(new ArrayList<>(singletonList("."))));
         connection.commit(CommitParams.create("add file in new branch"));
         //when
         MergeResult mergeResult = connection.merge(branchName);
@@ -107,10 +107,10 @@ public class MergeTest {
         assertEquals(mergeResult.getMergeStatus(), MergeResult.MergeStatus.CONFLICTING);
 
         String expContent = "<<<<<<< HEAD\n" //
-                + "bbb\n" //
-                + "=======\n" //
-                + "aaa\n" //
-                + ">>>>>>> MergeTestBranch\n";
+                            + "bbb\n" //
+                            + "=======\n" //
+                            + "aaa\n" //
+                            + ">>>>>>> MergeTestBranch\n";
         String actual = Files.toString(new File(connection.getWorkingDir(), "t-merge-conflict"), Charsets.UTF_8);
         assertEquals(actual, expContent);
     }
@@ -123,7 +123,7 @@ public class MergeTest {
 //
 //        connection.checkout(newDto(CheckoutRequest.class).withName(branchName).withCreateNew(true));
 //        addFile(connection, "t-merge-failed", "aaa\n");
-//        connection.add(AddParams.create(new ArrayList<>(Arrays.asList("."))));
+//        connection.add(newDto(AddRequest.class).withFilepattern(new ArrayList<>(singletonList("."))));
 //        connection.commit(newDto(CommitRequest.class).withMessage("add file in new branch"));
 //
 //        connection.checkout(newDto(CheckoutRequest.class).withName("master"));

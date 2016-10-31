@@ -13,17 +13,17 @@ package org.eclipse.che.ide.extension.machine.client.targets.categories.docker;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.dialogs.CancelCallback;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.ConfirmDialog;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
-import org.eclipse.che.ide.extension.machine.client.machine.MachineStateEvent;
+import org.eclipse.che.ide.api.machine.events.MachineStateEvent;
 import org.eclipse.che.ide.extension.machine.client.targets.TargetsTreeManager;
 import org.junit.Before;
 import org.junit.Test;
@@ -106,7 +106,7 @@ public class DockerCategoryPresenterTest {
         final String deletingMachineId = "deletingMachineId";
         final String deleteSuccessMessage = "Successfully disconnected from machine " + deletingTargetName;
         final DockerMachineTarget target = Mockito.mock(DockerMachineTarget.class);
-        final MachineDto machine = Mockito.mock(MachineDto.class);
+        final MachineEntity machine = Mockito.mock(MachineEntity.class);
         when(machineLocale.targetsViewDisconnectSuccess(deletingTargetName)).thenReturn(deleteSuccessMessage);
         when(target.getName()).thenReturn(deletingTargetName);
         when(targetsTreeManager.getMachineByName(deletingTargetName)).thenReturn(machine);

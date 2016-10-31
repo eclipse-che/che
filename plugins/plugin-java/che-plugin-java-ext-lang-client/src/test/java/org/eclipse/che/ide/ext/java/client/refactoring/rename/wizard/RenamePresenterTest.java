@@ -213,7 +213,8 @@ public class RenamePresenterTest {
                                               previewPresenter,
                                               refactorService,
                                               dtoFactory,
-                                              dialogFactory);
+                                              dialogFactory,
+                                              eventBus);
     }
 
     @Test

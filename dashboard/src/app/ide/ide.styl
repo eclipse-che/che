@@ -18,6 +18,16 @@
   right 0
   margin auto
 
-.ide-page-loader-content
-  width 120px
-  height 120px
+.ide-page-loader-content img
+  max-width 140px
+  max-height 140px
+  animation-name opacity
+  animation-duration 2s
+  animation-iteration-count infinite
+  animation-timing-function ease-in-out
+
+@keyframes opacity
+  0%, 100%
+    opacity 0
+  50%
+    opacity 1

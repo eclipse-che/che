@@ -12,13 +12,14 @@ package org.eclipse.che.ide.api.app;
 
 import com.google.common.annotations.Beta;
 
-import org.eclipse.che.api.factory.shared.dto.Factory;
+import org.eclipse.che.api.core.model.factory.Factory;
+import org.eclipse.che.api.core.model.workspace.Workspace;
+import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.resource.Path;
 
 import java.util.List;
@@ -175,21 +176,29 @@ public interface AppContext {
     void setStartUpActions(List<StartUpAction> startUpActions);
 
     /**
-     * Returns {@link Factory} instance which id was set on startup, or {@code null} if no factory was specified.
+     * Returns {@link Factory} instance which id was set on startup,
+     * or {@code null} if no factory was specified.
      *
      * @return loaded factory or {@code null}
      */
-    Factory getFactory();
+    FactoryDto getFactory();
 
+    void setFactory(FactoryDto factory);
+    
     String getWorkspaceId();
 
-    /* Deprecated methods */
+    /**
+     * Returns {@link Workspace} instance of current workspace.
+     *
+     * @return current workspace
+     */
+    Workspace getWorkspace();
 
-    /* No more supported, will be removed soon. */
-    @Deprecated
-    WorkspaceDto getWorkspace();
-
-    /* No more supported, will be removed soon. */
-    @Deprecated
-    void setWorkspace(WorkspaceDto workspace);
+    /**
+     * Sets current workspace.
+     *
+     * @param workspace
+     *         current workspace or {@code null}
+     */
+    void setWorkspace(Workspace workspace);
 }

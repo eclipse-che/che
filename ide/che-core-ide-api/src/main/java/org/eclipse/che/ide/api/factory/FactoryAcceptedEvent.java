@@ -12,7 +12,7 @@ package org.eclipse.che.ide.api.factory;
 
 import com.google.gwt.event.shared.GwtEvent;
 
-import org.eclipse.che.api.factory.shared.dto.Factory;
+import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 
 
 /**
@@ -22,9 +22,9 @@ import org.eclipse.che.api.factory.shared.dto.Factory;
  */
 public class FactoryAcceptedEvent extends GwtEvent<FactoryAcceptedHandler> {
 
-    private Factory factory;
+    private FactoryDto factory;
 
-    public FactoryAcceptedEvent(Factory factory) {
+    public FactoryAcceptedEvent(FactoryDto factory) {
         this.factory = factory;
     }
 
@@ -41,7 +41,7 @@ public class FactoryAcceptedEvent extends GwtEvent<FactoryAcceptedHandler> {
 
     }
 
-    public Factory getFactory() {
+    public FactoryDto getFactory() {
         return factory;
     }
 }

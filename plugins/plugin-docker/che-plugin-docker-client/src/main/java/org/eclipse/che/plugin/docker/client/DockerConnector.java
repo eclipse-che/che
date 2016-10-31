@@ -29,6 +29,7 @@ import org.eclipse.che.plugin.docker.client.connection.DockerResponse;
 import org.eclipse.che.plugin.docker.client.exception.ContainerNotFoundException;
 import org.eclipse.che.plugin.docker.client.exception.DockerException;
 import org.eclipse.che.plugin.docker.client.exception.ImageNotFoundException;
+import org.eclipse.che.plugin.docker.client.exception.NetworkNotFoundException;
 import org.eclipse.che.plugin.docker.client.json.ContainerCommitted;
 import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
 import org.eclipse.che.plugin.docker.client.json.ContainerExitStatus;
@@ -1253,6 +1254,8 @@ public class DockerConnector {
     /**
      * Removes network matching provided params
      *
+     * @throws NetworkNotFoundException
+     *         if network is not found
      * @throws IOException
      *         when a problem occurs with docker api calls
      */
@@ -1261,7 +1264,11 @@ public class DockerConnector {
                                                             .method("DELETE")
                                                             .path(apiVersionPathPrefix + "/networks/" + params.getNetworkId())) {
             final DockerResponse response = connection.request();
-            if (response.getStatus() / 100 != 2) {
+            int status = response.getStatus();
+            if (status == 404) {
+                throw new NetworkNotFoundException(readAndCloseQuietly(response.getInputStream()));
+            }
+            if (status / 100 != 2) {
                 throw getDockerException(response);
             }
         }

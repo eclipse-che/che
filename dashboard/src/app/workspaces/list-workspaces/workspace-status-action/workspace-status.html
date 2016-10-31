@@ -18,7 +18,7 @@
         tooltip="Run workspace"></span>
   <span class="fa fa-stop"
         data-ng-click="workspaceStatusController.stopWorkspace()"
-        ng-show="(workspaceStatusController.workspace.status === 'RUNNING' || workspaceStatusController.workspace.status === 'STOPPING')"
+        ng-show="(workspaceStatusController.workspace.status === 'RUNNING' || workspaceStatusController.workspace.status === 'STOPPING' || workspaceStatusController.workspace.status === 'SNAPSHOTTING')"
         ng-class="{'disabled' : workspaceStatusController.workspace.status !== 'RUNNING'}"
         tooltip="Stop workspace"></span>
 </div>

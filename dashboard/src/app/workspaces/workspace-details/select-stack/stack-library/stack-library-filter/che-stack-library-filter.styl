@@ -1,0 +1,139 @@
+.stack-library-filter
+  padding-bottom 10px
+
+  .md-chip-input-container
+    margin 0 !important
+    line-height 31px
+
+    input
+      height 17px !important
+      line-height 17px !important
+      font-size 11px
+      text-transform uppercase
+
+.stack-library-filter
+  .md-chips
+    padding 0 0 2px 0
+    margin-right 0
+
+    .md-chip:last-of-type
+      margin-right 16px
+
+    .md-chip
+      border-radius 3px !important
+      border none !important
+      padding 0 !important
+      height 17px
+      line-height 17px
+      font-size 11px
+      font-weight bold
+
+      // common
+      md-chip-template
+
+        div
+          color #fff !important
+          display inline-block
+          height 17px
+
+        .stack-library-filter-tag-text, .stack-library-filter-suggestion-text
+          border 1px solid #fff
+          border-radius 3px !important
+
+        .stack-library-filter-tag-btn, .stack-library-filter-suggestion-btn
+          border-left 1px solid #fff
+          position absolute
+          right 0
+          height 17px
+
+// tags
+.stack-library-filter-tags
+  padding-bottom 10px
+
+  .md-chips:not(.md-focused)
+    box-shadow 0 1px $default-border-color !important
+  .md-chips.md-focused
+    box-shadow 0 1px $primary-color !important
+
+  .md-chips
+
+    .md-chip-content
+      padding-right 0 !important
+
+    // hide native 'remove' button
+    .md-chip .md-chip-remove
+      width 18px
+      height 18px
+
+      md-icon
+        visibility hidden
+
+    .md-chip
+      background-color $che-medium-blue-color
+
+      .stack-library-filter-tag-text
+        padding 0 25px 0 11px
+
+      .stack-library-filter-tag-btn
+        line-height 17px
+        font-size 14px
+        padding 0 3px
+
+    // not focused
+    .md-chip:not(.md-focused)
+      background-color $clear-foggy-sky-color
+
+      .stack-library-filter-tag-text
+        border-color $clear-foggy-sky-color !important
+
+    // focused
+    .md-chip.md-focused
+      background-color alpha($che-medium-blue-color, 0.7)
+
+      .stack-library-filter-tag-text
+        border-color $che-medium-blue-color
+
+// suggestions
+.stack-library-filter-suggestions
+
+  .md-chips
+    box-shadow none !important
+
+    .md-chip
+      .stack-library-filter-suggestion-text
+        padding 0 28px 0 11px
+
+      .stack-library-filter-suggestion-btn
+        line-height 19px
+        font-size 14px
+        padding 0 5px
+        cursor pointer
+
+    // unselected
+    .md-chip:not(.stack-library-filter-suggestion-selected)
+      background-color $clear-foggy-sky-color
+
+      .stack-library-filter-suggestion-text
+        border-color $clear-foggy-sky-color
+
+    // selected
+    .md-chip.stack-library-filter-suggestion-selected
+      background-color alpha($che-green-color, 0.7)
+
+      .stack-library-filter-suggestion-text
+        border-color $che-green-color
+
+// other
+.stack-library-filter-description
+  font-size 12px
+  color $disabled-color
+  line-height 20px
+
+.stack-library-filter-description-bold
+  font-weight bold
+
+.stack-library-filter-hidden
+  visibility hidden
+
+.stack-library-filter-suggestions-row
+  line-height 27px

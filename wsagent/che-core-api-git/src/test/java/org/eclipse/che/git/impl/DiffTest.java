@@ -34,9 +34,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.git.impl.GitTestUtil.addFile;
 import static org.eclipse.che.git.impl.GitTestUtil.cleanupTestRepo;
 import static org.eclipse.che.git.impl.GitTestUtil.connectToInitializedGitRepository;
@@ -82,7 +82,7 @@ public class DiffTest {
         makeCommitInMaster(connection);
         //change README.txt
         connection.add(AddParams.create(AddRequest.DEFAULT_PATTERN));
-        connection.rm(RmParams.create(Arrays.asList("README.txt")));
+        connection.rm(RmParams.create(singletonList("README.txt")));
         connection.commit(CommitParams.create("testDiffNameStatusWithCommits"));
 
         //when
@@ -106,13 +106,13 @@ public class DiffTest {
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
         makeCommitInMaster(connection);
 
-        connection.add(AddParams.create(Arrays.asList("aaa")));
-        connection.rm(RmParams.create(Arrays.asList("README.txt")));
+        connection.add(AddParams.create(singletonList("aaa")));
+        connection.rm(RmParams.create(singletonList("README.txt")));
         connection.commit(CommitParams.create("testDiffNameStatusWithCommits"));
 
         //when
         List<String> diff = readDiff(DiffParams.create()
-                                               .withFileFilter(Arrays.asList("aaa"))
+                                               .withFileFilter(singletonList("aaa"))
                                                .withType(DiffType.NAME_STATUS)
                                                .withNoRenames(false)
                                                .withRenameLimit(0)
@@ -150,8 +150,8 @@ public class DiffTest {
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
         makeCommitInMaster(connection);
 
-        connection.add(AddParams.create(Arrays.asList("aaa")));
-        connection.rm(RmParams.create(Arrays.asList("README.txt")));
+        connection.add(AddParams.create(singletonList("aaa")));
+        connection.rm(RmParams.create(singletonList("README.txt")));
         connection.commit(CommitParams.create("testDiffNameStatusWithCommits"));
 
         //when
@@ -177,7 +177,7 @@ public class DiffTest {
         makeCommitInMaster(connection);
 
         //when
-        connection.add(AddParams.create(Arrays.asList("aaa")));
+        connection.add(AddParams.create(singletonList("aaa")));
         List<String> diff = readDiff(DiffParams.create()
                                                .withFileFilter(null)
                                                .withType(DiffType.NAME_ONLY)
@@ -199,7 +199,7 @@ public class DiffTest {
         makeCommitInMaster(connection);
 
         //when
-        connection.add(AddParams.create(Arrays.asList("aaa")));
+        connection.add(AddParams.create(singletonList("aaa")));
         List<String> diff = readDiff(DiffParams.create()
                                                .withFileFilter(null)
                                                .withType(DiffType.NAME_ONLY)
@@ -243,7 +243,7 @@ public class DiffTest {
 
         //when
         List<String> diff = readDiff(DiffParams.create()
-                                               .withFileFilter(Arrays.asList("aaa"))
+                                               .withFileFilter(singletonList("aaa"))
                                                .withType(DiffType.NAME_ONLY)
                                                .withNoRenames(false)
                                                .withRenameLimit(0),
@@ -263,7 +263,7 @@ public class DiffTest {
 
         //when
         List<String> diff = readDiff(DiffParams.create()
-                                               .withFileFilter(Arrays.asList("anotherFile"))
+                                               .withFileFilter(singletonList("anotherFile"))
                                                .withType(DiffType.NAME_ONLY)
                                                .withNoRenames(false)
                                                .withRenameLimit(0),
@@ -278,13 +278,13 @@ public class DiffTest {
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
         makeCommitInMaster(connection);
 
-        connection.add(AddParams.create(Arrays.asList("aaa")));
-        connection.rm(RmParams.create(Arrays.asList("README.txt")));
+        connection.add(AddParams.create(singletonList("aaa")));
+        connection.rm(RmParams.create(singletonList("README.txt")));
         connection.commit(CommitParams.create("testDiffNameStatusWithCommits"));
 
         //when
         List<String> diff = readDiff(DiffParams.create()
-                                               .withFileFilter(Arrays.asList("aaa"))
+                                               .withFileFilter(singletonList("aaa"))
                                                .withType(DiffType.NAME_ONLY)
                                                .withNoRenames(false)
                                                .withRenameLimit(0)
@@ -321,8 +321,8 @@ public class DiffTest {
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
         makeCommitInMaster(connection);
 
-        connection.add(AddParams.create(Arrays.asList("aaa")));
-        connection.rm(RmParams.create(Arrays.asList("README.txt")));
+        connection.add(AddParams.create(singletonList("aaa")));
+        connection.rm(RmParams.create(singletonList("README.txt")));
         connection.commit(CommitParams.create("testDiffNameStatusWithCommits"));
 
         //when
@@ -362,7 +362,7 @@ public class DiffTest {
 
         //make some changes
         addFile(connection, "aaa", "AAA\n");
-        connection.add(AddParams.create(Arrays.asList(".")));
+        connection.add(AddParams.create(singletonList(".")));
         addFile(connection, "aaa", "BBB\n");
     }
 }

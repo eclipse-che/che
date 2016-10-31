@@ -32,7 +32,7 @@ public class DefaultOutputConsole implements OutputConsole, OutputConsoleView.Ac
     private final MachineResources              resources;
     private       String                        title;
 
-    private final List<ConsoleOutputListener>   outputListeners;
+    private final List<ActionDelegate>          actionDelegates = new ArrayList<>();
 
     private boolean                             wrapText;
 
@@ -46,7 +46,7 @@ public class DefaultOutputConsole implements OutputConsole, OutputConsoleView.Ac
         this.view = view;
         this.title = title;
         this.resources = resources;
-        outputListeners = new ArrayList<>();
+        this.view.enableAutoScroll(true);
 
         view.setDelegate(this);
 
@@ -65,8 +65,8 @@ public class DefaultOutputConsole implements OutputConsole, OutputConsoleView.Ac
     public void printText(String text) {
         view.print(text, text.endsWith("\r"));
 
-        for (ConsoleOutputListener outputListener : outputListeners) {
-            outputListener.onConsoleOutput(this);
+        for (ActionDelegate actionDelegate : actionDelegates) {
+            actionDelegate.onConsoleOutput(this);
         }
     }
 
@@ -81,9 +81,19 @@ public class DefaultOutputConsole implements OutputConsole, OutputConsoleView.Ac
     public void printText(String text, String color) {
         view.print(text, text.endsWith("\r"), color);
 
-        for (ConsoleOutputListener outputListener : outputListeners) {
-            outputListener.onConsoleOutput(this);
+        for (ActionDelegate actionDelegate : actionDelegates) {
+            actionDelegate.onConsoleOutput(this);
         }
+    }
+
+    /**
+     * Returns the console text.
+     *
+     * @return
+     *          console text
+     */
+    public String getText() {
+        return view.getText();
     }
 
     /** {@inheritDoc} */
@@ -116,12 +126,12 @@ public class DefaultOutputConsole implements OutputConsole, OutputConsoleView.Ac
 
     @Override
     public void close() {
-        outputListeners.clear();
+        actionDelegates.clear();
     }
 
     @Override
-    public void addOutputListener(ConsoleOutputListener listener) {
-        outputListeners.add(listener);
+    public void addActionDelegate(ActionDelegate actionDelegate) {
+        actionDelegates.add(actionDelegate);
     }
 
     @Override
@@ -135,6 +145,13 @@ public class DefaultOutputConsole implements OutputConsole, OutputConsoleView.Ac
     @Override
     public void clearOutputsButtonClicked() {
         view.clearConsole();
+    }
+
+    @Override
+    public void downloadOutputsButtonClicked() {
+        for (ActionDelegate actionDelegate : actionDelegates) {
+            actionDelegate.onDownloadOutput(this);
+        }
     }
 
     @Override

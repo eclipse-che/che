@@ -12,6 +12,9 @@ package org.eclipse.che.ide.api.machine;
 
 import com.google.common.base.Strings;
 
+import org.eclipse.che.api.core.model.machine.MachineConfig;
+import org.eclipse.che.api.core.model.machine.MachineRuntimeInfo;
+import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.rest.shared.dto.Hyperlinks;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.core.model.machine.Machine;
@@ -31,9 +34,10 @@ import java.util.Map;
  *
  * @author Vitalii Parfonov
  */
-public class DevMachine {
+public class DevMachine implements MachineEntity {
 
-    private final Machine devMachineDescriptor;
+    private final Machine       devMachineDescriptor;
+    private final MachineConfig machineConfig;
 
     private final Map<String, DevMachineServer> servers;
     private final Map<String, String>           runtimeProperties;
@@ -42,6 +46,7 @@ public class DevMachine {
 
     public DevMachine(@NotNull Machine devMachineDescriptor) {
         this.devMachineDescriptor = devMachineDescriptor;
+        this.machineConfig = devMachineDescriptor.getConfig();
         this.devMachineLinks = devMachineDescriptor instanceof Hyperlinks ? ((Hyperlinks)devMachineDescriptor).getLinks() : null;
 
         Map<String, ? extends Server> serverDtoMap = devMachineDescriptor.getRuntime().getServers();
@@ -49,20 +54,33 @@ public class DevMachine {
         for (String s : serverDtoMap.keySet()) {
             servers.put(s, new DevMachineServer(serverDtoMap.get(s)));
         }
-        runtimeProperties = devMachineDescriptor.getRuntime().getProperties();
-        envVariables = devMachineDescriptor.getRuntime().getEnvVariables();
+
+        MachineRuntimeInfo machineRuntime = devMachineDescriptor.getRuntime();
+        runtimeProperties = machineRuntime != null ? machineRuntime.getProperties() : null;
+        envVariables = machineRuntime != null ? machineRuntime.getEnvVariables() : null;
     }
 
     public Map<String, String> getEnvVariables() {
         return envVariables;
     }
 
-    public Map<String, String> getRuntimeProperties() {
-        return runtimeProperties;
+    @Override
+    public boolean isDev() {
+        return true;
     }
 
     public String getType() {
         return devMachineDescriptor.getConfig().getType();
+    }
+
+    @Override
+    public String getDisplayName() {
+        return machineConfig.getName();
+    }
+
+    @Override
+    public Map<String, String> getProperties() {
+        return runtimeProperties;
     }
 
     public String getWsAgentWebSocketUrl() {
@@ -128,8 +146,38 @@ public class DevMachine {
         return devMachineDescriptor.getWorkspaceId();
     }
 
+    @Override
+    public MachineConfig getConfig() {
+        return machineConfig;
+    }
+
     public String getId() {
         return devMachineDescriptor.getId();
+    }
+
+    @Override
+    public String getWorkspaceId() {
+        return devMachineDescriptor.getWorkspaceId();
+    }
+
+    @Override
+    public String getEnvName() {
+        return devMachineDescriptor.getEnvName();
+    }
+
+    @Override
+    public String getOwner() {
+        return devMachineDescriptor.getOwner();
+    }
+
+    @Override
+    public MachineStatus getStatus() {
+        return devMachineDescriptor.getStatus();
+    }
+
+    @Override
+    public MachineRuntimeInfo getRuntime() {
+        return devMachineDescriptor.getRuntime();
     }
 
     public List<Link> getDevMachineLinks() {

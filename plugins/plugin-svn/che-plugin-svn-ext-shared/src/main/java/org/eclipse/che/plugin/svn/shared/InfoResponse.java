@@ -65,5 +65,4 @@ public interface InfoResponse {
     void setItems(List<SubversionItem> items);
 
     InfoResponse withItems(List<SubversionItem> items);
-
 }

@@ -52,7 +52,7 @@ public class ProjectTemplateDescriptionLoader {
      *         registry which contains templates associated with tags
      */
     @Inject
-    public ProjectTemplateDescriptionLoader(@Named("project.template_description.location_dir") String templateDescriptionLocationDir,
+    public ProjectTemplateDescriptionLoader(@Named("che.template.storage") String templateDescriptionLocationDir,
                                             ProjectTemplateRegistry templateRegistry) {
         this.templateDescriptionLocationDir = templateDescriptionLocationDir;
         this.templateRegistry = templateRegistry;

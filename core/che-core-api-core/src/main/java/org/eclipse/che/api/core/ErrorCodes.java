@@ -23,6 +23,7 @@ public class ErrorCodes {
     public static final int NO_COMMITTER_NAME_OR_EMAIL_DEFINED = 15216;
     public static final int UNABLE_GET_PRIVATE_SSH_KEY         = 32068;
     public static final int UNAUTHORIZED_GIT_OPERATION         = 32080;
+    public static final int UNAUTHORIZED_SVN_OPERATION         = 32090;
     public static final int MERGE_CONFLICT                     = 32062;
     public static final int FAILED_CHECKOUT                    = 32063;
     public static final int FAILED_CHECKOUT_WITH_START_POINT   = 32064;

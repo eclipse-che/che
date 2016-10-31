@@ -10,20 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.machine.create;
 
-import org.eclipse.che.api.machine.shared.dto.MachineDto;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.DevMachine;
+import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.machine.MachineManager;
-import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.project.ProjectTypeServiceClient;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -32,7 +27,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -55,17 +49,10 @@ public class CreateMachinePresenterTest {
     @Mock
     private ProjectTypeServiceClient projectTypeServiceClient;
     @Mock
-    private MachineServiceClient     machineServiceClient;
-    @Mock
     private EntityFactory            entityFactory;
 
     @InjectMocks
     private CreateMachinePresenter presenter;
-
-    @Mock
-    private Promise<MachineDto>                   machineDescriptorPromise;
-    @Captor
-    private ArgumentCaptor<Operation<MachineDto>> machineCaptor;
 
     @Before
     public void setUp() {
@@ -123,20 +110,15 @@ public class CreateMachinePresenterTest {
     public void shouldReplaceDevMachine() throws Exception {
         DevMachine devMachine = mock(DevMachine.class);
         when(appContext.getDevMachine()).thenReturn(devMachine);
-        when(appContext.getWorkspaceId()).thenReturn(WORKSPACE_ID);
         when(devMachine.getId()).thenReturn(SOME_TEXT);
         when(devMachine.getWorkspace()).thenReturn(WORKSPACE_ID);
-        when(machineServiceClient.getMachine(WORKSPACE_ID, SOME_TEXT)).thenReturn(machineDescriptorPromise);
 
         presenter.onReplaceDevMachineClicked();
 
         verify(view).getMachineName();
         verify(view).getRecipeURL();
-        verify(appContext, times(2)).getDevMachine();
-        verify(machineServiceClient).getMachine(WORKSPACE_ID, SOME_TEXT);
-        verify(machineDescriptorPromise).then(machineCaptor.capture());
-        machineCaptor.getValue().apply(mock(MachineDto.class));
-        verify(machineManager).destroyMachine(any(MachineDto.class));
+        verify(appContext).getDevMachine();
+        verify(machineManager).destroyMachine(devMachine);
         verify(machineManager).startDevMachine(eq(RECIPE_URL), eq(MACHINE_NAME));
         verify(view).close();
     }
@@ -144,7 +126,6 @@ public class CreateMachinePresenterTest {
     @Test
     public void shouldStartNewDevMachine() throws Exception {
         when(appContext.getDevMachine()).thenReturn(null);
-        when(machineServiceClient.getMachine(WORKSPACE_ID, SOME_TEXT)).thenReturn(machineDescriptorPromise);
 
         presenter.onReplaceDevMachineClicked();
 
@@ -153,8 +134,7 @@ public class CreateMachinePresenterTest {
         verify(appContext).getDevMachine();
         verify(machineManager).startDevMachine(eq(RECIPE_URL), eq(MACHINE_NAME));
         verify(view).close();
-        verify(machineServiceClient, never()).getMachine(WORKSPACE_ID, SOME_TEXT);
-        verify(machineManager, never()).destroyMachine(any(MachineDto.class));
+        verify(machineManager, never()).destroyMachine(any(MachineEntity.class));
         verify(machineManager).startDevMachine(eq(RECIPE_URL), eq(MACHINE_NAME));
     }
 

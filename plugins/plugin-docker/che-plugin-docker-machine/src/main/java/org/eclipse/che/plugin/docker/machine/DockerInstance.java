@@ -106,8 +106,8 @@ public class DockerInstance extends AbstractInstance {
 
     @Inject
     public DockerInstance(DockerConnector docker,
-                          @Named("machine.docker.registry") String registry,
-                          @Named("machine.docker.snapshot.registry_namespace") @Nullable String registryNamespace,
+                          @Named("che.docker.registry") String registry,
+                          @Named("che.docker.namespace") @Nullable String registryNamespace,
                           DockerMachineFactory dockerMachineFactory,
                           @Assisted Machine machine,
                           @Assisted("container") String container,
@@ -116,7 +116,7 @@ public class DockerInstance extends AbstractInstance {
                           @Assisted LineConsumer outputConsumer,
                           DockerInstanceStopDetector dockerInstanceStopDetector,
                           DockerInstanceProcessesCleaner processesCleaner,
-                          @Named("machine.docker.snapshot_use_registry") boolean snapshotUseRegistry) {
+                          @Named("che.docker.registry_for_snapshots") boolean snapshotUseRegistry) {
         super(machine);
         this.dockerMachineFactory = dockerMachineFactory;
         this.container = container;
@@ -145,6 +145,7 @@ public class DockerInstance extends AbstractInstance {
             try {
                 final ContainerInfo containerInfo = docker.inspectContainer(container);
                 machineRuntime = new MachineRuntimeInfoImpl(dockerMachineFactory.createMetadata(containerInfo,
+                                                                                                null,
                                                                                                 node.getHost(),
                                                                                                 getConfig()));
             } catch (IOException e) {
@@ -175,7 +176,7 @@ public class DockerInstance extends AbstractInstance {
         List<InstanceProcess> processes = new LinkedList<>();
         try {
             final Exec exec = docker.createExec(CreateExecParams.create(container,
-                                                                        new String[] {"/bin/bash",
+                                                                        new String[] {"/bin/sh",
                                                                                       "-c",
                                                                                       GET_ALIVE_PROCESSES_COMMAND})
                                                                 .withDetach(false));
@@ -327,9 +328,9 @@ public class DockerInstance extends AbstractInstance {
         }
 
         // command sed getting file content from startFrom line to (startFrom + limit)
-        String bashCommand = format("sed -n \'%1$2s, %2$2sp\' %3$2s", startFrom, startFrom + limit, filePath);
+        String shCommand = format("sed -n \'%1$2s, %2$2sp\' %3$2s", startFrom, startFrom + limit, filePath);
 
-        final String[] command = {"/bin/bash", "-c", bashCommand};
+        final String[] command = {"/bin/sh", "-c", shCommand};
 
         ListLineConsumer lines = new ListLineConsumer();
         try {

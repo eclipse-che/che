@@ -18,8 +18,10 @@ import javax.inject.Singleton;
 import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import static java.util.Optional.empty;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -50,7 +52,7 @@ class EventTreeQueueHolder {
 
     public Optional<EventTreeNode> take() {
         try {
-            return Optional.of(loVfsEventQueue.take());
+            return Optional.ofNullable(loVfsEventQueue.take());
         } catch (InterruptedException e) {
             LOG.error("Error trying to take an event tree out of an event tree queue", e);
         }

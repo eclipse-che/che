@@ -29,14 +29,14 @@ public class LsFilesParams {
     }
 
     /**
-     * Create new {@link LsFilesParams} instance with empty parameters
+     * Create new {@link LsFilesParams} instance with empty parameters.
      */
     public static LsFilesParams create() {
         return new LsFilesParams();
     }
 
     /**
-     * Show other (i.e. untracked) files in the output
+     * Show other (i.e. untracked) files in the output.
      */
     public boolean isOthers() {
         return isOthers;
@@ -48,7 +48,7 @@ public class LsFilesParams {
     }
 
     /**
-     * Show modified files in the output
+     * Show modified files in the output.
      */
     public boolean isModified() {
         return isModified;
@@ -72,7 +72,7 @@ public class LsFilesParams {
     }
 
     /**
-     * Show cached files in the output (default)
+     * Show cached files in the output (default).
      */
     public boolean isCached() {
         return isCached;
@@ -84,7 +84,7 @@ public class LsFilesParams {
     }
 
     /**
-     * Show deleted files in the output
+     * Show deleted files in the output.
      */
     public boolean isDeleted() {
         return isDeleted;

@@ -29,8 +29,8 @@ import org.testng.annotations.Test;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Arrays;
 
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.git.impl.GitTestUtil.addFile;
 import static org.eclipse.che.git.impl.GitTestUtil.cleanupTestRepo;
 import static org.eclipse.che.git.impl.GitTestUtil.connectToInitializedGitRepository;
@@ -66,7 +66,7 @@ public class FetchTest {
         GitConnection fetchConnection = connectionFactory.getConnection(fetchTestRepo.getAbsolutePath());
 
         addFile(connection, "README", "readme content");
-        connection.add(AddParams.create(Arrays.asList(".")));
+        connection.add(AddParams.create(singletonList(".")));
         connection.commit(CommitParams.create("fetch test"));
         //clone default repo into fetchRepo
         fetchConnection.clone(CloneParams.create(connection.getWorkingDir().getAbsolutePath())
@@ -75,7 +75,7 @@ public class FetchTest {
         //add new File into defaultRepository
         addFile(connection, "newfile1", "newfile1 content");
         //add file to index and make commit
-        connection.add(AddParams.create(Arrays.asList(".")));
+        connection.add(AddParams.create(singletonList(".")));
         connection.commit(CommitParams.create("fetch test"));
 
         //when
@@ -96,7 +96,7 @@ public class FetchTest {
         GitConnection fetchConnection = connectionFactory.getConnection(fetchTestRepo.getAbsolutePath());
 
         addFile(connection, "README", "readme content");
-        connection.add(AddParams.create(Arrays.asList(".")));
+        connection.add(AddParams.create(singletonList(".")));
         connection.commit(CommitParams.create("fetch test"));
         //clone default repo into fetchRepo
         fetchConnection.clone(CloneParams.create(repository.getAbsolutePath()));
@@ -104,14 +104,14 @@ public class FetchTest {
         //add new File into defaultRepository
         addFile(connection, "newfile1", "newfile1 content");
         //add file to index and make commit
-        connection.add(AddParams.create(Arrays.asList(".")));
+        connection.add(AddParams.create(singletonList(".")));
         connection.commit(CommitParams.create("fetch test"));
 
         String branchName = "branch";
         connection.checkout(CheckoutParams.create(branchName).withCreateNew(true));
         addFile(connection, "otherfile1", "otherfile1 content");
         addFile(connection, "otherfile2", "otherfile2 content");
-        connection.add(AddParams.create(Arrays.asList(".")));
+        connection.add(AddParams.create(singletonList(".")));
         connection.commit(CommitParams.create("fetch branch test"));
 
         //when

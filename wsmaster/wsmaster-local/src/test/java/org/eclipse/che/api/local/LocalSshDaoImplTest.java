@@ -56,16 +56,16 @@ public class LocalSshDaoImplTest {
     public void testSshPairsSerialization() throws Exception {
         SshPairImpl pair = createPair();
 
-        sshDao.create("owner", pair);
+        sshDao.create(pair);
         sshDao.saveSshPairs();
 
-        assertEquals(GSON.toJson(ImmutableMap.of("owner", singletonList(pair))), new String(readAllBytes(sshPath)));
+        assertEquals(GSON.toJson(singletonList(pair)), new String(readAllBytes(sshPath)));
     }
 
     @Test
     public void testSshPairsDeserialization() throws Exception {
         SshPairImpl pair = createPair();
-        Files.write(sshPath, GSON.toJson(ImmutableMap.of("owner", singletonList(pair))).getBytes());
+        Files.write(sshPath, GSON.toJson(singletonList(pair)).getBytes());
 
         sshDao.loadSshPairs();
 
@@ -75,6 +75,6 @@ public class LocalSshDaoImplTest {
     }
 
     private static SshPairImpl createPair() {
-        return new SshPairImpl("service", "name", "publicKey", "privateKey");
+        return new SshPairImpl("owner", "service", "name", "publicKey", "privateKey");
     }
 }

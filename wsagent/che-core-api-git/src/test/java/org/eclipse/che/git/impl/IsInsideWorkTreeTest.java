@@ -25,8 +25,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
-import java.util.Arrays;
 
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.git.impl.GitTestUtil.addFile;
 import static org.eclipse.che.git.impl.GitTestUtil.cleanupTestRepo;
 import static org.eclipse.che.git.impl.GitTestUtil.connectToInitializedGitRepository;
@@ -60,7 +60,7 @@ public class IsInsideWorkTreeTest {
 
         // add new dir into working tree
         addFile(connection.getWorkingDir().toPath().resolve("new_directory"), "a", "content of a");
-        connection.add(AddParams.create(Arrays.asList(".")));
+        connection.add(AddParams.create(singletonList(".")));
         connection.commit(CommitParams.create("test"));
 
         // when

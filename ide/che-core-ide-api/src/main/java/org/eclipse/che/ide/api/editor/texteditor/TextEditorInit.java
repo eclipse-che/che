@@ -15,6 +15,7 @@ import elemental.events.KeyboardEvent.KeyCode;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.editor.events.DocumentReadyEvent;
+import org.eclipse.che.ide.api.editor.formatter.ContentFormatter;
 import org.eclipse.che.ide.api.editor.text.TypedRegion;
 import org.eclipse.che.ide.api.editor.annotation.AnnotationModel;
 import org.eclipse.che.ide.api.editor.annotation.HasAnnotationRendering;
@@ -101,9 +102,18 @@ public class TextEditorInit<T extends EditorWidget> {
                 configureCodeAssist(documentHandle);
                 configureChangeInterceptors(documentHandle);
                 addQuickAssistKeyBinding();
+                configureFormatter(textEditor);
             }
         };
         new DocReadyWrapper<TextEditorInit<T>>(generalEventBus, this.textEditor.getEditorHandle(), init, this);
+    }
+
+    private void configureFormatter(TextEditorPresenter<T> textEditor) {
+        ContentFormatter formatter = configuration.getContentFormatter();
+        if (formatter != null) {
+            formatter.install(textEditor);
+        }
+
     }
 
     public void uninstall() {
@@ -180,8 +190,9 @@ public class TextEditorInit<T extends EditorWidget> {
 
             final KeyBindingAction action = new KeyBindingAction() {
                 @Override
-                public void action() {
+                public boolean action() {
                     showCompletion(codeAssistant);
+                    return true;
                 }
             };
             final HasKeyBindings hasKeyBindings = this.textEditor.getHasKeybindings();
@@ -197,8 +208,9 @@ public class TextEditorInit<T extends EditorWidget> {
         } else {
             final KeyBindingAction action = new KeyBindingAction() {
                 @Override
-                public void action() {
+                public boolean action() {
                     showCompletion();
+                    return true;
                 }
             };
             final HasKeyBindings hasKeyBindings = this.textEditor.getHasKeybindings();
@@ -261,11 +273,12 @@ public class TextEditorInit<T extends EditorWidget> {
         if (this.quickAssist != null) {
             final KeyBindingAction action = new KeyBindingAction() {
                 @Override
-                public void action() {
+                public boolean action() {
                     final PositionConverter positionConverter = textEditor.getPositionConverter();
                     if (positionConverter != null) {
                         textEditor.showQuickAssist();
                     }
+                    return true;
                 }
             };
             final HasKeyBindings hasKeyBindings = this.textEditor.getHasKeybindings();

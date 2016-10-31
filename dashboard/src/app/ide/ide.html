@@ -15,12 +15,8 @@
   <div class="ide-page-loader"
        layout="column" layout-align="center center">
     <div ng-hide="ideCtrl.selectedWorkspace">No workspace selected. Unable to open IDE</div>
-    <div layout="column" class="ide-page-loader-content" ng-show="ideCtrl.selectedWorkspace">
-      <div class="spinner">
-        <div class="rect1"></div>
-        <div class="rect2"></div>
-        <div class="rect3"></div>
-      </div>
+    <div class="ide-page-loader-content" ng-show="ideCtrl.selectedWorkspace">
+      <img ng-src="{{branding.loaderURL}}">
     </div>
   </div>
 </div>

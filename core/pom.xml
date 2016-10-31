@@ -16,19 +16,22 @@
     <parent>
         <artifactId>che-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>4.8.0-SNAPSHOT</version>
+        <version>5.0.0-M7-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <groupId>org.eclipse.che.core</groupId>
     <artifactId>che-core-parent</artifactId>
-    <version>4.8.0-SNAPSHOT</version>
+    <version>5.0.0-M7-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Che Core Parent</name>
     <modules>
         <module>commons</module>
         <module>che-core-api-dto</module>
         <module>che-core-api-dto-maven-plugin</module>
+        <module>che-core-typescript-dto-maven-plugin</module>
         <module>che-core-api-core</module>
         <module>che-core-api-model</module>
+        <module>che-core-api-jdbc</module>
+        <module>che-core-api-jdbc-vendor-h2</module>
     </modules>
 </project>

@@ -29,14 +29,15 @@ import org.eclipse.che.api.vfs.impl.file.DefaultFileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.FileTreeWatcher;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
+import org.eclipse.che.api.vfs.impl.file.event.detectors.ProjectTreeChangesDetector;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.commons.lang.IoUtil;
+import org.eclipse.che.jdt.core.resources.ResourceChangedEvent;
 import org.eclipse.che.plugin.java.server.projecttype.JavaProjectType;
 import org.eclipse.che.plugin.java.server.projecttype.JavaValueProviderFactory;
 import org.eclipse.che.plugin.maven.server.projecttype.MavenProjectType;
 import org.eclipse.che.plugin.maven.server.projecttype.MavenValueProviderFactory;
-import org.eclipse.che.jdt.core.resources.ResourceChangedEvent;
 import org.eclipse.core.internal.filebuffers.FileBuffersPlugin;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.core.JavaCore;
@@ -57,6 +58,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_ID;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Evgen Vidolob
@@ -144,8 +146,10 @@ public abstract class BaseTest {
         fileWatcherNotificationHandler = new DefaultFileWatcherNotificationHandler(vfsProvider);
         fileTreeWatcher = new FileTreeWatcher(root, new HashSet<>(), fileWatcherNotificationHandler);
 
+
         pm = new ProjectManager(vfsProvider, eventService, projectTypeRegistry, projectRegistry, projectHandlerRegistry,
-                                importerRegistry, fileWatcherNotificationHandler, fileTreeWatcher, new TestWorkspaceHolder(new ArrayList<>()));
+                                importerRegistry, fileWatcherNotificationHandler, fileTreeWatcher, new TestWorkspaceHolder(new ArrayList<>()),
+                                mock(ProjectTreeChangesDetector.class));
 
         plugin = new ResourcesPlugin("target/index", wsPath, () -> projectRegistry, () -> pm);
 

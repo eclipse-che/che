@@ -15,6 +15,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.inject.Provider;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.machine.shared.dto.SnapshotDto;
 import org.eclipse.che.api.promises.client.Operation;
@@ -35,11 +36,11 @@ import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.context.BrowserQueryFieldRenderer;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.ide.ui.loaders.initialization.InitialLoadingInfo;
-import org.eclipse.che.ide.ui.loaders.initialization.LoaderPresenter;
+import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 import org.eclipse.che.ide.websocket.MessageBus;
 import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.eclipse.che.ide.websocket.events.ConnectionOpenedHandler;
@@ -49,16 +50,13 @@ import org.eclipse.che.ide.workspace.start.StartWorkspacePresenter;
 import java.util.List;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
-import static org.eclipse.che.ide.ui.loaders.initialization.InitialLoadingInfo.Operations.WORKSPACE_BOOTING;
-import static org.eclipse.che.ide.ui.loaders.initialization.OperationInfo.Status.IN_PROGRESS;
-import static org.eclipse.che.ide.ui.loaders.initialization.OperationInfo.Status.SUCCESS;
 
 /**
  * @author Evgen Vidolob
  * @author Dmitry Shnurenko
  * @author Yevhenii Voevodin
  */
-public abstract class WorkspaceComponent implements Component, WsAgentStateHandler {
+public abstract class WorkspaceComponent implements Component, WsAgentStateHandler, WorkspaceStoppedEvent.Handler {
 
     protected final WorkspaceServiceClient    workspaceServiceClient;
     protected final CoreLocalizationConstant  locale;
@@ -73,11 +71,10 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
     protected final StartWorkspacePresenter   startWorkspacePresenter;
 
     private final   EventBus                  eventBus;
-    private final   LoaderPresenter           loader;
     private final   Provider<MachineManager>  machineManagerProvider;
     private final   MessageBusProvider        messageBusProvider;
-    private final   InitialLoadingInfo        initialLoadingInfo;
-    private final   WorkspaceEventsNotifier   workspaceEventsNotifier;
+    private final   WorkspaceEventsHandler    workspaceEventsHandler;
+    private final   LoaderPresenter           loader;
 
     protected Callback<Component, Exception> callback;
     protected boolean                        needToReloadComponents;
@@ -89,7 +86,6 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
                               CoreLocalizationConstant locale,
                               DtoUnmarshallerFactory dtoUnmarshallerFactory,
                               EventBus eventBus,
-                              LoaderPresenter loader,
                               AppContext appContext,
                               Provider<MachineManager> machineManagerProvider,
                               NotificationManager notificationManager,
@@ -98,15 +94,14 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
                               DialogFactory dialogFactory,
                               PreferencesManager preferencesManager,
                               DtoFactory dtoFactory,
-                              InitialLoadingInfo initialLoadingInfo,
-                              WorkspaceEventsNotifier workspaceEventsNotifier) {
+                              WorkspaceEventsHandler workspaceEventsHandler,
+                              LoaderPresenter loader) {
         this.workspaceServiceClient = workspaceServiceClient;
         this.createWorkspacePresenter = createWorkspacePresenter;
         this.startWorkspacePresenter = startWorkspacePresenter;
         this.locale = locale;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.eventBus = eventBus;
-        this.loader = loader;
         this.appContext = appContext;
         this.machineManagerProvider = machineManagerProvider;
         this.notificationManager = notificationManager;
@@ -115,18 +110,25 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
         this.dialogFactory = dialogFactory;
         this.preferencesManager = preferencesManager;
         this.dtoFactory = dtoFactory;
-        this.initialLoadingInfo = initialLoadingInfo;
-        this.workspaceEventsNotifier = workspaceEventsNotifier;
+        this.workspaceEventsHandler = workspaceEventsHandler;
+        this.loader = loader;
 
         this.needToReloadComponents = true;
 
         eventBus.addHandler(WsAgentStateEvent.TYPE, this);
+        eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
+        setCurrentWorkspace(null);
     }
 
     /** {@inheritDoc} */
     @Override
     public void onWsAgentStarted(WsAgentStateEvent event) {
-        notificationManager.notify(locale.extServerStarted(), StatusNotification.Status.SUCCESS, FLOAT_MODE);
+        notificationManager.notify(locale.startedWs(), StatusNotification.Status.SUCCESS, FLOAT_MODE);
     }
 
     /** {@inheritDoc} */
@@ -134,15 +136,13 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
     public void onWsAgentStopped(WsAgentStateEvent event) {
     }
 
-    abstract void tryStartWorkspace();
-
     /**
      * Sets workspace to app context as current.
      *
      * @param workspace
      *         workspace which will be current
      */
-    public void setCurrentWorkspace(WorkspaceDto workspace) {
+    public void setCurrentWorkspace(Workspace workspace) {
         appContext.setWorkspace(workspace);
 
         if (needToReloadComponents) {
@@ -150,10 +150,25 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
             needToReloadComponents = false;
         }
 
-        browserQueryFieldRenderer.setQueryField(workspace.getNamespace(), workspace.getConfig().getName(), "");
+        if (workspace != null) {
+            browserQueryFieldRenderer.setQueryField(workspace.getNamespace(), workspace.getConfig().getName(), "");
+        }
     }
 
-    public void handleWorkspaceEvents(final WorkspaceDto workspace, final Callback<Component, Exception> callback) {
+    /**
+     * Listens message bus and handles workspace events.
+     *
+     * @param workspace
+     *          workspace to listen
+     * @param callback
+     *          callback
+     * @param checkForShapshots
+     *          whether is needed checking workspace for snapshots
+     * @param restoreFromSnapshot
+     *          restore or not the workspace from snapshot
+     */
+    public void handleWorkspaceEvents(final WorkspaceDto workspace, final Callback<Component, Exception> callback,
+                                      final boolean checkForShapshots, final boolean restoreFromSnapshot) {
         this.callback = callback;
         if (messageBus != null) {
             messageBus.cancelReconnection();
@@ -163,13 +178,12 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
         messageBus.addOnOpenHandler(new ConnectionOpenedHandler() {
             @Override
             public void onOpen() {
-                loader.show(initialLoadingInfo);
-                initialLoadingInfo.setOperationStatus(WORKSPACE_BOOTING.getValue(), IN_PROGRESS);
+                loader.show(LoaderPresenter.Phase.STARTING_WORKSPACE_RUNTIME);
 
                 messageBus.removeOnOpenHandler(this);
 
                 setCurrentWorkspace(workspace);
-                workspaceEventsNotifier.trackWorkspaceEvents(workspace, callback);
+                workspaceEventsHandler.trackWorkspaceEvents(workspace, callback);
 
                 final WorkspaceStatus workspaceStatus = workspace.getStatus();
                 switch (workspaceStatus) {
@@ -180,16 +194,42 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
                         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
                             @Override
                             public void execute() {
-                                initialLoadingInfo.setOperationStatus(WORKSPACE_BOOTING.getValue(), SUCCESS);
-                                notificationManager.notify(locale.startedWs(), StatusNotification.Status.SUCCESS, FLOAT_MODE);
+                                loader.setSuccess(LoaderPresenter.Phase.STARTING_WORKSPACE_RUNTIME);
                                 eventBus.fireEvent(new WorkspaceStartedEvent(workspace));
                                 machineManagerProvider.get();//start instance of machine manager
                             }
                         });
                         break;
                     default:
-                        checkWorkspaceForSnapshots(workspace);
+                        if (checkForShapshots) {
+                            checkWorkspaceForSnapshots(workspace);
+                        } else {
+                            loader.show(LoaderPresenter.Phase.STARTING_WORKSPACE_RUNTIME);
+                            workspaceServiceClient.startById(workspace.getId(), workspace.getConfig().getDefaultEnv(), restoreFromSnapshot);
+                        }
                 }
+            }
+        });
+    }
+
+    /**
+     * Starts workspace.
+     *
+     * @param workspaceID
+     *          workspace ID to start
+     * @param callback
+     *          callback
+     * @param checkForShapshots
+     *          whether is needed checking workspace for snapshots
+     * @param restoreFromSnapshot
+     *          restore or not the workspace from snapshot
+     */
+    public void startWorkspace(final String workspaceID, final Callback<Component, Exception> callback,
+                               final boolean checkForShapshots, final boolean restoreFromSnapshot) {
+        workspaceServiceClient.getWorkspace(workspaceID).then(new Operation<WorkspaceDto>() {
+            @Override
+            public void apply(WorkspaceDto workspace) throws OperationException {
+                handleWorkspaceEvents(workspace, callback, checkForShapshots, restoreFromSnapshot);
             }
         });
     }
@@ -202,15 +242,9 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
      * @param callback
      *         callback to be executed
      */
-    public void startWorkspace(final WorkspaceDto workspace, final Callback<Component, Exception> callback) {
-        workspaceServiceClient.getWorkspace(workspace.getId()).then(new Operation<WorkspaceDto>() {
-            @Override
-            public void apply(WorkspaceDto workspace) throws OperationException {
-                handleWorkspaceEvents(workspace, callback);
-            }
-        });
+    public void startWorkspace(final Workspace workspace, final Callback<Component, Exception> callback) {
+        startWorkspace(workspace.getId(), callback, true, false);
     }
-
 
     /**
      * Checks workspace for snapshots and asks the uses for an action.
@@ -218,12 +252,12 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
      * @param workspace
      *         workspace
      */
-    private void checkWorkspaceForSnapshots(final WorkspaceDto workspace) {
+    private void checkWorkspaceForSnapshots(final Workspace workspace) {
         workspaceServiceClient.getSnapshot(workspace.getId()).then(new Operation<List<SnapshotDto>>() {
             @Override
             public void apply(List<SnapshotDto> snapshots) throws OperationException {
                 if (snapshots.isEmpty()) {
-                    initialLoadingInfo.setOperationStatus(WORKSPACE_BOOTING.getValue(), IN_PROGRESS);
+                    loader.show(LoaderPresenter.Phase.STARTING_WORKSPACE_RUNTIME);
                     workspaceServiceClient.startById(workspace.getId(), workspace.getConfig().getDefaultEnv(), false);
                 } else {
                     showRecoverWorkspaceConfirmDialog(workspace);
@@ -242,7 +276,7 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
     /**
      * Shows workspace recovering confirm dialog.
      */
-    private void showRecoverWorkspaceConfirmDialog(final WorkspaceDto workspace) {
+    private void showRecoverWorkspaceConfirmDialog(final Workspace workspace) {
         dialogFactory.createConfirmDialog(locale.workspaceRecoveringDialogTitle(),
                                           locale.workspaceRecoveringDialogText(),
                                           locale.yesButtonTitle(),
@@ -250,14 +284,14 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
                                           new ConfirmCallback() {
                                               @Override
                                               public void accepted() {
-                                                  initialLoadingInfo.setOperationStatus(WORKSPACE_BOOTING.getValue(), IN_PROGRESS);
+                                                  loader.show(LoaderPresenter.Phase.STARTING_WORKSPACE_RUNTIME);
                                                   workspaceServiceClient.startById(workspace.getId(), workspace.getConfig().getDefaultEnv(), true);
                                               }
                                           },
                                           new CancelCallback() {
                                               @Override
                                               public void cancelled() {
-                                                  initialLoadingInfo.setOperationStatus(WORKSPACE_BOOTING.getValue(), IN_PROGRESS);
+                                                  loader.show(LoaderPresenter.Phase.STARTING_WORKSPACE_RUNTIME);
                                                   workspaceServiceClient.startById(workspace.getId(), workspace.getConfig().getDefaultEnv(), false);
                                               }
                                           }).show();
@@ -276,4 +310,7 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
             }
         };
     }
+
+    abstract void tryStartWorkspace();
+
 }

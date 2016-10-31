@@ -13,12 +13,17 @@ package org.eclipse.che.ide.extension.machine.client.outputspanel.console;
 import com.google.common.base.Strings;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
+import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.dom.client.PreElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.ScrollEvent;
 import com.google.gwt.event.dom.client.ScrollHandler;
+import com.google.gwt.regexp.shared.MatchResult;
+import com.google.gwt.regexp.shared.RegExp;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.DOM;
@@ -30,12 +35,21 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
+
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
+import org.eclipse.che.ide.ui.FontAwesome;
 import org.eclipse.che.ide.ui.Tooltip;
+
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.gwt.regexp.shared.RegExp.compile;
 import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
 import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
+
+import org.eclipse.che.ide.util.Pair;
 import org.vectomatic.dom.svg.ui.SVGImage;
+
+import java.util.List;
 
 /**
  * View representation of output console.
@@ -45,10 +59,16 @@ import org.vectomatic.dom.svg.ui.SVGImage;
  */
 public class OutputConsoleViewImpl extends Composite implements OutputConsoleView, ScrollHandler {
 
+    private final List<Pair<RegExp, String>> output2Color = newArrayList(new Pair<>(compile("\\[\\s*(DOCKER)\\s*\\]"), "#4EABFF"),
+                                                                         new Pair<>(compile("\\[\\s*(ERROR)\\s*\\]"), "#FF2727"),
+                                                                         new Pair<>(compile("\\[\\s*(WARN)\\s*\\]"), "#F5A623"),
+                                                                         new Pair<>(compile("\\[\\s*(STDOUT)\\s*\\]"), "#8ED72B"),
+                                                                         new Pair<>(compile("\\[\\s*(STDERR)\\s*\\]"), "#FF4343"));
+
     interface OutputConsoleViewUiBinder extends UiBinder<Widget, OutputConsoleViewImpl> {
     }
 
-    private static final OutputConsoleViewUiBinder UI_BINDER   = GWT.create(OutputConsoleViewUiBinder.class);
+    private static final OutputConsoleViewUiBinder UI_BINDER = GWT.create(OutputConsoleViewUiBinder.class);
 
     private ActionDelegate delegate;
 
@@ -56,40 +76,43 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
     DockLayoutPanel consolePanel;
 
     @UiField
-    FlowPanel       commandPanel;
+    FlowPanel commandPanel;
 
     @UiField
-    FlowPanel       previewPanel;
+    FlowPanel previewPanel;
 
     @UiField
-    Label           commandTitle;
+    Label commandTitle;
 
     @UiField
-    Label           commandLabel;
+    Label commandLabel;
 
     @UiField
-    ScrollPanel     scrollPanel;
+    ScrollPanel scrollPanel;
 
     @UiField
-    FlowPanel       consoleLines;
+    FlowPanel consoleLines;
 
     @UiField
-    Anchor          previewUrlLabel;
+    Anchor previewUrlLabel;
 
     @UiField
-    FlowPanel       reRunProcessButton;
+    FlowPanel reRunProcessButton;
 
     @UiField
-    FlowPanel       stopProcessButton;
+    FlowPanel stopProcessButton;
 
     @UiField
-    FlowPanel       clearOutputsButton;
+    FlowPanel clearOutputsButton;
 
     @UiField
-    FlowPanel       wrapTextButton;
+    FlowPanel downloadOutputsButton;
 
     @UiField
-    FlowPanel       scrollToBottomButton;
+    FlowPanel wrapTextButton;
+
+    @UiField
+    FlowPanel scrollToBottomButton;
 
     /** If true - next printed line should replace the previous one. */
     private boolean carriageReturn;
@@ -108,6 +131,7 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
         reRunProcessButton.add(new SVGImage(resources.reRunIcon()));
         stopProcessButton.add(new SVGImage(resources.stopIcon()));
         clearOutputsButton.add(new SVGImage(resources.clearOutputsIcon()));
+        downloadOutputsButton.getElement().setInnerHTML(FontAwesome.DOWNLOAD);
 
         wrapTextButton.add(new SVGImage(resources.lineWrapIcon()));
         scrollToBottomButton.add(new SVGImage(resources.scrollToBottomIcon()));
@@ -141,6 +165,15 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
             }
         }, ClickEvent.getType());
 
+        downloadOutputsButton.addDomHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (delegate != null) {
+                    delegate.downloadOutputsButtonClicked();
+                }
+            }
+        }, ClickEvent.getType());
+
         wrapTextButton.addDomHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent clickEvent) {
@@ -159,30 +192,30 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
             }
         }, ClickEvent.getType());
 
-        Tooltip.create((elemental.dom.Element) reRunProcessButton.getElement(),
-                BOTTOM,
-                MIDDLE,
-                localization.consolesReRunButtonTooltip());
+        Tooltip.create((elemental.dom.Element)reRunProcessButton.getElement(),
+                       BOTTOM,
+                       MIDDLE,
+                       localization.consolesReRunButtonTooltip());
 
-        Tooltip.create((elemental.dom.Element) stopProcessButton.getElement(),
-                BOTTOM,
-                MIDDLE,
-                localization.consolesStopButtonTooltip());
+        Tooltip.create((elemental.dom.Element)stopProcessButton.getElement(),
+                       BOTTOM,
+                       MIDDLE,
+                       localization.consolesStopButtonTooltip());
 
-        Tooltip.create((elemental.dom.Element) clearOutputsButton.getElement(),
-                BOTTOM,
-                MIDDLE,
-                localization.consolesClearOutputsButtonTooltip());
+        Tooltip.create((elemental.dom.Element)clearOutputsButton.getElement(),
+                       BOTTOM,
+                       MIDDLE,
+                       localization.consolesClearOutputsButtonTooltip());
 
-        Tooltip.create((elemental.dom.Element) wrapTextButton.getElement(),
-                BOTTOM,
-                MIDDLE,
-                localization.consolesWrapTextButtonTooltip());
+        Tooltip.create((elemental.dom.Element)wrapTextButton.getElement(),
+                       BOTTOM,
+                       MIDDLE,
+                       localization.consolesWrapTextButtonTooltip());
 
-        Tooltip.create((elemental.dom.Element) scrollToBottomButton.getElement(),
-                BOTTOM,
-                MIDDLE,
-                localization.consolesAutoScrollButtonTooltip());
+        Tooltip.create((elemental.dom.Element)scrollToBottomButton.getElement(),
+                       BOTTOM,
+                       MIDDLE,
+                       localization.consolesAutoScrollButtonTooltip());
     }
 
     @Override
@@ -279,7 +312,7 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
     }
 
     @Override
-    public void print(String text, boolean carriageReturn, String color) {
+    public void print(final String text, boolean carriageReturn, String color) {
         if (this.carriageReturn) {
             Node lastChild = consoleLines.getElement().getLastChild();
             if (lastChild != null) {
@@ -289,14 +322,49 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
 
         this.carriageReturn = carriageReturn;
 
+        final SafeHtml colorOutput = new SafeHtml() {
+            @Override
+            public String asString() {
+
+                if (Strings.isNullOrEmpty(text)) {
+                    return " ";
+                }
+
+                for (final Pair<RegExp, String> pair : output2Color) {
+                    final MatchResult matcher = pair.first.exec(text);
+
+                    if (matcher != null) {
+                        return text.replaceAll(matcher.getGroup(1),
+                                               "<span style=\"color: " + pair.second + "\">" + matcher.getGroup(1) + "</span>");
+                    }
+                }
+
+                return text;
+            }
+        };
+
         PreElement pre = DOM.createElement("pre").cast();
-        pre.setInnerText(text.isEmpty() ? " " : text);
+        pre.setInnerSafeHtml(colorOutput);
         if (color != null) {
             pre.getStyle().setColor(color);
         }
         consoleLines.getElement().appendChild(pre);
 
         followOutput();
+    }
+
+    @Override
+    public String getText() {
+        String text = "";
+        NodeList<Node> nodes = consoleLines.getElement().getChildNodes();
+
+        for (int i = 0; i < nodes.getLength(); i++) {
+            Node node = nodes.getItem(i);
+            Element element = node.cast();
+            text += element.getInnerText() + "\r\n";
+        }
+
+        return text;
     }
 
     @Override
@@ -311,7 +379,8 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
         }
 
         // Follow output if scroll area is scrolled to the end
-        if (scrollPanel.getElement().getScrollTop() + scrollPanel.getElement().getOffsetHeight() > scrollPanel.getElement().getScrollHeight()) {
+        if (scrollPanel.getElement().getScrollTop() + scrollPanel.getElement().getOffsetHeight() >
+            scrollPanel.getElement().getScrollHeight()) {
             followOutput = true;
         } else {
             followOutput = false;

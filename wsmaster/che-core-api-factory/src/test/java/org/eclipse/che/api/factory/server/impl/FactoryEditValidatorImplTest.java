@@ -14,8 +14,8 @@ import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.factory.server.FactoryEditValidator;
-import org.eclipse.che.api.factory.shared.dto.Author;
-import org.eclipse.che.api.factory.shared.dto.Factory;
+import org.eclipse.che.api.factory.shared.dto.AuthorDto;
+import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.mockito.InjectMocks;
@@ -36,7 +36,7 @@ import static org.mockito.Mockito.when;
 public class FactoryEditValidatorImplTest {
 
     @Mock
-    private Factory factory;
+    private FactoryDto factory;
 
     @InjectMocks
     private FactoryEditValidator factoryEditValidator = new FactoryEditValidatorImpl();
@@ -60,7 +60,7 @@ public class FactoryEditValidatorImplTest {
         String userId = "florent";
         setCurrentUser(userId);
 
-        Author author = mock(Author.class);
+        AuthorDto author = mock(AuthorDto.class);
         doReturn(author).when(factory)
                         .getCreator();
         doReturn("john").when(author)
@@ -77,7 +77,7 @@ public class FactoryEditValidatorImplTest {
     public void testUserIsTheAuthor() throws ApiException {
         String userId = "florent";
         setCurrentUser(userId);
-        Author author = mock(Author.class);
+        AuthorDto author = mock(AuthorDto.class);
         doReturn(author).when(factory)
                         .getCreator();
         doReturn(userId).when(author)

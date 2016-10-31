@@ -10,11 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server;
 
+import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.environment.server.CheEnvironmentValidator;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
+import org.eclipse.che.api.workspace.shared.dto.EnvironmentRecipeDto;
+import org.eclipse.che.api.workspace.shared.dto.ExtendedMachineDto;
+import org.eclipse.che.api.workspace.shared.dto.ServerConf2Dto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -27,7 +31,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
@@ -116,7 +119,8 @@ public class DefaultWorkspaceValidatorTest {
     @Test(expectedExceptions = BadRequestException.class,
           expectedExceptionsMessageRegExp = "Attribute name 'null' is not valid")
     public void shouldFailValidationIfAttributeNameIsNull() throws Exception {
-        final WorkspaceImpl workspace = new WorkspaceImpl("id", "namespace", createConfig());
+        final AccountImpl account = new AccountImpl("accountId", "namespace", "test");
+        final WorkspaceImpl workspace = new WorkspaceImpl("id", account, createConfig());
         workspace.getAttributes().put(null, "value1");
 
 
@@ -126,7 +130,8 @@ public class DefaultWorkspaceValidatorTest {
     @Test(expectedExceptions = BadRequestException.class,
           expectedExceptionsMessageRegExp = "Attribute name '' is not valid")
     public void shouldFailValidationIfAttributeNameIsEmpty() throws Exception {
-        final WorkspaceImpl workspace = new WorkspaceImpl("id", "namespace", createConfig());
+        final AccountImpl account = new AccountImpl("accountId", "namespace", "test");
+        final WorkspaceImpl workspace = new WorkspaceImpl("id", account, createConfig());
         workspace.getAttributes().put("", "value1");
 
         wsValidator.validateWorkspace(workspace);
@@ -135,7 +140,8 @@ public class DefaultWorkspaceValidatorTest {
     @Test(expectedExceptions = BadRequestException.class,
           expectedExceptionsMessageRegExp = "Attribute name '.*' is not valid")
     public void shouldFailValidationIfAttributeNameStartsWithWordCodenvy() throws Exception {
-        final WorkspaceImpl workspace = new WorkspaceImpl("id", "namespace", createConfig());
+        final AccountImpl account = new AccountImpl("accountId", "namespace", "test");
+        final WorkspaceImpl workspace = new WorkspaceImpl("id", account, createConfig());
         workspace.getAttributes().put("codenvy_key", "value1");
 
         wsValidator.validateWorkspace(workspace);
@@ -223,10 +229,18 @@ public class DefaultWorkspaceValidatorTest {
         final WorkspaceConfigDto workspaceConfigDto = newDto(WorkspaceConfigDto.class).withName("ws-name")
                                                                                       .withDefaultEnv("dev-env");
 
-        EnvironmentDto devEnv = newDto(EnvironmentDto.class).withName("dev-env")
-                                                            .withMachineConfigs(emptyList())
-                                                            .withRecipe(null);
-        workspaceConfigDto.setEnvironments(new ArrayList<>(singletonList(devEnv)));
+        ExtendedMachineDto extendedMachine =
+                newDto(ExtendedMachineDto.class).withAgents(singletonList("org.eclipse.che.ws-agent"))
+                                                .withServers(singletonMap("ref1",
+                                                                          newDto(ServerConf2Dto.class).withPort("8080/tcp")
+                                                                                                      .withProtocol("https")
+                                                                                                      .withProperties(singletonMap("some", "prop"))))
+                                                .withAttributes(singletonMap("memoryLimitBytes", "1000000"));
+        EnvironmentDto env = newDto(EnvironmentDto.class).withMachines(singletonMap("devmachine1", extendedMachine))
+                                                         .withRecipe(newDto(EnvironmentRecipeDto.class).withType("type")
+                                                                                                       .withContent("content")
+                                                                                                       .withContentType("content type"));
+        workspaceConfigDto.setEnvironments(singletonMap("dev-env", env));
 
         List<CommandDto> commandDtos = new ArrayList<>();
         commandDtos.add(newDto(CommandDto.class).withName("command_name")

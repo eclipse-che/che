@@ -16,7 +16,7 @@ import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.core.util.LinksHelper;
-import org.eclipse.che.api.machine.server.dao.RecipeDao;
+import org.eclipse.che.api.machine.server.spi.RecipeDao;
 import org.eclipse.che.api.machine.shared.ManagedRecipe;
 import org.eclipse.che.api.machine.shared.dto.recipe.NewRecipe;
 import org.eclipse.che.api.machine.shared.dto.recipe.RecipeDescriptor;
@@ -36,8 +36,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -101,10 +104,14 @@ public class RecipeService extends Service {
 
     @GET
     @Path("/{id}/script")
-    @Produces(TEXT_PLAIN)
-    public String getRecipeScript(@PathParam("id") String id) throws ApiException {
+    public Response getRecipeScript(@PathParam("id") String id) throws ApiException, UnsupportedEncodingException {
+        // Do not remove!
+        // Docker can not use dockerfile in some cases without content-length header.
         final ManagedRecipe recipe = recipeDao.getById(id);
-        return recipe.getScript();
+        byte[] script = recipe.getScript().getBytes("UTF-8");
+        return Response.ok(script, MediaType.TEXT_PLAIN)
+                       .header(HttpHeaders.CONTENT_LENGTH, script.length)
+                       .build();
     }
 
     @GET

@@ -1,0 +1,98 @@
+<!--
+
+    Copyright (c) 2015 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<div class="list-components"
+     layout="column">
+
+  <div ng-if="listComponentsController.components.length > 0">
+
+    <che-list-header>
+      <div flex="100"
+           layout="row"
+           layout-align="start stretch"
+           class="che-list-item-row">
+        <div layout="row"
+             layout-align="start center"
+             class="che-checkbox-area">
+          <div layout="row" layout-align="start center" class="che-list-item-checkbox-main">
+            <md-checkbox class="che-list-item-checkbox"
+                         aria-label="All components"
+                         md-theme="default"
+                         ng-checked="listComponentsController.isBulkChecked"
+                         ng-click="listComponentsController.changeBulkSelection()"></md-checkbox>
+          </div>
+        </div>
+        <div flex hide-xs layout-gt-xs="row"
+             layout-align="start center"
+             class="che-list-item-details">
+          <che-list-header-column flex="30"
+                                  che-sort-value="listComponentsController.componentsOrderBy"
+                                  che-sort-item="name"
+                                  che-column-title='Name'></che-list-header-column>
+          <che-list-header-column flex="60"
+                                  che-sort-value="listComponentsController.componentsOrderBy"
+                                  che-sort-item="version"
+                                  che-column-title='Version'></che-list-header-column>
+          <che-list-header-column flex="10"
+                                  che-column-title='Action'></che-list-header-column>
+        </div>
+      </div>
+    </che-list-header>
+    <che-list flex>
+      <che-list-item ng-mouseover="hover=true" ng-mouseout="hover=false"
+                     ng-repeat="component in listComponentsController.components | orderBy:listComponentsController.componentsOrderBy">
+        <div flex="100"
+             layout="row"
+             layout-align="start stretch"
+             class="component-item-row">
+          <div layout="row"
+               layout-align="start center"
+               class="che-checkbox-area">
+            <che-list-item-checked ng-model="listComponentsController.componentsSelectedStatus[component.name]"
+                                   che-aria-label-checkbox="Component {{component.name}}"
+                                   ng-click="listComponentsController.updateSelectedStatus()"></che-list-item-checked>
+          </div>
+          <div flex
+               layout-xs="column" layout-gt-xs="row"
+               layout-align-gt-xs="start center"
+               layout-align-xs="start start"
+               class="che-list-item-details">
+            <div flex="30" class="che-list-item-name">
+              <span class="che-hover">{{component.name}}</span>
+            </div>
+            <div flex="60" class="che-list-item-name">
+              <span class="che-hover">{{component.version}}</span>
+            </div>
+            <div flex="10">
+              <div class="che-list-actions"
+                   ng-click="listComponentsController.showEditDialog($event,listComponentsController.components.indexOf(component))">
+                <i class="fa fa-pencil" tooltip="Edit"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </che-list-item>
+    </che-list>
+  </div>
+  <!-- buttons -->
+  <div layout="row" flex>
+    <div flex>
+      <che-button-default che-button-title="Add" name="addButton"
+                          ng-click="listComponentsController.showAddDialog($event)"></che-button-default>
+    </div>
+    <div flex-offset="5" ng-if="listComponentsController.components.length > 0">
+      <che-button-primary-flat ng-disabled="!listComponentsController.selectedComponentsNumber"
+                               che-button-title="Delete" name="deleteButton"
+                               ng-click="listComponentsController.deleteSelectedComponents()"></che-button-primary-flat>
+    </div>
+  </div>
+</div>

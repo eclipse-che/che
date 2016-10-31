@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-assembly-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>4.8.0-SNAPSHOT</version>
+        <version>5.0.0-M7-SNAPSHOT</version>
     </parent>
     <artifactId>assembly-main</artifactId>
     <packaging>pom</packaging>
@@ -30,7 +30,7 @@
         <dependency>
             <groupId>org.eclipse.che</groupId>
             <artifactId>assembly-wsagent-server</artifactId>
-            <type>zip</type>
+            <type>tar.gz</type>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che</groupId>
@@ -65,13 +65,13 @@
         <dependency>
             <groupId>org.eclipse.che.lib</groupId>
             <artifactId>che-websocket-terminal</artifactId>
-            <type>zip</type>
+            <type>tar.gz</type>
             <classifier>linux_amd64</classifier>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.lib</groupId>
             <artifactId>che-websocket-terminal</artifactId>
-            <type>zip</type>
+            <type>tar.gz</type>
             <classifier>linux_arm7</classifier>
         </dependency>
         <dependency>
@@ -83,6 +83,28 @@
     </dependencies>
     <build>
         <plugins>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>add-stack</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <loadfile property="stack.che-in-che" srcFile="${project.basedir}/src/assembly/stack/che-in-che.json" />
+                                <unzip dest="${project.build.directory}/stacks" src="${org.eclipse.che.core:che-core-ide-stacks:jar}" />
+                                <replaceregexp file="${project.build.directory}/stacks/stacks.json" flags="m">
+                                    <regexp pattern="^]$" />
+                                    <substitution expression=", ${stack.che-in-che} ]" />
+                                </replaceregexp>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>

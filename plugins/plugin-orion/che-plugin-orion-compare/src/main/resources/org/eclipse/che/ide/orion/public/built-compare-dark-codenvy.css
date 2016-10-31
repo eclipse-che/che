@@ -4581,11 +4581,11 @@ a.breadcrumb.currentLocation {
 	
 @font-face {
   font-family: 'Orion Icon Font';
-  src: url('built-compare-11.0/OrionIconFont-Regular.eot');
-  src: url('built-compare-11.0/OrionIconFont-Regular.eot?#iefix') format('embedded-opentype'),
-       url('built-compare-11.0/OrionIconFont-Regular.woff') format('woff'),
-       url('built-compare-11.0/OrionIconFont-Regular.ttf')  format('truetype'),
-       url('built-compare-11.0/OrionIconFont-Regular.svg#04b530a8db6e0f4a0fdb83697b7ace5f') format('svg');
+  src: url('built-compare-12.0/OrionIconFont-Regular.eot');
+  src: url('built-compare-12.0/OrionIconFont-Regular.eot?#iefix') format('embedded-opentype'),
+       url('built-compare-12.0/OrionIconFont-Regular.woff') format('woff'),
+       url('built-compare-12.0/OrionIconFont-Regular.ttf')  format('truetype'),
+       url('built-compare-12.0/OrionIconFont-Regular.svg#04b530a8db6e0f4a0fdb83697b7ace5f') format('svg');
        
   font-style:   normal;
   font-weight:  400;

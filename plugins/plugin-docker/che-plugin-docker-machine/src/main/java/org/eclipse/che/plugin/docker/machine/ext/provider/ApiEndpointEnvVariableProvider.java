@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.machine.ext.provider;
 
-import org.eclipse.che.plugin.docker.machine.DockerInstanceRuntimeInfo;
-
 import com.google.common.base.Strings;
+
+import org.eclipse.che.plugin.docker.machine.DockerInstanceRuntimeInfo;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -27,7 +27,7 @@ import javax.inject.Singleton;
 @Singleton
 public class ApiEndpointEnvVariableProvider implements Provider<String> {
     @Inject
-    @Named("machine.docker.che_api.endpoint")
+    @Named("che.workspace.che_server_endpoint")
     private String apiEndpoint;
 
     @Override

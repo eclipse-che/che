@@ -34,7 +34,7 @@ public class RemoteUpdateParams {
     }
 
     /**
-     * Create new {@link RemoteUpdateParams} instance
+     * Create new {@link RemoteUpdateParams} instance.
      *
      * @param name
      *         remote name

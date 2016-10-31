@@ -102,20 +102,22 @@ public class ExpandEditorAction extends Action implements CustomComponentAction 
      * Expands or restores the editor.
      */
     public void toggleExpand() {
-        Perspective activePerspective = perspectiveManager.getActivePerspective();
-        if (activePerspective != null) {
-            expanded = !expanded;
+        Perspective perspective = perspectiveManager.getActivePerspective();
+        if (perspective == null) {
+            return;
+        }
 
-            if (expanded) {
-                activePerspective.collapseParts();
-                if (button != null) {
-                    button.getElement().setInnerHTML(FontAwesome.COMPRESS);
-                }
-            } else {
-                activePerspective.expandParts();
-                if (button != null) {
-                    button.getElement().setInnerHTML(FontAwesome.EXPAND);
-                }
+        expanded = !expanded;
+
+        if (expanded) {
+            perspective.maximizeCentralPart();
+            if (button != null) {
+                button.getElement().setInnerHTML(FontAwesome.COMPRESS);
+            }
+        } else {
+            perspective.restoreParts();
+            if (button != null) {
+                button.getElement().setInnerHTML(FontAwesome.EXPAND);
             }
         }
     }

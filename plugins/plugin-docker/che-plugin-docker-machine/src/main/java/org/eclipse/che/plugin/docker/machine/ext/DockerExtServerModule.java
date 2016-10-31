@@ -14,9 +14,8 @@ import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
-import org.eclipse.che.api.core.model.machine.ServerConf;
 import org.eclipse.che.inject.CheBootstrap;
-import org.eclipse.che.plugin.docker.machine.ext.provider.WsAgentServerConfProvider;
+import org.eclipse.che.plugin.docker.machine.ext.provider.WsAgentVolumeProvider;
 
 /**
  * Guice module for extension servers feature in docker machines
@@ -29,16 +28,11 @@ import org.eclipse.che.plugin.docker.machine.ext.provider.WsAgentServerConfProvi
 public class DockerExtServerModule extends AbstractModule {
     @Override
     protected void configure() {
-        Multibinder<ServerConf> machineServers = Multibinder.newSetBinder(binder(),
-                                                                          ServerConf.class,
-                                                                          Names.named("machine.docker.dev_machine.machine_servers"));
-        machineServers.addBinding().toProvider(WsAgentServerConfProvider.class);
-
         Multibinder<String> volumesMultibinder = Multibinder.newSetBinder(binder(),
                                                                           String.class,
                                                                           Names.named("machine.docker.dev_machine.machine_volumes"));
         volumesMultibinder.addBinding()
-                          .toProvider(org.eclipse.che.plugin.docker.machine.ext.provider.ExtServerVolumeProvider.class);
+                          .toProvider(WsAgentVolumeProvider.class);
 
         Multibinder<String> devMachineEnvVars = Multibinder.newSetBinder(binder(),
                                                                          String.class,

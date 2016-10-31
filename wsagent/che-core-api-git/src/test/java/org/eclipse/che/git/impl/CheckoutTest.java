@@ -29,8 +29,8 @@ import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.git.impl.GitTestUtil.addFile;
 import static org.eclipse.che.git.impl.GitTestUtil.cleanupTestRepo;
 import static org.eclipse.che.git.impl.GitTestUtil.connectToInitializedGitRepository;
@@ -100,7 +100,7 @@ public class CheckoutTest {
         assertEquals(MODIFIED_CONTENT, Files.toString(new File(connection.getWorkingDir(), "README.txt"), Charsets.UTF_8));
         
         //when
-        connection.checkout(CheckoutParams.create(null).withFiles(Arrays.asList("README.txt")));
+        connection.checkout(CheckoutParams.create(null).withFiles(singletonList("README.txt")));
 
         //then
         assertTrue(new File(repository, "README.txt").exists());
@@ -175,7 +175,7 @@ public class CheckoutTest {
         connection.branchCreate(FIRST_BRANCH_NAME, null);
         connection.checkout(CheckoutParams.create(FIRST_BRANCH_NAME));
         addFile(connection, "newfile", "new file content");
-        connection.add(AddParams.create(Arrays.asList(".")));
+        connection.add(AddParams.create(singletonList(".")));
         connection.commit(CommitParams.create("Commit message"));
         connection.checkout(CheckoutParams.create("master"));
 
@@ -204,7 +204,7 @@ public class CheckoutTest {
         connection.branchCreate(FIRST_BRANCH_NAME, null);
         connection.checkout(CheckoutParams.create(FIRST_BRANCH_NAME));
         addFile(connection, "newfile", "new file content");
-        connection.add(AddParams.create(Arrays.asList(".")));
+        connection.add(AddParams.create(singletonList(".")));
         connection.commit(CommitParams.create("Commit message"));
         connection.checkout(CheckoutParams.create("master"));
 

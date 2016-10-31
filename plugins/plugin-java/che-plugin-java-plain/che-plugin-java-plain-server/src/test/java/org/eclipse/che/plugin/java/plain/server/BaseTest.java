@@ -28,6 +28,7 @@ import org.eclipse.che.api.vfs.impl.file.DefaultFileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.FileTreeWatcher;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
+import org.eclipse.che.api.vfs.impl.file.event.detectors.ProjectTreeChangesDetector;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.commons.lang.IoUtil;
@@ -50,6 +51,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.mockito.Mockito.mock;
+
 /**
  * @author Valeriy Svydenko
  */
@@ -57,9 +60,9 @@ public abstract class BaseTest {
     private final static String wsPath     = BaseTest.class.getResource("/projects").getFile();
     private final static String INDEX_PATH = "target/fs_index";
 
-    protected File            root;
-    protected ProjectRegistry projectRegistry;
-    protected ProjectManager  projectManager;
+    protected File                           root;
+    protected ProjectRegistry                projectRegistry;
+    protected ProjectManager                 projectManager;
     protected LocalVirtualFileSystemProvider vfsProvider;
 
     @BeforeClass
@@ -111,7 +114,8 @@ public abstract class BaseTest {
                                             importerRegistry,
                                             fileWatcherNotificationHandler,
                                             fileTreeWatcher,
-                                            new TestWorkspaceHolder(new ArrayList<>()));
+                                            new TestWorkspaceHolder(new ArrayList<>()),
+                                            mock(ProjectTreeChangesDetector.class));
 
         ResourcesPlugin plugin = new ResourcesPlugin("target/index", wsPath, () -> projectRegistry, () -> projectManager);
 

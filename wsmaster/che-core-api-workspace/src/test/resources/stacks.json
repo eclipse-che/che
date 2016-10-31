@@ -33,26 +33,24 @@
             "origin": "codenvy/ubuntu_jdk8"
         },
         "workspaceConfig": {
-            "environments": [
-                {
-                    "name": "default",
-                    "recipe": null,
-                    "machineConfigs": [
-                        {
-                            "name": "default",
-                            "limits": {
-                                "ram": 1000
-                            },
-                            "source": {
-                                "location": "stub",
-                                "type": "dockerfile"
-                            },
-                            "type": "docker",
-                            "dev": true
+            "environments": {
+                "default" : {
+                    "machines": {
+                        "devmachine": {
+                            "agents": [
+                                "org.eclipse.che.ws-agent"
+                            ],
+                            "attributes" : {
+                                "memoryLimitBytes": "2147483648"
+                            }
                         }
-                    ]
+                    },
+                    "recipe": {
+                        "location": "codenvy/ubuntu_jdk8",
+                        "type": "dockerimage"
+                    }
                 }
-            ],
+            },
             "name": "default",
             "defaultEnv": "default",
             "description": null,
@@ -64,14 +62,6 @@
                 }
             ]
         },
-        "acl": [
-            {
-                "user": "*",
-                "actions": [
-                    "search"
-                ]
-            }
-        ],
         "stackIcon" : {
             "name": "type-java.svg",
             "mediaType": "image/svg+xml"
@@ -126,26 +116,25 @@
             "origin": "codenvy/node"
         },
         "workspaceConfig": {
-            "environments": [
-                {
-                    "name": "default",
-                    "recipe": null,
-                    "machineConfigs": [
-                        {
-                            "name": "default",
-                            "limits": {
-                                "ram": 1000
-                            },
-                            "source": {
-                                "location": "stub",
-                                "type": "dockerfile"
-                            },
-                            "type": "docker",
-                            "dev": true
+            "environments": {
+                "default" : {
+                    "machines": {
+                        "devmachine": {
+                            "agents": [
+                                "org.eclipse.che.ws-agent"
+                            ],
+                            "attributes" : {
+                                "memoryLimitBytes": "2147483648"
+                            }
                         }
-                    ]
+                    },
+                    "recipe": {
+                        "location": "https://raw.githubusercontent.com/eclipse/che/master/Dockerfile",
+                        "type": "dockerfile",
+                        "contentType": "text/x-dockerfile"
+                    }
                 }
-            ],
+            },
             "name": "default",
             "defaultEnv": "default",
             "description": null,
@@ -156,14 +145,243 @@
                     "type": "mvn"
                 }
             ]
-        },
-        "acl": [
+        }
+    },
+    {
+        "id": "node-default",
+        "creator": "ide",
+        "name": "Node",
+        "description": "Default Node Stack with Node 0.12.",
+        "scope": "general",
+        "tags": [
+            "Ubuntu",
+            "Git",
+            "Node.JS",
+            "NPM",
+            "Gulp",
+            "Bower",
+            "Grunt",
+            "Yeoman",
+            "Angular",
+            "Karma"
+        ],
+        "components": [
             {
-                "user": "*",
-                "actions": [
-                    "search"
-                ]
+                "name": "Node.JS",
+                "version": "0.12.9"
+            },
+            {
+                "name": "NPM",
+                "version": "---"
+            },
+            {
+                "name": "Gulp",
+                "version": "---"
+            },
+            {
+                "name": "Bower",
+                "version": "---"
+            },
+            {
+                "name": "Grunt",
+                "version": "---"
+            },
+            {
+                "name": "Yeoman",
+                "version": "---"
             }
-        ]
+        ],
+        "source": {
+            "type": "image",
+            "origin": "codenvy/node"
+        },
+        "workspaceConfig": {
+            "environments": {
+                "default" : {
+                    "machines": {
+                        "devmachine": {
+                            "agents": [
+                                "org.eclipse.che.ws-agent"
+                            ],
+                            "attributes" : {
+                                "memoryLimitBytes": "2147483648"
+                            }
+                        }
+                    },
+                    "recipe": {
+                        "content": "FROM codenvy/ubuntu_jdk8",
+                        "type": "dockerfile",
+                        "contentType": "text/x-dockerfile"
+                    }
+                }
+            },
+            "name": "default",
+            "defaultEnv": "default",
+            "description": null,
+            "commands": [
+                {
+                    "commandLine": "mvn clean install -f ${current.project.path}",
+                    "name": "newMaven",
+                    "type": "mvn"
+                }
+            ]
+        }
+    },
+    {
+        "id": "compose-location",
+        "creator": "ide",
+        "name": "Node",
+        "description": "Default Node Stack with Node 0.12.",
+        "scope": "general",
+        "tags": [
+            "Ubuntu",
+            "Git",
+            "Node.JS",
+            "NPM",
+            "Gulp",
+            "Bower",
+            "Grunt",
+            "Yeoman",
+            "Angular",
+            "Karma"
+        ],
+        "components": [
+            {
+                "name": "Node.JS",
+                "version": "0.12.9"
+            },
+            {
+                "name": "NPM",
+                "version": "---"
+            },
+            {
+                "name": "Gulp",
+                "version": "---"
+            },
+            {
+                "name": "Bower",
+                "version": "---"
+            },
+            {
+                "name": "Grunt",
+                "version": "---"
+            },
+            {
+                "name": "Yeoman",
+                "version": "---"
+            }
+        ],
+        "source": {
+            "type": "image",
+            "origin": "codenvy/node"
+        },
+        "workspaceConfig": {
+            "environments": {
+                "default" : {
+                    "machines": {
+                        "devmachine": {
+                            "agents": [
+                                "org.eclipse.che.ws-agent"
+                            ],
+                            "attributes" : {
+                                "memoryLimitBytes": "2147483648"
+                            }
+                        }
+                    },
+                    "recipe": {
+                        "location": "https://raw.githubusercontent.com/eclipse/che/master/Dockerfile",
+                        "type": "compose",
+                        "contentType": "application/x-yaml"
+                    }
+                }
+            },
+            "name": "default",
+            "defaultEnv": "default",
+            "description": null,
+            "commands": [
+                {
+                    "commandLine": "mvn clean install -f ${current.project.path}",
+                    "name": "newMaven",
+                    "type": "mvn"
+                }
+            ]
+        }
+    },
+    {
+        "id": "compose-content",
+        "creator": "ide",
+        "name": "Node",
+        "description": "Default Node Stack with Node 0.12.",
+        "scope": "general",
+        "tags": [
+            "Ubuntu",
+            "Git",
+            "Node.JS",
+            "NPM",
+            "Gulp",
+            "Bower",
+            "Grunt",
+            "Yeoman",
+            "Angular",
+            "Karma"
+        ],
+        "components": [
+            {
+                "name": "Node.JS",
+                "version": "0.12.9"
+            },
+            {
+                "name": "NPM",
+                "version": "---"
+            },
+            {
+                "name": "Gulp",
+                "version": "---"
+            },
+            {
+                "name": "Bower",
+                "version": "---"
+            },
+            {
+                "name": "Grunt",
+                "version": "---"
+            },
+            {
+                "name": "Yeoman",
+                "version": "---"
+            }
+        ],
+        "source": {
+            "type": "image",
+            "origin": "codenvy/node"
+        },
+        "workspaceConfig": {
+            "environments": {
+                "default" : {
+                    "machines": {
+                        "devmachine": {
+                            "agents": [
+                                "org.eclipse.che.ws-agent"
+                            ]
+                        }
+                    },
+                    "recipe": {
+                        "content": "service:\n  devmachine:\n    image: codenvy/ubuntu_jdk8\n    mem_limit: 2147483648",
+                        "type": "compose",
+                        "contentType": "application/x-yaml"
+                    }
+                }
+            },
+            "name": "default",
+            "defaultEnv": "default",
+            "description": null,
+            "commands": [
+                {
+                    "commandLine": "mvn clean install -f ${current.project.path}",
+                    "name": "newMaven",
+                    "type": "mvn"
+                }
+            ]
+        }
     }
 ]

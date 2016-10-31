@@ -13,9 +13,7 @@ package org.eclipse.che.api.git.params;
 import org.eclipse.che.api.git.shared.AddRequest;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Arguments holder for {@link org.eclipse.che.api.git.GitConnection#add(AddParams)}.
@@ -24,21 +22,25 @@ import java.util.Map;
  */
 public class AddParams {
 
-    private Map<String, String> attributes;
-    private List<String>        filePattern;
-    private boolean             isUpdate;
+    private List<String> filePattern;
+    private boolean      isUpdate;
 
     private AddParams() {
     }
 
     /**
-     * Create new {@link AddParams} instance
+     * Create new {@link AddParams} instance.
      *
      * @param filePattern
      *         file pattern of files to add
      */
     public static AddParams create(List<String> filePattern) {
         return new AddParams().withFilePattern(filePattern);
+    }
+
+    /** Create new {@link AddParams} instance */
+    public static AddParams create() {
+        return new AddParams();
     }
 
     /** @see AddRequest#getFilePattern() */
@@ -49,16 +51,6 @@ public class AddParams {
     /** @see AddRequest#withFilePattern(List) */
     public AddParams withFilePattern(List<String> filePattern) {
         this.filePattern = filePattern;
-        return this;
-    }
-
-    /** @see AddRequest#getAttributes() */
-    public Map<String, String> getAttributes() {
-        return attributes == null ? new HashMap<>() : attributes;
-    }
-
-    public AddParams withAttributes(Map<String, String> attributes) {
-        this.attributes = attributes;
         return this;
     }
 

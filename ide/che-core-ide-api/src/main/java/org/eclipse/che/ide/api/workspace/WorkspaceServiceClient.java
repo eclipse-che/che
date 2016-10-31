@@ -17,8 +17,9 @@ import org.eclipse.che.api.machine.shared.dto.SnapshotDto;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WsAgentHealthStateDto;
 
 import java.util.List;
 
@@ -182,12 +183,14 @@ public interface WorkspaceServiceClient {
      *
      * @param wsId
      *         workspace ID
+     * @param envName
+     *         the name of the environment to add
      * @param newEnv
      *         the new environment
      * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
      * @see WorkspaceService#addEnvironment(String, EnvironmentDto)
      */
-    Promise<WorkspaceDto> addEnvironment(String wsId, EnvironmentDto newEnv);
+    Promise<WorkspaceDto> addEnvironment(String wsId, String envName, EnvironmentDto newEnv);
 
     /**
      * Updates environment.
@@ -259,7 +262,7 @@ public interface WorkspaceServiceClient {
      * @return a promise that resolves to the {@link MachineDto}, or rejects with an error
      * @see WorkspaceService#createMachine(String, MachineConfigDto)
      */
-    Promise<MachineDto> createMachine(String wsId, MachineConfigDto machineConfig);
+    Promise<Void> createMachine(String wsId, MachineConfigDto machineConfig);
 
     /**
      * Returns workspace's snapshot.
@@ -280,5 +283,15 @@ public interface WorkspaceServiceClient {
      * @see WorkspaceService#createSnapshot(String)
      */
     Promise<Void> createSnapshot(String workspaceId);
+
+    /**
+     * Gets state of the workspace agent.
+     *
+     * @param workspaceId
+     *         workspace ID
+     * @return a promise that will resolve when the snapshot has been created, or rejects with an error
+     * @see WorkspaceService#checkAgentHealth(String)
+     */
+    Promise<WsAgentHealthStateDto> getWsAgentState(String workspaceId);
 
 }

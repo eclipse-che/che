@@ -11,6 +11,7 @@
 package org.eclipse.che.api.user.server;
 
 import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
@@ -26,6 +27,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.Callable;
 
@@ -112,7 +114,19 @@ public class UserManagerTest {
     }
 
     @Test
-    public void shouldGenerateIdentifierWhenCreatingUser() throws Exception {
+    public void shouldGenerateIdentifierWhenCreatingUserWithNullId() throws Exception {
+        final User user = new UserImpl(null, "test@email.com", "testName", null, null);
+
+        manager.create(user, false);
+
+        final ArgumentCaptor<UserImpl> userCaptor = ArgumentCaptor.forClass(UserImpl.class);
+        verify(userDao).create(userCaptor.capture());
+        final String id = userCaptor.getValue().getId();
+        assertNotNull(id);
+    }
+
+    @Test
+    public void shouldNotGenerateIdentifierWhenCreatingUserWithNotNullId() throws Exception {
         final User user = new UserImpl("identifier", "test@email.com", "testName", null, null);
 
         manager.create(user, false);
@@ -121,7 +135,7 @@ public class UserManagerTest {
         verify(userDao).create(userCaptor.capture());
         final String id = userCaptor.getValue().getId();
         assertNotNull(id);
-        assertNotEquals(id, "identifier");
+        assertEquals(id, "identifier");
     }
 
     @Test(expectedExceptions = NullPointerException.class)
@@ -191,6 +205,36 @@ public class UserManagerTest {
         assertEquals(manager.getByEmail(user.getEmail()), user);
     }
 
+    @Test
+    public void shouldGetTotalUserCount() throws Exception {
+        when(userDao.getTotalCount()).thenReturn(5L);
+
+        assertEquals(manager.getTotalCount(), 5);
+        verify(userDao).getTotalCount();
+    }
+
+    @Test
+    public void shouldGetAllUsers() throws Exception {
+        final Page users = new Page(Arrays.asList(
+                new UserImpl("identifier1", "test1@email.com", "testName1", "password", Collections.singletonList("alias1")),
+                new UserImpl("identifier2", "test2@email.com", "testName2", "password", Collections.singletonList("alias2")),
+                new UserImpl("identifier3", "test3@email.com", "testName3", "password", Collections.singletonList("alias3"))), 0, 30, 3);
+        when(userDao.getAll(30, 0)).thenReturn(users);
+
+        assertEquals(manager.getAll(30, 0), users);
+        verify(userDao).getAll(30, 0);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void shouldThrowIllegalArgumentExceptionsWhenGetAllUsersWithNegativeMaxItems() throws Exception {
+        manager.getAll(-5, 0);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void shouldThrowIllegalArgumentExceptionsWhenGetAllUsersWithNegativeSkipCount() throws Exception {
+        manager.getAll(30, -11);
+    }
+
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNpeWhenRemovingUserByNullId() throws Exception {
         manager.remove(null);
@@ -201,8 +245,6 @@ public class UserManagerTest {
         manager.remove("user123");
 
         verify(userDao).remove("user123");
-        verify(preferencesDao).remove("user123");
-        verify(profileDao).remove("user123");
     }
 
     @Test(expectedExceptions = ConflictException.class)

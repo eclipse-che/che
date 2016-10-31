@@ -16,7 +16,6 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
-import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.texteditor.HandlesTextOperations;
@@ -35,12 +34,10 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
  */
 public class FormatterAction extends AbstractPerspectiveAction {
 
-    private final AppContext           appContext;
     private final EditorAgent          editorAgent;
 
     @Inject
-    public FormatterAction(AppContext appContext,
-                           EditorAgent editorAgent,
+    public FormatterAction(EditorAgent editorAgent,
                            CoreLocalizationConstant localization,
                            Resources resources) {
         super(singletonList(PROJECT_PERSPECTIVE_ID),
@@ -48,7 +45,6 @@ public class FormatterAction extends AbstractPerspectiveAction {
               localization.formatDescription(),
               null,
               resources.format());
-        this.appContext = appContext;
         this.editorAgent = editorAgent;
     }
 

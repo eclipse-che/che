@@ -24,6 +24,7 @@ import org.eclipse.che.ide.actions.CreateProjectAction;
 import org.eclipse.che.ide.actions.DeleteResourceAction;
 import org.eclipse.che.ide.actions.DownloadProjectAction;
 import org.eclipse.che.ide.actions.DownloadResourceAction;
+import org.eclipse.che.ide.actions.DownloadWsAction;
 import org.eclipse.che.ide.actions.EditFileAction;
 import org.eclipse.che.ide.actions.ExpandEditorAction;
 import org.eclipse.che.ide.actions.FormatterAction;
@@ -31,7 +32,6 @@ import org.eclipse.che.ide.actions.FullTextSearchAction;
 import org.eclipse.che.ide.actions.GoIntoAction;
 import org.eclipse.che.ide.actions.HotKeysListAction;
 import org.eclipse.che.ide.actions.ImportProjectAction;
-import org.eclipse.che.ide.actions.LoaderAction;
 import org.eclipse.che.ide.actions.NavigateToFileAction;
 import org.eclipse.che.ide.actions.OpenFileAction;
 import org.eclipse.che.ide.actions.ProjectConfigurationAction;
@@ -43,6 +43,7 @@ import org.eclipse.che.ide.actions.SaveAllAction;
 import org.eclipse.che.ide.actions.ShowHiddenFilesAction;
 import org.eclipse.che.ide.actions.ShowPreferencesAction;
 import org.eclipse.che.ide.actions.ShowReferenceAction;
+import org.eclipse.che.ide.actions.SignatureHelpAction;
 import org.eclipse.che.ide.actions.UndoAction;
 import org.eclipse.che.ide.actions.UploadFileAction;
 import org.eclipse.che.ide.actions.UploadFolderAction;
@@ -62,13 +63,11 @@ import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.keybinding.KeyBuilder;
 import org.eclipse.che.ide.connection.WsConnectionListener;
-import org.eclipse.che.ide.machine.macro.ServerHostNameMacroProvider;
-import org.eclipse.che.ide.machine.macro.ServerMacroProvider;
-import org.eclipse.che.ide.machine.macro.ServerPortMacroProvider;
-import org.eclipse.che.ide.machine.macro.ServerProtocolMacroProvider;
-import org.eclipse.che.ide.part.editor.actions.SwitchNextEditorAction;
-import org.eclipse.che.ide.part.editor.actions.SwitchPreviousEditorAction;
 import org.eclipse.che.ide.imageviewer.ImageViewerProvider;
+import org.eclipse.che.ide.macro.ServerHostNameMacro;
+import org.eclipse.che.ide.macro.ServerMacro;
+import org.eclipse.che.ide.macro.ServerPortMacro;
+import org.eclipse.che.ide.macro.ServerProtocolMacro;
 import org.eclipse.che.ide.newresource.NewFileAction;
 import org.eclipse.che.ide.newresource.NewFolderAction;
 import org.eclipse.che.ide.part.editor.actions.CloseAction;
@@ -79,6 +78,9 @@ import org.eclipse.che.ide.part.editor.actions.PinEditorTabAction;
 import org.eclipse.che.ide.part.editor.actions.ReopenClosedFileAction;
 import org.eclipse.che.ide.part.editor.actions.SplitHorizontallyAction;
 import org.eclipse.che.ide.part.editor.actions.SplitVerticallyAction;
+import org.eclipse.che.ide.part.editor.actions.SwitchNextEditorAction;
+import org.eclipse.che.ide.part.editor.actions.SwitchPreviousEditorAction;
+import org.eclipse.che.ide.part.editor.recent.ClearRecentListAction;
 import org.eclipse.che.ide.part.editor.recent.OpenRecentFilesAction;
 import org.eclipse.che.ide.part.explorer.project.TreeResourceRevealer;
 import org.eclipse.che.ide.resources.action.CopyResourceAction;
@@ -94,8 +96,18 @@ import org.eclipse.che.ide.util.input.KeyCodeMap;
 import org.eclipse.che.ide.xml.NewXmlFileAction;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
+import static org.eclipse.che.ide.actions.EditorActions.CLOSE;
+import static org.eclipse.che.ide.actions.EditorActions.CLOSE_ALL;
+import static org.eclipse.che.ide.actions.EditorActions.CLOSE_ALL_EXCEPT_PINNED;
+import static org.eclipse.che.ide.actions.EditorActions.CLOSE_OTHER;
+import static org.eclipse.che.ide.actions.EditorActions.PIN_TAB;
+import static org.eclipse.che.ide.actions.EditorActions.REOPEN_CLOSED;
+import static org.eclipse.che.ide.actions.EditorActions.SPLIT_HORIZONTALLY;
+import static org.eclipse.che.ide.actions.EditorActions.SPLIT_VERTICALLY;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_FILE_NEW;
 import static org.eclipse.che.ide.api.constraints.Constraints.FIRST;
+import static org.eclipse.che.ide.api.constraints.Constraints.LAST;
+import static org.eclipse.che.ide.part.editor.recent.RecentFileStore.RECENT_GROUP_ID;
 import static org.eclipse.che.ide.projecttype.BlankProjectWizardRegistrar.BLANK_CATEGORY;
 
 /**
@@ -219,6 +231,9 @@ public class StandardComponentInitializer {
     private DownloadProjectAction downloadProjectAction;
 
     @Inject
+    private DownloadWsAction downloadWsAction;
+
+    @Inject
     private DownloadResourceAction downloadResourceAction;
 
     @Inject
@@ -261,13 +276,13 @@ public class StandardComponentInitializer {
     private SwitchNextEditorAction switchNextEditorAction;
 
     @Inject
-    private LoaderAction loaderAction;
-
-    @Inject
     private HotKeysListAction hotKeysListAction;
 
     @Inject
     private OpenRecentFilesAction openRecentFilesAction;
+
+    @Inject
+    private ClearRecentListAction clearRecentFilesAction;
 
     @Inject
     private CloseActiveEditorAction closeActiveEditorAction;
@@ -289,6 +304,9 @@ public class StandardComponentInitializer {
 
     @Inject
     private RefreshPathAction refreshPathAction;
+
+    @Inject
+    private SignatureHelpAction signatureHelpAction;
 
     @Inject
     @Named("XMLFileType")
@@ -346,16 +364,16 @@ public class StandardComponentInitializer {
 
     // do not remove the injections below
     @Inject
-    private ServerMacroProvider serverMacroProvider;
+    private ServerMacro serverMacro;
 
     @Inject
-    private ServerProtocolMacroProvider serverProtocolMacroProvider;
+    private ServerProtocolMacro serverProtocolMacro;
 
     @Inject
-    private ServerHostNameMacroProvider serverHostNameMacroProvider;
+    private ServerHostNameMacro serverHostNameMacro;
 
     @Inject
-    private ServerPortMacroProvider serverPortMacroProvider;
+    private ServerPortMacro serverPortMacro;
 
 
     /** Instantiates {@link StandardComponentInitializer} an creates standard content. */
@@ -411,8 +429,8 @@ public class StandardComponentInitializer {
         actionManager.registerAction("createProject", createProjectAction);
         workspaceGroup.add(createProjectAction);
 
-        actionManager.registerAction("downloadAsZipAction", downloadProjectAction);
-        workspaceGroup.add(downloadProjectAction);
+        actionManager.registerAction("downloadWsAsZipAction", downloadWsAction);
+        workspaceGroup.add(downloadWsAction);
 
         workspaceGroup.addSeparator();
 
@@ -448,6 +466,7 @@ public class StandardComponentInitializer {
         actionManager.registerAction("convertFolderToProject", convertFolderToProjectAction);
         projectGroup.add(convertFolderToProjectAction);
 
+        actionManager.registerAction("downloadAsZipAction", downloadProjectAction);
         projectGroup.add(downloadProjectAction);
 
         actionManager.registerAction("showHideHiddenFiles", showHiddenFilesAction);
@@ -460,7 +479,12 @@ public class StandardComponentInitializer {
 
         // Edit (New Menu)
         DefaultActionGroup editGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_EDIT);
-
+        DefaultActionGroup recentGroup = new DefaultActionGroup(RECENT_GROUP_ID, true, actionManager);
+        actionManager.registerAction(IdeActions.GROUP_RECENT_FILES, recentGroup);
+        actionManager.registerAction("clearRecentList", clearRecentFilesAction);
+        recentGroup.addSeparator();
+        recentGroup.add(clearRecentFilesAction, LAST);
+        editGroup.add(recentGroup);
         actionManager.registerAction("openRecentFiles", openRecentFilesAction);
         editGroup.add(openRecentFilesAction);
 
@@ -604,31 +628,26 @@ public class StandardComponentInitializer {
         DefaultActionGroup editorTabContextMenu =
                 (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_EDITOR_TAB_CONTEXT_MENU);
         editorTabContextMenu.add(closeAction);
-        actionManager.registerAction("closeEditor", closeAction);
+        actionManager.registerAction(CLOSE, closeAction);
         editorTabContextMenu.add(closeAllAction);
-        actionManager.registerAction("closeAllEditors", closeAllAction);
+        actionManager.registerAction(CLOSE_ALL, closeAllAction);
         editorTabContextMenu.add(closeOtherAction);
-        actionManager.registerAction("closeOtherEditorExceptCurrent", closeOtherAction);
+        actionManager.registerAction(CLOSE_OTHER, closeOtherAction);
         editorTabContextMenu.add(closeAllExceptPinnedAction);
-        actionManager.registerAction("closeAllEditorExceptPinned", closeAllExceptPinnedAction);
+        actionManager.registerAction(CLOSE_ALL_EXCEPT_PINNED, closeAllExceptPinnedAction);
         editorTabContextMenu.addSeparator();
         editorTabContextMenu.add(reopenClosedFileAction);
-        actionManager.registerAction("reopenClosedEditorTab", reopenClosedFileAction);
+        actionManager.registerAction(REOPEN_CLOSED, reopenClosedFileAction);
         editorTabContextMenu.add(pinEditorTabAction);
-        actionManager.registerAction("pinEditorTab", pinEditorTabAction);
+        actionManager.registerAction(PIN_TAB, pinEditorTabAction);
         editorTabContextMenu.addSeparator();
-        actionManager.registerAction("splitVertically", splitVerticallyAction);
-        editorTabContextMenu.add(splitVerticallyAction);
-        actionManager.registerAction("splitHorizontally", splitHorizontallyAction);
+        actionManager.registerAction(SPLIT_HORIZONTALLY, splitHorizontallyAction);
         editorTabContextMenu.add(splitHorizontallyAction);
-
-        final DefaultActionGroup loaderToolbarGroup = new DefaultActionGroup("loader", false, actionManager);
-        actionManager.registerAction("loader", loaderToolbarGroup);
-        actionManager.registerAction("loaderAction", loaderAction);
-        centerToolbarGroup.add(loaderToolbarGroup);
-        loaderToolbarGroup.add(loaderAction);
+        actionManager.registerAction(SPLIT_VERTICALLY, splitVerticallyAction);
+        editorTabContextMenu.add(splitVerticallyAction);
 
         actionManager.registerAction("noOpAction", new NoOpAction());
+        actionManager.registerAction("signatureHelp", signatureHelpAction);
 
         // Define hot-keys
         keyBinding.getGlobal().addKey(new KeyBuilder().action().alt().charCode('n').build(), "navigateToFile");
@@ -646,8 +665,10 @@ public class StandardComponentInitializer {
 
         if (UserAgent.isMac()) {
             keyBinding.getGlobal().addKey(new KeyBuilder().control().charCode('w').build(), "closeActiveEditor");
+            keyBinding.getGlobal().addKey(new KeyBuilder().control().charCode('p').build(), "signatureHelp");
         } else {
             keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode('w').build(), "closeActiveEditor");
+            keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('p').build(), "signatureHelp");
         }
     }
 

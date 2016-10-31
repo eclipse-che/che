@@ -86,7 +86,12 @@ import java.util.Map;
 
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
-/** @author andrew00x */
+/**
+ * Defines Git REST API.
+ *
+ * @author andrew00x
+ * @author Igor Vinokur
+ */
 @Path("git")
 public class GitService {
 
@@ -106,10 +111,8 @@ public class GitService {
     @Consumes(MediaType.APPLICATION_JSON)
     public void add(AddRequest request) throws ApiException {
         try (GitConnection gitConnection = getGitConnection()) {
-            AddParams params = AddParams.create(request.getFilePattern())
-                                        .withAttributes(request.getAttributes())
-                                        .withUpdate(request.isUpdate());
-            gitConnection.add(params);
+            gitConnection.add(AddParams.create(request.getFilePattern())
+                                       .withUpdate(request.isUpdate()));
         }
     }
 
@@ -118,13 +121,12 @@ public class GitService {
     @Consumes(MediaType.APPLICATION_JSON)
     public void checkout(CheckoutRequest request) throws ApiException {
         try (GitConnection gitConnection = getGitConnection()) {
-            CheckoutParams params = CheckoutParams.create(request.getName())
-                                                  .withFiles(request.getFiles())
-                                                  .withCreateNew(request.isCreateNew())
-                                                  .withNoTrack(request.isNoTrack())
-                                                  .withTrackBranch(request.getTrackBranch())
-                                                  .withStartPoint(request.getStartPoint());
-            gitConnection.checkout(params);
+            gitConnection.checkout(CheckoutParams.create(request.getName())
+                                                 .withFiles(request.getFiles())
+                                                 .withCreateNew(request.isCreateNew())
+                                                 .withNoTrack(request.isNoTrack())
+                                                 .withTrackBranch(request.getTrackBranch())
+                                                 .withStartPoint(request.getStartPoint()));
         }
     }
 
@@ -172,17 +174,17 @@ public class GitService {
     @Produces(MediaType.APPLICATION_JSON)
     public RepoInfo clone(final CloneRequest request) throws URISyntaxException, ApiException {
         long start = System.currentTimeMillis();
-        // On-the-fly resolving of repository's working directory.
-        CloneParams params = CloneParams.create(request.getRemoteUri())
-                                        .withWorkingDir(getAbsoluteProjectPath(request.getWorkingDir()))
-                                        .withBranchesToFetch(request.getBranchesToFetch())
-                                        .withRemoteName(request.getRemoteName())
-                                        .withTimeout(request.getTimeout());
-
         LOG.info("Repository clone from '" + request.getRemoteUri() + "' to '" + request.getWorkingDir() + "' started");
         GitConnection gitConnection = getGitConnection();
         try {
-            gitConnection.clone(params);
+            gitConnection.clone(CloneParams.create(request.getRemoteUri())
+                                           // On-the-fly resolving of repository's working directory.
+                                           .withWorkingDir(getAbsoluteProjectPath(request.getWorkingDir()))
+                                           .withBranchesToFetch(request.getBranchesToFetch())
+                                           .withRemoteName(request.getRemoteName())
+                                           .withTimeout(request.getTimeout())
+                                           .withUsername(request.getUsername())
+                                           .withPassword(request.getPassword()));
             return newDto(RepoInfo.class).withRemoteUri(request.getRemoteUri());
         } finally {
             long end = System.currentTimeMillis();
@@ -199,11 +201,10 @@ public class GitService {
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     public Revision commit(CommitRequest request) throws ApiException {
         try (GitConnection gitConnection = getGitConnection()) {
-            CommitParams params = CommitParams.create(request.getMessage())
-                                              .withFiles(request.getFiles())
-                                              .withAll(request.isAll())
-                                              .withAmend(request.isAmend());
-            return gitConnection.commit(params);
+            return gitConnection.commit(CommitParams.create(request.getMessage())
+                                                    .withFiles(request.getFiles())
+                                                    .withAll(request.isAll())
+                                                    .withAmend(request.isAmend()));
         }
     }
 
@@ -218,15 +219,14 @@ public class GitService {
                          @QueryParam("commitB") String commitB,
                          @QueryParam("cached") boolean cached) throws ApiException {
         try (GitConnection gitConnection = getGitConnection()) {
-            DiffParams params = DiffParams.create()
-                                          .withFileFilter(fileFilter)
-                                          .withType(diffType == null ? null : DiffType.valueOf(diffType))
-                                          .withNoRenames(noRenames)
-                                          .withRenameLimit(renameLimit)
-                                          .withCommitA(commitA)
-                                          .withCommitB(commitB)
-                                          .withCached(cached);
-            return gitConnection.diff(params);
+            return gitConnection.diff(DiffParams.create()
+                                                .withFileFilter(fileFilter)
+                                                .withType(diffType == null ? null : DiffType.valueOf(diffType))
+                                                .withNoRenames(noRenames)
+                                                .withRenameLimit(renameLimit)
+                                                .withCommitA(commitA)
+                                                .withCommitB(commitB)
+                                                .withCached(cached));
         }
     }
 
@@ -245,11 +245,12 @@ public class GitService {
     @Consumes(MediaType.APPLICATION_JSON)
     public void fetch(FetchRequest request) throws ApiException {
         try (GitConnection gitConnection = getGitConnection()) {
-            FetchParams params = FetchParams.create(request.getRemote())
-                                            .withRefSpec(request.getRefSpec())
-                                            .withTimeout(request.getTimeout())
-                                            .withRemoveDeletedRefs(request.isRemoveDeletedRefs());
-            gitConnection.fetch(params);
+            gitConnection.fetch(FetchParams.create(request.getRemote())
+                                           .withRefSpec(request.getRefSpec())
+                                           .withTimeout(request.getTimeout())
+                                           .withRemoveDeletedRefs(request.isRemoveDeletedRefs())
+                                           .withUsername(request.getUsername())
+                                           .withPassword(request.getPassword()));
         }
     }
 
@@ -277,12 +278,11 @@ public class GitService {
     public LogPage log(@QueryParam("fileFilter") List<String> fileFilter,
                        @QueryParam("since") String revisionRangeSince,
                        @QueryParam("until") String revisionRangeUntil) throws ApiException {
-        LogParams params = LogParams.create()
-                                    .withFileFilter(fileFilter)
-                                    .withRevisionRangeSince(revisionRangeSince)
-                                    .withRevisionRangeUntil(revisionRangeUntil);
         try (GitConnection gitConnection = getGitConnection()) {
-            return gitConnection.log(params);
+            return gitConnection.log(LogParams.create()
+                                              .withFileFilter(fileFilter)
+                                              .withRevisionRangeSince(revisionRangeSince)
+                                              .withRevisionRangeUntil(revisionRangeUntil));
         }
     }
 
@@ -309,7 +309,7 @@ public class GitService {
     @POST
     @Path("move")
     @Consumes(MediaType.APPLICATION_JSON)
-    public void mv(MoveRequest request) throws ApiException {
+    public void move(MoveRequest request) throws ApiException {
         try (GitConnection gitConnection = getGitConnection()) {
             gitConnection.mv(request.getSource(), request.getTarget());
         }
@@ -318,12 +318,11 @@ public class GitService {
     @POST
     @Path("remove")
     @Consumes(MediaType.APPLICATION_JSON)
-    public void rm(RmRequest request) throws ApiException {
+    public void remove(RmRequest request) throws ApiException {
         try (GitConnection gitConnection = getGitConnection()) {
-            RmParams params = RmParams.create(request.getItems())
-                                      .withRecursively(request.isRecursively())
-                                      .withCached(request.isCached());
-            gitConnection.rm(params);
+            gitConnection.rm(RmParams.create(request.getItems())
+                                     .withRecursively(request.isRecursively())
+                                     .withCached(request.isCached()));
         }
     }
 
@@ -332,10 +331,11 @@ public class GitService {
     @Consumes(MediaType.APPLICATION_JSON)
     public PullResponse pull(PullRequest request) throws ApiException {
         try (GitConnection gitConnection = getGitConnection()) {
-            PullParams params = PullParams.create(request.getRemote())
-                                          .withRefSpec(request.getRefSpec())
-                                          .withTimeout(request.getTimeout());
-            return gitConnection.pull(params);
+            return gitConnection.pull(PullParams.create(request.getRemote())
+                                                .withRefSpec(request.getRefSpec())
+                                                .withTimeout(request.getTimeout())
+                                                .withUsername(request.getUsername())
+                                                .withPassword(request.getPassword()));
         }
     }
 
@@ -344,11 +344,12 @@ public class GitService {
     @Consumes(MediaType.APPLICATION_JSON)
     public PushResponse push(PushRequest request) throws ApiException {
         try (GitConnection gitConnection = getGitConnection()) {
-            PushParams params = PushParams.create(request.getRemote())
-                                          .withRefSpec(request.getRefSpec())
-                                          .withForce(request.isForce())
-                                          .withTimeout(request.getTimeout());
-            return gitConnection.push(params);
+            return gitConnection.push(PushParams.create(request.getRemote())
+                                                .withRefSpec(request.getRefSpec())
+                                                .withForce(request.isForce())
+                                                .withTimeout(request.getTimeout())
+                                                .withUsername(request.getUsername())
+                                                .withPassword(request.getPassword()));
         }
     }
 
@@ -357,8 +358,7 @@ public class GitService {
     @Consumes(MediaType.APPLICATION_JSON)
     public void remoteAdd(RemoteAddRequest request) throws ApiException {
         try (GitConnection gitConnection = getGitConnection()) {
-            RemoteAddParams params = RemoteAddParams.create(request.getName(), request.getUrl()).withBranches(request.getBranches());
-            gitConnection.remoteAdd(params);
+            gitConnection.remoteAdd(RemoteAddParams.create(request.getName(), request.getUrl()).withBranches(request.getBranches()));
         }
     }
 
@@ -386,14 +386,13 @@ public class GitService {
     @Consumes(MediaType.APPLICATION_JSON)
     public void remoteUpdate(RemoteUpdateRequest request) throws ApiException {
         try (GitConnection gitConnection = getGitConnection()) {
-            RemoteUpdateParams params = RemoteUpdateParams.create(request.getName())
-                                                          .withRemoveUrl(request.getRemoveUrl())
-                                                          .withRemovePushUrl(request.getRemovePushUrl())
-                                                          .withAddUrl(request.getAddUrl())
-                                                          .withAddPushUrl(request.getAddPushUrl())
-                                                          .withBranches(request.getBranches())
-                                                          .withAddBranches(request.isAddBranches());
-            gitConnection.remoteUpdate(params);
+            gitConnection.remoteUpdate(RemoteUpdateParams.create(request.getName())
+                                                         .withRemoveUrl(request.getRemoveUrl())
+                                                         .withRemovePushUrl(request.getRemovePushUrl())
+                                                         .withAddUrl(request.getAddUrl())
+                                                         .withAddPushUrl(request.getAddPushUrl())
+                                                         .withBranches(request.getBranches())
+                                                         .withAddBranches(request.isAddBranches()));
         }
     }
 
@@ -402,8 +401,7 @@ public class GitService {
     @Consumes(MediaType.APPLICATION_JSON)
     public void reset(ResetRequest request) throws ApiException {
         try (GitConnection gitConnection = getGitConnection()) {
-            ResetParams params = ResetParams.create(request.getCommit(), request.getType()).withFilePattern(request.getFilePattern());
-            gitConnection.reset(params);
+            gitConnection.reset(ResetParams.create(request.getCommit(), request.getType()).withFilePattern(request.getFilePattern()));
         }
     }
 
@@ -423,11 +421,10 @@ public class GitService {
     public Tag tagCreate(TagCreateRequest request) throws ApiException {
         GitConnection gitConnection = getGitConnection();
         try {
-            TagCreateParams params = TagCreateParams.create(request.getName())
-                                                    .withCommit(request.getCommit())
-                                                    .withMessage(request.getMessage())
-                                                    .withForce(request.isForce());
-            return gitConnection.tagCreate(params);
+            return gitConnection.tagCreate(TagCreateParams.create(request.getName())
+                                                          .withCommit(request.getCommit())
+                                                          .withMessage(request.getMessage())
+                                                          .withForce(request.isForce()));
         } finally {
             gitConnection.close();
         }

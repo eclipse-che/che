@@ -38,12 +38,8 @@
   </head>
   <body layout="row">
   <div ng-hide="hideLoader" class="main-page-loader">
-      <div layout="column" class="main-page-loader-content">
-        <div class="spinner">
-          <div class="rect1"></div>
-          <div class="rect2"></div>
-          <div class="rect3"></div>
-        </div>
+    <div class="ide-page-loader-content">
+      <img ng-src="{{branding.loaderURL}}">
     </div>
   </div>
   <!--[if lt IE 10]>
@@ -55,6 +51,7 @@
   </md-sidenav>
   <div class="main-page ide-show" layout="column" flex>
     <div id="main-content" role="main" ng-view layout="column" flex ng-show="waitingLoaded && !showIDE"></div>
+    <ide-iframe id="ide-iframe-window" ng-show="showIDE && ideIframeLink" flex style="height: 100%"></ide-iframe>
     <che-footer che-support-help-path="{{branding.helpPath}}" che-support-help-title="{{branding.helpTitle}}" che-support-email="{{branding.supportEmail}}" che-product-name="Eclipse Che" ng-show="waitingLoaded && !showIDE"></che-footer>
   </div>
     <!-- Addons are not automatically injected -->
@@ -65,7 +62,10 @@
     <script src="../bower_components/jsonlint/lib/jsonlint.js"></script>
     <script src="../bower_components/codemirror/addon/lint/lint.js"></script>
     <script src="../bower_components/codemirror/addon/lint/json-lint.js"></script>
+    <script src="../bower_components/codemirror/addon/mode/simple.js"></script>
     <script src="../bower_components/codemirror/mode/javascript/javascript.js"></script>
+    <script src="../bower_components/codemirror/mode/yaml/yaml.js"></script>
+    <script src="../bower_components/codemirror/mode/dockerfile/dockerfile.js"></script>
     <script src="../bower_components/codemirror/addon/edit/matchbrackets.js"></script>
     <script src="../bower_components/codemirror/addon/edit/closebrackets.js"></script>
     <script src="../bower_components/codemirror/addon/fold/foldcode.js"></script>

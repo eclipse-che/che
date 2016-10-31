@@ -1,0 +1,13 @@
+This patch reduces amount of scrolling lines.
+===================================================================
+diff --git a/org/eclipse/che/ide/editor/orion/public/built-codeEdit-12.0/code_edit/built-codeEdit-amd.js b/org/eclipse/che/ide/editor/orion/public/built-codeEdit-12.0/code_edit/built-codeEdit-amd.js
+--- a/org/eclipse/che/ide/editor/orion/public/built-codeEdit-12.0/code_edit/built-codeEdit-amd.js
++++ b/org/eclipse/che/ide/editor/orion/public/built-codeEdit-12.0/code_edit/built-codeEdit-amd.js
+@@ -22588,6 +22588,7 @@
+ 		},
+ 		_handleMouseWheel: function (e) {
+ 			if (this._noScroll) return;
++			if(e.defaultPrevented) return;
+ 			var lineHeight = this._getLineHeight();
+ 			var pixelX = 0, pixelY = 0;
+ 			// Note: On the Mac the correct behaviour is to scroll by pixel.

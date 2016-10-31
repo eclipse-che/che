@@ -26,10 +26,12 @@ import org.eclipse.che.api.project.server.type.SettableValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProviderFactory;
 import org.eclipse.che.api.project.server.type.ValueStorageException;
+import org.eclipse.che.api.vfs.Path;
 import org.eclipse.che.api.vfs.impl.file.DefaultFileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.FileTreeWatcher;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
+import org.eclipse.che.api.vfs.impl.file.event.detectors.ProjectTreeChangesDetector;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
 import org.eclipse.che.commons.lang.IoUtil;
 
@@ -42,6 +44,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import static org.mockito.Mockito.mock;
 
 /**
  * @author gazarenkov
@@ -72,6 +76,8 @@ public class WsAgentTestBase {
     protected ProjectHandlerRegistry projectHandlerRegistry;
 
     protected ProjectImporterRegistry importerRegistry;
+
+    protected ProjectTreeChangesDetector projectTreeChangesDetector;
 
     public void setUp() throws Exception {
 
@@ -117,8 +123,10 @@ public class WsAgentTestBase {
 
         TestWorkspaceHolder wsHolder = new  TestWorkspaceHolder();
 
+
         pm = new ProjectManager(vfsProvider, eventService, projectTypeRegistry, projectRegistry, projectHandlerRegistry,
-                                importerRegistry, fileWatcherNotificationHandler, fileTreeWatcher, wsHolder);
+                                importerRegistry, fileWatcherNotificationHandler, fileTreeWatcher, wsHolder,
+                                mock(ProjectTreeChangesDetector.class));
         pm.initWatcher();
     }
 
@@ -200,7 +208,7 @@ public class WsAgentTestBase {
         }
     }
 
-    protected static class PT3 extends ProjectTypeDef {
+    public class PT3 extends ProjectTypeDef {
 
         protected PT3() {
             super("pt3", "pt3", true, false);
@@ -242,23 +250,6 @@ public class WsAgentTestBase {
                 };
             }
         }
-
-        protected static class SrcGenerator implements CreateProjectHandler {
-
-            @Override
-            public void onCreateProject(FolderEntry baseFolder, Map<String, AttributeValue> attributes, Map<String, String> options)
-                    throws ForbiddenException, ConflictException, ServerException {
-
-                baseFolder.createFolder("file1");
-
-            }
-
-            @Override
-            public String getProjectType() {
-                return "pt3";
-            }
-        }
-
     }
 
     protected static class PT4NoGen extends ProjectTypeDef {

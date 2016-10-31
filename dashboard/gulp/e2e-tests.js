@@ -28,7 +28,7 @@ function runProtractor (done) {
   var params = process.argv;
   var args = params.length > 3 ? [params[3], params[4]] : [];
 
-  gulp.src(path.join(conf.paths.e2e, '/**/*.js'))
+  gulp.src(path.join(conf.paths.e2e, '/**/*.ts'))
     .pipe($.protractor.protractor({
       configFile: 'protractor.conf.js',
       args: args

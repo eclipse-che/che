@@ -12,9 +12,9 @@ package org.eclipse.che.ide.extension.machine.client.perspective.terminal.contai
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 
+import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.TerminalFactory;
-import org.eclipse.che.ide.extension.machine.client.machine.Machine;
-import org.eclipse.che.ide.extension.machine.client.machine.MachineStateEvent;
+import org.eclipse.che.ide.api.machine.events.MachineStateEvent;
 import org.eclipse.che.ide.extension.machine.client.perspective.terminal.TerminalPresenter;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,7 +40,7 @@ public class TerminalContainerTest {
     private TerminalFactory       terminalFactory;
 
     @Mock
-    private Machine           machineState;
+    private MachineEntity     machineState;
     @Mock
     private TerminalPresenter terminal;
     @Mock
