@@ -37,21 +37,21 @@ public class EnvironmentDeserializer extends JsonDeserializer<Map<String, String
     public Map<String, String> deserialize(JsonParser jsonParser, DeserializationContext ctxt) throws IOException, JsonProcessingException {
         Object environment = jsonParser.readValueAs(Object.class);
 
-        try {
-            /* Parse dictionary in view of:
-               "environment:
-                 key1: value1
-                 key2: value2"
-            */
-            if (environment instanceof Map) {
-                return (Map<String, String>) environment;
-            }
+        /* Parse dictionary in view of:
+           "environment:
+             key1: value1
+             key2: value2"
+        */
+        if (environment instanceof Map) {
+            return (Map<String, String>) environment;
+        }
 
-            /* Parse array in view of:
-               "environment:
-                 - key1=value1
-                 - key2=value2"
-            */
+        /* Parse array in view of:
+           "environment:
+             - key1=value1
+             - key2=value2"
+        */
+        try {
             if (environment instanceof List) {
                 // convert array to Map<String, String>{ key1: value1, key2: value2 }
                 Map<String, String> map = new HashMap<>();
