@@ -99,7 +99,7 @@ public class CommandProducerActionManager implements MachineStateEvent.Handler, 
 
         commandActionsPopUpGroup = new DefaultActionGroup("Commands", true, actionManager);
         actionManager.registerAction("commandActionsPopUpGroup", commandActionsPopUpGroup);
-        commandActionsPopUpGroup.getTemplatePresentation().setSVGResource(resources.execute());
+        commandActionsPopUpGroup.getTemplatePresentation().setSVGResource(resources.compile());
         commandActionsPopUpGroup.getTemplatePresentation().setDescription("Execute command");
 
         DefaultActionGroup mainContextMenu = (DefaultActionGroup)actionManager.getAction(GROUP_MAIN_CONTEXT_MENU);
