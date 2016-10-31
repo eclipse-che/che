@@ -279,8 +279,12 @@ export class CreateProjectController {
    * @returns {boolean|FormController.$valid|*|ngModel.NgModelController.$valid|context.ctrl.$valid|Ic.$valid}
    */
   checkValidFormState() {
-    // check project information form and selected tab form
+    // check workspace resource form
+    if (this.workspaceResourceForm && this.workspaceResourceForm.$invalid) {
+      return false;
+    }
 
+    // check project information form and selected tab form
     if (this.selectSourceOption === 'select-source-new') {
       return this.projectInformationForm && this.projectInformationForm.$valid;
     } else if (this.selectSourceOption === 'select-source-existing') {
@@ -299,6 +303,9 @@ export class CreateProjectController {
     this.projectInformationForm = form;
   }
 
+  setWorkspaceResourceForm(form) {
+    this.workspaceResourceForm = form;
+  }
 
   /**
    * Sets the form for a given mode
@@ -852,7 +859,7 @@ export class CreateProjectController {
       this.createProjectSvc.setWorkspaceOfProject(this.workspaceSelected.config.name);
       this.createProjectSvc.setWorkspaceNamespace(this.workspaceSelected.namespace);
       this.checkExistingWorkspaceState(this.workspaceSelected);
-    } else {
+    } else if (this.workspaceResource === 'from-stack') {
       // create workspace based on a stack
       switch (this.stackTab) {
         case 'ready-to-go':
@@ -861,17 +868,23 @@ export class CreateProjectController {
         case 'stack-library':
           source = this.getSourceFromStack(this.stackLibraryUser);
           break;
-        case 'custom-stack':
+        case 'stack-import':
           source.type = 'environment';
           source.format = this.recipeFormat;
           if (this.recipeUrl && this.recipeUrl.length > 0) {
             source.location = this.recipeUrl;
-          } else {
-            source.content = this.recipeScript;
           }
           break;
+        case 'stack-authoring':
+          source.type = 'environment';
+          source.format = this.recipeFormat;
+          source.content = this.recipeScript;
+          break;
       }
-      this.createWorkspace(source);
+      this.createWorkspaceFromStack(source);
+    } else {
+      // create workspace based on config
+      this.createWorkspace(this.stack.workspaceConfig);
     }
   }
 
@@ -960,7 +973,7 @@ export class CreateProjectController {
    *
    * @param source machine source
    */
-  createWorkspace(source) {
+  createWorkspaceFromStack(source: any) {
     this.createProjectSvc.setWorkspaceOfProject(this.workspaceName);
 
     let attributes = this.stack ? {stackId: this.stack.id} : {};
@@ -968,6 +981,15 @@ export class CreateProjectController {
     this.setEnvironment(stackWorkspaceConfig);
     let workspaceConfig = this.cheAPI.getWorkspace().formWorkspaceConfig(stackWorkspaceConfig, this.workspaceName, source, this.workspaceRam);
 
+    this.createWorkspace(workspaceConfig, attributes);
+  }
+
+  /**
+   * Create new workspace with workspace config
+   *
+   * @param workspaceConfig
+   */
+  createWorkspace(workspaceConfig: any, attributes?: any) {
     //TODO: no account in che ? it's null when testing on localhost
     let creationPromise = this.cheAPI.getWorkspace().createWorkspaceFromConfig(null, workspaceConfig, attributes);
     creationPromise.then((workspace) => {
@@ -1099,7 +1121,7 @@ export class CreateProjectController {
   }
 
   setStackTab(stackTab) {
-    this.isCustomStack = stackTab === 'custom-stack';
+    this.isCustomStack = (stackTab === 'stack-import' || stackTab === 'stack-authoring');
     this.stackTab = stackTab;
   }
 
@@ -1135,6 +1157,22 @@ export class CreateProjectController {
   }
 
   /**
+   * Update creation flow state when workspace resource changes
+   */
+  workspaceResourceOnChange() {
+    this.workspaceConfig = undefined;
+    if (this.workspaceResource === 'existing-workspace') {
+      this.updateWorkspaceStatus(true);
+    } else {
+      if (this.workspaceResource === 'from-config') {
+        this.stack = null;
+        this.currentStackTags = null;
+      }
+      this.updateWorkspaceStatus(false);
+    }
+  }
+
+  /**
    * Use of an existing stack
    * @param stack the stack to use
    */
@@ -1148,15 +1186,75 @@ export class CreateProjectController {
       this.stackLibraryUser = angular.copy(stack);
     }
     this.updateCurrentStack(stack);
-    this.updateWorkspaceStatus(false);
+  }
+
+  /**
+   * Callback when workspace config in editor is changed
+   *
+   * @param config {Object} workspace config
+   */
+  updateWorkspaceConfigImport(config) {
+    this.isWorkspaceConfig = true;
+    this.workspaceConfig = angular.copy(config);
+    this.stack = {
+      id: 'config-import',
+      workspaceConfig: this.workspaceConfig
+    };
+    this.workspaceName = this.workspaceConfig.name;
+
+    delete this.stackMachines[this.stack.id];
+  }
+
+  /**
+   * Changes workspace name in workspace config provided by user
+   *
+   * @param form {Object}
+   */
+  workspaceNameChange(form) {
+    if (!this.isWorkspaceConfig || form.$invalid || !this.workspaceConfig) {
+      return;
+    }
+
+    this.workspaceConfig.name = this.workspaceName;
+  }
+
+  /**
+   * Changes workspace RAM in workspace config provided by user
+   *
+   * @param machineName {string}
+   * @param machineRam {number}
+   */
+  workspaceRamChange(machineName, machineRam) {
+    if (!this.isWorkspaceConfig || !this.workspaceConfig) {
+      return;
+    }
+
+    try {
+      let config = this.workspaceConfig,
+          machines = config.environments[config.defaultEnv].machines;
+      if (machines[machineName]) {
+        machines[machineName].attributes.memoryLimitBytes = machineRam;
+      } else {
+        machines[machineName] = {
+          attributes: {
+            memoryLimitBytes: machineRam
+          }
+        };
+      }
+    } catch (e) {
+      this.$log.error('Cannot set memory limit for "' + machineName + '"', e);
+    }
+
   }
 
   updateWorkspaceStatus(isExistingWorkspace) {
     if (isExistingWorkspace) {
       this.stackLibraryOption = 'existing-workspace';
+      this.existingWorkspaceName = this.workspaceSelected.config.name;
     } else {
       this.stackLibraryOption = 'new-workspace';
       this.generateWorkspaceName();
+      this.existingWorkspaceName = '';
     }
     this.$rootScope.$broadcast('chePanel:disabled', {id: 'create-project-workspace', disabled: isExistingWorkspace});
   }
