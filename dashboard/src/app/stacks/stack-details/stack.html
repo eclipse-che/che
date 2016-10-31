@@ -1,23 +1,37 @@
-<che-toolbar che-title="{{stackController.stack ? stackController.stack.name : stackController.stackId}}"
-             che-title-icons-controller="stackController"
-             che-breadcrumb-title="All stacks"
-             che-breadcrumb-href="#/stacks"
-             che-subheader-title="{{stackController.stack.type}}">
-</che-toolbar>
-<md-progress-linear md-mode="indeterminate" ng-show="stackController.loading"></md-progress-linear>
+<!--
 
-<md-content md-scroll-y flex class="stack-content">
+    Copyright (c) 2015 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
 
-  <!-- Name -->
-  <che-label-container che-label-name="Name">
-    <div layout="column" class="stack-details-input">
-      <ng-form flex layout="column" name="stackForm">
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<ng-form flex layout="column" name="stackForm">
+  <che-toolbar che-title="{{stackController.stack ? stackController.stack.name : stackController.stackId}}"
+               che-button-name="Save"
+               che-button-disabled="!stackController.isStackChange || !stackForm.$valid"
+               che-button-on-click="stackController.saveStack()"
+               che-title-icons-controller="stackController"
+               che-breadcrumb-title="All stacks"
+               che-breadcrumb-href="#/stacks"
+               che-subheader-title="{{stackController.stack.type}}">
+  </che-toolbar>
+  <md-progress-linear md-mode="indeterminate" ng-show="stackController.loading"></md-progress-linear>
+  <md-content md-scroll-y flex class="stack-content" ng-if="!stackController.loading">
+    <!-- Name -->
+    <che-label-container che-label-name="Name">
+      <div layout="column" class="stack-details-input">
         <che-input che-form="stackForm"
                    che-name="name"
+                   aria-label="Name of the stack"
                    che-place-holder="Name of the stack"
                    ng-model="stackController.stackName"
-                   unique-stack-name="stackController.stack.name"
-                   ng-change="stackController.updateStack(stackForm.$valid)"
+                   custom-validator="stackController.isUniqueName($value)"
+                   ng-change="stackController.updateStackName(stackForm.$valid)"
                    required
                    ng-maxlength="128"
                    ng-pattern="/^[A-Za-z0-9_\s\-\.\+]+$/">
@@ -26,65 +40,95 @@
           </div>
           <div ng-message="maxlength">The name has to be less than 128 characters long.</div>
           <div ng-message="md-maxlength">The name has to be less than 128 characters long.</div>
-          <div ng-message="uniqueStackName">This stack name is already used.</div>
+          <div ng-message="customValidator">This stack name is already used.</div>
         </che-input>
-      </ng-form>
-    </div>
-  </che-label-container>
-
-  <!-- Configuration -->
-  <che-label-container che-label-name="Configuration">
-    <div class="stack-editor">
-      <textarea ui-codemirror="stackController.editorOptions"
-                ng-model="stackController.stackContent"
-                aria-label="Stack configuration editor">
-      </textarea>
-      <a target="_blank" ng-href="https://eclipse-che.readme.io/docs/stacks">Docs: Stack Structure</a>
-    </div>
-    <div layout="row" layout-align="start center" class="stack-editor-footer">
-      <che-button-primary che-button-title="Save"
-                          ng-click="stackController.saveStack()"></che-button-primary>
-    </div>
-  </che-label-container>
-
-  <!-- stack's tags -->
-  <che-label-container class="stack-tags-label"
-                       che-label-name="Tags"
-                       che-label-description="Tags define the templates available for workspace">
-    <div layout="column" flex="100" class="stack-tags">
-      <md-chips flex name="stack's tags"
-                ng-model="stackController.stack.tags"
-                md-transform-chip="stackController.handleTagAdding($chip)"
-                md-on-add="stackController.updateEditorContent()"
-                md-on-remove="stackController.updateEditorContent()"
-                secondary-placeholder="Enter stack's tags">
-        <md-chip-template>
-          <div class="stack-library-text">{{$chip | uppercase}}</div>
-          <div class="stack-library-btn">
-            <i class="fa fa-close"></i>
-          </div>
-        </md-chip-template>
-      </md-chips>
-      <div flex>
-        <div class="stack-tags-reset" data-ng-click="stackController.stack.tags.length = 0">Reset</div>
       </div>
-    </div>
-  </che-label-container>
+    </che-label-container>
+    <!-- stack's environments -->
+    <che-label-container che-label-name="Runtimes">
+      <div ng-repeat="(environmentName, environmentValue) in stackController.stack.workspaceConfig.environments">
+        <workspace-environments
+          environment-name="environmentName"
+          workspace-config="stackController.stack.workspaceConfig"
+          machines-view-status="stackController.machinesViewStatus"
+          environment-on-change="stackController.updateJsonFromStack()"></workspace-environments>
+      </div>
+    </che-label-container>
+    <!-- Commands -->
+    <che-label-container che-label-name="Commands"
+                         che-label-description="Commands define the commands available for workspace">
+      <list-commands commands-on-change="stackController.updateJsonFromStack()"
+                     commands="stackController.stack.workspaceConfig.commands"></list-commands>
+    </che-label-container>
+    <!-- Category -->
+    <che-label-container che-label-name="Category"
+                         che-label-description="Define the process for users in the workplace.">
+      <div layout="column">
+        <che-toggle ng-model="stackController.stack.scope" ng-change="stackController.updateJsonFromStack()"
+                    md-theme="default">
+          <che-toggle-button che-title="Ready-to-go" che-value="{{stackController.GENERAL_SCOPE}}"></che-toggle-button>
+          <che-toggle-button che-title="Advanced" che-value="{{stackController.ADVANCED_SCOPE}}"></che-toggle-button>
+        </che-toggle>
+      </div>
+    </che-label-container>
+    <!-- Components -->
+    <che-label-container che-label-name="Components"
+                         che-label-description="Components are listed in the stack's description for users.">
+      <list-components components-on-change="stackController.updateJsonFromStack()"
+                       components="stackController.stack.components"></list-components>
+    </che-label-container>
+    <!-- stack's tags -->
+    <che-label-container che-label-name="Tags"
+                         che-label-description="Associate the type of templates available when creating projects for this workspace.">
+      <div layout="column" flex="100" class="stack-tags">
+        <md-chips flex name="stack's tags"
+                  ng-model="stackController.stackTags"
+                  md-transform-chip="stackController.handleTagAdding($chip)"
+                  md-on-add="stackController.updateStackTags()"
+                  md-on-remove="stackController.updateStackTags()"
+                  secondary-placeholder="Enter stack's tags">
+          <md-chip-template>
+            <div class="stack-library-text">{{$chip | uppercase}}</div>
+            <div class="stack-library-btn">
+              <i class="fa fa-close"></i>
+            </div>
+          </md-chip-template>
+        </md-chips>
+        <div flex>
+          <div class="stack-tags-reset" data-ng-click="stackController.resetTags()">Reset</div>
+        </div>
+      </div>
+    </che-label-container>
+    <!-- Configuration -->
+    <che-label-container che-label-name="Raw Configuration"
+                         che-label-description="JSON definition of the stack.">
+      <che-show-area>
+        <div class="stack-editor">
+              <textarea class="stack-editor"
+                        ui-codemirror="stackController.editorOptions"
+                        ng-model="stackController.stackJson"
+                        ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 500, 'blur': 0 } }"
+                        ng-change="stackController.updateStackFromJson()"
+                        aria-label="Stack configuration editor">
+      </textarea>
+          <a target="_blank" ng-href="https://eclipse-che.readme.io/docs/stacks">Docs: Stack Structure</a>
+        </div>
+      </che-show-area>
+    </che-label-container>
+    <!-- Delete stack -->
+    <che-label-container class="stack-delete-label"
+                         ng-if="!stackController.isCreation"
+                         che-label-name="Delete stack"
+                         che-label-description="This is irreversible. This stack will not be available when creating a workspace.">
+      <che-button-danger che-button-title="Delete"
+                         ng-click="stackController.deleteStack()"></che-button-danger>
+    </che-label-container>
 
-  <!-- Delete stack -->
-  <che-label-container class="stack-delete-label"
-                       ng-if="!stackController.isCreation"
-                       che-label-name="Delete stack"
-                       che-label-description="This is irreversible. This stack will not be available when creating a workspace.">
-    <che-button-danger che-button-title="Delete"
-                       ng-click="stackController.deleteStack()"></che-button-danger>
-  </che-label-container>
-
-</md-content>
-
-
+  </md-content>
+  <workspace-edit-mode-overlay ng-show="stackController.isStackChange && stackForm.$valid"
+                               workspace-edit-mode-on-save="stackController.saveStack()"
+                               workspace-edit-mode-on-cancel="stackController.cancelStackChanges()"></workspace-edit-mode-overlay>
+</ng-form>
 <md-content ng-show="stackController.invalidStack">
   {{stackController.invalidStack}}
 </md-content>
-
-

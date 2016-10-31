@@ -9,24 +9,32 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {CheToggleController} from "./che-toggle.controller";
 
 /**
  * Defines a directive for the toggle button.
  * @author Florent Benoit
  */
 export class CheToggle {
+  scope: Object;
+  controllerAs: string;
+  templateUrl: string;
+  controller: string;
+  restrict: string;
+  require: string;
+  transclude: boolean;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor () {
-    this.restrict='E';
+  constructor() {
+    this.restrict = 'E';
     this.templateUrl = 'components/widget/toggle-button/che-toggle.html';
 
     this.transclude = true;
-    this.controller = 'CheToggleCtrl';
-    this.controllerAs = 'cheToggleCtrl';
+    this.controller = 'CheToggleController';
+    this.controllerAs = 'cheToggleController';
 
     // we require ngModel as we want to use it inside our directive
     this.require = 'ngModel';
@@ -39,9 +47,7 @@ export class CheToggle {
   /**
    * Keep reference to the model controller
    */
-  link($scope, element, attr, ngModelCtrl) {
-    $scope.setupModelController = ngModelCtrl;
+  link($scope: ng.IScope, element: ng.IAugmentedJQuery, attrs: ng.IAttributes, ngModelController: CheToggleController) {
+    ($scope as any).setupModelController = ngModelController;
   }
-
-
 }

@@ -14,9 +14,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
-import org.eclipse.che.api.core.model.machine.ServerConf;
 import org.eclipse.che.inject.CheBootstrap;
-import org.eclipse.che.plugin.docker.machine.ext.provider.WsAgentServerConfProvider;
 import org.eclipse.che.plugin.docker.machine.ext.provider.WsAgentVolumeProvider;
 
 /**
@@ -30,11 +28,6 @@ import org.eclipse.che.plugin.docker.machine.ext.provider.WsAgentVolumeProvider;
 public class DockerExtServerModule extends AbstractModule {
     @Override
     protected void configure() {
-        Multibinder<ServerConf> machineServers = Multibinder.newSetBinder(binder(),
-                                                                          ServerConf.class,
-                                                                          Names.named("machine.docker.dev_machine.machine_servers"));
-        machineServers.addBinding().toProvider(WsAgentServerConfProvider.class);
-
         Multibinder<String> volumesMultibinder = Multibinder.newSetBinder(binder(),
                                                                           String.class,
                                                                           Names.named("machine.docker.dev_machine.machine_volumes"));

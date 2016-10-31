@@ -28,7 +28,6 @@ export class EditPortDialogController {
 
     this.usedPorts = [];
 
-    this.updateInProgress = false;
     this.port = parseInt(this.servers[this.serverName].port, 10);
     this.protocol = this.servers[this.serverName].protocol;
 
@@ -59,11 +58,7 @@ export class EditPortDialogController {
    * Update port
    */
   updatePort() {
-    this.updateInProgress = true;
-
-    this.callbackController.updatePort(this.serverName, this.port, this.protocol).finally(() => {
-      this.updateInProgress = false;
-      this.hide();
-    });
+    this.callbackController.updatePort(this.serverName, this.port, this.protocol);
+    this.hide();
   }
 }

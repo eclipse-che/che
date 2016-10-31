@@ -62,7 +62,7 @@ public class UserManager {
     public UserManager(UserDao userDao,
                        ProfileDao profileDao,
                        PreferenceDao preferencesDao,
-                       @Named("che.account.reserved_names") String[] reservedNames) {
+                       @Named("che.auth.reserved_user_names") String[] reservedNames) {
         this.userDao = userDao;
         this.profileDao = profileDao;
         this.preferencesDao = preferencesDao;

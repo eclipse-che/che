@@ -74,7 +74,7 @@ public class DockerInstanceProvider implements InstanceProvider {
 
     @Inject
     public DockerInstanceProvider(DockerConnector docker,
-                                  @Named("machine.docker.snapshot_use_registry") boolean snapshotUseRegistry) throws IOException {
+                                  @Named("che.docker.registry_for_snapshots") boolean snapshotUseRegistry) throws IOException {
         this.docker = docker;
         this.snapshotUseRegistry = snapshotUseRegistry;
     }

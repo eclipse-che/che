@@ -55,8 +55,8 @@ public class LocalDockerInstanceRuntimeInfo extends DockerInstanceRuntimeInfo {
                                           @Assisted("externalhost") @Nullable String containerExternalHostname,
                                           @Assisted("internalhost") String containerInternalHostname,
                                           @Assisted MachineConfig machineConfig,
-                                          @Nullable @Named("machine.docker.local_node_host") String dockerNodeInternalHostname,
-                                          @Nullable @Named("machine.docker.local_node_host.external") String dockerNodeExternalHostname,
+                                          @Nullable @Named("che.docker.ip") String dockerNodeInternalHostname,
+                                          @Nullable @Named("che.docker.ip.external") String dockerNodeExternalHostname,
                                           @Named("machine.docker.dev_machine.machine_servers") Set<ServerConf> devMachineServers,
                                           @Named("machine.docker.machine_servers") Set<ServerConf> allMachinesServers) {
 

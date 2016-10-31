@@ -50,6 +50,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 
 /**
@@ -214,9 +215,8 @@ public class CheBootstrap extends EverrestGuiceContextListener {
 
         @Override
         protected void configure() {
-            Iterable<Map.Entry<String, Object>> cheProperties = System.getProperties().entrySet().stream()
-                                                                      .filter(new PropertyNamePrefixPredicate<>("che."))
-                                                                      .map(new PropertyNamePrefixRemover<>(4))
+            Iterable<Map.Entry<Object, Object>> cheProperties = System.getProperties().entrySet().stream()
+                                                                      .filter(new PropertyNamePrefixPredicate<>("che.", "codenvy."))
                                                                       .collect(toList());
             bindProperties(null, cheProperties);
         }
@@ -230,8 +230,7 @@ public class CheBootstrap extends EverrestGuiceContextListener {
         @Override
         protected void configure() {
             Iterable<Map.Entry<String, String>> cheProperties = System.getenv().entrySet().stream()
-                                                                      .filter(new PropertyNamePrefixPredicate<>("CHE_"))
-                                                                      .map(new PropertyNamePrefixRemover<>(4))
+                                                                      .filter(new PropertyNamePrefixPredicate<>("CHE_", "CODENVY_"))
                                                                       .map(new EnvironmentVariableToSystemPropertyFormatNameConverter())
                                                                       .collect(toList());
             bindProperties(null, cheProperties);
@@ -239,15 +238,20 @@ public class CheBootstrap extends EverrestGuiceContextListener {
     }
 
     static class PropertyNamePrefixPredicate<K, V> implements Predicate<Map.Entry<K, V>> {
-        final String prefix;
+        final String[] prefixes;
 
-        PropertyNamePrefixPredicate(String prefix) {
-            this.prefix = prefix;
+        PropertyNamePrefixPredicate(String... prefix) {
+            this.prefixes = prefix;
         }
 
         @Override
         public boolean test(Map.Entry<K, V> entry) {
-            return ((String)entry.getKey()).startsWith(prefix);
+            for (String prefix : prefixes) {
+                if (((String)entry.getKey()).startsWith(prefix)) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 
@@ -366,14 +370,14 @@ public class CheBootstrap extends EverrestGuiceContextListener {
                 bind(String.class).annotatedWith(Names.named(key)).toProvider(Providers.<String>of(null));
                 if (aliasesForName != null) {
                     for (String alias : aliasesForName) {
-                        bind(String.class).annotatedWith(Names.named(alias)).toProvider(Providers.<String>of(null));
+                        bind(String.class).annotatedWith(Names.named(prefix == null ? alias : prefix + alias)).toProvider(Providers.<String>of(null));
                     }
                 }
             } else {
                 bindConstant().annotatedWith(Names.named(key)).to(value);
                 if (aliasesForName != null) {
                     for (String alias : aliasesForName) {
-                        bindConstant().annotatedWith(Names.named(alias)).to(value);
+                        bindConstant().annotatedWith(Names.named(prefix == null ? alias : prefix + alias)).to(value);
                     }
                 }
             }

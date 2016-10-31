@@ -111,7 +111,7 @@ public final class DtoConverter {
                        .withRef(server.getRef())
                        .withProtocol(server.getProtocol())
                        .withUrl(server.getUrl())
-                       .withProperties(asDto(server.getProperties()));
+                       .withProperties(server.getProperties() == null ? null : asDto(server.getProperties()));
     }
 
     /**
