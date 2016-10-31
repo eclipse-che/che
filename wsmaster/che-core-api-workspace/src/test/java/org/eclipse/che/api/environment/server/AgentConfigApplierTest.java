@@ -84,10 +84,10 @@ public class AgentConfigApplierTest {
         final ServerConf2 serverConf1 = mock(ServerConf2.class);
         when(serverConf1.getPort()).thenReturn("1111/udp");
         when(serverConf1.getProtocol()).thenReturn("http");
-        when(serverConf1.getProperties()).thenReturn(ImmutableMap.of("ref", "a", "path", "b"));
+        when(serverConf1.getProperties()).thenReturn(ImmutableMap.of("path", "b"));
 
         when(sorter.sort(any())).thenReturn(singletonList(AgentKeyImpl.parse("agent1")));
-        when(agent1.getServers()).thenAnswer(invocation -> singletonList(serverConf1));
+        when(agent1.getServers()).thenAnswer(invocation -> singletonMap("a", serverConf1));
         CheServiceImpl service = new CheServiceImpl();
 
         agentConfigApplier.modify(service, singletonList("agent1"));
@@ -109,8 +109,8 @@ public class AgentConfigApplierTest {
         when(sorter.sort(any())).thenReturn(asList(AgentKeyImpl.parse("agent1"),
                                                    AgentKeyImpl.parse("agent2"),
                                                    AgentKeyImpl.parse("agent3")));
-        when(agent1.getServers()).thenAnswer(invocation -> singletonList(serverConf1));
-        when(agent2.getServers()).thenAnswer(invocation -> singletonList(serverConf2));
+        when(agent1.getServers()).thenAnswer(invocation -> singletonMap("a", serverConf1));
+        when(agent2.getServers()).thenAnswer(invocation -> singletonMap("b", serverConf2));
         when(agent3.getServers()).thenReturn(emptyMap());
         CheServiceImpl service = new CheServiceImpl();
 
