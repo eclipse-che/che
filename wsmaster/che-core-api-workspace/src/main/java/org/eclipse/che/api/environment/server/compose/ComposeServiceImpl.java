@@ -11,6 +11,8 @@
 package org.eclipse.che.api.environment.server.compose;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import org.eclipse.che.api.environment.server.compose.deserializer.EnvironmentDeserializer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,6 +33,7 @@ public class ComposeServiceImpl {
     private String              image;
     @JsonProperty("depends_on")
     private List<String>        dependsOn;
+    @JsonDeserialize(using = EnvironmentDeserializer.class)
     private Map<String, String> environment;
     private List<String>        expose;
     private List<String>        ports;
