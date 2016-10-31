@@ -37,7 +37,6 @@ import java.util.Map;
 import static org.mockito.Mockito.RETURNS_MOCKS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * Tests that {@link RemotePreferenceDao} uses correct methods of {@link ProfileService}.
