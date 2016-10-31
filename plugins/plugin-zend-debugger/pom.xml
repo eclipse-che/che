@@ -19,7 +19,7 @@
     </parent>
     <artifactId>che-plugin-zend-debugger-parent</artifactId>
     <packaging>pom</packaging>
-    <name>Che Plugin :: Zend Debugger :: Parent</name>
+    <name>Che Plugin :: PHP :: Zend Debugger Parent</name>
     <modules>
         <module>che-plugin-zend-debugger-server</module>
         <module>che-plugin-zend-debugger-ide</module>
