@@ -31,13 +31,14 @@ import org.eclipse.che.ide.ext.java.testing.core.shared.TestResult;
 import org.eclipse.che.ide.ext.java.testing.testng.client.TestNGLocalizationConstant;
 import org.eclipse.che.ide.ext.java.testing.testng.client.TestNGResources;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.*;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 
 /**
  *

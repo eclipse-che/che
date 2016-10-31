@@ -31,7 +31,9 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import static com.jayway.restassured.RestAssured.given;
-import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.anyMapOf;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.testng.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertNotEquals;

@@ -33,7 +33,6 @@ import org.eclipse.che.ide.ext.java.testing.junit.client.JUnitTestLocalizationCo
 import org.eclipse.che.ide.ext.java.testing.junit.client.JUnitTestResources;
 import org.eclipse.che.ide.resources.tree.FileNode;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.ide.util.loging.Log;
 
 import javax.validation.constraints.NotNull;
 import java.util.Arrays;
@@ -41,7 +40,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.*;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 
