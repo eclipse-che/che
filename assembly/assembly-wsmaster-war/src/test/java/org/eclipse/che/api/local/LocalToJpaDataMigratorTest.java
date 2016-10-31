@@ -105,7 +105,7 @@ public class LocalToJpaDataMigratorTest {
         injector = Guice.createInjector(Stage.PRODUCTION, new AbstractModule() {
             @Override
             protected void configure() {
-                bindConstant().annotatedWith(Names.named("che.conf.storage")).to(workingDir.toString());
+                bindConstant().annotatedWith(Names.named("che.database")).to(workingDir.toString());
 
                 bind(JpaInitializer.class).asEagerSingleton();
                 bind(EntityListenerInjectionManagerInitializer.class).asEagerSingleton();

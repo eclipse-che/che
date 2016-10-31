@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.ide.core;
 
+import elemental.json.Json;
+import elemental.json.JsonFactory;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
@@ -31,6 +34,7 @@ import org.eclipse.che.ide.api.auth.OAuthServiceClient;
 import org.eclipse.che.ide.api.auth.OAuthServiceClientImpl;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.component.Component;
+import org.eclipse.che.ide.api.component.StateComponent;
 import org.eclipse.che.ide.api.component.WsAgentComponent;
 import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
 import org.eclipse.che.ide.api.data.tree.settings.SettingsProvider;
@@ -74,8 +78,8 @@ import org.eclipse.che.ide.api.parts.PartStack;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.PartStackView;
 import org.eclipse.che.ide.api.parts.Perspective;
+import org.eclipse.che.ide.api.parts.PerspectiveView;
 import org.eclipse.che.ide.api.parts.ProjectExplorerPart;
-import org.eclipse.che.ide.api.parts.WorkBenchView;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.preferences.PreferencePagePresenter;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
@@ -296,6 +300,8 @@ import org.eclipse.che.ide.workspace.perspectives.general.PerspectiveViewImpl;
 import org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective;
 import org.eclipse.che.ide.workspace.start.workspacewidget.WorkspaceWidget;
 import org.eclipse.che.ide.workspace.start.workspacewidget.WorkspaceWidgetImpl;
+import org.eclipse.che.providers.DynaProvider;
+import org.eclipse.che.providers.DynaProviderImpl;
 
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
@@ -342,6 +348,8 @@ public class CoreGinModule extends AbstractGinModule {
         bind(ThemeAgent.class).to(ThemeAgentImpl.class).in(Singleton.class);
         bind(FileTypeRegistry.class).to(FileTypeRegistryImpl.class).in(Singleton.class);
 
+        bind(DynaProvider.class).to(DynaProviderImpl.class);
+
         GinMultibinder.newSetBinder(binder(), OAuth2Authenticator.class).addBinding().to(DefaultOAuthAuthenticatorImpl.class);
 
         configureComponents();
@@ -356,6 +364,10 @@ public class CoreGinModule extends AbstractGinModule {
         configureJsonRpc();
         configureWebSocket();
         configureClientServerEventService();
+
+        GinMapBinder<String, StateComponent> stateComponents = GinMapBinder.newMapBinder(binder(), String.class, StateComponent.class);
+        stateComponents.addBinding("workspace").to(WorkspacePresenter.class);
+        stateComponents.addBinding("editor").to(EditorAgentImpl.class);
 
         GinMultibinder<PersistenceComponent> persistenceComponentsMultibinder =
                 GinMultibinder.newSetBinder(binder(), PersistenceComponent.class);
@@ -530,7 +542,7 @@ public class CoreGinModule extends AbstractGinModule {
         bind(PartStackUIResources.class).to(Resources.class).in(Singleton.class);
         // Views
         bind(WorkspaceView.class).to(WorkspaceViewImpl.class).in(Singleton.class);
-        bind(WorkBenchView.class).to(PerspectiveViewImpl.class).in(Singleton.class);
+        bind(PerspectiveView.class).to(PerspectiveViewImpl.class);
         bind(MainMenuView.class).to(MainMenuViewImpl.class).in(Singleton.class);
         bind(StatusPanelGroupView.class).to(StatusPanelGroupViewImpl.class).in(Singleton.class);
 
@@ -629,5 +641,18 @@ public class CoreGinModule extends AbstractGinModule {
     @Singleton
     protected PartStackEventHandler providePartStackEventHandler(FocusManager partAgentPresenter) {
         return partAgentPresenter.getPartStackHandler();
+    }
+
+    @Provides
+    @Singleton
+    @Named("defaultPerspectiveId")
+    protected String defaultPerspectiveId() {
+        return PROJECT_PERSPECTIVE_ID;
+    }
+
+    @Provides
+    @Singleton
+    protected JsonFactory provideJsonFactory() {
+        return Json.instance();
     }
 }

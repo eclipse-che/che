@@ -175,11 +175,11 @@ public class CheBootstrapTest {
         systemPropertiesHelper.property(CHE_LOCAL_CONF_DIR, userCongDir.getAbsolutePath());
 
         Properties cheProperties = new Properties();
-        cheProperties.put("some.name", "che_value");
+        cheProperties.put("che.some.name", "che_value");
         writePropertiesFile(che, "che.properties", cheProperties);
 
         Properties userProperties = new Properties();
-        userProperties.put("some.name", "user_value");
+        userProperties.put("che.some.name", "user_value");
         writePropertiesFile(userCongDir, "user.properties", userProperties);
 
         ModuleScanner.modules.add(binder -> binder.bind(TestConfOverrideComponent.class));
@@ -195,12 +195,12 @@ public class CheBootstrapTest {
     @Test
     public void system_properties_prefixed_with_che_dot_override_user_specified_and_che_properties() throws Exception {
         Properties cheProperties = new Properties();
-        cheProperties.put("some.name", "che_value");
-        cheProperties.put("some.other.name", "NULL");
+        cheProperties.put("che.some.name", "che_value");
+        cheProperties.put("che.some.other.name", "NULL");
         writePropertiesFile(che, "che.properties", cheProperties);
 
         Properties userProperties = new Properties();
-        userProperties.put("some.name", "user_value");
+        userProperties.put("che.some.name", "user_value");
         writePropertiesFile(userCongDir, "user.properties", userProperties);
 
         systemPropertiesHelper.property("che.some.name", "che_dot_system_property_value");
@@ -218,12 +218,12 @@ public class CheBootstrapTest {
     @Test
     public void environment_variables_prefixed_with_che_underscore_override_che_dot_prefixed_system_and_user_specified_and_che_properties() throws Exception {
         Properties cheProperties = new Properties();
-        cheProperties.put("some.other.name", "che_value");
-        cheProperties.put("some.name", "NULL");
+        cheProperties.put("che.some.other.name", "che_value");
+        cheProperties.put("che.some.name", "NULL");
         writePropertiesFile(che, "che.properties", cheProperties);
 
         Properties userProperties = new Properties();
-        userProperties.put("some.other.name", "user_value");
+        userProperties.put("che.some.other.name", "user_value");
         writePropertiesFile(userCongDir, "user.properties", userProperties);
 
         systemPropertiesHelper.property("che.some.other.name", "che_dot_system_property_value");
@@ -245,7 +245,7 @@ public class CheBootstrapTest {
         writePropertiesFile(che, "che.properties", cheProperties);
 
         Properties aliases = new Properties();
-        aliases.put("very.new.some.name", "new.some.name, some.name");
+        aliases.put("very.new.some.name", "new.some.name, che.some.name");
         writePropertiesFile(che.getParentFile(), PROPERTIES_ALIASES_CONFIG_FILE, aliases);
 
         ModuleScanner.modules.add(binder -> binder.bind(TestConfAliasComponent.class));
@@ -385,19 +385,19 @@ public class CheBootstrapTest {
     }
 
     static class TestConfOverrideComponent {
-        @Named("some.name")
+        @Named("che.some.name")
         @Inject
         @Nullable
         String string;
 
-        @Named("some.other.name")
+        @Named("che.some.other.name")
         @Inject
         @Nullable
         String otherString;
     }
 
     static class TestConfAliasComponent {
-        @Named("some.name")
+        @Named("che.some.name")
         @Inject
         String string;
 

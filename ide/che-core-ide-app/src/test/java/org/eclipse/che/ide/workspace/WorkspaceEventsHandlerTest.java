@@ -307,7 +307,6 @@ public class WorkspaceEventsHandlerTest {
         verify(workspacesPromise).then(workspacesCaptor.capture());
         workspacesCaptor.getValue().apply(workspaces);
 
-        verify(messageBus, times(4)).unsubscribe(anyString(), (MessageHandler)anyObject());
         verify(notificationManager).notify(anyString(), eq(StatusNotification.Status.FAIL), eq(FLOAT_MODE));
 
         verify(loader).setError(eq(LoaderPresenter.Phase.STARTING_WORKSPACE_RUNTIME));
@@ -323,7 +322,6 @@ public class WorkspaceEventsHandlerTest {
         workspaceEventsHandler.trackWorkspaceEvents(workspace, callback);
         workspaceEventsHandler.workspaceStatusSubscriptionHandler.onMessageReceived(workspaceStatusEvent);
 
-        verify(messageBus, times(4)).unsubscribe(anyString(), (MessageHandler)anyObject());
         verify(eventBus).fireEvent(Matchers.<WorkspaceStoppedEvent>anyObject());
     }
 

@@ -24,7 +24,7 @@ public class HttpProxyEnvVariableProvider implements Provider<String> {
     private static final String HTTP_PROXY = "http_proxy=";
 
     @Inject
-    @Named("http.proxy")
+    @Named("che.workspace.http_proxy")
     private String httpProxy;
 
     @Override

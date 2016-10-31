@@ -34,6 +34,7 @@ import org.eclipse.che.ide.api.parts.Perspective;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.extension.machine.client.actions.CreateMachineAction;
 import org.eclipse.che.ide.extension.machine.client.actions.CreateSnapshotAction;
 import org.eclipse.che.ide.extension.machine.client.actions.DestroyMachineAction;
@@ -52,6 +53,7 @@ import org.eclipse.che.ide.extension.machine.client.processes.actions.StopProces
 import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.extension.machine.client.targets.EditTargetsAction;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
+import org.eclipse.che.ide.statepersistance.AppStateManager;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
 
 import javax.inject.Named;
@@ -82,7 +84,8 @@ public class MachineExtension {
     public static final String GROUP_MACHINES_DROPDOWN = "MachinesSelector";
     public static final String GROUP_MACHINES_LIST     = "MachinesListGroup";
 
-    private final PerspectiveManager perspectiveManager;
+    private final PerspectiveManager        perspectiveManager;
+    private final Provider<AppStateManager> appStateManagerProvider;
 
     /**
      * Controls central toolbar action group visibility. Use for example next snippet:
@@ -103,8 +106,10 @@ public class MachineExtension {
                             final Provider<ServerPortProvider> machinePortProvider,
                             final PerspectiveManager perspectiveManager,
                             final Provider<MachineStatusHandler> machineStatusHandlerProvider,
-                            final ProjectExplorerPresenter projectExplorerPresenter) {
+                            final ProjectExplorerPresenter projectExplorerPresenter,
+                            final Provider<AppStateManager> appStateManagerProvider) {
         this.perspectiveManager = perspectiveManager;
+        this.appStateManagerProvider = appStateManagerProvider;
 
         machineResources.getCss().ensureInjected();
         machineStatusHandlerProvider.get();
@@ -126,8 +131,9 @@ public class MachineExtension {
                     });
                     workspaceAgent.openPart(processesPanelPresenter, PartStackType.INFORMATION);
                 }
-
-                workspaceAgent.setActivePart(projectExplorerPresenter);
+                if (!appStateManagerProvider.get().hasStateForWorkspace(appContext.getWorkspaceId())) {
+                    workspaceAgent.setActivePart(projectExplorerPresenter);
+                }
             }
 
             @Override
@@ -139,6 +145,20 @@ public class MachineExtension {
             @Override
             public void onWorkspaceStarting(WorkspaceStartingEvent event) {
                 maximizeTerminal();
+            }
+        });
+
+        eventBus.addHandler(WorkspaceStoppedEvent.TYPE, new WorkspaceStoppedEvent.Handler() {
+            @Override
+            public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
+                Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+                    @Override
+                    public void execute() {
+                        workspaceAgent.setActivePart(projectExplorerPresenter);
+                        processesPanelPresenter.selectDevMachine();
+                        maximizeTerminal();
+                    }
+                });
             }
         });
 

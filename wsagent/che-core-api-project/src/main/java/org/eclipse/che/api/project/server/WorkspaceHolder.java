@@ -41,7 +41,7 @@ public class WorkspaceHolder extends WorkspaceProjectsSyncer {
     private HttpJsonRequestFactory httpJsonRequestFactory;
 
     @Inject
-    public WorkspaceHolder(@Named("api.endpoint") String apiEndpoint,
+    public WorkspaceHolder(@Named("che.api") String apiEndpoint,
                            @Named("env.CHE_WORKSPACE_ID") String workspaceId,
                            HttpJsonRequestFactory httpJsonRequestFactory) throws ServerException {
 

@@ -33,8 +33,8 @@ public class WsMasterAnalyticsAddresser {
             final URL url = new URL("https://install.codenvycorp.com/che/init/server");
             connection = (HttpsURLConnection)url.openConnection();
             connection.getResponseCode();
-        } catch (IOException e) {
-            LOG.error("Failed to send master analytics", e);
+        } catch (Exception e) {
+            LOG.debug("Failed to send master analytics", e);
         } finally {
             if (connection != null) {
                 connection.disconnect();

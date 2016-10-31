@@ -31,7 +31,7 @@
     <che-label-container>
       <div layout="row">
         <che-button-primary che-button-title="Add"
-                            ng-disabled="envVariableForm.$invalid || addVariableDialogController.updateInProgress"
+                            ng-disabled="envVariableForm.$invalid"
                             ng-click="addVariableDialogController.addVariable()"></che-button-primary>
         <che-button-notice che-button-title="Cancel"
                            ng-click="addVariableDialogController.hide()"
