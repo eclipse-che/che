@@ -229,7 +229,7 @@ responsible_shutdown() {
   echo ""
   echo "Received SIGTERM"
   "${CHE_HOME}"/bin/che.sh stop
-  return 2;
+  exit;
 }
 
 # setup handlers
