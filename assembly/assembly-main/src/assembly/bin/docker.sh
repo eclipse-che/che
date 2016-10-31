@@ -83,7 +83,7 @@ init() {
   # Update the provided che.properties with the location of the /data mounts
   sed -i "/che.workspace.storage/c\che.workspace.storage=${CHE_DATA_HOST}/workspaces" $CHE_LOCAL_CONF_DIR/che.properties
   sed -i "/che.database/c\che.database=/data/storage" $CHE_LOCAL_CONF_DIR/che.properties
-  sed -i "/machine.server.ext.archive/c\machine.server.ext.archive=${CHE_DATA_HOST}/lib/ws-agent.tar.gz" $CHE_LOCAL_CONF_DIR/che.properties
+  sed -i "/che.workspace.agent.dev/c\che.workspace.agent.dev=${CHE_DATA_HOST}/lib/ws-agent.tar.gz" $CHE_LOCAL_CONF_DIR/che.properties
   sed -i "/che.workspace.terminal_linux_amd64/c\che.workspace.terminal_linux_amd64=${CHE_DATA_HOST}/lib/linux_amd64/terminal" $CHE_LOCAL_CONF_DIR/che.properties
   sed -i "/che.workspace.terminal_linux_arm7/c\che.workspace.terminal_linux_arm7=${CHE_DATA_HOST}/lib/linux_arm7/terminal" $CHE_LOCAL_CONF_DIR/che.properties
 
