@@ -17,12 +17,13 @@ pid=0
 check_docker() {
   if [ ! -S /var/run/docker.sock ]; then
     echo "Docker socket (/var/run/docker.sock) hasn't been mounted. Verify your \"docker run\" syntax."
-    return 1;
+    return 2;
   fi
 
   if ! docker ps > /dev/null 2>&1; then
     output=$(docker ps)
-    error_exit "Error when running \"docker ps\": ${output}"
+    info "Error when running \"docker ps\": ${output}"
+    return 2;
   fi
 }
 
@@ -86,6 +87,9 @@ init() {
   sed -i "/che.workspace.agent.dev/c\che.workspace.agent.dev=${CHE_DATA_HOST}/lib/ws-agent.tar.gz" $CHE_LOCAL_CONF_DIR/che.properties
   sed -i "/che.workspace.terminal_linux_amd64/c\che.workspace.terminal_linux_amd64=${CHE_DATA_HOST}/lib/linux_amd64/terminal" $CHE_LOCAL_CONF_DIR/che.properties
   sed -i "/che.workspace.terminal_linux_arm7/c\che.workspace.terminal_linux_arm7=${CHE_DATA_HOST}/lib/linux_arm7/terminal" $CHE_LOCAL_CONF_DIR/che.properties
+  sed -i "/che.template.storage/c\che.template.storage=${CHE_DATA_HOST}/templates" $CHE_LOCAL_CONF_DIR/che.properties
+  sed -i "/che.stacks.storage/c\che.stacks.storage=${CHE_DATA_HOST}/stacks/stacks.json" $CHE_LOCAL_CONF_DIR/che.properties
+  sed -i "/che.stacks.images/c\che.stacks.images=${CHE_DATA_HOST}/stacks/images" $CHE_LOCAL_CONF_DIR/che.properties
 
   ### If this container is inside of a VM like boot2docker, then additional internal mods required
   DEFAULT_CHE_IN_VM=$(is_in_vm)
@@ -112,6 +116,21 @@ init() {
   rm -rf ${CHE_DATA}/lib/*
   mkdir -p ${CHE_DATA}/lib
   cp -rf ${CHE_HOME}/lib/* ${CHE_DATA}/lib
+
+  if [[ ! -f "${CHE_DATA}"/stacks/stacks.json ]];then
+    rm -rf "${CHE_DATA}"/stacks/*
+    mkdir -p "${CHE_DATA}"/stacks
+    cp -rf "${CHE_HOME}"/stacks/* "${CHE_DATA}"/stacks
+  fi
+
+  if [[ ! -f "${CHE_DATA}"/templates/samples.json ]];then
+    rm -rf "${CHE_DATA}"/templates/*
+    mkdir -p "${CHE_DATA}"/templates
+    cp -rf "${CHE_HOME}"/templates/* "${CHE_DATA}"/templates
+  fi
+
+  # Move files from /lib to /lib-copy.  This puts files onto the host.
+  rm -rf ${CHE_DATA}/lib/*
 
   # A che property, which names the Docker network used for che + ws to communicate
   export JAVA_OPTS="${JAVA_OPTS} -Dche.docker.network=bridge"
@@ -213,6 +232,7 @@ responsible_shutdown() {
   echo ""
   echo "Received SIGTERM"
   "${CHE_HOME}"/bin/che.sh stop
+  exit;
 }
 
 # setup handlers

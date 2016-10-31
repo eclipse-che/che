@@ -271,7 +271,6 @@ start_che_server () {
 stop_che_server () {
   echo -e "Stopping Che server running on localhost:${CHE_PORT}"
   call_catalina >/dev/null 2>&1
-  return 1;
 }
 
 call_catalina () {
