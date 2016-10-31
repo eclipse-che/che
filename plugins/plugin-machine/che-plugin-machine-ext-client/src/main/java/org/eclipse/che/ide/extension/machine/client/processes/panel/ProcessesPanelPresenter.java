@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.processes.panel;
 
-import com.google.common.base.Strings;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
@@ -80,6 +79,7 @@ import java.util.Map;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Collections.emptyList;
 import static org.eclipse.che.api.core.model.machine.MachineStatus.RUNNING;
+import static org.eclipse.che.api.machine.shared.Constants.TERMINAL_REFERENCE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.extension.machine.client.processes.ProcessTreeNode.ProcessNodeType.COMMAND_NODE;
@@ -724,7 +724,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
      * @return
      *          <b>true</b> is the terminal url, otherwise return <b>false</b>
      */
-    private boolean hasTerminalUrl(String machineId) {
+    private boolean hasTerminal(String machineId) {
         List<MachineEntity> wsMachines = getMachines(appContext.getWorkspace());
         for (MachineEntity machineEntity : wsMachines) {
             if (machineId.equals(machineEntity.getId())) {
@@ -733,7 +733,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         }
 
         final MachineEntity machineEntity = machines.get(machineId);
-        return machineEntity != null && !isNullOrEmpty(machineEntity.getTerminalUrl());
+        return machineEntity != null && machineEntity.getServer(TERMINAL_REFERENCE) != null;
     }
 
     /**
@@ -765,7 +765,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         // create new node
         final ProcessTreeNode newMachineNode = new ProcessTreeNode(MACHINE_NODE, rootNode, machine, null, new ArrayList<ProcessTreeNode>());
         newMachineNode.setRunning(true);
-        newMachineNode.setHasTerminalAgent(hasAgent(machine.getDisplayName(), TERMINAL_AGENT) || hasTerminalUrl(machineId));
+        newMachineNode.setHasTerminalAgent(hasAgent(machine.getDisplayName(), TERMINAL_AGENT) || hasTerminal(machineId));
         newMachineNode.setHasSSHAgent(hasAgent(machine.getDisplayName(), SSH_AGENT));
         machineNodes.put(machineId, newMachineNode);
 
