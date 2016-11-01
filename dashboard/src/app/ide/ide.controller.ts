@@ -31,6 +31,8 @@ class IdeCtrl {
 
     $rootScope.wantTokeepLoader = true;
 
+    this.selectedWorkspaceExists = true;
+
     // search the selected workspace
     let namespace = $routeParams.namespace;
     let workspace = $routeParams.workspaceName;
@@ -122,6 +124,8 @@ class IdeCtrl {
         this.selectedWorkspace = this.workspaces[i];
       }
     }
+
+    this.selectedWorkspaceExists = !!this.selectedWorkspace;
 
     this.$rootScope.hideLoader = true;
 
