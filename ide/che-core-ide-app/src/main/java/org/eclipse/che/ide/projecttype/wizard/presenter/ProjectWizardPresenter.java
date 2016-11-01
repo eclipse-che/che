@@ -205,6 +205,7 @@ public class ProjectWizardPresenter implements Wizard.UpdateDelegate,
         // set dataObject's values from projectTemplate
         dataObject.setType(projectTemplate.getProjectType());
         dataObject.setSource(projectTemplate.getSource());
+        dataObject.setCommands(projectTemplate.getCommands());
     }
 
     /** Creates or returns project wizard for the specified projectType with the given dataObject. */

@@ -14,6 +14,7 @@ import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
+import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Operation;
@@ -21,6 +22,8 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.command.CommandImpl;
+import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode;
 import org.eclipse.che.ide.api.resources.Container;
@@ -49,17 +52,22 @@ import static org.eclipse.che.ide.api.resources.Resource.PROJECT;
  * @author Valeriy Svydenko
  */
 public class ProjectWizard extends AbstractWizard<MutableProjectConfig> {
+    
+    private final static String PROJECT_PATH_MACRO_REGEX = "\\$\\{current.project.path\\}";
 
     private final ProjectWizardMode mode;
     private final AppContext        appContext;
+    private final CommandManager    commandManager;
 
     @Inject
     public ProjectWizard(@Assisted MutableProjectConfig dataObject,
                          @Assisted ProjectWizardMode mode,
-                         AppContext appContext) {
+                         AppContext appContext,
+                         CommandManager commandManager) {
         super(dataObject);
         this.mode = mode;
         this.appContext = appContext;
+        this.commandManager = commandManager;
 
         context.put(WIZARD_MODE_KEY, mode.toString());
         context.put(PROJECT_NAME_KEY, dataObject.getName());
@@ -108,9 +116,48 @@ public class ProjectWizard extends AbstractWizard<MutableProjectConfig> {
                               return project.update().withBody(dataObject).send();
                           }
                       })
-                      .then(onComplete(callback))
+                      .then(addCommands(callback))
                       .catchError(onFailure(callback));
         }
+    }
+
+    private Operation<Project> addCommands(final CompleteCallback callback) {
+        return new Operation<Project>() {
+            @Override
+            public void apply(final Project project) throws OperationException {
+                Promise<CommandImpl> chain = null;
+                for (final CommandDto command : dataObject.getCommands()) {
+                    if (chain == null) {
+                        chain = addCommand(project, command);
+                    } else {
+                        chain = chain.thenPromise(new Function<CommandImpl, Promise<CommandImpl>>() {
+                            @Override
+                            public Promise<CommandImpl> apply(CommandImpl ignored) throws FunctionException {
+                                return addCommand(project, command);
+                            }
+                        });
+                    }
+                }
+                
+                if (chain == null) {
+                    callback.onCompleted();
+                } else {
+                    chain.then(new Operation<CommandImpl>() {
+                        @Override
+                        public void apply(CommandImpl ignored) throws OperationException {
+                            callback.onCompleted();
+                        }
+                    }).catchError(onFailure(callback));
+                }
+            }
+        };
+    }
+
+    private Promise<CommandImpl> addCommand(Project project, CommandDto command) {
+        String name = project.getName() + ": " + command.getName();
+        String projectPath = appContext.getProjectsRoot().append(project.getPath()).toString();
+        String commandLine = command.getCommandLine().replaceAll(PROJECT_PATH_MACRO_REGEX, projectPath);
+        return commandManager.create(name, commandLine, command.getType(), command.getAttributes());
     }
 
     private Operation<Project> onComplete(final CompleteCallback callback) {
