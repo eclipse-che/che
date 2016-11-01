@@ -1,8 +1,10 @@
 package org.eclipse.che.api.core.util.lineconsumer;
 
 import org.eclipse.che.api.core.util.LineConsumer;
+import org.eclipse.che.commons.test.mockito.answer.WaitingAnswer;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
@@ -12,13 +14,19 @@ import java.nio.channels.ClosedByInterruptException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.fail;
 
 /**
  * @author Mykola Morhun
@@ -35,12 +43,20 @@ public class ConcurrentCompositeLineConsumerTest  {
 
     private ConcurrentCompositeLineConsumer concurrentCompositeLineConsumer;
 
-    private LineConsumer subConsumers[];
+    private LineConsumer    subConsumers[];
+    private ExecutorService executor;
 
     @BeforeMethod
     public void beforeMethod() throws Exception {
         subConsumers = new LineConsumer[] { lineConsumer1, lineConsumer2, lineConsumer3 };
         concurrentCompositeLineConsumer = new ConcurrentCompositeLineConsumer(subConsumers);
+
+        executor = Executors.newFixedThreadPool(5);
+    }
+
+    @AfterMethod
+    public void afterMethod() {
+        executor.shutdownNow();
     }
 
     @Test
@@ -119,6 +135,105 @@ public class ConcurrentCompositeLineConsumerTest  {
         // then
         for (LineConsumer subConsumer : closedConsumers) {
             verify(subConsumer, never()).writeLine(eq(message));
+        }
+    }
+
+    @Test
+    public void shouldBeAbleToWriteIntoSubConsumersSimultaneously() throws Exception {
+        // given
+        final String message1 = "Message 1";
+        final String message2 = "Message 2";
+
+        WaitingAnswer<Void> waitingAnswer = new WaitingAnswer<>();
+        doAnswer(waitingAnswer).when(lineConsumer2).writeLine(eq(message1));
+
+        executor.execute(() -> concurrentCompositeLineConsumer.writeLine(message1));
+        waitingAnswer.waitAnswerCall(1, TimeUnit.SECONDS);
+
+        // when
+        concurrentCompositeLineConsumer.writeLine(message2);
+        waitingAnswer.completeAnswer();
+
+        // then
+        awaitFinalization();
+
+        for (LineConsumer consumer : subConsumers) {
+            verify(consumer).writeLine(eq(message1));
+            verify(consumer).writeLine(eq(message2));
+        }
+    }
+
+    @Test
+    public void closeOperationShouldWaitUntilAllCurrentOperationsWillBeFinished() throws Exception {
+        // given
+        final String message1 = "Message 1";
+        final String message2 = "Message 2";
+
+        WaitingAnswer<Void> waitingAnswer1 = waitOnWrite(lineConsumer2, message1);
+        WaitingAnswer<Void> waitingAnswer2 = waitOnWrite(lineConsumer2, message2);
+
+        // when
+        executor.execute(concurrentCompositeLineConsumer::close);
+
+        waitingAnswer1.completeAnswer();
+        waitingAnswer2.completeAnswer();
+
+        // then
+        awaitFinalization();
+
+        assertFalse(concurrentCompositeLineConsumer.isOpen());
+
+        for (LineConsumer consumer : subConsumers) {
+            verify(consumer).writeLine(eq(message1));
+            verify(consumer).writeLine(eq(message2));
+        }
+    }
+
+    @Test
+    public void shouldIgnoreWriteToSubConsumersWhenLockForCloseIsLocked() throws Exception {
+        // given
+        WaitingAnswer<Void> waitingAnswer = new WaitingAnswer<>();
+        doAnswer(waitingAnswer).when(lineConsumer2).close();
+
+        executor.execute(() -> concurrentCompositeLineConsumer.close());
+        waitingAnswer.waitAnswerCall(1, TimeUnit.SECONDS);
+
+        // when
+        concurrentCompositeLineConsumer.writeLine("Test line");
+        waitingAnswer.completeAnswer();
+
+        // then
+        awaitFinalization();
+
+        for (LineConsumer consumer : subConsumers) {
+            verify(consumer, never()).writeLine(anyString());
+        }
+    }
+
+    /**
+     * Executes write line into file in separate thread and waits on writing to file operation until this thread released.
+     *
+     * @param consumer
+     *         subconsumer on which thread should be freezed
+     * @param message
+     *         message to write
+     * @return waiting answer to release this thread later using {@link WaitingAnswer#completeAnswer()}
+     * @throws Exception
+     */
+    private WaitingAnswer<Void> waitOnWrite(LineConsumer consumer, String message) throws Exception {
+        WaitingAnswer<Void> waitingAnswer = new WaitingAnswer<>();
+        doAnswer(waitingAnswer).when(consumer).writeLine(eq(message));
+
+        executor.execute(() -> concurrentCompositeLineConsumer.writeLine(message));
+        waitingAnswer.waitAnswerCall(1, TimeUnit.SECONDS);
+
+        return waitingAnswer;
+    }
+
+    private void awaitFinalization() throws Exception {
+        executor.shutdown();
+        if (!executor.awaitTermination(1_000, TimeUnit.MILLISECONDS)) {
+            fail("Operation is hanged up. Terminated.");
         }
     }
 
