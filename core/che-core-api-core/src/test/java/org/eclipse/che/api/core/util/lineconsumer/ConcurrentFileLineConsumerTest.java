@@ -32,17 +32,19 @@ public class ConcurrentFileLineConsumerTest {
 
     private ConcurrentFileLineConsumer concurrentFileLineConsumer;
 
-    private final File file = new File(System.getProperty("java.io.tmpdir") + System.getProperty("file.separator") + "tmp.file");
+    private File file;
 
     @BeforeMethod
     public void beforeMethod() throws Exception {
+        file = File.createTempFile("file", ".tmp");
         concurrentFileLineConsumer = new ConcurrentFileLineConsumer(file);
+        injectWriterMock(concurrentFileLineConsumer, writer);
     }
 
     @AfterClass
     public void afterClass() {
         if (!file.delete()) {
-            LOG.error("Failed to remove temporary file: '{}'.", file);
+            LOG.warn("Failed to remove temporary file: '{}'.", file);
         }
     }
 
@@ -50,9 +52,6 @@ public class ConcurrentFileLineConsumerTest {
     public void shouldBeAbleToWriteIntoFile() throws Exception {
         // given
         final String message = "Test line";
-        injectWriterMock(concurrentFileLineConsumer, writer);
-        doNothing().when(writer).write(anyString());
-        doNothing().when(writer).flush();
 
         // when
         concurrentFileLineConsumer.writeLine(message);
@@ -64,13 +63,11 @@ public class ConcurrentFileLineConsumerTest {
     @Test
     public void shouldNotWriteIntoFileAfterConsumerClosing() throws Exception {
         // given
-        injectWriterMock(concurrentFileLineConsumer, writer);
-        doNothing().when(writer).write(anyString());
-        doNothing().when(writer).flush();
+        final String message = "Test line";
 
         // when
         concurrentFileLineConsumer.close();
-        concurrentFileLineConsumer.writeLine("Test line");
+        concurrentFileLineConsumer.writeLine(message);
 
         // then
         verify(writer, never()).write(anyString());

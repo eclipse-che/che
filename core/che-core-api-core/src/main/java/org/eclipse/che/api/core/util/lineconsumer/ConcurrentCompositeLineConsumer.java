@@ -23,7 +23,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 /**
  * This line consumer consists of several consumers and copies each consumed line into all subconsumers.
  * Is used when lines should be written into two or more consumers.
- * This class is thread safe.
+ * This implementation is thread safe.
  *
  * @author andrew00x
  * @author Mykola Morhun
@@ -34,7 +34,7 @@ public class ConcurrentCompositeLineConsumer implements LineConsumer {
     private final List<LineConsumer>     lineConsumers;
     private final ReentrantReadWriteLock lock;
 
-    private boolean isOpen;
+    private volatile boolean isOpen;
 
     public ConcurrentCompositeLineConsumer(LineConsumer... lineConsumers) {
         this.lineConsumers = new CopyOnWriteArrayList<>(lineConsumers);

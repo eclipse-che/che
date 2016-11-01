@@ -22,6 +22,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /**
  * This line consumer consists of several consumers and copies each consumed line into all subconsumers.
  * Is used when lines should be written into two or more consumers.
+ * <br/>
+ * This class is not thread safe.
+ * Also see multithreaded implementation {@link org.eclipse.che.api.core.util.lineconsumer.ConcurrentCompositeLineConsumer}
  *
  * @author andrew00x
  * @author Mykola Morhun

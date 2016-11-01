@@ -9,10 +9,12 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.nio.channels.ClosedByInterruptException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -37,18 +39,14 @@ public class CompositeLineConsumerTest {
 
     @BeforeMethod
     public void beforeMethod() throws Exception {
-        subConsumers = new LineConsumer[] { lineConsumer1, lineConsumer2 };
-
-        for (LineConsumer lineConsumer : subConsumers) {
-            doNothing().when(lineConsumer).writeLine(anyString());
-        }
+        subConsumers = new LineConsumer[] { lineConsumer1, lineConsumer2, lineConsumer3 };
+        compositeLineConsumer = new CompositeLineConsumer(subConsumers);
     }
 
     @Test
     public void shouldWriteMessageIntoEachConsumer() throws Exception {
         // given
         final String message = "Test line";
-        compositeLineConsumer = new CompositeLineConsumer(subConsumers);
 
         // when
         compositeLineConsumer.writeLine(message);
@@ -63,7 +61,6 @@ public class CompositeLineConsumerTest {
     public void shouldNotWriteIntoSubConsumersAfterClosingCompositeConsumer() throws Exception {
         // given
         final String message = "Test line";
-        compositeLineConsumer = new CompositeLineConsumer(subConsumers);
 
         // when
         compositeLineConsumer.close();
@@ -84,29 +81,24 @@ public class CompositeLineConsumerTest {
     }
 
     @Test(dataProvider = "subConsumersExceptions")
-    public void shouldCloseSubConsumerOnConsumerAlreadyClosedException(Throwable exception) throws Exception {
+    public void shouldCloseSubConsumerOnException(Throwable exception) throws Exception {
         // given
         final String message = "Test line";
         final String message2 = "Test line2";
-        final int closedConsumerIndex = 1;
 
         LineConsumer closedConsumer = mock(LineConsumer.class);
-        doThrow(exception.getClass()).when(closedConsumer).writeLine(anyString());
-        subConsumers[closedConsumerIndex] = closedConsumer;
+        doThrow(exception).when(closedConsumer).writeLine(anyString());
 
-        compositeLineConsumer = new CompositeLineConsumer(subConsumers);
+        compositeLineConsumer = new CompositeLineConsumer(appendTo(subConsumers, closedConsumer));
 
         // when
         compositeLineConsumer.writeLine(message);
         compositeLineConsumer.writeLine(message2);
 
         // then
-        for (int i = 0; i < subConsumers.length; i++) {
-            if (i != closedConsumerIndex) {
-                verify(subConsumers[i]).writeLine(eq(message2));
-            } else {
-                verify(subConsumers[closedConsumerIndex], never()).writeLine(eq(message2));
-            }
+        verify(closedConsumer, never()).writeLine(eq(message2));
+        for (LineConsumer consumer : subConsumers) {
+            verify(consumer).writeLine(eq(message2));
         }
     }
 
@@ -114,21 +106,26 @@ public class CompositeLineConsumerTest {
     public void shouldDoNothingOnWriteLineIfAllSubConsumersAreClosed() throws Exception {
         // given
         final String message = "Test line";
-        for (int i = 0; i < subConsumers.length; i++) {
-            LineConsumer closedConsumer = mock(LineConsumer.class);
-            doThrow(ConsumerAlreadyClosedException.class).when(closedConsumer).writeLine(anyString());
-            subConsumers[i] = closedConsumer;
+        LineConsumer[] closedConsumers = subConsumers;
+        for (LineConsumer consumer : closedConsumers) {
+            doThrow(ConsumerAlreadyClosedException.class).when(consumer).writeLine(anyString());
         }
-        compositeLineConsumer = new CompositeLineConsumer(subConsumers);
+        compositeLineConsumer = new CompositeLineConsumer(closedConsumers);
 
         // when
         compositeLineConsumer.writeLine("Error");
         compositeLineConsumer.writeLine(message);
 
         // then
-        for (LineConsumer subConsumer : subConsumers) {
+        for (LineConsumer subConsumer : closedConsumers) {
             verify(subConsumer, never()).writeLine(eq(message));
         }
+    }
+
+    private LineConsumer[] appendTo(LineConsumer[] base, LineConsumer... toAppend ) {
+        List<LineConsumer> allElements = new ArrayList<>(Arrays.asList(base));
+        allElements.addAll(Arrays.asList(toAppend));
+        return allElements.toArray(new LineConsumer[allElements.size()]);
     }
 
 }

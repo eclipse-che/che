@@ -12,8 +12,6 @@ package org.eclipse.che.plugin.docker.client;
 
 import org.eclipse.che.plugin.docker.client.json.ProgressStatus;
 
-import java.io.IOException;
-
 /**
  * Receives updated progress statuses to be able to show user beatified progress info.
  *

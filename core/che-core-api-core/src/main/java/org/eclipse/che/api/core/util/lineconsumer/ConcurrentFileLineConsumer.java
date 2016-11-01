@@ -20,6 +20,9 @@ import java.nio.file.Files;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
+ * Consumes logs and writes them into file.
+ * This implementation is thread safe.
+ *
  * @author andrew00x
  * @author Mykola Morhun
  */

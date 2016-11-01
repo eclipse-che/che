@@ -19,12 +19,15 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 
 /**
+ * Consumes logs and writes them into file.
+ * <br/>
+ * This class is not thread safe.
+ * Also see multithreaded implementation {@link org.eclipse.che.api.core.util.lineconsumer.ConcurrentFileLineConsumer}
+ *
  * @author andrew00x
  * @author Mykola Morhun
  */
 public class FileLineConsumer implements LineConsumer {
-
-
     private final File   file;
     private final Writer writer;
 
