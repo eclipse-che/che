@@ -1311,5 +1311,69 @@
     "tags": [
       "Zend"
     ]
+  },
+  {
+    "name": "platformio-arduino-blink",
+    "displayName": "platformio-arduino-blink",
+    "path": "/arduino-blink",
+    "description": "Arduino blink sample",
+    "projectType": "cpp",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "cpp"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/platformio/platformio-examples.git",
+      "parameters": {
+        "keepDir":"atmelavr-and-arduino/arduino-blink",
+        "keepVcs": "false",
+        "convertToTopLevelProject": "true"
+      }
+    },
+    "commands": [
+
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "Platformio"
+    ]
+  },
+  {
+    "name": "platformio-mbed-blink",
+    "displayName": "platformio-mbed-blink",
+    "path": "/mbed-blink",
+    "description": "Mbed blink sample",
+    "projectType": "cpp",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "cpp"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/platformio/platformio-examples.git",
+      "parameters": {
+        "keepDir":"mbed/mbed-blink",
+        "keepVcs": "false",
+        "convertToTopLevelProject": "true"
+      }
+    },
+    "commands": [
+
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "Platformio"
+    ]
   }
 ]
