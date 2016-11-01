@@ -18,6 +18,7 @@ import org.eclipse.che.api.agent.server.exception.AgentException;
 import org.eclipse.che.api.agent.server.impl.AgentSorter;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.agent.shared.model.AgentKey;
+import org.eclipse.che.api.core.model.workspace.ServerConf2;
 import org.eclipse.che.api.environment.server.model.CheServiceImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.slf4j.Logger;
@@ -30,7 +31,6 @@ import java.util.Map;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static org.eclipse.che.api.environment.server.AgentConfigApplier.PROPERTIES.ENVIRONMENT;
-import static org.eclipse.che.api.environment.server.AgentConfigApplier.PROPERTIES.PORTS;
 
 /**
  * Applies docker specific properties of the agents over {@link CheServiceImpl}.
@@ -38,11 +38,7 @@ import static org.eclipse.che.api.environment.server.AgentConfigApplier.PROPERTI
  * Docker instance must't be started, otherwise changing configuration has no effect.
  *
  * The list of supported properties are:
- * <li>ports</li>
  * <li>environment</li>
- *
- * The {@code ports} property contains comma separated ports to expose respecting
- * the following format: "label:port/protocol" or "port/protocol.
  *
  * The {@code environment} property contains command separated environment variables to set
  * respecting the following format: "name=value".
@@ -50,6 +46,7 @@ import static org.eclipse.che.api.environment.server.AgentConfigApplier.PROPERTI
  * @see Agent#getProperties()
  * @see CheServiceImpl#getEnvironment()
  * @see CheServiceImpl#getPorts()
+ * @see CheServiceImpl#getLabels()
  *
  * @author Anatolii Bazko
  */
@@ -57,7 +54,7 @@ import static org.eclipse.che.api.environment.server.AgentConfigApplier.PROPERTI
 public class AgentConfigApplier {
     private static final Logger LOG = LoggerFactory.getLogger(AgentConfigApplier.class);
 
-    private final AgentSorter sorter;
+    private final AgentSorter   sorter;
     private final AgentRegistry agentRegistry;
 
     @Inject
@@ -80,7 +77,23 @@ public class AgentConfigApplier {
         for (AgentKey agentKey : sorter.sort(agentKeys)) {
             Agent agent = agentRegistry.getAgent(agentKey);
             addEnv(service, agent.getProperties());
-            addExposedPorts(service, agent.getProperties());
+            addExposedPorts(service, agent.getServers());
+            addLabels(service, agent.getServers());
+        }
+    }
+
+    private void addLabels(CheServiceImpl service, Map<String, ? extends ServerConf2> servers) {
+        for (Map.Entry<String, ? extends ServerConf2> entry : servers.entrySet()) {
+            String ref = entry.getKey();
+            ServerConf2 conf = entry.getValue();
+
+            service.getLabels().put("che:server:" + conf.getPort() + ":protocol", conf.getProtocol());
+            service.getLabels().put("che:server:" + conf.getPort() + ":ref", ref);
+
+            String path = conf.getProperties().get("path");
+            if (!isNullOrEmpty(path)) {
+                service.getLabels().put("che:server:" + conf.getPort() + ":path", path);
+            }
         }
     }
 
@@ -110,25 +123,13 @@ public class AgentConfigApplier {
         service.setEnvironment(newEnv);
     }
 
-    private void addExposedPorts(CheServiceImpl service, Map<String, String> properties) {
-        String ports = properties.get(PORTS.toString());
-        if (isNullOrEmpty(ports)) {
-            return;
-        }
-
-        for (String port : ports.split(",")) {
-            String[] items = port.split(":"); // ref:port
-            if (items.length == 1) {
-                service.getExpose().add(items[0]);
-            } else {
-                service.getExpose().add(items[1]);
-            }
+    private void addExposedPorts(CheServiceImpl service, Map<String, ? extends ServerConf2> servers) {
+        for (ServerConf2 server : servers.values()) {
+            service.getExpose().add(server.getPort());
         }
     }
 
-
     enum PROPERTIES {
-        PORTS("ports"),
         ENVIRONMENT("environment");
 
         private final String value;

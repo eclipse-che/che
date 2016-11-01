@@ -47,8 +47,8 @@ export class CheWorkspace {
     // listeners if workspaces are changed/updated
     this.listeners = [];
 
-    // list of websocket bus per workspace
-    this.websocketBusByWorkspaceId = new Map();
+    // list of subscribed to websocket workspace Ids
+    this.subscribedWorkspacesIds = [];
     this.statusDefers = {};
 
     // remote call
@@ -474,9 +474,9 @@ export class CheWorkspace {
    * @param workspaceId
      */
   startUpdateWorkspaceStatus(workspaceId) {
-    if (!this.websocketBusByWorkspaceId.has(workspaceId)) {
-      let bus = this.cheWebsocket.getBus(workspaceId);
-      this.websocketBusByWorkspaceId.set(workspaceId, bus);
+    if (!this.subscribedWorkspacesIds.includes(workspaceId)) {
+      let bus = this.cheWebsocket.getBus();
+      this.subscribedWorkspacesIds.push(workspaceId);
 
       bus.subscribe('workspace:' + workspaceId, (message) => {
 

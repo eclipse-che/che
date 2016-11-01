@@ -10,9 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.agent.server.model.impl;
 
-import com.google.common.base.MoreObjects;
-
 import org.eclipse.che.api.agent.shared.model.Agent;
+import org.eclipse.che.api.core.model.workspace.ServerConf2;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,30 +23,47 @@ import java.util.Objects;
  * @author Anatoliy Bazko
  */
 public class AgentImpl implements Agent {
-    private final String              name;
-    private final String              version;
-    private final List<String>        dependencies;
-    private final Map<String, String> properties;
-    private final String              script;
+    private final String                             id;
+    private final String                             name;
+    private final String                             version;
+    private final String                             description;
+    private final List<String>                       dependencies;
+    private final Map<String, String>                properties;
+    private final String                             script;
+    private final Map<String, ? extends ServerConf2> servers;
 
-    public AgentImpl(String name,
+    public AgentImpl(String id,
+                     String name,
                      String version,
+                     String description,
                      List<String> dependencies,
                      Map<String, String> properties,
-                     String script) {
+                     String script,
+                     Map<String, ? extends ServerConf2> servers) {
+        this.id = id;
         this.name = name;
         this.version = version;
+        this.description = description;
         this.dependencies = dependencies;
         this.properties = properties;
         this.script = script;
+        this.servers = servers;
     }
 
     public AgentImpl(Agent agent) {
-        this(agent.getName(),
+        this(agent.getId(),
+             agent.getName(),
              agent.getVersion(),
+             agent.getDescription(),
              agent.getDependencies(),
              agent.getProperties(),
-             agent.getScript());
+             agent.getScript(),
+             agent.getServers());
+    }
+
+    @Override
+    public String getId() {
+        return id;
     }
 
     @Override
@@ -59,20 +75,30 @@ public class AgentImpl implements Agent {
     public String getVersion() {
         return version;
     }
+    
+    @Override
+    public String getDescription() {
+        return description;
+    }
 
     @Override
     public List<String> getDependencies() {
-        return MoreObjects.firstNonNull(dependencies, new ArrayList<String>());
+        return dependencies != null ? dependencies : new ArrayList<>();
     }
 
     @Override
     public Map<String, String> getProperties() {
-        return MoreObjects.firstNonNull(properties, new HashMap<String, String>());
+        return properties != null ? properties : new HashMap<>();
     }
 
     @Override
     public String getScript() {
         return script;
+    }
+
+    @Override
+    public Map<String, ? extends ServerConf2> getServers() {
+        return servers != null ? servers : new HashMap<>();
     }
 
     @Override
@@ -84,30 +110,37 @@ public class AgentImpl implements Agent {
             return false;
         }
         final AgentImpl that = (AgentImpl)obj;
-        return Objects.equals(name, that.name)
+        return Objects.equals(id, that.id)
+               && Objects.equals(name, that.name)
                && Objects.equals(version, that.version)
                && getDependencies().equals(that.getDependencies())
                && getProperties().equals(that.getProperties())
-               && Objects.equals(script, that.script);
+               && Objects.equals(script, that.script)
+               && Objects.equals(servers, that.servers);
     }
 
     @Override
     public int hashCode() {
         int hash = 7;
+        hash = 31 * hash + Objects.hashCode(id);
         hash = 31 * hash + Objects.hashCode(name);
         hash = 31 * hash + Objects.hashCode(version);
         hash = 31 * hash + getDependencies().hashCode();
         hash = 31 * hash + getProperties().hashCode();
         hash = 31 * hash + Objects.hashCode(script);
+        hash = 31 * hash + Objects.hashCode(servers);
         return hash;
     }
 
     @Override
     public String toString() {
         return "AgentImpl{" +
-               "name='" + name + '\'' +
+               "id='" + id + '\'' +
+               ", name='" + name + '\'' +
+               ", description='" + description + '\'' +
                ", version='" + version + '\'' +
                ", dependencies='" + dependencies + '\'' +
+               ", servers='" + servers + '\'' +
                ", properties='" + properties + "\'}";
     }
 }

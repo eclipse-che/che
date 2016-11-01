@@ -25,6 +25,7 @@ import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
 import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredentialsProvider;
+import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.json.ContainerState;
@@ -1084,6 +1085,26 @@ public class MachineProviderImplTest {
                                                                        "=" +
                                                                        entry.getValue())
                                                          .collect(Collectors.toList())));
+    }
+
+    @Test
+    public void shouldAddLinksToContainerOnCreation() throws Exception {
+        // given
+        String links[] = new String[] {"container1", "container2:alias"};
+        String networkName = "network";
+
+        CheServiceImpl service = createService();
+        service.setLinks(asList(links));
+
+        // when
+        createInstanceFromRecipe(service, true);
+
+        // then
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        ContainerConfig containerConfig = argumentCaptor.getValue().getContainerConfig();
+        assertEquals(containerConfig.getHostConfig().getLinks(), links);
+        assertEquals(containerConfig.getNetworkingConfig().getEndpointsConfig().get(NETWORK_NAME).getLinks(), links);
     }
 
     private CheServiceImpl createInstanceFromRecipe() throws Exception {

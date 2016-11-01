@@ -73,7 +73,7 @@ public class WsAgentLauncherImpl implements AgentLauncher {
     }
 
     @Override
-    public String getAgentName() {
+    public String getAgentId() {
         return "org.eclipse.che.ws-agent";
     }
 
@@ -98,7 +98,7 @@ public class WsAgentLauncherImpl implements AgentLauncher {
             // for server side type of command mean nothing
             // but we will use it as marker on
             // client side for track this command
-            CommandImpl command = new CommandImpl(getAgentName(), script, WS_AGENT_PROCESS_NAME);
+            CommandImpl command = new CommandImpl(getAgentId(), script, WS_AGENT_PROCESS_NAME);
 
             machineProcessManagerProvider.get().exec(machine.getWorkspaceId(),
                                                      machine.getId(),

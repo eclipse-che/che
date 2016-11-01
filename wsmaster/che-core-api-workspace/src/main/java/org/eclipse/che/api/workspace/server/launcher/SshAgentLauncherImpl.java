@@ -40,7 +40,7 @@ public class SshAgentLauncherImpl extends AbstractAgentLauncher {
     }
 
     @Override
-    public String getAgentName() {
+    public String getAgentId() {
         return "org.eclipse.che.ssh";
     }
 }

@@ -244,8 +244,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                  boolean isDev,
                                  String networkName,
                                  CheServiceImpl service,
-                                 LineConsumer machineLogger)
-            throws ServerException {
+                                 LineConsumer machineLogger) throws ServerException {
 
         // copy to not affect/be affected by changes in origin
         service = new CheServiceImpl(service);
@@ -483,7 +482,8 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                        isDev,
                                        service);
 
-        EndpointConfig endpointConfig = new EndpointConfig().withAliases(machineName);
+        EndpointConfig endpointConfig = new EndpointConfig().withAliases(machineName)
+                                                            .withLinks(toArrayIfNotNull(service.getLinks()));
         NetworkingConfig networkingConfig = new NetworkingConfig().withEndpointsConfig(singletonMap(networkName,
                                                                                                     endpointConfig));
 

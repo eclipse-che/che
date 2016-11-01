@@ -16,8 +16,11 @@ import com.google.inject.assistedinject.Assisted;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.model.machine.MachineRuntimeInfo;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
+import org.eclipse.che.api.core.model.machine.Server;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
+import org.eclipse.che.api.machine.shared.dto.MachineRuntimeInfoDto;
+import org.eclipse.che.api.machine.shared.dto.ServerDto;
 import org.eclipse.che.ide.api.machine.MachineEntity;
 
 import java.util.List;
@@ -109,6 +112,27 @@ public class MachineEntityImpl implements MachineEntity {
             }
         }
         return "";
+    }
+
+    @Override
+    public Map<String, ? extends Server> getServers() {
+        final MachineRuntimeInfoDto runtime = descriptor.getRuntime();
+        return runtime != null ? runtime.getServers() : null;
+    }
+
+    @Override
+    public Server getServer(String ref) {
+        final MachineRuntimeInfoDto runtime = descriptor.getRuntime();
+        if (runtime == null) {
+            return null;
+        }
+        final Map<String, ServerDto> servers = runtime.getServers();
+        for (ServerDto server : servers.values()) {
+            if (TERMINAL_REFERENCE.equals(server.getRef())) {
+                return server;
+            }
+        }
+        return null;
     }
 
     @Override

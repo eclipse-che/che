@@ -10,11 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.api.environment.server;
 
+import org.eclipse.che.api.agent.server.AgentRegistry;
+import org.eclipse.che.api.agent.shared.model.Agent;
+import org.eclipse.che.api.agent.shared.model.AgentKey;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.MachineLogMessage;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
+import org.eclipse.che.api.core.model.workspace.ServerConf2;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.MessageConsumer;
@@ -22,16 +26,17 @@ import org.eclipse.che.api.environment.server.compose.ComposeFileParser;
 import org.eclipse.che.api.environment.server.exception.EnvironmentNotRunningException;
 import org.eclipse.che.api.environment.server.model.CheServiceImpl;
 import org.eclipse.che.api.machine.server.MachineInstanceProviders;
-import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineLimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
+import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceProvider;
+import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.machine.server.util.RecipeDownloader;
 import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
@@ -61,6 +66,7 @@ import java.util.UUID;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.mockito.Matchers.any;
@@ -107,6 +113,11 @@ public class CheEnvironmentEngineTest {
     AgentConfigApplier                 agentConfigApplier;
     @Mock
     ContainerNameGenerator             containerNameGenerator;
+    @Mock
+    AgentRegistry                      agentRegistry;
+    @Mock
+    Agent agent;
+
 
     EnvironmentParser environmentParser = new EnvironmentParser(new ComposeFileParser(), recipeDownloader);
 
@@ -125,10 +136,11 @@ public class CheEnvironmentEngineTest {
                                               agentConfigApplier,
                                               API_ENDPOINT,
                                               recipeDownloader,
-                                              containerNameGenerator));
+                                              containerNameGenerator, agentRegistry));
 
         when(machineInstanceProviders.getProvider("docker")).thenReturn(instanceProvider);
         when(instanceProvider.getRecipeTypes()).thenReturn(Collections.singleton("dockerfile"));
+        when(agentRegistry.getAgent(any(AgentKey.class))).thenReturn(agent);
 
         EnvironmentContext.getCurrent().setSubject(new SubjectImpl("name", "id", "token", false));
     }
@@ -696,6 +708,12 @@ public class CheEnvironmentEngineTest {
     @Test
     public void shouldBeAbleToStartNonDockerMachine() throws Exception {
         // given
+        ServerConf2 serverConf2 = mock(ServerConf2.class);
+        when(serverConf2.getPort()).thenReturn("1111/tcp");
+        when(serverConf2.getProtocol()).thenReturn("http");
+        when(serverConf2.getProperties()).thenReturn(singletonMap("path", "some path"));
+        when(agent.getServers()).thenAnswer(invocation -> singletonMap("ssh", serverConf2));
+
         List<Instance> instances = startEnv();
         String workspaceId = instances.get(0).getWorkspaceId();
 
@@ -711,15 +729,17 @@ public class CheEnvironmentEngineTest {
                                                     .setType("anotherType")
                                                     .build();
 
-
         // when
-        Instance actualInstance = engine.startMachine(workspaceId, config, emptyList());
+        Instance actualInstance = engine.startMachine(workspaceId, config, singletonList("agent"));
 
         // then
         assertEquals(actualInstance, newMachine);
         ArgumentCaptor<Machine> argumentCaptor = ArgumentCaptor.forClass(Machine.class);
         verify(instanceProvider).createInstance(argumentCaptor.capture(), any(LineConsumer.class));
-        assertEquals(argumentCaptor.getValue().getConfig(), config);
+
+        MachineConfigImpl newConfig = new MachineConfigImpl(config);
+        newConfig.setServers(singletonList(new ServerConfImpl("ssh", "1111/tcp", "http", "some path")));
+        assertEquals(argumentCaptor.getValue().getConfig(), newConfig);
     }
 
     @Test(expectedExceptions = EnvironmentNotRunningException.class,
@@ -893,6 +913,65 @@ public class CheEnvironmentEngineTest {
 
         // then
         verify(instanceProvider).removeInstanceSnapshot(machineSource);
+    }
+
+    @Test
+    public void shouldReplaceServiceNameWithContainerNameInLinks() {
+        //given
+        final String serviceNameToLink = "service";
+        final String containerNameToLink = "container";
+
+        List<String> links = new ArrayList<>();
+        links.add(serviceNameToLink);
+
+        CheServiceImpl serviceToNormalizeLinks = new CheServiceImpl().withLinks(links);
+
+        CheServiceImpl service1 = mock(CheServiceImpl.class);
+        CheServiceImpl service2 = mock(CheServiceImpl.class);
+
+        Map<String, CheServiceImpl> allServices = new HashMap<>();
+        allServices.put("this", serviceToNormalizeLinks);
+        allServices.put(serviceNameToLink, service1);
+        allServices.put("anotherService", service2);
+
+        when(service1.getContainerName()).thenReturn(containerNameToLink);
+
+        // when
+        engine.normalizeLinks(serviceToNormalizeLinks, allServices);
+
+        // then
+        assertEquals(serviceToNormalizeLinks.getLinks().size(), 1);
+        assertEquals(serviceToNormalizeLinks.getLinks().get(0), containerNameToLink);
+    }
+
+    @Test
+    public void shouldReplaceServiceNameWithContainerNameAndUseAliasInLinks() {
+        //given
+        final String serviceNameToLink = "service";
+        final String containerNameToLink = "container";
+        final String AliasToServiceToLink = "alias";
+
+        List<String> links = new ArrayList<>();
+        links.add(serviceNameToLink + ':' + AliasToServiceToLink);
+
+        CheServiceImpl serviceToNormalizeLinks = new CheServiceImpl().withLinks(links);
+
+        CheServiceImpl service1 = mock(CheServiceImpl.class);
+        CheServiceImpl service2 = mock(CheServiceImpl.class);
+
+        Map<String, CheServiceImpl> allServices = new HashMap<>();
+        allServices.put("this", serviceToNormalizeLinks);
+        allServices.put(serviceNameToLink, service1);
+        allServices.put("anotherService", service2);
+
+        when(service1.getContainerName()).thenReturn(containerNameToLink);
+
+        // when
+        engine.normalizeLinks(serviceToNormalizeLinks, allServices);
+
+        // then
+        assertEquals(serviceToNormalizeLinks.getLinks().size(), 1);
+        assertEquals(serviceToNormalizeLinks.getLinks().get(0), containerNameToLink + ':' + AliasToServiceToLink);
     }
 
     private List<Instance> startEnv() throws Exception {

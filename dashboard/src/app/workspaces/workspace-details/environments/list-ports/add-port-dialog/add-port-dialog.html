@@ -24,7 +24,7 @@
     <che-label-container>
       <div layout="row">
         <che-button-primary che-button-title="Add"
-                            ng-disabled="addPortForm.$invalid || addPortDialogController.updateInProgress"
+                            ng-disabled="addPortForm.$invalid"
                             ng-click="addPortDialogController.addPort()"></che-button-primary>
         <che-button-notice che-button-title="Cancel"
                            ng-click="addPortDialogController.hide()"
