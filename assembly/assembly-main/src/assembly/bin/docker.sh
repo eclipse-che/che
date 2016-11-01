@@ -52,9 +52,17 @@ init() {
   export CHE_IN_CONTAINER="true"
   export CHE_SKIP_JAVA_VERSION_CHECK="true"
 
+  if [ -f "/assembly/bin/che.sh" ]; then
+    echo "Found custom assembly..."
+    export CHE_HOME="/assembly"
+  else
+    echo "Using embedded assembly..."
+    export CHE_HOME="/home/user/che"
+  fi
+
   ### Are we using the included assembly or did user provide their own?
-  DEFAULT_CHE_HOME="/home/user/che"
-  export CHE_HOME=${CHE_ASSEMBLY:-${DEFAULT_CHE_HOME}}
+#  DEFAULT_CHE_HOME="/assembly"
+#  export CHE_HOME=${CHE_ASSEMBLY:-${DEFAULT_CHE_HOME}}
 
   if [ ! -f $CHE_HOME/bin/che.sh ]; then
     echo "!!!"
@@ -65,20 +73,25 @@ init() {
   fi
 
   ### We need to discover the host mount provided by the user for `/data`
-  DEFAULT_CHE_DATA="/data"
-  export CHE_DATA=${CHE_DATA:-${DEFAULT_CHE_DATA}}
+ # DEFAULT_CHE_DATA="/data"
+ # export CHE_DATA=${CHE_DATA:-${DEFAULT_CHE_DATA}}
+  export CHE_DATA="/data"
   CHE_DATA_HOST=$(get_che_data_from_host)
 
   ### Are we going to use the embedded che.properties or one provided by user?`
   ### CHE_LOCAL_CONF_DIR is internal Che variable that sets where to load
-  DEFAULT_CHE_CONF_DIR="${CHE_DATA}/conf"
-  export CHE_LOCAL_CONF_DIR=${CHE_LOCAL_CONF_DIR:-${DEFAULT_CHE_CONF_DIR}}
+#  DEFAULT_CHE_CONF_DIR="/conf"
+#  export CHE_LOCAL_CONF_DIR="${CHE_DATA}/conf"
+#  export CHE_LOCAL_CONF_DIR=${CHE_LOCAL_CONF_DIR:-${DEFAULT_CHE_CONF_DIR}}
 
-  if [ ! -f "${CHE_LOCAL_CONF_DIR}/che.properties" ]; then
-    echo "Did not discover che.properties file. Copying properties template to ${CHE_DATA_HOST}/conf."
+  if [ -f "/conf/che.properties" ]; then
+    echo "Found custom che.properties..."
+    export CHE_LOCAL_CONF_DIR="/conf"
+  else
+    echo "Using embedded che.properties... Copying template to ${CHE_DATA_HOST}/conf."
     mkdir -p /data/conf
     cp -rf "${CHE_HOME}/conf/che.properties" /data/conf/che.properties
-    export CHE_LOCAL_CONF_DIR=/data/conf
+    export CHE_LOCAL_CONF_DIR="/data/conf"
   fi
 
   # Update the provided che.properties with the location of the /data mounts
@@ -114,8 +127,8 @@ init() {
 
   # Move files from /lib to /lib-copy.  This puts files onto the host.
   rm -rf ${CHE_DATA}/lib/*
-  mkdir -p ${CHE_DATA}/lib
-  cp -rf ${CHE_HOME}/lib/* ${CHE_DATA}/lib
+  mkdir -p ${CHE_DATA}/lib  
+  cp -rf ${CHE_HOME}/lib/* "${CHE_DATA}"/lib
 
   if [[ ! -f "${CHE_DATA}"/stacks/stacks.json ]];then
     rm -rf "${CHE_DATA}"/stacks/*
