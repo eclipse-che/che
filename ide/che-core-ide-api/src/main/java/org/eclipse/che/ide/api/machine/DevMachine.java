@@ -127,10 +127,12 @@ public class DevMachine implements MachineEntity {
         }
     }
 
+    @Override
     public Map<String, DevMachineServer> getServers() {
         return servers;
     }
 
+    @Override
     public DevMachineServer getServer(String reference) {
         if (!Strings.isNullOrEmpty(reference)) {
             for (DevMachineServer server : servers.values()) {

@@ -31,17 +31,21 @@ import org.eclipse.che.api.git.shared.GitCheckoutEvent;
 import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.importer.ProjectImporter;
 import org.eclipse.che.commons.lang.IoUtil;
+import org.eclipse.che.commons.lang.NameGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.che.api.core.ErrorCodes.FAILED_CHECKOUT;
 import static org.eclipse.che.api.core.ErrorCodes.FAILED_CHECKOUT_WITH_START_POINT;
 import static org.eclipse.che.api.git.GitBasicAuthenticationCredentialsProvider.clearCredentials;
@@ -125,6 +129,7 @@ public class GitProjectImporter implements ProjectImporter {
             String branchMerge = null;
             boolean keepVcs = true;
             boolean recursiveEnabled = false;
+            boolean convertToTopLevelProject = false;
 
             Map<String, String> parameters = storage.getParameters();
             if (parameters != null) {
@@ -139,6 +144,11 @@ public class GitProjectImporter implements ProjectImporter {
                 if (parameters.containsKey("recursive")) {
                     recursiveEnabled = true;
                 }
+                //convertToTopLevelProject feature is working only if we don't need any git information
+                //and when we are working in git sparse checkout mode.
+                if (!keepVcs && !isNullOrEmpty(keepDir) && parameters.containsKey("convertToTopLevelProject")) {
+                    convertToTopLevelProject = Boolean.parseBoolean(parameters.get("convertToTopLevelProject"));
+                }
                 branchMerge = parameters.get("branchMerge");
                 final String user = storage.getParameters().remove("username");
                 final String pass = storage.getParameters().remove("password");
@@ -151,7 +161,20 @@ public class GitProjectImporter implements ProjectImporter {
             final String localPath = baseFolder.getVirtualFile().toIoFile().getAbsolutePath();
             final String location = storage.getLocation();
             final String projectName = baseFolder.getName();
-            git = gitConnectionFactory.getConnection(localPath, consumerFactory);
+
+            // Converting steps
+            // 1. Clone to temporary folder on same device with /projects
+            // 2. Remove git information
+            // 3. Move to path requested by user.
+            // Very important to have initial clone folder on the same drive with /project
+            // otherwise we will have to replace atomic move with copy-delete operation.
+            if (convertToTopLevelProject) {
+                File tempDir = new File(new File(localPath).getParent(), NameGenerator.generate(".che", 6));
+                git = gitConnectionFactory.getConnection(tempDir, consumerFactory);
+            } else {
+                git = gitConnectionFactory.getConnection(localPath, consumerFactory);
+            }
+
             if (keepDir != null) {
                 git.cloneWithSparseCheckout(keepDir, location);
                 if (branch != null) {
@@ -199,6 +222,13 @@ public class GitProjectImporter implements ProjectImporter {
             if (!keepVcs) {
                 cleanGit(git.getWorkingDir());
             }
+            if (convertToTopLevelProject) {
+                Files.move(new File(git.getWorkingDir(), keepDir).toPath(),
+                           new File(localPath).toPath(),
+                           StandardCopyOption.ATOMIC_MOVE);
+                IoUtil.deleteRecursive(git.getWorkingDir());
+            }
+
         } catch (URISyntaxException e) {
             throw new ServerException(
                     "Your project cannot be imported. The issue is either from git configuration, a malformed URL, " +

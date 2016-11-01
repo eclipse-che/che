@@ -21,8 +21,8 @@ import static com.google.gwt.user.client.Window.Location.getProtocol;
  */
 public class MessageBusImpl extends AbstractMessageBus {
 
-    public MessageBusImpl(String workspaceId) {
-        super((getProtocol().equals("https:") ? "wss://" : "ws://") + getHost() + getRestContext() + "/ws/" + workspaceId);
+    public MessageBusImpl() {
+        super((getProtocol().equals("https:") ? "wss://" : "ws://") + getHost() + getRestContext() + "/ws");
     }
 
     private static native String getRestContext() /*-{
