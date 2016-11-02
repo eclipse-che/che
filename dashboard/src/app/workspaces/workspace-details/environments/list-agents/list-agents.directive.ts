@@ -25,19 +25,22 @@
  * @author Ilya Buziuk
  */
 export class ListAgents {
+  restrict: string = 'E';
+  templateUrl: string = 'app/workspaces/workspace-details/environments/list-agents/list-agents.html';
+
+  controller: string = 'ListAgentsController';
+  controllerAs: string = 'listAgentsController';
+  bindToController: boolean = true;
+
+  scope: {
+    [paramName: string]: string
+  };
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
   constructor (cheAPI) {
-    this.restrict = 'E';
-    this.templateUrl = 'app/workspaces/workspace-details/environments/list-agents/list-agents.html';
-
-    this.controller = 'ListAgentsController';
-    this.controllerAs = 'listAgentsController';
-    this.bindToController = true;
-
     // scope values
     this.scope = {
       agents: '=',
