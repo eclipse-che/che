@@ -31,7 +31,6 @@ import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
-import org.eclipse.che.api.ssh.server.SshManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes.RuntimeDescriptor;
 import org.eclipse.che.api.workspace.server.event.WorkspaceCreatedEvent;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
@@ -101,7 +100,6 @@ public class WorkspaceManager {
     private final boolean           defaultAutoSnapshot;
     private final boolean           defaultAutoRestore;
     private final SnapshotDao       snapshotDao;
-    private final SshManager        sshManager;
 
     @Inject
     public WorkspaceManager(WorkspaceDao workspaceDao,
@@ -110,8 +108,7 @@ public class WorkspaceManager {
                             AccountManager accountManager,
                             @Named("che.workspace.auto_snapshot") boolean defaultAutoSnapshot,
                             @Named("che.workspace.auto_restore") boolean defaultAutoRestore,
-                            SnapshotDao snapshotDao,
-                            SshManager sshManager) {
+                            SnapshotDao snapshotDao) {
         this.workspaceDao = workspaceDao;
         this.runtimes = workspaceRegistry;
         this.accountManager = accountManager;
@@ -119,7 +116,6 @@ public class WorkspaceManager {
         this.defaultAutoSnapshot = defaultAutoSnapshot;
         this.defaultAutoRestore = defaultAutoRestore;
         this.snapshotDao = snapshotDao;
-        this.sshManager = sshManager;
 
         executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("WorkspaceManager-%d")
                                                                            .setDaemon(true)
