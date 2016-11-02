@@ -19,7 +19,8 @@ import {CheWorkspace} from '../../components/api/che-workspace.factory';
  * @author Florent Benoit
  */
 class IdeCtrl {
-  $rootScope: ng.IRootScopeService;
+  $rootScope: che.IRootScopeService;
+  $routeParams: che.route.IRouteParamsService;
   $timeout: ng.ITimeoutService;
   ideSvc: IdeSvc;
   ideIFrameSvc: IdeIFrameSvc;
@@ -40,26 +41,27 @@ class IdeCtrl {
               ideIFrameSvc: IdeIFrameSvc, cheWorkspace: CheWorkspace, routeHistory: RouteHistory) {
     this.ideSvc = ideSvc;
     this.ideIFrameSvc = ideIFrameSvc;
-    this.$rootScope = $rootScope;
+    this.$rootScope = <che.IRootScopeService>$rootScope;
+    this.$routeParams = <che.route.IRouteParamsService>$routeParams;
     this.cheWorkspace = cheWorkspace;
     this.$timeout = $timeout;
 
-    (this.$rootScope as any).showIDE = false;
-    (this.$rootScope as any).wantTokeepLoader = true;
+    this.$rootScope.showIDE = false;
+    this.$rootScope.wantTokeepLoader = true;
 
     this.selectedWorkspaceExists = true;
 
     // search the selected workspace
-    let namespace = ($routeParams as any).namespace;
-    let workspace = ($routeParams as any).workspaceName;
+    let namespace = this.$routeParams.namespace;
+    let workspace = this.$routeParams.workspaceName;
     if (!workspace) {
       this.selectedWorkspaceName = null;
     } else {
       this.selectedWorkspaceName = workspace;
     }
 
-    let ideAction = ($routeParams as any).action;
-    let ideParams = ($routeParams as any).ideParams;
+    let ideAction = this.$routeParams.action2;
+    let ideParams: any = this.$routeParams.ideParams;
     let selectedWorkspaceIdeUrl = this.cheWorkspace.getIdeUrl(namespace, this.selectedWorkspaceName);
     if (ideAction) {
       // send action
@@ -97,7 +99,7 @@ class IdeCtrl {
     } else {
       let promise = cheWorkspace.fetchWorkspaces();
 
-      if (($routeParams as any).showLogs) {
+      if (this.$routeParams.showLogs) {
         routeHistory.popCurrentPath();
 
         // remove action from path
@@ -143,7 +145,7 @@ class IdeCtrl {
 
     this.selectedWorkspaceExists = !!this.selectedWorkspace;
 
-    (this.$rootScope as any).hideLoader = true;
+    this.$rootScope.hideLoader = true;
 
     if (this.selectedWorkspace) {
       this.ideSvc.openIde(this.selectedWorkspace.id);
