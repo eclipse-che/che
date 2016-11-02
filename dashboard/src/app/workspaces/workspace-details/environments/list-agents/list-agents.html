@@ -39,8 +39,6 @@
                            ng-disabled="listAgentsController.needToDisable(agent.id)"
                            ng-change="listAgentsController.updateAgent(agent)"
                            aria-label="Agent">
-                  <span ng-if="agent.isEnabled === true">ACTIVE</span>
-                  <span ng-if="agent.isEnabled === false">INACTIVE</span>
                 </md-switch>
               </div>
             </div>
