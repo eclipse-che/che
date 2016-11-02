@@ -58,6 +58,13 @@ public class TestingService {
     /**
      * Execute the Java test cases and return the test result.
      *
+     * <pre>
+     *     Required request parameters.
+     *     <em>projectPath</em> : Relative path to the project directory.
+     *     <em>testFramework</em> : Name of the test framework where the tests should be run on. This should match with
+     *                     the name returned by {@link TestRunner#getName()} implementation.
+     * </pre>
+     *
      * @param uriInfo JAX-RS implementation of UrlInfo with set of query parameters.
      * @return the test result of test case
      * @throws Exception when the test runner failed to execute test cases.

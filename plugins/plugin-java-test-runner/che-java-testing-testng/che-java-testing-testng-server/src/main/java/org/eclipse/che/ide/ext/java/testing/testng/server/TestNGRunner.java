@@ -34,6 +34,19 @@ import java.util.Map;
 /**
  * TestNG implementation for the test runner service.
  *
+ * <pre>
+ * Available Parameters for {@link TestNGRunner#execute(Map, TestClasspathProvider)}
+ *
+ * <em>absoluteProjectPath</em> : Absolute path to the project directory
+ * <em>updateClasspath</em> : A boolean indicating whether rebuilding of class path is required.
+ * <em>runClass</em> : A boolean indicating whether the test runner should execute all, TestNG XML suite test cases or
+ *            a test class indicated by <em>fqn</em> parameter.
+ * <em>fqn</em> : Fully qualified class name of the test class if the <em>runClass</em> is true.
+ * <em>testngXML</em> : Relative path to the testng.xml file. If this parameter is set, the TestNG test runner will
+ *             execute given testng.xml test suite, otherwise all the test classes are get executed.
+ *             (Note: If the <em>runClass</em> parameter is true then <em>testngXML</em> parameter gets ignored.)
+ *
+ * </pre>
  * @author Mirage Abeysekara
  */
 public class TestNGRunner implements TestRunner {
