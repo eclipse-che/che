@@ -32,7 +32,6 @@ import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.ssh.server.SshManager;
-import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes.RuntimeDescriptor;
 import org.eclipse.che.api.workspace.server.event.WorkspaceCreatedEvent;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
@@ -64,7 +63,6 @@ import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.lang.Boolean.parseBoolean;
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
@@ -110,8 +108,8 @@ public class WorkspaceManager {
                             WorkspaceRuntimes workspaceRegistry,
                             EventService eventService,
                             AccountManager accountManager,
-                            @Named("workspace.runtime.auto_snapshot") boolean defaultAutoSnapshot,
-                            @Named("workspace.runtime.auto_restore") boolean defaultAutoRestore,
+                            @Named("che.workspace.auto_snapshot") boolean defaultAutoSnapshot,
+                            @Named("che.workspace.auto_restore") boolean defaultAutoRestore,
                             SnapshotDao snapshotDao,
                             SshManager sshManager) {
         this.workspaceDao = workspaceDao;
@@ -883,8 +881,13 @@ public class WorkspaceManager {
                                                      .setTemporary(isTemporary)
                                                      .build();
 
-        // Register default SSH keypair for this workspace
-        SshPairImpl sshPair = this.sshManager.generatePair(EnvironmentContext.getCurrent().getSubject().getUserId(), "workspace", workspace.getId());
+        // Register default SSH keypair for this workspace.
+        try {
+            this.sshManager.generatePair(EnvironmentContext.getCurrent().getSubject().getUserId(), "workspace", workspace.getId());
+        } catch (ServerException | ConflictException e) {
+            // Conflict shouldn't happen as workspace id is new each time.
+            LOG.error(String.format("Unable to generate a default ssh pair for the workspace with ID %s", workspace.getId()), e);
+        }
 
         workspace.getAttributes().put(CREATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
         workspaceDao.create(workspace);

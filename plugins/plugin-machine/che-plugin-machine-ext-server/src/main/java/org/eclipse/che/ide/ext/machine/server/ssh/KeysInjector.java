@@ -67,10 +67,16 @@ public class KeysInjector {
             @Override
             public void onEvent(MachineStatusEvent event) {
                 if (event.getEventType() == MachineStatusEvent.EventType.RUNNING) {
+                    final Instance machine;
                     try {
-                        final Instance machine = environmentEngine.getMachine(event.getWorkspaceId(),
-                                                                              event.getMachineId());
+                        machine = environmentEngine.getMachine(event.getWorkspaceId(),
+                                                               event.getMachineId());
+                    } catch (NotFoundException e) {
+                        LOG.error("Unable to find machine: " + e.getLocalizedMessage(), e);
+                        return;
+                    }
 
+                    try {
                         // get machine keypairs
                         List<SshPairImpl> sshPairs = sshManager.getPairs(machine.getOwner(), "machine");
                         final List<String> publicMachineKeys = sshPairs.stream()
@@ -78,14 +84,20 @@ public class KeysInjector {
                                                              .map(SshPairImpl::getPublicKey)
                                                              .collect(Collectors.toList());
 
-                        // get workspace keypair
-                        SshPairImpl sshWorkspacePair = sshManager.getPair(machine.getOwner(), "workspace", event.getWorkspaceId());
+                        // get workspace keypair (if any)
+                        SshPairImpl sshWorkspacePair = null;
+                        try {
+                            sshWorkspacePair = sshManager.getPair(machine.getOwner(), "workspace", event.getWorkspaceId());
+                        } catch (NotFoundException e) {
+                            LOG.debug("No ssh key associated to the workspace", e);
+                        }
 
                         // build list of all pairs.
                         final List<String> publicKeys;
                         if (sshWorkspacePair != null && sshWorkspacePair.getPublicKey() != null) {
                             publicKeys = new ArrayList<>(publicMachineKeys.size() + 1);
                             publicKeys.add(sshWorkspacePair.getPublicKey());
+                            publicKeys.addAll(publicMachineKeys);
                         } else {
                             publicKeys = publicMachineKeys;
                         }
@@ -115,7 +127,7 @@ public class KeysInjector {
                                 }
                             }
                         });
-                    } catch (IOException | ServerException | NotFoundException e) {
+                    } catch (IOException | ServerException e) {
                         LOG.error(e.getLocalizedMessage(), e);
                     }
                 }
