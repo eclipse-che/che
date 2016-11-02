@@ -63,6 +63,13 @@ public interface Theme {
     String selectionBackground();
 
     /**
+     * Background color for selected text in input fields.
+     *
+     * @return the color
+     */
+    String inputSelectionBackground();
+
+    /**
      * Background color for inactive selection.
      *
      * @return the color

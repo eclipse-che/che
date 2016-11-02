@@ -437,7 +437,9 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
     public void hideProcessOutput(String processId) {
         final WidgetToShow widgetToShow = processWidgets.get(processId);
         final SubPanel subPanel = widget2Panels.get(widgetToShow);
-        subPanel.removeWidget(widgetToShow);
+        if (subPanel != null) {
+            subPanel.removeWidget(widgetToShow);
+        }
         processWidgets.remove(processId);
     }
 

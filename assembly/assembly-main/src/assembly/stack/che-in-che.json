@@ -65,7 +65,7 @@
         "type": "custom"
       },
       {
-        "commandLine": "export CHE_BIN_PATH=$(ls -d /projects/che/assembly/assembly-main/target/eclipse-che-*/eclipse-che-*); sudo docker run -t -v /var/run/docker.sock:/var/run/docker.sock --env CHE_LOCAL_BINARY=${CHE_BIN_PATH//projects/'home/user/che/workspaces/che'} --env CHE_HOST_IP=$HOST_IP --env CHE_PORT=54321 codenvy/che-launcher start",
+        "commandLine": "export CHE_BIN_PATH=$(ls -d /projects/che/assembly/assembly-main/target/eclipse-che-*/eclipse-che-*); sudo docker run -t -v /var/run/docker.sock:/var/run/docker.sock --env CHE_ASSEMBLY=${CHE_BIN_PATH//projects/'home/user/che/workspaces/che'} --env CHE_HOST_IP=$HOST_IP --env CHE_PORT=54321 codenvy/che-launcher start",
         "name": "3. Run Che in Che",
         "type": "custom",
         "attributes": {

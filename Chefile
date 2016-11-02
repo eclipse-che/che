@@ -6,7 +6,7 @@ workspace.commands[0].name="1. Build Che in Che"
 workspace.commands[0].commandLine="mvn clean install -f /projects/che/assembly/assembly-main"
 
 workspace.commands[1].name="2. Run Che in Che"
-workspace.commands[1].commandLine='export CHE_VERSION="nightly" && export CHE_BIN_PATH=$(ls -d /projects/che/assembly/assembly-main/target/eclipse-che-*/eclipse-che-*); sudo docker run --rm -t -v /var/run/docker.sock:/var/run/docker.sock --env CHE_LOCAL_BINARY=${CHE_BIN_PATH/\'/projects/che\'/$(sudo docker inspect --format \'{{ range .Mounts }}{{ if eq .Destination "/projects/che" }}{{ .Source }}{{ end }}{{ end }}\' $(hostname))}  --env CHE_PORT=54321 --env CHE_SERVER_CONTAINER_NAME="che-in-che-server" codenvy/che-launcher:nightly start'
+workspace.commands[1].commandLine='export CHE_VERSION="nightly" && export CHE_BIN_PATH=$(ls -d /projects/che/assembly/assembly-main/target/eclipse-che-*/eclipse-che-*); sudo docker run --rm -t -v /var/run/docker.sock:/var/run/docker.sock --env CHE_ASSEMBY=${CHE_BIN_PATH/\'/projects/che\'/$(sudo docker inspect --format \'{{ range .Mounts }}{{ if eq .Destination "/projects/che" }}{{ .Source }}{{ end }}{{ end }}\' $(hostname))}  --env CHE_PORT=54321 --env CHE_SERVER_CONTAINER_NAME="che-in-che-server" codenvy/che-launcher:nightly start'
 workspace.commands[1].attributes={
 "previewUrl": "http://localhost:54321"
 }
