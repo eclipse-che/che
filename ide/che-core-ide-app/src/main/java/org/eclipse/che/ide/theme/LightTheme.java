@@ -58,6 +58,11 @@ public class LightTheme implements Theme {
     }
 
     @Override
+    public String inputSelectionBackground() {
+        return "#b1d7fe";
+    }
+
+    @Override
     public String inactiveSelectionBackground() {
         return "rgba(73,143,225,0.40)";
     }
