@@ -447,7 +447,6 @@ public class CoreGinModule extends AbstractGinModule {
         componentsBinder.addBinding("Workspace").toProvider(WorkspaceComponentProvider.class);
         componentsBinder.addBinding("Standard components").to(StandardComponent.class);
         componentsBinder.addBinding("Contextual Commands").to(CommandProducerActionManager.class);
-        componentsBinder.addBinding("Text Selection Color").to(SelectionColorInjector.class);
 
         GinMapBinder<String, WsAgentComponent> wsAgentComponentsBinder =
                 GinMapBinder.newMapBinder(binder(), String.class, WsAgentComponent.class);
