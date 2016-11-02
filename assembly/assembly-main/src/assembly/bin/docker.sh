@@ -17,12 +17,13 @@ pid=0
 check_docker() {
   if [ ! -S /var/run/docker.sock ]; then
     echo "Docker socket (/var/run/docker.sock) hasn't been mounted. Verify your \"docker run\" syntax."
-    return 1;
+    return 2;
   fi
 
   if ! docker ps > /dev/null 2>&1; then
     output=$(docker ps)
-    error_exit "Error when running \"docker ps\": ${output}"
+    echo "Error when running \"docker ps\": ${output}"
+    return 2;
   fi
 }
 
@@ -51,9 +52,17 @@ init() {
   export CHE_IN_CONTAINER="true"
   export CHE_SKIP_JAVA_VERSION_CHECK="true"
 
+  if [ -f "/assembly/bin/che.sh" ]; then
+    echo "Found custom assembly..."
+    export CHE_HOME="/assembly"
+  else
+    echo "Using embedded assembly..."
+    export CHE_HOME="/home/user/che"
+  fi
+
   ### Are we using the included assembly or did user provide their own?
-  DEFAULT_CHE_HOME="/home/user/che"
-  export CHE_HOME=${CHE_ASSEMBLY:-${DEFAULT_CHE_HOME}}
+#  DEFAULT_CHE_HOME="/assembly"
+#  export CHE_HOME=${CHE_ASSEMBLY:-${DEFAULT_CHE_HOME}}
 
   if [ ! -f $CHE_HOME/bin/che.sh ]; then
     echo "!!!"
@@ -64,27 +73,36 @@ init() {
   fi
 
   ### We need to discover the host mount provided by the user for `/data`
-  DEFAULT_CHE_DATA="/data"
-  export CHE_DATA=${CHE_DATA:-${DEFAULT_CHE_DATA}}
+ # DEFAULT_CHE_DATA="/data"
+ # export CHE_DATA=${CHE_DATA:-${DEFAULT_CHE_DATA}}
+  export CHE_DATA="/data"
   CHE_DATA_HOST=$(get_che_data_from_host)
 
   ### Are we going to use the embedded che.properties or one provided by user?`
   ### CHE_LOCAL_CONF_DIR is internal Che variable that sets where to load
-  DEFAULT_CHE_CONF_DIR="${CHE_DATA}/conf"
-  export CHE_LOCAL_CONF_DIR=${CHE_LOCAL_CONF_DIR:-${DEFAULT_CHE_CONF_DIR}}
+#  DEFAULT_CHE_CONF_DIR="/conf"
+#  export CHE_LOCAL_CONF_DIR="${CHE_DATA}/conf"
+#  export CHE_LOCAL_CONF_DIR=${CHE_LOCAL_CONF_DIR:-${DEFAULT_CHE_CONF_DIR}}
 
-  if [ ! -f "${CHE_LOCAL_CONF_DIR}/che.properties" ]; then
-    echo "Did not discover che.properties file. Copying properties template to ${CHE_DATA_HOST}/conf."
+  if [ -f "/conf/che.properties" ]; then
+    echo "Found custom che.properties..."
+    export CHE_LOCAL_CONF_DIR="/conf"
+  else
+    echo "Using embedded che.properties... Copying template to ${CHE_DATA_HOST}/conf."
     mkdir -p /data/conf
     cp -rf "${CHE_HOME}/conf/che.properties" /data/conf/che.properties
+    export CHE_LOCAL_CONF_DIR="/data/conf"
   fi
 
   # Update the provided che.properties with the location of the /data mounts
-  sed -i "/che.workspace.storage/c\che.workspace.storage=${CHE_DATA_HOST}/workspaces" $CHE_LOCAL_CONF_DIR/che.properties
-  sed -i "/che.conf.storage/c\che.conf.storage=/data/storage" $CHE_LOCAL_CONF_DIR/che.properties
-  sed -i "/machine.server.ext.archive/c\machine.server.ext.archive=${CHE_DATA_HOST}/lib/ws-agent.tar.gz" $CHE_LOCAL_CONF_DIR/che.properties
-  sed -i "/machine.server.terminal.path_to_archive.linux_amd64/c\machine.server.terminal.path_to_archive.linux_amd64=${CHE_DATA_HOST}/lib/linux_amd64/terminal" $CHE_LOCAL_CONF_DIR/che.properties
-  sed -i "/machine.server.terminal.path_to_archive.linux_arm7/c\machine.server.terminal.path_to_archive.linux_arm7=${CHE_DATA_HOST}/lib/linux_arm7/terminal" $CHE_LOCAL_CONF_DIR/che.properties
+  sed -i "/che.workspace.storage=/c\che.workspace.storage=/data/workspaces" $CHE_LOCAL_CONF_DIR/che.properties
+  sed -i "/che.database=/c\che.database=/data/storage" $CHE_LOCAL_CONF_DIR/che.properties
+  sed -i "/che.template.storage=/c\che.template.storage=/data/templates" $CHE_LOCAL_CONF_DIR/che.properties
+  sed -i "/che.stacks.storage=/c\che.stacks.storage=/data/stacks/stacks.json" $CHE_LOCAL_CONF_DIR/che.properties
+  sed -i "/che.stacks.images=/c\che.stacks.images=/data/stacks/images" $CHE_LOCAL_CONF_DIR/che.properties
+  sed -i "/che.workspace.agent.dev=/c\che.workspace.agent.dev=${CHE_DATA_HOST}/lib/ws-agent.tar.gz" $CHE_LOCAL_CONF_DIR/che.properties
+  sed -i "/che.workspace.terminal_linux_amd64=/c\che.workspace.terminal_linux_amd64=${CHE_DATA_HOST}/lib/linux_amd64/terminal" $CHE_LOCAL_CONF_DIR/che.properties
+  sed -i "/che.workspace.terminal_linux_arm7=/c\che.workspace.terminal_linux_arm7=${CHE_DATA_HOST}/lib/linux_arm7/terminal" $CHE_LOCAL_CONF_DIR/che.properties
 
   ### If this container is inside of a VM like boot2docker, then additional internal mods required
   DEFAULT_CHE_IN_VM=$(is_in_vm)
@@ -109,8 +127,20 @@ init() {
 
   # Move files from /lib to /lib-copy.  This puts files onto the host.
   rm -rf ${CHE_DATA}/lib/*
-  mkdir -p ${CHE_DATA}/lib
-  cp -rf ${CHE_HOME}/lib/* ${CHE_DATA}/lib
+  mkdir -p ${CHE_DATA}/lib  
+  cp -rf ${CHE_HOME}/lib/* "${CHE_DATA}"/lib
+
+  if [[ ! -f "${CHE_DATA}"/stacks/stacks.json ]];then
+    rm -rf "${CHE_DATA}"/stacks/*
+    mkdir -p "${CHE_DATA}"/stacks
+    cp -rf "${CHE_HOME}"/stacks/* "${CHE_DATA}"/stacks
+  fi
+
+  if [[ ! -f "${CHE_DATA}"/templates/samples.json ]];then
+    rm -rf "${CHE_DATA}"/templates/*
+    mkdir -p "${CHE_DATA}"/templates
+    cp -rf "${CHE_HOME}"/templates/* "${CHE_DATA}"/templates
+  fi
 
   # A che property, which names the Docker network used for che + ws to communicate
   export JAVA_OPTS="${JAVA_OPTS} -Dche.docker.network=bridge"
@@ -212,6 +242,7 @@ responsible_shutdown() {
   echo ""
   echo "Received SIGTERM"
   "${CHE_HOME}"/bin/che.sh stop
+  exit;
 }
 
 # setup handlers
