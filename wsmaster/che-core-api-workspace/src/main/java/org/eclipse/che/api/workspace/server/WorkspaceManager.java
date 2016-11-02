@@ -881,14 +881,6 @@ public class WorkspaceManager {
                                                      .setTemporary(isTemporary)
                                                      .build();
 
-        // Register default SSH keypair for this workspace.
-        try {
-            this.sshManager.generatePair(EnvironmentContext.getCurrent().getSubject().getUserId(), "workspace", workspace.getId());
-        } catch (ServerException | ConflictException e) {
-            // Conflict shouldn't happen as workspace id is new each time.
-            LOG.error(String.format("Unable to generate a default ssh pair for the workspace with ID %s", workspace.getId()), e);
-        }
-
         workspace.getAttributes().put(CREATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
         workspaceDao.create(workspace);
         LOG.info("Workspace '{}:{}' with id '{}' created by user '{}'",
