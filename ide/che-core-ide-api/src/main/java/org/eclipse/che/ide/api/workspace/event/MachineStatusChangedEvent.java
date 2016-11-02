@@ -54,6 +54,20 @@ public class MachineStatusChangedEvent extends GwtEvent<MachineStatusChangedEven
         errorMessage = machineStatusEvent.getError();
     }
 
+    public MachineStatusChangedEvent(String workspaceId,
+                                     String machineId,
+                                     String machineName,
+                                     boolean dev,
+                                     EventType eventType,
+                                     String errorMessage) {
+        this.workspaceId = workspaceId;
+        this.machineId = machineId;
+        this.machineName = machineName;
+        this.dev = dev;
+        this.eventType = eventType;
+        this.errorMessage = errorMessage;
+    }
+
     @Override
     public Type<Handler> getAssociatedType() {
         return TYPE;
