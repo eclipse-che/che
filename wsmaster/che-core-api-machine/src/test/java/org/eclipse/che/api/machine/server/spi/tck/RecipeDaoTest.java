@@ -18,11 +18,11 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.machine.server.spi.RecipeDao;
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.commons.test.tck.TckModuleFactory;
+import org.eclipse.che.commons.test.tck.TckListener;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Guice;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import javax.inject.Inject;
@@ -31,7 +31,6 @@ import java.util.HashSet;
 import java.util.List;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -40,7 +39,7 @@ import static org.testng.Assert.assertTrue;
  *
  * @author Anton Korneta
  */
-@Guice(moduleFactory = TckModuleFactory.class)
+@Listeners(TckListener.class)
 @Test(suiteName = RecipeDaoTest.SUITE_NAME)
 public class RecipeDaoTest {
 
