@@ -24,7 +24,7 @@ init_global_variables() {
   DEFAULT_CHE_CLI_ACTION="help"
   DEFAULT_IS_INTERACTIVE="true"
   DEFAULT_IS_PSEUDO_TTY="true"
-  DEFAULT_CHE_DATA_FOLDER="/home/user/che"
+  DEFAULT_CHE_DATA="/home/user/che"
 
   CHE_PRODUCT_NAME=${CHE_PRODUCT_NAME:-${DEFAULT_CHE_PRODUCT_NAME}}
   CHE_LAUNCHER_IMAGE_NAME=${CHE_LAUNCHER_IMAGE_NAME:-${DEFAULT_CHE_LAUNCHER_IMAGE_NAME}}
@@ -40,7 +40,7 @@ init_global_variables() {
   CHE_CLI_ACTION=${CHE_CLI_ACTION:-${DEFAULT_CHE_CLI_ACTION}}
   CHE_IS_INTERACTIVE=${CHE_IS_INTERACTIVE:-${DEFAULT_IS_INTERACTIVE}}
   CHE_IS_PSEUDO_TTY=${CHE_IS_PSEUDO_TTY:-${DEFAULT_IS_PSEUDO_TTY}}
-  CHE_DATA_FOLDER=${CHE_DATA_FOLDER:-${DEFAULT_CHE_DATA_FOLDER}}
+  CHE_DATA=${CHE_DATA:-${DEFAULT_CHE_DATA}}
 
   GLOBAL_NAME_MAP=$(docker info | grep "Name:" | cut -d" " -f2)
   GLOBAL_HOST_ARCH=$(docker version --format {{.Client}} | cut -d" " -f5)
@@ -48,9 +48,9 @@ init_global_variables() {
   GLOBAL_GET_DOCKER_HOST_IP=$(get_docker_host_ip)
 
   if is_boot2docker && has_docker_for_windows_client; then
-    if [[ "${CHE_DATA_FOLDER,,}" != *"${USERPROFILE,,}"* ]]; then
-      CHE_DATA_FOLDER=$(get_mount_path "${USERPROFILE}/.${CHE_MINI_PRODUCT_NAME}/")
-      warning "Boot2docker for Windows - CHE_DATA_FOLDER set to $CHE_DATA_FOLDER"   
+    if [[ "${CHE_DATA,,}" != *"${USERPROFILE,,}"* ]]; then
+      CHE_DATA=$(get_mount_path "${USERPROFILE}/.${CHE_MINI_PRODUCT_NAME}/")
+      warning "Boot2docker for Windows - CHE_DATA set to $CHE_DATA"
     fi
   fi
 
@@ -88,12 +88,12 @@ Variables:
     CHE_VERSION                        Version of Che to run
     CHE_PORT                           External port of Che server
     CHE_HOST_IP                        IP address Che server binds to - must set for external users
-    CHE_DATA_FOLDER                    Where workspaces and Che prefs are stored
+    CHE_DATA                           Where workspaces and Che prefs are stored
     CHE_HOSTNAME                       External hostname of Che server
-    CHE_CONF_FOLDER                    Folder for custom che.properties file
+    CHE_CONF                           Folder for custom che.properties file
     CHE_RESTART_POLICY                 Che server Docker restart policy if container exited
     CHE_USER                           User ID of the Che server inside its container
-    CHE_LOCAL_BINARY                   Path to a Che assembly to use instead of binary in container
+    CHE_ASSEMBLY                       Path to a Che assembly to use instead of binary in container
     CHE_LOG_LEVEL                      Logging level for Che server - either debug or info
     CHE_EXTRA_VOLUME_MOUNT             Folders to mount from host into Che workspaces
     CHE_PROPERTY_<>                    One time use properties passed to Che - see docs
@@ -242,15 +242,15 @@ docker_run_with_interactive() {
 
 docker_run_with_che_properties() {
   debug $FUNCNAME
-  if [ ! -z ${CHE_CONF_FOLDER+x} ]; then
+  if [ ! -z ${CHE_CONF+x} ]; then
 
     # Configuration directory set by user - this has precedence.
-    docker_run_with_interactive -e "CHE_CONF_FOLDER=${CHE_CONF_FOLDER}" "$@"
+    docker_run_with_interactive -e "CHE_CONF=${CHE_CONF}" "$@"
   else 
     if has_che_properties; then
       # No user configuration directory, but CHE_PROPERTY_ values set
       generate_temporary_che_properties_file
-      docker_run_with_interactive -e "CHE_CONF_FOLDER=$(get_mount_path ~/.${CHE_MINI_PRODUCT_NAME}/conf)" "$@"
+      docker_run_with_interactive -e "CHE_CONF=$(get_mount_path ~/.${CHE_MINI_PRODUCT_NAME}/conf)" "$@"
       rm -rf ~/."${CHE_MINI_PRODUCT_NAME}"/conf/che.properties > /dev/null
     else
       docker_run_with_interactive "$@"
@@ -457,7 +457,7 @@ get_list_of_che_system_environment_variables() {
     echo "CHE_VERSION=${CHE_VERSION}" >> "${TMP_FILE}"
     echo "CHE_CLI_INFO=${CHE_CLI_INFO}" >> "${TMP_FILE}"
     echo "CHE_CLI_DEBUG=${CHE_CLI_DEBUG}" >> "${TMP_FILE}"
-    echo "CHE_DATA_FOLDER=${CHE_DATA_FOLDER}" >> "${TMP_FILE}"
+    echo "CHE_DATA=${CHE_DATA}" >> "${TMP_FILE}"
 
     CHE_VARIABLES=$(env | grep CHE_)
 
