@@ -61,7 +61,7 @@ public class ConcurrentCompositeLineConsumerTest  {
         subConsumers = new LineConsumer[] { lineConsumer1, lineConsumer2, lineConsumer3 };
         concurrentCompositeLineConsumer = new ConcurrentCompositeLineConsumer(subConsumers);
 
-        executor = Executors.newFixedThreadPool(5);
+        executor = Executors.newFixedThreadPool(3);
     }
 
     @AfterMethod
@@ -185,6 +185,12 @@ public class ConcurrentCompositeLineConsumerTest  {
         // when
         executor.execute(concurrentCompositeLineConsumer::close);
 
+        // then
+        for (LineConsumer consumer : subConsumers) {
+            verify(consumer, never()).close();
+        }
+
+        // when
         waitingAnswer1.completeAnswer();
         waitingAnswer2.completeAnswer();
 
@@ -196,11 +202,12 @@ public class ConcurrentCompositeLineConsumerTest  {
         for (LineConsumer consumer : subConsumers) {
             verify(consumer).writeLine(eq(message1));
             verify(consumer).writeLine(eq(message2));
+            verify(consumer).close();
         }
     }
 
     @Test
-    public void shouldIgnoreWriteToSubConsumersWhenLockForCloseIsLocked() throws Exception {
+    public void shouldIgnoreWriteToSubConsumersAfterCloseWasCalled() throws Exception {
         // given
         WaitingAnswer<Void> waitingAnswer = new WaitingAnswer<>();
         doAnswer(waitingAnswer).when(lineConsumer2).close();
@@ -248,7 +255,8 @@ public class ConcurrentCompositeLineConsumerTest  {
     }
 
     private LineConsumer[] appendTo(LineConsumer[] base, LineConsumer... toAppend ) {
-        List<LineConsumer> allElements = new ArrayList<>(Arrays.asList(base));
+        List<LineConsumer> allElements = new ArrayList<>();
+        allElements.addAll(Arrays.asList(base));
         allElements.addAll(Arrays.asList(toAppend));
         return allElements.toArray(new LineConsumer[allElements.size()]);
     }

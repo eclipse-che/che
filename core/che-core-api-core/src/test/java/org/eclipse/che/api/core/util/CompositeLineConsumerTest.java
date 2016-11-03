@@ -133,7 +133,8 @@ public class CompositeLineConsumerTest {
     }
 
     private LineConsumer[] appendTo(LineConsumer[] base, LineConsumer... toAppend ) {
-        List<LineConsumer> allElements = new ArrayList<>(Arrays.asList(base));
+        List<LineConsumer> allElements = new ArrayList<>();
+        allElements.addAll(Arrays.asList(base));
         allElements.addAll(Arrays.asList(toAppend));
         return allElements.toArray(new LineConsumer[allElements.size()]);
     }

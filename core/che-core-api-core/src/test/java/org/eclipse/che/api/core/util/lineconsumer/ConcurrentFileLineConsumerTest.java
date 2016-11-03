@@ -59,7 +59,7 @@ public class ConcurrentFileLineConsumerTest {
         concurrentFileLineConsumer = new ConcurrentFileLineConsumer(file);
         injectWriterMock(concurrentFileLineConsumer, writer);
 
-        executor = Executors.newFixedThreadPool(5);
+        executor = Executors.newFixedThreadPool(3);
     }
 
     @AfterMethod
@@ -147,7 +147,7 @@ public class ConcurrentFileLineConsumerTest {
     }
 
     @Test
-    public void shouldIgnoreWriteOperationsWhenLockForCloseIsLocked() throws Exception {
+    public void shouldNotWriteIntoSubConsumersWhenLockForCloseIsLocked() throws Exception {
         // given
         WaitingAnswer<Void> waitingAnswer = new WaitingAnswer<>();
         doAnswer(waitingAnswer).when(writer).close();
