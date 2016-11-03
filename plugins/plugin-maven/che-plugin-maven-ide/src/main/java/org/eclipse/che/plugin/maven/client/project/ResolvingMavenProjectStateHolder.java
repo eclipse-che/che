@@ -11,11 +11,13 @@
 package org.eclipse.che.plugin.maven.client.project;
 
 import com.google.gwt.user.client.Timer;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.ide.api.machine.WsAgentStateController;
+import org.eclipse.che.ide.api.machine.WsAgentMessageBusProvider;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.collections.Jso;
@@ -28,8 +30,6 @@ import org.eclipse.che.ide.websocket.events.MessageHandler;
 import org.eclipse.che.plugin.maven.shared.MessageType;
 import org.eclipse.che.plugin.maven.shared.dto.StartStopNotification;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.util.HashSet;
 
 import static org.eclipse.che.ide.project.ResolvingProjectStateHolder.ResolvingProjectState.IN_PROGRESS;
@@ -52,17 +52,17 @@ import static org.eclipse.che.plugin.maven.shared.MessageType.START_STOP;
  */
 @Singleton
 public class ResolvingMavenProjectStateHolder implements ResolvingProjectStateHolder, WsAgentStateHandler {
-    private final DtoFactory factory;
-    private final WsAgentStateController wsAgentStateController;
-    private ResolvingProjectState                  state;
-    private HashSet<ResolvingProjectStateListener> listeners;
+    private final DtoFactory                             factory;
+    private final WsAgentMessageBusProvider              wsAgentMessageBusProvider;
+    private       ResolvingProjectState                  state;
+    private       HashSet<ResolvingProjectStateListener> listeners;
 
     @Inject
     public ResolvingMavenProjectStateHolder(DtoFactory factory,
                                             EventBus eventBus,
-                                            WsAgentStateController wsAgentStateController) {
+                                            WsAgentMessageBusProvider wsAgentMessageBusProvider) {
         this.factory = factory;
-        this.wsAgentStateController = wsAgentStateController;
+        this.wsAgentMessageBusProvider = wsAgentMessageBusProvider;
         this.state = NOT_RESOLVED;
         this.listeners = new HashSet<>();
 
@@ -91,7 +91,7 @@ public class ResolvingMavenProjectStateHolder implements ResolvingProjectStateHo
 
     @Override
     public void onWsAgentStarted(WsAgentStateEvent event) {
-        wsAgentStateController.getMessageBus().then(new Operation<MessageBus>() {
+        wsAgentMessageBusProvider.getMessageBus().then(new Operation<MessageBus>() {
             @Override
             public void apply(MessageBus messageBus) throws OperationException {
                 try {
