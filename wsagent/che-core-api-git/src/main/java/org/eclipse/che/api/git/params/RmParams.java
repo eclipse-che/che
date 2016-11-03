@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.git.params;
 
-import org.eclipse.che.api.git.shared.RmRequest;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +22,6 @@ public class RmParams {
 
     private List<String> items;
     private boolean      cached;
-    private boolean      isRecursively;
 
     private RmParams() {
     }
@@ -39,36 +36,26 @@ public class RmParams {
         return new RmParams().withItems(items);
     }
 
-    /** @see RmRequest#getItems() */
+    /** Returns files to remove */
     public List<String> getItems() {
         return items == null ? new ArrayList<>() : items;
     }
 
-    /** @see RmRequest#withItems(List) */
     public RmParams withItems(List<String> items) {
         this.items = items;
         return this;
     }
 
-    /** @see RmRequest#isCached() */
+    /**
+     * Returns {@code true} if needed to remove from index only,
+     * otherwise returns {@code false}.
+     */
     public boolean isCached() {
         return cached;
     }
 
-    /** @see RmRequest#withCached(boolean) */
     public RmParams withCached(boolean cached) {
         this.cached = cached;
-        return this;
-    }
-
-    /** @see RmRequest#isRecursively() */
-    public boolean isRecursively() {
-        return isRecursively;
-    }
-
-    /** @see RmRequest#withRecursively(boolean) */
-    public RmParams withRecursively(boolean recursively) {
-        isRecursively = recursively;
         return this;
     }
 }

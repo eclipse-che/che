@@ -53,7 +53,6 @@ import org.eclipse.che.api.git.shared.RemoteUpdateRequest;
 import org.eclipse.che.api.git.shared.RepoInfo;
 import org.eclipse.che.api.git.shared.ResetRequest;
 import org.eclipse.che.api.git.shared.Revision;
-import org.eclipse.che.api.git.shared.RmRequest;
 import org.eclipse.che.api.git.shared.ShowFileContentResponse;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.git.shared.StatusFormat;
@@ -76,7 +75,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 import java.net.URISyntaxException;
@@ -159,7 +157,7 @@ public class GitService {
 
     @GET
     @Path("branch")
-    @Produces({MediaType.APPLICATION_JSON})
+    @Produces(MediaType.APPLICATION_JSON)
     public List<Branch> branchList(@QueryParam("listMode") String listMode) throws ApiException {
         try (GitConnection gitConnection = getGitConnection()) {
             return gitConnection.branchList(listMode == null ? null : BranchListMode.valueOf(listMode));
@@ -315,14 +313,12 @@ public class GitService {
         }
     }
 
-    @POST
+    @DELETE
     @Path("remove")
-    @Consumes(MediaType.APPLICATION_JSON)
-    public void remove(RmRequest request) throws ApiException {
+    public void remove(@QueryParam("items") List<String> items,
+                       @QueryParam("cached") boolean cached) throws ApiException {
         try (GitConnection gitConnection = getGitConnection()) {
-            gitConnection.rm(RmParams.create(request.getItems())
-                                     .withRecursively(request.isRecursively())
-                                     .withCached(request.isCached()));
+            gitConnection.rm(RmParams.create(items).withCached(cached));
         }
     }
 
@@ -372,12 +368,11 @@ public class GitService {
 
     @GET
     @Path("remote")
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    public GenericEntity<List<Remote>> remoteList(@QueryParam("remoteName") String remoteName, @QueryParam("verbose") boolean verbose)
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<Remote> remoteList(@QueryParam("remoteName") String remoteName, @QueryParam("verbose") boolean verbose)
             throws ApiException {
         try (GitConnection gitConnection = getGitConnection()) {
-            return new GenericEntity<List<Remote>>(gitConnection.remoteList(remoteName, verbose)) {
-            };
+            return gitConnection.remoteList(remoteName, verbose);
         }
     }
 
@@ -432,7 +427,6 @@ public class GitService {
 
     @DELETE
     @Path("tag/{name}")
-    @Consumes(MediaType.APPLICATION_JSON)
     public void tagDelete(@PathParam("name") String name) throws ApiException {
         try (GitConnection gitConnection = getGitConnection()) {
             gitConnection.tagDelete(name);
@@ -442,11 +436,10 @@ public class GitService {
 
     @GET
     @Path("tag")
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    public GenericEntity<List<Tag>> tagList(@QueryParam("pattern") String pattern) throws ApiException {
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<Tag> tagList(@QueryParam("pattern") String pattern) throws ApiException {
         try (GitConnection gitConnection = getGitConnection()) {
-            return new GenericEntity<List<Tag>>(gitConnection.tagList(pattern)) {
-            };
+            return gitConnection.tagList(pattern);
         }
     }
 

@@ -582,8 +582,8 @@ public class GitServiceClientImpl implements GitServiceClient {
                 params += "&items=" + item;
             }
         }
-        params += "&cashed" + String.valueOf(cached);
-        String url = appContext.getDevMachine().getWsAgentBaseUrl() + REMOVE + "?projectPath=" + params;
+        params += "&cached=" + String.valueOf(cached);
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + REMOVE + params;
         asyncRequestFactory.createDeleteRequest(url).loader(loader).send(callback);
     }
 
@@ -595,8 +595,8 @@ public class GitServiceClientImpl implements GitServiceClient {
                 params += "&items=" + item.toString();
             }
         }
-        params += "&cashed" + String.valueOf(cached);
-        String url = appContext.getDevMachine().getWsAgentBaseUrl() + REMOVE + "?projectPath=" + params;
+        params += "&cached=" + String.valueOf(cached);
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + REMOVE + params;
         return asyncRequestFactory.createDeleteRequest(url).loader(loader).send();
     }
 
@@ -886,7 +886,7 @@ public class GitServiceClientImpl implements GitServiceClient {
     public void deleteRepository(DevMachine devMachine, ProjectConfigDto project, AsyncRequestCallback<Void> callback) {
         String url = appContext.getDevMachine().getWsAgentBaseUrl() + REPOSITORY + "?projectPath=" + project.getPath();
         asyncRequestFactory.createDeleteRequest(url).loader(loader)
-                           .header(CONTENTTYPE, APPLICATION_JSON).header(ACCEPT, TEXT_PLAIN)
+                           .header(ACCEPT, TEXT_PLAIN)
                            .send(callback);
     }
 
@@ -895,9 +895,8 @@ public class GitServiceClientImpl implements GitServiceClient {
         return createFromAsyncRequest(new RequestCall<Void>() {
             @Override
             public void makeCall(final AsyncCallback<Void> callback) {
-                String url = appContext.getDevMachine().getWsAgentBaseUrl() + REPOSITORY + "?projectPath=" + project.toString();
-                final Message message = new MessageBuilder(DELETE, url).header(CONTENTTYPE, APPLICATION_JSON)
-                                                                       .header(ACCEPT, TEXT_PLAIN)
+                String url = REPOSITORY + "?projectPath=" + project.toString();
+                final Message message = new MessageBuilder(DELETE, url).header(ACCEPT, TEXT_PLAIN)
                                                                        .build();
 
                 sendMessageToWS(message, new RequestCallback<Void>() {
