@@ -9,32 +9,60 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {CheAPI} from '../../components/api/che-api.factory';
+import {CheWorkspace} from '../../components/api/che-workspace.factory';
+import {RouteHistory} from '../../components/routing/route-history.service';
 
 /**
  * This class is handling the service for viewing the IDE
  * @author Florent Benoit
  */
 class IdeSvc {
+  $location: ng.ILocationService;
+  $log: ng.ILogService;
+  $mdDialog: ng.material.IDialogService;
+  $q: ng.IQService;
+  $rootScope: ng.IRootScopeService;
+  $sce: ng.ISCEService;
+  $timeout: ng.ITimeoutService;
+  $websocket: ng.websocket.IWebSocketProvider;
+  cheAPI: CheAPI;
+  cheWorkspace: CheWorkspace;
+  lodash: any;
+  proxySettings: any;
+  routeHistory: RouteHistory;
+  userDashboardConfig: any;
+
+  ideParams: Map<string, string>;
+  lastWorkspace: any;
+  openedWorkspace: any;
+
+  listeningChannels: string[];
+  websocketReconnect: number;
+  ideAction: string;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheAPI, $rootScope, lodash, $mdDialog, userDashboardConfig, $timeout, $websocket, $sce, proxySettings, $location, routeHistory, $q, $log, cheWorkspace) {
-    this.cheAPI = cheAPI;
-    this.$rootScope = $rootScope;
-    this.lodash = lodash;
+  constructor($location: ng.ILocationService, $log: ng.ILogService, $mdDialog: ng.material.IDialogService,
+              $q: ng.IQService, $rootScope: ng.IRootScopeService, $sce: ng.ISCEService, $timeout: ng.ITimeoutService,
+              $websocket: ng.websocket.IWebSocketProvider, cheAPI: CheAPI, cheWorkspace: CheWorkspace, lodash: any,
+              proxySettings: any, routeHistory: RouteHistory, userDashboardConfig: any) {
+    this.$location = $location;
+    this.$log = $log;
     this.$mdDialog = $mdDialog;
+    this.$q = $q;
+    this.$rootScope = $rootScope;
+    this.$sce = $sce;
     this.$timeout = $timeout;
     this.$websocket = $websocket;
-    this.userDashboardConfig = userDashboardConfig;
-    this.$sce = $sce;
-    this.proxySettings = proxySettings;
-    this.$location = $location;
-    this.routeHistory = routeHistory;
-    this.$q = $q;
-    this.$log = $log;
+    this.cheAPI = cheAPI;
     this.cheWorkspace = cheWorkspace;
+    this.lodash = lodash;
+    this.proxySettings = proxySettings;
+    this.routeHistory = routeHistory;
+    this.userDashboardConfig = userDashboardConfig;
 
     this.ideParams = new Map();
 
@@ -44,24 +72,24 @@ class IdeSvc {
     this.listeningChannels = [];
   }
 
-  displayIDE() {
-    this.$rootScope.showIDE = true;
+  displayIDE(): void {
+    (this.$rootScope as any).showIDE = true;
   }
 
-  restoreIDE() {
-    this.$rootScope.restoringIDE = true;
+  restoreIDE(): void {
+    (this.$rootScope as any).restoringIDE = true;
     this.displayIDE();
   }
 
-  hasIdeLink() {
-    return this.$rootScope.ideIframeLink && (this.$rootScope.ideIframeLink !== null);
+  hasIdeLink(): boolean {
+    return (this.$rootScope as any).ideIframeLink && ((this.$rootScope as any).ideIframeLink !== null);
   }
 
-  handleError(error) {
+  handleError(error: any): void {
     this.$log.error(error);
   }
 
-  startIde(workspace) {
+  startIde(workspace: any): ng.IPromise<any> {
     if (this.lastWorkspace) {
       this.cleanupChannels(this.lastWorkspace.id);
     }
@@ -85,20 +113,20 @@ class IdeSvc {
         return this.cheWorkspace.fetchWorkspaceDetails(workspace.id);
       }).then(() => {
         startWorkspaceDefer.resolve();
-      }, (error) => {
+      }, (error: any) => {
         this.handleError(error);
         startWorkspaceDefer.reject(error);
       });
-      this.cheWorkspace.fetchStatusChange(workspace.id, 'ERROR').then((data) => {
+      this.cheWorkspace.fetchStatusChange(workspace.id, 'ERROR').then((data: any) => {
         startWorkspaceDefer.reject(data);
       });
-    }, (error) => {
+    }, (error: any) => {
       startWorkspaceDefer.reject(error);
     });
 
     return startWorkspaceDefer.promise.then(() => {
       if (this.lastWorkspace && workspace.id === this.lastWorkspace.id) {
-        // Now that the container is started, wait for the extension server. For this, needs to get runtime details
+        // now that the container is started, wait for the extension server. For this, needs to get runtime details
         let websocketUrl = this.cheWorkspace.getWebsocketUrl(workspace.id);
         // try to connect
         this.websocketReconnect = 50;
@@ -107,7 +135,7 @@ class IdeSvc {
         this.cleanupChannels(workspace.id);
       }
       return this.$q.resolve();
-    }, (error) => {
+    }, (error: any) => {
       if (this.lastWorkspace && workspace.id === this.lastWorkspace.id) {
         this.cleanupChannels(workspace.id);
       }
@@ -115,11 +143,11 @@ class IdeSvc {
     });
   }
 
-  startWorkspace(bus, data) {
+  startWorkspace(bus: any, data: any): ng.IPromise<any> {
     let startWorkspacePromise = this.cheAPI.getWorkspace().startWorkspace(data.id, data.config.defaultEnv);
 
-    startWorkspacePromise.then((data) => {
-      let statusLink = this.lodash.find(data.links, (link) => {
+    startWorkspacePromise.then((data: any) => {
+      let statusLink = this.lodash.find(data.links, (link: any) => {
         return link.rel === 'environment.status_channel';
       });
 
@@ -130,8 +158,8 @@ class IdeSvc {
 
       this.listeningChannels.push(statusChannel);
       // for now, display log of status channel in case of errors
-      bus.subscribe(statusChannel, (message) => {
-        if (message.eventType === 'DESTROYED' && message.workspaceId === data.id && !this.$rootScope.showIDE) {
+      bus.subscribe(statusChannel, (message: any) => {
+        if (message.eventType === 'DESTROYED' && message.workspaceId === data.id && !(this.$rootScope as any).showIDE) {
           // need to show the error
           this.$mdDialog.show(
             this.$mdDialog.alert()
@@ -161,7 +189,7 @@ class IdeSvc {
       });
 
       this.listeningChannels.push(agentChannel);
-      bus.subscribe(agentChannel, (message) => {
+      bus.subscribe(agentChannel, (message: any) => {
         if (message.eventType === 'ERROR' && message.workspaceId === data.id) {
           // need to show the error
           this.$mdDialog.show(
@@ -173,7 +201,7 @@ class IdeSvc {
           );
         }
       });
-    }, (error) => {
+    }, (error: any) => {
       this.handleError(error);
       this.$q.reject(error);
     });
@@ -181,7 +209,7 @@ class IdeSvc {
     return startWorkspacePromise;
   }
 
-  connectToExtensionServer(websocketURL, workspaceId) {
+  connectToExtensionServer(websocketURL: string, workspaceId: string): void {
     // try to connect
     let websocketStream = this.$websocket(websocketURL);
 
@@ -191,7 +219,7 @@ class IdeSvc {
     });
 
     // on error, retry to connect or after a delay, abort
-    websocketStream.onError((error) => {
+    websocketStream.onError((error: any) => {
       this.websocketReconnect--;
       if (this.websocketReconnect > 0) {
         this.$timeout(() => {
@@ -212,16 +240,16 @@ class IdeSvc {
     });
   }
 
-  setLoadingParameter(paramName, paramValue) {
+  setLoadingParameter(paramName: string, paramValue: string): void {
     this.ideParams.set(paramName, paramValue);
   }
 
-  setIDEAction(ideAction) {
+  setIDEAction(ideAction: string): void {
     this.ideAction = ideAction;
   }
 
-  openIde(workspaceId) {
-    this.$rootScope.hideNavbar = false;
+  openIde(workspaceId: string): void {
+    (this.$rootScope as any).hideNavbar = false;
 
     this.updateRecentWorkspace(workspaceId);
 
@@ -242,16 +270,16 @@ class IdeSvc {
     }
 
     if (this.ideParams) {
-      for (var [key, val] of this.ideParams) {
+      for (let [key, val] of this.ideParams) {
         appendUrl = appendUrl + '&' + key + '=' + val;
       }
       this.ideParams.clear();
     }
 
     if (inDevMode) {
-      this.$rootScope.ideIframeLink = this.$sce.trustAsResourceUrl(ideUrlLink + appendUrl);
+      (this.$rootScope as any).ideIframeLink = this.$sce.trustAsResourceUrl(ideUrlLink + appendUrl);
     } else {
-      this.$rootScope.ideIframeLink = ideUrlLink + appendUrl;
+      (this.$rootScope as any).ideIframeLink = ideUrlLink + appendUrl;
     }
 
     let defer = this.$q.defer();
@@ -260,10 +288,10 @@ class IdeSvc {
     } else {
       this.cheWorkspace.fetchStatusChange(workspace.id, 'STARTING').then(() => {
         defer.resolve();
-      }, (error) => {
+      }, (error: any) => {
         defer.reject(error);
         this.$log.error('Unable to start workspace: ', error);
-      })
+      });
     }
     defer.promise.then(() => {
       // update list of recent workspaces
@@ -274,7 +302,7 @@ class IdeSvc {
   /**
    * Cleanup the websocket channels (unsubscribe)
    */
-  cleanupChannels(workspaceId, websocketStream) {
+  cleanupChannels(workspaceId: string, websocketStream?: any): void {
     if (websocketStream != null) {
       websocketStream.close();
     }
@@ -282,7 +310,7 @@ class IdeSvc {
     let workspaceBus = this.cheAPI.getWebsocket().getBus();
 
     if (workspaceBus != null) {
-      this.listeningChannels.forEach((channel) => {
+      this.listeningChannels.forEach((channel: any) => {
         workspaceBus.unsubscribe(channel);
       });
       this.listeningChannels.length = 0;
@@ -295,9 +323,9 @@ class IdeSvc {
    * @param name the name of the link to find (rel attribute)
    * @returns empty or the href attribute of the link
    */
-  getHrefLink(workspace, name) {
+  getHrefLink(workspace: any, name: string): string {
     let links = workspace.links;
-    var i = 0;
+    let i = 0;
     while (i < links.length) {
       let link = links[i];
       if (link.rel === name) {
@@ -314,7 +342,7 @@ class IdeSvc {
    *
    * @param workspaceId
    */
-  updateRecentWorkspace(workspaceId) {
+  updateRecentWorkspace(workspaceId: string): void {
     this.$rootScope.$broadcast('recent-workspace:set', workspaceId);
   }
 }

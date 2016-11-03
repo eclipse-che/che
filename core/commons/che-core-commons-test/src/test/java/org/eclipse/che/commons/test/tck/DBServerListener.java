@@ -11,8 +11,6 @@
 package org.eclipse.che.commons.test.tck;
 
 import org.testng.ITestContext;
-import org.testng.ITestListener;
-import org.testng.ITestResult;
 
 /**
  * Listener representing fake db server url injection for testing "attributes sharing"

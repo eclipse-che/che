@@ -28,12 +28,12 @@ import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
-import org.eclipse.che.commons.test.tck.TckModuleFactory;
+import org.eclipse.che.commons.test.tck.TckListener;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepositoryException;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Guice;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import javax.inject.Inject;
@@ -54,7 +54,7 @@ import static org.testng.Assert.assertTrue;
  *
  * @author Yevhenii Voevodin
  */
-@Guice(moduleFactory = TckModuleFactory.class)
+@Listeners(TckListener.class)
 @Test(suiteName = WorkspaceDaoTest.SUITE_NAME)
 public class WorkspaceDaoTest {
 
@@ -188,7 +188,7 @@ public class WorkspaceDaoTest {
 
     @Test
     public void shouldPublicRemoveWorkspaceEventAfterRemoveWorkspace() throws Exception {
-        final boolean[] isNotified = new boolean[] { false };
+        final boolean[] isNotified = new boolean[] {false};
         eventService.subscribe(event -> isNotified[0] = true, WorkspaceRemovedEvent.class);
 
         workspaceDao.remove(workspaces[0].getId());
