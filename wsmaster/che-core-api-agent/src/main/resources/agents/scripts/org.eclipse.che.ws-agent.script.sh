@@ -123,7 +123,7 @@ mkdir -p ${CHE_DIR}/ws-agent
 
 
 # Compute URI of workspace master
-WORKSPACE_MASTER_URI=$(echo $CHE_API_ENDPOINT | cut -d / -f 1-3)
+WORKSPACE_MASTER_URI=$(echo $CHE_API | cut -d / -f 1-3)
 
 ## Evaluate variables now that prefix is defined
 eval "DOWNLOAD_AGENT_BINARIES_URI=${DOWNLOAD_AGENT_BINARIES_URI}"

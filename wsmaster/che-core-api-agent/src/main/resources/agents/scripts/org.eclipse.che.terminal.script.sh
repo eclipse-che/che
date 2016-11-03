@@ -115,7 +115,7 @@ else
 fi
 
 # Compute URI of workspace master
-WORKSPACE_MASTER_URI=$(echo $CHE_API_ENDPOINT | cut -d / -f 1-3)
+WORKSPACE_MASTER_URI=$(echo $CHE_API | cut -d / -f 1-3)
 
 ## Evaluate variables now that prefix is defined
 eval "LOCAL_AGENT_BINARIES_URI=${LOCAL_AGENT_BINARIES_URI}"
