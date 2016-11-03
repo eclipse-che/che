@@ -99,7 +99,7 @@ public class CommandProducerActionManager implements MachineStateEvent.Handler, 
 
         commandActionsPopUpGroup = new DefaultActionGroup("Commands", true, actionManager);
         actionManager.registerAction("commandActionsPopUpGroup", commandActionsPopUpGroup);
-        commandActionsPopUpGroup.getTemplatePresentation().setSVGResource(resources.execute());
+        commandActionsPopUpGroup.getTemplatePresentation().setSVGResource(resources.compile());
         commandActionsPopUpGroup.getTemplatePresentation().setDescription("Execute command");
 
         DefaultActionGroup mainContextMenu = (DefaultActionGroup)actionManager.getAction(GROUP_MAIN_CONTEXT_MENU);
@@ -108,7 +108,7 @@ public class CommandProducerActionManager implements MachineStateEvent.Handler, 
         DefaultActionGroup editorTabContextMenu = (DefaultActionGroup)actionManager.getAction(GROUP_EDITOR_TAB_CONTEXT_MENU);
         editorTabContextMenu.add(commandActionsPopUpGroup);
 
-        // add debug pop-up group to the main toolbar
+        // add 'Commands' pop-up group to the main toolbar
         DefaultActionGroup commandActionsToolbarGroup = new CommandActionsToolbarGroup(actionManager);
         commandActionsToolbarGroup.add(commandActionsPopUpGroup);
         DefaultActionGroup mainToolbarGroup = (DefaultActionGroup)actionManager.getAction(GROUP_MAIN_TOOLBAR);

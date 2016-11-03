@@ -17,7 +17,6 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.parts.EditorPartStack;
 import org.eclipse.che.ide.api.parts.EditorTab;
-import org.eclipse.che.ide.part.editor.EditorPartStackFactory;
 import org.eclipse.che.ide.part.editor.EditorPartStackPresenter;
 import org.eclipse.che.ide.part.editor.multipart.SplitEditorPartView;
 import org.eclipse.che.ide.part.editor.multipart.SplitEditorPartViewFactory;
@@ -49,8 +48,7 @@ public class IDEClientModule extends AbstractGinModule {
 
         bind(ResolvingProjectStateHolderRegistry.class).to(ResolvingProjectStateHolderRegistryImpl.class);
 
-        install(new GinFactoryModuleBuilder().implement(EditorPartStack.class, EditorPartStackPresenter.class)
-                                             .build(EditorPartStackFactory.class));
+        bind(EditorPartStack.class).to(EditorPartStackPresenter.class);
 
         install(new GinFactoryModuleBuilder().implement(SplitEditorPartView.class, SplitEditorPartViewImpl.class)
                                              .build(SplitEditorPartViewFactory.class));

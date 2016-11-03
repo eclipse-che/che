@@ -10,59 +10,57 @@
  *******************************************************************************/
 package org.eclipse.che.ide.part.editor.multipart;
 
-import com.google.gwt.core.client.GWT;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.ResizeComposite;
-import com.google.gwt.user.client.ui.SplitLayoutPanel;
-import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
 import org.eclipse.che.ide.api.constraints.Constraints;
-import org.eclipse.che.ide.api.parts.PartStack;
+import org.eclipse.che.ide.api.parts.EditorMultiPartStackState;
+import org.eclipse.che.ide.api.parts.EditorPartStack;
 import org.eclipse.che.ide.util.loging.Log;
 
 import javax.validation.constraints.NotNull;
-import java.util.HashMap;
-import java.util.Map;
 
 import static com.google.gwt.dom.client.Style.Unit.PCT;
 
 /**
  * @author Roman Nikitenko
  */
-public class EditorMultiPartStackViewImpl extends ResizeComposite implements EditorMultiPartStackView {
-    private static final PartStackUiBinder UI_BINDER = GWT.create(PartStackUiBinder.class);
+public class EditorMultiPartStackViewImpl extends ResizeComposite implements EditorMultiPartStackView{
 
-    @UiField
-    DockLayoutPanel  root;
-    @UiField
-    SplitLayoutPanel contentPanel;
+    private LayoutPanel contentPanel;
 
-    private final Map<PartStack, SplitEditorPartView> splitEditorParts;
-    private final SplitEditorPartViewFactory          splitEditorPartViewFactory;
+    private final BiMap<EditorPartStack, SplitEditorPartView> splitEditorParts;
+    private final SplitEditorPartViewFactory                  splitEditorPartViewFactory;
+
+    private SplitEditorPartView rootView;
 
     @Inject
     public EditorMultiPartStackViewImpl(SplitEditorPartViewFactory splitEditorPartViewFactory) {
         this.splitEditorPartViewFactory = splitEditorPartViewFactory;
-        this.splitEditorParts = new HashMap<>();
+        this.splitEditorParts = HashBiMap.create();
 
-        initWidget(UI_BINDER.createAndBindUi(this));
+        contentPanel = new LayoutPanel();
+        contentPanel.setSize("100%", "100%");
+        contentPanel.ensureDebugId("editorMultiPartStack-contentPanel");
+        initWidget(contentPanel);
     }
 
     @Override
-    public void addPartStack(@NotNull final PartStack partStack, final PartStack relativePartStack, final Constraints constraints) {
+    public void addPartStack(@NotNull final EditorPartStack partStack, final EditorPartStack relativePartStack,
+                             final Constraints constraints, final double size) {
         AcceptsOneWidget partViewContainer = new AcceptsOneWidget() {
             @Override
             public void setWidget(IsWidget widget) {
                 if (relativePartStack == null) {
-                    SplitEditorPartView splitEditorPartView = splitEditorPartViewFactory.create(widget);
-                    splitEditorParts.put(partStack, splitEditorPartView);
-                    contentPanel.add(splitEditorPartView);
+                    rootView = splitEditorPartViewFactory.create(widget);
+                    splitEditorParts.put(partStack, rootView);
+                    contentPanel.add(rootView);
                     return;
                 }
 
@@ -73,7 +71,7 @@ public class EditorMultiPartStackViewImpl extends ResizeComposite implements Edi
                 }
 
 
-                relativePartStackView.split(widget, constraints.direction);
+                relativePartStackView.split(widget, constraints.direction, size);
                 splitEditorParts.put(partStack, relativePartStackView.getReplica());
                 splitEditorParts.put(relativePartStack, relativePartStackView.getSpecimen());
             }
@@ -82,11 +80,19 @@ public class EditorMultiPartStackViewImpl extends ResizeComposite implements Edi
     }
 
     @Override
-    public void removePartStack(@NotNull PartStack partStack) {
+    public void removePartStack(@NotNull EditorPartStack partStack) {
         SplitEditorPartView splitEditorPartView = splitEditorParts.remove(partStack);
         if (splitEditorPartView != null) {
             splitEditorPartView.removeFromParent();
         }
+    }
+
+    @Override
+    public EditorMultiPartStackState getState() {
+        if (rootView == null) {
+            return null;
+        }
+        return rootView.getState(splitEditorParts.inverse());
     }
 
     @Override
@@ -98,6 +104,4 @@ public class EditorMultiPartStackViewImpl extends ResizeComposite implements Edi
         style.setWidth(100, PCT);
     }
 
-    interface PartStackUiBinder extends UiBinder<Widget, EditorMultiPartStackViewImpl> {
-    }
 }

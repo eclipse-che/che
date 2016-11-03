@@ -45,7 +45,7 @@ public class WsAgentPingRequestFactory {
 
     @Inject
     public WsAgentPingRequestFactory(HttpJsonRequestFactory httpJsonRequestFactory,
-                                     @Named("machine.ws_agent.ping_conn_timeout_ms") int wsAgentPingConnectionTimeoutMs) {
+                                     @Named("che.workspace.agent.dev.ping_conn_timeout_ms") int wsAgentPingConnectionTimeoutMs) {
         this.httpJsonRequestFactory = httpJsonRequestFactory;
         this.wsAgentPingConnectionTimeoutMs = wsAgentPingConnectionTimeoutMs;
     }

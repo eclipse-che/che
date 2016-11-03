@@ -32,6 +32,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMod
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.machine.events.MachineStateEvent.MachineAction.CREATING;
 import static org.eclipse.che.ide.api.machine.events.MachineStateEvent.MachineAction.RUNNING;
+import org.eclipse.che.ide.util.loging.Log;
 
 /**
  * Notifies about changing machine state.
@@ -119,6 +120,8 @@ public class MachineStatusHandler implements MachineStatusChangedEvent.Handler {
         if (machine == null) {
             return;
         }
+
         eventBus.fireEvent(new MachineStateEvent(machine, RUNNING));
     }
+
 }

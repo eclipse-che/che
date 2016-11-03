@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.git;
 
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -33,6 +34,7 @@ import org.eclipse.che.api.git.shared.RemoteAddRequest;
 import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.importer.ProjectImporter;
 import org.eclipse.che.commons.lang.IoUtil;
+import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +42,8 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -47,9 +51,9 @@ import java.util.Optional;
 
 import static org.eclipse.che.api.core.ErrorCodes.FAILED_CHECKOUT;
 import static org.eclipse.che.api.core.ErrorCodes.FAILED_CHECKOUT_WITH_START_POINT;
-import static org.eclipse.che.api.git.shared.BranchListRequest.LIST_ALL;
 import static org.eclipse.che.api.git.GitBasicAuthenticationCredentialsProvider.clearCredentials;
 import static org.eclipse.che.api.git.GitBasicAuthenticationCredentialsProvider.setCurrentCredentials;
+import static org.eclipse.che.api.git.shared.BranchListRequest.LIST_ALL;
 
 /**
  * @author Vladyslav Zhukovskii
@@ -59,7 +63,7 @@ public class GitProjectImporter implements ProjectImporter {
 
     private final GitConnectionFactory gitConnectionFactory;
     private static final Logger LOG = LoggerFactory.getLogger(GitProjectImporter.class);
-    private final EventService         eventService;
+    private final EventService eventService;
 
     @Inject
     public GitProjectImporter(GitConnectionFactory gitConnectionFactory,
@@ -125,6 +129,7 @@ public class GitProjectImporter implements ProjectImporter {
             String branchMerge = null;
             boolean keepVcs = true;
             boolean recursiveEnabled = false;
+            boolean convertToTopLevelProject = false;
 
             Map<String, String> parameters = storage.getParameters();
             if (parameters != null) {
@@ -139,6 +144,11 @@ public class GitProjectImporter implements ProjectImporter {
                 if (parameters.containsKey("recursive")) {
                     recursiveEnabled = true;
                 }
+                //convertToTopLevelProject feature is working only if we don't need any git information
+                //and when we are working in git sparse checkout mode.
+                if (!keepVcs && !Strings.isNullOrEmpty(keepDir) && parameters.containsKey("convertToTopLevelProject")) {
+                    convertToTopLevelProject = Boolean.parseBoolean(parameters.get("convertToTopLevelProject"));
+                }
                 branchMerge = parameters.get("branchMerge");
                 final String user = storage.getParameters().remove("username");
                 final String pass = storage.getParameters().remove("password");
@@ -152,7 +162,20 @@ public class GitProjectImporter implements ProjectImporter {
             final DtoFactory dtoFactory = DtoFactory.getInstance();
             final String location = storage.getLocation();
             final String projectName = baseFolder.getName();
-            git = gitConnectionFactory.getConnection(localPath, consumerFactory);
+
+            // Converting steps
+            // 1. Clone to temporary folder on same device with /projects
+            // 2. Remove git information
+            // 3. Move to path requested by user.
+            // Very important to have initial clone folder on the same drive with /project
+            // otherwise we will have to replace atomic move with copy-delete operation.
+            if (convertToTopLevelProject) {
+                File tempDir = new File(new File(localPath).getParent(), NameGenerator.generate(".che", 6));
+                git = gitConnectionFactory.getConnection(tempDir, consumerFactory);
+            } else {
+                git = gitConnectionFactory.getConnection(localPath, consumerFactory);
+            }
+
             if (keepDir != null) {
                 git.cloneWithSparseCheckout(keepDir, location, branch == null ? "master" : branch);
             } else {
@@ -193,10 +216,17 @@ public class GitProjectImporter implements ProjectImporter {
                 if (branchMerge != null) {
                     git.getConfig().set("branch." + (branch == null ? "master" : branch) + ".merge", branchMerge);
                 }
-                if (!keepVcs) {
-                    cleanGit(git.getWorkingDir());
-                }
             }
+            if (!keepVcs) {
+                cleanGit(git.getWorkingDir());
+            }
+            if (convertToTopLevelProject) {
+                Files.move(new File(git.getWorkingDir(), keepDir).toPath(),
+                           new File(localPath).toPath(),
+                           StandardCopyOption.ATOMIC_MOVE);
+                IoUtil.deleteRecursive(git.getWorkingDir());
+            }
+
         } catch (URISyntaxException e) {
             throw new ServerException(
                     "Your project cannot be imported. The issue is either from git configuration, a malformed URL, " +

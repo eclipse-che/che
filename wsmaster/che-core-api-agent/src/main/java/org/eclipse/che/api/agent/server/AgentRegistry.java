@@ -15,6 +15,7 @@ import org.eclipse.che.api.agent.server.exception.AgentNotFoundException;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.agent.shared.model.AgentKey;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -43,23 +44,23 @@ public interface AgentRegistry {
     /**
      * Returns a list of the available versions of the specific agent.
      *
-     * @param name
-     *      the name of the agent
+     * @param id
+     *      the id of the agent
      * @return list of versions
      * @throws AgentNotFoundException
      *      if agent not found in the registry
      * @throws AgentException
      *      if unexpected error occurred
      */
-    List<String> getVersions(String name) throws AgentException;
+    List<String> getVersions(String id) throws AgentException;
 
 
     /**
-     * Returns the list of available agents.
+     * Returns the collection of available agents.
      *
-     * @return list of agents
+     * @return collection of agents
      * @throws AgentException
      *      if unexpected error occurred
      */
-    List<String> getAgents() throws AgentException;
+    Collection<Agent> getAgents() throws AgentException;
 }

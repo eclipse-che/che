@@ -61,9 +61,9 @@ public class WsAgentLauncherImpl implements AgentLauncher {
     public WsAgentLauncherImpl(Provider<MachineProcessManager> machineProcessManagerProvider,
                                WsAgentPingRequestFactory wsAgentPingRequestFactory,
                                @Nullable @Named("machine.ws_agent.run_command") String wsAgentRunCommand,
-                               @Named("machine.ws_agent.max_start_time_ms") long wsAgentMaxStartTimeMs,
-                               @Named("machine.ws_agent.ping_delay_ms") long wsAgentPingDelayMs,
-                               @Named("machine.ws_agent.ping_timed_out_error_msg") String pingTimedOutErrorMessage) {
+                               @Named("che.workspace.agent.dev.max_start_time_ms") long wsAgentMaxStartTimeMs,
+                               @Named("che.workspace.agent.dev.ping_delay_ms") long wsAgentPingDelayMs,
+                               @Named("che.workspace.agent.dev.ping_timeout_error_msg") String pingTimedOutErrorMessage) {
         this.machineProcessManagerProvider = machineProcessManagerProvider;
         this.wsAgentPingRequestFactory = wsAgentPingRequestFactory;
         this.wsAgentMaxStartTimeMs = wsAgentMaxStartTimeMs;
@@ -73,7 +73,7 @@ public class WsAgentLauncherImpl implements AgentLauncher {
     }
 
     @Override
-    public String getAgentName() {
+    public String getAgentId() {
         return "org.eclipse.che.ws-agent";
     }
 
@@ -98,7 +98,7 @@ public class WsAgentLauncherImpl implements AgentLauncher {
             // for server side type of command mean nothing
             // but we will use it as marker on
             // client side for track this command
-            CommandImpl command = new CommandImpl(getAgentName(), script, WS_AGENT_PROCESS_NAME);
+            CommandImpl command = new CommandImpl(getAgentId(), script, WS_AGENT_PROCESS_NAME);
 
             machineProcessManagerProvider.get().exec(machine.getWorkspaceId(),
                                                      machine.getId(),

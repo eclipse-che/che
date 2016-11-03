@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>5.0.0-M6-SNAPSHOT</version>
+        <version>5.0.0-M7-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <groupId>org.eclipse.che.core</groupId>
@@ -27,6 +27,7 @@
         <module>commons-gwt</module>
         <module>che-core-ide-api</module>
         <module>che-core-ide-generators</module>
+        <module>che-core-dyna-provider-generator-maven-plugin</module>
         <module>che-core-ide-ui</module>
         <module>che-core-ide-app</module>
         <module>che-core-ide-templates</module>

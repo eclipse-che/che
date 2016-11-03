@@ -65,7 +65,7 @@ public abstract class AbstractAgentLauncher implements AgentLauncher {
     public void launch(Instance machine, Agent agent) throws ServerException {
         try {
             final InstanceProcess process = start(machine, agent);
-            LOG.debug("Waiting for agent {} is launched. Workspace ID:{}", agent.getName(), machine.getWorkspaceId());
+            LOG.debug("Waiting for agent {} is launched. Workspace ID:{}", agent.getId(), machine.getWorkspaceId());
 
             final long pingStartTimestamp = System.currentTimeMillis();
             while (System.currentTimeMillis() - pingStartTimestamp < agentMaxStartTimeMs) {
@@ -91,7 +91,7 @@ public abstract class AbstractAgentLauncher implements AgentLauncher {
 
 
     protected InstanceProcess start(final Instance machine, final Agent agent) throws ServerException {
-        final Command command = new CommandImpl(agent.getName(), agent.getScript(), "agent");
+        final Command command = new CommandImpl(agent.getId(), agent.getScript(), "agent");
         final InstanceProcess process = machine.createProcess(command, null);
         final LineConsumer lineConsumer = new AbstractLineConsumer() {
             @Override

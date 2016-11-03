@@ -42,7 +42,7 @@ public class RemotePreferenceDao implements PreferenceDao {
     private final HttpJsonRequestFactory requestFactory;
 
     @Inject
-    public RemotePreferenceDao(@Named("api.endpoint") String apiUrl, HttpJsonRequestFactory requestFactory) {
+    public RemotePreferenceDao(@Named("che.api") String apiUrl, HttpJsonRequestFactory requestFactory) {
         this.prefsUrl = apiUrl + "/preferences";
         this.requestFactory = requestFactory;
     }

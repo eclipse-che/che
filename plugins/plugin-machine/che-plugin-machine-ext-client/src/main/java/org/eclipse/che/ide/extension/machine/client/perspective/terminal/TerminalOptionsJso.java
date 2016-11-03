@@ -21,8 +21,8 @@ class TerminalOptionsJso extends Jso{
 
     public static native TerminalOptionsJso createDefault() /*-{
         return {
-            cols: 200,
-            rows: 60,
+            cols: 80,
+            rows: 24,
             useStyle: true,
             screenKeys: true
         }

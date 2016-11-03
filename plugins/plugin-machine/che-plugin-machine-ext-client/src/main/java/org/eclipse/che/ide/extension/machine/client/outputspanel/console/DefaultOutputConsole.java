@@ -46,6 +46,7 @@ public class DefaultOutputConsole implements OutputConsole, OutputConsoleView.Ac
         this.view = view;
         this.title = title;
         this.resources = resources;
+        this.view.enableAutoScroll(true);
 
         view.setDelegate(this);
 
@@ -54,6 +55,14 @@ public class DefaultOutputConsole implements OutputConsole, OutputConsoleView.Ac
         view.setReRunButtonVisible(false);
         view.setStopButtonVisible(false);
     }
+
+    /**
+     * Enables auto scroll when output.
+     */
+    public void enableAutoScroll(boolean enable) {
+        view.enableAutoScroll(enable);
+    }
+
 
     /**
      * Print text in the console.

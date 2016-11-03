@@ -21,6 +21,7 @@ import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.SshTransport;
+import org.eclipse.jgit.transport.Transport;
 import org.eclipse.jgit.transport.TransportHttp;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.mockito.ArgumentCaptor;
@@ -41,7 +42,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
-import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertEquals;
 
 /**
  * Test class for {@link JGitConnection}
@@ -52,34 +53,34 @@ import static org.testng.AssertJUnit.assertEquals;
 public class JGitConnectionTest {
 
     @Mock
-    private Repository repository;
+    private Repository        repository;
     @Mock
     private CredentialsLoader credentialsLoader;
     @Mock
-    private SshKeyProvider sshKeyProvider;
+    private SshKeyProvider    sshKeyProvider;
     @Mock
-    private GitUserResolver gitUserResolver;
+    private GitUserResolver   gitUserResolver;
     @Mock
-    private TransportCommand transportCommand;
+    private TransportCommand  transportCommand;
     @Mock
-    private GitRequest request;
+    private GitRequest        request;
     @InjectMocks
-    private JGitConnection jGitConnection;
+    private JGitConnection    jGitConnection;
 
     @DataProvider(name = "gitUrlsWithCredentialsProvider")
     private static Object[][] gitUrlsWithCredentials() {
-        return new Object[][]{{"http://username:password@host.xz/path/to/repo.git"},
-                              {"https://username:password@host.xz/path/to/repo.git"}};
+        return new Object[][] {{"http://username:password@host.xz/path/to/repo.git"},
+                               {"https://username:password@host.xz/path/to/repo.git"}};
     }
 
     @DataProvider(name = "gitUrlsWithoutOrWrongCredentialsProvider")
     private static Object[][] gitUrlsWithoutOrWrongCredentials() {
-        return new Object[][]{{"http://host.xz/path/to/repo.git"},
-                              {"https://host.xz/path/to/repo.git"},
-                              {"http://username:@host.xz/path/to/repo.git"},
-                              {"https://username:@host.xz/path/to/repo.git"},
-                              {"http://:password@host.xz/path/to/repo.git"},
-                              {"https://:password@host.xz/path/to/repo.git"}};
+        return new Object[][] {{"http://host.xz/path/to/repo.git"},
+                               {"https://host.xz/path/to/repo.git"},
+                               {"http://username:@host.xz/path/to/repo.git"},
+                               {"https://username:@host.xz/path/to/repo.git"},
+                               {"http://:password@host.xz/path/to/repo.git"},
+                               {"https://:password@host.xz/path/to/repo.git"}};
     }
 
     @Test(dataProvider = "gitUrlsWithCredentials")
@@ -99,12 +100,12 @@ public class JGitConnectionTest {
         UsernamePasswordCredentialsProvider credentialsProvider = captor.getValue();
         String username = (String)usernameField.get(credentialsProvider);
         char[] password = (char[])passwordField.get(credentialsProvider);
-        assertEquals("username", username);
-        assertEquals("password", String.valueOf(password));
+        assertEquals(username, "username");
+        assertEquals(String.valueOf(password), "password");
     }
 
     @Test(dataProvider = "gitUrlsWithoutOrWrongCredentials")
-    public void shouldNotSetCredentialsProviderIfUrlDoesNotContainCredentials(String url) throws Exception{
+    public void shouldNotSetCredentialsProviderIfUrlDoesNotContainCredentials(String url) throws Exception {
         //when
         jGitConnection.executeRemoteCommand(url, transportCommand, request);
 
@@ -113,7 +114,7 @@ public class JGitConnectionTest {
     }
 
     @Test
-    public void shouldSetSshSessionFactoryWhenSshTransportReceived() throws Exception{
+    public void shouldSetSshSessionFactoryWhenSshTransportReceived() throws Exception {
         //given
         SshTransport sshTransport = mock(SshTransport.class);
         when(sshKeyProvider.getPrivateKey(anyString())).thenReturn(new byte[0]);
@@ -131,8 +132,26 @@ public class JGitConnectionTest {
     }
 
     @Test
-    public void shouldDoNothingWhenTransportHttpReceived() throws Exception{
+    public void shouldDoNothingWhenTransportHttpReceived() throws Exception {
         //given
+
+        /*
+         * We need create {@link TransportHttp} mock, but this class has parent
+         * abstract class {@link Transport}. Class Transport uses fields of children
+         * classes for static initialization collection {@link Transport#protocols}.
+         * When we create mock for {@link TransportHttp} - Mockito mocks fields and
+         * they return null value. For full mock creation TransportHttp Mockito
+         * launches static block in the parent class {@link Transport}, but static
+         * block initializes collection with help mocked children fields which
+         * return null values, so Transport class loses real field value in the
+         * collection. It creates troubles in other tests when we use real object
+         * of TransportHttp(collection 'protocols' contains not all values).
+         * To realize right initialization {@link Transport#protocols} we create
+         * mock of {@link Transport} and this class initializes collection "protocols"
+         * with  help real children {@link TransportHttp}, which returns real not null
+         * value. And then we can create mock {@link TransportHttp}.
+         */
+        mock(Transport.class);
         TransportHttp transportHttp = mock(TransportHttp.class);
         when(sshKeyProvider.getPrivateKey(anyString())).thenReturn(new byte[0]);
         doAnswer(invocation -> {
@@ -150,7 +169,9 @@ public class JGitConnectionTest {
 
     /**
      * Check branch using current repository reference is returned
-     * @throws Exception if it fails
+     *
+     * @throws Exception
+     *         if it fails
      */
     @Test
     public void checkCurrentBranch() throws Exception {
@@ -161,6 +182,6 @@ public class JGitConnectionTest {
         when(ref.getName()).thenReturn(branchTest);
         String branchName = jGitConnection.getCurrentBranch();
 
-        assertEquals(branchTest, branchName);
+        assertEquals(branchName, branchTest);
     }
 }

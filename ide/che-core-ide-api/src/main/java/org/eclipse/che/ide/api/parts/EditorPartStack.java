@@ -15,6 +15,7 @@ import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.resource.Path;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * Part Stack is tabbed layout element, containing Parts. EditorPartStack is shared
@@ -92,4 +93,11 @@ public interface EditorPartStack extends PartStack {
      */
     @Nullable
     EditorPartPresenter getLastClosed();
+
+    /**
+     * Get all parts, opened in this stack.
+     *
+     * @return the parts list.
+     */
+    List<EditorPartPresenter> getParts();
 }

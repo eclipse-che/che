@@ -9,34 +9,38 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {CheStack} from "../../../components/api/che-stack.factory";
+import {CheNotification} from "../../../components/notification/che-notification.factory";
 
 /**
  * Controller for stack management - creation or edit.
  *
  * @author Ann Shumilova
+ * @author Oleksii Orel
  */
 export class StackController {
+  GENERAL_SCOPE: string = 'general';
+  ADVANCED_SCOPE: string = 'advanced';
   $log: ng.ILogService;
   $filter: ng.IFilterService;
   $timeout: ng.ITimeoutService;
   $location: ng.ILocationService;
-  $mdDialog: angular.material.IDialogService;
-
+  $mdDialog: ng.material.IDialogService;
+  cheStack: CheStack;
+  cheNotification: CheNotification;
   loading: boolean;
   isLoading: boolean;
   isCreation: boolean;
-
+  isStackChange: boolean;
   stackId: string;
   stackName: string;
-  stackContent: string;
+  stackJson: string;
   invalidStack: string;
-
+  stackTags: Array<string>;
   stack: any;
+  copyStack: any;
   editorOptions: any;
-  changesPromise: any;
-
-  cheStack;
-  cheNotification;
+  machinesViewStatus: any;
 
   /**
    * Default constructor that is using resource injection
@@ -63,14 +67,62 @@ export class StackController {
       }
     };
 
+    this.machinesViewStatus = {};
     //Checking creation mode:
     this.isCreation = $route.current.params.stackId === 'create';
+    this.copyStack = {};
+    this.stackTags = [];
+
+    if(!this.cheStack.getStacks().length) {
+      this.loading = true;
+      this.cheStack.fetchStacks().finally(()=>{
+        this.loading = false;
+      });
+    }
+
     if (this.isCreation) {
       this.stack = this.getNewStackTemplate();
+      this.stackTags = angular.copy(this.stack.tags);
+      this.stackName = angular.copy(this.stack.name);
     } else {
       this.stackId = $route.current.params.stackId;
       this.fetchStack();
     }
+  }
+
+  /**
+   * Check if the name is unique.
+   * @param name
+   * @returns {boolean}
+   */
+  isUniqueName(name: string): boolean {
+    if(this.copyStack && this.copyStack.name === name) {
+      return true;
+    }
+    return this.cheStack.isUniqueName(name);
+  }
+
+  /**
+   * Cancels stack's changes
+   */
+  cancelStackChanges() {
+    if (!this.copyStack) {
+      return;
+    }
+    if (this.isCreation) {
+      this.$location.path('/stacks');
+    }
+    this.stack = angular.copy(this.copyStack);
+    this.stackName = angular.copy(this.stack.name);
+
+    if (this.stack.tags && this.stack.tags.isArray) {
+      this.stackTags = angular.copy(this.stack.tags);
+    } else {
+      this.stackTags = [];
+    }
+
+    this.stackTags = this.stack.tags ? angular.copy(this.stack.tags) : [];
+    this.updateJsonFromStack();
   }
 
   /**
@@ -79,17 +131,8 @@ export class StackController {
    * @returns {{stack}} new stack template
    */
   getNewStackTemplate(): any {
-    this.stackName = 'New Stack';
-    let stack: any = {};
-    stack.name = this.stackName;
-    stack.description = '';
-    stack.source = {};
-    stack.source.origin = '';
-    stack.source.type = '';
-    stack.components = [];
-    stack.tags = [];
-    stack.workspaceConfig = {};
-    stack.scope = 'advanced';
+    let stack: any = this.cheStack.getStackTemplate();
+    this.stackName = stack.name;
     return stack;
   }
 
@@ -131,7 +174,7 @@ export class StackController {
    */
   handleTagAdding(tag: string): string {
     //Prevents mentioning same tags twice:
-    if (this.stack.tags.includes(tag)) {
+    if (this.stackTags.indexOf(tag) > -1) {
       return null;
     }
 
@@ -139,10 +182,64 @@ export class StackController {
   }
 
   /**
-   * Update stack's editor content.
+   * Reset stack's tags.
    */
-  updateEditorContent(): void {
-    this.stackContent = this.$filter('json')(this.stack);
+  resetTags(): void {
+    if (!this.stack || !this.stack.tags) {
+      return;
+    }
+    this.stack.tags.length = 0;
+    this.updateJsonFromStack();
+  }
+
+  /**
+   * Updates stack name info.
+   * @param isFormValid {Boolean} true if form is valid
+   */
+  updateStackName(isFormValid: boolean) {
+    if (isFormValid === false) {
+      return;
+    }
+    this.stack.name = this.stackName;
+    this.updateJsonFromStack();
+  }
+
+  /**
+   * Updates stack tags info.
+   */
+  updateStackTags() {
+    if (!this.stack.tags) {
+      this.stack.tags = [];
+    }
+    this.stack.tags = angular.copy(this.stackTags);
+    this.updateJsonFromStack();
+  }
+
+  /**
+   * Update stack's editor json from stack.
+   */
+  updateJsonFromStack(): void {
+    this.isStackChange = !angular.equals(this.stack, this.copyStack);
+    this.stackJson = angular.toJson(this.stack, true);
+  }
+
+  /**
+   * Update stack from stack's editor json.
+   */
+  updateStackFromJson(): void {
+    let stack: any;
+    try {
+      stack = angular.fromJson(this.stackJson);
+    } catch (e) {
+      this.isStackChange = false;
+      return;
+    }
+    this.isStackChange = !angular.equals(stack, this.copyStack);
+    if (this.isStackChange) {
+      this.stack = stack;
+      this.stackTags = !stack.tags ? [] : angular.copy(stack.tags);
+      this.stackName = !stack.name ? '' : angular.copy(stack.name);
+    }
   }
 
   /**
@@ -152,71 +249,34 @@ export class StackController {
     if (!this.stack.tags) {
       this.stack.tags = [];
     }
+    this.stackTags = angular.copy(this.stack.tags);
 
     delete this.stack.links;
     this.stackName = angular.copy(this.stack.name);
-    this.stackContent = this.$filter('json')(this.stack);
-  }
-
-  /**
-   * Updates stack info.
-   * @param isFormValid {Boolean} true if form is valid
-   */
-  updateStack(isFormValid: boolean) {
-    if (this.isCreation) {
-      this.stack.name = this.stackName;
-      this.updateEditorContent();
-      return;
-    }
-
-    this.updateEditorContent();
-
-    if (this.changesPromise) {
-      this.$timeout.cancel(this.changesPromise);
-    }
-
-    if (isFormValid === false || this.stack.name === this.stackName) {
-      return;
-    }
-
-    this.changesPromise = this.$timeout(() => {
-      this.isLoading = true;
-      let stackData = angular.copy(this.stack);
-      stackData.name = this.stackName;
-
-      this.cheStack.updateStack(this.stack.id, stackData).then((stack) => {
-        this.cheNotification.showInfo('Stack is successfully updated.');
-        this.stack = stack;
-        this.isLoading = false;
-        this.prepareStackData();
-        this.cheStack.fetchStacks();
-      }, (error) => {
-        this.isLoading = false;
-        this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Update stack failed.');
-        this.$log.error(error);
-      });
-    }, 1000);
+    this.copyStack = angular.copy(this.stack);
+    this.updateJsonFromStack();
   }
 
   /**
    * Saves stack configuration - creates new one or updates existing.
    */
   saveStack(): void {
+    this.updateJsonFromStack();
     if (this.isCreation) {
       this.createStack();
       return;
     }
-
-    this.cheStack.updateStack(this.stack.id, this.stackContent).then((stack) => {
+    this.cheStack.updateStack(this.stack.id, this.stackJson).then((stack) => {
       this.cheNotification.showInfo('Stack is successfully updated.');
-      this.stack = stack;
       this.isLoading = false;
-      this.cheStack.fetchStacks();
+      this.stack = stack;
       this.prepareStackData();
     }, (error) => {
       this.isLoading = false;
       this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Update stack failed.');
       this.$log.error(error);
+      this.stack = this.cheStack.getStackById(this.stackId);
+      this.cancelStackChanges();
     });
   }
 
@@ -224,12 +284,12 @@ export class StackController {
    * Creates new stack.
    */
   createStack(): void {
-    this.cheStack.createStack(this.stackContent).then((stack) => {
-      this.cheNotification.showInfo('Stack is successfully created.');
+    this.cheStack.createStack(this.stackJson).then((stack) => {
       this.stack = stack;
       this.isLoading = false;
       this.cheStack.fetchStacks();
       this.prepareStackData();
+      this.isCreation = false;
     }, (error) => {
       this.isLoading = false;
       this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Creation stack failed.');
@@ -257,7 +317,7 @@ export class StackController {
         this.$location.path('/stacks');
       }, (error) => {
         this.loading = false;
-        let message = 'Failed to delete <b>' + this.stack.name + '</b> stack.' + (error && error.message) ? error.message : "";
+        let message = 'Failed to delete <b>' + this.stack.name + '</b> stack.' + (error && error.message) ? error.message : '';
         this.cheNotification.showError(message);
       });
     });

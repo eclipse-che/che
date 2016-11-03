@@ -117,6 +117,8 @@ public class WorkspaceEventsHandler {
     @VisibleForTesting
     WsAgentOutputSubscriptionHandler     wsAgentLogSubscriptionHandler;
 
+    private boolean workspaceEventsHandled;
+
     @Inject
     WorkspaceEventsHandler(final EventBus eventBus,
                             final CoreLocalizationConstant locale,
@@ -157,6 +159,12 @@ public class WorkspaceEventsHandler {
      *         callback which is necessary to notify that workspace component started or failed
      */
     void trackWorkspaceEvents(final WorkspaceDto workspace, final Callback<Component, Exception> callback) {
+        if (workspaceEventsHandled) {
+            return;
+        }
+
+        workspaceEventsHandled = true;
+
         this.workspaceComponent = wsComponentProvider.get();
         this.messageBus = messageBusProvider.getMessageBus();
         subscribeToWorkspaceStatusEvents(workspace);
@@ -194,6 +202,7 @@ public class WorkspaceEventsHandler {
     }
 
     private void onWorkspaceStarted(final String workspaceId) {
+        startWorkspaceNotification.hide();
         workspaceServiceClient.getWorkspace(workspaceId).then(new Operation<WorkspaceDto>() {
             @Override
             public void apply(WorkspaceDto workspace) throws OperationException {
@@ -270,6 +279,10 @@ public class WorkspaceEventsHandler {
     }
 
     private void subscribeOnEnvironmentOutputChannel(WorkspaceDto workspace) {
+        if (environmentOutputSubscriptionHandler != null) {
+            return;
+        }
+
         final Link link = workspace.getLink(LINK_REL_ENVIRONMENT_OUTPUT_CHANNEL);
         final LinkParameter logsChannelLinkParameter = link.getParameter("channel");
         if (logsChannelLinkParameter == null) {
@@ -282,6 +295,10 @@ public class WorkspaceEventsHandler {
     }
 
     private void subscribeOnEnvironmentStatusChannel(WorkspaceDto workspace) {
+        if (environmentStatusSubscriptionHandler != null) {
+            return;
+        }
+
         final Link link = workspace.getLink(LINK_REL_ENVIRONMENT_STATUS_CHANNEL);
         final LinkParameter statusChannelLinkParameter = link.getParameter("channel");
         if (statusChannelLinkParameter == null) {
@@ -294,6 +311,10 @@ public class WorkspaceEventsHandler {
     }
 
     private void subscribeOnWsAgentOutputChannel(final WorkspaceDto workspace, final String wsMachineName) {
+        if (wsAgentLogSubscriptionHandler != null) {
+            return;
+        }
+
         restoreDevMachineLogs(workspace.getRuntime().getDevMachine()); //try to restore logs if workspace already started
                                                                        // and dev machine provide some output
         wsAgentLogChannel = "workspace:" + workspace.getId() + ":ext-server:output";
@@ -384,7 +405,6 @@ public class WorkspaceEventsHandler {
                     break;
 
                 case ERROR:
-                    unSubscribeHandlers();
                     notificationManager.notify(locale.workspaceStartFailed(), FAIL, FLOAT_MODE);
                     loader.setError(LoaderPresenter.Phase.STARTING_WORKSPACE_RUNTIME);
                     final String workspaceName = workspace.getConfig().getName();
@@ -399,9 +419,8 @@ public class WorkspaceEventsHandler {
 
                 case STOPPED:
                     loader.setSuccess(LoaderPresenter.Phase.STOPPING_WORKSPACE);
-                    unSubscribeHandlers();
-                    eventBus.fireEvent(new WorkspaceStoppedEvent(workspace));
                     startWorkspaceNotification.show(statusEvent.getWorkspaceId());
+                    eventBus.fireEvent(new WorkspaceStoppedEvent(workspace));
                     break;
 
                 case SNAPSHOT_CREATING:

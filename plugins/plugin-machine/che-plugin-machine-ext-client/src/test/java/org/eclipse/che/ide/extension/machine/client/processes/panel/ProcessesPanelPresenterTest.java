@@ -382,7 +382,7 @@ public class ProcessesPanelPresenterTest {
         when(workspaceRuntime.getMachines()).thenReturn(machines);
         when(entityFactory.createMachine(machineDto)).thenReturn(machine);
 
-        presenter.rootNode = new ProcessTreeNode(ROOT_NODE, null, null, null, Collections.EMPTY_LIST);
+        presenter.rootNode = new ProcessTreeNode(ROOT_NODE, null, null, null, new ArrayList<ProcessTreeNode>());
 
         TerminalPresenter terminal = mock(TerminalPresenter.class);
         when(terminalFactory.create(machine)).thenReturn(terminal);
@@ -616,36 +616,4 @@ public class ProcessesPanelPresenterTest {
         verify(outputConsole).attachToProcess(machineProcessDto);
     }
 
-    @Test
-    public void shouldCreateMachineNodeToPrintWsAgentOutput() throws Exception {
-        EnvironmentOutputEvent event = mock(EnvironmentOutputEvent.class);
-        when(event.getMachineName()).thenReturn(MACHINE_NAME);
-
-        MachineEntity machineEntity = mock(MachineEntity.class);
-        MachineDto machine = mock(MachineDto.class);
-        when(entityFactory.createMachine(machine)).thenReturn(machineEntity);
-        when(machineEntity.getDisplayName()).thenReturn(MACHINE_NAME);
-        when(machineEntity.getId()).thenReturn(MACHINE_ID);
-        when(machineEntity.getWorkspaceId()).thenReturn(WORKSPACE_ID);
-        MachineConfigDto machineConfigDto = mock(MachineConfigDto.class);
-        when(machineEntity.getConfig()).thenReturn(machineConfigDto);
-        when(machineConfigDto.isDev()).thenReturn(true);
-        List<MachineDto> machines = new ArrayList<>(2);
-        machines.add(machine);
-        when(workspaceRuntime.getMachines()).thenReturn(machines);
-        OutputConsole outputConsole = mock(OutputConsole.class);
-        when(machineConfigDto.getName()).thenReturn(MACHINE_NAME);
-        when(appContext.getWorkspaceId()).thenReturn(WORKSPACE_ID);
-        when(commandConsoleFactory.create(eq(MACHINE_NAME))).thenReturn(outputConsole);
-
-        presenter.onEnvironmentOutputEvent(event);
-
-        verify(outputConsole).go(acceptsOneWidgetCaptor.capture());
-        IsWidget widget = mock(IsWidget.class);
-        acceptsOneWidgetCaptor.getValue().setWidget(widget);
-
-        verify(commandConsoleFactory).create(eq(MACHINE_NAME));
-        verify(view).addWidget(anyString(), anyString(), anyObject(), anyObject(), anyBoolean());
-        verify(view).setProcessesData(eq(presenter.rootNode));
-    }
 }

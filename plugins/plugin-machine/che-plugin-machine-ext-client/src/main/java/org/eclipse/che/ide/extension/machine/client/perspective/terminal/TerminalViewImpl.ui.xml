@@ -20,9 +20,11 @@
         @eval outputBackgroundColor org.eclipse.che.ide.api.theme.Style.theme.outputBackgroundColor();
 
         .terminalView {
+            position: relative;
         }
 
         .terminalPanel {
+            position: absolute;
             width: 100%;
             height: 100%;
             overflow: hidden;
