@@ -11,7 +11,7 @@ declare namespace _che {
   export namespace route {
 
     export interface IRouteParamsService extends ng.route.IRouteParamsService {
-      action2: string;
+      action: string;
       ideParams: string | string[];
       namespace: string;
       showLogs: string;
