@@ -92,7 +92,7 @@ public class WorkspaceSshKeys {
                     sshManager.removePair(EnvironmentContext.getCurrent().getSubject().getUserId(), "workspace",
                                           workspaceRemovedEvent.getWorkspace().getId());
                 } catch (NotFoundException e) {
-                    LOG.error(String.format("Do not remove default keypair from workspace %s as it is not existing (workspace ID %s)",
+                    LOG.debug(String.format("Do not remove default keypair from workspace %s as it is not existing (workspace ID %s)",
                                             workspaceRemovedEvent.getWorkspace().getConfig().getName(),
                                             workspaceRemovedEvent.getWorkspace().getId()));
                 } catch (ServerException e) {
