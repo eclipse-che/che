@@ -26,8 +26,8 @@ import org.mockito.Mock;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.eclipse.che.api.git.shared.BranchListRequest.LIST_LOCAL;
-import static org.eclipse.che.api.git.shared.BranchListRequest.LIST_REMOTE;
+import static org.eclipse.che.api.git.shared.BranchListMode.LIST_LOCAL;
+import static org.eclipse.che.api.git.shared.BranchListMode.LIST_REMOTE;
 import static org.eclipse.che.api.git.shared.MergeResult.MergeStatus.ALREADY_UP_TO_DATE;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
