@@ -107,11 +107,16 @@ public class BootstrapController {
                         MachineDto devMachineDto = ws.getRuntime().getDevMachine();
                         DevMachine devMachine = new DevMachine(devMachineDto);
 
-                        wsAgentInitializerProvider.get().initialize(devMachine);
+                        wsAgentInitializerProvider.get().initialize(devMachine, new WsAgentInitializer.WsAgentCallback() {
+                            @Override
+                            public void onWsAgentInitialized() {
+                                SortedMap<String, Provider<WsAgentComponent>> sortedComponents = new TreeMap<>();
+                                sortedComponents.putAll(components);
+                                startWsAgentComponents(sortedComponents.values().iterator());
+                            }
+                        });
                         wsAgentURLModifier.initialize(devMachine);
-                        SortedMap<String, Provider<WsAgentComponent>> sortedComponents = new TreeMap<>();
-                        sortedComponents.putAll(components);
-                        startWsAgentComponents(sortedComponents.values().iterator());
+
                     }
                 }).catchError(new Operation<PromiseError>() {
                     @Override

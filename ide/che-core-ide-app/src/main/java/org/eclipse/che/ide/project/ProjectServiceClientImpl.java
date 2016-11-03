@@ -32,8 +32,6 @@ import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.api.machine.WsAgentMessageBusProvider;
 import org.eclipse.che.ide.api.project.ProjectServiceClient;
 import org.eclipse.che.ide.api.project.QueryExpression;
-import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.WsAgentStateController;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;

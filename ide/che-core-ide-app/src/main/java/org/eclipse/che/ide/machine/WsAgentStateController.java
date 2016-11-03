@@ -85,6 +85,7 @@ public class WsAgentStateController implements ConnectionOpenedHandler,
     private       WsAgentState           state;
     private List<AsyncCallback<MessageBus>> messageBusCallbacks = newArrayList();
     private List<AsyncCallback<DevMachine>> devMachineCallbacks = newArrayList();
+    private WsAgentCallback initCallback;
 
     @Inject
     public WsAgentStateController(WorkspaceServiceClient workspaceServiceClient,
@@ -105,11 +106,12 @@ public class WsAgentStateController implements ConnectionOpenedHandler,
     }
 
     @Override
-    public void initialize(DevMachine devMachine) {
+    public void initialize(DevMachine devMachine, WsAgentCallback callback) {
         checkNotNull(devMachine, "Developer machine should not be a null");
 
         this.devMachine = devMachine;
         this.state = STOPPED;
+        this.initCallback = callback;
         loader.show(LoaderPresenter.Phase.STARTING_WORKSPACE_AGENT);
         checkHttpConnection();
     }
@@ -216,6 +218,8 @@ public class WsAgentStateController implements ConnectionOpenedHandler,
             ((AppContextImpl)appContext).setDevMachine(devMachine);
             ((AppContextImpl)appContext).setProjectsRoot(Path.valueOf(devMachine.getRuntime().projectsRoot()));
         }
+
+        initCallback.onWsAgentInitialized();
 
         eventBus.fireEvent(WsAgentStateEvent.createWsAgentStartedEvent());
     }

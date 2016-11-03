@@ -27,11 +27,17 @@ public interface WsAgentInitializer {
      *
      * @param devMachine
      *         booted up developer machine
+     * @param callback
+     *         the callback which indicates that workspace agent has been initialized
      * @throws NullPointerException
      *         in case if {@code devMachine} is null. Reason includes:
      *         <ul>
      *         <li>Developer machine should not be a null</li>
      *         </ul>
      */
-    void initialize(DevMachine devMachine);
+    void initialize(DevMachine devMachine, WsAgentCallback callback);
+
+    interface WsAgentCallback {
+        void onWsAgentInitialized();
+    }
 }
