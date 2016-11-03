@@ -19,7 +19,9 @@ import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.machine.server.spi.RecipeDao;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
+import org.eclipse.che.commons.test.tck.JpaCleaner;
 import org.eclipse.che.commons.test.tck.TckModule;
+import org.eclipse.che.commons.test.tck.TckResourcesCleaner;
 import org.eclipse.che.commons.test.tck.repository.JpaTckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 
@@ -32,7 +34,7 @@ public class JpaTckModule extends TckModule {
     protected void configure() {
         install(new JpaPersistModule("main"));
         bind(JpaInitializer.class).asEagerSingleton();
-
+        bind(TckResourcesCleaner.class).to(JpaCleaner.class);
         bind(EntityListenerInjectionManagerInitializer.class).asEagerSingleton();
 
         bind(new TypeLiteral<TckRepository<RecipeImpl>>() {}).toInstance(new JpaTckRepository<>(RecipeImpl.class));

@@ -97,7 +97,6 @@ public class MachineServiceLinksInjector {
         final Link workspaceChannelLink = createLink("GET",
                                                      serviceContext.getBaseUriBuilder()
                                                                    .path("ws")
-                                                                   .path(machine.getWorkspaceId())
                                                                    .scheme("https".equals(getProcessesUri.getScheme()) ? "wss" : "ws")
                                                                    .build()
                                                                    .toString(),

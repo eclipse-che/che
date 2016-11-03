@@ -36,7 +36,7 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.WsAgentStateController;
+import org.eclipse.che.ide.api.machine.WsAgentMessageBusProvider;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.dto.JsonSerializable;
@@ -74,14 +74,14 @@ public class TextDocumentServiceClient {
             final NotificationManager notificationManager,
             final AppContext appContext,
             final AsyncRequestFactory asyncRequestFactory,
-            final WsAgentStateController wsAgentStateController,
+            final WsAgentMessageBusProvider wsAgentMessageBusProvider,
             final PublishDiagnosticsProcessor publishDiagnosticsProcessor) {
         this.unmarshallerFactory = unmarshallerFactory;
         this.notificationManager = notificationManager;
         this.appContext = appContext;
         this.asyncRequestFactory = asyncRequestFactory;
         this.publishDiagnosticsProcessor = publishDiagnosticsProcessor;
-        wsAgentStateController.getMessageBus().then(new Operation<MessageBus>() {
+        wsAgentMessageBusProvider.getMessageBus().then(new Operation<MessageBus>() {
             @Override
             public void apply(MessageBus arg) throws OperationException {
                 subscribeToPublishDiagnostics(arg);
