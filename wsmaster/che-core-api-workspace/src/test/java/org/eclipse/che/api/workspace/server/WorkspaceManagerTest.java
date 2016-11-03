@@ -1051,8 +1051,6 @@ public class WorkspaceManagerTest {
         verify(runtimes).getMachine(workspace.getId(), machine.getId());
     }
 
-
-
     private RuntimeDescriptor createDescriptor(WorkspaceImpl workspace, WorkspaceStatus status)
             throws ServerException, NotFoundException, ConflictException {
         EnvironmentImpl environment = workspace.getConfig().getEnvironments().get(workspace.getConfig().getDefaultEnv());

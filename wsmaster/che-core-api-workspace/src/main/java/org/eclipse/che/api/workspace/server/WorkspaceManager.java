@@ -62,6 +62,7 @@ import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.lang.Boolean.parseBoolean;
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
@@ -876,7 +877,6 @@ public class WorkspaceManager {
                                                      .setAttributes(attributes)
                                                      .setTemporary(isTemporary)
                                                      .build();
-
         workspace.getAttributes().put(CREATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
         workspaceDao.create(workspace);
         LOG.info("Workspace '{}:{}' with id '{}' created by user '{}'",

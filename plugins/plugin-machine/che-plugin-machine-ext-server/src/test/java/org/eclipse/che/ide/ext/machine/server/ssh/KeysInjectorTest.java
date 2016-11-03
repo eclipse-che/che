@@ -171,7 +171,6 @@ public class KeysInjectorTest {
         verifyZeroInteractions(docker, environmentEngine, sshManager);
     }
 
-
     /**
      * Validate the usecase: There is a workspace sshkeypair but no machine keypair (empty list)
      * Expect that the workspace public key is injected.
@@ -203,8 +202,6 @@ public class KeysInjectorTest {
         verify(docker).startExec(eq(StartExecParams.create(EXEC_ID)), anyObject());
         verifyZeroInteractions(docker, environmentEngine, sshManager);
     }
-
-
 
     /**
      * Validate the usecase: There is a workspace sshkeypair (without public key) but there is a machine keypair
@@ -238,8 +235,6 @@ public class KeysInjectorTest {
         verifyZeroInteractions(docker, environmentEngine, sshManager);
     }
 
-
-
     /**
      * Validate the usecase of no workspace keypair (notfound exception) and no machine keypair
      * Expect no ssh keys are injected
@@ -266,10 +261,6 @@ public class KeysInjectorTest {
 
         verifyZeroInteractions(docker, environmentEngine, sshManager);
     }
-
-
-
-
 
     @Test
     public void shouldSendMessageInMachineLoggerWhenSomeErrorOcursOnKeysInjection() throws Exception {

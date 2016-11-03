@@ -78,8 +78,8 @@ public class WorkspaceSshKeys {
                                             workspaceCreatedEvent.getWorkspace().getId());
                 } catch (ServerException | ConflictException e) {
                     // Conflict shouldn't happen as workspace id is new each time.
-                    LOG.error(String.format("Unable to generate a default ssh pair for the workspace with ID %s",
-                                            workspaceCreatedEvent.getWorkspace().getId()), e);
+                    LOG.error("Unable to generate a default ssh pair for the workspace with ID {}",
+                                            workspaceCreatedEvent.getWorkspace().getId(), e);
                 }
             }
         });
@@ -92,13 +92,12 @@ public class WorkspaceSshKeys {
                     sshManager.removePair(EnvironmentContext.getCurrent().getSubject().getUserId(), "workspace",
                                           workspaceRemovedEvent.getWorkspace().getId());
                 } catch (NotFoundException e) {
-                    LOG.debug(String.format("Do not remove default keypair from workspace %s as it is not existing (workspace ID %s)",
+                    LOG.debug("Do not remove default keypair from workspace {} as it is not existing (workspace ID {})",
                                             workspaceRemovedEvent.getWorkspace().getConfig().getName(),
-                                            workspaceRemovedEvent.getWorkspace().getId()));
+                                            workspaceRemovedEvent.getWorkspace().getId());
                 } catch (ServerException e) {
-                    LOG.error(String.format(
-                            "Error when trying to remove default ssh pair for the workspace %s as it is not existing (workspace ID %s)",
-                            workspaceRemovedEvent.getWorkspace().getConfig().getName(), workspaceRemovedEvent.getWorkspace().getId()));
+                    LOG.error("Error when trying to remove default ssh pair for the workspace {} (workspace ID {})",
+                            workspaceRemovedEvent.getWorkspace().getConfig().getName(), workspaceRemovedEvent.getWorkspace().getId());
                 }
             }
         });

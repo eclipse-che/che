@@ -25,6 +25,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -123,7 +124,6 @@ public class WorkspaceSshKeysTest {
         workspaceCreatedEventEventSubscriber = (EventSubscriber<WorkspaceCreatedEvent>)subscriberCaptor.getAllValues().get(0);
         workspaceRemovedEventEventSubscriber = (EventSubscriber<WorkspaceRemovedEvent>)subscriberCaptor.getAllValues().get(1);
 
-
         when(workspace.getId()).thenReturn(WORKSPACE_ID);
         when(workspace.getConfig()).thenReturn(workspaceConfig);
         when(workspaceConfig.getName()).thenReturn(WORKSPACE_NAME);
@@ -135,6 +135,14 @@ public class WorkspaceSshKeysTest {
             }
         });
 
+    }
+
+    /**
+     * Cleanup Environment Context after each method
+     */
+    @AfterMethod
+    public void tearDown() throws Exception {
+        EnvironmentContext.reset();
     }
 
     /**
@@ -150,7 +158,6 @@ public class WorkspaceSshKeysTest {
         verify(sshManager).generatePair(eq(OWNER_ID), eq("workspace"), eq(WORKSPACE_ID));
 
     }
-
 
     /**
      * Ensure that when a workspace is removed, any associated ssh keypair is removed on sshManager
