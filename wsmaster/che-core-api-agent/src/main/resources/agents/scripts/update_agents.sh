@@ -34,6 +34,7 @@ updateAgentScript ".." "org.eclipse.che.ws-agent"
 updateAgentScript ".." "org.eclipse.che.ls.json"
 updateAgentScript ".." "org.eclipse.che.ls.csharp"
 updateAgentScript ".." "org.eclipse.che.ls.php"
+updateAgentScript ".." "org.eclipse.che.unison"
 
 
 
