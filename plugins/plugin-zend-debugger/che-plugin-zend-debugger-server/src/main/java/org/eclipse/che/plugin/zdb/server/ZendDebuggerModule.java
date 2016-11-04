@@ -12,7 +12,7 @@ package org.eclipse.che.plugin.zdb.server;
 
 import org.eclipse.che.api.debugger.server.DebuggerFactory;
 import org.eclipse.che.inject.DynaModule;
-import org.eclipse.che.plugin.zdb.server.utils.ZendDbgUtils;
+import org.eclipse.che.plugin.zdb.server.utils.ZendDbgFileUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
@@ -28,7 +28,7 @@ public class ZendDebuggerModule extends AbstractModule {
     @Override
     protected void configure() {
         Multibinder.newSetBinder(binder(), DebuggerFactory.class).addBinding().to(ZendDebuggerFactory.class);
-        bind(ZendDbgUtils.class);
+        bind(ZendDbgFileUtils.class);
     }
 
 }

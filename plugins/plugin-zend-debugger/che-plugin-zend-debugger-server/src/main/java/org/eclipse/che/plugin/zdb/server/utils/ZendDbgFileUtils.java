@@ -33,44 +33,13 @@ import com.google.inject.Singleton;
  * @author Bartlomiej Laczkowski
  */
 @Singleton
-public class ZendDbgUtils {
+public class ZendDbgFileUtils {
 
     private static ProjectManager projectManager;
 
-    public static final String[] SUPER_GLOBAL_NAMES = new String[] { "$GLOBALS", "$_SERVER", "$_GET", "$_POST",
-            "$_FILES", "$_COOKIE", "$_SESSION", "$_REQUEST", "$_ENV" };
-
-    public static final String THIS = "$this";
-    public static final String CLASS_INDICATOR = "<class>";
-
     @Inject
-    public ZendDbgUtils(ProjectManager projectManager) {
-        ZendDbgUtils.projectManager = projectManager;
-    }
-
-    /**
-     * Checks if given variable name is a name of super global variable.
-     *
-     * @param name
-     * @return <code>true</code> if given variable name is a name of super
-     *         global variable, <code>false</code> otherwise
-     */
-    public static boolean isSuperGlobal(String name) {
-        for (int i = 0; i < SUPER_GLOBAL_NAMES.length; i++)
-            if (SUPER_GLOBAL_NAMES[i].equalsIgnoreCase(name))
-                return true;
-        return false;
-    }
-
-    /**
-     * Checks if given variable name is a name of "this" pseudo-variable.
-     *
-     * @param name
-     * @return <code>true</code> if given variable name is a name of "this"
-     *         pseudo-variable, <code>false</code> otherwise
-     */
-    public static boolean isThis(String name) {
-        return THIS.equalsIgnoreCase(name);
+    public ZendDbgFileUtils(ProjectManager projectManager) {
+        ZendDbgFileUtils.projectManager = projectManager;
     }
 
     /**
