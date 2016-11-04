@@ -547,7 +547,7 @@
     "name": "angular-patternfly-starter",                                                                               
     "displayName": "angular-patternfly-starter",                                                                        
     "path": "/angular-patternfly-starter",                                                                              
-    "description": "Angular PatternFly Starter project.",                                                               
+    "description": "Angular PatternFly Starter Project.",                                                               
     "projectType": "node-js",                                                                                           
     "mixins": [],                                                                                                       
     "attributes": {                                                                                                     
