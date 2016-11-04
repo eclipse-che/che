@@ -126,6 +126,7 @@ public class WorkspaceServiceTest {
     private static final ApiExceptionMapper MAPPER       = new ApiExceptionMapper();
     private static final String             NAMESPACE    = "user";
     private static final String             USER_ID      = "user123";
+    private static final String             API_ENDPOINT = "http://localhost:8080/api";
     private static final Account            TEST_ACCOUNT = new AccountImpl("anyId", NAMESPACE, "test");
     @SuppressWarnings("unused")
     private static final EnvironmentFilter  FILTER       = new EnvironmentFilter();
@@ -143,7 +144,7 @@ public class WorkspaceServiceTest {
 
     @BeforeMethod
     public void setup() {
-        service = new WorkspaceService("https://localhost:8080/api",
+        service = new WorkspaceService(API_ENDPOINT,
                                        wsManager,
                                        validator,
                                        wsAgentHealthChecker,
@@ -621,7 +622,7 @@ public class WorkspaceServiceTest {
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
                                          .contentType("application/json")
-                                         .body(createCommandDto())
+                                         .body(createEnvDto())
                                          .when()
                                          .put(SECURE_PATH + "/workspace/" + workspace.getId() + "/environment/fake");
 
@@ -646,6 +647,35 @@ public class WorkspaceServiceTest {
         assertEquals(response.getStatusCode(), 204);
         verify(wsManager).updateWorkspace(any(), any());
     }
+
+
+    @Test
+    public void shouldRelativizeLinksOnAddEnvironment() throws Exception {
+        final WorkspaceImpl workspace = createWorkspace(createConfigDto());
+        final String initialLocation = "http://localhost:8080/api/recipe/idrecipe123456789/script";
+        when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
+        when(wsManager.updateWorkspace(any(), any())).thenReturn(workspace);
+        final EnvironmentDto envDto = createEnvDto();
+        envDto.getRecipe().withLocation(initialLocation).withType("dockerfile");
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .contentType("application/json")
+                                         .body(envDto)
+                                         .when()
+                                         .queryParam("name", "new-env")
+                                         .post(SECURE_PATH + "/workspace/" + workspace.getId() + "/environment");
+
+        assertEquals(response.getStatusCode(), 200);
+        String savedLocation = unwrapDto(response, WorkspaceDto.class).getConfig()
+                                                                      .getEnvironments()
+                                                                      .get("new-env")
+                                                                      .getRecipe()
+                                                                      .getLocation();
+
+        assertEquals(savedLocation, initialLocation.substring(API_ENDPOINT.length()));
+    }
+
 
 
     @Test

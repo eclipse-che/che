@@ -129,7 +129,6 @@ public class CheEnvironmentEngine {
                                 DefaultServicesStartStrategy startStrategy,
                                 MachineInstanceProvider machineProvider,
                                 AgentConfigApplier agentConfigApplier,
-                                @Named("che.api") String apiEndpoint,
                                 RecipeDownloader recipeDownloader,
                                 ContainerNameGenerator containerNameGenerator,
                                 AgentRegistry agentRegistry) {
