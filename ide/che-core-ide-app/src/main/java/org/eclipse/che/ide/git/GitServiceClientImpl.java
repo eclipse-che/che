@@ -140,8 +140,7 @@ public class GitServiceClientImpl implements GitServiceClient {
             throws WebSocketException {
         String url = INIT + "?projectPath=" + project.getPath() + "&bare=" + bare;
 
-        MessageBuilder builder = new MessageBuilder(POST, url);
-        Message message = builder.build();
+        Message message = new MessageBuilder(POST, url).header(ACCEPT, TEXT_PLAIN).build();
 
         sendMessageToWS(message, callback);
     }
@@ -153,8 +152,7 @@ public class GitServiceClientImpl implements GitServiceClient {
             public void makeCall(final AsyncCallback<Void> callback) {
                 String url = INIT + "?projectPath=" + project.toString() + "&bare=" + bare;
 
-                MessageBuilder builder = new MessageBuilder(POST, url);
-                Message message = builder.build();
+                Message message = new MessageBuilder(POST, url).header(ACCEPT, TEXT_PLAIN).build();
 
                 sendMessageToWS(message, new RequestCallback<Void>() {
                     @Override
