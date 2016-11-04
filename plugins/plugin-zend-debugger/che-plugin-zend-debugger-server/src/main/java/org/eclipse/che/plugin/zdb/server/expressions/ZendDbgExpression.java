@@ -54,10 +54,6 @@ public class ZendDbgExpression implements IDbgExpression {
 
     @Override
     public List<IDbgExpression> getChildren() {
-        // Re-evaluate the expression if result is incomplete
-        if (expressionResult.getChildrenCount() != expressionResult.getChildren().size()) {
-            evaluate();
-        }
         return expressionResult.getChildren();
     }
 

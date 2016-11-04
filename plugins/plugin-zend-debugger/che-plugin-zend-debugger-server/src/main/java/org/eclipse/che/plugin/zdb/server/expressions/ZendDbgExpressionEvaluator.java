@@ -280,8 +280,6 @@ public class ZendDbgExpressionEvaluator {
             ZendDebugger.LOG.error("Could not assign new value for: " + expression.getExpression() + " variable.");
             return false;
         }
-        // Re-evaluate to update changed state
-        evaluate(expression, depth);
         return true;
     }
 

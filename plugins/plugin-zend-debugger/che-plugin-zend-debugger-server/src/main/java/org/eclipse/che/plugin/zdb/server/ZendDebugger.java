@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -94,7 +95,7 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
     private static final class VariablesStorage {
 
         private static final String GLOBALS_VARIABLE = "$GLOBALS";
-        
+
         private final List<IDbgVariable> variables;
 
         public VariablesStorage(List<IDbgVariable> variables) {
@@ -108,11 +109,15 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
         IDbgVariable findVariable(VariablePath variablePath) {
             List<IDbgVariable> currentVariables = variables;
             IDbgVariable matchingVariable = null;
-            for (String variableName : variablePath.getPath()) {
+            Iterator<String> pathIterator = variablePath.getPath().iterator();
+            while (pathIterator.hasNext()) {
+                String variableName = pathIterator.next();
                 for (IDbgVariable currentVariable : currentVariables) {
                     if (currentVariable.getName().equals(variableName)) {
                         matchingVariable = currentVariable;
-                        currentVariables = new ArrayList<>(currentVariable.getVariables());
+                        if (pathIterator.hasNext()) {
+                            currentVariables = new ArrayList<>(currentVariable.getVariables());
+                        }
                         break;
                     }
                 }
@@ -205,7 +210,8 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
 
     @Override
     public SimpleValue getValue(VariablePath variablePath) {
-        Variable matchingVariable = debugVariableStorage.findVariable(variablePath);
+        IDbgVariable matchingVariable = debugVariableStorage.findVariable(variablePath);
+        matchingVariable.makeComplete();
         return new SimpleValueImpl(matchingVariable.getVariables(), matchingVariable.getValue());
     }
 

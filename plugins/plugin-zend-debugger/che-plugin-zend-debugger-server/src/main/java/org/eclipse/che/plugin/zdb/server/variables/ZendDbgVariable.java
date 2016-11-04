@@ -14,6 +14,7 @@ import static org.eclipse.che.plugin.zdb.server.expressions.IDbgDataFacet.Facet.
 import static org.eclipse.che.plugin.zdb.server.expressions.IDbgDataFacet.Facet.KIND_OBJECT_MEMBER;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.che.api.debug.shared.model.VariablePath;
@@ -31,11 +32,14 @@ public class ZendDbgVariable implements IDbgVariable {
     private final VariablePath variablePath;
     private final String name;
     private List<IDbgVariable> variables;
+    private boolean isComplete;
 
     public ZendDbgVariable(VariablePath variablePath, IDbgExpression zendDbgExpression) {
         this.variablePath = variablePath;
         this.zendDbgExpression = zendDbgExpression;
         this.name = createName(zendDbgExpression);
+        this.variables = Collections.emptyList();
+        this.isComplete = zendDbgExpression.getChildrenCount() == zendDbgExpression.getChildren().size();
     }
 
     @Override
@@ -77,14 +81,6 @@ public class ZendDbgVariable implements IDbgVariable {
 
     @Override
     public List<IDbgVariable> getVariables() {
-        if (variables == null) {
-            variables = new ArrayList<>();
-            for (IDbgExpression child : zendDbgExpression.getChildren()) {
-                List<String> childPath = new ArrayList<>(variablePath.getPath());
-                childPath.add(createName(child));
-                variables.add(new ZendDbgVariable(new VariablePathImpl(childPath), child));
-            }
-        }
         return variables;
     }
 
@@ -96,8 +92,24 @@ public class ZendDbgVariable implements IDbgVariable {
     @Override
     public void setValue(String newValue) {
         if (zendDbgExpression.setValue(newValue)) {
-            // New value was set successfully, reset child variables
-            variables = null;
+            // Re-evaluate underlying expression
+            isComplete = false;
+            makeComplete();
+        }
+    }
+
+    @Override
+    public void makeComplete() {
+        if (!isComplete) {
+            // Evaluate wrapped expression to fetch all child variables
+            zendDbgExpression.evaluate();
+            variables = new ArrayList<>();
+            for (IDbgExpression child : zendDbgExpression.getChildren()) {
+                List<String> childPath = new ArrayList<>(variablePath.getPath());
+                childPath.add(createName(child));
+                variables.add(new ZendDbgVariable(new VariablePathImpl(childPath), child));
+            }
+            isComplete = true;
         }
     }
 

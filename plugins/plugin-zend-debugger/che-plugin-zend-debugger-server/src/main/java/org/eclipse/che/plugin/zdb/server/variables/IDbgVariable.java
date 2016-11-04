@@ -25,6 +25,11 @@ public interface IDbgVariable extends Variable {
     List<IDbgVariable> getVariables();
 
     /**
+     * Requests child variables computation.
+     */
+    public void makeComplete();
+
+    /**
      * Assigns new value to this variable.
      *
      * @param newValue
