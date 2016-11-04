@@ -9,6 +9,8 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {CheAgent} from '../../../../../components/api/che-agent.factory';
+import {CheAPI} from '../../../../../components/api/che-api.factory';
 
 /**
  * @ngdoc controller
@@ -17,12 +19,19 @@
  * @author Ilya Buziuk
  */
 export class ListAgentsController {
+  cheAgent: CheAgent;
+
+  agents: string[];
+  agentsList: any[];
+  allAgents: any[];
+
+  agentsOnChange: Function;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheAPI) {
+  constructor(cheAPI: CheAPI) {
     this.cheAgent = cheAPI.getAgent();
 
     this.cheAgent.fetchAgents().then(() => {
@@ -30,11 +39,11 @@ export class ListAgentsController {
     });
   }
 
-  buildAgentsList() {
+  buildAgentsList(): void {
     this.agentsList = [];
     this.allAgents = this.cheAgent.getAgents();
 
-    this.allAgents.forEach(agent => {
+    this.allAgents.forEach((agent: any) => {
         let agentItem = angular.copy(agent);
         let isEnabled = this.isEnabled(agent.id, this.agents);
         agentItem.isEnabled = isEnabled;
@@ -42,7 +51,7 @@ export class ListAgentsController {
     });
   }
 
-  updateAgent(agent) {
+  updateAgent(agent: any): void {
     if (agent.isEnabled) {
       this.agents.push(agent.id);
     } else {
@@ -57,11 +66,11 @@ export class ListAgentsController {
    * "ws-agent" should be listed, but always disabled regardless of the state
    * @param agentId {string}
    */
-  needToDisable(agentId) {
-    return (agentId === "org.eclipse.che.ws-agent");
+  needToDisable(agentId: string): boolean {
+    return (agentId === 'org.eclipse.che.ws-agent');
   }
 
-  isEnabled(agentId, agents) {
+  isEnabled(agentId: string, agents: string[]): boolean {
     return (-1 !== agents.indexOf(agentId));
   }
 

@@ -20,7 +20,7 @@ import java.util.List;
  * @author andrew00x
  */
 @DTO
-public interface RmRequest extends GitRequest {
+public interface RmRequest {
     /** @return files to remove */
     List<String> getItems();
     
