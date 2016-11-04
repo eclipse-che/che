@@ -37,6 +37,7 @@ import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
+import org.eclipse.che.api.workspace.shared.dto.EnvironmentRecipeDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
@@ -44,6 +45,7 @@ import org.eclipse.che.api.workspace.shared.dto.WsAgentHealthStateDto;
 import org.eclipse.che.commons.env.EnvironmentContext;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -86,15 +88,18 @@ public class WorkspaceService extends Service {
     private final WorkspaceValidator            validator;
     private final WsAgentHealthChecker          agentHealthChecker;
     private final WorkspaceServiceLinksInjector linksInjector;
+    private final String                        apiEndpoint;
 
     @Context
     private SecurityContext securityContext;
 
     @Inject
-    public WorkspaceService(WorkspaceManager workspaceManager,
+    public WorkspaceService(@Named("che.api") String apiEndpoint,
+                            WorkspaceManager workspaceManager,
                             WorkspaceValidator validator,
                             WsAgentHealthChecker agentHealthChecker,
                             WorkspaceServiceLinksInjector workspaceServiceLinksInjector) {
+        this.apiEndpoint = apiEndpoint;
         this.workspaceManager = workspaceManager;
         this.validator = validator;
         this.agentHealthChecker = agentHealthChecker;
@@ -139,6 +144,7 @@ public class WorkspaceService extends Service {
         final Map<String, String> attributes = parseAttrs(attrsList);
         validator.validateAttributes(attributes);
         validator.validateConfig(config);
+        relativizeRecipeLinks(config);
         if (namespace == null) {
             namespace = EnvironmentContext.getCurrent().getSubject().getUserName();
         }
@@ -250,6 +256,7 @@ public class WorkspaceService extends Service {
                                                            ConflictException {
         requiredNotNull(update, "Workspace configuration");
         validator.validateWorkspace(update);
+        relativizeRecipeLinks(update.getConfig());
         return linksInjector.injectLinks(asDto(workspaceManager.updateWorkspace(id, update)), getServiceContext());
     }
 
@@ -316,7 +323,7 @@ public class WorkspaceService extends Service {
                                                       "(e.g. workspace with such name already exists"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
     public WorkspaceDto startFromConfig(@ApiParam(value = "The configuration to start the workspace from", required = true)
-                                        WorkspaceConfigDto cfg,
+                                        WorkspaceConfigDto config,
                                         @ApiParam("Weather this workspace is temporary or not")
                                         @QueryParam("temporary")
                                         Boolean isTemporary,
@@ -327,12 +334,13 @@ public class WorkspaceService extends Service {
                                                                  NotFoundException,
                                                                  ServerException,
                                                                  ConflictException {
-        requiredNotNull(cfg, "Workspace configuration");
-        validator.validateConfig(cfg);
+        requiredNotNull(config, "Workspace configuration");
+        validator.validateConfig(config);
+        relativizeRecipeLinks(config);
         if (namespace == null) {
             namespace = EnvironmentContext.getCurrent().getSubject().getUserName();
         }
-        return linksInjector.injectLinks(asDto(workspaceManager.startWorkspace(cfg,
+        return linksInjector.injectLinks(asDto(workspaceManager.startWorkspace(config,
                                                                                namespace,
                                                                                firstNonNull(isTemporary, false))), getServiceContext());
     }
@@ -514,6 +522,7 @@ public class WorkspaceService extends Service {
                                                               ForbiddenException {
         requiredNotNull(newEnvironment, "New environment");
         requiredNotNull(envName, "New environment name");
+        relativizeRecipeLinks(newEnvironment);
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
         workspace.getConfig().getEnvironments().put(envName, new EnvironmentImpl(newEnvironment));
         validator.validateConfig(workspace.getConfig());
@@ -544,6 +553,7 @@ public class WorkspaceService extends Service {
                                                                         ConflictException,
                                                                         ForbiddenException {
         requiredNotNull(update, "Environment description");
+        relativizeRecipeLinks(update);
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
         EnvironmentImpl previous = workspace.getConfig().getEnvironments().put(envName, new EnvironmentImpl(update));
         if (previous == null) {
@@ -745,6 +755,20 @@ public class WorkspaceService extends Service {
             }
             default: {
                 throw new BadRequestException(format("Wrong composite key %s. Format should be 'username:workspace_name'. ", key));
+            }
+        }
+    }
+
+    private void relativizeRecipeLinks(WorkspaceConfigDto config) {
+        config.getEnvironments().values().forEach(this::relativizeRecipeLinks);
+    }
+
+    private void relativizeRecipeLinks(EnvironmentDto environment) {
+        EnvironmentRecipeDto recipe =  environment.getRecipe();
+        if (recipe.getType().equals("dockerfile")) {
+            String location = recipe.getLocation();
+            if (location != null && location.startsWith(apiEndpoint)) {
+                recipe.setLocation(location.substring(apiEndpoint.length()));
             }
         }
     }

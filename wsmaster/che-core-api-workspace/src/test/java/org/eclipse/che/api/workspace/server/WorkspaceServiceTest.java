@@ -143,7 +143,8 @@ public class WorkspaceServiceTest {
 
     @BeforeMethod
     public void setup() {
-        service = new WorkspaceService(wsManager,
+        service = new WorkspaceService("https://localhost:8080/api",
+                                       wsManager,
                                        validator,
                                        wsAgentHealthChecker,
                                        new WorkspaceServiceLinksInjector(new MachineServiceLinksInjector()));
