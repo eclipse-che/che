@@ -2085,7 +2085,7 @@
         {
           "name": "upload",
           "type": "custom",
-          "commandLine": "cd ${current.project.path} && pio run -t upload",
+          "commandLine": "pio run -d ${current.project.path} -t upload",
           "attributes": {
             "previewUrl": ""
           }
@@ -2093,7 +2093,7 @@
         {
           "name": "clean",
           "type": "custom",
-          "commandLine": "cd ${current.project.path} && pio run -t clean",
+          "commandLine": "pio run -d ${current.project.path} -t clean",
           "attributes": {
             "previewUrl": ""
           }
@@ -2109,7 +2109,7 @@
         {
           "name": "Remote: Upload",
           "type": "custom",
-          "commandLine": "cd ${current.project.path} && pio remote run -t upload",
+          "commandLine": "pio -d ${current.project.path} remote run -t upload",
           "attributes": {
             "previewUrl": ""
           }
