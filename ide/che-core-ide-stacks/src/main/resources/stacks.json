@@ -2109,7 +2109,7 @@
         {
           "name": "Remote: Upload",
           "type": "custom",
-          "commandLine": "pio -d ${current.project.path} remote run -t upload",
+          "commandLine": "pio remote run -d ${current.project.path} -t upload",
           "attributes": {
             "previewUrl": ""
           }
