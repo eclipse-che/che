@@ -543,6 +543,52 @@
       "Node.JS"
     ]
   },
+  {                                                                                                                     
+    "name": "angular-patternfly-starter",                                                                               
+    "displayName": "angular-patternfly-starter",                                                                        
+    "path": "/angular-patternfly-starter",                                                                              
+    "description": "Angular PatternFly Starter Project.",                                                               
+    "projectType": "node-js",                                                                                           
+    "mixins": [],                                                                                                       
+    "attributes": {                                                                                                     
+      "language": [                                                                                                     
+        "javascript"                                                                                                    
+      ]                                                                                                                 
+    },                                                                                                                  
+    "modules": [],                                                                                                      
+    "problems": [],                                                                                                     
+    "source": {                                                                                                         
+      "type": "git",                                                                                                    
+      "location": "https://github.com/patternfly/angular-patternfly-demo-app.git",                                            
+      "parameters": {}                                                                                                  
+    },                                                                                                                  
+    "commands": [                                                                                                       
+      {                                                                                                                 
+        "name": "install dependencies",                                                                                 
+        "type": "custom",                                                                                               
+        "commandLine": "cd ${current.project.path} && npm install --no-bin-links && bower install",                     
+        "attributes": {                                                                                                 
+          "previewUrl": ""                                                                                              
+        }                                                                                                               
+      },                                                                                                                
+      {                                                                                                                 
+        "name": "run",                                                                                                  
+        "type": "custom",                                                                                               
+        "commandLine": "cd ${current.project.path} && grunt server",                                                    
+        "attributes": {                                                                                                 
+          "previewUrl": "http://${server.port.8003}"                                                                    
+        }                                                                                                               
+      }                                                                                                                 
+    ],                                                                                                                  
+    "links": [],                                                                                                        
+    "category": "Samples",                                                                                              
+    "tags": [                                                                                                           
+      "nodejs",                                                                                                         
+      "patternfly",                                                                                                     
+      "javascript",                                                                                                     
+      "Node.JS"                                                                                                         
+    ]                                                                                                                   
+  },
   {
     "name": "web-java-spring",
     "displayName": "web-java-spring",
