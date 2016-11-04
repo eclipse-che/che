@@ -45,6 +45,7 @@ export class CheWorkspace {
   workspaces: Array<che.IWorkspace>;
   subscribedWorkspacesIds: Array<string>;
   workspaceAgents: Map<string, CheWorkspaceAgent>;
+  workspacesByNamespace: Map<string, any>;
   workspacesById: Map<string, che.IWorkspace>;
   remoteWorkspaceAPI: ICHELicenseResource<any>;
   lodash: any;
@@ -71,7 +72,10 @@ export class CheWorkspace {
     // per Id
     this.workspacesById = new Map();
 
-    // workspace agents per workspace id:
+    // per namespace
+    this.workspacesByNamespace = new Map();
+
+    //Workspace agents per workspace id:
     this.workspaceAgents = new Map();
 
     // listeners if workspaces are changed/updated
@@ -173,6 +177,10 @@ export class CheWorkspace {
     });
   }
 
+  getWorkspacesByNamespace(namespace) {
+    return this.workspacesByNamespace.get(namespace);
+  }
+
   /**
    * Gets the workspace by id
    * @param id {string} - workspace id
@@ -199,12 +207,20 @@ export class CheWorkspace {
       angular.copy(this.workspacesById, copyWorkspaceById);
 
       this.workspacesById.clear();
+      this.workspacesByNamespace.clear();
       // add workspace if not temporary
       data.forEach((workspace: che.IWorkspace) => {
 
         if (!workspace.temporary) {
           remoteWorkspaces.push(workspace);
           this.workspaces.push(workspace);
+          this.workspacesById.set(workspace.id, workspace);
+          let namespaceWorkspaces = this.workspacesByNamespace.get(workspace.namespace);
+          if (namespaceWorkspaces) {
+            namespaceWorkspaces.push(workspace);
+          } else {
+            this.workspacesByNamespace.set(workspace.namespace, [workspace]);
+          }
         }
         this.workspacesById.set(workspace.id, workspace);
         this.startUpdateWorkspaceStatus(workspace.id);
