@@ -21,6 +21,8 @@ import {UsageChart} from './list-workspaces/workspace-item/usage-chart.directive
 import {WorkspaceItemCtrl} from './list-workspaces/workspace-item/workspace-item.controller';
 import {WorkspaceEditModeOverlay} from './workspace-edit-mode/workspace-edit-mode-overlay.directive';
 import {WorkspaceEditModeToolbarButton} from './workspace-edit-mode/workspace-edit-mode-toolbar-button.directive';
+import {WorkspaceDetailsSsh} from './workspace-details/workspace-ssh/workspace-details-ssh.directive';
+import {WorkspaceDetailsSshCtrl} from './workspace-details/workspace-ssh/workspace-details-ssh.controller';
 import {WorkspaceDetailsProjectsCtrl} from './workspace-details/workspace-projects/workspace-details-projects.controller';
 import {WorkspaceDetailsService} from './workspace-details/workspace-details.service';
 import {ExportWorkspaceController} from './workspace-details/export-workspace/export-workspace.controller';
@@ -82,6 +84,9 @@ export class WorkspacesConfig {
   constructor(register) {
 
     new CreateProjectStackLibrarySelectedStackFilter(register);
+
+    register.controller('WorkspaceDetailsSshCtrl', WorkspaceDetailsSshCtrl);
+    register.directive('workspaceDetailsSsh', WorkspaceDetailsSsh);
 
     register.controller('ListWorkspacesCtrl', ListWorkspacesCtrl);
     register.controller('WorkspaceDetailsController', WorkspaceDetailsController);

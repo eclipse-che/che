@@ -30,6 +30,7 @@ import {CheRemote} from './remote/che-remote.factory';
 import {CheOAuthProvider} from './che-o-auth-provider.factory';
 import {CheEnvironmentRegistry} from './environment/che-environment-registry.factory';
 import {CheAgent} from './che-agent.factory';
+import {CheSsh} from './che-ssh.factory';
 import {CheNamespaceRegistry} from './namespace/che-namespace-registry.factory';
 
 export class ApiConfig {
@@ -54,6 +55,7 @@ export class ApiConfig {
     register.factory('cheOAuthProvider', CheOAuthProvider);
     register.factory('cheEnvironmentRegistry', CheEnvironmentRegistry);
     register.factory('cheAgent', CheAgent);
+    register.factory('cheSsh', CheSsh);
     register.factory('cheNamespaceRegistry', CheNamespaceRegistry);
   }
 }
