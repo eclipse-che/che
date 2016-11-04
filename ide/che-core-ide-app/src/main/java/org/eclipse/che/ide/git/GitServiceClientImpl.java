@@ -462,15 +462,15 @@ public class GitServiceClientImpl implements GitServiceClient {
                            ProjectConfig project,
                            BranchListMode listMode,
                            AsyncRequestCallback<List<Branch>> callback) {
-        String url = appContext.getDevMachine().getWsAgentBaseUrl() + BRANCH + "?projectPath=" + project.getPath() + "&listMode=" +
-                     listMode;
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + BRANCH + "?projectPath=" + project.getPath() +
+                     (listMode == null ? "" : "&listMode=" + listMode);
         asyncRequestFactory.createGetRequest(url).send(callback);
     }
 
     @Override
     public Promise<List<Branch>> branchList(DevMachine devMachine, Path project, BranchListMode listMode) {
-        String url = appContext.getDevMachine().getWsAgentBaseUrl() + BRANCH + "?projectPath=" + project.toString() + "&listMode=" +
-                     listMode;
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + BRANCH + "?projectPath=" + project.toString() +
+                     (listMode == null ? "" : "&listMode=" + listMode);
         return asyncRequestFactory.createGetRequest(url).send(dtoUnmarshallerFactory.newListUnmarshaller(Branch.class));
     }
 
@@ -821,7 +821,9 @@ public class GitServiceClientImpl implements GitServiceClient {
                 params.append("&fileFilter=").append(file);
             }
         }
-        params.append("&diffType=").append(type);
+        if (type != null) {
+            params.append("&diffType=").append(type);
+        }
         params.append("&noRenames=").append(noRenames);
         params.append("&renameLimit=").append(renameLimit);
         params.append("&commitA=").append(commitA);

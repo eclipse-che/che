@@ -31,6 +31,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -66,14 +67,40 @@ public class KeysInjector {
             @Override
             public void onEvent(MachineStatusEvent event) {
                 if (event.getEventType() == MachineStatusEvent.EventType.RUNNING) {
+                    final Instance machine;
                     try {
-                        final Instance machine = environmentEngine.getMachine(event.getWorkspaceId(),
-                                                                              event.getMachineId());
+                        machine = environmentEngine.getMachine(event.getWorkspaceId(),
+                                                               event.getMachineId());
+                    } catch (NotFoundException e) {
+                        LOG.error("Unable to find machine: " + e.getLocalizedMessage(), e);
+                        return;
+                    }
+
+                    try {
+                        // get machine keypairs
                         List<SshPairImpl> sshPairs = sshManager.getPairs(machine.getOwner(), "machine");
-                        final List<String> publicKeys = sshPairs.stream()
+                        final List<String> publicMachineKeys = sshPairs.stream()
                                                              .filter(sshPair -> sshPair.getPublicKey() != null)
                                                              .map(SshPairImpl::getPublicKey)
                                                              .collect(Collectors.toList());
+
+                        // get workspace keypair (if any)
+                        SshPairImpl sshWorkspacePair = null;
+                        try {
+                            sshWorkspacePair = sshManager.getPair(machine.getOwner(), "workspace", event.getWorkspaceId());
+                        } catch (NotFoundException e) {
+                            LOG.debug("No ssh key associated to the workspace", e);
+                        }
+
+                        // build list of all pairs.
+                        final List<String> publicKeys;
+                        if (sshWorkspacePair != null && sshWorkspacePair.getPublicKey() != null) {
+                            publicKeys = new ArrayList<>(publicMachineKeys.size() + 1);
+                            publicKeys.add(sshWorkspacePair.getPublicKey());
+                            publicKeys.addAll(publicMachineKeys);
+                        } else {
+                            publicKeys = publicMachineKeys;
+                        }
 
                         if (publicKeys.isEmpty()) {
                             return;
@@ -100,7 +127,7 @@ public class KeysInjector {
                                 }
                             }
                         });
-                    } catch (IOException | ServerException | NotFoundException e) {
+                    } catch (IOException | ServerException e) {
                         LOG.error(e.getLocalizedMessage(), e);
                     }
                 }
