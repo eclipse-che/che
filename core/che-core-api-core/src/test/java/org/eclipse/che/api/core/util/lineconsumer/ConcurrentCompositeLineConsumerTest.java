@@ -13,7 +13,11 @@ package org.eclipse.che.api.core.util.lineconsumer;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.commons.test.mockito.answer.WaitingAnswer;
 import org.mockito.Mock;
+import org.mockito.exceptions.base.MockitoException;
+import org.mockito.internal.invocation.InvocationMatcher;
+import org.mockito.invocation.Invocation;
 import org.mockito.testng.MockitoTestNGListener;
+import org.mockito.verification.VerificationMode;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -185,12 +189,6 @@ public class ConcurrentCompositeLineConsumerTest  {
         // when
         executor.execute(concurrentCompositeLineConsumer::close);
 
-        // then
-        for (LineConsumer consumer : subConsumers) {
-            verify(consumer, never()).close();
-        }
-
-        // when
         waitingAnswer1.completeAnswer();
         waitingAnswer2.completeAnswer();
 
@@ -202,7 +200,7 @@ public class ConcurrentCompositeLineConsumerTest  {
         for (LineConsumer consumer : subConsumers) {
             verify(consumer).writeLine(eq(message1));
             verify(consumer).writeLine(eq(message2));
-            verify(consumer).close();
+            verify(consumer, last()).close();
         }
     }
 
@@ -259,6 +257,29 @@ public class ConcurrentCompositeLineConsumerTest  {
         allElements.addAll(Arrays.asList(base));
         allElements.addAll(Arrays.asList(toAppend));
         return allElements.toArray(new LineConsumer[allElements.size()]);
+    }
+
+    /**
+     * Checks whether interaction with given mock is <i>the last one so far</i>.
+     * Typical using:
+     * <pre class="code"><code class="java">
+     * verify(someMock, last()).someMethod();
+     * </code></pre>
+     */
+    private static VerificationMode last() {
+        return (verificationData) -> {
+            List<Invocation> invocations = verificationData.getAllInvocations();
+            InvocationMatcher invocationMatcher = verificationData.getWanted();
+
+            if (invocations == null || invocations.isEmpty()) {
+                throw new MockitoException("\nNo interactions with " + invocationMatcher.getInvocation().getMock() + " mock so far");
+            }
+            Invocation invocation = invocations.get(invocations.size() - 1);
+
+            if (!invocationMatcher.matches(invocation)) {
+                throw new MockitoException("\nWanted but not invoked:\n" + invocationMatcher);
+            }
+        };
     }
 
 }
