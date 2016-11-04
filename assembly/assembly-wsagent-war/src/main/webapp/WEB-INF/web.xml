@@ -19,7 +19,7 @@
     <display-name>Che Machine API</display-name>
     <context-param>
         <param-name>org.everrest.websocket.context</param-name>
-        <param-value>/{var1}/api</param-value>
+        <param-value>/api</param-value>
     </context-param>
     <context-param>
         <param-name>org.eclipse.che.websocket.endpoint</param-name>
