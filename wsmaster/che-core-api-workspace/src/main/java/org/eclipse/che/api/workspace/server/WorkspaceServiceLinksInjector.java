@@ -37,6 +37,7 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.util.LinksHelper.createLink;
 import static org.eclipse.che.api.machine.shared.Constants.ENVIRONMENT_OUTPUT_CHANNEL_TEMPLATE;
 import static org.eclipse.che.api.machine.shared.Constants.ENVIRONMENT_STATUS_CHANNEL_TEMPLATE;
+import static org.eclipse.che.api.machine.shared.Constants.EXEC_AGENT_REFERENCE;
 import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_ENVIRONMENT_OUTPUT_CHANNEL;
 import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_ENVIRONMENT_STATUS_CHANNEL;
 import static org.eclipse.che.api.machine.shared.Constants.TERMINAL_REFERENCE;
@@ -222,15 +223,25 @@ public class WorkspaceServiceLinksInjector {
                 servers.stream()
                        .filter(server -> TERMINAL_REFERENCE.equals(server.getRef()))
                        .findAny()
-                       .ifPresent(terminal -> devMachine.getLinks()
-                                                        .add(createLink("GET",
-                                                                        UriBuilder.fromUri(terminal.getUrl())
-                                                                                  .scheme("https".equals(ideUri.getScheme()) ? "wss"
-                                                                                                                             : "ws")
-                                                                                  .path("/pty")
-                                                                                  .build()
-                                                                                  .toString(),
-                                                                        TERMINAL_REFERENCE)));
+                       .ifPresent(terminal -> {
+                           devMachine.getLinks()
+                                     .add(createLink("GET",
+                                                     UriBuilder.fromUri(terminal.getUrl())
+                                                               .scheme("https".equals(ideUri.getScheme()) ? "wss"
+                                                                                                          : "ws")
+                                                               .path("/pty")
+                                                               .build()
+                                                               .toString(),
+                                                     TERMINAL_REFERENCE));
+                           devMachine.getLinks()
+                                     .add(createLink("GET",
+                                                     UriBuilder.fromUri(terminal.getUrl())
+                                                               .scheme("https".equals(ideUri.getScheme()) ? "wss" : "ws")
+                                                               .path("/connect")
+                                                               .build()
+                                                               .toString(),
+                                                     EXEC_AGENT_REFERENCE));
+                       });
             }
         }
     }
