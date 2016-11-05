@@ -51,7 +51,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che</groupId>
-            <artifactId>org.eclipse.che.exec-agent</artifactId>
+            <artifactId>exec-agent</artifactId>
             <type>tar.gz</type>
             <classifier>linux_amd64</classifier>
         </dependency>
@@ -179,7 +179,7 @@
                         <id>analyze</id>
                         <configuration>
                             <ignoredDependencies>
-                                <ignoredDependency>org.eclipse.che:org.eclipse.che.exec-agent:tar.gz</ignoredDependency>
+                                <ignoredDependency>org.eclipse.che:exec-agent:tar.gz</ignoredDependency>
                             </ignoredDependencies>
                         </configuration>
                     </execution>
@@ -193,7 +193,7 @@
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>org.eclipse.che</groupId>
-                                    <artifactId>org.eclipse.che.exec-agent</artifactId>
+                                    <artifactId>exec-agent</artifactId>
                                     <version>${project.version}</version>
                                     <classifier>linux_amd64</classifier>
                                     <type>tar.gz</type>

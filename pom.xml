@@ -83,14 +83,14 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
-                <artifactId>org.eclipse.che.exec-agent</artifactId>
+                <artifactId>exec-agent</artifactId>
                 <version>${project.version}</version>
                 <type>tar.gz</type>
                 <classifier>linux_amd64</classifier>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
-                <artifactId>org.eclipse.che.exec-agent</artifactId>
+                <artifactId>exec-agent</artifactId>
                 <version>${project.version}</version>
                 <type>tar.gz</type>
                 <classifier>linux_arm7</classifier>
