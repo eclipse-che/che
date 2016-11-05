@@ -11,7 +11,6 @@
 package org.eclipse.che.ide.extension.machine.client.command;
 
 import com.google.inject.Inject;
-import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.model.machine.Machine;
@@ -31,7 +30,6 @@ import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
-import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandConsoleFactory;
@@ -75,7 +73,6 @@ public class CommandManagerImpl implements CommandManager {
                               WorkspaceServiceClient workspaceServiceClient,
                               MachineServiceClient machineServiceClient,
                               DtoFactory dtoFactory,
-                              EventBus eventBus,
                               MacroProcessor macroProcessor,
                               CommandConsoleFactory commandConsoleFactory,
                               ProcessesPanelPresenter processesPanelPresenter) {
@@ -90,13 +87,7 @@ public class CommandManagerImpl implements CommandManager {
 
         commands = new HashMap<>();
         commandChangedListeners = new HashSet<>();
-
-        eventBus.addHandler(WorkspaceReadyEvent.getType(), new WorkspaceReadyEvent.WorkspaceReadyHandler() {
-            @Override
-            public void onWorkspaceReady(WorkspaceReadyEvent event) {
-                retrieveAllCommands();
-            }
-        });
+        retrieveAllCommands();
     }
 
     private void retrieveAllCommands() {

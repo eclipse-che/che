@@ -11,6 +11,7 @@
 package org.eclipse.che.api.agent.shared.dto;
 
 import org.eclipse.che.api.agent.shared.model.Agent;
+import org.eclipse.che.api.workspace.shared.dto.ServerConf2Dto;
 import org.eclipse.che.dto.shared.DTO;
 
 import java.util.List;
@@ -70,4 +71,11 @@ public interface AgentDto extends Agent {
     void setProperties(Map<String, String> properties);
 
     AgentDto withProperties(Map<String, String> properties);
+
+    @Override
+    Map<String, ServerConf2Dto> getServers();
+
+    void setServers(Map<String, ServerConf2Dto> servers);
+
+    AgentDto withServers(Map<String, ServerConf2Dto> servers);
 }

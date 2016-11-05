@@ -32,7 +32,7 @@ export class CheWebsocket {
 
     if (inDevMode) {
       // it handle then http and https
-        wsUrl = proxySettings.replace('http', 'ws') + '/api/ws/';
+        wsUrl = proxySettings.replace('http', 'ws') + '/api/ws';
     } else {
 
       var wsProtocol;
@@ -42,10 +42,11 @@ export class CheWebsocket {
         wsProtocol = 'wss';
       }
 
-      wsUrl = wsProtocol + '://' + $location.host() + ':' + $location.port() + '/api/ws/';
+      wsUrl = wsProtocol + '://' + $location.host() + ':' + $location.port() + '/api/ws';
     }
     this.wsBaseUrl = wsUrl;
-    this.sockets = new Map();
+    this.bus = null;
+    this.remoteBus = null;
   }
 
 
@@ -54,34 +55,25 @@ export class CheWebsocket {
   }
 
 
-  getBus(workspaceId) {
-    var currentBus = this.sockets.get(workspaceId);
-    if (!currentBus) {
+  getBus() {
+    if (!this.bus) {
       // needs to initialize
-      var url = this.wsBaseUrl + workspaceId;
-      var dataStream = this.$websocket(url);
-      var bus = new MessageBus(dataStream, this.$interval);
-      this.sockets.set(workspaceId, bus);
-      currentBus = bus;
+      this.bus = new MessageBus(this.$websocket(this.wsBaseUrl), this.$interval);
     }
-    return currentBus;
+    return this.bus;
   }
 
 
   /**
    * Gets a bus for a remote worksace, by providing the remote URL to this websocket
    * @param websocketURL the remote host base WS url
-   * @param workspaceId the workspaceID used as suffix for the URL
    */
-  getRemoteBus(websocketURL, workspaceId) {
-    var currentBus = this.sockets.get(workspaceId);
-    if (!currentBus) {
-      var dataStream = this.$websocket(websocketURL + workspaceId);
-      var bus = new MessageBus(dataStream, this.$interval);
-      this.sockets.set(workspaceId, bus);
-      currentBus = bus;
+  getRemoteBus(websocketURL) {
+    if (!this.remoteBus) {
+      // needs to initialize
+      this.remoteBus = new MessageBus(this.$websocket(websocketURL), this.$interval);
     }
-    return currentBus;
+    return this.remoteBus;
   }
 
 }

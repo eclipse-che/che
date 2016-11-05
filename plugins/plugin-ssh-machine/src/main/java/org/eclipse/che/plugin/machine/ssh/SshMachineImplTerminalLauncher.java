@@ -61,6 +61,7 @@ public class SshMachineImplTerminalLauncher extends AbstractAgentLauncher {
         this.terminalLocation = terminalLocation;
     }
 
+    @Override
     public String getMachineType() {
         return "ssh";
     }

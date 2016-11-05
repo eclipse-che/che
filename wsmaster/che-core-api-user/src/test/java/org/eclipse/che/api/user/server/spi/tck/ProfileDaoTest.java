@@ -19,12 +19,12 @@ import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.commons.test.tck.TckModuleFactory;
+import org.eclipse.che.commons.test.tck.TckListener;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepositoryException;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Guice;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import javax.inject.Inject;
@@ -40,7 +40,7 @@ import static org.testng.Assert.assertEquals;
  *
  * @author Yevhenii Voevodin
  */
-@Guice(moduleFactory = TckModuleFactory.class)
+@Listeners(TckListener.class)
 @Test(suiteName = ProfileDaoTest.SUITE_NAME)
 public class ProfileDaoTest {
 
@@ -56,7 +56,7 @@ public class ProfileDaoTest {
     @Inject
     private TckRepository<ProfileImpl> profileTckRepository;
     @Inject
-    private TckRepository<UserImpl> userTckRepository;
+    private TckRepository<UserImpl>    userTckRepository;
 
     @BeforeMethod
     private void setUp() throws TckRepositoryException {

@@ -57,6 +57,14 @@ public class DefaultOutputConsole implements OutputConsole, OutputConsoleView.Ac
     }
 
     /**
+     * Enables auto scroll when output.
+     */
+    public void enableAutoScroll(boolean enable) {
+        view.enableAutoScroll(enable);
+    }
+
+
+    /**
      * Print text in the console.
      *
      * @param text

@@ -37,12 +37,10 @@ public class MessageBusProvider {
      * Creates new instance of  {@link MessageBusImpl} and connects to web socket via special url. The method returns new
      * instance each time it is called. Message bus is created only one time when we start workspace.
      *
-     * @param workspaceId
-     *         workspace id which need for path to connect to web socket
      * @return instance of {@link MessageBusImpl}
      */
-    public MessageBus createMessageBus(String workspaceId) {
-        this.messageBus = new MessageBusImpl(workspaceId);
+    public MessageBus createMessageBus() {
+        this.messageBus = new MessageBusImpl();
 
         return messageBus;
     }

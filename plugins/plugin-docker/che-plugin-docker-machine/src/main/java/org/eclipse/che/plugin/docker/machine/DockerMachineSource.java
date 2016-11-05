@@ -77,7 +77,7 @@ public class DockerMachineSource extends MachineSourceImpl {
     }
 
 
-        /**
+    /**
      * Build image source based on given arguments
      * @param repository as for example codenvy/ubuntu_jdk8
      */

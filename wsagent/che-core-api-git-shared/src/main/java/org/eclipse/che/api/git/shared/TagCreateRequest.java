@@ -18,7 +18,7 @@ import org.eclipse.che.dto.shared.DTO;
  * @author andrew00x
  */
 @DTO
-public interface TagCreateRequest extends GitRequest {
+public interface TagCreateRequest {
     /** @return name of tag to create */
     String getName();
     
