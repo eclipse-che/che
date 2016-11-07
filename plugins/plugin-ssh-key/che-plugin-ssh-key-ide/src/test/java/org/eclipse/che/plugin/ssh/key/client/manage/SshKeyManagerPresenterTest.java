@@ -28,6 +28,8 @@ import org.eclipse.che.ide.api.dialogs.ConfirmDialog;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.dialogs.InputCallback;
 import org.eclipse.che.ide.api.dialogs.InputDialog;
+import org.eclipse.che.ide.api.dialogs.InputValidator;
+import org.eclipse.che.ide.api.dialogs.InputValidator.Violation;
 import org.eclipse.che.ide.api.dialogs.MessageDialog;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
@@ -61,6 +63,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertNotNull;
+import static org.testng.AssertJUnit.assertNull;
 
 /**
  * Testing {@link SshKeyManagerPresenter} functionality.
@@ -364,6 +369,7 @@ public class SshKeyManagerPresenterTest {
         InputDialog inputDialog = mock(InputDialog.class);
         when(dialogFactory.createInputDialog(anyString(), anyString(), (InputCallback)anyObject(), (CancelCallback)anyObject()))
                 .thenReturn(inputDialog);
+        when(inputDialog.withValidator(any(InputValidator.class))).thenReturn(inputDialog);
 
         presenter.onGenerateClicked();
 
@@ -379,6 +385,7 @@ public class SshKeyManagerPresenterTest {
         InputDialog inputDialog = mock(InputDialog.class);
         when(dialogFactory.createInputDialog(anyString(), anyString(), (InputCallback)anyObject(), (CancelCallback)anyObject()))
                 .thenReturn(inputDialog);
+        when(inputDialog.withValidator(any(InputValidator.class))).thenReturn(inputDialog);
 
         presenter.onGenerateClicked();
 
@@ -394,6 +401,7 @@ public class SshKeyManagerPresenterTest {
         InputDialog inputDialog = mock(InputDialog.class);
         when(dialogFactory.createInputDialog(anyString(), anyString(), (InputCallback)anyObject(), (CancelCallback)anyObject()))
                 .thenReturn(inputDialog);
+        when(inputDialog.withValidator(any(InputValidator.class))).thenReturn(inputDialog);
 
         presenter.onGenerateClicked();
 
@@ -417,6 +425,7 @@ public class SshKeyManagerPresenterTest {
         InputDialog inputDialog = mock(InputDialog.class);
         when(dialogFactory.createInputDialog(anyString(), anyString(), (InputCallback)anyObject(), (CancelCallback)anyObject()))
                 .thenReturn(inputDialog);
+        when(inputDialog.withValidator(any(InputValidator.class))).thenReturn(inputDialog);
 
         presenter.onGenerateClicked();
 
@@ -434,5 +443,53 @@ public class SshKeyManagerPresenterTest {
         verify(service).generatePair(Matchers.eq(SshKeyManagerPresenter.VCS_SSH_SERVICE), eq(GITHUB_HOST));
         verify(service).getPairs(Matchers.eq(SshKeyManagerPresenter.VCS_SSH_SERVICE));
         verify(view).setPairs(eq(sshPairDtoArray));
+    }
+
+    @Test()
+    public void shouldReturnErrorOnHostNameWithHttpProtocolValidation() throws OperationException {
+        String invalidHostname = "http://host.xz";
+
+        Violation violation = ((InputValidator)presenter.hostNameValidator).validate(invalidHostname);
+
+        assertNotNull(violation);
+
+        violation.getMessage();
+
+        verify(constant).invalidHostName();
+    }
+
+    @Test()
+    public void shouldReturnErrorOnHostNameWithHttpsProtocolValidation() throws OperationException {
+        String invalidHostname = "https://host.xz";
+
+        Violation violation = ((InputValidator)presenter.hostNameValidator).validate(invalidHostname);
+
+        assertNotNull(violation);
+
+        violation.getMessage();
+
+        verify(constant).invalidHostName();
+    }
+
+    @Test()
+    public void shouldReturnErrorOnHostNameWithPortValidation() throws OperationException {
+        String invalidHostname = "host:5005";
+
+        Violation violation = ((InputValidator)presenter.hostNameValidator).validate(invalidHostname);
+
+        assertNotNull(violation);
+
+        violation.getMessage();
+
+        verify(constant).invalidHostName();
+    }
+
+    @Test()
+    public void shouldReturnNullOnValidHostNameValidation() throws OperationException {
+        String validHostname = "hostname.com";
+
+        Violation violation = ((InputValidator)presenter.hostNameValidator).validate(validHostname);
+
+        assertNull(violation);
     }
 }
