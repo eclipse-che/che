@@ -1,6 +1,6 @@
 {
 "id": "org.eclipse.che.unison",
-"name": "Unison",
+"name": "File Sync",
 "description": "Unison File Synchronizer",
 "dependencies": [],
 "properties": {},
