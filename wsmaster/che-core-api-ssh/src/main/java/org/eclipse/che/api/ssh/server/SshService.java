@@ -162,7 +162,7 @@ public class SshService extends Service {
     }
 
     @GET
-    @Path("{service}/{name}")
+    @Path("{service}/{name : .+}")
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Get the ssh pair by the name of pair and name of service owned by the current user",
                   notes = "This operation can be performed only by authorized user.")
@@ -179,7 +179,7 @@ public class SshService extends Service {
     }
 
     @DELETE
-    @Path("{service}/{name}")
+    @Path("{service}/{name : .+}")
     @ApiOperation(value = "Remove the ssh pair by the name of pair and name of service owned by the current user")
     @ApiResponses({@ApiResponse(code = 204, message = "The ssh pair successfully removed"),
                    @ApiResponse(code = 404, message = "The ssh pair doesn't exist"),
