@@ -40,6 +40,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
@@ -162,7 +163,7 @@ public class SshService extends Service {
     }
 
     @GET
-    @Path("{service}/{name : .+}")
+    @Path("find/{service}")
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Get the ssh pair by the name of pair and name of service owned by the current user",
                   notes = "This operation can be performed only by authorized user.")
@@ -172,14 +173,15 @@ public class SshService extends Service {
     public SshPairDto getPair(@ApiParam("Name of service")
                               @PathParam("service")
                               String service,
-                              @ApiParam("Name of ssh pair")
-                              @PathParam("name")
-                              String name) throws NotFoundException, ServerException {
+                              @ApiParam(value = "Name of ssh pair", required = true)
+                              @QueryParam("name")
+                              String name) throws NotFoundException, ServerException, BadRequestException {
+        requiredNotNull(name, "Name of ssh pair");
         return injectLinks(asDto(sshManager.getPair(getCurrentUserId(), service, name)));
     }
 
     @DELETE
-    @Path("{service}/{name : .+}")
+    @Path("{service}")
     @ApiOperation(value = "Remove the ssh pair by the name of pair and name of service owned by the current user")
     @ApiResponses({@ApiResponse(code = 204, message = "The ssh pair successfully removed"),
                    @ApiResponse(code = 404, message = "The ssh pair doesn't exist"),
@@ -187,9 +189,10 @@ public class SshService extends Service {
     public void removePair(@ApiParam("Name of service")
                            @PathParam("service")
                            String service,
-                           @ApiParam("Name of ssh pair")
-                           @PathParam("name")
-                           String name) throws ServerException, NotFoundException {
+                           @ApiParam(value = "Name of ssh pair", required = true)
+                           @QueryParam("name")
+                           String name) throws ServerException, NotFoundException, BadRequestException {
+        requiredNotNull(name, "Name of ssh pair");
         sshManager.removePair(getCurrentUserId(), service, name);
     }
 
