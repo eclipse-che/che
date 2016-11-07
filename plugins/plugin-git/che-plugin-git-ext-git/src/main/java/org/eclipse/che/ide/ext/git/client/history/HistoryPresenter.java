@@ -39,6 +39,7 @@ import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.providers.DynaObject;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
@@ -60,6 +61,7 @@ import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
  * @author Vlad Zhukovskyi
  */
 @Singleton
+@DynaObject
 public class HistoryPresenter extends BasePresenter implements HistoryView.ActionDelegate {
     public static final String LOG_COMMAND_NAME  = "Git log";
     public static final String DIFF_COMMAND_NAME = "Git diff";
