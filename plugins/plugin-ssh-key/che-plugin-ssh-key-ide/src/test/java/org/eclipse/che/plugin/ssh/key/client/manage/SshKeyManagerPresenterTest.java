@@ -54,7 +54,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
@@ -448,11 +447,7 @@ public class SshKeyManagerPresenterTest {
     public void shouldReturnErrorOnHostNameWithHttpProtocolValidation() throws OperationException {
         String invalidHostname = "http://host.xz";
 
-        Violation violation = ((InputValidator)presenter.hostNameValidator).validate(invalidHostname);
-
-        assertNotNull(violation);
-
-        violation.getMessage();
+        ((InputValidator)presenter.hostNameValidator).validate(invalidHostname).getMessage();
 
         verify(constant).invalidHostName();
     }
@@ -461,11 +456,7 @@ public class SshKeyManagerPresenterTest {
     public void shouldReturnErrorOnHostNameWithHttpsProtocolValidation() throws OperationException {
         String invalidHostname = "https://host.xz";
 
-        Violation violation = ((InputValidator)presenter.hostNameValidator).validate(invalidHostname);
-
-        assertNotNull(violation);
-
-        violation.getMessage();
+        ((InputValidator)presenter.hostNameValidator).validate(invalidHostname).getMessage();
 
         verify(constant).invalidHostName();
     }
@@ -474,11 +465,7 @@ public class SshKeyManagerPresenterTest {
     public void shouldReturnErrorOnHostNameWithPortValidation() throws OperationException {
         String invalidHostname = "host:5005";
 
-        Violation violation = ((InputValidator)presenter.hostNameValidator).validate(invalidHostname);
-
-        assertNotNull(violation);
-
-        violation.getMessage();
+        ((InputValidator)presenter.hostNameValidator).validate(invalidHostname).getMessage();
 
         verify(constant).invalidHostName();
     }
