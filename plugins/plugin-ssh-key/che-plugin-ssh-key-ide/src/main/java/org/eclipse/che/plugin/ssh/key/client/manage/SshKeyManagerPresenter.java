@@ -49,9 +49,8 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
  */
 @Singleton
 public class SshKeyManagerPresenter extends AbstractPreferencePagePresenter implements SshKeyManagerView.ActionDelegate {
-
-    private static final String GITHUB_HOST     = "github.com";
-    public static final  String VCS_SSH_SERVICE = "vcs";
+    public static final String GITHUB_HOST     = "github.com";
+    public static final String VCS_SSH_SERVICE = "vcs";
 
     private final AppContext                 appContext;
     private final DialogFactory              dialogFactory;
