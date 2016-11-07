@@ -275,7 +275,6 @@ public class WorkspaceServiceTest {
                                                                       .getLocation();
 
         assertEquals(savedLocation, initialLocation.substring(API_ENDPOINT.length()));
-
     }
 
     @Test
@@ -707,7 +706,6 @@ public class WorkspaceServiceTest {
 
         assertEquals(savedLocation, initialLocation.substring(API_ENDPOINT.length()));
     }
-
 
 
     @Test
