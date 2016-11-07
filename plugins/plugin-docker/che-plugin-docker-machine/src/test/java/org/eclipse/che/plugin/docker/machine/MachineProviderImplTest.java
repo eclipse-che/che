@@ -37,7 +37,6 @@ import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
 import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
 import org.eclipse.che.plugin.docker.client.params.TagParams;
 import org.eclipse.che.plugin.docker.machine.node.DockerNode;
-import org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -76,7 +75,6 @@ import static org.testng.Assert.assertTrue;
 
 @Listeners(MockitoTestNGListener.class)
 public class MachineProviderImplTest {
-    private static final String  PROJECT_FOLDER_PATH    = "/projects";
     private static final String  CONTAINER_ID           = "containerId";
     private static final String  WORKSPACE_ID           = "wsId";
     private static final String  MACHINE_NAME           = "machineName";
@@ -101,9 +99,6 @@ public class MachineProviderImplTest {
 
     @Mock
     private DockerNode dockerNode;
-
-    @Mock
-    private WorkspaceFolderPathProvider workspaceFolderPathProvider;
 
     @Mock
     private UserSpecificDockerRegistryCredentialsProvider credentialsReader;
@@ -298,17 +293,6 @@ public class MachineProviderImplTest {
     }
 
     @Test(expectedExceptions = ServerException.class)
-    public void shouldRemoveContainerInCaseFailedBindWorkspaceOnCreateInstance() throws Exception {
-        doThrow(ServerException.class).when(dockerNode).bindWorkspace();
-        final boolean isDev = true;
-
-        createInstanceFromRecipe(isDev, WORKSPACE_ID);
-
-        verify(dockerConnector)
-                .removeContainer(RemoveContainerParams.create(CONTAINER_ID).withRemoveVolumes(true).withForce(true));
-    }
-
-    @Test(expectedExceptions = ServerException.class)
     public void shouldRemoveContainerInCaseFailedStartContainer() throws Exception {
         doThrow(IOException.class).when(dockerConnector).startContainer(StartContainerParams.create(CONTAINER_ID));
 
@@ -358,42 +342,6 @@ public class MachineProviderImplTest {
                                                     eq("eclipse-che/" + service.getContainerName()),
                                                     eq(dockerNode),
                                                     any(LineConsumer.class));
-    }
-
-    @Test
-    public void shouldBindWorkspaceOnDevInstanceCreationFromRecipe() throws Exception {
-        final boolean isDev = true;
-
-        createInstanceFromRecipe(isDev, WORKSPACE_ID);
-
-        verify(dockerNode).bindWorkspace();
-    }
-
-    @Test
-    public void shouldBindWorkspaceOnDevInstanceCreationFromSnapshot() throws Exception {
-        final boolean isDev = true;
-
-        createInstanceFromSnapshot(isDev, WORKSPACE_ID);
-
-        verify(dockerNode).bindWorkspace();
-    }
-
-    @Test
-    public void shouldNotBindWorkspaceOnNonDevInstanceCreationFromRecipe() throws Exception {
-        final boolean isDev = false;
-
-        createInstanceFromRecipe(isDev, WORKSPACE_ID);
-
-        verify(dockerNode, never()).bindWorkspace();
-    }
-
-    @Test
-    public void shouldNotBindWorkspaceOnNonDevInstanceCreationFromSnapshot() throws Exception {
-        final boolean isDev = false;
-
-        createInstanceFromSnapshot(isDev, WORKSPACE_ID);
-
-        verify(dockerNode, never()).bindWorkspace();
     }
 
     @Test
@@ -612,7 +560,7 @@ public class MachineProviderImplTest {
     }
 
     @Test
-    public void shouldAddServersConfsPortsFromMachineConfigToExposedPortsOnDevInstanceCreationFromRecipe()
+    public void shouldAddServersConfigsPortsFromMachineConfigToExposedPortsOnDevInstanceCreationFromRecipe()
             throws Exception {
         // given
         final boolean isDev = true;
@@ -634,47 +582,7 @@ public class MachineProviderImplTest {
     }
 
     @Test
-    public void shouldBindProjectsFSVolumeToContainerOnDevInstanceCreationFromRecipe() throws Exception {
-        final String expectedHostPathOfProjects = "/tmp/projects";
-        String[] expectedVolumes = new String[] {expectedHostPathOfProjects + ":/projects:Z"};
-
-        when(workspaceFolderPathProvider.getPath(anyString())).thenReturn(expectedHostPathOfProjects);
-
-        final boolean isDev = true;
-
-        CheServiceImpl service = createService();
-        service.setVolumes(null);
-        createInstanceFromRecipe(isDev, service);
-
-
-        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
-        verify(dockerConnector).createContainer(argumentCaptor.capture());
-        verify(dockerConnector).startContainer(any(StartContainerParams.class));
-
-        assertEquals(argumentCaptor.getValue().getContainerConfig().getHostConfig().getBinds(), expectedVolumes);
-    }
-
-    @Test
-    public void shouldNotBindProjectsFSVolumeToContainerOnNonDevInstanceCreationFromRecipe() throws Exception {
-        String[] expectedVolumes = new String[0];
-        final boolean isDev = false;
-
-
-        CheServiceImpl service = createService();
-        service.setVolumes(null);
-        createInstanceFromRecipe(isDev, service);
-
-
-        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
-        verify(dockerConnector).createContainer(argumentCaptor.capture());
-        verify(dockerConnector).startContainer(any(StartContainerParams.class));
-
-        assertEquals(argumentCaptor.getValue().getContainerConfig().getHostConfig().getBinds(), expectedVolumes);
-    }
-
-    @Test
     public void shouldBindCommonAndDevVolumesToContainerOnDevInstanceCreationFromRecipe() throws Exception {
-        final String expectedHostPathOfProjects = "/tmp/projects";
         Set<String> devVolumes = new HashSet<>(asList("/etc:/tmp/etc:ro", "/some/thing:/home/some/thing"));
         Set<String> commonVolumes =
                 new HashSet<>(asList("/some/thing/else:/home/some/thing/else", "/other/path:/home/other/path"));
@@ -682,13 +590,11 @@ public class MachineProviderImplTest {
         final ArrayList<String> expectedVolumes = new ArrayList<>();
         expectedVolumes.addAll(devVolumes);
         expectedVolumes.addAll(commonVolumes);
-        expectedVolumes.add(expectedHostPathOfProjects + ":/projects:Z");
 
         provider = new MachineProviderBuilder().setDevMachineVolumes(devVolumes)
                                                .setAllMachineVolumes(commonVolumes)
                                                .build();
 
-        when(workspaceFolderPathProvider.getPath(anyString())).thenReturn(expectedHostPathOfProjects);
         final boolean isDev = true;
 
         CheServiceImpl service = createService();
@@ -1312,15 +1218,14 @@ public class MachineProviderImplTest {
                                            devMachineVolumes,
                                            allMachineVolumes,
                                            extraHosts,
-                                           workspaceFolderPathProvider,
-                                           PROJECT_FOLDER_PATH,
                                            doForcePullOnBuild,
                                            privilegedMode,
                                            devMachineEnvVars,
                                            allMachineEnvVars,
                                            snapshotUseRegistry,
                                            memorySwapMultiplier,
-                                           additionalNetworks);
+                                           additionalNetworks,
+                                           null);
         }
     }
 }

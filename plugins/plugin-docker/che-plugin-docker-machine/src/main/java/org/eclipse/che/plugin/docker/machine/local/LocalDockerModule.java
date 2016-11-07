@@ -16,6 +16,7 @@ import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
+import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.environment.server.MachineService;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceProcess;
@@ -74,5 +75,6 @@ public class LocalDockerModule extends AbstractModule {
                                                                      new TypeLiteral<Set<String>>() {},
                                                                      Names.named("machine.docker.networks"));
         networks.addBinding().toProvider(org.eclipse.che.plugin.docker.machine.CheInContainerNetworkProvider.class);
+        Multibinder<Agent> agentsMultibinder = Multibinder.newSetBinder(binder(), Agent.class);
     }
 }

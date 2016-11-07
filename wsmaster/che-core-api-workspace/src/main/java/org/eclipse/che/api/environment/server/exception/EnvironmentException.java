@@ -8,15 +8,21 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.docker.machine.node;
-
-import java.io.IOException;
+package org.eclipse.che.api.environment.server.exception;
 
 /**
- * Finds path to workspace folder on host.
- *
  * @author Alexander Garagatyi
  */
-public interface WorkspaceFolderPathProvider {
-    String getPath(String workspaceId) throws IOException;
+public class EnvironmentException extends Exception {
+    public EnvironmentException(String message) {
+        super(message);
+    }
+
+    public EnvironmentException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public EnvironmentException(Throwable cause) {
+        super(cause);
+    }
 }

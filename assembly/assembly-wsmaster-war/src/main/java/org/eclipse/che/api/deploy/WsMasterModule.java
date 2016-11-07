@@ -15,22 +15,21 @@ import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 import com.google.inject.persist.jpa.JpaPersistModule;
 
+import org.eclipse.che.account.api.AccountModule;
 import org.eclipse.che.api.agent.server.launcher.AgentLauncher;
+import org.eclipse.che.api.core.jdbc.jpa.eclipselink.EntityListenerInjectionManagerInitializer;
 import org.eclipse.che.api.core.jdbc.jpa.guice.JpaInitializer;
 import org.eclipse.che.api.core.rest.CheJsonProvider;
 import org.eclipse.che.api.core.rest.MessageBodyAdapter;
 import org.eclipse.che.api.core.rest.MessageBodyAdapterInterceptor;
-import org.eclipse.che.account.api.AccountModule;
-import org.eclipse.che.api.core.jdbc.jpa.eclipselink.EntityListenerInjectionManagerInitializer;
 import org.eclipse.che.api.machine.server.jpa.MachineJpaModule;
 import org.eclipse.che.api.machine.shared.Constants;
-import org.eclipse.che.api.workspace.server.WorkspaceConfigMessageBodyAdapter;
-import org.eclipse.che.api.workspace.server.WorkspaceMessageBodyAdapter;
 import org.eclipse.che.api.ssh.server.jpa.SshJpaModule;
 import org.eclipse.che.api.user.server.CheUserCreator;
 import org.eclipse.che.api.user.server.TokenValidator;
-
 import org.eclipse.che.api.user.server.jpa.UserJpaModule;
+import org.eclipse.che.api.workspace.server.WorkspaceConfigMessageBodyAdapter;
+import org.eclipse.che.api.workspace.server.WorkspaceMessageBodyAdapter;
 import org.eclipse.che.api.workspace.server.jpa.WorkspaceJpaModule;
 import org.eclipse.che.api.workspace.server.stack.StackMessageBodyAdapter;
 import org.eclipse.che.inject.DynaModule;
@@ -143,5 +142,7 @@ public class WsMasterModule extends AbstractModule {
         bindInterceptor(subclassesOf(CheJsonProvider.class), names("readFrom"), interceptor);
         bind(org.eclipse.che.api.workspace.server.WorkspaceFilesCleaner.class)
                 .to(org.eclipse.che.plugin.docker.machine.cleaner.LocalWorkspaceFilesCleaner.class);
+        bind(org.eclipse.che.api.environment.server.InfrastructureProvisioner.class)
+                .to(org.eclipse.che.plugin.docker.machine.local.LocalCheInfrastructureProvisioner.class);
     }
 }

@@ -44,10 +44,10 @@ public class AgentImpl implements Agent {
         this.name = name;
         this.version = version;
         this.description = description;
-        this.dependencies = dependencies;
-        this.properties = properties;
+        this.dependencies = dependencies != null ? dependencies : new ArrayList<>();
+        this.properties = properties != null ? properties : new HashMap<>();
         this.script = script;
-        this.servers = servers;
+        this.servers = servers != null ? servers : new HashMap<>();
     }
 
     public AgentImpl(Agent agent) {
@@ -75,7 +75,7 @@ public class AgentImpl implements Agent {
     public String getVersion() {
         return version;
     }
-    
+
     @Override
     public String getDescription() {
         return description;
