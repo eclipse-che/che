@@ -65,8 +65,8 @@ public class RecipeDownloader {
         try {
             UriBuilder targetUriBuilder = UriBuilder.fromUri(location);
             // add user token to be able to download user's private recipe
-            final String host = targetUriBuilder.build().getHost();
-            if (host == null) {
+            final URI recipeUri = targetUriBuilder.build();
+            if (!recipeUri.isAbsolute() && recipeUri.getHost() == null) {
                 targetUriBuilder.scheme(apiEndpoint.getScheme())
                                 .host(apiEndpoint.getHost())
                                 .port(apiEndpoint.getPort())
@@ -108,8 +108,8 @@ public class RecipeDownloader {
         try {
             UriBuilder targetUriBuilder = UriBuilder.fromUri(location);
             // add user token to be able to download user's private recipe
-            final String host = targetUriBuilder.build().getHost();
-            if (host == null) {
+            final URI recipeUri = targetUriBuilder.build();
+            if (!recipeUri.isAbsolute() && recipeUri.getHost() == null) {
                 targetUriBuilder.scheme(apiEndpoint.getScheme())
                                 .host(apiEndpoint.getHost())
                                 .port(apiEndpoint.getPort())

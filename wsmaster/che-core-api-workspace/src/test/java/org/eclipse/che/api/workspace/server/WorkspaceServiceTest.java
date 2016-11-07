@@ -57,6 +57,7 @@ import org.everrest.assured.EverrestJetty;
 import org.everrest.core.Filter;
 import org.everrest.core.GenericContainerRequest;
 import org.everrest.core.RequestFilter;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -244,6 +245,37 @@ public class WorkspaceServiceTest {
         assertEquals(unwrapError(response), "Attribute 'stackId=stack123' is not valid, " +
                                             "it should contain name and value separated " +
                                             "with colon. For example: attributeName:attributeValue");
+    }
+
+    @Test
+    public void shouldRelativizeLinksOnCreateWorkspace() throws Exception {
+        final String initialLocation = "http://localhost:8080/api/recipe/idrecipe123456789/script";
+        final WorkspaceConfigDto configDto = createConfigDto();
+        configDto.getEnvironments().get(configDto.getDefaultEnv()).getRecipe().withLocation(initialLocation)
+                                                                              .withType("dockerfile");
+
+        ArgumentCaptor<WorkspaceConfigDto> captor = ArgumentCaptor.forClass(WorkspaceConfigDto.class);
+        when(wsManager.createWorkspace(captor.capture(), any(), any())).thenAnswer(invocation -> createWorkspace(captor.getValue()));
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .contentType("application/json")
+                                         .body(configDto)
+                                         .when()
+                                         .post(SECURE_PATH + "/workspace" +
+                                               "?namespace=test" +
+                                               "&attribute=stackId:stack123" +
+                                               "&attribute=custom:custom:value");
+
+        assertEquals(response.getStatusCode(), 201);
+        String savedLocation = unwrapDto(response, WorkspaceDto.class).getConfig()
+                                                                      .getEnvironments()
+                                                                      .get(configDto.getDefaultEnv())
+                                                                      .getRecipe()
+                                                                      .getLocation();
+
+        assertEquals(savedLocation, initialLocation.substring(API_ENDPOINT.length()));
+
     }
 
     @Test
