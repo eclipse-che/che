@@ -168,6 +168,7 @@ public class SshService extends Service {
     @ApiOperation(value = "Get the ssh pair by the name of pair and name of service owned by the current user",
                   notes = "This operation can be performed only by authorized user.")
     @ApiResponses({@ApiResponse(code = 200, message = "The ssh pair successfully fetched"),
+                   @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
                    @ApiResponse(code = 404, message = "The ssh pair with specified name and service does not exist for current user"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
     public SshPairDto getPair(@ApiParam("Name of service")
@@ -184,6 +185,7 @@ public class SshService extends Service {
     @Path("{service}")
     @ApiOperation(value = "Remove the ssh pair by the name of pair and name of service owned by the current user")
     @ApiResponses({@ApiResponse(code = 204, message = "The ssh pair successfully removed"),
+                   @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
                    @ApiResponse(code = 404, message = "The ssh pair doesn't exist"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
     public void removePair(@ApiParam("Name of service")
