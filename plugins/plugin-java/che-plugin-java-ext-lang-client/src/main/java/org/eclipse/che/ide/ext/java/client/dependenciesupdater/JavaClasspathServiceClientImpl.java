@@ -13,9 +13,9 @@ package org.eclipse.che.ide.ext.java.client.dependenciesupdater;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.api.machine.WsAgentMessageBusProvider;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.ide.api.machine.WsAgentStateController;
 import org.eclipse.che.ide.ext.java.shared.dto.ClassPathBuilderResult;
 import org.eclipse.che.ide.websocket.Message;
 import org.eclipse.che.ide.websocket.MessageBuilder;
@@ -37,12 +37,12 @@ import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
 @Singleton
 public class JavaClasspathServiceClientImpl implements JavaClasspathServiceClient {
 
-    private final String                    baseHttpUrl;
-    private final WsAgentMessageBusProvider wsAgentMessageBusProvider;
+    private final String                 baseHttpUrl;
+    private final WsAgentStateController wsAgentStateController;
 
     @Inject
-    protected JavaClasspathServiceClientImpl(WsAgentMessageBusProvider wsAgentMessageBusProvider) {
-        this.wsAgentMessageBusProvider = wsAgentMessageBusProvider;
+    protected JavaClasspathServiceClientImpl(WsAgentStateController wsAgentStateController) {
+        this.wsAgentStateController = wsAgentStateController;
         this.baseHttpUrl = "/java/";
     }
 
@@ -59,7 +59,7 @@ public class JavaClasspathServiceClientImpl implements JavaClasspathServiceClien
 
 
     private void sendMessageToWS(final @NotNull Message message, final @NotNull RequestCallback<?> callback) {
-        wsAgentMessageBusProvider.getMessageBus().then(new Operation<MessageBus>() {
+        wsAgentStateController.getMessageBus().then(new Operation<MessageBus>() {
             @Override
             public void apply(MessageBus arg) throws OperationException {
                 try {

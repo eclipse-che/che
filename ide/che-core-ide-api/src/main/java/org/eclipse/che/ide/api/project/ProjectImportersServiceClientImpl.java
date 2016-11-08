@@ -8,17 +8,16 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.project;
-
-import com.google.inject.Inject;
+package org.eclipse.che.ide.api.project;
 
 import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.api.project.shared.dto.ProjectImporterData;
 import org.eclipse.che.ide.MimeType;
-import org.eclipse.che.ide.api.project.ProjectImportersServiceClient;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.HTTPHeader;
+
+import javax.inject.Inject;
 
 /**
  * @author Vitaly Parfonov
