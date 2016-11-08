@@ -1,0 +1,109 @@
+/*******************************************************************************
+ * Copyright (c) 2012-2016 Codenvy, S.A.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Codenvy, S.A. - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.che.ide.api.machine;
+
+import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessLogsResponseDto;
+import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessResponseDto;
+import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessesResponseDto;
+import org.eclipse.che.api.machine.shared.dto.execagent.ProcessKillResponseDto;
+import org.eclipse.che.api.machine.shared.dto.execagent.ProcessStartResponseDto;
+import org.eclipse.che.api.machine.shared.dto.execagent.ProcessSubscribeResponseDto;
+import org.eclipse.che.api.machine.shared.dto.execagent.ProcessUnSubscribeResponseDto;
+import org.eclipse.che.api.machine.shared.dto.execagent.UpdateSubscriptionResponseDto;
+import org.eclipse.che.api.promises.client.Promise;
+
+import java.util.List;
+
+/**
+ * Manages calls to exec agent that are related to processes, subscription, etc.
+ *
+ * @author Dmitry Kuleshov
+ */
+public interface ExecAgentCommandManager {
+    /**
+     * Call to exec agent to start a process with specified command parameters
+     *
+     * @param name name of a command
+     * @param commandLine command line
+     * @param type type of a command
+     * @return promise with appropriate dto
+     */
+    Promise<ProcessStartResponseDto> startProcess(String name, String commandLine, String type);
+
+    /**
+     * Call exec agent to kill a process with specified identifier
+     *
+     * @param pid process identifier
+     * @return promise with appropriate dto
+     */
+    Promise<ProcessKillResponseDto> killProcess(int pid);
+
+    /**
+     * Call for a subscription to events related to a specified process after defined timestamp
+     * represented by a corresponding string (RFC3339Nano e.g. "2016-07-26T09:36:44.920890113+03:00").
+     *
+     * @param pid process identifier
+     * @param eventTypes event types (e.g. stderr, stdout)
+     * @param after after timestamp
+     * @return promise with appropriate dto
+     */
+    Promise<ProcessSubscribeResponseDto> subscribe(int pid, List<String> eventTypes, String after);
+
+    /**
+     * Call for a cancellation of a subscription to events related to a specific process after defined
+     * timestamp represented by a corresponding string (RFC3339Nano e.g. "2016-07-26T09:36:44.920890113+03:00").
+     *
+     * @param pid process identifier
+     * @param eventTypes event types (e.g. stderr, stdout)
+     * @param after after timestamp
+     * @return promise with appropriate dto
+     */
+    Promise<ProcessUnSubscribeResponseDto> unsubscribe(int pid, List<String> eventTypes, String after);
+
+    /**
+     * Call for an update of a subscription to events related to a specific process.
+     *
+     * @param pid process identifier
+     * @param eventTypes event types (e.g. stderr, stdout)
+     * @return promise with appropriate dto
+     */
+    Promise<UpdateSubscriptionResponseDto> updateSubscription(int pid, List<String> eventTypes);
+
+    /**
+     * Call for a report on proess logs of a specific process.
+     *
+     * @param pid process identifier
+     * @param from string represented timestamp the beginning of a time
+     *             segment (RFC3339Nano e.g. "2016-07-26T09:36:44.920890113+03:00")
+     * @param till string represented timestamp the ending of a time
+     *             segment (RFC3339Nano e.g. "2016-07-26T09:36:44.920890113+03:00")
+     * @param limit the limit of logs in result, the default value is 50
+     * @param skip the logs to skip, default value is 0
+     * @return promise with appropriate dto
+     */
+    Promise<List<GetProcessLogsResponseDto>> getProcessLogs(int pid, String from, String till, int limit, int skip);
+
+    /**
+     * Call for a process info
+     *
+     * @param pid process identifier
+     * @return promise with appropriate dto
+     */
+    Promise<GetProcessResponseDto> getProcess(int pid);
+
+    /**
+     * Call for a process info
+     *
+     * @param all defines if include already stopped processes, tru
+     * @return promise with appropriate dto
+     */
+    Promise<List<GetProcessesResponseDto>> getProcesses(boolean all);
+}

@@ -30,8 +30,6 @@ import org.eclipse.che.ide.actions.find.FindActionView;
 import org.eclipse.che.ide.actions.find.FindActionViewImpl;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.oauth.OAuthServiceClient;
-import org.eclipse.che.ide.oauth.OAuthServiceClientImpl;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.component.StateComponent;
@@ -49,10 +47,10 @@ import org.eclipse.che.ide.api.dialogs.MessageDialog;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorRegistry;
 import org.eclipse.che.ide.api.event.ng.ClientServerEventService;
-import org.eclipse.che.ide.api.event.ng.EditorFileStatusNotificationReceiver;
+import org.eclipse.che.ide.api.event.ng.EditorFileStatusNotificationHandler;
 import org.eclipse.che.ide.api.event.ng.FileOpenCloseEventListener;
 import org.eclipse.che.ide.api.event.ng.JsonRpcWebSocketAgentEventListener;
-import org.eclipse.che.ide.api.event.ng.ProjectTreeStatusNotificationReceiver;
+import org.eclipse.che.ide.api.event.ng.ProjectTreeStatusNotificationHandler;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.extension.ExtensionRegistry;
 import org.eclipse.che.ide.api.factory.FactoryServiceClient;
@@ -60,21 +58,27 @@ import org.eclipse.che.ide.api.factory.FactoryServiceClientImpl;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.git.GitServiceClient;
-import org.eclipse.che.ide.machine.WsAgentInitializer;
-import org.eclipse.che.ide.api.machine.WsAgentMessageBusProvider;
-import org.eclipse.che.ide.git.GitServiceClientImpl;
 import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
+import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
+import org.eclipse.che.ide.api.machine.ExecAgentEventManager;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
-import org.eclipse.che.ide.machine.MachineServiceClientImpl;
 import org.eclipse.che.ide.api.machine.RecipeServiceClient;
-import org.eclipse.che.ide.machine.RecipeServiceClientImpl;
+import org.eclipse.che.ide.api.machine.WsAgentMessageBusProvider;
+import org.eclipse.che.ide.api.machine.execagent.ConnectedEventHandler;
+import org.eclipse.che.ide.api.machine.execagent.JsonRpcExecAgentCommandManager;
+import org.eclipse.che.ide.api.machine.execagent.JsonRpcExecAgentEventManager;
+import org.eclipse.che.ide.api.machine.execagent.ProcessDiedEventHandler;
+import org.eclipse.che.ide.api.machine.execagent.ProcessStartedEventHandler;
+import org.eclipse.che.ide.api.machine.execagent.ProcessStdErrEventHandler;
+import org.eclipse.che.ide.api.machine.execagent.ProcessStdOutEventHandler;
 import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
 import org.eclipse.che.ide.api.macro.MacroRegistry;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.oauth.OAuth2Authenticator;
 import org.eclipse.che.ide.api.oauth.OAuth2AuthenticatorRegistry;
+import org.eclipse.che.ide.api.oauth.OAuthServiceClient;
 import org.eclipse.che.ide.api.parts.EditorMultiPartStack;
 import org.eclipse.che.ide.api.parts.PartStack;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
@@ -86,14 +90,9 @@ import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.preferences.PreferencePagePresenter;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.api.project.ProjectImportersServiceClient;
-import org.eclipse.che.ide.machine.WsAgentStateController;
-import org.eclipse.che.ide.project.ProjectImportersServiceClientImpl;
 import org.eclipse.che.ide.api.project.ProjectServiceClient;
-import org.eclipse.che.ide.project.ProjectServiceClientImpl;
 import org.eclipse.che.ide.api.project.ProjectTemplateServiceClient;
-import org.eclipse.che.ide.project.ProjectTemplateServiceClientImpl;
 import org.eclipse.che.ide.api.project.ProjectTypeServiceClient;
-import org.eclipse.che.ide.project.ProjectTypeServiceClientImpl;
 import org.eclipse.che.ide.api.project.type.ProjectTemplateRegistry;
 import org.eclipse.che.ide.api.project.type.ProjectTypeRegistry;
 import org.eclipse.che.ide.api.project.type.wizard.PreSelectedProjectTypeManager;
@@ -108,17 +107,12 @@ import org.eclipse.che.ide.api.resources.ResourceInterceptor;
 import org.eclipse.che.ide.api.resources.modification.ClipboardManager;
 import org.eclipse.che.ide.api.selection.SelectionAgent;
 import org.eclipse.che.ide.api.ssh.SshServiceClient;
-import org.eclipse.che.ide.ssh.SshServiceClientImpl;
 import org.eclipse.che.ide.api.theme.Theme;
 import org.eclipse.che.ide.api.theme.ThemeAgent;
 import org.eclipse.che.ide.api.user.PreferencesServiceClient;
-import org.eclipse.che.ide.user.PreferencesServiceClientImpl;
 import org.eclipse.che.ide.api.user.UserProfileServiceClient;
-import org.eclipse.che.ide.user.UserProfileServiceClientImpl;
 import org.eclipse.che.ide.api.user.UserServiceClient;
-import org.eclipse.che.ide.user.UserServiceClientImpl;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
-import org.eclipse.che.ide.workspace.WorkspaceServiceClientImpl;
 import org.eclipse.che.ide.client.StartUpActionsProcessor;
 import org.eclipse.che.ide.client.WorkspaceStateRestorer;
 import org.eclipse.che.ide.command.CommandProducerActionFactory;
@@ -138,25 +132,22 @@ import org.eclipse.che.ide.editor.synchronization.EditorGroupSychronizationFacto
 import org.eclipse.che.ide.editor.synchronization.EditorGroupSynchronization;
 import org.eclipse.che.ide.editor.synchronization.EditorGroupSynchronizationImpl;
 import org.eclipse.che.ide.filetypes.FileTypeRegistryImpl;
+import org.eclipse.che.ide.git.GitServiceClientImpl;
 import org.eclipse.che.ide.hotkeys.dialog.HotKeysDialogView;
 import org.eclipse.che.ide.hotkeys.dialog.HotKeysDialogViewImpl;
 import org.eclipse.che.ide.icon.DefaultIconsComponent;
 import org.eclipse.che.ide.icon.IconRegistryImpl;
-import org.eclipse.che.ide.jsonrpc.JsonRpcRequestReceiver;
-import org.eclipse.che.ide.jsonrpc.JsonRpcRequestTransmitter;
-import org.eclipse.che.ide.jsonrpc.JsonRpcResponseReceiver;
-import org.eclipse.che.ide.jsonrpc.JsonRpcResponseTransmitter;
-import org.eclipse.che.ide.jsonrpc.impl.BasicJsonRpcObjectValidator;
-import org.eclipse.che.ide.jsonrpc.impl.JsonRpcDispatcher;
-import org.eclipse.che.ide.jsonrpc.impl.JsonRpcInitializer;
-import org.eclipse.che.ide.jsonrpc.impl.JsonRpcObjectValidator;
-import org.eclipse.che.ide.jsonrpc.impl.WebSocketJsonRpcDispatcher;
+import org.eclipse.che.ide.jsonrpc.JsonRpcInitializer;
+import org.eclipse.che.ide.jsonrpc.RequestHandler;
+import org.eclipse.che.ide.jsonrpc.RequestTransmitter;
 import org.eclipse.che.ide.jsonrpc.impl.WebSocketJsonRpcInitializer;
-import org.eclipse.che.ide.jsonrpc.impl.WebSocketJsonRpcRequestDispatcher;
-import org.eclipse.che.ide.jsonrpc.impl.WebSocketJsonRpcRequestTransmitter;
-import org.eclipse.che.ide.jsonrpc.impl.WebSocketJsonRpcResponseDispatcher;
-import org.eclipse.che.ide.jsonrpc.impl.WebSocketJsonRpcResponseTransmitter;
+import org.eclipse.che.ide.jsonrpc.impl.WebSocketToJsonRpcDispatcher;
+import org.eclipse.che.ide.jsonrpc.impl.WebSocketTransmitter;
 import org.eclipse.che.ide.keybinding.KeyBindingManager;
+import org.eclipse.che.ide.machine.MachineServiceClientImpl;
+import org.eclipse.che.ide.machine.RecipeServiceClientImpl;
+import org.eclipse.che.ide.machine.WsAgentInitializer;
+import org.eclipse.che.ide.machine.WsAgentStateController;
 import org.eclipse.che.ide.macro.MacroProcessorImpl;
 import org.eclipse.che.ide.macro.MacroRegistryImpl;
 import org.eclipse.che.ide.menu.MainMenuView;
@@ -170,6 +161,7 @@ import org.eclipse.che.ide.notification.NotificationManagerView;
 import org.eclipse.che.ide.notification.NotificationManagerViewImpl;
 import org.eclipse.che.ide.oauth.DefaultOAuthAuthenticatorImpl;
 import org.eclipse.che.ide.oauth.OAuth2AuthenticatorRegistryImpl;
+import org.eclipse.che.ide.oauth.OAuthServiceClientImpl;
 import org.eclipse.che.ide.part.FocusManager;
 import org.eclipse.che.ide.part.PartStackPresenter;
 import org.eclipse.che.ide.part.PartStackPresenter.PartStackEventHandler;
@@ -202,6 +194,10 @@ import org.eclipse.che.ide.preferences.pages.appearance.AppearanceViewImpl;
 import org.eclipse.che.ide.preferences.pages.extensions.ExtensionManagerPresenter;
 import org.eclipse.che.ide.preferences.pages.extensions.ExtensionManagerView;
 import org.eclipse.che.ide.preferences.pages.extensions.ExtensionManagerViewImpl;
+import org.eclipse.che.ide.project.ProjectImportersServiceClientImpl;
+import org.eclipse.che.ide.project.ProjectServiceClientImpl;
+import org.eclipse.che.ide.project.ProjectTemplateServiceClientImpl;
+import org.eclipse.che.ide.project.ProjectTypeServiceClientImpl;
 import org.eclipse.che.ide.project.node.icon.DockerfileIconProvider;
 import org.eclipse.che.ide.project.node.icon.FileIconProvider;
 import org.eclipse.che.ide.project.node.icon.NodeIconProvider;
@@ -224,6 +220,7 @@ import org.eclipse.che.ide.rest.RestContext;
 import org.eclipse.che.ide.rest.RestContextProvider;
 import org.eclipse.che.ide.search.factory.FindResultNodeFactory;
 import org.eclipse.che.ide.selection.SelectionAgentImpl;
+import org.eclipse.che.ide.ssh.SshServiceClientImpl;
 import org.eclipse.che.ide.statepersistance.OpenedFilesPersistenceComponent;
 import org.eclipse.che.ide.statepersistance.PersistenceComponent;
 import org.eclipse.che.ide.statepersistance.ShowHiddenFilesPersistenceComponent;
@@ -273,19 +270,18 @@ import org.eclipse.che.ide.upload.file.UploadFileView;
 import org.eclipse.che.ide.upload.file.UploadFileViewImpl;
 import org.eclipse.che.ide.upload.folder.UploadFolderFromZipView;
 import org.eclipse.che.ide.upload.folder.UploadFolderFromZipViewImpl;
+import org.eclipse.che.ide.user.PreferencesServiceClientImpl;
+import org.eclipse.che.ide.user.UserProfileServiceClientImpl;
+import org.eclipse.che.ide.user.UserServiceClientImpl;
 import org.eclipse.che.ide.util.executor.UserActivityManager;
 import org.eclipse.che.ide.websocket.ng.WebSocketMessageReceiver;
 import org.eclipse.che.ide.websocket.ng.WebSocketMessageTransmitter;
 import org.eclipse.che.ide.websocket.ng.impl.BasicWebSocketEndpoint;
 import org.eclipse.che.ide.websocket.ng.impl.BasicWebSocketMessageTransmitter;
-import org.eclipse.che.ide.websocket.ng.impl.BasicWebSocketTransmissionValidator;
-import org.eclipse.che.ide.websocket.ng.impl.DelayableWebSocket;
-import org.eclipse.che.ide.websocket.ng.impl.SessionWebSocketInitializer;
-import org.eclipse.che.ide.websocket.ng.impl.WebSocket;
-import org.eclipse.che.ide.websocket.ng.impl.WebSocketCreator;
+import org.eclipse.che.ide.websocket.ng.impl.DelayableWebSocketConnection;
+import org.eclipse.che.ide.websocket.ng.impl.WebSocketConnection;
 import org.eclipse.che.ide.websocket.ng.impl.WebSocketEndpoint;
-import org.eclipse.che.ide.websocket.ng.impl.WebSocketInitializer;
-import org.eclipse.che.ide.websocket.ng.impl.WebSocketTransmissionValidator;
+import org.eclipse.che.ide.websocket.ng.impl.WebSocketFactory;
 import org.eclipse.che.ide.workspace.PartStackPresenterFactory;
 import org.eclipse.che.ide.workspace.PartStackViewFactory;
 import org.eclipse.che.ide.workspace.WorkBenchControllerFactory;
@@ -293,6 +289,7 @@ import org.eclipse.che.ide.workspace.WorkBenchPartController;
 import org.eclipse.che.ide.workspace.WorkBenchPartControllerImpl;
 import org.eclipse.che.ide.workspace.WorkspaceComponentProvider;
 import org.eclipse.che.ide.workspace.WorkspacePresenter;
+import org.eclipse.che.ide.workspace.WorkspaceServiceClientImpl;
 import org.eclipse.che.ide.workspace.WorkspaceView;
 import org.eclipse.che.ide.workspace.WorkspaceViewImpl;
 import org.eclipse.che.ide.workspace.WorkspaceWidgetFactory;
@@ -364,9 +361,11 @@ public class CoreGinModule extends AbstractGinModule {
         configureEditorAPI();
         configureProjectTree();
 
+
         configureJsonRpc();
         configureWebSocket();
         configureClientServerEventService();
+        configureExecAgent();
 
         GinMapBinder<String, StateComponent> stateComponents = GinMapBinder.newMapBinder(binder(), String.class, StateComponent.class);
         stateComponents.addBinding("workspace").to(WorkspacePresenter.class);
@@ -391,55 +390,59 @@ public class CoreGinModule extends AbstractGinModule {
         bind(WsAgentInitializer.class).to(WsAgentStateController.class).in(Singleton.class);
     }
 
+    private void configureExecAgent() {
+        bind(ExecAgentCommandManager.class).to(JsonRpcExecAgentCommandManager.class);
+        bind(ExecAgentEventManager.class).to(JsonRpcExecAgentEventManager.class);
+
+        GinMapBinder.newMapBinder(binder(), String.class, RequestHandler.class)
+                    .addBinding("exec-agent" + '@' + "connected")
+                    .to(ConnectedEventHandler.class);
+
+        GinMapBinder.newMapBinder(binder(), String.class, RequestHandler.class)
+                    .addBinding("exec-agent" + '@' + "process_started")
+                    .to(ProcessStartedEventHandler.class);
+
+        GinMapBinder.newMapBinder(binder(), String.class, RequestHandler.class)
+                    .addBinding("exec-agent" + '@' + "process_stdout")
+                    .to(ProcessStdOutEventHandler.class);
+
+        GinMapBinder.newMapBinder(binder(), String.class, RequestHandler.class)
+                    .addBinding("exec-agent" + '@' + "process_stderr")
+                    .to(ProcessStdErrEventHandler.class);
+
+        GinMapBinder.newMapBinder(binder(), String.class, RequestHandler.class)
+                    .addBinding("exec-agent" + '@' + "process_died")
+                    .to(ProcessDiedEventHandler.class);
+    }
+
     private void configureClientServerEventService() {
         bind(FileOpenCloseEventListener.class).asEagerSingleton();
         bind(ClientServerEventService.class).asEagerSingleton();
 
-        GinMapBinder<String, JsonRpcRequestReceiver> requestReceivers =
-                GinMapBinder.newMapBinder(binder(), String.class, JsonRpcRequestReceiver.class);
+        GinMapBinder.newMapBinder(binder(), String.class, RequestHandler.class)
+                    .addBinding("ws-agent" + '@' + "event:file-in-vfs-status-changed")
+                    .to(EditorFileStatusNotificationHandler.class);
 
-        requestReceivers.addBinding("event:file-in-vfs-status-changed").to(EditorFileStatusNotificationReceiver.class);
-        requestReceivers.addBinding("event:project-tree-status-changed").to(ProjectTreeStatusNotificationReceiver.class);
+        GinMapBinder.newMapBinder(binder(), String.class, RequestHandler.class)
+                    .addBinding("ws-agent" + '@' + "event:project-tree-status-changed")
+                    .to(ProjectTreeStatusNotificationHandler.class);
     }
 
     private void configureJsonRpc() {
         bind(JsonRpcWebSocketAgentEventListener.class).asEagerSingleton();
-
         bind(JsonRpcInitializer.class).to(WebSocketJsonRpcInitializer.class);
+        bind(RequestTransmitter.class).to(WebSocketTransmitter.class);
 
-        bind(JsonRpcRequestTransmitter.class).to(WebSocketJsonRpcRequestTransmitter.class);
-        bind(JsonRpcResponseTransmitter.class).to(WebSocketJsonRpcResponseTransmitter.class);
-
-        bind(JsonRpcObjectValidator.class).to(BasicJsonRpcObjectValidator.class);
-
-        GinMapBinder<String, JsonRpcDispatcher> dispatchers = GinMapBinder.newMapBinder(binder(), String.class, JsonRpcDispatcher.class);
-        dispatchers.addBinding("request").to(WebSocketJsonRpcRequestDispatcher.class);
-        dispatchers.addBinding("response").to(WebSocketJsonRpcResponseDispatcher.class);
-
-        GinMapBinder<String, JsonRpcRequestReceiver> requestReceivers =
-                GinMapBinder.newMapBinder(binder(), String.class, JsonRpcRequestReceiver.class);
-
-        GinMapBinder<String, JsonRpcResponseReceiver> responseReceivers =
-                GinMapBinder.newMapBinder(binder(), String.class, JsonRpcResponseReceiver.class);
+        GinMapBinder.newMapBinder(binder(), String.class, RequestHandler.class);
     }
 
     private void configureWebSocket() {
-        bind(WebSocketInitializer.class).to(SessionWebSocketInitializer.class);
-
         bind(WebSocketEndpoint.class).to(BasicWebSocketEndpoint.class);
-
-        bind(WebSocketTransmissionValidator.class).to(BasicWebSocketTransmissionValidator.class);
-
         bind(WebSocketMessageTransmitter.class).to(BasicWebSocketMessageTransmitter.class);
+        bind(WebSocketMessageReceiver.class).to(WebSocketToJsonRpcDispatcher.class);
 
-        install(new GinFactoryModuleBuilder()
-                        .implement(WebSocket.class, DelayableWebSocket.class)
-                        .build(WebSocketCreator.class));
-
-        GinMapBinder<String, WebSocketMessageReceiver> receivers =
-                GinMapBinder.newMapBinder(binder(), String.class, WebSocketMessageReceiver.class);
-
-        receivers.addBinding("jsonrpc-2.0").to(WebSocketJsonRpcDispatcher.class);
+        install(new GinFactoryModuleBuilder().implement(WebSocketConnection.class, DelayableWebSocketConnection.class)
+                                             .build(WebSocketFactory.class));
     }
 
     private void configureComponents() {
@@ -661,4 +664,6 @@ public class CoreGinModule extends AbstractGinModule {
     protected JsonFactory provideJsonFactory() {
         return Json.instance();
     }
+
+
 }

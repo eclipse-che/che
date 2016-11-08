@@ -107,6 +107,18 @@ public class DevMachine implements MachineEntity {
         throw new RuntimeException(message);
     }
 
+    public String getExecAgentUrl() {
+        for (Link link : devMachineLinks) {
+            if (Constants.EXEC_AGENT_REFERENCE.equals(link.getRel())) {
+                return link.getHref();
+            }
+        }
+        //should not be
+        final String message = "Reference " + Constants.EXEC_AGENT_REFERENCE + " not found in DevMachine description";
+        Log.error(getClass(), message);
+        throw new RuntimeException(message);
+    }
+
     /**
      *
      * @return return base URL to the ws agent REST services. URL will be always without trailing slash
