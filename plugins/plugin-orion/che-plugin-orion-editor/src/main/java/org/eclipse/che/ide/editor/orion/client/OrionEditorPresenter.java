@@ -779,7 +779,9 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
     public void editorLostFocus() {
         this.editorView.updateInfoPanelUnfocused(this.document.getLineCount());
         this.isFocused = false;
-        doSave();
+        if (isDirty()) {
+            doSave();
+        }
     }
 
     @Override

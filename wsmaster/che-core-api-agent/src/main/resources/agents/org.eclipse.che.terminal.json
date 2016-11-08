@@ -1,7 +1,7 @@
 {
   "id": "org.eclipse.che.terminal",
   "name": "Terminal",
-  "description": "Terminal support",
+  "description": "Embedded web terminal",
   "dependencies": [],
   "properties": {},
   "servers": {

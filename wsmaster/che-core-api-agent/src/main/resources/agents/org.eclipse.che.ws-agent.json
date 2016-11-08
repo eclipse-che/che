@@ -1,7 +1,7 @@
 {
   "id": "org.eclipse.che.ws-agent",
-  "name": "WS-agent",
-  "description": "WS-agent support",
+  "name": "Workspace API",
+  "description": "Workspace API support",
   "dependencies": [
     "org.eclipse.che.terminal"
   ],

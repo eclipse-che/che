@@ -1,7 +1,7 @@
 {
   "id": "org.eclipse.che.ssh",
   "name": "SSH",
-  "description": "SSH support",
+  "description": "SSH server, key-pair generation",
   "dependencies": [],
   "properties": {},
   "servers": {
