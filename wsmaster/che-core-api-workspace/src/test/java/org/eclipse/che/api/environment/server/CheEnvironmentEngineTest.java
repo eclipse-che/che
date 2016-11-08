@@ -482,7 +482,7 @@ public class CheEnvironmentEngineTest {
         MachineConfigImpl config = createConfig(false);
         String machineName = "extraMachine";
         config.setName(machineName);
-        config.setSource(new MachineSourceImpl("docker").setLocation("/recipe/12345"));
+        config.setSource(new MachineSourceImpl("docker").setLocation(API_ENDPOINT + "/recipe/12345"));
         String dockerfileContent = "this is dockerfile content";
         when(recipeDownloader.getRecipe(anyString())).thenReturn("this is dockerfile content");
 
