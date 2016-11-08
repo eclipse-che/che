@@ -33,7 +33,7 @@ public class WorkspaceEntityListener {
     @PreRemove
     private void preRemove(WorkspaceImpl workspace) {
         final BeforeWorkspaceRemovedEvent event = new BeforeWorkspaceRemovedEvent(workspace);
-        eventService.publish(new BeforeWorkspaceRemovedEvent(workspace));
+        eventService.publish(event);
         if (event.getContext().isFailed()) {
             throw new CascadeRemovalException(event.getContext().getCause());
         }
