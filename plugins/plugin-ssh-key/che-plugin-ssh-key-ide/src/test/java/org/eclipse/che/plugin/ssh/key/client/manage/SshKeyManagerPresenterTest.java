@@ -470,8 +470,37 @@ public class SshKeyManagerPresenterTest {
     }
 
     @Test
+    public void shouldReturnErrorOnHostNameThatStartsWithDotValidation() throws OperationException {
+        String invalidHostname = ".host.com";
+        when(constant.invalidHostName()).thenReturn("ErrorMessage");
+
+        String errorMessage = ((InputValidator)presenter.hostNameValidator).validate(invalidHostname).getMessage();
+
+        assertEquals("ErrorMessage", errorMessage);
+    }
+
+    @Test
+    public void shouldReturnErrorOnHostNameThatEndsOnDotValidation() throws OperationException {
+        String invalidHostname = "host.com.";
+        when(constant.invalidHostName()).thenReturn("ErrorMessage");
+
+        String errorMessage = ((InputValidator)presenter.hostNameValidator).validate(invalidHostname).getMessage();
+
+        assertEquals("ErrorMessage", errorMessage);
+    }
+
+    @Test
     public void shouldReturnNullOnValidHostNameValidation() throws OperationException {
         String validHostname = "hostname.com";
+
+        Violation violation = ((InputValidator)presenter.hostNameValidator).validate(validHostname);
+
+        assertNull(violation);
+    }
+
+    @Test
+    public void shouldReturnNullOnHostNameWithSeveralDotsValidation() throws OperationException {
+        String validHostname = "host.name.com";
 
         Violation violation = ((InputValidator)presenter.hostNameValidator).validate(validHostname);
 

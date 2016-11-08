@@ -294,8 +294,7 @@ public class SshKeyManagerPresenter extends AbstractPreferencePagePresenter impl
         private final RegExp hostNamePattern;
 
         HostNameValidator() {
-            hostNamePattern = RegExp.compile("^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*" +
-                                             "([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$");
+            hostNamePattern = RegExp.compile("^([a-zA-Z0-9]\\.?)*[a-zA-Z0-9]+$");
         }
 
         @Override
