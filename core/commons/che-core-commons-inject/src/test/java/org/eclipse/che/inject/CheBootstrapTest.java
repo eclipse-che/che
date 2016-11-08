@@ -242,12 +242,12 @@ public class CheBootstrapTest {
     public void environment_variables_prefixed_with_che_underscore_convert_double_underscores_into_one_underscore_in_variable_name()
             throws Exception {
         Properties cheProperties = new Properties();
-        cheProperties.put("some.other.name_with_underscores", "che_value");
-        cheProperties.put("some.name", "NULL");
+        cheProperties.put("che.some.other.name_with_underscores", "che_value");
+        cheProperties.put("che.some.name", "NULL");
         writePropertiesFile(che, "che.properties", cheProperties);
 
         Properties userProperties = new Properties();
-        userProperties.put("some.other.name_with_underscores", "user_value");
+        userProperties.put("che.some.other.name_with_underscores", "user_value");
         writePropertiesFile(userCongDir, "user.properties", userProperties);
 
         systemPropertiesHelper.property("che.some.other.name_with_underscores", "che_dot_system_property_value");
@@ -422,12 +422,12 @@ public class CheBootstrapTest {
     }
 
     static class TestConfOverrideWithUnderscoresComponent {
-        @Named("some.name")
+        @Named("che.some.name")
         @Inject
         @Nullable
         String string;
 
-        @Named("some.other.name_with_underscores")
+        @Named("che.some.other.name_with_underscores")
         @Inject
         @Nullable
         String otherString;
