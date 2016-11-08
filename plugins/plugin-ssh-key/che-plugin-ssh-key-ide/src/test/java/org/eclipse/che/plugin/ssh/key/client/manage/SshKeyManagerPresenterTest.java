@@ -480,8 +480,38 @@ public class SshKeyManagerPresenterTest {
     }
 
     @Test
+    public void shouldReturnErrorOnHostNameThatStartsWithDashValidation() throws OperationException {
+        String invalidHostname = "-host.com";
+        when(constant.invalidHostName()).thenReturn("ErrorMessage");
+
+        String errorMessage = ((InputValidator)presenter.hostNameValidator).validate(invalidHostname).getMessage();
+
+        assertEquals("ErrorMessage", errorMessage);
+    }
+
+    @Test
     public void shouldReturnErrorOnHostNameThatEndsOnDotValidation() throws OperationException {
         String invalidHostname = "host.com.";
+        when(constant.invalidHostName()).thenReturn("ErrorMessage");
+
+        String errorMessage = ((InputValidator)presenter.hostNameValidator).validate(invalidHostname).getMessage();
+
+        assertEquals("ErrorMessage", errorMessage);
+    }
+
+    @Test
+    public void shouldReturnErrorOnHostNameThatEndsOnDashValidation() throws OperationException {
+        String invalidHostname = "host.com-";
+        when(constant.invalidHostName()).thenReturn("ErrorMessage");
+
+        String errorMessage = ((InputValidator)presenter.hostNameValidator).validate(invalidHostname).getMessage();
+
+        assertEquals("ErrorMessage", errorMessage);
+    }
+
+    @Test
+    public void shouldReturnErrorOnHostNameWithDotAndDashTogetherValidation() throws OperationException {
+        String invalidHostname = "host.-com";
         when(constant.invalidHostName()).thenReturn("ErrorMessage");
 
         String errorMessage = ((InputValidator)presenter.hostNameValidator).validate(invalidHostname).getMessage();
@@ -499,8 +529,17 @@ public class SshKeyManagerPresenterTest {
     }
 
     @Test
-    public void shouldReturnNullOnHostNameWithSeveralDotsValidation() throws OperationException {
-        String validHostname = "host.name.com";
+    public void shouldReturnNullOnHostNameWithDotAndDashValidation() throws OperationException {
+        String validHostname = "host-name.com";
+
+        Violation violation = ((InputValidator)presenter.hostNameValidator).validate(validHostname);
+
+        assertNull(violation);
+    }
+
+    @Test
+    public void shouldReturnNullOnHostNameWithSeveralDotsAndDashesValidation() throws OperationException {
+        String validHostname = "ho-st.na-me.com";
 
         Violation violation = ((InputValidator)presenter.hostNameValidator).validate(validHostname);
 
