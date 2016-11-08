@@ -212,7 +212,10 @@ public class ProjectService extends Service {
     @Path("/batch")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Creates batch of projects", response = ProjectConfigDto.class)
+    @ApiOperation(value = "Creates batch of projects according to their configurations",
+                  notes = "A project will be created by importing when project configuration contains source object. " +
+                          "For creating a project by generator options should be specified.",
+                  response = ProjectConfigDto.class)
     @ApiResponses({@ApiResponse(code = 200, message = "OK"),
                    @ApiResponse(code = 403, message = "Operation is forbidden"),
                    @ApiResponse(code = 409, message = "Project with specified name already exist in workspace"),

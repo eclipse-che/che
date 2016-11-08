@@ -13,7 +13,7 @@ package org.eclipse.che.api.workspace.shared.dto;
 import io.swagger.annotations.ApiModelProperty;
 
 import org.eclipse.che.api.core.factory.FactoryParameter;
-import org.eclipse.che.api.core.model.project.ProjectConfig;
+import org.eclipse.che.api.core.model.project.CreateProjectConfig;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.dto.shared.DTO;
 
@@ -29,7 +29,7 @@ import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.OPTIO
  * @author Roman Nikitenko
  */
 @DTO
-public interface CreateProjectConfigDto extends ProjectConfig {
+public interface CreateProjectConfigDto extends CreateProjectConfig {
     @Override
     @FactoryParameter(obligation = MANDATORY)
     String getName();
@@ -103,6 +103,7 @@ public interface CreateProjectConfigDto extends ProjectConfig {
 
     CreateProjectConfigDto withProblems(List<ProjectProblemDto> problems);
 
+    @Override
     @FactoryParameter(obligation = OPTIONAL)
     Map<String, String> getOptions();
 

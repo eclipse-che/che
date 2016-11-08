@@ -95,6 +95,10 @@ public interface ProjectServiceClient {
 
     /**
      * Creates the batch of projects with given {@code configuration}s.
+     * A project will be created by importing when project configuration contains {@link SourceStorageDto}
+     * object, otherwise this one will be created corresponding its {@link CreateProjectConfigDto}.
+     * For creating a project by generator {@link CreateProjectConfigDto#getOptions()}
+     * should be specified.
      *
      * @param configurations
      *         the list of configurations to creating projects

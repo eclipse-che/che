@@ -17,6 +17,7 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
+import org.eclipse.che.api.core.model.project.CreateProjectConfig;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.core.model.project.type.ProjectType;
@@ -45,8 +46,6 @@ import org.eclipse.che.api.vfs.impl.file.event.LoEvent;
 import org.eclipse.che.api.vfs.impl.file.event.detectors.ProjectTreeChangesDetector;
 import org.eclipse.che.api.vfs.search.Searcher;
 import org.eclipse.che.api.vfs.search.SearcherProvider;
-import org.eclipse.che.api.workspace.shared.dto.CreateProjectConfigDto;
-import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -293,30 +292,35 @@ public final class ProjectManager {
     }
 
     /**
-     * Create batch of projects
+     * Create batch of projects according to their configurations.
+     * <p/>
+     * A project will be created by importing when project configuration contains {@link SourceStorage} object,
+     * otherwise this one will be created corresponding its {@link CreateProjectConfig}.
+     * For creating a project by generator {@link CreateProjectConfig#getOptions()}
+     * should be specified.
      *
      * @param projectConfigList
-     *         the list of configurations to creating projects
+     *         the list of configurations to create projects
      * @return the list of new projects
      * @throws ConflictException
      * @throws ForbiddenException
      * @throws ServerException
      * @throws NotFoundException
      */
-    public List<RegisteredProject> createBatchProjects(List<CreateProjectConfigDto> projectConfigList) throws ConflictException,
-                                                                                                              ForbiddenException,
-                                                                                                              ServerException,
-                                                                                                              NotFoundException,
-                                                                                                              IOException,
-                                                                                                              UnauthorizedException {
+    public List<RegisteredProject> createBatchProjects(List<? extends CreateProjectConfig> projectConfigList) throws ConflictException,
+                                                                                                           ForbiddenException,
+                                                                                                           ServerException,
+                                                                                                           NotFoundException,
+                                                                                                           IOException,
+                                                                                                           UnauthorizedException {
         List<RegisteredProject> projects = new ArrayList<>(projectConfigList.size());
-        Iterator<CreateProjectConfigDto> iterator = projectConfigList.iterator();
+        Iterator<? extends CreateProjectConfig> iterator = projectConfigList.iterator();
 
         while (iterator.hasNext()) {
-            final CreateProjectConfigDto projectConfig = iterator.next();
+            final CreateProjectConfig projectConfig = iterator.next();
             final String path = projectConfig.getPath();
 
-            final SourceStorageDto sourceStorage = projectConfig.getSource();
+            final SourceStorage sourceStorage = projectConfig.getSource();
             if (sourceStorage != null && !isNullOrEmpty(sourceStorage.getLocation())) {
                 checkParentExist(path);
 
@@ -326,7 +330,7 @@ public final class ProjectManager {
             }
         }
 
-        for (CreateProjectConfigDto projectConfig : projectConfigList) {
+        for (CreateProjectConfig projectConfig : projectConfigList) {
             final String pathToProject = projectConfig.getPath();
             checkParentExist(pathToProject);
 
