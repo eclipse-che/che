@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.machine;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
 import com.google.common.collect.ObjectArrays;
@@ -35,6 +34,7 @@ import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.Size;
+import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
 import org.eclipse.che.plugin.docker.client.ProgressLineFormatterImpl;
@@ -81,7 +81,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
@@ -89,6 +88,7 @@ import static java.lang.Thread.sleep;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
 import static org.eclipse.che.plugin.docker.machine.DockerInstance.LATEST_TAG;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -125,6 +125,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
     private final double                                        memorySwapMultiplier;
     private final String                                        networkDriver;
     private final Set<String>                                   additionalNetworks;
+    private final WindowsPathEscaper                            windowsPathEscaper;
 
     @Inject
     public MachineProviderImpl(DockerConnector docker,
@@ -144,7 +145,8 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                @Named("che.docker.registry_for_snapshots") boolean snapshotUseRegistry,
                                @Named("che.docker.swap") double memorySwapMultiplier,
                                @Named("machine.docker.networks") Set<Set<String>> additionalNetworks,
-                               @Nullable @Named("che.docker.network_driver") String networkDriver)
+                               @Nullable @Named("che.docker.network_driver") String networkDriver,
+                               WindowsPathEscaper windowsPathEscaper)
             throws IOException {
         this.docker = docker;
         this.dockerCredentials = dockerCredentials;
@@ -163,6 +165,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
         //  we calculate this field as memorySwap=memory * (1 + multiplier) so we just add 1 to multiplier
         this.memorySwapMultiplier = memorySwapMultiplier == -1 ? -1 : memorySwapMultiplier + 1;
         this.networkDriver = networkDriver;
+        this.windowsPathEscaper = windowsPathEscaper;
 
         allMachinesSystemVolumes = removeEmptyAndNullValues(allMachinesSystemVolumes);
         devMachineSystemVolumes = removeEmptyAndNullValues(devMachineSystemVolumes);
@@ -171,13 +174,13 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                                            .map(line -> line.split(";"))
                                                            .flatMap(Arrays::stream)
                                                            .distinct()
-                                                           .collect(Collectors.toSet());
+                                                           .collect(toSet());
 
         devMachineSystemVolumes = devMachineSystemVolumes.stream()
                                                          .map(line -> line.split(";"))
                                                          .flatMap(Arrays::stream)
                                                          .distinct()
-                                                         .collect(Collectors.toSet());
+                                                         .collect(toSet());
 
         if (SystemInfo.isWindows()) {
             allMachinesSystemVolumes = escapePaths(allMachinesSystemVolumes);
@@ -225,7 +228,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
 
         this.additionalNetworks = additionalNetworks.stream()
                                                     .flatMap(Set::stream)
-                                                    .collect(Collectors.toSet());
+                                                    .collect(toSet());
 
         // TODO single point of failure in case of highly loaded system
         executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("MachineLogsStreamer-%d")
@@ -630,7 +633,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
     protected Set<String> removeEmptyAndNullValues(Set<String> paths) {
         return paths.stream()
                     .filter(path -> !Strings.isNullOrEmpty(path))
-                    .collect(Collectors.toSet());
+                    .collect(toSet());
     }
 
     /**
@@ -642,33 +645,9 @@ public class MachineProviderImpl implements MachineInstanceProvider {
      * @return set of escaped path
      */
     private Set<String> escapePaths(Set<String> paths) {
-        return paths.stream().map(this::escapePath).collect(Collectors.toSet());
-    }
-
-    /**
-     * Escape path for Windows system with boot@docker according to rules given here :
-     * https://github.com/boot2docker/boot2docker/blob/master/README.md#virtualbox-guest-additions
-     *
-     * @param path
-     *         path to escape
-     * @return escaped path
-     */
-    @VisibleForTesting
-    String escapePath(String path) {
-        String esc;
-        if (path.indexOf(":") == 1) {
-            //check and replace only occurrence of ":" after disk label on Windows host (e.g. C:/)
-            // but keep other occurrences it can be marker for docker mount volumes
-            // (e.g. /path/dir/from/host:/name/of/dir/in/container                                               )
-            esc = path.replaceFirst(":", "").replace('\\', '/');
-            esc = Character.toLowerCase(esc.charAt(0)) + esc.substring(1); //letter of disk mark must be lower case
-        } else {
-            esc = path.replace('\\', '/');
-        }
-        if (!esc.startsWith("/")) {
-            esc = "/" + esc;
-        }
-        return esc;
+        return paths.stream()
+                    .map(path -> windowsPathEscaper.escapePathStatic(path))
+                    .collect(toSet());
     }
 
     /** Converts list to array if it is not null, otherwise returns null */

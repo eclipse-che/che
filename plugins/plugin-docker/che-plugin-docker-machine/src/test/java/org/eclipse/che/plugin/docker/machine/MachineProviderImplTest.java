@@ -20,6 +20,7 @@ import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.machine.server.util.RecipeRetriever;
 import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
@@ -111,6 +112,9 @@ public class MachineProviderImplTest {
 
     @Mock
     private RecipeRetriever recipeRetriever;
+
+    @Mock
+    private WindowsPathEscaper pathEscaper;
 
     private MachineProviderImpl provider;
 
@@ -764,28 +768,6 @@ public class MachineProviderImplTest {
                     "Non dev machine should not contains " + DockerInstanceRuntimeInfo.CHE_WORKSPACE_ID);
     }
 
-    /**
-     * E.g from https://github.com/boot2docker/boot2docker/blob/master/README.md#virtualbox-guest-additions
-     *
-     * Users should be /Users
-     * /Users should be /Users
-     * c/Users should be /c/Users
-     * /c/Users should be /c/Users
-     * c:/Users should be /c/Users
-     */
-    @Test
-    public void shouldEscapePathForWindowsHost() {
-        assertEquals(provider.escapePath("Users"), "/Users");
-        assertEquals(provider.escapePath("/Users"), "/Users");
-        assertEquals(provider.escapePath("c/Users"), "/c/Users");
-        assertEquals(provider.escapePath("/c/Users"), "/c/Users");
-        assertEquals(provider.escapePath("c:/Users"), "/c/Users");
-        assertEquals(provider.escapePath("C:/Users"), "/c/Users");
-
-        assertEquals(provider.escapePath("C:/Users/path/dir/from/host:/name/of/dir/in/container"),
-                     "/c/Users/path/dir/from/host:/name/of/dir/in/container");
-    }
-
     @Test
     public void shouldAddCommonAndDevEnvVariablesToContainerOnDevInstanceCreationFromRecipe() throws Exception {
         Set<String> commonEnv = new HashSet<>(asList("ENV_VAR1=123", "ENV_VAR2=234"));
@@ -1225,7 +1207,8 @@ public class MachineProviderImplTest {
                                            snapshotUseRegistry,
                                            memorySwapMultiplier,
                                            additionalNetworks,
-                                           null);
+                                           null,
+                                           pathEscaper);
         }
     }
 }

@@ -27,6 +27,8 @@ import java.util.Map;
 import static java.lang.String.format;
 
 /**
+ * Infrastructure provisioner that uses volumes for workspaces projects storing because it relies on local Che usage.
+ *
  * @author Alexander Garagatyi
  */
 public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProvisioner {

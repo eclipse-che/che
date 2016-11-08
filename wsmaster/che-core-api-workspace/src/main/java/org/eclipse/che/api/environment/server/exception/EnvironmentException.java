@@ -11,6 +11,8 @@
 package org.eclipse.che.api.environment.server.exception;
 
 /**
+ * Is thrown when environment bootstrapping fails for some reason.
+ *
  * @author Alexander Garagatyi
  */
 public class EnvironmentException extends Exception {

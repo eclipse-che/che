@@ -104,7 +104,8 @@ public class WsMasterModule extends AbstractModule {
 
         bind(org.eclipse.che.api.workspace.server.event.MachineStateListener.class).asEagerSingleton();
 
-        bind(org.eclipse.che.api.agent.server.AgentRegistry.class).to(org.eclipse.che.api.agent.server.impl.LocalAgentRegistryImpl.class);
+        bind(org.eclipse.che.api.agent.server.AgentRegistry.class)
+                .to(org.eclipse.che.api.agent.server.impl.LocalAgentRegistryImpl.class);
 
         Multibinder<AgentLauncher> agentLaunchers = Multibinder.newSetBinder(binder(), AgentLauncher.class);
         agentLaunchers.addBinding().to(org.eclipse.che.api.workspace.server.launcher.WsAgentLauncherImpl.class);
