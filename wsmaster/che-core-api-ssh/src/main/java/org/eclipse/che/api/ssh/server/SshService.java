@@ -163,7 +163,7 @@ public class SshService extends Service {
     }
 
     @GET
-    @Path("find/{service}")
+    @Path("{service}/find")
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Get the ssh pair by the name of pair and name of service owned by the current user",
                   notes = "This operation can be performed only by authorized user.")
