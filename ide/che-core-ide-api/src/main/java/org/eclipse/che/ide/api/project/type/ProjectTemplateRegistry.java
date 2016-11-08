@@ -16,7 +16,7 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
- * Registry for {@link org.eclipse.che.api.project.templates.shared.dto.ProjectTemplateDescriptor}s.
+ * Registry for {@link ProjectTemplateDescriptor}s.
  *
  * @author Artem Zatsarynnyi
  */

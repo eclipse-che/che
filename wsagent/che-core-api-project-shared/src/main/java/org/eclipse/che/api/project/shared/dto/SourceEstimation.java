@@ -24,7 +24,6 @@ import java.util.Map;
 @DTO
 public interface SourceEstimation {
 
-
     /** Gets unique id of type of project. */
     @ApiModelProperty(value = "type ID", position = 1)
     String getType();
@@ -44,4 +43,10 @@ public interface SourceEstimation {
 
     SourceEstimation withMatched(boolean matched);
 
+
+    /** Gets resolution  - the reason that source code not matches project type requirements. */
+    @ApiModelProperty(value = "Resolution", position = 4)
+    String getResolution();
+
+    SourceEstimation withResolution(String resolution);
 }
