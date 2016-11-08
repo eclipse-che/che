@@ -93,6 +93,7 @@ import static org.testng.Assert.assertTrue;
 @Listeners(MockitoTestNGListener.class)
 public class CheEnvironmentEngineTest {
     private static final int    DEFAULT_MACHINE_MEM_LIMIT_MB = 256;
+    private static final String API_ENDPOINT                 = "http://eclipse.che:8080/api";
 
     @Mock
     MessageConsumer<MachineLogMessage> messageConsumer;
@@ -133,6 +134,7 @@ public class CheEnvironmentEngineTest {
                                               new DefaultServicesStartStrategy(),
                                               machineProvider,
                                               agentConfigApplier,
+                                              API_ENDPOINT,
                                               recipeDownloader,
                                               containerNameGenerator, agentRegistry));
 
@@ -296,7 +298,7 @@ public class CheEnvironmentEngineTest {
         // given
         EnvironmentImpl env = createEnv();
         String machineName = "machineWithDockerfileFromApi";
-        String additionalServiceComposeFilePart = "\n  " + machineName + ":\n    build:\n      context: /recipe/12345";
+        String additionalServiceComposeFilePart = "\n  " + machineName + ":\n    build:\n      context: " + API_ENDPOINT + "/recipe/12345";
         env.getRecipe().setContent(env.getRecipe().getContent() + additionalServiceComposeFilePart);
         String dockerfileContent = "this is dockerfile content";
         when(recipeDownloader.getRecipe(anyString())).thenReturn(dockerfileContent);

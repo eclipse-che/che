@@ -129,6 +129,7 @@ public class CheEnvironmentEngine {
                                 DefaultServicesStartStrategy startStrategy,
                                 MachineInstanceProvider machineProvider,
                                 AgentConfigApplier agentConfigApplier,
+                                @Named("che.api") String apiEndpoint,
                                 RecipeDownloader recipeDownloader,
                                 ContainerNameGenerator containerNameGenerator,
                                 AgentRegistry agentRegistry) {
@@ -146,7 +147,9 @@ public class CheEnvironmentEngine {
         this.defaultMachineMemorySizeBytes = Size.parseSize(defaultMachineMemorySizeMB + "MB");
         // 16 - experimental value for stripes count, it comes from default hash map size
         this.stripedLocks = new StripedLocks(16);
-        this.recipeApiPattern = Pattern.compile("^/recipe/.*$");
+        this.recipeApiPattern = Pattern.compile("^https?" +
+                                                  apiEndpoint.substring(apiEndpoint.indexOf(":")) +
+                                                  "/recipe/.*$ |^/recipe/.*$");
         this.containerNameGenerator = containerNameGenerator;
 
         eventService.subscribe(new MachineCleaner());
