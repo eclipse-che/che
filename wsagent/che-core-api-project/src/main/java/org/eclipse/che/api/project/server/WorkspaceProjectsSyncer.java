@@ -48,13 +48,14 @@ public abstract class WorkspaceProjectsSyncer {
 
             if(!project.isSynced() && !project.isDetected()) {
 
-                final ProjectConfig config = new NewProjectConfig(project.getPath(),
-                                                                  project.getType(),
-                                                                  project.getMixins(),
-                                                                  project.getName(),
-                                                                  project.getDescription(),
-                                                                  project.getPersistableAttributes(),
-                                                                  project.getSource());
+                final ProjectConfig config = new NewProjectConfigImpl(project.getPath(),
+                                                                      project.getType(),
+                                                                      project.getMixins(),
+                                                                      project.getName(),
+                                                                      project.getDescription(),
+                                                                      project.getPersistableAttributes(),
+                                                                      null,
+                                                                      project.getSource());
 
                 boolean found = false;
                 for(ProjectConfig r  : remote) {

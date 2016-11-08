@@ -43,6 +43,7 @@ import org.eclipse.che.api.vfs.search.QueryExpression;
 import org.eclipse.che.api.vfs.search.SearchResult;
 import org.eclipse.che.api.vfs.search.SearchResultEntry;
 import org.eclipse.che.api.vfs.search.Searcher;
+import org.eclipse.che.api.workspace.shared.dto.NewProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -90,6 +91,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.eclipse.che.api.core.util.LinksHelper.createLink;
 import static org.eclipse.che.api.project.server.DtoConverter.asDto;
 import static org.eclipse.che.api.project.shared.Constants.LINK_REL_CHILDREN;
+import static org.eclipse.che.api.project.shared.Constants.LINK_REL_CREATE_BATCH_PROJECTS;
 import static org.eclipse.che.api.project.shared.Constants.LINK_REL_CREATE_PROJECT;
 import static org.eclipse.che.api.project.shared.Constants.LINK_REL_DELETE;
 import static org.eclipse.che.api.project.shared.Constants.LINK_REL_GET_CONTENT;
@@ -206,6 +208,37 @@ public class ProjectService extends Service {
         return injectProjectLinks(configDto);
     }
 
+    @POST
+    @Path("/batch")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Creates batch of projects according to their configurations",
+                  notes = "A project will be created by importing when project configuration contains source object. " +
+                          "For creating a project by generator options should be specified.",
+                  response = ProjectConfigDto.class)
+    @ApiResponses({@ApiResponse(code = 200, message = "OK"),
+                   @ApiResponse(code = 400, message = "Path for new project should be defined"),
+                   @ApiResponse(code = 403, message = "Operation is forbidden"),
+                   @ApiResponse(code = 409, message = "Project with specified name already exist in workspace"),
+                   @ApiResponse(code = 500, message = "Server error")})
+    @GenerateLink(rel = LINK_REL_CREATE_BATCH_PROJECTS)
+    public List<ProjectConfigDto> createBatchProjects(
+            @Description("list of descriptors for projects") List<NewProjectConfigDto> projectConfigList,
+            @ApiParam(value = "Force rewrite existing project", allowableValues = "true,false")
+            @QueryParam("force") boolean rewrite)
+            throws ConflictException, ForbiddenException, ServerException, NotFoundException, IOException, UnauthorizedException,
+                   BadRequestException {
+
+        List<ProjectConfigDto> result = new ArrayList<>(projectConfigList.size());
+        for (RegisteredProject registeredProject : projectManager.createBatchProjects(projectConfigList, rewrite)) {
+            ProjectConfigDto projectConfig = injectProjectLinks(asDto(registeredProject));
+            result.add(projectConfig);
+
+            eventService.publish(new ProjectCreatedEvent(workspace, registeredProject.getPath()));
+        }
+        return result;
+    }
+
     @PUT
     @Path("/{path:.*}")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -271,6 +304,7 @@ public class ProjectService extends Service {
         return DtoFactory.newDto(SourceEstimation.class)
                          .withType(projectType)
                          .withMatched(resolution.matched())
+                         .withResolution(resolution.getResolution())
                          .withAttributes(attributes);
     }
 
