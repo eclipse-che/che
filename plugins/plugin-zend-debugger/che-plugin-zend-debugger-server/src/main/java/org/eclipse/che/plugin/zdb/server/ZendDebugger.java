@@ -322,8 +322,7 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
             debugConnection.sendRequest(new DeleteBreakpointRequest(breakpointAflId));
             breakpointAflId = null;
         }
-        String localFilePath = ZendDbgFileUtils.getLocalPath(remoteFilePath);
-        VirtualFileEntry localFileEntry = ZendDbgFileUtils.getVirtualFileEntry(localFilePath);
+        VirtualFileEntry localFileEntry = ZendDbgFileUtils.findVirtualFileEntry(remoteFilePath);
         if (localFileEntry == null) {
             sendCloseSession();
             LOG.error("Could not found corresponding local file for: " + remoteFilePath);
@@ -344,13 +343,12 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
 
     private GetLocalFileContentResponse handleGetLocalFileContent(GetLocalFileContentRequest request) {
         String remoteFilePath = request.getFileName();
-        String localFilePath = ZendDbgFileUtils.getLocalPath(remoteFilePath);
-        if (localFilePath == null) {
+        VirtualFileEntry localFileEntry = ZendDbgFileUtils.findVirtualFileEntry(remoteFilePath);
+        if (localFileEntry == null) {
             LOG.error("Could not found corresponding local file for: " + remoteFilePath);
             return new GetLocalFileContentResponse(request.getID(), GetLocalFileContentResponse.STATUS_FAILURE, null);
         }
         try {
-            VirtualFileEntry localFileEntry = ZendDbgFileUtils.getVirtualFileEntry(localFilePath);
             byte[] localFileContent = localFileEntry.getVirtualFile().getContentAsBytes();
             // Check if remote content is equal to corresponding local one
             if (ZendDbgConnectionUtils.isRemoteContentEqual(request.getSize(), request.getCheckSum(),
@@ -401,17 +399,17 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
     private void sendAddBreakpointFiles() {
         Set<String> breakpointFiles = new HashSet<>();
         for (Breakpoint breakpoint : breakpoints) {
-            String absoluteRemotePath = ZendDbgFileUtils.getAbsolutePath(breakpoint.getLocation().getResourcePath());
+            String absoluteRemotePath = ZendDbgFileUtils.findAbsolutePath(breakpoint.getLocation().getResourcePath());
             breakpointFiles.add(absoluteRemotePath);
         }
         debugConnection.sendRequest(new AddFilesRequest(breakpointFiles));
     }
 
     private void sendAddBreakpoints(String remoteFilePath) {
-        String localFilePath = ZendDbgFileUtils.getLocalPath(remoteFilePath);
+        VirtualFileEntry localFileEntry = ZendDbgFileUtils.findVirtualFileEntry(remoteFilePath);
         List<Breakpoint> fileBreakpoints = new ArrayList<>();
         for (Breakpoint breakpoint : breakpoints) {
-            if (breakpoint.getLocation().getResourcePath().equals(localFilePath)) {
+            if (breakpoint.getLocation().getResourcePath().equals(localFileEntry.getPath().toString())) {
                 fileBreakpoints.add(breakpoint);
             }
         }
@@ -427,7 +425,7 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
     }
 
     private void sendAddBreakpoint(Breakpoint breakpoint) {
-        String remoteFilePath = ZendDbgFileUtils.getAbsolutePath(breakpoint.getLocation().getResourcePath());
+        String remoteFilePath = ZendDbgFileUtils.findAbsolutePath(breakpoint.getLocation().getResourcePath());
         AddBreakpointResponse response = debugConnection
                 .sendRequest(new AddBreakpointRequest(1, 2, breakpoint.getLocation().getLineNumber(), remoteFilePath));
         if (isOK(response)) {
