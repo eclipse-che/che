@@ -18,12 +18,12 @@ import org.eclipse.che.api.user.server.Constants;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.commons.test.tck.TckModuleFactory;
+import org.eclipse.che.commons.test.tck.TckListener;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepositoryException;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Guice;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import javax.inject.Inject;
@@ -42,7 +42,7 @@ import static org.testng.AssertJUnit.assertTrue;
  *
  * @author Yevhenii Voevodin
  */
-@Guice(moduleFactory = TckModuleFactory.class)
+@Listeners(TckListener.class)
 @Test(suiteName = UserDaoTest.SUITE_NAME)
 public class UserDaoTest {
 

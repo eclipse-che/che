@@ -49,5 +49,9 @@
 }
 
 .codeassistant-detail {
-    color: #326EED;
+    color: completionPopupItemSubtitleTextColor;
+}
+
+.codeassistant-highlight {
+    color: completionPopupItemHighlightTextColor;
 }

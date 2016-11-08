@@ -39,11 +39,11 @@ import org.eclipse.che.api.workspace.server.model.impl.ServerConf2Impl;
 import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.commons.lang.Pair;
-import org.eclipse.che.commons.test.tck.TckModuleFactory;
+import org.eclipse.che.commons.test.tck.TckListener;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Guice;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import javax.inject.Inject;
@@ -65,7 +65,7 @@ import static org.testng.Assert.assertEquals;
  *
  * @author Anton Korneta
  */
-@Guice(moduleFactory = TckModuleFactory.class)
+@Listeners(TckListener.class)
 @Test(suiteName = FactoryDaoTest.SUITE_NAME)
 public class FactoryDaoTest {
 
@@ -257,17 +257,18 @@ public class FactoryDaoTest {
         final List<ActionImpl> a3 = new ArrayList<>(singletonList(new ActionImpl("id" + index, ImmutableMap.of("key3", "value3"))));
         final OnAppClosedImpl onAppClosed = new OnAppClosedImpl(a3);
         final IdeImpl ide = new IdeImpl(onAppLoaded, onProjectsLoaded, onAppClosed);
-        return FactoryImpl.builder()
-                          .generateId()
-                          .setVersion("4_0")
-                          .setName("factoryName" + index)
-                          .setWorkspace(createWorkspaceConfig(index))
-                          .setButton(factoryButton)
-                          .setCreator(creator)
-                          .setPolicies(policies)
-                          .setImages(images)
-                          .setIde(ide)
-                          .build();
+        final FactoryImpl factory = FactoryImpl.builder()
+                                               .generateId()
+                                               .setVersion("4_0")
+                                               .setName("factoryName" + index)
+                                               .setButton(factoryButton)
+                                               .setCreator(creator)
+                                               .setPolicies(policies)
+                                               .setImages(images)
+                                               .setIde(ide)
+                                               .build();
+        factory.setWorkspace(createWorkspaceConfig(index));
+        return factory;
     }
 
     public static WorkspaceConfigImpl createWorkspaceConfig(int index) {
@@ -363,6 +364,9 @@ public class FactoryDaoTest {
         wCfg.setCommands(commands);
         wCfg.setProjects(projects);
         wCfg.setEnvironments(environments);
+
+        wCfg.getProjects().forEach(ProjectConfigImpl::prePersistAttributes);
+
         return wCfg;
     }
 }

@@ -221,7 +221,7 @@ export class CreateProjectController {
       //check current workspace
       if (findWorkspace) {
         // init WS bus
-        this.messageBus = this.cheAPI.getWebsocket().getBus(findWorkspace.id);
+        this.messageBus = this.cheAPI.getWebsocket().getBus();
       } else {
         this.resetCreateProgress();
       }
@@ -522,7 +522,7 @@ export class CreateProjectController {
       });
 
       // now, resolve the project
-      deferredImportPromise.then(() => {
+      deferredAddCommandPromise.then(() => {
         this.resolveProjectType(workspaceId, projectName, projectData, deferredResolve);
       });
       promise = this.$q.all([deferredImportPromise, deferredAddCommandPromise, deferredResolvePromise]);
@@ -914,7 +914,7 @@ export class CreateProjectController {
       });
     } else {
       this.subscribeStatusChannel(workspace);
-      let bus = this.cheAPI.getWebsocket().getBus(workspace.id);
+      let bus = this.cheAPI.getWebsocket().getBus();
       this.startWorkspace(bus, workspace);
     }
   }
@@ -945,7 +945,7 @@ export class CreateProjectController {
       let promiseWorkspace = this.cheAPI.getWorkspace().fetchWorkspaceDetails(workspace.id);
       promiseWorkspace.then(() => {
         let websocketUrl = this.cheAPI.getWorkspace().getWebsocketUrl(workspace.id),
-          bus = this.cheAPI.getWebsocket().getBus(workspace.id);
+          bus = this.cheAPI.getWebsocket().getBus();
         // try to connect
         this.websocketReconnect = 10;
         this.connectToExtensionServer(websocketUrl, workspace.id, this.importProjectData.project.name, this.importProjectData, bus);
@@ -974,7 +974,7 @@ export class CreateProjectController {
 
       // init message bus if not there
       if (this.workspaces.length === 0) {
-        this.messageBus = this.cheAPI.getWebsocket().getBus(workspace.id);
+        this.messageBus = this.cheAPI.getWebsocket().getBus();
       }
 
       this.cheAPI.getWorkspace().fetchWorkspaceDetails(workspace.id).then(() => {
@@ -982,7 +982,7 @@ export class CreateProjectController {
       });
 
       this.$timeout(() => {
-        let bus = this.cheAPI.getWebsocket().getBus(workspace.id);
+        let bus = this.cheAPI.getWebsocket().getBus();
         this.startWorkspace(bus, workspace);
       }, 1000);
 

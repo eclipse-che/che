@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.ide.core;
 
+import elemental.json.Json;
+import elemental.json.JsonFactory;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
@@ -27,9 +30,11 @@ import org.eclipse.che.ide.actions.find.FindActionView;
 import org.eclipse.che.ide.actions.find.FindActionViewImpl;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.auth.OAuthServiceClient;
-import org.eclipse.che.ide.api.auth.OAuthServiceClientImpl;
+import org.eclipse.che.ide.api.oauth.OAuthServiceClient;
+import org.eclipse.che.ide.oauth.OAuthServiceClientImpl;
+import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.component.Component;
+import org.eclipse.che.ide.api.component.StateComponent;
 import org.eclipse.che.ide.api.component.WsAgentComponent;
 import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
 import org.eclipse.che.ide.api.data.tree.settings.SettingsProvider;
@@ -55,16 +60,18 @@ import org.eclipse.che.ide.api.factory.FactoryServiceClientImpl;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.git.GitServiceClient;
-import org.eclipse.che.ide.api.git.GitServiceClientImpl;
+import org.eclipse.che.ide.machine.WsAgentInitializer;
+import org.eclipse.che.ide.api.machine.WsAgentMessageBusProvider;
+import org.eclipse.che.ide.git.GitServiceClientImpl;
 import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
-import org.eclipse.che.ide.api.machine.CommandPropertyValueProvider;
-import org.eclipse.che.ide.api.machine.CommandPropertyValueProviderRegistry;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
-import org.eclipse.che.ide.api.machine.MachineServiceClientImpl;
+import org.eclipse.che.ide.machine.MachineServiceClientImpl;
 import org.eclipse.che.ide.api.machine.RecipeServiceClient;
-import org.eclipse.che.ide.api.machine.RecipeServiceClientImpl;
-import org.eclipse.che.ide.ui.loaders.PopupLoaderFactory;
+import org.eclipse.che.ide.machine.RecipeServiceClientImpl;
+import org.eclipse.che.ide.api.macro.Macro;
+import org.eclipse.che.ide.api.macro.MacroProcessor;
+import org.eclipse.che.ide.api.macro.MacroRegistry;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.oauth.OAuth2Authenticator;
 import org.eclipse.che.ide.api.oauth.OAuth2AuthenticatorRegistry;
@@ -73,19 +80,20 @@ import org.eclipse.che.ide.api.parts.PartStack;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.PartStackView;
 import org.eclipse.che.ide.api.parts.Perspective;
+import org.eclipse.che.ide.api.parts.PerspectiveView;
 import org.eclipse.che.ide.api.parts.ProjectExplorerPart;
-import org.eclipse.che.ide.api.parts.WorkBenchView;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.preferences.PreferencePagePresenter;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.api.project.ProjectImportersServiceClient;
-import org.eclipse.che.ide.api.project.ProjectImportersServiceClientImpl;
+import org.eclipse.che.ide.machine.WsAgentStateController;
+import org.eclipse.che.ide.project.ProjectImportersServiceClientImpl;
 import org.eclipse.che.ide.api.project.ProjectServiceClient;
-import org.eclipse.che.ide.api.project.ProjectServiceClientImpl;
+import org.eclipse.che.ide.project.ProjectServiceClientImpl;
 import org.eclipse.che.ide.api.project.ProjectTemplateServiceClient;
-import org.eclipse.che.ide.api.project.ProjectTemplateServiceClientImpl;
+import org.eclipse.che.ide.project.ProjectTemplateServiceClientImpl;
 import org.eclipse.che.ide.api.project.ProjectTypeServiceClient;
-import org.eclipse.che.ide.api.project.ProjectTypeServiceClientImpl;
+import org.eclipse.che.ide.project.ProjectTypeServiceClientImpl;
 import org.eclipse.che.ide.api.project.type.ProjectTemplateRegistry;
 import org.eclipse.che.ide.api.project.type.ProjectTypeRegistry;
 import org.eclipse.che.ide.api.project.type.wizard.PreSelectedProjectTypeManager;
@@ -100,27 +108,30 @@ import org.eclipse.che.ide.api.resources.ResourceInterceptor;
 import org.eclipse.che.ide.api.resources.modification.ClipboardManager;
 import org.eclipse.che.ide.api.selection.SelectionAgent;
 import org.eclipse.che.ide.api.ssh.SshServiceClient;
-import org.eclipse.che.ide.api.ssh.SshServiceClientImpl;
+import org.eclipse.che.ide.ssh.SshServiceClientImpl;
 import org.eclipse.che.ide.api.theme.Theme;
 import org.eclipse.che.ide.api.theme.ThemeAgent;
 import org.eclipse.che.ide.api.user.PreferencesServiceClient;
-import org.eclipse.che.ide.api.user.PreferencesServiceClientImpl;
+import org.eclipse.che.ide.user.PreferencesServiceClientImpl;
 import org.eclipse.che.ide.api.user.UserProfileServiceClient;
-import org.eclipse.che.ide.api.user.UserProfileServiceClientImpl;
+import org.eclipse.che.ide.user.UserProfileServiceClientImpl;
 import org.eclipse.che.ide.api.user.UserServiceClient;
-import org.eclipse.che.ide.api.user.UserServiceClientImpl;
+import org.eclipse.che.ide.user.UserServiceClientImpl;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
-import org.eclipse.che.ide.api.workspace.WorkspaceServiceClientImpl;
+import org.eclipse.che.ide.workspace.WorkspaceServiceClientImpl;
 import org.eclipse.che.ide.client.StartUpActionsProcessor;
 import org.eclipse.che.ide.client.WorkspaceStateRestorer;
+import org.eclipse.che.ide.command.CommandProducerActionFactory;
+import org.eclipse.che.ide.command.CommandProducerActionManager;
+import org.eclipse.che.ide.command.CommandTypeRegistryImpl;
 import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.editor.EditorAgentImpl;
 import org.eclipse.che.ide.editor.EditorRegistryImpl;
-import org.eclipse.che.ide.editor.macro.EditorCurrentFileNameProvider;
-import org.eclipse.che.ide.editor.macro.EditorCurrentFilePathProvider;
-import org.eclipse.che.ide.editor.macro.EditorCurrentFileRelativePathProvider;
-import org.eclipse.che.ide.editor.macro.EditorCurrentProjectNameProvider;
-import org.eclipse.che.ide.editor.macro.EditorCurrentProjectTypeProvider;
+import org.eclipse.che.ide.editor.macro.EditorCurrentFileNameMacro;
+import org.eclipse.che.ide.editor.macro.EditorCurrentFilePathMacro;
+import org.eclipse.che.ide.editor.macro.EditorCurrentFileRelativePathMacro;
+import org.eclipse.che.ide.editor.macro.EditorCurrentProjectNameMacro;
+import org.eclipse.che.ide.editor.macro.EditorCurrentProjectTypeMacro;
 import org.eclipse.che.ide.editor.synchronization.EditorContentSynchronizer;
 import org.eclipse.che.ide.editor.synchronization.EditorContentSynchronizerImpl;
 import org.eclipse.che.ide.editor.synchronization.EditorGroupSychronizationFactory;
@@ -146,7 +157,8 @@ import org.eclipse.che.ide.jsonrpc.impl.WebSocketJsonRpcRequestTransmitter;
 import org.eclipse.che.ide.jsonrpc.impl.WebSocketJsonRpcResponseDispatcher;
 import org.eclipse.che.ide.jsonrpc.impl.WebSocketJsonRpcResponseTransmitter;
 import org.eclipse.che.ide.keybinding.KeyBindingManager;
-import org.eclipse.che.ide.machine.CommandPropertyValueProviderRegistryImpl;
+import org.eclipse.che.ide.macro.MacroProcessorImpl;
+import org.eclipse.che.ide.macro.MacroRegistryImpl;
 import org.eclipse.che.ide.menu.MainMenuView;
 import org.eclipse.che.ide.menu.MainMenuViewImpl;
 import org.eclipse.che.ide.menu.StatusPanelGroupView;
@@ -174,11 +186,12 @@ import org.eclipse.che.ide.part.explorer.project.ProjectExplorerView;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerViewImpl;
 import org.eclipse.che.ide.part.explorer.project.RevealNodesPersistenceComponent;
 import org.eclipse.che.ide.part.explorer.project.TreeResourceRevealer;
-import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentFileNameProvider;
-import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentFilePathProvider;
-import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentFileRelativePathProvider;
-import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentProjectNameProvider;
-import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentProjectTypeProvider;
+import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentFileNameMacro;
+import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentFileParentPathMacro;
+import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentFilePathMacro;
+import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentFileRelativePathMacro;
+import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentProjectNameMacro;
+import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentProjectTypeMacro;
 import org.eclipse.che.ide.preferences.PreferencesComponent;
 import org.eclipse.che.ide.preferences.PreferencesManagerImpl;
 import org.eclipse.che.ide.preferences.PreferencesView;
@@ -239,6 +252,7 @@ import org.eclipse.che.ide.ui.dialogs.message.MessageDialogViewImpl;
 import org.eclipse.che.ide.ui.dropdown.DropDownListFactory;
 import org.eclipse.che.ide.ui.dropdown.DropDownWidget;
 import org.eclipse.che.ide.ui.dropdown.DropDownWidgetImpl;
+import org.eclipse.che.ide.ui.loaders.PopupLoaderFactory;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.ui.multisplitpanel.SubPanel;
 import org.eclipse.che.ide.ui.multisplitpanel.SubPanelFactory;
@@ -284,11 +298,13 @@ import org.eclipse.che.ide.workspace.WorkspaceViewImpl;
 import org.eclipse.che.ide.workspace.WorkspaceWidgetFactory;
 import org.eclipse.che.ide.workspace.create.recipewidget.RecipeWidget;
 import org.eclipse.che.ide.workspace.create.recipewidget.RecipeWidgetImpl;
-import org.eclipse.che.ide.workspace.macro.WorkspaceNameMacroProvider;
+import org.eclipse.che.ide.workspace.macro.WorkspaceNameMacro;
 import org.eclipse.che.ide.workspace.perspectives.general.PerspectiveViewImpl;
 import org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective;
 import org.eclipse.che.ide.workspace.start.workspacewidget.WorkspaceWidget;
 import org.eclipse.che.ide.workspace.start.workspacewidget.WorkspaceWidgetImpl;
+import org.eclipse.che.providers.DynaProvider;
+import org.eclipse.che.providers.DynaProviderImpl;
 
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
@@ -322,9 +338,9 @@ public class CoreGinModule extends AbstractGinModule {
 
         bind(AppContext.class).to(AppContextImpl.class);
 
+        install(new GinFactoryModuleBuilder().build(LoaderFactory.class));
         install(new GinFactoryModuleBuilder().build(PopupLoaderFactory.class));
 
-        install(new GinFactoryModuleBuilder().build(LoaderFactory.class));
         install(new GinFactoryModuleBuilder().implement(PartStackView.class, PartStackViewImpl.class).build(PartStackViewFactory.class));
         install(new GinFactoryModuleBuilder().implement(PartStack.class, PartStackPresenter.class).build(PartStackPresenterFactory.class));
 
@@ -334,6 +350,8 @@ public class CoreGinModule extends AbstractGinModule {
         bind(NotificationManager.class).to(NotificationManagerImpl.class).in(Singleton.class);
         bind(ThemeAgent.class).to(ThemeAgentImpl.class).in(Singleton.class);
         bind(FileTypeRegistry.class).to(FileTypeRegistryImpl.class).in(Singleton.class);
+
+        bind(DynaProvider.class).to(DynaProviderImpl.class);
 
         GinMultibinder.newSetBinder(binder(), OAuth2Authenticator.class).addBinding().to(DefaultOAuthAuthenticatorImpl.class);
 
@@ -350,6 +368,10 @@ public class CoreGinModule extends AbstractGinModule {
         configureWebSocket();
         configureClientServerEventService();
 
+        GinMapBinder<String, StateComponent> stateComponents = GinMapBinder.newMapBinder(binder(), String.class, StateComponent.class);
+        stateComponents.addBinding("workspace").to(WorkspacePresenter.class);
+        stateComponents.addBinding("editor").to(EditorAgentImpl.class);
+
         GinMultibinder<PersistenceComponent> persistenceComponentsMultibinder =
                 GinMultibinder.newSetBinder(binder(), PersistenceComponent.class);
         persistenceComponentsMultibinder.addBinding().to(ShowHiddenFilesPersistenceComponent.class);
@@ -364,6 +386,9 @@ public class CoreGinModule extends AbstractGinModule {
         bind(ClipboardManager.class).to(ClipboardManagerImpl.class);
 
         GinMultibinder.newSetBinder(binder(), ResourceInterceptor.class).addBinding().to(ResourceInterceptor.NoOpInterceptor.class);
+
+        bind(WsAgentMessageBusProvider.class).to(WsAgentStateController.class).in(Singleton.class);
+        bind(WsAgentInitializer.class).to(WsAgentStateController.class).in(Singleton.class);
     }
 
     private void configureClientServerEventService() {
@@ -427,6 +452,7 @@ public class CoreGinModule extends AbstractGinModule {
         componentsBinder.addBinding("Project templates").to(ProjectTemplatesComponent.class);
         componentsBinder.addBinding("Workspace").toProvider(WorkspaceComponentProvider.class);
         componentsBinder.addBinding("Standard components").to(StandardComponent.class);
+        componentsBinder.addBinding("Contextual Commands").to(CommandProducerActionManager.class);
 
         GinMapBinder<String, WsAgentComponent> wsAgentComponentsBinder =
                 GinMapBinder.newMapBinder(binder(), String.class, WsAgentComponent.class);
@@ -478,6 +504,7 @@ public class CoreGinModule extends AbstractGinModule {
         bind(SelectionAgent.class).to(SelectionAgentImpl.class).asEagerSingleton();
         bind(WorkspaceAgent.class).to(WorkspacePresenter.class).in(Singleton.class);
         bind(IconRegistry.class).to(IconRegistryImpl.class).in(Singleton.class);
+
         // UI Model
         bind(EditorMultiPartStack.class).to(EditorMultiPartStackPresenter.class).in(Singleton.class);
         bind(ActionManager.class).to(ActionManagerImpl.class).in(Singleton.class);
@@ -485,20 +512,26 @@ public class CoreGinModule extends AbstractGinModule {
         GinMultibinder<NodeInterceptor> nodeInterceptors = GinMultibinder.newSetBinder(binder(), NodeInterceptor.class);
         nodeInterceptors.addBinding().to(DefaultNodeInterceptor.class);
 
-        // Machine
-        bind(CommandPropertyValueProviderRegistry.class).to(CommandPropertyValueProviderRegistryImpl.class).in(Singleton.class);
-        GinMultibinder<CommandPropertyValueProvider> macroProviders = GinMultibinder.newSetBinder(binder(), CommandPropertyValueProvider.class);
-        macroProviders.addBinding().to(EditorCurrentFileNameProvider.class);
-        macroProviders.addBinding().to(EditorCurrentFilePathProvider.class);
-        macroProviders.addBinding().to(EditorCurrentFileRelativePathProvider.class);
-        macroProviders.addBinding().to(EditorCurrentProjectNameProvider.class);
-        macroProviders.addBinding().to(EditorCurrentProjectTypeProvider.class);
-        macroProviders.addBinding().to(ExplorerCurrentFileNameProvider.class);
-        macroProviders.addBinding().to(ExplorerCurrentFilePathProvider.class);
-        macroProviders.addBinding().to(ExplorerCurrentFileRelativePathProvider.class);
-        macroProviders.addBinding().to(ExplorerCurrentProjectNameProvider.class);
-        macroProviders.addBinding().to(ExplorerCurrentProjectTypeProvider.class);
-        macroProviders.addBinding().to(WorkspaceNameMacroProvider.class);
+        // Command API
+        bind(CommandTypeRegistry.class).to(CommandTypeRegistryImpl.class).in(Singleton.class);
+
+        bind(MacroRegistry.class).to(MacroRegistryImpl.class).in(Singleton.class);
+
+        bind(MacroProcessor.class).to(MacroProcessorImpl.class).in(Singleton.class);
+
+        GinMultibinder<Macro> macrosBinder = GinMultibinder.newSetBinder(binder(), Macro.class);
+        macrosBinder.addBinding().to(EditorCurrentFileNameMacro.class);
+        macrosBinder.addBinding().to(EditorCurrentFilePathMacro.class);
+        macrosBinder.addBinding().to(EditorCurrentFileRelativePathMacro.class);
+        macrosBinder.addBinding().to(EditorCurrentProjectNameMacro.class);
+        macrosBinder.addBinding().to(EditorCurrentProjectTypeMacro.class);
+        macrosBinder.addBinding().to(ExplorerCurrentFileNameMacro.class);
+        macrosBinder.addBinding().to(ExplorerCurrentFilePathMacro.class);
+        macrosBinder.addBinding().to(ExplorerCurrentFileParentPathMacro.class);
+        macrosBinder.addBinding().to(ExplorerCurrentFileRelativePathMacro.class);
+        macrosBinder.addBinding().to(ExplorerCurrentProjectNameMacro.class);
+        macrosBinder.addBinding().to(ExplorerCurrentProjectTypeMacro.class);
+        macrosBinder.addBinding().to(WorkspaceNameMacro.class);
     }
 
     /** Configure Core UI components, resources and views */
@@ -515,7 +548,7 @@ public class CoreGinModule extends AbstractGinModule {
         bind(PartStackUIResources.class).to(Resources.class).in(Singleton.class);
         // Views
         bind(WorkspaceView.class).to(WorkspaceViewImpl.class).in(Singleton.class);
-        bind(WorkBenchView.class).to(PerspectiveViewImpl.class).in(Singleton.class);
+        bind(PerspectiveView.class).to(PerspectiveViewImpl.class);
         bind(MainMenuView.class).to(MainMenuViewImpl.class).in(Singleton.class);
         bind(StatusPanelGroupView.class).to(StatusPanelGroupViewImpl.class).in(Singleton.class);
 
@@ -577,6 +610,8 @@ public class CoreGinModule extends AbstractGinModule {
         bind(RecentFileList.class).to(RecentFileStore.class).in(Singleton.class);
 
         install(new GinFactoryModuleBuilder().build(RecentFileActionFactory.class));
+
+        install(new GinFactoryModuleBuilder().build(CommandProducerActionFactory.class));
     }
 
     /** Configures binding for Editor API */
@@ -612,5 +647,18 @@ public class CoreGinModule extends AbstractGinModule {
     @Singleton
     protected PartStackEventHandler providePartStackEventHandler(FocusManager partAgentPresenter) {
         return partAgentPresenter.getPartStackHandler();
+    }
+
+    @Provides
+    @Singleton
+    @Named("defaultPerspectiveId")
+    protected String defaultPerspectiveId() {
+        return PROJECT_PERSPECTIVE_ID;
+    }
+
+    @Provides
+    @Singleton
+    protected JsonFactory provideJsonFactory() {
+        return Json.instance();
     }
 }

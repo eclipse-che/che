@@ -24,8 +24,6 @@ export class EditVariableDialogController {
    */
   constructor($mdDialog) {
     this.$mdDialog = $mdDialog;
-
-    this.updateInProgress = false;
   }
 
   /**
@@ -39,11 +37,7 @@ export class EditVariableDialogController {
    * Update environment variable
    */
   updateVariable() {
-    this.updateInProgress = true;
-
-    this.callbackController.updateEnvVariable(this.name, this.value).finally(() => {
-      this.updateInProgress = false;
-      this.hide();
-    });
+    this.callbackController.updateEnvVariable(this.name, this.value);
+    this.hide();
   }
 }

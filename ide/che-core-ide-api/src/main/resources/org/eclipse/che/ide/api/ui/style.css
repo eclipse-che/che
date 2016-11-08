@@ -146,6 +146,7 @@
 @eval completionPopupSelectedItemBackgroundColor org.eclipse.che.ide.api.theme.Style.theme.completionPopupSelectedItemBackgroundColor();
 @eval completionPopupItemTextColor org.eclipse.che.ide.api.theme.Style.theme.completionPopupItemTextColor();
 @eval completionPopupItemSubtitleTextColor org.eclipse.che.ide.api.theme.Style.theme.completionPopupItemSubtitleTextColor();
+@eval completionPopupItemHighlightTextColor org.eclipse.che.ide.api.theme.Style.theme.completionPopupItemHighlightTextColor();
 
 @eval editorInfoBorderColor org.eclipse.che.ide.api.theme.Style.getEditorInfoBorderColor();
 @eval editorInfoBorderShadowColor org.eclipse.che.ide.api.theme.Style.getEditorInfoBorderShadowColor();

@@ -19,6 +19,7 @@ import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.event.FileEvent;
+import org.eclipse.che.ide.api.parts.EditorPartStack;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 
 import javax.validation.constraints.NotNull;
@@ -42,8 +43,8 @@ public class ReopenClosedFileAction extends EditorAbstractAction {
     /** {@inheritDoc} */
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
-        EditorPartPresenter currentEditor = getEditorTab(event).getRelativeEditorPart();
-        EditorPartPresenter lastClosed = editorAgent.getLastClosedBasedOn(currentEditor);
+        EditorPartStack currentPartStack = getEditorPane(event);
+        EditorPartPresenter lastClosed = currentPartStack.getLastClosed();
 
         event.getPresentation().setEnabled(lastClosed != null);
     }
@@ -51,8 +52,8 @@ public class ReopenClosedFileAction extends EditorAbstractAction {
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent event) {
-        EditorPartPresenter currentEditor = getEditorTab(event).getRelativeEditorPart();
-        EditorPartPresenter lastClosed = editorAgent.getLastClosedBasedOn(currentEditor);
+        EditorPartStack currentPartStack = getEditorPane(event);
+        EditorPartPresenter lastClosed = currentPartStack.getLastClosed();
         VirtualFile file = lastClosed.getEditorInput().getFile();
 
         eventBus.fireEvent(FileEvent.createOpenFileEvent(file));

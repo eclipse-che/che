@@ -10,8 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.event;
 
-import org.eclipse.che.ide.api.parts.PartPresenter;
 import com.google.gwt.event.shared.GwtEvent;
+
+import org.eclipse.che.ide.api.parts.PartPresenter;
 
 /**
  * Event that notifies of changing active PartPresenter

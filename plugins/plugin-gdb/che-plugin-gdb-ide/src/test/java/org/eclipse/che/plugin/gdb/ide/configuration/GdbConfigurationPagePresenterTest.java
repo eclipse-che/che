@@ -16,7 +16,7 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.DebugConfiguration;
 import org.eclipse.che.ide.api.debug.DebugConfigurationPage;
 import org.eclipse.che.ide.api.machine.RecipeServiceClient;
-import org.eclipse.che.ide.extension.machine.client.command.valueproviders.CurrentProjectPathProvider;
+import org.eclipse.che.ide.extension.machine.client.command.macros.CurrentProjectPathMacro;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,15 +44,15 @@ public class GdbConfigurationPagePresenterTest {
     private static final int    PORT = 8000;
 
     @Mock
-    private GdbConfigurationPageView   pageView;
+    private GdbConfigurationPageView pageView;
     @Mock
-    private DebugConfiguration         configuration;
+    private DebugConfiguration       configuration;
     @Mock
-    private CurrentProjectPathProvider currentProjectPathProvider;
+    private CurrentProjectPathMacro  currentProjectPathMacro;
     @Mock
-    private AppContext                 appContext;
+    private AppContext               appContext;
     @Mock
-    private RecipeServiceClient        recipeServiceClient;
+    private RecipeServiceClient      recipeServiceClient;
 
     @InjectMocks
     private GdbConfigurationPagePresenter pagePresenter;
@@ -70,7 +70,7 @@ public class GdbConfigurationPagePresenterTest {
         verify(configuration, atLeastOnce()).getHost();
         verify(configuration, atLeastOnce()).getPort();
         verify(configuration, atLeastOnce()).getConnectionProperties();
-        verify(currentProjectPathProvider).getKey();
+        verify(currentProjectPathMacro).getName();
     }
 
     @Test

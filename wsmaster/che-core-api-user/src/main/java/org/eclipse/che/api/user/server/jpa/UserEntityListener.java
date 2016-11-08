@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.user.server.jpa;
 
+import org.eclipse.che.api.core.jdbc.jpa.CascadeRemovalException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.user.server.event.BeforeUserPersistedEvent;
 import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
@@ -33,7 +34,11 @@ public class UserEntityListener {
 
     @PreRemove
     public void preRemove(UserImpl user) {
-        eventService.publish(new BeforeUserRemovedEvent(user));
+        final BeforeUserRemovedEvent event = new BeforeUserRemovedEvent(user);
+        eventService.publish(event);
+        if (event.getContext().isFailed()) {
+            throw new CascadeRemovalException(event.getContext().getCause());
+        }
     }
 
     @PrePersist

@@ -17,6 +17,8 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jdbc.jpa.DuplicateKeyException;
 import org.eclipse.che.api.core.jdbc.jpa.IntegrityConstraintViolationException;
+import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.machine.server.event.RecipePersistedEvent;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.machine.server.spi.RecipeDao;
 
@@ -47,11 +49,15 @@ public class JpaRecipeDao implements RecipeDao {
     @Inject
     private Provider<EntityManager> managerProvider;
 
+    @Inject
+    private EventService eventService;
+
     @Override
     public void create(RecipeImpl recipe) throws ConflictException, ServerException {
         requireNonNull(recipe);
         try {
             doCreateRecipe(recipe);
+            eventService.publish(new RecipePersistedEvent(recipe));
         } catch (DuplicateKeyException ex) {
             throw new ConflictException(format("Recipe with id %s already exists", recipe.getId()));
         } catch (IntegrityConstraintViolationException ex) {

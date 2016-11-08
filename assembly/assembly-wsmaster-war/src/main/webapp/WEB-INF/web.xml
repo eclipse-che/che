@@ -23,7 +23,7 @@
     </context-param>
     <context-param>
         <param-name>org.eclipse.che.websocket.endpoint</param-name>
-        <param-value>/ws/{ws-id}</param-value>
+        <param-value>/ws</param-value>
     </context-param>
     <context-param>
         <param-name>org.eclipse.che.eventbus.endpoint</param-name>

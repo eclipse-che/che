@@ -14,11 +14,28 @@
  * Simple parser and simple dumper of dockerfiles.
  * @author Oleksii Kurinnyi
  */
+
+interface IRecipeLine {
+  instruction?: string;
+  argument?: string | string[];
+  comment?: string;
+}
+
 export class DockerfileParser {
+  fromRE: RegExp;
+  backslashLineBreakRE: RegExp;
+  lineBreakRE: RegExp;
+  commentLineRE: RegExp;
+  instructionRE: RegExp;
+  envVariablesRE: RegExp;
+  quotesRE: RegExp;
+  backslashSpaceRE: RegExp;
 
   constructor() {
+    this.fromRE = /^FROM\s+\w+/m;
     this.backslashLineBreakRE = /\\\r?\n(\s+)?/;
     this.lineBreakRE = /\r?\n/;
+    this.commentLineRE = /^#/;
     this.instructionRE = /(\w+)\s+?(.+)/;
     this.envVariablesRE = /(?:^|(?:\s+))([^\s=]+?)=([^=]+?)(?:(?=\s+\w+=)|$)/g;
     //                     |            |          |       |
@@ -33,28 +50,40 @@ export class DockerfileParser {
   /**
    * Parses a dockerfile into array of pairs of instructions and arguments
    *
-   * @param content
-   * @returns {Array}
+   * @param {string} content recipe content
+   * @returns {IRecipeLine[]}
    */
-  parse(content) {
+  parse(content: string): IRecipeLine[] {
+    if (!this.fromRE.test(content)) {
+      throw new TypeError('Dockerfile should start with \'FROM\' instruction. Cannot parse this recipe.');
+    }
+
     // join multiline instructions
     content = this._joinMultilineInstructions(content);
 
     // split dockerfile into separate instruction lines
-    let instructionLines = content.split(this.lineBreakRE);
+    let instructionLines: string[] = content.split(this.lineBreakRE);
 
     // split instruction line into instruction and argument
-    let instructions = [];
-    instructionLines.forEach((line) => {
+    let instructions: IRecipeLine[] = [];
+    instructionLines.forEach((line: string) => {
+      line = line.trim();
+
+      // check for comment line
+      if (this.commentLineRE.test(line)) {
+        instructions.push({comment: line});
+        return;
+      }
+
       let m = line.match(this.instructionRE);
       if (m) {
         let instruction = m[1],
             argument = m[2];
 
         // parse argument
-        let results = this._parseArgument(instruction, argument);
+        let results: IRecipeLine[] = this._parseArgument(instruction, argument);
 
-        results.forEach((result) => {
+        results.forEach((result: IRecipeLine) => {
           instructions.push(result);
         });
       }
@@ -67,10 +96,10 @@ export class DockerfileParser {
    * Remove line breaks from lines which end with backslash
    *
    * @param content {string}
-   * @returns {*}
+   * @returns {string}
    * @private
    */
-  _joinMultilineInstructions(content) {
+  _joinMultilineInstructions(content: string): string {
     return content.replace(this.backslashLineBreakRE, '');
   }
 
@@ -79,20 +108,20 @@ export class DockerfileParser {
    *
    * @param instruction {string}
    * @param argumentStr {string}
-   * @returns {Array}
+   * @returns {IRecipeLine[]}
    * @private
    */
-  _parseArgument(instruction, argumentStr) {
-    let results = [];
+  _parseArgument(instruction: string, argumentStr: string): IRecipeLine[] {
+    let results: IRecipeLine[] = [];
 
     switch (instruction) {
       case 'ENV':
         if (argumentStr.includes('=')) {
           // this argument string contains one or more environment variables
           let match;
-          while(match = this.envVariablesRE.exec(argumentStr)) {
-            let name  = match[1],
-                value = match[2];
+          while (match = this.envVariablesRE.exec(argumentStr)) {
+            let name: string  = match[1],
+                value: string = match[2];
             if (this.quotesRE.test(value)) {
               value = value.replace(this.quotesRE, '');
             }
@@ -110,7 +139,7 @@ export class DockerfileParser {
           let firstSpaceIndex = argumentStr.indexOf(' ');
           results.push({
             instruction: instruction,
-            argument: [argumentStr.slice(0, firstSpaceIndex), argumentStr.slice(firstSpaceIndex+1)]
+            argument: [argumentStr.slice(0, firstSpaceIndex), argumentStr.slice(firstSpaceIndex + 1)]
           });
         }
         break;
@@ -125,16 +154,20 @@ export class DockerfileParser {
   }
 
   /**
-   * Dumps an array into a dockerfile
+   * Dumps an array of instructions into a dockerfile
    *
-   * @param instructions {array}
+   * @param instructions {IRecipeLine[]}
    * @returns {string}
    */
-  dump(instructions) {
+  dump(instructions: IRecipeLine[]): string {
     let content = '';
 
-    instructions.forEach((line) => {
-      content += line.instruction + ' ' + this._stringifyArgument(line.instruction, line.argument) + '\n';
+    instructions.forEach((line: IRecipeLine) => {
+      if (line.comment) {
+        content += line.comment + '\n';
+      } else {
+        content += line.instruction + ' ' + this._stringifyArgument(line) + '\n';
+      }
     });
 
     return content;
@@ -143,17 +176,16 @@ export class DockerfileParser {
   /**
    * Dumps argument object depending on instruction.
    *
-   * @param instruction {string}
-   * @param argument {*|string}
+   * @param line {IRecipeLine}
    * @returns {string}
    * @private
    */
-  _stringifyArgument(instruction, argument) {
-    switch (instruction) {
+  _stringifyArgument(line: IRecipeLine): string {
+    switch (line.instruction) {
       case 'ENV':
-        return argument.join(' ');
+        return (line.argument as string[]).join(' ');
       default:
-        return argument;
+        return line.argument as string;
     }
   }
 }

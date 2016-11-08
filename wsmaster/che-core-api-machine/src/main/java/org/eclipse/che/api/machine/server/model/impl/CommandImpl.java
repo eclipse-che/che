@@ -15,6 +15,7 @@ import org.eclipse.che.api.core.model.machine.Command;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.MapKeyColumn;
@@ -43,7 +44,7 @@ public class CommandImpl implements Command {
     @Column(nullable = false)
     private String type;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @MapKeyColumn(name = "name")
     @Column(name = "value", columnDefinition = "TEXT")
     private Map<String, String> attributes;

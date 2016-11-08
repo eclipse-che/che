@@ -61,7 +61,7 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
     /**
      * Env variable for dev machine that contains url of Che API
      */
-    public static final String API_ENDPOINT_URL_VARIABLE = "CHE_API_ENDPOINT";
+    public static final String API_ENDPOINT_URL_VARIABLE = "CHE_API";
 
     /**
      * Environment variable that will be setup in developer machine will contain ID of a workspace for which this machine has been created
@@ -97,8 +97,7 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
                                      @Named("machine.docker.dev_machine.machine_servers") Set<ServerConf> devMachineSystemServers,
                                      @Named("machine.docker.machine_servers") Set<ServerConf> allMachinesSystemServers) {
         this.info = containerInfo;
-        this.containerExternalHostname = containerExternalHostname == null ?
-                                                    containerInternalHostname : containerExternalHostname;
+        this.containerExternalHostname = containerExternalHostname == null ? containerInternalHostname : containerExternalHostname;
         this.containerInternalHostname = containerInternalHostname;
         Stream<ServerConf> confStream = Stream.concat(machineConfig.getServers().stream(), allMachinesSystemServers.stream());
         if (machineConfig.isDev()) {
@@ -182,7 +181,7 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
             md.put("network.linkLocalIPv6PrefixLen", String.valueOf(networkSettings.getLinkLocalIPv6PrefixLen()));
             md.put("network.globalIPv6Address", networkSettings.getGlobalIPv6Address());
             md.put("network.globalIPv6PrefixLen", String.valueOf(networkSettings.getGlobalIPv6PrefixLen()));
-            md.put("network.iPv6Gateway", networkSettings.getiPv6Gateway());
+            md.put("network.iPv6Gateway", networkSettings.getIpV6Gateway());
             md.put("network.linkLocalIPv6Address", networkSettings.getLinkLocalIPv6Address());
         }
         HostConfig hostConfig = info.getHostConfig();

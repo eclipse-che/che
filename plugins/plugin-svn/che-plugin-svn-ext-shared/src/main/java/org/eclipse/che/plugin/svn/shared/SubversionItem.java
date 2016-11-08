@@ -150,4 +150,17 @@ public interface SubversionItem {
 
     SubversionItem withLastChangedDate(String lastChangedDate);
 
+
+    /**************************************************************************
+     *
+     *  Project URL
+     *
+     **************************************************************************/
+
+    String getProjectUri();
+
+    void setProjectUri(String projectUri);
+
+    SubversionItem withProjectUri(String projectUri);
+
 }

@@ -19,10 +19,10 @@ import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.core.util.LineConsumerFactory;
 import org.eclipse.che.api.core.util.ValueHolder;
+import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
 import org.eclipse.che.api.project.server.importer.ProjectImporter;
 import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
-import org.eclipse.che.api.project.server.type.ProjectTypeConstraintException;
 import org.eclipse.che.api.project.server.type.Variable;
 import org.eclipse.che.api.vfs.Path;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
@@ -65,7 +65,7 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
         projectTypeRegistry.registerProjectType(new M2());
         projectTypeRegistry.registerProjectType(new PTsettableVP());
 
-        projectHandlerRegistry.register(new PT3.SrcGenerator());
+        projectHandlerRegistry.register(new SrcGenerator());
 
     }
 
@@ -106,7 +106,7 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
         try {
             pm.createProject(pc, null);
             fail("ProjectTypeConstraintException should be thrown : pt-var2 attribute is mandatory");
-        } catch (ProjectTypeConstraintException e) {
+        } catch (ServerException e) {
             //
         }
 
@@ -138,14 +138,14 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
     public void testFailCreateProjectWithNoRequiredGenerator() throws Exception {
 
         // SPECS:
-        // If there are no respective CreateProjectHandler ProjectTypeConstraintException will be thrown
+        // If there are no respective CreateProjectHandler ServerException will be thrown
 
         ProjectConfig pc = new NewProjectConfig("/testFailCreateProjectWithNoRequiredGenerator", "pt4", null, "name", "descr", null, null);
 
         try {
             pm.createProject(pc, null);
             fail("ProjectTypeConstraintException: Value for required attribute is not initialized pt4:pt4-provided1");
-        } catch (ProjectTypeConstraintException e) {
+        } catch (ServerException e) {
         }
 
 
@@ -186,7 +186,7 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
         try {
             pm.createProject(pc, null);
             fail("NotFoundException: Project Type not found: invalid");
-        } catch (NotFoundException e) {
+        } catch (ServerException e) {
         }
 
         assertNull(projectRegistry.getProject("/testInvalidPTProjectCreateFailed"));
@@ -202,7 +202,7 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
         try {
             pm.createProject(pc, null);
             fail("NotFoundException: Project Type not found: invalid");
-        } catch (NotFoundException e) {
+        } catch (ServerException e) {
         }
 
 
@@ -223,7 +223,7 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
         try {
             pm.createProject(pc, null);
             fail("ProjectTypeConstraintException: Attribute name conflict. Duplicated attributes detected /testConflictAttributesProjectCreateFailed Attribute pt2-const1 declared in m2 already declared in pt2");
-        } catch (ProjectTypeConstraintException e) {
+        } catch (ServerException e) {
         }
 
         //assertNull(projectRegistry.folder("/testConflictAttributesProjectCreateFailed"));
@@ -317,7 +317,7 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
         try {
             pm.updateProject(pc);
             fail("ProjectTypeConstraintException: Value for required attribute is not initialized pt3:pt2-provided1 ");
-        } catch (ProjectTypeConstraintException e) {
+        } catch (ServerException e) {
         }
 
 
@@ -562,5 +562,21 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
         });
     }
 
+
+    class SrcGenerator implements CreateProjectHandler {
+
+        @Override
+        public void onCreateProject(Path projectPath, Map<String, AttributeValue> attributes, Map<String, String> options)
+                throws ForbiddenException, ConflictException, ServerException {
+            FolderEntry baseFolder = new FolderEntry(vfsProvider.getVirtualFileSystem().getRoot().createFolder(projectPath.toString()));
+            baseFolder.createFolder("file1");
+
+        }
+
+        @Override
+        public String getProjectType() {
+            return "pt3";
+        }
+    }
 
 }

@@ -23,6 +23,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStackView.TabPosition;
@@ -30,8 +31,6 @@ import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
-
-import org.eclipse.che.commons.annotation.Nullable;
 
 import static org.eclipse.che.ide.api.parts.PartStackView.TabPosition.BELOW;
 import static org.eclipse.che.ide.api.parts.PartStackView.TabPosition.LEFT;

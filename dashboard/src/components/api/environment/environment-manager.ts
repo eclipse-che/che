@@ -14,31 +14,60 @@
  * This is base class, which describes the environment manager.
  * It's aim is to handle machines retrieval and editing, based on the type of environment.
  */
+
+const WS_AGENT_NAME: string = 'org.eclipse.che.ws-agent';
+const TERMINAL_AGENT_NAME: string = 'org.eclipse.che.terminal';
+const SSH_AGENT_NAME: string = 'org.eclipse.che.ssh';
+
 export class EnvironmentManager {
 
-  constructor() {
-    this.WS_AGENT_NAME = 'org.eclipse.che.ws-agent';
+  constructor() { }
+
+  get editorMode(): string {
+    return '';
   }
 
-  canRenameMachine() {
+  canRenameMachine(machine: any): boolean {
     return false;
   }
 
-  canDeleteMachine() {
+  canDeleteMachine(machine: any): boolean {
     return false;
   }
 
-  canEditEnvVariables() {
+  canEditEnvVariables(machine: any): boolean {
     return false;
   }
 
   /**
    * Retrieves the list of machines.
    *
+   * @param {*} environment
    * @returns {Array} list of machines defined in environment
    */
-  getMachines() {
+  getMachines(environment: any): any[] {
     return [];
+  }
+
+  /**
+   * Renames machine.
+   *
+   * @param environment {object}
+   * @param oldName {string}
+   * @param newName {string}
+   */
+  renameMachine(environment: any, oldName: string, newName: string): void {
+    throw new TypeError('EnvironmentManager: cannot rename machine.');
+  }
+
+  /**
+   * Removes machine.
+   *
+   * @param environment {object}
+   * @param name {string} name of machine
+   */
+  deleteMachine(environment: any, name: string): void {
+    throw new TypeError('EnvironmentManager: cannot delete machine.');
   }
 
   /**
@@ -48,12 +77,15 @@ export class EnvironmentManager {
    * @param machines the list of machines
    * @returns environment's configuration
    */
-  getEnvironment(environment, machines) {
+  getEnvironment(environment: any, machines: any): any {
     let newEnvironment = angular.copy(environment);
 
     machines.forEach((machine) => {
       let machineName = machine.name;
 
+      if (angular.isUndefined(newEnvironment.machines)) {
+        newEnvironment.machines = {};
+      }
       if (angular.isUndefined(newEnvironment.machines[machineName])) {
         newEnvironment.machines[machineName] = {'attributes': {}};
       }
@@ -71,8 +103,8 @@ export class EnvironmentManager {
    * @param machine
    * @returns {boolean}
    */
-  isDev(machine) {
-    return machine.agents && machine.agents.includes(this.WS_AGENT_NAME);
+  isDev(machine: any): boolean {
+    return machine.agents && machine.agents.includes(WS_AGENT_NAME);
   }
 
   /**
@@ -81,32 +113,40 @@ export class EnvironmentManager {
    * @param machine machine to edit
    * @param isDev defined whether machine is developer or not
    */
-  setDev(machine, isDev) {
+  setDev(machine: any, isDev: boolean): void {
     let hasWsAgent = this.isDev(machine);
-    if (isDev && !hasWsAgent) {
+    if (isDev) {
       machine.agents = machine.agents ? machine.agents : [];
-      machine.agents.push(this.WS_AGENT_NAME);
+      if (!hasWsAgent) {
+        machine.agents.push(WS_AGENT_NAME);
+      }
+      if (!machine.agents.includes(SSH_AGENT_NAME)) {
+        machine.agents.push(SSH_AGENT_NAME);
+      }
+      if (!machine.agents.includes(TERMINAL_AGENT_NAME)) {
+        machine.agents.push(TERMINAL_AGENT_NAME);
+      }
       return;
     }
 
     if (!isDev && hasWsAgent) {
-      machine.agents.splice(machine.agents.indexOf(this.WS_AGENT_NAME), 1);
+      machine.agents.splice(machine.agents.indexOf(WS_AGENT_NAME), 1);
     }
   }
 
-  getServers(machine) {
+  getServers(machine: any): any {
     return machine.servers || {};
   }
 
-  setServers(machine, servers) {
+  setServers(machine: any, servers: any): void {
     machine.servers = angular.copy(servers);
   }
 
-  getAgents(machine) {
-    return machine.agents || {};
+  getAgents(machine: any): any[] {
+    return machine.agents || [];
   }
 
-  setAgents(machine, agents) {
+  setAgents(machine: any, agents: any[]): void {
     machine.agents = angular.copy(agents);
   }
 
@@ -114,9 +154,9 @@ export class EnvironmentManager {
    * Returns memory limit from machine's attributes
    *
    * @param machine
-   * @returns {*} memory limit in bytes
+   * @returns {number|string} memory limit in bytes
    */
-  getMemoryLimit(machine) {
+  getMemoryLimit(machine: any): number|string {
     if (machine && machine.attributes && machine.attributes.memoryLimitBytes) {
       return machine.attributes.memoryLimitBytes;
     }
@@ -131,12 +171,12 @@ export class EnvironmentManager {
    * @param machine machine to change memory limit
    * @param limit memory limit
    */
-  setMemoryLimit(machine, limit) {
+  setMemoryLimit(machine: any, limit: number): void {
     machine.attributes = machine.attributes ? machine.attributes : {};
     machine.attributes.memoryLimitBytes = limit;
   }
 
-  getEnvVariables() {
+  getEnvVariables(machine: any): any {
     return null;
   }
 }

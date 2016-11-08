@@ -12,6 +12,7 @@ package org.eclipse.che.ide.api.editor.filetype;
 
 import org.eclipse.che.ide.api.resources.VirtualFile;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -40,6 +41,9 @@ public class FileNameFileTypeIdentifier implements FileTypeIdentifier {
         }
         if ("Dockerfile".equals(filename)) {
             return Collections.singletonList("text/x-dockerfile");
+        }
+        if ("Chefile".equals(filename)) {
+            return Arrays.asList("application/javascript", "text/javascript");
         }
 
         // not a known file name

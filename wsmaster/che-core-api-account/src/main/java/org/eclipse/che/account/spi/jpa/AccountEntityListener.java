@@ -13,6 +13,7 @@ package org.eclipse.che.account.spi.jpa;
 
 import org.eclipse.che.account.event.BeforeAccountRemovedEvent;
 import org.eclipse.che.account.spi.AccountImpl;
+import org.eclipse.che.api.core.jdbc.jpa.CascadeRemovalException;
 import org.eclipse.che.api.core.notification.EventService;
 
 import javax.inject.Inject;
@@ -32,6 +33,10 @@ public class AccountEntityListener {
 
     @PreRemove
     private void preRemove(AccountImpl account) {
-        eventService.publish(new BeforeAccountRemovedEvent(account));
+        final BeforeAccountRemovedEvent event = new BeforeAccountRemovedEvent(account);
+        eventService.publish(event);
+        if (event.getContext().isFailed()) {
+            throw new CascadeRemovalException(event.getContext().getCause());
+        }
     }
 }

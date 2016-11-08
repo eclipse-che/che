@@ -63,6 +63,13 @@ public interface Theme {
     String selectionBackground();
 
     /**
+     * Background color for selected text in input fields.
+     *
+     * @return the color
+     */
+    String inputSelectionBackground();
+
+    /**
      * Background color for inactive selection.
      *
      * @return the color
@@ -661,6 +668,13 @@ public interface Theme {
      * @return color
      */
     String completionPopupItemSubtitleTextColor();
+
+    /**
+     * Item highlight text color for completion popup.
+     *
+     * @return color
+     */
+    String completionPopupItemHighlightTextColor();
 
     /**
      * Background color of the window widget.

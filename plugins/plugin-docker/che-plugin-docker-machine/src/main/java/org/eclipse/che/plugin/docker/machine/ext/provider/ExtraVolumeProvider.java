@@ -20,7 +20,7 @@ import javax.inject.Singleton;
  * Provides volume configuration of machine for any local directories
  * that a user may want to mount into any docker machine.
  *
- * {@code machine.server.extra.volume} property is optional
+ * {@code che.workspace.volume} property is optional
  * and contains semicolon separated extra volumes to mount, for instance:
  *
  * /path/on/host1:/path/in/container1;/path/on/host2:/path/in/container2
@@ -31,7 +31,7 @@ import javax.inject.Singleton;
 @Singleton
 public class ExtraVolumeProvider implements Provider<String> {
     @Inject(optional = true)
-    @Named("machine.server.extra.volume")
+    @Named("che.workspace.volume")
     private String volume;
 
     @Override

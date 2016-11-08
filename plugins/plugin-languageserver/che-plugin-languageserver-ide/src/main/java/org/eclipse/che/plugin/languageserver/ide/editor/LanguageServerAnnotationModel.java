@@ -13,6 +13,8 @@ package org.eclipse.che.plugin.languageserver.ide.editor;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
+import org.eclipse.che.api.languageserver.shared.lsapi.DiagnosticDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.RangeDTO;
 import org.eclipse.che.ide.api.editor.annotation.AnnotationModelImpl;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.document.DocumentHandle;
@@ -22,8 +24,6 @@ import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.texteditor.EditorResources;
 import org.eclipse.che.ide.editor.orion.client.OrionAnnotationSeverityProvider;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerResources;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.DiagnosticDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.RangeDTO;
 
 import java.util.ArrayList;
 import java.util.HashMap;

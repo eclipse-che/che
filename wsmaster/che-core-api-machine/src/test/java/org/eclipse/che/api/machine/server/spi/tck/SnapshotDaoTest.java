@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.server.spi.tck;
 
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
 import org.eclipse.che.api.core.NotFoundException;
@@ -17,19 +18,20 @@ import org.eclipse.che.api.machine.server.exception.SnapshotException;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
-import org.eclipse.che.commons.test.tck.TckModuleFactory;
+import org.eclipse.che.commons.test.tck.TckListener;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepositoryException;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
-import org.testng.annotations.Guice;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.util.HashSet;
 import java.util.List;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
@@ -38,7 +40,7 @@ import static org.testng.Assert.fail;
  *
  * @author Yevhenii Voevodin
  */
-@Guice(moduleFactory = TckModuleFactory.class)
+@Listeners(TckListener.class)
 @Test(suiteName = SnapshotDaoTest.SUITE_NAME)
 public class SnapshotDaoTest {
 
@@ -178,6 +180,22 @@ public class SnapshotDaoTest {
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNpeWhenRemovingNull() throws Exception {
         snapshotDao.removeSnapshot(null);
+    }
+
+    @Test(dependsOnMethods = "shouldFindSnapshotsByWorkspaceAndNamespace")
+    public void replacesSnapshots() throws Exception {
+        final SnapshotImpl newSnapshot = createSnapshot("new-snapshot",
+                                                        snapshots[0].getWorkspaceId(),
+                                                        snapshots[0].getEnvName(),
+                                                        snapshots[0].getMachineName());
+
+        final List<SnapshotImpl> replaced = snapshotDao.replaceSnapshots(newSnapshot.getWorkspaceId(),
+                                                                         newSnapshot.getEnvName(),
+                                                                         singletonList(newSnapshot));
+
+        assertEquals(new HashSet<>(replaced), Sets.newHashSet(snapshots[0], snapshots[1]));
+        assertEquals(new HashSet<>(snapshotDao.findSnapshots(snapshots[0].getWorkspaceId())),
+                     Sets.newHashSet(newSnapshot, snapshots[2]));
     }
 
     @DataProvider(name = "missingSnapshots")

@@ -58,6 +58,11 @@ public class LightTheme implements Theme {
     }
 
     @Override
+    public String inputSelectionBackground() {
+        return "#b1d7fe";
+    }
+
+    @Override
     public String inactiveSelectionBackground() {
         return "rgba(73,143,225,0.40)";
     }
@@ -485,6 +490,11 @@ public class LightTheme implements Theme {
     @Override
     public String completionPopupItemSubtitleTextColor() {
         return "#909090";
+    }
+
+    @Override
+    public String completionPopupItemHighlightTextColor() {
+        return "#1A68AF";
     }
 
     @Override

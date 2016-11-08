@@ -19,15 +19,15 @@ import java.util.Set;
 @Singleton
 public class MemoryLuceneSearcherProvider extends AbstractLuceneSearcherProvider {
     /**
-     * @param fileIndexFilters
+     * @param excludeFileIndexFilters
      *         set filter for files that should not be indexed
      */
-    public MemoryLuceneSearcherProvider(@Named("vfs.index_filter") Set<VirtualFileFilter> fileIndexFilters) {
-        super(fileIndexFilters);
+    public MemoryLuceneSearcherProvider(@Named("vfs.index_filter") Set<VirtualFileFilter> excludeFileIndexFilters) {
+        super(excludeFileIndexFilters);
     }
 
     @Override
     protected LuceneSearcher createLuceneSearcher(CloseCallback closeCallback) {
-        return new MemoryLuceneSearcher(fileIndexFilter, closeCallback);
+        return new MemoryLuceneSearcher(excludeFileIndexFilters, closeCallback);
     }
 }

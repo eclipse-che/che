@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.environment.server.model;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -18,24 +20,30 @@ import java.util.Objects;
  * @author Alexander Garagatyi
  */
 public class CheServiceBuildContextImpl {
-    private String context;
-    private String dockerfilePath;
-    private String dockerfileContent;
+    private String             context;
+    private String             dockerfilePath;
+    private String             dockerfileContent;
+    private Map<String,String> args;
 
     public CheServiceBuildContextImpl() {}
 
     public CheServiceBuildContextImpl(String context,
                                       String dockerfilePath,
-                                      String dockerfileContent) {
+                                      String dockerfileContent,
+                                      Map<String,String> args) {
         this.context = context;
         this.dockerfilePath = dockerfilePath;
         this.dockerfileContent = dockerfileContent;
+        if (args != null) {
+            this.args = new HashMap<>(args);
+        }
     }
 
     public CheServiceBuildContextImpl(CheServiceBuildContextImpl buildContext) {
-        this.context = buildContext.getContext();
-        this.dockerfilePath = buildContext.getDockerfilePath();
-        this.dockerfileContent = buildContext.getDockerfileContent();
+        this(buildContext.getContext(),
+             buildContext.getDockerfilePath(),
+             buildContext.getDockerfileContent(),
+             buildContext.getArgs());
     }
 
     /**
@@ -93,6 +101,25 @@ public class CheServiceBuildContextImpl {
         return this;
     }
 
+    /**
+     * Args for Dockerfile build.
+     */
+    public Map<String,String> getArgs() {
+        if (args == null) {
+            args = new HashMap<>();
+        }
+        return args;
+    }
+
+    public void setArgs(Map<String,String> args) {
+        this.args = args;
+    }
+
+    public CheServiceBuildContextImpl withArgs(Map<String,String> args) {
+        this.args = args;
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -100,12 +127,13 @@ public class CheServiceBuildContextImpl {
         CheServiceBuildContextImpl that = (CheServiceBuildContextImpl)o;
         return Objects.equals(context, that.context) &&
                Objects.equals(dockerfilePath, that.dockerfilePath) &&
-               Objects.equals(dockerfileContent, that.dockerfileContent);
+               Objects.equals(dockerfileContent, that.dockerfileContent) &&
+               Objects.equals(args, that.args);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(context, dockerfilePath, dockerfileContent);
+        return Objects.hash(context, dockerfilePath, dockerfileContent, args);
     }
 
     @Override
@@ -114,6 +142,7 @@ public class CheServiceBuildContextImpl {
                "context='" + context + '\'' +
                ", dockerfilePath='" + dockerfilePath + '\'' +
                ", dockerfileContent='" + dockerfileContent + '\'' +
+               ", args='" + args + '\'' +
                '}';
     }
 }

@@ -32,7 +32,7 @@ import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
-import org.eclipse.che.ide.extension.machine.client.machine.MachineStateEvent;
+import org.eclipse.che.ide.api.machine.events.MachineStateEvent;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.appliance.MachineAppliancePresenter;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -140,7 +140,7 @@ public class MachinePanelPresenter extends BasePresenter implements MachinePanel
         return machines;
     }
 
-    private void addNodeToTree(Machine machine) {
+    private MachineTreeNode addNodeToTree(Machine machine) {
         MachineTreeNode machineNode = entityFactory.createMachineNode(rootNode, machine, null);
 
         existingMachineNodes.put(machine.getId(), machineNode);
@@ -148,6 +148,8 @@ public class MachinePanelPresenter extends BasePresenter implements MachinePanel
         if (!machineNodes.contains(machineNode)) {
             machineNodes.add(machineNode);
         }
+
+        return machineNode;
     }
 
     private void selectFirstNode() {
@@ -264,8 +266,11 @@ public class MachinePanelPresenter extends BasePresenter implements MachinePanel
 
         selectedMachine = event.getMachine();
         final MachineTreeNode machineTreeNode = existingMachineNodes.get(selectedMachine.getId());
-        machineTreeNode.setData(selectedMachine);
+        if (machineTreeNode == null) {
+            return;
+        }
 
+        machineTreeNode.setData(selectedMachine);
         view.selectNode(machineTreeNode);
     }
 

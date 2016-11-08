@@ -62,7 +62,7 @@ public class UserManager {
     public UserManager(UserDao userDao,
                        ProfileDao profileDao,
                        PreferenceDao preferencesDao,
-                       @Named("che.account.reserved_names") String[] reservedNames) {
+                       @Named("che.auth.reserved_user_names") String[] reservedNames) {
         this.userDao = userDao;
         this.profileDao = profileDao;
         this.preferencesDao = preferencesDao;
@@ -222,7 +222,7 @@ public class UserManager {
      * @throws ServerException
      *         when any other error occurs
      */
-    public Page<UserImpl> getAll(int maxItems, int skipCount) throws ServerException {
+    public Page<UserImpl> getAll(int maxItems, long skipCount) throws ServerException {
         checkArgument(maxItems >= 0, "The number of items to return can't be negative.");
         checkArgument(skipCount >= 0, "The number of items to skip can't be negative.");
         return userDao.getAll(maxItems, skipCount);

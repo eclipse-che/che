@@ -15,11 +15,28 @@ import io.typefox.lsapi.CompletionItem;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.languageserver.shared.lsapi.CompletionItemDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.DidChangeTextDocumentParamsDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.DidCloseTextDocumentParamsDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.DidOpenTextDocumentParamsDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.DidSaveTextDocumentParamsDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.DocumentFormattingParamsDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.DocumentOnTypeFormattingParamsDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.DocumentRangeFormattingParamsDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.DocumentSymbolParamsDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.HoverDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.LocationDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.PublishDiagnosticsParamsDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.ReferenceParamsDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.SignatureHelpDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.SymbolInformationDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentPositionParamsDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.TextEditDTO;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.WsAgentStateController;
+import org.eclipse.che.ide.api.machine.WsAgentMessageBusProvider;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.dto.JsonSerializable;
@@ -31,23 +48,6 @@ import org.eclipse.che.ide.websocket.MessageBus;
 import org.eclipse.che.ide.websocket.WebSocketException;
 import org.eclipse.che.ide.websocket.rest.SubscriptionHandler;
 import org.eclipse.che.plugin.languageserver.ide.editor.PublishDiagnosticsProcessor;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.CompletionItemDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.DidChangeTextDocumentParamsDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.DidCloseTextDocumentParamsDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.DidOpenTextDocumentParamsDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.DidSaveTextDocumentParamsDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.DocumentFormattingParamsDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.DocumentOnTypeFormattingParamsDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.DocumentRangeFormattingParamsDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.DocumentSymbolParamsDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.HoverDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.LocationDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.PublishDiagnosticsParamsDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.ReferenceParamsDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.SignatureHelpDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.SymbolInformationDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.TextDocumentPositionParamsDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.TextEditDTO;
 
 import java.util.List;
 
@@ -74,14 +74,14 @@ public class TextDocumentServiceClient {
             final NotificationManager notificationManager,
             final AppContext appContext,
             final AsyncRequestFactory asyncRequestFactory,
-            final WsAgentStateController wsAgentStateController,
+            final WsAgentMessageBusProvider wsAgentMessageBusProvider,
             final PublishDiagnosticsProcessor publishDiagnosticsProcessor) {
         this.unmarshallerFactory = unmarshallerFactory;
         this.notificationManager = notificationManager;
         this.appContext = appContext;
         this.asyncRequestFactory = asyncRequestFactory;
         this.publishDiagnosticsProcessor = publishDiagnosticsProcessor;
-        wsAgentStateController.getMessageBus().then(new Operation<MessageBus>() {
+        wsAgentMessageBusProvider.getMessageBus().then(new Operation<MessageBus>() {
             @Override
             public void apply(MessageBus arg) throws OperationException {
                 subscribeToPublishDiagnostics(arg);

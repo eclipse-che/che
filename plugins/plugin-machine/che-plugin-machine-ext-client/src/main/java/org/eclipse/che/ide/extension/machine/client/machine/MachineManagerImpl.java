@@ -27,11 +27,12 @@ import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.machine.MachineManager;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
+import org.eclipse.che.ide.api.machine.events.MachineStateEvent;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.dto.DtoFactory;
 
-import static org.eclipse.che.ide.extension.machine.client.machine.MachineStateEvent.MachineAction.DESTROYED;
+import static org.eclipse.che.ide.api.machine.events.MachineStateEvent.MachineAction.DESTROYED;
 
 /**
  * Manager for machine operations.

@@ -18,17 +18,18 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.workspace.server.event.StackPersistedEvent;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackSourceImpl;
 import org.eclipse.che.api.workspace.server.spi.StackDao;
 import org.eclipse.che.api.workspace.server.stack.image.StackIcon;
-import org.eclipse.che.commons.test.tck.TckModuleFactory;
+import org.eclipse.che.commons.test.tck.TckListener;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepositoryException;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Guice;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.util.Collections;
@@ -45,7 +46,7 @@ import static org.testng.Assert.assertTrue;
  *
  * @author Yevhenii Voevodin
  */
-@Guice(moduleFactory = TckModuleFactory.class)
+@Listeners(TckListener.class)
 @Test(suiteName = StackDaoTest.SUITE_NAME)
 public class StackDaoTest {
 
@@ -227,7 +228,7 @@ public class StackDaoTest {
 
     @Test
     public void shouldPublishStackPersistedEventAfterStackIsPersisted() throws Exception {
-        final boolean[] isNotified = new boolean[] { false };
+        final boolean[] isNotified = new boolean[] {false};
         eventService.subscribe(event -> isNotified[0] = true, StackPersistedEvent.class);
 
         stackDao.create(createStack("test", "test"));
@@ -242,20 +243,22 @@ public class StackDaoTest {
     }
 
     private static StackImpl createStack(String id, String name) {
-        return StackImpl.builder()
-                        .setId(id)
-                        .setName(name)
-                        .setCreator("user123")
-                        .setDescription(id + "-description")
-                        .setScope(id + "-scope")
-                        .setWorkspaceConfig(createWorkspaceConfig("test"))
-                        .setTags(asList(id + "-tag1", id + "-tag2"))
-                        .setComponents(asList(new StackComponentImpl(id + "-component1", id + "-component1-version"),
-                                              new StackComponentImpl(id + "-component2", id + "-component2-version")))
-                        .setSource(new StackSourceImpl(id + "-type", id + "-origin"))
-                        .setStackIcon(new StackIcon(id + "-icon",
-                                                    id + "-media-type",
-                                                    "0x1234567890abcdef".getBytes()))
-                        .build();
+        final StackImpl stack = StackImpl.builder()
+                                         .setId(id)
+                                         .setName(name)
+                                         .setCreator("user123")
+                                         .setDescription(id + "-description")
+                                         .setScope(id + "-scope")
+                                         .setTags(asList(id + "-tag1", id + "-tag2"))
+                                         .setComponents(asList(new StackComponentImpl(id + "-component1", id + "-component1-version"),
+                                                               new StackComponentImpl(id + "-component2", id + "-component2-version")))
+                                         .setSource(new StackSourceImpl(id + "-type", id + "-origin"))
+                                         .setStackIcon(new StackIcon(id + "-icon",
+                                                                     id + "-media-type",
+                                                                     "0x1234567890abcdef".getBytes()))
+                                         .build();
+        final WorkspaceConfigImpl config = createWorkspaceConfig("test");
+        stack.setWorkspaceConfig(config);
+        return stack;
     }
 }

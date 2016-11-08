@@ -17,15 +17,14 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jdbc.jpa.DuplicateKeyException;
+import org.eclipse.che.api.core.jdbc.jpa.event.CascadeRemovalEventSubscriber;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.core.notification.EventSubscriber;
-import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
-import org.eclipse.che.api.machine.server.spi.SnapshotDao;
+import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
+import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
+import org.eclipse.che.api.workspace.server.event.WorkspaceRemovedEvent;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -47,8 +46,8 @@ import static java.util.Objects.requireNonNull;
 @Singleton
 public class JpaWorkspaceDao implements WorkspaceDao {
 
-    private static final Logger LOG = LoggerFactory.getLogger(JpaWorkspaceDao.class);
-
+    @Inject
+    private EventService            eventService;
     @Inject
     private Provider<EntityManager> manager;
 
@@ -154,6 +153,9 @@ public class JpaWorkspaceDao implements WorkspaceDao {
 
     @Transactional
     protected void doCreate(WorkspaceImpl workspace) {
+        if (workspace.getConfig() != null) {
+            workspace.getConfig().getProjects().forEach(ProjectConfigImpl::prePersistAttributes);
+        }
         manager.get().persist(workspace);
     }
 
@@ -163,6 +165,7 @@ public class JpaWorkspaceDao implements WorkspaceDao {
         if (workspace != null) {
             manager.get().remove(workspace);
         }
+        eventService.publish(new WorkspaceRemovedEvent(workspace));
     }
 
     @Transactional
@@ -170,64 +173,60 @@ public class JpaWorkspaceDao implements WorkspaceDao {
         if (manager.get().find(WorkspaceImpl.class, update.getId()) == null) {
             throw new NotFoundException(format("Workspace with id '%s' doesn't exist", update.getId()));
         }
+        if (update.getConfig() != null) {
+            update.getConfig().getProjects().forEach(ProjectConfigImpl::prePersistAttributes);
+        }
         return manager.get().merge(update);
     }
 
     @Singleton
-    public static class RemoveWorkspaceBeforeAccountRemovedEventSubscriber implements EventSubscriber<BeforeAccountRemovedEvent> {
+    public static class RemoveWorkspaceBeforeAccountRemovedEventSubscriber
+            extends CascadeRemovalEventSubscriber<BeforeAccountRemovedEvent> {
+
         @Inject
-        private EventService eventService;
+        private EventService     eventService;
         @Inject
-        private WorkspaceDao workspaceDao;
+        private WorkspaceManager workspaceManager;
 
         @PostConstruct
         public void subscribe() {
-            eventService.subscribe(this);
+            eventService.subscribe(this, BeforeAccountRemovedEvent.class);
         }
 
         @PreDestroy
         public void unsubscribe() {
-            eventService.unsubscribe(this);
+            eventService.unsubscribe(this, BeforeAccountRemovedEvent.class);
         }
 
         @Override
-        public void onEvent(BeforeAccountRemovedEvent event) {
-            try {
-                for (WorkspaceImpl workspace : workspaceDao.getByNamespace(event.getAccount().getName())) {
-                    workspaceDao.remove(workspace.getId());
-                }
-            } catch (Exception x) {
-                LOG.error(format("Couldn't remove workspaces before account '%s' is removed", event.getAccount().getId()), x);
+        public void onRemovalEvent(BeforeAccountRemovedEvent event) throws Exception {
+            for (WorkspaceImpl workspace : workspaceManager.getByNamespace(event.getAccount().getName())) {
+                workspaceManager.removeWorkspace(workspace.getId());
             }
         }
     }
 
     @Singleton
-    public static class RemoveSnapshotsBeforeWorkspaceRemovedEventSubscriber implements EventSubscriber<BeforeWorkspaceRemovedEvent> {
+    public static class RemoveSnapshotsBeforeWorkspaceRemovedEventSubscriber
+            extends CascadeRemovalEventSubscriber<BeforeWorkspaceRemovedEvent> {
         @Inject
-        private EventService eventService;
+        private EventService     eventService;
         @Inject
-        private SnapshotDao  snapshotDao;
+        private WorkspaceManager workspaceManager;
 
         @PostConstruct
         public void subscribe() {
-            eventService.subscribe(this);
+            eventService.subscribe(this, BeforeWorkspaceRemovedEvent.class);
         }
 
         @PreDestroy
         public void unsubscribe() {
-            eventService.unsubscribe(this);
+            eventService.unsubscribe(this, BeforeWorkspaceRemovedEvent.class);
         }
 
         @Override
-        public void onEvent(BeforeWorkspaceRemovedEvent event) {
-            try {
-                for (SnapshotImpl snapshot : snapshotDao.findSnapshots(event.getWorkspace().getId())) {
-                    snapshotDao.removeSnapshot(snapshot.getId());
-                }
-            } catch (Exception x) {
-                LOG.error(format("Couldn't remove snapshots before workspace '%s' is removed", event.getWorkspace().getId()), x);
-            }
+        public void onRemovalEvent(BeforeWorkspaceRemovedEvent event) throws Exception {
+            workspaceManager.removeSnapshots(event.getWorkspace().getId());
         }
     }
 }

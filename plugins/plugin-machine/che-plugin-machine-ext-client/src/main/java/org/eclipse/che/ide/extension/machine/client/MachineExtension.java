@@ -34,28 +34,32 @@ import org.eclipse.che.ide.api.parts.Perspective;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.extension.machine.client.actions.CreateMachineAction;
 import org.eclipse.che.ide.extension.machine.client.actions.CreateSnapshotAction;
 import org.eclipse.che.ide.extension.machine.client.actions.DestroyMachineAction;
 import org.eclipse.che.ide.extension.machine.client.actions.EditCommandsAction;
 import org.eclipse.che.ide.extension.machine.client.actions.ExecuteSelectedCommandAction;
-import org.eclipse.che.ide.extension.machine.client.actions.NewTerminalAction;
 import org.eclipse.che.ide.extension.machine.client.actions.RestartMachineAction;
 import org.eclipse.che.ide.extension.machine.client.actions.RunCommandAction;
 import org.eclipse.che.ide.extension.machine.client.actions.SelectCommandComboBox;
 import org.eclipse.che.ide.extension.machine.client.actions.SwitchPerspectiveAction;
-import org.eclipse.che.ide.extension.machine.client.command.custom.CustomCommandType;
-import org.eclipse.che.ide.extension.machine.client.command.valueproviders.ServerPortProvider;
+import org.eclipse.che.ide.extension.machine.client.command.macros.ServerPortProvider;
 import org.eclipse.che.ide.extension.machine.client.machine.MachineStatusHandler;
+import org.eclipse.che.ide.extension.machine.client.processes.NewTerminalAction;
 import org.eclipse.che.ide.extension.machine.client.processes.actions.CloseConsoleAction;
 import org.eclipse.che.ide.extension.machine.client.processes.actions.ReRunProcessAction;
 import org.eclipse.che.ide.extension.machine.client.processes.actions.StopProcessAction;
 import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.extension.machine.client.targets.EditTargetsAction;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
+import org.eclipse.che.ide.statepersistance.AppStateManager;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
 
+import javax.inject.Named;
+
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_CENTER_TOOLBAR;
+import static org.eclipse.che.ide.api.action.IdeActions.GROUP_CONSOLES_TREE_CONTEXT_MENU;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_MAIN_MENU;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RIGHT_TOOLBAR;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RUN;
@@ -80,7 +84,18 @@ public class MachineExtension {
     public static final String GROUP_MACHINES_DROPDOWN = "MachinesSelector";
     public static final String GROUP_MACHINES_LIST     = "MachinesListGroup";
 
-    private final PerspectiveManager perspectiveManager;
+    private final PerspectiveManager        perspectiveManager;
+    private final Provider<AppStateManager> appStateManagerProvider;
+
+    /**
+     * Controls central toolbar action group visibility. Use for example next snippet:
+     * <code>
+     *     bindConstant().annotatedWith(Names.named("machine.extension.central.toolbar.visibility")).to(false);
+     * </code>
+     * to define a constant. If no constant defined than default value is used - <code>true</code>.
+     */
+    @Inject(optional = true)
+    @Named("central.toolbar.visibility") boolean centralToolbarVisible = true;
 
     @Inject
     public MachineExtension(final MachineResources machineResources,
@@ -90,11 +105,11 @@ public class MachineExtension {
                             final ProcessesPanelPresenter processesPanelPresenter,
                             final Provider<ServerPortProvider> machinePortProvider,
                             final PerspectiveManager perspectiveManager,
-                            final IconRegistry iconRegistry,
-                            final CustomCommandType arbitraryCommandType,
                             final Provider<MachineStatusHandler> machineStatusHandlerProvider,
-                            final ProjectExplorerPresenter projectExplorerPresenter) {
+                            final ProjectExplorerPresenter projectExplorerPresenter,
+                            final Provider<AppStateManager> appStateManagerProvider) {
         this.perspectiveManager = perspectiveManager;
+        this.appStateManagerProvider = appStateManagerProvider;
 
         machineResources.getCss().ensureInjected();
         machineStatusHandlerProvider.get();
@@ -107,11 +122,18 @@ public class MachineExtension {
                 machinePortProvider.get();
                 /* Do not show terminal on factories by default */
                 if (appContext.getFactory() == null) {
-                    processesPanelPresenter.newTerminal();
+                    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+                        @Override
+                        public void execute() {
+                            processesPanelPresenter.selectDevMachine();
+                            processesPanelPresenter.newTerminal();
+                        }
+                    });
                     workspaceAgent.openPart(processesPanelPresenter, PartStackType.INFORMATION);
                 }
-
-                workspaceAgent.setActivePart(projectExplorerPresenter);
+                if (!appStateManagerProvider.get().hasStateForWorkspace(appContext.getWorkspaceId())) {
+                    workspaceAgent.setActivePart(projectExplorerPresenter);
+                }
             }
 
             @Override
@@ -126,6 +148,20 @@ public class MachineExtension {
             }
         });
 
+        eventBus.addHandler(WorkspaceStoppedEvent.TYPE, new WorkspaceStoppedEvent.Handler() {
+            @Override
+            public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
+                Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+                    @Override
+                    public void execute() {
+                        workspaceAgent.setActivePart(projectExplorerPresenter);
+                        processesPanelPresenter.selectDevMachine();
+                        maximizeTerminal();
+                    }
+                });
+            }
+        });
+
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             @Override
             public void execute() {
@@ -137,8 +173,6 @@ public class MachineExtension {
                 }
             }
         });
-
-        iconRegistry.registerIcon(new Icon(arbitraryCommandType.getId() + ".commands.category.icon", machineResources.customCommandType()));
     }
 
     /**
@@ -225,15 +259,17 @@ public class MachineExtension {
         machineMenu.add(destroyMachineAction);
         machineMenu.add(createSnapshotAction);
 
-        // add actions on center part of toolbar
-        final DefaultActionGroup centerToolbarGroup = (DefaultActionGroup)actionManager.getAction(GROUP_CENTER_TOOLBAR);
-        final DefaultActionGroup machineToolbarGroup = new DefaultActionGroup(GROUP_MACHINE_TOOLBAR, false, actionManager);
-        actionManager.registerAction(GROUP_MACHINE_TOOLBAR, machineToolbarGroup);
-        centerToolbarGroup.add(machineToolbarGroup, FIRST);
-        machineToolbarGroup.add(selectCommandAction);
-        final DefaultActionGroup executeToolbarGroup = new DefaultActionGroup(actionManager);
-        executeToolbarGroup.add(executeSelectedCommandAction);
-        machineToolbarGroup.add(executeToolbarGroup);
+        if (centralToolbarVisible) {
+            // add actions on center part of toolbar
+            final DefaultActionGroup centerToolbarGroup = (DefaultActionGroup)actionManager.getAction(GROUP_CENTER_TOOLBAR);
+            final DefaultActionGroup machineToolbarGroup = new DefaultActionGroup(GROUP_MACHINE_TOOLBAR, false, actionManager);
+            actionManager.registerAction(GROUP_MACHINE_TOOLBAR, machineToolbarGroup);
+            centerToolbarGroup.add(machineToolbarGroup, FIRST);
+            machineToolbarGroup.add(selectCommandAction);
+            final DefaultActionGroup executeToolbarGroup = new DefaultActionGroup(actionManager);
+            executeToolbarGroup.add(executeSelectedCommandAction);
+            machineToolbarGroup.add(executeToolbarGroup);
+        }
 
         // add actions on right part of toolbar
         final DefaultActionGroup rightToolbarGroup = (DefaultActionGroup)actionManager.getAction(GROUP_RIGHT_TOOLBAR);
@@ -251,8 +287,7 @@ public class MachineExtension {
 
 
         // Consoles tree context menu group
-        DefaultActionGroup consolesTreeContextMenu =
-                (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_CONSOLES_TREE_CONTEXT_MENU);
+        DefaultActionGroup consolesTreeContextMenu = (DefaultActionGroup)actionManager.getAction(GROUP_CONSOLES_TREE_CONTEXT_MENU);
 
         consolesTreeContextMenu.add(reRunProcessAction);
         consolesTreeContextMenu.add(stopProcessAction);
