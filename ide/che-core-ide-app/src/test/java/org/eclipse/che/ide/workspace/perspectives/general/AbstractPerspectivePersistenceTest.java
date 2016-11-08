@@ -39,9 +39,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -166,6 +172,16 @@ public class AbstractPerspectivePersistenceTest {
         JsonObject partStack = Json.createObject();
         parts.put("INFORMATION", partStack);
         partStack.put("HIDDEN", true);
+
+        //PartStackPresenter should not be empty otherwise setHidden() will call twice
+        final List<PartPresenter> partPresenters = new ArrayList<>();
+        partPresenters.add(mock(PartPresenter.class));
+        when(partStackPresenter.getParts()).thenAnswer(new Answer<List<? extends PartPresenter>>() {
+            public List<? extends PartPresenter> answer(InvocationOnMock invocation) throws Throwable {
+                return partPresenters;
+            }
+
+        });
 
         perspective.loadState(state);
         verify(workBenchController).setHidden(true);
