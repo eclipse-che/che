@@ -82,12 +82,12 @@
   <che-label-container che-label-name="Recipe"
                        che-label-description="The contents of the runtime started by the workspace."
                        ng-if="workspaceEnvironmentsController.environment.recipe.content">
-    <div layout="row" layout-wrap>
+    <che-show-area>
       <div flex class="recipe-editor">
         <ui-codemirror ui-codemirror="workspaceEnvironmentsController.editorOptions"
                        ng-model="workspaceEnvironmentsController.environment.recipe.content"></ui-codemirror>
       </div>
-    </div>
+    </che-show-area>
   </che-label-container>
   <!-- OR Location -->
   <che-label-container che-label-name="Recipe Location"
