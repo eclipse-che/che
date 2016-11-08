@@ -9,7 +9,7 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 
-import {CheSsh} from "./che-ssh.factory";
+import {CheSsh} from './che-ssh.factory';
 'use strict';
 
 

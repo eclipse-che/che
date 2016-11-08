@@ -8,9 +8,9 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  */
-import {CheWorkspace} from "../../../../components/api/che-workspace.factory";
-import {CheNotification} from "../../../../components/notification/che-notification.factory";
-import {CheSsh} from "../../../../components/api/che-ssh.factory";
+import {CheWorkspace} from '../../../../components/api/che-workspace.factory';
+import {CheNotification} from '../../../../components/notification/che-notification.factory';
+import {CheSsh} from '../../../../components/api/che-ssh.factory';
 'use strict';
 
 /**
@@ -83,7 +83,7 @@ export class WorkspaceDetailsSshCtrl {
     this.machineSshAgents = new Array<>();
     this.namespace = $route.current.params.namespace;
     this.workspaceName = $route.current.params.workspaceName;
-    this.workspaceKey = this.namespace + ":" + this.workspaceName;
+    this.workspaceKey = this.namespace + ':' + this.workspaceName;
 
     this.updateData();
 
@@ -96,8 +96,8 @@ export class WorkspaceDetailsSshCtrl {
     this.workspaceId = this.workspace.id;
 
     // get ssh key
-    this.cheSsh.fetchKey("workspace", this.workspaceId).finally(() => {
-      this.sshKeyPair = this.cheSsh.getKey("workspace", this.workspaceId);
+    this.cheSsh.fetchKey('workspace', this.workspaceId).finally(() => {
+      this.sshKeyPair = this.cheSsh.getKey('workspace', this.workspaceId);
 
     });
 
@@ -106,7 +106,7 @@ export class WorkspaceDetailsSshCtrl {
     let machineNames : Array<string> = Object.keys(machines);
     this.machineSshAgents.length = 0;
     machineNames.forEach((machineName) => {
-      let enabled : boolean = machines[machineName].agents.indexOf("org.eclipse.che.ssh") >= 0;
+      let enabled : boolean = machines[machineName].agents.indexOf('org.eclipse.che.ssh') >= 0;
       let machineAgent = {agentEnabled : enabled, name: machineName};
       this.machineSshAgents.push(machineAgent);
       if (enabled) {
@@ -120,7 +120,7 @@ export class WorkspaceDetailsSshCtrl {
    * Remove the default workspace keypair
    */
   removeDefaultKey() {
-    this.cheSsh.removeKey("workspace", this.workspaceId).then(
+    this.cheSsh.removeKey('workspace', this.workspaceId).then(
       () => {this.$timeout( this.updateData(), 3000)}
     );
   }
@@ -129,9 +129,8 @@ export class WorkspaceDetailsSshCtrl {
    * Generate a new default workspace keypair
    */
   generateDefaultKey() {
-    this.cheSsh.generateKey("workspace", this.workspaceId).then(() => {this.$timeout( this.updateData(), 3000)});
+    this.cheSsh.generateKey('workspace', this.workspaceId).then(() => {this.$timeout( this.updateData(), 3000)});
   }
-
 
 
 }
