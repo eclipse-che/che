@@ -27,6 +27,7 @@ import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.api.promises.client.js.Promises;
+import org.eclipse.che.api.workspace.shared.dto.CreateProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectProblemDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
@@ -56,6 +57,7 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.Arrays;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -263,22 +265,22 @@ public final class ResourceManager {
      * @since 4.4.0
      */
     protected Promise<Project> update(final Path path, final ProjectRequest request) {
-
+        final ProjectConfig projectConfig = request.getBody();
+        final SourceStorage source = projectConfig.getSource();
         final SourceStorageDto sourceDto = dtoFactory.createDto(SourceStorageDto.class);
-
-        if (request.getBody().getSource() != null) {
-            sourceDto.setLocation(request.getBody().getSource().getLocation());
-            sourceDto.setType(request.getBody().getSource().getType());
-            sourceDto.setParameters(request.getBody().getSource().getParameters());
+        if (source != null) {
+            sourceDto.setLocation(source.getLocation());
+            sourceDto.setType(source.getType());
+            sourceDto.setParameters(source.getParameters());
         }
 
         final ProjectConfigDto dto = dtoFactory.createDto(ProjectConfigDto.class)
-                                               .withName(request.getBody().getName())
+                                               .withName(projectConfig.getName())
                                                .withPath(path.toString())
-                                               .withDescription(request.getBody().getDescription())
-                                               .withType(request.getBody().getType())
-                                               .withMixins(request.getBody().getMixins())
-                                               .withAttributes(request.getBody().getAttributes())
+                                               .withDescription(projectConfig.getDescription())
+                                               .withType(projectConfig.getType())
+                                               .withMixins(projectConfig.getMixins())
+                                               .withAttributes(projectConfig.getAttributes())
                                                .withSource(sourceDto);
 
         return ps.updateProject(dto).thenPromise(new Function<ProjectConfigDto, Promise<Project>>() {
@@ -410,21 +412,9 @@ public final class ResourceManager {
         checkArgument(typeRegistry.getProjectType(createRequest.getBody().getType()) != null, "Invalid project type");
 
         final Path path = Path.valueOf(createRequest.getBody().getPath());
-
         return findResource(path, true).thenPromise(new Function<Optional<Resource>, Promise<Project>>() {
             @Override
             public Promise<Project> apply(Optional<Resource> resource) throws FunctionException {
-
-                final MutableProjectConfig projectConfig = (MutableProjectConfig)createRequest.getBody();
-                final ProjectConfigDto dto = dtoFactory.createDto(ProjectConfigDto.class)
-                                                       .withName(projectConfig.getName())
-                                                       .withPath(path.toString())
-                                                       .withDescription(projectConfig.getDescription())
-                                                       .withType(projectConfig.getType())
-                                                       .withMixins(projectConfig.getMixins())
-                                                       .withAttributes(projectConfig.getAttributes());
-
-
                 if (resource.isPresent()) {
                     if (resource.get().isProject()) {
                         throw new IllegalStateException("Project already exists");
@@ -435,11 +425,19 @@ public final class ResourceManager {
                     return update(path, createRequest);
                 }
 
-                return ps.createProject(dto, projectConfig.getOptions()).thenPromise(new Function<ProjectConfigDto, Promise<Project>>() {
+                final MutableProjectConfig projectConfig = (MutableProjectConfig)createRequest.getBody();
+                final List<CreateProjectConfigDto> projectConfigList = projectConfig.getProjects();
+                projectConfigList.add(toCreateProjectConfig(projectConfig));
+
+                return ps.createBatchProjects(projectConfigList).thenPromise(new Function<List<ProjectConfigDto>, Promise<Project>>() {
                     @Override
-                    public Promise<Project> apply(ProjectConfigDto config) throws FunctionException {
-                        final Project newResource = resourceFactory.newProjectImpl(config, ResourceManager.this);
-                        store.register(newResource);
+                    public Promise<Project> apply(List<ProjectConfigDto> configList) throws FunctionException {
+                        final List<Project> projects = new ArrayList<>(configList.size());
+                        for (ProjectConfigDto config : configList) {
+                            final Project newResource = resourceFactory.newProjectImpl(config, ResourceManager.this);
+                            projects.add(newResource);
+                            store.register(newResource);
+                        }
 
                         return ps.getProjects().then(new Function<List<ProjectConfigDto>, Project>() {
                             @Override
@@ -448,15 +446,39 @@ public final class ResourceManager {
                                 //cache new configs
                                 cachedConfigs = updatedConfiguration.toArray(new ProjectConfigDto[updatedConfiguration.size()]);
 
-                                eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(newResource, ADDED | DERIVED)));
+                                Project createdProject = null;
+                                for (Project resource : projects) {
+                                    if (path.toString().equals(resource.getPath())) {
+                                        createdProject = resource;
+                                    }
+                                    eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(resource, ADDED | DERIVED)));
+                                }
 
-                                return newResource;
+                                return createdProject;
                             }
                         });
                     }
                 });
             }
         });
+    }
+
+    private CreateProjectConfigDto toCreateProjectConfig(MutableProjectConfig config) {
+        final SourceStorage source = config.getSource();
+        final SourceStorageDto sourceStorageDto = dtoFactory.createDto(SourceStorageDto.class)
+                                                            .withType(source.getType())
+                                                            .withLocation(source.getLocation())
+                                                            .withParameters(source.getParameters());
+
+        return dtoFactory.createDto(CreateProjectConfigDto.class)
+                         .withName(config.getName())
+                         .withPath(config.getPath())
+                         .withDescription(config.getDescription())
+                         .withSource(sourceStorageDto)
+                         .withType(config.getType())
+                         .withMixins(config.getMixins())
+                         .withAttributes(config.getAttributes())
+                         .withOptions(config.getOptions());
     }
 
     protected Promise<Project> importProject(final Project.ProjectRequest importRequest) {

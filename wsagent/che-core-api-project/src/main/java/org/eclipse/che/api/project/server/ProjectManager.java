@@ -45,6 +45,8 @@ import org.eclipse.che.api.vfs.impl.file.event.LoEvent;
 import org.eclipse.che.api.vfs.impl.file.event.detectors.ProjectTreeChangesDetector;
 import org.eclipse.che.api.vfs.search.Searcher;
 import org.eclipse.che.api.vfs.search.SearcherProvider;
+import org.eclipse.che.api.workspace.shared.dto.CreateProjectConfigDto;
+import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,10 +58,13 @@ import java.io.IOException;
 import java.nio.file.PathMatcher;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
  * Facade for all project related operations.
@@ -284,6 +289,68 @@ public final class ProjectManager {
             return project;
         } finally {
             projectTreeChangesDetector.resume();
+        }
+    }
+
+    /**
+     * Create batch of projects
+     *
+     * @param projectConfigList
+     *         the list of configurations to creating projects
+     * @return the list of new projects
+     * @throws ConflictException
+     * @throws ForbiddenException
+     * @throws ServerException
+     * @throws NotFoundException
+     */
+    public List<RegisteredProject> createBatchProjects(List<CreateProjectConfigDto> projectConfigList) throws ConflictException,
+                                                                                                              ForbiddenException,
+                                                                                                              ServerException,
+                                                                                                              NotFoundException,
+                                                                                                              IOException,
+                                                                                                              UnauthorizedException {
+        List<RegisteredProject> projects = new ArrayList<>(projectConfigList.size());
+        Iterator<CreateProjectConfigDto> iterator = projectConfigList.iterator();
+
+        while (iterator.hasNext()) {
+            final CreateProjectConfigDto projectConfig = iterator.next();
+            final String path = projectConfig.getPath();
+
+            final SourceStorageDto sourceStorage = projectConfig.getSource();
+            if (sourceStorage != null && !isNullOrEmpty(sourceStorage.getLocation())) {
+                checkParentExist(path);
+
+                final RegisteredProject registeredProject = importProject(path, sourceStorage, true);
+                projects.add(registeredProject);
+                iterator.remove();
+            }
+        }
+
+        for (CreateProjectConfigDto projectConfig : projectConfigList) {
+            final String pathToProject = projectConfig.getPath();
+            checkParentExist(pathToProject);
+
+            RegisteredProject registeredProject;
+            final VirtualFileEntry projectFileEntry = getProjectsRoot().getChild(pathToProject);
+            if (projectFileEntry != null) {
+                registeredProject = updateProject(projectConfig);
+            } else {
+                registeredProject = createProject(projectConfig, projectConfig.getOptions());
+            }
+
+            projects.add(registeredProject);
+        }
+
+        return projects;
+    }
+
+    private void checkParentExist(String pathToProject) throws ServerException, NotFoundException {
+        final String pathToParent = pathToProject.substring(0, pathToProject.lastIndexOf("/"));
+        if (!pathToParent.equals("/")) {
+            VirtualFileEntry parentFileEntry = getProjectsRoot().getChild(pathToParent);
+            if (parentFileEntry == null) {
+                throw new NotFoundException(String.format("The parent folder with path %s does not exist.", pathToParent));
+            }
         }
     }
 

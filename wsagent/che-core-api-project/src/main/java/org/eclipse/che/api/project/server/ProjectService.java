@@ -43,6 +43,7 @@ import org.eclipse.che.api.vfs.search.QueryExpression;
 import org.eclipse.che.api.vfs.search.SearchResult;
 import org.eclipse.che.api.vfs.search.SearchResultEntry;
 import org.eclipse.che.api.vfs.search.Searcher;
+import org.eclipse.che.api.workspace.shared.dto.CreateProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -90,6 +91,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.eclipse.che.api.core.util.LinksHelper.createLink;
 import static org.eclipse.che.api.project.server.DtoConverter.asDto;
 import static org.eclipse.che.api.project.shared.Constants.LINK_REL_CHILDREN;
+import static org.eclipse.che.api.project.shared.Constants.LINK_REL_CREATE_BATCH_PROJECTS;
 import static org.eclipse.che.api.project.shared.Constants.LINK_REL_CREATE_PROJECT;
 import static org.eclipse.che.api.project.shared.Constants.LINK_REL_DELETE;
 import static org.eclipse.che.api.project.shared.Constants.LINK_REL_GET_CONTENT;
@@ -204,6 +206,33 @@ public class ProjectService extends Service {
         //logProjectCreatedEvent(configDto.getName(), configDto.getProjectType());
 
         return injectProjectLinks(configDto);
+    }
+
+    @POST
+    @Path("/batch")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Creates batch of projects", response = ProjectConfigDto.class)
+    @ApiResponses({@ApiResponse(code = 200, message = "OK"),
+                   @ApiResponse(code = 403, message = "Operation is forbidden"),
+                   @ApiResponse(code = 409, message = "Project with specified name already exist in workspace"),
+                   @ApiResponse(code = 500, message = "Server error")})
+    @GenerateLink(rel = LINK_REL_CREATE_BATCH_PROJECTS)
+    public List<ProjectConfigDto> createBatchProjects(
+            @Description("list of descriptors for projects") List<CreateProjectConfigDto> projectConfigList)
+            throws ConflictException,
+                   ForbiddenException,
+                   ServerException,
+                   NotFoundException, IOException, UnauthorizedException {
+
+        List<ProjectConfigDto> result = new ArrayList<>(projectConfigList.size());
+        for (RegisteredProject registeredProject : projectManager.createBatchProjects(projectConfigList)) {
+            ProjectConfigDto projectConfig = injectProjectLinks(asDto(registeredProject));
+            result.add(projectConfig);
+
+            eventService.publish(new ProjectCreatedEvent(workspace, registeredProject.getPath()));
+        }
+        return result;
     }
 
     @PUT

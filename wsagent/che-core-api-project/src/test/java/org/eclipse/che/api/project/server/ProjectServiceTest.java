@@ -414,9 +414,6 @@ public class ProjectServiceTest {
 
     @Test
     public void testCreateProject() throws Exception {
-
-
-
         phRegistry.register(new CreateProjectHandler() {
             @Override
             public void onCreateProject(Path projectPath, Map<String, AttributeValue> attributes, Map<String, String> options)

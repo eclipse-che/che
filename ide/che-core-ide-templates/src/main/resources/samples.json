@@ -1,5 +1,69 @@
 [
   {
+    "name": "artik-sdk-examples",
+    "displayName": "artik-sdk-examples",
+    "path": "/artik-sdk-examples",
+    "description": "artik",
+    "projectType": "blank",
+    "mixins": [],
+    "attributes": {
+    },
+    "projects": [
+      {
+        "name": "artik-adc",
+        "displayName": "artik-adc",
+        "path": "/artik-sdk-examples/adc",
+        "description": "artik-adc",
+        "type": "c",
+        "mixins": [],
+        "attributes": {
+        },
+        "modules": [],
+        "problems": [],
+        "source": {},
+        "commands": [],
+        "links": [],
+        "category": "Samples",
+        "tags": [
+          "blank"
+        ]
+      },
+      {
+        "name": "artik-http",
+        "displayName": "artik-http",
+        "path": "/artik-sdk-examples/http",
+        "description": "artik-http",
+        "type": "c",
+        "mixins": [],
+        "attributes": {
+        },
+        "modules": [],
+        "problems": [],
+        "source": {},
+        "commands": [],
+        "links": [],
+        "category": "Samples",
+        "tags": [
+          "blank"
+        ]
+      }
+    ],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/artik-iot/artik-sdk-examples.git",
+      "parameters": {
+        "branch":"master"
+      }
+    },
+    "commands": [],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "blank"
+    ]
+  },
+  {
     "name": "web-java-petclinic",
     "displayName": "web-java-petclinic",
     "path": "/web-java-petclinic",

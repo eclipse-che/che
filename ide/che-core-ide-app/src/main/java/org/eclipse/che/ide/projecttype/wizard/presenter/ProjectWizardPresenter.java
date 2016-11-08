@@ -25,6 +25,7 @@ import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistry;
 import org.eclipse.che.ide.api.wizard.Wizard;
 import org.eclipse.che.ide.api.wizard.WizardPage;
+import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.projecttype.wizard.ProjectWizard;
 import org.eclipse.che.ide.projecttype.wizard.ProjectWizardFactory;
 import org.eclipse.che.ide.projecttype.wizard.categoriespage.CategoriesPagePresenter;
@@ -58,6 +59,7 @@ public class ProjectWizardPresenter implements Wizard.UpdateDelegate,
     private final ProjectWizardFactory               projectWizardFactory;
     private final ProjectWizardRegistry              wizardRegistry;
     private final Provider<CategoriesPagePresenter>  categoriesPageProvider;
+    private final DtoFactory                         dtoFactory;
     private final DialogFactory                      dialogFactory;
     private final Map<ProjectTypeDto, ProjectWizard> wizardsCache;
     private       CategoriesPagePresenter            categoriesPage;
@@ -72,11 +74,13 @@ public class ProjectWizardPresenter implements Wizard.UpdateDelegate,
                                   ProjectWizardFactory projectWizardFactory,
                                   ProjectWizardRegistry wizardRegistry,
                                   Provider<CategoriesPagePresenter> categoriesPageProvider,
+                                  DtoFactory dtoFactory,
                                   DialogFactory dialogFactory) {
         this.view = view;
         this.projectWizardFactory = projectWizardFactory;
         this.wizardRegistry = wizardRegistry;
         this.categoriesPageProvider = categoriesPageProvider;
+        this.dtoFactory = dtoFactory;
         this.dialogFactory = dialogFactory;
         wizardsCache = new HashMap<>();
         view.setDelegate(this);
@@ -169,6 +173,14 @@ public class ProjectWizardPresenter implements Wizard.UpdateDelegate,
     @Override
     public void onProjectTypeSelected(ProjectTypeDto projectType) {
         final MutableProjectConfig prevData = wizard.getDataObject();
+        MutableProjectConfig.MutableSourceStorage sourceStorage = prevData.getSource();
+        if (sourceStorage != null) { // some values should be cleared when user switch between categories
+            sourceStorage.setLocation("");
+            sourceStorage.setType("");
+            sourceStorage.getParameters().clear();
+        }
+        prevData.getProjects().clear();
+
         wizard = getWizardForProjectType(projectType, prevData);
         wizard.navigateToFirst();
         final MutableProjectConfig newProject = wizard.getDataObject();
@@ -198,13 +210,18 @@ public class ProjectWizardPresenter implements Wizard.UpdateDelegate,
 
     @Override
     public void onProjectTemplateSelected(ProjectTemplateDescriptor projectTemplate) {
+        //we should not change the original object - so we create copy of this one
+        projectTemplate = dtoFactory.createDtoFromJson(dtoFactory.toJson(projectTemplate), ProjectTemplateDescriptor.class);
+
         final MutableProjectConfig dataObject = wizard.getDataObject();
         wizard = importWizard == null ? importWizard = createDefaultWizard(dataObject, IMPORT) : importWizard;
         wizard.navigateToFirst();
 
         // set dataObject's values from projectTemplate
+        dataObject.setPath(projectTemplate.getPath());
         dataObject.setType(projectTemplate.getProjectType());
         dataObject.setSource(projectTemplate.getSource());
+        dataObject.setProjects(projectTemplate.getProjects());
     }
 
     /** Creates or returns project wizard for the specified projectType with the given dataObject. */

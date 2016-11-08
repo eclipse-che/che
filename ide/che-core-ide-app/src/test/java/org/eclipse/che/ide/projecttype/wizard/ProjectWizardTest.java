@@ -139,7 +139,7 @@ public class ProjectWizardTest {
     public void shouldImportProjectSuccessfully() throws Exception {
         prepareWizard(IMPORT);
 
-        when(workspaceRoot.importProject()).thenReturn(createProjectRequest);
+        when(workspaceRoot.newProject()).thenReturn(createProjectRequest);
         when(createProjectRequest.withBody(any(ProjectConfig.class))).thenReturn(createProjectRequest);
         when(createProjectRequest.send()).thenReturn(createProjectPromise);
         when(createProjectPromise.then(any(Operation.class))).thenReturn(createProjectPromise);
@@ -159,7 +159,7 @@ public class ProjectWizardTest {
     public void shouldFailOnImportProject() throws Exception {
         prepareWizard(IMPORT);
 
-        when(workspaceRoot.importProject()).thenReturn(createProjectRequest);
+        when(workspaceRoot.newProject()).thenReturn(createProjectRequest);
         when(createProjectRequest.withBody(any(ProjectConfig.class))).thenReturn(createProjectRequest);
         when(createProjectRequest.send()).thenReturn(createProjectPromise);
         when(createProjectPromise.then(any(Operation.class))).thenReturn(createProjectPromise);

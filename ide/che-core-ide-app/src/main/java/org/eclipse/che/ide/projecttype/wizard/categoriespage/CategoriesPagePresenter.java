@@ -15,7 +15,9 @@ import com.google.inject.Inject;
 
 import org.eclipse.che.api.project.shared.dto.ProjectTypeDto;
 import org.eclipse.che.api.project.templates.shared.dto.ProjectTemplateDescriptor;
+import org.eclipse.che.api.workspace.shared.dto.CreateProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.type.ProjectTemplateRegistry;
 import org.eclipse.che.ide.api.project.type.ProjectTypeRegistry;
 import org.eclipse.che.ide.api.project.type.wizard.PreSelectedProjectTypeManager;
@@ -23,7 +25,6 @@ import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistry;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.wizard.AbstractWizardPage;
-import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.resources.selector.SelectPathPresenter;
 import org.eclipse.che.ide.resources.selector.SelectionPathHandler;
@@ -167,8 +168,20 @@ public class CategoriesPagePresenter extends AbstractWizardPage<MutableProjectCo
 
     @Override
     public void projectNameChanged(String name) {
+        String currentProjectPath = dataObject.getPath();
+        String newProjectPath = originParent.append(name).toString();
+
+        List<CreateProjectConfigDto> projectConfigList = dataObject.getProjects();
+        for (CreateProjectConfigDto projectConfig : projectConfigList) {
+            String projectPath = projectConfig.getPath();
+            if (projectPath.startsWith(currentProjectPath)) {
+                String path = projectPath.replaceFirst(currentProjectPath, newProjectPath);
+                projectConfig.setPath(path);
+            }
+        }
+
         dataObject.setName(name);
-        dataObject.setPath(originParent.append(name).toString());
+        dataObject.setPath(newProjectPath);
         updateDelegate.updateControls();
 
         if (NameUtils.checkProjectName(name)) {
