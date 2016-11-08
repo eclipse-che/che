@@ -18,6 +18,7 @@ import java.util.Collections;
 
 import org.eclipse.che.plugin.zdb.server.expressions.ZendDbgExpression;
 import org.eclipse.che.plugin.zdb.server.expressions.ZendDbgExpressionEvaluator;
+import org.eclipse.che.plugin.zdb.server.utils.ZendDbgVariableUtils;
 
 /**
  * Expression for fetching current stack frame variables.
@@ -27,9 +28,6 @@ import org.eclipse.che.plugin.zdb.server.expressions.ZendDbgExpressionEvaluator;
 public class ZendDbgVariables extends ZendDbgExpression {
 
     private final static String DUMP_VARIABLES_EXPRESSION = "eval('if (isset($this)) {$this;}; return get_defined_vars();')";
-    private static final String[] SUPER_GLOBALS = new String[] { 
-            "$GLOBALS", "$_SERVER", "$_GET", "$_POST", "$_FILES", "$_COOKIE", "$_SESSION", "$_REQUEST", "$_ENV" };
-    private static final String THIS = "$this";
     private static final String SIGIL = "$";
 
     public ZendDbgVariables(ZendDbgExpressionEvaluator expressionEvaluator) {
@@ -40,23 +38,12 @@ public class ZendDbgVariables extends ZendDbgExpression {
     protected ZendDbgExpression createChild(String variableName, Facet... facets) {
         variableName = SIGIL + variableName;
         Facet facet = KIND_LOCAL;
-        if (isThis(variableName))
+        if (ZendDbgVariableUtils.isThis(variableName))
             facet = KIND_THIS;
-        else if (isSuperGlobal(variableName))
+        else if (ZendDbgVariableUtils.isSuperGlobal(variableName))
             facet = KIND_SUPER_GLOBAL;
         return new ZendDbgExpression(getExpressionEvaluator(), variableName, Collections.singletonList(variableName),
                 facet);
-    }
-    
-    private boolean isThis(String name) {
-        return THIS.equalsIgnoreCase(name);
-    }
-
-    private boolean isSuperGlobal(String name) {
-        for (int i = 0; i < SUPER_GLOBALS.length; i++)
-            if (SUPER_GLOBALS[i].equalsIgnoreCase(name))
-                return true;
-        return false;
     }
 
 }

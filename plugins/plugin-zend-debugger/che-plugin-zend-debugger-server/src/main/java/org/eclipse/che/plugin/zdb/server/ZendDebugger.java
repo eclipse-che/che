@@ -79,6 +79,7 @@ import org.eclipse.che.plugin.zdb.server.expressions.ZendDbgExpression;
 import org.eclipse.che.plugin.zdb.server.expressions.ZendDbgExpressionEvaluator;
 import org.eclipse.che.plugin.zdb.server.utils.ZendDbgConnectionUtils;
 import org.eclipse.che.plugin.zdb.server.utils.ZendDbgFileUtils;
+import org.eclipse.che.plugin.zdb.server.utils.ZendDbgVariableUtils;
 import org.eclipse.che.plugin.zdb.server.variables.IDbgVariable;
 import org.eclipse.che.plugin.zdb.server.variables.ZendDbgVariable;
 import org.eclipse.che.plugin.zdb.server.variables.ZendDbgVariables;
@@ -111,9 +112,11 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
             IDbgVariable matchingVariable = null;
             Iterator<String> pathIterator = variablePath.getPath().iterator();
             while (pathIterator.hasNext()) {
-                String variableName = pathIterator.next();
+                String pathElement = ZendDbgVariableUtils.encodePathElement(pathIterator.next());
                 for (IDbgVariable currentVariable : currentVariables) {
-                    if (currentVariable.getName().equals(variableName)) {
+                    List<String> currentVariablePath = currentVariable.getVariablePath().getPath();
+                    String currentVariablePathElement = currentVariablePath.get(currentVariablePath.size() - 1);
+                    if (currentVariablePathElement.equals(pathElement)) {
                         matchingVariable = currentVariable;
                         if (pathIterator.hasNext()) {
                             currentVariables = new ArrayList<>(currentVariable.getVariables());
@@ -390,7 +393,9 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
         for (IDbgExpression zendVariableExpression : zendVariablesExpression.getChildren()) {
             if (VariablesStorage.GLOBALS_VARIABLE.equalsIgnoreCase(zendVariableExpression.getExpression()))
                 continue;
-            variables.add(new ZendDbgVariable(new VariablePathImpl(ZendDbgVariable.createName(zendVariableExpression)),
+            variables.add(new ZendDbgVariable(
+                    new VariablePathImpl(
+                            ZendDbgVariableUtils.encodePathElement(zendVariableExpression.getExpression())),
                     zendVariableExpression));
         }
         debugVariableStorage = new VariablesStorage(variables);

@@ -21,6 +21,7 @@ import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.debug.shared.model.impl.VariablePathImpl;
 import org.eclipse.che.plugin.zdb.server.expressions.IDbgDataType.DataType;
 import org.eclipse.che.plugin.zdb.server.expressions.IDbgExpression;
+import org.eclipse.che.plugin.zdb.server.utils.ZendDbgVariableUtils;
 
 /**
  * PHP Zend debugger specific variable.
@@ -106,20 +107,14 @@ public class ZendDbgVariable implements IDbgVariable {
             variables = new ArrayList<>();
             for (IDbgExpression child : zendDbgExpression.getChildren()) {
                 List<String> childPath = new ArrayList<>(variablePath.getPath());
-                childPath.add(createName(child));
+                childPath.add(ZendDbgVariableUtils.encodePathElement(child.getExpression()));
                 variables.add(new ZendDbgVariable(new VariablePathImpl(childPath), child));
             }
             isComplete = true;
         }
     }
 
-    /**
-     * Creates human-readable name for Zend dbg variable.
-     *
-     * @param expression
-     * @return name for Zend dbg variable
-     */
-    public static String createName(IDbgExpression expression) {
+    private String createName(IDbgExpression expression) {
         String name = expression.getExpression();
         if (expression.hasFacet(KIND_OBJECT_MEMBER)) {
             name = name.substring(name.lastIndexOf(":") + 1);
@@ -128,5 +123,5 @@ public class ZendDbgVariable implements IDbgVariable {
         }
         return name;
     }
-
+    
 }
