@@ -42,7 +42,7 @@ export class WorkspaceEnvironmentsController {
   environment: any;
   environmentName: string;
   newEnvironmentName: string;
-  recipeType: string;
+  recipe: any;
   machines: any[];
   machinesViewStatus: any;
   devMachineName: string;
@@ -87,16 +87,15 @@ export class WorkspaceEnvironmentsController {
     this.newEnvironmentName = this.environmentName;
     this.environment = this.workspaceConfig.environments[this.environmentName];
 
-    let recipe = this.environment.recipe;
-    if (!recipe || !(recipe.content || recipe.location)) {
+    this.recipe = this.environment.recipe;
+    if (!this.recipe || !(this.recipe.content || this.recipe.location)) {
       this.machines = [];
       delete this.devMachineName;
       delete this.machinesViewStatus[this.environmentName];
       return;
     }
 
-    this.recipeType = this.environment.recipe.type;
-    this.environmentManager = this.cheEnvironmentRegistry.getEnvironmentManager(this.recipeType);
+    this.environmentManager = this.cheEnvironmentRegistry.getEnvironmentManager(this.recipe.type);
 
     this.editorOptions.mode = this.environmentManager.editorMode;
 
