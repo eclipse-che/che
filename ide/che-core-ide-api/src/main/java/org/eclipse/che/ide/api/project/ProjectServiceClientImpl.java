@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.project;
+package org.eclipse.che.ide.api.project;
 
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -29,9 +29,7 @@ import org.eclipse.che.api.promises.client.callback.PromiseHelper;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.ide.MimeType;
-import org.eclipse.che.ide.api.machine.WsAgentMessageBusProvider;
-import org.eclipse.che.ide.api.project.ProjectServiceClient;
-import org.eclipse.che.ide.api.project.QueryExpression;
+import org.eclipse.che.ide.api.machine.WsAgentStateController;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
@@ -80,21 +78,21 @@ public class ProjectServiceClientImpl implements ProjectServiceClient {
     private static final String RESOLVE  = "/resolve";
     private static final String ESTIMATE = "/estimate";
 
-    private final WsAgentMessageBusProvider wsAgentMessageBusProvider;
-    private final LoaderFactory             loaderFactory;
-    private final AsyncRequestFactory       reqFactory;
-    private final DtoFactory                dtoFactory;
-    private final DtoUnmarshallerFactory    unmarshaller;
-    private final AppContext                appContext;
+    private final WsAgentStateController wsAgentStateController;
+    private final LoaderFactory          loaderFactory;
+    private final AsyncRequestFactory    reqFactory;
+    private final DtoFactory             dtoFactory;
+    private final DtoUnmarshallerFactory unmarshaller;
+    private final AppContext             appContext;
 
     @Inject
-    protected ProjectServiceClientImpl(WsAgentMessageBusProvider wsAgentMessageBusProvider,
+    protected ProjectServiceClientImpl(WsAgentStateController wsAgentStateController,
                                        LoaderFactory loaderFactory,
                                        AsyncRequestFactory reqFactory,
                                        DtoFactory dtoFactory,
                                        DtoUnmarshallerFactory unmarshaller,
                                        AppContext appContext) {
-        this.wsAgentMessageBusProvider = wsAgentMessageBusProvider;
+        this.wsAgentStateController = wsAgentStateController;
         this.loaderFactory = loaderFactory;
         this.reqFactory = reqFactory;
         this.dtoFactory = dtoFactory;
@@ -148,7 +146,7 @@ public class ProjectServiceClientImpl implements ProjectServiceClient {
                                                                      .header(CONTENTTYPE, APPLICATION_JSON)
                                                                      .build();
 
-                wsAgentMessageBusProvider.getMessageBus().then(new Operation<MessageBus>() {
+                wsAgentStateController.getMessageBus().then(new Operation<MessageBus>() {
                     @Override
                     public void apply(MessageBus messageBus) throws OperationException {
                         try {
