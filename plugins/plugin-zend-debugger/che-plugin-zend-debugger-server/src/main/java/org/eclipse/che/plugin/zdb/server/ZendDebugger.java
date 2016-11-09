@@ -239,8 +239,11 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
             return;
         }
         breakpoints.remove(matchingBreakpoint);
-        int breakpointId = breakpointIds.remove(matchingBreakpoint);
-        sendDeleteBreakpoint(breakpointId);
+        // Unregister breakpoint if it was registered in active session
+        if (breakpointIds.containsKey(matchingBreakpoint)) {
+            int breakpointId = breakpointIds.remove(matchingBreakpoint);
+            sendDeleteBreakpoint(breakpointId);
+        }
     }
 
     @Override
@@ -419,8 +422,8 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
             AddBreakpointResponse response = debugConnection.sendRequest(
                     new AddBreakpointRequest(1, 2, breakpoint.getLocation().getLineNumber(), remoteFilePath));
             if (isOK(response)) {
+                // Breakpoint was successfully registered in active session, send breakpoint activated event
                 breakpointIds.put(breakpoint, response.getBreakpointID());
-                // Send breakpoint activated event
                 debugCallback.onEvent(new BreakpointActivatedEventImpl(breakpoint));
             }
         }
@@ -431,6 +434,7 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
         AddBreakpointResponse response = debugConnection
                 .sendRequest(new AddBreakpointRequest(1, 2, breakpoint.getLocation().getLineNumber(), remoteFilePath));
         if (isOK(response)) {
+            // Breakpoint was successfully registered in active session, send breakpoint activated event
             breakpointIds.put(breakpoint, response.getBreakpointID());
             debugCallback.onEvent(new BreakpointActivatedEventImpl(breakpoint));
         }
