@@ -181,7 +181,8 @@
                          che-panel-id="create-project-workspace"
                          che-label-description="A workspace contains projects and runtime environments. If your stack requires a new workspace, configure it here.">
       <ng-form name="workspaceInformationForm">
-        <div class="create-project-nested-container">
+        <div class="create-project-nested-container"
+             ng-init="createProjectCtrl.setWorkspaceInformationForm(workspaceInformationForm)">
           <che-label-container che-label-name="Name">
             <div class="create-project-input">
               <che-input che-form="workspaceInformationForm"

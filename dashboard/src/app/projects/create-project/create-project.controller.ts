@@ -284,6 +284,11 @@ export class CreateProjectController {
       return false;
     }
 
+    // check workspace information form
+    if (this.workspaceInformationForm && this.workspaceInformationForm.$invalid) {
+      return false;
+    }
+
     // check project information form and selected tab form
     if (this.selectSourceOption === 'select-source-new') {
       return this.projectInformationForm && this.projectInformationForm.$valid;
@@ -305,6 +310,10 @@ export class CreateProjectController {
 
   setWorkspaceResourceForm(form) {
     this.workspaceResourceForm = form;
+  }
+
+  setWorkspaceInformationForm(form) {
+    this.workspaceInformationForm = form;
   }
 
   /**
