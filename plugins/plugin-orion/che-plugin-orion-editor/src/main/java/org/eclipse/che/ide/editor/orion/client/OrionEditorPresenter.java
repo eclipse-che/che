@@ -128,7 +128,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.Boolean.parseBoolean;
 import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingStartEvent;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
@@ -536,7 +536,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
             editorWidget.refresh();
             editorWidget.setFocus();
             final String isLinkedWithEditor = preferencesManager.getValue(LinkWithEditorAction.LINK_WITH_EDITOR);
-            if (isNullOrEmpty(isLinkedWithEditor) || !Boolean.parseBoolean(isLinkedWithEditor )) {
+            if (!parseBoolean(isLinkedWithEditor)) {
                 setSelection(new Selection<>(input.getFile()));
             }
         } else {

@@ -26,7 +26,7 @@ import org.eclipse.che.ide.resources.reveal.RevealResourceEvent;
 
 import javax.validation.constraints.NotNull;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.Boolean.parseBoolean;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
@@ -65,12 +65,9 @@ public class LinkWithEditorAction extends AbstractPerspectiveAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        final String linkWithEditor = preferencesManager.getValue(LINK_WITH_EDITOR);
-        boolean value = true;
-        if (!isNullOrEmpty(linkWithEditor)) {
-            value = !Boolean.parseBoolean(linkWithEditor);
-        }
-        preferencesManager.setValue("linkWithEditor", Boolean.toString(value));
+        final String linkWithEditorValue = preferencesManager.getValue(LINK_WITH_EDITOR);
+        boolean value = !parseBoolean(linkWithEditorValue);
+        preferencesManager.setValue(LINK_WITH_EDITOR, Boolean.toString(value));
 
         if (!value) {
             return;
