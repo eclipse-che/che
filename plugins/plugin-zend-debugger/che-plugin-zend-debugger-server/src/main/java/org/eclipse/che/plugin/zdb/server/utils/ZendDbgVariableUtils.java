@@ -10,11 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.zdb.server.utils;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-
-import org.eclipse.che.plugin.zdb.server.connection.IDbgMessage;
-
 /**
  * Debug variable utilities.
  *
@@ -49,21 +44,6 @@ public class ZendDbgVariableUtils {
             if (SUPER_GLOBALS[i].equalsIgnoreCase(name))
                 return true;
         return false;
-    }
-
-    /**
-     * Returns path element string encoded by URLEncoder.
-     * 
-     * @param element
-     * @return path element string encoded by URLEncoder
-     */
-    public static String encodePathElement(String element) {
-        try {
-            return URLEncoder.encode(element, IDbgMessage.ENCODING);
-        } catch (UnsupportedEncodingException e) {
-            // Should never happen...
-        }
-        return element;
     }
 
 }

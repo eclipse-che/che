@@ -29,7 +29,7 @@ import com.google.inject.Singleton;
 @Singleton
 public class ZendDbgConfigurationType implements DebugConfigurationType {
 
-    public static final String DISPLAY_NAME = "PHP - Zend Debugger";
+    public static final String DISPLAY_NAME = "PHP";
 
     public static final String ATTR_BREAK_AT_FIRST_LINE = "break-at-first-line";
     public static final String ATTR_CLIENT_HOST_IP = "client-host-ip";

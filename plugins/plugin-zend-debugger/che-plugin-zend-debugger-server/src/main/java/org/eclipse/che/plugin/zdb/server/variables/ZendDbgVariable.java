@@ -21,7 +21,6 @@ import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.debug.shared.model.impl.VariablePathImpl;
 import org.eclipse.che.plugin.zdb.server.expressions.IDbgDataType.DataType;
 import org.eclipse.che.plugin.zdb.server.expressions.IDbgExpression;
-import org.eclipse.che.plugin.zdb.server.utils.ZendDbgVariableUtils;
 
 /**
  * PHP Zend debugger specific variable.
@@ -105,9 +104,10 @@ public class ZendDbgVariable implements IDbgVariable {
             // Evaluate wrapped expression to fetch all child variables
             zendDbgExpression.evaluate();
             variables = new ArrayList<>();
+            int childId = 0;
             for (IDbgExpression child : zendDbgExpression.getChildren()) {
                 List<String> childPath = new ArrayList<>(variablePath.getPath());
-                childPath.add(ZendDbgVariableUtils.encodePathElement(child.getExpression()));
+                childPath.add(String.valueOf(childId++));
                 variables.add(new ZendDbgVariable(new VariablePathImpl(childPath), child));
             }
             isComplete = true;
