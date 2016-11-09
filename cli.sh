@@ -67,7 +67,7 @@ Usage: ${CHE_MINI_PRODUCT_NAME} [COMMAND]
     profile update <name>              Update profile in ~/.${CHE_MINI_PRODUCT_NAME}/
     profile info <name>                Print the profile configuration
     profile list                       List available profiles
-    ssh <wksp-name> [machine-name]     Connect through ssh (if agent enabled) to the given machine workspace
+    ssh <wksp-name> [machine-name]     SSH to a workspace if SSH agent enabled
     mount <wksp-id or wksp-name>       Synchronize workspace with current working directory
     dir init                           Initialize directory with ${CHE_MINI_PRODUCT_NAME} configuration
     dir up                             Create workspace from source in current directory
