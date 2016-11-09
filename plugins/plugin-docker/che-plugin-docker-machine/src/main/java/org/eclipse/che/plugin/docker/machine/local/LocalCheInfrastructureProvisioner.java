@@ -40,7 +40,7 @@ public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProv
     public LocalCheInfrastructureProvisioner(AgentConfigApplier agentConfigApplier,
                                              WorkspaceFolderPathProvider workspaceFolderPathProvider,
                                              WindowsPathEscaper pathEscaper,
-                                             @Named("che.machine.projects.internal.storage") String projectFolderPath) {
+                                             @Named("che.workspace.projects.storage") String projectFolderPath) {
         super(agentConfigApplier);
         this.workspaceFolderPathProvider = workspaceFolderPathProvider;
         this.pathEscaper = pathEscaper;
