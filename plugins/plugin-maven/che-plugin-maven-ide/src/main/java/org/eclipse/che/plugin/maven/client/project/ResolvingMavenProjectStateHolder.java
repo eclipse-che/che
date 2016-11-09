@@ -17,7 +17,7 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.ide.api.machine.WsAgentMessageBusProvider;
+import org.eclipse.che.ide.api.machine.WsAgentStateController;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.collections.Jso;
@@ -53,16 +53,16 @@ import static org.eclipse.che.plugin.maven.shared.MessageType.START_STOP;
 @Singleton
 public class ResolvingMavenProjectStateHolder implements ResolvingProjectStateHolder, WsAgentStateHandler {
     private final DtoFactory                             factory;
-    private final WsAgentMessageBusProvider              wsAgentMessageBusProvider;
+    private final WsAgentStateController                 wsAgentStateController;
     private       ResolvingProjectState                  state;
     private       HashSet<ResolvingProjectStateListener> listeners;
 
     @Inject
     public ResolvingMavenProjectStateHolder(DtoFactory factory,
                                             EventBus eventBus,
-                                            WsAgentMessageBusProvider wsAgentMessageBusProvider) {
+                                            WsAgentStateController wsAgentStateController) {
         this.factory = factory;
-        this.wsAgentMessageBusProvider = wsAgentMessageBusProvider;
+        this.wsAgentStateController = wsAgentStateController;
         this.state = NOT_RESOLVED;
         this.listeners = new HashSet<>();
 
@@ -91,7 +91,7 @@ public class ResolvingMavenProjectStateHolder implements ResolvingProjectStateHo
 
     @Override
     public void onWsAgentStarted(WsAgentStateEvent event) {
-        wsAgentMessageBusProvider.getMessageBus().then(new Operation<MessageBus>() {
+        wsAgentStateController.getMessageBus().then(new Operation<MessageBus>() {
             @Override
             public void apply(MessageBus messageBus) throws OperationException {
                 try {
