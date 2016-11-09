@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.statepersistance;
 
-import org.eclipse.che.ide.statepersistance.dto.ActionDescriptor;
+import org.eclipse.che.ide.api.statepersistance.dto.ActionDescriptor;
 
 import java.util.List;
 

@@ -234,6 +234,8 @@
                         <package>org.eclipse.che.api.ssh</package>
                         <package>org.eclipse.che.api.user</package>
                         <package>org.eclipse.che.api.debug.shared.dto</package>
+                        <package>org.eclipse.che.ide.api.debug.dto</package>
+                        <package>org.eclipse.che.ide.statepersistance.dto</package>
                     </dtoPackages>
                     <outputDirectory>${dto-generator-out-directory}</outputDirectory>
                     <genClassName>org.eclipse.che.ide.api.dto.DtoClientImpls</genClassName>
