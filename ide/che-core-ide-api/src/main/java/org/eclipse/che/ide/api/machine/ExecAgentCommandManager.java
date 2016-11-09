@@ -33,7 +33,9 @@ public interface ExecAgentCommandManager {
     /**
      * Call to exec agent to start a process with specified command parameters
      *
-     * @param command command
+     * @param command
+     *         command
+     *
      * @return exec agent promise with appropriate dto
      */
     ExecAgentPromise<ProcessStartResponseDto> startProcess(Command command);
@@ -41,7 +43,9 @@ public interface ExecAgentCommandManager {
     /**
      * Call exec agent to kill a process with specified identifier
      *
-     * @param pid process identifier
+     * @param pid
+     *         process identifier
+     *
      * @return promise with appropriate dto
      */
     Promise<ProcessKillResponseDto> killProcess(int pid);
@@ -50,9 +54,13 @@ public interface ExecAgentCommandManager {
      * Call for a subscription to events related to a specified process after defined timestamp
      * represented by a corresponding string (RFC3339Nano e.g. "2016-07-26T09:36:44.920890113+03:00").
      *
-     * @param pid process identifier
-     * @param eventTypes event types (e.g. stderr, stdout)
-     * @param after after timestamp
+     * @param pid
+     *         process identifier
+     * @param eventTypes
+     *         event types (e.g. stderr, stdout)
+     * @param after
+     *         after timestamp
+     *
      * @return exec agent promise with appropriate dto
      */
     ExecAgentPromise<ProcessSubscribeResponseDto> subscribe(int pid, List<String> eventTypes, String after);
@@ -61,9 +69,13 @@ public interface ExecAgentCommandManager {
      * Call for a cancellation of a subscription to events related to a specific process after defined
      * timestamp represented by a corresponding string (RFC3339Nano e.g. "2016-07-26T09:36:44.920890113+03:00").
      *
-     * @param pid process identifier
-     * @param eventTypes event types (e.g. stderr, stdout)
-     * @param after after timestamp
+     * @param pid
+     *         process identifier
+     * @param eventTypes
+     *         event types (e.g. stderr, stdout)
+     * @param after
+     *         after timestamp
+     *
      * @return promise with appropriate dto
      */
     Promise<ProcessUnSubscribeResponseDto> unsubscribe(int pid, List<String> eventTypes, String after);
@@ -71,8 +83,11 @@ public interface ExecAgentCommandManager {
     /**
      * Call for an update of a subscription to events related to a specific process.
      *
-     * @param pid process identifier
-     * @param eventTypes event types (e.g. stderr, stdout)
+     * @param pid
+     *         process identifier
+     * @param eventTypes
+     *         event types (e.g. stderr, stdout)
+     *
      * @return promise with appropriate dto
      */
     Promise<UpdateSubscriptionResponseDto> updateSubscription(int pid, List<String> eventTypes);
@@ -80,13 +95,19 @@ public interface ExecAgentCommandManager {
     /**
      * Call for a report on proess logs of a specific process.
      *
-     * @param pid process identifier
-     * @param from string represented timestamp the beginning of a time
-     *             segment (RFC3339Nano e.g. "2016-07-26T09:36:44.920890113+03:00")
-     * @param till string represented timestamp the ending of a time
-     *             segment (RFC3339Nano e.g. "2016-07-26T09:36:44.920890113+03:00")
-     * @param limit the limit of logs in result, the default value is 50
-     * @param skip the logs to skip, default value is 0
+     * @param pid
+     *         process identifier
+     * @param from
+     *         string represented timestamp the beginning of a time
+     *         segment (RFC3339Nano e.g. "2016-07-26T09:36:44.920890113+03:00")
+     * @param till
+     *         string represented timestamp the ending of a time
+     *         segment (RFC3339Nano e.g. "2016-07-26T09:36:44.920890113+03:00")
+     * @param limit
+     *         the limit of logs in result, the default value is 50
+     * @param skip
+     *         the logs to skip, default value is 0
+     *
      * @return promise with appropriate dto
      */
     Promise<List<GetProcessLogsResponseDto>> getProcessLogs(int pid, String from, String till, int limit, int skip);
@@ -94,7 +115,9 @@ public interface ExecAgentCommandManager {
     /**
      * Call for a process info
      *
-     * @param pid process identifier
+     * @param pid
+     *         process identifier
+     *
      * @return promise with appropriate dto
      */
     Promise<GetProcessResponseDto> getProcess(int pid);
@@ -102,7 +125,10 @@ public interface ExecAgentCommandManager {
     /**
      * Call for a process info
      *
-     * @param all defines if include already stopped processes, tru
+     * @param all
+     *         defines if include already stopped processes, true for all,
+     *         processes and false for running processes
+     *
      * @return promise with appropriate dto
      */
     Promise<List<GetProcessesResponseDto>> getProcesses(boolean all);
