@@ -26,16 +26,16 @@ import org.eclipse.che.dto.shared.DTO;
  * @author Dmitry Kuleshov
  */
 @DTO
-public interface ProcessDiedEventWithPidDto extends EventWithPidDto {
+public interface ProcessDiedEventDto extends DtoWithPidDto {
     String getTime();
-    ProcessDiedEventWithPidDto withTime(String time);
+    ProcessDiedEventDto withTime(String time);
 
     Integer getNativePid();
-    ProcessDiedEventWithPidDto withNativePid(Integer nativePid);
+    ProcessDiedEventDto withNativePid(Integer nativePid);
 
     String getName();
-    ProcessDiedEventWithPidDto withName(String name);
+    ProcessDiedEventDto withName(String name);
 
     String getCommandLine();
-    ProcessDiedEventWithPidDto withCommandLine(String commandLine);
+    ProcessDiedEventDto withCommandLine(String commandLine);
 }

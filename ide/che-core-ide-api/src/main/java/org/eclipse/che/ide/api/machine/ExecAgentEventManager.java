@@ -10,10 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.machine;
 
-import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessDiedEventWithPidDto;
-import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStartedEventWithPidDto;
-import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStdErrEventWithPidDto;
-import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStdOutEventWithPidDto;
+import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessDiedEventDto;
+import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStartedEventDto;
+import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStdErrEventDto;
+import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStdOutEventDto;
 import org.eclipse.che.api.promises.client.Operation;
 
 /**
@@ -25,32 +25,48 @@ public interface ExecAgentEventManager {
     /**
      * Registers an operation that is performed when 'process died' event is received
      *
-     * @param pid process identifier
-     * @param operation operation to be performed
+     * @param pid
+     *         process identifier
+     * @param operation
+     *         operation to be performed
      */
-    void registerProcessDiedOperation(int pid, Operation<ProcessDiedEventWithPidDto> operation);
+    void registerProcessDiedOperation(int pid, Operation<ProcessDiedEventDto> operation);
 
     /**
      * Registers an operation that is performed when 'process started' event is received
      *
-     * @param pid process identifier
-     * @param operation operation to be performed
+     * @param pid
+     *         process identifier
+     * @param operation
+     *         operation to be performed
      */
-    void registerProcessStartedOperation(int pid, Operation<ProcessStartedEventWithPidDto> operation);
+    void registerProcessStartedOperation(int pid, Operation<ProcessStartedEventDto> operation);
 
     /**
      * Registers an operation that is performed when 'process standard error' event is received
      *
-     * @param pid process identifier
-     * @param operation operation to be performed
+     * @param pid
+     *         process identifier
+     * @param operation
+     *         operation to be performed
      */
-    void registerProcessStdErrOperation(int pid, Operation<ProcessStdErrEventWithPidDto> operation);
+    void registerProcessStdErrOperation(int pid, Operation<ProcessStdErrEventDto> operation);
 
     /**
      * Registers an operation that is performed when 'process standard output' event is received
      *
-     * @param pid process identifier
-     * @param operation operation to be performed
+     * @param pid
+     *         process identifier
+     * @param operation
+     *         operation to be performed
      */
-    void registerProcessStdOutOperation(int pid, Operation<ProcessStdOutEventWithPidDto> operation);
+    void registerProcessStdOutOperation(int pid, Operation<ProcessStdOutEventDto> operation);
+
+    /**
+     * Removes all registered event handler operations for the process associated with a PID
+     *
+     * @param pid
+     *         process identifier
+     */
+    void cleanPidOperations(int pid);
 }

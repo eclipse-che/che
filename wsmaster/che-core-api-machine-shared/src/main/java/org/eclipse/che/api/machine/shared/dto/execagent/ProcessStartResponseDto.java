@@ -10,17 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.shared.dto.execagent;
 
+import org.eclipse.che.api.machine.shared.dto.execagent.event.DtoWithPidDto;
 import org.eclipse.che.dto.shared.DTO;
 
 /**
  * @author Dmitry Kuleshov
  */
 @DTO
-public interface ProcessStartResponseDto {
-    Integer getPid();
-
-    ProcessStartResponseDto withPid(Integer pid);
-
+public interface ProcessStartResponseDto extends DtoWithPidDto{
     String getName();
 
     ProcessStartResponseDto withName(String name);

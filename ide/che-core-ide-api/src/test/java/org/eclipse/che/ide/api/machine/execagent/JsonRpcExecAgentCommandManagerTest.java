@@ -26,6 +26,8 @@ import org.eclipse.che.api.machine.shared.dto.execagent.ProcessUnSubscribeReques
 import org.eclipse.che.api.machine.shared.dto.execagent.ProcessUnSubscribeResponseDto;
 import org.eclipse.che.api.machine.shared.dto.execagent.UpdateSubscriptionRequestDto;
 import org.eclipse.che.api.machine.shared.dto.execagent.UpdateSubscriptionResponseDto;
+import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.jsonrpc.RequestTransmitter;
 import org.junit.Test;
@@ -38,6 +40,7 @@ import static java.util.Collections.singletonList;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -84,13 +87,15 @@ public class JsonRpcExecAgentCommandManagerTest {
     private GetProcessesRequestDto       getProcessesRequestDto;
 
     @Test
+    @SuppressWarnings("unchecked")
     public void shouldProperlyRunStartProcess() {
+        when(transmitter.transmitRequest(ID, START, processStartRequestDto, ProcessStartResponseDto.class)).thenReturn(mock(Promise.class));
         when(dtoFactory.createDto(ProcessStartRequestDto.class)).thenReturn(processStartRequestDto);
         when(processStartRequestDto.withName(anyString())).thenReturn(processStartRequestDto);
         when(processStartRequestDto.withCommandLine(anyString())).thenReturn(processStartRequestDto);
         when(processStartRequestDto.withType(anyString())).thenReturn(processStartRequestDto);
 
-        commandManager.startProcess("name", "command", "type");
+        commandManager.startProcess(new CommandImpl("name", "command", "type"));
 
         verify(dtoFactory).createDto(ProcessStartRequestDto.class);
         verify(processStartRequestDto).withName("name");
@@ -101,6 +106,7 @@ public class JsonRpcExecAgentCommandManagerTest {
 
     @Test
     public void shouldProperlyRunKillProcess() {
+        when(transmitter.transmitRequest(ID, KILL, processKillRequestDto, ProcessKillResponseDto.class)).thenReturn(mock(Promise.class));
         when(dtoFactory.createDto(ProcessKillRequestDto.class)).thenReturn(processKillRequestDto);
         when(processKillRequestDto.withPid(anyInt())).thenReturn(processKillRequestDto);
 
@@ -112,7 +118,10 @@ public class JsonRpcExecAgentCommandManagerTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void shouldProperlyRunSubscribe() {
+        when(transmitter.transmitRequest(ID, SUBSCRIBE, processSubscribeRequestDto, ProcessSubscribeResponseDto.class))
+                .thenReturn(mock(Promise.class));
         when(dtoFactory.createDto(ProcessSubscribeRequestDto.class)).thenReturn(processSubscribeRequestDto);
         when(processSubscribeRequestDto.withPid(anyInt())).thenReturn(processSubscribeRequestDto);
         when(processSubscribeRequestDto.withAfter(anyString())).thenReturn(processSubscribeRequestDto);
@@ -165,9 +174,8 @@ public class JsonRpcExecAgentCommandManagerTest {
         when(getProcessLogsRequestDto.withSkip(anyInt())).thenReturn(getProcessLogsRequestDto);
         when(getProcessLogsRequestDto.withFrom(anyString())).thenReturn(getProcessLogsRequestDto);
         when(getProcessLogsRequestDto.withTill(anyString())).thenReturn(getProcessLogsRequestDto);
-        when(getProcessLogsRequestDto.withFormat(anyString())).thenReturn(getProcessLogsRequestDto);
 
-        commandManager.getProcessLogs(0, "from", "till", "format", 0, 0);
+        commandManager.getProcessLogs(0, "from", "till", 0, 0);
 
         verify(dtoFactory).createDto(GetProcessLogsRequestDto.class);
         verify(getProcessLogsRequestDto).withPid(0);
@@ -175,7 +183,6 @@ public class JsonRpcExecAgentCommandManagerTest {
         verify(getProcessLogsRequestDto).withSkip(0);
         verify(getProcessLogsRequestDto).withFrom("from");
         verify(getProcessLogsRequestDto).withTill("till");
-        verify(getProcessLogsRequestDto).withFormat("format");
         verify(transmitter).transmitRequestForList(ID, GET_LOGS, getProcessLogsRequestDto, GetProcessLogsResponseDto.class);
     }
 

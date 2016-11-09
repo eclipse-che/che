@@ -26,10 +26,10 @@ import org.eclipse.che.dto.shared.DTO;
  * @author Dmitry Kuleshov
  */
 @DTO
-public interface ProcessStdOutEventWithPidDto extends EventWithPidDto {
+public interface ProcessStdErrEventDto extends DtoWithPidDto {
     String getTime();
-    ProcessStdOutEventWithPidDto withTime(String time);
+    ProcessStdErrEventDto withTime(String time);
 
     String getText();
-    ProcessStdOutEventWithPidDto withText(String text);
+    ProcessStdErrEventDto withText(String text);
 }

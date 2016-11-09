@@ -12,7 +12,7 @@ package org.eclipse.che.ide.api.machine.execagent;
 
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessDiedEventWithPidDto;
+import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessDiedEventDto;
 import org.eclipse.che.ide.util.loging.Log;
 
 /**
@@ -21,14 +21,14 @@ import org.eclipse.che.ide.util.loging.Log;
  * @author Dmitry Kuleshov
  */
 @Singleton
-public class ProcessDiedEventHandler extends AbstractExecAgentEventHandler<ProcessDiedEventWithPidDto, Void>{
+public class ProcessDiedEventHandler extends AbstractExecAgentEventHandler<ProcessDiedEventDto, Void>{
 
     protected ProcessDiedEventHandler() {
-        super(ProcessDiedEventWithPidDto.class, Void.class);
+        super(ProcessDiedEventDto.class, Void.class);
     }
 
     @Override
-    public void handleNotification(ProcessDiedEventWithPidDto params) {
+    public void handleNotification(ProcessDiedEventDto params) {
         Log.debug(getClass(), "Handling process died event. Params: " + params);
         handle(params);
     }

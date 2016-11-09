@@ -20,11 +20,16 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.shared.dto.execagent.event;
 
+import org.eclipse.che.dto.shared.DTO;
+
 /**
  * @author Dmitry Kuleshov
  */
-public interface EventWithPidDto {
-    Integer getPid();
+@DTO
+public interface ProcessStdOutEventDto extends DtoWithPidDto {
+    String getTime();
+    ProcessStdOutEventDto withTime(String time);
 
-    EventWithPidDto withPid(Integer pid);
+    String getText();
+    ProcessStdOutEventDto withText(String text);
 }

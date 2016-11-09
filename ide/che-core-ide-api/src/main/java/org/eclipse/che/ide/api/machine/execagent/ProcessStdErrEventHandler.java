@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.machine.execagent;
 
-import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStdErrEventWithPidDto;
+import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStdErrEventDto;
 import org.eclipse.che.ide.util.loging.Log;
 
 import javax.inject.Singleton;
@@ -21,14 +21,14 @@ import javax.inject.Singleton;
  * @author Dmitry Kuleshov
  */
 @Singleton
-public class ProcessStdErrEventHandler extends AbstractExecAgentEventHandler<ProcessStdErrEventWithPidDto, Void>{
+public class ProcessStdErrEventHandler extends AbstractExecAgentEventHandler<ProcessStdErrEventDto, Void>{
 
     protected ProcessStdErrEventHandler() {
-        super(ProcessStdErrEventWithPidDto.class, Void.class);
+        super(ProcessStdErrEventDto.class, Void.class);
     }
 
     @Override
-    public void handleNotification(ProcessStdErrEventWithPidDto params) {
+    public void handleNotification(ProcessStdErrEventDto params) {
         Log.debug(getClass(), "Handling process error output event. Params: " + params);
         handle(params);
     }

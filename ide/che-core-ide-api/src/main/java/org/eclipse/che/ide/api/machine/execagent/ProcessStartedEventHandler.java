@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.machine.execagent;
 
-import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStartedEventWithPidDto;
+import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStartedEventDto;
 import org.eclipse.che.ide.util.loging.Log;
 
 import javax.inject.Singleton;
@@ -21,14 +21,14 @@ import javax.inject.Singleton;
  * @author Dmitry Kuleshov
  */
 @Singleton
-public class ProcessStartedEventHandler extends AbstractExecAgentEventHandler<ProcessStartedEventWithPidDto, Void>{
+public class ProcessStartedEventHandler extends AbstractExecAgentEventHandler<ProcessStartedEventDto, Void>{
 
     protected ProcessStartedEventHandler() {
-        super(ProcessStartedEventWithPidDto.class, Void.class);
+        super(ProcessStartedEventDto.class, Void.class);
     }
 
     @Override
-    public void handleNotification(ProcessStartedEventWithPidDto params) {
+    public void handleNotification(ProcessStartedEventDto params) {
         Log.debug(getClass(), "Handling process started event. Params: " + params);
         handle(params);
     }

@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.machine.execagent;
 
-import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStdOutEventWithPidDto;
+import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStdOutEventDto;
 import org.eclipse.che.ide.util.loging.Log;
 
 import javax.inject.Singleton;
@@ -21,14 +21,14 @@ import javax.inject.Singleton;
  * @author Dmitry Kuleshov
  */
 @Singleton
-public class ProcessStdOutEventHandler extends AbstractExecAgentEventHandler<ProcessStdOutEventWithPidDto, Void> {
+public class ProcessStdOutEventHandler extends AbstractExecAgentEventHandler<ProcessStdOutEventDto, Void> {
 
     protected ProcessStdOutEventHandler() {
-        super(ProcessStdOutEventWithPidDto.class, Void.class);
+        super(ProcessStdOutEventDto.class, Void.class);
     }
 
     @Override
-    public void handleNotification(ProcessStdOutEventWithPidDto params) {
+    public void handleNotification(ProcessStdOutEventDto params) {
         Log.debug(getClass(), "Handling process standard output event. Params: " + params);
         handle(params);
     }

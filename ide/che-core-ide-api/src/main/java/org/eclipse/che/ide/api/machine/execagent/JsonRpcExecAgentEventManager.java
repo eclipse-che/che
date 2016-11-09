@@ -12,10 +12,10 @@ package org.eclipse.che.ide.api.machine.execagent;
 
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessDiedEventWithPidDto;
-import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStartedEventWithPidDto;
-import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStdErrEventWithPidDto;
-import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStdOutEventWithPidDto;
+import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessDiedEventDto;
+import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStartedEventDto;
+import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStdErrEventDto;
+import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStdOutEventDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.ide.api.machine.ExecAgentEventManager;
 import org.eclipse.che.ide.util.loging.Log;
@@ -46,26 +46,34 @@ public class JsonRpcExecAgentEventManager implements ExecAgentEventManager {
     }
 
     @Override
-    public void registerProcessDiedOperation(int pid, Operation<ProcessDiedEventWithPidDto> operation) {
+    public void registerProcessDiedOperation(int pid, Operation<ProcessDiedEventDto> operation) {
         Log.debug(getClass(), "Registering operation for process died event for PID: " + pid);
         processDiedEventHandler.registerOperation(pid, operation);
     }
 
     @Override
-    public void registerProcessStartedOperation(int pid, Operation<ProcessStartedEventWithPidDto> operation) {
+    public void registerProcessStartedOperation(int pid, Operation<ProcessStartedEventDto> operation) {
         Log.debug(getClass(), "Registering operation for process started event for PID: " + pid);
         processStartedEventHandler.registerOperation(pid, operation);
     }
 
     @Override
-    public void registerProcessStdErrOperation(int pid, Operation<ProcessStdErrEventWithPidDto> operation) {
+    public void registerProcessStdErrOperation(int pid, Operation<ProcessStdErrEventDto> operation) {
         Log.debug(getClass(), "Registering operation for process standard output event for PID: " + pid);
         processStdErrEventHandler.registerOperation(pid, operation);
     }
 
     @Override
-    public void registerProcessStdOutOperation(int pid, Operation<ProcessStdOutEventWithPidDto> operation) {
+    public void registerProcessStdOutOperation(int pid, Operation<ProcessStdOutEventDto> operation) {
         Log.debug(getClass(), "Registering operation for process error output event for PID: " + pid);
         processStdOutEventHandler.registerOperation(pid, operation);
+    }
+
+    @Override
+    public void cleanPidOperations(int pid) {
+        processDiedEventHandler.unregisterOperations(pid);
+        processStartedEventHandler.unregisterOperations(pid);
+        processStdErrEventHandler.unregisterOperations(pid);
+        processStdOutEventHandler.unregisterOperations(pid);
     }
 }

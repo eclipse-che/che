@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.machine;
 
+import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessLogsResponseDto;
 import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessResponseDto;
 import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessesResponseDto;
@@ -19,6 +20,7 @@ import org.eclipse.che.api.machine.shared.dto.execagent.ProcessSubscribeResponse
 import org.eclipse.che.api.machine.shared.dto.execagent.ProcessUnSubscribeResponseDto;
 import org.eclipse.che.api.machine.shared.dto.execagent.UpdateSubscriptionResponseDto;
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.ide.api.machine.execagent.ExecAgentPromise;
 
 import java.util.List;
 
@@ -31,12 +33,10 @@ public interface ExecAgentCommandManager {
     /**
      * Call to exec agent to start a process with specified command parameters
      *
-     * @param name name of a command
-     * @param commandLine command line
-     * @param type type of a command
-     * @return promise with appropriate dto
+     * @param command command
+     * @return exec agent promise with appropriate dto
      */
-    Promise<ProcessStartResponseDto> startProcess(String name, String commandLine, String type);
+    ExecAgentPromise<ProcessStartResponseDto> startProcess(Command command);
 
     /**
      * Call exec agent to kill a process with specified identifier
@@ -53,9 +53,9 @@ public interface ExecAgentCommandManager {
      * @param pid process identifier
      * @param eventTypes event types (e.g. stderr, stdout)
      * @param after after timestamp
-     * @return promise with appropriate dto
+     * @return exec agent promise with appropriate dto
      */
-    Promise<ProcessSubscribeResponseDto> subscribe(int pid, List<String> eventTypes, String after);
+    ExecAgentPromise<ProcessSubscribeResponseDto> subscribe(int pid, List<String> eventTypes, String after);
 
     /**
      * Call for a cancellation of a subscription to events related to a specific process after defined

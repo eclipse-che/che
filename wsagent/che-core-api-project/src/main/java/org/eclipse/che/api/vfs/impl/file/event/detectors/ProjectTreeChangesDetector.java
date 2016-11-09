@@ -13,7 +13,6 @@ package org.eclipse.che.api.vfs.impl.file.event.detectors;
 import com.google.common.annotations.Beta;
 
 import org.eclipse.che.api.core.jsonrpc.RequestTransmitter;
-import org.eclipse.che.api.core.jsonrpc.shared.JsonRpcRequest;
 import org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType;
 import org.eclipse.che.api.project.shared.dto.event.ProjectTreeStatusUpdateDto;
 import org.eclipse.che.api.vfs.impl.file.event.EventTreeNode;
@@ -125,13 +124,6 @@ public class ProjectTreeChangesDetector implements HiEventDetector<ProjectTreeCh
 
     private ProjectTreeStatusUpdateDto getParams(String path, FileWatcherEventType type) {
         return newDto(ProjectTreeStatusUpdateDto.class).withPath(path).withType(type);
-    }
-
-    private JsonRpcRequest getJsonRpcRequest(String params) {
-        return newDto(JsonRpcRequest.class)
-                .withMethod("event:project-tree-status-changed")
-                .withJsonrpc("2.0")
-                .withParams(params);
     }
 
     private enum State {

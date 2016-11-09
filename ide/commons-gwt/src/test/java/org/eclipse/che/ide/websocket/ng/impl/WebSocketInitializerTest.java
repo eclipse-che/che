@@ -78,14 +78,16 @@ public class WebSocketInitializerTest {
 
     @Test
     public void shouldGetUrlOnTerminate(){
+        when(urlResolver.removeMapping("id")).thenReturn("url");
+
         initializer.terminate("id");
 
-        verify(urlResolver).getUrl("id");
+        verify(urlResolver).removeMapping("id");
     }
 
     @Test
     public void shouldDisableSustainerOnTerminate(){
-        when(urlResolver.getUrl("id")).thenReturn("url");
+        when(urlResolver.removeMapping("id")).thenReturn("url");
 
         initializer.terminate("id");
 
@@ -94,7 +96,7 @@ public class WebSocketInitializerTest {
 
     @Test
     public void shouldCloseConnectionOnTerminate(){
-        when(urlResolver.getUrl("id")).thenReturn("url");
+        when(urlResolver.removeMapping("id")).thenReturn("url");
 
         initializer.terminate("id");
 

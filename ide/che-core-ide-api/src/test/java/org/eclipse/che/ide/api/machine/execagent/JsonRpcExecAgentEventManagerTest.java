@@ -10,10 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.machine.execagent;
 
-import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessDiedEventWithPidDto;
-import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStartedEventWithPidDto;
-import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStdErrEventWithPidDto;
-import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStdOutEventWithPidDto;
+import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessDiedEventDto;
+import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStartedEventDto;
+import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStdErrEventDto;
+import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStdOutEventDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,13 +41,13 @@ public class JsonRpcExecAgentEventManagerTest {
     private JsonRpcExecAgentEventManager eventManager;
 
     @Mock
-    Operation<ProcessDiedEventWithPidDto> processDiedOperation;
+    Operation<ProcessDiedEventDto>    processDiedOperation;
     @Mock
-    Operation<ProcessStartedEventWithPidDto> processStartedOperation;
+    Operation<ProcessStartedEventDto> processStartedOperation;
     @Mock
-    Operation<ProcessStdErrEventWithPidDto> processStdErrOperation;
+    Operation<ProcessStdErrEventDto>  processStdErrOperation;
     @Mock
-    Operation<ProcessStdOutEventWithPidDto> processStdOutOperation;
+    Operation<ProcessStdOutEventDto>  processStdOutOperation;
 
     @Test
     public void shouldProperlyRegisterProcessDiedOperation(){
