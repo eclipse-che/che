@@ -16,7 +16,6 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.ssh.shared.dto.GenerateSshPairRequest;
 import org.eclipse.che.api.ssh.shared.dto.SshPairDto;
 import org.eclipse.che.ide.MimeType;
-import org.eclipse.che.ide.api.ssh.SshServiceClient;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
@@ -45,6 +44,18 @@ public class SshServiceClientImpl implements SshServiceClient {
         this.asyncRequestFactory = asyncRequestFactory;
         this.unmarshallerFactory = unmarshallerFactory;
         this.sshApi = baseUrl + "/ssh";
+    }
+
+    /**
+     * Gets ssh pair of given service and specific name
+     * @param service the service name
+     * @param name the identifier of one the pair
+     */
+    @Override
+    public Promise<SshPairDto> getPair(String service, String name) {
+        return asyncRequestFactory.createGetRequest(sshApi + "/" + service + "/" + name)
+                                  .header(HTTPHeader.ACCEPT, MimeType.APPLICATION_JSON)
+                                  .send(unmarshallerFactory.newUnmarshaller(SshPairDto.class));
     }
 
     @Override
