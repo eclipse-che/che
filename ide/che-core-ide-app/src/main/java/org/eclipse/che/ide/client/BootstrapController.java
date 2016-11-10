@@ -35,11 +35,13 @@ import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.component.WsAgentComponent;
 import org.eclipse.che.ide.api.event.WindowActionEvent;
 import org.eclipse.che.ide.api.machine.DevMachine;
-import org.eclipse.che.ide.machine.WsAgentInitializer;
+import org.eclipse.che.ide.api.machine.WsAgentStateController;
 import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
 import org.eclipse.che.ide.api.theme.Style;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
+import org.eclipse.che.ide.context.AppContextImpl;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.statepersistance.AppStateManager;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.workspace.WorkspacePresenter;
@@ -59,13 +61,14 @@ import java.util.TreeMap;
 @Singleton
 public class BootstrapController {
 
-    private final Provider<WorkspacePresenter> workspaceProvider;
-    private final ExtensionInitializer         extensionInitializer;
-    private final EventBus                     eventBus;
-    private final Provider<AppStateManager>    appStateManagerProvider;
-    private final WorkspaceServiceClient       workspaceService;
-    private final Provider<WsAgentInitializer> wsAgentInitializerProvider;
-    private final WsAgentURLModifier           wsAgentURLModifier;
+    private final Provider<WorkspacePresenter>     workspaceProvider;
+    private final ExtensionInitializer             extensionInitializer;
+    private final EventBus                         eventBus;
+    private final Provider<AppStateManager>        appStateManagerProvider;
+    private final AppContext                       appContext;
+    private final WorkspaceServiceClient           workspaceService;
+    private final Provider<WsAgentStateController> wsAgentStateControllerProvider;
+    private final WsAgentURLModifier               wsAgentURLModifier;
 
     @Inject
     public BootstrapController(Provider<WorkspacePresenter> workspaceProvider,
@@ -75,14 +78,15 @@ public class BootstrapController {
                                AppContext appContext,
                                DtoRegistrar dtoRegistrar,
                                WorkspaceServiceClient workspaceService,
-                               Provider<WsAgentInitializer> wsAgentInitializerProvider,
+                               Provider<WsAgentStateController> wsAgentStateControllerProvider,
                                WsAgentURLModifier wsAgentURLModifier) {
         this.workspaceProvider = workspaceProvider;
         this.extensionInitializer = extensionInitializer;
         this.eventBus = eventBus;
         this.appStateManagerProvider = appStateManagerProvider;
+        this.appContext = appContext;
         this.workspaceService = workspaceService;
-        this.wsAgentInitializerProvider = wsAgentInitializerProvider;
+        this.wsAgentStateControllerProvider = wsAgentStateControllerProvider;
         this.wsAgentURLModifier = wsAgentURLModifier;
 
         appContext.setStartUpActions(StartUpActionsParser.getStartUpActions());
@@ -107,16 +111,16 @@ public class BootstrapController {
                         MachineDto devMachineDto = ws.getRuntime().getDevMachine();
                         DevMachine devMachine = new DevMachine(devMachineDto);
 
-                        wsAgentInitializerProvider.get().initialize(devMachine, new WsAgentInitializer.WsAgentCallback() {
-                            @Override
-                            public void onWsAgentInitialized() {
-                                SortedMap<String, Provider<WsAgentComponent>> sortedComponents = new TreeMap<>();
-                                sortedComponents.putAll(components);
-                                startWsAgentComponents(sortedComponents.values().iterator());
-                            }
-                        });
-                        wsAgentURLModifier.initialize(devMachine);
+                        if (appContext instanceof AppContextImpl) {
+                            ((AppContextImpl)appContext).setDevMachine(devMachine);
+                            ((AppContextImpl)appContext).setProjectsRoot(Path.valueOf(devMachineDto.getRuntime().projectsRoot()));
+                        }
 
+                        wsAgentStateControllerProvider.get().initialize(devMachine);
+                        wsAgentURLModifier.initialize(devMachine);
+                        SortedMap<String, Provider<WsAgentComponent>> sortedComponents = new TreeMap<>();
+                        sortedComponents.putAll(components);
+                        startWsAgentComponents(sortedComponents.values().iterator());
                     }
                 }).catchError(new Operation<PromiseError>() {
                     @Override

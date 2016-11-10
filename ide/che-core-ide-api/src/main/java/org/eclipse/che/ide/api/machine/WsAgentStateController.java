@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.machine;
+package org.eclipse.che.ide.api.machine;
 
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
@@ -25,16 +25,10 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
 import org.eclipse.che.api.workspace.shared.dto.WsAgentHealthStateDto;
-import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.ide.api.machine.DevMachine;
-import org.eclipse.che.ide.api.machine.WsAgentMessageBusProvider;
-import org.eclipse.che.ide.api.machine.WsAgentState;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
-import org.eclipse.che.ide.context.AppContextImpl;
-import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.RestServiceInfo;
 import org.eclipse.che.ide.rest.StringUnmarshaller;
@@ -66,15 +60,10 @@ import static org.eclipse.che.ide.api.machine.WsAgentState.STOPPED;
  * @author Valeriy Svydenko
  */
 @Singleton
-public class WsAgentStateController implements ConnectionOpenedHandler,
-                                               ConnectionClosedHandler,
-                                               ConnectionErrorHandler,
-                                               WsAgentMessageBusProvider,
-                                               WsAgentInitializer {
+public class WsAgentStateController implements ConnectionOpenedHandler, ConnectionClosedHandler, ConnectionErrorHandler {
     private final EventBus               eventBus;
     private final MessageBusProvider     messageBusProvider;
     private final DialogFactory          dialogFactory;
-    private final AppContext             appContext;
     private final AsyncRequestFactory    asyncRequestFactory;
     private final WorkspaceServiceClient workspaceServiceClient;
     private final LoaderPresenter        loader;
@@ -85,7 +74,6 @@ public class WsAgentStateController implements ConnectionOpenedHandler,
     private       WsAgentState           state;
     private List<AsyncCallback<MessageBus>> messageBusCallbacks = newArrayList();
     private List<AsyncCallback<DevMachine>> devMachineCallbacks = newArrayList();
-    private WsAgentCallback initCallback;
 
     @Inject
     public WsAgentStateController(WorkspaceServiceClient workspaceServiceClient,
@@ -93,25 +81,21 @@ public class WsAgentStateController implements ConnectionOpenedHandler,
                                   LoaderPresenter loader,
                                   MessageBusProvider messageBusProvider,
                                   AsyncRequestFactory asyncRequestFactory,
-                                  DialogFactory dialogFactory,
-                                  AppContext appContext) {
+                                  DialogFactory dialogFactory) {
         this.workspaceServiceClient = workspaceServiceClient;
         this.loader = loader;
         this.eventBus = eventBus;
         this.messageBusProvider = messageBusProvider;
         this.asyncRequestFactory = asyncRequestFactory;
         this.dialogFactory = dialogFactory;
-        this.appContext = appContext;
         this.availableServices = new ArrayList<>();
     }
 
-    @Override
-    public void initialize(DevMachine devMachine, WsAgentCallback callback) {
+    public void initialize(DevMachine devMachine) {
         checkNotNull(devMachine, "Developer machine should not be a null");
 
         this.devMachine = devMachine;
         this.state = STOPPED;
-        this.initCallback = callback;
         loader.show(LoaderPresenter.Phase.STARTING_WORKSPACE_AGENT);
         checkHttpConnection();
     }
@@ -151,7 +135,6 @@ public class WsAgentStateController implements ConnectionOpenedHandler,
         return state;
     }
 
-    @Override
     public Promise<MessageBus> getMessageBus() {
         return AsyncPromiseHelper.createFromAsyncRequest(new AsyncPromiseHelper.RequestCall<MessageBus>() {
             @Override
@@ -213,13 +196,6 @@ public class WsAgentStateController implements ConnectionOpenedHandler,
             callback.onSuccess(devMachine);
         }
         devMachineCallbacks.clear();
-
-        if (appContext instanceof AppContextImpl) {
-            ((AppContextImpl)appContext).setDevMachine(devMachine);
-            ((AppContextImpl)appContext).setProjectsRoot(Path.valueOf(devMachine.getRuntime().projectsRoot()));
-        }
-
-        initCallback.onWsAgentInitialized();
 
         eventBus.fireEvent(WsAgentStateEvent.createWsAgentStartedEvent());
     }

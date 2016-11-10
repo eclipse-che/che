@@ -30,7 +30,9 @@ import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.api.ssh.shared.dto.SshPairDto;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandImpl;
@@ -46,6 +48,7 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
+import org.eclipse.che.ide.api.ssh.SshServiceClient;
 import org.eclipse.che.ide.api.workspace.event.EnvironmentOutputEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
@@ -117,6 +120,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     private final MachineLocalizationConstant   localizationConstant;
     private final MachineResources              resources;
     private final MachineServiceClient          machineServiceClient;
+    private final SshServiceClient              sshServiceClient;
     private final WorkspaceAgent                workspaceAgent;
     private final AppContext                    appContext;
     private final NotificationManager           notificationManager;
@@ -148,11 +152,13 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                                    CommandConsoleFactory commandConsoleFactory,
                                    DialogFactory dialogFactory,
                                    ConsoleTreeContextMenuFactory consoleTreeContextMenuFactory,
-                                   CommandTypeRegistry commandTypeRegistry) {
+                                   CommandTypeRegistry commandTypeRegistry,
+                                   SshServiceClient sshServiceClient) {
         this.view = view;
         this.localizationConstant = localizationConstant;
         this.resources = resources;
         this.machineServiceClient = machineServiceClient;
+        this.sshServiceClient = sshServiceClient;
         this.workspaceAgent = workspaceAgent;
         this.appContext = appContext;
         this.notificationManager = notificationManager;
@@ -409,23 +415,55 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
         Machine machine = (Machine)machineTreeNode.getData();
 
-        OutputConsole defaultConsole = commandConsoleFactory.create("SSH");
+        final OutputConsole defaultConsole = commandConsoleFactory.create("SSH");
         addCommandOutput(machineId, defaultConsole);
 
-        String machineName = machine.getConfig().getName();
+        final String machineName = machine.getConfig().getName();
         String sshServiceAddress = getSshServerAddress(machine);
-        String machineHost = "";
-        String sshPort = SSH_PORT;
+        final String machineHost;
+        final String sshPort;
         if (sshServiceAddress != null) {
             String[] parts = sshServiceAddress.split(":");
             machineHost = parts[0];
-            sshPort = (parts.length == 2) ? parts[1] : sshPort;
+            sshPort = (parts.length == 2) ? parts[1] : SSH_PORT;
+        } else {
+            sshPort = SSH_PORT;
+            machineHost = "";
         }
 
-        if (defaultConsole instanceof DefaultOutputConsole) {
-            ((DefaultOutputConsole)defaultConsole).enableAutoScroll(false);
-            ((DefaultOutputConsole)defaultConsole).printText(localizationConstant.sshConnectInfo(machineName, machineHost, sshPort));
+        // user
+        final String userName;
+        String user = machine.getRuntime().getProperties().get("config.user");
+        if (isNullOrEmpty(user)) {
+            userName = "root";
+        } else {
+            userName = user;
         }
+
+        // ssh key
+        final String workspaceName = appContext.getWorkspace().getConfig().getName();
+        Promise<SshPairDto> sshPairDtoPromise = sshServiceClient.getPair("workspace", machine.getWorkspaceId());
+
+        sshPairDtoPromise.then(new Operation<SshPairDto>() {
+            @Override
+            public void apply(SshPairDto sshPairDto) throws OperationException {
+                if (defaultConsole instanceof DefaultOutputConsole) {
+                    ((DefaultOutputConsole)defaultConsole).enableAutoScroll(false);
+                    ((DefaultOutputConsole)defaultConsole).printText(localizationConstant.sshConnectInfo(machineName, machineHost, sshPort, workspaceName, userName, localizationConstant.sshConnectInfoPrivateKey(sshPairDto.getPrivateKey())));
+                }
+
+                }
+            }
+        ).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError arg) throws OperationException {
+                if (defaultConsole instanceof DefaultOutputConsole) {
+                    ((DefaultOutputConsole)defaultConsole).enableAutoScroll(false);
+                    ((DefaultOutputConsole)defaultConsole).printText(localizationConstant.sshConnectInfo(machineName, machineHost, sshPort, workspaceName, userName, localizationConstant.sshConnectInfoNoPrivateKey()));
+                }
+            }
+        });
+
     }
 
     @Override
