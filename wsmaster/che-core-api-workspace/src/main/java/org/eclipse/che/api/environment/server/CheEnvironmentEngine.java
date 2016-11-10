@@ -147,9 +147,9 @@ public class CheEnvironmentEngine {
         this.defaultMachineMemorySizeBytes = Size.parseSize(defaultMachineMemorySizeMB + "MB");
         // 16 - experimental value for stripes count, it comes from default hash map size
         this.stripedLocks = new StripedLocks(16);
-        this.recipeApiPattern = Pattern.compile("^https?" +
+        this.recipeApiPattern = Pattern.compile("(^https?" +
                                                 apiEndpoint.substring(apiEndpoint.indexOf(":")) +
-                                                "/recipe/.*$");
+                                                "/recipe/.*$)|(^/recipe/.*$)");
         this.containerNameGenerator = containerNameGenerator;
 
         eventService.subscribe(new MachineCleaner());

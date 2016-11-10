@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-machine-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>5.0.0-M7-SNAPSHOT</version>
+        <version>5.0.0-M8-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-machine-ext-client</artifactId>
     <packaging>jar</packaging>
@@ -60,6 +60,10 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-model</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-ssh-shared</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>

@@ -19,6 +19,8 @@ import org.eclipse.che.inject.DynaModule;
 
 @DynaModule
 public class MachineModule extends AbstractModule {
+
+    @Override
     protected void configure() {
         bind(KeysInjector.class).asEagerSingleton();
         bind(WorkspaceSshKeys.class).asEagerSingleton();
