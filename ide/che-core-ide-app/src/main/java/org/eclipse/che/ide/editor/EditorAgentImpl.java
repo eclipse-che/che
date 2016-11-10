@@ -83,7 +83,6 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.Boolean.parseBoolean;
 import static org.eclipse.che.ide.api.parts.PartStackType.EDITING;
@@ -176,7 +175,7 @@ public class EditorAgentImpl implements EditorAgent,
         activeEditor = (EditorPartPresenter)event.getActivePart();
         activeEditor.activate();
         final String isLinkedWithEditor = preferencesManager.getValue(LinkWithEditorAction.LINK_WITH_EDITOR);
-        if (!isNullOrEmpty(isLinkedWithEditor) && parseBoolean(isLinkedWithEditor)) {
+        if (parseBoolean(isLinkedWithEditor)) {
             final VirtualFile file = activeEditor.getEditorInput().getFile();
             eventBus.fireEvent(new RevealResourceEvent(file.getLocation()));
         }
