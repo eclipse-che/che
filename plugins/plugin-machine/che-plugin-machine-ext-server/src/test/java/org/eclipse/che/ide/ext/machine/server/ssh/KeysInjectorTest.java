@@ -12,6 +12,7 @@ package org.eclipse.che.ide.ext.machine.server.ssh;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.machine.MachineRuntimeInfo;
+import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.core.util.LineConsumer;
@@ -20,6 +21,7 @@ import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.ssh.server.SshManager;
 import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
+import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.Exec;
 import org.eclipse.che.plugin.docker.client.LogMessage;
@@ -59,7 +61,8 @@ import static org.testng.Assert.assertEquals;
 public class KeysInjectorTest {
     private static final String WORKSPACE_ID = "workspace123";
     private static final String MACHINE_ID   = "machine123";
-    private static final String OWNER_ID     = "user123";
+    private static final String OWNER_NAME   = "user";
+    private static final String USER_ID      = "user123";
     private static final String CONTAINER_ID = "container123";
     private static final String EXEC_ID      = "exec123";
 
@@ -80,13 +83,17 @@ public class KeysInjectorTest {
     LineConsumer       lineConsumer;
 
     @Mock
-    EventService    eventService;
+    EventService         eventService;
     @Mock
-    DockerConnector docker;
+    DockerConnector      docker;
     @Mock
     CheEnvironmentEngine environmentEngine;
     @Mock
-    SshManager      sshManager;
+    SshManager           sshManager;
+    @Mock
+    UserManager          userManager;
+    @Mock
+    User                 user;
 
     EventSubscriber<MachineStatusEvent> subscriber;
 
@@ -100,13 +107,16 @@ public class KeysInjectorTest {
         when(machineRuntime.getProperties()).thenReturn(metadataProperties);
 
         when(environmentEngine.getMachine(WORKSPACE_ID, MACHINE_ID)).thenReturn(instance);
-        when(instance.getOwner()).thenReturn(OWNER_ID);
+        when(instance.getOwner()).thenReturn(OWNER_NAME);
         when(instance.getRuntime()).thenReturn(machineRuntime);
         when(instance.getLogger()).thenReturn(lineConsumer);
 
         keysInjector.start();
         verify(eventService).subscribe(subscriberCaptor.capture());
         subscriber = subscriberCaptor.getValue();
+
+        when(userManager.getByName(eq(OWNER_NAME))).thenReturn(user);
+        when(user.getId()).thenReturn(USER_ID);
 
         when(docker.createExec(any(CreateExecParams.class))).thenReturn(exec);
         when(exec.getId()).thenReturn(EXEC_ID);
@@ -128,39 +138,39 @@ public class KeysInjectorTest {
                                                            .withWorkspaceId(WORKSPACE_ID));
 
         verify(environmentEngine).getMachine(eq(WORKSPACE_ID), eq(MACHINE_ID));
-        verify(sshManager).getPairs(eq(OWNER_ID), eq("machine"));
-        verify(sshManager).getPair(eq(OWNER_ID), eq("workspace"), eq(WORKSPACE_ID));
+        verify(sshManager).getPairs(eq(USER_ID), eq("machine"));
+        verify(sshManager).getPair(eq(USER_ID), eq("workspace"), eq(WORKSPACE_ID));
         verifyZeroInteractions(docker, environmentEngine, sshManager);
     }
 
     @Test
     public void shouldNotInjectSshKeysWhenThereAreNotAnyPairWithPublicKey() throws Exception {
         when(sshManager.getPairs(anyString(), anyString()))
-                .thenReturn(Collections.singletonList(new SshPairImpl(OWNER_ID, "machine", "myPair", null, null)));
+                .thenReturn(Collections.singletonList(new SshPairImpl(USER_ID, "machine", "myPair", null, null)));
 
         subscriber.onEvent(newDto(MachineStatusEvent.class).withEventType(MachineStatusEvent.EventType.RUNNING)
                                                            .withMachineId(MACHINE_ID)
                                                            .withWorkspaceId(WORKSPACE_ID));
 
         verify(environmentEngine).getMachine(eq(WORKSPACE_ID), eq(MACHINE_ID));
-        verify(sshManager).getPairs(eq(OWNER_ID), eq("machine"));
-        verify(sshManager).getPair(eq(OWNER_ID), eq("workspace"), eq(WORKSPACE_ID));
+        verify(sshManager).getPairs(eq(USER_ID), eq("machine"));
+        verify(sshManager).getPair(eq(USER_ID), eq("workspace"), eq(WORKSPACE_ID));
         verifyZeroInteractions(docker, environmentEngine, sshManager);
     }
 
     @Test
     public void shouldInjectSshKeysWhenThereAreAnyPairWithNotNullPublicKey() throws Exception {
         when(sshManager.getPairs(anyString(), anyString()))
-                .thenReturn(Arrays.asList(new SshPairImpl(OWNER_ID, "machine", "myPair", "publicKey1", null),
-                                          new SshPairImpl(OWNER_ID, "machine", "myPair", "publicKey2", null)));
+                .thenReturn(Arrays.asList(new SshPairImpl(USER_ID, "machine", "myPair", "publicKey1", null),
+                                          new SshPairImpl(USER_ID, "machine", "myPair", "publicKey2", null)));
 
         subscriber.onEvent(newDto(MachineStatusEvent.class).withEventType(MachineStatusEvent.EventType.RUNNING)
                                                            .withMachineId(MACHINE_ID)
                                                            .withWorkspaceId(WORKSPACE_ID));
 
         verify(environmentEngine).getMachine(eq(WORKSPACE_ID), eq(MACHINE_ID));
-        verify(sshManager).getPairs(eq(OWNER_ID), eq("machine"));
-        verify(sshManager).getPair(eq(OWNER_ID), eq("workspace"), eq(WORKSPACE_ID));
+        verify(sshManager).getPairs(eq(USER_ID), eq("machine"));
+        verify(sshManager).getPair(eq(USER_ID), eq("workspace"), eq(WORKSPACE_ID));
 
         ArgumentCaptor<CreateExecParams> argumentCaptor = ArgumentCaptor.forClass(CreateExecParams.class);
         verify(docker).createExec(argumentCaptor.capture());
@@ -183,7 +193,7 @@ public class KeysInjectorTest {
 
         // workspace keypair
         when(sshManager.getPair(anyString(), eq("workspace"), anyString()))
-                .thenReturn(new SshPairImpl(OWNER_ID, "workspace", WORKSPACE_ID, "publicKeyWorkspace", null));
+                .thenReturn(new SshPairImpl(USER_ID, "workspace", WORKSPACE_ID, "publicKeyWorkspace", null));
 
 
         subscriber.onEvent(newDto(MachineStatusEvent.class).withEventType(MachineStatusEvent.EventType.RUNNING)
@@ -192,8 +202,8 @@ public class KeysInjectorTest {
 
         verify(environmentEngine).getMachine(eq(WORKSPACE_ID), eq(MACHINE_ID));
         // check calls for machine and workspace ssh pairs
-        verify(sshManager).getPairs(eq(OWNER_ID), eq("machine"));
-        verify(sshManager).getPair(eq(OWNER_ID), eq("workspace"), eq(WORKSPACE_ID));
+        verify(sshManager).getPairs(eq(USER_ID), eq("machine"));
+        verify(sshManager).getPair(eq(USER_ID), eq("workspace"), eq(WORKSPACE_ID));
 
         ArgumentCaptor<CreateExecParams> argumentCaptor = ArgumentCaptor.forClass(CreateExecParams.class);
         verify(docker).createExec(argumentCaptor.capture());
@@ -211,11 +221,11 @@ public class KeysInjectorTest {
     public void shouldInjectSshKeysWhenThereIsNoPublicWorkspaceKeyButMachineKeys() throws Exception {
         // no machine key pairs
         when(sshManager.getPairs(anyString(), eq("machine")))
-                .thenReturn(Arrays.asList(new SshPairImpl(OWNER_ID, "machine", "myPair", "publicKey1", null)));
+                .thenReturn(Arrays.asList(new SshPairImpl(USER_ID, "machine", "myPair", "publicKey1", null)));
 
         // workspace keypair without public key
         when(sshManager.getPair(anyString(), eq("workspace"), anyString()))
-                .thenReturn(new SshPairImpl(OWNER_ID, "workspace", WORKSPACE_ID, null, null));
+                .thenReturn(new SshPairImpl(USER_ID, "workspace", WORKSPACE_ID, null, null));
 
 
         subscriber.onEvent(newDto(MachineStatusEvent.class).withEventType(MachineStatusEvent.EventType.RUNNING)
@@ -224,8 +234,8 @@ public class KeysInjectorTest {
 
         verify(environmentEngine).getMachine(eq(WORKSPACE_ID), eq(MACHINE_ID));
         // check calls for machine and workspace ssh pairs
-        verify(sshManager).getPairs(eq(OWNER_ID), eq("machine"));
-        verify(sshManager).getPair(eq(OWNER_ID), eq("workspace"), eq(WORKSPACE_ID));
+        verify(sshManager).getPairs(eq(USER_ID), eq("machine"));
+        verify(sshManager).getPair(eq(USER_ID), eq("workspace"), eq(WORKSPACE_ID));
 
         ArgumentCaptor<CreateExecParams> argumentCaptor = ArgumentCaptor.forClass(CreateExecParams.class);
         verify(docker).createExec(argumentCaptor.capture());
@@ -256,8 +266,8 @@ public class KeysInjectorTest {
 
         verify(environmentEngine).getMachine(eq(WORKSPACE_ID), eq(MACHINE_ID));
         // check calls for machine and workspace ssh pairs
-        verify(sshManager).getPairs(eq(OWNER_ID), eq("machine"));
-        verify(sshManager).getPair(eq(OWNER_ID), eq("workspace"), eq(WORKSPACE_ID));
+        verify(sshManager).getPairs(eq(USER_ID), eq("machine"));
+        verify(sshManager).getPair(eq(USER_ID), eq("workspace"), eq(WORKSPACE_ID));
 
         verifyZeroInteractions(docker, environmentEngine, sshManager);
     }
@@ -265,7 +275,7 @@ public class KeysInjectorTest {
     @Test
     public void shouldSendMessageInMachineLoggerWhenSomeErrorOcursOnKeysInjection() throws Exception {
         when(sshManager.getPairs(anyString(), anyString()))
-                .thenReturn(Collections.singletonList(new SshPairImpl(OWNER_ID, "machine", "myPair", "publicKey1", null)));
+                .thenReturn(Collections.singletonList(new SshPairImpl(USER_ID, "machine", "myPair", "publicKey1", null)));
         when(logMessage.getType()).thenReturn(LogMessage.Type.STDERR);
         when(logMessage.getContent()).thenReturn("FAILED");
 
