@@ -43,7 +43,6 @@ import static org.testng.Assert.assertTrue;
 /**
  * @author Anatolii Bazko
  */
-// TODO tests
 @Listeners(value = {MockitoTestNGListener.class})
 public class AgentConfigApplierTest {
 

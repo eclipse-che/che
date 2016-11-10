@@ -49,6 +49,7 @@ public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProv
 
     @Override
     public void provision(Environment envConfig, CheServicesEnvironmentImpl internalEnv) throws EnvironmentException {
+        // find dev machine name
         String devMachineName = envConfig.getMachines()
                                          .entrySet()
                                          .stream()
@@ -62,6 +63,7 @@ public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProv
                                          .orElseThrow(() -> new EnvironmentException(
                                                  "ws-machine is not found on agents applying"));
 
+        // add bind-mount volume for projects in a workspace
         String projectFolderVolume;
         try {
             projectFolderVolume = format("%s:%s:Z",
@@ -77,6 +79,7 @@ public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProv
                    .add(SystemInfo.isWindows() ? pathEscaper.escapePath(projectFolderVolume)
                                                : projectFolderVolume);
 
+        // apply basic infra (e.g. agents)
         super.provision(envConfig, internalEnv);
     }
 }

@@ -25,7 +25,6 @@ import static org.testng.AssertJUnit.assertFalse;
 /**
  * @author Anatoliy Bazko
  */
-// TODO TESTS
 @Listeners(value = {EverrestJetty.class, MockitoTestNGListener.class})
 public class LocalAgentRegistryImplTest {
 
