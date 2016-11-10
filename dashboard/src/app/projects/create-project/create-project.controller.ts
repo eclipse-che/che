@@ -506,7 +506,8 @@ export class CreateProjectController {
       let deferredResolve = this.$q.defer();
       let deferredResolvePromise = deferredResolve.promise;
 
-      let importPromise = this.cheAPI.getWorkspace().getWorkspaceAgent(workspaceId).getProject().importProject(projectName, projectData.source);
+      let projects = this.processMultiproject(projectData);
+      let importPromise = this.cheAPI.getWorkspace().getWorkspaceAgent(workspaceId).getProject().createProjects(projects);
 
       importPromise.then(() => {
         // add commands if there are some that have been defined
@@ -555,6 +556,30 @@ export class CreateProjectController {
       );
     });
 
+  }
+
+  /**
+   * Process multi-project and prepare batch of projects to be created.
+   *
+   * @param projectData project data to process
+   * @returns {Array|any} array of projects
+   */
+  processMultiproject(projectData) {
+    let currentPath = '/' + projectData.project.name;
+
+    let projects = projectData.projects;
+    let project = angular.copy(projectData.project);
+    project.path = currentPath;
+    project.source = projectData.source;
+
+    //Update path of sub-projects:
+    projects.forEach((project : any) => {
+      let index = project.path.indexOf('/' + project.name);
+      project.path = currentPath + project.path.substr(index);
+    });
+
+    projects.push(project);
+    return projects;
   }
 
   resolveProjectType(workspaceId, projectName, projectData, deferredResolve) {

@@ -66,11 +66,11 @@ export class CreateProjectSamplesController {
     createProjectCtrl.importProjectData.source.location = template.source.location;
     createProjectCtrl.importProjectData.source.parameters = template.source.parameters;
 
-
     // update name, type, description
     createProjectCtrl.setProjectDescription(template.description);
     createProjectCtrl.importProjectData.project.type = template.projectType;
     createProjectCtrl.importProjectData.project.commands = template.commands;
+    createProjectCtrl.importProjectData.projects = template.projects;
 
     var name = template.displayName;
     // strip space
