@@ -136,9 +136,6 @@ public class CheServiceImpl {
      * Override the default entrypoint.
      */
     public List<String> getEntrypoint() {
-        if (entrypoint == null) {
-            entrypoint = new ArrayList<>();
-        }
         return entrypoint;
     }
 
@@ -155,9 +152,6 @@ public class CheServiceImpl {
      * Override the default command.
      */
     public List<String> getCommand() {
-        if (command == null) {
-            command = new ArrayList<>();
-        }
         return command;
     }
 

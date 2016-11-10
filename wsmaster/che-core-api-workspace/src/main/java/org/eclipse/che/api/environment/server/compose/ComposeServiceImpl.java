@@ -12,6 +12,7 @@ package org.eclipse.che.api.environment.server.compose;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 import org.eclipse.che.api.environment.server.compose.deserializer.EnvironmentDeserializer;
 
 import java.util.ArrayList;
@@ -127,9 +128,6 @@ public class ComposeServiceImpl {
      * Override the default entrypoint.
      */
     public List<String> getEntrypoint() {
-        if (entrypoint == null) {
-            entrypoint = new ArrayList<>();
-        }
         return entrypoint;
     }
 
@@ -146,9 +144,6 @@ public class ComposeServiceImpl {
      * Override the default command.
      */
     public List<String> getCommand() {
-        if (command == null) {
-            command = new ArrayList<>();
-        }
         return command;
     }
 
