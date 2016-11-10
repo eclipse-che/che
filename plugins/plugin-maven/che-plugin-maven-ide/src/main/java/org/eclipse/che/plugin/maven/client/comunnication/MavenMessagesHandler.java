@@ -18,7 +18,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.WsAgentMessageBusProvider;
+import org.eclipse.che.ide.api.machine.WsAgentStateController;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.resources.Container;
@@ -68,7 +68,7 @@ public class MavenMessagesHandler {
                                 DtoFactory factory,
                                 BackgroundLoaderPresenter dependencyResolver,
                                 PomEditorReconciler pomEditorReconciler,
-                                WsAgentMessageBusProvider wsAgentMessageBusProvider,
+                                WsAgentStateController wsAgentStateController,
                                 ProcessesPanelPresenter processesPanelPresenter,
                                 CommandConsoleFactory commandConsoleFactory,
                                 AppContext appContext) {
@@ -81,14 +81,14 @@ public class MavenMessagesHandler {
         this.commandConsoleFactory = commandConsoleFactory;
         this.appContext = appContext;
 
-        handleOperations(factory, wsAgentMessageBusProvider);
+        handleOperations(factory, wsAgentStateController);
     }
 
-    private void handleOperations(final DtoFactory factory, final WsAgentMessageBusProvider wsAgentMessageBusProvider) {
+    private void handleOperations(final DtoFactory factory, final WsAgentStateController wsAgentStateController) {
         eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
             @Override
             public void onWsAgentStarted(WsAgentStateEvent event) {
-                wsAgentMessageBusProvider.getMessageBus().then(new Operation<MessageBus>() {
+                wsAgentStateController.getMessageBus().then(new Operation<MessageBus>() {
                     @Override
                     public void apply(MessageBus messageBus) throws OperationException {
                         try {

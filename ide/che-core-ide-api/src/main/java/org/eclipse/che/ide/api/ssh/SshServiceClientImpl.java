@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.ssh;
+package org.eclipse.che.ide.api.ssh;
 
 import com.google.inject.Inject;
 

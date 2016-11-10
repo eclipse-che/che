@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.debug.dto;
+package org.eclipse.che.ide.api.debug.dto;
 
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.dto.shared.DTO;
@@ -20,7 +20,7 @@ import org.eclipse.che.ide.api.debug.Breakpoint;
  * @author Anatoliy Bazko
  */
 @DTO
-public interface BreakpointDto {
+public interface StorableBreakpointDto {
 
     void setActive(boolean active);
 
