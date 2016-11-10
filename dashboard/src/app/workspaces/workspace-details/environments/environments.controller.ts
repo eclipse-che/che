@@ -38,7 +38,7 @@ export class WorkspaceEnvironmentsController {
   };
 
   stackId: string;
-  workspaceConfig: any;
+  workspaceConfig: che.IWorkspaceConfig;
   environment: any;
   environmentName: string;
   newEnvironmentName: string;

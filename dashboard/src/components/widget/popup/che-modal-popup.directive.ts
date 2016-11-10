@@ -12,25 +12,23 @@
 
 /**
  * @ngdoc directive
- * @name workspaces.details.directive:listCommands
+ * @name components.directive:cheModalPopup
  * @restrict E
+ * @function
  * @element
  *
  * @description
- * `<list-commands commands="ctrl.commands"></list-commands>` for displaying list of commands
+ * `<che-modal-popup>` defines modal popup component as wrapper for transclude content
  *
- * @usage
- *   <list-commands commands="ctrl.commands"></list-commands>
+ * @param {string=} title the title of popup massage
+ * @param {Function=} on-close close popup function
  *
  * @author Oleksii Orel
  */
-export class ListCommands {
-  bindToController: boolean;
+export class CheModalPopup {
   restrict: string;
   templateUrl: string;
-  controller: string;
-  controllerAs: string;
-
+  transclude: boolean;
   scope: {
     [propName: string]: string
   };
@@ -39,18 +37,16 @@ export class ListCommands {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor () {
+  constructor() {
     this.restrict = 'E';
-    this.templateUrl = 'app/workspaces/workspace-details/list-commands/list-commands.html';
-
-    this.controller = 'ListCommandsController';
-    this.controllerAs = 'listCommandsController';
-    this.bindToController = true;
+    this.transclude = true;
+    this.templateUrl = 'components/widget/popup/che-modal-popup.html';
 
     // scope values
     this.scope = {
-      commands: '=',
-      commandsOnChange: '&'
+      title: '@',
+      onClose: '&'
     };
   }
+
 }

@@ -15,6 +15,8 @@
  * @author Florent Benoit
  */
 export class CreateProjectController {
+  importProjectData: che.IImportProject;
+  selectSourceOption: string;
 
   /**
    * Default constructor that is using resource
@@ -194,7 +196,7 @@ export class CreateProjectController {
   /**
    * Gets default project JSON used for import data
    */
-  getDefaultProjectJson() {
+  getDefaultProjectJson(): che.IImportProject {
     return {
       source: {
         location: '',

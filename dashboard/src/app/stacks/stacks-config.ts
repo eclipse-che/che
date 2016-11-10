@@ -17,6 +17,7 @@ import {StackController} from './stack-details/stack.controller';
 import {ListComponents} from './stack-details/list-components/list-components.directive';
 import {ListComponentsController} from './stack-details/list-components/list-components.controller';
 import {EditComponentDialogController} from './stack-details/list-components/edit-component-dialog/edit-component-dialog.controller';
+import {SelectTemplateController} from './stack-details/select-template/select-template.controller';
 
 /**
  * @ngdoc controller
@@ -26,7 +27,7 @@ import {EditComponentDialogController} from './stack-details/list-components/edi
  */
 export class StacksConfig {
 
-  constructor(register) {
+  constructor(register: che.IRegisterService) {
     register.controller('ListStacksController', ListStacksController);
 
     register.controller('StackItemController', StackItemController);
@@ -37,9 +38,10 @@ export class StacksConfig {
 
     register.controller('StackController', StackController);
     register.controller('EditComponentDialogController', EditComponentDialogController);
+    register.controller('SelectTemplateController', SelectTemplateController);
 
     // config routes
-    register.app.config(function ($routeProvider) {
+    register.app.config(($routeProvider: any) => {
       $routeProvider.accessWhen('/stacks', {
         title: 'Stacks',
         templateUrl: 'app/stacks/list-stacks/list-stacks.html',
@@ -47,11 +49,13 @@ export class StacksConfig {
         controllerAs: 'listStacksController'
       })
         .accessWhen('/stack/:stackId', {
-          title: (params) => {return params.stackId},
+          title: (params: any) => {
+            return params.stackId;
+          },
           templateUrl: 'app/stacks/stack-details/stack.html',
           controller: 'StackController',
           controllerAs: 'stackController'
-        })
+        });
     });
   }
 }

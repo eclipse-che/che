@@ -1,7 +1,9 @@
 <div class="che-list-header-column noselect" ng-click="updateSortValue();">
-  <span>{{columnTitle}}</span>
-  <span class="header-sort-direction" ng-if='sortItem && sortValue'>
+  <div>
+    <span>{{columnTitle}}</span>
+    <span class="header-sort-direction" ng-if="sortItem && sortValue">
     <i class="fa fa-sort-asc" ng-show="sortValue === '-' + sortItem"></i>
     <i class="fa fa-sort-desc" ng-show="sortValue === sortItem"></i>
   </span>
+  </div>
 </div>
