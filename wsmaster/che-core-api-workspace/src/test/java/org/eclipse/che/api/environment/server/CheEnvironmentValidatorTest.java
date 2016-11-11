@@ -601,7 +601,6 @@ public class CheEnvironmentValidatorTest {
 
     private static CheServicesEnvironmentImpl createServicesEnv() {
         CheServicesEnvironmentImpl cheServicesEnvironment = new CheServicesEnvironmentImpl();
-        cheServicesEnvironment.setVersion("2");
         Map<String, CheServiceImpl> services = new HashMap<>();
         Map<String, String> buildArgs =  new HashMap<String, String>() {{put("argkey","argvalue");}};
         cheServicesEnvironment.setServices(services);

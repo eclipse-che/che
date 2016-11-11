@@ -8,20 +8,21 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.agent.server;
-
-import com.google.inject.AbstractModule;
-import com.google.inject.multibindings.Multibinder;
+package org.eclipse.che.api.agent.server.launcher;
 
 import org.eclipse.che.api.agent.shared.model.Agent;
+import org.eclipse.che.api.machine.server.exception.MachineException;
+import org.eclipse.che.api.machine.server.spi.Instance;
+import org.eclipse.che.api.machine.server.spi.InstanceProcess;
 
 /**
- * @author Anatolii Bazko
+ * Agent launching checker that does nothing. Useful when agent does not run in a machine as daemon.
+ *
+ * @author Alexander Garagatyi
  */
-public class AgentModule extends AbstractModule {
+public class NoOpAgentLaunchingChecker implements AgentLaunchingChecker {
     @Override
-    protected void configure() {
-        bind(AgentRegistryService.class);
-        Multibinder<Agent> agentsMultibinder = Multibinder.newSetBinder(binder(), Agent.class);
+    public boolean isLaunched(Agent agent, InstanceProcess process, Instance machine) throws MachineException {
+        return true;
     }
 }
