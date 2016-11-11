@@ -15,6 +15,7 @@
                      ng-required
                      ng-maxlength="255">
             <div ng-message="required">URL is required.</div>
+            <div ng-message="minlength">URL has to be more than 3 characters long.</div>
             <div ng-message="maxlength">URL has to be less than 255 characters long.</div>
             <div ng-message="pattern">URL is not valid.</div>
           </che-input>

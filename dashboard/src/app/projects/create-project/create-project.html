@@ -149,7 +149,14 @@
           <md-radio-button value="existing-workspace" ng-disabled="createProjectCtrl.workspaces.length === 0">Select existing workspace</md-radio-button>
           <div ng-if="createProjectCtrl.workspaceResource === 'existing-workspace'">
             <create-project-workspaces che-workspace="createProjectCtrl.workspaceSelected"
-                                       che-workspace-change="createProjectCtrl.onWorkspaceChange()"/>
+                                       che-workspace-change="createProjectCtrl.onWorkspaceChange()"></create-project-workspaces>
+          </div>
+
+          <!-- radio-button: from config -->
+          <md-radio-button value="from-config">Create from configuration</md-radio-button>
+          <div ng-if="createProjectCtrl.workspaceResource === 'from-config'">
+            <che-workspace-config-import workspace-config="createProjectCtrl.workspaceConfig"
+                                         workspace-config-on-change="createProjectCtrl.updateWorkspaceConfigImport(config)"></che-workspace-config-import>
           </div>
 
           <!-- radio-button: from stack -->
@@ -162,14 +169,7 @@
                                         che-stack-change="createProjectCtrl.cheStackLibrarySelecter(stack)"
                                         che-recipe-script="createProjectCtrl.recipeScript"
                                         che-recipe-url="createProjectCtrl.recipeUrl"
-                                        che-recipe-format="createProjectCtrl.recipeFormat"/>
-          </div>
-
-          <!-- radio-button: from config -->
-          <md-radio-button value="from-config">Create from workspace configuration file</md-radio-button>
-          <div ng-if="createProjectCtrl.workspaceResource === 'from-config'">
-            <che-workspace-config-import workspace-config="createProjectCtrl.workspaceConfig"
-                                         workspace-config-on-change="createProjectCtrl.updateWorkspaceConfigImport(config)"></che-workspace-config-import>
+                                        che-recipe-format="createProjectCtrl.recipeFormat"></che-workspace-select-stack>
           </div>
         </md-radio-group>
       </ng-form>

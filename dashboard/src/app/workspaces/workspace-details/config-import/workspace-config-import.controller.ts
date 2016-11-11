@@ -63,7 +63,7 @@ export class WorkspaceConfigImportController {
     }, true);
   }
 
-  configValid() {
+  configValid(): boolean {
     return !this.validationError;
   }
 
@@ -97,25 +97,20 @@ export class WorkspaceConfigImportController {
    * @returns {string} validation error message
    */
   validateConfig(config: any): string {
-    let error: string = '';
     if (!config.name) {
-      error = 'Config should contain property "name" which is a string.';
-      return error;
+      return 'Config should contain property "name" which is a string.';
     }
 
     if (!angular.isObject(config.environments)) {
-      error = 'Config should contain property "environments" which is an Object.';
-      return error;
+      return 'Config should contain property "environments" which is an Object.';
     }
 
     if (!config.defaultEnv) {
-      error = 'Config should contain property "defaultEnv" which is a string.';
-      return error;
+      return 'Config should contain property "defaultEnv" which is a string.';
     }
 
     if (!config.environments[config.defaultEnv]) {
-      error = 'Section "environments" should contain default environment.';
-      return error;
+      return 'Section "environments" should contain default environment.';
     }
 
     let envNames = Object.keys(config.environments);
@@ -123,20 +118,16 @@ export class WorkspaceConfigImportController {
       let envName = envNames[i];
       let machines = config.environments[envName].machines;
       if (!angular.isObject(machines)) {
-        error = `Environment "${envName}" should contain property "machines" which is an Object.`;
-        return error;
+        return `Environment "${envName}" should contain property "machines" which is an Object.`;
       }
 
       let recipe = config.environments[config.defaultEnv].recipe;
       if (!angular.isObject(recipe)) {
-        error = `Environment "${envName}" should contain property "recipe" which is an Object.`;
-        return error;
+        return `Environment "${envName}" should contain property "recipe" which is an Object.`;
       } else if (!recipe.type) {
-        error = `Environment "${envName}": recipe should contain property "type" which is a string.`;
-        return error;
+        return `Environment "${envName}": recipe should contain property "type" which is a string.`;
       } else if (!recipe.location && !recipe.content) {
-        error = `Environment "${envName}": recipe should have either "location" or "content" property which is a string.`;
-        return error;
+        return `Environment "${envName}": recipe should have either "location" or "content" property which is a string.`;
       }
     }
   }

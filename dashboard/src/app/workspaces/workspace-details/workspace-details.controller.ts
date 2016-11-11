@@ -271,7 +271,7 @@ export class WorkspaceDetailsController {
    *
    * @param config {object} workspace config
    */
-  updateWorkspaceConfigImport(config: any) {
+  updateWorkspaceConfigImport(config: any): void {
     if (!config) {
       return;
     }
@@ -307,7 +307,7 @@ export class WorkspaceDetailsController {
     }
   }
 
-  saveWorkspace() {
+  saveWorkspace(): void {
     if (this.isCreationFlow) {
       this.createWorkspace();
     } else {
