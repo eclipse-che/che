@@ -18,6 +18,8 @@ import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jdbc.jpa.CascadeRemovalException;
 import org.eclipse.che.api.core.jdbc.jpa.DuplicateKeyException;
+import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.user.server.event.PostUserRemovedEvent;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.security.PasswordEncryptor;
@@ -28,6 +30,7 @@ import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import java.util.List;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
@@ -48,6 +51,8 @@ public class JpaUserDao implements UserDao {
     protected Provider<EntityManager> managerProvider;
     @Inject
     private   PasswordEncryptor       encryptor;
+    @Inject
+    private   EventService            eventService;
 
     @Override
     @Transactional
@@ -103,7 +108,10 @@ public class JpaUserDao implements UserDao {
     public void remove(String id) throws ServerException, ConflictException {
         requireNonNull(id, "Required non-null id");
         try {
-            doRemove(id);
+            Optional<UserImpl> user = doRemove(id);
+            if (user.isPresent()) {
+                eventService.publish(new PostUserRemovedEvent(id));
+            }
         } catch (CascadeRemovalException removeEx) {
             throw new ServerException(removeEx.getCause().getLocalizedMessage(), removeEx.getCause());
         } catch (RuntimeException x) {
@@ -228,12 +236,12 @@ public class JpaUserDao implements UserDao {
     }
 
     @Transactional
-    protected void doRemove(String id) {
+    protected Optional<UserImpl> doRemove(String id) {
         final EntityManager manager = managerProvider.get();
-        final UserImpl user = manager.find(UserImpl.class, id);
-        if (user != null) {
-            manager.remove(user);
-        }
+        final Optional<UserImpl> user = Optional.ofNullable(manager.find(UserImpl.class, id));
+        user.ifPresent(manager::remove);
+        return user;
+
     }
 
     // Returns user instance copy without password
