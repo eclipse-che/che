@@ -57,7 +57,6 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.Arrays;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -428,33 +427,27 @@ public final class ResourceManager {
                 final MutableProjectConfig projectConfig = (MutableProjectConfig)createRequest.getBody();
                 final List<CreateProjectConfigDto> projectConfigList = projectConfig.getProjects();
                 projectConfigList.add(toCreateProjectConfig(projectConfig));
-
                 return ps.createBatchProjects(projectConfigList).thenPromise(new Function<List<ProjectConfigDto>, Promise<Project>>() {
                     @Override
-                    public Promise<Project> apply(List<ProjectConfigDto> configList) throws FunctionException {
-                        final List<Project> projects = new ArrayList<>(configList.size());
-                        for (ProjectConfigDto config : configList) {
-                            final Project newResource = resourceFactory.newProjectImpl(config, ResourceManager.this);
-                            projects.add(newResource);
-                            store.register(newResource);
-                        }
+                    public Promise<Project> apply(final List<ProjectConfigDto> configList) throws FunctionException {
 
                         return ps.getProjects().then(new Function<List<ProjectConfigDto>, Project>() {
                             @Override
                             public Project apply(List<ProjectConfigDto> updatedConfiguration) throws FunctionException {
-
                                 //cache new configs
                                 cachedConfigs = updatedConfiguration.toArray(new ProjectConfigDto[updatedConfiguration.size()]);
 
-                                Project createdProject = null;
-                                for (Project resource : projects) {
-                                    if (path.toString().equals(resource.getPath())) {
-                                        createdProject = resource;
+                                for (ProjectConfigDto projectConfigDto : configList) {
+                                    if (projectConfigDto.getPath().equals(path.toString())) {
+                                        final Project newResource = resourceFactory.newProjectImpl(projectConfigDto, ResourceManager.this);
+                                        store.register(newResource);
+                                        eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(newResource, ADDED | DERIVED)));
+
+                                        return newResource;
                                     }
-                                    eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(resource, ADDED | DERIVED)));
                                 }
 
-                                return createdProject;
+                                throw new IllegalStateException("Created project is not found");
                             }
                         });
                     }
