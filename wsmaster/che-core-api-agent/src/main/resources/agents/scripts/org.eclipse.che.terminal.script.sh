@@ -122,12 +122,13 @@ eval "LOCAL_AGENT_BINARIES_URI=${LOCAL_AGENT_BINARIES_URI}"
 eval "DOWNLOAD_AGENT_BINARIES_URI=${DOWNLOAD_AGENT_BINARIES_URI}"
 eval "TARGET_AGENT_BINARIES_URI=${TARGET_AGENT_BINARIES_URI}"
 
-if [ -f "${LOCAL_AGENT_BINARIES_URI}" ]
-then
-	AGENT_BINARIES_URI="file://${LOCAL_AGENT_BINARIES_URI}"
+if [ -f "${LOCAL_AGENT_BINARIES_URI}" ]; then
+    AGENT_BINARIES_URI="file://${LOCAL_AGENT_BINARIES_URI}"
+elif [ -f $(echo "${LOCAL_AGENT_BINARIES_URI}" | sed "s/-${PREFIX}//g") ]; then
+    AGENT_BINARIES_URI="file://"$(echo "${LOCAL_AGENT_BINARIES_URI}" | sed "s/-${PREFIX}//g")
 else
     echo "Terminal Agent will be downloaded from Workspace Master"
-	AGENT_BINARIES_URI=${DOWNLOAD_AGENT_BINARIES_URI}
+    AGENT_BINARIES_URI=${DOWNLOAD_AGENT_BINARIES_URI}
 fi
 
 
@@ -140,7 +141,7 @@ fi
 curl -s $(echo ${TARGET_AGENT_BINARIES_URI} | sed 's/\\${PREFIX}/'${PREFIX}'/g') | tar  xzf - -C ${CHE_DIR}
 
 if [ -f /bin/bash ]; then
-  SHELL_INTERPRETER="/bin/bash"
+    SHELL_INTERPRETER="/bin/bash"
 fi
 
 $HOME/che/terminal/che-websocket-terminal -addr :4411 -cmd ${SHELL_INTERPRETER} -static $HOME/che/terminal/
