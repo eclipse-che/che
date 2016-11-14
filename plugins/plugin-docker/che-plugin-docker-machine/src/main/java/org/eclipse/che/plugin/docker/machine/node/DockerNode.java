@@ -40,4 +40,9 @@ public interface DockerNode extends InstanceNode {
 
     @Override
     String getHost();
+
+    /**
+     * Returns IP of the node where container is deployed.
+     */
+    String getIp();
 }

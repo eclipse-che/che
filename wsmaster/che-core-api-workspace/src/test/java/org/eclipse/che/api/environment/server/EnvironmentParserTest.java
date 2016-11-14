@@ -845,8 +845,7 @@ public class EnvironmentParserTest {
                                                               .collect(toMap(Map.Entry::getKey,
                                                                              entry -> toCompose(entry.getValue())));
 
-        return composeEnvironment.withVersion(environment.getVersion())
-                                 .withServices(services);
+        return composeEnvironment.withServices(services);
     }
 
     private static ComposeServiceImpl toCompose(CheServiceImpl service) {
@@ -882,8 +881,7 @@ public class EnvironmentParserTest {
                                                           .collect(toMap(Map.Entry::getKey,
                                                                          entry -> fromCompose(entry.getValue())));
 
-        return cheServicesEnvironment.withVersion(environment.getVersion())
-                                     .withServices(services);
+        return cheServicesEnvironment.withServices(services);
     }
 
     private static CheServiceImpl fromCompose(ComposeServiceImpl service) {

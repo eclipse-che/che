@@ -495,11 +495,10 @@ public class WorkspaceManagerTest {
 
     @Test
     public void shouldBeAbleToStartTemporaryWorkspace() throws Exception {
-        final WorkspaceConfigImpl config = createConfig();
         when(runtimes.start(any(), anyString(), anyBoolean())).thenReturn(mock(RuntimeDescriptor.class));
         when(runtimes.get(any())).thenThrow(new NotFoundException(""));
 
-        final WorkspaceImpl runtime = workspaceManager.startWorkspace(createConfig(), NAMESPACE, true);
+        workspaceManager.startWorkspace(createConfig(), NAMESPACE, true);
 
         verify(runtimes).startAsync(workspaceCaptor.capture(), anyString(), anyBoolean());
         final WorkspaceImpl captured = workspaceCaptor.getValue();

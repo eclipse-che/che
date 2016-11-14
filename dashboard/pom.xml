@@ -16,12 +16,12 @@
     <parent>
         <artifactId>che-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>5.0.0-M7-SNAPSHOT</version>
+        <version>5.0.0-M8-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <groupId>org.eclipse.che.dashboard</groupId>
     <artifactId>che-dashboard-war</artifactId>
-    <version>5.0.0-M7-SNAPSHOT</version>
+    <version>5.0.0-M8-SNAPSHOT</version>
     <packaging>war</packaging>
     <name>Che Dashboard :: Web App</name>
     <inceptionYear>2015</inceptionYear>

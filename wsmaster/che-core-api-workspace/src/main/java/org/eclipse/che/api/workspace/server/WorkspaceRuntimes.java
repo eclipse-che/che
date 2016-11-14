@@ -37,8 +37,10 @@ import org.eclipse.che.api.core.util.AbstractMessageConsumer;
 import org.eclipse.che.api.core.util.MessageConsumer;
 import org.eclipse.che.api.core.util.WebsocketMessageConsumer;
 import org.eclipse.che.api.environment.server.CheEnvironmentEngine;
+import org.eclipse.che.api.environment.server.exception.EnvironmentException;
 import org.eclipse.che.api.environment.server.exception.EnvironmentNotRunningException;
 import org.eclipse.che.api.machine.server.exception.MachineException;
+import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
@@ -347,14 +349,20 @@ public class WorkspaceRuntimes {
     public Instance startMachine(String workspaceId,
                                  MachineConfig machineConfig) throws ServerException,
                                                                      ConflictException,
-                                                                     NotFoundException {
+                                                                     NotFoundException,
+                                                                     EnvironmentException {
 
         try (StripedLocks.ReadLock lock = stripedLocks.acquireReadLock(workspaceId)) {
             getRunningState(workspaceId);
         }
 
+        // Copy constructor makes deep copy of objects graph
+        // which means that original values won't affect the values in used further in this class
+        MachineConfigImpl machineConfigCopy = new MachineConfigImpl(machineConfig);
+
         List<String> agents = Collections.singletonList("org.eclipse.che.terminal");
-        Instance instance = environmentEngine.startMachine(workspaceId, machineConfig, agents);
+
+        Instance instance = environmentEngine.startMachine(workspaceId, machineConfigCopy, agents);
         launchAgents(instance, agents);
 
         try (StripedLocks.WriteLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
@@ -633,7 +641,7 @@ public class WorkspaceRuntimes {
             // Event publication should be performed outside of the lock
             // as it may take some time to notify subscribers
             publishWorkspaceEvent(EventType.RUNNING, workspaceId, null);
-        } catch (ApiException | RuntimeException e) {
+        } catch (ApiException | EnvironmentException | RuntimeException e) {
             try {
                 environmentEngine.stop(workspaceId);
             } catch (EnvironmentNotRunningException ignore) {

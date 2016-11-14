@@ -23,14 +23,14 @@ import java.util.Objects;
  * @author Anatoliy Bazko
  */
 public class AgentImpl implements Agent {
-    private final String                             id;
-    private final String                             name;
-    private final String                             version;
-    private final String                             description;
-    private final List<String>                       dependencies;
-    private final Map<String, String>                properties;
-    private final String                             script;
-    private final Map<String, ? extends ServerConf2> servers;
+    private String                             id;
+    private String                             name;
+    private String                             version;
+    private String                             description;
+    private List<String>                       dependencies;
+    private Map<String, String>                properties;
+    private String                             script;
+    private Map<String, ? extends ServerConf2> servers;
 
     public AgentImpl(String id,
                      String name,
@@ -75,7 +75,7 @@ public class AgentImpl implements Agent {
     public String getVersion() {
         return version;
     }
-    
+
     @Override
     public String getDescription() {
         return description;
@@ -83,12 +83,18 @@ public class AgentImpl implements Agent {
 
     @Override
     public List<String> getDependencies() {
-        return dependencies != null ? dependencies : new ArrayList<>();
+        if (dependencies == null) {
+            dependencies = new ArrayList<>();
+        }
+        return dependencies;
     }
 
     @Override
     public Map<String, String> getProperties() {
-        return properties != null ? properties : new HashMap<>();
+        if (properties == null) {
+            properties = new HashMap<>();
+        }
+        return properties;
     }
 
     @Override
@@ -98,38 +104,38 @@ public class AgentImpl implements Agent {
 
     @Override
     public Map<String, ? extends ServerConf2> getServers() {
-        return servers != null ? servers : new HashMap<>();
+        if (servers == null) {
+            servers = new HashMap<>();
+        }
+        return servers;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof AgentImpl)) {
-            return false;
-        }
-        final AgentImpl that = (AgentImpl)obj;
-        return Objects.equals(id, that.id)
-               && Objects.equals(name, that.name)
-               && Objects.equals(version, that.version)
-               && getDependencies().equals(that.getDependencies())
-               && getProperties().equals(that.getProperties())
-               && Objects.equals(script, that.script)
-               && Objects.equals(servers, that.servers);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof AgentImpl)) return false;
+        AgentImpl agent = (AgentImpl)o;
+        return Objects.equals(getId(), agent.getId()) &&
+               Objects.equals(getName(), agent.getName()) &&
+               Objects.equals(getVersion(), agent.getVersion()) &&
+               Objects.equals(getDescription(), agent.getDescription()) &&
+               Objects.equals(getDependencies(), agent.getDependencies()) &&
+               Objects.equals(getProperties(), agent.getProperties()) &&
+               Objects.equals(getScript(), agent.getScript()) &&
+               Objects.equals(getServers(), agent.getServers());
     }
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 31 * hash + Objects.hashCode(id);
-        hash = 31 * hash + Objects.hashCode(name);
-        hash = 31 * hash + Objects.hashCode(version);
-        hash = 31 * hash + getDependencies().hashCode();
-        hash = 31 * hash + getProperties().hashCode();
-        hash = 31 * hash + Objects.hashCode(script);
-        hash = 31 * hash + Objects.hashCode(servers);
-        return hash;
+        return Objects
+                .hash(getId(),
+                      getName(),
+                      getVersion(),
+                      getDescription(),
+                      getDependencies(),
+                      getProperties(),
+                      getScript(),
+                      getServers());
     }
 
     @Override
@@ -137,11 +143,13 @@ public class AgentImpl implements Agent {
         return "AgentImpl{" +
                "id='" + id + '\'' +
                ", name='" + name + '\'' +
-               ", description='" + description + '\'' +
                ", version='" + version + '\'' +
-               ", dependencies='" + dependencies + '\'' +
-               ", servers='" + servers + '\'' +
-               ", properties='" + properties + "\'}";
+               ", description='" + description + '\'' +
+               ", dependencies=" + dependencies +
+               ", properties=" + properties +
+               ", script='" + script + '\'' +
+               ", servers=" + servers +
+               '}';
     }
 }
 

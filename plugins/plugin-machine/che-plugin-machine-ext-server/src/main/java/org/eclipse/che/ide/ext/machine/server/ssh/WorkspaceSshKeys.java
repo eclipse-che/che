@@ -13,12 +13,13 @@ package org.eclipse.che.ide.ext.machine.server.ssh;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.ssh.server.SshManager;
+import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.event.WorkspaceCreatedEvent;
 import org.eclipse.che.api.workspace.server.event.WorkspaceRemovedEvent;
-import org.eclipse.che.commons.env.EnvironmentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +50,11 @@ public class WorkspaceSshKeys {
      */
     private final SshManager sshManager;
 
+    /**
+     * User manager used to get user from given namespace.
+     */
+    private final UserManager userManager;
+
 
     /**
      * Default injection by using event service and ssh manager.
@@ -59,9 +65,10 @@ public class WorkspaceSshKeys {
      *         used to generate/remove default ssh keys
      */
     @Inject
-    public WorkspaceSshKeys(final EventService eventService, final SshManager sshManager) {
+    public WorkspaceSshKeys(final EventService eventService, final SshManager sshManager, final UserManager userManager) {
         this.eventService = eventService;
         this.sshManager = sshManager;
+        this.userManager = userManager;
     }
 
     /**
@@ -72,9 +79,18 @@ public class WorkspaceSshKeys {
         eventService.subscribe(new EventSubscriber<WorkspaceCreatedEvent>() {
             @Override
             public void onEvent(WorkspaceCreatedEvent workspaceCreatedEvent) {
+                final String userId;
+                try {
+                    final User user = userManager.getByName(workspaceCreatedEvent.getWorkspace().getNamespace());
+                    userId = user.getId();
+                } catch (NotFoundException | ServerException e) {
+                    LOG.error("Unable to get owner of the workspace {} with namespace {}", workspaceCreatedEvent.getWorkspace().getId(), workspaceCreatedEvent.getWorkspace().getNamespace());
+                    return;
+                }
+
                 // Register default SSH keypair for this workspace.
                 try {
-                    sshManager.generatePair(EnvironmentContext.getCurrent().getSubject().getUserId(), "workspace",
+                    sshManager.generatePair(userId, "workspace",
                                             workspaceCreatedEvent.getWorkspace().getId());
                 } catch (ServerException | ConflictException e) {
                     // Conflict shouldn't happen as workspace id is new each time.
@@ -87,9 +103,19 @@ public class WorkspaceSshKeys {
         eventService.subscribe(new EventSubscriber<WorkspaceRemovedEvent>() {
             @Override
             public void onEvent(WorkspaceRemovedEvent workspaceRemovedEvent) {
+
+                final String userId;
+                try {
+                    final User user = userManager.getByName(workspaceRemovedEvent.getWorkspace().getNamespace());
+                    userId = user.getId();
+                } catch (NotFoundException | ServerException e) {
+                    LOG.error("Unable to get owner of the workspace {} with namespace {}", workspaceRemovedEvent.getWorkspace().getId(), workspaceRemovedEvent.getWorkspace().getNamespace());
+                    return;
+                }
+
                 // Unregister default SSH keypair for this workspace (if any)
                 try {
-                    sshManager.removePair(EnvironmentContext.getCurrent().getSubject().getUserId(), "workspace",
+                    sshManager.removePair(userId, "workspace",
                                           workspaceRemovedEvent.getWorkspace().getId());
                 } catch (NotFoundException e) {
                     LOG.debug("Do not remove default keypair from workspace {} as it is not existing (workspace ID {})",

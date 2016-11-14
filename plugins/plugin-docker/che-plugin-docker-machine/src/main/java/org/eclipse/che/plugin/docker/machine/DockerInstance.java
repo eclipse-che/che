@@ -387,7 +387,7 @@ public class DockerInstance extends AbstractInstance {
     /**
      * Can be used for docker specific operations with machine
      */
-    String getContainer() {
+    public String getContainer() {
         return container;
     }
 }
