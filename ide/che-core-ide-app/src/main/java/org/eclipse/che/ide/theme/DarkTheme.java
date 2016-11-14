@@ -58,6 +58,11 @@ public class DarkTheme implements Theme {
     }
 
     @Override
+    public String inputSelectionBackground() {
+        return "#b1b1b1";
+    }
+
+    @Override
     public String inactiveSelectionBackground() {
         return "#132D41";
     }

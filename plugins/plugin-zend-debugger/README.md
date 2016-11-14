@@ -24,7 +24,7 @@ To be able to debug PHP code, you have to start Zend Debugger client in Che and 
 
 ##### Starting debug client in Che:
 * Go to _Run -> Edit Debug Configurations..._
-* Create new *PHP - ZEND DEBUGGER* configuration with default settings
+* Create new *PHP* configuration with default settings
 * Press *Debug* button to start Zend Debugger client
 
 ##### Starting debug session in CLI mode:

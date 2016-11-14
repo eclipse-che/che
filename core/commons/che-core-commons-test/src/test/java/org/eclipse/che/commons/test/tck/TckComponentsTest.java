@@ -11,7 +11,7 @@
 package org.eclipse.che.commons.test.tck;
 
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
-import org.testng.annotations.Guice;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import javax.inject.Inject;
@@ -24,7 +24,7 @@ import static org.testng.Assert.assertNotNull;
  *
  * @author Yevhenii Voevodin
  */
-@Guice(moduleFactory = TckModuleFactory.class)
+@Listeners(TckListener.class)
 public class TckComponentsTest {
 
     @Inject

@@ -14,6 +14,7 @@ import com.google.inject.Inject;
 
 import org.eclipse.che.api.user.shared.dto.UserDto;
 import org.eclipse.che.ide.MimeType;
+import org.eclipse.che.ide.api.user.UserServiceClient;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.RestContext;

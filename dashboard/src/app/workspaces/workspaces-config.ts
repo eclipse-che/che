@@ -21,6 +21,8 @@ import {UsageChart} from './list-workspaces/workspace-item/usage-chart.directive
 import {WorkspaceItemCtrl} from './list-workspaces/workspace-item/workspace-item.controller';
 import {WorkspaceEditModeOverlay} from './workspace-edit-mode/workspace-edit-mode-overlay.directive';
 import {WorkspaceEditModeToolbarButton} from './workspace-edit-mode/workspace-edit-mode-toolbar-button.directive';
+import {WorkspaceDetailsSsh} from './workspace-details/workspace-ssh/workspace-details-ssh.directive';
+import {WorkspaceDetailsSshCtrl} from './workspace-details/workspace-ssh/workspace-details-ssh.controller';
 import {WorkspaceDetailsProjectsCtrl} from './workspace-details/workspace-projects/workspace-details-projects.controller';
 import {WorkspaceDetailsService} from './workspace-details/workspace-details.service';
 import {ExportWorkspaceController} from './workspace-details/export-workspace/export-workspace.controller';
@@ -62,7 +64,12 @@ import {ListPorts} from './workspace-details/environments/list-ports/list-ports.
 import {AddPortDialogController} from  './workspace-details/environments/list-ports/add-port-dialog/add-port-dialog.controller';
 import {EditPortDialogController} from  './workspace-details/environments/list-ports/edit-port-dialog/edit-port-dialog.controller';
 
+import {ListCommandsController} from './workspace-details/list-commands/list-commands.controller';
+import {ListCommands} from './workspace-details/list-commands/list-commands.directive';
+import {EditCommandDialogController} from  './workspace-details/list-commands/edit-command-dialog/edit-command-dialog.controller';
+
 import {ListAgentsController} from  './workspace-details/environments/list-agents/list-agents.controller';
+import {AddMachineDialogController} from  './workspace-details/environments/add-machine-dialog/add-machine-dialog.controller';
 import {ListAgents} from  './workspace-details/environments/list-agents/list-agents.directive';
 
 
@@ -77,6 +84,9 @@ export class WorkspacesConfig {
   constructor(register) {
 
     new CreateProjectStackLibrarySelectedStackFilter(register);
+
+    register.controller('WorkspaceDetailsSshCtrl', WorkspaceDetailsSshCtrl);
+    register.directive('workspaceDetailsSsh', WorkspaceDetailsSsh);
 
     register.controller('ListWorkspacesCtrl', ListWorkspacesCtrl);
     register.controller('WorkspaceDetailsController', WorkspaceDetailsController);
@@ -140,6 +150,11 @@ export class WorkspacesConfig {
     register.controller('AddPortDialogController', AddPortDialogController);
     register.controller('EditPortDialogController', EditPortDialogController);
 
+    register.controller('ListCommandsController', ListCommandsController);
+    register.directive('listCommands', ListCommands);
+    register.controller('EditCommandDialogController', EditCommandDialogController);
+
+    register.controller('AddMachineDialogController', AddMachineDialogController);
     register.controller('ListAgentsController', ListAgentsController);
     register.directive('listAgents', ListAgents);
 

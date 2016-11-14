@@ -2,9 +2,9 @@
   <div class="usage-chart-label">{{label}}</div>
   <div ng-if="loaded" ac-chart="'pie'" ac-data="data" id="usage-chart" ac-config="config" class="usage-chart"></div>
   <div layout="column" layout-align="center start">
-    <div ng-show='used && used > 0' class="usage-chart-used-value">{{usedDescription}}</div>
-    <div ng-if='used && used > 0' class="usage-chart-separator"></div>
-    <div ng-if='provided && provided > 0' class="usage-chart-provided-value">{{providedDescription}}</div>
-    <div ng-if='!provided' class="usage-chart-provided-value">not available</div>
+    <div ng-show="used && used > 0" class="usage-chart-used-value">{{usedDescription}}</div>
+    <div ng-if="used && used > 0" class="usage-chart-separator"></div>
+    <div ng-if="provided && provided > 0" class="usage-chart-provided-value">{{providedDescription}}</div>
+    <div ng-if="!provided" class="usage-chart-provided-value">not available</div>
   </div>
 </div>

@@ -24,8 +24,6 @@ export class EditMachineNameDialogController {
    */
   constructor($mdDialog) {
     this.$mdDialog = $mdDialog;
-
-    this.updateInProgress = false;
   }
 
   isUnique(name) {
@@ -43,11 +41,7 @@ export class EditMachineNameDialogController {
    * Update machine name
    */
   updateMachineName() {
-    this.updateInProgress = true;
-
-    this.callbackController.updateMachineName(this.name).finally(() => {
-      this.updateInProgress = false;
-      this.hide();
-    });
+    this.callbackController.updateMachineName(this.name);
+    this.hide();
   }
 }

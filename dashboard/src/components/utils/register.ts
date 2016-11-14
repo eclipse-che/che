@@ -15,29 +15,29 @@
  * https://raw.githubusercontent.com/michaelbromley/angular-es6/master/src/app/utils/register.js
  * Florent: Add userDashboard module and transform it to a class
  */
-export class Register {
-  constructor(moduleApp) {
+export class Register implements che.IRegisterService {
+  app: ng.IModule;
+
+  constructor(moduleApp: ng.IModule) {
     this.app = moduleApp;
   }
 
-
-
-  directive(name, constructorFn) {
+  directive(name: string, constructorFn: Function): che.IRegisterService {
 
     constructorFn = this._normalizeConstructor(constructorFn);
 
     if (!constructorFn.prototype.compile) {
       // create an empty compile function if none was defined.
-      constructorFn.prototype.compile = () => {};
+      constructorFn.prototype.compile = () => {return; };
     }
 
-    var originalCompileFn = this._cloneFunction(constructorFn.prototype.compile);
+    let originalCompileFn = this._cloneFunction(constructorFn.prototype.compile);
 
-    // Decorate the compile method to automatically return the link method (if it exists)
+    // decorate the compile method to automatically return the link method (if it exists)
     // and bind it to the context of the constructor (so `this` works correctly).
-    // This gets around the problem of a non-lexical "this" which occurs when the directive class itself
+    // this gets around the problem of a non-lexical "this" which occurs when the directive class itself
     // returns `this.link` from within the compile function.
-    this._override(constructorFn.prototype, 'compile', function () {
+    this._override(constructorFn.prototype, 'compile', () => {
       return function () {
         originalCompileFn.apply(this, arguments);
 
@@ -47,34 +47,34 @@ export class Register {
       };
     });
 
-    var factoryArray = this._createFactoryArray(constructorFn);
+    let factoryArray = this._createFactoryArray(constructorFn);
 
     this.app.directive(name, factoryArray);
     return this;
   }
 
 
-  filter(name, contructorFn) {
-    this.app.filter(name, contructorFn);
+  filter(name: string, constructorFn: Function): che.IRegisterService {
+    this.app.filter(name, constructorFn);
     return this;
   }
 
-  controller(name, contructorFn) {
-    this.app.controller(name, contructorFn);
+  controller(name: string, constructorFn: Function): che.IRegisterService {
+    this.app.controller(name, constructorFn);
     return this;
   }
 
-  service(name, contructorFn) {
-    this.app.service(name, contructorFn);
+  service(name: string, constructorFn: Function): che.IRegisterService {
+    this.app.service(name, constructorFn);
     return this;
   }
 
-  provider(name, constructorFn) {
+  provider(name: string, constructorFn: ng.IServiceProvider): che.IRegisterService {
     this.app.provider(name, constructorFn);
     return this;
   }
 
-   factory(name, constructorFn) {
+   factory(name: string, constructorFn: Function): che.IRegisterService {
     constructorFn = this._normalizeConstructor(constructorFn);
     var factoryArray = this._createFactoryArray(constructorFn);
     this.app.factory(name, factoryArray);
@@ -89,17 +89,16 @@ export class Register {
    * @returns {*}
    * @private
    */
-  _normalizeConstructor(input) {
-    var constructorFn;
+  _normalizeConstructor(input: Function | any): Function {
+    let constructorFn: Function;
 
     if (!input) {
-      var stack = new Error().stack;
+      let stack = (new Error() as any).stack;
       console.log('Invalid constructor', stack);
     }
 
     if (input.constructor === Array) {
-      //
-      var injected = input.slice(0, input.length - 1);
+      let injected = input.slice(0, input.length - 1);
       constructorFn = input[input.length - 1];
       constructorFn.$inject = injected;
     } else {
@@ -120,19 +119,14 @@ export class Register {
    * @returns {Array.<T>}
    * @private
    */
-  _createFactoryArray(ConstructorFn) {
+  _createFactoryArray(ConstructorFn: Function | any): Array<any> {
     // get the array of dependencies that are needed by this component (as contained in the `$inject` array)
-    var args = ConstructorFn.$inject || [];
-    var factoryArray = args.slice(); // create a copy of the array
-    // The factoryArray uses Angular's array notation whereby each element of the array is the name of a
+    let args: Array<any> = ConstructorFn.$inject || [];
+    let factoryArray: Array<any> = args.slice(); // create a copy of the array
+    // the factoryArray uses Angular's array notation whereby each element of the array is the name of a
     // dependency, and the final item is the factory function itself.
-    factoryArray.push((...args) => {
-      //return new constructorFn(...args);
-      var instance = new ConstructorFn(...args);
-      for (var key in instance) {
-        instance[key] = instance[key];
-      }
-      return instance;
+    factoryArray.push((...args: Array<any>) => {
+      return  new ConstructorFn(...args);
     });
 
     return factoryArray;
@@ -140,10 +134,10 @@ export class Register {
 
   /**
    * Clone a function
-   * @param original
+   * @param original: Function
    * @returns {Function}
    */
-  _cloneFunction(original) {
+  _cloneFunction(original: Function): Function {
     return function() {
       return original.apply(this, arguments);
     };
@@ -151,14 +145,14 @@ export class Register {
 
   /**
    * Override an object's method with a new one specified by `callback`.
-   * @param object
-   * @param methodName
-   * @param callback
+   * @param object: Object
+   * @param methodName: string
+   * @param callback: any
    */
-  _override(object, methodName, callback) {
+  _override(object: Object, methodName: string, callback: any): void {
     object[methodName] = callback(object[methodName]);
   }
 
 }
 
-//export default Register;
+// export default Register;

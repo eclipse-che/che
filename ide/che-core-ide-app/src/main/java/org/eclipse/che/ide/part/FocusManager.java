@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.part;
 
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
@@ -80,14 +81,15 @@ public class FocusManager {
 
                 /** focus part if it has view and focusable */
                 if (activePart != null) {
-                    if (activePart.getView() instanceof Focusable) {
-                        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-                            @Override
-                            public void execute() {
-                                ((Focusable)activePart.getView()).setFocus(true);
+                    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+                        @Override
+                        public void execute() {
+                            final IsWidget view = activePart.getView();
+                            if (view instanceof Focusable) {
+                                ((Focusable)view).setFocus(true);
                             }
-                        });
-                    }
+                        }
+                    });
                 }
 
                 Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
