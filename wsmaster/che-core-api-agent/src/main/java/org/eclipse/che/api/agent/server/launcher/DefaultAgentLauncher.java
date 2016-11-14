@@ -25,6 +25,7 @@ import org.eclipse.che.api.machine.server.spi.InstanceProcess;
 
 import java.io.IOException;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 
 /**
@@ -42,6 +43,9 @@ public class DefaultAgentLauncher implements AgentLauncher {
 
     @Override
     public void launch(Instance machine, Agent agent) throws ServerException {
+        if (isNullOrEmpty(agent.getScript())) {
+            return;
+        }
         final Command command = new CommandImpl(agent.getId(), agent.getScript(), "agent");
         final InstanceProcess process = machine.createProcess(command, null);
         final LineConsumer lineConsumer = new AbstractLineConsumer() {

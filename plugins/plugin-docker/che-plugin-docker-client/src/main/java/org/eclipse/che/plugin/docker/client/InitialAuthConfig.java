@@ -32,11 +32,11 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 /**
  * Collects auth configurations for private docker registries. Credential might be configured in .properties files, see details {@link
  * org.eclipse.che.inject.CheBootstrap}. Credentials configured as (key=value) pairs. Key is string that starts with prefix
- * {@code docker.registry.auth.} followed by url and credentials of docker registry server.
+ * {@code che.docker.registry.auth.} followed by url and credentials of docker registry server.
  * <pre>{@code
- * docker.registry.auth.url=localhost:5000
- * docker.registry.auth.username=user1
- * docker.registry.auth.password=pass
+ * che.docker.registry.auth.url=localhost:5000
+ * che.docker.registry.auth.username=user1
+ * che.docker.registry.auth.password=pass
  * }</pre>
  *
  * @author Alexander Garagatyi
@@ -54,9 +54,9 @@ public class InitialAuthConfig {
     private AuthConfigs authConfigs;
 
     @VisibleForTesting
-    protected static final String CONFIG_PREFIX                      = "docker.registry.auth.";
+    protected static final String CONFIG_PREFIX                      = "che.docker.registry.auth.";
     @VisibleForTesting
-    protected static final String CONFIGURATION_PREFIX_PATTERN       = "docker\\.registry\\.auth\\..+";
+    protected static final String CONFIGURATION_PREFIX_PATTERN       = "che\\.docker\\.registry\\.auth\\..+";
     @VisibleForTesting
     protected static final String VALID_DOCKER_PROPERTY_NAME_EXAMPLE = CONFIG_PREFIX + "registry_name.parameter_name";
 

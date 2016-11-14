@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 
 /**
@@ -63,6 +64,9 @@ public abstract class AbstractAgentLauncher implements AgentLauncher {
 
     @Override
     public void launch(Instance machine, Agent agent) throws ServerException {
+        if (isNullOrEmpty(agent.getScript())) {
+            return;
+        }
         try {
             final InstanceProcess process = start(machine, agent);
             LOG.debug("Waiting for agent {} is launched. Workspace ID:{}", agent.getId(), machine.getWorkspaceId());
