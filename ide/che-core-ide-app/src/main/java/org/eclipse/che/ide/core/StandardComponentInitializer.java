@@ -649,6 +649,18 @@ public class StandardComponentInitializer {
         actionManager.registerAction("noOpAction", new NoOpAction());
         actionManager.registerAction("signatureHelp", signatureHelpAction);
 
+        DefaultActionGroup editorContext = new DefaultActionGroup(actionManager);
+        actionManager.registerAction(IdeActions.GROUP_EDITOR_CONTEXT_MENU, editorContext);
+
+        editorContext.add(undoAction);
+        editorContext.add(redoAction);
+        editorContext.addSeparator();
+        editorContext.add(formatterAction);
+
+        editorContext.addSeparator();
+        editorContext.add(fullTextSearchAction);
+        editorContext.add(closeActiveEditorAction);
+
         // Define hot-keys
         keyBinding.getGlobal().addKey(new KeyBuilder().action().alt().charCode('n').build(), "navigateToFile");
         keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('F').build(), "fullTextSearch");

@@ -14,6 +14,8 @@ import com.google.common.base.Optional;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ContextMenuEvent;
+import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
@@ -116,6 +118,7 @@ import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelDataOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelGroupOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelOverlay;
+import org.eclipse.che.ide.editor.orion.client.menu.EditorContextMenu;
 import org.eclipse.che.ide.editor.orion.client.signature.SignatureHelpView;
 import org.eclipse.che.ide.part.editor.multipart.EditorMultiPartStackPresenter;
 import org.eclipse.che.ide.resource.Path;
@@ -167,15 +170,16 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
     private final EditorMultiPartStackPresenter          editorMultiPartStackPresenter;
     private final EditorLocalizationConstants            constant;
     private final EditorWidgetFactory<OrionEditorWidget> editorWidgetFactory;
-    private final EditorInitializePromiseHolder          editorModule;
-    private final TextEditorPartView    editorView;
-    private final EventBus              generalEventBus;
-    private final FileTypeIdentifier    fileTypeIdentifier;
-    private final QuickAssistantFactory quickAssistantFactory;
-    private final WorkspaceAgent        workspaceAgent;
-    private final NotificationManager   notificationManager;
-    private final AppContext            appContext;
-    private final SignatureHelpView     signatureHelpView;
+    private final EditorInitializePromiseHolder editorModule;
+    private final TextEditorPartView            editorView;
+    private final EventBus                      generalEventBus;
+    private final FileTypeIdentifier            fileTypeIdentifier;
+    private final QuickAssistantFactory         quickAssistantFactory;
+    private final WorkspaceAgent                workspaceAgent;
+    private final NotificationManager           notificationManager;
+    private final AppContext                    appContext;
+    private final SignatureHelpView             signatureHelpView;
+    private final EditorContextMenu             contextMenu;
 
     private final AnnotationRendering rendering = new AnnotationRendering();
     private HasKeyBindings           keyBindingsManager;
@@ -213,7 +217,8 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
                                 final WorkspaceAgent workspaceAgent,
                                 final NotificationManager notificationManager,
                                 final AppContext appContext,
-                                final SignatureHelpView signatureHelpView) {
+                                final SignatureHelpView signatureHelpView,
+                                final EditorContextMenu contextMenu) {
         this.codeAssistantFactory = codeAssistantFactory;
         this.deletedFilesController = deletedFilesController;
         this.breakpointManager = breakpointManager;
@@ -232,6 +237,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
         this.notificationManager = notificationManager;
         this.appContext = appContext;
         this.signatureHelpView = signatureHelpView;
+        this.contextMenu = contextMenu;
 
         keyBindingsManager = new TemporaryKeyBindingsManager();
 
@@ -1046,6 +1052,13 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
                     isInitialized = true;
                 }
             });
+
+            editorWidget.addDomHandler(new ContextMenuHandler() {
+                @Override
+                public void onContextMenu(ContextMenuEvent event) {
+                    contextMenu.show(event.getNativeEvent().getClientX(), event.getNativeEvent().getClientY());
+                }
+            }, ContextMenuEvent.getType());
         }
     }
 }
