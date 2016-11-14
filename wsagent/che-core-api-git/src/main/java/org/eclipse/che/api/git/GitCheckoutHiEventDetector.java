@@ -90,7 +90,7 @@ public class GitCheckoutHiEventDetector implements HiEventDetector<GitCheckoutEv
                 final Type type = getType(fileContent);
                 final String name = getName(fileContent, type);
 
-                transmitter.transmit("event:git-checkout", newDto(GitCheckoutEventDto.class).withName(name).withType(type));
+                transmitter.broadcast("event:git-checkout", newDto(GitCheckoutEventDto.class).withName(name).withType(type));
 
             }
         }

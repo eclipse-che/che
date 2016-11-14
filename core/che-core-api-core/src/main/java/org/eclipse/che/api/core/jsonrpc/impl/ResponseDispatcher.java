@@ -37,8 +37,10 @@ public class ResponseDispatcher {
      * Dispatches json rpc response received from endpoint identified by a high
      * level identifier and represented as a json object.
      *
-     * @param endpointId high level endpoint identifier
-     * @param incomingJson json object
+     * @param endpointId
+     *         high level endpoint identifier
+     * @param incomingJson
+     *         json object
      */
     public void dispatch(String endpointId, JsonObject incomingJson) {
         LOG.debug("Dispatching incoming response from: " + endpointId + ", json: " + incomingJson);
@@ -54,7 +56,7 @@ public class ResponseDispatcher {
 
         final CompletableFuture completableFuture = futures.get(key);
 
-        if (incomingJson.has("result")){
+        if (incomingJson.has("result")) {
             LOG.debug("Response contains result field, processing result");
 
             final JsonObject result = incomingJson.get("result").getAsJsonObject();
@@ -75,10 +77,14 @@ public class ResponseDispatcher {
      * Register and get a completable future that will be resolved when specified response
      * will be dispatched.
      *
-     * @param endpointId high level endpoint identifier
-     * @param requestId request identifier
-     * @param resultClass class of request result that is contained within response
-     * @return  completable future based on result represented by DTO
+     * @param endpointId
+     *         high level endpoint identifier
+     * @param requestId
+     *         request identifier
+     * @param resultClass
+     *         class of request result that is contained within response
+     *
+     * @return completable future based on result represented by DTO
      */
     public <R> CompletableFuture<R> getCompletableFuture(String endpointId, String requestId, Class<R> resultClass) {
         final CompletableFuture<R> future = new CompletableFuture<>();

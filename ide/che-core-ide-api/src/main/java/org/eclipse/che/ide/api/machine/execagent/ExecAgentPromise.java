@@ -62,7 +62,7 @@ public class ExecAgentPromise<T> {
 
     /**
      * Register an operation which will be performed when a process generates
-     * process standard error event.
+     * process standard output event.
      *
      * @param operation
      *         operation to be performed
@@ -76,7 +76,7 @@ public class ExecAgentPromise<T> {
 
     /**
      * Register an operation which will be performed when a process generates
-     * process standard output event.
+     * process standard error event.
      *
      * @param operation
      *         operation to be performed

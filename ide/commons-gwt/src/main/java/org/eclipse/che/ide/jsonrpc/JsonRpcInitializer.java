@@ -25,15 +25,18 @@ public interface JsonRpcInitializer {
      * Initialize json rpc service for an endpoint defined by a high level
      * identifier with implementation defined properties.
      *
-     * @param endpointId high level endpoint identifier (e.g. "exec-agent")
-     * @param properties map of implementation dependent properties (e.g. URL, etc.)
+     * @param endpointId
+     *         high level endpoint identifier (e.g. "exec-agent")
+     * @param properties
+     *         map of implementation dependent properties (e.g. URL, etc.)
      */
     void initialize(String endpointId, Map<String, String> properties);
 
     /**
      * Terminate json rpc service defined by high level identifier
      *
-     * @param endpointId high level endpoint identifier (e.g. "exec-agent")
+     * @param endpointId
+     *         high level endpoint identifier (e.g. "exec-agent")
      */
     void terminate(String endpointId);
 }

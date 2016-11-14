@@ -89,7 +89,7 @@ public class FileTrackingOperationTransmitter {
 
             registry.getEndpoints(path).forEach(endpoint -> {
                 final String method = "event:file-in-vfs-status-changed";
-                transmitter.transmit(endpoint, method, params);
+                transmitter.transmitNotification(endpoint, method, params);
             });
         }
 
@@ -100,7 +100,7 @@ public class FileTrackingOperationTransmitter {
 
                 registry.getEndpoints(path).forEach(endpoint -> {
                     final String method = "event:file-in-vfs-status-changed";
-                    transmitter.transmit(endpoint, method, params);
+                    transmitter.transmitNotification(endpoint, method, params);
                 });
             }
         }

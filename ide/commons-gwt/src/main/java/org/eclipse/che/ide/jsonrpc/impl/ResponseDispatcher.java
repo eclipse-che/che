@@ -52,8 +52,10 @@ public class ResponseDispatcher {
      * Dispatches json rpc response received from endpoint identified by a high
      * level identifier and represented as a json object.
      *
-     * @param endpointId high level endpoint identifier
-     * @param incomingJson json object
+     * @param endpointId
+     *         high level endpoint identifier
+     * @param incomingJson
+     *         json object
      */
     public void dispatch(String endpointId, JSONObject incomingJson) {
         Log.debug(getClass(), "Dispatching a response from: " + endpointId + ", json: " + incomingJson);
@@ -82,9 +84,13 @@ public class ResponseDispatcher {
      * Register and get a promise that will be resolved when specified response
      * will be dispatched.
      *
-     * @param endpointId high level endpoint identifier
-     * @param id request identifier
-     * @param resultClass class of request result that is contained within response
+     * @param endpointId
+     *         high level endpoint identifier
+     * @param id
+     *         request identifier
+     * @param resultClass
+     *         class of request result that is contained within response
+     *
      * @return promise with result dto
      */
     public <T> Promise<T> getPromise(final String endpointId, final String id, final Class<T> resultClass) {
@@ -105,9 +111,13 @@ public class ResponseDispatcher {
      * will be dispatched. The response result is represented as list of objects
      * that has a type defined in a corresponding parameter.
      *
-     * @param endpointId high level endpoint identifier
-     * @param id request identifier
-     * @param resultClass class of request result that is contained within response
+     * @param endpointId
+     *         high level endpoint identifier
+     * @param id
+     *         request identifier
+     * @param resultClass
+     *         class of request result that is contained within response
+     *
      * @return promise with result dto
      */
     public <T> Promise<List<T>> getListPromise(final String endpointId, final String id, final Class<T> resultClass) {

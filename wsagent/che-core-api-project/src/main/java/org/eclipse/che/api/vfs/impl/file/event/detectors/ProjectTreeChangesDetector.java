@@ -119,7 +119,7 @@ public class ProjectTreeChangesDetector implements HiEventDetector<ProjectTreeCh
 
     private void transmit(String path, FileWatcherEventType type) {
         final ProjectTreeStatusUpdateDto params = getParams(path, type);
-        transmitter.transmit("event:project-tree-status-changed", params);
+        transmitter.broadcast("event:project-tree-status-changed", params);
     }
 
     private ProjectTreeStatusUpdateDto getParams(String path, FileWatcherEventType type) {

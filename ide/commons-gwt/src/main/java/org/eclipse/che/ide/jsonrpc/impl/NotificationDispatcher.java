@@ -39,8 +39,10 @@ public class NotificationDispatcher extends AbstractJsonRpcDispatcher {
      * Dispatches json rpc notification received from endpoint identified by a
      * high level identifier and represented as a json object.
      *
-     * @param endpointId high level endpoint identifier
-     * @param incomingJson json object
+     * @param endpointId
+     *         high level endpoint identifier
+     * @param incomingJson
+     *         json object
      */
     public void dispatch(String endpointId, JSONObject incomingJson) {
         Log.debug(getClass(), "Dispatching a notification from endpoint: " + endpointId + ", jso: " + incomingJson);

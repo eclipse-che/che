@@ -17,7 +17,7 @@ import org.eclipse.che.dto.shared.DTO;
  * @author Dmitry Kuleshov
  */
 @DTO
-public interface ProcessKillResponseDto extends DtoWithPidDto{
+public interface ProcessKillResponseDto extends DtoWithPidDto {
     String getText();
 
     ProcessKillResponseDto withText(String text);

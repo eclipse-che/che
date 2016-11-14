@@ -22,7 +22,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 /**
- * Dispatches messages received from web socket endpoint throughout json rcp
+ * Dispatches messages received from web socket endpoint throughout json rpc
  * inner infrastructure.
  *
  * @author Dmitry Kuleshov

@@ -42,21 +42,21 @@ public class WebSocketTransmitter implements RequestTransmitter {
     }
 
     @Override
-    public void transmit(String endpointId, String method) {
+    public void transmitNotification(String endpointId, String method) {
         LOG.debug("Transmitting a parametrized notification to endpoint: " + endpointId + ", method: " + method);
 
         internalTransmit(endpointId, method, null, null);
     }
 
     @Override
-    public void transmit(String endpointId, String method, Object dto) {
-        LOG.debug("Transmitting a parametrized notification to endpoint: " + endpointId + ", method: " + method + ", params:" + dto);
+    public void transmitNotification(String endpointId, String method, Object params) {
+        LOG.debug("Transmitting a parametrized notification to endpoint: " + endpointId + ", method: " + method + ", params:" + params);
 
-        internalTransmit(endpointId, method, dto, null);
+        internalTransmit(endpointId, method, params, null);
     }
 
     @Override
-    public <R> CompletableFuture<R> transmit(String endpointId, String method, Class<R> resultClass) {
+    public <R> CompletableFuture<R> transmitRequest(String endpointId, String method, Class<R> resultClass) {
         LOG.debug("Transmitting a request to endpoint: " + endpointId + ", method: " + method + ", result class:" + resultClass);
 
         final String id = Long.toString(++idCounter);
@@ -65,23 +65,23 @@ public class WebSocketTransmitter implements RequestTransmitter {
     }
 
     @Override
-    public <R> CompletableFuture<R> transmit(String endpointId, String method, Object dto, Class<R> resultClass) {
+    public <R> CompletableFuture<R> transmitRequest(String endpointId, String method, Object params, Class<R> resultClass) {
         LOG.debug("Transmitting a parametrized request to endpoint: " + endpointId +
                   ", method: " + method +
-                  ", params:" + dto +
+                  ", params:" + params +
                   ", result class:" + resultClass);
 
         final String id = Long.toString(++idCounter);
-        internalTransmit(endpointId, method, dto, id);
+        internalTransmit(endpointId, method, params, id);
         return responseDispatcher.getCompletableFuture(endpointId, id, resultClass);
     }
 
     @Override
-    public void transmit(String method, Object dto) {
+    public void broadcast(String method, Object params) {
         final String id = null;
         final String endpointId = null;
 
-        internalTransmit(endpointId, method, dto, id);
+        internalTransmit(endpointId, method, params, id);
     }
 
     private void internalTransmit(String endpointId, String method, Object dto, String id) {

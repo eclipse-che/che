@@ -41,8 +41,10 @@ public class NotificationDispatcher {
      * Dispatches json rpc notification received from endpoint identified by a
      * high level identifier and represented as a json object.
      *
-     * @param endpointId high level endpoint identifier
-     * @param incomingJson json object
+     * @param endpointId
+     *         high level endpoint identifier
+     * @param incomingJson
+     *         json object
      */
     public void dispatch(String endpointId, JsonObject incomingJson) {
         LOG.debug("Dispatching incoming notification from: " + endpointId + ", json: " + incomingJson);

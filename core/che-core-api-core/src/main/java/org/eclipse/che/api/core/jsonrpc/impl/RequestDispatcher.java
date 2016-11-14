@@ -45,8 +45,10 @@ public class RequestDispatcher {
      * Dispatches json rpc request received from endpoint identified by a high
      * level identifier and represented as a json object.
      *
-     * @param endpointId high level endpoint identifier
-     * @param incomingJson json object
+     * @param endpointId
+     *         high level endpoint identifier
+     * @param incomingJson
+     *         json object
      */
     public void dispatch(String endpointId, JsonObject incomingJson) {
         LOG.debug("Dispatching incoming request from: " + endpointId + ", json: " + incomingJson);

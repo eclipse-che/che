@@ -17,7 +17,7 @@ import org.eclipse.che.dto.shared.DTO;
  * @author Dmitry Kuleshov
  */
 @DTO
-public interface ProcessStartResponseDto extends DtoWithPidDto{
+public interface ProcessStartResponseDto extends DtoWithPidDto {
     String getName();
 
     ProcessStartResponseDto withName(String name);
