@@ -15,13 +15,12 @@ import com.google.gwt.json.client.JSONParser;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.api.machine.WsAgentStateController;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.machine.WsAgentStateController;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
@@ -50,7 +49,7 @@ public class ProjectNotificationSubscriberImpl implements ProjectNotificationSub
     private final CoreLocalizationConstant locale;
     private final NotificationManager      notificationManager;
     private final String                   workspaceId;
-    private final Promise<MessageBus>      messageBusPromise;
+    private final WsAgentStateController   wsAgentStateController;
 
     private String                      wsChannel;
     private String                      projectName;
@@ -65,7 +64,7 @@ public class ProjectNotificationSubscriberImpl implements ProjectNotificationSub
         this.locale = locale;
         this.notificationManager = notificationManager;
         this.workspaceId = appContext.getWorkspace().getId();
-        this.messageBusPromise = wsAgentStateController.getMessageBus();
+        this.wsAgentStateController = wsAgentStateController;
         this.logErrorHandler = new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError error) throws OperationException {
@@ -93,7 +92,7 @@ public class ProjectNotificationSubscriberImpl implements ProjectNotificationSub
 
             @Override
             protected void onErrorReceived(final Throwable throwable) {
-                messageBusPromise.then(new Operation<MessageBus>() {
+                wsAgentStateController.getMessageBus().then(new Operation<MessageBus>() {
                     @Override
                     public void apply(MessageBus messageBus) throws OperationException {
                         try {
@@ -110,7 +109,7 @@ public class ProjectNotificationSubscriberImpl implements ProjectNotificationSub
             }
         };
 
-        messageBusPromise.then(new Operation<MessageBus>() {
+        wsAgentStateController.getMessageBus().then(new Operation<MessageBus>() {
             @Override
             public void apply(final MessageBus messageBus) throws OperationException {
                 try {
@@ -124,7 +123,7 @@ public class ProjectNotificationSubscriberImpl implements ProjectNotificationSub
 
     @Override
     public void onSuccess() {
-        messageBusPromise.then(new Operation<MessageBus>() {
+        wsAgentStateController.getMessageBus().then(new Operation<MessageBus>() {
             @Override
             public void apply(MessageBus messageBus) throws OperationException {
                 try {
@@ -141,7 +140,7 @@ public class ProjectNotificationSubscriberImpl implements ProjectNotificationSub
 
     @Override
     public void onFailure(final String errorMessage) {
-        messageBusPromise.then(new Operation<MessageBus>() {
+        wsAgentStateController.getMessageBus().then(new Operation<MessageBus>() {
             @Override
             public void apply(MessageBus messageBus) throws OperationException {
                 try {

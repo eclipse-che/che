@@ -21,7 +21,7 @@ import java.util.List;
  * @author andrew00x
  */
 @DTO
-public interface ResetRequest extends GitRequest {
+public interface ResetRequest {
     /** Type of reset operation. */
     public enum ResetType {
         /** Change the ref and the index, the workdir is not changed (default). */

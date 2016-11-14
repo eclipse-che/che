@@ -46,6 +46,18 @@ public class SshServiceClientImpl implements SshServiceClient {
         this.sshApi = baseUrl + "/ssh";
     }
 
+    /**
+     * Gets ssh pair of given service and specific name
+     * @param service the service name
+     * @param name the identifier of one the pair
+     */
+    @Override
+    public Promise<SshPairDto> getPair(String service, String name) {
+        return asyncRequestFactory.createGetRequest(sshApi + "/" + service + "/" + name)
+                                  .header(HTTPHeader.ACCEPT, MimeType.APPLICATION_JSON)
+                                  .send(unmarshallerFactory.newUnmarshaller(SshPairDto.class));
+    }
+
     @Override
     public Promise<List<SshPairDto>> getPairs(String service) {
         return asyncRequestFactory.createGetRequest(sshApi + "/" + service)

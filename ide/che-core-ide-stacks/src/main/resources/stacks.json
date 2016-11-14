@@ -895,8 +895,8 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.terminal", 
-                "org.eclipse.che.ws-agent", 
+                "org.eclipse.che.terminal",
+                "org.eclipse.che.ws-agent",
                 "org.eclipse.che.ssh",
                 "org.eclipse.che.ls.csharp",
                 "org.eclipse.che.ls.json",
@@ -1440,7 +1440,7 @@
     "source": {
       "type": "image",
       "origin": "codenvy/ubuntu_jre"
-    }    
+    }
   },
   {
     "id": "bitnami-express",
@@ -1984,7 +1984,7 @@
       "name": "default",
       "defaultEnv": "default",
       "description": null,
-      "commands": [  
+      "commands": [
         {
           "name": "restart zend server",
           "type": "custom",
@@ -2013,6 +2013,111 @@
     },
     "stackIcon": {
       "name": "type-zend.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
+    "id": "platformio",
+    "creator": "ide",
+    "name": "PlatformIO",
+    "description": "Stack for IoT development",
+    "scope": "general",
+    "tags": [
+      "PlatformIO",
+      "IoT",
+      "embedded",
+      "arduino",
+      "mbed"
+    ],
+    "components": [
+      {
+        "name": "Python",
+        "version": "2.7"
+      },
+      {
+        "name": "pip",
+        "version": "8.1.1"
+      },
+      {
+        "name": "PlatformIO",
+        "version": "3.2.0"
+      }
+    ],
+    "source": {
+      "type": "image",
+        "origin": "code/pio:latest"
+    },
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "machines": {
+            "dev-machine": {
+              "agents": [
+                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+              ],
+              "servers": {},
+              "attributes" : {
+                "memoryLimitBytes": "2147483648",
+                "auto_snapshot": "true",
+                "auto_restore": "true"
+
+              }
+            }
+          },
+          "recipe": {
+            "location": "eclipse/platformio:latest",
+            "type": "dockerimage"
+          }
+        }
+      },
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "commands": [
+        {
+          "name": "run",
+          "type": "custom",
+          "commandLine": "pio run -d ${current.project.path}",
+          "attributes": {
+            "previewUrl": ""
+          }
+        },
+        {
+          "name": "upload",
+          "type": "custom",
+          "commandLine": "pio run -d ${current.project.path} -t upload",
+          "attributes": {
+            "previewUrl": ""
+          }
+        },
+        {
+          "name": "clean",
+          "type": "custom",
+          "commandLine": "pio run -d ${current.project.path} -t clean",
+          "attributes": {
+            "previewUrl": ""
+          }
+        },
+        {
+          "name": "Remote: Device list",
+          "type": "custom",
+          "commandLine": "pio remote device list",
+          "attributes": {
+            "previewUrl": ""
+          }
+        },
+        {
+          "name": "Remote: Upload",
+          "type": "custom",
+          "commandLine": "pio remote run -d ${current.project.path} -t upload",
+          "attributes": {
+            "previewUrl": ""
+          }
+        }
+      ]
+    },
+    "stackIcon": {
+      "name": "type-python.svg",
       "mediaType": "image/svg+xml"
     }
   }

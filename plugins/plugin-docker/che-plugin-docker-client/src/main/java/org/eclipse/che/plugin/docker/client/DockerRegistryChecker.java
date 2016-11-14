@@ -63,7 +63,7 @@ public class DockerRegistryChecker {
                          "which means that you won't be able to save snapshots of your workspaces." +
                          "\nHow to configure registry?" +
                          "\n\tLocal registry  -> https://docs.docker.com/registry/" +
-                         "\n\tRemote registry -> set up 'docker.registry.auth.*' properties", registryUrl);
+                         "\n\tRemote registry -> set up 'che.docker.registry.auth.*' properties", registryUrl);
             } finally {
                 conn.disconnect();
             }

@@ -122,7 +122,6 @@ public class WorkspaceServiceLinksInjector {
         final Link workspaceChannelLink = createLink("GET",
                                                      serviceContext.getBaseUriBuilder()
                                                                    .path("ws")
-                                                                   .path(workspace.getId())
                                                                    .scheme("https".equals(ideUri.getScheme()) ? "wss" : "ws")
                                                                    .build()
                                                                    .toString(),

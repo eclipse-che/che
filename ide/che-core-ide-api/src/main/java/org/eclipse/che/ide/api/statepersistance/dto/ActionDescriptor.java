@@ -8,28 +8,33 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.statepersistance.dto;
+package org.eclipse.che.ide.api.statepersistance.dto;
 
 import org.eclipse.che.dto.shared.DTO;
 
-import java.util.List;
+import java.util.Map;
 
 /**
- * DTO describes saved state of the workspace.
+ * DTO for {@link org.eclipse.che.ide.api.action.Action}.
  *
  * @author Artem Zatsarynnyi
  */
 @DTO
-public interface WorkspaceState {
+public interface ActionDescriptor {
 
-    /** Returns the list of the actions that should be performed in order to restore workspace's state. */
-    List<ActionDescriptor> getActions();
+    /** Returns action's ID. */
+    String getId();
 
-    /**
-     * Sets the list of the actions that should be performed in order to restore workspace's state.
-     *
-     * @param actions
-     *         the list of the actions
-     */
-    void setActions(List<ActionDescriptor> actions);
+    /** Sets action's ID. */
+    void setId(String id);
+
+    ActionDescriptor withId(String id);
+
+    /** Returns parameters for performing action. */
+    Map<String, String> getParameters();
+
+    /** Sets parameters for performing action. */
+    void setParameters(Map<String, String> parameters);
+
+    ActionDescriptor withParameters(Map<String, String> parameters);
 }

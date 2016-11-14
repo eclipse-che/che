@@ -10,26 +10,27 @@
  *******************************************************************************/
 package org.eclipse.che.api.git.shared;
 
-import org.eclipse.che.dto.shared.DTO;
-
 /**
- * Request to delete branch.
+ * Branch list modes.
  *
- * @author andrew00x
+ * @author Igor Vinokur
  */
-@DTO
-public interface BranchDeleteRequest extends GitRequest {
-    /** @return name of branch to delete */
-    String getName();
-    
-    void setName(String name);
-    
-    BranchDeleteRequest withName(String name);
+public enum BranchListMode {
+    /**
+     * Show both remote and local branches. <br/>
+     * Corresponds to -a option in console git.
+     */
+    LIST_ALL,
 
-    /** @return if <code>true</code> then delete branch {@link #name} even if it is not fully merged */
-    boolean isForce();
-    
-    void setForce(boolean isForce);
-    
-    BranchDeleteRequest withForce(boolean force);
+    /**
+     * Show only remote branches. <br/>
+     * Corresponds to -r option in console git.
+     */
+    LIST_REMOTE,
+
+    /**
+     * Show only local branches. <br/>
+     * Corresponds to -l or empty option in console git.
+     */
+    LIST_LOCAL
 }

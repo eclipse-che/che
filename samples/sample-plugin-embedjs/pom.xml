@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-sample-parent</artifactId>
         <groupId>org.eclipse.che.sample</groupId>
-        <version>5.0.0-M7-SNAPSHOT</version>
+        <version>5.0.0-M8-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>che-sample-plugin-embedjs-parent</artifactId>

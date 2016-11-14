@@ -20,7 +20,7 @@ import java.util.List;
  * @author andrew00x
  */
 @DTO
-public interface RemoteAddRequest extends GitRequest {
+public interface RemoteAddRequest {
     /** @return remote name */
     String getName();
     

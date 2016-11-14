@@ -297,17 +297,21 @@ public abstract class AbstractPerspective implements Presenter, Perspective, Act
     private JsonObject getPartStackState(PartStack partStack, WorkBenchPartController partController) {
         JsonObject state = Json.createObject();
         state.put("SIZE", partController.getSize());
-        if (partStack.getActivePart() != null) {
-            state.put("ACTIVE_PART", partStack.getActivePart().getClass().getName());
-        }
-        state.put("HIDDEN", partController.isHidden());
-        JsonArray parts = Json.createArray();
-        state.put("PARTS", parts);
-        int i = 0;
-        for (PartPresenter entry : partStack.getParts()) {
-            JsonObject presenterState = Json.createObject();
-            presenterState.put("CLASS", entry.getClass().getName());
-            parts.set(i++, presenterState);
+        if (partStack.getParts().isEmpty()) {
+            state.put("HIDDEN", true);
+        } else {
+            if (partStack.getActivePart() != null) {
+                state.put("ACTIVE_PART", partStack.getActivePart().getClass().getName());
+            }
+            state.put("HIDDEN", partController.isHidden());
+            JsonArray parts = Json.createArray();
+            state.put("PARTS", parts);
+            int i = 0;
+            for (PartPresenter entry : partStack.getParts()) {
+                JsonObject presenterState = Json.createObject();
+                presenterState.put("CLASS", entry.getClass().getName());
+                parts.set(i++, presenterState);
+            }
         }
         return state;
     }
@@ -347,15 +351,15 @@ public abstract class AbstractPerspective implements Presenter, Perspective, Act
 
     private double restorePartController(PartStack stack, WorkBenchPartController controller, JsonObject partStack,
                                          List<PartPresenter> activeParts) {
-        if (partStack.hasKey("HIDDEN")) {
-            controller.setHidden(partStack.getBoolean("HIDDEN"));
-        }
         double size = 0;
         if (partStack.hasKey("SIZE")) {
             size = partStack.getNumber("SIZE");
             controller.setSize(size);
         }
 
+        if (partStack.hasKey("HIDDEN")) {
+            controller.setHidden(partStack.getBoolean("HIDDEN"));
+        }
 
         if (partStack.hasKey("PARTS")) {
             JsonArray parts = partStack.get("PARTS");
@@ -366,10 +370,17 @@ public abstract class AbstractPerspective implements Presenter, Perspective, Act
                     Provider<PartPresenter> provider = dynaProvider.getProvider(className);
                     if (provider != null) {
                         PartPresenter partPresenter = provider.get();
-                        stack.addPart(partPresenter);
+                        if (!stack.containsPart(partPresenter)) {
+                            stack.addPart(partPresenter);
+                        }
                     }
                 }
             }
+        }
+
+        //hide part stack if we cannot restore opened parts
+        if (stack.getParts().isEmpty()) {
+            controller.setHidden(true);
         }
 
         if (partStack.hasKey("ACTIVE_PART")) {

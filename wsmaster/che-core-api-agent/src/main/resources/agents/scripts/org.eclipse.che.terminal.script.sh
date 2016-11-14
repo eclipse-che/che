@@ -16,8 +16,9 @@ command -v curl >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" curl"; }
 test "$(id -u)" = 0 || SUDO="sudo"
 
 CHE_DIR=$HOME/che
-AGENT_BINARIES_URI="file:///mnt/che/terminal/websocket-terminal-\\${PREFIX}.tar.gz"
-TARGET_AGENT_BINARIES_URI="file://"${CHE_DIR}"/websocket-terminal-\\${PREFIX}.tar.gz"
+LOCAL_AGENT_BINARIES_URI='/mnt/che/terminal/websocket-terminal-${PREFIX}.tar.gz'
+DOWNLOAD_AGENT_BINARIES_URI='${WORKSPACE_MASTER_URI}/agent-binaries/${PREFIX}/terminal/websocket-terminal-${PREFIX}.tar.gz'
+TARGET_AGENT_BINARIES_URI='file://${CHE_DIR}/websocket-terminal-${PREFIX}.tar.gz'
 LINUX_TYPE=$(cat /etc/os-release | grep ^ID= | tr '[:upper:]' '[:lower:]')
 LINUX_VERSION=$(cat /etc/os-release | grep ^VERSION_ID=)
 MACHINE_TYPE=$(uname -m)
@@ -113,6 +114,24 @@ else
     exit 1
 fi
 
+# Compute URI of workspace master
+WORKSPACE_MASTER_URI=$(echo $CHE_API | cut -d / -f 1-3)
+
+## Evaluate variables now that prefix is defined
+eval "LOCAL_AGENT_BINARIES_URI=${LOCAL_AGENT_BINARIES_URI}"
+eval "DOWNLOAD_AGENT_BINARIES_URI=${DOWNLOAD_AGENT_BINARIES_URI}"
+eval "TARGET_AGENT_BINARIES_URI=${TARGET_AGENT_BINARIES_URI}"
+
+if [ -f "${LOCAL_AGENT_BINARIES_URI}" ]; then
+    AGENT_BINARIES_URI="file://${LOCAL_AGENT_BINARIES_URI}"
+elif [ -f $(echo "${LOCAL_AGENT_BINARIES_URI}" | sed "s/-${PREFIX}//g") ]; then
+    AGENT_BINARIES_URI="file://"$(echo "${LOCAL_AGENT_BINARIES_URI}" | sed "s/-${PREFIX}//g")
+else
+    echo "Terminal Agent will be downloaded from Workspace Master"
+    AGENT_BINARIES_URI=${DOWNLOAD_AGENT_BINARIES_URI}
+fi
+
+
 if curl -o /dev/null --silent --head --fail $(echo ${AGENT_BINARIES_URI} | sed 's/\\${PREFIX}/'${PREFIX}'/g'); then
     curl -o $(echo ${TARGET_AGENT_BINARIES_URI} | sed 's/\\${PREFIX}/'${PREFIX}'/g' | sed 's/file:\\/\\///g') -s $(echo ${AGENT_BINARIES_URI} | sed 's/\\${PREFIX}/'${PREFIX}'/g')
 elif curl -o /dev/null --silent --head --fail $(echo ${AGENT_BINARIES_URI} | sed 's/-\\${PREFIX}//g'); then
@@ -122,7 +141,7 @@ fi
 curl -s $(echo ${TARGET_AGENT_BINARIES_URI} | sed 's/\\${PREFIX}/'${PREFIX}'/g') | tar  xzf - -C ${CHE_DIR}
 
 if [ -f /bin/bash ]; then
-  SHELL_INTERPRETER="/bin/bash"
+    SHELL_INTERPRETER="/bin/bash"
 fi
 
 $HOME/che/terminal/che-websocket-terminal -addr :4411 -cmd ${SHELL_INTERPRETER} -static $HOME/che/terminal/

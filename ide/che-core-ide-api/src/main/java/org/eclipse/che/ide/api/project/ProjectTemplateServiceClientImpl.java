@@ -13,6 +13,7 @@ package org.eclipse.che.ide.api.project;
 import com.google.inject.Inject;
 
 import org.eclipse.che.api.project.templates.shared.dto.ProjectTemplateDescriptor;
+import org.eclipse.che.ide.api.project.ProjectTemplateServiceClient;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.AsyncRequestLoader;

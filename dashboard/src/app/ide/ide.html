@@ -14,8 +14,8 @@
 <div flex class="open-ide-page" md-theme="maincontent-theme">
   <div class="ide-page-loader"
        layout="column" layout-align="center center">
-    <div ng-hide="ideCtrl.selectedWorkspace">No workspace selected. Unable to open IDE</div>
-    <div class="ide-page-loader-content" ng-show="ideCtrl.selectedWorkspace">
+    <div ng-hide="ideCtrl.selectedWorkspaceExists">Workspace doesn't exist, unable to open IDE.</div>
+    <div class="ide-page-loader-content" ng-show="ideCtrl.selectedWorkspaceExists">
       <img ng-src="{{branding.loaderURL}}">
     </div>
   </div>

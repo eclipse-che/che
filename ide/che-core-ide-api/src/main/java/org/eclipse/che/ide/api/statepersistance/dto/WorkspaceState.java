@@ -8,30 +8,28 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.git.shared;
+package org.eclipse.che.ide.api.statepersistance.dto;
 
 import org.eclipse.che.dto.shared.DTO;
 
-
+import java.util.List;
 
 /**
- * Request to init git repository.
+ * DTO describes saved state of the workspace.
  *
- * @author andrew00x
+ * @author Artem Zatsarynnyi
  */
 @DTO
-public interface InitRequest extends GitRequest {
-    /** @return working directory for new git repository */
-    String getWorkingDir();
+public interface WorkspaceState {
 
-    void setWorkingDir(String workingDir);
+    /** Returns the list of the actions that should be performed in order to restore workspace's state. */
+    List<ActionDescriptor> getActions();
 
-    InitRequest withWorkingDir(String workingDir);
-    
-    /** @return <code>true</code> then bare repository created */
-    boolean isBare();
-    
-    void setBare(boolean bare);
-    
-    InitRequest withBare(boolean bare);
+    /**
+     * Sets the list of the actions that should be performed in order to restore workspace's state.
+     *
+     * @param actions
+     *         the list of the actions
+     */
+    void setActions(List<ActionDescriptor> actions);
 }

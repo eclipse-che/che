@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-core-ide-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>5.0.0-M7-SNAPSHOT</version>
+        <version>5.0.0-M8-SNAPSHOT</version>
     </parent>
     <groupId>org.eclipse.che.core</groupId>
     <artifactId>che-core-ide-api</artifactId>
@@ -234,6 +234,8 @@
                         <package>org.eclipse.che.api.ssh</package>
                         <package>org.eclipse.che.api.user</package>
                         <package>org.eclipse.che.api.debug.shared.dto</package>
+                        <package>org.eclipse.che.ide.api.debug.dto</package>
+                        <package>org.eclipse.che.ide.statepersistance.dto</package>
                     </dtoPackages>
                     <outputDirectory>${dto-generator-out-directory}</outputDirectory>
                     <genClassName>org.eclipse.che.ide.api.dto.DtoClientImpls</genClassName>

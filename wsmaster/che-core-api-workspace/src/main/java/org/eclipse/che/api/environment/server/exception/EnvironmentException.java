@@ -8,19 +8,23 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.git.shared;
-
-import org.eclipse.che.dto.shared.DTO;
+package org.eclipse.che.api.environment.server.exception;
 
 /**
- * Request to delete named tag.
+ * Is thrown when environment bootstrapping fails for some reason.
  *
- * @author andrew00x
+ * @author Alexander Garagatyi
  */
-@DTO
-public interface TagDeleteRequest extends GitRequest {
-    /** @return name of tag to delete */
-    String getName();
-    
-    void setName(String name);
+public class EnvironmentException extends Exception {
+    public EnvironmentException(String message) {
+        super(message);
+    }
+
+    public EnvironmentException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public EnvironmentException(Throwable cause) {
+        super(cause);
+    }
 }

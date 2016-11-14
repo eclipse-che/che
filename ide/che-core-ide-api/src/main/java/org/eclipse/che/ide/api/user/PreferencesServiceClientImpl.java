@@ -13,6 +13,7 @@ package org.eclipse.che.ide.api.user;
 import com.google.inject.Inject;
 
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.ide.api.user.PreferencesServiceClient;
 import org.eclipse.che.ide.json.JsonHelper;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.RestContext;

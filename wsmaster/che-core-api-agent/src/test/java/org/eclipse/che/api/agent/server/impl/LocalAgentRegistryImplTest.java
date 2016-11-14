@@ -10,16 +10,17 @@
  *******************************************************************************/
 package org.eclipse.che.api.agent.server.impl;
 
-import static org.testng.AssertJUnit.assertFalse;
-
-import java.util.Collection;
-
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.everrest.assured.EverrestJetty;
-import org.mockito.InjectMocks;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
+
+import java.util.Collection;
+import java.util.Collections;
+
+import static org.testng.AssertJUnit.assertFalse;
 
 /**
  * @author Anatoliy Bazko
@@ -27,8 +28,12 @@ import org.testng.annotations.Test;
 @Listeners(value = {EverrestJetty.class, MockitoTestNGListener.class})
 public class LocalAgentRegistryImplTest {
 
-    @InjectMocks
     private LocalAgentRegistryImpl agentRegistry;
+
+    @BeforeMethod
+    public void setUp() throws Exception {
+        agentRegistry = new LocalAgentRegistryImpl(Collections.emptySet());
+    }
 
     @Test
     public void testInitializeAgents() throws Exception {
