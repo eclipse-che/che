@@ -146,13 +146,13 @@ public class JavaExtension {
         mainContextMenuGroup.add(markDirectoryAsGroup);
         mainContextMenuGroup.addSeparator();
 
-        DefaultActionGroup editorContext = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_EDITOR_CONTEXT_MENU);
+        DefaultActionGroup editorContextMenuGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_EDITOR_CONTEXT_MENU);
 
-        editorContext.add(quickDocumentationAction, new Constraints(Anchor.AFTER, "format"));
-        editorContext.add(quickFixAction, new Constraints(Anchor.AFTER, "showQuickDoc"));
-        editorContext.add(openDeclarationAction, new Constraints(Anchor.AFTER, "quickFix"));
-        editorContext.add(refactorGroup, new Constraints(Anchor.AFTER, "openJavaDeclaration"));
-        editorContext.add(fileStructureAction, new Constraints(Anchor.AFTER, GROUP_ASSISTANT_REFACTORING));
+        editorContextMenuGroup.add(quickDocumentationAction, new Constraints(Anchor.AFTER, "format"));
+        editorContextMenuGroup.add(quickFixAction, new Constraints(Anchor.AFTER, "showQuickDoc"));
+        editorContextMenuGroup.add(openDeclarationAction, new Constraints(Anchor.AFTER, "quickFix"));
+        editorContextMenuGroup.add(refactorGroup, new Constraints(Anchor.AFTER, "openJavaDeclaration"));
+        editorContextMenuGroup.add(fileStructureAction, new Constraints(Anchor.AFTER, GROUP_ASSISTANT_REFACTORING));
 
         if (UserAgent.isMac()) {
             keyBinding.getGlobal().addKey(new KeyBuilder().alt().control().charCode('b').build(), "openImplementation");

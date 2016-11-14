@@ -649,17 +649,17 @@ public class StandardComponentInitializer {
         actionManager.registerAction("noOpAction", new NoOpAction());
         actionManager.registerAction("signatureHelp", signatureHelpAction);
 
-        DefaultActionGroup editorContext = new DefaultActionGroup(actionManager);
-        actionManager.registerAction(IdeActions.GROUP_EDITOR_CONTEXT_MENU, editorContext);
+        DefaultActionGroup editorContextMenuGroup = new DefaultActionGroup(actionManager);
+        actionManager.registerAction(IdeActions.GROUP_EDITOR_CONTEXT_MENU, editorContextMenuGroup);
 
-        editorContext.add(undoAction);
-        editorContext.add(redoAction);
-        editorContext.addSeparator();
-        editorContext.add(formatterAction);
+        editorContextMenuGroup.add(undoAction);
+        editorContextMenuGroup.add(redoAction);
+        editorContextMenuGroup.addSeparator();
+        editorContextMenuGroup.add(formatterAction);
 
-        editorContext.addSeparator();
-        editorContext.add(fullTextSearchAction);
-        editorContext.add(closeActiveEditorAction);
+        editorContextMenuGroup.addSeparator();
+        editorContextMenuGroup.add(fullTextSearchAction);
+        editorContextMenuGroup.add(closeActiveEditorAction);
 
         // Define hot-keys
         keyBinding.getGlobal().addKey(new KeyBuilder().action().alt().charCode('n').build(), "navigateToFile");
