@@ -10,26 +10,25 @@
  *******************************************************************************/
 package org.eclipse.che.api.user.server.event;
 
-import org.eclipse.che.api.core.jdbc.jpa.event.CascadeRemovalEvent;
 import org.eclipse.che.api.core.notification.EventOrigin;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 
 /**
- * Published before {@link UserImpl user} removed.
+ * Published after {@link UserImpl user} removed.
  *
- * @author Yevhenii Voevodin
+ * @author Sergii Kabashniuk
  */
 @EventOrigin("user")
-public class BeforeUserRemovedEvent extends CascadeRemovalEvent {
+public class PostUserRemovedEvent {
 
-    private final UserImpl user;
+    private final String userId;
 
-    public BeforeUserRemovedEvent(UserImpl user) {
-        this.user = user;
+    public PostUserRemovedEvent(String userId) {
+        this.userId = userId;
     }
 
-    /** Returns user which is going to be removed. */
-    public UserImpl getUser() {
-        return user;
+    /** Returns id of removed user*/
+    public String getUserId() {
+        return userId;
     }
 }
