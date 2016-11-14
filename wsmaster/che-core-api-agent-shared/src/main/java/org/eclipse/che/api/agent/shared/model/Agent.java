@@ -21,7 +21,7 @@ import java.util.Map;
  * @author Anatoliy Bazko
  */
 public interface Agent {
-	
+
     /**
      * Returns the id of the agent.
      */

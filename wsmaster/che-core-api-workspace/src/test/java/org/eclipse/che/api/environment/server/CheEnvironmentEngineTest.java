@@ -18,6 +18,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.MachineLogMessage;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
+import org.eclipse.che.api.core.model.workspace.ExtendedMachine;
 import org.eclipse.che.api.core.model.workspace.ServerConf2;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.util.LineConsumer;
@@ -25,6 +26,7 @@ import org.eclipse.che.api.core.util.MessageConsumer;
 import org.eclipse.che.api.environment.server.compose.ComposeFileParser;
 import org.eclipse.che.api.environment.server.exception.EnvironmentNotRunningException;
 import org.eclipse.che.api.environment.server.model.CheServiceImpl;
+import org.eclipse.che.api.environment.server.model.CheServicesEnvironmentImpl;
 import org.eclipse.che.api.machine.server.MachineInstanceProviders;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
@@ -110,13 +112,13 @@ public class CheEnvironmentEngineTest {
     @Mock
     RecipeDownloader                   recipeDownloader;
     @Mock
-    AgentConfigApplier                 agentConfigApplier;
+    InfrastructureProvisioner          infrastructureProvisioner;
     @Mock
     ContainerNameGenerator             containerNameGenerator;
     @Mock
     AgentRegistry                      agentRegistry;
     @Mock
-    Agent agent;
+    Agent                              agent;
 
 
     EnvironmentParser environmentParser = new EnvironmentParser(new ComposeFileParser(), recipeDownloader);
@@ -133,10 +135,11 @@ public class CheEnvironmentEngineTest {
                                               environmentParser,
                                               new DefaultServicesStartStrategy(),
                                               machineProvider,
-                                              agentConfigApplier,
+                                              infrastructureProvisioner,
                                               API_ENDPOINT,
                                               recipeDownloader,
-                                              containerNameGenerator, agentRegistry));
+                                              containerNameGenerator,
+                                              agentRegistry));
 
         when(machineInstanceProviders.getProvider("docker")).thenReturn(instanceProvider);
         when(instanceProvider.getRecipeTypes()).thenReturn(Collections.singleton("dockerfile"));
@@ -369,10 +372,8 @@ public class CheEnvironmentEngineTest {
                                              anyString(),
                                              any(CheServiceImpl.class),
                                              any(LineConsumer.class));
-        for (ExtendedMachineImpl extendedMachine : env.getMachines().values()) {
-            verify(agentConfigApplier).modify(any(CheServiceImpl.class), eq(extendedMachine.getAgents()));
-        }
-        verifyNoMoreInteractions(agentConfigApplier);
+        verify(infrastructureProvisioner).provision(eq(env), any(CheServicesEnvironmentImpl.class));
+        verifyNoMoreInteractions(infrastructureProvisioner);
     }
 
     @Test
@@ -577,7 +578,7 @@ public class CheEnvironmentEngineTest {
         engine.startMachine(workspaceId, config, agents);
 
         // then
-        verify(agentConfigApplier).modify(any(CheServiceImpl.class), eq(agents));
+        verify(infrastructureProvisioner).provision(any(ExtendedMachine.class), any(CheServiceImpl.class));
     }
 
     @Test

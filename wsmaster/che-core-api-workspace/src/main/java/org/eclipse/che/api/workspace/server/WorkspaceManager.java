@@ -26,6 +26,7 @@ import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.environment.server.exception.EnvironmentException;
 import org.eclipse.che.api.machine.server.exception.SnapshotException;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
@@ -63,7 +64,6 @@ import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.lang.Boolean.parseBoolean;
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
@@ -709,7 +709,7 @@ public class WorkspaceManager {
         executor.execute(ThreadLocalPropagateContext.wrap(() -> {
             try {
                 runtimes.startMachine(workspaceId, machineConfig);
-            } catch (ApiException e) {
+            } catch (ApiException | EnvironmentException e) {
                 LOG.error(e.getLocalizedMessage(), e);
             }
         }));

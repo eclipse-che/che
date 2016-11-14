@@ -10,15 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.machine.node;
 
-import com.google.inject.assistedinject.Assisted;
-
 import java.io.IOException;
 
 /**
- * Finds path to workspace folder on docker node.
+ * Finds path to workspace folder on host.
  *
  * @author Alexander Garagatyi
  */
 public interface WorkspaceFolderPathProvider {
-    String getPath(@Assisted("workspace") String workspaceId) throws IOException;
+    String getPath(String workspaceId) throws IOException;
 }
