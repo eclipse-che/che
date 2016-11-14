@@ -6,6 +6,7 @@ import com.openshift.restclient.IResourceFactory;
 import com.openshift.restclient.model.IPort;
 import com.openshift.restclient.model.IServicePort;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
+import org.eclipse.che.plugin.docker.client.json.ExposedPort;
 import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
 import org.mockito.Mock;
 import org.testng.annotations.BeforeMethod;
@@ -68,7 +69,7 @@ public class OpenShiftConnectorTest {
         exposedPorts.put("4403/tcp",null);
 
         // When
-        List<IServicePort> servicePorts = openShiftConnector.getServicePortsFrom(exposedPorts);
+        List<IServicePort> servicePorts = openShiftConnector.getServicePortsFrom(exposedPorts.keySet());
 
         // Then
         List<String> portsAndProtocols = servicePorts.stream().
@@ -100,7 +101,7 @@ public class OpenShiftConnectorTest {
         expectedPortNames.add("codeserver");
 
         // When
-        List<IServicePort> servicePorts = openShiftConnector.getServicePortsFrom(exposedPorts);
+        List<IServicePort> servicePorts = openShiftConnector.getServicePortsFrom(exposedPorts.keySet());
         List<String> actualPortNames = servicePorts.stream().
                 map(p -> p.getName()).collect(Collectors.toList());
 
@@ -115,10 +116,10 @@ public class OpenShiftConnectorTest {
         exposedPorts.put("55/tcp",null);
 
         Set<String> expectedPortNames = new HashSet<>();
-        expectedPortNames.add("55/tcp");
+        expectedPortNames.add("55-tcp");
 
         // When
-        List<IServicePort> servicePorts = openShiftConnector.getServicePortsFrom(exposedPorts);
+        List<IServicePort> servicePorts = openShiftConnector.getServicePortsFrom(exposedPorts.keySet());
         List<String> actualPortNames = servicePorts.stream().
                 map(p -> p.getName()).collect(Collectors.toList());
 
@@ -129,11 +130,11 @@ public class OpenShiftConnectorTest {
     @Test
     public void shouldReturnContainerPortFromExposedPortList() {
         // Given
-        Map<String, Map<String, String>> exposedPorts = new HashMap<>();
-        exposedPorts.put("8080/tcp",null);
-        exposedPorts.put("22/tcp",null);
-        exposedPorts.put("4401/tcp",null);
-        exposedPorts.put("4403/tcp",null);
+        Set<String> exposedPorts = new HashSet<>();
+        exposedPorts.add("8080/tcp");
+        exposedPorts.add("22/tcp");
+        exposedPorts.add("4401/tcp");
+        exposedPorts.add("4403/tcp");
 
         // When
         Set<IPort> containerPorts = openShiftConnector.getContainerPortsFrom(exposedPorts);
@@ -142,8 +143,8 @@ public class OpenShiftConnectorTest {
         List<String> portsAndProtocols = containerPorts.stream().
                 map(p -> Integer.toString(p.getContainerPort()) +
                         OpenShiftConnector.DOCKER_PROTOCOL_PORT_DELIMITER +
-                        p.getProtocol()).collect(Collectors.toList());
-        assertTrue(exposedPorts.keySet().stream().anyMatch(portsAndProtocols::contains));
+                        p.getProtocol().toLowerCase()).collect(Collectors.toList());
+        assertTrue(exposedPorts.stream().anyMatch(portsAndProtocols::contains));
     }
 
     @Test
@@ -172,5 +173,57 @@ public class OpenShiftConnectorTest {
         // Then
         List<String> keysAndValues = env.keySet().stream().map(k -> k + "=" + env.get(k)).collect(Collectors.toList());
         assertTrue(Arrays.stream(envVariables).anyMatch(keysAndValues::contains));
+    }
+
+    @Test
+    public void shouldUpdateCheApiEndpointVariable() {
+        // Given
+        String[] envVariablesIn = {
+                "CHE_API_ENDPOINT=http://che-host:8080/wsmaster/api"
+        };
+        String[] envVariablesOut = {
+                "CHE_API_ENDPOINT=http://che-server:8080/wsmaster/api"
+        };
+
+        // When
+        Map<String, String> env = openShiftConnector.getContainerEnvFrom(envVariablesIn);
+
+        // Then
+        List<String> keysAndValues = env.keySet().stream().map(k -> k + "=" + env.get(k)).collect(Collectors.toList());
+        assertTrue(Arrays.stream(envVariablesOut).anyMatch(keysAndValues::contains));
+    }
+
+    @Test
+    public void shouldReturnContainerPortListFromImageExposedPortList() {
+        // Given
+        Map<String, ExposedPort> imageExposedPorts = new HashMap<>();
+        imageExposedPorts.put("8080/tcp",new ExposedPort());
+
+        // When
+        Set<IPort> containerPorts = openShiftConnector.getContainerPortsFrom(imageExposedPorts.keySet());
+
+        // Then
+        List<String> portsAndProtocols = containerPorts.stream().
+                map(p -> Integer.toString(p.getContainerPort()) +
+                        OpenShiftConnector.DOCKER_PROTOCOL_PORT_DELIMITER +
+                        p.getProtocol().toLowerCase()).collect(Collectors.toList());
+        assertTrue(imageExposedPorts.keySet().stream().anyMatch(portsAndProtocols::contains));
+    }
+
+    @Test
+    public void shouldReturnServicePortListFromImageExposedPortList() {
+        // Given
+        Map<String, ExposedPort> imageExposedPorts = new HashMap<>();
+        imageExposedPorts.put("8080/tcp",new ExposedPort());
+
+        // When
+        List<IServicePort> servicePorts = openShiftConnector.getServicePortsFrom(imageExposedPorts.keySet());
+
+        // Then
+        List<String> portsAndProtocols = servicePorts.stream().
+                map(p -> Integer.toString(p.getPort()) +
+                        OpenShiftConnector.DOCKER_PROTOCOL_PORT_DELIMITER +
+                        p.getProtocol()).collect(Collectors.toList());
+        assertTrue(imageExposedPorts.keySet().stream().anyMatch(portsAndProtocols::contains));
     }
 }
