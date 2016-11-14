@@ -524,7 +524,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                               .map(entry -> entry.getKey() + "=" + entry.getValue())
                               .toArray(String[]::new));
 
-        return openShift.createContainer(CreateContainerParams.create(config)
+        return openShift.createContainer(docker, CreateContainerParams.create(config)
                                                            .withContainerName(service.getContainerName()))
                      .getId();
     }
