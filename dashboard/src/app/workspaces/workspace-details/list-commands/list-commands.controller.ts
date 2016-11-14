@@ -19,7 +19,7 @@
 export class ListCommandsController {
   $mdDialog: ng.material.IDialogService;
 
-  commands: Array<any>;
+  commands: Array<che.IWorkspaceCommand>;
   isNoSelected: boolean;
   isBulkChecked: boolean;
   commandsOrderBy: string;
@@ -48,7 +48,7 @@ export class ListCommandsController {
   updateSelectedStatus(): void {
     this.selectedCommandsNumber = 0;
     this.isBulkChecked = this.commands.length > 0;
-    this.commands.forEach((command) => {
+    this.commands.forEach((command: che.IWorkspaceCommand) => {
       if (this.commandsSelectedStatus[command.name]) {
         this.selectedCommandsNumber++;
       } else {
@@ -84,9 +84,9 @@ export class ListCommandsController {
    */
   selectAllCommands(): void {
     this.selectedCommandsNumber = this.commands.length;
-    this.commands.forEach((command) => {
+    this.commands.forEach((command: che.IWorkspaceCommand) => {
       this.commandsSelectedStatus[command.name] = true;
-    })
+    });
   }
 
   /**
@@ -105,11 +105,12 @@ export class ListCommandsController {
    * @param previewUrl: string
    */
   addCommand(name: string, commandLine: string, previewUrl: string): void {
-    let command: any = {};
-    command.name = name;
-    command.type = "custom";
-    command.commandLine = commandLine;
-    command.attributes = {};
+    let command: che.IWorkspaceCommand = {
+      'name': name,
+      'type': 'custom',
+      'commandLine': commandLine,
+      'attributes': {}
+    };
     if (previewUrl) {
       command.attributes.previewUrl = previewUrl;
     }
@@ -124,7 +125,7 @@ export class ListCommandsController {
    * @param previewUrl: string
    */
   updateCommand(index: number, name: string, commandLine: string, previewUrl: string): void {
-    if(index === -1){
+    if (index === -1) {
       this.addCommand(name, commandLine, previewUrl);
     } else {
       this.commands[index].name = name;
@@ -132,7 +133,7 @@ export class ListCommandsController {
       if (!this.commands[index].attributes) {
         this.commands[index].attributes = {};
       }
-      this.commands[index].previewUrl = previewUrl;
+      this.commands[index].attributes.previewUrl = previewUrl;
     }
     this.updateSelectedStatus();
     this.commandsOnChange();
@@ -143,7 +144,7 @@ export class ListCommandsController {
    * @param $event: MouseEvent
    */
   showAddDialog($event: MouseEvent): void {
-    this.showEditDialog($event, -1)
+    this.showEditDialog($event, -1);
   }
 
   /**
@@ -172,14 +173,14 @@ export class ListCommandsController {
    */
   deleteSelectedCommands(): void {
     this.showDeleteConfirmation(this.selectedCommandsNumber).then(() => {
-      this.commands.reduceRight((previousValue, currentValue, index, array) => {
+      this.commands.reduceRight((previousValue: che.IWorkspaceCommand | any, currentValue: che.IWorkspaceCommand, index: number, array: Array<any>) => {
         if (this.commandsSelectedStatus[currentValue.name]) {
           array.splice(index, 1);
         }
       }, []);
       this.deselectAllCommands();
       this.commandsOnChange();
-    })
+    });
   }
 
   /**

@@ -10,14 +10,14 @@
       Codenvy, S.A. - initial API and implementation
 
 -->
-<div class="che-popup" layout="column" flex>
+<div class="che-modal-popup" layout="column" flex>
   <div layout="row" flex="100" layout-align="start stretch">
-    <div layout="row" flex layout-align="start center" class="che-popup-header">
+    <div layout="row" flex layout-align="start center" class="che-modal-popup-header">
       <div flex>{{title}}</div>
       <div ng-click="onClose()">
         <i class="fa fa-times" aria-hidden="true"></i>
       </div>
     </div>
   </div>
-  <div layout="row" flex="100" layout-align="start stretch" class="che-popup-body" ng-transclude></div>
+  <div layout="row" flex="100" layout-align="start stretch" class="che-modal-popup-body" ng-transclude></div>
 </div>

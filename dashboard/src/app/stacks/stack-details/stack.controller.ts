@@ -9,8 +9,12 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
-import {CheStack} from "../../../components/api/che-stack.factory";
-import {CheNotification} from "../../../components/notification/che-notification.factory";
+import {CheStack} from '../../../components/api/che-stack.factory';
+import {CheNotification} from '../../../components/notification/che-notification.factory';
+import {CheUIElementsInjectorService} from '../../../components/injector/che-ui-elements-injector.service';
+import {CheWorkspace} from '../../../components/api/che-workspace.factory';
+
+const STACK_TEST_POPUP_ID: string = 'stackTestPopup';
 
 /**
  * Controller for stack management - creation or edit.
@@ -22,17 +26,24 @@ export class StackController {
   GENERAL_SCOPE: string = 'general';
   ADVANCED_SCOPE: string = 'advanced';
   $log: ng.ILogService;
+  $route: ng.route.IRoute;
+  $scope: ng.IScope;
+  $document: ng.IDocumentService;
   $filter: ng.IFilterService;
   $timeout: ng.ITimeoutService;
   $location: ng.ILocationService;
   $mdDialog: ng.material.IDialogService;
+  cheUIElementsInjectorService: CheUIElementsInjectorService;
   cheStack: CheStack;
+  cheWorkspace: CheWorkspace;
   cheNotification: CheNotification;
+  showIDE: boolean;
   loading: boolean;
   isLoading: boolean;
   isCreation: boolean;
   isStackChange: boolean;
   stackId: string;
+  tmpWorkspaceId: string;
   stackName: string;
   stackJson: string;
   invalidStack: string;
@@ -46,46 +57,65 @@ export class StackController {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($route, $location, $log, $filter, cheStack, $mdDialog, cheNotification, $timeout) {
+  constructor($route: ng.route.IRoute, $location: ng.ILocationService, $log: ng.ILogService, $filter: ng.IFilterService, cheStack: CheStack, cheWorkspace: CheWorkspace, $mdDialog: ng.material.IDialogService, cheNotification: CheNotification, $timeout: ng.ITimeoutService, $document: ng.IDocumentService, cheUIElementsInjectorService: CheUIElementsInjectorService, $scope: ng.IScope, $window: ng.IWindowService) {
     this.$location = $location;
     this.$log = $log;
+    this.$route = $route;
+    this.$scope = $scope;
     this.$filter = $filter;
+    this.$timeout = $timeout;
     this.cheStack = cheStack;
+    this.cheWorkspace = cheWorkspace;
     this.$mdDialog = $mdDialog;
     this.cheNotification = cheNotification;
-    this.$timeout = $timeout;
+    this.$document = $document;
+    this.cheUIElementsInjectorService = cheUIElementsInjectorService;
 
     this.editorOptions = {
       lineWrapping: true,
       lineNumbers: false,
       matchBrackets: true,
       mode: 'application/json',
-      onLoad: (editor) => {
-        this.$timeout(() => {
+      onLoad: (editor: {refresh: Function}) => {
+        $timeout(() => {
           editor.refresh();
         }, 1000);
       }
     };
 
     this.machinesViewStatus = {};
-    //Checking creation mode:
-    this.isCreation = $route.current.params.stackId === 'create';
+    // checking creation mode:
+    this.isCreation = ($route as any).current.params.stackId === 'create';
     this.copyStack = {};
     this.stackTags = [];
 
-    if(!this.cheStack.getStacks().length) {
+    if (!this.cheStack.getStacks().length) {
       this.loading = true;
-      this.cheStack.fetchStacks().finally(()=>{
+      this.cheStack.fetchStacks().finally(() => {
         this.loading = false;
+        this.updateData();
       });
+    } else {
+      this.updateData();
     }
 
+    $window.addEventListener('message', (event: {data: string}) => {
+      if ('show-ide' === event.data) {
+        this.showIDE = true;
+      }
+    }, false);
+  }
+
+  /**
+   * Update stack's data
+   */
+  updateData() {
     if (this.isCreation) {
       this.stack = this.getNewStackTemplate();
       this.stackTags = angular.copy(this.stack.tags);
       this.stackName = angular.copy(this.stack.name);
     } else {
-      this.stackId = $route.current.params.stackId;
+      this.stackId = (this.$route as any).current.params.stackId;
       this.fetchStack();
     }
   }
@@ -96,7 +126,7 @@ export class StackController {
    * @returns {boolean}
    */
   isUniqueName(name: string): boolean {
-    if(this.copyStack && this.copyStack.name === name) {
+    if (this.copyStack && this.copyStack.name === name) {
       return true;
     }
     return this.cheStack.isUniqueName(name);
@@ -149,11 +179,11 @@ export class StackController {
       return;
     }
 
-    this.cheStack.fetchStack(this.stackId).then((stack) => {
+    this.cheStack.fetchStack(this.stackId).then((stack: any) => {
       this.stack = stack;
       this.loading = false;
       this.prepareStackData();
-    }, (error) => {
+    }, (error: any) => {
       if (error.status === 304) {
         this.loading = false;
         this.stack = this.cheStack.getStackById(this.stackId);
@@ -173,7 +203,7 @@ export class StackController {
    * @returns {string} tag if it is unique one, otherwise null
    */
   handleTagAdding(tag: string): string {
-    //Prevents mentioning same tags twice:
+    // prevents mentioning same tags twice:
     if (this.stackTags.indexOf(tag) > -1) {
       return null;
     }
@@ -266,12 +296,12 @@ export class StackController {
       this.createStack();
       return;
     }
-    this.cheStack.updateStack(this.stack.id, this.stackJson).then((stack) => {
+    this.cheStack.updateStack(this.stack.id, this.stackJson).then((stack: any) => {
       this.cheNotification.showInfo('Stack is successfully updated.');
       this.isLoading = false;
       this.stack = stack;
       this.prepareStackData();
-    }, (error) => {
+    }, (error: any) => {
       this.isLoading = false;
       this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Update stack failed.');
       this.$log.error(error);
@@ -284,17 +314,79 @@ export class StackController {
    * Creates new stack.
    */
   createStack(): void {
-    this.cheStack.createStack(this.stackJson).then((stack) => {
+    this.cheStack.createStack(this.stackJson).then((stack: any) => {
       this.stack = stack;
       this.isLoading = false;
       this.cheStack.fetchStacks();
       this.prepareStackData();
       this.isCreation = false;
-    }, (error) => {
+    }, (error: any) => {
       this.isLoading = false;
       this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Creation stack failed.');
       this.$log.error(error);
     });
+  }
+
+  /**
+   * Show dialog to select project templates for stack's testing
+   * @param $event: MouseEvent
+   */
+  showSelectTemplateDialog($event: MouseEvent): void {
+    this.$mdDialog.show({
+      targetEvent: $event,
+      controller: 'SelectTemplateController',
+      controllerAs: 'selectTemplateController',
+      bindToController: true,
+      clickOutsideToClose: true,
+      locals: {
+        callbackController: this,
+        stack: this.stack
+      },
+      templateUrl: 'app/stacks/stack-details/select-template/select-template.html'
+    });
+  }
+
+  /**
+   * Show popup for stack's testing
+   * @param stack: che.IStack
+   */
+  showStackTestPopup(stack: che.IStack): void {
+    this.showIDE = false;
+    this.cheWorkspace.startTemporaryWorkspace(stack.workspaceConfig).then((workspace: any) => {
+      this.tmpWorkspaceId = workspace.id;
+      let tmpWorkspaceIdeUrl: string = '';
+      angular.forEach(workspace.links, (link: any) => {
+        if (link.rel === 'ide url') {
+          tmpWorkspaceIdeUrl = link.href;
+          return;
+        }
+      });
+      if (!tmpWorkspaceIdeUrl) {
+        this.cheNotification.showError('Testing stack failed.');
+        return;
+      }
+      let testPopupEl: string = '<che-modal-popup id="' + STACK_TEST_POPUP_ID + '" ' +
+        'title="Testing Stack: ' + stack.name + '" on-close="stackController.closeStackTestPopup()">' +
+        '<div ng-hide="stackController.showIDE" class="main-page-loader">' +
+        '<div class="ide-page-loader-content"><img ng-src="{{branding.loaderURL}}"></div></div>' +
+        '<iframe ng-show="stackController.showIDE" class="ide-page-frame" ' +
+        'src="' + tmpWorkspaceIdeUrl.toString() + '"></iframe></che-modal-popup>';
+      this.cheUIElementsInjectorService.injectAdditionalElement(this.$document.find('body'), testPopupEl, this.$scope);
+    }, (error: any) => {
+      this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Testing stack failed.');
+      this.closeStackTestPopup();
+    });
+  }
+
+  /**
+   * Close stack's test popup
+   */
+  closeStackTestPopup(): void {
+    if (this.tmpWorkspaceId) {
+      this.cheWorkspace.stopWorkspace(this.tmpWorkspaceId);
+      this.tmpWorkspaceId = '';
+    }
+    this.cheUIElementsInjectorService.deleteElementById(STACK_TEST_POPUP_ID);
   }
 
   /**
@@ -315,7 +407,7 @@ export class StackController {
       this.cheStack.deleteStack(this.stack.id).then(() => {
         this.cheNotification.showInfo('Stack <b>' + this.stack.name + '</b> has been successfully removed.');
         this.$location.path('/stacks');
-      }, (error) => {
+      }, (error: any) => {
         this.loading = false;
         let message = 'Failed to delete <b>' + this.stack.name + '</b> stack.' + (error && error.message) ? error.message : '';
         this.cheNotification.showError(message);
