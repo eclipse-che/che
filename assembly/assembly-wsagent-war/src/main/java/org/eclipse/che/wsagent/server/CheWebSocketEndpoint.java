@@ -10,6 +10,9 @@ import javax.inject.Inject;
 import javax.websocket.server.ServerEndpoint;
 
 /**
+ * Implementation of BasicWebSocketEndpoint for Che packaging.
+ * Add only mapping "/websocket/{endpoint-id}".
+ *
  * @author Vitalii Parfonov
  */
 
