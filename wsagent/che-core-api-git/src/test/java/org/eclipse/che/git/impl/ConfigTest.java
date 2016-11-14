@@ -74,7 +74,7 @@ public class ConfigTest {
     }
 
     @Test(expectedExceptions = GitException.class, expectedExceptionsMessageRegExp = "Can not find property '" + PROPERTY_NAME +
-                                                                                     "' in repository configuration",
+                                                                                     "' in Git configuration settings.",
           dataProvider = "GitConnectionFactory", dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
     public void testShouldReturnEmptyValueForParameter(GitConnectionFactory connectionFactory) throws Exception {
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
