@@ -29,6 +29,7 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.ide.actions.LinkWithEditorAction;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.BreakpointRenderer;
@@ -107,6 +108,7 @@ import org.eclipse.che.ide.api.parts.EditorPartStack;
 import org.eclipse.che.ide.api.parts.EditorTab;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
+import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
@@ -126,6 +128,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static java.lang.Boolean.parseBoolean;
 import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingStartEvent;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
@@ -161,6 +164,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
     private final CodeAssistantFactory                   codeAssistantFactory;
     private final DeletedFilesController                 deletedFilesController;
     private final BreakpointManager                      breakpointManager;
+    private final PreferencesManager                     preferencesManager;
     private final BreakpointRendererFactory              breakpointRendererFactory;
     private final DialogFactory                          dialogFactory;
     private final DocumentStorage                        documentStorage;
@@ -199,6 +203,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
     public OrionEditorPresenter(final CodeAssistantFactory codeAssistantFactory,
                                 final DeletedFilesController deletedFilesController,
                                 final BreakpointManager breakpointManager,
+                                final PreferencesManager preferencesManager,
                                 final BreakpointRendererFactory breakpointRendererFactory,
                                 final DialogFactory dialogFactory,
                                 final DocumentStorage documentStorage,
@@ -217,6 +222,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
         this.codeAssistantFactory = codeAssistantFactory;
         this.deletedFilesController = deletedFilesController;
         this.breakpointManager = breakpointManager;
+        this.preferencesManager = preferencesManager;
         this.breakpointRendererFactory = breakpointRendererFactory;
         this.dialogFactory = dialogFactory;
         this.documentStorage = documentStorage;
@@ -529,7 +535,10 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
         if (editorWidget != null) {
             editorWidget.refresh();
             editorWidget.setFocus();
-            setSelection(new Selection<>(input.getFile()));
+            final String isLinkedWithEditor = preferencesManager.getValue(LinkWithEditorAction.LINK_WITH_EDITOR);
+            if (!parseBoolean(isLinkedWithEditor)) {
+                setSelection(new Selection<>(input.getFile()));
+            }
         } else {
             this.delayedFocus = true;
         }
