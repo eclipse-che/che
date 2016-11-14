@@ -8,6 +8,7 @@
 # Contributors:
 #   Codenvy, S.A. - initial API and implementation
 #
+
 unset PACKAGES
 unset SUDO
 command -v tar >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" tar"; }
