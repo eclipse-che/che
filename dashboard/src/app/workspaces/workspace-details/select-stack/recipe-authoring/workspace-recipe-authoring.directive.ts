@@ -11,21 +11,22 @@
 'use strict';
 
 /**
- * Defines a directive for displaying stacks tab.
+ * Defines a directive for displaying recipe authoring widget.
+ * @author Oleksii Orel
  * @author Oleksii Kurinnyi
  */
-export class WorkspaceStacks {
+export class WorkspaceRecipeAuthoring {
   restrict: string = 'E';
-  templateUrl: string = 'app/workspaces/workspace-details/workspace-stacks/workspace-stacks.html';
+  templateUrl: string = 'app/workspaces/workspace-details/select-stack/recipe-authoring/workspace-recipe-authoring.html';
   replace: boolean = false;
 
-  controller: string = 'WorkspaceStacksController';
-  controllerAs: string = 'workspaceStacksController';
+  controller: string = 'WorkspaceRecipeAuthoringController';
+  controllerAs: string = 'workspaceRecipeAuthoringController';
 
   bindToController: boolean = true;
 
   scope: {
-    [propName: string]: string
+    [paramName: string]: string;
   };
 
   /**
@@ -35,12 +36,10 @@ export class WorkspaceStacks {
   constructor() {
     // scope values
     this.scope = {
-      workspaceName: '=',
-      environmentName: '=',
-      workspaceImportedRecipe: '=',
-      workspaceStackOnChange: '&'
+      recipeScript: '=cheRecipeScript',
+      recipeFormat: '=cheRecipeFormat'
     };
+
   }
 
 }
-

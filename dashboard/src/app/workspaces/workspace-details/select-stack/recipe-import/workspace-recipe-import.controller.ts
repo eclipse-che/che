@@ -11,32 +11,22 @@
 'use strict';
 
 /**
- * Defines a directive for displaying recipe widget.
+ * @ngdoc controller
+ * @name workspaces.recipe-import.controller:WorkspaceRecipeImportController
+ * @description This class is handling the controller for the workspace recipe import widget
  * @author Oleksii Orel
+ * @author Oleksii Kurinnyi
  */
-export class WorkspaceRecipe {
+export class WorkspaceRecipeImportController {
+  recipeUrl: string;
+  recipeFormat: string;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
   constructor() {
-    this.restrict = 'E';
-    this.templateUrl = 'app/workspaces/workspace-details/select-stack/recipe/workspace-recipe.html';
-    this.replace = false;
-
-    this.controller = 'WorkspaceRecipeController';
-    this.controllerAs = 'workspaceRecipeCtrl';
-
-    this.bindToController = true;
-
-    // scope values
-    this.scope = {
-      recipeUrl:'=cheRecipeUrl',
-      recipeScript:'=cheRecipeScript',
-      recipeFormat:'=cheRecipeFormat'
-    };
-
+    this.recipeFormat = this.recipeFormat || 'compose';
   }
 
 }

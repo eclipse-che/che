@@ -46,7 +46,7 @@ export class WorkspaceItemCtrl {
       limits.forEach((limit) => {
         total += limit;
       });
-      return total + ' MB';
+      return Math.round(total) + ' MB';
     }
 
     let environment = this.getDefaultEnvironment(workspace);
@@ -58,7 +58,7 @@ export class WorkspaceItemCtrl {
           total += limit / (1024*1024);
         }
       });
-      return (total > 0) ? total + ' MB' : '-';
+      return (total > 0) ? Math.round(total) + ' MB' : '-';
     }
 
     return '-';

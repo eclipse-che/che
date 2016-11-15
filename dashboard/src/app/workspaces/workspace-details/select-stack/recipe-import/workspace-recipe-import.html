@@ -1,0 +1,35 @@
+<div layout="column" flex class="recipe-widget" md-theme="default">
+  <ng-form name="workspaceRecipeImportForm">
+
+    <div layout="column">
+      <che-label-container che-label-name="Recipe URL">
+        <div class="recipe-url-input">
+          <che-input che-form="workspaceRecipeImportForm"
+                     che-name="url"
+                     che-place-holder="URL of the Recipe"
+                     aria-label="URL of the Recipe"
+                     che-pattern="^(ftp|https?)://[\w@.\-\_]+(:\d{1,5})?(/[\w#!:.?+=&%@!\_\-/]+)*$"
+                     che-width="auto"
+                     ng-model="workspaceRecipeImportCtrl.recipeUrl"
+                     minlength="3"
+                     ng-required
+                     ng-maxlength="255">
+            <div ng-message="required">URL is required.</div>
+            <div ng-message="minlength">URL has to be more than 3 characters long.</div>
+            <div ng-message="maxlength">URL has to be less than 255 characters long.</div>
+            <div ng-message="pattern">URL is not valid.</div>
+          </che-input>
+        </div>
+      </che-label-container>
+      <che-label-container che-label-name="Recipe Type">
+        <div layout="column">
+          <che-toggle ng-model="workspaceRecipeImportCtrl.recipeFormat" class="recipe-format">
+            <che-toggle-button che-title="compose"></che-toggle-button>
+            <che-toggle-button che-title="dockerfile"></che-toggle-button>
+          </che-toggle>
+        </div>
+      </che-label-container>
+    </div>
+
+  </ng-form>
+</div>

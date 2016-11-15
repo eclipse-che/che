@@ -12,21 +12,18 @@
 
 /**
  * @ngdoc controller
- * @name workspaces.recipe.controller:WorkspacesRecipeCtrl
- * @description This class is handling the controller for the workspace recipe widget
+ * @name workspaces.recipe-authoring.controller:WorkspaceRecipeAuthoringController
+ * @description This class is handling the controller for the workspace recipe authoring widget
  * @author Oleksii Orel
+ * @author Oleksii Kurinnyi
  */
-export class WorkspaceRecipeController {
+export class WorkspaceRecipeAuthoringController {
   $timeout: ng.ITimeoutService;
 
   editingTimeoutPromise: ng.IPromise<any>;
 
-  recipeUrl: string;
   recipeFormat: string;
   recipeScript: string;
-
-  // default selection
-  selectSourceOption: string = 'upload-custom-stack';
 
   editorOptions: {
     lineWrapping: boolean,
@@ -43,8 +40,6 @@ export class WorkspaceRecipeController {
   constructor($timeout: ng.ITimeoutService) {
     this.$timeout = $timeout;
 
-    this.setDefaultData();
-
     this.editorOptions = {
       lineWrapping: true,
       lineNumbers: true,
@@ -54,12 +49,6 @@ export class WorkspaceRecipeController {
         this.setEditor(editor);
       }
     };
-  }
-
-  setDefaultData(): void {
-    this.recipeUrl = null;
-    this.recipeScript = '';
-    this.recipeFormat = 'compose';
   }
 
   setEditor(editor: any): void {

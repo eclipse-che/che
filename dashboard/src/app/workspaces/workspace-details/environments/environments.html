@@ -13,7 +13,7 @@
 <div class="workspace-environments">
 
   <!-- Name -->
-  <che-label-container che-label-name="Name">
+  <che-label-container che-label-name="Runtime name">
     <ng-form flex layout="column" name="workspaceEnvironmentsForm">
       <div layout="column" class="workspace-environments-input">
         <che-input che-form="workspaceEnvironmentsForm"
@@ -43,9 +43,10 @@
                        che-label-name="Select Stack"
                        che-label-description="Stacks are recipes or images used to define your environment runtime. Workspace environments are used to build and run your project.">
     <ng-form name="workspaceStackForm">
-      <workspace-stacks ng-if="workspaceEnvironmentsController.workspaceName"
-                        workspace-stack-on-change="workspaceEnvironmentsController.changeWorkspaceStack(config, stackId)"
-                        workspace-name="workspaceEnvironmentsController.workspaceName"></workspace-stacks>
+      <workspace-stacks workspace-stack-on-change="workspaceEnvironmentsController.changeWorkspaceStack(config, stackId)"
+                        workspace-name="workspaceEnvironmentsController.workspaceName"
+                        environment-name="workspaceEnvironmentsController.environmentName"
+                        workspace-imported-recipe="workspaceEnvironmentsController.workspaceImportedRecipe"></workspace-stacks>
     </ng-form>
   </che-label-container>
 
@@ -81,12 +82,12 @@
   <che-label-container che-label-name="Recipe"
                        che-label-description="The contents of the runtime started by the workspace."
                        ng-if="workspaceEnvironmentsController.environment.recipe.content">
-    <div layout="row" layout-wrap>
+    <che-show-area>
       <div flex class="recipe-editor">
         <ui-codemirror ui-codemirror="workspaceEnvironmentsController.editorOptions"
                        ng-model="workspaceEnvironmentsController.environment.recipe.content"></ui-codemirror>
       </div>
-    </div>
+    </che-show-area>
   </che-label-container>
   <!-- OR Location -->
   <che-label-container che-label-name="Recipe Location"
@@ -98,9 +99,9 @@
   </che-label-container>
   <che-button-default class="add-machine-button"
                       che-button-title="Add" name="addButton"
-                      ng-disabled="workspaceEnvironmentsController.recipeType !== 'compose'"
+                      ng-disabled="workspaceEnvironmentsController.recipe.type !== 'compose' || !workspaceEnvironmentsController.recipe.content"
                       ng-click="workspaceEnvironmentsController.showAddMachineDialog($event)"></che-button-default>
-  <div class="recipe-warning-container" ng-show="workspaceEnvironmentsController.recipeType !== 'compose'">
+  <div class="recipe-warning-container" ng-show="workspaceEnvironmentsController.recipe.type !== 'compose' || !workspaceEnvironmentsController.recipe.content">
     Add another machine by changing the environment type to <b>compose</b>
   </div>
 </div>
