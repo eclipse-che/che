@@ -234,7 +234,7 @@ public class OpenShiftConnector {
         ((DeploymentConfig) dc).setName(CHE_OPENSHIFT_RESOURCES_PREFIX + workspaceID);
         ((DeploymentConfig) dc).setNamespace(cheProject.getName());
 //        ((DeploymentConfig) dc).getNode().get("spec").get("template").get("spec").get("dnsPolicy").set("Default");
-        ((DeploymentConfig)dc).getNode().get("spec").get("template").get("spec").get("securityContext").get("runAsUser").set("0");
+        ((DeploymentConfig)dc).getNode().get("spec").get("template").get("spec").get("securityContext").get("runAsUser").set("1000");
 
         dc.setReplicas(1);
         dc.setReplicaSelector("deploymentConfig", CHE_OPENSHIFT_RESOURCES_PREFIX + workspaceID );
@@ -261,11 +261,11 @@ public class OpenShiftConnector {
 
         // Run as root user
         dcFirstContainer.get("securityContext").get("privileged").set(true);
-        dcFirstContainer.get("securityContext").get("runAsUser").set("0");
+        dcFirstContainer.get("securityContext").get("runAsUser").set("1000");
 
         // LivenessProbe
-        dcFirstContainer.get("livenessProbe").get("tcpSocket").get("port").set(10);
-        dcFirstContainer.get("livenessProbe").get("initialDelaySeconds").set(10);
+        dcFirstContainer.get("livenessProbe").get("tcpSocket").get("port").set(8080);
+        dcFirstContainer.get("livenessProbe").get("initialDelaySeconds").set(120);
         dcFirstContainer.get("livenessProbe").get("timeoutSeconds").set(1);
     }
 
@@ -418,115 +418,4 @@ public class OpenShiftConnector {
         }
         return networkSettingsPorts;
     }
-
-    private List<IServicePort> putServicePorts() {
-        List<IServicePort> openShiftPorts = new ArrayList<>();
-
-        IServicePort openShiftPort1 = OpenShiftPortFactory.createServicePort(
-                "ssh",
-                "tcp",
-                22,
-                22);
-        openShiftPorts.add(openShiftPort1);
-
-        IServicePort openShiftPort2 = OpenShiftPortFactory.createServicePort(
-                "wsagent",
-                "tcp",
-                4401,
-                4401);
-        openShiftPorts.add(openShiftPort2);
-
-        IServicePort openShiftPort3 = OpenShiftPortFactory.createServicePort(
-                "wsagent-jpda",
-                "tcp",
-                4403,
-                4403);
-        openShiftPorts.add(openShiftPort3);
-
-        IServicePort openShiftPort4 = OpenShiftPortFactory.createServicePort(
-                "port1",
-                "tcp",
-                4411,
-                4411);
-        openShiftPorts.add(openShiftPort4);
-
-        IServicePort openShiftPort5 = OpenShiftPortFactory.createServicePort(
-                "tomcat",
-                "tcp",
-                8080,
-                8080);
-        openShiftPorts.add(openShiftPort5);
-
-        IServicePort openShiftPort6 = OpenShiftPortFactory.createServicePort(
-                "tomcat-jpda",
-                "tcp",
-                8888,
-                8888);
-        openShiftPorts.add(openShiftPort6);
-
-        IServicePort openShiftPort7 = OpenShiftPortFactory.createServicePort(
-                "port2",
-                "tcp",
-                9876,
-                9876);
-        openShiftPorts.add(openShiftPort7);
-        return openShiftPorts;
-    }
-
-    private void putEnvVariables(Map<String, String> envVariables, String workspaceID) {
-        envVariables.put("CHE_LOCAL_CONF_DIR", "/mnt/che/conf");
-        envVariables.put("USER_TOKEN", "dummy_token");
-        envVariables.put("CHE_API_ENDPOINT", "http://172.17.0.4:8080/wsmaster/api");
-        envVariables.put("JAVA_OPTS", "-Xms256m -Xmx2048m -Djava.security.egd=file:/dev/./urandom");
-        envVariables.put("CHE_WORKSPACE_ID", workspaceID);
-        envVariables.put("CHE_PROJECTS_ROOT", "/projects");
-//        envVariables.put("PATH","/opt/jdk1.8.0_45/bin:/home/user/apache-maven-3.3.9/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin");
-//        envVariables.put("MAVEN_VERSION","3.3.9");
-//        envVariables.put("JAVA_VERSION","8u45");
-//        envVariables.put("JAVA_VERSION_PREFIX","1.8.0_45");
-        envVariables.put("TOMCAT_HOME", "/home/user/tomcat8");
-        //envVariables.put("JAVA_HOME","/opt/jdk1.8.0_45");
-        envVariables.put("M2_HOME", "/home/user/apache-maven-3.3.9");
-        envVariables.put("TERM", "xterm");
-        envVariables.put("LANG", "en_US.UTF-8");
-    }
-
-    private void putContainerPorts(Set<IPort> containerPorts) {
-        Port port1 = new Port(new ModelNode());
-        port1.setName("ssh");
-        port1.setProtocol("TCP");
-        port1.setContainerPort(22);
-        containerPorts.add(port1);
-        Port port2 = new Port(new ModelNode());
-        port2.setName("wsagent");
-        port2.setProtocol("TCP");
-        port2.setContainerPort(4401);
-        containerPorts.add(port2);
-        Port port3 = new Port(new ModelNode());
-        port3.setName("wsagent-jpda");
-        port3.setProtocol("TCP");
-        port3.setContainerPort(4403);
-        containerPorts.add(port3);
-        Port port4 = new Port(new ModelNode());
-        port4.setName("port1");
-        port4.setProtocol("TCP");
-        port4.setContainerPort(4411);
-        containerPorts.add(port4);
-        Port port5 = new Port(new ModelNode());
-        port5.setName("tomcat");
-        port5.setProtocol("TCP");
-        port5.setContainerPort(8080);
-        containerPorts.add(port5);
-        Port port6 = new Port(new ModelNode());
-        port6.setName("tomcat-jpda");
-        port6.setProtocol("TCP");
-        port6.setContainerPort(8888);
-        containerPorts.add(port6);
-        Port port7 = new Port(new ModelNode());
-        port7.setName("port2");
-        port7.setProtocol("TCP");
-        port7.setContainerPort(9876);
-        containerPorts.add(port7);
-    }
-
 }
