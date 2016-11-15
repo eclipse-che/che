@@ -97,13 +97,7 @@ public class JsonRpcExecAgentCommandManager implements ExecAgentCommandManager {
         final ProcessKillRequestDto dto = dtoFactory.createDto(ProcessKillRequestDto.class)
                                                     .withPid(pid);
 
-        return transmitter.transmitRequest("exec-agent", "process.kill", dto, ProcessKillResponseDto.class).then(
-                new Operation<ProcessKillResponseDto>() {
-                    @Override
-                    public void apply(ProcessKillResponseDto arg) throws OperationException {
-                        eventManager.cleanPidOperations(pid);
-                    }
-                });
+        return transmitter.transmitRequest("exec-agent", "process.kill", dto, ProcessKillResponseDto.class);
     }
 
     @Override
@@ -193,7 +187,7 @@ public class JsonRpcExecAgentCommandManager implements ExecAgentCommandManager {
     }
 
     private <T extends DtoWithPidDto> void subscribe(ExecAgentPromise<T> promise, T arg) throws OperationException {
-        final Integer pid = arg.getPid();
+        final int pid = arg.getPid();
 
         if (promise.hasProcessDiedEventOperation()) {
             final Operation<ProcessDiedEventDto> operation = promise.getProcessDiedEventDtoOperation();
