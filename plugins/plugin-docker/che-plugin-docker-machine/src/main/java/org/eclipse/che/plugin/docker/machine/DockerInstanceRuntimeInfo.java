@@ -209,8 +209,7 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
             md.put("hostConfig.restartPolicy", String.valueOf(hostConfig.getRestartPolicy()));
             md.put("hostConfig.ulimits", Arrays.toString(hostConfig.getUlimits()));
             md.put("hostConfig.volumesFrom", Arrays.toString(hostConfig.getVolumesFrom()));
-            md.put("hostConfig.memory", Long.toString(hostConfig.getMemory()));
-            md.put("hostConfig.memorySwap", Long.toString(hostConfig.getMemorySwap()));
+            md.put("hostConfig.pidsLimit", Long.toString(hostConfig.getPidsLimit()));
         }
 
         return md;
