@@ -19,8 +19,18 @@ CHE_DIR=$HOME/che
 LOCAL_AGENT_BINARIES_URI='/mnt/che/terminal/websocket-terminal-${PREFIX}.tar.gz'
 DOWNLOAD_AGENT_BINARIES_URI='${WORKSPACE_MASTER_URI}/agent-binaries/${PREFIX}/terminal/websocket-terminal-${PREFIX}.tar.gz'
 TARGET_AGENT_BINARIES_URI='file://${CHE_DIR}/websocket-terminal-${PREFIX}.tar.gz'
-LINUX_TYPE=$(cat /etc/os-release | grep ^ID= | tr '[:upper:]' '[:lower:]')
-LINUX_VERSION=$(cat /etc/os-release | grep ^VERSION_ID=)
+
+if [ -f /etc/centos-release ]; then
+    FILE="/etc/centos-release"
+    LINUX_TYPE=$(cat $FILE | awk '{print $1}')
+ elif [ -f /etc/redhat-release ]; then
+    FILE="/etc/redhat-release"
+    LINUX_TYPE=$(cat $FILE | cut -c 1-8)
+ else
+    FILE="/etc/os-release"
+    LINUX_TYPE=$(cat $FILE | grep ^ID= | tr '[:upper:]' '[:lower:]')
+    LINUX_VERSION=$(cat $FILE | grep ^VERSION_ID=)
+fi
 MACHINE_TYPE=$(uname -m)
 SHELL_INTERPRETER="/bin/sh"
 
@@ -77,16 +87,31 @@ elif echo ${LINUX_TYPE} | grep -qi "opensuse"; then
     }
 
 # Alpine 3.3
-############$$
+############
 elif echo ${LINUX_TYPE} | grep -qi "alpine"; then
     test "${PACKAGES}" = "" || {
         ${SUDO} apk update
         ${SUDO} apk add ${PACKAGES};
     }
 
+# Centos 6.6, 6.7, 6.8
+############
+elif echo ${LINUX_TYPE} | grep -qi "CentOS"; then
+     test "${PACKAGES}" = "" || {
+         ${SUDO} yum -y install ${PACKAGES};
+    }
+
+# Red Hat Enterprise Linux 6 
+############################
+
+elif echo ${LINUX_TYPE} | grep -qi "Red Hat"; then
+    test "${PACKAGES}" = "" || {
+        ${SUDO} yum install ${PACKAGES};
+    }
+
 else
     >&2 echo "Unrecognized Linux Type"
-    >&2 cat /etc/os-release
+    >&2 cat $FILE
     exit 1
 fi
 
