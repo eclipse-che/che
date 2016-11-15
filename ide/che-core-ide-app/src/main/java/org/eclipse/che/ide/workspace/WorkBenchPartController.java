@@ -58,4 +58,11 @@ public interface WorkBenchPartController {
      *         <code>true</code> hides part, <code>false</code> display part
      */
     void setHidden(boolean hidden);
+
+    /**
+     * Return hidden state.
+     *
+     * @return the hidden state
+     */
+    boolean isHidden();
 }

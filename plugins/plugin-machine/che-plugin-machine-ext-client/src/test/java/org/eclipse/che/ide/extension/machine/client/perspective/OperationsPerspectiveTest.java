@@ -18,7 +18,6 @@ import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.PartStackView;
@@ -31,13 +30,13 @@ import org.eclipse.che.ide.workspace.PartStackViewFactory;
 import org.eclipse.che.ide.workspace.WorkBenchControllerFactory;
 import org.eclipse.che.ide.workspace.WorkBenchPartController;
 import org.eclipse.che.ide.workspace.perspectives.general.PerspectiveViewImpl;
+import org.eclipse.che.providers.DynaProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 
-import static org.eclipse.che.ide.extension.machine.client.perspective.OperationsPerspective.OPERATIONS_PERSPECTIVE_ID;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -85,6 +84,8 @@ public class OperationsPerspectiveTest {
     private PartStackPresenter      partStackPresenter;
     @Mock
     private AcceptsOneWidget        container;
+    @Mock
+    private DynaProvider            dynaProvider;
 
     private OperationsPerspective perspective;
 
@@ -110,22 +111,14 @@ public class OperationsPerspectiveTest {
                                           Matchers.<WorkBenchPartController>anyObject())).thenReturn(partStackPresenter);
 
         perspective = new OperationsPerspective(view,
-                                             partViewFactory,
-                                             controllerFactory,
-                                             stackPresenterFactory,
-                                             machinePanel,
-                                             recipePanel,
-                                             notificationManager,
-                                             infoContainer,
-                                             eventBus);
-    }
-
-    @Test
-    public void constructorShouldBeVerified() {
-        verify(notificationManager).addRule(OPERATIONS_PERSPECTIVE_ID);
-
-        verify(partStackPresenter).addPart(notificationManager, Constraints.FIRST);
-        verify(partStackPresenter).addPart(machinePanel, null);
+                                                partViewFactory,
+                                                controllerFactory,
+                                                stackPresenterFactory,
+                                                machinePanel,
+                                                recipePanel,
+                                                infoContainer,
+                                                eventBus,
+                                                dynaProvider);
     }
 
     @Test

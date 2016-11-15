@@ -29,8 +29,8 @@ public class TerminalAgentLauncherImpl extends AbstractAgentLauncher {
     protected static final Logger LOG = LoggerFactory.getLogger(TerminalAgentLauncherImpl.class);
 
     @Inject
-    public TerminalAgentLauncherImpl(@Named("machine.agent.max_start_time_ms") long agentMaxStartTimeMs,
-                                     @Named("machine.agent.ping_delay_ms") long agentPingDelayMs) {
+    public TerminalAgentLauncherImpl(@Named("che.agent.dev.max_start_time_ms") long agentMaxStartTimeMs,
+                                     @Named("che.agent.dev.ping_delay_ms") long agentPingDelayMs) {
         super(agentMaxStartTimeMs, agentPingDelayMs, new ProcessIsLaunchedChecker("che-websocket-terminal"));
     }
 
@@ -40,7 +40,7 @@ public class TerminalAgentLauncherImpl extends AbstractAgentLauncher {
     }
 
     @Override
-    public String getAgentName() {
+    public String getAgentId() {
         return "org.eclipse.che.terminal";
     }
 }

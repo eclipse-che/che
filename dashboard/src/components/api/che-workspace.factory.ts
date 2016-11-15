@@ -27,7 +27,7 @@ export class CheWorkspace {
    * @ngInject for Dependency injection
    */
   constructor ($resource, $q, cheWebsocket, lodash, cheEnvironmentRegistry, $log) {
-    this.workspaceStatuses = ['RUNNING', 'STOPPED', 'PAUSED', 'STARTING', 'STOPPING', 'ERROR', 'SNAPSHOT_CREATING'];
+    this.workspaceStatuses = ['RUNNING', 'STOPPED', 'PAUSED', 'STARTING', 'STOPPING', 'ERROR'];
 
     // keep resource
     this.$resource = $resource;
@@ -47,20 +47,23 @@ export class CheWorkspace {
     // listeners if workspaces are changed/updated
     this.listeners = [];
 
-    // list of websocket bus per workspace
-    this.websocketBusByWorkspaceId = new Map();
+    // list of subscribed to websocket workspace Ids
+    this.subscribedWorkspacesIds = [];
     this.statusDefers = {};
 
     // remote call
     this.remoteWorkspaceAPI = this.$resource('/api/workspace', {}, {
         getDetails: {method: 'GET', url: '/api/workspace/:workspaceKey'},
-        create: {method: 'POST', url: '/api/workspace?account=:accountId'},
+        //having 2 methods for creation to ensure namespace parameter won't be send at all if value is null or undefined
+        create: {method: 'POST', url: '/api/workspace'},
+        createWithNamespace: {method: 'POST', url: '/api/workspace?namespace=:namespace'},
         deleteWorkspace: {method: 'DELETE', url: '/api/workspace/:workspaceId'},
         updateWorkspace: {method: 'PUT', url : '/api/workspace/:workspaceId'},
         addProject: {method: 'POST', url : '/api/workspace/:workspaceId/project'},
         deleteProject: {method: 'DELETE', url : '/api/workspace/:workspaceId/project/:path'},
         stopWorkspace: {method: 'DELETE', url : '/api/workspace/:workspaceId/runtime'},
         startWorkspace: {method: 'POST', url : '/api/workspace/:workspaceId/runtime?environment=:envName'},
+        startTemporaryWorkspace: {method: 'POST', url : '/api/workspace/runtime?temporary=true'},
         addCommand: {method: 'POST', url: '/api/workspace/:workspaceId/command'}
       }
     );
@@ -162,11 +165,11 @@ export class CheWorkspace {
       // add workspace if not temporary
       data.forEach((workspace) => {
 
-        if (!workspace.config.temporary) {
+        if (!workspace.temporary) {
           remoteWorkspaces.push(workspace);
           this.workspaces.push(workspace);
-          this.workspacesById.set(workspace.id, workspace);
         }
+        this.workspacesById.set(workspace.id, workspace);
         this.startUpdateWorkspaceStatus(workspace.id);
       });
       return this.workspaces;
@@ -265,7 +268,6 @@ export class CheWorkspace {
     //Check default environment is provided and add if there is no:
     if (!defaultEnvironment) {
       defaultEnvironment = {
-        'name': config.defaultEnv,
         'recipe': null,
         'machines': {'dev-machine': {'attributes': {'memoryLimitBytes': ram}, 'agents': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']}}
       };
@@ -292,7 +294,7 @@ export class CheWorkspace {
       return machine.agents.includes('org.eclipse.che.ws-agent');
     });
 
-    //Check dev machine is provided and add if there is no:
+    // check dev machine is provided and add if there is no:
     if (!devMachine) {
       devMachine = {
         'name': 'ws-machine',
@@ -316,17 +318,18 @@ export class CheWorkspace {
     return config;
   }
 
-  createWorkspace(accountId, workspaceName, source, ram, attributes) {
+  createWorkspace(namespace, workspaceName, source, ram, attributes) {
     let data = this.formWorkspaceConfig({}, workspaceName, source, ram);
-
     let attrs = this.lodash.map(this.lodash.pairs(attributes || {}), (item) => { return item[0] + ':' + item[1]});
-    let promise = this.remoteWorkspaceAPI.create({accountId : accountId, attribute: attrs}, data).$promise;
+    let promise = namespace ? this.remoteWorkspaceAPI.createWithNamespace({namespace : namespace, attribute: attrs}, data).$promise :
+      this.remoteWorkspaceAPI.create({attribute: attrs}, data).$promise;
     return promise;
   }
 
-  createWorkspaceFromConfig(accountId, workspaceConfig, attributes) {
+  createWorkspaceFromConfig(namespace, workspaceConfig, attributes) {
     let attrs = this.lodash.map(this.lodash.pairs(attributes || {}), (item) => { return item[0] + ':' + item[1]});
-    return this.remoteWorkspaceAPI.create({accountId : accountId, attribute: attrs}, workspaceConfig).$promise;
+    return namespace ? this.remoteWorkspaceAPI.createWithNamespace({namespace : namespace, attribute: attrs}, workspaceConfig).$promise :
+      this.remoteWorkspaceAPI.create({attribute: attrs}, workspaceConfig).$promise;
   }
 
   /**
@@ -350,6 +353,14 @@ export class CheWorkspace {
     return promise;
   }
 
+  /**
+   * Starts a temporary workspace by specifying configuration
+   * @param workspaceConfig: che.IWorkspaceConfig - the configuration to start the workspace from
+   * @returns {*} promise
+   */
+  startTemporaryWorkspace(workspaceConfig: che.IWorkspaceConfig): ng.IHttpPromise<any> {
+    return this.remoteWorkspaceAPI.startTemporaryWorkspace({}, workspaceConfig).$promise;
+  }
 
   stopWorkspace(workspaceId) {
     let promise = this.remoteWorkspaceAPI.stopWorkspace({workspaceId: workspaceId}, {}).$promise;
@@ -471,15 +482,17 @@ export class CheWorkspace {
    * @param workspaceId
      */
   startUpdateWorkspaceStatus(workspaceId) {
-    if (!this.websocketBusByWorkspaceId.has(workspaceId)) {
-      let bus = this.cheWebsocket.getBus(workspaceId);
-      this.websocketBusByWorkspaceId.set(workspaceId, bus);
+    if (!this.subscribedWorkspacesIds.includes(workspaceId)) {
+      let bus = this.cheWebsocket.getBus();
+      this.subscribedWorkspacesIds.push(workspaceId);
 
       bus.subscribe('workspace:' + workspaceId, (message) => {
 
         //Filter workspace events, which really indicate the status change:
         if (this.workspaceStatuses.indexOf(message.eventType) >= 0) {
           this.getWorkspaceById(workspaceId).status = message.eventType;
+        } else if (message.eventType === 'SNAPSHOT_CREATING') {
+          this.getWorkspaceById(workspaceId).status = 'SNAPSHOTTING';
         } else if (message.eventType === 'SNAPSHOT_CREATED') {
           //Snapshot can be created for RUNNING workspace only. As far as snapshot creation is only the events, not the state,
           //we introduced SNAPSHOT_CREATING status to be handled by UI, though it is fake one, and end of it is indicated by SNAPSHOT_CREATED.

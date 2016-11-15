@@ -85,7 +85,7 @@ public class WsAgentModule extends AbstractModule {
         bind(GitUserResolver.class).to(LocalGitUserResolver.class);
         bind(GitConnectionFactory.class).to(JGitConnectionFactory.class);
 
-        bind(URI.class).annotatedWith(Names.named("api.endpoint")).toProvider(UriApiEndpointProvider.class);
+        bind(URI.class).annotatedWith(Names.named("che.api")).toProvider(UriApiEndpointProvider.class);
         bind(String.class).annotatedWith(Names.named("user.token")).toProvider(UserTokenProvider.class);
         bind(WSocketEventBusClient.class).asEagerSingleton();
 

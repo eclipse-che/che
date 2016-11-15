@@ -15,10 +15,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.local.StackDeserializer;
-import org.eclipse.che.api.local.WorkspaceConfigDeserializer;
 import org.eclipse.che.api.local.storage.LocalStorage;
-import org.eclipse.che.api.workspace.server.WorkspaceConfigJsonAdapter;
-import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.stack.StackJsonAdapter;
 import org.eclipse.che.api.workspace.server.stack.image.StackIcon;
@@ -55,7 +52,7 @@ public class StackLocalStorage {
     private final Path         iconFolderPath;
 
     @Inject
-    public StackLocalStorage(@Named("che.conf.storage") String pathToStorage,
+    public StackLocalStorage(@Named("che.database") String pathToStorage,
                              StackJsonAdapter stackJsonAdapter) throws IOException {
         this.localStorage = new LocalStorage(pathToStorage,
                                              STACK_STORAGE_FILE,

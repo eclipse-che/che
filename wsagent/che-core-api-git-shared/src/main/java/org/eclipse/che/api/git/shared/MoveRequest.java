@@ -18,7 +18,7 @@ import org.eclipse.che.dto.shared.DTO;
  * @author andrew00x
  */
 @DTO
-public interface MoveRequest extends GitRequest {
+public interface MoveRequest {
     /** @return source */
     String getSource();
     

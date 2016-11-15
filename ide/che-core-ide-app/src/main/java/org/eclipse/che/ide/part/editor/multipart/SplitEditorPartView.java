@@ -10,10 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.ide.part.editor.multipart;
 
+import com.google.common.collect.BiMap;
 import com.google.gwt.user.client.ui.IsWidget;
-import com.google.inject.ImplementedBy;
 
 import org.eclipse.che.ide.api.constraints.Direction;
+import org.eclipse.che.ide.api.parts.EditorMultiPartStackState;
+import org.eclipse.che.ide.api.parts.EditorPartStack;
 
 /**
  * View representation of editor to displaying in {@link EditorMultiPartStackView}.
@@ -28,18 +30,17 @@ import org.eclipse.che.ide.api.constraints.Direction;
  *
  * @author Roman nikitenko
  */
-@ImplementedBy(SplitEditorPartViewImpl.class)
 public interface SplitEditorPartView extends IsWidget {
 
     /**
      * Split the view corresponding to {@code direction} on two areas and adds {@code replica} into the created area.
-     *
-     * @param replica
+     *  @param replica
      *         will be added into the created area
      * @param direction
      *         contains info about way how {@code replica} should be displayed
+     * @param size
      */
-    void split(IsWidget replica, Direction direction);
+    void split(IsWidget replica, Direction direction, double size);
 
     /** Returns view of the "Specimen" area. */
     SplitEditorPartView getSpecimen();
@@ -58,4 +59,13 @@ public interface SplitEditorPartView extends IsWidget {
 
     /** Removes this view from its parent widget */
     void removeFromParent();
+
+    /**
+     * Get editor multi part stack state
+     *
+     * @param splitEditorParts
+     *         split editor part view mapped to their part stack
+     * @return the editor multi part stack state
+     */
+    EditorMultiPartStackState getState(BiMap<SplitEditorPartView, EditorPartStack> splitEditorParts);
 }

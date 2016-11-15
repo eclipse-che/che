@@ -17,7 +17,7 @@ import org.eclipse.che.ide.actions.ShowHiddenFilesAction;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
-import org.eclipse.che.ide.statepersistance.dto.ActionDescriptor;
+import org.eclipse.che.ide.api.statepersistance.dto.ActionDescriptor;
 
 import java.util.ArrayList;
 import java.util.List;

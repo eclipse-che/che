@@ -30,8 +30,14 @@
          ng-click="workspaceMachineConfigController.showEditDialog($event)">
       <i class="config-title-action-edit fa fa-pencil" aria-hidden="true"></i>
     </div>
-    <div flex
-         ng-click="workspaceMachineConfigController.machineIsOpened=!workspaceMachineConfigController.machineIsOpened">&nbsp;</div>
+    <div flex ng-click="workspaceMachineConfigController.machineIsOpened=!workspaceMachineConfigController.machineIsOpened">
+      <span class="che-list-actions">
+          <span ng-if="workspaceMachineConfigController.machineConfig.canDeleteMachine && !workspaceMachineConfigController.machineConfig.isDev"
+                ng-click="workspaceMachineConfigController.deleteMachine()">
+            <span class="fa fa-trash-o"></span>
+          </span>
+      </span>
+    </div>
   </div>
 
   <!-- Params -->
@@ -71,7 +77,7 @@
 
     <!-- Agents -->
     <che-label-container che-label-name="Agents">
-      <div class="config-agents">
+      <div class="config-params-table">
          <list-agents agents="workspaceMachineConfigController.machineConfig.agents"
                       agents-on-change="workspaceMachineConfigController.updateAgents()"></list-agents>
       </div>

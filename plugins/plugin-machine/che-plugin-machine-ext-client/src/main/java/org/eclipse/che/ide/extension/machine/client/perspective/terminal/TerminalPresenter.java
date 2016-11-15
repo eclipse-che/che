@@ -60,14 +60,18 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
     private final NotificationManager         notificationManager;
     private final MachineLocalizationConstant locale;
     private final MachineEntity               machine;
-    private final Timer                       retryConnectionTimer;
 
     private Promise<Boolean>      promise;
     private WebSocket             socket;
-    private boolean               isTerminalConnected;
+    private boolean               connected;
     private int                   countRetry;
     private TerminalJso           terminal;
     private TerminalStateListener terminalStateListener;
+
+    /**
+     * Indicates javascript term.js is injected in the page.
+     */
+    private static boolean scriptInjected;
 
     @Inject
     public TerminalPresenter(TerminalView view,
@@ -80,11 +84,17 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
         this.locale = locale;
         this.machine = machine;
 
-        isTerminalConnected = false;
+        connected = false;
+        countRetry = 2;
 
         promise = AsyncPromiseHelper.createFromAsyncRequest(new AsyncPromiseHelper.RequestCall<Boolean>() {
             @Override
             public void makeCall(final AsyncCallback<Boolean> callback) {
+                if (scriptInjected) {
+                    callback.onSuccess(true);
+                    return;
+                }
+
                 ScriptInjector.fromUrl(GWT.getModuleBaseURL() + "term/term.js")
                               .setWindow(ScriptInjector.TOP_WINDOW)
                               .setCallback(new Callback<Void, Exception>() {
@@ -95,22 +105,12 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
 
                                   @Override
                                   public void onSuccess(Void result) {
+                                      scriptInjected = true;
                                       callback.onSuccess(true);
                                   }
                               }).inject();
             }
         });
-
-        countRetry = 2;
-
-        retryConnectionTimer = new Timer() {
-            @Override
-            public void run() {
-                connect();
-
-                countRetry--;
-            }
-        };
     }
 
     /**
@@ -118,7 +118,11 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
      * when the method is called the first time.
      */
     public void connect() {
-        if (!isTerminalConnected) {
+        if (countRetry == 0) {
+            return;
+        }
+
+        if (!connected) {
             promise.then(new Operation<Boolean>() {
                 @Override
                 public void apply(Boolean arg) throws OperationException {
@@ -127,36 +131,37 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
             }).catchError(new Operation<PromiseError>() {
                 @Override
                 public void apply(PromiseError arg) throws OperationException {
-                    isTerminalConnected = false;
                     notificationManager.notify(locale.failedToConnectTheTerminal(), locale.terminalCanNotLoadScript(), FAIL, NOT_EMERGE_MODE);
-
-                    tryToReconnect();
-
-                    if (arg != null) {
-                        Log.error(TerminalViewImpl.class, arg);
-                    }
+                    reconnect();
                 }
             });
         }
     }
 
-    private void tryToReconnect() {
-        view.showErrorMessage(locale.terminalTryRestarting());
-
+    private void reconnect() {
         if (countRetry <= 0) {
             view.showErrorMessage(locale.terminalErrorStart());
         } else {
-            retryConnectionTimer.schedule(TIME_BETWEEN_CONNECTIONS);
+            view.showErrorMessage(locale.terminalTryRestarting());
+            new Timer() {
+                @Override
+                public void run() {
+                    connect();
+                }
+            }.schedule(TIME_BETWEEN_CONNECTIONS);
         }
     }
 
     private void connectToTerminalWebSocket(@NotNull String wsUrl) {
+        countRetry--;
+
         socket = WebSocket.create(wsUrl);
+
         socket.setOnOpenHandler(new ConnectionOpenedHandler() {
             @Override
             public void onOpen() {
                 terminal = TerminalJso.create(TerminalOptionsJso.createDefault());
-                isTerminalConnected = true;
+                connected = true;
 
                 view.openTerminal(terminal);
 
@@ -187,11 +192,14 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
         socket.setOnErrorHandler(new ConnectionErrorHandler() {
             @Override
             public void onError() {
-                isTerminalConnected = false;
+                connected = false;
 
-                notificationManager.notify(locale.connectionFailedWithTerminal(), locale.terminalErrorConnection(), FAIL, FLOAT_MODE);
-
-                tryToReconnect();
+                if (countRetry == 0) {
+                    view.showErrorMessage(locale.terminalErrorStart());
+                    notificationManager.notify(locale.connectionFailedWithTerminal(), locale.terminalErrorConnection(), FAIL, FLOAT_MODE);
+                } else {
+                    reconnect();
+                }
             }
         });
     }
@@ -200,7 +208,7 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
      * Sends 'exit' command on server side to stop terminal.
      */
     public void stopTerminal() {
-        if (isTerminalConnected) {
+        if (connected) {
             Jso jso = Jso.create();
             jso.addField("type", "data");
             jso.addField("data", "exit\n");
@@ -229,7 +237,7 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
 
     @Override
     public void setTerminalSize(int x, int y) {
-        if (!isTerminalConnected) {
+        if (!connected) {
             return;
         }
 
@@ -246,10 +254,9 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
 
     /** Set focus on terminal */
     public void setFocus() {
-        if (!isTerminalConnected) {
-            return;
+        if (connected) {
+            terminal.focus();
         }
-        terminal.focus();
     }
 
     /**
@@ -263,4 +270,5 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
     public interface TerminalStateListener {
         void onExit();
     }
+
 }

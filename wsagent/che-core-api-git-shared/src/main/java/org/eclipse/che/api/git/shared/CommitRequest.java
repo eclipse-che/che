@@ -19,7 +19,7 @@ import java.util.List;
  * @author andrew00x
  */
 @DTO
-public interface CommitRequest extends GitRequest {
+public interface CommitRequest {
     /** @return commit message */
     String getMessage();
 

@@ -22,8 +22,12 @@ public class KeyBinding {
     private final boolean alt;
     /** Is the cmd key pressed? */
     private final boolean cmd;
-    /** The key code. */
-    private final int keycode;
+    /** The key code of this key binding. */
+    private final Integer keyCodeNumber;
+    /** The character of this key binding. */
+    private final String character;
+    /** The key event type. */
+    private final String type;
     /** The action taken on the key binding. */
     private final KeyBindingAction action;
 
@@ -33,9 +37,23 @@ public class KeyBinding {
         this.shift = shift;
         this.alt = alt;
         this.cmd = cmd;
-        this.keycode = keycode;
+        this.keyCodeNumber = keycode;
+        this.character = null;
         this.action = action;
+        this.type = "keydown";
     }
+    
+    public KeyBinding(final boolean control, final boolean shift, final boolean alt,
+            final boolean cmd, final char character, final KeyBindingAction action) {
+    	this.control = control;
+		this.shift = shift;
+		this.alt = alt;
+		this.cmd = cmd;
+		this.keyCodeNumber = null;
+		this.character = String.valueOf(character);
+		this.action = action;
+		this.type = "keypress";
+	}
 
     /**
      * Whether the control key is hold during the key binding.
@@ -70,11 +88,35 @@ public class KeyBinding {
     }
 
     /**
-     * Returns the keycode of the bey binding.
+     * Returns the keycode of the key binding.
      * @return the keycode
      */
-    public int getKeyCode() {
-        return this.keycode;
+    public Integer getKeyCodeNumber() {
+        return this.keyCodeNumber;
+    }
+
+    /**
+     * Returns the keycode of the key binding.
+     * @return the keycode
+     */
+    public String getCharacter() {
+        return this.character;
+    }
+
+    /**
+     * Whether the key binding is character based. 
+     * @return true iff the binding uses a character
+     */
+    public boolean isCharacterBinding() {
+        return getCharacter() != null;
+    }
+
+    /**
+     * Returns the event type of the key binding.
+     * @return the event type
+     */
+    public String getType() {
+        return type;
     }
 
     /**

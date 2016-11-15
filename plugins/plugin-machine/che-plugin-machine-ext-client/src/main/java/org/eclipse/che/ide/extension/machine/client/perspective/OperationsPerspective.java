@@ -15,7 +15,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.PartStack;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.appliance.MachineAppliancePresenter;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.panel.MachinePanelPresenter;
@@ -25,10 +24,10 @@ import org.eclipse.che.ide.workspace.PartStackViewFactory;
 import org.eclipse.che.ide.workspace.WorkBenchControllerFactory;
 import org.eclipse.che.ide.workspace.perspectives.general.AbstractPerspective;
 import org.eclipse.che.ide.workspace.perspectives.general.PerspectiveViewImpl;
+import org.eclipse.che.providers.DynaProvider;
 
 import javax.validation.constraints.NotNull;
 
-import static org.eclipse.che.ide.api.constraints.Constraints.FIRST;
 import static org.eclipse.che.ide.api.parts.PartStackType.EDITING;
 import static org.eclipse.che.ide.api.parts.PartStackType.INFORMATION;
 import static org.eclipse.che.ide.api.parts.PartStackType.NAVIGATION;
@@ -51,26 +50,18 @@ public class OperationsPerspective extends AbstractPerspective {
                                  PartStackPresenterFactory stackPresenterFactory,
                                  MachinePanelPresenter machinePanel,
                                  RecipePartPresenter recipePanel,
-                                 NotificationManager notificationManager,
                                  MachineAppliancePresenter infoContainer,
-                                 EventBus eventBus) {
-        super(OPERATIONS_PERSPECTIVE_ID, view, stackPresenterFactory, partViewFactory, controllerFactory, eventBus);
-
-        notificationManager.addRule(OPERATIONS_PERSPECTIVE_ID);
+                                 EventBus eventBus,
+                                 DynaProvider dynaProvider) {
+        super(OPERATIONS_PERSPECTIVE_ID, view, stackPresenterFactory, partViewFactory, controllerFactory, eventBus, dynaProvider);
 
         //central panel
         partStacks.put(EDITING, infoContainer);
 
-        addPart(notificationManager, INFORMATION, FIRST);
         addPart(machinePanel, NAVIGATION);
         addPart(recipePanel, NAVIGATION);
 
         setActivePart(machinePanel);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void go(@NotNull AcceptsOneWidget container) {
         PartStack information = getPartStack(INFORMATION);
         PartStack navigation = getPartStack(NAVIGATION);
         PartStack editing = getPartStack(EDITING);
@@ -84,11 +75,14 @@ public class OperationsPerspective extends AbstractPerspective {
         information.go(view.getInformationPanel());
         navigation.go(view.getNavigationPanel());
         editing.go(view.getEditorPanel());
-
-        container.setWidget(view);
-
         openActivePart(INFORMATION);
         openActivePart(NAVIGATION);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void go(@NotNull AcceptsOneWidget container) {
+        container.setWidget(view);
     }
 
 }

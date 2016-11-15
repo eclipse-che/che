@@ -36,6 +36,8 @@ export class WorkspaceStacks {
     // scope values
     this.scope = {
       workspaceName: '=',
+      environmentName: '=',
+      workspaceImportedRecipe: '=',
       workspaceStackOnChange: '&'
     };
   }

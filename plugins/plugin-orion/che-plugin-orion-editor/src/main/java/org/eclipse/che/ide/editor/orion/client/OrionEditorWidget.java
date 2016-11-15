@@ -512,29 +512,25 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
     @Override
     public void addKeyBinding(final KeyBinding keyBinding, String actionDescription) {
         OrionKeyStrokeOverlay strokeOverlay;
-        if (UserAgent.isMac()) {
-            strokeOverlay = OrionKeyStrokeOverlay.create(keyBinding.getKeyCode(),
-                                                         keyBinding.isCmd(),
-                                                         keyBinding.isShift(),
-                                                         keyBinding.isAlt(),
-                                                         keyBinding.isControl(),
-                                                         "keydown",
-                                                         moduleHolder.getModule("OrionKeyBinding").cast());
+        JavaScriptObject keyBindingModule = moduleHolder.getModule("OrionKeyBinding").cast();
+        String type = keyBinding.getType();
+        boolean modifier1 = UserAgent.isMac() ? keyBinding.isCmd() : keyBinding.isControl();
+        boolean modifier2 = keyBinding.isShift();
+        boolean modifier3 = keyBinding.isAlt();
+        boolean modifier4 = UserAgent.isMac() ? keyBinding.isControl() : false;
+        if (keyBinding.isCharacterBinding()) {
+			strokeOverlay = OrionKeyStrokeOverlay.create(keyBinding.getCharacter(), modifier1, modifier2, modifier3,
+					modifier4, type, keyBindingModule);
         } else {
-            strokeOverlay = OrionKeyStrokeOverlay.create(keyBinding.getKeyCode(),
-                                                         keyBinding.isControl(),
-                                                         keyBinding.isShift(),
-                                                         keyBinding.isAlt(),
-                                                         false,
-                                                         "keydown",
-                                                         moduleHolder.getModule("OrionKeyBinding").cast());
+			strokeOverlay = OrionKeyStrokeOverlay.create(keyBinding.getKeyCodeNumber(), modifier1, modifier2, modifier3,
+					modifier4, type, keyBindingModule);
         }
         String actionId = "che-action-" + keyBinding.getAction().toString();
         editorOverlay.getTextView().setKeyBinding(strokeOverlay, actionId);
         editorOverlay.getTextView().setAction(actionId, new Action() {
             @Override
-            public void onAction() {
-                keyBinding.getAction().action();
+            public boolean onAction() {
+                return keyBinding.getAction().action();
             }
         }, actionDescription);
     }
@@ -709,6 +705,14 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
     @Override
     public Gutter getGutter() {
         return gutter;
+    }
+
+    public int getTopVisibleLine() {
+        return editorOverlay.getTextView().getTopIndex();
+    }
+
+    public void setTopLine(int line) {
+        editorOverlay.getTextView().setTopIndex(line);
     }
 
     /**

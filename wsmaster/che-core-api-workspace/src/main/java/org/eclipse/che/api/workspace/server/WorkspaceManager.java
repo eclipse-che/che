@@ -26,6 +26,7 @@ import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.environment.server.exception.EnvironmentException;
 import org.eclipse.che.api.machine.server.exception.SnapshotException;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
@@ -57,12 +58,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.lang.Boolean.parseBoolean;
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
@@ -107,8 +108,8 @@ public class WorkspaceManager {
                             WorkspaceRuntimes workspaceRegistry,
                             EventService eventService,
                             AccountManager accountManager,
-                            @Named("workspace.runtime.auto_snapshot") boolean defaultAutoSnapshot,
-                            @Named("workspace.runtime.auto_restore") boolean defaultAutoRestore,
+                            @Named("che.workspace.auto_snapshot") boolean defaultAutoSnapshot,
+                            @Named("che.workspace.auto_restore") boolean defaultAutoRestore,
                             SnapshotDao snapshotDao) {
         this.workspaceDao = workspaceDao;
         this.runtimes = workspaceRegistry;
@@ -372,8 +373,8 @@ public class WorkspaceManager {
         final WorkspaceImpl workspace = workspaceDao.get(workspaceId);
         final String restoreAttr = workspace.getAttributes().get(AUTO_RESTORE_FROM_SNAPSHOT);
         final boolean autoRestore = restoreAttr == null ? defaultAutoRestore : parseBoolean(restoreAttr);
-        final boolean snapshotExists = !getSnapshot(workspaceId).isEmpty();
-        return performAsyncStart(workspace, envName, firstNonNull(restore, autoRestore) && snapshotExists);
+        performAsyncStart(workspace, envName, firstNonNull(restore, autoRestore) && !getSnapshot(workspaceId).isEmpty());
+        return normalizeState(workspace);
     }
 
     /**
@@ -615,43 +616,28 @@ public class WorkspaceManager {
 
     /** Asynchronously starts given workspace. */
     @VisibleForTesting
-    WorkspaceImpl performAsyncStart(WorkspaceImpl workspace,
-                                    String envName,
-                                    boolean recover) throws ConflictException, NotFoundException, ServerException {
-        if (envName != null && !workspace.getConfig()
-                                         .getEnvironments()
-                                         .containsKey(envName)) {
+    void performAsyncStart(WorkspaceImpl workspace,
+                           String envName,
+                           boolean recover) throws ConflictException, NotFoundException, ServerException {
+        if (envName != null && !workspace.getConfig().getEnvironments().containsKey(envName)) {
             throw new NotFoundException(format("Workspace '%s:%s' doesn't contain environment '%s'",
                                                workspace.getNamespace(),
                                                workspace.getConfig().getName(),
                                                envName));
         }
-        // WorkspaceRuntimes performs this check as well
-        // but this check needed here because permanent workspace start performed asynchronously
-        // which means that even if workspace runtimes won't start workspace client receives workspace object
-        // with starting status, this check prevents it and throws appropriate exception
-        try {
-            final RuntimeDescriptor descriptor = runtimes.get(workspace.getId());
-            throw new ConflictException(format("Could not start workspace '%s' because its status is '%s'",
-                                               workspace.getConfig().getName(),
-                                               descriptor.getRuntimeStatus()));
-        } catch (NotFoundException ignored) {
-            // it is okay if workspace does not exist in runtimes
-        }
-
         workspace.getAttributes().put(UPDATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
         workspaceDao.update(workspace);
-
+        final String env = firstNonNull(envName, workspace.getConfig().getDefaultEnv());
+        final Future<RuntimeDescriptor> descriptor = runtimes.startAsync(workspace, env, recover);
         executor.execute(ThreadLocalPropagateContext.wrap(() -> {
             try {
-                final String env = firstNonNull(envName, workspace.getConfig().getDefaultEnv());
-                runtimes.start(workspace, env, recover);
+                descriptor.get();
                 LOG.info("Workspace '{}:{}' with id '{}' started by user '{}'",
                          workspace.getNamespace(),
                          workspace.getConfig().getName(),
                          workspace.getId(),
                          sessionUserNameOr("undefined"));
-            } catch (RuntimeException | ApiException ex) {
+            } catch (Exception ex) {
                 if (workspace.isTemporary()) {
                     try {
                         removeWorkspace(workspace.getId());
@@ -664,7 +650,6 @@ public class WorkspaceManager {
                 LOG.error(ex.getLocalizedMessage(), ex);
             }
         }));
-        return normalizeState(workspace);
     }
 
     /**
@@ -724,7 +709,7 @@ public class WorkspaceManager {
         executor.execute(ThreadLocalPropagateContext.wrap(() -> {
             try {
                 runtimes.startMachine(workspaceId, machineConfig);
-            } catch (ApiException e) {
+            } catch (ApiException | EnvironmentException e) {
                 LOG.error(e.getLocalizedMessage(), e);
             }
         }));

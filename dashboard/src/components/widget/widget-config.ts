@@ -31,6 +31,7 @@ import {CheFrame} from './frame/che-frame.directive';
 import {CheFooter} from './footer/che-footer.directive';
 import {CheHtmlSource} from './html-source/che-html-source.directive';
 import {CheInput} from './input/che-input.directive';
+import {CheInputBox} from './input/che-input-box.directive';
 import {CheTextarea} from './input/che-textarea.directive';
 import {CheLabel} from './label/che-label.directive';
 import {CheLabelContainer} from './label-container/che-label-container.directive';
@@ -56,12 +57,15 @@ import {CheSelecter} from './selecter/che-selecter.directive';
 import {CheSlider} from './slider/che-slider.directive';
 import {CheLogsOutput} from './logs-output/che-logs-output.directive';
 import {CheTextInfo} from './text-info/che-text-info.directive';
-import {CheToggleCtrl} from './toggle-button/che-toggle.controller';
+import {CheToggleController} from './toggle-button/che-toggle.controller';
 import {CheToggleButton} from './toggle-button/che-toggle-button.directive';
 import {CheToggle} from './toggle-button/che-toggle.directive';
 import {CheToolbar} from './toolbar/che-toolbar.directive';
 import {CheErrorNotification} from './notification/che-error-notification.directive';
 import {CheInfoNotification} from './notification/che-info-notification.directive';
+import {ChePopup} from './popup/che-popup.directive';
+import {CheModalPopup} from './popup/che-modal-popup.directive';
+import {CheShowArea} from './show-area/che-show-area.directive';
 
 
 export class WidgetConfig {
@@ -71,7 +75,7 @@ export class WidgetConfig {
     // accordion
     register.directive('cheAccordion', CheAccordion)
 
-      // button
+    // button
       .directive('cheButtonPrimary', CheButtonPrimary)
       .directive('cheButtonPrimaryFlat', CheButtonPrimaryFlat)
       .directive('cheButtonDanger', CheButtonDanger)
@@ -83,11 +87,11 @@ export class WidgetConfig {
       // dropdown
       .controller('CheButtonDropdownCtrl', CheButtonDropdownCtrl)
       .directive('cheButtonDropdown', CheButtonDropdown)
-      //clipboard
+      // clipboard
       .directive('cheClipboard', CheClipboard)
       .directive('cheCompile', CheCompile)
       .directive('cheDescription', CheDescription)
-      //dropzone
+      // dropzone
       .controller('CheDropZoneCtrl', CheDropZoneCtrl)
       .directive('cheDropzone', CheDropZone)
       .directive('cheEmptyState', CheEmptyState)
@@ -95,6 +99,7 @@ export class WidgetConfig {
       .directive('cheFooter', CheFooter)
       .directive('cheHtmlSource', CheHtmlSource)
       .directive('cheInput', CheInput)
+      .directive('cheInputBox', CheInputBox)
       .directive('cheTextarea', CheTextarea)
       .directive('cheLabel', CheLabel)
       .directive('cheLabelContainer', CheLabelContainer)
@@ -132,14 +137,18 @@ export class WidgetConfig {
 
       .directive('cheTextInfo', CheTextInfo)
 
-      .controller('CheToggleCtrl', CheToggleCtrl)
+      .controller('CheToggleController', CheToggleController)
       .directive('cheToggleButton', CheToggleButton)
       .directive('cheToggle', CheToggle)
 
       .directive('cheToolbar', CheToolbar)
-      //notifications
+      // notifications
       .directive('cheErrorNotification', CheErrorNotification)
       .directive('cheInfoNotification', CheInfoNotification)
-
+      // wrapper for popup
+      .directive('chePopup', ChePopup)
+      .directive('cheModalPopup', CheModalPopup)
+      // show area
+      .directive('cheShowArea', CheShowArea)
   }
 }

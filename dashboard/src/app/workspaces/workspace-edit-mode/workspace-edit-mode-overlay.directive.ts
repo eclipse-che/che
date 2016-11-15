@@ -35,22 +35,27 @@
  * @author Oleksii Kurinnyi
  */
 export class WorkspaceEditModeOverlay {
-  restrict = 'E';
+  replace: boolean = true;
+  transclude: boolean = true;
+  restrict: string = 'E';
+  templateUrl: string = 'app/workspaces/workspace-edit-mode/workspace-edit-mode-overlay.html';
 
-  replace = true;
-  templateUrl = 'app/workspaces/workspace-edit-mode/workspace-edit-mode-overlay.html';
-
-  scope = {
-    message: '@?workspaceEditModeMessage',
-    showMessage: '=?workspaceEditModeShowMessage',
-    onSave: '&workspaceEditModeOnSave',
-    onCancel: '&workspaceEditModeOnCancel'
+  scope: {
+    [propName: string]: string
   };
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor () { }
+  constructor () {
+    this.scope = {
+      message: '@?workspaceEditModeMessage',
+      showMessage: '=?workspaceEditModeShowMessage',
+      onSave: '&workspaceEditModeOnSave',
+      onCancel: '&workspaceEditModeOnCancel',
+      disableSaveButton: '=workspaceEditDisableSaveButton'
+    };
+  }
 
 }

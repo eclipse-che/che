@@ -1,29 +1,45 @@
 .stack-content
   padding 15px
 
+  .workspace-environments
+    padding 0
+
+    & > .che-label-container:first-child
+      padding-top 0
+
+  .list-commands .che-list-header-additional,
+  .list-components .che-list-header-additional
+    display none
+
+  .che-button,
+  .che-toggle-button,
+  div.stack-editor,
+  .stack-details-input
+    margin-left 0
+
 .stack-details-content
-    padding 0 14px
+  padding 0 14px
 
-    button
-      margin 0 30px 0 0
+  button
+    margin 0 30px 0 0
 
-    .stack-delete-label label
-      color $che-delete-label-color
+  .stack-delete-label label
+    color $che-delete-label-color
 
 .stack-details-input
-      margin 0 8px
+  margin 0 8px
 
 .stack-editor, .stack-editor-footer
   min-width 500px
   max-width 1000px
 
 .stack-editor
+  width 100%
   margin 0 0 20px 8px
 
 .stack-editor .CodeMirror
   border 1px solid $list-separator-color
   min-height 500px
-
 
 .stack-tags md-chips
   margin 0
