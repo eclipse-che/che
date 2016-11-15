@@ -310,7 +310,7 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
         return servers;
     }
 
-    protected Map<String, ServerImpl> getServersWithFilledPorts(final String externalHostame, final String internalHostname, final Map<String, List<PortBinding>> exposedPorts) {
+    protected Map<String, ServerImpl> getServersWithFilledPorts(final String externalHostname, final String internalHostname, final Map<String, List<PortBinding>> exposedPorts) {
         final HashMap<String, ServerImpl> servers = new LinkedHashMap<>();
 
         for (Map.Entry<String, List<PortBinding>> portEntry : exposedPorts.entrySet()) {
@@ -330,7 +330,7 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
 
             servers.put(portProtocol, new ServerImpl(null,
                                                      null,
-                                                     externalHostame + ":" + externalPort,
+                                                     externalHostname + ":" + externalPort,
                                                      null,
                                                      new ServerPropertiesImpl(null, internalHostnameAndPort, null)));
         }

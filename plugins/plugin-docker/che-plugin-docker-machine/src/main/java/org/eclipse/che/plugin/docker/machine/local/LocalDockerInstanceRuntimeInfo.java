@@ -29,13 +29,10 @@ import java.util.Set;
  * directly (e.g. when running on Docker for Mac or behind a NAT). If the external address is not provided it defaults
  * to the internal one.
  *
- * <p>If environment variable {@code CHE_DOCKER_IP_USE__INTERNAL__ADDRESS} or
- * property {@code che.docker.ip.use_internal_address} is true, is true, the IP Address from
+ * <p>If property {@code che.docker.ip.use_internal_address} is true, is true, the IP Address from
  * {@link ContainerInfo}, if available, is used for internal address instead.<br>
- * <p>Value of host can be retrieved from property {@code che.docker.ip} or
- * from environment variable {@code CHE_DOCKER_IP}.<br>
- * <p>Value of external hostname can be retrieved from property {@code che.docker.ip.external} or
- * from environment variable {@code CHE_DOCKER_IP_EXTERNAL}.<br>
+ * <p>Value of host can be retrieved from property {@code che.docker.ip}. <br>
+ * <p>Value of external hostname can be retrieved from property {@code che.docker.ip.external}. <br>
  * Environment variables override properties.
  *
  * @author Alexander Garagatyi
