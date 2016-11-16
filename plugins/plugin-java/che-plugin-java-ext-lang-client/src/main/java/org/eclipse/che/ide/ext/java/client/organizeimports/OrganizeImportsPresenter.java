@@ -13,6 +13,7 @@ package org.eclipse.che.ide.ext.java.client.organizeimports;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -41,6 +42,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingResumeEvent;
+import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingSuspendEvent;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
@@ -51,11 +54,13 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
  */
 @Singleton
 public class OrganizeImportsPresenter implements OrganizeImportsView.ActionDelegate {
-    private final OrganizeImportsView      view;
-    private final JavaCodeAssistClient     javaCodeAssistClient;
-    private final DtoFactory               dtoFactory;
-    private final JavaLocalizationConstant locale;
-    private final NotificationManager      notificationManager;
+    private final     OrganizeImportsView      view;
+    private final     JavaCodeAssistClient     javaCodeAssistClient;
+    private final     DtoFactory               dtoFactory;
+    private final     JavaLocalizationConstant locale;
+    private final     NotificationManager      notificationManager;
+    private final EventBus                 eventBus;
+
 
     private int                     page;
     private List<ConflictImportDTO> choices;
@@ -69,9 +74,11 @@ public class OrganizeImportsPresenter implements OrganizeImportsView.ActionDeleg
                                     JavaCodeAssistClient javaCodeAssistClient,
                                     DtoFactory dtoFactory,
                                     JavaLocalizationConstant locale,
-                                    NotificationManager notificationManager) {
+                                    NotificationManager notificationManager,
+                                    EventBus eventBus) {
         this.view = view;
         this.javaCodeAssistClient = javaCodeAssistClient;
+        this.eventBus = eventBus;
         this.view.setDelegate(this);
 
         this.dtoFactory = dtoFactory;
@@ -102,6 +109,7 @@ public class OrganizeImportsPresenter implements OrganizeImportsView.ActionDeleg
 
             final String fqn = JavaUtil.resolveFQN((Container)srcFolder.get(), (Resource)file);
 
+            eventBus.fireEvent(newFileTrackingSuspendEvent());
             javaCodeAssistClient.organizeImports(project.get().getLocation().toString(), fqn)
                                 .then(new Operation<List<ConflictImportDTO>>() {
                                     @Override
@@ -111,12 +119,14 @@ public class OrganizeImportsPresenter implements OrganizeImportsView.ActionDeleg
                                         } else {
                                             applyChanges(file);
                                         }
+                                        eventBus.fireEvent(newFileTrackingResumeEvent());
                                     }
                                 })
                                 .catchError(new Operation<PromiseError>() {
                                     @Override
                                     public void apply(PromiseError arg) throws OperationException {
                                         notificationManager.notify(locale.failedToProcessOrganizeImports(), arg.getMessage(), FAIL, FLOAT_MODE);
+                                        eventBus.fireEvent(newFileTrackingResumeEvent());
                                     }
                                 });
         }
