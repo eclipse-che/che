@@ -296,6 +296,19 @@ public class MachineProviderImplTest {
         assertTrue(argumentCaptor.getValue().getContainerConfig().getHostConfig().isPrivileged());
     }
 
+    @Test
+    public void shouldCreateContainerWithPidsLimit() throws Exception {
+        provider = spy(new MachineProviderBuilder().setPidsLimit(512)
+                                                   .build());
+
+        createInstanceFromRecipe();
+
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        assertEquals(argumentCaptor.getValue().getContainerConfig().getHostConfig().getPidsLimit(), 512);
+    }
+
+
     @Test(expectedExceptions = ServerException.class)
     public void shouldRemoveContainerInCaseFailedStartContainer() throws Exception {
         doThrow(IOException.class).when(dockerConnector).startContainer(StartContainerParams.create(CONTAINER_ID));
@@ -1118,6 +1131,7 @@ public class MachineProviderImplTest {
         private String           extraHosts;
         private boolean          doForcePullOnBuild;
         private boolean          privilegedMode;
+        private int              pidsLimit;
         private Set<String>      devMachineEnvVars;
         private Set<String>      allMachineEnvVars;
         private boolean          snapshotUseRegistry;
@@ -1137,6 +1151,7 @@ public class MachineProviderImplTest {
             allMachineVolumes = emptySet();
             extraHosts = null;
             memorySwapMultiplier = MEMORY_SWAP_MULTIPLIER;
+            pidsLimit = -1;
         }
 
         public MachineProviderBuilder setDevMachineEnvVars(Set<String> devMachineEnvVars) {
@@ -1156,6 +1171,11 @@ public class MachineProviderImplTest {
 
         public MachineProviderBuilder setPrivilegedMode(boolean privilegedMode) {
             this.privilegedMode = privilegedMode;
+            return this;
+        }
+
+        public MachineProviderBuilder setPidsLimit(int pidsLimit) {
+            this.pidsLimit = pidsLimit;
             return this;
         }
 
@@ -1202,6 +1222,7 @@ public class MachineProviderImplTest {
                                            extraHosts,
                                            doForcePullOnBuild,
                                            privilegedMode,
+                                           pidsLimit,
                                            devMachineEnvVars,
                                            allMachineEnvVars,
                                            snapshotUseRegistry,

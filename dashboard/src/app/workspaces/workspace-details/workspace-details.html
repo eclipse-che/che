@@ -2,19 +2,14 @@
              che-title-icons-controller="workspaceDetailsController"
              che-breadcrumb-title="All workspaces"
              che-breadcrumb-href="#/workspaces">
-  <che-button-default ng-if="workspaceDetailsController.isCreationFlow"
-                      ng-disabled="workspaceDetailsController.isCreateButtonDisabled()"
-                      che-button-title="Create"
-                      ng-click="workspaceDetailsController.createWorkspace()"></che-button-default>
-  <div ng-if="workspaceDetailsController.isCreationFlow === false">
-    <che-button-default ng-if="workspaceDetailsController.editMode === false"
-                        che-button-title="Open"
-                        href="#/ide/{{workspaceDetailsController.namespace}}/{{workspaceDetailsController.workspaceName}}"></che-button-default>
-    <workspace-edit-mode-toolbar-button ng-if="workspaceDetailsController.editMode"
-                                        workspace-edit-mode-message="Changes will be applied and workspace restarted"
-                                        workspace-edit-mode-show-message="workspaceDetailsController.showApplyMessage"
-                                        workspace-edit-mode-on-save="workspaceDetailsController.applyConfigChanges()"></workspace-edit-mode-toolbar-button>
-  </div>
+  <che-button-default ng-if="workspaceDetailsController.editMode === false"
+                      che-button-title="Open"
+                      href="#/ide/{{workspaceDetailsController.namespace}}/{{workspaceDetailsController.workspaceName}}"></che-button-default>
+  <workspace-edit-mode-toolbar-button ng-if="workspaceDetailsController.editMode"
+                                      workspace-edit-mode-message="Changes will be applied and workspace restarted"
+                                      workspace-edit-mode-show-message="workspaceDetailsController.showApplyMessage"
+                                      workspace-edit-disable-save-button="workspaceDetailsController.isSaveButtonDisabled()"
+                                      workspace-edit-mode-on-save="workspaceDetailsController.saveWorkspace()"></workspace-edit-mode-toolbar-button>
 </che-toolbar>
 
 <md-progress-linear md-mode="indeterminate" ng-show="workspaceDetailsController.loading"></md-progress-linear>
@@ -35,7 +30,7 @@
         <div class="workspace-details-tab-content">
 
           <!-- Name -->
-          <che-label-container che-label-name="Name">
+          <che-label-container che-label-name="Workspace name">
             <div layout="column" class="workspace-details-input">
               <ng-form flex layout="column" name="workspaceNameForm">
                 <che-input ng-init="workspaceDetailsController.setForm(workspaceDetailsController.tab.Settings, workspaceNameForm)"
@@ -44,7 +39,7 @@
                            che-place-holder="Name of the workspace"
                            aria-label="Name of the workspace"
                            ng-model="workspaceDetailsController.newName"
-                           ng-change="workspaceDetailsController.updateName(workspaceNameForm.$valid)"
+                           ng-change="workspaceDetailsController.updateName(workspaceNameForm)"
                            ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 2000, 'blur': 0 } }"
                            required
                            unique-workspace-name="workspaceDetailsController.workspaceName"
@@ -117,8 +112,26 @@
       </md-tab-body>
     </md-tab>
 
+    <!-- Config tab -->
+    <md-tab ng-disabled="workspaceDetailsController.isTabDisabled(workspaceDetailsController.tab.Config)">
+      <md-tab-label>
+        <md-icon md-font-icon="fa-file-text-o" class="fa che-tab-label-icon"></md-icon>
+        <span class="che-tab-label-title">Workspace Config</span>
+      </md-tab-label>
+      <md-tab-body>
+        <ng-form name="workspaceConfigForm">
+          <che-label-container che-label-name="Workspace config">
+            <che-workspace-config-import
+              ng-init="workspaceDetailsController.setForm(workspaceDetailsController.tab.Config, workspaceConfigForm)"
+              workspace-config="workspaceDetailsController.copyWorkspaceDetails.config"
+              workspace-config-on-change="workspaceDetailsController.updateWorkspaceConfigImport(config)"></che-workspace-config-import>
+          </che-label-container>
+        </ng-form>
+      </md-tab-body>
+    </md-tab>
+
     <!-- Runtime Tab -->
-    <md-tab ng-disabled="workspaceDetailsController.isRuntimeTabDisabled()">
+    <md-tab ng-disabled="workspaceDetailsController.isTabDisabled(workspaceDetailsController.tab.Runtime)">
       <md-tab-label>
         <md-icon md-font-icon="fa-wrench" class="fa che-tab-label-icon"></md-icon>
         <span class="che-tab-label-title">Runtime</span>
@@ -132,8 +145,9 @@
             stack-id="workspaceDetailsController.stackId"
             environment-name="workspaceDetailsController.copyWorkspaceDetails.config.defaultEnv"
             workspace-config="workspaceDetailsController.copyWorkspaceDetails.config"
+            workspace-imported-recipe="workspaceDetailsController.workspaceImportedRecipe"
             machines-view-status="workspaceDetailsController.machinesViewStatus"
-            environment-on-change="workspaceDetailsController.updateWorkspaceConfig()"></workspace-environments>
+            environment-on-change="workspaceDetailsController.updateWorkspaceConfigEnvironment()"></workspace-environments>
         </ng-form>
       </md-tab-body>
     </md-tab>
@@ -155,7 +169,8 @@
 <workspace-edit-mode-overlay ng-if="workspaceDetailsController.editMode"
                              workspace-edit-mode-message="Changes will be applied and workspace restarted"
                              workspace-edit-mode-show-message="workspaceDetailsController.showApplyMessage"
-                             workspace-edit-mode-on-save="workspaceDetailsController.applyConfigChanges()"
+                             workspace-edit-disable-save-button="workspaceDetailsController.isSaveButtonDisabled()"
+                             workspace-edit-mode-on-save="workspaceDetailsController.saveWorkspace()"
                              workspace-edit-mode-on-cancel="workspaceDetailsController.cancelConfigChanges()"></workspace-edit-mode-overlay>
 
 <md-content ng-show="workspaceDetailsController.invalidWorkspace">

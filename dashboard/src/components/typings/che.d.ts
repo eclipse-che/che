@@ -26,6 +26,7 @@ declare namespace _che {
       namespace: string;
       showLogs: string;
       workspaceName: string;
+      tabName: string;
     }
 
   }

@@ -113,6 +113,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
     private final DockerInstanceStopDetector                    dockerInstanceStopDetector;
     private final boolean                                       doForcePullOnBuild;
     private final boolean                                       privilegeMode;
+    private final int                                           pidsLimit;
     private final DockerMachineFactory                          dockerMachineFactory;
     private final List<String>                                  devMachinePortsToExpose;
     private final List<String>                                  commonMachinePortsToExpose;
@@ -140,6 +141,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                @Nullable @Named("che.workspace.hosts") String allMachinesExtraHosts,
                                @Named("che.docker.always_pull_image") boolean doForcePullOnBuild,
                                @Named("che.docker.privilege") boolean privilegeMode,
+                               @Named("che.docker.pids_limit") int pidsLimit,
                                @Named("machine.docker.dev_machine.machine_env") Set<String> devMachineEnvVariables,
                                @Named("machine.docker.machine_env") Set<String> allMachinesEnvVariables,
                                @Named("che.docker.registry_for_snapshots") boolean snapshotUseRegistry,
@@ -166,6 +168,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
         this.memorySwapMultiplier = memorySwapMultiplier == -1 ? -1 : memorySwapMultiplier + 1;
         this.networkDriver = networkDriver;
         this.windowsPathEscaper = windowsPathEscaper;
+        this.pidsLimit = pidsLimit;
 
         allMachinesSystemVolumes = removeEmptyAndNullValues(allMachinesSystemVolumes);
         devMachineSystemVolumes = removeEmptyAndNullValues(devMachineSystemVolumes);
@@ -490,6 +493,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                   .withMemorySwap(machineMemorySwap)
                   .withMemory(service.getMemLimit())
                   .withPrivileged(privilegeMode)
+                  .withPidsLimit(pidsLimit)
                   .withNetworkMode(networkName)
                   .withLinks(toArrayIfNotNull(service.getLinks()))
                   .withPortBindings(service.getPorts()
