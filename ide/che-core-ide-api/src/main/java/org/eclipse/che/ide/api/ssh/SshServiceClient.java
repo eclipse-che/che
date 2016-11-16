@@ -27,6 +27,13 @@ public interface SshServiceClient {
     Promise<List<SshPairDto>> getPairs(String service);
 
     /**
+     * Gets ssh pair of given service and specific name
+     * @param service the service name
+     * @param name the identifier of one the pair
+     */
+    Promise<SshPairDto> getPair(String service, String name);
+
+    /**
      * Generates new ssh key pair with given service and name
      */
     Promise<SshPairDto> generatePair(String service, String name);

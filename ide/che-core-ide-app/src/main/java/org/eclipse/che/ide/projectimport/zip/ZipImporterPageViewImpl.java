@@ -55,6 +55,7 @@ public class ZipImporterPageViewImpl extends Composite implements ZipImporterPag
         initWidget(uiBinder.createAndBindUi(this));
         projectName.getElement().setAttribute("maxlength", "32");
         projectDescription.getElement().setAttribute("maxlength", "256");
+        skipFirstLevel.setValue(false);
     }
 
     @UiHandler("projectName")

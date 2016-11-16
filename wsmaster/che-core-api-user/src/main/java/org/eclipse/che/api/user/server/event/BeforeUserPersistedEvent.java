@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.user.server.event;
 
+import org.eclipse.che.api.core.notification.EventOrigin;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 
 /**
@@ -17,6 +18,7 @@ import org.eclipse.che.api.user.server.model.impl.UserImpl;
  *
  * @author Max Shaposhnik
  */
+@EventOrigin("user")
 public class BeforeUserPersistedEvent {
 
     private final UserImpl user;

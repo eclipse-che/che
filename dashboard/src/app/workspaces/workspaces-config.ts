@@ -21,6 +21,8 @@ import {UsageChart} from './list-workspaces/workspace-item/usage-chart.directive
 import {WorkspaceItemCtrl} from './list-workspaces/workspace-item/workspace-item.controller';
 import {WorkspaceEditModeOverlay} from './workspace-edit-mode/workspace-edit-mode-overlay.directive';
 import {WorkspaceEditModeToolbarButton} from './workspace-edit-mode/workspace-edit-mode-toolbar-button.directive';
+import {WorkspaceDetailsSsh} from './workspace-details/workspace-ssh/workspace-details-ssh.directive';
+import {WorkspaceDetailsSshCtrl} from './workspace-details/workspace-ssh/workspace-details-ssh.controller';
 import {WorkspaceDetailsProjectsCtrl} from './workspace-details/workspace-projects/workspace-details-projects.controller';
 import {WorkspaceDetailsService} from './workspace-details/workspace-details.service';
 import {ExportWorkspaceController} from './workspace-details/export-workspace/export-workspace.controller';
@@ -29,8 +31,12 @@ import {ExportWorkspaceDialogController} from  './workspace-details/export-works
 import {WorkspaceDetailsProjects} from './workspace-details/workspace-projects/workspace-details-projects.directive';
 import {ReadyToGoStacksController} from './workspace-details/select-stack/ready-to-go-stacks/ready-to-go-stacks.controller';
 import {ReadyToGoStacks} from './workspace-details/select-stack/ready-to-go-stacks/ready-to-go-stacks.directive';
-import {WorkspaceRecipeController} from './workspace-details/select-stack/recipe/workspace-recipe.controller';
-import {WorkspaceRecipe} from './workspace-details/select-stack/recipe/workspace-recipe.directive';
+import {WorkspaceRecipeImportController} from './workspace-details/select-stack/recipe-import/workspace-recipe-import.controller';
+import {WorkspaceRecipeImport} from './workspace-details/select-stack/recipe-import/workspace-recipe-import.directive';
+import {WorkspaceRecipeAuthoringController} from './workspace-details/select-stack/recipe-authoring/workspace-recipe-authoring.controller';
+import {WorkspaceRecipeAuthoring} from './workspace-details/select-stack/recipe-authoring/workspace-recipe-authoring.directive';
+import {WorkspaceConfigImportController} from './workspace-details/config-import/workspace-config-import.controller';
+import {WorkspaceConfigImport} from './workspace-details/config-import/workspace-config-import.directive';
 import {CheStackLibrarySelecter} from './workspace-details/select-stack/stack-library/stack-library-selecter/che-stack-library-selecter.directive';
 import {CreateProjectStackLibraryController} from './workspace-details/select-stack/stack-library/create-project-stack-library.controller';
 import {CreateProjectStackLibrary} from './workspace-details/select-stack/stack-library/create-project-stack-library.directive';
@@ -83,6 +89,9 @@ export class WorkspacesConfig {
 
     new CreateProjectStackLibrarySelectedStackFilter(register);
 
+    register.controller('WorkspaceDetailsSshCtrl', WorkspaceDetailsSshCtrl);
+    register.directive('workspaceDetailsSsh', WorkspaceDetailsSsh);
+
     register.controller('ListWorkspacesCtrl', ListWorkspacesCtrl);
     register.controller('WorkspaceDetailsController', WorkspaceDetailsController);
     register.controller('WorkspaceStacksController', WorkspaceStacksController);
@@ -106,8 +115,14 @@ export class WorkspacesConfig {
     register.controller('ExportWorkspaceController', ExportWorkspaceController);
     register.directive('exportWorkspace', ExportWorkspace);
 
-    register.controller('WorkspaceRecipeController', WorkspaceRecipeController);
-    register.directive('cheWorkspaceRecipe', WorkspaceRecipe);
+    register.controller('WorkspaceRecipeImportController', WorkspaceRecipeImportController);
+    register.directive('cheWorkspaceRecipeImport', WorkspaceRecipeImport);
+
+    register.controller('WorkspaceRecipeAuthoringController', WorkspaceRecipeAuthoringController);
+    register.directive('cheWorkspaceRecipeAuthoring', WorkspaceRecipeAuthoring);
+
+    register.controller('WorkspaceConfigImportController', WorkspaceConfigImportController);
+    register.directive('cheWorkspaceConfigImport', WorkspaceConfigImport);
 
     register.controller('CheWorkspaceRamAllocationSliderController', CheWorkspaceRamAllocationSliderController);
     register.directive('cheWorkspaceRamAllocationSlider', CheWorkspaceRamAllocationSlider);
@@ -154,7 +169,7 @@ export class WorkspacesConfig {
     register.directive('listAgents', ListAgents);
 
     let locationProvider = {
-      title: (params) => { return params.workspaceName;},
+      title: (params: any) => { return params.workspaceName; },
       templateUrl: 'app/workspaces/workspace-details/workspace-details.html',
       controller: 'WorkspaceDetailsController',
       controllerAs: 'workspaceDetailsController'

@@ -11,15 +11,15 @@
 
 init_global_variables() {
   DEFAULT_CHE_PRODUCT_NAME="ECLIPSE CHE"
-  DEFAULT_CHE_LAUNCHER_IMAGE_NAME="codenvy/che-launcher"
-  DEFAULT_CHE_SERVER_IMAGE_NAME="codenvy/che-server"
-  DEFAULT_CHE_DIR_IMAGE_NAME="codenvy/che-dir"
-  DEFAULT_CHE_MOUNT_IMAGE_NAME="codenvy/che-mount"
-  DEFAULT_CHE_ACTION_IMAGE_NAME="codenvy/che-action"
-  DEFAULT_CHE_TEST_IMAGE_NAME="codenvy/che-test"
-  DEFAULT_CHE_DEV_IMAGE_NAME="codenvy/che-dev"
+  DEFAULT_CHE_LAUNCHER_IMAGE_NAME="eclipse/che-launcher"
+  DEFAULT_CHE_SERVER_IMAGE_NAME="eclipse/che-server"
+  DEFAULT_CHE_DIR_IMAGE_NAME="eclipse/che-dir"
+  DEFAULT_CHE_MOUNT_IMAGE_NAME="eclipse/che-mount"
+  DEFAULT_CHE_ACTION_IMAGE_NAME="eclipse/che-action"
+  DEFAULT_CHE_TEST_IMAGE_NAME="eclipse/che-test"
+  DEFAULT_CHE_DEV_IMAGE_NAME="eclipse/che-dev"
   DEFAULT_CHE_SERVER_CONTAINER_NAME="che-server"
-  DEFAULT_CHE_VERSION="latest"
+  DEFAULT_CHE_VERSION="5.0.0-latest"
   DEFAULT_CHE_UTILITY_VERSION="nightly"
   DEFAULT_CHE_CLI_ACTION="help"
   DEFAULT_IS_INTERACTIVE="true"
@@ -67,7 +67,8 @@ Usage: ${CHE_MINI_PRODUCT_NAME} [COMMAND]
     profile update <name>              Update profile in ~/.${CHE_MINI_PRODUCT_NAME}/
     profile info <name>                Print the profile configuration
     profile list                       List available profiles
-    mount [<ws-ssh-port>]              Synchronize workspace with current working directory
+    ssh <wksp-name> [machine-name]     SSH to a workspace if SSH agent enabled
+    mount <wksp-id or wksp-name>       Synchronize workspace with current working directory
     dir init                           Initialize directory with ${CHE_MINI_PRODUCT_NAME} configuration
     dir up                             Create workspace from source in current directory
     dir down                           Stop workspace running in current directory
@@ -126,7 +127,7 @@ parse_command_line () {
     CHE_CLI_ACTION="help"
   else
     case $1 in
-      start|stop|restart|update|info|profile|action|dir|mount|compile|test|help|-h|--help)
+      start|stop|restart|update|info|profile|action|dir|ssh|mount|compile|test|help|-h|--help)
         CHE_CLI_ACTION=$1
       ;;
       *)
@@ -170,6 +171,11 @@ execute_cli() {
       update_che_image "$@" ${CHE_ACTION_IMAGE_NAME} ${CHE_UTILITY_VERSION}
       update_che_image "$@" ${CHE_TEST_IMAGE_NAME} ${CHE_UTILITY_VERSION}
       update_che_image "$@" ${CHE_DEV_IMAGE_NAME} ${CHE_UTILITY_VERSION}
+    ;;
+    ssh)
+      shift
+      load_profile
+      execute_che_action "workspace-ssh" "$@"
     ;;
     mount)
       shift
@@ -455,6 +461,7 @@ get_list_of_che_system_environment_variables() {
     echo "CHE_PRODUCT_NAME=${CHE_PRODUCT_NAME}" >> "${TMP_FILE}"
     echo "CHE_MINI_PRODUCT_NAME=${CHE_MINI_PRODUCT_NAME}" >> "${TMP_FILE}"
     echo "CHE_VERSION=${CHE_VERSION}" >> "${TMP_FILE}"
+    echo "CHE_UTILITY_VERSION=${CHE_UTILITY_VERSION}" >> "${TMP_FILE}"
     echo "CHE_CLI_INFO=${CHE_CLI_INFO}" >> "${TMP_FILE}"
     echo "CHE_CLI_DEBUG=${CHE_CLI_DEBUG}" >> "${TMP_FILE}"
     echo "CHE_DATA=${CHE_DATA}" >> "${TMP_FILE}"
@@ -776,52 +783,6 @@ execute_che_mount() {
   MOUNT_PATH=$(get_mount_path "${PWD}")
   HOME_PATH=$(get_mount_path "${HOME}")
 
-  # If extra parameter provided, then this is the port to connect to
-  if [ $# -eq 1 ]; then
-    info "mount" "Connecting to remote workspace on port ${1}"
-    WS_PORT=${1}
-
-  # Port not provided, let's do a simple discovery of running workspaces
-  else 
-    info "mount" "Searching for running workspaces with open SSH port..."
-
-    CURRENT_WS_INSTANCES=$(docker ps -aq --filter "name=workspace")
-    CURRENT_WS_COUNT=$(echo $CURRENT_WS_INSTANCES | wc -w)
-    
-    # No running workspaces
-    if [ $CURRENT_WS_COUNT -eq 0 ]; then
-      error "We could not find any running workspaces"
-      return
-
-    # Exactly 1 running workspace
-    elif [ $CURRENT_WS_COUNT -eq 1 ]; then
-
-      if has_ssh ${CURRENT_WS_INSTANCES}; then
-        RUNNING_WS_PORT=$(docker inspect --format='{{ (index (index .NetworkSettings.Ports "22/tcp") 0).HostPort }}' ${CURRENT_WS_INSTANCES})
-        info "mount" "Connecting to remote workspace on port $RUNNING_WS_PORT"
-        WS_PORT=$RUNNING_WS_PORT
-      else
-        error "We found 1 running workspace, but it does not have an SSH agent"
-        return
-      fi
-
-    # 2+ running workspace
-    else 
-      info "mount" "Re-run with 'che mount <ssh-port>'"
-      IFS=$'\n'
-
-      echo "WS CONTAINER ID    HAS SSH?    SSH PORT"
-      for CHE_WS_CONTAINER_ID in $CURRENT_WS_INSTANCES; do
-        CURRENT_WS_PORT=""
-        if has_ssh ${CHE_WS_CONTAINER_ID}; then 
-          CURRENT_WS_PORT=$(docker inspect --format='{{ (index (index .NetworkSettings.Ports "22/tcp") 0).HostPort }}' ${CHE_WS_CONTAINER_ID})
-        fi
-        echo "$CHE_WS_CONTAINER_ID       $(has_ssh ${CHE_WS_CONTAINER_ID} && echo "y" || echo "n")           $CURRENT_WS_PORT"
-      done
-      return
-    fi
-  fi
-  
   if is_native; then
     docker_run_with_che_properties --cap-add SYS_ADMIN \
                                    --device /dev/fuse \
@@ -833,7 +794,7 @@ execute_che_mount() {
                                    -v ~/.che/unison:/profile \
                                    -v "${MOUNT_PATH}":/mnthost \
                                    "${CHE_MOUNT_IMAGE_NAME}":"${CHE_UTILITY_VERSION}" \
-                                        "${GLOBAL_GET_DOCKER_HOST_IP}" $WS_PORT
+                                     $*
     
   else
     docker_run_with_che_properties --cap-add SYS_ADMIN \
@@ -842,7 +803,7 @@ execute_che_mount() {
                                    -v ~/.che/unison:/profile \
                                    -v "${MOUNT_PATH}":/mnthost \
                                    "${CHE_MOUNT_IMAGE_NAME}":"${CHE_UTILITY_VERSION}" \
-                                        "${GLOBAL_GET_DOCKER_HOST_IP}" $WS_PORT
+                                        $*
   fi
 
   # Docker doesn't seem to normally clean up this container

@@ -3,8 +3,10 @@
   <div ng-if="showMessage"
        class="workspace-edit-mode-message">{{message}}</div>
   <che-button-save-flat che-button-title="Save" name="saveButton"
+                        ng-disabled="disableSaveButton"
                         ng-click="onSave()"></che-button-save-flat>
   <che-button-cancel-flat che-button-title="Cancel" name="cancelButton"
                           ng-click="onCancel()"></che-button-cancel-flat>
+  <ng-transclude></ng-transclude>
 </div>
 

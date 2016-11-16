@@ -9,18 +9,88 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {CheAPI} from '../../../components/api/che-api.factory';
+import {CheStack} from '../../../components/api/che-stack.factory';
+import {CreateProjectSvc} from './create-project.service';
+import {CheNotification} from '../../../components/notification/che-notification.factory';
+import {RouteHistory} from '../../../components/routing/route-history.service';
+import {CheEnvironmentRegistry} from '../../../components/api/environment/che-environment-registry.factory';
 
 /**
  * This class is handling the controller for the projects
  * @author Florent Benoit
  */
 export class CreateProjectController {
+  $document: ng.IDocumentService;
+  $location: ng.ILocationService;
+  $log: ng.ILogService;
+  $mdDialog: ng.material.IDialogService;
+  $q: ng.IQService;
+  $rootScope: che.IRootScopeService;
+  $scope: ng.IScope;
+  $timeout: ng.ITimeoutService;
+  $websocket: ng.websocket.IWebSocketProvider;
+  $window: ng.IWindowService;
+  createProjectSvc: CreateProjectSvc;
+  lodash: any;
+  cheNotification: CheNotification;
+  cheAPI: CheAPI;
+  cheStack: CheStack;
+  cheEnvironmentRegistry: CheEnvironmentRegistry;
+
+  stackMachines: any;
+  importProjectData: che.IImportProject;
+  stackTab: string;
+  enableWizardProject: boolean;
+  currentStackTags: any;
+  stacksInitialized: boolean;
+  workspaces: any[];
+  selectSourceOption: string;
+  templatesChoice: string;
+  workspaceRam: number;
+  websocketReconnect: number;
+  messageBus: any;
+  recipeUrl: string;
+  recipeFormat: string;
+  recipeScript: string;
+  selectedTabIndex: number;
+  currentTab: string;
+  state: string;
+  forms: Map<string, ng.IFormController>;
+  jsonConfig: any;
+  isReady: boolean;
+  listeningChannels: any[];
+  defaultProjectName: string;
+  projectName: string;
+  defaultProjectDescription: string;
+  projectDescription: string;
+  workspaceName: string;
+  stackLibraryOption: string;
+  existingWorkspaceName: string;
+  defaultWorkspaceName: string;
+  workspaceResource: any;
+  workspaceSelected: any;
+  isWorkspaceConfig: boolean;
+  workspaceConfig: any;
+  stack: any;
+  readyToGoStack: any;
+  stackLibraryUser: any;
+  isCustomStack: boolean;
+
+  workspaceResourceForm: ng.IFormController;
+  workspaceInformationForm: ng.IFormController;
+  projectInformationForm: ng.IFormController;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheAPI, cheStack, $websocket, $routeParams, $filter, $timeout, $location, $mdDialog, $scope, $rootScope, createProjectSvc, lodash, cheNotification, $q, $log, $document, routeHistory, $window, cheEnvironmentRegistry) {
+  constructor($document: ng.IDocumentService, $filter: ng.IFilterService, $location: ng.ILocationService,
+              $log: ng.ILogService, $mdDialog: ng.material.IDialogService, $rootScope: che.IRootScopeService,
+              $routeParams: che.route.IRouteParamsService, $q: ng.IQService, $scope: ng.IScope,
+              $timeout: ng.ITimeoutService, $websocket: ng.websocket.IWebSocketProvider, $window: ng.IWindowService,
+              lodash: any, cheAPI: CheAPI, cheStack: CheStack, createProjectSvc: CreateProjectSvc,
+              cheNotification: CheNotification, routeHistory: RouteHistory, cheEnvironmentRegistry: CheEnvironmentRegistry) {
     this.$log = $log;
     this.cheAPI = cheAPI;
     this.cheStack = cheStack;
@@ -62,7 +132,7 @@ export class CreateProjectController {
     this.templatesChoice = 'templates-samples';
 
     // default RAM value for workspaces
-    this.workspaceRam = 2 * Math.pow(1024,3);
+    this.workspaceRam = 2 * Math.pow(1024, 3);
     this.websocketReconnect = 50;
 
     this.generateWorkspaceName();
@@ -71,7 +141,7 @@ export class CreateProjectController {
     this.recipeUrl = null;
     this.recipeFormat = null;
 
-    //search the selected tab
+    // search the selected tab
     let routeParams = $routeParams.tabName;
     if (!routeParams) {
       this.selectedTabIndex = 0;
@@ -105,7 +175,7 @@ export class CreateProjectController {
     } else {
       cheStack.fetchStacks().then(() => {
         this.updateWorkspaces();
-      }, (error) => {
+      }, (error: any) => {
         if (error.status === 304) {
           this.updateWorkspaces();
           return;
@@ -166,21 +236,21 @@ export class CreateProjectController {
    * @param targetObject
    * @returns [*]
    */
-  getObjectKeys(targetObject) {
+  getObjectKeys(targetObject: any): string[] {
     return Object.keys(targetObject);
   }
 
   /**
    * Fetch workspaces when initializing
    */
-  updateWorkspaces() {
+  updateWorkspaces(): void {
     this.workspaces = this.cheAPI.getWorkspace().getWorkspaces();
       // fetch workspaces when initializing
     let promise = this.cheAPI.getWorkspace().fetchWorkspaces();
     promise.then(() => {
         this.updateData();
       },
-      (error) => {
+      (error: any) => {
         // retrieve last data that were fetched before
         if (error.status === 304) {
           // ok
@@ -194,7 +264,7 @@ export class CreateProjectController {
   /**
    * Gets default project JSON used for import data
    */
-  getDefaultProjectJson() {
+  getDefaultProjectJson(): che.IImportProject {
     return {
       source: {
         location: '',
@@ -210,15 +280,15 @@ export class CreateProjectController {
   /**
    * Fetching operation has been done, so get workspaces and websocket connection
    */
-  updateData() {
+  updateData(): void {
     this.workspaceResource = this.workspaces.length > 0 ? 'existing-workspace' : 'from-stack';
-    //if create project in progress and workspace have started
+    // if create project in progress and workspace have started
     if (this.createProjectSvc.isCreateProjectInProgress() && this.createProjectSvc.getCurrentProgressStep() > 0) {
       let workspaceName = this.createProjectSvc.getWorkspaceOfProject();
-      let findWorkspace = this.lodash.find(this.workspaces, (workspace) => {
+      let findWorkspace = this.lodash.find(this.workspaces, (workspace: any) => {
         return workspace.config.name === workspaceName;
       });
-      //check current workspace
+      // check current workspace
       if (findWorkspace) {
         // init WS bus
         this.messageBus = this.cheAPI.getWebsocket().getBus();
@@ -228,7 +298,7 @@ export class CreateProjectController {
     } else {
       let preselectWorkspaceId = this.$location.search().workspaceId;
       if (preselectWorkspaceId) {
-        this.workspaceSelected = this.lodash.find(this.workspaces, (workspace) => {
+        this.workspaceSelected = this.lodash.find(this.workspaces, (workspace: any) => {
           return workspace.id === preselectWorkspaceId;
         });
       }
@@ -240,7 +310,7 @@ export class CreateProjectController {
   /**
    * Force codemirror editor to be refreshed
    */
-  refreshCM() {
+  refreshCM(): void {
     // hack to make a refresh of the zone
     this.importProjectData.cm = 'aaa';
     this.$timeout(() => {
@@ -251,7 +321,7 @@ export class CreateProjectController {
   /**
    * Update internal json data from JSON codemirror editor config file
    */
-  update() {
+  update(): void {
     try {
       this.importProjectData = angular.fromJson(this.jsonConfig.content);
     } catch (e) {
@@ -265,7 +335,7 @@ export class CreateProjectController {
    * Select the given github repository
    * @param gitHubRepository the repository selected
    */
-  selectGitHubRepository(gitHubRepository) {
+  selectGitHubRepository(gitHubRepository: any): void {
     this.setProjectName(gitHubRepository.name);
     this.setProjectDescription(gitHubRepository.description);
     this.importProjectData.source.location = gitHubRepository.clone_url;
@@ -276,13 +346,22 @@ export class CreateProjectController {
    * Checks if the current forms are being validated
    * @returns {boolean|FormController.$valid|*|ngModel.NgModelController.$valid|context.ctrl.$valid|Ic.$valid}
    */
-  checkValidFormState() {
-    // check project information form and selected tab form
+  checkValidFormState(): boolean {
+    // check workspace resource form
+    if (this.workspaceResourceForm && this.workspaceResourceForm.$invalid) {
+      return false;
+    }
 
+    // check workspace information form
+    if (this.workspaceInformationForm && this.workspaceInformationForm.$invalid) {
+      return false;
+    }
+
+    // check project information form and selected tab form
     if (this.selectSourceOption === 'select-source-new') {
       return this.projectInformationForm && this.projectInformationForm.$valid;
     } else if (this.selectSourceOption === 'select-source-existing') {
-      var currentForm = this.forms.get(this.currentTab);
+      let currentForm = this.forms.get(this.currentTab);
       if (currentForm) {
         return this.projectInformationForm && this.projectInformationForm.$valid && currentForm.$valid;
       }
@@ -293,17 +372,24 @@ export class CreateProjectController {
    * Defines the project information form
    * @param form
    */
-  setProjectInformationForm(form) {
+  setProjectInformationForm(form: ng.IFormController): void {
     this.projectInformationForm = form;
   }
 
+  setWorkspaceResourceForm(form: ng.IFormController): void {
+    this.workspaceResourceForm = form;
+  }
+
+  setWorkspaceInformationForm(form: ng.IFormController): void {
+    this.workspaceInformationForm = form;
+  }
 
   /**
    * Sets the form for a given mode
    * @param form the selected form
    * @param mode the tab selected
    */
-  setForm(form, mode) {
+  setForm(form: ng.IFormController, mode: string): void {
     this.forms.set(mode, form);
   }
 
@@ -311,7 +397,7 @@ export class CreateProjectController {
    * Sets the current selected tab
    * @param tab the selected tab
    */
-  setCurrentTab(tab) {
+  setCurrentTab(tab: string): void {
     this.currentTab = tab;
     this.importProjectData = this.getDefaultProjectJson();
 
@@ -325,7 +411,7 @@ export class CreateProjectController {
     } else if ('config' === tab) {
       this.importProjectData.project.type = 'blank';
       this.importProjectData.source.type = 'git';
-      //try to set default values
+      // try to set default values
       this.setProjectDescription(this.importProjectData.project.description);
       this.setProjectName(this.importProjectData.project.name);
       this.refreshCM();
@@ -338,19 +424,19 @@ export class CreateProjectController {
    * Returns current selected tab
    * @returns {string|*}
    */
-  getCurrentTab() {
+  getCurrentTab(): string {
     return this.currentTab;
   }
 
-  startWorkspace(bus, workspace) {
+  startWorkspace(bus: any, workspace: any): ng.IPromise<any> {
     // then we've to start workspace
     this.createProjectSvc.setCurrentProgressStep(1);
 
-    let statusLink = this.lodash.find(workspace.links, (link) => {
+    let statusLink = this.lodash.find(workspace.links, (link: any) => {
       return link.rel === 'environment.status_channel';
     });
 
-    let outputLink = this.lodash.find(workspace.links, (link) => {
+    let outputLink = this.lodash.find(workspace.links, (link: any) => {
       return link.rel === 'environment.output_channel';
     });
 
@@ -361,7 +447,7 @@ export class CreateProjectController {
     let outputChannel = outputLink ? outputLink.parameters[0].defaultValue : null;
 
     this.listeningChannels.push(agentChannel);
-    bus.subscribe(agentChannel, (message) => {
+    bus.subscribe(agentChannel, (message: any) => {
       if (this.createProjectSvc.getCurrentProgressStep() < 2) {
         this.createProjectSvc.setCurrentProgressStep(2);
       }
@@ -376,7 +462,7 @@ export class CreateProjectController {
     if (statusChannel) {
       // for now, display log of status channel in case of errors
       this.listeningChannels.push(statusChannel);
-      bus.subscribe(statusChannel, (message) => {
+      bus.subscribe(statusChannel, (message: any) => {
         message = this.getDisplayMachineLog(message);
         if (message.eventType === 'DESTROYED' && message.workspaceId === workspace.id) {
           this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
@@ -413,7 +499,7 @@ export class CreateProjectController {
 
     if (outputChannel) {
       this.listeningChannels.push(outputChannel);
-      bus.subscribe(outputChannel, (message) => {
+      bus.subscribe(outputChannel, (message: any) => {
         message = this.getDisplayMachineLog(message);
         if (this.getCreationSteps()[this.getCurrentProgressStep()].logs.length > 0) {
           this.getCreationSteps()[this.getCurrentProgressStep()].logs = this.getCreationSteps()[this.getCurrentProgressStep()].logs + '\n' + message;
@@ -428,7 +514,7 @@ export class CreateProjectController {
       // update list of workspaces
       // for new workspace to show in recent workspaces
       this.cheAPI.cheWorkspace.fetchWorkspaces();
-    }, (error) => {
+    }, (error: any) => {
       let errorMessage;
 
       if (!error || !error.data) {
@@ -460,7 +546,7 @@ export class CreateProjectController {
    * @param log origin log content
    * @returns {*} parsed log
    */
-  getDisplayMachineLog(log) {
+  getDisplayMachineLog(log: any): string {
     log = angular.fromJson(log);
     if (angular.isObject(log)) {
       return '[' + log.machineName + '] ' + log.content;
@@ -469,7 +555,7 @@ export class CreateProjectController {
     }
   }
 
-  createProjectInWorkspace(workspaceId, projectName, projectData, bus, websocketStream, workspaceBus) {
+  createProjectInWorkspace(workspaceId: string, projectName: string, projectData: any, bus: any, websocketStream?: any, workspaceBus?: any): void {
     this.updateRecentWorkspace(workspaceId);
 
     this.createProjectSvc.setCurrentProgressStep(3);
@@ -495,7 +581,7 @@ export class CreateProjectController {
       channel = 'importProject:output:' + workspaceId + ':' + projectName;
 
       // on import
-      bus.subscribe(channel, (message) => {
+      bus.subscribe(channel, (message: any) => {
         this.getCreationSteps()[this.getCurrentProgressStep()].logs = message.line;
       });
 
@@ -517,7 +603,7 @@ export class CreateProjectController {
           deferredAddCommand.resolve('no commands to add');
         }
         deferredImport.resolve();
-      }, (error) => {
+      }, (error: any) => {
         deferredImport.reject(error);
       });
 
@@ -538,10 +624,10 @@ export class CreateProjectController {
       if (/create-project/.test(currentPath)) {
         this.createProjectSvc.redirectToIDE();
       }
-    }, (error) => {
+    }, (error: any) => {
       this.cleanupChannels(websocketStream, workspaceBus, bus, channel);
       this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
-      //if we have a SSH error
+      // if we have a SSH error
       if (error.data && error.data.errorCode === 32068) {
         this.showAddSecretKeyDialog(projectData.source.location, workspaceId);
         return;
@@ -557,7 +643,7 @@ export class CreateProjectController {
 
   }
 
-  resolveProjectType(workspaceId, projectName, projectData, deferredResolve) {
+  resolveProjectType(workspaceId: string, projectName: string, projectData: any, deferredResolve: ng.IDeferred<any>) {
     let projectDetails = projectData.project;
     if (!projectDetails.attributes) {
       projectDetails.source = projectData.source;
@@ -571,7 +657,7 @@ export class CreateProjectController {
       let updateProjectPromise = projectService.updateProject(projectName, projectDetails);
       updateProjectPromise.then(() => {
         deferredResolve.resolve();
-      }, (error) => {
+      }, (error: any) => {
         deferredResolve.reject(error);
       });
       return;
@@ -587,10 +673,13 @@ export class CreateProjectController {
 
         let estimatePromises = [];
         let estimateTypes = [];
-        resultResolve.forEach((sourceResolve) => {
+        resultResolve.forEach((sourceResolve: any) => {
           // add attributes if any
           if (sourceResolve.attributes && Object.keys(sourceResolve.attributes).length > 0) {
             for (let attributeKey in sourceResolve.attributes) {
+              if (!sourceResolve.attributes.hasOwnProperty(attributeKey)) {
+                continue;
+              }
               projectDetails.attributes[attributeKey] = sourceResolve.attributes[attributeKey];
             }
           }
@@ -610,7 +699,7 @@ export class CreateProjectController {
 
           waitEstimate.then(() => {
             let firstMatchingType;
-            estimateTypes.forEach((type) => {
+            estimateTypes.forEach((type: string) => {
               let resultEstimate = projectService.getEstimate(projectName, type);
               // add attributes
               if (Object.keys(resultEstimate.attributes).length > 0) {
@@ -618,11 +707,11 @@ export class CreateProjectController {
               }
             });
 
-            attributesByMatchingType.forEach((attributes, type) => {
+            attributesByMatchingType.forEach((attributes: any, type: string) => {
               if (!firstMatchingType) {
                 let projectType = projectTypesByCategory.get(type);
                 if (projectType && projectType.parents) {
-                  projectType.parents.forEach((parentType) => {
+                  projectType.parents.forEach((parentType: string) => {
                     if (parentType === 'java') {
                       let additionalType = 'maven';
                       if (attributesByMatchingType.get(additionalType)) {
@@ -645,14 +734,14 @@ export class CreateProjectController {
             let updateProjectPromise = projectService.updateProject(projectName, projectDetails);
             updateProjectPromise.then(() => {
               deferredResolve.resolve();
-            }, (error) => {
+            }, (error: any) => {
               this.$log.log('Update project error', projectDetails, error);
-              //a second attempt with type blank
+              // a second attempt with type blank
               projectDetails.attributes = {};
               projectDetails.type = 'blank';
               projectService.updateProject(projectName, projectDetails).then(() => {
                 deferredResolve.resolve();
-              }, (error) => {
+              }, (error: any) => {
                 deferredResolve.reject(error);
               });
             });
@@ -665,7 +754,7 @@ export class CreateProjectController {
         }
       });
 
-    }, (error) => {
+    }, (error: any) => {
       deferredResolve.reject(error);
     });
   }
@@ -676,8 +765,8 @@ export class CreateProjectController {
    * @param repoURL  the repository URL
    * @param workspaceId  the workspace IDL
    */
-  showAddSecretKeyDialog(repoURL, workspaceId) {
-    let parentEl = angular.element(this.$document.body);
+  showAddSecretKeyDialog(repoURL: string, workspaceId: string): void {
+    let parentEl = angular.element(this.$document.find('body'));
 
     this.$mdDialog.show({
       bindToController: true,
@@ -693,13 +782,13 @@ export class CreateProjectController {
   /**
    * Cleanup the websocket elements after actions are finished
    */
-  cleanupChannels(websocketStream, workspaceBus, bus, channel) {
+  cleanupChannels(websocketStream: any, workspaceBus: any, bus: any, channel: any): void {
     if (websocketStream != null) {
       websocketStream.close();
     }
 
     if (workspaceBus != null) {
-      this.listeningChannels.forEach((channel) => {
+      this.listeningChannels.forEach((channel: string) => {
         workspaceBus.unsubscribe(channel);
       });
       this.listeningChannels.length = 0;
@@ -720,12 +809,13 @@ export class CreateProjectController {
    * @param projectName the name that will be used to prefix the commands inserted
    * @param commands the array to follow
    * @param index the index of the array of commands to register
+   * @param deferred
    */
-  addCommand(workspaceId, projectName, commands, index, deferred) {
+  addCommand(workspaceId: string, projectName: string, commands: any[], index: number, deferred: ng.IDeferred<any>): void {
     if (index < commands.length) {
       let newCommand = angular.copy(commands[index]);
 
-      // Update project command lines using current.project.path with actual path based on workspace runtime configuration
+      // update project command lines using current.project.path with actual path based on workspace runtime configuration
       // so adding the same project twice allow to use commands for each project without first selecting project in tree
       let workspace = this.cheAPI.getWorkspace().getWorkspaceById(workspaceId);
       if (workspace && workspace.runtime) {
@@ -743,11 +833,11 @@ export class CreateProjectController {
         }
       }
       newCommand.name = projectName + ': ' + newCommand.name;
-      var addPromise = this.cheAPI.getWorkspace().addCommand(workspaceId, newCommand);
+      let addPromise = this.cheAPI.getWorkspace().addCommand(workspaceId, newCommand);
       addPromise.then(() => {
         // call the method again
         this.addCommand(workspaceId, projectName, commands, ++index, deferred);
-      }, (error) => {
+      }, (error: any) => {
         deferred.reject(error);
       });
     } else {
@@ -755,7 +845,7 @@ export class CreateProjectController {
     }
   }
 
-  connectToExtensionServer(websocketURL, workspaceId, projectName, projectData, workspaceBus, bus) {
+  connectToExtensionServer(websocketURL: any, workspaceId: string, projectName: string, projectData: any, workspaceBus: any, bus?: any) {
 
     // try to connect
     let websocketStream = this.$websocket(websocketURL);
@@ -767,7 +857,7 @@ export class CreateProjectController {
     });
 
     // on error, retry to connect or after a delay, abort
-    websocketStream.onError((error) => {
+    websocketStream.onError((error: any) => {
       this.websocketReconnect--;
       if (this.websocketReconnect > 0) {
         this.$timeout(() => {
@@ -795,7 +885,7 @@ export class CreateProjectController {
   /**
    * User has selected a stack. needs to find or add recipe for that stack
    */
-  computeRecipeForStack(stack) {
+  computeRecipeForStack(stack: any): ng.IPromise<any> {
     // look at recipe
     let recipeSource = stack.source;
 
@@ -814,7 +904,7 @@ export class CreateProjectController {
     return promise;
   }
 
-  submitRecipe(recipeName, recipeScript) {
+  submitRecipe(recipeName: string, recipeScript: string): ng.IPromise<any> {
     let recipe = {
       type: 'docker',
       name: recipeName,
@@ -827,7 +917,7 @@ export class CreateProjectController {
   /**
    * Call the create operation that may create or import a project
    */
-  create() {
+  create(): void {
     this.importProjectData.project.description = this.projectDescription;
     this.importProjectData.project.name = this.projectName;
     this.createProjectSvc.setProject(this.projectName);
@@ -840,7 +930,7 @@ export class CreateProjectController {
     this.resetCreateProgress();
     this.setCreateProjectInProgress();
 
-    let source = {};
+    let source: any = {};
     source.type = 'dockerfile';
     // logic to decide if we create workspace based on a stack or reuse existing workspace
     if (this.workspaceResource === 'existing-workspace') {
@@ -850,7 +940,7 @@ export class CreateProjectController {
       this.createProjectSvc.setWorkspaceOfProject(this.workspaceSelected.config.name);
       this.createProjectSvc.setWorkspaceNamespace(this.workspaceSelected.namespace);
       this.checkExistingWorkspaceState(this.workspaceSelected);
-    } else {
+    } else if (this.workspaceResource === 'from-stack') {
       // create workspace based on a stack
       switch (this.stackTab) {
         case 'ready-to-go':
@@ -859,17 +949,23 @@ export class CreateProjectController {
         case 'stack-library':
           source = this.getSourceFromStack(this.stackLibraryUser);
           break;
-        case 'custom-stack':
+        case 'stack-import':
           source.type = 'environment';
           source.format = this.recipeFormat;
           if (this.recipeUrl && this.recipeUrl.length > 0) {
             source.location = this.recipeUrl;
-          } else {
-            source.content = this.recipeScript;
           }
           break;
+        case 'stack-authoring':
+          source.type = 'environment';
+          source.format = this.recipeFormat;
+          source.content = this.recipeScript;
+          break;
       }
-      this.createWorkspace(source);
+      this.createWorkspaceFromStack(source);
+    } else {
+      // create workspace based on config
+      this.createWorkspace(this.stack.workspaceConfig);
     }
   }
 
@@ -879,8 +975,8 @@ export class CreateProjectController {
    * @param stack to retrieve described source
    * @returns {source} machine source config
    */
-  getSourceFromStack(stack) {
-    let source = {};
+  getSourceFromStack(stack: any): any {
+    let source: any = {};
     source.type = 'dockerfile';
 
     switch (stack.source.type.toLowerCase()) {
@@ -902,10 +998,10 @@ export class CreateProjectController {
    *
    * @param workspace existing workspace
    */
-  checkExistingWorkspaceState(workspace) {
+  checkExistingWorkspaceState(workspace: any): void {
     if (workspace.runtime) {
       let websocketUrl = this.cheAPI.getWorkspace().getWebsocketUrl(workspace.id);
-      // Get bus
+      // get bus
       let websocketStream = this.$websocket(websocketUrl);
       // on success, create project
       websocketStream.onOpen(() => {
@@ -924,8 +1020,8 @@ export class CreateProjectController {
    *
    * @param workspace workspace for listening status
    */
-  subscribeStatusChannel(workspace) {
-    this.cheAPI.getWorkspace().fetchStatusChange(workspace.id, 'ERROR').then((message) => {
+  subscribeStatusChannel(workspace: any): void {
+    this.cheAPI.getWorkspace().fetchStatusChange(workspace.id, 'ERROR').then((message: any) => {
       this.createProjectSvc.setCurrentProgressStep(2);
       this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
       // need to show the error
@@ -958,7 +1054,7 @@ export class CreateProjectController {
    *
    * @param source machine source
    */
-  createWorkspace(source) {
+  createWorkspaceFromStack(source: any): void {
     this.createProjectSvc.setWorkspaceOfProject(this.workspaceName);
 
     let attributes = this.stack ? {stackId: this.stack.id} : {};
@@ -966,9 +1062,18 @@ export class CreateProjectController {
     this.setEnvironment(stackWorkspaceConfig);
     let workspaceConfig = this.cheAPI.getWorkspace().formWorkspaceConfig(stackWorkspaceConfig, this.workspaceName, source, this.workspaceRam);
 
-    //TODO: no account in che ? it's null when testing on localhost
+    this.createWorkspace(workspaceConfig, attributes);
+  }
+
+  /**
+   * Create new workspace with workspace config
+   *
+   * @param workspaceConfig
+   */
+  createWorkspace(workspaceConfig: any, attributes?: any): void {
+    // TODO: no account in che ? it's null when testing on localhost
     let creationPromise = this.cheAPI.getWorkspace().createWorkspaceFromConfig(null, workspaceConfig, attributes);
-    creationPromise.then((workspace) => {
+    creationPromise.then((workspace: any) => {
       this.createProjectSvc.setWorkspaceNamespace(workspace.namespace);
       this.updateRecentWorkspace(workspace.id);
 
@@ -986,7 +1091,7 @@ export class CreateProjectController {
         this.startWorkspace(bus, workspace);
       }, 1000);
 
-    }, (error) => {
+    }, (error: any) => {
       if (error.data.message) {
         this.getCreationSteps()[this.getCurrentProgressStep()].logs = error.data.message;
       }
@@ -999,9 +1104,9 @@ export class CreateProjectController {
    * Generates a default project name only if user has not entered any data
    * @param firstInit on first init, user do not have yet initialized something
    */
-  generateProjectName(firstInit) {
+  generateProjectName(firstInit: boolean): void {
     // name has not been modified by the user
-    if (firstInit || (this.projectInformationForm['deskname'].$pristine && this.projectInformationForm.name.$pristine)) {
+    if (firstInit || (this.projectInformationForm.deskname.$pristine && this.projectInformationForm.name.$pristine)) {
       // generate a name
 
       // starts with project
@@ -1022,22 +1127,22 @@ export class CreateProjectController {
   /**
    * Generates a default workspace name
    */
-  generateWorkspaceName() {
+  generateWorkspaceName(): void {
     // starts with wksp
     let name = 'wksp';
     name += '-' + (('0000' + (Math.random() * Math.pow(36, 4) << 0).toString(36)).slice(-4)); // jshint ignore:line
     this.setWorkspaceName(name);
   }
 
-  isImporting() {
+  isImporting(): boolean {
     return this.isCreateProjectInProgress();
   }
 
-  isReadyToCreate() {
+  isReadyToCreate(): boolean {
     let isCreateProjectInProgress = this.isCreateProjectInProgress();
 
     if (!this.isCustomStack) {
-      return !isCreateProjectInProgress && this.isReady
+      return !isCreateProjectInProgress && this.isReady;
     }
 
     let isRecipeUrl = this.recipeUrl && this.recipeUrl.length > 0;
@@ -1046,65 +1151,65 @@ export class CreateProjectController {
     return !isCreateProjectInProgress && this.isReady && (isRecipeUrl || isRecipeScript);
   }
 
-  resetCreateProgress() {
+  resetCreateProgress(): void {
     if (this.isResourceProblem()) {
       this.$location.path('/workspaces');
     }
     this.createProjectSvc.resetCreateProgress();
   }
 
-  resetCreateNewProject() {
+  resetCreateNewProject(): void {
     this.resetCreateProgress();
     this.generateWorkspaceName();
     this.generateProjectName(true);
   }
 
-  showIDE() {
+  showIDE(): void {
     this.$rootScope.showIDE = !this.$rootScope.showIDE;
   }
 
-  getStepText(stepNumber) {
+  getStepText(stepNumber: number): string {
     return this.createProjectSvc.getStepText(stepNumber);
   }
 
-  getCreationSteps() {
+  getCreationSteps(): any[] {
     return this.createProjectSvc.getProjectCreationSteps();
   }
 
-  getCurrentProgressStep() {
+  getCurrentProgressStep(): number {
     return this.createProjectSvc.getCurrentProgressStep();
   }
 
-  isCreateProjectInProgress() {
+  isCreateProjectInProgress(): boolean {
     return this.createProjectSvc.isCreateProjectInProgress();
   }
 
-  setCreateProjectInProgress() {
+  setCreateProjectInProgress(): void {
     this.createProjectSvc.setCreateProjectInProgress(true);
   }
 
-  getWorkspaceOfProject() {
+  getWorkspaceOfProject(): string {
     return this.createProjectSvc.getWorkspaceOfProject();
   }
 
-  getIDELink() {
+  getIDELink(): string {
     return this.createProjectSvc.getIDELink();
   }
 
-  isResourceProblem() {
+  isResourceProblem(): boolean {
     let currentCreationStep = this.getCreationSteps()[this.getCurrentProgressStep()];
     return currentCreationStep.hasError && currentCreationStep.logs.includes('You can stop other workspaces');
   }
 
-  setStackTab(stackTab) {
-    this.isCustomStack = stackTab === 'custom-stack';
+  setStackTab(stackTab: string): void {
+    this.isCustomStack = (stackTab === 'stack-import' || stackTab === 'stack-authoring');
     this.stackTab = stackTab;
   }
 
   /**
    * Update data for selected workspace
    */
-  onWorkspaceChange() {
+  onWorkspaceChange(): void {
     if (!this.workspaceSelected) {
       return;
     }
@@ -1125,10 +1230,26 @@ export class CreateProjectController {
   /**
    * Update creation flow state when source option changes
    */
-  onSourceOptionChanged() {
+  onSourceOptionChanged(): void {
     if ('select-source-existing' === this.selectSourceOption) {
-      //Need to call selection of current tab
+      // need to call selection of current tab
       this.setCurrentTab(this.currentTab);
+    }
+  }
+
+  /**
+   * Update creation flow state when workspace resource changes
+   */
+  workspaceResourceOnChange(): void {
+    this.workspaceConfig = undefined;
+    if (this.workspaceResource === 'existing-workspace') {
+      this.updateWorkspaceStatus(true);
+    } else {
+      if (this.workspaceResource === 'from-config') {
+        this.stack = null;
+        this.currentStackTags = null;
+      }
+      this.updateWorkspaceStatus(false);
     }
   }
 
@@ -1136,7 +1257,7 @@ export class CreateProjectController {
    * Use of an existing stack
    * @param stack the stack to use
    */
-  cheStackLibrarySelecter(stack) {
+  cheStackLibrarySelecter(stack: any): void {
     if (this.workspaceResource === 'existing-workspace') {
       return;
     }
@@ -1146,15 +1267,75 @@ export class CreateProjectController {
       this.stackLibraryUser = angular.copy(stack);
     }
     this.updateCurrentStack(stack);
-    this.updateWorkspaceStatus(false);
   }
 
-  updateWorkspaceStatus(isExistingWorkspace) {
+  /**
+   * Callback when workspace config in editor is changed
+   *
+   * @param config {Object} workspace config
+   */
+  updateWorkspaceConfigImport(config: any): void {
+    this.isWorkspaceConfig = true;
+    this.workspaceConfig = angular.copy(config);
+    this.stack = {
+      id: 'config-import',
+      workspaceConfig: this.workspaceConfig
+    };
+    this.workspaceName = this.workspaceConfig.name;
+
+    delete this.stackMachines[this.stack.id];
+  }
+
+  /**
+   * Changes workspace name in workspace config provided by user
+   *
+   * @param form {Object}
+   */
+  workspaceNameChange(form: ng.IFormController): void {
+    if (!this.isWorkspaceConfig || form.$invalid || !this.workspaceConfig) {
+      return;
+    }
+
+    this.workspaceConfig.name = this.workspaceName;
+  }
+
+  /**
+   * Changes workspace RAM in workspace config provided by user
+   *
+   * @param machineName {string}
+   * @param machineRam {number}
+   */
+  workspaceRamChange(machineName: string, machineRam: number): void {
+    if (!this.isWorkspaceConfig || !this.workspaceConfig) {
+      return;
+    }
+
+    try {
+      let config = this.workspaceConfig,
+          machines = config.environments[config.defaultEnv].machines;
+      if (machines[machineName]) {
+        machines[machineName].attributes.memoryLimitBytes = machineRam;
+      } else {
+        machines[machineName] = {
+          attributes: {
+            memoryLimitBytes: machineRam
+          }
+        };
+      }
+    } catch (e) {
+      this.$log.error('Cannot set memory limit for "' + machineName + '"', e);
+    }
+
+  }
+
+  updateWorkspaceStatus(isExistingWorkspace: boolean): void {
     if (isExistingWorkspace) {
       this.stackLibraryOption = 'existing-workspace';
+      this.existingWorkspaceName = this.workspaceSelected.config.name;
     } else {
       this.stackLibraryOption = 'new-workspace';
       this.generateWorkspaceName();
+      this.existingWorkspaceName = '';
     }
     this.$rootScope.$broadcast('chePanel:disabled', {id: 'create-project-workspace', disabled: isExistingWorkspace});
   }
@@ -1163,7 +1344,7 @@ export class CreateProjectController {
    * Update current stack
    * @param stack the stack to use
    */
-  updateCurrentStack(stack) {
+  updateCurrentStack(stack: any): void {
     this.stack = stack;
     this.currentStackTags = stack && stack.tags ? angular.copy(stack.tags) : null;
     if (!stack) {
@@ -1172,7 +1353,7 @@ export class CreateProjectController {
 
     this.templatesChoice = 'templates-samples';
     this.generateProjectName(true);
-    // Enable wizard only if
+    // enable wizard only if
     // - ready-to-go-stack with PT
     // - custom stack
     if (stack === null || 'general' !== stack.scope) {
@@ -1182,7 +1363,7 @@ export class CreateProjectController {
     this.enableWizardProject  = 'Java' === stack.name;
   }
 
-  selectWizardProject() {
+  selectWizardProject(): void {
     this.importProjectData.source.location = '';
   }
 
@@ -1190,7 +1371,7 @@ export class CreateProjectController {
    * Set workspace name
    * @param name
    */
-  setWorkspaceName(name) {
+  setWorkspaceName(name: string): void {
     if (!name) {
       return;
     }
@@ -1204,7 +1385,7 @@ export class CreateProjectController {
    * Set project name
    * @param name
    */
-  setProjectName(name) {
+  setProjectName(name: string): void {
     if (!name) {
       return;
     }
@@ -1219,7 +1400,7 @@ export class CreateProjectController {
    * Set project description
    * @param description
    */
-  setProjectDescription(description) {
+  setProjectDescription(description: string): void {
     if (!description) {
       return;
     }
@@ -1230,9 +1411,9 @@ export class CreateProjectController {
     this.importProjectData.project.description = this.projectDescription;
   }
 
-  downloadLogs() {
+  downloadLogs(): void {
     let logs = '';
-    this.getCreationSteps().forEach((step) => {
+    this.getCreationSteps().forEach((step: any) => {
       logs += step.logs + '\n';
     });
     this.$window.open('data:text/csv,' + encodeURIComponent(logs));
@@ -1242,10 +1423,9 @@ export class CreateProjectController {
    * Returns list of projects of current workspace
    * @returns {*|Array}
    */
-  getWorkspaceProjects() {
+  getWorkspaceProjects(): any[] {
     if (this.workspaceSelected && this.workspaceResource === 'existing-workspace') {
-      let projects = this.cheAPI.getWorkspace().getWorkspaceProjects()[this.workspaceSelected.id];
-      return projects;
+      return this.cheAPI.getWorkspace().getWorkspaceProjects()[this.workspaceSelected.id];
     }
     return [];
   }
@@ -1256,11 +1436,11 @@ export class CreateProjectController {
    *
    * @param workspaceId
    */
-  updateRecentWorkspace(workspaceId) {
+  updateRecentWorkspace(workspaceId: string): any {
     this.$rootScope.$broadcast('recent-workspace:set', workspaceId);
   }
 
-  getStackMachines(environment) {
+  getStackMachines(environment: any): any {
     let recipeType = environment.recipe.type;
     let environmentManager = this.cheEnvironmentRegistry.getEnvironmentManager(recipeType);
     if (!this.stackMachines[this.stack.id]) {
@@ -1275,7 +1455,7 @@ export class CreateProjectController {
    *
    * @param workspace workspace to update
    */
-  setEnvironment(workspace) {
+  setEnvironment(workspace: any): void {
     if (!workspace.defaultEnv || !workspace.environments || workspace.environments.length === 0) {
       return;
     }

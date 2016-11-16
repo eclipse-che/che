@@ -78,6 +78,11 @@ public class FontAwesome {
     public static final String REFRESH = "<i class=\"fa fa-refresh\"></i>";
 
     /**
+     * http://fortawesome.github.io/Font-Awesome/icon/exchange/
+     */
+    public static final String EXCHANGE = "<i class=\"fa fa-exchange\"></i>";
+
+    /**
      * http://fortawesome.github.io/Font-Awesome/icon/search/
      */
     public static final String SEARCH = "<i class=\"fa fa-search\"></i>";

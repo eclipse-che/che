@@ -48,7 +48,7 @@ import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
 import org.eclipse.che.ide.api.resources.ResourceDelta;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
-import org.eclipse.che.ide.debug.dto.BreakpointDto;
+import org.eclipse.che.ide.api.debug.dto.StorableBreakpointDto;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.loging.Log;
@@ -499,7 +499,7 @@ public class BreakpointManagerImpl implements BreakpointManager,
     private void preserveBreakpoints() {
         Storage localStorage = Storage.getLocalStorageIfSupported();
         if (localStorage != null) {
-            List<BreakpointDto> allDtoBreakpoints = new LinkedList<BreakpointDto>();
+            List<StorableBreakpointDto> allDtoBreakpoints = new LinkedList<StorableBreakpointDto>();
 
             List<Breakpoint> allBreakpoints = getBreakpointList();
             if (currentBreakpoint != null) {
@@ -507,7 +507,7 @@ public class BreakpointManagerImpl implements BreakpointManager,
             }
 
             for (Breakpoint breakpoint : allBreakpoints) {
-                BreakpointDto dto = dtoFactory.createDto(BreakpointDto.class);
+                StorableBreakpointDto dto = dtoFactory.createDto(StorableBreakpointDto.class);
                 dto.setType(breakpoint.getType());
                 dto.setPath(breakpoint.getPath());
                 dto.setLineNumber(breakpoint.getLineNumber());
@@ -547,11 +547,11 @@ public class BreakpointManagerImpl implements BreakpointManager,
             return;
         }
 
-        List<BreakpointDto> allDtoBreakpoints = dtoFactory.createListDtoFromJson(data, BreakpointDto.class);
+        List<StorableBreakpointDto> allDtoBreakpoints = dtoFactory.createListDtoFromJson(data, StorableBreakpointDto.class);
 
         Promise<Void> bpPromise = promises.resolve(null);
 
-        for (final BreakpointDto dto : allDtoBreakpoints) {
+        for (final StorableBreakpointDto dto : allDtoBreakpoints) {
             bpPromise.thenPromise(new Function<Void, Promise<Void>>() {
                 @Override
                 public Promise<Void> apply(Void ignored) throws FunctionException {

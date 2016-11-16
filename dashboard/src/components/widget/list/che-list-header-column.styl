@@ -1,9 +1,17 @@
 .che-list-header-column
   display inherit
+  height inherit
   line-height inherit
   margin 0 !important
   text-transform uppercase
   color $list-header-blue-color
+
+  & > div
+   display inline-block
+   overflow visible
+
+  span:first-child
+    margin auto 0 auto 0
 
   .header-sort-direction
     padding 0 4px 0 4px
@@ -16,7 +24,7 @@
       color $menu-bg-color
 
     .fa-sort-desc::before
-      top 1px
+      top 0
 
     .fa-sort-asc::before
-      top 3px
+      top 1px

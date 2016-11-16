@@ -9,6 +9,7 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {CheStack} from '../../../../components/api/che-stack.factory';
 
 /**
  * @ngdoc controller
@@ -17,15 +18,36 @@
  * @author Oleksii Orel
  */
 export class WorkspaceSelectStackController {
+  $timeout: ng.ITimeoutService;
+  $scope: ng.IScope;
+  lodash: any;
+
+  stack: any;
+  stacks: any[];
+  readyToGoStack: any;
+  stackLibraryUser: any;
+  tabName: string;
+  selectedTabIndex: number;
+
+  recipeUrl: string;
+  recipeScript: string;
+
+  onTabChange: Function;
+  onStackChange: Function;
+
+  tabs: string[];
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($timeout, $scope, lodash, cheStack) {
+  constructor($timeout: ng.ITimeoutService, $scope: ng.IScope, lodash: any, cheStack: CheStack) {
     this.$timeout = $timeout;
     this.$scope = $scope;
     this.lodash = lodash;
+
+    this.tabs = ['ready-to-go', 'stack-library', 'stack-import', 'stack-authoring'];
+    this.setSelectedTab();
 
     this.stacks = cheStack.getStacks();
     if (this.stacks.length) {
@@ -36,9 +58,9 @@ export class WorkspaceSelectStackController {
       });
     }
 
-    $scope.$on('event:selectStackId', (event, data) => {
+    $scope.$on('event:selectStackId', (event: ng.IAngularEvent, data: any) => {
       event.stopPropagation();
-      let findStack = this.lodash.find(this.stacks, (stack) => {
+      let findStack = this.lodash.find(this.stacks, (stack: any) => {
         return stack.id === data.stackId;
       });
       if (findStack) {
@@ -52,22 +74,51 @@ export class WorkspaceSelectStackController {
         }
       }
     });
+
+    $scope.$watch(() => { return this.tabName; }, () => {
+      if (!this.tabName) {
+        return;
+      }
+      this.setSelectedTab();
+    });
+  }
+
+  setSelectedTab(): void {
+    this.selectedTabIndex = this.tabs.indexOf(this.tabName) !== -1
+      ? this.tabs.indexOf(this.tabName)
+      : 0;
   }
 
   /**
    * Callback when tab has been change
-   * @param tabName  the select tab name
+   * @param tabName {string} the select tab name
    */
-  setStackTab(tabName) {
+  setStackTab(tabName: string): void {
     this.tabName = tabName;
     this.onTabChange({tabName: tabName});
 
     if (tabName === 'ready-to-go') {
       this.onStackSelect(this.readyToGoStack);
+      this.recipeScript = null;
+      this.recipeUrl = null;
       return;
     } else if (tabName === 'stack-library') {
       this.onStackSelect(this.stackLibraryUser);
+      this.recipeScript = null;
+      this.recipeUrl = null;
       return;
+    } else {
+      if (tabName === 'stack-import') {
+        if (this.recipeUrl) {
+          return;
+        }
+        this.recipeScript = null;
+      } else if (tabName === 'stack-authoring') {
+        if (this.recipeScript) {
+          return;
+        }
+        this.recipeUrl = null;
+      }
     }
     this.onStackSelect(null);
   }
@@ -76,8 +127,8 @@ export class WorkspaceSelectStackController {
    * Callback when stack has been select
    * @param stack
    */
-  onStackSelect(stack) {
-    this.stack = stack;
-    this.onStackChange({stack: stack});
+  onStackSelect(stack: any): void {
+    this.stack = angular.copy(stack);
+    this.onStackChange({stack: this.stack});
   }
 }

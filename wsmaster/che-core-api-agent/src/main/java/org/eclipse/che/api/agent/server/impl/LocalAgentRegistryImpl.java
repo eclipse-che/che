@@ -39,6 +39,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.zip.ZipFile;
@@ -65,10 +66,14 @@ public class LocalAgentRegistryImpl implements AgentRegistry {
     private final List<String>       agentIds;
 
     @Inject
-    public LocalAgentRegistryImpl() throws IOException {
+    public LocalAgentRegistryImpl(Set<Agent> agents) throws IOException {
+
         this.agents = new HashMap<>();
         findAgents();
-        this.agentIds = ImmutableList.copyOf(agents.keySet());
+        for (Agent agent : agents) {
+            this.agents.put(agent.getId(), agent);
+        }
+        this.agentIds = ImmutableList.copyOf(this.agents.keySet());
     }
 
     @Override

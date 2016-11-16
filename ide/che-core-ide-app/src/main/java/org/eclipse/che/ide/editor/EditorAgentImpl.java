@@ -29,10 +29,12 @@ import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.CoreLocalizationConstant;
+import org.eclipse.che.ide.actions.LinkWithEditorAction;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.component.StateComponent;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.constraints.Direction;
+import org.eclipse.che.ide.api.data.HasDataObject;
 import org.eclipse.che.ide.api.editor.AsyncEditorProvider;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorInput;
@@ -48,6 +50,8 @@ import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
 import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.event.FileEvent.FileEventHandler;
+import org.eclipse.che.ide.api.event.SelectionChangedEvent;
+import org.eclipse.che.ide.api.event.SelectionChangedHandler;
 import org.eclipse.che.ide.api.event.WindowActionEvent;
 import org.eclipse.che.ide.api.event.WindowActionHandler;
 import org.eclipse.che.ide.api.filetypes.FileType;
@@ -61,11 +65,16 @@ import org.eclipse.che.ide.api.parts.EditorTab;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PropertyListener;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
+import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.api.resources.File;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.VirtualFile;
+import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.editor.synchronization.EditorContentSynchronizer;
 import org.eclipse.che.ide.part.editor.multipart.EditorMultiPartStackPresenter;
+import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.resources.reveal.RevealResourceEvent;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
@@ -75,6 +84,7 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Lists.newArrayList;
+import static java.lang.Boolean.parseBoolean;
 import static org.eclipse.che.ide.api.parts.PartStackType.EDITING;
 
 /**
@@ -87,6 +97,7 @@ public class EditorAgentImpl implements EditorAgent,
                                         EditorPartCloseHandler,
                                         FileEventHandler,
                                         ActivePartChangedHandler,
+                                        SelectionChangedHandler,
                                         WindowActionHandler,
                                         WsAgentStateHandler,
                                         StateComponent {
@@ -94,6 +105,7 @@ public class EditorAgentImpl implements EditorAgent,
     private final EventBus                 eventBus;
     private final WorkspaceAgent           workspaceAgent;
     private final FileTypeRegistry         fileTypeRegistry;
+    private final PreferencesManager       preferencesManager;
     private final EditorRegistry           editorRegistry;
     private final CoreLocalizationConstant coreLocalizationConstant;
     private final EditorMultiPartStack     editorMultiPartStack;
@@ -105,10 +117,12 @@ public class EditorAgentImpl implements EditorAgent,
     private final PromiseProvider                     promiseProvider;
     private       List<EditorPartPresenter>           dirtyEditors;
     private       EditorPartPresenter                 activeEditor;
+    private       PartPresenter                       activePart;
 
     @Inject
     public EditorAgentImpl(EventBus eventBus,
                            FileTypeRegistry fileTypeRegistry,
+                           PreferencesManager preferencesManager,
                            EditorRegistry editorRegistry,
                            WorkspaceAgent workspaceAgent,
                            CoreLocalizationConstant coreLocalizationConstant,
@@ -118,6 +132,7 @@ public class EditorAgentImpl implements EditorAgent,
                            PromiseProvider promiseProvider) {
         this.eventBus = eventBus;
         this.fileTypeRegistry = fileTypeRegistry;
+        this.preferencesManager = preferencesManager;
         this.editorRegistry = editorRegistry;
         this.workspaceAgent = workspaceAgent;
         this.coreLocalizationConstant = coreLocalizationConstant;
@@ -129,6 +144,7 @@ public class EditorAgentImpl implements EditorAgent,
         this.openedEditorsToProviders = new HashMap<>();
 
         eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
+        eventBus.addHandler(SelectionChangedEvent.TYPE, this);
         eventBus.addHandler(FileEvent.TYPE, this);
         eventBus.addHandler(WindowActionEvent.TYPE, this);
         eventBus.addHandler(WsAgentStateEvent.TYPE, this);
@@ -152,9 +168,16 @@ public class EditorAgentImpl implements EditorAgent,
 
     @Override
     public void onActivePartChanged(ActivePartChangedEvent event) {
-        if (event.getActivePart() instanceof EditorPartPresenter) {
-            activeEditor = (EditorPartPresenter)event.getActivePart();
-            activeEditor.activate();
+        activePart = event.getActivePart();
+        if (!(event.getActivePart() instanceof EditorPartPresenter)) {
+            return;
+        }
+        activeEditor = (EditorPartPresenter)event.getActivePart();
+        activeEditor.activate();
+        final String isLinkedWithEditor = preferencesManager.getValue(LinkWithEditorAction.LINK_WITH_EDITOR);
+        if (parseBoolean(isLinkedWithEditor)) {
+            final VirtualFile file = activeEditor.getEditorInput().getFile();
+            eventBus.fireEvent(new RevealResourceEvent(file.getLocation()));
         }
     }
 
@@ -574,6 +597,53 @@ public class EditorAgentImpl implements EditorAgent,
         finalizeInit(file, callback, editor, editorProvider);
     }
 
+    @Override
+    public void onSelectionChanged(SelectionChangedEvent event) {
+        final String isLinkedWithEditor = preferencesManager.getValue(LinkWithEditorAction.LINK_WITH_EDITOR);
+        if (!parseBoolean(isLinkedWithEditor)) {
+            return;
+        }
+
+        final Selection<?> selection = event.getSelection();
+        if (selection instanceof Selection.NoSelectionProvided) {
+            return;
+        }
+
+        Resource currentResource = null;
+
+        if (selection == null || selection.getHeadElement() == null || selection.getAllElements().size() > 1) {
+            return;
+        }
+
+        final Object headObject = selection.getHeadElement();
+
+        if (headObject instanceof HasDataObject) {
+            Object data = ((HasDataObject)headObject).getData();
+
+            if (data instanceof Resource) {
+                currentResource = (Resource)data;
+            }
+        } else if (headObject instanceof Resource) {
+            currentResource = (Resource)headObject;
+        }
+
+        EditorPartStack activePartStack = editorMultiPartStack.getActivePartStack();
+        if (currentResource == null || activePartStack == null || activeEditor == null) {
+            return;
+        }
+
+        final Path locationOfActiveOpenedFile = activeEditor.getEditorInput().getFile().getLocation();
+        final Path selectedResourceLocation = currentResource.getLocation();
+        if (!(activePart instanceof ProjectExplorerPresenter) &&
+            selectedResourceLocation.equals(locationOfActiveOpenedFile)) {
+            return;
+        }
+
+        PartPresenter partPresenter = activePartStack.getPartByPath(selectedResourceLocation);
+        if (partPresenter != null) {
+            workspaceAgent.setActivePart(partPresenter, EDITING);
+        }
+    }
 
     private static class RestoreStateEditorCallBack extends OpenEditorCallbackImpl {
         private final int cursorOffset;

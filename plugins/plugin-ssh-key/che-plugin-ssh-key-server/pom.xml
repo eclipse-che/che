@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-ssh-key-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>5.0.0-M7-SNAPSHOT</version>
+        <version>5.0.0-M8-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-ssh-key-server</artifactId>
     <packaging>jar</packaging>
