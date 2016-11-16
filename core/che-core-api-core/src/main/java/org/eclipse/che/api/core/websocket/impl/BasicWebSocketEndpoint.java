@@ -26,14 +26,14 @@ import javax.websocket.server.PathParam;
  *
  * @author Dmitry Kuleshov
  */
-public abstract class BasicWebSocketEndpoint {
+public class BasicWebSocketEndpoint {
     private static final Logger LOG = LoggerFactory.getLogger(BasicWebSocketEndpoint.class);
 
     private final WebSocketSessionRegistry        registry;
     private final PendingMessagesReSender         reSender;
     private final WebSocketTransmissionDispatcher dispatcher;
 
-    public BasicWebSocketEndpoint(WebSocketSessionRegistry registry,
+    protected BasicWebSocketEndpoint(WebSocketSessionRegistry registry,
                                   PendingMessagesReSender reSender,
                                   WebSocketTransmissionDispatcher dispatcher) {
 
