@@ -65,7 +65,7 @@ public class JsonRpcExecAgentCommandManager implements ExecAgentCommandManager {
     }
 
     @Override
-    public ExecAgentPromise<ProcessStartResponseDto> startProcess(Command command) {
+    public ExecAgentPromise<ProcessStartResponseDto> startProcess(final String endpointId, Command command) {
         final String name = command.getName();
         final String commandLine = command.getCommandLine();
         final String type = command.getType();
@@ -79,11 +79,11 @@ public class JsonRpcExecAgentCommandManager implements ExecAgentCommandManager {
 
         final ExecAgentPromise<ProcessStartResponseDto> execAgentPromise = new ExecAgentPromise<>();
 
-        transmitter.transmitRequest("exec-agent", "process.start", dto, ProcessStartResponseDto.class).then(
+        transmitter.transmitRequest(endpointId, "process.start", dto, ProcessStartResponseDto.class).then(
                 new Operation<ProcessStartResponseDto>() {
                     @Override
                     public void apply(ProcessStartResponseDto arg) throws OperationException {
-                        subscribe(execAgentPromise, arg);
+                        subscribe(endpointId, execAgentPromise, arg);
                     }
                 });
 
@@ -91,17 +91,18 @@ public class JsonRpcExecAgentCommandManager implements ExecAgentCommandManager {
     }
 
     @Override
-    public Promise<ProcessKillResponseDto> killProcess(final int pid) {
+    public Promise<ProcessKillResponseDto> killProcess(String endpointId, final int pid) {
         Log.debug(getClass(), "Killing a process. PID: " + pid);
 
         final ProcessKillRequestDto dto = dtoFactory.createDto(ProcessKillRequestDto.class)
                                                     .withPid(pid);
 
-        return transmitter.transmitRequest("exec-agent", "process.kill", dto, ProcessKillResponseDto.class);
+        return transmitter.transmitRequest(endpointId, "process.kill", dto, ProcessKillResponseDto.class);
     }
 
     @Override
-    public ExecAgentPromise<ProcessSubscribeResponseDto> subscribe(int pid, List<String> eventTypes, String after) {
+    public ExecAgentPromise<ProcessSubscribeResponseDto> subscribe(final String endpointId, int pid, List<String> eventTypes,
+                                                                   String after) {
         Log.debug(getClass(), "Subscribing to a process. PID: " + pid + ", event types: " + eventTypes + ", after timestamp: " + after);
 
         final ProcessSubscribeRequestDto dto = dtoFactory.createDto(ProcessSubscribeRequestDto.class)
@@ -111,11 +112,11 @@ public class JsonRpcExecAgentCommandManager implements ExecAgentCommandManager {
 
         final ExecAgentPromise<ProcessSubscribeResponseDto> execAgentPromise = new ExecAgentPromise<>();
 
-        transmitter.transmitRequest("exec-agent", "process.subscribe", dto, ProcessSubscribeResponseDto.class).then(
+        transmitter.transmitRequest(endpointId, "process.subscribe", dto, ProcessSubscribeResponseDto.class).then(
                 new Operation<ProcessSubscribeResponseDto>() {
                     @Override
                     public void apply(ProcessSubscribeResponseDto arg) throws OperationException {
-                        subscribe(execAgentPromise, arg);
+                        subscribe(endpointId, execAgentPromise, arg);
                     }
                 });
 
@@ -123,7 +124,7 @@ public class JsonRpcExecAgentCommandManager implements ExecAgentCommandManager {
     }
 
     @Override
-    public Promise<ProcessUnSubscribeResponseDto> unsubscribe(int pid, List<String> eventTypes, String after) {
+    public Promise<ProcessUnSubscribeResponseDto> unsubscribe(String endpointId, int pid, List<String> eventTypes, String after) {
         Log.debug(getClass(), "Unsubscribing to a process. PID: " + pid + ", event types: " + eventTypes + ", after timestamp: " + after);
 
         final ProcessUnSubscribeRequestDto dto = dtoFactory.createDto(ProcessUnSubscribeRequestDto.class)
@@ -131,22 +132,23 @@ public class JsonRpcExecAgentCommandManager implements ExecAgentCommandManager {
                                                            .withEventTypes(join(eventTypes, ","))
                                                            .withAfter(after);
 
-        return transmitter.transmitRequest("exec-agent", "process.unsubscribe", dto, ProcessUnSubscribeResponseDto.class);
+        return transmitter.transmitRequest(endpointId, "process.unsubscribe", dto, ProcessUnSubscribeResponseDto.class);
     }
 
     @Override
-    public Promise<UpdateSubscriptionResponseDto> updateSubscription(int pid, List<String> eventTypes) {
+    public Promise<UpdateSubscriptionResponseDto> updateSubscription(String endpointId, int pid, List<String> eventTypes) {
         Log.debug(getClass(), "Updating subscription to a process. PID: " + pid + ", event types: " + eventTypes);
 
         final UpdateSubscriptionRequestDto dto = dtoFactory.createDto(UpdateSubscriptionRequestDto.class)
                                                            .withPid(pid)
                                                            .withEventTypes(join(eventTypes, ","));
 
-        return transmitter.transmitRequest("exec-agent", "process.updateSubscriber", dto, UpdateSubscriptionResponseDto.class);
+        return transmitter.transmitRequest(endpointId, "process.updateSubscriber", dto, UpdateSubscriptionResponseDto.class);
     }
 
     @Override
-    public Promise<List<GetProcessLogsResponseDto>> getProcessLogs(int pid, String from, String till, int limit, int skip) {
+    public Promise<List<GetProcessLogsResponseDto>> getProcessLogs(String endpointId, int pid, String from, String till, int limit,
+                                                                   int skip) {
         Log.debug(getClass(),
                   "Getting process logs" +
                   ". PID: " + pid +
@@ -163,50 +165,50 @@ public class JsonRpcExecAgentCommandManager implements ExecAgentCommandManager {
                                                        .withLimit(limit)
                                                        .withSkip(skip);
 
-        return transmitter.transmitRequestForList("exec-agent", "process.getLogs", dto, GetProcessLogsResponseDto.class);
+        return transmitter.transmitRequestForList(endpointId, "process.getLogs", dto, GetProcessLogsResponseDto.class);
     }
 
     @Override
-    public Promise<GetProcessResponseDto> getProcess(int pid) {
+    public Promise<GetProcessResponseDto> getProcess(String endpointId, int pid) {
         Log.debug(getClass(), "Getting process info. PID: " + pid);
 
         final GetProcessRequestDto dto = dtoFactory.createDto(GetProcessRequestDto.class)
                                                    .withPid(pid);
 
-        return transmitter.transmitRequest("exec-agent", "process.getProcess", dto, GetProcessResponseDto.class);
+        return transmitter.transmitRequest(endpointId, "process.getProcess", dto, GetProcessResponseDto.class);
     }
 
     @Override
-    public Promise<List<GetProcessesResponseDto>> getProcesses(boolean all) {
+    public Promise<List<GetProcessesResponseDto>> getProcesses(String endpointId, boolean all) {
         Log.debug(getClass(), "Getting processes info. All: " + all);
 
         final GetProcessesRequestDto dto = dtoFactory.createDto(GetProcessesRequestDto.class)
                                                      .withAll(all);
 
-        return transmitter.transmitRequestForList("exec-agent", "process.getProcesses", dto, GetProcessesResponseDto.class);
+        return transmitter.transmitRequestForList(endpointId, "process.getProcesses", dto, GetProcessesResponseDto.class);
     }
 
-    private <T extends DtoWithPidDto> void subscribe(ExecAgentPromise<T> promise, T arg) throws OperationException {
+    private <T extends DtoWithPidDto> void subscribe(String endpointId, ExecAgentPromise<T> promise, T arg) throws OperationException {
         final int pid = arg.getPid();
 
         if (promise.hasProcessDiedEventOperation()) {
             final Operation<ProcessDiedEventDto> operation = promise.getProcessDiedEventDtoOperation();
-            eventManager.registerProcessDiedOperation(pid, operation);
+            eventManager.registerProcessDiedOperation(endpointId, pid, operation);
         }
 
         if (promise.hasProcessStartedEventOperation()) {
             final Operation<ProcessStartedEventDto> operation = promise.getProcessStartedEventDtoOperation();
-            eventManager.registerProcessStartedOperation(pid, operation);
+            eventManager.registerProcessStartedOperation(endpointId, pid, operation);
         }
 
         if (promise.hasProcessStdOutEventOperation()) {
             final Operation<ProcessStdOutEventDto> operation = promise.getProcessStdOutEventDtoOperation();
-            eventManager.registerProcessStdOutOperation(pid, operation);
+            eventManager.registerProcessStdOutOperation(endpointId, pid, operation);
         }
 
         if (promise.hasProcessStdErrEventOperation()) {
             final Operation<ProcessStdErrEventDto> operation = promise.getProcessStdErrEventDtoOperation();
-            eventManager.registerProcessStdErrOperation(pid, operation);
+            eventManager.registerProcessStdErrOperation(endpointId, pid, operation);
         }
 
         if (promise.hasOperation()) {

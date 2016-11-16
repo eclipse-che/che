@@ -18,14 +18,11 @@ package org.eclipse.che.ide.jsonrpc;
  * dependency injection infrastructure (e.g. gin) The example:
  * <p><code>
  * GinMapBinder.newMapBinder(binder(), String.class, RequestHandler.class)
- * .addBinding("exec-agent" + '@' + "process_died")
+ * .addBinding("process_died")
  * .to(ProcessDiedEventHandler.class);
  * </code></p>
  * where
  * <ul>
- * <li>
- * <code>exec-agent</code>: high level identifier of web socket connection
- * </li>
  * <li>
  * <code>process_died</code>: corresponding method
  * </li>
@@ -49,7 +46,7 @@ package org.eclipse.che.ide.jsonrpc;
  * All handling methods are throwing an {@link UnsupportedOperationException}
  * so you must override method that mostly correspond the type of you handler.
  * For example, if you are going to handle a notification without parameters
- * you must override {@link RequestHandler#handleNotification()} method, while
+ * you must override {@link RequestHandler#handleNotification(String)} method, while
  * the implementation will independently (analyzing the request) define which
  * handler and which method to call.
  * </p>
@@ -75,39 +72,49 @@ public abstract class RequestHandler<P, R> {
 
     /**
      * Handle a notification without parameters
+     *
+     * @param endpointId
+     *         endpoint identifier
      */
-    public void handleNotification() {
+    public void handleNotification(String endpointId) {
         throw new UnsupportedOperationException();
     }
 
     /**
      * Handle a notification with parameters
      *
+     * @param endpointId
+     *         endpoint identifier
      * @param params
      *         parameters represented by DTO
      */
-    public void handleNotification(P params) {
+    public void handleNotification(String endpointId, P params) {
         throw new UnsupportedOperationException();
     }
 
     /**
      * Handle a request without parameters
      *
+     * @param endpointId
+     *         endpoint identifier
+     *
      * @return result of handling of a request
      */
-    public R handleRequest() {
+    public R handleRequest(String endpointId) {
         throw new UnsupportedOperationException();
     }
 
     /**
      * Handle a request with parameters
      *
+     * @param endpointId
+     *         endpoint identifier
      * @param params
      *         parameters represented by DTO
      *
      * @return result of handling of a request
      */
-    public R handleRequest(P params) {
+    public R handleRequest(String endpointId, P params) {
         throw new UnsupportedOperationException();
     }
 }

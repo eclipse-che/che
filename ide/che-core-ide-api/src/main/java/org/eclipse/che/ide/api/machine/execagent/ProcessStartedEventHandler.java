@@ -28,8 +28,8 @@ public class ProcessStartedEventHandler extends AbstractExecAgentEventHandler<Pr
     }
 
     @Override
-    public void handleNotification(ProcessStartedEventDto params) {
+    public void handleNotification(String endpointId, ProcessStartedEventDto params) {
         Log.debug(getClass(), "Handling process started event. Params: " + params);
-        handle(params);
+        handle(endpointId, params);
     }
 }

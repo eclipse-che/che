@@ -30,11 +30,8 @@ public abstract class AbstractJsonRpcDispatcher {
     }
 
     RequestHandler getRequestHandler(String endpointId, String method) {
-        final String key = endpointId + '@' + method;
-        final RequestHandler handler = handlers.get(key);
-
-        if (handler != null) {
-            return handler;
+        if (handlers.containsKey(method)) {
+            return handlers.get(method);
         }
 
         final String error = "No handler registered for method: " + method + ", and endpoint: " + endpointId;

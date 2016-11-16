@@ -63,7 +63,7 @@ public class EditorFileStatusNotificationHandler extends RequestHandler<VfsFileS
     }
 
     @Override
-    public void handleNotification(VfsFileStatusUpdateDto params) {
+    public void handleNotification(String endpointId, VfsFileStatusUpdateDto params) {
         final FileWatcherEventType status = params.getType();
         final String stringPath = params.getPath();
         final String name = stringPath.substring(stringPath.lastIndexOf("/") + 1);

@@ -26,7 +26,6 @@ import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.dialogs.InputCallback;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
-import org.eclipse.che.ide.api.machine.ExecAgentEventManager;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandConsoleFactory;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.DefaultOutputConsole;
 import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
@@ -78,7 +77,7 @@ public class RunExecAgentCommandsAction extends AbstractPerspectiveAction {
                 processesPanelPresenter.addCommandOutput(id, console);
 
                 final CommandImpl command = new CommandImpl("Test command", value, "Custom");
-                jsonRpcExecAgentCommandManager.startProcess(command)
+                jsonRpcExecAgentCommandManager.startProcess(id, command)
                                               .thenIfProcessStartedEvent(new ProcessStartedEventOperation(console))
                                               .thenIfProcessDiedEvent(new ProcessDiedEventOperation(console))
                                               .thenIfProcessStdOutEvent(new ProcessStdOutEventOperation(console))

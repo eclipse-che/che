@@ -61,22 +61,26 @@ public class JsonRpcWebSocketAgentEventListener implements WsAgentStateHandler {
     }
 
     private void internalInitialize() {
-        final DevMachine devMachine = appContext.getDevMachine();
-        final String wsAgentWebSocketUrl = devMachine.getWsAgentWebSocketUrl();
+        DevMachine devMachine = appContext.getDevMachine();
+        String devMachineId = devMachine.getId();
+        String wsAgentWebSocketUrl = devMachine.getWsAgentWebSocketUrl();
 
-        final String wsAgentUrl = wsAgentWebSocketUrl.replaceFirst("(ext)(/)(ws)", "websocket" + "$2" + ENDPOINT_ID);
-        final String execAgentUrl = devMachine.getExecAgentUrl();
+        String wsAgentUrl = wsAgentWebSocketUrl.replaceFirst("(ext)(/)(ws)", "websocket" + "$2" + ENDPOINT_ID);
+        String execAgentUrl = devMachine.getExecAgentUrl();
 
 
         initializer.initialize("ws-agent", singletonMap("url", wsAgentUrl));
-        initializer.initialize("exec-agent", singletonMap("url", execAgentUrl));
+        initializer.initialize(devMachineId, singletonMap("url", execAgentUrl));
     }
 
     @Override
     public void onWsAgentStopped(WsAgentStateEvent event) {
+        DevMachine devMachine = appContext.getDevMachine();
+        String devMachineId = devMachine.getId();
+
         Log.debug(JsonRpcWebSocketAgentEventListener.class, "Web socket agent stopped event caught.");
 
         initializer.terminate("ws-agent");
-        initializer.terminate("exec-agent");
+        initializer.terminate(devMachineId);
     }
 }

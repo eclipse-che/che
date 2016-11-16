@@ -28,8 +28,8 @@ public class ProcessStdOutEventHandler extends AbstractExecAgentEventHandler<Pro
     }
 
     @Override
-    public void handleNotification(ProcessStdOutEventDto params) {
+    public void handleNotification(String endpointId, ProcessStdOutEventDto params) {
         Log.debug(getClass(), "Handling process standard output event. Params: " + params);
-        handle(params);
+        handle(endpointId, params);
     }
 }

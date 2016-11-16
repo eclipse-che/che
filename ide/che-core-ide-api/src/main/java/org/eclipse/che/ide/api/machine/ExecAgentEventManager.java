@@ -25,48 +25,58 @@ public interface ExecAgentEventManager {
     /**
      * Registers an operation that is performed when 'process died' event is received
      *
+     * @param endpointId
+     *         endpoint identifier
      * @param pid
      *         process identifier
      * @param operation
      *         operation to be performed
      */
-    void registerProcessDiedOperation(int pid, Operation<ProcessDiedEventDto> operation);
+    void registerProcessDiedOperation(String endpointId, int pid, Operation<ProcessDiedEventDto> operation);
 
     /**
      * Registers an operation that is performed when 'process started' event is received
      *
+     * @param endpointId
+     *         endpoint identifier
      * @param pid
      *         process identifier
      * @param operation
      *         operation to be performed
      */
-    void registerProcessStartedOperation(int pid, Operation<ProcessStartedEventDto> operation);
+    void registerProcessStartedOperation(String endpointId, int pid, Operation<ProcessStartedEventDto> operation);
 
     /**
      * Registers an operation that is performed when 'process standard error' event is received
      *
+     * @param endpointId
+     *         endpoint identifier
      * @param pid
      *         process identifier
      * @param operation
      *         operation to be performed
      */
-    void registerProcessStdErrOperation(int pid, Operation<ProcessStdErrEventDto> operation);
+    void registerProcessStdErrOperation(String endpointId, int pid, Operation<ProcessStdErrEventDto> operation);
 
     /**
      * Registers an operation that is performed when 'process standard output' event is received
      *
+     * @param endpointId
+     *         endpoint identifier
      * @param pid
      *         process identifier
      * @param operation
      *         operation to be performed
      */
-    void registerProcessStdOutOperation(int pid, Operation<ProcessStdOutEventDto> operation);
+    void registerProcessStdOutOperation(String endpointId, int pid, Operation<ProcessStdOutEventDto> operation);
 
     /**
      * Removes all registered event handler operations for the process associated with a PID
      *
+     * @param endpointId
+     *         endpoint identifier
      * @param pid
      *         process identifier
      */
-    void cleanPidOperations(int pid);
+    void cleanPidOperations(String endpointId, int pid);
 }

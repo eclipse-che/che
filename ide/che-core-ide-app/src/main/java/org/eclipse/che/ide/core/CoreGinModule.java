@@ -395,23 +395,23 @@ public class CoreGinModule extends AbstractGinModule {
         bind(ExecAgentEventManager.class).to(JsonRpcExecAgentEventManager.class);
 
         GinMapBinder.newMapBinder(binder(), String.class, RequestHandler.class)
-                    .addBinding("exec-agent" + '@' + "connected")
+                    .addBinding("connected")
                     .to(ConnectedEventHandler.class);
 
         GinMapBinder.newMapBinder(binder(), String.class, RequestHandler.class)
-                    .addBinding("exec-agent" + '@' + "process_started")
+                    .addBinding("process_started")
                     .to(ProcessStartedEventHandler.class);
 
         GinMapBinder.newMapBinder(binder(), String.class, RequestHandler.class)
-                    .addBinding("exec-agent" + '@' + "process_stdout")
+                    .addBinding("process_stdout")
                     .to(ProcessStdOutEventHandler.class);
 
         GinMapBinder.newMapBinder(binder(), String.class, RequestHandler.class)
-                    .addBinding("exec-agent" + '@' + "process_stderr")
+                    .addBinding("process_stderr")
                     .to(ProcessStdErrEventHandler.class);
 
         GinMapBinder.newMapBinder(binder(), String.class, RequestHandler.class)
-                    .addBinding("exec-agent" + '@' + "process_died")
+                    .addBinding("process_died")
                     .to(ProcessDiedEventHandler.class);
     }
 
@@ -420,11 +420,11 @@ public class CoreGinModule extends AbstractGinModule {
         bind(ClientServerEventService.class).asEagerSingleton();
 
         GinMapBinder.newMapBinder(binder(), String.class, RequestHandler.class)
-                    .addBinding("ws-agent" + '@' + "event:file-in-vfs-status-changed")
+                    .addBinding("event:file-in-vfs-status-changed")
                     .to(EditorFileStatusNotificationHandler.class);
 
         GinMapBinder.newMapBinder(binder(), String.class, RequestHandler.class)
-                    .addBinding("ws-agent" + '@' + "event:project-tree-status-changed")
+                    .addBinding("event:project-tree-status-changed")
                     .to(ProjectTreeStatusNotificationHandler.class);
     }
 

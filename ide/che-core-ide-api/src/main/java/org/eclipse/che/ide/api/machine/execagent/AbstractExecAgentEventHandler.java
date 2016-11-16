@@ -24,44 +24,49 @@ import java.util.Set;
 /**
  * @author Dmitry Kuleshov
  */
-public abstract class AbstractExecAgentEventHandler<P extends DtoWithPidDto, R> extends RequestHandler<P, R>{
+public abstract class AbstractExecAgentEventHandler<P extends DtoWithPidDto, R> extends RequestHandler<P, R> {
 
-    private final Map<Integer, Set<Operation<P>>> operationRegistry = new HashMap<>();
+    private final Map<String, Set<Operation<P>>> operationRegistry = new HashMap<>();
 
     protected AbstractExecAgentEventHandler(Class<P> paramsClass, Class<R> resultClass) {
         super(paramsClass, resultClass);
     }
 
-    public void handle(P params) {
-        final int pid = params.getPid();
-        final Set<Operation<P>> operations = operationRegistry.get(pid);
+    public void handle(String endpointId, P params) {
+        int pid = params.getPid();
+        String key = endpointId + '@' + pid;
 
-        if (operations != null) {
-            for (Operation<P> operation : operations) {
-                try {
-                    operation.apply(params);
-                } catch (OperationException e) {
-                    Log.error(getClass(), "Cannot perform operation for DTO: " + params + ", because of " + e.getLocalizedMessage());
-                }
+        if (!operationRegistry.containsKey(key)) {
+            return;
+        }
+
+        for (Operation<P> operation : operationRegistry.get(key)) {
+            try {
+                operation.apply(params);
+            } catch (OperationException e) {
+                Log.error(getClass(), "Cannot perform operation for DTO: " + params + ", because of " + e.getLocalizedMessage());
             }
         }
     }
 
-    public void registerOperation(int pid, Operation<P> operation){
-        if (!operationRegistry.containsKey(pid)){
-            operationRegistry.put(pid, new HashSet<Operation<P>>());
+    public void registerOperation(String endpointId, int pid, Operation<P> operation) {
+        String key = endpointId + '@' + pid;
+        if (!operationRegistry.containsKey(key)) {
+            operationRegistry.put(key, new HashSet<Operation<P>>());
         }
 
-        operationRegistry.get(pid).add(operation);
+        operationRegistry.get(key).add(operation);
     }
 
-    public void unregisterOperation(int pid, Operation<P> operation){
-        if (operationRegistry.containsKey(pid)){
-            operationRegistry.get(pid).remove(operation);
+    public void unregisterOperation(String endpointId, int pid, Operation<P> operation) {
+        String key = endpointId + '@' + pid;
+        if (operationRegistry.containsKey(key)) {
+            operationRegistry.get(key).remove(operation);
         }
     }
 
-    public void unregisterOperations(int pid){
-        operationRegistry.remove(pid);
+    public void unregisterOperations(String endpointId, int pid) {
+        String key = endpointId + '@' + pid;
+        operationRegistry.remove(key);
     }
 }

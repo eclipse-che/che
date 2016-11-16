@@ -28,8 +28,8 @@ public class ProcessDiedEventHandler extends AbstractExecAgentEventHandler<Proce
     }
 
     @Override
-    public void handleNotification(ProcessDiedEventDto params) {
+    public void handleNotification(String endpointId, ProcessDiedEventDto params) {
         Log.debug(getClass(), "Handling process died event. Params: " + params);
-        handle(params);
+        handle(endpointId, params);
     }
 }

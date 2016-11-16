@@ -43,7 +43,7 @@ public class GitCheckoutStatusNotificationHandler extends RequestHandler<GitChec
     }
 
     @Override
-    public void handleNotification(GitCheckoutEventDto dto) {
+    public void handleNotification(String endpointId, GitCheckoutEventDto dto) {
         final Type type = dto.getType();
         final String name = dto.getName();
 

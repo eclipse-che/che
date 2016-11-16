@@ -45,7 +45,7 @@ public class NotificationDispatcher extends AbstractJsonRpcDispatcher {
      *         json object
      */
     public void dispatch(String endpointId, JSONObject incomingJson) {
-        Log.debug(getClass(), "Dispatching a notification from endpoint: " + endpointId + ", jso: " + incomingJson);
+        Log.debug(getClass(), "Dispatching a notification from endpoint: " + endpointId + ", json: " + incomingJson);
 
         final String method = incomingJson.get("method").isString().stringValue();
         Log.debug(getClass(), "Extracted notification method: " + method);
@@ -59,19 +59,19 @@ public class NotificationDispatcher extends AbstractJsonRpcDispatcher {
             final Class paramsClass = handler.getParamsClass();
             Log.debug(getClass(), "Extracted notification params class: " + paramsClass);
 
-            dispatch(handler, params, paramsClass);
+            dispatch(endpointId, handler, params, paramsClass);
         } else {
-            dispatch(handler);
+            dispatch(endpointId, handler);
         }
 
     }
 
-    private <P> void dispatch(RequestHandler<P, Void> handler, JSONObject params, Class<P> paramsClass) {
+    private <P> void dispatch(String endpointId, RequestHandler<P, Void> handler, JSONObject params, Class<P> paramsClass) {
         final P param = dtoFactory.createDtoFromJson(params.toString(), paramsClass);
-        handler.handleNotification(param);
+        handler.handleNotification(endpointId, param);
     }
 
-    private void dispatch(RequestHandler handler) {
-        handler.handleNotification();
+    private void dispatch(String endpointId, RequestHandler handler) {
+        handler.handleNotification(endpointId);
     }
 }

@@ -51,29 +51,29 @@ public class JsonRpcExecAgentEventManagerTest {
 
     @Test
     public void shouldProperlyRegisterProcessDiedOperation(){
-        eventManager.registerProcessDiedOperation(0, processDiedOperation);
+        eventManager.registerProcessDiedOperation("endpoint", 0, processDiedOperation);
 
-        Mockito.verify(processDiedEventHandler).registerOperation(0, processDiedOperation);
+        Mockito.verify(processDiedEventHandler).registerOperation("endpoint", 0, processDiedOperation);
     }
 
     @Test
     public void shouldProperlyRegisterProcessStartedOperation(){
-        eventManager.registerProcessStartedOperation(0, processStartedOperation);
+        eventManager.registerProcessStartedOperation("endpoint", 0, processStartedOperation);
 
-        Mockito.verify(processStartedEventHandler).registerOperation(0, processStartedOperation);
+        Mockito.verify(processStartedEventHandler).registerOperation("endpoint", 0, processStartedOperation);
     }
 
     @Test
     public void shouldProperlyRegisterProcessStdErrOperation(){
-        eventManager.registerProcessStdErrOperation(0, processStdErrOperation);
+        eventManager.registerProcessStdErrOperation("endpoint", 0, processStdErrOperation);
 
-        Mockito.verify(processStdErrEventHandler).registerOperation(0, processStdErrOperation);
+        Mockito.verify(processStdErrEventHandler).registerOperation("endpoint", 0, processStdErrOperation);
     }
 
     @Test
     public void shouldProperlyRegisterProcessStdOutOperation() {
-        eventManager.registerProcessStdOutOperation(0, processStdOutOperation);
+        eventManager.registerProcessStdOutOperation("endpoint", 0, processStdOutOperation);
 
-        Mockito.verify(processStdOutEventHandler).registerOperation(0, processStdOutOperation);
+        Mockito.verify(processStdOutEventHandler).registerOperation("endpoint", 0, processStdOutOperation);
     }
 }

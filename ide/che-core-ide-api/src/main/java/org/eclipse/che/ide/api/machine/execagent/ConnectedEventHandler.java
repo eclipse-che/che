@@ -31,7 +31,7 @@ public class ConnectedEventHandler extends RequestHandler<ConnectedEventDto, Voi
     }
 
     @Override
-    public void handleNotification(ConnectedEventDto params) {
+    public void handleNotification(String endpointId, ConnectedEventDto params) {
         Log.debug(getClass(), "Handling channel connected event. Params: " + params);
     }
 }

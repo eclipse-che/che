@@ -97,7 +97,7 @@ public class GitGinModule extends AbstractGinModule {
 
     private void configureGitCheckoutNotifications() {
         GinMapBinder.newMapBinder(binder(), String.class, RequestHandler.class)
-                    .addBinding("ws-agent" + '@' + "event:git-checkout")
+                    .addBinding("event:git-checkout")
                     .to(GitCheckoutStatusNotificationHandler.class);
     }
 }

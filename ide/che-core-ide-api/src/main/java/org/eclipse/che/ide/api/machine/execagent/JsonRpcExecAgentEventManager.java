@@ -46,34 +46,34 @@ public class JsonRpcExecAgentEventManager implements ExecAgentEventManager {
     }
 
     @Override
-    public void registerProcessDiedOperation(int pid, Operation<ProcessDiedEventDto> operation) {
+    public void registerProcessDiedOperation(String endpointId, int pid, Operation<ProcessDiedEventDto> operation) {
         Log.debug(getClass(), "Registering operation for process died event for PID: " + pid);
-        processDiedEventHandler.registerOperation(pid, operation);
+        processDiedEventHandler.registerOperation(endpointId, pid, operation);
     }
 
     @Override
-    public void registerProcessStartedOperation(int pid, Operation<ProcessStartedEventDto> operation) {
+    public void registerProcessStartedOperation(String endpointId, int pid, Operation<ProcessStartedEventDto> operation) {
         Log.debug(getClass(), "Registering operation for process started event for PID: " + pid);
-        processStartedEventHandler.registerOperation(pid, operation);
+        processStartedEventHandler.registerOperation(endpointId, pid, operation);
     }
 
     @Override
-    public void registerProcessStdErrOperation(int pid, Operation<ProcessStdErrEventDto> operation) {
+    public void registerProcessStdErrOperation(String endpointId, int pid, Operation<ProcessStdErrEventDto> operation) {
         Log.debug(getClass(), "Registering operation for process standard output event for PID: " + pid);
-        processStdErrEventHandler.registerOperation(pid, operation);
+        processStdErrEventHandler.registerOperation(endpointId, pid, operation);
     }
 
     @Override
-    public void registerProcessStdOutOperation(int pid, Operation<ProcessStdOutEventDto> operation) {
+    public void registerProcessStdOutOperation(String endpointId, int pid, Operation<ProcessStdOutEventDto> operation) {
         Log.debug(getClass(), "Registering operation for process error output event for PID: " + pid);
-        processStdOutEventHandler.registerOperation(pid, operation);
+        processStdOutEventHandler.registerOperation(endpointId, pid, operation);
     }
 
     @Override
-    public void cleanPidOperations(int pid) {
-        processDiedEventHandler.unregisterOperations(pid);
-        processStartedEventHandler.unregisterOperations(pid);
-        processStdErrEventHandler.unregisterOperations(pid);
-        processStdOutEventHandler.unregisterOperations(pid);
+    public void cleanPidOperations(String endpointId, int pid) {
+        processDiedEventHandler.unregisterOperations(endpointId, pid);
+        processStartedEventHandler.unregisterOperations(endpointId, pid);
+        processStdErrEventHandler.unregisterOperations(endpointId, pid);
+        processStdOutEventHandler.unregisterOperations(endpointId, pid);
     }
 }

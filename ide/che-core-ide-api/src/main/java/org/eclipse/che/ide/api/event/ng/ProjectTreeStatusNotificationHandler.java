@@ -46,7 +46,7 @@ public class ProjectTreeStatusNotificationHandler extends RequestHandler<Project
 
 
     @Override
-    public void handleNotification(ProjectTreeStatusUpdateDto params) {
+    public void handleNotification(String endpointId, ProjectTreeStatusUpdateDto params) {
         final String path = params.getPath();
         final FileWatcherEventType type = params.getType();
 

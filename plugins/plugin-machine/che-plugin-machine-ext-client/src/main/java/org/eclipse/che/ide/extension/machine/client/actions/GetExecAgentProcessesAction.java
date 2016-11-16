@@ -66,7 +66,7 @@ public class GetExecAgentProcessesAction extends AbstractPerspectiveAction {
         processesPanelPresenter.addCommandOutput(id, console);
 
         final boolean all = true;
-        jsonRpcExecAgentCommandManager.getProcesses(all).then(new Operation<List<GetProcessesResponseDto>>() {
+        jsonRpcExecAgentCommandManager.getProcesses(id, all).then(new Operation<List<GetProcessesResponseDto>>() {
             @Override
             public void apply(List<GetProcessesResponseDto> arg) throws OperationException {
                 for (GetProcessesResponseDto dto : arg) {

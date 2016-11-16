@@ -72,11 +72,11 @@ public class RequestDispatcher extends AbstractJsonRpcDispatcher {
             final Class paramsClass = handler.getParamsClass();
             Log.debug(getClass(), "Extracted request params class: " + paramsClass);
 
-            result = dispatch(handler, params, paramsClass, resultClass);
+            result = dispatch(endpointId, handler, params, paramsClass);
         } else {
 
             Log.debug(getClass(), "Request is not parametrized");
-            result = dispatch(handler, resultClass);
+            result = dispatch(endpointId, handler);
         }
 
         final JSONObject response = prepareResponse(id, result);
@@ -95,16 +95,16 @@ public class RequestDispatcher extends AbstractJsonRpcDispatcher {
         return response;
     }
 
-    private <P, R> JSONObject dispatch(RequestHandler<P, R> handler, JSONObject params, Class<P> paramClass, Class<R> resultClass) {
+    private <P, R> JSONObject dispatch(String endpointId, RequestHandler<P, R> handler, JSONObject params, Class<P> paramClass) {
         final P param = dtoFactory.createDtoFromJson(params.toString(), paramClass);
-        final R result = handler.handleRequest(param);
+        final R result = handler.handleRequest(endpointId, param);
 
         final String resultString = dtoFactory.toJson(result);
         return JSONParser.parseStrict(resultString).isObject();
     }
 
-    private <R> JSONObject dispatch(RequestHandler<Void, R> handler, Class<R> resultClass) {
-        final R result = handler.handleRequest();
+    private <R> JSONObject dispatch(String endpointId, RequestHandler<Void, R> handler) {
+        final R result = handler.handleRequest(endpointId);
 
         final String resultString = dtoFactory.toJson(result);
         return JSONParser.parseStrict(resultString).isObject();
