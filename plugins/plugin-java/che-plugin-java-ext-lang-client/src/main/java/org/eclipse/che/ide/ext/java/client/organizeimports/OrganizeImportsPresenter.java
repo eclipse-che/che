@@ -61,7 +61,6 @@ public class OrganizeImportsPresenter implements OrganizeImportsView.ActionDeleg
     private final NotificationManager      notificationManager;
     private final EventBus                 eventBus;
 
-
     private int                     page;
     private List<ConflictImportDTO> choices;
     private Map<Integer, String>    selected;
