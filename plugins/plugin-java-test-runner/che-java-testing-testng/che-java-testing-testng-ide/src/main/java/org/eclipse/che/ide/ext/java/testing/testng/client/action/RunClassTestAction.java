@@ -53,9 +53,13 @@ public class RunClassTestAction extends JavaEditorAction {
     private final DtoUnmarshallerFactory dtoUnmarshallerFactory;
 
     @Inject
-    public RunClassTestAction(TestNGResources resources, NotificationManager notificationManager, EditorAgent editorAgent,
-                              FileTypeRegistry fileTypeRegistry, TestResultPresenter presenter,
-                              TestServiceClient service, DtoUnmarshallerFactory dtoUnmarshallerFactory,
+    public RunClassTestAction(TestNGResources resources,
+                              NotificationManager notificationManager,
+                              EditorAgent editorAgent,
+                              FileTypeRegistry fileTypeRegistry,
+                              TestResultPresenter presenter,
+                              TestServiceClient service,
+                              DtoUnmarshallerFactory dtoUnmarshallerFactory,
                               TestNGLocalizationConstant localization) {
         super(localization.actionRunClassTitle(), localization.actionRunClassDescription(), resources.testIcon(),
                 editorAgent, fileTypeRegistry);

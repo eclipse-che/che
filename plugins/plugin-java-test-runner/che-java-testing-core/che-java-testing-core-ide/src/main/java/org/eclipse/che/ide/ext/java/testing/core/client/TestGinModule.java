@@ -12,8 +12,10 @@ package org.eclipse.che.ide.ext.java.testing.core.client;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
-import com.google.gwt.inject.client.multibindings.GinMultibinder;
+
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
+import org.eclipse.che.ide.ext.java.testing.core.client.view.TestResultView;
+import org.eclipse.che.ide.ext.java.testing.core.client.view.TestResultViewImpl;
 import org.eclipse.che.ide.ext.java.testing.core.client.view.navigation.factory.TestResultNodeFactory;
 /**
  * Gin Module for test runner extension.
@@ -25,6 +27,6 @@ public class TestGinModule extends AbstractGinModule{
     @Override
     protected void configure() {
         install(new GinFactoryModuleBuilder().build(TestResultNodeFactory.class));
-        GinMultibinder.newSetBinder(binder(), TestAction.class);
+        bind(TestResultView.class).to(TestResultViewImpl.class);
     }
 }

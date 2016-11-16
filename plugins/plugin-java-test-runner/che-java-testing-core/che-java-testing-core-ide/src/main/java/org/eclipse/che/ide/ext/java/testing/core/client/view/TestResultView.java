@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.testing.core.client.view;
 
-import com.google.inject.ImplementedBy;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
 import org.eclipse.che.ide.ext.java.testing.core.shared.TestResult;
@@ -20,7 +19,6 @@ import org.eclipse.che.ide.ext.java.testing.core.shared.TestResult;
  *
  * @author Mirage Abeysekara
  */
-@ImplementedBy(TestResultViewImpl.class)
 public interface TestResultView extends View<TestResultView.ActionDelegate> {
     /**
      * Sets whether this panel is visible.

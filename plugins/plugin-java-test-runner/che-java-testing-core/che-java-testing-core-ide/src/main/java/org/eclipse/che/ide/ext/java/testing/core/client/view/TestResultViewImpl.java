@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.ext.java.testing.core.client.view;
 
 import com.google.common.base.Optional;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
@@ -24,6 +25,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
+
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
@@ -52,15 +54,15 @@ import org.eclipse.che.ide.ui.smartTree.NodeStorage;
 import org.eclipse.che.ide.ui.smartTree.NodeUniqueKeyProvider;
 import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.ide.util.loging.Log;
-import org.eclipse.che.plugin.maven.shared.MavenAttributes;
 
 import javax.validation.constraints.NotNull;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.eclipse.che.plugin.maven.shared.MavenAttributes.DEFAULT_TEST_SOURCE_FOLDER;
 
 /**
  * Implementation for TestResult view.
@@ -69,10 +71,12 @@ import java.util.Map;
  * @author Mirage Abeysekara
  */
 @Singleton
-class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate> implements TestResultView, TestClassNavigation {
+public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate> implements TestResultView, TestClassNavigation {
 
     interface TestResultViewImplUiBinder extends UiBinder<Widget, TestResultViewImpl> {
     }
+
+    private static final TestResultViewImplUiBinder UI_BINDER = GWT.create(TestResultViewImplUiBinder.class);
 
     private final AppContext appContext;
     private final EditorAgent editorAgent;
@@ -96,16 +100,14 @@ class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate> impleme
                               EditorAgent editorAgent,
                               AppContext appContext,
                               EventBus eventBus,
-                              TestResultViewImplUiBinder uiBinder,
                               TestResultNodeFactory nodeFactory) {
         super(resources);
-
         this.editorAgent = editorAgent;
         this.appContext = appContext;
         this.eventBus = eventBus;
         this.nodeFactory = nodeFactory;
         splitLayoutPanel = new SplitLayoutPanel(1);
-        setContentWidget(uiBinder.createAndBindUi(this));
+        setContentWidget(UI_BINDER.createAndBindUi(this));
 
         NodeUniqueKeyProvider idProvider = new NodeUniqueKeyProvider() {
             @NotNull
@@ -199,7 +201,7 @@ class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate> impleme
         final Project project = appContext.getRootProject();
 
 
-        String testSrcPath = Paths.get(project.getPath(), MavenAttributes.DEFAULT_TEST_SOURCE_FOLDER).toString();
+        String testSrcPath = project.getPath() + "/" + DEFAULT_TEST_SOURCE_FOLDER;
 
         appContext.getWorkspaceRoot().getFile(testSrcPath + packagePath).then(new Operation<Optional<File>>() {
             @Override

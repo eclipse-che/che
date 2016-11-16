@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-java-testing-core</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>5.0.0-M6-SNAPSHOT</version>
+        <version>5.0.0-M8-SNAPSHOT</version>
     </parent>
     <artifactId>che-java-testing-core-ide</artifactId>
     <name>Che Plugin :: Java Testing :: Core IDE</name>
@@ -106,5 +106,21 @@
                 <directory>src/main/resources</directory>
             </resource>
         </resources>
+        <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <executions>
+                <execution>
+                    <id>analyze</id>
+                    <configuration>
+                        <ignoredDependencies>
+                            <ignoredDependency>org.eclipse.che.plugin:che-plugin-maven-shared</ignoredDependency>
+                        </ignoredDependencies>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+        </plugins>
     </build>
 </project>

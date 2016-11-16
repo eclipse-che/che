@@ -33,9 +33,12 @@ public class TestNGTestAction implements TestAction {
     private final Action runTestXMLAction;
 
     @Inject
-    public TestNGTestAction(ActionManager actionManager, RunClassTestAction runClassTestAction,
-                            RunAllTestAction runAllTestAction, RunClassContextTestAction runClassContextTestAction,
-                            RunTestXMLAction runTestXMLAction, KeyBindingAgent keyBinding) {
+    public TestNGTestAction(ActionManager actionManager,
+                            RunClassTestAction runClassTestAction,
+                            RunAllTestAction runAllTestAction,
+                            RunClassContextTestAction runClassContextTestAction,
+                            RunTestXMLAction runTestXMLAction,
+                            KeyBindingAgent keyBinding) {
 
         actionManager.registerAction("TestNGActionRunClass", runClassTestAction);
         actionManager.registerAction("TestNGActionRunAll", runAllTestAction);

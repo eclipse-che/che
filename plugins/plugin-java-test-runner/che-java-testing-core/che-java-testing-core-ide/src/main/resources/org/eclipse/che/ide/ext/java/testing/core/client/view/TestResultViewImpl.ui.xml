@@ -12,9 +12,7 @@
 -->
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-             xmlns:ideui="urn:import:org.eclipse.che.ide.ui.tree"
              xmlns:g="urn:import:com.google.gwt.user.client.ui">
-    <!--<ui:with field="machineResources" type="org.eclipse.che.ide.extension.machine.client.MachineResources"/>-->
 
     <ui:style>
         .outputLabel {
