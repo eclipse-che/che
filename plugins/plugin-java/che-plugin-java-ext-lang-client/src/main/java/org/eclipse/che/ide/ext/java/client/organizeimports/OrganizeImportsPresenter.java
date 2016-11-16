@@ -19,22 +19,22 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
+import org.eclipse.che.ide.api.editor.document.Document;
+import org.eclipse.che.ide.api.editor.texteditor.HandlesUndoRedo;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
+import org.eclipse.che.ide.api.editor.texteditor.UndoableEditor;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.VirtualFile;
-import org.eclipse.che.ide.api.editor.texteditor.HandlesUndoRedo;
-import org.eclipse.che.ide.api.editor.texteditor.UndoableEditor;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.editor.JavaCodeAssistClient;
 import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
 import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
 import org.eclipse.che.ide.ext.java.shared.dto.ConflictImportDTO;
-import org.eclipse.che.ide.api.editor.document.Document;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.ArrayList;
@@ -54,11 +54,11 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
  */
 @Singleton
 public class OrganizeImportsPresenter implements OrganizeImportsView.ActionDelegate {
-    private final     OrganizeImportsView      view;
-    private final     JavaCodeAssistClient     javaCodeAssistClient;
-    private final     DtoFactory               dtoFactory;
-    private final     JavaLocalizationConstant locale;
-    private final     NotificationManager      notificationManager;
+    private final OrganizeImportsView      view;
+    private final JavaCodeAssistClient     javaCodeAssistClient;
+    private final DtoFactory               dtoFactory;
+    private final JavaLocalizationConstant locale;
+    private final NotificationManager      notificationManager;
     private final EventBus                 eventBus;
 
 
@@ -125,7 +125,8 @@ public class OrganizeImportsPresenter implements OrganizeImportsView.ActionDeleg
                                 .catchError(new Operation<PromiseError>() {
                                     @Override
                                     public void apply(PromiseError arg) throws OperationException {
-                                        notificationManager.notify(locale.failedToProcessOrganizeImports(), arg.getMessage(), FAIL, FLOAT_MODE);
+                                        notificationManager
+                                                .notify(locale.failedToProcessOrganizeImports(), arg.getMessage(), FAIL, FLOAT_MODE);
                                         eventBus.fireEvent(newFileTrackingResumeEvent());
                                     }
                                 });
@@ -176,7 +177,8 @@ public class OrganizeImportsPresenter implements OrganizeImportsView.ActionDeleg
                                 .catchError(new Operation<PromiseError>() {
                                     @Override
                                     public void apply(PromiseError arg) throws OperationException {
-                                        notificationManager.notify(locale.failedToProcessOrganizeImports(), arg.getMessage(), FAIL, FLOAT_MODE);
+                                        notificationManager
+                                                .notify(locale.failedToProcessOrganizeImports(), arg.getMessage(), FAIL, FLOAT_MODE);
                                     }
                                 });
         }
