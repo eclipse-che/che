@@ -11,18 +11,28 @@
 package org.eclipse.che.ide.part.explorer.project;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
+import org.eclipse.che.ide.api.action.Action;
+import org.eclipse.che.ide.actions.common.ActionFactory;
+import org.eclipse.che.ide.api.action.ActionManager;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.api.data.tree.TreeExpander;
 import org.eclipse.che.ide.api.data.tree.settings.NodeSettings;
 import org.eclipse.che.ide.api.data.tree.settings.SettingsProvider;
+import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
+import org.eclipse.che.ide.api.keybinding.KeyBuilder;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.parts.ProjectExplorerPart;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
@@ -37,11 +47,13 @@ import org.eclipse.che.ide.api.resources.marker.MarkerChangedEvent.MarkerChanged
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerView.ActionDelegate;
+import org.eclipse.che.ide.project.node.SyntheticNode;
 import org.eclipse.che.ide.project.node.SyntheticNodeUpdateEvent;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.resources.tree.ResourceNode;
 import org.eclipse.che.ide.ui.smartTree.NodeDescriptor;
 import org.eclipse.che.ide.ui.smartTree.Tree;
+import org.eclipse.che.ide.ui.smartTree.event.BeforeExpandNodeEvent;
 import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent;
 import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent.SelectionChangedHandler;
 import org.eclipse.che.providers.DynaObject;
@@ -50,6 +62,8 @@ import org.vectomatic.dom.svg.ui.SVGResource;
 import javax.validation.constraints.NotNull;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Iterables.any;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_FROM;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_TO;
@@ -85,7 +99,11 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
                                     CoreLocalizationConstant locale,
                                     Resources resources,
                                     final ResourceNode.NodeFactory nodeFactory,
-                                    final SettingsProvider settingsProvider) {
+                                    final SettingsProvider settingsProvider,
+                                    ActionManager actionManager,
+                                    ActionFactory actionFactory,
+                                    final AppContext appContext,
+                                    KeyBindingAgent keyBindingAgent) {
         this.view = view;
         this.nodeFactory = nodeFactory;
         this.settingsProvider = settingsProvider;
@@ -109,6 +127,78 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
                 setSelection(new Selection<>(event.getSelection()));
             }
         });
+
+        view.getTree().addBeforeExpandHandler(new BeforeExpandNodeEvent.BeforeExpandNodeHandler() {
+            @Override
+            public void onBeforeExpand(BeforeExpandNodeEvent event) {
+                final NodeDescriptor nodeDescriptor = view.getTree().getNodeDescriptor(event.getNode());
+
+                if (event.getNode() instanceof SyntheticNode && nodeDescriptor != null && nodeDescriptor.isExpandDeep()) {
+                    event.setCancelled(true);
+                }
+            }
+        });
+
+        final TreeExpander treeExpander = new TreeExpander() {
+
+            private final boolean[] everExpanded = new boolean[]{false};
+
+            @Override
+            public void expandTree() {
+                if (everExpanded[0]) {
+                    view.getTree().expandAll();
+
+                    return;
+                }
+
+                appContext.getWorkspaceRoot().getTree(-1).then(new Operation<Resource[]>() {
+                    @Override
+                    public void apply(Resource[] ignored) throws OperationException {
+                        everExpanded[0] = true;
+
+                        view.getTree().expandAll();
+                    }
+                });
+            }
+
+            @Override
+            public boolean isExpandEnabled() {
+                return view.getTree().getNodeStorage().getAllItemsCount() != 0;
+            }
+
+            @Override
+            public void collapseTree() {
+                view.getTree().collapseAll();
+            }
+
+            @Override
+            public boolean isCollapseEnabled() {
+                return any(view.getTree().getRootNodes(), isExpanded());
+            }
+        };
+
+        final Action expandTreeAction = actionFactory.createExpandTreeAction(treeExpander);
+        final Action collapseTreeAction = actionFactory.createCollapseTreeAction(treeExpander);
+
+        final String expandTreeActionId = "expandProjectExplorerTree";
+        final String collapseTreeActionId = "collapseProjectExplorerTree";
+
+        actionManager.registerAction(expandTreeActionId, expandTreeAction);
+        actionManager.registerAction(collapseTreeActionId, collapseTreeAction);
+
+        keyBindingAgent.getGlobal().addKey(new KeyBuilder().action().charCode('[').build(), expandTreeActionId);
+        keyBindingAgent.getGlobal().addKey(new KeyBuilder().action().charCode(']').build(), collapseTreeActionId);
+    }
+
+    private Predicate<Node> isExpanded() {
+        return new Predicate<Node>() {
+            @Override
+            public boolean apply(@javax.annotation.Nullable Node node) {
+                checkNotNull(node);
+
+                return view.getTree().isExpanded(node);
+            }
+        };
     }
 
     @Override
