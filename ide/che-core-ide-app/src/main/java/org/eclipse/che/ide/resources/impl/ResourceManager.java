@@ -1134,7 +1134,7 @@ public final class ResourceManager {
     protected Promise<Resource[]> search(final Container container, String fileMask, String contentMask) {
         QueryExpression queryExpression = new QueryExpression();
         if (!isNullOrEmpty(contentMask)) {
-            queryExpression.setText(contentMask + '*');
+            queryExpression.setText(contentMask);
         }
         if (!isNullOrEmpty(fileMask)) {
             queryExpression.setName(fileMask);

@@ -664,6 +664,9 @@ public interface CoreLocalizationConstant extends Messages {
     @Key("action.full.text.search.description")
     String actionFullTextSearchDescription();
 
+    @Key("text.search.wholeword.label")
+    String textSearchFileWholeWordLabel();
+
     String search();
 
     @Key("text.search.scope.label")
