@@ -229,7 +229,7 @@ public class DtoTemplate {
         }
         builder.append(" {\n\n");
         if ("server".equals(implType)) {
-            builder.append("  private static final Gson gson = new GsonBuilder().disableHtmlEscaping().create();\n\n");
+            builder.append("  private static final Gson gson = org.eclipse.che.dto.server.DtoFactory.getInstance().getGson();\n\n");
             builder.append("  @Override\n" +
                            "  public void accept(org.eclipse.che.dto.server.DtoFactory dtoFactory) {\n");
             for (DtoImpl dto : getDtoInterfaces()) {
