@@ -50,7 +50,7 @@ if echo ${LINUX_TYPE} | grep -qi "rhel"; then
 
 # Red Hat Enterprise Linux 6
 ############################
-if echo ${LINUX_TYPE} | grep -qi "Red Hat"; then
+elif echo ${LINUX_TYPE} | grep -qi "Red Hat"; then
     test "${PACKAGES}" = "" || {
         ${SUDO} yum install ${PACKAGES};
     }
