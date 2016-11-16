@@ -40,7 +40,7 @@ if echo ${LINUX_TYPE} | grep -qi "rhel"; then
 
 # Red Hat Enterprise Linux 6 
 ############################
-if echo ${LINUX_TYPE} | grep -qi "Red Hat"; then
+elif echo ${LINUX_TYPE} | grep -qi "Red Hat"; then
     command -v sshd >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" openssh-server"; }
     test "${PACKAGES}" = "" || {
         ${SUDO} yum -y install ${PACKAGES};
