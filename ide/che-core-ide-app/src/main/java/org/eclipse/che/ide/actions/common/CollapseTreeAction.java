@@ -17,18 +17,18 @@ import org.eclipse.che.ide.api.data.tree.TreeExpander;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Base tree expand action which consumes instance of {@link TreeExpander}.
+ * Base tree collapse action which consumes instance of {@link TreeExpander}.
  *
  * @author Vlad Zhukovskyi
  * @see TreeExpander
  * @since 5.0.0
  */
-public abstract class TreeExpandAction extends Action {
+public abstract class CollapseTreeAction extends Action {
 
     public abstract TreeExpander getTreeExpander();
 
-    public TreeExpandAction() {
-        super("Expand All");
+    public CollapseTreeAction() {
+        super("Collapse All");
     }
 
     @Override
@@ -37,17 +37,17 @@ public abstract class TreeExpandAction extends Action {
 
         checkNotNull(treeExpander);
 
-        if (!treeExpander.isExpandEnabled()) {
+        if (!treeExpander.isCollapseEnabled()) {
             return;
         }
 
-        treeExpander.expandTree();
+        treeExpander.collapseTree();
     }
 
     @Override
     public void update(ActionEvent e) {
         final TreeExpander treeExpander = getTreeExpander();
 
-        e.getPresentation().setEnabledAndVisible(treeExpander.isExpandEnabled());
+        e.getPresentation().setEnabledAndVisible(treeExpander.isCollapseEnabled());
     }
 }

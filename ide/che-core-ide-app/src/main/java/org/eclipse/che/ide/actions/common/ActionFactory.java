@@ -25,17 +25,17 @@ import org.eclipse.che.ide.api.data.tree.TreeExpander;
 public class ActionFactory {
 
     /**
-     * Returns the instance of the {@link TreeExpandAction} based on the given {@code expander}.
+     * Returns the instance of the {@link ExpandTreeAction} based on the given {@code expander}.
      *
      * @param expander
      *         tree expander
-     * @return instance of the {@link TreeExpandAction}
-     * @see TreeExpandAction
+     * @return instance of the {@link ExpandTreeAction}
+     * @see ExpandTreeAction
      * @see TreeExpander
      * @since 5.0.0
      */
     public Action createExpandTreeAction(final TreeExpander expander) {
-        return new TreeExpandAction() {
+        return new ExpandTreeAction() {
             @Override
             public TreeExpander getTreeExpander() {
                 return expander;
@@ -44,17 +44,17 @@ public class ActionFactory {
     }
 
     /**
-     * Returns the instance of the {@link TreeCollapseAction} based on the given {@code expander}.
+     * Returns the instance of the {@link CollapseTreeAction} based on the given {@code expander}.
      *
      * @param expander
      *         tree expander
-     * @return instance of the {@link TreeCollapseAction}
-     * @see TreeCollapseAction
+     * @return instance of the {@link CollapseTreeAction}
+     * @see CollapseTreeAction
      * @see TreeExpander
      * @since 5.0.0
      */
     public Action createCollapseTreeAction(final TreeExpander expander) {
-        return new TreeCollapseAction() {
+        return new CollapseTreeAction() {
             @Override
             public TreeExpander getTreeExpander() {
                 return expander;
