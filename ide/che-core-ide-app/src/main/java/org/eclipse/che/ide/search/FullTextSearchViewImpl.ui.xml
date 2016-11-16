@@ -84,6 +84,11 @@
         </g:FlowPanel>
 
         <g:FlowPanel addStyleNames="{style.section}">
+            <g:CheckBox ui:field="wholeWordsOnly" addStyleNames="{style.checkBox}" value="false" debugId="wholeWordsOnly-selector"/>
+            <g:Label text="{locale.textSearchFileWholeWordLabel}"  addStyleNames="{style.label}" debugId="wholeWordsOnly-label"/>
+        </g:FlowPanel>
+
+        <g:FlowPanel addStyleNames="{style.section}">
             <g:Label text="{locale.textSearchScopeLabel}" width="100%" addStyleNames="{style.label}"/>
             <g:CheckBox ui:field="isUseDirectory" addStyleNames="{style.checkBox} {style.sectionContent}" value="false"/>
             <g:Label addStyleNames="{style.label} {style.checkBoxLabel}" text="{locale.textSearchDirectory}"/>

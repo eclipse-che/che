@@ -174,7 +174,7 @@ public class FSLuceneSearcherTest {
         folder.createFile("xxx.txt", TEST_CONTENT[0]);
         searcher.init(virtualFileSystem);
 
-        List<String> paths = searcher.search(new QueryExpression().setText("stone")).getFilePaths();
+        List<String> paths = searcher.search(new QueryExpression().setText("*stone*")).getFilePaths();
         assertEquals(newArrayList("/folder/xxx.txt"), paths);
     }
 

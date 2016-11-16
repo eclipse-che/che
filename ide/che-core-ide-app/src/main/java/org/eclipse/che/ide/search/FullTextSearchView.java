@@ -73,4 +73,10 @@ public interface FullTextSearchView extends View<FullTextSearchView.ActionDelega
 
     /** Returns path to start search */
     String getPathToSearch();
+
+    /**
+     * True if need find only whole word
+     * @return
+     */
+    boolean isWholeWordsOnly();
 }
