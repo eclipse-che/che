@@ -252,4 +252,20 @@ public class PathTest {
         assertFalse(path.equals(pathWithDevice));
         assertTrue(pathWithDevice.toString().equals("mnt:/foo"));
     }
+
+    @Test
+    public void testShouldReturnCommonPath() throws Exception {
+        final Path common = Path.valueOf("/foo");
+
+        final Path path1 = common.append("a/b");
+        final Path path2 = common.append("a/c");
+        final Path path3 = common.append("a/d");
+        final Path path4 = common.append("c/d/b");
+        final Path path5 = common.append("a/d/c");
+        final Path path6 = common.append("a/c/c");
+
+        final Path result = Path.commonPath(path1, path2, path3, path4, path5, path6);
+
+        assertEquals(result, common);
+    }
 }
