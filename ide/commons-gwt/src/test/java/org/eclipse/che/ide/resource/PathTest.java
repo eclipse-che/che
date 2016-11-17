@@ -268,4 +268,51 @@ public class PathTest {
 
         assertEquals(result, common);
     }
+
+    @Test
+    public void testShouldReturnRootPathAsCommon() throws Exception {
+        final Path path1 = Path.valueOf("/a");
+        final Path path2 = Path.valueOf("/b");
+        final Path path3 = Path.valueOf("/c");
+        final Path path4 = Path.valueOf("/d");
+        final Path path5 = Path.valueOf("/e");
+
+        final Path result = Path.commonPath(path1, path2, path3, path4, path5);
+
+        assertEquals(result, Path.ROOT);
+    }
+
+    @Test
+    public void testShouldReturnRootPathAsCommon2() throws Exception {
+        final Path path1 = Path.valueOf("/a");
+        final Path path2 = Path.valueOf("b");
+        final Path path3 = Path.valueOf("/c");
+        final Path path4 = Path.valueOf("d");
+        final Path path5 = Path.valueOf("/e");
+
+        final Path result = Path.commonPath(path1, path2, path3, path4, path5);
+
+        assertEquals(result, Path.ROOT);
+    }
+
+    @Test
+    public void testShouldReturnEmptyPathForEmptyInputArray() throws Exception {
+        final Path result = Path.commonPath();
+
+        assertEquals(result, Path.EMPTY);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testShouldThrowNPEOnNullArgument() throws Exception {
+        Path.commonPath(null);
+    }
+
+    @Test
+    public void testShouldReturnSamePathAsOneGivenAsArgument() throws Exception {
+        final Path path = Path.valueOf("/some/path");
+
+        final Path result = Path.commonPath(path);
+
+        assertEquals(result, path);
+    }
 }

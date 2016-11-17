@@ -1252,6 +1252,10 @@ public final class Path {
             return EMPTY;
         }
 
+        if (paths.length == 1) {
+            return paths[0];
+        }
+
         for (int i = 0; i < paths.length; i++) {
             final String currentSegment = paths[0].segment(i);
 
