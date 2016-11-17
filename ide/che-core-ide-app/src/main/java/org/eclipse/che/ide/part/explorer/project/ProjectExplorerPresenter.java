@@ -11,15 +11,12 @@
 package org.eclipse.che.ide.part.explorer.project;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
@@ -62,8 +59,6 @@ import org.vectomatic.dom.svg.ui.SVGResource;
 import javax.validation.constraints.NotNull;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Iterables.any;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_FROM;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_TO;
@@ -139,43 +134,7 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
             }
         });
 
-        final TreeExpander treeExpander = new TreeExpander() {
-
-            private final boolean[] everExpanded = new boolean[]{false};
-
-            @Override
-            public void expandTree() {
-                if (everExpanded[0]) {
-                    view.getTree().expandAll();
-
-                    return;
-                }
-
-                appContext.getWorkspaceRoot().getTree(-1).then(new Operation<Resource[]>() {
-                    @Override
-                    public void apply(Resource[] ignored) throws OperationException {
-                        everExpanded[0] = true;
-
-                        view.getTree().expandAll();
-                    }
-                });
-            }
-
-            @Override
-            public boolean isExpandEnabled() {
-                return view.getTree().getNodeStorage().getAllItemsCount() != 0;
-            }
-
-            @Override
-            public void collapseTree() {
-                view.getTree().collapseAll();
-            }
-
-            @Override
-            public boolean isCollapseEnabled() {
-                return any(view.getTree().getRootNodes(), isExpanded());
-            }
-        };
+        final TreeExpander treeExpander = new ProjectExplorerTreeExpander(view.getTree(), appContext);
 
         final Action expandTreeAction = actionFactory.createExpandTreeAction(treeExpander);
         final Action collapseTreeAction = actionFactory.createCollapseTreeAction(treeExpander);
@@ -188,17 +147,6 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
 
         keyBindingAgent.getGlobal().addKey(new KeyBuilder().action().charCode('[').build(), expandTreeActionId);
         keyBindingAgent.getGlobal().addKey(new KeyBuilder().action().charCode(']').build(), collapseTreeActionId);
-    }
-
-    private Predicate<Node> isExpanded() {
-        return new Predicate<Node>() {
-            @Override
-            public boolean apply(@javax.annotation.Nullable Node node) {
-                checkNotNull(node);
-
-                return view.getTree().isExpanded(node);
-            }
-        };
     }
 
     @Override
