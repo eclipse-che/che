@@ -142,7 +142,7 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
             that.@org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter::doExpand()();
         })
 
-        ProjectExplorer.collapeAll = $entry(function() {
+        ProjectExplorer.collapseAll = $entry(function() {
             that.@org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter::doCollapse()();
         })
 
