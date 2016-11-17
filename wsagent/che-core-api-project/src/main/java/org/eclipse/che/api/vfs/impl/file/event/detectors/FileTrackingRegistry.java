@@ -52,7 +52,7 @@ public class FileTrackingRegistry {
         this.vfsProvider = vfsProvider;
     }
 
-    public void add(String path, int endpoint) {
+    public void add(String path, String endpoint) {
         final FileTrackingMetadata fileTrackingMetadata = registry.get(path);
 
         if (fileTrackingMetadata == null) {
@@ -62,14 +62,14 @@ public class FileTrackingRegistry {
         }
     }
 
-    public void suspend(int endpoint) {
+    public void suspend(String endpoint) {
         registry.values()
                 .stream()
                 .filter(m -> m.getNotSuspendedEndpoints().contains(endpoint))
                 .forEach(m -> m.suspend(endpoint));
     }
 
-    public void resume(int endpoint) {
+    public void resume(String endpoint) {
         registry.values()
                 .stream()
                 .filter(m -> m.getSuspendedEndpoints().contains(endpoint))
@@ -96,7 +96,7 @@ public class FileTrackingRegistry {
         registry.put(newPath, fileTrackingMetadata);
     }
 
-    public void remove(String path, int endpoint) {
+    public void remove(String path, String endpoint) {
         final FileTrackingMetadata fileTrackingMetadata = registry.get(path);
 
         if (fileTrackingMetadata == null) {
@@ -132,7 +132,7 @@ public class FileTrackingRegistry {
         return registry.keySet().contains(path);
     }
 
-    public Set<Integer> getEndpoints(String path) {
+    public Set<String> getEndpoints(String path) {
         return registry.get(path).getNotSuspendedEndpoints();
     }
 
@@ -163,20 +163,20 @@ public class FileTrackingRegistry {
         private static final boolean ACTIVE     = true;
         private static final boolean NOT_ACTIVE = false;
         private String hashCode;
-        private Map<Integer, Boolean> endpoints = new ConcurrentHashMap<>();
+        private Map<String, Boolean> endpoints = new ConcurrentHashMap<>();
 
-        public FileTrackingMetadata(String path, int endpoint) {
+        public FileTrackingMetadata(String path, String endpoint) {
             this.hashCode = getHash(path);
             this.endpoints.put(endpoint, ACTIVE);
         }
 
-        public void suspend(int endpoint) {
+        public void suspend(String endpoint) {
             if (endpoints.containsKey(endpoint)) {
                 endpoints.put(endpoint, NOT_ACTIVE);
             }
         }
 
-        public void resume(int endpoint) {
+        public void resume(String endpoint) {
             if (endpoints.containsKey(endpoint)) {
                 endpoints.put(endpoint, ACTIVE);
             }
@@ -190,19 +190,19 @@ public class FileTrackingRegistry {
             this.hashCode = hashCode;
         }
 
-        public void addEndpoint(int endpoint) {
+        public void addEndpoint(String endpoint) {
             endpoints.put(endpoint, ACTIVE);
         }
 
-        public void removeEndpoint(int endpoint) {
+        public void removeEndpoint(String endpoint) {
             endpoints.remove(endpoint);
         }
 
-        public Set<Integer> getNotSuspendedEndpoints() {
+        public Set<String> getNotSuspendedEndpoints() {
             return endpoints.entrySet().stream().filter(Entry::getValue).map(Entry::getKey).collect(toSet());
         }
 
-        public Set<Integer> getSuspendedEndpoints() {
+        public Set<String> getSuspendedEndpoints() {
             return endpoints.entrySet().stream().filter(e -> !e.getValue()).map(Entry::getKey).collect(toSet());
         }
 

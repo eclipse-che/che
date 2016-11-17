@@ -12,8 +12,7 @@ package org.eclipse.che.api.vfs.impl.file.event.detectors;
 
 import com.google.common.annotations.Beta;
 
-import org.eclipse.che.api.core.jsonrpc.JsonRpcRequestTransmitter;
-import org.eclipse.che.api.core.jsonrpc.shared.JsonRpcRequest;
+import org.eclipse.che.api.core.jsonrpc.RequestTransmitter;
 import org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType;
 import org.eclipse.che.api.project.shared.dto.event.ProjectTreeStatusUpdateDto;
 import org.eclipse.che.api.vfs.impl.file.event.EventTreeNode;
@@ -31,7 +30,6 @@ import java.util.Set;
 
 import static java.lang.Math.min;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -43,15 +41,15 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class ProjectTreeChangesDetector implements HiEventDetector<ProjectTreeChangesDetector> {
     private static final Logger LOG = getLogger(ProjectTreeChangesDetector.class);
 
-    private final JsonRpcRequestTransmitter transmitter;
-    private final ThreadPullLauncher        launcher;
+    private final RequestTransmitter transmitter;
+    private final ThreadPullLauncher launcher;
 
     private final Set<EventTreeNode> trees = new HashSet<>();
 
     private State state;
 
     @Inject
-    public ProjectTreeChangesDetector(JsonRpcRequestTransmitter transmitter, ThreadPullLauncher launcher) {
+    public ProjectTreeChangesDetector(RequestTransmitter transmitter, ThreadPullLauncher launcher) {
         this.transmitter = transmitter;
         this.launcher = launcher;
     }
@@ -120,21 +118,12 @@ public class ProjectTreeChangesDetector implements HiEventDetector<ProjectTreeCh
     }
 
     private void transmit(String path, FileWatcherEventType type) {
-        final String params = getParams(path, type);
-        final JsonRpcRequest request = getJsonRpcRequest(params);
-
-        transmitter.transmit(request);
+        final ProjectTreeStatusUpdateDto params = getParams(path, type);
+        transmitter.broadcast("event:project-tree-status-changed", params);
     }
 
-    private String getParams(String path, FileWatcherEventType type) {
-        return newDto(ProjectTreeStatusUpdateDto.class).withPath(path).withType(type).toString();
-    }
-
-    private JsonRpcRequest getJsonRpcRequest(String params) {
-        return newDto(JsonRpcRequest.class)
-                .withMethod("event:project-tree-status-changed")
-                .withJsonrpc("2.0")
-                .withParams(params);
+    private ProjectTreeStatusUpdateDto getParams(String path, FileWatcherEventType type) {
+        return newDto(ProjectTreeStatusUpdateDto.class).withPath(path).withType(type);
     }
 
     private enum State {

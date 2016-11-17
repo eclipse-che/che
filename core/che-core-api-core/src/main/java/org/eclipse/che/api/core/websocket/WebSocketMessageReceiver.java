@@ -11,23 +11,18 @@
 package org.eclipse.che.api.core.websocket;
 
 /**
- * The implementation of this interface receives WEB SOCKET messages corresponding
- * to the registered protocol according to the defined mapping. The protocol must
- * be mapped via MapBinder in an ordinary Guice module, for example:
- *
- * <pre>
- *     <code>
- *         MapBinder<String, WebSocketMessageReceiver> receivers =
- *         MapBinder.newMapBinder(binder(), String.class, WebSocketMessageReceiver.class);
- *         receivers.addBinding("protocol-name").to(CustomWebSocketMessageReceiver.class);
- *     </code>
- * </pre>
- *
- * All WEB SOCKET transmissions with the protocol field equal to "protocol-name" will
- * be processed with the <code>CustomWebSocketMessageReceiver</code> instance.
+ * Used as entry point for a web socket protocol message consumers.
  *
  * @author Dmitry Kuleshov
  */
 public interface WebSocketMessageReceiver {
-    void receive(String message, Integer endpointId);
+    /**
+     * Receives a message by a a web socket protocol.
+     *
+     * @param endpointId
+     *         identifier of an endpoint known to an transmitter implementation
+     * @param message
+     *         plain text message
+     */
+    void receive(String endpointId, String message);
 }

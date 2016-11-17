@@ -10,12 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.api.vfs.impl.file.event.detectors;
 
-import org.eclipse.che.api.core.jsonrpc.JsonRpcRequestReceiver;
-import org.eclipse.che.api.core.jsonrpc.shared.JsonRpcRequest;
+import org.eclipse.che.api.core.jsonrpc.RequestHandler;
 import org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto;
 import org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type;
-import org.eclipse.che.api.vfs.impl.file.event.HiEventClientBroadcaster;
-import org.eclipse.che.dto.server.DtoFactory;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -40,20 +37,19 @@ import static org.slf4j.LoggerFactory.getLogger;
  * @author Dmitry Kuleshov
  */
 @Singleton
-public class FileTrackingOperationReceiver implements JsonRpcRequestReceiver {
+public class FileTrackingOperationReceiver extends RequestHandler<FileTrackingOperationDto, Void> {
     private static final Logger LOG = getLogger(FileTrackingOperationReceiver.class);
 
     private final FileTrackingRegistry registry;
 
     @Inject
     public FileTrackingOperationReceiver(FileTrackingRegistry registry) {
+        super(FileTrackingOperationDto.class, Void.class);
         this.registry = registry;
     }
 
     @Override
-    public void receive(JsonRpcRequest request, Integer endpoint) {
-        final String params = request.getParams();
-        final FileTrackingOperationDto operation = DtoFactory.getInstance().createDtoFromJson(params, FileTrackingOperationDto.class);
+    public void handleNotification(String endpointId, FileTrackingOperationDto operation) {
         final Type type = operation.getType();
         final String path = operation.getPath();
         final String oldPath = operation.getOldPath();
@@ -62,28 +58,28 @@ public class FileTrackingOperationReceiver implements JsonRpcRequestReceiver {
             case START: {
                 LOG.debug("Received file tracking operation START trigger.");
 
-                registry.add(path, endpoint);
+                registry.add(path, endpointId);
 
                 break;
             }
             case STOP: {
                 LOG.debug("Received file tracking operation STOP trigger.");
 
-                registry.remove(path, endpoint);
+                registry.remove(path, endpointId);
 
                 break;
             }
             case SUSPEND: {
                 LOG.debug("Received file tracking operation SUSPEND trigger.");
 
-                registry.suspend(endpoint);
+                registry.suspend(endpointId);
 
                 break;
             }
             case RESUME: {
                 LOG.debug("Received file tracking operation RESUME trigger.");
 
-                registry.resume(endpoint);
+                registry.resume(endpointId);
 
                 break;
             }

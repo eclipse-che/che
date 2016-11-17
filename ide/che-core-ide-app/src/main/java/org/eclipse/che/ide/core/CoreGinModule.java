@@ -49,10 +49,10 @@ import org.eclipse.che.ide.api.dialogs.MessageDialog;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorRegistry;
 import org.eclipse.che.ide.api.event.ng.ClientServerEventService;
-import org.eclipse.che.ide.api.event.ng.EditorFileStatusNotificationReceiver;
+import org.eclipse.che.ide.api.event.ng.EditorFileStatusNotificationHandler;
 import org.eclipse.che.ide.api.event.ng.FileOpenCloseEventListener;
 import org.eclipse.che.ide.api.event.ng.JsonRpcWebSocketAgentEventListener;
-import org.eclipse.che.ide.api.event.ng.ProjectTreeStatusNotificationReceiver;
+import org.eclipse.che.ide.api.event.ng.ProjectTreeStatusNotificationHandler;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.extension.ExtensionRegistry;
 import org.eclipse.che.ide.api.factory.FactoryServiceClient;
@@ -63,10 +63,19 @@ import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.git.GitServiceClientImpl;
 import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
+import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
+import org.eclipse.che.ide.api.machine.ExecAgentEventManager;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.machine.MachineServiceClientImpl;
 import org.eclipse.che.ide.api.machine.RecipeServiceClient;
 import org.eclipse.che.ide.api.machine.RecipeServiceClientImpl;
+import org.eclipse.che.ide.api.machine.execagent.ConnectedEventHandler;
+import org.eclipse.che.ide.api.machine.execagent.JsonRpcExecAgentCommandManager;
+import org.eclipse.che.ide.api.machine.execagent.JsonRpcExecAgentEventManager;
+import org.eclipse.che.ide.api.machine.execagent.ProcessDiedEventHandler;
+import org.eclipse.che.ide.api.machine.execagent.ProcessStartedEventHandler;
+import org.eclipse.che.ide.api.machine.execagent.ProcessStdErrEventHandler;
+import org.eclipse.che.ide.api.machine.execagent.ProcessStdOutEventHandler;
 import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
 import org.eclipse.che.ide.api.macro.MacroRegistry;
@@ -139,20 +148,12 @@ import org.eclipse.che.ide.hotkeys.dialog.HotKeysDialogView;
 import org.eclipse.che.ide.hotkeys.dialog.HotKeysDialogViewImpl;
 import org.eclipse.che.ide.icon.DefaultIconsComponent;
 import org.eclipse.che.ide.icon.IconRegistryImpl;
-import org.eclipse.che.ide.jsonrpc.JsonRpcRequestReceiver;
-import org.eclipse.che.ide.jsonrpc.JsonRpcRequestTransmitter;
-import org.eclipse.che.ide.jsonrpc.JsonRpcResponseReceiver;
-import org.eclipse.che.ide.jsonrpc.JsonRpcResponseTransmitter;
-import org.eclipse.che.ide.jsonrpc.impl.BasicJsonRpcObjectValidator;
-import org.eclipse.che.ide.jsonrpc.impl.JsonRpcDispatcher;
-import org.eclipse.che.ide.jsonrpc.impl.JsonRpcInitializer;
-import org.eclipse.che.ide.jsonrpc.impl.JsonRpcObjectValidator;
-import org.eclipse.che.ide.jsonrpc.impl.WebSocketJsonRpcDispatcher;
+import org.eclipse.che.ide.jsonrpc.JsonRpcInitializer;
+import org.eclipse.che.ide.jsonrpc.RequestHandler;
+import org.eclipse.che.ide.jsonrpc.RequestTransmitter;
 import org.eclipse.che.ide.jsonrpc.impl.WebSocketJsonRpcInitializer;
-import org.eclipse.che.ide.jsonrpc.impl.WebSocketJsonRpcRequestDispatcher;
-import org.eclipse.che.ide.jsonrpc.impl.WebSocketJsonRpcRequestTransmitter;
-import org.eclipse.che.ide.jsonrpc.impl.WebSocketJsonRpcResponseDispatcher;
-import org.eclipse.che.ide.jsonrpc.impl.WebSocketJsonRpcResponseTransmitter;
+import org.eclipse.che.ide.jsonrpc.impl.WebSocketToJsonRpcDispatcher;
+import org.eclipse.che.ide.jsonrpc.impl.WebSocketTransmitter;
 import org.eclipse.che.ide.keybinding.KeyBindingManager;
 import org.eclipse.che.ide.macro.MacroProcessorImpl;
 import org.eclipse.che.ide.macro.MacroRegistryImpl;
@@ -275,14 +276,10 @@ import org.eclipse.che.ide.websocket.ng.WebSocketMessageReceiver;
 import org.eclipse.che.ide.websocket.ng.WebSocketMessageTransmitter;
 import org.eclipse.che.ide.websocket.ng.impl.BasicWebSocketEndpoint;
 import org.eclipse.che.ide.websocket.ng.impl.BasicWebSocketMessageTransmitter;
-import org.eclipse.che.ide.websocket.ng.impl.BasicWebSocketTransmissionValidator;
-import org.eclipse.che.ide.websocket.ng.impl.DelayableWebSocket;
-import org.eclipse.che.ide.websocket.ng.impl.SessionWebSocketInitializer;
-import org.eclipse.che.ide.websocket.ng.impl.WebSocket;
-import org.eclipse.che.ide.websocket.ng.impl.WebSocketCreator;
+import org.eclipse.che.ide.websocket.ng.impl.DelayableWebSocketConnection;
+import org.eclipse.che.ide.websocket.ng.impl.WebSocketConnection;
 import org.eclipse.che.ide.websocket.ng.impl.WebSocketEndpoint;
-import org.eclipse.che.ide.websocket.ng.impl.WebSocketInitializer;
-import org.eclipse.che.ide.websocket.ng.impl.WebSocketTransmissionValidator;
+import org.eclipse.che.ide.websocket.ng.impl.WebSocketFactory;
 import org.eclipse.che.ide.workspace.PartStackPresenterFactory;
 import org.eclipse.che.ide.workspace.PartStackViewFactory;
 import org.eclipse.che.ide.workspace.WorkBenchControllerFactory;
@@ -361,9 +358,11 @@ public class CoreGinModule extends AbstractGinModule {
         configureEditorAPI();
         configureProjectTree();
 
+
         configureJsonRpc();
         configureWebSocket();
         configureClientServerEventService();
+        configureExecAgent();
 
         GinMapBinder<String, StateComponent> stateComponents = GinMapBinder.newMapBinder(binder(), String.class, StateComponent.class);
         stateComponents.addBinding("workspace").to(WorkspacePresenter.class);
@@ -385,55 +384,59 @@ public class CoreGinModule extends AbstractGinModule {
         GinMultibinder.newSetBinder(binder(), ResourceInterceptor.class).addBinding().to(ResourceInterceptor.NoOpInterceptor.class);
     }
 
+    private void configureExecAgent() {
+        bind(ExecAgentCommandManager.class).to(JsonRpcExecAgentCommandManager.class);
+        bind(ExecAgentEventManager.class).to(JsonRpcExecAgentEventManager.class);
+
+        GinMapBinder.newMapBinder(binder(), String.class, RequestHandler.class)
+                    .addBinding("connected")
+                    .to(ConnectedEventHandler.class);
+
+        GinMapBinder.newMapBinder(binder(), String.class, RequestHandler.class)
+                    .addBinding("process_started")
+                    .to(ProcessStartedEventHandler.class);
+
+        GinMapBinder.newMapBinder(binder(), String.class, RequestHandler.class)
+                    .addBinding("process_stdout")
+                    .to(ProcessStdOutEventHandler.class);
+
+        GinMapBinder.newMapBinder(binder(), String.class, RequestHandler.class)
+                    .addBinding("process_stderr")
+                    .to(ProcessStdErrEventHandler.class);
+
+        GinMapBinder.newMapBinder(binder(), String.class, RequestHandler.class)
+                    .addBinding("process_died")
+                    .to(ProcessDiedEventHandler.class);
+    }
+
     private void configureClientServerEventService() {
         bind(FileOpenCloseEventListener.class).asEagerSingleton();
         bind(ClientServerEventService.class).asEagerSingleton();
 
-        GinMapBinder<String, JsonRpcRequestReceiver> requestReceivers =
-                GinMapBinder.newMapBinder(binder(), String.class, JsonRpcRequestReceiver.class);
+        GinMapBinder.newMapBinder(binder(), String.class, RequestHandler.class)
+                    .addBinding("event:file-in-vfs-status-changed")
+                    .to(EditorFileStatusNotificationHandler.class);
 
-        requestReceivers.addBinding("event:file-in-vfs-status-changed").to(EditorFileStatusNotificationReceiver.class);
-        requestReceivers.addBinding("event:project-tree-status-changed").to(ProjectTreeStatusNotificationReceiver.class);
+        GinMapBinder.newMapBinder(binder(), String.class, RequestHandler.class)
+                    .addBinding("event:project-tree-status-changed")
+                    .to(ProjectTreeStatusNotificationHandler.class);
     }
 
     private void configureJsonRpc() {
         bind(JsonRpcWebSocketAgentEventListener.class).asEagerSingleton();
-
         bind(JsonRpcInitializer.class).to(WebSocketJsonRpcInitializer.class);
+        bind(RequestTransmitter.class).to(WebSocketTransmitter.class);
 
-        bind(JsonRpcRequestTransmitter.class).to(WebSocketJsonRpcRequestTransmitter.class);
-        bind(JsonRpcResponseTransmitter.class).to(WebSocketJsonRpcResponseTransmitter.class);
-
-        bind(JsonRpcObjectValidator.class).to(BasicJsonRpcObjectValidator.class);
-
-        GinMapBinder<String, JsonRpcDispatcher> dispatchers = GinMapBinder.newMapBinder(binder(), String.class, JsonRpcDispatcher.class);
-        dispatchers.addBinding("request").to(WebSocketJsonRpcRequestDispatcher.class);
-        dispatchers.addBinding("response").to(WebSocketJsonRpcResponseDispatcher.class);
-
-        GinMapBinder<String, JsonRpcRequestReceiver> requestReceivers =
-                GinMapBinder.newMapBinder(binder(), String.class, JsonRpcRequestReceiver.class);
-
-        GinMapBinder<String, JsonRpcResponseReceiver> responseReceivers =
-                GinMapBinder.newMapBinder(binder(), String.class, JsonRpcResponseReceiver.class);
+        GinMapBinder.newMapBinder(binder(), String.class, RequestHandler.class);
     }
 
     private void configureWebSocket() {
-        bind(WebSocketInitializer.class).to(SessionWebSocketInitializer.class);
-
         bind(WebSocketEndpoint.class).to(BasicWebSocketEndpoint.class);
-
-        bind(WebSocketTransmissionValidator.class).to(BasicWebSocketTransmissionValidator.class);
-
         bind(WebSocketMessageTransmitter.class).to(BasicWebSocketMessageTransmitter.class);
+        bind(WebSocketMessageReceiver.class).to(WebSocketToJsonRpcDispatcher.class);
 
-        install(new GinFactoryModuleBuilder()
-                        .implement(WebSocket.class, DelayableWebSocket.class)
-                        .build(WebSocketCreator.class));
-
-        GinMapBinder<String, WebSocketMessageReceiver> receivers =
-                GinMapBinder.newMapBinder(binder(), String.class, WebSocketMessageReceiver.class);
-
-        receivers.addBinding("jsonrpc-2.0").to(WebSocketJsonRpcDispatcher.class);
+        install(new GinFactoryModuleBuilder().implement(WebSocketConnection.class, DelayableWebSocketConnection.class)
+                                             .build(WebSocketFactory.class));
     }
 
     private void configureComponents() {

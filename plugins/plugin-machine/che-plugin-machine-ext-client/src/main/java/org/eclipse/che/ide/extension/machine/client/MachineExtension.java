@@ -40,8 +40,10 @@ import org.eclipse.che.ide.extension.machine.client.actions.CreateSnapshotAction
 import org.eclipse.che.ide.extension.machine.client.actions.DestroyMachineAction;
 import org.eclipse.che.ide.extension.machine.client.actions.EditCommandsAction;
 import org.eclipse.che.ide.extension.machine.client.actions.ExecuteSelectedCommandAction;
+import org.eclipse.che.ide.extension.machine.client.actions.GetExecAgentProcessesAction;
 import org.eclipse.che.ide.extension.machine.client.actions.RestartMachineAction;
 import org.eclipse.che.ide.extension.machine.client.actions.RunCommandAction;
+import org.eclipse.che.ide.extension.machine.client.actions.RunExecAgentCommandsAction;
 import org.eclipse.che.ide.extension.machine.client.actions.SelectCommandComboBox;
 import org.eclipse.che.ide.extension.machine.client.actions.SwitchPerspectiveAction;
 import org.eclipse.che.ide.extension.machine.client.command.macros.ServerPortProvider;
@@ -207,6 +209,8 @@ public class MachineExtension {
                                 ExecuteSelectedCommandAction executeSelectedCommandAction,
                                 SelectCommandComboBox selectCommandAction,
                                 EditCommandsAction editCommandsAction,
+                                RunExecAgentCommandsAction runExecAgentCommandsAction,
+                                GetExecAgentProcessesAction getExecAgentProcessesAction,
                                 CreateMachineAction createMachine,
                                 RestartMachineAction restartMachine,
                                 DestroyMachineAction destroyMachineAction,
@@ -228,6 +232,8 @@ public class MachineExtension {
 
         // register actions
         actionManager.registerAction("editCommands", editCommandsAction);
+        actionManager.registerAction("execAgentCommands", runExecAgentCommandsAction);
+        actionManager.registerAction("execAgentProcesses", getExecAgentProcessesAction);
         actionManager.registerAction("selectCommandAction", selectCommandAction);
         actionManager.registerAction("executeSelectedCommand", executeSelectedCommandAction);
 
@@ -249,6 +255,8 @@ public class MachineExtension {
         runMenu.add(newTerminalAction, FIRST);
         runMenu.addSeparator();
         runMenu.add(editCommandsAction);
+        runMenu.add(runExecAgentCommandsAction);
+        runMenu.add(getExecAgentProcessesAction);
         runMenu.add(editTargetsAction);
 
         workspaceMenu.add(stopWorkspaceAction);

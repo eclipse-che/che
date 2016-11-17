@@ -11,7 +11,6 @@
 package org.eclipse.che.api.core.websocket.impl;
 
 import org.eclipse.che.api.core.websocket.WebSocketMessageTransmitter;
-import org.eclipse.che.api.core.websocket.shared.WebSocketTransmission;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -20,7 +19,6 @@ import javax.websocket.Session;
 import java.io.IOException;
 import java.util.Optional;
 
-import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -34,35 +32,28 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class BasicWebSocketMessageTransmitter implements WebSocketMessageTransmitter {
     private static final Logger LOG = getLogger(BasicWebSocketMessageTransmitter.class);
 
-    private final WebSocketSessionRegistry       registry;
-    private final PendingMessagesReSender        resender;
-    private final WebSocketTransmissionValidator validator;
+    private final WebSocketSessionRegistry registry;
+    private final MessagesReSender         reSender;
 
     @Inject
-    public BasicWebSocketMessageTransmitter(WebSocketSessionRegistry registry,
-                                            PendingMessagesReSender resender,
-                                            WebSocketTransmissionValidator validator) {
+    public BasicWebSocketMessageTransmitter(WebSocketSessionRegistry registry, MessagesReSender reSender) {
         this.registry = registry;
-        this.resender = resender;
-        this.validator = validator;
+        this.reSender = reSender;
     }
 
     @Override
-    public synchronized void transmit(String protocol, String message, Integer endpointId) {
-        final WebSocketTransmission transmission = newDto(WebSocketTransmission.class).withProtocol(protocol).withMessage(message);
-        validator.validate(transmission);
-
+    public synchronized void transmit(String endpointId, String message) {
         final Optional<Session> sessionOptional = registry.get(endpointId);
 
         if (!sessionOptional.isPresent() || !sessionOptional.get().isOpen()) {
             LOG.debug("Session is not registered or closed, adding message to pending");
 
-            resender.add(endpointId, transmission);
+            reSender.add(endpointId, message);
         } else {
             LOG.debug("Session registered and open, sending message");
 
             try {
-                sessionOptional.get().getBasicRemote().sendText(transmission.toString());
+                sessionOptional.get().getBasicRemote().sendText(message);
             } catch (IOException e) {
                 LOG.error("Error while trying to send a message to a basic websocket remote endpoint", e);
             }
@@ -70,11 +61,8 @@ public class BasicWebSocketMessageTransmitter implements WebSocketMessageTransmi
     }
 
     @Override
-    public synchronized void transmit(String protocol, String message) {
-        final WebSocketTransmission transmission = newDto(WebSocketTransmission.class).withProtocol(protocol).withMessage(message);
-        validator.validate(transmission);
-
-        LOG.debug("Broadcasting a web socket transmission: ", transmission.toString());
+    public synchronized void transmit(String message) {
+        LOG.debug("Broadcasting a web socket transmission: ", message);
 
         registry.getSessions()
                 .stream()
@@ -82,7 +70,7 @@ public class BasicWebSocketMessageTransmitter implements WebSocketMessageTransmi
                 .map(Session::getBasicRemote)
                 .forEach(it -> {
                     try {
-                        it.sendText(transmission.toString());
+                        it.sendText(message);
                     } catch (IOException e) {
                         LOG.error("Error while trying to send a message to a basic websocket remote endpoint", e);
                     }
