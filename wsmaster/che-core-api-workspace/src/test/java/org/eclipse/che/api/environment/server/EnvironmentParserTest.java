@@ -10,22 +10,20 @@
  *******************************************************************************/
 package org.eclipse.che.api.environment.server;
 
-import org.eclipse.che.api.environment.server.compose.BuildContextImpl;
-import org.eclipse.che.api.environment.server.compose.ComposeEnvironmentImpl;
-import org.eclipse.che.api.environment.server.compose.ComposeFileParser;
-import org.eclipse.che.api.environment.server.compose.ComposeServiceImpl;
+import com.google.common.collect.ImmutableMap;
+
+import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.workspace.Environment;
 import org.eclipse.che.api.environment.server.model.CheServiceBuildContextImpl;
 import org.eclipse.che.api.environment.server.model.CheServiceImpl;
 import org.eclipse.che.api.environment.server.model.CheServicesEnvironmentImpl;
-import org.eclipse.che.api.machine.server.util.RecipeDownloader;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentRecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ExtendedMachineImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConf2Impl;
-import org.eclipse.che.commons.annotation.Nullable;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -34,6 +32,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
@@ -41,13 +40,11 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
-import static java.util.stream.Collectors.toMap;
 import static org.eclipse.che.api.environment.server.EnvironmentParser.SERVER_CONF_LABEL_PATH_SUFFIX;
 import static org.eclipse.che.api.environment.server.EnvironmentParser.SERVER_CONF_LABEL_PREFIX;
 import static org.eclipse.che.api.environment.server.EnvironmentParser.SERVER_CONF_LABEL_PROTOCOL_SUFFIX;
 import static org.eclipse.che.api.environment.server.EnvironmentParser.SERVER_CONF_LABEL_REF_SUFFIX;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -59,31 +56,60 @@ import static org.testng.Assert.assertNotNull;
  */
 @Listeners(MockitoTestNGListener.class)
 public class EnvironmentParserTest {
-    private static String DEFAULT_MACHINE_NAME = "dev-machine";
-    private static String DEFAULT_DOCKERFILE   = "FROM codenvy/ubuntu_jdk8\n";
-    private static String DEFAULT_DOCKER_IMAGE = "codenvy/ubuntu_jdk8";
+
+    private static final String TEXT                 = "to be or not to be";
+    private static final String DEFAULT_MACHINE_NAME = "dev-machine";
+    private static final String DEFAULT_DOCKERFILE   = "FROM codenvy/ubuntu_jdk8\n";
+    private static final String DEFAULT_DOCKER_IMAGE = "codenvy/ubuntu_jdk8";
 
     @Mock
-    ComposeFileParser composeFileParser;
-
+    private EnvironmentImpl                            environment;
     @Mock
-    RecipeDownloader recipeDownloader;
+    private EnvironmentRecipeImpl                      recipe;
+    @Mock
+    private ExtendedMachineImpl                        machine;
+    @Mock
+    private TypeSpecificEnvironmentParser              envParser;
+    @Mock
+    private Map<String, TypeSpecificEnvironmentParser> parsers;
+    @Mock
+    private CheServicesEnvironmentImpl                 cheEnv;
+    @Mock
+    private CheServiceImpl                             cheService1;
+    @Mock
+    private CheServiceImpl                             cheService2;
+    @Mock
+    private ExtendedMachineImpl                        extendedMachine1;
+    @Mock
+    private ExtendedMachineImpl                        extendedMachine2;
 
-    @InjectMocks
-    EnvironmentParser parser;
+    private EnvironmentParser parser;
+
+    @BeforeMethod
+    public void setUp() throws ServerException {
+        when(environment.getRecipe()).thenReturn(recipe);
+        when(recipe.getType()).thenReturn("compose");
+        when(recipe.getContent()).thenReturn(TEXT);
+        when(envParser.parse(environment)).thenReturn(cheEnv);
+
+        parser = new EnvironmentParser(ImmutableMap.of("dockerfile", envParser,
+                                                       "dockerimage", envParser,
+                                                       "compose", envParser));
+    }
 
     @Test
     public void shouldReturnEnvTypesCoveredByTests() throws Exception {
         // when
-        List<String> environmentTypes = parser.getEnvironmentTypes();
+        Set<String> environmentTypes = parser.getEnvironmentTypes();
 
         // then
-        assertEquals(environmentTypes, asList("compose", "dockerimage", "dockerfile"));
+        assertEqualsNoOrder(environmentTypes.toArray(), new String[]{"dockerfile", "dockerimage", "compose"});
+        assertEquals(environmentTypes.size(), 3);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
           expectedExceptionsMessageRegExp = "Environment type '.*' is not supported. " +
-                                            "Supported environment types: compose, dockerimage, dockerfile")
+                                            "Supported environment types: .*")
     public void shouldThrowExceptionOnParsingUnknownEnvironmentType() throws Exception {
         parser.parse(new EnvironmentImpl(new EnvironmentRecipeImpl("unknownType",
                                                                    "text/x-dockerfile",
@@ -91,183 +117,52 @@ public class EnvironmentParserTest {
                                          null));
     }
 
-    @Test
-    public void shouldBeAbleToParseDockerfileEnvironmentFromContent() throws Exception {
-        // given
-        EnvironmentImpl environment = createDockerfileEnvConfig(DEFAULT_DOCKERFILE, null, DEFAULT_MACHINE_NAME);
-
-        CheServicesEnvironmentImpl expected = new CheServicesEnvironmentImpl();
-        expected.getServices().put(DEFAULT_MACHINE_NAME, new CheServiceImpl().withBuild(
-                new CheServiceBuildContextImpl().withDockerfileContent(DEFAULT_DOCKERFILE)));
-
-        // when
-        CheServicesEnvironmentImpl cheServicesEnvironment = parser.parse(environment);
-
-        // then
-        assertEquals(cheServicesEnvironment, expected);
-    }
-
-    @Test
-    public void shouldBeAbleToParseDockerfileEnvironmentFromLocation() throws Exception {
-        // given
-        String recipeLocation = "http://localhost:8080/recipe/url";
-        EnvironmentImpl environment = createDockerfileEnvConfig(null, recipeLocation, DEFAULT_MACHINE_NAME);
-
-        CheServicesEnvironmentImpl expected = new CheServicesEnvironmentImpl();
-        expected.getServices().put(DEFAULT_MACHINE_NAME, new CheServiceImpl().withBuild(
-                new CheServiceBuildContextImpl().withContext(recipeLocation)));
-
-        // when
-        CheServicesEnvironmentImpl cheServicesEnvironment = parser.parse(environment);
-
-        // then
-        assertEquals(cheServicesEnvironment, expected);
-    }
-
-    @Test
-    public void shouldSetMemoryLimitFromExtendedMachineInDockerfileEnv() throws Exception {
-        // given
-        String recipeLocation = "http://localhost:8080/recipe/url";
-        EnvironmentImpl environment = createDockerfileEnvConfig(null, recipeLocation, DEFAULT_MACHINE_NAME);
-        environment.getMachines().get(DEFAULT_MACHINE_NAME).getAttributes().put("memoryLimitBytes", "111111");
-
-        CheServicesEnvironmentImpl expected = new CheServicesEnvironmentImpl();
-        expected.getServices().put(DEFAULT_MACHINE_NAME, new CheServiceImpl().withBuild(
-                new CheServiceBuildContextImpl().withContext(recipeLocation))
-                                                                             .withMemLimit(111111L));
-
-        // when
-        CheServicesEnvironmentImpl cheServicesEnvironment = parser.parse(environment);
-
-        // then
-        assertEquals(cheServicesEnvironment, expected);
+    @Test(expectedExceptions = IllegalArgumentException.class,
+          expectedExceptionsMessageRegExp = "Environment should not be null")
+    public void environmentShouldNotBeNull() throws ServerException {
+        parser.parse(null);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "Environment of type '.*' doesn't support multiple machines, but contains machines: .*")
-    public void shouldThrowExceptionOnParseOfDockerfileEnvWithSeveralExtendedMachines() throws Exception {
-        EnvironmentImpl environment = createDockerfileEnvConfig();
-        environment.getMachines().put("anotherMachine", new ExtendedMachineImpl(emptyList(), emptyMap(), emptyMap()));
+          expectedExceptionsMessageRegExp = "Environment recipe should not be null")
+    public void environmentRecipeShouldNotBeNull() throws ServerException {
+        when(environment.getRecipe()).thenReturn(null);
 
-        // when
         parser.parse(environment);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "Content type '.*' of recipe of environment is unsupported." +
-                                            " Supported values are: text/x-dockerfile")
-    public void shouldThrowExceptionOnParseOfDockerfileEnvWithIllegalContentType() throws Exception {
-        EnvironmentImpl environment = createDockerfileEnvConfig();
-        environment.getRecipe().setContentType("dockerfile");
+          expectedExceptionsMessageRegExp = "Environment recipe type should not be null")
+    public void recipeTypeShouldNotBeNull() throws ServerException {
+        when(recipe.getType()).thenReturn(null);
 
-        // when
         parser.parse(environment);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "Environment of type '.*' doesn't support multiple machines, but contains machines: .*")
-    public void shouldThrowExceptionOnParseOfDockerimageEnvWithSeveralExtendedMachines() throws Exception {
-        EnvironmentImpl environment = createDockerimageEnvConfig();
-        environment.getMachines().put("anotherMachine", new ExtendedMachineImpl(emptyList(), emptyMap(), emptyMap()));
+          expectedExceptionsMessageRegExp = "Recipe of environment must contain location or content")
+    public void recipeShouldContainsContentOrLocationNotBeNull() throws ServerException {
+        when(recipe.getContent()).thenReturn(null);
 
-        // when
         parser.parse(environment);
     }
 
     @Test
-    public void shouldBeAbleToParseDockerimageEnvironment() throws Exception {
+    public void shouldBeAbleToParseEnvironment() throws Exception {
         // given
-        EnvironmentImpl environment = createDockerimageEnvConfig(DEFAULT_DOCKER_IMAGE, DEFAULT_MACHINE_NAME);
-
-        CheServicesEnvironmentImpl expected = new CheServicesEnvironmentImpl();
-        expected.getServices().put(DEFAULT_MACHINE_NAME, new CheServiceImpl().withImage(DEFAULT_DOCKER_IMAGE));
+        when(envParser.parse(environment)).thenReturn(cheEnv);
 
         // when
         CheServicesEnvironmentImpl cheServicesEnvironment = parser.parse(environment);
 
         // then
-        assertEquals(cheServicesEnvironment, expected);
-    }
-
-    @Test
-    public void shouldSetMemoryLimitFromExtendedMachineInDockerimageEnv() throws Exception {
-        // given
-        EnvironmentImpl environment = createDockerimageEnvConfig(DEFAULT_DOCKER_IMAGE, DEFAULT_MACHINE_NAME);
-        environment.getMachines().get(DEFAULT_MACHINE_NAME).getAttributes().put("memoryLimitBytes", "111112");
-
-        CheServicesEnvironmentImpl expected = new CheServicesEnvironmentImpl();
-        expected.getServices().put(DEFAULT_MACHINE_NAME, new CheServiceImpl().withImage(DEFAULT_DOCKER_IMAGE)
-                                                                             .withMemLimit(111112L));
-
-        // when
-        CheServicesEnvironmentImpl cheServicesEnvironment = parser.parse(environment);
-
-        // then
-        assertEquals(cheServicesEnvironment, expected);
-    }
-
-    @Test
-    public void shouldBeAbleToParseComposeEnvironmentFromContent() throws Exception {
-        // given
-        HashMap<String, ExtendedMachineImpl> machines = new HashMap<>();
-        machines.put("machine1", new ExtendedMachineImpl(emptyList(),
-                                                         emptyMap(),
-                                                         emptyMap()));
-        machines.put("machine2", new ExtendedMachineImpl(emptyList(),
-                                                         emptyMap(),
-                                                         emptyMap()));
-        EnvironmentImpl environment = new EnvironmentImpl(new EnvironmentRecipeImpl("compose",
-                                                                                    "application/x-yaml",
-                                                                                    "content",
-                                                                                    null),
-                                                          machines);
-        CheServicesEnvironmentImpl expected = new CheServicesEnvironmentImpl();
-        expected.getServices().put("machine1", createCheService(false));
-        expected.getServices().put("machine2", createCheService(true));
-        ComposeEnvironmentImpl composeEnvironment = toCompose(expected);
-        when(composeFileParser.parse(eq(environment.getRecipe().getContent()),
-                                     eq("application/x-yaml"))).thenReturn(composeEnvironment);
-
-        // when
-        CheServicesEnvironmentImpl cheServicesEnvironment = parser.parse(environment);
-
-        // then
-        assertEquals(cheServicesEnvironment, expected);
-        verify(composeFileParser).parse(eq(environment.getRecipe().getContent()), eq("application/x-yaml"));
-    }
-
-    @Test
-    public void shouldBeAbleToParseComposeEnvironmentFromLocation() throws Exception {
-        // given
-        HashMap<String, ExtendedMachineImpl> machines = new HashMap<>();
-        machines.put("machine1", new ExtendedMachineImpl(emptyList(),
-                                                         emptyMap(),
-                                                         emptyMap()));
-        machines.put("machine2", new ExtendedMachineImpl(emptyList(),
-                                                         emptyMap(),
-                                                         emptyMap()));
-        EnvironmentImpl environment = new EnvironmentImpl(new EnvironmentRecipeImpl("compose",
-                                                                                    "application/x-yaml",
-                                                                                    null,
-                                                                                    "location"),
-                                                          machines);
-        CheServicesEnvironmentImpl expected = new CheServicesEnvironmentImpl();
-        expected.getServices().put("machine1", createCheService(false));
-        expected.getServices().put("machine2", createCheService(true));
-        ComposeEnvironmentImpl composeEnvironment = toCompose(expected);
-        when(recipeDownloader.getRecipe(eq(environment.getRecipe().getLocation()))).thenReturn("content");
-        when(composeFileParser.parse(eq("content"), eq("application/x-yaml"))).thenReturn(composeEnvironment);
-
-        // when
-        CheServicesEnvironmentImpl cheServicesEnvironment = parser.parse(environment);
-
-        // then
-        assertEquals(cheServicesEnvironment, expected);
-        verify(composeFileParser).parse(eq("content"), eq("application/x-yaml"));
+        assertEquals(cheServicesEnvironment, cheEnv);
+        verify(envParser).parse(environment);
     }
 
     @Test
     public void shouldOverrideMemoryLimitFromExtendedMachineInComposeEnv() throws Exception {
+        // given
         HashMap<String, ExtendedMachineImpl> machines = new HashMap<>();
         machines.put("machine1", new ExtendedMachineImpl(emptyList(),
                                                          emptyMap(),
@@ -280,26 +175,48 @@ public class EnvironmentParserTest {
                                                                                     "content",
                                                                                     null),
                                                           machines);
-        CheServicesEnvironmentImpl expected = new CheServicesEnvironmentImpl();
-        expected.getServices().put("machine1", createCheService(false).withMemLimit(101010L));
-        expected.getServices().put("machine2", createCheService(true));
-        ComposeEnvironmentImpl composeEnvironment = toCompose(expected);
-        when(composeFileParser.parse(eq(environment.getRecipe().getContent()),
-                                     eq("application/x-yaml"))).thenReturn(composeEnvironment);
+        CheServicesEnvironmentImpl cheEnv = new CheServicesEnvironmentImpl();
+
+        cheEnv.getServices().put("machine1", new CheServiceImpl());
+        cheEnv.getServices().put("machine2", new CheServiceImpl());
+        when(envParser.parse(environment)).thenReturn(cheEnv);
 
         // when
         CheServicesEnvironmentImpl cheServicesEnvironment = parser.parse(environment);
 
         // then
-        assertEquals(cheServicesEnvironment, expected);
+        assertEquals(cheServicesEnvironment, cheEnv);
+        assertEquals(cheServicesEnvironment.getServices().get("machine1").getMemLimit().longValue(), 101010L);
+        assertEquals(cheServicesEnvironment.getServices().get("machine2").getMemLimit(), null);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class,
+          expectedExceptionsMessageRegExp = "Value of attribute 'memoryLimitBytes' of machine 'machine1' is illegal")
+    public void shouldThrowExceptionInCaseFailedParseMemoryLimit() throws ServerException {
+        HashMap<String, ExtendedMachineImpl> machines = new HashMap<>();
+        machines.put("machine1", new ExtendedMachineImpl(emptyList(),
+                                                         emptyMap(),
+                                                         singletonMap("memoryLimitBytes", "here should be memory size number")));
+        EnvironmentImpl environment = new EnvironmentImpl(new EnvironmentRecipeImpl("compose",
+                                                                                    "application/x-yaml",
+                                                                                    "content",
+                                                                                    null),
+                                                          machines);
+
+        CheServicesEnvironmentImpl cheEnv = new CheServicesEnvironmentImpl();
+        cheEnv.getServices().put("machine1", new CheServiceImpl());
+        when(envParser.parse(environment)).thenReturn(cheEnv);
+
+        // when
+        parser.parse(environment);
     }
 
     @Test(dataProvider = "environmentWithServersProvider")
     public void shouldAddPortsAndLabelsFromExtendedMachineServers(EnvironmentImpl environment,
                                                                   CheServicesEnvironmentImpl expectedEnv,
-                                                                  @Nullable ComposeEnvironmentImpl composeEnvironment)
+                                                                  CheServicesEnvironmentImpl parsedCheEnv)
             throws Exception {
-        when(composeFileParser.parse(anyString(), anyString())).thenReturn(composeEnvironment);
+        when(envParser.parse(any(Environment.class))).thenReturn(parsedCheEnv);
 
         // when
         CheServicesEnvironmentImpl cheServicesEnvironment = parser.parse(environment);
@@ -707,18 +624,29 @@ public class EnvironmentParserTest {
                                                          List<String> expectedExpose,
                                                          Map<String, String> expectedLabels) {
         EnvironmentImpl environmentConfig = createDockerfileEnvConfig();
+
         ExtendedMachineImpl extendedMachine = getMachine(environmentConfig);
         extendedMachine.setServers(servers);
-        return asList(environmentConfig, createExpectedEnvFromDockerfile(expectedExpose, expectedLabels), null);
+
+        CheServicesEnvironmentImpl parsedCheEnv = new CheServicesEnvironmentImpl();
+        CheServiceBuildContextImpl buildContext = new CheServiceBuildContextImpl().withDockerfileContent(DEFAULT_DOCKERFILE);
+        parsedCheEnv.getServices().put(DEFAULT_MACHINE_NAME, new CheServiceImpl().withBuild(buildContext));
+
+        return asList(environmentConfig, createExpectedEnvFromDockerfile(expectedExpose, expectedLabels), parsedCheEnv);
     }
 
     private static List<Object> getEntryForDockerimageEnv(Map<String, ServerConf2Impl> servers,
                                                           List<String> expectedExpose,
                                                           Map<String, String> expectedLabels) {
         EnvironmentImpl environmentConfig = createDockerimageEnvConfig();
+
         ExtendedMachineImpl extendedMachine = getMachine(environmentConfig);
         extendedMachine.setServers(servers);
-        return asList(environmentConfig, createExpectedEnvFromImage(expectedExpose, expectedLabels), null);
+
+        CheServicesEnvironmentImpl parsedCheEnv = new CheServicesEnvironmentImpl();
+        parsedCheEnv.getServices().put(DEFAULT_MACHINE_NAME, new CheServiceImpl().withImage(DEFAULT_DOCKER_IMAGE));
+
+        return asList(environmentConfig, createExpectedEnvFromImage(expectedExpose, expectedLabels), parsedCheEnv);
     }
 
     private static List<Object> getEntryForComposeEnv(Map<String, ServerConf2Impl> servers,
@@ -726,17 +654,27 @@ public class EnvironmentParserTest {
                                                       Map<String, String> composeLabels,
                                                       List<String> expectedExpose,
                                                       Map<String, String> expectedLabels) {
-        ComposeEnvironmentImpl composeEnvironment = create1ServiceComposeEnv();
-        ComposeServiceImpl composeService = getService(composeEnvironment);
-        composeService.withExpose(new ArrayList<>(composeExpose));
-        composeService.withLabels(new HashMap<>(composeLabels));
+        CheServicesEnvironmentImpl cheComposeEnv = createCheServicesEnv(new HashMap<>(composeLabels), new ArrayList<>(composeExpose));
+        CheServicesEnvironmentImpl expectedEnv = createCheServicesEnv(expectedLabels, expectedExpose);
 
         EnvironmentImpl environmentConfig = createCompose1MachineEnvConfig();
         ExtendedMachineImpl extendedMachine = getMachine(environmentConfig);
         extendedMachine.setServers(new HashMap<>(servers));
         return asList(environmentConfig,
-                      createExpectedEnvFromCompose(composeEnvironment, expectedExpose, expectedLabels),
-                      composeEnvironment);
+                      expectedEnv,
+                      cheComposeEnv);
+    }
+
+    private static ExtendedMachineImpl getMachine(EnvironmentImpl environmentConfig) {
+        return environmentConfig.getMachines().values().iterator().next();
+    }
+
+    private static CheServicesEnvironmentImpl createCheServicesEnv(Map<String, String> labels, List<String> expose) {
+        CheServiceImpl cheService = new CheServiceImpl().withLabels(labels).withExpose(expose).withImage(DEFAULT_DOCKER_IMAGE);
+        Map<String, CheServiceImpl> cheComposeEnvs = new HashMap<>();
+        cheComposeEnvs.put(DEFAULT_MACHINE_NAME, cheService);
+
+        return new CheServicesEnvironmentImpl().withServices(cheComposeEnvs);
     }
 
     private static EnvironmentImpl createDockerfileEnvConfig() {
@@ -774,8 +712,8 @@ public class EnvironmentParserTest {
     private static EnvironmentImpl createCompose1MachineEnvConfig() {
         Map<String, ExtendedMachineImpl> machines = new HashMap<>();
         machines.put(DEFAULT_MACHINE_NAME, new ExtendedMachineImpl(emptyList(),
-                                                         emptyMap(),
-                                                         emptyMap()));
+                                                                   emptyMap(),
+                                                                   emptyMap()));
         return new EnvironmentImpl(new EnvironmentRecipeImpl("compose",
                                                              "application/x-yaml",
                                                              "content",
@@ -798,7 +736,7 @@ public class EnvironmentParserTest {
                                                                 List<String> expectedExpose,
                                                                 Map<String, String> expectedLabels) {
         CheServiceBuildContextImpl build =
-                dockerfile == null ? null : new CheServiceBuildContextImpl(null, null, dockerfile, null);
+                dockerfile != null ? new CheServiceBuildContextImpl(null, null, dockerfile, null) : null;
         CheServicesEnvironmentImpl environment = new CheServicesEnvironmentImpl();
         environment.getServices()
                    .put(DEFAULT_MACHINE_NAME, new CheServiceImpl().withImage(image)
@@ -806,129 +744,5 @@ public class EnvironmentParserTest {
                                                                   .withBuild(build)
                                                                   .withExpose(expectedExpose));
         return environment;
-    }
-
-    private static CheServicesEnvironmentImpl createExpectedEnvFromCompose(ComposeEnvironmentImpl composeEnvironment,
-                                                                           List<String> expectedExpose,
-                                                                           Map<String, String> expectedLabels) {
-        CheServicesEnvironmentImpl cheServicesEnvironment = fromCompose(composeEnvironment);
-
-        CheServiceImpl cheService = cheServicesEnvironment.getServices().values().iterator().next();
-        cheService.setExpose(expectedExpose);
-        cheService.setLabels(expectedLabels);
-
-        return cheServicesEnvironment;
-    }
-
-    private static ComposeEnvironmentImpl create1ServiceComposeEnv() {
-        ComposeEnvironmentImpl composeEnvironment = new ComposeEnvironmentImpl();
-        ComposeServiceImpl composeService = new ComposeServiceImpl();
-        composeService.withImage(DEFAULT_DOCKER_IMAGE);
-        composeEnvironment.getServices().put(DEFAULT_MACHINE_NAME, composeService);
-
-        return composeEnvironment;
-    }
-
-    private static ComposeServiceImpl getService(ComposeEnvironmentImpl composeEnvironment) {
-        return composeEnvironment.getServices().values().iterator().next();
-    }
-
-    private static ExtendedMachineImpl getMachine(EnvironmentImpl environmentConfig) {
-        return environmentConfig.getMachines().values().iterator().next();
-    }
-
-    private static ComposeEnvironmentImpl toCompose(CheServicesEnvironmentImpl environment) {
-        ComposeEnvironmentImpl composeEnvironment = new ComposeEnvironmentImpl();
-        Map<String, ComposeServiceImpl> services = environment.getServices()
-                                                              .entrySet()
-                                                              .stream()
-                                                              .collect(toMap(Map.Entry::getKey,
-                                                                             entry -> toCompose(entry.getValue())));
-
-        return composeEnvironment.withServices(services);
-    }
-
-    private static ComposeServiceImpl toCompose(CheServiceImpl service) {
-        BuildContextImpl buildContext = null;
-        if (service.getBuild() != null) {
-            buildContext = new BuildContextImpl().withContext(service.getBuild().getContext())
-                                                 .withDockerfile(service.getBuild().getDockerfilePath())
-                                                 .withArgs(service.getBuild().getArgs());
-        }
-
-        return new ComposeServiceImpl().withBuild(buildContext)
-                                       .withCommand(service.getCommand())
-                                       .withContainerName(service.getContainerName())
-                                       .withDependsOn(service.getDependsOn())
-                                       .withEntrypoint(service.getEntrypoint())
-                                       .withEnvironment(service.getEnvironment())
-                                       .withExpose(service.getExpose())
-                                       .withImage(service.getImage())
-                                       .withLabels(service.getLabels())
-                                       .withLinks(service.getLinks())
-                                       .withMemLimit(service.getMemLimit())
-                                       .withNetworks(service.getNetworks())
-                                       .withPorts(service.getPorts())
-                                       .withVolumes(service.getVolumes())
-                                       .withVolumesFrom(service.getVolumesFrom());
-    }
-
-    private static CheServicesEnvironmentImpl fromCompose(ComposeEnvironmentImpl environment) {
-        CheServicesEnvironmentImpl cheServicesEnvironment = new CheServicesEnvironmentImpl();
-        Map<String, CheServiceImpl> services = environment.getServices()
-                                                          .entrySet()
-                                                          .stream()
-                                                          .collect(toMap(Map.Entry::getKey,
-                                                                         entry -> fromCompose(entry.getValue())));
-
-        return cheServicesEnvironment.withServices(services);
-    }
-
-    private static CheServiceImpl fromCompose(ComposeServiceImpl service) {
-        CheServiceBuildContextImpl buildContext = null;
-        if (service.getBuild() != null) {
-            buildContext = new CheServiceBuildContextImpl().withContext(service.getBuild().getContext())
-                                                           .withDockerfilePath(service.getBuild().getDockerfile())
-                                                           .withArgs(service.getBuild().getArgs());
-        }
-
-        return new CheServiceImpl().withBuild(buildContext)
-                                   .withCommand(service.getCommand())
-                                   .withContainerName(service.getContainerName())
-                                   .withDependsOn(service.getDependsOn())
-                                   .withEntrypoint(service.getEntrypoint())
-                                   .withEnvironment(service.getEnvironment())
-                                   .withExpose(service.getExpose())
-                                   .withImage(service.getImage())
-                                   .withLabels(service.getLabels())
-                                   .withLinks(service.getLinks())
-                                   .withMemLimit(service.getMemLimit())
-                                   .withNetworks(service.getNetworks())
-                                   .withPorts(service.getPorts())
-                                   .withVolumes(service.getVolumes())
-                                   .withVolumesFrom(service.getVolumesFrom());
-    }
-
-    private static CheServiceImpl createCheService(boolean isImageBased) {
-        return new CheServiceImpl()
-                .withBuild(isImageBased ? null : new CheServiceBuildContextImpl("some url",
-                                                                                "some path",
-                                                                                null,
-                                                                                new HashMap<String, String>()
-                                                                                {{put("argkey","argvalue");}}))
-                .withCommand(asList("some", "command"))
-                .withContainerName("con name")
-                .withDependsOn(asList("depends1", "depends2"))
-                .withEntrypoint(asList("some", "entrypoint"))
-                .withEnvironment(singletonMap("envKey", "envValue"))
-                .withExpose(asList("8080/udp", "9090/tcp"))
-                .withImage(isImageBased ? DEFAULT_DOCKER_IMAGE : null)
-                .withLabels(singletonMap("labelKey", "labelValue"))
-                .withLinks(asList("link1", "link2"))
-                .withMemLimit(123456L)
-                .withNetworks(asList("net1", "net2"))
-                .withPorts(asList("port1", "port2"))
-                .withVolumes(asList("volume1", "volume2"))
-                .withVolumesFrom(asList("volumeFrom1", "volumeFrom2"));
     }
 }

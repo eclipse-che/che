@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.environment.server.compose;
+package org.eclipse.che.plugin.docker.compose;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,13 +20,13 @@ import java.util.stream.Collectors;
  *
  * @author Alexander Garagatyi
  */
-public class ComposeEnvironmentImpl {
+public class ComposeEnvironment {
     private String                          version;
     private Map<String, ComposeServiceImpl> services;
 
-    public ComposeEnvironmentImpl() {}
+    public ComposeEnvironment() {}
 
-    public ComposeEnvironmentImpl(ComposeEnvironmentImpl environment) {
+    public ComposeEnvironment(ComposeEnvironment environment) {
         version = environment.getVersion();
         if (environment.getServices() != null) {
             services = environment.getServices()
@@ -48,7 +48,7 @@ public class ComposeEnvironmentImpl {
         this.version = version;
     }
 
-    public ComposeEnvironmentImpl withVersion(String version) {
+    public ComposeEnvironment withVersion(String version) {
         this.version = version;
         return this;
     }
@@ -67,7 +67,7 @@ public class ComposeEnvironmentImpl {
         this.services = services;
     }
 
-    public ComposeEnvironmentImpl withServices(Map<String, ComposeServiceImpl> services) {
+    public ComposeEnvironment withServices(Map<String, ComposeServiceImpl> services) {
         this.services = services;
         return this;
     }
@@ -75,8 +75,8 @@ public class ComposeEnvironmentImpl {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof ComposeEnvironmentImpl)) return false;
-        ComposeEnvironmentImpl that = (ComposeEnvironmentImpl)o;
+        if (!(o instanceof ComposeEnvironment)) return false;
+        ComposeEnvironment that = (ComposeEnvironment)o;
         return Objects.equals(version, that.version) &&
                Objects.equals(services, that.services);
     }
@@ -88,7 +88,7 @@ public class ComposeEnvironmentImpl {
 
     @Override
     public String toString() {
-        return "ComposeEnvironmentImpl{" +
+        return "ComposeEnvironment{" +
                "version='" + version + '\'' +
                ", services=" + services +
                '}';

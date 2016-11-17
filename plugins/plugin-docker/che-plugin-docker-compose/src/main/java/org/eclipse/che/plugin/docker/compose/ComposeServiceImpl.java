@@ -8,11 +8,13 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.environment.server.compose;
+package org.eclipse.che.plugin.docker.compose;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import org.eclipse.che.api.environment.server.compose.deserializer.EnvironmentDeserializer;
+
+import org.eclipse.che.plugin.docker.compose.yaml.deserializer.CommandDeserializer;
+import org.eclipse.che.plugin.docker.compose.yaml.deserializer.EnvironmentDeserializer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,6 +30,7 @@ import java.util.Objects;
 public class ComposeServiceImpl {
     @JsonProperty("container_name")
     private String              containerName;
+    @JsonDeserialize(using = CommandDeserializer.class)
     private List<String>        command;
     private List<String>        entrypoint;
     private String              image;
@@ -44,7 +47,7 @@ public class ComposeServiceImpl {
     private List<String>        volumesFrom;
     @JsonProperty("mem_limit")
     private Long                memLimit;
-    private BuildContextImpl    build;
+    private BuildContext        build;
     private List<String>        networks;
 
     public ComposeServiceImpl() {}
@@ -52,7 +55,7 @@ public class ComposeServiceImpl {
     public ComposeServiceImpl(ComposeServiceImpl service) {
         image = service.getImage();
         if (service.getBuild() != null) {
-            build = new BuildContextImpl(service.getBuild());
+            build = new BuildContext(service.getBuild());
         }
         if (service.getEntrypoint() != null) {
             entrypoint = new ArrayList<>(service.getEntrypoint());
@@ -110,15 +113,15 @@ public class ComposeServiceImpl {
     /**
      * Build context for container image creation.
      */
-    public BuildContextImpl getBuild() {
+    public BuildContext getBuild() {
         return build;
     }
 
-    public void setBuild(BuildContextImpl build) {
+    public void setBuild(BuildContext build) {
         this.build = build;
     }
 
-    public ComposeServiceImpl withBuild(BuildContextImpl build) {
+    public ComposeServiceImpl withBuild(BuildContext build) {
         this.build = build;
         return this;
     }
