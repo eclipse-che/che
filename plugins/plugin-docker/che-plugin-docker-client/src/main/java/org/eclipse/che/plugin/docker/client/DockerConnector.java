@@ -805,13 +805,17 @@ public class DockerConnector {
                         progressMonitor.updateProgress(progressStatus);
                     }
 
-                    throw new DockerException("Docker image build failed. Image id not found in build output.", 500);
+                    throw new ImageNotFoundException("Docker image build failed. Image id not found in build output.");
                 });
 
                 return imageIdFuture.get();
             } catch (ExecutionException e) {
                 // unwrap exception thrown by task with .getCause()
-                throw new DockerException(e.getCause().getLocalizedMessage(), 500);
+                if (e.getCause() instanceof ImageNotFoundException) {
+                    throw new ImageNotFoundException(e.getCause().getLocalizedMessage());
+                } else {
+                    throw new DockerException(e.getCause().getLocalizedMessage(), 500);
+                }
             } catch (InterruptedException e) {
                 throw new DockerException("Docker image build was interrupted", 500);
             }
