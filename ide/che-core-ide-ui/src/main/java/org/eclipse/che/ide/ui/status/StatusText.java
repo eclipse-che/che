@@ -22,20 +22,18 @@ import javax.validation.constraints.NotNull;
 /**
  * @author Vlad Zhukovskiy
  */
-public class StatusText<T extends Widget> {
+public class StatusText<T extends Widget> implements EmptyStatus<T> {
 
     public static final String DEFAULT_EMPTY_TEXT = "Nothing to show";
 
     private final VerticalPanel verticalPanel;
-    private final Predicate<T> showPredicate;
 
     private String myText = "";
-    private T widget;
 
-    public StatusText(T widget, Predicate<T> showPredicate) {
+    private T            widget;
+    private Predicate<T> showPredicate;
 
-        this.showPredicate = showPredicate;
-        this.widget = widget;
+    public StatusText() {
 
         setText(DEFAULT_EMPTY_TEXT);
 
@@ -54,11 +52,11 @@ public class StatusText<T extends Widget> {
         return myText;
     }
 
-    public StatusText setText(String text) {
+    public EmptyStatus setText(String text) {
         return clear().appendText(text);
     }
 
-    public StatusText appendText(String text) {
+    public EmptyStatus appendText(String text) {
         myText += text;
         return this;
     }
@@ -68,6 +66,7 @@ public class StatusText<T extends Widget> {
         return this;
     }
 
+    @Override
     public void paint() {
         verticalPanel.clear();
 
@@ -75,5 +74,11 @@ public class StatusText<T extends Widget> {
             verticalPanel.add(new Label(getText()));
             widget.getElement().appendChild(verticalPanel.getElement());
         }
+    }
+
+    @Override
+    public void init(T widget, Predicate<T> showPredicate) {
+        this.widget = widget;
+        this.showPredicate = showPredicate;
     }
 }
