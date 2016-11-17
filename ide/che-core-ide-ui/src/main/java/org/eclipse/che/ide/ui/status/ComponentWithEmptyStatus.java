@@ -15,7 +15,7 @@ import javax.validation.constraints.NotNull;
 /**
  * @author Vlad Zhukovskiy
  */
-public interface ComponentWithEmptyText {
+public interface ComponentWithEmptyStatus {
     @NotNull
-    StatusText getEmptyText();
+    EmptyStatus getEmptyStatus();
 }

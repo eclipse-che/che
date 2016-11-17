@@ -20,7 +20,6 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.DomEvent;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.FocusWidget;
@@ -43,7 +42,6 @@ import org.eclipse.che.ide.ui.smartTree.event.CollapseNodeEvent.HasCollapseItemH
 import org.eclipse.che.ide.ui.smartTree.event.ExpandNodeEvent;
 import org.eclipse.che.ide.ui.smartTree.event.ExpandNodeEvent.HasExpandItemHandlers;
 import org.eclipse.che.ide.ui.smartTree.event.FocusEvent;
-import org.eclipse.che.ide.ui.smartTree.handler.GroupingHandlerRegistration;
 import org.eclipse.che.ide.ui.smartTree.event.NodeAddedEvent;
 import org.eclipse.che.ide.ui.smartTree.event.NodeAddedEvent.HasNodeAddedEventHandlers;
 import org.eclipse.che.ide.ui.smartTree.event.StoreAddEvent;
@@ -59,10 +57,12 @@ import org.eclipse.che.ide.ui.smartTree.event.StoreSortEvent.StoreSortHandler;
 import org.eclipse.che.ide.ui.smartTree.event.StoreUpdateEvent;
 import org.eclipse.che.ide.ui.smartTree.event.StoreUpdateEvent.StoreUpdateHandler;
 import org.eclipse.che.ide.ui.smartTree.event.internal.NativeTreeEvent;
+import org.eclipse.che.ide.ui.smartTree.handler.GroupingHandlerRegistration;
 import org.eclipse.che.ide.ui.smartTree.presentation.DefaultPresentationRenderer;
 import org.eclipse.che.ide.ui.smartTree.presentation.HasPresentation;
 import org.eclipse.che.ide.ui.smartTree.presentation.PresentationRenderer;
-import org.eclipse.che.ide.ui.status.ComponentWithEmptyText;
+import org.eclipse.che.ide.ui.status.ComponentWithEmptyStatus;
+import org.eclipse.che.ide.ui.status.EmptyStatus;
 import org.eclipse.che.ide.ui.status.StatusText;
 
 import java.util.ArrayList;
@@ -162,7 +162,7 @@ public class Tree extends FocusWidget implements HasBeforeExpandNodeHandlers,
                                                  HasExpandItemHandlers,
                                                  HasBeforeCollapseItemHandlers,
                                                  HasCollapseItemHandlers,
-                                                 ComponentWithEmptyText,
+                                                 ComponentWithEmptyStatus,
                                                  HasBlurHandlers,
                                                  HasNodeAddedEventHandlers {
 
@@ -232,7 +232,7 @@ public class Tree extends FocusWidget implements HasBeforeExpandNodeHandlers,
     /**
      * Component which show some configurable text if there is a condition that tree widget doesn't have any element.
      */
-    private StatusText emptyText;
+    private EmptyStatus<Tree> emptyStatus;
 
     /**
      * View for the tree. View allow manipulating with node DOM elements.
@@ -275,12 +275,19 @@ public class Tree extends FocusWidget implements HasBeforeExpandNodeHandlers,
 
     private boolean focused = false;
 
-    @UiConstructor
     public Tree(NodeStorage nodeStorage, NodeLoader nodeLoader) {
         this(nodeStorage, nodeLoader, GWT.<TreeStyles>create(TreeStyles.class));
     }
 
+    public Tree(NodeStorage nodeStorage, NodeLoader nodeLoader, EmptyStatus<Tree> emptyStatus) {
+        this(nodeStorage, nodeLoader, GWT.<TreeStyles>create(TreeStyles.class), emptyStatus);
+    }
+
     public Tree(NodeStorage nodeStorage, NodeLoader nodeLoader, TreeStyles treeStyles) {
+        this(nodeStorage, nodeLoader, treeStyles, null);
+    }
+
+    public Tree(NodeStorage nodeStorage, NodeLoader nodeLoader, TreeStyles treeStyles, EmptyStatus<Tree> emptyStatus) {
         checkNotNull(nodeStorage);
         checkNotNull(nodeLoader);
         checkNotNull(treeStyles);
@@ -303,7 +310,12 @@ public class Tree extends FocusWidget implements HasBeforeExpandNodeHandlers,
 
         disableBrowserContextMenu(true);
 
-        this.emptyText = new StatusText<>(this, new Predicate<Tree>() {
+        // use as default
+        if (emptyStatus == null) {
+            emptyStatus = new StatusText<>();
+        }
+        this.emptyStatus = emptyStatus;
+        this.emptyStatus.init(this, new Predicate<Tree>() {
             @Override
             public boolean apply(@Nullable Tree tree) {
                 return tree.getNodeStorage().getRootCount() == 0;
@@ -768,7 +780,7 @@ public class Tree extends FocusWidget implements HasBeforeExpandNodeHandlers,
             if (isAttached()) {
                 moveFocus(getContainer(null));
             }
-            getEmptyText().paint(); //draw empty label
+            getEmptyStatus().paint(); //draw empty label
         }
     }
 
@@ -857,7 +869,7 @@ public class Tree extends FocusWidget implements HasBeforeExpandNodeHandlers,
             return;
         }
 
-        ((HasPresentation) node).getPresentation(true); //update presentation
+        ((HasPresentation)node).getPresentation(true); //update presentation
         Element el = getPresentationRenderer().render(node, nodeDescriptor.getDomId(), getJoint(node), nodeStorage.getDepth(node) - 1);
         view.onElementChanged(nodeDescriptor, el);
     }
@@ -926,8 +938,8 @@ public class Tree extends FocusWidget implements HasBeforeExpandNodeHandlers,
      * {@inheritDoc}
      */
     @Override
-    public StatusText getEmptyText() {
-        return emptyText;
+    public EmptyStatus getEmptyStatus() {
+        return emptyStatus;
     }
 
     /**
@@ -1163,6 +1175,10 @@ public class Tree extends FocusWidget implements HasBeforeExpandNodeHandlers,
         }
 
         if (!fireCancellableEvent(new BeforeExpandNodeEvent(node))) {
+            if (deep) {
+                nodeDescriptor.setExpandDeep(false);
+            }
+
             return;
         }
 
@@ -1196,7 +1212,7 @@ public class Tree extends FocusWidget implements HasBeforeExpandNodeHandlers,
         int depth = nodeStorage.getDepth(parent);
         List<Node> children = parent == null ? nodeStorage.getRootItems() : nodeStorage.getChildren(parent);
         if (children.size() == 0) {
-            emptyText.paint();
+            emptyStatus.paint();
             return;
         }
 
@@ -1294,7 +1310,7 @@ public class Tree extends FocusWidget implements HasBeforeExpandNodeHandlers,
     private boolean fireCancellableEvent(GwtEvent<?> event) {
         fireEvent(event);
         if (event instanceof CancellableEvent) {
-            return !((CancellableEvent) event).isCancelled();
+            return !((CancellableEvent)event).isCancelled();
         }
         return true;
     }
@@ -1323,8 +1339,8 @@ public class Tree extends FocusWidget implements HasBeforeExpandNodeHandlers,
         focusEl.getStyle().setPosition(Style.Position.ABSOLUTE);
 
         //subscribe for Event.FOCUSEVENTS
-        int bits = DOM.getEventsSunk((Element) focusEl.cast()); //do not remove redundant cast, GWT tests will fail
-        DOM.sinkEvents((Element) focusEl.cast(), bits | Event.FOCUSEVENTS);
+        int bits = DOM.getEventsSunk((Element)focusEl.cast()); //do not remove redundant cast, GWT tests will fail
+        DOM.sinkEvents((Element)focusEl.cast(), bits | Event.FOCUSEVENTS);
     }
 
     private boolean isRowRendered(int i, List<Node> visible) {
@@ -1335,7 +1351,7 @@ public class Tree extends FocusWidget implements HasBeforeExpandNodeHandlers,
     private int getVisibleRowCount() {
         int rh = view.getCalculatedRowHeight();
         int visibleHeight = getElement().getOffsetHeight();
-        return (int) ((visibleHeight < 1) ? 0 : Math.ceil(visibleHeight / rh));
+        return (int)((visibleHeight < 1) ? 0 : Math.ceil(visibleHeight / rh));
     }
 
     private void findChildren(Node parent, List<Node> list, boolean onlyVisible) {
@@ -1356,10 +1372,10 @@ public class Tree extends FocusWidget implements HasBeforeExpandNodeHandlers,
 
     private int[] getVisibleRows(List<Node> visible, int count) {
         int sc = getElement().getScrollTop();
-        int start = (int) (sc == 0 ? 0 : Math.floor(sc / view.getCalculatedRowHeight()) - 1);
+        int start = (int)(sc == 0 ? 0 : Math.floor(sc / view.getCalculatedRowHeight()) - 1);
         int first = Math.max(start, 0);
         int last = Math.min(start + count + 2, visible.size() - 1);
-        return new int[]{first, last};
+        return new int[] {first, last};
     }
 
     private Element getRootContainer() {
@@ -1422,7 +1438,7 @@ public class Tree extends FocusWidget implements HasBeforeExpandNodeHandlers,
         }
 
         if (!getRootNodes().isEmpty()) {
-            emptyText.paint();
+            emptyStatus.paint();
         }
     }
 
@@ -1462,7 +1478,7 @@ public class Tree extends FocusWidget implements HasBeforeExpandNodeHandlers,
         }
 
         if (getRootNodes().isEmpty()) {
-            emptyText.paint();
+            emptyStatus.paint();
         }
     }
 
@@ -1540,7 +1556,7 @@ public class Tree extends FocusWidget implements HasBeforeExpandNodeHandlers,
 
         if (nodeDescriptor.isLeaf()) {
             if (nodeDescriptor.getNode() instanceof HasAction) {
-                ((HasAction) nodeDescriptor.getNode()).actionPerformed();
+                ((HasAction)nodeDescriptor.getNode()).actionPerformed();
             }
         } else {
             toggle(nodeDescriptor.getNode());
@@ -1549,7 +1565,7 @@ public class Tree extends FocusWidget implements HasBeforeExpandNodeHandlers,
 
     private void onClick(Event event) {
         NativeTreeEvent e = event.cast();
-        NodeDescriptor node = getNodeDescriptor((Element) event.getEventTarget().cast());
+        NodeDescriptor node = getNodeDescriptor((Element)event.getEventTarget().cast());
         if (node != null) {
             Element jointEl = view.getJointContainer(node);
             if (jointEl != null && e.within(jointEl)) {
