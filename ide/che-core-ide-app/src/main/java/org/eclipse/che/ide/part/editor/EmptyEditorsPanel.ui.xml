@@ -1,0 +1,65 @@
+<!--
+
+    Copyright (c) 2012-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+
+    <ui:style type='org.eclipse.che.ide.part.editor.EmptyEditorsPanel.Css'>
+        @eval lineColor org.eclipse.che.ide.api.theme.Style.theme.iconColor();
+        .center{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0.2;
+            margin-bottom: 50px;
+        }
+        .parent {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        .child {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .list {
+            padding-left: 26px;
+            margin: 0;
+        }
+
+        .listElement{
+            font-size: 11px;
+            margin-bottom: 2px;
+        }
+
+        .line{
+            margin-top: 5px;
+            margin-bottom: 5px;
+            border-bottom: 1px solid lineColor;
+        }
+
+        .title{
+            margin-left: 8px;
+        }
+
+    </ui:style>
+    <g:HTMLPanel styleName="{style.parent}">
+        <div ui:field="root" class="{style.child}">
+            <div ui:field="logo" class="{style.center}"/>
+            <div ui:field="title" class="{style.title}"/>
+            <div class="{style.line}"/>
+            <div ui:field="container"/>
+        </div>
+    </g:HTMLPanel>
+</ui:UiBinder>
