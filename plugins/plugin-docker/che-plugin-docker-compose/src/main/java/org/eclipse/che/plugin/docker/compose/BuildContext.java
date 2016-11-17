@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.environment.server.compose;
+package org.eclipse.che.plugin.docker.compose;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,14 +19,14 @@ import java.util.Objects;
  *
  * @author Alexander Garagatyi
  */
-public class BuildContextImpl {
+public class BuildContext {
     private String              context;
     private String              dockerfile;
     private Map<String, String> args;
 
-    public BuildContextImpl() {}
+    public BuildContext() {}
 
-    public BuildContextImpl(String context, String dockerfile, Map<String,String> args) {
+    public BuildContext(String context, String dockerfile, Map<String,String> args) {
         this.context = context;
         this.dockerfile = dockerfile;
         if (args != null) {
@@ -34,7 +34,7 @@ public class BuildContextImpl {
         }
     }
 
-    public BuildContextImpl(BuildContextImpl buildContext) {
+    public BuildContext(BuildContext buildContext) {
         this(buildContext.getContext(),buildContext.getDockerfile(), buildContext.getArgs());
     }
 
@@ -51,7 +51,7 @@ public class BuildContextImpl {
         this.context = context;
     }
 
-    public BuildContextImpl withContext(String context) {
+    public BuildContext withContext(String context) {
         this.context = context;
         return this;
     }
@@ -69,7 +69,7 @@ public class BuildContextImpl {
         this.dockerfile = dockerfile;
     }
 
-    public BuildContextImpl withDockerfile(String dockerfile) {
+    public BuildContext withDockerfile(String dockerfile) {
         this.dockerfile = dockerfile;
         return this;
     }
@@ -88,7 +88,7 @@ public class BuildContextImpl {
         this.args = args;
     }
 
-    public BuildContextImpl withArgs(Map<String,String> args) {
+    public BuildContext withArgs(Map<String,String> args) {
         this.args = args;
         return this;
     }
@@ -96,8 +96,8 @@ public class BuildContextImpl {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof BuildContextImpl)) return false;
-        BuildContextImpl that = (BuildContextImpl)o;
+        if (!(o instanceof BuildContext)) return false;
+        BuildContext that = (BuildContext)o;
         return Objects.equals(context, that.context) &&
                Objects.equals(dockerfile, that.dockerfile) &&
                Objects.equals(args, that.args);
@@ -110,7 +110,7 @@ public class BuildContextImpl {
 
     @Override
     public String toString() {
-        return "BuildContextImpl{" +
+        return "BuildContext{" +
                "context='" + context + '\'' +
                 ", dockerfile='" + dockerfile + '\'' +
                 ", args='" + args + '\'' +
