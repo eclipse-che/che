@@ -228,6 +228,10 @@ public class NotificationContainerItem extends Composite implements Notification
                 icon = resources.fail();
                 status = "fail";
                 break;
+            case WARNING:
+            	icon = resources.warning();
+            	status = "warning";
+            	break;
             default:
                 throw new IllegalArgumentException("Can't determine notification icon");
         }
