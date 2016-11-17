@@ -1163,6 +1163,10 @@ public class Tree extends FocusWidget implements HasBeforeExpandNodeHandlers,
         }
 
         if (!fireCancellableEvent(new BeforeExpandNodeEvent(node))) {
+            if (deep) {
+                nodeDescriptor.setExpandDeep(false);
+            }
+
             return;
         }
 
