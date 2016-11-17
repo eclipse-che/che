@@ -20,16 +20,11 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
-import org.eclipse.che.ide.api.action.Action;
-import org.eclipse.che.ide.actions.common.ActionFactory;
-import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.data.tree.TreeExpander;
 import org.eclipse.che.ide.api.data.tree.settings.NodeSettings;
 import org.eclipse.che.ide.api.data.tree.settings.SettingsProvider;
-import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
-import org.eclipse.che.ide.api.keybinding.KeyBuilder;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.parts.ProjectExplorerPart;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
@@ -83,6 +78,7 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
     private final SettingsProvider         settingsProvider;
     private final CoreLocalizationConstant locale;
     private final Resources                resources;
+    private final TreeExpander             treeExpander;
 
     private static final int PART_SIZE = 500;
 
@@ -95,10 +91,7 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
                                     Resources resources,
                                     final ResourceNode.NodeFactory nodeFactory,
                                     final SettingsProvider settingsProvider,
-                                    ActionManager actionManager,
-                                    ActionFactory actionFactory,
-                                    final AppContext appContext,
-                                    KeyBindingAgent keyBindingAgent) {
+                                    final AppContext appContext) {
         this.view = view;
         this.nodeFactory = nodeFactory;
         this.settingsProvider = settingsProvider;
@@ -134,19 +127,38 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
             }
         });
 
-        final TreeExpander treeExpander = new ProjectExplorerTreeExpander(view.getTree(), appContext);
+        treeExpander = new ProjectExplorerTreeExpander(view.getTree(), appContext);
 
-        final Action expandTreeAction = actionFactory.createExpandTreeAction(treeExpander);
-        final Action collapseTreeAction = actionFactory.createCollapseTreeAction(treeExpander);
+        registerNative();
+    }
 
-        final String expandTreeActionId = "expandProjectExplorerTree";
-        final String collapseTreeActionId = "collapseProjectExplorerTree";
+    /* Expose Project Explorer's internal API to the world, to allow automated Selenium scripts expand all projects tree. */
+    private native void registerNative() /*-{
+        var that = this;
 
-        actionManager.registerAction(expandTreeActionId, expandTreeAction);
-        actionManager.registerAction(collapseTreeActionId, collapseTreeAction);
+        var ProjectExplorer = {};
 
-        keyBindingAgent.getGlobal().addKey(new KeyBuilder().action().charCode('[').build(), expandTreeActionId);
-        keyBindingAgent.getGlobal().addKey(new KeyBuilder().action().charCode(']').build(), collapseTreeActionId);
+        ProjectExplorer.expandAll = $entry(function() {
+            that.@org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter::doExpand()();
+        })
+
+        ProjectExplorer.collapeAll = $entry(function() {
+            that.@org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter::doCollapse()();
+        })
+
+        $wnd.IDE.ProjectExplorer = ProjectExplorer;
+    }-*/;
+
+    private void doExpand() {
+        if (treeExpander.isExpandEnabled()) {
+            treeExpander.expandTree();
+        }
+    }
+
+    private void doCollapse() {
+        if (treeExpander.isCollapseEnabled()) {
+            treeExpander.collapseTree();
+        }
     }
 
     @Override
