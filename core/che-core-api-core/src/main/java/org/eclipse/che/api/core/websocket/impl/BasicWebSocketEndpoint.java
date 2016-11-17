@@ -13,7 +13,6 @@ package org.eclipse.che.api.core.websocket.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
 import javax.websocket.CloseReason;
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
@@ -21,14 +20,12 @@ import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.PathParam;
-import javax.websocket.server.ServerEndpoint;
 
 /**
  * Duplex WEB SOCKET endpoint, handles messages, errors, session open/close events.
  *
  * @author Dmitry Kuleshov
  */
-@ServerEndpoint(value = "/websocket/{endpoint-id}", configurator = GuiceInjectorEndpointConfigurator.class)
 public class BasicWebSocketEndpoint {
     private static final Logger LOG = LoggerFactory.getLogger(BasicWebSocketEndpoint.class);
 
@@ -36,8 +33,7 @@ public class BasicWebSocketEndpoint {
     private final PendingMessagesReSender         reSender;
     private final WebSocketTransmissionDispatcher dispatcher;
 
-    @Inject
-    public BasicWebSocketEndpoint(WebSocketSessionRegistry registry,
+    protected BasicWebSocketEndpoint(WebSocketSessionRegistry registry,
                                   PendingMessagesReSender reSender,
                                   WebSocketTransmissionDispatcher dispatcher) {
 
