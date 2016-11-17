@@ -3,7 +3,7 @@
   "name": "Workspace API",
   "description": "Workspace API support",
   "dependencies": [
-    "org.eclipse.che.terminal"
+     "org.eclipse.che.terminal"
   ],
   "properties": {},
   "servers": {
