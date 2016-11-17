@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.core;
+package org.eclipse.che.ide.user;
 
 import org.eclipse.che.api.user.shared.dto.ProfileDto;
 import org.eclipse.che.ide.api.user.UserProfileServiceClient;

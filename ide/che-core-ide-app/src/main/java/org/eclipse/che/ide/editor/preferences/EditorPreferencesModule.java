@@ -14,12 +14,7 @@ import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
 
-import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.preferences.PreferencePagePresenter;
-import org.eclipse.che.ide.editor.preferences.EditorPreferencePresenter;
-import org.eclipse.che.ide.editor.preferences.EditorPreferenceSection;
-import org.eclipse.che.ide.editor.preferences.EditorPreferenceView;
-import org.eclipse.che.ide.editor.preferences.EditorPreferenceViewImpl;
 import org.eclipse.che.ide.editor.preferences.editorproperties.propertiessection.EditorPropertiesSectionPresenter;
 import org.eclipse.che.ide.editor.preferences.editorproperties.sections.EditorPreferenceSectionFactory;
 import org.eclipse.che.ide.editor.preferences.editorproperties.sections.EditorPropertiesSection;
@@ -32,25 +27,28 @@ import org.eclipse.che.ide.editor.preferences.keymaps.KeyMapsPreferencePresenter
 import org.eclipse.che.ide.editor.preferences.keymaps.KeymapsPreferenceView;
 import org.eclipse.che.ide.editor.preferences.keymaps.KeymapsPreferenceViewImpl;
 
-/** Gin module for the editor preferences. */
-@ExtensionGinModule
-public class EditorPreferencesGinModule extends AbstractGinModule {
+/**
+ * GIN module for configuring editor preferences.
+ *
+ * @author Artem Zatsarynnyi
+ */
+public class EditorPreferencesModule extends AbstractGinModule {
 
     @Override
     protected void configure() {
-        // Bind the editor preference panel
-        final GinMultibinder<PreferencePagePresenter> prefBinder = GinMultibinder.newSetBinder(binder(), PreferencePagePresenter.class);
-        prefBinder.addBinding().to(EditorPreferencePresenter.class);
+        GinMultibinder.newSetBinder(binder(), PreferencePagePresenter.class).addBinding().to(EditorPreferencePresenter.class);
 
         bind(EditorPreferenceView.class).to(EditorPreferenceViewImpl.class);
         bind(KeymapsPreferenceView.class).to(KeymapsPreferenceViewImpl.class);
         bind(KeyMapsPreferencePresenter.class);
 
-        install(new GinFactoryModuleBuilder().implement(EditorPreferenceSection.class, EditorPropertiesSectionPresenter.class)
-                                             .build(EditorPreferenceSectionFactory.class));
+        install(new GinFactoryModuleBuilder()
+                        .implement(EditorPreferenceSection.class, EditorPropertiesSectionPresenter.class)
+                        .build(EditorPreferenceSectionFactory.class));
 
-        GinMultibinder<EditorPropertiesSection> editorPropertiesSectionBinder = GinMultibinder.newSetBinder(binder(),
-                                                                                                            EditorPropertiesSection.class);
+        GinMultibinder<EditorPropertiesSection> editorPropertiesSectionBinder =
+                GinMultibinder.newSetBinder(binder(), EditorPropertiesSection.class);
+
         editorPropertiesSectionBinder.addBinding().to(TabsPropertiesSection.class);
         editorPropertiesSectionBinder.addBinding().to(LanguageToolsPropertiesSection.class);
         editorPropertiesSectionBinder.addBinding().to(TypingPropertiesSection.class);

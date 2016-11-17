@@ -17,9 +17,9 @@ import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
-import org.eclipse.che.ide.api.user.PreferencesServiceClient;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
+import org.eclipse.che.ide.api.user.PreferencesServiceClient;
 
 import java.util.HashMap;
 import java.util.Map;
