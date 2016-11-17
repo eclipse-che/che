@@ -1256,7 +1256,7 @@ public final class Path {
             return paths[0];
         }
 
-        for (int i = 0; i < paths.length; i++) {
+        for (int i = 0; i < paths[0].segmentCount(); i++) {
             final String currentSegment = paths[0].segment(i);
 
             boolean segmentsMatched = true;

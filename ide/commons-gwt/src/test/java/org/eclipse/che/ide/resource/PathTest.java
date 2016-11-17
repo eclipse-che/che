@@ -315,4 +315,16 @@ public class PathTest {
 
         assertEquals(result, path);
     }
+
+    @Test
+    public void testShouldReturnCorrectCommonPathIfPathHasSegmentsMoreThanPathCount() throws Exception {
+        final Path common = Path.valueOf("/foo");
+
+        final Path path1 = common.append("a/b/c/d/e/f/g/h/i/j/k/l");
+        final Path path2 = common.append("b/c");
+
+        final Path result = Path.commonPath(path1, path2);
+
+        assertEquals(result, common);
+    }
 }
