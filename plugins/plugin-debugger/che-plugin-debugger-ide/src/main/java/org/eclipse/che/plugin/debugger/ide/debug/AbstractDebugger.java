@@ -159,8 +159,9 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
                     }).catchError(new Operation<PromiseError>() {
                         @Override
                         public void apply(PromiseError arg) throws OperationException {
-                            invalidateDebugSession();
-                            preserveDebuggerState();
+                            if (isConnected()) {
+                                invalidateDebugSession();
+                            }
                         }
                     });
                 }
@@ -508,7 +509,8 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
             for (DebuggerObserver observer : observers) {
                 observer.onPreStepInto();
             }
-            currentLocation = null;
+            removeCurrentLocation();
+            preserveDebuggerState();
 
             StepIntoActionDto action = dtoFactory.createDto(StepIntoActionDto.class);
             action.setType(Action.TYPE.STEP_INTO);
@@ -529,7 +531,8 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
             for (DebuggerObserver observer : observers) {
                 observer.onPreStepOver();
             }
-            currentLocation = null;
+            removeCurrentLocation();
+            preserveDebuggerState();
 
             StepOverActionDto action = dtoFactory.createDto(StepOverActionDto.class);
             action.setType(Action.TYPE.STEP_OVER);
@@ -550,7 +553,8 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
             for (DebuggerObserver observer : observers) {
                 observer.onPreStepOut();
             }
-            currentLocation = null;
+            removeCurrentLocation();
+            preserveDebuggerState();
 
             StepOutActionDto action = dtoFactory.createDto(StepOutActionDto.class);
             action.setType(Action.TYPE.STEP_OUT);
@@ -571,7 +575,8 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
             for (DebuggerObserver observer : observers) {
                 observer.onPreResume();
             }
-            currentLocation = null;
+            removeCurrentLocation();
+            preserveDebuggerState();
 
             ResumeActionDto action = dtoFactory.createDto(ResumeActionDto.class);
             action.setType(Action.TYPE.RESUME);
@@ -646,7 +651,11 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
 
     private void invalidateDebugSession() {
         this.debugSessionDto = null;
-        this.currentLocation = null;
+        this.removeCurrentLocation();
+    }
+
+    private void removeCurrentLocation() {
+        currentLocation = null;
     }
 
     /**
