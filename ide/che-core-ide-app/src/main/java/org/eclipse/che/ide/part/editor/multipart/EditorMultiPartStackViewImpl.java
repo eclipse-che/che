@@ -22,6 +22,7 @@ import com.google.inject.Inject;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.parts.EditorMultiPartStackState;
 import org.eclipse.che.ide.api.parts.EditorPartStack;
+import org.eclipse.che.ide.part.editor.EmptyEditorsPanel;
 import org.eclipse.che.ide.util.loging.Log;
 
 import javax.validation.constraints.NotNull;
@@ -37,18 +38,21 @@ public class EditorMultiPartStackViewImpl extends ResizeComposite implements Edi
 
     private final BiMap<EditorPartStack, SplitEditorPartView> splitEditorParts;
     private final SplitEditorPartViewFactory                  splitEditorPartViewFactory;
+    private final EmptyEditorsPanel emptyEditorsPanel;
 
     private SplitEditorPartView rootView;
 
     @Inject
-    public EditorMultiPartStackViewImpl(SplitEditorPartViewFactory splitEditorPartViewFactory) {
+    public EditorMultiPartStackViewImpl(SplitEditorPartViewFactory splitEditorPartViewFactory, EmptyEditorsPanel emptyEditorsPanel) {
         this.splitEditorPartViewFactory = splitEditorPartViewFactory;
+        this.emptyEditorsPanel = emptyEditorsPanel;
         this.splitEditorParts = HashBiMap.create();
 
         contentPanel = new LayoutPanel();
         contentPanel.setSize("100%", "100%");
         contentPanel.ensureDebugId("editorMultiPartStack-contentPanel");
         initWidget(contentPanel);
+        contentPanel.add(emptyEditorsPanel);
     }
 
     @Override

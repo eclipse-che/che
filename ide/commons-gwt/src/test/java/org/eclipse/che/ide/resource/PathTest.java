@@ -252,4 +252,79 @@ public class PathTest {
         assertFalse(path.equals(pathWithDevice));
         assertTrue(pathWithDevice.toString().equals("mnt:/foo"));
     }
+
+    @Test
+    public void testShouldReturnCommonPath() throws Exception {
+        final Path common = Path.valueOf("/foo");
+
+        final Path path1 = common.append("a/b");
+        final Path path2 = common.append("a/c");
+        final Path path3 = common.append("a/d");
+        final Path path4 = common.append("c/d/b");
+        final Path path5 = common.append("a/d/c");
+        final Path path6 = common.append("a/c/c");
+
+        final Path result = Path.commonPath(path1, path2, path3, path4, path5, path6);
+
+        assertEquals(result, common);
+    }
+
+    @Test
+    public void testShouldReturnRootPathAsCommon() throws Exception {
+        final Path path1 = Path.valueOf("/a");
+        final Path path2 = Path.valueOf("/b");
+        final Path path3 = Path.valueOf("/c");
+        final Path path4 = Path.valueOf("/d");
+        final Path path5 = Path.valueOf("/e");
+
+        final Path result = Path.commonPath(path1, path2, path3, path4, path5);
+
+        assertEquals(result, Path.ROOT);
+    }
+
+    @Test
+    public void testShouldReturnRootPathAsCommon2() throws Exception {
+        final Path path1 = Path.valueOf("/a");
+        final Path path2 = Path.valueOf("b");
+        final Path path3 = Path.valueOf("/c");
+        final Path path4 = Path.valueOf("d");
+        final Path path5 = Path.valueOf("/e");
+
+        final Path result = Path.commonPath(path1, path2, path3, path4, path5);
+
+        assertEquals(result, Path.ROOT);
+    }
+
+    @Test
+    public void testShouldReturnEmptyPathForEmptyInputArray() throws Exception {
+        final Path result = Path.commonPath();
+
+        assertEquals(result, Path.EMPTY);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testShouldThrowNPEOnNullArgument() throws Exception {
+        Path.commonPath(null);
+    }
+
+    @Test
+    public void testShouldReturnSamePathAsOneGivenAsArgument() throws Exception {
+        final Path path = Path.valueOf("/some/path");
+
+        final Path result = Path.commonPath(path);
+
+        assertEquals(result, path);
+    }
+
+    @Test
+    public void testShouldReturnCorrectCommonPathIfPathHasSegmentsMoreThanPathCount() throws Exception {
+        final Path common = Path.valueOf("/foo");
+
+        final Path path1 = common.append("a/b/c/d/e/f/g/h/i/j/k/l");
+        final Path path2 = common.append("b/c");
+
+        final Path result = Path.commonPath(path1, path2);
+
+        assertEquals(result, common);
+    }
 }

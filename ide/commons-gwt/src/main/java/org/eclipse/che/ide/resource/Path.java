@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.resource;
 
-import com.google.common.annotations.Beta;
 import com.google.common.base.Objects;
 
 import java.util.ArrayList;
@@ -20,6 +19,7 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Strings.nullToEmpty;
 
 /**
  * Client side implementation for the resource path.
@@ -36,7 +36,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Vlad Zhukovskyi
  * @since 4.0.0-RC7
  */
-@Beta
 public final class Path {
 
     /**
@@ -1224,5 +1223,62 @@ public final class Path {
         }
 
         return list;
+    }
+
+    /**
+     * Calculated common path from the several paths given as array.
+     * <p>
+     * For example we have three paths:
+     * <ul>
+     * <li>{@code /a/b/c}</li>
+     * <li>{@code /a/b/d}</li>
+     * <li>{@code /a/b/d/e}</li>
+     * </ul>
+     * Common path will be {@code /a/b}
+     *
+     * @param paths
+     *         paths array
+     * @return common path of empty string if given array is empty
+     * @throws NullPointerException
+     *         in case if given {@code paths} array is null
+     * @since 5.0.0
+     */
+    public static Path commonPath(Path... paths) {
+        checkNotNull(paths);
+
+        Path commonPath = Path.ROOT;
+
+        if (paths.length == 0) {
+            return EMPTY;
+        }
+
+        if (paths.length == 1) {
+            return paths[0];
+        }
+
+        for (int i = 0; i < paths[0].segmentCount(); i++) {
+            final String currentSegment = paths[0].segment(i);
+
+            boolean segmentsMatched = true;
+
+            for (int j = 1; j < paths.length && segmentsMatched; j++) {
+                final Path comparedPath = paths[j];
+
+                if (comparedPath.segmentCount() < i) {
+                    segmentsMatched = false;
+                    break;
+                } else {
+                    segmentsMatched = nullToEmpty(comparedPath.segment(i)).equals(currentSegment);
+                }
+            }
+
+            if (segmentsMatched) {
+                commonPath = commonPath.append(currentSegment);
+            } else {
+                break;
+            }
+        }
+
+        return commonPath;
     }
 }

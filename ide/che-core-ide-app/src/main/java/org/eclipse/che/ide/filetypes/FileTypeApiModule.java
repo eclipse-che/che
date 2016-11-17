@@ -16,16 +16,26 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 import org.eclipse.che.ide.Resources;
-import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.filetypes.FileType;
+import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 
 /**
+ * GIN module for configuring File Type API components.
+ *
  * @author Evgen Vidolob
  */
-@ExtensionGinModule
-public class FileTypeModule extends AbstractGinModule {
+public class FileTypeApiModule extends AbstractGinModule {
+
     @Override
     protected void configure() {
+        bind(FileTypeRegistry.class).to(FileTypeRegistryImpl.class).in(Singleton.class);
+    }
+
+    @Provides
+    @Singleton
+    @Named("defaultFileType")
+    protected FileType provideDefaultFileType(Resources resources) {
+        return new FileType(resources.defaultFile(), null);
     }
 
     @Provides
