@@ -10,9 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.ide.preferences;
 
+import com.google.gwt.user.client.ui.AcceptsOneWidget;
+
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.preferences.PreferencePagePresenter;
-import com.google.gwt.user.client.ui.AcceptsOneWidget;
 
 import java.util.Map;
 import java.util.Set;
