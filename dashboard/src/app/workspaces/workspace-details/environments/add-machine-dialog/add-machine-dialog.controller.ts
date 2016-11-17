@@ -9,7 +9,7 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
-import {WorkspaceEnvironmentsController} from "../environments.controller";
+import {WorkspaceEnvironmentsController} from '../environments.controller';
 
 /**
  * @ngdoc controller
@@ -34,7 +34,7 @@ export class AddMachineDialogController {
     matchBrackets: boolean,
     mode: string,
     onLoad: Function };
-  environments: Map<any>;
+  environments: che.IWorkspaceEnvironments;
 
   /**
    * Default constructor that is using resource
@@ -45,7 +45,7 @@ export class AddMachineDialogController {
     this.$timeout = $timeout;
 
     this.usedMachinesName = [];
-    angular.forEach(this.environments, (environment: {machines}, key: string) => {
+    angular.forEach(this.environments, (environment: any) => {
       angular.forEach(environment.machines, (machine: Object, machineKey: string) => {
         this.usedMachinesName.push(machineKey);
       });
@@ -104,14 +104,14 @@ export class AddMachineDialogController {
       return;
     }
     this.machineName = keys[0];
-    this.machineRAM = this.machineRecipe[keys[0]]['mem_limit'];
+    this.machineRAM = this.machineRecipe[keys[0]].mem_limit;
   }
 
   /**
    * Update machine RAM.
    */
   updateMachineRAM() {
-    this.machineRecipe[Object.keys(this.machineRecipe)[0]]['mem_limit'] = this.machineRAM;
+    this.machineRecipe[Object.keys(this.machineRecipe)[0]].mem_limit = this.machineRAM;
     this.machineRecipeScript = jsyaml.safeDump(this.machineRecipe, {'indent': 1});
   }
 
@@ -151,7 +151,7 @@ export class AddMachineDialogController {
     if (!environment.recipe || environment.recipe.type !== 'compose') {
       return false;
     }
-    return this.machineRecipe[machines[0]]['image'] || this.machineRecipe[machines[0]]['build'];
+    return this.machineRecipe[machines[0]].image || this.machineRecipe[machines[0]].build;
   }
 
   /**

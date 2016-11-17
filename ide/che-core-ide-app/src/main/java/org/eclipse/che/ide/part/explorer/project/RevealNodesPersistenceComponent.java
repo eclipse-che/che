@@ -31,7 +31,7 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.resources.tree.ResourceNode;
 import org.eclipse.che.ide.statepersistance.PersistenceComponent;
-import org.eclipse.che.ide.statepersistance.dto.ActionDescriptor;
+import org.eclipse.che.ide.api.statepersistance.dto.ActionDescriptor;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.ui.loaders.request.MessageLoader;
 import org.eclipse.che.ide.util.loging.Log;

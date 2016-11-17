@@ -15,12 +15,12 @@ import com.google.gwt.json.client.JSONParser;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.api.machine.WsAgentMessageBusProvider;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.machine.WsAgentStateController;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
@@ -45,11 +45,11 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUC
 @Singleton
 public class ProjectNotificationSubscriberImpl implements ProjectNotificationSubscriber {
 
-    private final Operation<PromiseError>   logErrorHandler;
-    private final CoreLocalizationConstant  locale;
-    private final NotificationManager       notificationManager;
-    private final String                    workspaceId;
-    private final WsAgentMessageBusProvider wsAgentMessageBusProvider;
+    private final Operation<PromiseError>  logErrorHandler;
+    private final CoreLocalizationConstant locale;
+    private final NotificationManager      notificationManager;
+    private final String                   workspaceId;
+    private final WsAgentStateController   wsAgentStateController;
 
     private String                      wsChannel;
     private String                      projectName;
@@ -60,11 +60,11 @@ public class ProjectNotificationSubscriberImpl implements ProjectNotificationSub
     public ProjectNotificationSubscriberImpl(CoreLocalizationConstant locale,
                                              AppContext appContext,
                                              NotificationManager notificationManager,
-                                             WsAgentMessageBusProvider wsAgentMessageBusProvider) {
+                                             WsAgentStateController wsAgentStateController) {
         this.locale = locale;
         this.notificationManager = notificationManager;
         this.workspaceId = appContext.getWorkspace().getId();
-        this.wsAgentMessageBusProvider = wsAgentMessageBusProvider;
+        this.wsAgentStateController = wsAgentStateController;
         this.logErrorHandler = new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError error) throws OperationException {
@@ -92,7 +92,7 @@ public class ProjectNotificationSubscriberImpl implements ProjectNotificationSub
 
             @Override
             protected void onErrorReceived(final Throwable throwable) {
-                wsAgentMessageBusProvider.getMessageBus().then(new Operation<MessageBus>() {
+                wsAgentStateController.getMessageBus().then(new Operation<MessageBus>() {
                     @Override
                     public void apply(MessageBus messageBus) throws OperationException {
                         try {
@@ -109,7 +109,7 @@ public class ProjectNotificationSubscriberImpl implements ProjectNotificationSub
             }
         };
 
-        wsAgentMessageBusProvider.getMessageBus().then(new Operation<MessageBus>() {
+        wsAgentStateController.getMessageBus().then(new Operation<MessageBus>() {
             @Override
             public void apply(final MessageBus messageBus) throws OperationException {
                 try {
@@ -123,7 +123,7 @@ public class ProjectNotificationSubscriberImpl implements ProjectNotificationSub
 
     @Override
     public void onSuccess() {
-        wsAgentMessageBusProvider.getMessageBus().then(new Operation<MessageBus>() {
+        wsAgentStateController.getMessageBus().then(new Operation<MessageBus>() {
             @Override
             public void apply(MessageBus messageBus) throws OperationException {
                 try {
@@ -140,7 +140,7 @@ public class ProjectNotificationSubscriberImpl implements ProjectNotificationSub
 
     @Override
     public void onFailure(final String errorMessage) {
-        wsAgentMessageBusProvider.getMessageBus().then(new Operation<MessageBus>() {
+        wsAgentStateController.getMessageBus().then(new Operation<MessageBus>() {
             @Override
             public void apply(MessageBus messageBus) throws OperationException {
                 try {

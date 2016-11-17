@@ -342,6 +342,9 @@ public interface CoreLocalizationConstant extends Messages {
     @Key("action.newXmlFile.description")
     String actionNewXmlFileDescription();
 
+    @Key("action.link.with.editor")
+    String actionLinkWithEditor();
+
     @Key("action.projectConfiguration.description")
     String actionProjectConfigurationDescription();
 

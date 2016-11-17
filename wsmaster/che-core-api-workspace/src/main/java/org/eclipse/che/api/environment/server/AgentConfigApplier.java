@@ -10,33 +10,36 @@
  *******************************************************************************/
 package org.eclipse.che.api.environment.server;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
 import org.eclipse.che.api.agent.server.AgentRegistry;
 import org.eclipse.che.api.agent.server.exception.AgentException;
 import org.eclipse.che.api.agent.server.impl.AgentSorter;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.agent.shared.model.AgentKey;
+import org.eclipse.che.api.core.model.workspace.Environment;
+import org.eclipse.che.api.core.model.workspace.ExtendedMachine;
 import org.eclipse.che.api.core.model.workspace.ServerConf2;
 import org.eclipse.che.api.environment.server.model.CheServiceImpl;
+import org.eclipse.che.api.environment.server.model.CheServicesEnvironmentImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static org.eclipse.che.api.environment.server.AgentConfigApplier.PROPERTIES.ENVIRONMENT;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
- * Applies docker specific properties of the agents over {@link CheServiceImpl}.
- * Dependencies between agents are respected.
- * Docker instance must't be started, otherwise changing configuration has no effect.
+ * Applies docker specific properties of the agents to {@link CheServiceImpl} or {@link CheServicesEnvironmentImpl}.
  *
+ * </p>
+ * Dependencies between agents are respected.
+ * This class must be called before machines represented by {@link CheServiceImpl} is started,
+ * otherwise changing configuration has no effect.
+ * </br>
  * The list of supported properties are:
  * <li>environment</li>
  *
@@ -49,10 +52,10 @@ import static org.eclipse.che.api.environment.server.AgentConfigApplier.PROPERTI
  * @see CheServiceImpl#getLabels()
  *
  * @author Anatolii Bazko
+ * @author Alexander Garagatyi
  */
-@Singleton
 public class AgentConfigApplier {
-    private static final Logger LOG = LoggerFactory.getLogger(AgentConfigApplier.class);
+    private static final Logger LOG = getLogger(AgentConfigApplier.class);
 
     private final AgentSorter   sorter;
     private final AgentRegistry agentRegistry;
@@ -64,21 +67,46 @@ public class AgentConfigApplier {
     }
 
     /**
-     * Applies docker specific properties.
+     * Applies docker specific properties to an environment of machines.
      *
-     * @param service
-     *      the service
-     * @param agentKeys
-     *      the list of injected agents into machine
-     *
+     * @param envConfig
+     *         environment config with the list of agents that should be injected into machine
+     * @param internalEnv
+     *         affected environment of machines
      * @throws AgentException
+     *         if any error occurs
      */
-    public void modify(CheServiceImpl service, @Nullable List<String> agentKeys) throws AgentException {
-        for (AgentKey agentKey : sorter.sort(agentKeys)) {
-            Agent agent = agentRegistry.getAgent(agentKey);
-            addEnv(service, agent.getProperties());
-            addExposedPorts(service, agent.getServers());
-            addLabels(service, agent.getServers());
+    public void apply(Environment envConfig,
+                      CheServicesEnvironmentImpl internalEnv) throws AgentException {
+        for (Map.Entry<String, ? extends ExtendedMachine> machineEntry : envConfig.getMachines()
+                                                                                  .entrySet()) {
+            String machineName = machineEntry.getKey();
+            ExtendedMachine machineConf = machineEntry.getValue();
+            CheServiceImpl internalMachine = internalEnv.getServices().get(machineName);
+
+            apply(machineConf, internalMachine);
+        }
+    }
+
+    /**
+     * Applies docker specific properties to a machine.
+     *
+     * @param machineConf
+     *         machine config with the list of agents that should be injected into machine
+     * @param machine
+     *         affected machine
+     * @throws AgentException
+     *         if any error occurs
+     */
+    public void apply(@Nullable ExtendedMachine machineConf,
+                      CheServiceImpl machine) throws AgentException {
+        if (machineConf != null) {
+            for (AgentKey agentKey : sorter.sort(machineConf.getAgents())) {
+                Agent agent = agentRegistry.getAgent(agentKey);
+                addEnv(machine, agent.getProperties());
+                addExposedPorts(machine, agent.getServers());
+                addLabels(machine, agent.getServers());
+            }
         }
     }
 
@@ -129,7 +157,7 @@ public class AgentConfigApplier {
         }
     }
 
-    enum PROPERTIES {
+    public enum PROPERTIES {
         ENVIRONMENT("environment");
 
         private final String value;
@@ -144,4 +172,3 @@ public class AgentConfigApplier {
         }
     }
 }
-

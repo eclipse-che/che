@@ -166,7 +166,6 @@ public class MachineAppliancePresenterTest {
                                                   widgetsFactory,
                                                   entityFactory,
                                                   tabItemFactory,
-                                                  terminalContainer,
                                                   infoPresenter,
                                                   recipesContainerPresenter,
                                                   serverPresenter,
@@ -176,9 +175,8 @@ public class MachineAppliancePresenterTest {
 
     @Test
     public void constructorShouldBeVerified() {
-        verify(widgetsFactory, times(3)).createTabHeader(SOME_TEXT);
+        verify(widgetsFactory, times(2)).createTabHeader(SOME_TEXT);
 
-        verify(entityFactory).createTab(eq(tabHeader), eq(terminalContainer), Matchers.<TabSelectHandler>anyObject());
         verify(entityFactory).createTab(eq(tabHeader), eq(infoPresenter), Matchers.<TabSelectHandler>anyObject());
         verify(entityFactory).createTab(eq(tabHeader), eq(serverPresenter), Matchers.<TabSelectHandler>anyObject());
 
@@ -186,7 +184,6 @@ public class MachineAppliancePresenterTest {
         verify(locale).tabInfo();
         verify(locale).tabServer();
 
-        verify(tabContainer).addTab(terminalTab);
         verify(tabContainer).addTab(infoTab);
         verify(tabContainer).addTab(serverTab);
 
@@ -196,18 +193,11 @@ public class MachineAppliancePresenterTest {
         verify(view).addContainer(recipePartView);
     }
 
-    @Test
-    public void terminalHandlerShouldBePerformed() {
-        callAndVerifyHandler();
-
-        verify(locale).tabTerminal();
-        verify(terminalContainer, times(2)).addOrShowTerminal(machine);
-    }
 
     private void callAndVerifyHandler() {
         presenter.showAppliance(machine);
 
-        verify(entityFactory).createTab(eq(tabHeader), eq(terminalContainer), handlerCaptor.capture());
+        verify(entityFactory).createTab(eq(tabHeader), eq(infoPresenter), handlerCaptor.capture());
         handlerCaptor.getValue().onTabSelected();
 
         verify(machine, times(2)).getId();
@@ -238,7 +228,7 @@ public class MachineAppliancePresenterTest {
         verify(view).showContainer(tabContainerView);
 
         verify(tabContainer).showTab(SOME_TEXT);
-        verify(terminalContainer).addOrShowTerminal(machine);
+//        verify(terminalContainer).addOrShowTerminal(machine);
         verify(infoPresenter).update(machine);
         verify(serverPresenter).updateInfo(machine);
     }

@@ -1,0 +1,81 @@
+<!--
+
+    Copyright (c) 2015 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<che-popup title="Create a test workspace" on-close="selectTemplateController.hide()">
+  <div class="add-project-templates">
+    <span class="header-label">Import projects from templates that match your stack's tags:</span>
+    <div class="template-list">
+      <div>
+        <che-list-header>
+          <div flex="100"
+               layout="row"
+               layout-align="start stretch"
+               class="che-list-item-row">
+            <div flex hide-xs layout-gt-xs="row"
+                 layout-align="start center"
+                 class="che-list-item-details">
+              <che-list-header-column flex="25"
+                                      che-sort-value="selectTemplateController.projectsOrderBy"
+                                      che-sort-item="displayName"
+                                      che-column-title="Name"></che-list-header-column>
+              <che-list-header-column flex="60"
+                                      che-sort-value="selectTemplateController.projectsOrderBy"
+                                      che-sort-item="description"
+                                      che-column-title="Description"></che-list-header-column>
+              <che-list-header-column flex="15" che-column-title="Import"></che-list-header-column>
+            </div>
+          </div>
+        </che-list-header>
+        <che-list flex>
+          <che-list-item
+            ng-repeat="template in filteredTemplates = (selectTemplateController.templates | sampleTagFilter:selectTemplateController.stack.tags | orderBy:['projectType', selectTemplateController.projectsOrderBy])">
+            <div flex="100"
+                 layout="row"
+                 layout-align="start stretch"
+                 class="command-item-row">
+              <div flex
+                   layout-xs="column" layout-gt-xs="row"
+                   layout-align-gt-xs="start center"
+                   layout-align-xs="start start"
+                   class="che-list-item-details">
+                <div flex="25" class="che-list-item-name">
+                  <span class="che-hover">{{template.displayName}}</span>
+                </div>
+                <div flex="60" class="che-list-item-name">
+                  <span class="che-hover">{{template.description}}</span>
+                </div>
+                <div flex="15">
+                  <md-switch ng-model="isAdd"
+                             ng-change="selectTemplateController.updateSelectedTemplates(template, isAdd)"
+                             aria-label="Add {{template.name}} project">
+                  </md-switch>
+                </div>
+              </div>
+            </div>
+          </che-list-item>
+          <div ng-show="!selectTemplateController.getItemsSize(filteredTemplates)">
+            No matching sample.
+          </div>
+        </che-list>
+      </div>
+    </div>
+    <che-button-notice che-button-title="Cancel"
+                       ng-click="selectTemplateController.hide()">
+    </che-button-notice>
+    <che-button-primary che-button-title="Test Workspace"
+                        ng-click="selectTemplateController.startTest()">
+    </che-button-primary>
+    <div class="footer-label">
+      {{selectTemplateController.selectedTemplates.length}} project(s) will be imported
+    </div>
+  </div>
+</che-popup>

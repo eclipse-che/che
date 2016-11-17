@@ -11,9 +11,10 @@ Process API
 _POST /process_
 
 - `channel`(optional) - the id of the channel which should be subscribed to the process events
-- `types`(optional) - works only in couple with specified `channel`, defines
+- `types`(optional) - comma separated types works only in couple with specified `channel`, defines
 the events which will be sent by the process to the `channel`. Several values may be specified,
-e.g. `channel=channel-1&types=stderr,stdout`. Possible type values:
+e.g. `channel=channel-1&types=stderr,stdout`. By default channel will be subscribed to 
+all the existing types(listed below). Possible type values:
     - `stderr` - output from the process stderr
     - `stdout` - output from the process stdout
     - `process_status` - the process status events(_started, died_)
@@ -36,7 +37,7 @@ e.g. `channel=channel-1&types=stderr,stdout`. Possible type values:
     "commandLine": "mvn clean install",
     "type" : "maven",
     "alive": true,
-    "nativePid": 9186,
+    "nativePid": 9186
 }
 ```
 - `200` if successfully started
@@ -150,7 +151,8 @@ Json:
 
 _GET /process_
 
-- `all`(optional) - if `true` then all the processes including _dead_ ones will be returned(respecting paging ofc), otherwise if `all` is `false`, or not specified or invalid then only _alive_ processes will be returned
+- `all`(optional) - if `true` then all the processes including _dead_ ones will be returned(respecting paging ofc), 
+otherwise only _alive_ processes will be returnedg
 
 #### Response
 

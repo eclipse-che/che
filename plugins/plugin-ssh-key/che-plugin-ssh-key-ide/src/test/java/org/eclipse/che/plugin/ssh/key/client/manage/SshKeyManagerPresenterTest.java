@@ -28,6 +28,8 @@ import org.eclipse.che.ide.api.dialogs.ConfirmDialog;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.dialogs.InputCallback;
 import org.eclipse.che.ide.api.dialogs.InputDialog;
+import org.eclipse.che.ide.api.dialogs.InputValidator;
+import org.eclipse.che.ide.api.dialogs.InputValidator.Violation;
 import org.eclipse.che.ide.api.dialogs.MessageDialog;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
@@ -52,6 +54,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
@@ -119,6 +123,8 @@ public class SshKeyManagerPresenterTest {
     private UploadSshKeyPresenter      uploadSshKeyPresenter;
     @Mock
     private NotificationManager        notificationManager;
+    @Mock
+    private InputDialog                inputDialog;
     @InjectMocks
     private SshKeyManagerPresenter     presenter;
 
@@ -135,6 +141,7 @@ public class SshKeyManagerPresenterTest {
         when(service.getPairs(anyString())).thenReturn(sshPairDTOsPromise);
         when(service.deletePair(anyString(), anyString())).thenReturn(voidPromise);
         when(service.generatePair(anyString(), anyString())).thenReturn(sshPairDTOPromise);
+        when(inputDialog.withValidator(any(InputValidator.class))).thenReturn(inputDialog);
     }
 
     private Promise createPromiseMock() {
@@ -361,7 +368,6 @@ public class SshKeyManagerPresenterTest {
 
     @Test
     public void testOnGenerateClickedWhenUserConfirmGenerateKey() {
-        InputDialog inputDialog = mock(InputDialog.class);
         when(dialogFactory.createInputDialog(anyString(), anyString(), (InputCallback)anyObject(), (CancelCallback)anyObject()))
                 .thenReturn(inputDialog);
 
@@ -376,7 +382,6 @@ public class SshKeyManagerPresenterTest {
 
     @Test
     public void testOnGenerateClickedWhenUserCancelGenerateKey() {
-        InputDialog inputDialog = mock(InputDialog.class);
         when(dialogFactory.createInputDialog(anyString(), anyString(), (InputCallback)anyObject(), (CancelCallback)anyObject()))
                 .thenReturn(inputDialog);
 
@@ -391,7 +396,6 @@ public class SshKeyManagerPresenterTest {
 
     @Test
     public void testOnGenerateClickedWhenGenerateKeyIsFailed() throws OperationException {
-        InputDialog inputDialog = mock(InputDialog.class);
         when(dialogFactory.createInputDialog(anyString(), anyString(), (InputCallback)anyObject(), (CancelCallback)anyObject()))
                 .thenReturn(inputDialog);
 
@@ -414,7 +418,6 @@ public class SshKeyManagerPresenterTest {
     @Test
     public void testShouldRefreshKeysAfterSuccessfulGenerateKey() throws OperationException {
         List<SshPairDto> sshPairDtoArray = new ArrayList<>();
-        InputDialog inputDialog = mock(InputDialog.class);
         when(dialogFactory.createInputDialog(anyString(), anyString(), (InputCallback)anyObject(), (CancelCallback)anyObject()))
                 .thenReturn(inputDialog);
 
@@ -434,5 +437,112 @@ public class SshKeyManagerPresenterTest {
         verify(service).generatePair(Matchers.eq(SshKeyManagerPresenter.VCS_SSH_SERVICE), eq(GITHUB_HOST));
         verify(service).getPairs(Matchers.eq(SshKeyManagerPresenter.VCS_SSH_SERVICE));
         verify(view).setPairs(eq(sshPairDtoArray));
+    }
+
+    @Test
+    public void shouldReturnErrorOnHostNameWithHttpProtocolValidation() throws OperationException {
+        String invalidHostname = "http://host.xz";
+        when(constant.invalidHostName()).thenReturn("ErrorMessage");
+
+        String errorMessage = ((InputValidator)presenter.hostNameValidator).validate(invalidHostname).getMessage();
+
+        assertEquals("ErrorMessage", errorMessage);
+    }
+
+    @Test
+    public void shouldReturnErrorOnHostNameWithHttpsProtocolValidation() throws OperationException {
+        String invalidHostname = "https://host.xz";
+        when(constant.invalidHostName()).thenReturn("ErrorMessage");
+
+        String errorMessage = ((InputValidator)presenter.hostNameValidator).validate(invalidHostname).getMessage();
+
+        assertEquals("ErrorMessage", errorMessage);
+    }
+
+    @Test
+    public void shouldReturnErrorOnHostNameWithPortValidation() throws OperationException {
+        String invalidHostname = "host:5005";
+        when(constant.invalidHostName()).thenReturn("ErrorMessage");
+
+        String errorMessage = ((InputValidator)presenter.hostNameValidator).validate(invalidHostname).getMessage();
+
+        assertEquals("ErrorMessage", errorMessage);
+    }
+
+    @Test
+    public void shouldReturnErrorOnHostNameThatStartsWithDotValidation() throws OperationException {
+        String invalidHostname = ".host.com";
+        when(constant.invalidHostName()).thenReturn("ErrorMessage");
+
+        String errorMessage = ((InputValidator)presenter.hostNameValidator).validate(invalidHostname).getMessage();
+
+        assertEquals("ErrorMessage", errorMessage);
+    }
+
+    @Test
+    public void shouldReturnErrorOnHostNameThatStartsWithDashValidation() throws OperationException {
+        String invalidHostname = "-host.com";
+        when(constant.invalidHostName()).thenReturn("ErrorMessage");
+
+        String errorMessage = ((InputValidator)presenter.hostNameValidator).validate(invalidHostname).getMessage();
+
+        assertEquals("ErrorMessage", errorMessage);
+    }
+
+    @Test
+    public void shouldReturnErrorOnHostNameThatEndsOnDotValidation() throws OperationException {
+        String invalidHostname = "host.com.";
+        when(constant.invalidHostName()).thenReturn("ErrorMessage");
+
+        String errorMessage = ((InputValidator)presenter.hostNameValidator).validate(invalidHostname).getMessage();
+
+        assertEquals("ErrorMessage", errorMessage);
+    }
+
+    @Test
+    public void shouldReturnErrorOnHostNameThatEndsOnDashValidation() throws OperationException {
+        String invalidHostname = "host.com-";
+        when(constant.invalidHostName()).thenReturn("ErrorMessage");
+
+        String errorMessage = ((InputValidator)presenter.hostNameValidator).validate(invalidHostname).getMessage();
+
+        assertEquals("ErrorMessage", errorMessage);
+    }
+
+    @Test
+    public void shouldReturnErrorOnHostNameWithDotAndDashTogetherValidation() throws OperationException {
+        String invalidHostname = "host.-com";
+        when(constant.invalidHostName()).thenReturn("ErrorMessage");
+
+        String errorMessage = ((InputValidator)presenter.hostNameValidator).validate(invalidHostname).getMessage();
+
+        assertEquals("ErrorMessage", errorMessage);
+    }
+
+    @Test
+    public void shouldReturnNullOnValidHostNameValidation() throws OperationException {
+        String validHostname = "hostname.com";
+
+        Violation violation = ((InputValidator)presenter.hostNameValidator).validate(validHostname);
+
+        assertNull(violation);
+    }
+
+    @Test
+    public void shouldReturnNullOnHostNameWithDotAndDashValidation() throws OperationException {
+        String validHostname = "host-name.com";
+
+        Violation violation = ((InputValidator)presenter.hostNameValidator).validate(validHostname);
+
+        assertNull(violation);
+    }
+
+    @Test
+    public void shouldReturnNullOnHostNameWithSeveralDotsAndDashesValidation() throws OperationException {
+        String validHostname = "ho-st.na-me.com";
+
+        Violation violation = ((InputValidator)presenter.hostNameValidator).validate(validHostname);
+
+        assertNull(violation);
     }
 }

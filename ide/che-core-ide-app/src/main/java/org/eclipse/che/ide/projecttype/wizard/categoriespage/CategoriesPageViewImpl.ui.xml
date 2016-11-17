@@ -17,7 +17,7 @@
 
     <ui:style>
         .rootDirPanel {
-            width: calc(100% - 12px);
+            width: literal("calc(100% - 12px)");
             margin-right: 6px;
         }
 

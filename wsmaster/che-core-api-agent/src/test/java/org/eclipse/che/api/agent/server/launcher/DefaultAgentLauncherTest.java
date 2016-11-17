@@ -25,6 +25,7 @@ import org.testng.annotations.Test;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
@@ -66,5 +67,23 @@ public class DefaultAgentLauncherTest {
         assertEquals(command.getCommandLine(), "script1");
 
         verify(instanceProcess).start(any());
+    }
+
+    @Test
+    public void shouldDoNothingIfAgentScriptIsNull() throws Exception {
+        when(agent.getScript()).thenReturn(null);
+
+        agentLauncher.launch(machine, agent);
+
+        verifyZeroInteractions(machine, lineConsumer, instanceProcess);
+    }
+
+    @Test
+    public void shouldDoNothingIfAgentScriptIsEmpty() throws Exception {
+        when(agent.getScript()).thenReturn("");
+
+        agentLauncher.launch(machine, agent);
+
+        verifyZeroInteractions(machine, lineConsumer, instanceProcess);
     }
 }

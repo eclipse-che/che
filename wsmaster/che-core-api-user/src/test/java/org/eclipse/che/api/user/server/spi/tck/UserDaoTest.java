@@ -14,13 +14,17 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.model.user.User;
+import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.user.server.Constants;
+import org.eclipse.che.api.user.server.event.PostUserRemovedEvent;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.test.tck.TckListener;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepositoryException;
+import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
@@ -56,6 +60,9 @@ public class UserDaoTest {
     private UserDao userDao;
 
     @Inject
+    private EventService eventService;
+
+    @Inject
     private TckRepository<UserImpl> tckRepository;
 
     @BeforeMethod
@@ -70,7 +77,6 @@ public class UserDaoTest {
             final List<String> aliases = new ArrayList<>(asList("google:" + name, "github:" + name));
             users[i] = new UserImpl(id, email, name, password, aliases);
         }
-
         tckRepository.createAll(Arrays.asList(users));
     }
 
@@ -361,6 +367,19 @@ public class UserDaoTest {
 
         userDao.remove(user.getId());
         userDao.getById(user.getId());
+    }
+
+    @Test
+    public void shouldFireEventOnRemoveExistedUser() throws Exception {
+        final UserImpl user = users[0];
+        final String[] firedUserId = {null};
+        EventSubscriber eventSubscriber =
+                (EventSubscriber<PostUserRemovedEvent>)event -> firedUserId[0] = event.getUserId();
+
+        eventService.subscribe(eventSubscriber, PostUserRemovedEvent.class);
+        userDao.remove(user.getId());
+        Assert.assertEquals(firedUserId[0], user.getId());
+        eventService.unsubscribe(eventSubscriber, PostUserRemovedEvent.class);
     }
 
     @Test

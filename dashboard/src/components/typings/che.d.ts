@@ -26,8 +26,87 @@ declare namespace _che {
       namespace: string;
       showLogs: string;
       workspaceName: string;
+      tabName: string;
     }
 
+  }
+
+  export interface IRegisterService {
+    app: ng.IModule;
+    directive(name: string, constructorFn: Function);
+    filter(name: string, constructorFn: Function): che.IRegisterService;
+    controller(name: string, constructorFn: Function): che.IRegisterService;
+    service(name: string, constructorFn: Function): che.IRegisterService;
+    provider(name: string, constructorFn: ng.IServiceProvider): che.IRegisterService;
+    factory(name: string, constructorFn: Function): che.IRegisterService;
+  }
+
+  export interface IWorkspaceCommand {
+    name: string;
+    type: string;
+    commandLine: string;
+    attributes?: {
+      previewUrl?: string;
+      [propName: string]: string;
+    };
+  }
+
+  export interface IStack {
+    name: string;
+    description: string;
+    projects: Array<any>;
+    tags: Array<string>;
+    scope: string;
+    components: Array<any>;
+    source: any;
+    workspaceConfig: IWorkspace;
+  }
+
+  export interface IWorkspace {
+    id?: string;
+    runtime?: any;
+    temporary?: boolean;
+    config: IWorkspaceConfig;
+  }
+
+  export interface IWorkspaceConfig {
+    name?: string;
+    defaultEnv?: string;
+    environments?: IWorkspaceEnvironments;
+    projects: Array <any>;
+    commands?: Array <any>;
+  }
+
+  export interface IWorkspaceEnvironments {
+      [envName: string]: any;
+  }
+
+  export interface IProject {
+    name: string;
+    displayName: string;
+    description: string;
+    source: {
+      location: string;
+      parameters: any;
+      type: string;
+    };
+    commands: Array<any>;
+    projectType: string;
+    tags: Array<string>;
+  }
+
+  export interface IImportProject {
+    source: {
+      type: string;
+      location: string;
+      parameters: Object;
+    };
+    project: {
+      name: string;
+      type: string;
+      description: string;
+      commands: Array<any>;
+    };
   }
 
 }

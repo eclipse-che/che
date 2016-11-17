@@ -1,0 +1,21 @@
+<div layout="column" flex class="recipe-authoring" md-theme="default">
+  <ng-form name="workspaceRecipeAuthoringForm">
+
+    <div layout="column" class="recipe-editor">
+      <ui-codemirror ui-codemirror="workspaceRecipeAuthoringController.editorOptions"
+                     ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 1000, 'blur': 0 } }"
+                     ng-model="workspaceRecipeAuthoringController.recipeScript"></ui-codemirror>
+      <che-input che-form="workspaceRecipeAuthoringForm"
+                 che-name="recipe"
+                 type="hidden"
+                 ng-model="workspaceRecipeAuthoringController.recipeScript"
+                 ng-required>
+        <div ng-message="required">The recipe is required.</div>
+      </che-input>
+      <div class="recipe-docs-link">
+        <a href="https://eclipse-che.readme.io/docs/stacks#custom-stacks-for-che" target="_blank">Custom stack documentation</a>
+      </div>
+    </div>
+
+  </ng-form>
+</div>

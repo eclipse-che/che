@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.ssh.server;
 
-import com.google.common.collect.ImmutableMap;
-
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
@@ -88,12 +86,12 @@ public class HttpSshServiceClient implements SshServiceClient {
         try {
             final String url = UriBuilder.fromUri(sshUrl)
                                          .path(SshService.class, "getPair")
-                                         .buildFromMap(ImmutableMap.of("service", service,
-                                                                       "name", name))
+                                         .build(service)
                                          .toString();
 
             return requestFactory.fromUrl(url)
                                  .useGetMethod()
+                                 .addQueryParam("name", name)
                                  .request()
                                  .asDto(SshPairDto.class);
         } catch (IOException | ForbiddenException | BadRequestException | ConflictException | UnauthorizedException e) {
@@ -106,12 +104,12 @@ public class HttpSshServiceClient implements SshServiceClient {
         try {
             final String url = UriBuilder.fromUri(sshUrl)
                                          .path(SshService.class, "removePair")
-                                         .buildFromMap(ImmutableMap.of("service", service,
-                                                                       "name", name))
+                                         .build(service)
                                          .toString();
 
             requestFactory.fromUrl(url)
                           .useDeleteMethod()
+                          .addQueryParam("name", name)
                           .request();
         } catch (IOException | ForbiddenException | BadRequestException | ConflictException | UnauthorizedException e) {
             throw new ServerException(e);

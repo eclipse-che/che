@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.ssh.key.client.manage;
 
+import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
@@ -25,6 +26,7 @@ import org.eclipse.che.ide.api.dialogs.CancelCallback;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.dialogs.InputCallback;
+import org.eclipse.che.ide.api.dialogs.InputValidator;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.preferences.AbstractPreferencePagePresenter;
 import org.eclipse.che.ide.api.ssh.SshServiceClient;
@@ -60,6 +62,8 @@ public class SshKeyManagerPresenter extends AbstractPreferencePagePresenter impl
     private final UploadSshKeyPresenter      uploadSshKeyPresenter;
     private final NotificationManager        notificationManager;
 
+    final HostNameValidator hostNameValidator;
+
     @Inject
     public SshKeyManagerPresenter(SshKeyManagerView view,
                                   SshServiceClient service,
@@ -82,6 +86,7 @@ public class SshKeyManagerPresenter extends AbstractPreferencePagePresenter impl
         this.constant = constant;
         this.uploadSshKeyPresenter = uploadSshKeyPresenter;
         this.notificationManager = notificationManager;
+        this.hostNameValidator = new HostNameValidator();
     }
 
     /** {@inheritDoc} */
@@ -141,6 +146,7 @@ public class SshKeyManagerPresenter extends AbstractPreferencePagePresenter impl
                                             }
                                         },
                                         getCancelCallback())
+                     .withValidator(hostNameValidator)
                      .show();
     }
 
@@ -283,4 +289,31 @@ public class SshKeyManagerPresenter extends AbstractPreferencePagePresenter impl
     public void revertChanges() {
 
     }
+
+    private class HostNameValidator implements InputValidator {
+        private final RegExp hostNamePattern;
+
+        HostNameValidator() {
+            hostNamePattern = RegExp.compile("^([a-zA-Z0-9](\\.|\\-)?)*[a-zA-Z0-9]+$");
+        }
+
+        @Override
+        public Violation validate(String value) {
+            if (!hostNamePattern.test(value)) {
+                return new Violation() {
+                    @Override
+                    public String getMessage() {
+                        return constant.invalidHostName();
+                    }
+
+                    @Override
+                    public String getCorrectedValue() {
+                        return null;
+                    }
+                };
+            }
+            return null;
+        }
+    }
+
 }

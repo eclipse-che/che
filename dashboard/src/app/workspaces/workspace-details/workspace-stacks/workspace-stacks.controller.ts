@@ -35,7 +35,14 @@ export class WorkspaceStacksController {
   isCustomStack: boolean = false;
   selectSourceOption: string;
 
+  tabName: string;
+  environmentName: string;
   workspaceName: string;
+  workspaceImportedRecipe: {
+    type: string,
+    content: string,
+    location: string
+  };
   workspaceStackOnChange: Function;
 
   /**
@@ -61,17 +68,35 @@ export class WorkspaceStacksController {
         this.cheStackLibrarySelecter(null);
       }
     });
+
+    $scope.$watch(() => { return this.workspaceImportedRecipe; }, () => {
+      if (!this.workspaceImportedRecipe) {
+        return;
+      }
+      this.initStackSelecter();
+    }, true);
   }
 
   /**
-   * Callback when tab has been change.
-   *
-   * @param tabName {string} the select tab name
+   * Initialize stack selector widget.
    */
-  setStackTab(tabName: string): void {
-    if (tabName === 'custom-stack') {
-      this.cheStackLibrarySelecter(null);
-      this.isCustomStack = true;
+  initStackSelecter(): void {
+    let type = this.workspaceImportedRecipe.type;
+    if (this.workspaceImportedRecipe.location && type !== 'dockerimage') {
+      this.recipeFormat = type;
+      this.recipeUrl = this.workspaceImportedRecipe.location;
+      this.tabName = 'stack-import';
+      delete this.recipeScript;
+    } else {
+      if (type === 'dockerimage') {
+        type = 'dockerfile';
+        this.recipeScript = 'FROM ' + this.workspaceImportedRecipe.location;
+      } else {
+        this.recipeScript = this.workspaceImportedRecipe.content;
+      }
+      this.recipeFormat = type;
+      this.tabName = 'stack-authoring';
+      delete this.recipeUrl;
     }
   }
 
@@ -84,15 +109,14 @@ export class WorkspaceStacksController {
     if (stack) {
       this.isCustomStack = false;
       this.recipeUrl = null;
+      this.recipeScript = null;
+    } else {
+      this.isCustomStack = true;
     }
     this.stack = stack;
 
     let source = this.getSource();
     let config = this.buildWorkspaceConfig(source);
-
-    if (!config.defaultEnv || (!this.stack && !this.recipeFormat)) {
-      return;
-    }
 
     this.workspaceStackOnChange({config: config, stackId: this.stack ? this.stack.id : ''});
   }
@@ -111,9 +135,9 @@ export class WorkspaceStacksController {
       let machines    = this.composeEnvironmentManager.getMachines({recipe: source}),
           environment = this.composeEnvironmentManager.getEnvironment({recipe: source}, machines);
       stackWorkspaceConfig = {
-        defaultEnv: this.workspaceName,
+        defaultEnv: this.environmentName,
         environments: {
-          [this.workspaceName]: environment
+          [this.environmentName]: environment
         }
       };
     }

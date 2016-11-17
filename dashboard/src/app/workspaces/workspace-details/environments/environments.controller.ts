@@ -38,11 +38,11 @@ export class WorkspaceEnvironmentsController {
   };
 
   stackId: string;
-  workspaceConfig: any;
+  workspaceConfig: che.IWorkspaceConfig;
   environment: any;
   environmentName: string;
   newEnvironmentName: string;
-  recipeType: string;
+  recipe: any;
   machines: any[];
   machinesViewStatus: any;
   devMachineName: string;
@@ -74,9 +74,7 @@ export class WorkspaceEnvironmentsController {
     }, () => {
       if (this.workspaceConfig &&
         this.workspaceConfig.environments &&
-        this.workspaceConfig.environments[this.environmentName] &&
-        this.workspaceConfig.environments[this.environmentName].recipe &&
-        this.workspaceConfig.environments[this.environmentName].recipe.type) {
+        this.workspaceConfig.environments[this.environmentName]) {
         this.init();
       }
     });
@@ -89,8 +87,15 @@ export class WorkspaceEnvironmentsController {
     this.newEnvironmentName = this.environmentName;
     this.environment = this.workspaceConfig.environments[this.environmentName];
 
-    this.recipeType = this.environment.recipe.type;
-    this.environmentManager = this.cheEnvironmentRegistry.getEnvironmentManager(this.recipeType);
+    this.recipe = this.environment.recipe;
+    if (!this.recipe || !(this.recipe.content || this.recipe.location)) {
+      this.machines = [];
+      delete this.devMachineName;
+      delete this.machinesViewStatus[this.environmentName];
+      return;
+    }
+
+    this.environmentManager = this.cheEnvironmentRegistry.getEnvironmentManager(this.recipe.type);
 
     this.editorOptions.mode = this.environmentManager.editorMode;
 
@@ -109,7 +114,7 @@ export class WorkspaceEnvironmentsController {
    * @returns {boolean}
    */
   isUnique(name: string): boolean {
-    return name === this.environmentName || !this.workspaceConfig.environments[name];
+    return name === this.environmentName || !this.workspaceConfig.environments || !this.workspaceConfig.environments[name];
   }
 
   /**
@@ -234,14 +239,9 @@ export class WorkspaceEnvironmentsController {
     this.stackId = stackId;
     this.workspaceConfig = config;
 
-    if (!this.environmentName) {
+    if (!this.environmentName || this.environmentName !== config.defaultEnv) {
       this.environmentName = config.defaultEnv;
       this.newEnvironmentName = this.environmentName;
-    } else if (this.newEnvironmentName !== config.defaultEnv) {
-      this.workspaceConfig.environments[this.newEnvironmentName] = this.workspaceConfig.environments[config.defaultEnv];
-      delete this.workspaceConfig.environments[config.defaultEnv];
-
-      this.workspaceConfig.defaultEnv = this.newEnvironmentName;
     }
 
     // for compose recipe
@@ -266,7 +266,7 @@ export class WorkspaceEnvironmentsController {
       this.workspaceConfig.environments[this.environmentName] = environmentManager.getEnvironment(environment, machines);
     }
 
-    this.machinesViewStatus = {};
+    this.doUpdateEnvironments();
   }
 
   /**

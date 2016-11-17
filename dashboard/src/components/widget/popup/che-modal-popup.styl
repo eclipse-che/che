@@ -1,0 +1,47 @@
+.che-modal-popup
+  background-color alpha($black-color, 0.55)
+  position fixed
+  top 0
+  left 0
+  bottom 0
+  right 0
+  z-index 16777271
+
+  & > div:first-child
+    max-height: 120px;
+
+  .che-modal-popup-header
+    max-height 100px
+    margin-top 20px
+
+  .che-modal-popup-header > div:first-child
+    font-size 30px
+    text-align center
+    color $white-color
+    margin-left calc(14% + 70px)
+
+  .che-modal-popup-header > div:last-child
+    margin-right 50px
+    border 1px solid $white-color
+    background-color $white-color
+    border-radius 70px
+    text-align center
+    line-height 70px
+    height 70px
+    width 70px
+    outline none
+
+    i::before
+      position relative
+      color alpha($black-color, 0.55)
+      font-size 40px
+      top 7px
+
+  .che-modal-popup-body
+    position relative
+    width: 87%;
+    margin-left: 12%;
+    margin-bottom 2%
+
+    .ide-page-loader-content img
+      position absolute

@@ -49,6 +49,7 @@ export class WorkspaceEnvironments {
       environmentName: '=',
       machinesViewStatus: '=',
       workspaceConfig: '=',
+      workspaceImportedRecipe: '=',
       environmentOnChange: '&'
     };
   }

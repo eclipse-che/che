@@ -10,22 +10,20 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.machine.server.ssh;
 
+import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.ssh.server.SshManager;
+import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.event.WorkspaceCreatedEvent;
 import org.eclipse.che.api.workspace.server.event.WorkspaceRemovedEvent;
-import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.subject.Subject;
-import org.eclipse.che.commons.subject.SubjectImpl;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -59,10 +57,16 @@ public class WorkspaceSshKeysTest {
     private static final String NAMESPACE = "userNS";
 
     /**
-     * Dummy Owner identifier used in @{link EnvironmentContext}
+     * Dummy Owner identifier used
      * This will be used for registering ssh keys.
      */
-    private static final String OWNER_ID = "user123";
+    private static final String OWNER_NAME = "userName";
+
+    /**
+     * Dummy UserID of the owner name
+     * This will be used for registering ssh keys.
+     */
+    private static final String USER_ID = "user123";
 
     /**
      * Capturing the events on the event service.
@@ -81,6 +85,18 @@ public class WorkspaceSshKeysTest {
      */
     @Mock
     private SshManager sshManager;
+
+    /**
+     * Manager used by {@link WorkspaceSshKeys} to get userId from workspace owner
+     */
+    @Mock
+    private UserManager userManager;
+
+    /**
+     * User instance used for returning calls to userManager.
+     */
+    @Mock
+    private User user;
 
     /**
      * Mock of workspace used by events (create/remove)
@@ -127,22 +143,11 @@ public class WorkspaceSshKeysTest {
         when(workspace.getId()).thenReturn(WORKSPACE_ID);
         when(workspace.getConfig()).thenReturn(workspaceConfig);
         when(workspaceConfig.getName()).thenReturn(WORKSPACE_NAME);
+        when(workspace.getNamespace()).thenReturn(OWNER_NAME);
 
-        EnvironmentContext.setCurrent(new EnvironmentContext() {
-            @Override
-            public Subject getSubject() {
-                return new SubjectImpl(NAMESPACE, OWNER_ID, "token", false);
-            }
-        });
+        when(userManager.getByName(eq(OWNER_NAME))).thenReturn(user);
+        when(user.getId()).thenReturn(USER_ID);
 
-    }
-
-    /**
-     * Cleanup Environment Context after each method
-     */
-    @AfterMethod
-    public void tearDown() throws Exception {
-        EnvironmentContext.reset();
     }
 
     /**
@@ -155,7 +160,7 @@ public class WorkspaceSshKeysTest {
         workspaceCreatedEventEventSubscriber.onEvent(new WorkspaceCreatedEvent(this.workspace));
 
         // then
-        verify(sshManager).generatePair(eq(OWNER_ID), eq("workspace"), eq(WORKSPACE_ID));
+        verify(sshManager).generatePair(eq(USER_ID), eq("workspace"), eq(WORKSPACE_ID));
 
     }
 
@@ -169,7 +174,7 @@ public class WorkspaceSshKeysTest {
         workspaceRemovedEventEventSubscriber.onEvent(new WorkspaceRemovedEvent(this.workspace));
 
         // then
-        verify(sshManager).removePair(eq(OWNER_ID), eq("workspace"), eq(WORKSPACE_ID));
+        verify(sshManager).removePair(eq(USER_ID), eq("workspace"), eq(WORKSPACE_ID));
 
     }
 }
