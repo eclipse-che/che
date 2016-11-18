@@ -52,5 +52,6 @@
         <module>plugin-ssh-key</module>
         <module>plugin-languageserver</module>
         <module>plugin-json</module>
+        <module>plugin-mydsl</module>
     </modules>
 </project>
