@@ -264,6 +264,7 @@ public class TextDocumentService {
     public void didOpen(DidOpenTextDocumentParamsDTO openEvent) throws LanguageServerException {
         openEvent.getTextDocument().setUri(prefixURI(openEvent.getTextDocument().getUri()));
         openEvent.setUri(prefixURI(openEvent.getUri()));
+        openEvent.getTextDocument().setLanguageId("mydsl");
         LanguageServer server = getServer(openEvent.getTextDocument().getUri());
         if (server != null) {
             server.getTextDocumentService().didOpen(openEvent);
