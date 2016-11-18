@@ -621,7 +621,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
     private void cleanUpContainer(String containerId) {
         try {
             if (containerId != null) {
-                docker.removeContainer(RemoveContainerParams.create(containerId)
+                openShift.removeContainer(RemoveContainerParams.create(containerId)
                                                             .withRemoveVolumes(true)
                                                             .withForce(true));
             }
