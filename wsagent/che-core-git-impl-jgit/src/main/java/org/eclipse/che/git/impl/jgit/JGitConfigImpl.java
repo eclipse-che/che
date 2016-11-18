@@ -32,7 +32,7 @@ import static java.lang.System.lineSeparator;
  */
 class JGitConfigImpl extends Config {
 
-    private final String NOT_FOUND_ERROR_MESSAGE = "Can not find property '%s' in Git configuration settings.";
+    private final String CONFIGURATION_NOT_FOUND_MESSAGE = "Can not find property '%s' in Git configuration settings.";
 
     private final Repository repository;
 
@@ -46,7 +46,7 @@ class JGitConfigImpl extends Config {
         ConfigKey key = parseName(name);
         String value = repository.getConfig().getString(key.section, key.subsection, key.name);
         if (value == null) {
-            throw new GitException(format(NOT_FOUND_ERROR_MESSAGE, name));
+            throw new GitException(format(CONFIGURATION_NOT_FOUND_MESSAGE, name));
         }
         return value;
     }
@@ -56,7 +56,7 @@ class JGitConfigImpl extends Config {
         ConfigKey key = parseName(name);
         String[] values = repository.getConfig().getStringList(key.section, key.subsection, key.name);
         if (values == null || values.length == 0) {
-            throw new GitException(format(NOT_FOUND_ERROR_MESSAGE, name));
+            throw new GitException(format(CONFIGURATION_NOT_FOUND_MESSAGE, name));
         }
         return Arrays.asList(values);
     }
