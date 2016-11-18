@@ -113,13 +113,6 @@ elif echo ${LINUX_TYPE} | grep -qi "CentOS"; then
     }
     ${SUDO} sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
 
-# Red Hat Enterprise Linux 6 
-############################
-elif echo ${LINUX_TYPE} | grep -qi "Red Hat"; then
-    test "${PACKAGES}" = "" || {
-        ${SUDO} yum install ${PACKAGES};
-    }
-
 else
     >&2 echo "Unrecognized Linux Type"
     >&2 cat $FILE

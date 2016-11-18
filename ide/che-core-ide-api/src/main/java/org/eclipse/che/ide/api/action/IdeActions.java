@@ -46,4 +46,7 @@ public interface IdeActions {
     String GROUP_CENTER_STATUS_PANEL = "centerStatusPanelGroup";
     String GROUP_LEFT_STATUS_PANEL   = "leftStatusPanelGroup";
     String GROUP_RIGHT_STATUS_PANEL  = "rightStatusPanelGroup";
+
+    String GROUP_EMPTY_EDITOR_PANEL  = "emptyEditorPanelGroup";
+    String GROUP_EMPTY_PROJECT_PANEL = "emptyProjectPanelGroup";
 }
