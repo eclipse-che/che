@@ -282,7 +282,7 @@ public class DockerInstance extends AbstractInstance {
             }
 
             // kill container is not needed here, because we removing container with force flag
-            docker.removeContainer(RemoveContainerParams.create(container)
+            openShift.removeContainer(RemoveContainerParams.create(container)
                                                         .withRemoveVolumes(true)
                                                         .withForce(true));
         } catch (IOException e) {

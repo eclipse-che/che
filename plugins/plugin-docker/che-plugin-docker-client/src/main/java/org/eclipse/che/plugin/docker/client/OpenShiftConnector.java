@@ -69,11 +69,14 @@ public class OpenShiftConnector {
     public static final String CHE_DEFAULT_EXTERNAL_ADDRESS = "172.17.0.1";
     public static final String CHE_SERVER_INTERNAL_IP_ADB = "172.17.0.5";
     public static final String CHE_SERVER_INTERNAL_IP_MINISHIFT = "che-server";
+    public static final String CHE_CONTAINER_IDENTIFIER_LABEL_KEY = "cheContainerIdentifier";
 
     private final IClient            openShiftClient;
     private final IResourceFactory   openShiftFactory;
     private final String             cheOpenShiftProjectName;
     private final String             cheOpenShiftServiceAccount;
+
+
     private final String             openShiftApiEndpoint;
     private final String             openShiftUserName;
     private final String             openShiftUserPassword;
@@ -163,23 +166,79 @@ public class OpenShiftConnector {
         return info;
     }
 
-//    public void removeContainer(final RemoveContainerParams params) throws IOException {
-//        String containerId = params.getContainer();
-//        boolean useForce = params.isForce();
-//        boolean removeVolumes = params.isRemoveVolumes();
-//
-//        String workspaceId = getWorkspaceIdFromContainerId(containerId);
-//        String resourceName = CHE_OPENSHIFT_RESOURCES_PREFIX + workspaceId;
-//
-//        // Service
-//        openShiftClient.delete();
-//        // DC
-//        openShiftClient.delete();
-//        // Route
-//        openShiftClient.delete();
-//        // Pod
-//        openShiftClient.delete();
-//    }
+    public void removeContainer(final RemoveContainerParams params) throws IOException {
+        String containerId = params.getContainer();
+        boolean useForce = params.isForce();
+        boolean removeVolumes = params.isRemoveVolumes();
+
+        IPod pod = getChePodByContainerId(containerId);
+
+        String deploymentConfig = pod.getLabels().get("deploymentConfig");
+        String replicationController = pod.getLabels().get("deployment");
+
+        IDeploymentConfig dc = getCheDeploymentDescriptor(deploymentConfig);
+        IReplicationController rc = getCheReplicationController(replicationController);
+        IService svc = getCheServiceBySelector("deploymentConfig", deploymentConfig);
+
+        LOG.info("Removing OpenShift Service " + svc.getName());
+        openShiftClient.delete(svc);
+
+        LOG.info("Removing OpenShift DeploymentConfiguration " + dc.getName());
+        openShiftClient.delete(dc);
+
+        LOG.info("Removing OpenShift ReplicationController " + rc.getName());
+        openShiftClient.delete(rc);
+
+        LOG.info("Removing OpenShift Pod " + pod.getName());
+        openShiftClient.delete(pod);
+    }
+
+    private IService getCheServiceBySelector(String selectorKey, String selectorValue) {
+        List<IService> svcs = openShiftClient.list(ResourceKind.SERVICE, cheOpenShiftProjectName, Collections.emptyMap());
+        IService svc = svcs.stream().filter(s -> s.getSelector().get(selectorKey).equals(selectorValue)).findAny().orElse(null);
+
+        if (svc == null) {
+            LOG.warn("No Service with selector " + selectorKey + "=" + selectorValue + " could be found.");
+        }
+
+        return svc;
+    }
+
+    private IReplicationController getCheReplicationController(String replicationController) throws IOException {
+        IReplicationController rc = openShiftClient.get(ResourceKind.REPLICATION_CONTROLLER, replicationController, cheOpenShiftProjectName);
+        if (rc == null) {
+            LOG.warn("No ReplicationController with name " + replicationController + " could be found.");
+        }
+        return rc;
+    }
+
+    private IDeploymentConfig getCheDeploymentDescriptor(String deploymentConfig) throws IOException {
+        IDeploymentConfig dc = openShiftClient.get(ResourceKind.DEPLOYMENT_CONFIG, deploymentConfig, cheOpenShiftProjectName);
+        if (dc == null) {
+            LOG.warn("DeploymentConfig with name " + deploymentConfig + " could be found");
+        }
+        return dc;
+    }
+
+    private IPod getChePodByContainerId(String containerId) throws IOException {
+        Map<String, String> podLabels = new HashMap<>();
+        String labelKey = CHE_CONTAINER_IDENTIFIER_LABEL_KEY;
+        podLabels.put(labelKey, containerId.substring(0,12));
+
+        List<IPod> pods = openShiftClient.list(ResourceKind.POD, cheOpenShiftProjectName, podLabels);
+
+        if (pods.size() == 0 ) {
+            LOG.error("An OpenShift Pod with label " + labelKey + "=" + containerId+" could not be found");
+            throw new IOException("An OpenShift Pod with label " + labelKey + "=" + containerId+" could not be found");
+        }
+
+        if (pods.size() > 1 ) {
+            LOG.error("There are " + pods.size() + " pod with label " + labelKey + "=" + containerId+" (just one was expeced)");
+            throw  new  IOException("There are " + pods.size() + " pod with label " + labelKey + "=" + containerId+" (just one was expeced)");
+        }
+
+        return pods.get(0);
+    }
 
     private String getNormalizedContainerName(CreateContainerParams createContainerParams) {
         String containerName = createContainerParams.getContainerName();
@@ -286,6 +345,8 @@ public class OpenShiftConnector {
                 for (IPod pod : pods) {
                     if (pod.getLabels().get("deploymentConfig").equals(deploymentConfigName)) {
                         ModelNode containerID = ((Pod) pod).getNode().get("status").get("containerStatuses").get(0).get("containerID");
+                        pod.addLabel(CHE_CONTAINER_IDENTIFIER_LABEL_KEY, containerID.toString().substring(10,22));
+                        openShiftClient.update(pod);
                         return containerID.toString().substring(10, 74);
                     }
                 }
