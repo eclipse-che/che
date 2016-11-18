@@ -221,6 +221,17 @@
             <artifactId>javax.servlet-api</artifactId>
             <scope>provided</scope>
         </dependency>
+        <!-- support for 'test' language server -->
+        <dependency>
+          <groupId>org.eclipse.che</groupId>
+          <artifactId>che-plugin-test-lang-server</artifactId>
+          <version>${project.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.jboss.tools.language-server.test-lang</groupId>
+          <artifactId>org.jboss.tools.language-server.test-lang.server</artifactId>
+          <version>1.0.0-SNAPSHOT</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
