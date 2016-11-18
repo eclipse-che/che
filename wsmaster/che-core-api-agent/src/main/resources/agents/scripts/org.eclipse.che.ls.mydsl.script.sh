@@ -106,8 +106,8 @@ fi
 ### Install Mydsl LS ###
 ######################
 
-curl ${LS_DIR} -s ${AGENT_BINARIES_URI}
-
+curl -s --create-dirs -o ${LS_DIR}/mydsl-full.jar ${AGENT_BINARIES_URI}
+  		  
 touch ${LS_LAUNCHER}
 chmod +x ${LS_LAUNCHER}
 echo "java -jar ${LS_DIR}/mydsl-full.jar" >> ${LS_LAUNCHER}
