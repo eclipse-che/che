@@ -42,7 +42,7 @@ public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProv
                                              WorkspaceFolderPathProvider workspaceFolderPathProvider,
                                              WindowsPathEscaper pathEscaper,
                                              @Named("che.workspace.projects.storage") String projectFolderPath,
-                                             @Named("che.docker.volumes_agent_options") String volumeOptions) {
+                                             @Named("che.docker.volumes_projects_options") String volumeOptions) {
         super(agentConfigApplier);
         this.workspaceFolderPathProvider = workspaceFolderPathProvider;
         this.pathEscaper = pathEscaper;
