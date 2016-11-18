@@ -51,6 +51,7 @@ import org.eclipse.che.ide.ui.smartTree.TreeStyles;
 import org.eclipse.che.ide.ui.smartTree.event.GoIntoStateEvent;
 import org.eclipse.che.ide.ui.smartTree.event.GoIntoStateEvent.GoIntoStateHandler;
 import org.eclipse.che.ide.ui.smartTree.presentation.DefaultPresentationRenderer;
+import org.eclipse.che.ide.ui.status.StatusWidget;
 import org.eclipse.che.ide.ui.toolbar.PresentationFactory;
 
 import java.util.Comparator;
@@ -93,7 +94,8 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
                                    final RefreshPathAction refreshPathAction,
                                    final PresentationFactory presentationFactory,
                                    final Provider<PerspectiveManager> managerProvider,
-                                   final ActionManager actionManager) {
+                                   final ActionManager actionManager,
+                                   final EmptyTreePanel emptyTreePanel) {
         super(resources);
         this.skipHiddenNodesInterceptor = skipHiddenNodesInterceptor;
 
@@ -104,7 +106,7 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
         NodeLoader nodeLoader = new NodeLoader(nodeInterceptorSet);
         nodeLoader.getNodeInterceptors().add(skipHiddenNodesInterceptor);
 
-        tree = new Tree(nodeStorage, nodeLoader);
+        tree = new Tree(nodeStorage, nodeLoader, new StatusWidget<Tree>(emptyTreePanel));
         tree.setContextMenuInvocationHandler(new Tree.ContextMenuInvocationHandler() {
             @Override
             public void onInvokeContextMenu(int x, int y) {

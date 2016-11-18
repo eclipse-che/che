@@ -35,16 +35,19 @@ public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProv
     private final WorkspaceFolderPathProvider workspaceFolderPathProvider;
     private final WindowsPathEscaper          pathEscaper;
     private final String                      projectFolderPath;
+	private final String                      volumesOptions;
 
     @Inject
     public LocalCheInfrastructureProvisioner(AgentConfigApplier agentConfigApplier,
                                              WorkspaceFolderPathProvider workspaceFolderPathProvider,
                                              WindowsPathEscaper pathEscaper,
-                                             @Named("che.workspace.projects.storage") String projectFolderPath) {
+                                             @Named("che.workspace.projects.storage") String projectFolderPath,
+                                             @Named("che.docker.volumes_agent_options") String volumeOptions) {
         super(agentConfigApplier);
         this.workspaceFolderPathProvider = workspaceFolderPathProvider;
         this.pathEscaper = pathEscaper;
         this.projectFolderPath = projectFolderPath;
+        this.volumesOptions = volumeOptions;
     }
 
     @Override
@@ -66,9 +69,9 @@ public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProv
         // add bind-mount volume for projects in a workspace
         String projectFolderVolume;
         try {
-            projectFolderVolume = format("%s:%s:Z",
+            projectFolderVolume = format("%s:%s:%s",
                                          workspaceFolderPathProvider.getPath(internalEnv.getWorkspaceId()),
-                                         projectFolderPath);
+                                         projectFolderPath, volumesOptions);
         } catch (IOException e) {
             throw new EnvironmentException("Error occurred on resolving path to files of workspace " +
                                            internalEnv.getWorkspaceId());

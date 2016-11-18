@@ -12,10 +12,14 @@ package org.eclipse.che.plugin.docker.machine;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
+import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
 import org.eclipse.che.api.core.model.machine.ServerConf;
+import org.eclipse.che.api.environment.server.TypeSpecificEnvironmentParser;
+import org.eclipse.che.plugin.docker.machine.parser.DockerImageEnvironmentParser;
+import org.eclipse.che.plugin.docker.machine.parser.DockerfileEnvironmentParser;
 
 import java.util.Set;
 
@@ -65,5 +69,11 @@ public class DockerMachineModule extends AbstractModule {
 
         bind(org.eclipse.che.api.environment.server.ContainerNameGenerator.class)
                 .to(org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator.class);
+
+        MapBinder<String, TypeSpecificEnvironmentParser> envParserMapBinder = MapBinder.newMapBinder(binder(),
+                                                                                                     String.class,
+                                                                                                     TypeSpecificEnvironmentParser.class);
+        envParserMapBinder.addBinding("dockerfile").to(DockerfileEnvironmentParser.class);
+        envParserMapBinder.addBinding("dockerimage").to(DockerImageEnvironmentParser.class);
     }
 }

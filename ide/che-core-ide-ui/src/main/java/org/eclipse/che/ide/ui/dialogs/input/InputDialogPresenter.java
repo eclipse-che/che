@@ -10,16 +10,17 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ui.dialogs.input;
 
-import org.eclipse.che.ide.api.dialogs.InputDialog;
-import org.eclipse.che.ide.api.dialogs.InputValidator;
-import org.eclipse.che.ide.ui.UILocalizationConstant;
-import org.eclipse.che.ide.api.dialogs.CancelCallback;
-import org.eclipse.che.ide.api.dialogs.InputCallback;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
-import javax.validation.constraints.NotNull;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.api.dialogs.CancelCallback;
+import org.eclipse.che.ide.api.dialogs.InputCallback;
+import org.eclipse.che.ide.api.dialogs.InputDialog;
+import org.eclipse.che.ide.api.dialogs.InputValidator;
+import org.eclipse.che.ide.ui.UILocalizationConstant;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * {@link InputDialog} implementation.
@@ -151,7 +152,7 @@ public class InputDialogPresenter implements InputDialog, InputDialogView.Action
     private boolean isInputValid() {
         String currentValue = view.getValue();
         if (currentValue.trim().isEmpty()) {
-            view.showErrorHint(localizationConstant.validationErrorMessage());
+            view.showErrorHint("");
             return false;
         }
 
