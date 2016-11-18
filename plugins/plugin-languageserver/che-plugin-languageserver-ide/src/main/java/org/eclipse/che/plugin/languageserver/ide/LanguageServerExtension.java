@@ -140,6 +140,7 @@ public class LanguageServerExtension {
                 documentItem.setUri(event.getFile().getPath());
                 documentItem.setVersion(LanguageServerEditorConfiguration.INITIAL_DOCUMENT_VERSION);
                 documentItem.setText(text);
+                documentItem.setLanguageId("mydsl");
 
                 DidOpenTextDocumentParamsDTO openEvent = dtoFactory.createDto(DidOpenTextDocumentParamsDTO.class);
                 openEvent.setTextDocument(documentItem);
