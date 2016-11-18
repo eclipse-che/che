@@ -664,6 +664,9 @@ public interface CoreLocalizationConstant extends Messages {
     @Key("action.full.text.search.description")
     String actionFullTextSearchDescription();
 
+    @Key("text.search.wholeword.label")
+    String textSearchFileWholeWordLabel();
+
     String search();
 
     @Key("text.search.scope.label")
@@ -891,4 +894,10 @@ public interface CoreLocalizationConstant extends Messages {
 
     @Key("macro.explorer.current.file.path.description")
     String macroExplorerCurrentFilePathDescription();
+
+    @Key("empty.state.no.projects")
+    String emptyStateNoProjects();
+
+    @Key("empty.state.no.files")
+    String emptyStateNoFiles();
 }

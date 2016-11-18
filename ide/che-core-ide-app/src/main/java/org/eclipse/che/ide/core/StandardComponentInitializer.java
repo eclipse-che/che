@@ -667,6 +667,17 @@ public class StandardComponentInitializer {
         editorContextMenuGroup.add(fullTextSearchAction);
         editorContextMenuGroup.add(closeActiveEditorAction);
 
+
+        DefaultActionGroup emptyEditorsPanel = new DefaultActionGroup(actionManager);
+        actionManager.registerAction(IdeActions.GROUP_EMPTY_EDITOR_PANEL, emptyEditorsPanel);
+        emptyEditorsPanel.add(newFileAction);
+        emptyEditorsPanel.add(createProjectAction);
+
+        DefaultActionGroup emptyProjectPanel = new DefaultActionGroup(actionManager);
+        actionManager.registerAction(IdeActions.GROUP_EMPTY_PROJECT_PANEL, emptyProjectPanel);
+        emptyProjectPanel.add(importProjectAction);
+        emptyProjectPanel.add(createProjectAction);
+
         // Define hot-keys
         keyBinding.getGlobal().addKey(new KeyBuilder().action().alt().charCode('n').build(), "navigateToFile");
         keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('F').build(), "fullTextSearch");

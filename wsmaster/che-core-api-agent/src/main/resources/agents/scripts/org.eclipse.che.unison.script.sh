@@ -13,8 +13,17 @@ unset SUDO
 unset PACKAGES
 test "$(id -u)" = 0 || SUDO="sudo"
 
-LINUX_TYPE=$(cat /etc/os-release | grep ^ID= | tr '[:upper:]' '[:lower:]')
-LINUX_VERSION=$(cat /etc/os-release | grep ^VERSION_ID=)
+if [ -f /etc/centos-release ]; then
+    FILE="/etc/centos-release"
+    LINUX_TYPE=$(cat $FILE | awk '{print $1}')
+ elif [ -f /etc/redhat-release ]; then
+    FILE="/etc/redhat-release"
+    LINUX_TYPE=$(cat $FILE | cut -c 1-8)
+ else
+    FILE="/etc/os-release"
+    LINUX_TYPE=$(cat $FILE | grep ^ID= | tr '[:upper:]' '[:lower:]')
+    LINUX_VERSION=$(cat $FILE | grep ^VERSION_ID=)
+fi
 
 ###############################
 ### Install Needed packaged ###
@@ -23,6 +32,14 @@ LINUX_VERSION=$(cat /etc/os-release | grep ^VERSION_ID=)
 # Red Hat Enterprise Linux 7 
 ############################
 if echo ${LINUX_TYPE} | grep -qi "rhel"; then
+    command -v unison >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" unison"; }
+    test "${PACKAGES}" = "" || {
+        ${SUDO} yum -y install ${PACKAGES};
+    }
+
+# Red Hat Enterprise Linux 6 
+############################
+elif echo ${LINUX_TYPE} | grep -qi "Red Hat"; then
     command -v unison >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" unison"; }
     test "${PACKAGES}" = "" || {
         ${SUDO} yum -y install ${PACKAGES};

@@ -25,6 +25,7 @@
     <modules>
         <module>che-plugin-docker-client</module>
         <module>che-plugin-docker-machine</module>
+        <module>che-plugin-docker-compose</module>
     </modules>
     <properties>
         <dto-generator-out-directory>${project.build.directory}/generated-sources/dto/</dto-generator-out-directory>

@@ -17,6 +17,8 @@ import org.eclipse.che.plugin.docker.machine.WindowsHostUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import java.io.File;
@@ -37,8 +39,12 @@ public class DockerExtConfBindingProvider implements Provider<String> {
     public static final String EXT_CHE_LOCAL_CONF_DIR = "/mnt/che/conf";
 
     private static final String PLUGIN_CONF      = "plugin-conf";
-    private static final String CONTAINER_TARGET = ":" + EXT_CHE_LOCAL_CONF_DIR + ":ro,Z";
+    private static final String CONTAINER_TARGET = ":" + EXT_CHE_LOCAL_CONF_DIR;
     private static final Logger LOG              = LoggerFactory.getLogger(DockerExtConfBindingProvider.class);
+
+    @Inject
+    @Named("che.docker.volumes_agent_options")
+    private String volumeOptions;
 
     @Override
     public String get() {
@@ -54,19 +60,23 @@ public class DockerExtConfBindingProvider implements Provider<String> {
             }
             return null;
         }
-
         if (SystemInfo.isWindows()) {
             try {
                 final Path cheHome = WindowsHostUtils.ensureCheHomeExist();
                 final Path plgConfDir = cheHome.resolve(PLUGIN_CONF);
                 IoUtil.copy(extConfDir, plgConfDir.toFile(), null, true);
-                return plgConfDir.toString() + CONTAINER_TARGET;
+                return getTargetOptions(plgConfDir.toString());
             } catch (IOException e) {
                 LOG.warn(e.getMessage());
                 throw new RuntimeException(e);
             }
         } else {
-            return extConfDir.getAbsolutePath() + CONTAINER_TARGET;
+            return getTargetOptions(extConfDir.getAbsolutePath());
         }
     }
+
+    private String getTargetOptions(final String path) {
+        return path + CONTAINER_TARGET + ":" + volumeOptions;
+    }
+
 }
