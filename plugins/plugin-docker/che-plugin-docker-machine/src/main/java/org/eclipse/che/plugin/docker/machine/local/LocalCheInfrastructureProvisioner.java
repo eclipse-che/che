@@ -16,8 +16,11 @@ import org.eclipse.che.api.environment.server.AgentConfigApplier;
 import org.eclipse.che.api.environment.server.DefaultInfrastructureProvisioner;
 import org.eclipse.che.api.environment.server.exception.EnvironmentException;
 import org.eclipse.che.api.environment.server.model.CheServicesEnvironmentImpl;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
 import org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider;
+
+import com.google.common.base.Strings;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -35,19 +38,23 @@ public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProv
     private final WorkspaceFolderPathProvider workspaceFolderPathProvider;
     private final WindowsPathEscaper          pathEscaper;
     private final String                      projectFolderPath;
-	private final String                      volumesOptions;
+    private final String                      projectsVolumeOptions;
 
     @Inject
     public LocalCheInfrastructureProvisioner(AgentConfigApplier agentConfigApplier,
                                              WorkspaceFolderPathProvider workspaceFolderPathProvider,
                                              WindowsPathEscaper pathEscaper,
                                              @Named("che.workspace.projects.storage") String projectFolderPath,
-                                             @Named("che.docker.volumes_projects_options") String volumeOptions) {
+                                             @Nullable @Named("che.docker.volumes_projects_options") String projectsVolumeOptions) {
         super(agentConfigApplier);
         this.workspaceFolderPathProvider = workspaceFolderPathProvider;
         this.pathEscaper = pathEscaper;
         this.projectFolderPath = projectFolderPath;
-        this.volumesOptions = volumeOptions;
+        if (!Strings.isNullOrEmpty(projectsVolumeOptions)) {
+            this.projectsVolumeOptions = ":" + projectsVolumeOptions;
+        } else {
+            this.projectsVolumeOptions = "";
+        }
     }
 
     @Override
@@ -69,9 +76,9 @@ public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProv
         // add bind-mount volume for projects in a workspace
         String projectFolderVolume;
         try {
-            projectFolderVolume = format("%s:%s:%s",
+            projectFolderVolume = format("%s:%s%s",
                                          workspaceFolderPathProvider.getPath(internalEnv.getWorkspaceId()),
-                                         projectFolderPath, volumesOptions);
+                                         projectFolderPath, projectsVolumeOptions);
         } catch (IOException e) {
             throw new EnvironmentException("Error occurred on resolving path to files of workspace " +
                                            internalEnv.getWorkspaceId());
