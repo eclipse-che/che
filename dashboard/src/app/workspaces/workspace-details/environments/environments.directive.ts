@@ -45,7 +45,6 @@ export class WorkspaceEnvironments {
     this.scope = {
       workspaceCreationFlow: '=',
       workspaceName: '=',
-      stackId: '=',
       environmentName: '=',
       machinesViewStatus: '=',
       workspaceConfig: '=',

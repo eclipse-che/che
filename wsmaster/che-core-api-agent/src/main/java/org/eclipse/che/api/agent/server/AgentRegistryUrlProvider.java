@@ -34,10 +34,10 @@ public interface AgentRegistryUrlProvider {
      * Returns url to fetch available versions of the agent.
 
      * @param name
-     *      the agent id
+     *      the agent name
      * @return {@link URL}
      * @throws AgentException
      *      if unexpected error occurred
      */
-    URL getAgentVersionsUrl(String id) throws AgentException;
+    URL getAgentVersionsUrl(String name) throws AgentException;
 }

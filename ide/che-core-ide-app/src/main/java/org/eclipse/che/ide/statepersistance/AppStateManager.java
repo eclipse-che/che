@@ -99,12 +99,8 @@ public class AppStateManager {
         JsonObject workspace = Json.createObject();
         settings.put(WORKSPACE, workspace);
         for (Map.Entry<String, StateComponent> entry : persistenceComponents.entrySet()) {
-            try {
-                String key = entry.getKey();
-                workspace.put(key, entry.getValue().getState());
-            } catch (Exception e) {
-                Log.error(getClass(), e);
-            }
+            String key = entry.getKey();
+            workspace.put(key, entry.getValue().getState());
         }
         allWsState.put(wsId, settings);
         return writeStateToPreferences(allWsState);

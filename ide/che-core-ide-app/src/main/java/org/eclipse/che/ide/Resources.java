@@ -172,8 +172,8 @@ public interface Resources extends Tree.Resources,
     @Source("hotkeys/print_template.html")
     TextResource printTemplate();
 
-    @Source("actions/evaluate.svg")
-    SVGResource compile();
+    @Source("actions/execute.svg")
+    SVGResource execute();
 
     /** Interface for css resources. */
     interface CoreCss extends CssResource {

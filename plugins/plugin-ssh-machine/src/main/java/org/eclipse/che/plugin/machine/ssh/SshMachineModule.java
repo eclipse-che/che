@@ -47,5 +47,6 @@ public class SshMachineModule extends AbstractModule {
                 Multibinder.newSetBinder(binder(),
                                          org.eclipse.che.api.core.model.machine.ServerConf.class,
                                          Names.named("machine.ssh.machine_servers"));
+        machineServers.addBinding().toProvider(TerminalServerConfProvider.class);
     }
 }

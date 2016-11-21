@@ -9,59 +9,39 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
-import IdeSvc from './ide.service';
-import IdeIFrameSvc from './ide-iframe/ide-iframe.service';
-import {RouteHistory} from '../../components/routing/route-history.service';
-import {CheWorkspace} from '../../components/api/che-workspace.factory';
 
 /**
  * This class is handling the controller for the IDE
  * @author Florent Benoit
  */
 class IdeCtrl {
-  $rootScope: che.IRootScopeService;
-  $routeParams: che.route.IRouteParamsService;
-  $timeout: ng.ITimeoutService;
-  ideSvc: IdeSvc;
-  ideIFrameSvc: IdeIFrameSvc;
-  cheWorkspace: CheWorkspace;
-
-  hasData: boolean;
-  workspaces: any[];
-  selectedWorkspace: any = null;
-  selectedWorkspaceExists: boolean = true;
-  selectedWorkspaceName: string = null;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($location: ng.ILocationService, $rootScope: ng.IRootScopeService,
-              $routeParams: ng.route.IRouteParamsService, $timeout: ng.ITimeoutService, ideSvc: IdeSvc,
-              ideIFrameSvc: IdeIFrameSvc, cheWorkspace: CheWorkspace, routeHistory: RouteHistory) {
+  constructor(ideSvc, $routeParams, ideIFrameSvc, $rootScope, cheWorkspace, $timeout, $location, routeHistory) {
     this.ideSvc = ideSvc;
     this.ideIFrameSvc = ideIFrameSvc;
-    this.$rootScope = <che.IRootScopeService>$rootScope;
-    this.$routeParams = <che.route.IRouteParamsService>$routeParams;
+    this.$rootScope = $rootScope;
     this.cheWorkspace = cheWorkspace;
     this.$timeout = $timeout;
-
+    this.selectedWorkspace = null;
     this.$rootScope.showIDE = false;
-    this.$rootScope.wantTokeepLoader = true;
 
-    this.selectedWorkspaceExists = true;
+    $rootScope.wantTokeepLoader = true;
 
     // search the selected workspace
-    let namespace = this.$routeParams.namespace;
-    let workspace = this.$routeParams.workspaceName;
+    let namespace = $routeParams.namespace;
+    let workspace = $routeParams.workspaceName;
     if (!workspace) {
       this.selectedWorkspaceName = null;
     } else {
       this.selectedWorkspaceName = workspace;
     }
 
-    let ideAction = this.$routeParams.action;
-    let ideParams: any = this.$routeParams.ideParams;
+    let ideAction = $routeParams.action;
+    let ideParams = $routeParams.ideParams;
     let selectedWorkspaceIdeUrl = this.cheWorkspace.getIdeUrl(namespace, this.selectedWorkspaceName);
     if (ideAction) {
       // send action
@@ -71,13 +51,13 @@ class IdeCtrl {
       routeHistory.popCurrentPath();
 
       // remove action from path
-      $location.url(selectedWorkspaceIdeUrl);
+      $location.url(selectedWorkspaceIdeUrl, false);
 
     } else if (ideParams) {
       let params = new Map();
       let isArray = angular.isArray(ideParams);
       if (isArray) {
-        ideParams.forEach((param: string) => {
+        ideParams.forEach((param) => {
           let argParam = this.getParams(param);
           params.set(argParam.key, argParam.value);
         });
@@ -86,7 +66,7 @@ class IdeCtrl {
         params.set(argParam.key, argParam.value);
       }
 
-      for (let [key, val] of params) {
+      for (var [key, val] of params) {
         this.ideSvc.setLoadingParameter(key, val);
       }
 
@@ -94,16 +74,16 @@ class IdeCtrl {
       routeHistory.popCurrentPath();
 
       // remove action from path
-      $location.url(selectedWorkspaceIdeUrl);
+      $location.url(selectedWorkspaceIdeUrl, false);
 
     } else {
       let promise = cheWorkspace.fetchWorkspaces();
 
-      if (this.$routeParams.showLogs) {
+      if ($routeParams.showLogs) {
         routeHistory.popCurrentPath();
 
         // remove action from path
-        $location.url(selectedWorkspaceIdeUrl);
+        $location.url(selectedWorkspaceIdeUrl, false);
         $location.replace();
       }
 
@@ -118,32 +98,30 @@ class IdeCtrl {
 
   /**
    * Transform colon separator value into key/value
-   * @param arg {string}
-   * @returns {Object} object with key and value
+   * @param arg
+   * @returns object with key and value
    */
-  getParams(arg: string): {key: string, value: string} {
+  getParams(arg) {
     let array = arg.split(':');
-    let obj: any = {};
+    var obj = {};
     obj.key = array[0];
     obj.value = array[1];
     return obj;
   }
 
-  displayIDE(): void {
+  displayIDE() {
     this.ideSvc.displayIDE();
   }
 
-  updateData(): void {
+  updateData() {
     this.hasData = true;
 
     this.workspaces = this.cheWorkspace.getWorkspaces();
-    for (let i = 0; i < this.workspaces.length; i++) {
+    for (var i = 0; i < this.workspaces.length; i++) {
       if (this.workspaces[i].config.name === this.selectedWorkspaceName) {
         this.selectedWorkspace = this.workspaces[i];
       }
     }
-
-    this.selectedWorkspaceExists = !!this.selectedWorkspace;
 
     this.$rootScope.hideLoader = true;
 

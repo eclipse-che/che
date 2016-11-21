@@ -140,7 +140,7 @@ public class MachinePanelPresenter extends BasePresenter implements MachinePanel
         return machines;
     }
 
-    private MachineTreeNode addNodeToTree(Machine machine) {
+    private void addNodeToTree(Machine machine) {
         MachineTreeNode machineNode = entityFactory.createMachineNode(rootNode, machine, null);
 
         existingMachineNodes.put(machine.getId(), machineNode);
@@ -148,8 +148,6 @@ public class MachinePanelPresenter extends BasePresenter implements MachinePanel
         if (!machineNodes.contains(machineNode)) {
             machineNodes.add(machineNode);
         }
-
-        return machineNode;
     }
 
     private void selectFirstNode() {

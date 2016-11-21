@@ -32,7 +32,6 @@ import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -56,7 +55,6 @@ public class SshMachineInstance extends AbstractInstance {
     private final SshClient                                   sshClient;
     private final LineConsumer                                outputConsumer;
     private final SshMachineFactory                           machineFactory;
-
     private final Set<ServerConf>                             machinesServers;
     private final ConcurrentHashMap<Integer, InstanceProcess> machineProcesses;
 
@@ -72,9 +70,7 @@ public class SshMachineInstance extends AbstractInstance {
         this.sshClient = sshClient;
         this.outputConsumer = outputConsumer;
         this.machineFactory = machineFactory;
-        this.machinesServers = new HashSet<>(machinesServers.size() + machine.getConfig().getServers().size());
-        this.machinesServers.addAll(machinesServers);
-        this.machinesServers.addAll(machine.getConfig().getServers());
+        this.machinesServers = machinesServers;
         this.machineProcesses = new ConcurrentHashMap<>();
     }
 

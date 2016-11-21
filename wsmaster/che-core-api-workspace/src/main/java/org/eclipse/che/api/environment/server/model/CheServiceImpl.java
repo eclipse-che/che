@@ -21,7 +21,6 @@ import java.util.Objects;
  *
  * @author Alexander Garagatyi
  */
-// TODO rename because it doesn't implement anything
 public class CheServiceImpl {
     private String                     id;
     private String                     containerName;

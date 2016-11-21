@@ -1,7 +1,5 @@
 {
-"id": "org.eclipse.che.ls.json",
-"name": "JSON language server",
-"description" : "JSON intellisense",
+"name": "org.eclipse.che.ls.json",
 "dependencies": [],
 "properties": {
 },

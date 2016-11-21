@@ -47,8 +47,8 @@ export class CheWorkspace {
     // listeners if workspaces are changed/updated
     this.listeners = [];
 
-    // list of subscribed to websocket workspace Ids
-    this.subscribedWorkspacesIds = [];
+    // list of websocket bus per workspace
+    this.websocketBusByWorkspaceId = new Map();
     this.statusDefers = {};
 
     // remote call
@@ -63,7 +63,6 @@ export class CheWorkspace {
         deleteProject: {method: 'DELETE', url : '/api/workspace/:workspaceId/project/:path'},
         stopWorkspace: {method: 'DELETE', url : '/api/workspace/:workspaceId/runtime'},
         startWorkspace: {method: 'POST', url : '/api/workspace/:workspaceId/runtime?environment=:envName'},
-        startTemporaryWorkspace: {method: 'POST', url : '/api/workspace/runtime?temporary=true'},
         addCommand: {method: 'POST', url: '/api/workspace/:workspaceId/command'}
       }
     );
@@ -165,11 +164,11 @@ export class CheWorkspace {
       // add workspace if not temporary
       data.forEach((workspace) => {
 
-        if (!workspace.temporary) {
+        if (!workspace.config.temporary) {
           remoteWorkspaces.push(workspace);
           this.workspaces.push(workspace);
+          this.workspacesById.set(workspace.id, workspace);
         }
-        this.workspacesById.set(workspace.id, workspace);
         this.startUpdateWorkspaceStatus(workspace.id);
       });
       return this.workspaces;
@@ -295,7 +294,7 @@ export class CheWorkspace {
       return machine.agents.includes('org.eclipse.che.ws-agent');
     });
 
-    // check dev machine is provided and add if there is no:
+    //Check dev machine is provided and add if there is no:
     if (!devMachine) {
       devMachine = {
         'name': 'ws-machine',
@@ -354,14 +353,6 @@ export class CheWorkspace {
     return promise;
   }
 
-  /**
-   * Starts a temporary workspace by specifying configuration
-   * @param workspaceConfig: che.IWorkspaceConfig - the configuration to start the workspace from
-   * @returns {*} promise
-   */
-  startTemporaryWorkspace(workspaceConfig: che.IWorkspaceConfig): ng.IHttpPromise<any> {
-    return this.remoteWorkspaceAPI.startTemporaryWorkspace({}, workspaceConfig).$promise;
-  }
 
   stopWorkspace(workspaceId) {
     let promise = this.remoteWorkspaceAPI.stopWorkspace({workspaceId: workspaceId}, {}).$promise;
@@ -483,9 +474,9 @@ export class CheWorkspace {
    * @param workspaceId
      */
   startUpdateWorkspaceStatus(workspaceId) {
-    if (!this.subscribedWorkspacesIds.includes(workspaceId)) {
-      let bus = this.cheWebsocket.getBus();
-      this.subscribedWorkspacesIds.push(workspaceId);
+    if (!this.websocketBusByWorkspaceId.has(workspaceId)) {
+      let bus = this.cheWebsocket.getBus(workspaceId);
+      this.websocketBusByWorkspaceId.set(workspaceId, bus);
 
       bus.subscribe('workspace:' + workspaceId, (message) => {
 

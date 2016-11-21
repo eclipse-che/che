@@ -57,6 +57,7 @@ public class LanguageServerEditorConfiguration extends DefaultTextEditorConfigur
             (serverCapabilities.isDocumentRangeFormattingProvider() != null && serverCapabilities.isDocumentRangeFormattingProvider()) ||
             serverCapabilities.getDocumentOnTypeFormattingProvider() != null) {
             this.formatter = formatterFactory.create(serverCapabilities);
+            formatter.setTabWidth(getTabWidth());
         }
         this.serverCapabilities = serverCapabilities;
         this.annotationModel = annotationModelFactory.get(docPositionMapProvider.get());

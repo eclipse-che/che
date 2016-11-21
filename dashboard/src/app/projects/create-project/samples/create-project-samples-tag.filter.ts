@@ -12,21 +12,22 @@
 
 export class CreateProjectSamplesTagFilter {
 
-  constructor(register: che.IRegisterService) {
-    // register this factory
-    register.filter('sampleTagFilter', () => {
-      return (templates: Array<che.IStack>, tagFilter: Array<string>) => {
+  constructor(register) {
+    // Register this factory
+    register.app.filter('sampleTagFilter', function () {
+      return function (templates, tagFilter) {
         if (!templates) {
           return [];
+
         }
-        if (!tagFilter || !tagFilter.length) {
+        if (!tagFilter) {
           return templates;
         }
 
-        let filtered: Array<che.IStack> = [];
-        templates.forEach((template: che.IStack) => {
-          for (let i: number = 0; i < template.tags.length; i++) {
-            for (let j: number = 0; j < tagFilter.length; j++) {
+        var filtered = [];
+        templates.forEach((template) => {
+          for (let i = 0; i < template.tags.length; i++) {
+            for (let j = 0; j < tagFilter.length; j++) {
               if (template.tags[i].toLowerCase() === tagFilter[j].toLowerCase()) {
                 filtered.push(template);
                 return;
@@ -34,7 +35,7 @@ export class CreateProjectSamplesTagFilter {
             }
           }
         });
-        return filtered.length ? filtered : templates;
+        return filtered;
       };
     });
   }

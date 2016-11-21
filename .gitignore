@@ -9,8 +9,6 @@ target/
 bin/
 test-output/
 maven-eclipse.xml
-instance/
-config/
 
 # Idea #
 ##################

@@ -15,20 +15,21 @@ import com.google.common.io.Files;
 import org.eclipse.che.api.git.GitConnection;
 import org.eclipse.che.api.git.GitConnectionFactory;
 import org.eclipse.che.api.git.exception.GitException;
-import org.eclipse.che.api.git.params.RemoteAddParams;
-import org.eclipse.che.api.git.params.RemoteUpdateParams;
+import org.eclipse.che.api.git.shared.RemoteAddRequest;
+import org.eclipse.che.api.git.shared.RemoteUpdateRequest;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import static java.util.Collections.singletonList;
+import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.git.impl.GitTestUtil.cleanupTestRepo;
 import static org.eclipse.che.git.impl.GitTestUtil.connectToGitRepositoryWithContent;
 import static org.testng.Assert.assertEquals;
@@ -60,7 +61,9 @@ public class RemoteUpdateTest {
         addInitialRemote(connection);
         //when
         //change branch1 to branch2
-        RemoteUpdateParams request = RemoteUpdateParams.create("newRemote").withBranches(singletonList("branch2"));
+        RemoteUpdateRequest request = newDto(RemoteUpdateRequest.class);
+        request.setName("newRemote");
+        request.setBranches(Arrays.asList("branch2"));
         connection.remoteUpdate(request);
         //then
         assertEquals(parseAllConfig(connection).get("remote.newRemote.fetch").get(0),
@@ -73,7 +76,10 @@ public class RemoteUpdateTest {
         GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
         addInitialRemote(connection);
         //when
-        connection.remoteUpdate(RemoteUpdateParams.create("newRemote").withAddUrl(singletonList("new.com")));
+        RemoteUpdateRequest request = newDto(RemoteUpdateRequest.class);
+        request.setName("newRemote");
+        request.setAddUrl(Arrays.asList("new.com"));
+        connection.remoteUpdate(request);
         //then
         assertTrue(parseAllConfig(connection).get("remote.newRemote.url").contains("new.com"));
     }
@@ -84,7 +90,10 @@ public class RemoteUpdateTest {
         GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
         addInitialRemote(connection);
         //when
-        connection.remoteUpdate(RemoteUpdateParams.create("newRemote").withAddPushUrl(singletonList("pushurl1")));
+        RemoteUpdateRequest request = newDto(RemoteUpdateRequest.class);
+        request.setName("newRemote");
+        request.setAddPushUrl(Arrays.asList("pushurl1"));
+        connection.remoteUpdate(request);
         //then
         assertTrue(parseAllConfig(connection).get("remote.newRemote.pushurl").contains("pushurl1"));
     }
@@ -95,9 +104,15 @@ public class RemoteUpdateTest {
         //add url
         GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
         addInitialRemote(connection);
-        connection.remoteUpdate(RemoteUpdateParams.create("newRemote").withAddUrl(singletonList("newUrl")));
+        RemoteUpdateRequest addRequest = newDto(RemoteUpdateRequest.class);
+        addRequest.setName("newRemote");
+        addRequest.setAddUrl(Arrays.asList("newUrl"));
+        connection.remoteUpdate(addRequest);
         //when
-        connection.remoteUpdate(RemoteUpdateParams.create("newRemote").withRemoveUrl(singletonList("newUrl")));
+        RemoteUpdateRequest deleteRequest = newDto(RemoteUpdateRequest.class);
+        deleteRequest.setName("newRemote");
+        deleteRequest.setRemoveUrl(Arrays.asList("newUrl"));
+        connection.remoteUpdate(deleteRequest);
         //then
         assertFalse(parseAllConfig(connection).containsKey("remote.newRemote.newUrl"));
     }
@@ -108,10 +123,16 @@ public class RemoteUpdateTest {
         GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
         addInitialRemote(connection);
         //add push url
-        connection.remoteUpdate(RemoteUpdateParams.create("newRemote").withAddPushUrl(singletonList("pushurl")));
+        RemoteUpdateRequest addRequest = newDto(RemoteUpdateRequest.class);
+        addRequest.setName("newRemote");
+        addRequest.setAddPushUrl(Arrays.asList("pushurl"));
+        connection.remoteUpdate(addRequest);
 
         //when
-        connection.remoteUpdate(RemoteUpdateParams.create("newRemote").withRemovePushUrl(singletonList("pushurl")));
+        RemoteUpdateRequest removeRequest = newDto(RemoteUpdateRequest.class);
+        removeRequest.setName("newRemote");
+        removeRequest.setRemovePushUrl(Arrays.asList("pushurl"));
+        connection.remoteUpdate(removeRequest);
         //then
         assertNull(parseAllConfig(connection).get("remote.newRemote.pushurl"));
     }
@@ -134,9 +155,11 @@ public class RemoteUpdateTest {
     }
 
     private void addInitialRemote(GitConnection connection) throws GitException {
-        RemoteAddParams params = RemoteAddParams.create("newRemote", "newRemote.url")
-                                                .withBranches(singletonList("branch1"));
-        connection.remoteAdd(params);
+        RemoteAddRequest add = newDto(RemoteAddRequest.class);
+        add.setName("newRemote");
+        add.setUrl("newRemote.url");
+        add.setBranches(Arrays.asList("branch1"));
+        connection.remoteAdd(add);
     }
 }
 

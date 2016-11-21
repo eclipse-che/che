@@ -923,7 +923,7 @@ public final class ResourceManager {
             public Promise<Resource[]> apply(List<ProjectConfigDto> updatedConfiguration) throws FunctionException {
                 cachedConfigs = updatedConfiguration.toArray(new ProjectConfigDto[updatedConfiguration.size()]);
 
-                int maxDepth = 1;
+                int maxDepth = 0;
 
                 final Optional<Resource[]> descendants = store.getAll(container.getLocation());
 

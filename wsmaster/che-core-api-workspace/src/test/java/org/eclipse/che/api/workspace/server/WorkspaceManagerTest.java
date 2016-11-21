@@ -58,7 +58,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static com.google.common.util.concurrent.Futures.immediateFuture;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -344,7 +343,7 @@ public class WorkspaceManagerTest {
                                         workspace.getConfig().getDefaultEnv(),
                                         null);
 
-        verify(runtimes).startAsync(workspace, workspace.getConfig().getDefaultEnv(), false);
+        verify(runtimes, timeout(2000)).start(workspace, workspace.getConfig().getDefaultEnv(), false);
         assertNotNull(workspace.getAttributes().get(UPDATED_ATTRIBUTE_NAME));
     }
 
@@ -374,7 +373,9 @@ public class WorkspaceManagerTest {
                                         workspace.getConfig().getDefaultEnv(),
                                         null);
 
-        verify(runtimes).startAsync(workspace, workspace.getConfig().getDefaultEnv(), true);
+        verify(runtimes, timeout(2000)).start(workspace,
+                                              workspace.getConfig().getDefaultEnv(),
+                                              true);
         assertNotNull(workspace.getAttributes().get(UPDATED_ATTRIBUTE_NAME));
     }
 
@@ -403,7 +404,7 @@ public class WorkspaceManagerTest {
                                         workspace.getConfig().getDefaultEnv(),
                                         true);
 
-        verify(runtimes).startAsync(workspace, workspace.getConfig().getDefaultEnv(), true);
+        verify(runtimes, timeout(2000)).start(workspace, workspace.getConfig().getDefaultEnv(), true);
         assertNotNull(workspace.getAttributes().get(UPDATED_ATTRIBUTE_NAME));
     }
 
@@ -418,7 +419,7 @@ public class WorkspaceManagerTest {
                                         workspace.getConfig().getDefaultEnv(),
                                         null);
 
-        verify(runtimes).startAsync(workspace, workspace.getConfig().getDefaultEnv(), false);
+        verify(runtimes, timeout(2000)).start(workspace, workspace.getConfig().getDefaultEnv(), false);
         assertNotNull(workspace.getAttributes().get(UPDATED_ATTRIBUTE_NAME));
     }
 
@@ -432,7 +433,7 @@ public class WorkspaceManagerTest {
                                         workspace.getConfig().getDefaultEnv(),
                                         true);
 
-        verify(runtimes).startAsync(workspace, workspace.getConfig().getDefaultEnv(), false);
+        verify(runtimes, timeout(2000)).start(workspace, workspace.getConfig().getDefaultEnv(), false);
         assertNotNull(workspace.getAttributes().get(UPDATED_ATTRIBUTE_NAME));
     }
 
@@ -447,8 +448,19 @@ public class WorkspaceManagerTest {
                                         workspace.getConfig().getDefaultEnv(),
                                         false);
 
-        verify(runtimes).startAsync(workspace, workspace.getConfig().getDefaultEnv(), false);
+        verify(runtimes, timeout(2000)).start(workspace, workspace.getConfig().getDefaultEnv(), false);
         assertNotNull(workspace.getAttributes().get(UPDATED_ATTRIBUTE_NAME));
+    }
+
+    @Test(expectedExceptions = ConflictException.class,
+          expectedExceptionsMessageRegExp = "Could not start workspace '.*' because its status is '.*'")
+    public void shouldNotBeAbleToStartWorkspaceIfItIsRunning() throws Exception {
+        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), NAMESPACE);
+        when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
+        final RuntimeDescriptor descriptor = createDescriptor(workspace, STARTING);
+        when(runtimes.get(workspace.getId())).thenReturn(descriptor);
+
+        workspaceManager.startWorkspace(workspace.getId(), null, null);
     }
 
     @Test
@@ -457,12 +469,12 @@ public class WorkspaceManagerTest {
         when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
         when(runtimes.get(workspace.getId())).thenThrow(new NotFoundException(""));
         final RuntimeDescriptor descriptor = createDescriptor(workspace, STARTING);
-        when(runtimes.startAsync(any(), anyString(), anyBoolean())).thenReturn(immediateFuture(descriptor));
+        when(runtimes.start(any(), anyString(), anyBoolean())).thenReturn(descriptor);
 
         workspaceManager.startWorkspace(workspace.getId(), null, null);
 
         // timeout is needed because this invocation will run in separate thread asynchronously
-        verify(runtimes).startAsync(workspace, workspace.getConfig().getDefaultEnv(), false);
+        verify(runtimes, timeout(2000)).start(workspace, workspace.getConfig().getDefaultEnv(), false);
     }
 
     @Test
@@ -474,11 +486,11 @@ public class WorkspaceManagerTest {
         when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
         when(runtimes.get(workspace.getId())).thenThrow(new NotFoundException(""));
         final RuntimeDescriptor descriptor = createDescriptor(workspace, STARTING);
-        when(runtimes.startAsync(any(), anyString(), anyBoolean())).thenReturn(immediateFuture(descriptor));
+        when(runtimes.start(any(), anyString(), anyBoolean())).thenReturn(descriptor);
         workspaceManager.startWorkspace(workspace.getId(), "non-default-env", false);
 
         // timeout is needed because this invocation will run in separate thread asynchronously
-        verify(runtimes).startAsync(workspace, "non-default-env", false);
+        verify(runtimes, timeout(2000)).start(workspace, "non-default-env", false);
     }
 
     @Test(expectedExceptions = NotFoundException.class,
@@ -495,12 +507,13 @@ public class WorkspaceManagerTest {
 
     @Test
     public void shouldBeAbleToStartTemporaryWorkspace() throws Exception {
+        final WorkspaceConfigImpl config = createConfig();
         when(runtimes.start(any(), anyString(), anyBoolean())).thenReturn(mock(RuntimeDescriptor.class));
         when(runtimes.get(any())).thenThrow(new NotFoundException(""));
 
-        workspaceManager.startWorkspace(createConfig(), NAMESPACE, true);
+        final WorkspaceImpl runtime = workspaceManager.startWorkspace(createConfig(), NAMESPACE, true);
 
-        verify(runtimes).startAsync(workspaceCaptor.capture(), anyString(), anyBoolean());
+        verify(runtimes, timeout(2000)).start(workspaceCaptor.capture(), anyString(), anyBoolean());
         final WorkspaceImpl captured = workspaceCaptor.getValue();
         assertTrue(captured.isTemporary());
         verify(workspaceManager).performAsyncStart(captured, captured.getConfig().getDefaultEnv(), false);
@@ -793,7 +806,7 @@ public class WorkspaceManagerTest {
 
         workspaceManager.startWorkspace(workspace.getId(), workspace.getConfig().getDefaultEnv(), null);
 
-        verify(runtimes).startAsync(workspace, workspace.getConfig().getDefaultEnv(), true);
+        verify(runtimes, timeout(2000)).start(workspace, workspace.getConfig().getDefaultEnv(), true);
     }
 
     @Test

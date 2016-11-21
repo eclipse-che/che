@@ -12,10 +12,9 @@ package org.eclipse.che.ide.api.git;
 
 import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.git.shared.Branch;
-import org.eclipse.che.api.git.shared.BranchListMode;
 import org.eclipse.che.api.git.shared.CheckoutRequest;
 import org.eclipse.che.api.git.shared.Commiters;
-import org.eclipse.che.api.git.shared.DiffType;
+import org.eclipse.che.api.git.shared.DiffRequest.DiffType;
 import org.eclipse.che.api.git.shared.GitUrlVendorInfo;
 import org.eclipse.che.api.git.shared.LogResponse;
 import org.eclipse.che.api.git.shared.MergeResult;
@@ -155,12 +154,12 @@ public interface GitServiceClient {
      * @param mode
      *         get remote branches
      * @param callback
-     * @deprecated use {@link #branchList(DevMachine, Path, BranchListMode)}
+     * @deprecated use {@link #branchList(DevMachine, Path, String)}
      */
     @Deprecated
     void branchList(DevMachine devMachine,
                     ProjectConfig project,
-                    @Nullable BranchListMode mode,
+                    @Nullable String mode,
                     AsyncRequestCallback<List<Branch>> callback);
 
     /**
@@ -174,7 +173,7 @@ public interface GitServiceClient {
      * @param mode
      *         get remote branches
      */
-    Promise<List<Branch>> branchList(DevMachine devMachine, Path project, BranchListMode mode);
+    Promise<List<Branch>> branchList(DevMachine devMachine, Path project, String mode);
 
     /**
      * Delete branch.
@@ -759,35 +758,38 @@ public interface GitServiceClient {
     Promise<Revision> commit(DevMachine devMachine, Path project, String message, Path[] files, boolean amend);
 
     /**
-     * Get repository options.
+     * Performs commit changes from index to repository. The result of the commit is represented by {@link Revision}, which is returned by
+     * callback in <code>onSuccess(Revision result)</code>. Sends request over WebSocket.
      *
      * @param devMachine
      *         current machine
      * @param projectConfig
      *         project (root of GIT repository)
-     * @param requestedConfig
-     *         list of config keys
+     * @param all
+     *         automatically stage files that have been modified and deleted
      * @param callback
      *         callback for sending asynchronous response
-     * @deprecated use {@link #config(DevMachine, Path, List)}
+     * @deprecated use {@link #config(DevMachine, Path, List, boolean)}
      */
     @Deprecated
     void config(DevMachine devMachine,
                 ProjectConfigDto projectConfig,
-                List<String> requestedConfig,
+                @Nullable List<String> entries,
+                boolean all,
                 AsyncRequestCallback<Map<String, String>> callback);
 
     /**
-     * Get repository options.
+     * Performs commit changes from index to repository. The result of the commit is represented by {@link Revision}, which is returned by
+     * callback in <code>onSuccess(Revision result)</code>. Sends request over WebSocket.
      *
      * @param devMachine
      *         current machine
      * @param project
      *         project (root of GIT repository)
-     * @param requestedConfig
-     *         list of config keys
+     * @param all
+     *         automatically stage files that have been modified and deleted
      */
-    Promise<Map<String, String>> config(DevMachine devMachine, Path project, List<String> requestedConfig);
+    Promise<Map<String, String>> config(DevMachine devMachine, Path project, List<String> entries, boolean all);
 
     /**
      * Compare two commits, get the diff for pointed file(s) or for the whole project in text format.
@@ -1078,10 +1080,23 @@ public interface GitServiceClient {
      *         current machine
      * @param project
      *         project (root of GIT repository)
-     * @deprecated use {@link #getStatus(DevMachine, Path)}
+     * @deprecated use {@link #status(DevMachine, ProjectConfig)}
      */
     @Deprecated
     void status(DevMachine devMachine, ProjectConfigDto project, AsyncRequestCallback<Status> callback);
+
+    /**
+     * Returns the current working tree status.
+     *
+     * @param devMachine
+     *         current machine
+     * @param project
+     *         the project.
+     * @return the promise which either resolves working tree status or rejects with an error
+     * @deprecated use {@link #getStatus(DevMachine, Path)}
+     */
+    @Deprecated
+    Promise<Status> status(DevMachine devMachine, ProjectConfig project);
 
     /**
      * Returns the current working tree status.

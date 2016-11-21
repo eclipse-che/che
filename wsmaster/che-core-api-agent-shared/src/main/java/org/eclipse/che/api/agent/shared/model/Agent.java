@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.agent.shared.model;
 
-import org.eclipse.che.api.core.model.workspace.ServerConf2;
-
 import java.util.List;
 import java.util.Map;
 
@@ -23,11 +21,6 @@ import java.util.Map;
 public interface Agent {
 
     /**
-     * Returns the id of the agent.
-     */
-    String getId();
-
-    /**
      * Returns the name of the agent.
      */
     String getName();
@@ -36,11 +29,6 @@ public interface Agent {
      * Returns the version of the agent.
      */
     String getVersion();
-
-    /**
-     * Returns the description of the agent.
-     */
-    String getDescription();
 
     /**
      * Returns the depending agents, that must be applied before.
@@ -56,9 +44,4 @@ public interface Agent {
      * Returns any machine specific properties.
      */
     Map<String, String> getProperties();
-
-    /**
-     * Returns Che servers in the machine.
-     */
-    Map<String, ? extends ServerConf2> getServers();
 }

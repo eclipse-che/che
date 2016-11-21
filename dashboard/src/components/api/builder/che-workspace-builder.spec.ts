@@ -9,13 +9,12 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
-import {CheAPIBuilder} from './che-api-builder.factory';
 
 /**
  * Tests of the CheWorkspaceBuilder
  * @author Florent Benoit
  */
-describe('CheWorkspaceBuilder', () => {
+describe('CheWorkspaceBuilder', function(){
 
 
   var wkspBuilder;
@@ -29,16 +28,17 @@ describe('CheWorkspaceBuilder', () => {
   /**
    * Inject builder
    */
-  beforeEach(inject((cheAPIBuilder: CheAPIBuilder) => {
+  beforeEach(inject(function(cheAPIBuilder) {
     wkspBuilder = cheAPIBuilder.getWorkspaceBuilder();
   }));
 
   /**
    * Check builder
    */
-  it('check builder', () => {
-    let name = 'hello';
-    let workspace = wkspBuilder.withName(name).build();
+  it('check builder', function() {
+
+    var name = 'hello';
+    var workspace = wkspBuilder.withName(name).build();
 
 
     // check values
@@ -46,28 +46,37 @@ describe('CheWorkspaceBuilder', () => {
 
   });
 
+
   /**
    * Check builder
    */
-  it('check builder 1', () => {
-    let name = 'hello';
-    let id = 'id1';
-    let workspace = wkspBuilder.withName('hello').withId('id1').withTemporary(true).build();
+  it('check builder 1', function() {
+
+    var name = 'hello';
+    var id = 'id1';
+    var workspace = wkspBuilder.withName('hello').withId('id1').withTemporary(true).build();
+
 
     // check values
     expect(workspace.config.name).toEqual(name);
     expect(workspace.id).toEqual(id);
-    expect(workspace.temporary).toBeTruthy();
+    expect(workspace.config.temporary).toBeTruthy();
+
   });
 
   /**
    * Check builder
    */
-  it('check builder 2', () => {
-    let workspace: che.IWorkspace = wkspBuilder.withTemporary(false).build();
+  it('check builder 2', function() {
+
+    var workspace = wkspBuilder.withTemporary(false).build();
 
     // check values
-    expect(workspace.temporary).toBeFalsy();
+    expect(workspace.config.temporary).toBeFalsy();
+
+
   });
+
+
 
 });

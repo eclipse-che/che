@@ -16,34 +16,33 @@
  * @author Florent Benoit
  */
 export class CheWorkspaceBuilder {
-  workspace: che.IWorkspace;
 
   constructor() {
     this.workspace = {
-      temporary: false,
       config: {
-        projects: []
+        projects: [],
+        temporary: false
       }
     };
 
   }
 
-  withName(name: string) {
+  withName(name) {
     this.workspace.config.name = name;
     return this;
   }
 
-  withId(id: string) {
+  withId(id) {
     this.workspace.id = id;
     return this;
   }
 
-  withTemporary(temporary: boolean) {
-    this.workspace.temporary = temporary;
+  withTemporary(temporary) {
+    this.workspace.config.temporary = temporary;
     return this;
   }
 
-  withRuntime(runtime: any) {
+  withRuntime(runtime) {
     this.workspace.runtime = runtime;
     return this;
   }
@@ -51,6 +50,7 @@ export class CheWorkspaceBuilder {
   build() {
     return this.workspace;
   }
+
 
 }
 

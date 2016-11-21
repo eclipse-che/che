@@ -8,8 +8,6 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  */
-
-import {CheSsh} from './che-ssh.factory';
 'use strict';
 
 
@@ -20,15 +18,12 @@ import {CheSsh} from './che-ssh.factory';
  */
 export class CheAPI {
 
-
-  private cheSsh : CheSsh;
-
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
   constructor(cheWorkspace, cheProfile, chePreferences, cheProjectTemplate, cheWebsocket, cheService,
-              cheAdminPlugins, cheAdminService, cheRecipe, cheRecipeTemplate, cheStack, cheOAuthProvider, cheAgent, cheSsh : CheSsh) {
+              cheAdminPlugins, cheAdminService, cheRecipe, cheRecipeTemplate, cheStack, cheOAuthProvider, cheAgent) {
     this.cheWorkspace = cheWorkspace;
     this.cheProfile = cheProfile;
     this.chePreferences = chePreferences;
@@ -42,7 +37,6 @@ export class CheAPI {
     this.cheStack = cheStack;
     this.cheOAuthProvider = cheOAuthProvider;
     this.cheAgent = cheAgent;
-    this.cheSsh = cheSsh;
   }
 
 
@@ -149,14 +143,6 @@ export class CheAPI {
    */
   getAgent() {
     return this.cheAgent;
-  }
-
-  /**
-   * Gets Che ssh API
-   * @returns {CheSsh}
-     */
-  getSsh() {
-    return this.cheSsh;
   }
 
 }

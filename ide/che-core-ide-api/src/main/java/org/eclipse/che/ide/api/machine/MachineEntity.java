@@ -11,7 +11,6 @@
 package org.eclipse.che.ide.api.machine;
 
 import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.api.core.model.machine.Server;
 
 import java.util.Map;
 
@@ -36,10 +35,4 @@ public interface MachineEntity extends Machine {
 
     /** Returns url to connects to special WebSocket which allows get information from terminal on server side. */
     String getTerminalUrl();
-
-    /** Returns mapping of exposed ports to {@link Server}. */
-    Map<String, ? extends Server> getServers();
-
-    /** Returns {@link Server} by reference or null if it not exists. */
-    Server getServer(String ref);
 }

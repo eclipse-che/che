@@ -173,7 +173,7 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
         if (messageBus != null) {
             messageBus.cancelReconnection();
         }
-        messageBus = messageBusProvider.createMessageBus();
+        messageBus = messageBusProvider.createMessageBus(workspace.getId());
 
         messageBus.addOnOpenHandler(new ConnectionOpenedHandler() {
             @Override

@@ -15,8 +15,8 @@ import com.google.common.io.Files;
 import org.eclipse.che.api.git.GitConnection;
 import org.eclipse.che.api.git.GitConnectionFactory;
 import org.eclipse.che.api.git.exception.GitException;
-import org.eclipse.che.api.git.params.AddParams;
-import org.eclipse.che.api.git.params.CommitParams;
+import org.eclipse.che.api.git.shared.AddRequest;
+import org.eclipse.che.api.git.shared.CommitRequest;
 import org.eclipse.che.api.git.shared.GitUser;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -24,9 +24,10 @@ import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
-import static java.util.Collections.singletonList;
+import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.git.impl.GitTestUtil.*;
 import static org.eclipse.che.git.impl.GitTestUtil.addFile;
 import static org.eclipse.che.git.impl.GitTestUtil.cleanupTestRepo;
@@ -56,8 +57,8 @@ public class GetCommitersTest {
 
         //given
         addFile(connection, "newfile", "newfile content");
-        connection.add(AddParams.create(singletonList(".")));
-        connection.commit(CommitParams.create("test commit"));
+        connection.add(newDto(AddRequest.class).withFilepattern(Arrays.asList(".")));
+        connection.commit(newDto(CommitRequest.class).withMessage("test commit"));
 
         //when
         List<GitUser> committers = connection.getCommiters();

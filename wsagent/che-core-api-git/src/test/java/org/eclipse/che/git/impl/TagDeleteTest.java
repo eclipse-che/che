@@ -14,7 +14,6 @@ import com.google.common.io.Files;
 import org.eclipse.che.api.git.GitConnection;
 import org.eclipse.che.api.git.GitConnectionFactory;
 import org.eclipse.che.api.git.exception.GitException;
-import org.eclipse.che.api.git.params.TagCreateParams;
 import org.eclipse.che.api.git.shared.*;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -24,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.git.impl.GitTestUtil.*;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -51,18 +51,24 @@ public class TagDeleteTest {
         //create tags
         GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
 
-        connection.tagCreate(TagCreateParams.create("first-tag"));
-        connection.tagCreate(TagCreateParams.create("second-tag"));
+        TagCreateRequest first = newDto(TagCreateRequest.class);
+        first.setName("first-tag");
+        connection.tagCreate(first);
+        TagCreateRequest second = newDto(TagCreateRequest.class);
+        second.setName("second-tag");
+        connection.tagCreate(second);
 
-        List<Tag> tags = connection.tagList(null);
+        List<Tag> tags = connection.tagList(newDto(TagListRequest.class));
         assertTrue(tagExists(tags, "first-tag"));
         assertTrue(tagExists(tags, "second-tag"));
         //when
         //delete first-tag
-        connection.tagDelete("first-tag");
+        TagDeleteRequest request = newDto(TagDeleteRequest.class);
+        request.setName("first-tag");
+        connection.tagDelete(request);
         //then
         //check not exists more
-        tags = connection.tagList(null);
+        tags = connection.tagList(newDto(TagListRequest.class));
         assertFalse(tagExists(tags, "first-tag"));
         assertTrue(tagExists(tags, "second-tag"));
     }

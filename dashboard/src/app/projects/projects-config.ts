@@ -24,6 +24,8 @@ import {CreateProjectSamples} from './create-project/samples/create-project-samp
 import {CreateProjectWorkspacesController} from './create-project/workspaces/create-project-workspaces.controller';
 import {CreateProjectWorkspaces} from './create-project/workspaces/create-project-workspaces.directive';
 
+import {CreateProjectSamplesFilter} from './create-project/samples/create-project-samples.filter';
+import {CreateProjectSamplesNameFilter} from './create-project/samples/create-project-samples-name.filter';
 import {CreateProjectSamplesTagFilter} from './create-project/samples/create-project-samples-tag.filter';
 
 import {CreateProjectZip} from './create-project/zip/create-project-zip.directive';
@@ -35,7 +37,10 @@ import {ProjectItemCtrl} from './list-projects/project-item/project-item.control
 
 export class ProjectsConfig {
 
-  constructor(register: che.IRegisterService) {
+  constructor(register) {
+
+    new CreateProjectSamplesFilter(register);
+    new CreateProjectSamplesNameFilter(register);
     new CreateProjectSamplesTagFilter(register);
 
 

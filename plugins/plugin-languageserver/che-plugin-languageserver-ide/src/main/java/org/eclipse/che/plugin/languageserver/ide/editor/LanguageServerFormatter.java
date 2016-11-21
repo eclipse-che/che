@@ -38,8 +38,6 @@ import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.editor.texteditor.UndoableEditor;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.editor.preferences.editorproperties.EditorProperties;
-import org.eclipse.che.ide.editor.preferences.editorproperties.EditorPropertiesManager;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 
@@ -55,20 +53,22 @@ public class LanguageServerFormatter implements ContentFormatter {
     private final DtoFactory                dtoFactory;
     private final NotificationManager       manager;
     private final ServerCapabilities        capabilities;
-    private final EditorPropertiesManager   editorPropertiesManager;
+    private       int                       tabWidth;
     private       TextEditor                editor;
 
     @Inject
     public LanguageServerFormatter(TextDocumentServiceClient client,
                                    DtoFactory dtoFactory,
                                    NotificationManager manager,
-                                   @Assisted ServerCapabilities capabilities,
-                                   EditorPropertiesManager editorPropertiesManager) {
+                                   @Assisted ServerCapabilities capabilities) {
         this.client = client;
         this.dtoFactory = dtoFactory;
         this.manager = manager;
         this.capabilities = capabilities;
-        this.editorPropertiesManager = editorPropertiesManager;
+    }
+
+    public void setTabWidth(int tabWidth) {
+        this.tabWidth = tabWidth;
     }
 
     @Override
@@ -176,13 +176,9 @@ public class LanguageServerFormatter implements ContentFormatter {
 
     private FormattingOptionsDTO getFormattingOptions() {
         FormattingOptionsDTO options = dtoFactory.createDto(FormattingOptionsDTO.class);
-        options.setInsertSpaces(Boolean.parseBoolean(getEditorProperty(EditorProperties.EXPAND_TAB)));
-        options.setTabSize(Integer.parseInt(getEditorProperty(EditorProperties.TAB_SIZE)));
+        options.setInsertSpaces(true);
+        options.setTabSize(tabWidth);
         return options;
-    }
-
-    private String getEditorProperty(EditorProperties property) {
-        return editorPropertiesManager.getEditorProperties().get(property.toString()).toString();
     }
 
     private void formatRange(TextRange selectedRange, Document document) {

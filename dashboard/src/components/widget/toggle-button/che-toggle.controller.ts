@@ -14,29 +14,30 @@
  * Defines a directive for the toggle button.
  * @author Florent Benoit
  */
-export class CheToggleController {
-  $scope: ng.IScope;
+export class CheToggleCtrl {
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($scope: ng.IScope) {
+  constructor ($scope) {
     this.$scope = $scope;
   }
 
-  getSelected(): string {
-    return (this.$scope as any).setupModelController.$viewValue;
+  getSelected() {
+    return this.$scope.setupModelController.$viewValue;
   }
 
-  getCss(selected: string): string {
-    if (this.getSelected() !== selected) {
+  getCss(title) {
+    if (this.getSelected() !== title) {
       return 'che-toggle-button-disabled';
     }
     return 'che-toggle-button-enabled';
   }
 
-  onClick(selected: string): void {
-    (this.$scope as any).setupModelController.$setViewValue(selected);
+  onClick(selected) {
+    this.$scope.setupModelController.$setViewValue(selected);
   }
+
+
 }

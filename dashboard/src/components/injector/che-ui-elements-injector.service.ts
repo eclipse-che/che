@@ -16,33 +16,29 @@
  * @author Oleksii Orel
  */
 export class CheUIElementsInjectorService {
-  $compile: ng.ICompileService;
-  $timeout: ng.ITimeoutService;
-  $document: ng.IDocumentService;
-  elementsToInject: Object;
 
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($timeout: ng.ITimeoutService, $document: ng.IDocumentService, $compile: ng.ICompileService) {
+  constructor($timeout, $document, $compile) {
     this.$timeout = $timeout;
     this.$document = $document;
     this.$compile = $compile;
 
-    // object of destination elements with id as keys and innerHTML of additional widget as value
-    // { parentElementId: { additionalElementId: additionalElementInnerHTML } }
+    //object of destination elements with id as keys and innerHTML of additional widget as value
+    //{ parentElementId: { additionalElementId: additionalElementInnerHTML } }
     this.elementsToInject = {};
   }
 
   /**
    * Add an element for injection.
-   * @param parentElementId {string} - the ID of parent element
-   * @param additionalElementId {string}  - the ID of additional element
-   * @param additionalElementHTML {string}  - the innerHTML of additional Element
+   * @param parentElementId the ID of parent element
+   * @param additionalElementId the ID of additional element
+   * @param additionalElementHTML the innerHTML of additional Element
    * @returns {boolean} - true if successful
    */
-  addElementForInjection(parentElementId: string, additionalElementId: string, additionalElementHTML: string): boolean {
+  addElementForInjection(parentElementId, additionalElementId, additionalElementHTML) {
     if (!parentElementId || !additionalElementId || !additionalElementHTML) {
       return false;
     }
@@ -58,11 +54,11 @@ export class CheUIElementsInjectorService {
   /**
    * Inject all additional elements if it possible.
    */
-  injectAll(): void {
+  injectAll() {
     this.$timeout(() => {
       for (let parentElementId in this.elementsToInject) {
         let oneParentElements = this.elementsToInject[parentElementId];
-        let parentElement = this.$document.find('#' + parentElementId);
+        let parentElement = this.$document[0].getElementById(parentElementId);
         if (!parentElement) {
           continue;
         }
@@ -82,32 +78,24 @@ export class CheUIElementsInjectorService {
 
   /**
    *  Inject an additional elements if it possible.
-   * @param parentElement {string | ng.IRootElementService} - the parent DOM element for injection
-   * @param additionalElement {string | ng.IRootElementService} - the jqLite additional element
-   * @param scope? {ng.IScope}
+   * @param parentElement the parent DOM element for injection
+   * @param jqAdditionalElement the jqLite additional element
    * @returns {boolean} - true if successful
    */
-  injectAdditionalElement(parentElement: string | ng.IRootElementService, additionalElement: string | ng.IRootElementService, scope?: ng.IScope): boolean {
-    if (!additionalElement || !parentElement) {
+  injectAdditionalElement(parentElement, jqAdditionalElement) {
+    if (!jqAdditionalElement || !parentElement) {
       return false;
     }
 
-    let jqAdditionalElement = angular.element(additionalElement);
     let additionalElementId = jqAdditionalElement.attr('id');
     if (!additionalElementId) {
       return false;
     }
 
     let jqParentElement = angular.element(parentElement);
-    let additionalElementScope: ng.IScope;
-    if (scope) {
-      additionalElementScope = scope;
-    } else {
-      additionalElementScope = jqParentElement.scope();
-    }
 
     // compile the view
-    let compileAdditionalElement = this.$compile(jqAdditionalElement)(additionalElementScope);
+    let compileAdditionalElement = this.$compile(jqAdditionalElement)(jqParentElement.scope());
 
     this.deleteElementById(additionalElementId);
 
@@ -118,11 +106,11 @@ export class CheUIElementsInjectorService {
 
   /**
    *  Inject an additional element if it possible.
-   * @param parentElementId {string} - the ID of parent element for injection
-   * @param additionalElement {string | ng.IAugmentedJQuery} - the additional element
+   * @param parentElementId the ID of parent element for injection
+   * @param additionalElement the additional element
    * @returns {boolean} - true if successful
    */
-  injectAdditionalElementByParentId(parentElementId: string, additionalElement: string | ng.IRootElementService): boolean {
+  injectAdditionalElementByParentId(parentElementId, additionalElement) {
     if (!additionalElement) {
       return false;
     }
@@ -134,7 +122,7 @@ export class CheUIElementsInjectorService {
       return false;
     }
 
-    let parentElement = this.$document.find('#' + parentElementId);
+    let parentElement = this.$document[0].getElementById(parentElementId);
     if (!parentElement) {
       return false;
     }
@@ -144,10 +132,10 @@ export class CheUIElementsInjectorService {
 
   /**
    * delete a DOM element by id.
-   * @param elementId {string} - the ID of element
+   * @param elementId the ID of element
    * @returns {boolean} - true if successful
    */
-  deleteElementById(elementId: string): void {
+  deleteElementById(elementId) {
     return this.$document.find('#' + elementId).remove().length > 0;
   }
 }

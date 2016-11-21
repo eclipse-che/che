@@ -99,8 +99,7 @@ export class ListPortsController {
     this.servers[name] = {'port': port, 'protocol': protocol};
 
     this.updateSelectedStatus();
-    this.serversOnChange();
-    this.buildServersList();
+    return this.serversOnChange().then(() => {this.buildServersList();});
   }
 
   updatePort(serverName, port, protocol) {
@@ -111,8 +110,7 @@ export class ListPortsController {
     let newName = this.buildServerName(port);
     this.servers[newName] = {'port': port, 'protocol': protocol};
 
-    this.serversOnChange();
-    this.buildServersList();
+    return this.serversOnChange().then(() => {this.buildServersList();});
   }
 
   buildServerName(port) {
@@ -169,8 +167,7 @@ export class ListPortsController {
       });
       this.deselectAllPorts();
       this.isBulkChecked = false;
-      this.serversOnChange();
-      this.buildServersList();
+      this.serversOnChange().then(() => {this.buildServersList();});
     })
   }
 

@@ -25,9 +25,9 @@ import org.eclipse.che.api.machine.server.spi.Instance;
 public interface AgentLauncher {
 
     /**
-     * @return the id of the agent that launcher is designed for
+     * @return the name of the agent that launcher is designed for
      */
-    String getAgentId();
+    String getAgentName();
 
     /**
      * @return the machine type that launcher is designed for

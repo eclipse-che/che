@@ -35,10 +35,10 @@
  * @author Oleksii Kurinnyi
  */
 export class WorkspaceEditModeOverlay {
-  replace: boolean;
-  transclude: boolean;
-  restrict: string;
-  templateUrl: string;
+  restrict = 'E';
+
+  replace = true;
+  templateUrl = 'app/workspaces/workspace-edit-mode/workspace-edit-mode-overlay.html';
 
   scope = {
     message: '@?workspaceEditModeMessage',
@@ -51,11 +51,6 @@ export class WorkspaceEditModeOverlay {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor () {
-    this.restrict = 'E';
-    this.transclude = true;
-    this.replace = true;
-    this.templateUrl = 'app/workspaces/workspace-edit-mode/workspace-edit-mode-overlay.html';
-  }
+  constructor () { }
 
 }

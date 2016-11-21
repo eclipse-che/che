@@ -13,12 +13,8 @@
 import {ListStacksController} from './list-stacks/list-stacks.controller';
 import {StackItemController} from './list-stacks/stack-item/stack-item.controller';
 import {StackItem} from './list-stacks/stack-item/stack-item.directive';
-import {StackController} from './stack-details/stack.controller';
-import {ListComponents} from './stack-details/list-components/list-components.directive';
-import {ListComponentsController} from './stack-details/list-components/list-components.controller';
-import {EditComponentDialogController} from './stack-details/list-components/edit-component-dialog/edit-component-dialog.controller';
-import {SelectTemplateController} from './stack-details/select-template/select-template.controller';
 
+import {StackController} from './stack-details/stack.controller';
 /**
  * @ngdoc controller
  * @name stacks:StacksConfig
@@ -27,21 +23,16 @@ import {SelectTemplateController} from './stack-details/select-template/select-t
  */
 export class StacksConfig {
 
-  constructor(register: che.IRegisterService) {
+  constructor(register) {
     register.controller('ListStacksController', ListStacksController);
 
     register.controller('StackItemController', StackItemController);
     register.directive('stackItem', StackItem);
 
-    register.controller('ListComponentsController', ListComponentsController);
-    register.directive('listComponents', ListComponents);
-
     register.controller('StackController', StackController);
-    register.controller('EditComponentDialogController', EditComponentDialogController);
-    register.controller('SelectTemplateController', SelectTemplateController);
 
     // config routes
-    register.app.config(($routeProvider: any) => {
+    register.app.config(function ($routeProvider) {
       $routeProvider.accessWhen('/stacks', {
         title: 'Stacks',
         templateUrl: 'app/stacks/list-stacks/list-stacks.html',
@@ -49,13 +40,11 @@ export class StacksConfig {
         controllerAs: 'listStacksController'
       })
         .accessWhen('/stack/:stackId', {
-          title: (params: any) => {
-            return params.stackId;
-          },
+          title: (params) => {return params.stackId},
           templateUrl: 'app/stacks/stack-details/stack.html',
           controller: 'StackController',
           controllerAs: 'stackController'
-        });
+        })
     });
   }
 }

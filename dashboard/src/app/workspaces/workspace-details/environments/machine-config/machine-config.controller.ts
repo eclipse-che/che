@@ -128,15 +128,16 @@ export class WorkspaceMachineConfigController {
     this.environmentManager.setAgents(this.machine, this.machineConfig.agents);
     return this.doUpdateConfig();
   }
-
   /**
    * Callback which is called in order to update list of environment variables
    * @returns {Promise}
    */
   updateEnvVariables() {
     this.environmentManager.setEnvVariables(this.machine, this.machineConfig.envVariables);
-    this.doUpdateConfig()
-    this.init();
+
+    return this.doUpdateConfig().then(() => {
+      this.init();
+    });
   }
 
   /**
@@ -183,8 +184,9 @@ export class WorkspaceMachineConfigController {
     return this.machineNameOnChange({
       oldName: this.machineName,
       newName: newMachineName
+    }).then(() => {
+      this.init();
     });
-    this.init();
   }
 
   /**
@@ -194,8 +196,9 @@ export class WorkspaceMachineConfigController {
     this.showDeleteConfirmation().then(() => {
       this.machineOnDelete({
         name: this.machineName
+      }).then(() => {
+        this.init();
       });
-      this.init();
     });
   }
 

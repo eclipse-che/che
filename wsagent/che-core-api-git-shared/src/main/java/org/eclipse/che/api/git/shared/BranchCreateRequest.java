@@ -18,7 +18,7 @@ import org.eclipse.che.dto.shared.DTO;
  * @author andrew00x
  */
 @DTO
-public interface BranchCreateRequest {
+public interface BranchCreateRequest extends GitRequest {
     /** @return name of branch to be created */
     String getName();
     
@@ -26,7 +26,7 @@ public interface BranchCreateRequest {
     
     BranchCreateRequest withName(String name);
 
-    /** @return hash commit from which to start new branch. If <code>null</code> HEAD will be used */
+    /** @return name of a commit at which to start the new branch. If <code>null</code> the HEAD will be used */
     String getStartPoint();
     
     void setStartPoint(String startPoint);

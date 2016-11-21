@@ -895,8 +895,8 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.terminal",
-                "org.eclipse.che.ws-agent",
+                "org.eclipse.che.terminal", 
+                "org.eclipse.che.ws-agent", 
                 "org.eclipse.che.ssh",
                 "org.eclipse.che.ls.csharp",
                 "org.eclipse.che.ls.json",
@@ -1440,42 +1440,45 @@
     "source": {
       "type": "image",
       "origin": "codenvy/ubuntu_jre"
-    }
+    }    
   },
   {
     "id": "bitnami-express",
     "creator": "Bitnami",
     "name": "Bitnami Express",
-    "description": "Default Express stack with Node 7.0.0, Express 4.14.0, MongoDB 3.2.9.",
+    "description": "Default Express stack with Node.js 6.4.0, Express 4.14.0, MongoDB 3.2.7.",
     "scope": "advanced",
     "tags": [
+      "Ubuntu",
+      "Node.JS",
+      "NPM",
       "Express"
     ],
     "components": [
       {
         "name": "Node.JS",
-        "version": "7.0.0"
-      },
-      {
-        "name": "Express",
-        "version": "4.14.0"
-      },
-      {
-        "name": "Bower",
-        "version": "1.7.9"
+        "version": "6.4.0"
       },
       {
         "name": "NPM",
         "version": "---"
       },
       {
+        "name": "Express",
+        "version": "4.14.0"
+      },
+      {
         "name": "MongoDB",
-        "version": "3.2.9"
+        "version": "3.2.7"
+      },
+      {
+        "name": "Git",
+        "version": "---"
       }
     ],
     "source": {
       "type": "image",
-      "origin": "bitnami/che-express:che-4.14.0-r11"
+      "origin": "bitnami/che-express:che-4.14.0-r1"
     },
     "workspaceConfig": {
       "environments": {
@@ -1492,7 +1495,7 @@
             }
           },
           "recipe": {
-            "location": "bitnami/che-express:che-4.14.0-r11",
+            "location": "bitnami/che-express:che-4.14.0-r1",
             "type": "dockerimage"
           }
         }
@@ -1511,20 +1514,49 @@
     "id": "bitnami-swift",
     "creator": "Bitnami",
     "name": "Bitnami Swift",
-    "description": "Default Swift stack with Swift 3.0.1",
+    "description": "Default Swift stack with Swift 3.0-PREVIEW-6",
     "scope": "advanced",
     "tags": [
+      "Ubuntu",
       "Swift"
     ],
     "components": [
       {
         "name": "Swift",
-        "version": "3.0.1"
+        "version": "3.0-PREVIEW-6"
+      },
+      {
+        "name": "JDK",
+        "version": "1.8.0_91"
+      },
+      {
+        "name": "Python",
+        "version": "2.7.12rc1"
+      },
+      {
+        "name": "CLANG",
+        "version": "---"
+      },
+      {
+        "name": "libxml2",
+        "version": "---"
+      },
+      {
+        "name": "libedit2",
+        "version": "---"
+      },
+      {
+        "name": "libicu52",
+        "version": "---"
+      },
+      {
+        "name": "Git",
+        "version": "---"
       }
     ],
     "source": {
       "type": "image",
-      "origin": "bitnami/che-swift:che-3.0.1-RELEASE-r0"
+      "origin": "bitnami/che-swift:che-3.0-PREVIEW-6-r2"
     },
     "workspaceConfig": {
       "environments": {
@@ -1541,7 +1573,7 @@
             }
           },
           "recipe": {
-            "location": "bitnami/che-swift:che-3.0.1-RELEASE-r0",
+            "location": "bitnami/che-swift:che-3.0-PREVIEW-6-r2",
             "type": "dockerimage"
           }
         }
@@ -1560,10 +1592,14 @@
     "id": "bitnami-laravel",
     "creator": "Bitnami",
     "name": "Bitnami Laravel",
-    "description": "Default Laravel stack with PHP 7.0.10, Laravel 5.2.31, MariaDB 10.1.19.",
+    "description": "Default Laravel stack with PHP 7.0.10, Laravel 5.2.31, MariaDB 10.1.14.",
     "scope": "advanced",
     "tags": [
-      "Laravel"
+      "Ubuntu",
+      "Node.JS",
+      "Laravel",
+      "PHP",
+      "MariaDB"
     ],
     "components": [
       {
@@ -1577,11 +1613,19 @@
       {
         "name": "MariaDB",
         "version": "10.1.14"
+      },
+      {
+        "name": "Gulp",
+        "version": "---"
+      },
+      {
+        "name": "Git",
+        "version": "---"
       }
     ],
     "source": {
       "type": "image",
-      "origin": "bitnami/che-laravel:che-5.2.31-r9"
+      "origin": "bitnami/che-laravel:che-5.2.31-r5"
     },
     "workspaceConfig": {
       "environments": {
@@ -1598,7 +1642,7 @@
             }
           },
           "recipe": {
-            "location": "bitnami/che-laravel:che-5.2.31-r8",
+            "location": "bitnami/che-laravel:che-5.2.31-r5",
             "type": "dockerimage"
           }
         }
@@ -1620,9 +1664,16 @@
     "description": "Bitnami Rails stack with Ruby 2.3.1, Rails 5.0.0.1, MariaDB 10.1.14.",
     "scope": "advanced",
     "tags": [
-      "BitnamiRails"
+      "Ubuntu",
+      "BitnamiRails",
+      "MariaDB",
+      "Ruby"
     ],
     "components": [
+      {
+        "name": "MariaDb",
+        "version": "10.1.14"
+      },
       {
         "name": "Ruby",
         "version": "2.3.1"
@@ -1632,13 +1683,17 @@
         "version": "5.0.0.1"
       },
       {
-        "name": "MariaDB",
-        "version": "10.1.14"
+        "name": "MySQL Client",
+        "version": "10.1.13"
+      },
+      {
+        "name": "Git",
+        "version": "---"
       }
     ],
     "source": {
       "type": "image",
-      "origin": "bitnami/che-rails:che-5.0.0.1-r3"
+      "origin": "bitnami/che-rails:che-5.0.0.1-r0"
     },
     "workspaceConfig": {
       "environments": {
@@ -1655,7 +1710,7 @@
             }
           },
           "recipe": {
-            "location": "bitnami/che-rails:che-5.0.0.1-r3",
+            "location": "bitnami/che-rails:che-5.0.0.1-r0",
             "type": "dockerimage"
           }
         }
@@ -1674,15 +1729,18 @@
     "id": "bitnami-codeigniter",
     "creator": "Bitnami",
     "name": "Bitnami Codeigniter",
-    "description": "Default CodeIgniter stack with PHP 7.0.11, CodeIgniter 3.1.0, MariaDB 10.1.19.",
+    "description": "Default CodeIgniter stack with PHP 7.0.10, CodeIgniter 3.1.0, MariaDB 10.1.14.",
     "scope": "advanced",
     "tags": [
-      "CodeIgniter"
+      "Ubuntu",
+      "CodeIgniter",
+      "MariaDB",
+      "PHP"
     ],
     "components": [
       {
         "name": "PHP",
-        "version": "7.0.11"
+        "version": "7.0.10"
       },
       {
         "name": "Codeigniter",
@@ -1690,12 +1748,20 @@
       },
       {
         "name": "MariaDB",
-        "version": "10.1.19"
+        "version": "10.1.14"
+      },
+      {
+        "name": "MySQL Client",
+        "version": "10.1.13"
+      },
+      {
+        "name": "Git",
+        "version": "---"
       }
     ],
     "source": {
       "type": "image",
-      "origin": "bitnami/che-codeigniter:che-3.1.0-r9"
+      "origin": "bitnami/che-codeigniter:che-3.1.0-r2"
     },
     "workspaceConfig": {
       "environments": {
@@ -1712,7 +1778,7 @@
             }
           },
           "recipe": {
-            "location": "bitnami/che-codeigniter:che-3.1.0-r9",
+            "location": "bitnami/che-codeigniter:che-3.1.0-r2",
             "type": "dockerimage"
           }
         }
@@ -1731,15 +1797,18 @@
     "id": "bitnami-symfony",
     "creator": "Bitnami",
     "name": "Bitnami Symfony",
-    "description": "Default Symfony stack with PHP 7.0.11, Symfony 3.1.3, MariaDB 10.1.19.",
+    "description": "Default Symfony stack with PHP 7.0.10, Symfony 3.1.3, MariaDB 10.1.14.",
     "scope": "advanced",
     "tags": [
-      "Symfony"
+      "Ubuntu",
+      "Symfony",
+      "PHP",
+      "MariaDB"
     ],
     "components": [
       {
         "name": "PHP",
-        "version": "7.0.11"
+        "version": "7.0.10"
       },
       {
         "name": "Symfony",
@@ -1747,12 +1816,20 @@
       },
       {
         "name": "MariaDB",
-        "version": "10.1.19"
+        "version": "10.1.14"
+      },
+      {
+        "name": "MySQL Client",
+        "version": "10.1.13"
+      },
+      {
+        "name": "Git",
+        "version": "---"
       }
     ],
     "source": {
       "type": "image",
-      "origin": "bitnami/che-symfony:che-3.1.3-r6"
+      "origin": "bitnami/che-symfony:che-3.1.3-r0"
     },
     "workspaceConfig": {
       "environments": {
@@ -1769,7 +1846,7 @@
             }
           },
           "recipe": {
-            "location": "bitnami/che-symfony:che-3.1.3-r6",
+            "location": "bitnami/che-symfony:che-3.1.3-r0",
             "type": "dockerimage"
           }
         }
@@ -1788,10 +1865,13 @@
     "id": "bitnami-java-play",
     "creator": "Bitnami",
     "name": "Bitnami Play for Java",
-    "description": "Default Play stack with OpenJDK 1.8.0 and Play 1.3.10.",
+    "description": "Default Play stack with OpenJDK 1.8.0 and Play 2.55.",
     "scope": "advanced",
     "tags": [
-      "Play"
+      "Ubuntu",
+      "Activator",
+      "Play",
+      "Java"
     ],
     "components": [
       {
@@ -1803,13 +1883,21 @@
         "version": "2.55"
       },
       {
+        "name": "Node",
+        "version": "6.4.0"
+      },
+      {
         "name": "Activator",
         "version": "1.13.10"
+      },
+      {
+        "name": "Git",
+        "version": "---"
       }
     ],
     "source": {
       "type": "image",
-      "origin": "bitnami/che-java-play:che-1.3.10-r4"
+      "origin": "bitnami/che-java-play:che-2.55-r3"
     },
     "workspaceConfig": {
       "environments": {
@@ -1826,7 +1914,7 @@
             }
           },
           "recipe": {
-            "location": "bitnami/che-java-play:che-1.3.10-r4",
+            "location": "bitnami/che-java-play:che-2.55-r3",
             "type": "dockerimage"
           }
         }
@@ -1896,11 +1984,11 @@
       "name": "default",
       "defaultEnv": "default",
       "description": null,
-      "commands": [
+      "commands": [  
         {
           "name": "restart zend server",
           "type": "custom",
-          "commandLine": "sudo sqlite3 /usr/local/zend/var/db/zsd.db \"UPDATE ZSD_DIRECTIVES SET DISK_VALUE='http://${server.port.10081}/ZendServer' WHERE NAME='zray.zendserver_ui_url'\" && sudo sed -i 's#zray.zendserver_ui_url=.*#zray.zendserver_ui_url=http://${server.port.10081}/ZendServer#g' /usr/local/zend/etc/conf.d/zray.ini && sudo /usr/local/zend/bin/zendctl.sh restart",
+          "commandLine": "sudo sed -i 's#zray.zendserver_ui_url=.*#zray.zendserver_ui_url=http://${server.port.10081}/ZendServer#g' /usr/local/zend/etc/conf.d/zray.ini && sudo /usr/local/zend/bin/zendctl.sh restart",
           "attributes": {
             "previewUrl": "http://${server.port.80}"
           }
@@ -1925,111 +2013,6 @@
     },
     "stackIcon": {
       "name": "type-zend.svg",
-      "mediaType": "image/svg+xml"
-    }
-  },
-  {
-    "id": "platformio",
-    "creator": "ide",
-    "name": "PlatformIO",
-    "description": "Stack for IoT development",
-    "scope": "general",
-    "tags": [
-      "PlatformIO",
-      "IoT",
-      "embedded",
-      "arduino",
-      "mbed"
-    ],
-    "components": [
-      {
-        "name": "Python",
-        "version": "2.7"
-      },
-      {
-        "name": "pip",
-        "version": "8.1.1"
-      },
-      {
-        "name": "PlatformIO",
-        "version": "3.2.0"
-      }
-    ],
-    "source": {
-      "type": "image",
-        "origin": "code/pio:latest"
-    },
-    "workspaceConfig": {
-      "environments": {
-        "default": {
-          "machines": {
-            "dev-machine": {
-              "agents": [
-                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
-              ],
-              "servers": {},
-              "attributes" : {
-                "memoryLimitBytes": "2147483648",
-                "auto_snapshot": "true",
-                "auto_restore": "true"
-
-              }
-            }
-          },
-          "recipe": {
-            "location": "eclipse/platformio:latest",
-            "type": "dockerimage"
-          }
-        }
-      },
-      "name": "default",
-      "defaultEnv": "default",
-      "description": null,
-      "commands": [
-        {
-          "name": "run",
-          "type": "custom",
-          "commandLine": "pio run -d ${current.project.path}",
-          "attributes": {
-            "previewUrl": ""
-          }
-        },
-        {
-          "name": "upload",
-          "type": "custom",
-          "commandLine": "pio run -d ${current.project.path} -t upload",
-          "attributes": {
-            "previewUrl": ""
-          }
-        },
-        {
-          "name": "clean",
-          "type": "custom",
-          "commandLine": "pio run -d ${current.project.path} -t clean",
-          "attributes": {
-            "previewUrl": ""
-          }
-        },
-        {
-          "name": "Remote: Device list",
-          "type": "custom",
-          "commandLine": "pio remote device list",
-          "attributes": {
-            "previewUrl": ""
-          }
-        },
-        {
-          "name": "Remote: Upload",
-          "type": "custom",
-          "commandLine": "pio remote run -d ${current.project.path} -t upload",
-          "attributes": {
-            "previewUrl": ""
-          }
-        }
-      ]
-    },
-    "stackIcon": {
-      "name": "type-python.svg",
       "mediaType": "image/svg+xml"
     }
   }

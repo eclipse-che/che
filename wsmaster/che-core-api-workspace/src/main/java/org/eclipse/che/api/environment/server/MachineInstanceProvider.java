@@ -51,7 +51,8 @@ public interface MachineInstanceProvider {
                           boolean isDev,
                           String networkName,
                           CheServiceImpl service,
-                          LineConsumer machineLogger) throws ServerException;
+                          LineConsumer machineLogger)
+            throws ServerException;
 
     /**
      * Creates network for compose services.

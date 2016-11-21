@@ -1,7 +1,5 @@
 {
-"id" : "org.eclipse.che.ls.csharp",
-"name": "C# language server",
-"description" : "C# intellisense",
+"name": "org.eclipse.che.ls.csharp",
 "dependencies": [],
 "properties": {
 },

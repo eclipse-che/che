@@ -10,12 +10,11 @@ Che Dashboard
 - npm
 - Bower
 - gulp
-- typings
 
 Installation instructions for Node.js and npm can be found on the following [link](https://docs.npmjs.com/getting-started/installing-node). Bower and gulp are CLI utilities which are installed via npm:
 
 ```sh
-$ npm install --global bower gulp typings
+$ npm install --global bower gulp
 ```
 
 #Quick start

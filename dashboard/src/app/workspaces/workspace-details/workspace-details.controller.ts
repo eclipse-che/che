@@ -14,7 +14,6 @@ import {CheNotification} from '../../../components/notification/che-notification
 import {CheWorkspace} from '../../../components/api/che-workspace.factory';
 import IdeSvc from '../../ide/ide.service';
 import {WorkspaceDetailsService} from './workspace-details.service';
-import {CheNamespaceRegistry} from "../../../components/api/namespace/che-namespace-registry.factory";
 
 /**
  * @ngdoc controller
@@ -50,7 +49,7 @@ export class WorkspaceDetailsController {
   workspaceId: string;
   workspaceName: string;
   newName: string;
-  stackId: string;
+  stack: any;
   workspaceDetails: any = {};
   copyWorkspaceDetails: any = {};
   machinesViewStatus: any = {};
@@ -255,7 +254,7 @@ export class WorkspaceDetailsController {
    *
    * @returns {ng.IPromise<any>}
    */
-  updateWorkspaceConfig(): void {
+  updateWorkspaceConfig(): ng.IPromise<any> {
     if (!this.isCreationFlow) {
       this.editMode = !angular.equals(this.copyWorkspaceDetails.config, this.workspaceDetails.config);
 
@@ -266,6 +265,10 @@ export class WorkspaceDetailsController {
         this.showApplyMessage = true;
       }
     }
+
+    let defer = this.$q.defer();
+    defer.resolve();
+    return defer.promise;
   }
 
   /**
@@ -362,7 +365,7 @@ export class WorkspaceDetailsController {
    * Submit a new workspace
    */
   createWorkspace(): void {
-    let attributes = this.stackId ? {stackId: this.stackId} : {};
+    let attributes = this.stack ? {stackId: this.stack.id} : {};
     let creationPromise = this.cheWorkspace.createWorkspaceFromConfig(this.workspaceNamespace, this.copyWorkspaceDetails.config, attributes);
     this.redirectAfterSubmitWorkspace(creationPromise);
   }
@@ -453,7 +456,7 @@ export class WorkspaceDetailsController {
   }
 
   runWorkspace(): void {
-    this.errorMessage = '';
+    delete this.errorMessage;
 
     let promise = this.ideSvc.startIde(this.workspaceDetails);
     promise.then(() => {}, (error: any) => {

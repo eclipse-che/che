@@ -32,8 +32,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-
-import java.util.Collection;
 import java.util.List;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -59,15 +57,15 @@ public class AgentRegistryService extends Service {
     }
 
     @GET
-    @Path("/id/{id}")
+    @Path("/name/{name}")
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Gets the latest version of the agent", response = AgentDto.class)
     @ApiResponses({@ApiResponse(code = 200, message = "The response contains requested agent entity"),
                    @ApiResponse(code = 404, message = "Agent not found in the registry"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
-    public Agent getById(@ApiParam("The agent id") @PathParam("id") String id) throws ApiException {
+    public Agent getByName(@ApiParam("The agent name") @PathParam("name") String name) throws ApiException {
         try {
-            return asDto(agentRegistry.getAgent(new AgentKeyImpl(id)));
+            return asDto(agentRegistry.getAgent(new AgentKeyImpl(name)));
         } catch (AgentNotFoundException e) {
             throw new NotFoundException(e.getMessage());
         } catch (AgentException e) {
@@ -76,16 +74,16 @@ public class AgentRegistryService extends Service {
     }
 
     @GET
-    @Path("/id/{id}/version/{version}")
+    @Path("/name/{name}/version/{version}")
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Gets the specific version of the agent", response = AgentDto.class)
     @ApiResponses({@ApiResponse(code = 200, message = "The response contains requested agent entity"),
                    @ApiResponse(code = 404, message = "Agent not found in the registry"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
-    public Agent getByName(@ApiParam("The agent id") @PathParam("id") String id,
+    public Agent getByName(@ApiParam("The agent name") @PathParam("name") String name,
                            @ApiParam("The agent version") @PathParam("version") String version) throws ApiException {
         try {
-            return asDto(agentRegistry.getAgent(new AgentKeyImpl(id, version)));
+            return asDto(agentRegistry.getAgent(new AgentKeyImpl(name, version)));
         } catch (AgentNotFoundException e) {
             throw new NotFoundException(e.getMessage());
         } catch (AgentException e) {
@@ -95,15 +93,15 @@ public class AgentRegistryService extends Service {
     }
 
     @GET
-    @Path("/versions/{id}")
+    @Path("/versions/{name}")
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Get a list of available versions of the giving agent", response = List.class)
     @ApiResponses({@ApiResponse(code = 200, message = "The response contains available versions of the giving agent"),
                    @ApiResponse(code = 404, message = "Agent not found"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
-    public List<String> getVersions(@ApiParam("The agent id") @PathParam("id") String id) throws ApiException {
+    public List<String> getVersions(@ApiParam("The agent name") @PathParam("name") String name) throws ApiException {
         try {
-            return agentRegistry.getVersions(id);
+            return agentRegistry.getVersions(name);
         } catch (AgentNotFoundException e) {
             throw new NotFoundException(e.getMessage());
         } catch (AgentException e) {
@@ -113,10 +111,10 @@ public class AgentRegistryService extends Service {
 
     @GET
     @Produces(APPLICATION_JSON)
-    @ApiOperation(value = "Get a collection of the available agents", response = Collection.class)
-    @ApiResponses({@ApiResponse(code = 200, message = "The response contains collection of available agents"),
+    @ApiOperation(value = "Get a list of the available agents", response = List.class)
+    @ApiResponses({@ApiResponse(code = 200, message = "The response contains list of available agents"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
-    public Collection<Agent> getAgents() throws ApiException {
+    public List<String> getAgents() throws ApiException {
         try {
             return agentRegistry.getAgents();
         } catch (AgentNotFoundException e) {

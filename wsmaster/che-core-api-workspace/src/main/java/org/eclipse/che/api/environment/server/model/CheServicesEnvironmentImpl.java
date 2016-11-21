@@ -13,48 +13,43 @@ package org.eclipse.che.api.environment.server.model;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-
-import static java.util.stream.Collectors.toMap;
+import java.util.stream.Collectors;
 
 /**
  * Description of docker container environment as representation of environment of machines in Che.
  *
  * @author Alexander Garagatyi
  */
-// TODO rename it's doesn't implement anything
 public class CheServicesEnvironmentImpl {
-    private String                      workspaceId;
+    private String                      version;
     private Map<String, CheServiceImpl> services;
-    // TODO add networks, use it
-    // TODO use external networks for preconfigured networks for example
 
     public CheServicesEnvironmentImpl() {}
 
     public CheServicesEnvironmentImpl(CheServicesEnvironmentImpl environment) {
-        workspaceId = environment.getWorkspaceId();
+        version = environment.getVersion();
         if (environment.getServices() != null) {
             services = environment.getServices()
                                   .entrySet()
                                   .stream()
-                                  .collect(toMap(Map.Entry::getKey,
-                                                 entry -> new CheServiceImpl(entry.getValue())));
+                                  .collect(Collectors.toMap(Map.Entry::getKey,
+                                                            entry -> new CheServiceImpl(entry.getValue())));
         }
     }
 
     /**
-     * ID of workspace to which this environment belongs.
-     * May be used for internal purposes of environment runtime handling.
+     * Version of environment syntax.
      */
-    public String getWorkspaceId() {
-        return workspaceId;
+    public String getVersion() {
+        return version;
     }
 
-    public void setWorkspaceId(String workspaceId) {
-        this.workspaceId = workspaceId;
+    public void setVersion(String version) {
+        this.version = version;
     }
 
-    public CheServicesEnvironmentImpl withWorkspaceId(String workspaceId) {
-        this.workspaceId = workspaceId;
+    public CheServicesEnvironmentImpl withVersion(String version) {
+        this.version = version;
         return this;
     }
 
@@ -82,19 +77,19 @@ public class CheServicesEnvironmentImpl {
         if (this == o) return true;
         if (!(o instanceof CheServicesEnvironmentImpl)) return false;
         CheServicesEnvironmentImpl that = (CheServicesEnvironmentImpl)o;
-        return Objects.equals(getWorkspaceId(), that.getWorkspaceId()) &&
+        return Objects.equals(getVersion(), that.getVersion()) &&
                Objects.equals(getServices(), that.getServices());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getWorkspaceId(), getServices());
+        return Objects.hash(getVersion(), getServices());
     }
 
     @Override
     public String toString() {
         return "CheServicesEnvironmentImpl{" +
-               "workspaceId='" + workspaceId + '\'' +
+               "version='" + version + '\'' +
                ", services=" + services +
                '}';
     }

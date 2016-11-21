@@ -11,17 +11,18 @@
 package org.eclipse.che.ide.projectimport.zip;
 
 
-import com.google.gwt.regexp.shared.RegExp;
-import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.google.inject.Inject;
-
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.CoreLocalizationConstant;
+
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.wizard.AbstractWizardPage;
 import org.eclipse.che.ide.util.NameUtils;
 
+import com.google.gwt.regexp.shared.RegExp;
+import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.google.inject.Inject;
+
 import javax.validation.constraints.NotNull;
+import org.eclipse.che.commons.annotation.Nullable;
 import java.util.Map;
 
 /**
@@ -49,7 +50,7 @@ public class ZipImporterPagePresenter extends AbstractWizardPage<MutableProjectC
     public void init(MutableProjectConfig dataObject) {
         super.init(dataObject);
 
-        setImportParameterValue(SKIP_FIRST_LEVEL_PARAM_NAME, String.valueOf(false));
+        setImportParameterValue(SKIP_FIRST_LEVEL_PARAM_NAME, String.valueOf(true));
     }
 
     @Override

@@ -65,12 +65,9 @@ public class RecipeDownloader {
         try {
             UriBuilder targetUriBuilder = UriBuilder.fromUri(location);
             // add user token to be able to download user's private recipe
-            final URI recipeUri = targetUriBuilder.build();
-            if (!recipeUri.isAbsolute() && recipeUri.getHost() == null) {
-                targetUriBuilder.scheme(apiEndpoint.getScheme())
-                                .host(apiEndpoint.getHost())
-                                .port(apiEndpoint.getPort())
-                                .replacePath(apiEndpoint.getPath() + location);
+            final String apiEndPointHost = apiEndpoint.getHost();
+            final String host = targetUriBuilder.build().getHost();
+            if (apiEndPointHost.equals(host)) {
                 if (EnvironmentContext.getCurrent().getSubject() != null
                     && EnvironmentContext.getCurrent().getSubject().getToken() != null) {
                     targetUriBuilder.queryParam("token", EnvironmentContext.getCurrent().getSubject().getToken());
@@ -108,12 +105,9 @@ public class RecipeDownloader {
         try {
             UriBuilder targetUriBuilder = UriBuilder.fromUri(location);
             // add user token to be able to download user's private recipe
-            final URI recipeUri = targetUriBuilder.build();
-            if (!recipeUri.isAbsolute() && recipeUri.getHost() == null) {
-                targetUriBuilder.scheme(apiEndpoint.getScheme())
-                                .host(apiEndpoint.getHost())
-                                .port(apiEndpoint.getPort())
-                                .replacePath(apiEndpoint.getPath() + location);
+            final String apiEndPointHost = apiEndpoint.getHost();
+            final String host = targetUriBuilder.build().getHost();
+            if (apiEndPointHost.equals(host)) {
                 if (EnvironmentContext.getCurrent().getSubject() != null
                     && EnvironmentContext.getCurrent().getSubject().getToken() != null) {
                     targetUriBuilder.queryParam("token", EnvironmentContext.getCurrent().getSubject().getToken());

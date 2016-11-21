@@ -9,9 +9,6 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
-import {CheStack} from "../../../components/api/che-stack.factory";
-import {CheNotification} from "../../../components/notification/che-notification.factory";
-import {CheProfile} from "../../../components/api/che-profile.factory";
 
 /**
  * @ngdoc controller
@@ -20,28 +17,12 @@ import {CheProfile} from "../../../components/api/che-profile.factory";
  * @author Ann Shumilova
  */
 export class ListStacksController {
-  cheStack: CheStack;
-  cheNotification: CheNotification;
-  $log: ng.ILogService;
-  $mdDialog: ng.material.IDialogService;
-  $q: ng.IQService;
-  stackFilter: Object;
-  stackSelectionState: Object;
-  stacks: Array<any>;
-  stackOrderBy: string;
-  userId: string;
-  state: string;
-  isAllSelected: boolean;
-  isNoSelected: boolean;
-  loading: boolean;
-  profile: any;
-  lodash: any;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheStack: CheStack, cheProfile: CheProfile, $log: ng.ILogService, $mdDialog: ng.material.IDialogService, cheNotification: CheNotification, $rootScope: ng.IRootScopeService, lodash: any, $q: ng.IQService) {
+  constructor(cheStack, cheProfile, $log, $mdDialog, cheNotification, $rootScope, lodash, $q) {
     this.cheStack = cheStack;
     this.$log = $log;
     this.$mdDialog = $mdDialog;
@@ -49,7 +30,7 @@ export class ListStacksController {
     this.lodash = lodash;
     this.$q = $q;
 
-    ($rootScope as any).showIDE = false;
+    $rootScope.showIDE = false;
 
     this.stackFilter = {name: ''};
     this.stackOrderBy = 'stack.name';
@@ -77,13 +58,13 @@ export class ListStacksController {
   /**
    * Gets the list of stacks.
    */
-  getStacks(): void {
+  getStacks() {
     this.loading = true;
     this.updateSelectionState();
 
     let promise = this.cheStack.fetchStacks();
     promise.then(() => {
-        this.loading = false;
+        this.loading = false
         this.stacks = this.cheStack.getStacks();
       },
       (error) => {
@@ -100,8 +81,8 @@ export class ListStacksController {
    *
    * @param stack stack to delete
    */
-  deleteStack(stack: any): void {
-    let confirmationPromise: ng.IPromise<any> = this.confirmStacksDeletion(1, stack.name);
+  deleteStack(stack) {
+    let confirmationPromise = this.confirmStacksDeletion(1, stack.name);
     confirmationPromise.then(() => {
       this.loading = true;
       this.cheStack.deleteStack(stack.id).then(() => {
@@ -122,8 +103,8 @@ export class ListStacksController {
    *
    * @param stack stack to make copy of
    */
-  duplicateStack(stack: any): void {
-    let newStack: any = angular.copy(stack);
+  duplicateStack(stack) {
+    let newStack = angular.copy(stack);
     delete newStack.links;
     delete newStack.creator;
     delete newStack.id;
@@ -142,10 +123,10 @@ export class ListStacksController {
    * Generate new stack name - based on the provided one and existing.
    *
    * @param name
-   * @returns {string}
+   * @returns {*}
    */
-  generateStackName(name: string): string {
-    if (this.stacks.length === 0) {
+  generateStackName(name) {
+    if (this.stacks.size === 0) {
       return name;
     }
     let existingNames = this.lodash.pluck(this.stacks, 'name');
@@ -165,48 +146,43 @@ export class ListStacksController {
   /**
    * Returns whether all stacks are selected.
    *
-   * @returns {boolean} <code>true</code> if all stacks are selected
+   * @returns {*} <code>true</code> if all stacks are selected
    */
-  isAllStacksSelected(): boolean {
+  isAllStacksSelected() {
     return this.isAllSelected;
   }
 
   /**
    * Returns whether there are no selected stacks.
    *
-   * @returns {boolean} <code>true</code> if no stacks are selected
+   * @returns {*} <code>true</code> if no stacks are selected
    */
-  isNoStacksSelected(): boolean {
+  isNoStacksSelected() {
     return this.isNoSelected;
   }
 
   /**
-   * Make all own stacks selected.
+   * Make all stacks selected.
    */
-  selectAllStacks(): void {
-    this.stackSelectionState = {};
+  selectAllStacks() {
     this.stacks.forEach((stack) => {
-      if (stack.creator === this.userId) {
-        this.stackSelectionState[stack.id] = true;
-      }
+      this.stackSelectionState[stack.id] = true;
     });
   }
 
   /**
    * Make all stacks deselected.
    */
-  deselectAllStacks(): void {
+  deselectAllStacks() {
     this.stacks.forEach((stack) => {
-      if (this.stackSelectionState[stack.id]) {
-        this.stackSelectionState[stack.id] = false;
-      }
+      this.stackSelectionState[stack.id] = false;
     });
   }
 
   /**
    * Change the state of the stacks selection,
    */
-  changeSelectionState(): void {
+  changeSelectionState() {
     if (this.isAllSelected) {
       this.deselectAllStacks();
     } else {
@@ -218,11 +194,11 @@ export class ListStacksController {
   /**
    * Update stack selection state.
    */
-  updateSelectionState(): void {
+  updateSelectionState() {
     this.isNoSelected = true;
-    let keys: Array<string> = Object.keys(this.stackSelectionState);
-    this.isAllSelected = keys.length > 0;
-    keys.forEach((key) => {
+    this.isAllSelected = true;
+
+    Object.keys(this.stackSelectionState).forEach((key) => {
       if (this.stackSelectionState[key]) {
         this.isNoSelected = false;
       } else {
@@ -234,8 +210,8 @@ export class ListStacksController {
   /**
    * Delete all selected stacks.
    */
-  deleteSelectedStacks(): void {
-    let selectedStackIds: Array<any> = [];
+  deleteSelectedStacks() {
+    let selectedStackIds = [];
 
 
     Object.keys(this.stackSelectionState).forEach((key) => {
@@ -249,7 +225,7 @@ export class ListStacksController {
       return;
     }
 
-    let confirmationPromise: ng.IPromise<any> = this.confirmStacksDeletion(selectedStackIds.length, '');
+    let confirmationPromise = this.confirmStacksDeletion(selectedStackIds.length);
     confirmationPromise.then(() => {
       let deleteStackPromises = [];
 
@@ -277,7 +253,7 @@ export class ListStacksController {
    * @param stackName name of stack to confirm (can be null)
    * @returns {*}
    */
-  confirmStacksDeletion(numberToDelete: number, stackName: string): ng.IPromise<any> {
+  confirmStacksDeletion(numberToDelete, stackName) {
     let confirmTitle = 'Would you like to delete ';
     if (numberToDelete > 1) {
       confirmTitle += 'these ' + numberToDelete + ' stacks?';

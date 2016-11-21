@@ -16,12 +16,12 @@ import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
 import org.eclipse.che.api.ssh.server.spi.SshDao;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.commons.test.tck.TckListener;
+import org.eclipse.che.commons.test.tck.TckModuleFactory;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepositoryException;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Listeners;
+import org.testng.annotations.Guice;
 import org.testng.annotations.Test;
 
 import javax.inject.Inject;
@@ -41,11 +41,10 @@ import static org.testng.Assert.fail;
  * @author Mihail Kuznyetsov.
  * @author Yevhenii Voevodin
  */
-@Listeners(TckListener.class)
+@Guice(moduleFactory = TckModuleFactory.class)
 @Test(suiteName = SshDaoTest.SUITE_NAME)
 public class SshDaoTest {
-    public static final String SUITE_NAME = "SshDaoTck";
-
+    public static final String SUITE_NAME   = "SshDaoTck";
     private static final int COUNT_OF_PAIRS = 6;
     private static final int COUNT_OF_USERS = 3;
 
@@ -74,8 +73,8 @@ public class SshDaoTest {
         pairs = new SshPairImpl[COUNT_OF_PAIRS];
 
         for (int i = 0; i < COUNT_OF_PAIRS; i++) {
-            pairs[i] = new SshPairImpl("owner" + i / 3, // 3 each pairs share the same owner
-                                       "service" + i / 2, // each 2 pairs share the same service
+            pairs[i] = new SshPairImpl("owner" + i/3, // 3 each pairs share the same owner
+                                       "service" + i/2, // each 2 pairs share the same service
                                        "name" + i,
                                        NameGenerator.generate("publicKey-", 20),
                                        NameGenerator.generate("privateKey-", 20));
@@ -108,9 +107,8 @@ public class SshDaoTest {
     public void shouldThrowNpeOnCreateIfSshPairIsNull() throws Exception {
         sshDao.create(null);
     }
-
     @Test
-    public void shouldGetSshPairByNameOwnerAndService() throws Exception {
+    public void shouldGetSshPairByNameOwnerAndService() throws Exception{
         SshPairImpl sshPair = pairs[0];
 
         sshDao.get(sshPair.getOwner(), sshPair.getService(), sshPair.getName());
@@ -124,22 +122,22 @@ public class SshDaoTest {
     }
 
     @Test(expectedExceptions = NullPointerException.class)
-    public void shouldThrowNpeOnGetSshPairWhenOwnerIsNull() throws Exception {
+    public void shouldThrowNpeOnGetSshPairWhenOwnerIsNull() throws Exception{
         sshDao.get(null, "service", "name");
     }
 
     @Test(expectedExceptions = NullPointerException.class)
-    public void shouldThrowNpeOnGetSshPairWhenServiceIsNull() throws Exception {
+    public void shouldThrowNpeOnGetSshPairWhenServiceIsNull() throws Exception{
         sshDao.get("owner", null, "name");
     }
 
     @Test(expectedExceptions = NullPointerException.class)
-    public void shouldThrowNpeOnGetSshPairWhenNameIsNull() throws Exception {
+    public void shouldThrowNpeOnGetSshPairWhenNameIsNull() throws Exception{
         sshDao.get("owner", "service", null);
     }
 
     @Test
-    public void shouldGetSshPairListByNameAndService() throws Exception {
+    public void shouldGetSshPairListByNameAndService() throws Exception{
         SshPairImpl sshPair1 = pairs[0];
         SshPairImpl sshPair2 = pairs[1];
         assertEquals(sshPair1.getOwner(), sshPair2.getOwner(), "Owner must be the same");
@@ -155,12 +153,12 @@ public class SshDaoTest {
     }
 
     @Test(expectedExceptions = NullPointerException.class)
-    public void shouldThrowNpeOnGetSshPairsListWhenOwnerIsNull() throws Exception {
+    public void shouldThrowNpeOnGetSshPairsListWhenOwnerIsNull() throws Exception{
         sshDao.get(null, "service");
     }
 
     @Test(expectedExceptions = NullPointerException.class)
-    public void shouldThrowNpeOnGetSshPairsListWhenServiceIsNull() throws Exception {
+    public void shouldThrowNpeOnGetSshPairsListWhenServiceIsNull() throws Exception{
         sshDao.get("owner", null);
     }
 

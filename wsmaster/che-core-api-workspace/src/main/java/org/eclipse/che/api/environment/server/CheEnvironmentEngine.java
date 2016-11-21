@@ -13,10 +13,7 @@ package org.eclipse.che.api.environment.server;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 
-import org.eclipse.che.api.agent.server.AgentRegistry;
 import org.eclipse.che.api.agent.server.exception.AgentException;
-import org.eclipse.che.api.agent.server.model.impl.AgentImpl;
-import org.eclipse.che.api.agent.server.model.impl.AgentKeyImpl;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
@@ -28,7 +25,7 @@ import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.model.machine.ServerConf;
 import org.eclipse.che.api.core.model.workspace.Environment;
-import org.eclipse.che.api.core.model.workspace.ServerConf2;
+import org.eclipse.che.api.core.model.workspace.ExtendedMachine;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.core.util.AbstractLineConsumer;
@@ -36,7 +33,6 @@ import org.eclipse.che.api.core.util.CompositeLineConsumer;
 import org.eclipse.che.api.core.util.FileLineConsumer;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.MessageConsumer;
-import org.eclipse.che.api.environment.server.exception.EnvironmentException;
 import org.eclipse.che.api.environment.server.exception.EnvironmentNotRunningException;
 import org.eclipse.che.api.environment.server.model.CheServiceBuildContextImpl;
 import org.eclipse.che.api.environment.server.model.CheServiceImpl;
@@ -50,7 +46,6 @@ import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineLimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineLogMessageImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
-import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceProvider;
@@ -59,6 +54,7 @@ import org.eclipse.che.api.machine.server.util.RecipeDownloader;
 import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.workspace.server.StripedLocks;
 import org.eclipse.che.api.workspace.server.model.impl.ExtendedMachineImpl;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -105,16 +101,15 @@ public class CheEnvironmentEngine {
     private final File                           machineLogsDir;
     private final MachineInstanceProviders       machineInstanceProviders;
     private final long                           defaultMachineMemorySizeBytes;
-    private final SnapshotDao                    snapshotDao;
-    private final EventService                   eventService;
-    private final EnvironmentParser              environmentParser;
-    private final DefaultServicesStartStrategy   startStrategy;
-    private final MachineInstanceProvider        machineProvider;
-    private final InfrastructureProvisioner      infrastructureProvisioner;
-    private final RecipeDownloader               recipeDownloader;
-    private final Pattern                        recipeApiPattern;
-    private final ContainerNameGenerator         containerNameGenerator;
-    private final AgentRegistry                  agentRegistry;
+    private final SnapshotDao                  snapshotDao;
+    private final EventService                 eventService;
+    private final EnvironmentParser            environmentParser;
+    private final DefaultServicesStartStrategy startStrategy;
+    private final MachineInstanceProvider      machineProvider;
+    private final AgentConfigApplier           agentConfigApplier;
+    private final RecipeDownloader             recipeDownloader;
+    private final Pattern                      recipeApiPattern;
+    private final ContainerNameGenerator       containerNameGenerator;
 
     private volatile boolean isPreDestroyInvoked;
 
@@ -127,28 +122,26 @@ public class CheEnvironmentEngine {
                                 EnvironmentParser environmentParser,
                                 DefaultServicesStartStrategy startStrategy,
                                 MachineInstanceProvider machineProvider,
-                                InfrastructureProvisioner infrastructureProvisioner,
+                                AgentConfigApplier agentConfigApplier,
                                 @Named("che.api") String apiEndpoint,
                                 RecipeDownloader recipeDownloader,
-                                ContainerNameGenerator containerNameGenerator,
-                                AgentRegistry agentRegistry) {
+                                ContainerNameGenerator containerNameGenerator) {
         this.snapshotDao = snapshotDao;
         this.eventService = eventService;
         this.environmentParser = environmentParser;
         this.startStrategy = startStrategy;
         this.machineProvider = machineProvider;
-        this.infrastructureProvisioner = infrastructureProvisioner;
+        this.agentConfigApplier = agentConfigApplier;
         this.recipeDownloader = recipeDownloader;
-        this.agentRegistry = agentRegistry;
         this.environments = new ConcurrentHashMap<>();
         this.machineInstanceProviders = machineInstanceProviders;
         this.machineLogsDir = new File(machineLogsDir);
         this.defaultMachineMemorySizeBytes = Size.parseSize(defaultMachineMemorySizeMB + "MB");
         // 16 - experimental value for stripes count, it comes from default hash map size
         this.stripedLocks = new StripedLocks(16);
-        this.recipeApiPattern = Pattern.compile("(^https?" +
+        this.recipeApiPattern = Pattern.compile("^https?" +
                                                 apiEndpoint.substring(apiEndpoint.indexOf(":")) +
-                                                "/recipe/.*$)|(^/recipe/.*$)");
+                                                "/recipe/.*$");
         this.containerNameGenerator = containerNameGenerator;
 
         eventService.subscribe(new MachineCleaner());
@@ -230,8 +223,7 @@ public class CheEnvironmentEngine {
                                 Environment env,
                                 boolean recover,
                                 MessageConsumer<MachineLogMessage> messageConsumer) throws ServerException,
-                                                                                           ConflictException,
-                                                                                           EnvironmentException {
+                                                                                           ConflictException {
         // TODO move to machines provider
         // add random chars to ensure that old environments that weren't removed by some reason won't prevent start
         String networkId = NameGenerator.generate(workspaceId + "_", 16);
@@ -320,8 +312,7 @@ public class CheEnvironmentEngine {
                                  MachineConfig machineConfig,
                                  List<String> agents) throws ServerException,
                                                              NotFoundException,
-                                                             ConflictException,
-                                                             EnvironmentException {
+                                                             ConflictException {
 
         MachineConfig machineConfigCopy = new MachineConfigImpl(machineConfig);
         EnvironmentHolder environmentHolder;
@@ -361,15 +352,16 @@ public class CheEnvironmentEngine {
             machine.setId(service.getId());
 
             machineStarter = (machineLogger, machineSource) -> {
-                CheServiceImpl serviceWithNormalizedSource = normalizeServiceSource(service, machineSource);
+                CheServiceImpl serviceWithCorrectSource = getServiceWithCorrectSource(service, machineSource);
 
                 normalize(namespace,
                           workspaceId,
                           machineConfig.getName(),
-                          serviceWithNormalizedSource);
+                          serviceWithCorrectSource);
 
-                infrastructureProvisioner.provision(new ExtendedMachineImpl().withAgents(agents),
-                                                    serviceWithNormalizedSource);
+                ExtendedMachineImpl extendedMachine = new ExtendedMachineImpl();
+                extendedMachine.setAgents(agents);
+                applyAgents(extendedMachine, serviceWithCorrectSource);
 
                 return machineProvider.startService(namespace,
                                                     workspaceId,
@@ -377,18 +369,17 @@ public class CheEnvironmentEngine {
                                                     machineConfig.getName(),
                                                     machineConfig.isDev(),
                                                     environmentHolder.networkId,
-                                                    serviceWithNormalizedSource,
+                                                    serviceWithCorrectSource,
                                                     machineLogger);
             };
         } else {
             try {
                 InstanceProvider provider = machineInstanceProviders.getProvider(machineConfig.getType());
                 machine.setId(generateMachineId());
-                addAgentsProvidedServers(machine, agents);
 
                 machineStarter = (machineLogger, machineSource) -> {
-                    Machine machineWithNormalizedSource = normalizeMachineSource(machine, machineSource);
-                    return provider.createInstance(machineWithNormalizedSource, machineLogger);
+                    Machine machineWithCorrectSource = getMachineWithCorrectSource(machine, machineSource);
+                    return provider.createInstance(machineWithCorrectSource, machineLogger);
                 };
             } catch (NotFoundException e) {
                 throw new NotFoundException(format("Provider of machine type '%s' not found", machineConfig.getType()));
@@ -527,29 +518,26 @@ public class CheEnvironmentEngine {
     private void initializeEnvironment(String namespace,
                                        String workspaceId,
                                        String envName,
-                                       Environment envConfig,
+                                       Environment env,
                                        String networkId,
                                        MessageConsumer<MachineLogMessage> messageConsumer)
             throws ServerException,
-                   ConflictException,
-                   EnvironmentException {
+                   ConflictException {
 
-        CheServicesEnvironmentImpl internalEnv = environmentParser.parse(envConfig);
+        CheServicesEnvironmentImpl environment = environmentParser.parse(env);
 
-        internalEnv.setWorkspaceId(workspaceId);
-
-        infrastructureProvisioner.provision(envConfig, internalEnv);
+        applyAgents(env, environment);
 
         normalize(namespace,
                   workspaceId,
-                  internalEnv);
+                  environment);
 
-        List<String> servicesOrder = startStrategy.order(internalEnv);
+        List<String> servicesOrder = startStrategy.order(environment);
 
-        normalizeNames(internalEnv);
+        normilizeVolumesFrom(environment);
 
         EnvironmentHolder environmentHolder = new EnvironmentHolder(servicesOrder,
-                                                                    internalEnv,
+                                                                    environment,
                                                                     messageConsumer,
                                                                     EnvStatus.STARTING,
                                                                     envName,
@@ -562,22 +550,23 @@ public class CheEnvironmentEngine {
         }
     }
 
-    private void addAgentsProvidedServers(MachineImpl machine, List<String> agentKeys) throws ServerException {
-        for (String agentKey : agentKeys) {
-            try {
-                AgentImpl agent = new AgentImpl(agentRegistry.getAgent(AgentKeyImpl.parse(agentKey)));
-                for (Map.Entry<String, ? extends ServerConf2> entry : agent.getServers().entrySet()) {
-                    String ref = entry.getKey();
-                    ServerConf2 conf2 = entry.getValue();
+    private void applyAgents(Environment env, CheServicesEnvironmentImpl servicesEnvironment) throws ServerException {
+        for (Map.Entry<String, ? extends ExtendedMachine> machineEntry : env.getMachines().entrySet()) {
+            String machineName = machineEntry.getKey();
+            ExtendedMachine extendedMachine = machineEntry.getValue();
+            CheServiceImpl service = servicesEnvironment.getServices().get(machineName);
 
-                    ServerConfImpl conf = new ServerConfImpl(ref,
-                                                             conf2.getPort(),
-                                                             conf2.getProtocol(),
-                                                             conf2.getProperties().get("path"));
-                    machine.getConfig().getServers().add(conf);
-                }
+            applyAgents(extendedMachine, service);
+        }
+    }
+
+    private void applyAgents(@Nullable ExtendedMachine extendedMachine,
+                             CheServiceImpl service) throws ServerException {
+        if (extendedMachine != null) {
+            try {
+                agentConfigApplier.modify(service, extendedMachine.getAgents());
             } catch (AgentException e) {
-                throw new ServerException(e);
+                throw new ServerException("Can't apply agent config", e);
             }
         }
     }
@@ -595,67 +584,18 @@ public class CheEnvironmentEngine {
         }
     }
 
-    /**
-     * Sets specific names for this environment instance where it is required.
-     *
-     * @param environment
-     *         environment in which names will be normalized
-     */
-    private void normalizeNames(CheServicesEnvironmentImpl environment) {
+    private void normilizeVolumesFrom(CheServicesEnvironmentImpl environment) {
         Map<String, CheServiceImpl> services = environment.getServices();
+        // replace machines names in volumes_from with containers IDs
         for (Map.Entry<String, CheServiceImpl> serviceEntry : services.entrySet()) {
             CheServiceImpl service = serviceEntry.getValue();
-            normalizeVolumesFrom(service, services);
-            normalizeLinks(service, services);
+            if (service.getVolumesFrom() != null) {
+                service.setVolumesFrom(service.getVolumesFrom()
+                                              .stream()
+                                              .map(serviceName -> services.get(serviceName).getContainerName())
+                                              .collect(toList()));
+            }
         }
-    }
-
-    // replace machines names in volumes_from with containers IDs
-    private void normalizeVolumesFrom(CheServiceImpl service, Map<String, CheServiceImpl> services) {
-        if (service.getVolumesFrom() != null) {
-            service.setVolumesFrom(service.getVolumesFrom()
-                                          .stream()
-                                          .map(serviceName -> services.get(serviceName).getContainerName())
-                                          .collect(toList()));
-        }
-    }
-
-    /**
-     * Replaces linked to this service's name with container name which represents the service in links section.
-     * The problem is that a user writes names of other services in links section in compose file.
-     * But actually links are constraints and their values should be names of containers (not services) to be linked.
-     * <br/>
-     * For example: serviceDB:serviceDbAlias -> container_1234:serviceDbAlias <br/>
-     * If alias is omitted then service name will be used.
-     *
-     * @param serviceToNormalizeLinks
-     *         service which links will be normalized
-     * @param services
-     *         all services in environment
-     */
-    @VisibleForTesting
-    void normalizeLinks(CheServiceImpl serviceToNormalizeLinks, Map<String, CheServiceImpl> services) {
-        serviceToNormalizeLinks.setLinks(
-                serviceToNormalizeLinks.getLinks()
-                                       .stream()
-                                       .map(link -> {
-                                           // a link has format: 'name:alias' or 'name'
-                                           String serviceNameAndAliasToLink[] = link.split(":", 2);
-                                           String serviceName = serviceNameAndAliasToLink[0];
-                                           String serviceAlias = (serviceNameAndAliasToLink.length > 1) ?
-                                                                 serviceNameAndAliasToLink[1] : null;
-                                           CheServiceImpl serviceLinkTo = services.get(serviceName);
-                                           if (serviceLinkTo != null) {
-                                               String containerNameLinkTo = serviceLinkTo.getContainerName();
-                                               return (serviceAlias == null) ?
-                                                      containerNameLinkTo :
-                                                      containerNameLinkTo + ':' + serviceAlias;
-                                           } else {
-                                               // should never happens. Errors like this should be filtered by CheEnvironmentValidator
-                                               throw new IllegalArgumentException("Attempt to link non existing service " + serviceName +
-                                                                                  " to " + serviceToNormalizeLinks + " service.");
-                                           }
-                                       }).collect(toList()));
     }
 
     private void normalize(String namespace,
@@ -709,8 +649,7 @@ public class CheEnvironmentEngine {
                                        String devMachineName,
                                        String networkId,
                                        boolean recover)
-            throws ServerException,
-                   EnvironmentException {
+            throws ServerException {
         // Starting all machines in environment one by one by getting configs
         // from the corresponding starting queue.
         // Config will be null only if there are no machines left in the queue
@@ -756,14 +695,14 @@ public class CheEnvironmentEngine {
                 // needed to reuse startInstance method and
                 // create machine instances by different implementation-specific providers
                 MachineStarter machineStarter = (machineLogger, machineSource) -> {
-                    CheServiceImpl serviceWithNormalizedSource = normalizeServiceSource(service, machineSource);
+                    CheServiceImpl serviceWithCorrectSource = getServiceWithCorrectSource(service, machineSource);
                     return machineProvider.startService(namespace,
                                                         workspaceId,
                                                         envName,
                                                         finalMachineName,
                                                         isDev,
                                                         networkId,
-                                                        serviceWithNormalizedSource,
+                                                        serviceWithCorrectSource,
                                                         machineLogger);
                 };
 
@@ -857,8 +796,7 @@ public class CheEnvironmentEngine {
                                    MessageConsumer<MachineLogMessage> environmentLogger,
                                    MachineImpl machine,
                                    MachineStarter machineStarter)
-            throws ServerException,
-                   EnvironmentException {
+            throws ServerException {
 
         LineConsumer machineLogger = null;
         Instance instance = null;
@@ -898,7 +836,6 @@ public class CheEnvironmentEngine {
                     throw e;
                 }
             }
-
             replaceMachine(instance);
 
             eventService.publish(newDto(MachineStatusEvent.class)
@@ -947,51 +884,50 @@ public class CheEnvironmentEngine {
     private interface MachineStarter {
         Instance startMachine(LineConsumer machineLogger,
                               MachineSource machineSource) throws ServerException,
-                                                                  NotFoundException,
-                                                                  EnvironmentException;
+                                                                  NotFoundException;
     }
 
-    private CheServiceImpl normalizeServiceSource(CheServiceImpl service,
-                                                  MachineSource machineSource)
+    private CheServiceImpl getServiceWithCorrectSource(CheServiceImpl service,
+                                                       MachineSource machineSource)
             throws ServerException {
-        CheServiceImpl serviceWithNormalizedSource = service;
+        CheServiceImpl serviceWithCorrectSource = service;
         if (machineSource != null) {
-            serviceWithNormalizedSource = new CheServiceImpl(service);
+            serviceWithCorrectSource = new CheServiceImpl(service);
             if ("image".equals(machineSource.getType())) {
-                serviceWithNormalizedSource.setBuild(null);
-                serviceWithNormalizedSource.setImage(machineSource.getLocation());
+                serviceWithCorrectSource.setBuild(null);
+                serviceWithCorrectSource.setImage(machineSource.getLocation());
             } else {
                 // dockerfile
-                serviceWithNormalizedSource.setImage(null);
+                serviceWithCorrectSource.setImage(null);
                 if (machineSource.getContent() != null) {
-                    serviceWithNormalizedSource.setBuild(new CheServiceBuildContextImpl(null,
-                                                                                        null,
-                                                                                        machineSource.getContent(),
-                                                                                        null));
+                    serviceWithCorrectSource.setBuild(new CheServiceBuildContextImpl(null,
+                                                                                     null,
+                                                                                     machineSource.getContent(),
+                                                                                     null));
                 } else {
-                    serviceWithNormalizedSource.setBuild(new CheServiceBuildContextImpl(machineSource.getLocation(),
-                                                                                        null,
-                                                                                        null,
-                                                                                        null));
+                    serviceWithCorrectSource.setBuild(new CheServiceBuildContextImpl(machineSource.getLocation(),
+                                                                                     null,
+                                                                                     null,
+                                                                                     null));
                 }
             }
         }
-        return serviceWithNormalizedSource;
+        return serviceWithCorrectSource;
     }
 
-    private Machine normalizeMachineSource(MachineImpl machine, MachineSource machineSource) {
-        Machine machineWithNormalizedSource = machine;
+    private Machine getMachineWithCorrectSource(MachineImpl machine, MachineSource machineSource) {
+        Machine machineWithCorrectSource = machine;
         if (machineSource != null) {
-            machineWithNormalizedSource = MachineImpl.builder()
-                                                     .fromMachine(machine)
-                                                     .setConfig(MachineConfigImpl.builder()
-                                                                                 .fromConfig(machine.getConfig())
-                                                                                 .setSource(machineSource)
-                                                                                 .build())
-                                                     .build();
+            machineWithCorrectSource = MachineImpl.builder()
+                                                  .fromMachine(machine)
+                                                  .setConfig(MachineConfigImpl.builder()
+                                                                              .fromConfig(machine.getConfig())
+                                                                              .setSource(machineSource)
+                                                                              .build())
+                                                  .build();
 
         }
-        return machineWithNormalizedSource;
+        return machineWithCorrectSource;
     }
 
     private void addMachine(MachineImpl machine) throws ServerException {
@@ -1249,6 +1185,16 @@ public class CheEnvironmentEngine {
             this.name = name;
             this.environment = environment;
             this.networkId = networkId;
+        }
+
+        public EnvironmentHolder(EnvironmentHolder environmentHolder) {
+            this.startQueue = environmentHolder.startQueue;
+            this.machines = environmentHolder.machines;
+            this.logger = environmentHolder.logger;
+            this.status = environmentHolder.status;
+            this.name = environmentHolder.name;
+            this.environment = environmentHolder.environment;
+            this.networkId = environmentHolder.networkId;
         }
 
         @Override

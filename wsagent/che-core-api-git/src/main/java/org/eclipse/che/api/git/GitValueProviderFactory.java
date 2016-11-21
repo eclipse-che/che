@@ -14,6 +14,7 @@ import com.google.inject.Inject;
 
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.git.shared.Remote;
+import org.eclipse.che.api.git.shared.RemoteListRequest;
 import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.type.ReadonlyValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProvider;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 import static org.eclipse.che.api.git.GitProjectType.GIT_CURRENT_BRANCH_NAME;
 import static org.eclipse.che.api.git.GitProjectType.GIT_REPOSITORY_REMOTES;
 import static org.eclipse.che.api.git.GitProjectType.VCS_PROVIDER_NAME;
+import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
  * @author Roman Nikitenko
@@ -58,7 +60,7 @@ public class GitValueProviderFactory implements ValueProviderFactory {
                         case GIT_CURRENT_BRANCH_NAME:
                             return Collections.singletonList(gitConnection.getCurrentBranch());
                         case GIT_REPOSITORY_REMOTES:
-                            return gitConnection.remoteList(null, false)
+                            return gitConnection.remoteList(newDto(RemoteListRequest.class))
                                                 .stream()
                                                 .map(Remote::getUrl)
                                                 .collect(Collectors.toList());

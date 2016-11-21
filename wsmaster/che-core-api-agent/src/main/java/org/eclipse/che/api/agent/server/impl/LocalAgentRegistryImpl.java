@@ -33,13 +33,11 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.zip.ZipFile;
@@ -63,46 +61,42 @@ public class LocalAgentRegistryImpl implements AgentRegistry {
     private static final   Pattern AGENTS = Pattern.compile(".*[//]?agents/[^//]+[.]json");
 
     private final Map<String, Agent> agents;
-    private final List<String>       agentIds;
+    private final List<String>       agentNames;
 
     @Inject
-    public LocalAgentRegistryImpl(Set<Agent> agents) throws IOException {
-
+    public LocalAgentRegistryImpl() throws IOException {
         this.agents = new HashMap<>();
         findAgents();
-        for (Agent agent : agents) {
-            this.agents.put(agent.getId(), agent);
-        }
-        this.agentIds = ImmutableList.copyOf(this.agents.keySet());
+        this.agentNames = ImmutableList.copyOf(agents.keySet());
     }
 
     @Override
     public Agent getAgent(AgentKey agentKey) throws AgentException {
-        return doGetAgent(agentKey.getId());
+        return doGetAgent(agentKey.getName());
     }
 
     @Override
-    public List<String> getVersions(String id) throws AgentException {
-        Agent agent = doGetAgent(id);
+    public List<String> getVersions(String name) throws AgentException {
+        Agent agent = doGetAgent(name);
         String version = agent.getVersion();
         return version == null ? Collections.emptyList() : singletonList(version);
     }
 
     @Override
-    public Collection<Agent> getAgents() throws AgentException {
-        return agents.values();
+    public List<String> getAgents() throws AgentException {
+        return agentNames;
     }
 
-    protected Agent doGetAgent(String id) throws AgentException {
+    protected Agent doGetAgent(String name) throws AgentException {
         try {
-            URL url = new URL(id);
+            URL url = new URL(name);
             return doGetRemoteAgent(url);
         } catch (MalformedURLException ignored) {
-            // id doesn't represent a url
+            // name doesn't represent a url
         }
 
-        Optional<Agent> agent = Optional.ofNullable(agents.get(id));
-        return agent.orElseThrow(() -> new AgentNotFoundException(format("Agent %s not found", id)));
+        Optional<Agent> agent = Optional.ofNullable(agents.get(name));
+        return agent.orElseThrow(() -> new AgentNotFoundException(format("Agent %s not found", name)));
     }
 
     protected Agent doGetRemoteAgent(URL url) throws AgentException {
@@ -149,7 +143,7 @@ public class LocalAgentRegistryImpl implements AgentRegistry {
         public void accept(InputStream inputStream) {
             try {
                 final Agent agent = DtoFactory.getInstance().createDtoFromJson(inputStream, AgentDto.class);
-                agents.put(agent.getId(), agent);
+                agents.put(agent.getName(), agent);
             } catch (IOException e) {
                 LOG.error("Can't create agent.", e);
             }

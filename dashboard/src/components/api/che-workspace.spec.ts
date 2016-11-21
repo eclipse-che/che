@@ -9,14 +9,11 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
-import {CheWorkspace} from './che-workspace.factory';
-import {CheAPIBuilder} from './builder/che-api-builder.factory';
-import {CheHttpBackend} from './test/che-http-backend';
 
 /**
  * Test of the CheWorkspace
  */
-describe('CheWorkspace', () => {
+describe('CheWorkspace', function(){
 
     /**
      * Workspace Factory for the test
@@ -43,10 +40,10 @@ describe('CheWorkspace', () => {
      */
     function Listener() {
         this.workspaces = [];
-        this.onChangeWorkspaces = (remoteWorkspaces: Array<any>) => {
+        this.onChangeWorkspaces = function (remoteWorkspaces) {
             this.workspaces = remoteWorkspaces;
         };
-        this.getWorkspaces = () => {
+        this.getWorkspaces = function() {
             return this.workspaces;
         };
     }
@@ -59,7 +56,7 @@ describe('CheWorkspace', () => {
     /**
      * Inject factory and http backend
      */
-    beforeEach(inject((cheWorkspace: CheWorkspace, cheAPIBuilder: CheAPIBuilder, cheHttpBackend: CheHttpBackend) => {
+    beforeEach(inject(function(cheWorkspace, cheAPIBuilder, cheHttpBackend) {
         factory = cheWorkspace;
         apiBuilder = cheAPIBuilder;
         cheBackend = cheHttpBackend;
@@ -69,7 +66,7 @@ describe('CheWorkspace', () => {
     /**
      * Check assertion after the test
      */
-    afterEach(() => {
+    afterEach(function () {
         httpBackend.verifyNoOutstandingExpectation();
         httpBackend.verifyNoOutstandingRequest();
     });
@@ -78,13 +75,14 @@ describe('CheWorkspace', () => {
     /**
      * Check that we're able to fetch workspaces and calls the listeners
      */
-    it('Fetch Workspaces', () => {
-        // setup tests objects
-        let workspace1 = apiBuilder.getWorkspaceBuilder().withId('123').withName('testWorkspace').build();
-        let tmpWorkspace2 = apiBuilder.getWorkspaceBuilder().withId('456').withName('tmpWorkspace').withTemporary(true).build();
+    it('Fetch Workspaces', function() {
 
-        // add the listener
-        let listener = new Listener();
+        // setup tests objects
+        var workspace1 = apiBuilder.getWorkspaceBuilder().withId('123').withName('testWorkspace').build();
+        var tmpWorkspace2 = apiBuilder.getWorkspaceBuilder().withId('456').withName('tmpWorkspace').withTemporary(true).build();
+
+        // Add the listener
+        var listener = new Listener();
         factory.addListener(listener);
 
         // no workspaces now on factory or on listener
@@ -108,13 +106,13 @@ describe('CheWorkspace', () => {
         httpBackend.flush();
 
         // now, check workspaces
-        let workspaces = factory.getWorkspaces();
+        var workspaces = factory.getWorkspaces();
 
         // check we have only one workspace (temporary workspace is excluded)
         expect(workspaces.length).toEqual(1);
 
-        // check name of the workspaces
-        let resultWorkspace1 = workspaces[0];
+        // check name of the workspace
+        var resultWorkspace1 = workspaces[0];
         expect(resultWorkspace1.config.name).toEqual(workspace1.config.name);
 
         // check the callback has been called without temporary workspace
@@ -122,5 +120,7 @@ describe('CheWorkspace', () => {
         expect(listener.getWorkspaces()[0].config.name).toEqual(workspace1.config.name);
        }
     );
+
+
 
 });

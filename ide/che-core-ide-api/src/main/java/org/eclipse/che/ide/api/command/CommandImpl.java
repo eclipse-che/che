@@ -16,6 +16,8 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 
+import static java.util.Collections.unmodifiableMap;
+
 /**
  * Model of the command.
  *
@@ -46,7 +48,7 @@ public class CommandImpl implements Command {
         this.name = name;
         this.commandLine = commandLine;
         this.type = type;
-        this.attributes = attributes;
+        this.attributes = unmodifiableMap(attributes);
     }
 
     /** Creates copy of the given {@link Command}. */
@@ -54,7 +56,7 @@ public class CommandImpl implements Command {
         this(command.getName(),
              command.getCommandLine(),
              command.getType(),
-             command.getAttributes());
+             unmodifiableMap(command.getAttributes()));
     }
 
     @Override
@@ -86,7 +88,7 @@ public class CommandImpl implements Command {
     }
 
     public void setAttributes(Map<String, String> attributes) {
-        this.attributes = attributes;
+        this.attributes = unmodifiableMap(attributes);
     }
 
     @Override

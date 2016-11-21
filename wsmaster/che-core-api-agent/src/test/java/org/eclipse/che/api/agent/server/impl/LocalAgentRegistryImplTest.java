@@ -10,15 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.api.agent.server.impl;
 
-import org.eclipse.che.api.agent.shared.model.Agent;
 import org.everrest.assured.EverrestJetty;
+import org.mockito.InjectMocks;
 import org.mockito.testng.MockitoTestNGListener;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 
 import static org.testng.AssertJUnit.assertFalse;
 
@@ -28,16 +26,12 @@ import static org.testng.AssertJUnit.assertFalse;
 @Listeners(value = {EverrestJetty.class, MockitoTestNGListener.class})
 public class LocalAgentRegistryImplTest {
 
+    @InjectMocks
     private LocalAgentRegistryImpl agentRegistry;
-
-    @BeforeMethod
-    public void setUp() throws Exception {
-        agentRegistry = new LocalAgentRegistryImpl(Collections.emptySet());
-    }
 
     @Test
     public void testInitializeAgents() throws Exception {
-        Collection<Agent> agents = agentRegistry.getAgents();
+        List<String> agents = agentRegistry.getAgents();
         assertFalse(agents.isEmpty());
     }
 }

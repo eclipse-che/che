@@ -15,30 +15,27 @@
  * @author Florent Benoit
  */
 export class CheToggleButton {
-  restrict: string;
-  templateUrl: string;
-  scope: {
-    [propName: string]: string
-  };
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor() {
-    this.restrict = 'E';
+  constructor () {
+    this.restrict='E';
     this.templateUrl = 'components/widget/toggle-button/che-toggle-button.html';
 
     // scope values
     this.scope = {
-      title: '@cheTitle',
-      value: '@?cheValue',
+      title:'@cheTitle',
       fontIcon: '@cheFontIcon',
       ngDisabled: '@ngDisabled'
     };
+
   }
 
-  link($scope: ng.IScope): void {
-    ($scope as any).controller = ($scope.$parent.$parent as any).cheToggleController || ($scope.$parent.$parent.$parent as any).cheToggleController;
+  link($scope) {
+    $scope.controller = $scope.$parent.$parent.cheToggleCtrl || $scope.$parent.$parent.$parent.cheToggleCtrl;
   }
+
+
 }

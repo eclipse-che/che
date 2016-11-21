@@ -16,13 +16,13 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
 import org.eclipse.che.ide.api.editor.EditorInput;
-import org.eclipse.che.ide.api.editor.document.Document;
-import org.eclipse.che.ide.api.editor.document.DocumentHandle;
 import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
-import org.eclipse.che.ide.api.editor.partition.DocumentPartitioner;
 import org.eclipse.che.ide.api.editor.text.Region;
 import org.eclipse.che.ide.api.editor.text.RegionImpl;
 import org.eclipse.che.ide.api.editor.text.TypedRegion;
+import org.eclipse.che.ide.api.editor.document.Document;
+import org.eclipse.che.ide.api.editor.document.DocumentHandle;
+import org.eclipse.che.ide.api.editor.partition.DocumentPartitioner;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.util.loging.Log;
 
@@ -97,23 +97,21 @@ public class ReconcilerWithAutoSave implements Reconciler {
 
     private void save() {
         if (autoSaveEnabled) {
-            if (editor.isDirty()) {
-                editor.doSave(new AsyncCallback<EditorInput>() {
-                    @Override
-                    public void onFailure(Throwable throwable) {
-                        Log.error(ReconcilerWithAutoSave.class, throwable);
-                    }
+            editor.doSave(new AsyncCallback<EditorInput>() {
+                @Override
+                public void onFailure(Throwable throwable) {
+                    Log.error(ReconcilerWithAutoSave.class, throwable);
+                }
 
-                    @Override
-                    public void onSuccess(EditorInput editorInput) {
-                        processNextRegion();
+                @Override
+                public void onSuccess(EditorInput editorInput) {
+                    processNextRegion();
 
-                    }
-                });
-                return;
-            }
+                }
+            });
+        } else {
+            processNextRegion();
         }
-        processNextRegion();
     }
 
     private void processNextRegion() {

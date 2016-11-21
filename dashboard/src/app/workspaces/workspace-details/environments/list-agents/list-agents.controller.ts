@@ -9,8 +9,6 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
-import {CheAgent} from '../../../../../components/api/che-agent.factory';
-import {CheAPI} from '../../../../../components/api/che-api.factory';
 
 /**
  * @ngdoc controller
@@ -19,59 +17,52 @@ import {CheAPI} from '../../../../../components/api/che-api.factory';
  * @author Ilya Buziuk
  */
 export class ListAgentsController {
-  cheAgent: CheAgent;
-
-  agents: string[];
-  agentsList: any[];
-  allAgents: any[];
-
-  agentsOnChange: Function;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheAPI: CheAPI) {
+  constructor(cheAPI) {
     this.cheAgent = cheAPI.getAgent();
 
     this.cheAgent.fetchAgents().then(() => {
       this.buildAgentsList();
+    }, (error) => {
+      if (error.status === 304) {
+        this.buildAgentsList();
+      }
     });
   }
 
-  buildAgentsList(): void {
+  buildAgentsList() {
     this.agentsList = [];
-    this.allAgents = this.cheAgent.getAgents();
-
-    this.allAgents.forEach((agent: any) => {
-        let agentItem = angular.copy(agent);
-        let isEnabled = this.isEnabled(agent.id, this.agents);
-        agentItem.isEnabled = isEnabled;
-        this.agentsList.push(agentItem);
+    this.availableAgents = this.cheAgent.getAgents();
+    this.availableAgents.forEach(agent => {
+      let isEnabled = this.isEnabled(agent, this.agents);
+      this.agentsList.push({ "name": agent, "isEnabled": isEnabled });
     });
   }
 
-  updateAgent(agent: any): void {
+  updateAgent(agent) {
     if (agent.isEnabled) {
-      this.agents.push(agent.id);
+      this.agents.push(agent.name);
     } else {
-      this.agents.splice(this.agents.indexOf(agent.id), 1);
+      this.agents.splice(this.agents.indexOf(agent.name), 1);
     }
-    this.agentsOnChange();
-    this.buildAgentsList();
+    return this.agentsOnChange().then(() => { this.buildAgentsList() });
   }
 
   /**
    * Switching of the "ws-agent" must happen only via "Dev" slider.
    * "ws-agent" should be listed, but always disabled regardless of the state
-   * @param agentId {string}
+   * @param agentName {string}
    */
-  needToDisable(agentId: string): boolean {
-    return (agentId === 'org.eclipse.che.ws-agent');
+  needToDisable(agentName) {
+    return (agentName === "org.eclipse.che.ws-agent");
   }
 
-  isEnabled(agentId: string, agents: string[]): boolean {
-    return (-1 !== agents.indexOf(agentId));
+  isEnabled(agentName, agents) {
+    return (-1 !== agents.indexOf(agentName));
   }
 
 }

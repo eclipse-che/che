@@ -26,7 +26,6 @@ const DEFAULT_WORKSPACE_RAM: number = 2 * MIN_WORKSPACE_RAM;
 export class WorkspaceEnvironmentsController {
   cheEnvironmentRegistry: CheEnvironmentRegistry;
   environmentManager: EnvironmentManager;
-  $mdDialog: ng.material.IDialogService;
 
   editorOptions: {
     lineWrapping: boolean,
@@ -37,8 +36,7 @@ export class WorkspaceEnvironmentsController {
     onLoad: Function
   };
 
-  stackId: string;
-  workspaceConfig: che.IWorkspaceConfig;
+  workspaceConfig: any;
   environment: any;
   environmentName: string;
   newEnvironmentName: string;
@@ -53,8 +51,7 @@ export class WorkspaceEnvironmentsController {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($scope: ng.IScope, $timeout: ng.ITimeoutService, $mdDialog: ng.material.IDialogService, cheEnvironmentRegistry: CheEnvironmentRegistry) {
-    this.$mdDialog = $mdDialog;
+  constructor($scope: ng.IScope, $timeout: ng.ITimeoutService, cheEnvironmentRegistry: CheEnvironmentRegistry) {
     this.cheEnvironmentRegistry = cheEnvironmentRegistry;
 
     this.editorOptions = {
@@ -177,8 +174,9 @@ export class WorkspaceEnvironmentsController {
     this.workspaceConfig.environments[this.environmentName] = newEnvironment;
     this.environment = newEnvironment;
 
-    this.doUpdateEnvironments();
-    this.init();
+    return this.doUpdateEnvironments().then(() => {
+      this.init();
+    });
   }
 
   /**
@@ -200,38 +198,38 @@ export class WorkspaceEnvironmentsController {
    *
    * @returns {ng.IPromise<any>}
    */
-  updateMachineName(oldName: string, newName: string): void {
+  updateMachineName(oldName: string, newName: string): ng.IPromise<any> {
     let newEnvironment = this.environmentManager.renameMachine(this.environment, oldName, newName);
     this.workspaceConfig.environments[this.newEnvironmentName] = newEnvironment;
 
     this.machinesViewStatus[this.newEnvironmentName][newName] = this.machinesViewStatus[this.newEnvironmentName][oldName];
     delete this.machinesViewStatus[this.newEnvironmentName][oldName];
 
-    this.doUpdateEnvironments();
-    this.init();
+    return this.doUpdateEnvironments().then(() => {
+      this.init();
+    });
   }
 
   /**
    * Callback which is called in order to delete specified machine
    *
    * @param name
+   * @returns {ng.IPromise<any>}
    */
-  deleteMachine(name: string): void {
+  deleteMachine(name: string): ng.IPromise<any> {
     let newEnvironment = this.environmentManager.deleteMachine(this.environment, name);
     this.workspaceConfig.environments[this.newEnvironmentName] = newEnvironment;
-
-    this.doUpdateEnvironments();
-    this.init();
+    return this.doUpdateEnvironments().then(() => {
+      this.init();
+    });
   }
 
   /**
    * Callback when stack has been changed.
    *
    * @param config {object} workspace config
-   * @param stackId {string}
    */
-  changeWorkspaceStack(config: any, stackId: string): void {
-    this.stackId = stackId;
+  changeWorkspaceStack(config: any): void {
     this.workspaceConfig = config;
 
     if (!this.environmentName) {
@@ -249,7 +247,7 @@ export class WorkspaceEnvironmentsController {
     let environment = this.workspaceConfig.environments[this.environmentName];
     if (environment.recipe && environment.recipe.type === 'compose') {
       let recipeType = environment.recipe.type,
-        environmentManager = this.cheEnvironmentRegistry.getEnvironmentManager(recipeType);
+          environmentManager = this.cheEnvironmentRegistry.getEnvironmentManager(recipeType);
       let machines: any = environmentManager.getMachines(environment);
       machines.forEach((machine: any) => {
         if (!machine.attributes.memoryLimitBytes || machine.attributes.memoryLimitBytes < MIN_WORKSPACE_RAM || machine.attributes.memoryLimitBytes > MAX_WORKSPACE_RAM) {
@@ -278,33 +276,4 @@ export class WorkspaceEnvironmentsController {
     return this.environmentOnChange();
   }
 
-  /**
-   * Show dialog to add a new machine to config
-   * @param $event
-   */
-  showAddMachineDialog($event: MouseEvent): void {
-    this.$mdDialog.show({
-      targetEvent: $event,
-      controller: 'AddMachineDialogController',
-      controllerAs: 'addMachineDialogController',
-      bindToController: true,
-      clickOutsideToClose: true,
-      locals: {
-        environmentKey: this.environmentName,
-        environments: this.workspaceConfig.environments,
-        callbackController: this
-      },
-      templateUrl: 'app/workspaces/workspace-details/environments/add-machine-dialog/add-machine-dialog.html'
-    });
-  }
-
-  /**
-   * Sets environments
-   * @param environments: {[envName: string]: any}
-   */
-  setEnvironments(environments: {[envName: string]: any}) {
-    this.workspaceConfig.environments = environments;
-    this.doUpdateEnvironments();
-    this.init();
-  }
 }
