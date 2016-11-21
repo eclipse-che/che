@@ -131,6 +131,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
 
     @Inject
     public MachineProviderImpl(DockerConnector docker,
+                               OpenShiftConnector openShift,
                                DockerConnectorConfiguration dockerConnectorConfiguration,
                                UserSpecificDockerRegistryCredentialsProvider dockerCredentials,
                                DockerMachineFactory dockerMachineFactory,
@@ -152,7 +153,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                WindowsPathEscaper windowsPathEscaper)
             throws IOException {
         this.docker = docker;
-        this.openShift = new OpenShiftConnector();
+        this.openShift = openShift;
         this.dockerCredentials = dockerCredentials;
         this.dockerMachineFactory = dockerMachineFactory;
         this.dockerInstanceStopDetector = dockerInstanceStopDetector;

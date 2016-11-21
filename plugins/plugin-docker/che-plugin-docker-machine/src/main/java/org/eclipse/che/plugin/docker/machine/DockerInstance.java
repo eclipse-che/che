@@ -104,6 +104,7 @@ public class DockerInstance extends AbstractInstance {
 
     @Inject
     public DockerInstance(DockerConnector docker,
+                          OpenShiftConnector openShift,
                           @Named("che.docker.registry") String registry,
                           @Named("che.docker.namespace") @Nullable String registryNamespace,
                           DockerMachineFactory dockerMachineFactory,
@@ -119,7 +120,7 @@ public class DockerInstance extends AbstractInstance {
         this.dockerMachineFactory = dockerMachineFactory;
         this.container = container;
         this.docker = docker;
-        this.openShift = new OpenShiftConnector();;
+        this.openShift = openShift;
         this.image = image;
         this.outputConsumer = outputConsumer;
         this.registry = registry;

@@ -52,11 +52,12 @@ public class DockerContainerCleaner implements Runnable {
     @Inject
     public DockerContainerCleaner(CheEnvironmentEngine environmentEngine,
                                   DockerConnector dockerConnector,
+                                  OpenShiftConnector openShiftConnector,
                                   DockerContainerNameGenerator nameGenerator) {
         this.environmentEngine = environmentEngine;
         this.dockerConnector = dockerConnector;
         this.nameGenerator = nameGenerator;
-        this.openShiftConnector = new OpenShiftConnector();
+        this.openShiftConnector = openShiftConnector;
     }
 
     @ScheduleRate(periodParameterName = "che.docker.unused_containers_cleanup_min",
