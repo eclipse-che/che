@@ -34,16 +34,12 @@ import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.Size;
-<<<<<<< 13000b066f56d27792e9b625cb0c8742d04e6444
 import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
 import org.eclipse.che.plugin.docker.client.ProgressLineFormatterImpl;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
 import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredentialsProvider;
-=======
-import org.eclipse.che.plugin.docker.client.*;
->>>>>>> Added an OpenShift connector for container creation
 import org.eclipse.che.plugin.docker.client.exception.ContainerNotFoundException;
 import org.eclipse.che.plugin.docker.client.exception.ImageNotFoundException;
 import org.eclipse.che.plugin.docker.client.exception.NetworkNotFoundException;
@@ -54,7 +50,14 @@ import org.eclipse.che.plugin.docker.client.json.container.NetworkingConfig;
 import org.eclipse.che.plugin.docker.client.json.network.ConnectContainer;
 import org.eclipse.che.plugin.docker.client.json.network.EndpointConfig;
 import org.eclipse.che.plugin.docker.client.json.network.NewNetwork;
-import org.eclipse.che.plugin.docker.client.params.*;
+import org.eclipse.che.plugin.docker.client.params.BuildImageParams;
+import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
+import org.eclipse.che.plugin.docker.client.params.GetContainerLogsParams;
+import org.eclipse.che.plugin.docker.client.params.PullParams;
+import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
+import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
+import org.eclipse.che.plugin.docker.client.params.RemoveNetworkParams;
+import org.eclipse.che.plugin.docker.client.params.TagParams;
 import org.eclipse.che.plugin.docker.client.params.network.ConnectContainerToNetworkParams;
 import org.eclipse.che.plugin.docker.client.params.network.CreateNetworkParams;
 import org.eclipse.che.plugin.docker.machine.node.DockerNode;
@@ -67,16 +70,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.nio.file.Files;
-<<<<<<< 13000b066f56d27792e9b625cb0c8742d04e6444
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-=======
-import java.util.*;
->>>>>>> Added an OpenShift connector for container creation
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
