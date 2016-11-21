@@ -35,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.IOException;
 import java.util.*;
@@ -56,15 +57,8 @@ public class OpenShiftConnector {
     private static final String CHE_WORKSPACE_ID_ENV_VAR = "CHE_WORKSPACE_ID";
     private static final String CHE_OPENSHIFT_RESOURCES_PREFIX = "che-ws-";
 
-    private static final String CHE_DEFAULT_OPENSHIFT_PROJECT_NAME = "eclipse-che";
-    private static final String CHE_DEFAULT_OPENSHIFT_SERVICEACCOUNT = "cheserviceaccount";
-    private static final String OPENSHIFT_API_ENDPOINT_ADB = "https://10.0.2.15:8443/";
-    private static final String OPENSHIFT_API_ENDPOINT_MINISHIFT = "https://192.168.64.2:8443/";
-    private static final String OPENSHIFT_DEFAULT_USER_NAME = "openshift-dev";
-    private static final String OPENSHIFT_DEFAULT_USER_PASSWORD = "devel";
     private static final String OPENSHIFT_SERVICE_TYPE_NODE_PORT = "NodePort";
-    public  static final String DOCKER_PROTOCOL_PORT_DELIMITER = "/";
-    public static final String IMAGE_PULL_POLICY_ALWAYS = "Always";
+    public static final String DOCKER_PROTOCOL_PORT_DELIMITER = "/";
     public static final String IMAGE_PULL_POLICY_IFNOTPRESENT = "IfNotPresent";
     public static final String CHE_DEFAULT_EXTERNAL_ADDRESS = "172.17.0.1";
     public static final String CHE_SERVER_INTERNAL_IP_ADB = "172.17.0.5";
@@ -76,11 +70,6 @@ public class OpenShiftConnector {
     private final String             cheOpenShiftProjectName;
     private final String             cheOpenShiftServiceAccount;
 
-
-    private final String             openShiftApiEndpoint;
-    private final String             openShiftUserName;
-    private final String             openShiftUserPassword;
-
     public final Map<Integer, String> servicePortNames = ImmutableMap.<Integer, String>builder().
                                                                 put(22, "sshd").
                                                                 put(4401, "wsagent").
@@ -89,23 +78,23 @@ public class OpenShiftConnector {
                                                                 put(8080, "tomcat").
                                                                 put(8000, "tomcat-jpda").
                                                                 put(9876, "codeserver").build();
-    private final String wsAgentExternalAddress;
     private final String wsMasterInternalAddress;
 
     @Inject
-    public OpenShiftConnector() {
+    public OpenShiftConnector(@Named("che.openshift.endpoint") String openShiftApiEndpoint,
+                              @Named("che.openshift.username") String openShiftUserName,
+                              @Named("che.openshift.password") String openShiftUserPassword,
+                              @Named("che.openshift.project") String cheOpenShiftProjectName,
+                              @Named("che.openshift.serviceaccountname") String cheOpenShiftServiceAccount) {
+        this.cheOpenShiftProjectName = cheOpenShiftProjectName;
+        this.cheOpenShiftServiceAccount = cheOpenShiftServiceAccount;
+
         // Hardcoded values. Should be injected instead
-        this.cheOpenShiftProjectName = CHE_DEFAULT_OPENSHIFT_PROJECT_NAME;
-        this.cheOpenShiftServiceAccount = CHE_DEFAULT_OPENSHIFT_SERVICEACCOUNT;
-        this.openShiftApiEndpoint = OPENSHIFT_API_ENDPOINT_MINISHIFT;
-        this.wsAgentExternalAddress = CHE_DEFAULT_EXTERNAL_ADDRESS;
-        this.openShiftUserName = OPENSHIFT_DEFAULT_USER_NAME;
-        this.openShiftUserPassword = OPENSHIFT_DEFAULT_USER_PASSWORD;
         this.wsMasterInternalAddress = CHE_SERVER_INTERNAL_IP_MINISHIFT;
 
-        this.openShiftClient = new ClientBuilder(this.openShiftApiEndpoint)
-                .withUserName(this.openShiftUserName)
-                .withPassword(this.openShiftUserPassword)
+        this.openShiftClient = new ClientBuilder(openShiftApiEndpoint)
+                .withUserName(openShiftUserName)
+                .withPassword(openShiftUserPassword)
                 .build();
         this.openShiftFactory = new ResourceFactory(openShiftClient);
     }

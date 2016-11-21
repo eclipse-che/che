@@ -24,6 +24,12 @@ public class OpenShiftConnectorTest {
 
     private static final String[] CONTAINER_ENV_VARIABLES = {"CHE_WORKSPACE_ID=abcd1234"};
     private static final String   CONTAINER_NAME          = "workspace33c89znmqidvzol8_machineyytelq6lni7mndlf_che_dev-machine";
+    private static final String   CHE_DEFAULT_OPENSHIFT_PROJECT_NAME = "eclipse-che";
+    private static final String   CHE_DEFAULT_OPENSHIFT_SERVICEACCOUNT = "cheserviceaccount";
+    private static final String   OPENSHIFT_API_ENDPOINT_MINISHIFT = "https://192.168.64.2:8443/";
+    private static final String   OPENSHIFT_DEFAULT_USER_NAME = "openshift-dev";
+    private static final String   OPENSHIFT_DEFAULT_USER_PASSWORD = "devel";
+
 
     @Mock
     private CreateContainerParams createContainerParams;
@@ -39,7 +45,11 @@ public class OpenShiftConnectorTest {
     @BeforeMethod
     public void setup() {
         openShiftResourceFactory = spy(new ResourceFactory(openShiftClient));
-        openShiftConnector = spy(new OpenShiftConnector());
+        openShiftConnector = spy(new OpenShiftConnector(OPENSHIFT_API_ENDPOINT_MINISHIFT,
+                                                        OPENSHIFT_DEFAULT_USER_NAME,
+                                                        OPENSHIFT_DEFAULT_USER_PASSWORD,
+                                                        CHE_DEFAULT_OPENSHIFT_PROJECT_NAME,
+                                                        CHE_DEFAULT_OPENSHIFT_SERVICEACCOUNT));
     }
 
 
