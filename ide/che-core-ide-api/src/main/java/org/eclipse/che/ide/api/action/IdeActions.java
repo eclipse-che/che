@@ -37,6 +37,7 @@ public interface IdeActions {
     String GROUP_PROJECT_EXPLORER_CONTEXT_MENU = "projectExplorerContextMenu";
     String GROUP_EDITOR_TAB_CONTEXT_MENU       = "editorTabContextMenu";
     String GROUP_CONSOLES_TREE_CONTEXT_MENU    = "consolesTreeContextMenu";
+    String GROUP_EDITOR_CONTEXT_MENU           = "editorContextMenu";
 
     String GROUP_OTHER_MENU      = "otherMenu";
     String GROUP_LEFT_MAIN_MENU  = "leftMainMenu";
@@ -45,4 +46,7 @@ public interface IdeActions {
     String GROUP_CENTER_STATUS_PANEL = "centerStatusPanelGroup";
     String GROUP_LEFT_STATUS_PANEL   = "leftStatusPanelGroup";
     String GROUP_RIGHT_STATUS_PANEL  = "rightStatusPanelGroup";
+
+    String GROUP_EMPTY_EDITOR_PANEL  = "emptyEditorPanelGroup";
+    String GROUP_EMPTY_PROJECT_PANEL = "emptyProjectPanelGroup";
 }

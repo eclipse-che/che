@@ -13,16 +13,16 @@ package org.eclipse.che.api.agent.shared.model;
 import org.eclipse.che.commons.annotation.Nullable;
 
 /**
- * A pair of name and version of the agent.
+ * A pair of id and version of the agent.
  * Version part is not mandatory.
  *
  * @author Anatolii Bazko
  */
 public interface AgentKey {
     /**
-     * @return the name of the agent
+     * @return the id of the agent
      */
-    String getName();
+    String getId();
 
     /**
      * @return the version of the agent

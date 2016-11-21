@@ -58,6 +58,11 @@ public class LightTheme implements Theme {
     }
 
     @Override
+    public String inputSelectionBackground() {
+        return "#b1d7fe";
+    }
+
+    @Override
     public String inactiveSelectionBackground() {
         return "rgba(73,143,225,0.40)";
     }
@@ -1333,6 +1338,11 @@ public class LightTheme implements Theme {
     }
 
     @Override
+    public String notificationPopupWarningBackground() {
+    	return "#F0AD4E";
+    }
+    
+    @Override
     public String notificationPopupPanelShadow() {
         return "0 0 7px rgba(0,0,0,0.2)";
     }
@@ -1351,7 +1361,12 @@ public class LightTheme implements Theme {
     public String notificationPopupIconProgressFill() {
         return "#9b9b9b";
     }
-
+    
+    @Override
+    public String notificationPopupIconWarningFill() {
+    	return "#F0AD4E";
+    }
+    
     @Override
     public String notificationPopupIconSvgFill() {
         return "#FFFFFF";

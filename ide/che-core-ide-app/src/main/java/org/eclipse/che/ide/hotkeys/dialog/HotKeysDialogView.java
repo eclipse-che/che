@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.ide.hotkeys.dialog;
 
+import com.google.inject.ImplementedBy;
+
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.hotkeys.HotKeyItem;
 
@@ -22,6 +24,7 @@ import java.util.Map;
  * @author Alexander Andrienko
  * @author Artem Zatsarynnyi
  */
+@ImplementedBy(HotKeysDialogViewImpl.class)
 public interface HotKeysDialogView extends View<HotKeysDialogView.ActionDelegate> {
 
     /** Reset filter input and Show dialog. */

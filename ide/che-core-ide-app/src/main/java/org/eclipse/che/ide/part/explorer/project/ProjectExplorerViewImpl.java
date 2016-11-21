@@ -20,6 +20,7 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
+import org.eclipse.che.ide.actions.LinkWithEditorAction;
 import org.eclipse.che.ide.actions.RefreshPathAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionManager;
@@ -50,6 +51,7 @@ import org.eclipse.che.ide.ui.smartTree.TreeStyles;
 import org.eclipse.che.ide.ui.smartTree.event.GoIntoStateEvent;
 import org.eclipse.che.ide.ui.smartTree.event.GoIntoStateEvent.GoIntoStateHandler;
 import org.eclipse.che.ide.ui.smartTree.presentation.DefaultPresentationRenderer;
+import org.eclipse.che.ide.ui.status.StatusWidget;
 import org.eclipse.che.ide.ui.toolbar.PresentationFactory;
 
 import java.util.Comparator;
@@ -71,7 +73,7 @@ import static org.eclipse.che.ide.ui.smartTree.event.GoIntoStateEvent.State.DEAC
 @Singleton
 public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.ActionDelegate> implements ProjectExplorerView,
                                                                                                      GoIntoStateHandler {
-    private final Tree tree;
+    private final Tree                       tree;
     private final SkipHiddenNodesInterceptor skipHiddenNodesInterceptor;
 
     private ToolButton goBackButton;
@@ -79,6 +81,7 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
     private static final String GO_BACK_BUTTON_ID      = "goBackButton";
     private static final String COLLAPSE_ALL_BUTTON_ID = "collapseAllButton";
     private static final String REFRESH_BUTTON_ID      = "refreshSelectedPath";
+    private static final String LINK_WITH_EDITOR_ID    = "linkWithEditor";
     private static final String PROJECT_TREE_WIDGET_ID = "projectTree";
 
     @Inject
@@ -87,10 +90,12 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
                                    final CoreLocalizationConstant coreLocalizationConstant,
                                    final Set<NodeInterceptor> nodeInterceptorSet,
                                    final SkipHiddenNodesInterceptor skipHiddenNodesInterceptor,
+                                   final LinkWithEditorAction linkWithEditorAction,
                                    final RefreshPathAction refreshPathAction,
                                    final PresentationFactory presentationFactory,
                                    final Provider<PerspectiveManager> managerProvider,
-                                   final ActionManager actionManager) {
+                                   final ActionManager actionManager,
+                                   final EmptyTreePanel emptyTreePanel) {
         super(resources);
         this.skipHiddenNodesInterceptor = skipHiddenNodesInterceptor;
 
@@ -101,7 +106,7 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
         NodeLoader nodeLoader = new NodeLoader(nodeInterceptorSet);
         nodeLoader.getNodeInterceptors().add(skipHiddenNodesInterceptor);
 
-        tree = new Tree(nodeStorage, nodeLoader);
+        tree = new Tree(nodeStorage, nodeLoader, new StatusWidget<Tree>(emptyTreePanel));
         tree.setContextMenuInvocationHandler(new Tree.ContextMenuInvocationHandler() {
             @Override
             public void onInvokeContextMenu(int x, int y) {
@@ -149,6 +154,18 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
         collapseAllButton.ensureDebugId(COLLAPSE_ALL_BUTTON_ID);
         collapseAllButton.setVisible(true);
         addToolButton(collapseAllButton);
+
+        ToolButton linkedEditorButton = new ToolButton(FontAwesome.EXCHANGE);
+        linkedEditorButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                linkWithEditorAction.actionPerformed(null);
+            }
+        });
+        Tooltip.create((elemental.dom.Element)linkedEditorButton.getElement(), BOTTOM, MIDDLE, "Link with editor");
+        linkedEditorButton.ensureDebugId(LINK_WITH_EDITOR_ID);
+        linkedEditorButton.setVisible(true);
+        addToolButton(linkedEditorButton);
 
         ToolButton refreshPathButton = new ToolButton(FontAwesome.REFRESH);
         refreshPathButton.addClickHandler(new ClickHandler() {

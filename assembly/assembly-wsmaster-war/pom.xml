@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-assembly-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>5.0.0-M7-SNAPSHOT</version>
+        <version>5.0.0-M8-SNAPSHOT</version>
     </parent>
     <artifactId>assembly-wsmaster-war</artifactId>
     <packaging>war</packaging>
@@ -121,6 +121,10 @@
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-docker-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-docker-compose</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>

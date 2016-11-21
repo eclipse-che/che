@@ -18,13 +18,11 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.action.Action;
-import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionGroup;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.ActionSelectedHandler;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.action.IdeActions;
-import org.eclipse.che.ide.api.action.Presentation;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.ui.toolbar.CloseMenuHandler;
@@ -53,7 +51,6 @@ public class ContextMenu implements CloseMenuHandler, ActionSelectedHandler {
     private PopupMenu     popupMenu;
     private MenuLockLayer lockLayer;
 
-    protected final DefaultActionGroup  actions;
     protected final PresentationFactory presentationFactory;
 
     @Inject
@@ -63,7 +60,6 @@ public class ContextMenu implements CloseMenuHandler, ActionSelectedHandler {
         this.managerProvider = managerProvider;
 
         presentationFactory = new PresentationFactory();
-        actions = new DefaultActionGroup(actionManager);
 
         blockBrowserMenu();
     }
@@ -94,7 +90,7 @@ public class ContextMenu implements CloseMenuHandler, ActionSelectedHandler {
      */
     public void show(int x, int y) {
         hide();
-        updateActions();
+        ActionGroup actions = updateActions();
 
         lockLayer = new MenuLockLayer(this);
         popupMenu = new PopupMenu(actions,
@@ -123,24 +119,15 @@ public class ContextMenu implements CloseMenuHandler, ActionSelectedHandler {
     /**
      * Updates the list of visible actions.
      */
-    private void updateActions() {
-        actions.removeAll();
+    protected ActionGroup updateActions() {
+
 
         final ActionGroup mainActionGroup = (ActionGroup)actionManager.getAction(getGroupMenu());
         if (mainActionGroup == null) {
-            return;
+            return new DefaultActionGroup(actionManager);
         }
 
-        final Action[] children = mainActionGroup.getChildren(null);
-        for (final Action action : children) {
-            final Presentation presentation = presentationFactory.getPresentation(action);
-            final ActionEvent e = new ActionEvent(presentation, actionManager, managerProvider.get());
-
-            action.update(e);
-            if (presentation.isVisible()) {
-                actions.add(action);
-            }
-        }
+        return mainActionGroup;
     }
 
     protected String getGroupMenu() {

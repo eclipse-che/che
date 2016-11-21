@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.processes.panel;
 
-import com.google.common.base.Strings;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
@@ -31,7 +30,9 @@ import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.api.ssh.shared.dto.SshPairDto;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandImpl;
@@ -47,6 +48,7 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
+import org.eclipse.che.ide.api.ssh.SshServiceClient;
 import org.eclipse.che.ide.api.workspace.event.EnvironmentOutputEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
@@ -77,7 +79,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Collections.emptyList;
+import static org.eclipse.che.api.core.model.machine.MachineStatus.RUNNING;
+import static org.eclipse.che.api.machine.shared.Constants.TERMINAL_REFERENCE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.extension.machine.client.processes.ProcessTreeNode.ProcessNodeType.COMMAND_NODE;
@@ -115,6 +120,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     private final MachineLocalizationConstant   localizationConstant;
     private final MachineResources              resources;
     private final MachineServiceClient          machineServiceClient;
+    private final SshServiceClient              sshServiceClient;
     private final WorkspaceAgent                workspaceAgent;
     private final AppContext                    appContext;
     private final NotificationManager           notificationManager;
@@ -130,6 +136,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     private final Map<String, ProcessTreeNode>  machineNodes;
 
     private ProcessTreeNode                     contextTreeNode;
+    private Map<String, MachineEntity>          machines;
 
     @Inject
     public ProcessesPanelPresenter(ProcessesPanelView view,
@@ -145,11 +152,13 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                                    CommandConsoleFactory commandConsoleFactory,
                                    DialogFactory dialogFactory,
                                    ConsoleTreeContextMenuFactory consoleTreeContextMenuFactory,
-                                   CommandTypeRegistry commandTypeRegistry) {
+                                   CommandTypeRegistry commandTypeRegistry,
+                                   SshServiceClient sshServiceClient) {
         this.view = view;
         this.localizationConstant = localizationConstant;
         this.resources = resources;
         this.machineServiceClient = machineServiceClient;
+        this.sshServiceClient = sshServiceClient;
         this.workspaceAgent = workspaceAgent;
         this.appContext = appContext;
         this.notificationManager = notificationManager;
@@ -162,6 +171,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         this.commandTypeRegistry = commandTypeRegistry;
 
         machineNodes = new HashMap<>();
+        machines = new HashMap<>();
         rootNode = new ProcessTreeNode(ROOT_NODE, null, null, null, new ArrayList<ProcessTreeNode>());
         terminals = new HashMap<>();
         consoles = new HashMap<>();
@@ -257,12 +267,14 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     public void onMachineRunning(MachineStateEvent event) {
         final MachineEntity machine = event.getMachine();
         if (!machine.isDev()) {
+            machines.put(event.getMachineId(), event.getMachine());
             provideMachineNode(machine, true);
         }
     }
 
     @Override
     public void onMachineDestroyed(MachineStateEvent event) {
+        machines.remove(event.getMachineId());
         ProcessTreeNode destroyedMachineNode = machineNodes.get(event.getMachineId());
         if (destroyedMachineNode == null) {
             return;
@@ -403,22 +415,55 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
         Machine machine = (Machine)machineTreeNode.getData();
 
-        OutputConsole defaultConsole = commandConsoleFactory.create("SSH");
+        final OutputConsole defaultConsole = commandConsoleFactory.create("SSH");
         addCommandOutput(machineId, defaultConsole);
 
-        String machineName = machine.getConfig().getName();
+        final String machineName = machine.getConfig().getName();
         String sshServiceAddress = getSshServerAddress(machine);
-        String machineHost = "";
-        String sshPort = SSH_PORT;
+        final String machineHost;
+        final String sshPort;
         if (sshServiceAddress != null) {
             String[] parts = sshServiceAddress.split(":");
             machineHost = parts[0];
-            sshPort = (parts.length == 2) ? parts[1] : sshPort;
+            sshPort = (parts.length == 2) ? parts[1] : SSH_PORT;
+        } else {
+            sshPort = SSH_PORT;
+            machineHost = "";
         }
 
-        if (defaultConsole instanceof DefaultOutputConsole) {
-            ((DefaultOutputConsole)defaultConsole).printText(localizationConstant.sshConnectInfo(machineName, machineHost, sshPort));
+        // user
+        final String userName;
+        String user = machine.getRuntime().getProperties().get("config.user");
+        if (isNullOrEmpty(user)) {
+            userName = "root";
+        } else {
+            userName = user;
         }
+
+        // ssh key
+        final String workspaceName = appContext.getWorkspace().getConfig().getName();
+        Promise<SshPairDto> sshPairDtoPromise = sshServiceClient.getPair("workspace", machine.getWorkspaceId());
+
+        sshPairDtoPromise.then(new Operation<SshPairDto>() {
+            @Override
+            public void apply(SshPairDto sshPairDto) throws OperationException {
+                if (defaultConsole instanceof DefaultOutputConsole) {
+                    ((DefaultOutputConsole)defaultConsole).enableAutoScroll(false);
+                    ((DefaultOutputConsole)defaultConsole).printText(localizationConstant.sshConnectInfo(machineName, machineHost, sshPort, workspaceName, userName, localizationConstant.sshConnectInfoPrivateKey(sshPairDto.getPrivateKey())));
+                }
+
+                }
+            }
+        ).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError arg) throws OperationException {
+                if (defaultConsole instanceof DefaultOutputConsole) {
+                    ((DefaultOutputConsole)defaultConsole).enableAutoScroll(false);
+                    ((DefaultOutputConsole)defaultConsole).printText(localizationConstant.sshConnectInfo(machineName, machineHost, sshPort, workspaceName, userName, localizationConstant.sshConnectInfoNoPrivateKey()));
+                }
+            }
+        });
+
     }
 
     @Override
@@ -698,7 +743,6 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         if (environments == null) {
             return false;
         }
-
         for (Environment environment : environments.values()) {
             ExtendedMachine extendedMachine = environment.getMachines().get(machineName);
             if (extendedMachine != null) {
@@ -709,6 +753,26 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         }
 
         return false;
+    }
+
+    /**
+     * Checks supporting of the terminal for machine which is running out the workspace runtime.
+     *
+     * @param machineId
+     *          machine id
+     * @return
+     *          <b>true</b> is the terminal url, otherwise return <b>false</b>
+     */
+    private boolean hasTerminal(String machineId) {
+        List<MachineEntity> wsMachines = getMachines(appContext.getWorkspace());
+        for (MachineEntity machineEntity : wsMachines) {
+            if (machineId.equals(machineEntity.getId())) {
+                return false;
+            }
+        }
+
+        final MachineEntity machineEntity = machines.get(machineId);
+        return machineEntity != null && machineEntity.getServer(TERMINAL_REFERENCE) != null;
     }
 
     /**
@@ -740,7 +804,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         // create new node
         final ProcessTreeNode newMachineNode = new ProcessTreeNode(MACHINE_NODE, rootNode, machine, null, new ArrayList<ProcessTreeNode>());
         newMachineNode.setRunning(true);
-        newMachineNode.setHasTerminalAgent(hasAgent(machine.getDisplayName(), TERMINAL_AGENT));
+        newMachineNode.setHasTerminalAgent(hasAgent(machine.getDisplayName(), TERMINAL_AGENT) || hasTerminal(machineId));
         newMachineNode.setHasSSHAgent(hasAgent(machine.getDisplayName(), SSH_AGENT));
         machineNodes.put(machineId, newMachineNode);
 
@@ -779,13 +843,13 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
     @Nullable
     private MachineEntity getMachine(@NotNull String machineId) {
-        List<MachineEntity> machines = getMachines(appContext.getWorkspace());
-        for (MachineEntity machine : machines) {
+        List<MachineEntity> wsMachines = getMachines(appContext.getWorkspace());
+        for (MachineEntity machine : wsMachines) {
             if (machineId.equals(machine.getId())) {
                 return machine;
             }
         }
-        return null;
+        return machines.containsKey(machineId) ? machines.get(machineId) : null;
     }
 
     @Override
@@ -795,13 +859,13 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
     @Override
     public void onWorkspaceStarted(WorkspaceStartedEvent event) {
-        List<MachineEntity> machines = getMachines(event.getWorkspace());
-        if (machines.isEmpty()) {
+        List<MachineEntity> wsMachines = getMachines(event.getWorkspace());
+        if (wsMachines.isEmpty()) {
             return;
         }
 
         MachineEntity devMachine = null;
-        for (MachineEntity machineEntity : machines) {
+        for (MachineEntity machineEntity : wsMachines) {
             if (machineEntity.isDev()) {
                 devMachine = machineEntity;
                 break;
@@ -811,10 +875,10 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         ProcessTreeNode machineToSelect = null;
         if (devMachine != null) {
             machineToSelect = provideMachineNode(devMachine, true);
-            machines.remove(devMachine);
+            wsMachines.remove(devMachine);
         }
 
-        for (MachineEntity machine : machines) {
+        for (MachineEntity machine : wsMachines) {
             provideMachineNode(machine, true);
         }
 
@@ -828,6 +892,12 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         }
 
         workspaceAgent.setActivePart(ProcessesPanelPresenter.this);
+
+        for (MachineEntity machine : machines.values()) {
+            if (RUNNING.equals(machine.getStatus()) && !wsMachines.contains(machine)) {
+                provideMachineNode(machine, true);
+            }
+        }
     }
 
     @Override
@@ -894,7 +964,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                     /**
                      * Do not show the process if the command line has prefix #hidden
                      */
-                    if (!Strings.isNullOrEmpty(machineProcessDto.getCommandLine()) &&
+                    if (!isNullOrEmpty(machineProcessDto.getCommandLine()) &&
                         machineProcessDto.getCommandLine().startsWith("#hidden")) {
                         continue;
                     }

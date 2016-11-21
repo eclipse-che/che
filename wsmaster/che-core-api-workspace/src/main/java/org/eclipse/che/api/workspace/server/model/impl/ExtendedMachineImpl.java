@@ -80,6 +80,11 @@ public class ExtendedMachineImpl implements ExtendedMachine {
         this.agents = agents;
     }
 
+    public ExtendedMachineImpl withAgents(List<String> agents) {
+        this.agents = agents;
+        return this;
+    }
+
     @Override
     public Map<String, ServerConf2Impl> getServers() {
         if (servers == null) {
@@ -92,6 +97,11 @@ public class ExtendedMachineImpl implements ExtendedMachine {
         this.servers = servers;
     }
 
+    public ExtendedMachineImpl withServers(Map<String, ServerConf2Impl> servers) {
+        this.servers = servers;
+        return this;
+    }
+
     @Override
     public Map<String, String> getAttributes() {
         return attributes;
@@ -99,6 +109,11 @@ public class ExtendedMachineImpl implements ExtendedMachine {
 
     public void setAttributes(Map<String, String> attributes) {
         this.attributes = attributes;
+    }
+
+    public ExtendedMachineImpl withAttributes(Map<String, String> attributes) {
+        this.attributes = attributes;
+        return this;
     }
 
     @Override

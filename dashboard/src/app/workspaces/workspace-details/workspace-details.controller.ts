@@ -14,6 +14,7 @@ import {CheNotification} from '../../../components/notification/che-notification
 import {CheWorkspace} from '../../../components/api/che-workspace.factory';
 import IdeSvc from '../../ide/ide.service';
 import {WorkspaceDetailsService} from './workspace-details.service';
+import {CheNamespaceRegistry} from '../../../components/api/namespace/che-namespace-registry.factory';
 
 /**
  * @ngdoc controller
@@ -23,7 +24,7 @@ import {WorkspaceDetailsService} from './workspace-details.service';
  * @author Oleksii Kurinnyi
  */
 
-enum Tab {Settings, Runtime}
+enum Tab {Settings, Config, Runtime}
 
 export class WorkspaceDetailsController {
   $location: ng.ILocationService;
@@ -45,24 +46,29 @@ export class WorkspaceDetailsController {
   isCreationFlow: boolean = true;
   selectedTabIndex: number;
 
-  namespace: string;
-  workspaceId: string;
-  workspaceName: string;
-  newName: string;
-  stack: any;
+  namespace: string = '';
+  workspaceId: string = '';
+  workspaceName: string = '';
+  newName: string = '';
+  stackId: string = '';
   workspaceDetails: any = {};
   copyWorkspaceDetails: any = {};
   machinesViewStatus: any = {};
-  errorMessage: string;
-  invalidWorkspace: string;
+  errorMessage: string = '';
+  invalidWorkspace: string = '';
   editMode: boolean = false;
   showApplyMessage: boolean = false;
   workspaceNamespace: string = undefined;
+  workspaceImportedRecipe: {
+    type: string,
+    content: string,
+    location: string
+  };
 
   usedNamesList: any = [];
 
   forms: Map<number, any> = new Map();
-  tab: Object;
+  tab: Object = Tab;
 
   /**
    * Default constructor that is using resource injection
@@ -86,8 +92,6 @@ export class WorkspaceDetailsController {
     this.cheNamespaceRegistry = cheNamespaceRegistry;
     this.ideSvc = ideSvc;
     this.workspaceDetailsService = workspaceDetailsService;
-
-    this.tab = Tab;
 
     cheWorkspace.fetchWorkspaces().then(() => {
       let workspaces: any[] = cheWorkspace.getWorkspaces();
@@ -122,14 +126,20 @@ export class WorkspaceDetailsController {
       } else {
         let selectedTabIndex = Tab.Settings;
         switch (page) {
-          case 'info':
+          case 'info' || 'Settings':
             selectedTabIndex = Tab.Settings;
             break;
+          case 'Config':
+            selectedTabIndex = Tab.Config;
+            break;
+          case 'Runtime':
+            selectedTabIndex = Tab.Runtime;
+            break;
           case 'projects':
-            selectedTabIndex = 2;
+            selectedTabIndex = 3;
             break;
           case 'share':
-            selectedTabIndex = 3;
+            selectedTabIndex = 4;
             break;
           default:
             this.$location.path('/workspace/' + this.namespace + '/' + this.workspaceName);
@@ -141,9 +151,19 @@ export class WorkspaceDetailsController {
       }
     } else {
       this.isCreationFlow = true;
+      this.editMode = true;
       this.namespace = '';
       this.workspaceName = this.generateWorkspaceName();
-      this.copyWorkspaceDetails = {config: {}};
+      this.workspaceDetails = {
+        config: {
+          environments: {
+            [this.workspaceName]: {}
+          },
+          defaultEnv: this.workspaceName,
+          name: this.workspaceName
+        }
+      };
+      this.copyWorkspaceDetails = angular.copy(this.workspaceDetails);
     }
     this.newName = this.workspaceName;
   }
@@ -193,7 +213,7 @@ export class WorkspaceDetailsController {
    * @returns {boolean}
    */
   isNameChanged(): boolean {
-    if (this.workspaceDetails && this.workspaceDetails.config) {
+    if (this.newName && this.workspaceDetails && this.workspaceDetails.config) {
       return this.workspaceDetails.config.name !== this.newName;
     }
     return false;
@@ -202,18 +222,15 @@ export class WorkspaceDetailsController {
   /**
    * Updates name of workspace in config.
    *
-   * @param isFormValid {boolean}
+   * @param form {any}
    */
-  updateName(isFormValid: boolean): void {
-    if (isFormValid === false || !this.isNameChanged()) {
+  updateName(form: any): void {
+    if (form.$invalid) {
       return;
     }
 
     this.copyWorkspaceDetails.config.name = this.newName;
-
-    if (!this.isCreationFlow) {
-      this.doUpdateWorkspace();
-    }
+    this.switchEditMode();
   }
 
   /**
@@ -250,11 +267,34 @@ export class WorkspaceDetailsController {
   }
 
   /**
-   * Callback when environment has been changed.
+   * Callback when workspace config has been changed in editor.
    *
-   * @returns {ng.IPromise<any>}
+   * @param config {object} workspace config
    */
-  updateWorkspaceConfig(): ng.IPromise<any> {
+  updateWorkspaceConfigImport(config: any): void {
+    if (!config) {
+      return;
+    }
+
+    if (this.newName !== config.name) {
+      this.newName = config.name;
+    }
+
+    this.copyWorkspaceDetails.config = config;
+    this.workspaceImportedRecipe = config.environments[config.defaultEnv].recipe;
+
+    this.switchEditMode();
+  }
+
+  /**
+   * Callback when environment has been changed.
+   */
+  updateWorkspaceConfigEnvironment(): void {
+    delete this.workspaceImportedRecipe;
+    this.switchEditMode();
+  }
+
+  switchEditMode(): void {
     if (!this.isCreationFlow) {
       this.editMode = !angular.equals(this.copyWorkspaceDetails.config, this.workspaceDetails.config);
 
@@ -265,10 +305,14 @@ export class WorkspaceDetailsController {
         this.showApplyMessage = true;
       }
     }
+  }
 
-    let defer = this.$q.defer();
-    defer.resolve();
-    return defer.promise;
+  saveWorkspace(): void {
+    if (this.isCreationFlow) {
+      this.createWorkspace();
+    } else {
+      this.applyConfigChanges();
+    }
   }
 
   /**
@@ -316,6 +360,10 @@ export class WorkspaceDetailsController {
    * Cancels workspace config changes that weren't stored
    */
   cancelConfigChanges(): void {
+    if (this.isCreationFlow) {
+      this.$location.path('/workspaces');
+    }
+
     this.editMode = false;
     this.updateWorkspaceData();
   }
@@ -365,7 +413,7 @@ export class WorkspaceDetailsController {
    * Submit a new workspace
    */
   createWorkspace(): void {
-    let attributes = this.stack ? {stackId: this.stack.id} : {};
+    let attributes = this.stackId ? {stackId: this.stackId} : {};
     let creationPromise = this.cheWorkspace.createWorkspaceFromConfig(this.workspaceNamespace, this.copyWorkspaceDetails.config, attributes);
     this.redirectAfterSubmitWorkspace(creationPromise);
   }
@@ -383,6 +431,7 @@ export class WorkspaceDetailsController {
       this.updateRecentWorkspace(workspaceData.id);
       this.cheWorkspace.fetchWorkspaces().then(() => {
         this.$location.path('/workspace/' + workspaceData.namespace + '/' +  workspaceData.config.name);
+        this.$location.search({page: this.tab[this.selectedTabIndex]});
       });
     }, (error: any) => {
       let errorMessage = error.data.message ? error.data.message : 'Error during workspace creation.';
@@ -456,7 +505,7 @@ export class WorkspaceDetailsController {
   }
 
   runWorkspace(): void {
-    delete this.errorMessage;
+    this.errorMessage = '';
 
     let promise = this.ideSvc.startIde(this.workspaceDetails);
     promise.then(() => {}, (error: any) => {
@@ -497,46 +546,65 @@ export class WorkspaceDetailsController {
   }
 
   /**
-   * Register forms
+   * Register form for corresponding tab.
    *
-   * @param tab {number} tab number
+   * @param tabIndex {Number}
    * @param form
    */
-  setForm(tab: number, form: ng.IFormController): void {
-    this.forms.set(tab, form);
+  setForm(tabIndex: number, form: ng.IFormController): void {
+    this.forms.set(tabIndex, form);
   }
 
   /**
    * Returns false if all forms from specified tabs are valid
    *
-   * @param tabs {Array} list of tab IDs
+   * @param tabIndex {Number}
+   * @returns {Boolean}
+   */
+  checkFormsNotValid(tabIndex: number): boolean {
+    let form = this.forms.get(tabIndex);
+    return form && form.$invalid;
+  }
+
+  /**
+   * Returns true when 'Save' button should be disabled
+   *
    * @returns {boolean}
    */
-  checkFormsNotValid(tabs: number[]): boolean {
-    return tabs.some((tab: number) => {
-      let form = this.forms.get(tab);
-      return form && form.$invalid;
+  isSaveButtonDisabled(): boolean {
+    let tabs = [Tab.Settings, Tab.Config, Tab.Runtime];
+
+    return tabs.some((tabIndex: number) => {
+      return this.checkFormsNotValid(tabIndex);
     });
   }
 
   /**
-   * Returns true when 'Create' button should be disabled
+   * Returns true when specified tab should be disabled.
    *
+   * @param tabIndex {Number}
    * @returns {boolean}
    */
-  isCreateButtonDisabled(): boolean {
-    let tabs = [Tab.Settings, Tab.Runtime];
+  isTabDisabled(tabIndex: number): boolean {
+    if (tabIndex === Tab.Settings) {
+      // never disable 'Settings' tab
+      return false;
+    }
 
-    return this.checkFormsNotValid(tabs);
+    // activate tab which contains invalid form
+    // to let user see the problem
+    if (this.checkFormsNotValid(Tab.Settings)) {
+      this.selectedTabIndex = Tab.Settings;
+    } else if (this.checkFormsNotValid(Tab.Runtime)) {
+      this.selectedTabIndex = Tab.Runtime;
+    }
+
+    if (tabIndex === Tab.Runtime) {
+      return this.checkFormsNotValid(Tab.Settings);
+    } else {
+      return this.checkFormsNotValid(Tab.Settings) || this.checkFormsNotValid(Tab.Runtime);
+    }
   }
 
-  /**
-   * Returns true when 'Runtime' tab should be disabled
-   *
-   * @returns {boolean}
-   */
-  isRuntimeTabDisabled(): boolean {
-    return this.checkFormsNotValid([Tab.Settings]);
-  }
 }
 

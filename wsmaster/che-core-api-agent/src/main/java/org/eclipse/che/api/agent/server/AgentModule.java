@@ -11,6 +11,9 @@
 package org.eclipse.che.api.agent.server;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.multibindings.Multibinder;
+
+import org.eclipse.che.api.agent.shared.model.Agent;
 
 /**
  * @author Anatolii Bazko
@@ -19,5 +22,6 @@ public class AgentModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(AgentRegistryService.class);
+        Multibinder<Agent> agentsMultibinder = Multibinder.newSetBinder(binder(), Agent.class);
     }
 }

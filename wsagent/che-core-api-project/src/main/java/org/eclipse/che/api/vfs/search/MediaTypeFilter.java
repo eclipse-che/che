@@ -23,19 +23,23 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
 
+import static com.google.common.collect.Sets.newHashSet;
+
 /**
  * Filter based on media type of the file.
- * The filter includes in result files with media type different from the specified types in the set {@link MediaTypeFilter#mediaTypes}
- * Note: if media type can not be detected a file will be include in result as well.
+ * The filter includes in result files with media type different from the specified types in the set {@link MediaTypeFilter#excludedMediaTypes}
+ * Note: if media type can not be detected a file will be not include in result as well.
  *
  * @author Valeriy Svydenko
  * @author Roman Nikitenko
  */
 public class MediaTypeFilter implements VirtualFileFilter {
-    private final Set<MediaType> mediaTypes;
+    private final Set<MediaType> excludedMediaTypes;
+    private final Set<String> excludedTypes;
 
     public MediaTypeFilter() {
-        this.mediaTypes = MediaType.set(MediaType.TEXT_HTML, MediaType.TEXT_PLAIN, MediaType.APPLICATION_XML);
+        this.excludedMediaTypes = newHashSet(MediaType.APPLICATION_ZIP, MediaType.OCTET_STREAM);
+        this.excludedTypes = newHashSet("video", "audio", "image");
     }
 
     @Override
@@ -43,7 +47,10 @@ public class MediaTypeFilter implements VirtualFileFilter {
         try (InputStream content = file.getContent()) {
             TikaConfig tikaConfig = new TikaConfig();
             MediaType mimeType = tikaConfig.getDetector().detect(content, new Metadata());
-            return !mediaTypes.contains(mimeType);
+            if (excludedMediaTypes.contains(mimeType) || excludedTypes.contains(mimeType.getType())) {
+                return true;
+            }
+            return false;
         } catch (TikaException | ForbiddenException | ServerException | IOException e) {
             return true;
         }

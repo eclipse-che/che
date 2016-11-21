@@ -273,7 +273,13 @@ public class CheBootstrap extends EverrestGuiceContextListener {
         public Map.Entry<String, String> apply(Map.Entry<String, String> entry) {
             String name = entry.getKey();
             name = name.toLowerCase();
+            // replace single underscore with dot and double underscores with single underscore
+            // at first replace double underscores with equal sign which is forbidden in env variable name
+            // then replace single underscores
+            // then recover underscore from equal sign
+            name = name.replace("__", "=");
             name = name.replace('_', '.');
+            name = name.replace("=", "_");
             return new SimpleEntry<>(name, entry.getValue());
         }
     }

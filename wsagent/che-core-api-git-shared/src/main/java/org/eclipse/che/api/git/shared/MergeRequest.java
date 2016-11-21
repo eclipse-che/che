@@ -18,7 +18,7 @@ import org.eclipse.che.dto.shared.DTO;
  * @author andrew00x
  */
 @DTO
-public interface MergeRequest extends GitRequest {
+public interface MergeRequest {
     /** @return commit to merge */
     String getCommit();
     

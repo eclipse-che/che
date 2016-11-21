@@ -20,7 +20,7 @@ import org.eclipse.che.dto.shared.DTO;
  * @author andrew00x
  */
 @DTO
-public interface CheckoutRequest extends GitRequest {
+public interface CheckoutRequest {
     /** @return name of branch to checkout */
     String getName();
     

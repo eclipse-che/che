@@ -1,0 +1,85 @@
+<!--
+
+    Copyright (c) 2015 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<md-content flex class="workspace-ssh-content">
+
+  <div layout="row" flex class="workspace-ssh-content-invalid-notification" ng-if="workspaceDetailsSshCtrl.workspace.status !== 'RUNNING'">
+    <i class="fa fa-info-circle"></i>
+    <div>Workspace is not running. SSH connections are unavailable.</div>
+  </div>
+  <div layout="row" flex class="workspace-ssh-content-invalid-notification" ng-if="!workspaceDetailsSshCtrl.hasSSHAgents">
+    <i class="fa fa-info-circle"></i>
+    <div>SSH keys are configured but there is no SSH agent enabled on machines. SSH connections are unavailable.</div>
+  </div>
+
+  <che-label-container che-label-name="Default key" che-label-description="SSH keys are generated when workspaces are created. This key is placed in all workspace machines.">
+
+    <div layout="column" ng-if="workspaceDetailsSshCtrl.sshKeyPair">
+      <che-text-info che-label-name="Private key" che-text="workspaceDetailsSshCtrl.sshKeyPair.privateKey"
+                     che-copy-clipboard="true"
+                     class="workspace-ssh-content-private"></che-text-info>
+
+      <che-text-info che-label-name="Public key" che-text="workspaceDetailsSshCtrl.sshKeyPair.publicKey"
+                     che-copy-clipboard="true"
+                     class=""></che-text-info>
+
+      <che-button-danger che-button-title="Remove default SSH key"
+                         ng-click="workspaceDetailsSshCtrl.removeDefaultKey()"></che-button-danger>
+    </div>
+
+    <div layout="column" ng-if="!workspaceDetailsSshCtrl.sshKeyPair">
+      <che-button-primary che-button-title="Generate"
+                          ng-click="workspaceDetailsSshCtrl.generateDefaultKey()"></che-button-primary>
+      <span class="workspace-ssh-content-notice">This workspace does not have a generated SSH key. We can generate a new one here or you can add your own in the IDE.</span>
+      <span ng-if="workspaceDetailsSshCtrl.workspace.status === 'RUNNING'">Note: Workspace is currently in RUNNING state. It will require a restart of the workspace in order to be taken into account.</span>
+    </div>
+
+  </che-label-container>
+
+  <che-label-container che-label-name="SSH agent" che-label-description="Machines of workspaces with SSH agents. Agents can be enabled/disabled in runtime view.">
+
+    <che-list-header>
+      <div flex="100" layout="row" layout-align="start stretch" class="che-list-item-row">
+        <div layout="row" layout-align="start center">
+        </div>
+        <div flex hide-xs layout-gt-xs="row" layout-align="start center" class="che-list-item-details">
+          <che-list-header-column flex="30" che-column-title="MACHINE"></che-list-header-column>
+          <che-list-header-column flex="40" che-column-title="SSH ENABLED"></che-list-header-column>
+        </div>
+      </div>
+    </che-list-header>
+
+    <che-list flex>
+      <che-list-item ng-repeat="machine in workspaceDetailsSshCtrl.machineSshAgents">
+        <div flex="100" layout="row" layout-align="start stretch" class="agent-item-row">
+          <div flex layout-xs="column" layout-gt-xs="row" layout-align-gt-xs="start center" layout-align-xs="start start" class="che-list-item-details">
+            <div flex="30" class="che-agent-item-name">
+              <span>{{machine.name}}</span>
+            </div>
+            <div flex="40">
+              <div>
+                <md-checkbox ng-model="machine.agentEnabled"
+                             ng-disabled="true"
+                           aria-label="Agent">
+                </md-checkbox>
+              </div>
+            </div>
+            <div flex="30"></div>
+          </div>
+        </div>
+      </che-list-item>
+    </che-list>
+
+  </che-label-container>
+
+</md-content>
+

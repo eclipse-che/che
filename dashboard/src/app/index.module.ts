@@ -22,7 +22,6 @@ import {CheCountriesConfig} from './constants/che-countries.constant';
 import {CheJobsConfig} from './constants/che-jobs.constant';
 import {DashboardConfig} from './dashboard/dashboard-config';
 // switch to a config
-import {DemoComponentsCtrl} from './demo-components/demo-components.controller';
 import {IdeConfig} from './ide/ide-config';
 import {NavbarConfig} from './navbar/navbar-config';
 import {ProjectsConfig} from './projects/projects-config';
@@ -99,7 +98,7 @@ initModule.config(['$routeProvider', 'ngClipProvider', ($routeProvider, ngClipPr
   $routeProvider.accessOtherWise({
     redirectTo: '/workspaces'
   });
-  //add .swf path location using ngClipProvider
+  // add .swf path location using ngClipProvider
   let ngClipProviderPath = DEV ? 'bower_components/zeroclipboard/dist/ZeroClipboard.swf' : 'assets/zeroclipboard/ZeroClipboard.swf';
   ngClipProvider.setPath(ngClipProviderPath);
 }]);
@@ -115,6 +114,7 @@ initModule.run(['$rootScope', '$location', '$routeParams', 'routingRedirect', '$
     $rootScope.showIDE = false;
 
     workspaceDetailsService.addSection('Projects', '<workspace-details-projects></workspace-details-projects>', 'icon-ic_inbox_24px');
+    workspaceDetailsService.addSection('SSH', '<workspace-details-ssh></workspace-details-ssh>', 'icon-ic_vpn_key_24px');
 
     // here only to create instances of these components
     cheIdeFetcher;
@@ -148,7 +148,7 @@ initModule.run(['$rootScope', '$location', '$routeParams', 'routingRedirect', '$
         $rootScope.currentPage = next.$$route.title || 'Dashboard';
       }
 
-      // When a route is about to change, notify the routing redirect node
+      // when a route is about to change, notify the routing redirect node
       if (next.resolve) {
         if (DEV) {
           console.log('$routeChangeSuccess event with route', next);
@@ -352,7 +352,7 @@ initModule.constant('userDashboardConfig', {
 });
 
 initModule.config(['$routeProvider', '$locationProvider', '$httpProvider', ($routeProvider, $locationProvider, $httpProvider) => {
-  // Add the ETag interceptor for Che API
+  // add the ETag interceptor for Che API
   $httpProvider.interceptors.push('ETagInterceptor');
 }]);
 

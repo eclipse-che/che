@@ -41,6 +41,8 @@ import static org.mockito.Mockito.when;
 public class ZipImporterPagePresenterTest {
 
     private static final String SKIP_FIRST_LEVEL_PARAM_NAME = "skipFirstLevel";
+    private static final String CORRECT_URL = "https://host.com/some/path/angularjs.zip";
+    private static final String INCORRECT_URL = " https://host.com/some/path/angularjs.zip";
 
     @Mock
     private ZipImporterPageView                       view;
@@ -84,11 +86,10 @@ public class ZipImporterPagePresenterTest {
 
     @Test
     public void incorrectProjectUrlEnteredTest() {
-        String incorrectUrl = "https//host.com/some/path/angularjs.zip";
         when(view.getProjectName()).thenReturn("");
         when(view.getProjectName()).thenReturn("angularjs");
 
-        presenter.projectUrlChanged(incorrectUrl);
+        presenter.projectUrlChanged(INCORRECT_URL);
 
         verify(view).showUrlError(anyString());
         verify(delegate).updateControls();
@@ -108,10 +109,9 @@ public class ZipImporterPagePresenterTest {
 
     @Test
     public void projectUrlStartWithWhiteSpaceEnteredTest() {
-        String incorrectUrl = " https://host.com/some/path/angularjs.zip";
         when(view.getProjectName()).thenReturn("name");
 
-        presenter.projectUrlChanged(incorrectUrl);
+        presenter.projectUrlChanged(INCORRECT_URL);
 
         verify(view).showUrlError(eq(locale.importProjectMessageStartWithWhiteSpace()));
         verify(delegate).updateControls();
@@ -119,10 +119,9 @@ public class ZipImporterPagePresenterTest {
 
     @Test
     public void correctProjectUrlEnteredTest() {
-        String correctUrl = "https://host.com/some/path/angularjs.zip";
         when(view.getProjectName()).thenReturn("", "angularjs");
 
-        presenter.projectUrlChanged(correctUrl);
+        presenter.projectUrlChanged(CORRECT_URL);
 
         verify(view, never()).showUrlError(anyString());
         verify(view).hideNameError();
@@ -176,6 +175,16 @@ public class ZipImporterPagePresenterTest {
         String description = "description";
         presenter.projectDescriptionChanged(description);
 
+        verify(delegate).updateControls();
+    }
+
+    @Test
+    public void pageShouldNotBeReadyIfUrlIsEmpty() throws Exception {
+        when(view.getProjectName()).thenReturn("name");
+
+        presenter.projectUrlChanged("");
+
+        verify(view).showUrlError(eq(""));
         verify(delegate).updateControls();
     }
 }
