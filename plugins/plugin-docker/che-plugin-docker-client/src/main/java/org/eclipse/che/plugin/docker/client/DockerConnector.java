@@ -798,6 +798,12 @@ public class DockerConnector {
                 Future<String> imageIdFuture = executor.submit(() -> {
                     ProgressStatus progressStatus;
                     while ((progressStatus = progressReader.next()) != null) {
+                        if (progressStatus.getError() != null) {
+                            String errorMessage = progressStatus.getError();
+                            if (errorMessage.matches("Error: image .+ not found")) {
+                                throw new ImageNotFoundException(errorMessage);
+                            }
+                        }
                         final String buildImageId = getBuildImageId(progressStatus);
                         if (buildImageId != null) {
                             return buildImageId;
@@ -805,7 +811,7 @@ public class DockerConnector {
                         progressMonitor.updateProgress(progressStatus);
                     }
 
-                    throw new ImageNotFoundException("Docker image build failed. Image id not found in build output.");
+                    throw new DockerException("Docker image build failed. Image id not found in build output.", 500);
                 });
 
                 return imageIdFuture.get();
