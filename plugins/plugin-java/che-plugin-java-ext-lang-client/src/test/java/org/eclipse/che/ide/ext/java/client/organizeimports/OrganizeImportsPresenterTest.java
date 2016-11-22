@@ -12,10 +12,13 @@ package org.eclipse.che.ide.ext.java.client.organizeimports;
 
 import com.google.common.base.Optional;
 import com.google.gwtmockito.GwtMockitoTestRunner;
+import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.editor.EditorInput;
+import org.eclipse.che.ide.api.editor.document.Document;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
@@ -26,8 +29,6 @@ import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.editor.JavaCodeAssistClient;
 import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
 import org.eclipse.che.ide.ext.java.shared.dto.ConflictImportDTO;
-import org.eclipse.che.ide.api.editor.document.Document;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.resource.Path;
 import org.junit.Before;
 import org.junit.Test;
@@ -65,9 +66,10 @@ public class OrganizeImportsPresenterTest {
     private JavaLocalizationConstant locale;
     @Mock
     private NotificationManager      notificationManager;
+    @Mock
+    private EventBus                 eventBus;
 
     private OrganizeImportsPresenter presenter;
-
     @Mock
     private File        file;
     @Mock
@@ -78,9 +80,9 @@ public class OrganizeImportsPresenterTest {
     private EditorInput editorInput;
     @Mock
     private TextEditor  editor;
+
     @Mock
     private Document    document;
-
     @Mock
     private Promise<List<ConflictImportDTO>> importsPromise;
     @Mock
@@ -121,7 +123,8 @@ public class OrganizeImportsPresenterTest {
                                                  javaCodeAssistClient,
                                                  dtoFactory,
                                                  locale,
-                                                 notificationManager);
+                                                 notificationManager,
+                                                 eventBus);
 
         prepareConflicts();
 

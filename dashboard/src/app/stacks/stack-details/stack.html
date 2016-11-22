@@ -128,18 +128,14 @@
     </che-label-container>
 
   </md-content>
-  <workspace-edit-mode-overlay ng-show="stackController.isStackChange && stackForm.$valid"
+  <workspace-edit-mode-overlay ng-show="stackController.isStackChange"
+                               workspace-edit-disable-save-button="!stackForm.$valid"
                                workspace-edit-mode-on-save="stackController.saveStack()"
                                workspace-edit-mode-on-cancel="stackController.cancelStackChanges()">
     <che-button-primary ng-disabled="!stackForm.$valid"
                         che-button-title="Test" name="testButton"
                         ng-click="stackController.showSelectTemplateDialog($event)"></che-button-primary>
   </workspace-edit-mode-overlay>
-
-
-
-
-
 </ng-form>
 <md-content ng-show="stackController.invalidStack">
   {{stackController.invalidStack}}

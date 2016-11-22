@@ -34,13 +34,17 @@ import java.nio.file.Paths;
 @Singleton
 public class TerminalVolumeProvider implements Provider<String> {
 
-    private static final String CONTAINER_TARGET = ":/mnt/che/terminal:ro,Z";
+    private static final String CONTAINER_TARGET = ":/mnt/che/terminal";
     private static final String TERMINAL         = "terminal";
     private static final Logger LOG              = LoggerFactory.getLogger(TerminalVolumeProvider.class);
 
     @Inject
     @Named("che.workspace.terminal_linux_amd64")
     private String terminalArchivePath;
+
+    @Inject
+    @Named("che.docker.volumes_agent_options")
+    private String volumeOptions;
 
     @Override
     public String get() {
@@ -49,13 +53,18 @@ public class TerminalVolumeProvider implements Provider<String> {
                 final Path cheHome = WindowsHostUtils.ensureCheHomeExist();
                 final Path terminalPath = cheHome.resolve(TERMINAL);
                 IoUtil.copy(Paths.get(terminalArchivePath).toFile(), terminalPath.toFile(), null, true);
-                return terminalPath.toString() + CONTAINER_TARGET;
+                return getTargetOptions(terminalPath.toString());
             } catch (IOException e) {
                 LOG.warn(e.getMessage());
                 throw new RuntimeException(e);
             }
         } else {
-            return terminalArchivePath + CONTAINER_TARGET;
+            return getTargetOptions(terminalArchivePath);
         }
     }
+
+    private String getTargetOptions(final String path) {
+        return path + CONTAINER_TARGET + ":" + volumeOptions;
+    }
+
 }

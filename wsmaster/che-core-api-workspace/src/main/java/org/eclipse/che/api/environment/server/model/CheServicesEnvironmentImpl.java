@@ -30,6 +30,10 @@ public class CheServicesEnvironmentImpl {
 
     public CheServicesEnvironmentImpl() {}
 
+    public CheServicesEnvironmentImpl(Map<String, CheServiceImpl> services) {
+        this.services = services;
+    }
+
     public CheServicesEnvironmentImpl(CheServicesEnvironmentImpl environment) {
         workspaceId = environment.getWorkspaceId();
         if (environment.getServices() != null) {
