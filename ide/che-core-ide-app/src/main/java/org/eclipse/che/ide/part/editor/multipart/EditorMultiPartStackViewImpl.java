@@ -64,6 +64,7 @@ public class EditorMultiPartStackViewImpl extends ResizeComposite implements Edi
                 if (relativePartStack == null) {
                     rootView = splitEditorPartViewFactory.create(widget);
                     splitEditorParts.put(partStack, rootView);
+                    contentPanel.remove(emptyEditorsPanel);
                     contentPanel.add(rootView);
                     return;
                 }
@@ -88,6 +89,9 @@ public class EditorMultiPartStackViewImpl extends ResizeComposite implements Edi
         SplitEditorPartView splitEditorPartView = splitEditorParts.remove(partStack);
         if (splitEditorPartView != null) {
             splitEditorPartView.removeFromParent();
+        }
+        if (splitEditorParts.size() == 0) {
+            contentPanel.add(emptyEditorsPanel);
         }
     }
 
