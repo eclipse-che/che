@@ -34,6 +34,7 @@ import javax.inject.Singleton;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 
+import static com.google.common.base.MoreObjects.firstNonNull;
 import static org.eclipse.che.api.workspace.shared.Constants.WS_AGENT_PROCESS_NAME;
 
 /**
@@ -90,7 +91,7 @@ public class WsAgentLauncherImpl implements AgentLauncher {
             throw new MachineException(e.getServiceError());
         }
 
-        String script = agent.getScript(); // + "\n" + firstNonNull(wsAgentRunCommand, DEFAULT_WS_AGENT_RUN_COMMAND);
+        String script = agent.getScript() + "\n" + firstNonNull(wsAgentRunCommand, DEFAULT_WS_AGENT_RUN_COMMAND);
 
         final String wsAgentPingUrl = wsAgentPingRequest.getUrl();
         try {

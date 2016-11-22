@@ -23,8 +23,6 @@ import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.images.DockerImageURI;
 import com.openshift.restclient.model.*;
 import com.openshift.restclient.model.deploy.DeploymentTriggerType;
-import org.eclipse.che.plugin.docker.client.connection.DockerConnection;
-import org.eclipse.che.plugin.docker.client.connection.DockerResponse;
 import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.json.PortBinding;
@@ -62,7 +60,6 @@ public class OpenShiftConnector {
     public static final String IMAGE_PULL_POLICY_IFNOTPRESENT = "IfNotPresent";
     public static final String CHE_DEFAULT_EXTERNAL_ADDRESS = "172.17.0.1";
     public static final String CHE_SERVER_INTERNAL_IP_ADB = "172.17.0.5";
-    public static final String CHE_SERVER_INTERNAL_IP_MINISHIFT = "che-server";
     public static final String CHE_CONTAINER_IDENTIFIER_LABEL_KEY = "cheContainerIdentifier";
 
     private final IClient            openShiftClient;
@@ -78,7 +75,6 @@ public class OpenShiftConnector {
                                                                 put(8080, "tomcat").
                                                                 put(8000, "tomcat-jpda").
                                                                 put(9876, "codeserver").build();
-    private final String wsMasterInternalAddress;
 
     @Inject
     public OpenShiftConnector(@Named("che.openshift.endpoint") String openShiftApiEndpoint,
@@ -88,9 +84,6 @@ public class OpenShiftConnector {
                               @Named("che.openshift.serviceaccountname") String cheOpenShiftServiceAccount) {
         this.cheOpenShiftProjectName = cheOpenShiftProjectName;
         this.cheOpenShiftServiceAccount = cheOpenShiftServiceAccount;
-
-        // Hardcoded values. Should be injected instead
-        this.wsMasterInternalAddress = CHE_SERVER_INTERNAL_IP_MINISHIFT;
 
         this.openShiftClient = new ClientBuilder(openShiftApiEndpoint)
                 .withUserName(openShiftUserName)
@@ -108,14 +101,13 @@ public class OpenShiftConnector {
 
         String containerName = getNormalizedContainerName(createContainerParams);
         String workspaceID = getCheWorkspaceId(createContainerParams);
-        String imageName = "mariolet/che-ws-agent";//"172.30.166.244:5000/eclipse-che/che-ws-agent:latest";//createContainerParams.getContainerConfig().getImage();
+        String imageName = createContainerParams.getContainerConfig().getImage();//"mariolet/che-ws-agent";//"172.30.166.244:5000/eclipse-che/che-ws-agent:latest";//
         Set<String> containerExposedPorts = createContainerParams.getContainerConfig().getExposedPorts().keySet();
         Set<String> imageExposedPorts = docker.inspectImage(imageName).getConfig().getExposedPorts().keySet();
         Set<String> exposedPorts = new HashSet<>();
         exposedPorts.addAll(containerExposedPorts);
         exposedPorts.addAll(imageExposedPorts);
 
-        Map<String, PortBinding[]> portBindings = createContainerParams.getContainerConfig().getHostConfig().getPortBindings();
         String[] envVariables = createContainerParams.getContainerConfig().getEnv();
 
         IProject cheProject = getCheProject();
@@ -268,8 +260,8 @@ public class OpenShiftConnector {
         service.setPorts(openShiftPorts);
 
         service.setSelector("deploymentConfig", (CHE_OPENSHIFT_RESOURCES_PREFIX + workspaceID));
-        LOG.info(String.format("Createing service: %s", service));
         openShiftClient.create(service);
+        LOG.info(String.format("OpenShift service %s created", service.getName()));
     }
 
     private String createOpenShiftDeploymentConfig(IProject cheProject,
@@ -278,20 +270,24 @@ public class OpenShiftConnector {
                                                    String sanitizedContaninerName,
                                                    Set<String> exposedPorts,
                                                    String[] envVariables) {
+        String dcName = CHE_OPENSHIFT_RESOURCES_PREFIX + workspaceID;
+        LOG.info(String.format("Creating OpenShift deploymentConfig %s", dcName));
         IDeploymentConfig dc = openShiftFactory.create(OPENSHIFT_API_VERSION, ResourceKind.DEPLOYMENT_CONFIG);
-        ((DeploymentConfig) dc).setName(CHE_OPENSHIFT_RESOURCES_PREFIX + workspaceID);
+        ((DeploymentConfig) dc).setName(dcName);
         ((DeploymentConfig) dc).setNamespace(cheProject.getName());
 //        ((DeploymentConfig) dc).getNode().get("spec").get("template").get("spec").get("dnsPolicy").set("Default");
         ((DeploymentConfig)dc).getNode().get("spec").get("template").get("spec").get("securityContext").get("runAsUser").set("1000");
 
         dc.setReplicas(1);
-        dc.setReplicaSelector("deploymentConfig", CHE_OPENSHIFT_RESOURCES_PREFIX + workspaceID );
+        dc.setReplicaSelector("deploymentConfig", dcName);
         dc.setServiceAccountName(this.cheOpenShiftServiceAccount);
 
+        LOG.info(String.format("Adding container %s to OpenShift deploymentConfig %s", sanitizedContaninerName, dcName));
         addContainer(dc, workspaceID, imageName, sanitizedContaninerName, exposedPorts, envVariables);
 
         dc.addTrigger(DeploymentTriggerType.CONFIG_CHANGE);
         openShiftClient.create(dc);
+        LOG.info(String.format("OpenShift deploymentConfig %s created", dcName));
         return dc.getName();
     }
 
@@ -389,25 +385,15 @@ public class OpenShiftConnector {
     }
 
     public Map<String, String> getContainerEnvFrom(String[] envVariables){
+        LOG.info("Container environment variables:");
         Map<String, String> env = new HashMap<>();
         for (String envVariable : envVariables) {
             String[] nameAndValue = envVariable.split("=",2);
             String varName = nameAndValue[0];
             String varValue = nameAndValue[1];
             env.put(varName, varValue);
+            LOG.info("- " + varName + "=" + varValue);
         }
-        return sanitizeCheServerHostName(env);
-    }
-
-    private Map<String,String> sanitizeCheServerHostName(Map<String, String> env) {
-        String cheApiEndpoint = env.get("CHE_API_ENDPOINT");
-        if (isNullOrEmpty(cheApiEndpoint)) {
-            return env;
-        }
-
-        cheApiEndpoint = cheApiEndpoint.replaceFirst("che-host",
-                                                      Matcher.quoteReplacement(this.wsMasterInternalAddress));
-        env.put("CHE_API_ENDPOINT", cheApiEndpoint);
         return env;
     }
 
@@ -417,6 +403,12 @@ public class OpenShiftConnector {
         }
 
         Map<String,String> configLabels = new HashMap<>();
+        configLabels.put("che:server:22/tcp:ref", "ssh");
+        configLabels.put("che:server:4401/tcp:path", "/api");
+        configLabels.put("che:server:4401/tcp:protocol", "http");
+        configLabels.put("che:server:4401/tcp:ref", "wsagent");
+        configLabels.put("che:server:4411/tcp:protocol", "http");
+        configLabels.put("che:server:4411/tcp:ref", "terminal");
         configLabels.put("che:server:8000:protocol", "http");
         configLabels.put("che:server:8000:ref", "tomcat8-debug");
         configLabels.put("che:server:8080:protocol", "http");
@@ -424,6 +416,13 @@ public class OpenShiftConnector {
         configLabels.put("che:server:9876:protocol", "http");
         configLabels.put("che:server:9876:ref", "codeserver");
         info.getConfig().setLabels(configLabels);
+
+        LOG.info("Container labels:");
+        for (String key: info.getConfig().getLabels().keySet()) {
+            String value = info.getConfig().getLabels().get(key);
+
+            LOG.info("- " + key + "=" + value);
+        }
     }
 
     private void replaceNetworkSettings(ContainerInfo info) throws IOException {
