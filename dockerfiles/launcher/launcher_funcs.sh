@@ -188,6 +188,22 @@ docker_run_with_debug() {
   fi
 }
 
+docker_run_with_volumes_lib() {
+  if has_lib_volume; then
+    docker_run_with_debug -v "${CHE_LIB_VOLUME}":/data/lib "$@"
+  else
+    docker_run_with_debug "$@"
+  fi
+}
+
+has_lib_volume() {
+  if [ "${CHE_LIB_VOLUME}" = "" ]; then
+    return 1
+  else
+    return 0
+  fi
+}
+
 has_debug_suspend() {
   if [ "${CHE_DEBUG_SERVER_SUSPEND}" = "false" ]; then
     return 1

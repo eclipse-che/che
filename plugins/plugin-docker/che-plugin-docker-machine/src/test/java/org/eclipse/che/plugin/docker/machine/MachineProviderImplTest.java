@@ -592,7 +592,7 @@ public class MachineProviderImplTest {
                                                  .getExposedPorts()
                                                  .keySet())
                            .containsAll(expectedExposedPorts));
-    }
+    }  
 
     @Test
     public void shouldExposeOnlyCommonPortsToContainerOnNonDevInstanceCreationFromSnapshot() throws Exception {
@@ -696,6 +696,30 @@ public class MachineProviderImplTest {
         final String[] actualBinds = argumentCaptor.getValue().getContainerConfig().getHostConfig().getBinds();
         assertEquals(actualBinds.length, expectedVolumes.size());
         assertEquals(new HashSet<>(asList(actualBinds)), new HashSet<>(expectedVolumes));
+    }
+    
+    @Test
+    public void shouldBindVolumesFromToContainerOnDevInstanceCreationFromRecipe() throws Exception {
+    	
+    	List<String> cheServerVolumes = new ArrayList<>(asList("SomeVolumeName:/data/lib"));
+    	String expectedVolumesFrom = "che-server";
+    	
+    	provider = new MachineProviderBuilder().setVolumesFrom(expectedVolumesFrom)
+    									       .build();
+    	
+    	final boolean isDev = true;
+    	
+    	CheServiceImpl service = createService();
+    	service.setContainerName(expectedVolumesFrom);
+    	service.setVolumes(cheServerVolumes);
+    	createInstanceFromRecipe(isDev, service);
+    	
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        verify(dockerConnector).startContainer(any(StartContainerParams.class));
+        
+        final String[] actualVolumesFrom = argumentCaptor.getValue().getContainerConfig().getHostConfig().getVolumesFrom();
+        assertTrue(Arrays.asList(actualVolumesFrom).contains(expectedVolumesFrom));
     }
 
     @Test
@@ -1197,6 +1221,7 @@ public class MachineProviderImplTest {
         private Set<ServerConf>  allMachineServers;
         private Set<String>      devMachineVolumes;
         private Set<String>      allMachineVolumes;
+        private String           volumesFrom;
         private String           extraHosts;
         private boolean          doForcePullOnBuild;
         private boolean          privilegedMode;
@@ -1277,6 +1302,11 @@ public class MachineProviderImplTest {
             this.devMachineVolumes = devMachineVolumes;
             return this;
         }
+        
+        public MachineProviderBuilder setVolumesFrom(String volumesFrom) {
+        	this.volumesFrom = volumesFrom;
+        	return this;
+        }
 
         public MachineProviderBuilder setExtraHosts(String extraHosts) {
             this.extraHosts = extraHosts;
@@ -1318,6 +1348,7 @@ public class MachineProviderImplTest {
                                            allMachineServers,
                                            devMachineVolumes,
                                            allMachineVolumes,
+                                           volumesFrom,
                                            extraHosts,
                                            doForcePullOnBuild,
                                            privilegedMode,
