@@ -29,6 +29,7 @@ import org.eclipse.che.ide.ext.web.html.PreviewAction;
 import org.eclipse.che.ide.ext.web.html.editor.HtmlEditorProvider;
 import org.eclipse.che.ide.ext.web.js.NewJavaScriptFileAction;
 import org.eclipse.che.ide.ext.web.js.editor.JsEditorProvider;
+import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorProvider;
 
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_ASSISTANT;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_FILE_NEW;
@@ -56,15 +57,13 @@ public class WebExtension {
                         @Named("JSFileType") FileType jsFile,
                         @Named("HTMLFileType") FileType htmlFile,
                         @Named("ES6FileType") FileType es6File,
-                        @Named("JSXFileType") FileType jsxFile,
-                        @Named("TypeScript") FileType typeScriptFile) {
+                        @Named("JSXFileType") FileType jsxFile) {
         // register new Icon for javascript project type
         iconRegistry.registerIcon(new Icon("JavaScript.samples.category.icon", resources.samplesCategoryJs()));
 
         editorRegistry.registerDefaultEditor(jsFile, jsEditorProvider);
         editorRegistry.registerDefaultEditor(es6File, jsEditorProvider);
         editorRegistry.registerDefaultEditor(jsxFile, jsEditorProvider);
-        editorRegistry.registerDefaultEditor(typeScriptFile, jsEditorProvider);
         editorRegistry.registerDefaultEditor(htmlFile, htmlEditorProvider);
     }
 
