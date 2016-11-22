@@ -11,31 +11,36 @@
 package org.eclipse.che.api.core.websocket;
 
 /**
- * Transmits WEB SOCKET messages to an endpoint or broadcasts them
- * to all available endpoints.
+ * Plain text transmitter over a web socket protocol. In current specification
+ * it is not required from and the implementor to fulfill strict ordering of
+ * sequential transmissions along with message delivery notification. The only
+ * guarantee that is required is to send a text message to predefined endpoint.
  *
  * @author Dmitry Kuleshov
  */
 public interface WebSocketMessageTransmitter {
     /**
-     * Transmits WEB SOCKET messages to an endpoint
+     * Transmit a string message to an endpoint over wer socket protocol. The
+     * connection should be considered to be opened at the moment of calling,
+     * however the some of implementation may provide ability to cache messages
+     * until the connection is opened.
      *
-     * @param protocol
-     *         message protocol
-     * @param message
-     *         message body
      * @param endpointId
-     *         endpoint identifier
+     *         identifier of an endpoint known to an transmitter implementation
+     * @param message
+     *         plain text message
+     *
      */
-    void transmit(String protocol, String message, Integer endpointId);
+    void transmit(String endpointId, String message);
 
     /**
-     * Broadcasts WEB SOCKET messages to all endpoints
+     * Transmit (broadcast) a string message to all endpoints registered over
+     * web socket protocol. The connection should be considered to be opened at
+     * the moment of calling, however the some of implementation may provide
+     * ability to cache messages  until the connection is opened.
      *
-     * @param protocol
-     *         message protocol
      * @param message
-     *         message body
+     *         plain text message
      */
-    void transmit(String protocol, String message);
+    void transmit(String message);
 }

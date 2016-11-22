@@ -16,7 +16,7 @@ import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
-import org.eclipse.che.api.core.jsonrpc.JsonRpcRequestReceiver;
+import org.eclipse.che.api.core.jsonrpc.RequestHandler;
 import org.eclipse.che.api.project.server.handlers.CreateBaseProjectTypeHandler;
 import org.eclipse.che.api.project.server.handlers.ProjectHandler;
 import org.eclipse.che.api.project.server.importer.ProjectImporter;
@@ -121,9 +121,9 @@ public class ProjectApiModule extends AbstractModule {
 
         bind(FileTrackingOperationTransmitter.class).asEagerSingleton();
 
-        MapBinder<String, JsonRpcRequestReceiver> requestReceivers =
-                MapBinder.newMapBinder(binder(), String.class, JsonRpcRequestReceiver.class);
 
-        requestReceivers.addBinding("track:editor-file").to(FileTrackingOperationReceiver.class);
+        MapBinder.newMapBinder(binder(), String.class, RequestHandler.class)
+                 .addBinding("track:editor-file")
+                 .to(FileTrackingOperationReceiver.class);
     }
 }

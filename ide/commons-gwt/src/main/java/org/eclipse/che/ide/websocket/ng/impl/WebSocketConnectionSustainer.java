@@ -18,58 +18,52 @@ import javax.inject.Singleton;
 /**
  * Responsible for keeping connection alive and reconnecting if needed.
  * If connection is closed and sustainer is active it tries to reconnect
- * according to its properties:
- *
+ * according to its properties. Default values are:
  * <ul>
- * <li>reconnection delay - 500 milliseconds</li>
- * <li>reconnection limit - 5 attempts</li>
+ * <li>reconnection delay: 500 milliseconds</li>
+ * <li>reconnection limit: 5 attempts</li>
  * </ul>
  *
  * @author Dmitry Kuleshov
  */
 @Singleton
 public class WebSocketConnectionSustainer {
-    private static final int RECONNECTION_DELAY = 500;
+    private static final int RECONNECTION_DELAY = 1_000;
     private static final int RECONNECTION_LIMIT = 5;
 
-    private final WebSocketConnection connection;
-
-    private boolean active;
-    private int     attempt;
+    private final WebSocketConnectionManager connectionManager;
+    private final WebSocketPropertyManager   propertyManager;
 
     @Inject
-    public WebSocketConnectionSustainer(WebSocketConnection connection) {
-        this.connection = connection;
+    public WebSocketConnectionSustainer(WebSocketConnectionManager connectionManager, WebSocketPropertyManager propertyManager) {
+        this.connectionManager = connectionManager;
+        this.propertyManager = propertyManager;
     }
 
-    public void reset() {
-        Log.debug(getClass(), "Resetting number of reconnection attempt number. Previous was: " + attempt);
-        attempt = 0;
+    public void reset(String url) {
+        final int attempts = propertyManager.getReConnectionAttempts(url);
+
+        Log.debug(getClass(), "Resetting number of reconnection attempt number. Previous was: " + attempts);
+
+        propertyManager.setReConnectionAttempts(url, 0);
     }
 
-    public void sustain() {
-        if (++attempt > RECONNECTION_LIMIT) {
+    public void sustain(String url) {
+        final int reConnectionAttempts = propertyManager.getReConnectionAttempts(url);
+
+        if (reConnectionAttempts + 1 > RECONNECTION_LIMIT) {
             Log.debug(getClass(), "Exceeding reconnection limit.");
-            disable();
+
+            propertyManager.disableSustainer(url);
         }
 
-        if (active) {
-            Log.debug(getClass(), "Sustaining connection. Current attempt number: " + attempt);
-            connection.open(RECONNECTION_DELAY);
-        }
-    }
+        if (propertyManager.sustainerEnabled(url)) {
+            Log.debug(getClass(), "Sustaining connection. Current attempt number: " + reConnectionAttempts);
 
-    public void enable() {
-        if (!active) {
-            Log.debug(getClass(), "Sustainer enabled.");
-            active = true;
-        }
-    }
+            propertyManager.setReConnectionAttempts(url, reConnectionAttempts + 1);
+            propertyManager.setConnectionDelay(url, RECONNECTION_DELAY);
 
-    public void disable() {
-        if (active) {
-            Log.debug(getClass(), "Sustainer disabled");
-            active = false;
+            connectionManager.establishConnection(url);
         }
     }
 }

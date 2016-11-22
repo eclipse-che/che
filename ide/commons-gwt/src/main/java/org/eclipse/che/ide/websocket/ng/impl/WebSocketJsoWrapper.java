@@ -24,19 +24,19 @@ public class WebSocketJsoWrapper extends JavaScriptObject {
     public static native WebSocketJsoWrapper connect(String url, WebSocketEndpoint endpoint) /*-{
         var webSocket = new WebSocket(url);
         webSocket.onopen = function () {
-            endpoint.@org.eclipse.che.ide.websocket.ng.impl.WebSocketEndpoint::onOpen()();
+            endpoint.@org.eclipse.che.ide.websocket.ng.impl.WebSocketEndpoint::onOpen(Ljava/lang/String;)(url);
         };
 
         webSocket.onclose = function () {
-            endpoint.@org.eclipse.che.ide.websocket.ng.impl.WebSocketEndpoint::onClose()();
+            endpoint.@org.eclipse.che.ide.websocket.ng.impl.WebSocketEndpoint::onClose(Ljava/lang/String;)(url);
         };
 
         webSocket.onerror = function () {
-            endpoint.@org.eclipse.che.ide.websocket.ng.impl.WebSocketEndpoint::onError()();
+            endpoint.@org.eclipse.che.ide.websocket.ng.impl.WebSocketEndpoint::onError(Ljava/lang/String;)(url);
         };
 
         webSocket.onmessage = function (event) {
-            endpoint.@org.eclipse.che.ide.websocket.ng.impl.WebSocketEndpoint::onMessage(Ljava/lang/String;)(event.data);
+            endpoint.@org.eclipse.che.ide.websocket.ng.impl.WebSocketEndpoint::onMessage(Ljava/lang/String;Ljava/lang/String;)(url, event.data);
         };
         return webSocket;
     }-*/;

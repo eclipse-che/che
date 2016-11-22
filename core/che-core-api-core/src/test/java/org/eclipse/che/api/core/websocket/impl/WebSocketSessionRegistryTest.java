@@ -12,18 +12,16 @@ package org.eclipse.che.api.core.websocket.impl;
 
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import javax.websocket.Session;
+
 import java.util.Optional;
 
 import static org.mockito.Mockito.mock;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 /**
  * Tests for {@link WebSocketSessionRegistry}
@@ -47,16 +45,16 @@ public class WebSocketSessionRegistryTest {
     public void shouldAddSession() {
         assertTrue(registry.getSessions().isEmpty());
 
-        registry.add(0, session);
+        registry.add("0", session);
 
         assertFalse(registry.getSessions().isEmpty());
     }
 
     @Test
     public void shouldAddCorrectSession() {
-        registry.add(0, this.session);
+        registry.add("0", this.session);
 
-        final Optional<Session> sessionOptional = registry.get(0);
+        final Optional<Session> sessionOptional = registry.get("0");
         assertTrue(sessionOptional.isPresent());
 
         final Session session = sessionOptional.get();
@@ -66,24 +64,24 @@ public class WebSocketSessionRegistryTest {
 
     @Test
     public void shouldRemoveSession() {
-        registry.add(0, session);
+        registry.add("0", session);
 
         assertFalse(registry.getSessions().isEmpty());
         assertEquals(1, registry.getSessions().size());
 
-        registry.remove(0);
+        registry.remove("0");
 
         assertTrue(registry.getSessions().isEmpty());
     }
 
     @Test
     public void shouldGetAllSessions() {
-        registry.add(0, session);
+        registry.add("0", session);
 
         assertFalse(registry.getSessions().isEmpty());
         assertEquals(1, registry.getSessions().size());
 
-        registry.add(1, mock(Session.class));
+        registry.add("1", mock(Session.class));
 
         assertFalse(registry.getSessions().isEmpty());
         assertEquals(2, registry.getSessions().size());
