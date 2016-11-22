@@ -279,14 +279,13 @@ public class CheEnvironmentEngine {
                                                 ServerException {
         List<Instance> machinesCopy = null;
         EnvironmentHolder environmentHolder;
-        try (StripedLocks.WriteLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
+        try (StripedLocks.ReadLock lock = stripedLocks.acquireReadLock(workspaceId)) {
             environmentHolder = environments.get(workspaceId);
             if (environmentHolder == null || environmentHolder.status != EnvStatus.RUNNING) {
                 throw new EnvironmentNotRunningException(
                         format("Stop of not running environment of workspace with ID '%s' is not allowed.",
                                workspaceId));
             }
-            environments.remove(workspaceId);
             List<Instance> machines = environmentHolder.machines;
             if (machines != null && !machines.isEmpty()) {
                 machinesCopy = new ArrayList<>(machines);
@@ -296,6 +295,10 @@ public class CheEnvironmentEngine {
         // long operation - perform out of lock
         if (machinesCopy != null) {
             destroyEnvironment(environmentHolder.networkId, machinesCopy);
+        }
+
+        try (StripedLocks.WriteLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
+            environments.remove(workspaceId);
         }
     }
 

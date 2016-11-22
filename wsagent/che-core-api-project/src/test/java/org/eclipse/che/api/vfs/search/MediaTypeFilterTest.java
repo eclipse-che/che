@@ -30,14 +30,16 @@ import static org.mockito.Mockito.when;
  */
 @RunWith(DataProviderRunner.class)
 public class MediaTypeFilterTest {
+
+
     @DataProvider
     public static Object[][] testData() throws Exception {
         return new Object[][]{
-                {virtualFileWithContent("to be or not to be".getBytes()), false},
-                {virtualFileWithContent("<html><head></head></html>".getBytes()), false},
-                {virtualFileWithContent("<a><b/></a>".getBytes()), false},
-                {virtualFileWithContent("public class SomeClass {}".getBytes()), false},
-                {virtualFileWithContent(new byte[10]), true}
+       {virtualFileWithContent("to be or not to be".getBytes()), false},
+       {virtualFileWithContent("<html><head></head></html>".getBytes()), false},
+       {virtualFileWithContent("<a><b/></a>".getBytes()), false},
+       {virtualFileWithContent("public class SomeClass {}".getBytes()), false},
+       {virtualFileWithContent(new byte[10]), true}
         };
     }
 

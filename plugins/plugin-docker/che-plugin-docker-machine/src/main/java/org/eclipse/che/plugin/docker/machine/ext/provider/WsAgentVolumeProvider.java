@@ -37,7 +37,7 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 @Singleton
 public class WsAgentVolumeProvider implements Provider<String> {
 
-    private static final String CONTAINER_TARGET = ":/mnt/che/ws-agent.tar.gz:ro,Z";
+    private static final String CONTAINER_TARGET = ":/mnt/che/ws-agent.tar.gz";
     private static final String WS_AGENT         = "ws-agent.tar.gz";
 
     private static final Logger LOG = LoggerFactory.getLogger(WsAgentVolumeProvider.class);
@@ -46,19 +46,28 @@ public class WsAgentVolumeProvider implements Provider<String> {
     @Named("che.workspace.agent.dev")
     private String wsAgentArchivePath;
 
+    @Inject
+    @Named("che.docker.volumes_agent_options")
+    private String volumeOptions;
+
     @Override
     public String get() {
+
         if (SystemInfo.isWindows()) {
             try {
                 final Path cheHome = WindowsHostUtils.ensureCheHomeExist();
                 final Path path = Files.copy(Paths.get(wsAgentArchivePath), cheHome.resolve(WS_AGENT), REPLACE_EXISTING);
-                return path.toString() + CONTAINER_TARGET;
+                return getTargetOptions(path.toString());
             } catch (IOException e) {
                 LOG.warn(e.getMessage());
                 throw new RuntimeException(e);
             }
         } else {
-            return wsAgentArchivePath + CONTAINER_TARGET;
+            return getTargetOptions(wsAgentArchivePath);
         }
+    }
+
+    private String getTargetOptions(final String path) {
+        return path + CONTAINER_TARGET + ":" + volumeOptions;
     }
 }

@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.upload.folder;
 
 import com.google.gwt.user.client.ui.IsWidget;
+import com.google.inject.ImplementedBy;
 
 import javax.validation.constraints.NotNull;
 
@@ -19,6 +20,7 @@ import javax.validation.constraints.NotNull;
  *
  * @author Roman Nikitenko.
  */
+@ImplementedBy(UploadFolderFromZipViewImpl.class)
 public interface UploadFolderFromZipView extends IsWidget {
 
     public interface ActionDelegate {

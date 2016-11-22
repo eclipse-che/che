@@ -19,7 +19,7 @@
     <display-name>Che Machine API</display-name>
     <context-param>
         <param-name>org.everrest.websocket.context</param-name>
-        <param-value>/ext</param-value>
+        <param-value>/api</param-value>
     </context-param>
     <context-param>
         <param-name>org.eclipse.che.websocket.endpoint</param-name>
@@ -27,7 +27,7 @@
     </context-param>
     <context-param>
         <param-name>org.eclipse.che.eventbus.endpoint</param-name>
-        <param-value>/eventbus/</param-value>
+        <param-value>/eventbus</param-value>
     </context-param>
     <listener>
         <listener-class>org.eclipse.che.inject.CheBootstrap</listener-class>

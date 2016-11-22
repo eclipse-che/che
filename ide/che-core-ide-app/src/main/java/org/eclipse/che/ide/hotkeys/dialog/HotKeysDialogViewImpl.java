@@ -25,6 +25,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.hotkeys.HotKeyItem;
@@ -44,6 +45,7 @@ import java.util.Map;
  * @author Alexander Andrienko
  * @author Artem Zatsarynnyi
  */
+@Singleton
 public class HotKeysDialogViewImpl extends Window implements HotKeysDialogView {
 
     interface KeyMapViewImplUiBinder extends UiBinder<Widget, HotKeysDialogViewImpl> {

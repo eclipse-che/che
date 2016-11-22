@@ -40,7 +40,7 @@ if echo ${LINUX_TYPE} | grep -qi "rhel"; then
 
 # Red Hat Enterprise Linux 6 
 ############################
-if echo ${LINUX_TYPE} | grep -qi "Red Hat"; then
+elif echo ${LINUX_TYPE} | grep -qi "Red Hat"; then
     command -v sshd >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" openssh-server"; }
     test "${PACKAGES}" = "" || {
         ${SUDO} yum -y install ${PACKAGES};
@@ -112,13 +112,6 @@ elif echo ${LINUX_TYPE} | grep -qi "CentOS"; then
         ${SUDO} yum -y install ${PACKAGES};
     }
     ${SUDO} sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
-
-# Red Hat Enterprise Linux 6 
-############################
-elif echo ${LINUX_TYPE} | grep -qi "Red Hat"; then
-    test "${PACKAGES}" = "" || {
-        ${SUDO} yum install ${PACKAGES};
-    }
 
 else
     >&2 echo "Unrecognized Linux Type"
