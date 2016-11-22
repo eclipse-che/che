@@ -61,4 +61,9 @@ public class LocalDockerNode implements DockerNode {
     public String getHost() {
         return host;
     }
+
+    @Override
+    public String getIp() {
+        return null;
+    }
 }

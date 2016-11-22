@@ -1,0 +1,73 @@
+<!--
+
+    Copyright (c) 2015 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<che-popup title="Add a new machine" on-close="addMachineDialogController.hide()">
+  <ng-form name="addMachineForm" class="add-machine-form">
+    <div class="form-input-fields" flex="100" layout="column">
+      <che-input type="text"
+                 che-form="addMachineForm"
+                 che-label-name="Name"
+                 che-name="name"
+                 che-place-holder="enter machine's name"
+                 custom-validator="addMachineDialogController.isUnique($value)"
+                 ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 500, 'blur': 0 } }"
+                 ng-model="addMachineDialogController.machineName"
+                 ng-change="addMachineDialogController.updateMachineName(addMachineForm.$valid)"
+                 ng-maxlength="128"
+                 ng-pattern="/^[A-Za-z0-9_\-\.]+$/"
+                 required>
+        <div ng-message="required">Machine's name is required.</div>
+        <div ng-message="pattern">The name should not contain special characters like space, dollar, etc.</div>
+        <div ng-message="customValidator">This machine's name is already in use.</div>
+        <div ng-message="maxlength">Machine's name should be less than 128 characters long.</div>
+      </che-input>
+      <div layout="row" layout-align="start start" class="ram-slider">
+        <div flex="15">
+          <label>RAM:</label>
+        </div>
+        <div flex="85">
+          <che-workspace-ram-allocation-slider ng-model="addMachineDialogController.machineRAM"
+                                               ng-if="addMachineDialogController.machineRAM > 0"
+                                               che-on-change="addMachineDialogController.updateMachineRAM()">
+          </che-workspace-ram-allocation-slider>
+        </div>
+      </div>
+      <div layout="row" layout-align="start start">
+        <div flex="15">
+          <label>Recipe:</label>
+        </div>
+        <div flex="85">
+          <ui-codemirror ui-codemirror="addMachineDialogController.editorOptions"
+                         ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 500, 'blur': 0 } }"
+                         data-ng-model="addMachineDialogController.machineRecipeScript"
+                         ng-change="addMachineDialogController.updateMachineRecipe()"
+                         ng-if="addMachineDialogController.machineRecipeScript"></ui-codemirror>
+          <a href="https://eclipse-che.readme.io/docs/recipes#section-authoring-custom-recipes" target="_blank">
+            Recipe Structure
+          </a>
+          <div class="recipe-errors-container">
+          <span ng-if="!addMachineDialogController.isRecipeValid()">
+            Syntax error or you try to add more then one machine.
+          </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <che-button-primary che-button-title="Add"
+                        ng-click="addMachineDialogController.addMachine()"
+                        ng-disabled="addMachineForm.$invalid || !addMachineDialogController.isRecipeValid()">
+    </che-button-primary>
+    <che-button-notice che-button-title="Cancel"
+                       ng-click="addMachineDialogController.hide()">
+    </che-button-notice>
+  </ng-form>
+</che-popup>

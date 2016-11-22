@@ -68,7 +68,7 @@ public class MavenMessagesHandler {
                                 DtoFactory factory,
                                 BackgroundLoaderPresenter dependencyResolver,
                                 PomEditorReconciler pomEditorReconciler,
-                                WsAgentStateController agentStateController,
+                                WsAgentStateController wsAgentStateController,
                                 ProcessesPanelPresenter processesPanelPresenter,
                                 CommandConsoleFactory commandConsoleFactory,
                                 AppContext appContext) {
@@ -81,14 +81,14 @@ public class MavenMessagesHandler {
         this.commandConsoleFactory = commandConsoleFactory;
         this.appContext = appContext;
 
-        handleOperations(factory, agentStateController);
+        handleOperations(factory, wsAgentStateController);
     }
 
-    private void handleOperations(final DtoFactory factory, final WsAgentStateController agentStateController) {
+    private void handleOperations(final DtoFactory factory, final WsAgentStateController wsAgentStateController) {
         eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
             @Override
             public void onWsAgentStarted(WsAgentStateEvent event) {
-                agentStateController.getMessageBus().then(new Operation<MessageBus>() {
+                wsAgentStateController.getMessageBus().then(new Operation<MessageBus>() {
                     @Override
                     public void apply(MessageBus messageBus) throws OperationException {
                         try {

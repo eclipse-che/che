@@ -247,7 +247,7 @@ public class DockerInstance extends AbstractInstance {
     }
 
     @VisibleForTesting
-    void commitContainer(String repository, String tag) throws IOException {
+    protected void commitContainer(String repository, String tag) throws IOException {
         String comment = format("Suspended at %1$ta %1$tb %1$td %1$tT %1$tZ %1$tY",
                                 System.currentTimeMillis());
         // !! We SHOULD NOT pause container before commit because all execs will fail
@@ -387,7 +387,7 @@ public class DockerInstance extends AbstractInstance {
     /**
      * Can be used for docker specific operations with machine
      */
-    String getContainer() {
+    public String getContainer() {
         return container;
     }
 }

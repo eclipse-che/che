@@ -103,7 +103,7 @@ public class InputDialogPresenterTest extends BaseTest {
 
         presenter.inputValueChanged();
 
-        verify(view).showErrorHint(anyString());
+        verify(view).showErrorHint(eq(""));
         verify(view, never()).hideErrorHint();
         verify(view, never()).setValue(anyString());
     }

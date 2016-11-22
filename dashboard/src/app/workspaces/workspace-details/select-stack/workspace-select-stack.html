@@ -1,5 +1,7 @@
 <div>
-  <md-tabs md-dynamic-height md-stretch-tabs="auto">
+  <md-tabs md-dynamic-height
+           md-stretch-tabs="auto"
+           md-selected="workspaceSelectStackCtrl.selectedTabIndex">
     <md-tab md-on-select="workspaceSelectStackCtrl.setStackTab('ready-to-go')">
       <md-tab-label>
         <md-icon md-font-icon="fa-magic" class="fa che-tab-label-icon"></md-icon>
@@ -18,16 +20,26 @@
         <create-project-stack-library che-tab-name="stack-library"></create-project-stack-library>
       </md-tab-body>
     </md-tab>
-    <md-tab md-on-select="workspaceSelectStackCtrl.setStackTab('custom-stack')">
+    <md-tab md-on-select="workspaceSelectStackCtrl.setStackTab('stack-import')">
       <md-tab-label>
         <md-icon md-font-icon="material-design icon-ic_input_24px" class="che-tab-label-icon"></md-icon>
-        <span class="che-tab-label-title">Custom stack</span>
+        <span class="che-tab-label-title">Stack import</span>
       </md-tab-label>
       <md-tab-body>
-        <che-workspace-recipe ng-if="workspaceSelectStackCtrl.tabName==='custom-stack'"
-                              che-recipe-script="workspaceSelectStackCtrl.recipeScript"
-                              che-recipe-url="workspaceSelectStackCtrl.recipeUrl"
-                              che-recipe-format="workspaceSelectStackCtrl.recipeFormat"></che-workspace-recipe>
+        <che-workspace-recipe-import ng-if="workspaceSelectStackCtrl.tabName==='stack-import'"
+                                     che-recipe-url="workspaceSelectStackCtrl.recipeUrl"
+                                     che-recipe-format="workspaceSelectStackCtrl.recipeFormat"></che-workspace-recipe-import>
+      </md-tab-body>
+    </md-tab>
+    <md-tab md-on-select="workspaceSelectStackCtrl.setStackTab('stack-authoring')">
+      <md-tab-label>
+        <md-icon md-font-icon="fa fa-pencil-square-o" class="che-tab-label-icon tab-fa-icon"></md-icon>
+        <span class="che-tab-label-title">Stack authoring</span>
+      </md-tab-label>
+      <md-tab-body>
+        <che-workspace-recipe-authoring ng-if="workspaceSelectStackCtrl.tabName==='stack-authoring'"
+                                        che-recipe-script="workspaceSelectStackCtrl.recipeScript"
+                                        che-recipe-format="workspaceSelectStackCtrl.recipeFormat"></che-workspace-recipe-authoring>
       </md-tab-body>
     </md-tab>
   </md-tabs>

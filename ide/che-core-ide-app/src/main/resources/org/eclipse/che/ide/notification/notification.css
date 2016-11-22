@@ -11,10 +11,12 @@
 @eval notificationPopupSuccessBackground org.eclipse.che.ide.api.theme.Style.theme.notificationPopupSuccessBackground();
 @eval notificationPopupFailBackground org.eclipse.che.ide.api.theme.Style.theme.notificationPopupFailBackground();
 @eval notificationPopupProgressBackground org.eclipse.che.ide.api.theme.Style.theme.notificationPopupProgressBackground();
+@eval notificationPopupWarningBackground org.eclipse.che.ide.api.theme.Style.theme.notificationPopupWarningBackground();
 @eval notificationPopupPanelShadow org.eclipse.che.ide.api.theme.Style.theme.notificationPopupPanelShadow();
 @eval notificationPopupIconSuccessFill org.eclipse.che.ide.api.theme.Style.theme.notificationPopupIconSuccessFill();
 @eval notificationPopupIconFailFill org.eclipse.che.ide.api.theme.Style.theme.notificationPopupIconFailFill();
 @eval notificationPopupIconProgressFill org.eclipse.che.ide.api.theme.Style.theme.notificationPopupIconProgressFill();
+@eval notificationPopupIconWarningFill org.eclipse.che.ide.api.theme.Style.theme.notificationPopupIconWarningFill();
 @eval notificationPopupIconSvgFill org.eclipse.che.ide.api.theme.Style.theme.notificationPopupIconSvgFill();
 @eval notificationPopupTextColor org.eclipse.che.ide.api.theme.Style.theme.notificationPopupTextColor();
 @eval closeNotificationButtonColor org.eclipse.che.ide.api.theme.Style.theme.closeNotificationButtonColor();
@@ -58,6 +60,10 @@
 
 .notificationIconWrapper svg[name="progress"] {
     fill: notificationPopupIconProgressFill;
+}
+
+.notificationIconWrapper svg[name="warning"] {
+    fill: notificationPopupIconWarningFill;
 }
 
 .notificationContentWrapper{
@@ -127,6 +133,10 @@
 
 .notificationStatusProgress {
     background-color: notificationPopupProgressBackground;
+}
+
+.notificationStatusWarning {
+    background-color: notificationPopupWarningBackground;
 }
 
 .notificationStatusSuccess {

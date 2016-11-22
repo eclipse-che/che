@@ -10,10 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.ide.navigation;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.inject.ImplementedBy;
+
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.resource.Path;
-
-import com.google.gwt.user.client.rpc.AsyncCallback;
 
 import java.util.List;
 
@@ -24,6 +25,7 @@ import java.util.List;
  * @author Artem Zatsarynnyi
  * @author Vlad Zhukovskyi
  */
+@ImplementedBy(NavigateToFileViewImpl.class)
 public interface NavigateToFileView extends View<NavigateToFileView.ActionDelegate> {
     /** Needs for delegate some function into NavigateToFile view. */
     interface ActionDelegate {

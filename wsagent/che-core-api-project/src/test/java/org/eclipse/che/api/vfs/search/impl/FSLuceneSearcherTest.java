@@ -40,6 +40,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@SuppressWarnings("Duplicates")
 public class FSLuceneSearcherTest {
     private static final String[] TEST_CONTENT = {
             "Apollo set several major human spaceflight milestones",
@@ -163,6 +164,18 @@ public class FSLuceneSearcherTest {
         assertTrue(paths.isEmpty());
         paths = searcher.search(new QueryExpression().setText("should")).getFilePaths();
         assertTrue(paths.isEmpty());
+    }
+
+
+    @Test
+    public void searchesByWordFragment() throws Exception {
+        VirtualFileSystem virtualFileSystem = virtualFileSystem();
+        VirtualFile folder = virtualFileSystem.getRoot().createFolder("folder");
+        folder.createFile("xxx.txt", TEST_CONTENT[0]);
+        searcher.init(virtualFileSystem);
+
+        List<String> paths = searcher.search(new QueryExpression().setText("*stone*")).getFilePaths();
+        assertEquals(newArrayList("/folder/xxx.txt"), paths);
     }
 
     @Test

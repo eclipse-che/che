@@ -20,7 +20,9 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.api.data.tree.TreeExpander;
 import org.eclipse.che.ide.api.data.tree.settings.NodeSettings;
 import org.eclipse.che.ide.api.data.tree.settings.SettingsProvider;
 import org.eclipse.che.ide.api.mvp.View;
@@ -37,11 +39,13 @@ import org.eclipse.che.ide.api.resources.marker.MarkerChangedEvent.MarkerChanged
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerView.ActionDelegate;
+import org.eclipse.che.ide.project.node.SyntheticNode;
 import org.eclipse.che.ide.project.node.SyntheticNodeUpdateEvent;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.resources.tree.ResourceNode;
 import org.eclipse.che.ide.ui.smartTree.NodeDescriptor;
 import org.eclipse.che.ide.ui.smartTree.Tree;
+import org.eclipse.che.ide.ui.smartTree.event.BeforeExpandNodeEvent;
 import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent;
 import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent.SelectionChangedHandler;
 import org.eclipse.che.providers.DynaObject;
@@ -74,6 +78,7 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
     private final SettingsProvider         settingsProvider;
     private final CoreLocalizationConstant locale;
     private final Resources                resources;
+    private final TreeExpander             treeExpander;
 
     private static final int PART_SIZE = 500;
 
@@ -85,7 +90,8 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
                                     CoreLocalizationConstant locale,
                                     Resources resources,
                                     final ResourceNode.NodeFactory nodeFactory,
-                                    final SettingsProvider settingsProvider) {
+                                    final SettingsProvider settingsProvider,
+                                    final AppContext appContext) {
         this.view = view;
         this.nodeFactory = nodeFactory;
         this.settingsProvider = settingsProvider;
@@ -109,6 +115,50 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
                 setSelection(new Selection<>(event.getSelection()));
             }
         });
+
+        view.getTree().addBeforeExpandHandler(new BeforeExpandNodeEvent.BeforeExpandNodeHandler() {
+            @Override
+            public void onBeforeExpand(BeforeExpandNodeEvent event) {
+                final NodeDescriptor nodeDescriptor = view.getTree().getNodeDescriptor(event.getNode());
+
+                if (event.getNode() instanceof SyntheticNode && nodeDescriptor != null && nodeDescriptor.isExpandDeep()) {
+                    event.setCancelled(true);
+                }
+            }
+        });
+
+        treeExpander = new ProjectExplorerTreeExpander(view.getTree(), appContext);
+
+        registerNative();
+    }
+
+    /* Expose Project Explorer's internal API to the world, to allow automated Selenium scripts expand all projects tree. */
+    private native void registerNative() /*-{
+        var that = this;
+
+        var ProjectExplorer = {};
+
+        ProjectExplorer.expandAll = $entry(function() {
+            that.@org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter::doExpand()();
+        })
+
+        ProjectExplorer.collapseAll = $entry(function() {
+            that.@org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter::doCollapse()();
+        })
+
+        $wnd.IDE.ProjectExplorer = ProjectExplorer;
+    }-*/;
+
+    private void doExpand() {
+        if (treeExpander.isExpandEnabled()) {
+            treeExpander.expandTree();
+        }
+    }
+
+    private void doCollapse() {
+        if (treeExpander.isCollapseEnabled()) {
+            treeExpander.collapseTree();
+        }
     }
 
     @Override

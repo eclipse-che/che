@@ -46,6 +46,8 @@ public interface NotificationResources extends ClientBundle {
 
         String notificationStatusFail();
 
+        String notificationStatusWarning();
+        
         String notificationPopup();
 
         String notificationPopupContentWrapper();
@@ -78,4 +80,7 @@ public interface NotificationResources extends ClientBundle {
 
     @Source("progress.svg")
     SVGResource progress();
+
+    @Source("warning.svg")
+    SVGResource warning();
 }

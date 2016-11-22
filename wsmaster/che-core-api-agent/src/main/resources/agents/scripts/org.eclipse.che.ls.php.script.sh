@@ -20,12 +20,87 @@ CHE_DIR=$HOME/che
 LS_DIR=${CHE_DIR}/ls-php
 LS_LAUNCHER=${LS_DIR}/launch.sh
 
-LINUX_TYPE=$(cat /etc/os-release | grep ^ID= | tr '[:upper:]' '[:lower:]')
-LINUX_VERSION=$(cat /etc/os-release | grep ^VERSION_ID=)
+if [ -f /etc/centos-release ]; then
+    FILE="/etc/centos-release"
+    LINUX_TYPE=$(cat $FILE | awk '{print $1}')
+ elif [ -f /etc/redhat-release ]; then
+    FILE="/etc/redhat-release"
+    LINUX_TYPE=$(cat $FILE | cut -c 1-8)
+ else
+    FILE="/etc/os-release"
+    LINUX_TYPE=$(cat $FILE | grep ^ID= | tr '[:upper:]' '[:lower:]')
+    LINUX_VERSION=$(cat $FILE | grep ^VERSION_ID=)
+fi
+
 MACHINE_TYPE=$(uname -m)
 
 mkdir -p ${CHE_DIR}
 mkdir -p ${LS_DIR}
+
+########################
+### Install packages ###
+########################
+
+# Red Hat Enterprise Linux 7
+############################
+if echo ${LINUX_TYPE} | grep -qi "rhel"; then
+    test "${PACKAGES}" = "" || {
+        ${SUDO} yum install ${PACKAGES};
+    }
+
+# Red Hat Enterprise Linux 6
+############################
+elif echo ${LINUX_TYPE} | grep -qi "Red Hat"; then
+    test "${PACKAGES}" = "" || {
+        ${SUDO} yum install ${PACKAGES};
+    }
+
+# Ubuntu 14.04 16.04 / Linux Mint 17
+####################################
+elif echo ${LINUX_TYPE} | grep -qi "ubuntu"; then
+    test "${PACKAGES}" = "" || {
+        ${SUDO} apt-get update;
+        ${SUDO} apt-get -y install ${PACKAGES};
+    }
+
+
+# Debian 8
+##########
+elif echo ${LINUX_TYPE} | grep -qi "debian"; then
+    test "${PACKAGES}" = "" || {
+        ${SUDO} apt-get update;
+        ${SUDO} apt-get -y install ${PACKAGES};
+    }
+
+# Fedora 23
+###########
+elif echo ${LINUX_TYPE} | grep -qi "fedora"; then
+    PACKAGES=${PACKAGES}" procps-ng"
+    test "${PACKAGES}" = "" || {
+        ${SUDO} dnf -y install ${PACKAGES};
+    }
+
+
+# CentOS 7.1 & Oracle Linux 7.1
+###############################
+elif echo ${LINUX_TYPE} | grep -qi "centos"; then
+    test "${PACKAGES}" = "" || {
+        ${SUDO} yum -y install ${PACKAGES};
+    }
+
+# openSUSE 13.2
+###############
+elif echo ${LINUX_TYPE} | grep -qi "opensuse"; then
+    test "${PACKAGES}" = "" || {
+        ${SUDO} zypper install -y ${PACKAGES};
+    }
+
+else
+    >&2 echo "Unrecognized Linux Type"
+    >&2 cat /etc/os-release
+    exit 1
+fi
+
 
 ######################
 ### Install PHP LS ###

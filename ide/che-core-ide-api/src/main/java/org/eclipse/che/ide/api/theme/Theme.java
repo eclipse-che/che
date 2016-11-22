@@ -63,6 +63,13 @@ public interface Theme {
     String selectionBackground();
 
     /**
+     * Background color for selected text in input fields.
+     *
+     * @return the color
+     */
+    String inputSelectionBackground();
+
+    /**
      * Background color for inactive selection.
      *
      * @return the color
@@ -1486,7 +1493,6 @@ public interface Theme {
      */
     String loaderProgressStatusColor();
 
-
     /**
      * The placeholder color for input fields.
      *
@@ -1522,6 +1528,8 @@ public interface Theme {
 
     String notificationPopupProgressBackground();
 
+    String notificationPopupWarningBackground();
+    
     String notificationPopupPanelShadow();
 
     String notificationPopupIconSuccessFill();
@@ -1530,6 +1538,8 @@ public interface Theme {
 
     String notificationPopupIconProgressFill();
 
+    String notificationPopupIconWarningFill();
+    
     String notificationPopupIconSvgFill();
 
     String notificationPopupTextColor();

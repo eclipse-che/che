@@ -631,10 +631,10 @@ public final class ResourceManager {
             return promises.resolve(NO_RESOURCES);
         }
 
+        int depthToReload = depth;
         final Optional<Resource[]> descendants = store.getAll(container.getLocation());
 
-        int depthToReload = depth;
-        if (descendants.isPresent()) {
+        if (depthToReload != -1 && descendants.isPresent()) {
             for (Resource resource : descendants.get()) {
                 if (resource.getLocation().segmentCount() - container.getLocation().segmentCount() > depth) {
                     depthToReload = resource.getLocation().segmentCount() - container.getLocation().segmentCount();
@@ -923,7 +923,7 @@ public final class ResourceManager {
             public Promise<Resource[]> apply(List<ProjectConfigDto> updatedConfiguration) throws FunctionException {
                 cachedConfigs = updatedConfiguration.toArray(new ProjectConfigDto[updatedConfiguration.size()]);
 
-                int maxDepth = 0;
+                int maxDepth = 1;
 
                 final Optional<Resource[]> descendants = store.getAll(container.getLocation());
 
@@ -1134,7 +1134,7 @@ public final class ResourceManager {
     protected Promise<Resource[]> search(final Container container, String fileMask, String contentMask) {
         QueryExpression queryExpression = new QueryExpression();
         if (!isNullOrEmpty(contentMask)) {
-            queryExpression.setText(contentMask + '*');
+            queryExpression.setText(contentMask);
         }
         if (!isNullOrEmpty(fileMask)) {
             queryExpression.setName(fileMask);

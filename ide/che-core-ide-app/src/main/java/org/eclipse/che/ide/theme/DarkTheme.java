@@ -58,6 +58,11 @@ public class DarkTheme implements Theme {
     }
 
     @Override
+    public String inputSelectionBackground() {
+        return "#b1b1b1";
+    }
+
+    @Override
     public String inactiveSelectionBackground() {
         return "#132D41";
     }
@@ -1357,6 +1362,11 @@ public class DarkTheme implements Theme {
     }
 
     @Override
+    public String notificationPopupWarningBackground() {
+    	return "#F0AD4E";
+    }
+    
+    @Override
     public String notificationPopupPanelShadow() {
         return "0 0 10px rgba(0,0,0,0.6)";
     }
@@ -1376,6 +1386,11 @@ public class DarkTheme implements Theme {
         return "#9b9b9b";
     }
 
+    @Override
+    public String notificationPopupIconWarningFill() {
+    	return "#F0AD4E";
+    }
+    
     @Override
     public String notificationPopupIconSvgFill() {
         return "#FFFFFF";

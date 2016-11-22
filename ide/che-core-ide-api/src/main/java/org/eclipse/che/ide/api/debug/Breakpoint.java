@@ -16,7 +16,7 @@ import java.util.Objects;
 
 /**
  * Immutable object represents a breakpoint. It isn't designed to be preserved.
- * {@link org.eclipse.che.ide.debug.dto.BreakpointDto} should be used then.
+ * {@link org.eclipse.che.ide.api.debug.dto.StorableBreakpointDto} should be used then.
  *
  * @author Evgen Vidolob
  * @author Anatoliy Bazko

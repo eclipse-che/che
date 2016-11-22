@@ -113,7 +113,13 @@ public class FullTextSearchPresenter implements FullTextSearchView.ActionDelegat
             }
             sb.append(character);
         }
-        String escapedText = sb.toString();
+        String escapedText;
+        if (view.isWholeWordsOnly()) {
+            escapedText = sb.toString();
+        } else {
+            sb.append('*');
+            escapedText = '*' + sb.toString();
+        }
 
         String[] items = escapedText.trim().split("\\s+");
         int numberItem = items.length;

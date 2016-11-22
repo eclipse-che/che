@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-php-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>5.0.0-M7-SNAPSHOT</version>
+        <version>5.0.0-M8-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-php-lang-server</artifactId>
     <name>Che Plugin :: PHP :: Extension Server</name>

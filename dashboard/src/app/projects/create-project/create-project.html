@@ -140,23 +140,39 @@
     <!-- Select stack -->
     <che-label-container che-label-name="{{createProjectCtrl.workspaces.length ? 'Select Workspace' : 'Select Stack'}}"
                          che-label-description="{{createProjectCtrl.workspaces.length ? 'Select existing workspace or create it from stack' : 'Select stack'}}, recipe or image used to define your environment runtime. Workspace environments are used to build and run your project.">
-      <md-radio-group ng-show="createProjectCtrl.workspaces.length" ng-model="createProjectCtrl.workspaceResource">
-        <md-radio-button value="existing-workspace">Select existing workspace</md-radio-button>
-        <div ng-if="createProjectCtrl.workspaceResource === 'existing-workspace'">
-          <create-project-workspaces che-workspace="createProjectCtrl.workspaceSelected"
-                                     che-workspace-change="createProjectCtrl.onWorkspaceChange()"/>
-        </div>
-        <md-radio-button value="from-stack">Create new workspace from stack</md-radio-button>
-      </md-radio-group>
-      <che-workspace-select-stack id="create-project-source-stack"
-                                  che-tab-name="tabName"
-                                  che-on-tab-change="createProjectCtrl.setStackTab(tabName)"
-                                  che-stack="stack"
-                                  che-stack-change="createProjectCtrl.cheStackLibrarySelecter(stack)"
-                                  che-recipe-script="createProjectCtrl.recipeScript"
-                                  che-recipe-url="createProjectCtrl.recipeUrl"
-                                  che-recipe-format="createProjectCtrl.recipeFormat"
-                                  ng-if="!createProjectCtrl.workspaces.length || createProjectCtrl.workspaceResource === 'from-stack'"/>
+      <ng-form name="workspaceResourceForm">
+        <md-radio-group ng-model="createProjectCtrl.workspaceResource"
+                        ng-init="createProjectCtrl.setWorkspaceResourceForm(workspaceResourceForm)"
+                        ng-change="createProjectCtrl.workspaceResourceOnChange()">
+
+          <!-- radio-button: existing workspace-->
+          <md-radio-button value="existing-workspace" ng-disabled="createProjectCtrl.workspaces.length === 0">Select existing workspace</md-radio-button>
+          <div ng-if="createProjectCtrl.workspaceResource === 'existing-workspace'">
+            <create-project-workspaces che-workspace="createProjectCtrl.workspaceSelected"
+                                       che-workspace-change="createProjectCtrl.onWorkspaceChange()"></create-project-workspaces>
+          </div>
+
+          <!-- radio-button: from config -->
+          <md-radio-button value="from-config">Create from configuration</md-radio-button>
+          <div ng-if="createProjectCtrl.workspaceResource === 'from-config'">
+            <che-workspace-config-import workspace-config="createProjectCtrl.workspaceConfig"
+                                         workspace-config-on-change="createProjectCtrl.updateWorkspaceConfigImport(config)"></che-workspace-config-import>
+          </div>
+
+          <!-- radio-button: from stack -->
+          <md-radio-button value="from-stack">Create new workspace from stack</md-radio-button>
+          <div ng-if="createProjectCtrl.workspaceResource === 'from-stack'">
+            <che-workspace-select-stack id="create-project-source-stack"
+                                        che-tab-name="tabName"
+                                        che-on-tab-change="createProjectCtrl.setStackTab(tabName)"
+                                        che-stack="stack"
+                                        che-stack-change="createProjectCtrl.cheStackLibrarySelecter(stack)"
+                                        che-recipe-script="createProjectCtrl.recipeScript"
+                                        che-recipe-url="createProjectCtrl.recipeUrl"
+                                        che-recipe-format="createProjectCtrl.recipeFormat"></che-workspace-select-stack>
+          </div>
+        </md-radio-group>
+      </ng-form>
     </che-label-container>
 
     <!-- Workspace -->
@@ -165,7 +181,8 @@
                          che-panel-id="create-project-workspace"
                          che-label-description="A workspace contains projects and runtime environments. If your stack requires a new workspace, configure it here.">
       <ng-form name="workspaceInformationForm">
-        <div class="create-project-nested-container">
+        <div class="create-project-nested-container"
+             ng-init="createProjectCtrl.setWorkspaceInformationForm(workspaceInformationForm)">
           <che-label-container che-label-name="Name">
             <div class="create-project-input">
               <che-input che-form="workspaceInformationForm"
@@ -173,8 +190,10 @@
                          che-place-holder="Name of the workspace"
                          aria-label="Name of the workspace"
                          ng-model="createProjectCtrl.workspaceName"
+                         ng-change="createProjectCtrl.workspaceNameChange(workspaceInformationForm)"
+                         ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 1000, 'blur': 0 } }"
                          required
-                         unique-workspace-name="createProjectCtrl.workspaceName"
+                         unique-workspace-name="createProjectCtrl.existingWorkspaceName"
                          ng-minlength="3"
                          ng-maxlength="20"
                          ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
@@ -196,11 +215,12 @@
                     class="workspace-environment-name">ENVIRONMENT: {{environmentKey}}</span>
 
               <div>
-                <div data-ng-repeat="machine in createProjectCtrl.getStackMachines(environmentValue)">
+                <div data-ng-repeat="machine in createProjectCtrl.getStackMachines(environmentValue) as machines">
                   <div class="workspace-machine" ng-if="machine.attributes && machine.attributes.memoryLimitBytes">
-                    <span ng-if="$first !== $last">MACHINE: {{machineKey}}</span>
+                    <span ng-if="machines.length > 1">MACHINE: {{machine.name}}</span>
                     <che-workspace-ram-allocation-slider
-                            ng-model="machine.attributes.memoryLimitBytes"></che-workspace-ram-allocation-slider>
+                            ng-model="machine.attributes.memoryLimitBytes"
+                            che-on-change="createProjectCtrl.workspaceRamChange(machine.name, machine.attributes.memoryLimitBytes)"></che-workspace-ram-allocation-slider>
                   </div>
                 </div>
               </div>

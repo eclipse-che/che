@@ -76,4 +76,7 @@ public interface SshKeyLocalizationConstant extends Messages {
 
     @Key("failed.to.upload.ssh.key")
     String failedToUploadSshKey();
+
+    @Key("invalid.hostname")
+    String invalidHostName();
 }

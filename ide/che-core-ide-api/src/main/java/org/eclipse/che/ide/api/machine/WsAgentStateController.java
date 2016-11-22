@@ -34,7 +34,6 @@ import org.eclipse.che.ide.rest.RestServiceInfo;
 import org.eclipse.che.ide.rest.StringUnmarshaller;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 import org.eclipse.che.ide.util.loging.Log;
-import org.eclipse.che.ide.websocket.MachineMessageBus;
 import org.eclipse.che.ide.websocket.MessageBus;
 import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.eclipse.che.ide.websocket.events.ConnectionClosedHandler;
@@ -45,6 +44,7 @@ import org.eclipse.che.ide.websocket.events.WebSocketClosedEvent;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.ide.api.machine.WsAgentState.STARTED;
@@ -91,13 +91,9 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
         this.availableServices = new ArrayList<>();
     }
 
-    /**
-     * Initialize state of the agent.
-     *
-     * @param devMachine
-     *         development machine instance
-     */
     public void initialize(DevMachine devMachine) {
+        checkNotNull(devMachine, "Developer machine should not be a null");
+
         this.devMachine = devMachine;
         this.state = STOPPED;
         loader.show(LoaderPresenter.Phase.STARTING_WORKSPACE_AGENT);
@@ -139,7 +135,6 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
         return state;
     }
 
-    /** Returns instance of {@link MachineMessageBus}. */
     public Promise<MessageBus> getMessageBus() {
         return AsyncPromiseHelper.createFromAsyncRequest(new AsyncPromiseHelper.RequestCall<MessageBus>() {
             @Override

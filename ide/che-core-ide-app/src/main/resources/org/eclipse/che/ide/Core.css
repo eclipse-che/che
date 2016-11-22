@@ -10,6 +10,8 @@
  *******************************************************************************/
 @external .gwt-SplitLayoutPanel-HDragger, .gwt-SplitLayoutPanel-VDragger, .hsplitter, .hsplitter, .gwt-DialogBox, .gwt-Button, .gwt-PushButton, gwt-PushButton-up, gwt-PushButton-up-hovering, gwt-PushButton-up-disabled, gwt-PushButton-down,.gwt-PushButton-down-hovering,.gwt-PushButton-down-disabled, gwt-ToggleButton, gwt-ToggleButton-up, gwt-ToggleButton-up-hovering, gwt-ToggleButton-up-disabled, gwt-ToggleButton-down, .gwt-ToggleButton-down-hovering, .gwt-ToggleButton-down-disabled, .gwt-TextBox, .inputError, .gwt-TextArea, .gwt-ListBox, .gwt-PopupPanel, .gwt-Label;
 
+@eval inputSelectionBackground org.eclipse.che.ide.api.theme.Style.theme.inputSelectionBackground();
+
 /* Global styles and external GWT styles. */
 
 body, td {
@@ -22,6 +24,10 @@ body, td {
 
     /* We turn off document level scrolling all together for the outer page. */
     overflow: hidden;
+}
+
+input::selection {
+    background-color: inputSelectionBackground !important;
 }
 
 /* We must override the user agent stylesheet which sets textarea font to monospace. */

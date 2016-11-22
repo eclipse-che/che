@@ -45,6 +45,7 @@ import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
+import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
@@ -79,7 +80,7 @@ public class CheEnvironmentValidatorTest {
         when(machineInstanceProviders.hasProvider("docker")).thenReturn(true);
         when(machineInstanceProviders.getProviderTypes()).thenReturn(asList("docker", "ssh"));
         when(environmentParser.parse(any(Environment.class))).thenReturn(cheServicesEnv);
-        when(environmentParser.getEnvironmentTypes()).thenReturn(singletonList("compose"));
+        when(environmentParser.getEnvironmentTypes()).thenReturn(singleton("compose"));
     }
 
     @Test
@@ -118,7 +119,7 @@ public class CheEnvironmentValidatorTest {
         // given
         when(environmentParser.parse(any(Environment.class)))
                 .thenThrow(new IllegalArgumentException("test exception"));
-        when(environmentParser.getEnvironmentTypes()).thenReturn(singletonList("otherType"));
+        when(environmentParser.getEnvironmentTypes()).thenReturn(singleton("otherType"));
 
         // when
         environmentValidator.validate("env", environment);
@@ -601,7 +602,6 @@ public class CheEnvironmentValidatorTest {
 
     private static CheServicesEnvironmentImpl createServicesEnv() {
         CheServicesEnvironmentImpl cheServicesEnvironment = new CheServicesEnvironmentImpl();
-        cheServicesEnvironment.setVersion("2");
         Map<String, CheServiceImpl> services = new HashMap<>();
         Map<String, String> buildArgs =  new HashMap<String, String>() {{put("argkey","argvalue");}};
         cheServicesEnvironment.setServices(services);
