@@ -103,7 +103,7 @@ public class WsMasterModule extends AbstractModule {
 
 
         bindConstant().annotatedWith(Names.named("machine.ws_agent.run_command"))
-                      .to("echo Agent is not started");
+                      .to("export JPDA_ADDRESS=\"4403\" && ~/che/ws-agent/bin/catalina.sh jpda run");
         bind(org.eclipse.che.api.workspace.server.WorkspaceValidator.class)
                 .to(org.eclipse.che.api.workspace.server.DefaultWorkspaceValidator.class);
 
