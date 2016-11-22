@@ -798,6 +798,12 @@ public class DockerConnector {
                 Future<String> imageIdFuture = executor.submit(() -> {
                     ProgressStatus progressStatus;
                     while ((progressStatus = progressReader.next()) != null) {
+                        if (progressStatus.getError() != null) {
+                            String errorMessage = progressStatus.getError();
+                            if (errorMessage.matches("Error: image .+ not found")) {
+                                throw new ImageNotFoundException(errorMessage);
+                            }
+                        }
                         final String buildImageId = getBuildImageId(progressStatus);
                         if (buildImageId != null) {
                             return buildImageId;
@@ -811,7 +817,11 @@ public class DockerConnector {
                 return imageIdFuture.get();
             } catch (ExecutionException e) {
                 // unwrap exception thrown by task with .getCause()
-                throw new DockerException(e.getCause().getLocalizedMessage(), 500);
+                if (e.getCause() instanceof ImageNotFoundException) {
+                    throw new ImageNotFoundException(e.getCause().getLocalizedMessage());
+                } else {
+                    throw new DockerException(e.getCause().getLocalizedMessage(), 500);
+                }
             } catch (InterruptedException e) {
                 throw new DockerException("Docker image build was interrupted", 500);
             }
