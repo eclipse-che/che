@@ -29,7 +29,6 @@ import org.eclipse.che.ide.ext.web.html.PreviewAction;
 import org.eclipse.che.ide.ext.web.html.editor.HtmlEditorProvider;
 import org.eclipse.che.ide.ext.web.js.NewJavaScriptFileAction;
 import org.eclipse.che.ide.ext.web.js.editor.JsEditorProvider;
-import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorProvider;
 
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_ASSISTANT;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_FILE_NEW;
