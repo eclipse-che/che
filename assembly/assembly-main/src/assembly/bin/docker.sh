@@ -110,7 +110,7 @@ init() {
 
   if [ "$CHE_IN_VM" = "true" ]; then
     # CHE_DOCKER_MACHINE_HOST_EXTERNAL must be set if you are in a VM. 
-    HOSTNAME=$(get_docker_external_hostname)
+    HOSTNAME=${CHE_DOCKER_MACHINE_HOST_EXTERNAL:-$(get_docker_external_hostname)}
     if has_external_hostname; then
       # Internal property used by Che to set hostname.
       # See: LocalDockerInstanceRuntimeInfo.java#L9
@@ -147,11 +147,16 @@ init() {
 }
 
 get_che_data_from_host() {
+  DEFAULT_DATA_HOST_PATH=/home/user/che
   CHE_SERVER_CONTAINER_ID=$(get_che_server_container_id)
-  echo $(docker inspect --format='{{(index .Volumes "/data")}}' $CHE_SERVER_CONTAINER_ID)
+  # If `docker inspect` fails $DEFAULT_DATA_HOST_PATH is returned
+  echo $(docker inspect --format='{{(index .Volumes "/data")}}' $CHE_SERVER_CONTAINER_ID 2>/dev/null || echo $DEFAULT_DATA_HOST_PATH)
 }
 
 get_che_server_container_id() {
+  # Returning `hostname` doesn't work when running Che on OpenShift/Kubernetes.
+  # In these cases `hostname` correspond to the pod ID that is different from
+  # the container ID
   hostname
 }
 
