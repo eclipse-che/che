@@ -27,11 +27,11 @@ import java.nio.file.Paths;
 import static java.util.Arrays.asList;
 
 /**
- *
+ * Launcher for TypeScript Language Server
  */
 @Singleton
 public class TSLSLauncher extends LanguageServerLauncherTemplate {
-    private static final String   LANGUAGE_ID = "js-ts";
+    private static final String   LANGUAGE_ID = "typescript";
     private static final String[] EXTENSIONS  = new String[] {"ts"};
     private static final String[] MIME_TYPES  = new String[] {"application/typescript"};
     private static final LanguageDescriptionImpl description;
@@ -39,7 +39,7 @@ public class TSLSLauncher extends LanguageServerLauncherTemplate {
     private final Path launchScript;
 
     public TSLSLauncher() {
-        launchScript =  Paths.get(System.getenv("HOME"), "che/ls-js-ts/launch.sh");
+        launchScript =  Paths.get(System.getenv("HOME"), "che/ls-typescript/launch.sh");
     }
 
     @Override

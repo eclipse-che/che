@@ -14,7 +14,7 @@ import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.plugin.web.shared.Constants;
 
 /**
- *
+ * TypeScript project type definition
  */
 public class TypeScriptProjectType extends ProjectTypeDef {
 

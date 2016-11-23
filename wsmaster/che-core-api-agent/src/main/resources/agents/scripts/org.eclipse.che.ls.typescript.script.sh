@@ -15,9 +15,9 @@ command -v tar >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" tar"; }
 command -v curl >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" curl"; }
 test "$(id -u)" = 0 || SUDO="sudo"
 
-AGENT_BINARIES_URI=https://codenvy.com/update/repository/public/download/org.eclipse.che.ls.js-ts.binaries
+AGENT_BINARIES_URI=https://codenvy.com/update/repository/public/download/org.eclipse.che.ls.typescript.binaries
 CHE_DIR=$HOME/che
-LS_DIR=${CHE_DIR}/ls-js-ts
+LS_DIR=${CHE_DIR}/ls-typescript
 LS_LAUNCHER=${LS_DIR}/launch.sh
 
 if [ -f /etc/centos-release ]; then

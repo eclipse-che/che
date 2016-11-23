@@ -20,7 +20,7 @@ import org.eclipse.che.plugin.web.typescript.TSLSLauncher;
 import org.eclipse.che.plugin.web.typescript.TypeScriptProjectType;
 
 /**
- *
+ * The module that contains configuration of the server side part of the Web plugin
  */
 @DynaModule
 public class WebModule extends AbstractModule {
