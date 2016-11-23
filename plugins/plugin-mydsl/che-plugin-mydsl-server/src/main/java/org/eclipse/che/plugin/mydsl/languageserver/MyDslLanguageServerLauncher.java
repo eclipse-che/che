@@ -36,7 +36,7 @@ public class MyDslLanguageServerLauncher extends LanguageServerLauncherTemplate 
 
     private static final String   LANGUAGE_ID = "mydsl";
     private static final String[] EXTENSIONS  = new String[] {"mydsl"};
-    private static final String[] MIME_TYPES  = new String[] {"application/json"};
+    private static final String[] MIME_TYPES  = new String[] {"text/mydsl"};
     private static final LanguageDescriptionImpl description;
 
     private final Path launchScript;
