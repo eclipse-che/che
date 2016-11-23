@@ -12,13 +12,16 @@ package org.eclipse.che.api.workspace.server.model.impl;
 
 import org.eclipse.che.api.core.model.project.SourceStorage;
 
-import javax.persistence.Basic;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.MapKeyColumn;
+import javax.persistence.Table;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -29,19 +32,24 @@ import java.util.Objects;
  * @author Yevhenii Voevodin
  */
 @Entity(name = "SourceStorage")
+@Table(name = "sourcestorage")
 public class SourceStorageImpl implements SourceStorage {
 
     @Id
     @GeneratedValue
+    @Column(name = "id")
     private Long id;
 
-    @Basic
+    @Column(name = "type")
     private String type;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "location", columnDefinition = "TEXT")
     private String location;
 
     @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "sourcestorage_parameters", joinColumns = @JoinColumn(name = "sourcestorage_id"))
+    @MapKeyColumn(name = "parameters_key")
+    @Column(name = "parameters")
     private Map<String, String> parameters;
 
     public SourceStorageImpl() {}

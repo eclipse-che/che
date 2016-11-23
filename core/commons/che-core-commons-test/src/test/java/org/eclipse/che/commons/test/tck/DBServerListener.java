@@ -18,7 +18,7 @@ import org.testng.ITestContext;
  *
  * @author Yevhenii Voevodin
  */
-public class DBServerListener extends AbstractTestListener {
+public class DBServerListener extends TestListenerAdapter {
 
     public static final String DB_SERVER_URL_ATTRIBUTE_NAME = "db_server_url";
     public static final String DB_SERVER_URL                = "localhost:12345";

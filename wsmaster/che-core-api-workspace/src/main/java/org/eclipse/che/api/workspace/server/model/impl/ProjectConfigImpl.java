@@ -14,8 +14,8 @@ package org.eclipse.che.api.workspace.server.model.impl;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.model.project.SourceStorage;
 
-import javax.persistence.Basic;
 import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
@@ -29,6 +29,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.PostLoad;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
+import javax.persistence.Table;
 import javax.persistence.Transient;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,32 +46,37 @@ import static java.util.stream.Collectors.toMap;
  * @author Dmitry Shnurenko
  */
 @Entity(name = "ProjectConfig")
+@Table(name = "projectconfig")
 public class ProjectConfigImpl implements ProjectConfig {
 
     @Id
     @GeneratedValue
+    @Column(name = "id")
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "path", nullable = false)
     private String path;
 
-    @Column
+    @Column(name = "name")
     private String name;
 
-    @Basic
+    @Column(name = "type")
     private String type;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "source_id")
     private SourceStorageImpl source;
 
     @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "projectconfig_mixins", joinColumns = @JoinColumn(name = "projectconfig_id"))
+    @Column(name = "mixins")
     private List<String> mixins;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JoinColumn
+    @JoinColumn(name = "dbattributes_id")
     @MapKey(name = "name")
     private Map<String, Attribute> dbAttributes;
 
@@ -209,7 +215,7 @@ public class ProjectConfigImpl implements ProjectConfig {
     }
 
     /**
-     * Synchronizes instance attribute with db attributes,
+     * Synchronizes instance attributes with db attributes,
      * should be called by internal components in needed places,
      * this can't be done neither by {@link PrePersist} nor by {@link PreUpdate}
      * as when the entity is merged the transient attribute won't be passed
@@ -240,16 +246,20 @@ public class ProjectConfigImpl implements ProjectConfig {
     }
 
     @Entity(name = "ProjectAttribute")
+    @Table(name = "projectattribute")
     private static class Attribute {
 
         @Id
         @GeneratedValue
+        @Column(name = "id")
         private Long id;
 
-        @Basic
+        @Column(name = "name")
         private String name;
 
         @ElementCollection(fetch = FetchType.EAGER)
+        @CollectionTable(name = "projectattribute_values", joinColumns = @JoinColumn(name = "projectattribute_id"))
+        @Column(name = "values")
         private List<String> values;
 
         public Attribute() {}

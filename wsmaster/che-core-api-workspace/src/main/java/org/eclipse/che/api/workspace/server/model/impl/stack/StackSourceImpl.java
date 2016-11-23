@@ -14,6 +14,7 @@ package org.eclipse.che.api.workspace.server.model.impl.stack;
 import org.eclipse.che.api.workspace.shared.stack.StackSource;
 
 import javax.persistence.Basic;
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import java.util.Objects;
 
@@ -25,10 +26,10 @@ import java.util.Objects;
 @Embeddable
 public class StackSourceImpl implements StackSource {
 
-    @Basic
+    @Column(name = "type")
     private String type;
 
-    @Basic
+    @Column(name = "origin")
     private String origin;
 
     public StackSourceImpl() {}

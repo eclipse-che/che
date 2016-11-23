@@ -23,6 +23,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.Table;
 import java.util.Objects;
 
 /**
@@ -43,20 +44,24 @@ import java.util.Objects;
         }
 )
 @IdClass(SshPairPrimaryKey.class)
+@Table(name = "sshkeypair")
 public class SshPairImpl implements SshPair {
     @Id
+    @Column(name = "owner")
     private String owner;
 
     @Id
+    @Column(name = "service")
     private String service;
 
     @Id
+    @Column(name = "name")
     private String name;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "publickey", columnDefinition = "TEXT")
     private String publicKey;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "privatekey", columnDefinition = "TEXT")
     private String privateKey;
 
     @ManyToOne

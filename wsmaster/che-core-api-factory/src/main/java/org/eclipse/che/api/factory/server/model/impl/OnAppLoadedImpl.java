@@ -13,10 +13,14 @@ package org.eclipse.che.api.factory.server.model.impl;
 import org.eclipse.che.api.core.model.factory.Action;
 import org.eclipse.che.api.core.model.factory.OnAppLoaded;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,13 +33,18 @@ import static java.util.stream.Collectors.toList;
 import static javax.persistence.CascadeType.ALL;
 
 @Entity(name = "OnAppLoaded")
+@Table(name = "onapploaded")
 public class OnAppLoadedImpl implements OnAppLoaded {
 
     @Id
     @GeneratedValue
+    @Column(name = "id")
     private Long id;
 
     @OneToMany(cascade = ALL, orphanRemoval = true)
+    @JoinTable(name = "onapploaded_action",
+               joinColumns = @JoinColumn(name = "onapploaded_id"),
+               inverseJoinColumns = @JoinColumn(name = "actions_entityid"))
     private List<ActionImpl> actions;
 
     public OnAppLoadedImpl() {}

@@ -24,9 +24,11 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.MapKeyColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
+import javax.persistence.Table;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -44,6 +46,7 @@ import static java.util.stream.Collectors.toMap;
  * @author Yevhenii Voevodin
  */
 @Entity(name = "WorkspaceConfig")
+@Table(name = "workspaceconfig")
 public class WorkspaceConfigImpl implements WorkspaceConfig {
 
     public static WorkspaceConfigImplBuilder builder() {
@@ -52,27 +55,29 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
 
     @Id
     @GeneratedValue
+    @Column(name = "id")
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    @Column(nullable = false)
+    @Column(name = "defaultenv", nullable = false)
     private String defaultEnv;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JoinColumn
+    @JoinColumn(name = "commands_id")
     private List<CommandImpl> commands;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JoinColumn
+    @JoinColumn(name = "projects_id")
     private List<ProjectConfigImpl> projects;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JoinColumn
+    @JoinColumn(name = "environments_id")
+    @MapKeyColumn(name = "environments_key")
     private Map<String, EnvironmentImpl> environments;
 
     public WorkspaceConfigImpl() {}

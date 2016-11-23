@@ -16,12 +16,10 @@ import org.eclipse.che.api.core.model.machine.Snapshot;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.commons.lang.NameGenerator;
 
-import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.Index;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
@@ -52,7 +50,7 @@ import java.util.Objects;
                                     "  AND snapshot.envName = :envName")
         }
 )
-@Table(indexes = @Index(columnList = "workspaceId, envName, machineName", unique = true))
+@Table(name = "snapshot")
 public class SnapshotImpl implements Snapshot {
 
     public static SnapshotBuilder builder() {
@@ -60,27 +58,28 @@ public class SnapshotImpl implements Snapshot {
     }
 
     @Id
+    @Column(name = "id")
     private String id;
 
-    @Column(nullable = false)
+    @Column(name = "workspaceid", nullable = false)
     private String workspaceId;
 
-    @Column(nullable = false)
+    @Column(name = "machinename", nullable = false)
     private String machineName;
 
-    @Column(nullable = false)
+    @Column(name = "envname", nullable = false)
     private String envName;
 
-    @Basic
+    @Column(name = "type")
     private String type;
 
-    @Basic
+    @Column(name = "isdev")
     private boolean isDev;
 
-    @Basic
+    @Column(name = "creationdate")
     private long creationDate;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
     @Embedded

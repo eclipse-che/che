@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.server.jpa;
 
-import org.eclipse.che.api.core.jdbc.jpa.CascadeRemovalException;
+import org.eclipse.che.core.db.jpa.CascadeRemovalException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.machine.server.event.BeforeRecipeRemovedEvent;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
