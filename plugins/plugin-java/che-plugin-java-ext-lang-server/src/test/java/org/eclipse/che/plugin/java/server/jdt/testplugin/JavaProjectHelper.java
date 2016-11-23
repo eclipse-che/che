@@ -139,7 +139,7 @@ public class JavaProjectHelper {
             outputLocation = project.getFullPath();
         }
 
-        IFolder codenvyFolder = project.getFolder(".codenvy");
+        IFolder codenvyFolder = project.getFolder(".che");
         if (!codenvyFolder.exists()) {
             CoreUtility.createFolder(codenvyFolder, false, true, null);
         }

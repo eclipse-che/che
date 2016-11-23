@@ -1,1 +1,0 @@
-{"builders":{"default":"maven"},"runners":{"configs":{"recommend":{"variables":{},"ram":256,"options":{}}},"default":"system:/java/web/tomcat7"},"description":"A basic example using Spring servlets. The app returns values entered into a submit form.","type":"maven","attributes":{}}

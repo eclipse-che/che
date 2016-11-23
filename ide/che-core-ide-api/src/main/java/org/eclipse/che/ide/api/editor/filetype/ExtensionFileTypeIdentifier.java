@@ -33,7 +33,7 @@ public class ExtensionFileTypeIdentifier implements FileTypeIdentifier {
         final String filename = file.getName();
         if (filename != null) {
             final int dotPos = filename.lastIndexOf('.');
-            if (dotPos < 1) { // either -1 (not found) or 0 (first position, for example .project or .codenvy etc.
+            if (dotPos < 1) { // either -1 (not found) or 0 (first position, for example .project or .che etc.
                 Log.debug(ExtensionFileTypeIdentifier.class, "File name has no suffix ");
                 return null;
             }

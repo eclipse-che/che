@@ -92,7 +92,6 @@ public class ProjectApiModule extends AbstractModule {
 
     private void configureVfsFilters(Multibinder<PathMatcher> excludeMatcher) {
         addVfsFilter(excludeMatcher, ".che");
-        addVfsFilter(excludeMatcher, ".codenvy");
         addVfsFilter(excludeMatcher, ".#");
     }
 
