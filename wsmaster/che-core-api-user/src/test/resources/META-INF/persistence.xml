@@ -22,13 +22,12 @@
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
             <property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>
-            <property name="javax.persistence.jdbc.url" value="jdbc:h2:mem:"/>
+            <property name="javax.persistence.jdbc.url" value="jdbc:h2:mem:test"/>
             <property name="javax.persistence.jdbc.user" value=""/>
             <property name="javax.persistence.jdbc.password" value=""/>
 
-            <property name="eclipselink.exception-handler" value="org.eclipse.che.api.core.h2.jdbc.jpa.eclipselink.H2ExceptionHandler"/>
+            <property name="eclipselink.exception-handler" value="org.eclipse.che.core.db.h2.jpa.eclipselink.H2ExceptionHandler"/>
             <property name="eclipselink.target-server" value="None"/>
-            <property name="eclipselink.ddl-generation" value="create-tables"/>
             <property name="eclipselink.ddl-generation.output-mode" value="database"/>
             <property name="eclipselink.logging.logger" value="DefaultLogger"/>
             <property name="eclipselink.logging.level" value="SEVERE"/>

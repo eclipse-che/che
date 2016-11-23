@@ -12,13 +12,16 @@ package org.eclipse.che.api.machine.server.model.impl;
 
 import org.eclipse.che.api.core.model.machine.Command;
 
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.MapKeyColumn;
+import javax.persistence.Table;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -29,22 +32,25 @@ import java.util.Objects;
  * @author Eugene Voevodin
  */
 @Entity(name = "Command")
+@Table(name = "command")
 public class CommandImpl implements Command {
 
     @Id
     @GeneratedValue
+    @Column(name = "id")
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(name = "commandline", nullable = false, columnDefinition = "TEXT")
     private String commandLine;
 
-    @Column(nullable = false)
+    @Column(name = "type", nullable = false)
     private String type;
 
     @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "command_attributes", joinColumns = @JoinColumn(name = "command_id"))
     @MapKeyColumn(name = "name")
     @Column(name = "value", columnDefinition = "TEXT")
     private Map<String, String> attributes;

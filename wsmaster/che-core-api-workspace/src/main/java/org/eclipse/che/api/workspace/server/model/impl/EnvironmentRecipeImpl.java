@@ -23,16 +23,16 @@ import java.util.Objects;
 @Embeddable
 public class EnvironmentRecipeImpl implements EnvironmentRecipe {
 
-    @Basic
+    @Column(name = "type")
     private String type;
 
-    @Basic
+    @Column(name = "contenttype")
     private String contentType;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "content", columnDefinition = "TEXT")
     private String content;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "location", columnDefinition = "TEXT")
     private String location;
 
     public EnvironmentRecipeImpl() {}

@@ -13,7 +13,7 @@ package org.eclipse.che.api.machine.server.jpa;
 import com.google.inject.persist.Transactional;
 
 import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.jdbc.jpa.DuplicateKeyException;
+import org.eclipse.che.core.db.jpa.DuplicateKeyException;
 import org.eclipse.che.api.machine.server.exception.SnapshotException;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;

@@ -13,7 +13,7 @@ package org.eclipse.che.api.user.server.jpa;
 import com.google.inject.persist.Transactional;
 
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.jdbc.jpa.event.CascadeRemovalEventSubscriber;
+import org.eclipse.che.core.db.event.CascadeRemovalEventSubscriber;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;

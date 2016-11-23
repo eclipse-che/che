@@ -13,6 +13,7 @@ package org.eclipse.che.api.workspace.server.model.impl.stack;
 import org.eclipse.che.api.workspace.shared.stack.StackComponent;
 
 import javax.persistence.Basic;
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import java.util.Objects;
 
@@ -24,10 +25,10 @@ import java.util.Objects;
 @Embeddable
 public class StackComponentImpl implements StackComponent {
 
-    @Basic
+    @Column(name = "name")
     private String name;
 
-    @Basic
+    @Column(name = "version")
     private String version;
 
     public StackComponentImpl() {}

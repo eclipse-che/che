@@ -16,8 +16,8 @@ import org.eclipse.che.account.event.BeforeAccountRemovedEvent;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.jdbc.jpa.DuplicateKeyException;
-import org.eclipse.che.api.core.jdbc.jpa.event.CascadeRemovalEventSubscriber;
+import org.eclipse.che.core.db.jpa.DuplicateKeyException;
+import org.eclipse.che.core.db.event.CascadeRemovalEventSubscriber;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
@@ -49,7 +49,7 @@ public class JpaWorkspaceDao implements WorkspaceDao {
     @Inject
     private EventService            eventService;
     @Inject
-    private Provider<EntityManager> manager;
+    private Provider<EntityManager> managerProvider;
 
     @Override
     public WorkspaceImpl create(WorkspaceImpl workspace) throws ConflictException, ServerException {
@@ -96,7 +96,7 @@ public class JpaWorkspaceDao implements WorkspaceDao {
     public WorkspaceImpl get(String id) throws NotFoundException, ServerException {
         requireNonNull(id, "Required non-null id");
         try {
-            final WorkspaceImpl workspace = manager.get().find(WorkspaceImpl.class, id);
+            final WorkspaceImpl workspace = managerProvider.get().find(WorkspaceImpl.class, id);
             if (workspace == null) {
                 throw new NotFoundException(format("Workspace with id '%s' doesn't exist", id));
             }
@@ -112,11 +112,11 @@ public class JpaWorkspaceDao implements WorkspaceDao {
         requireNonNull(name, "Required non-null name");
         requireNonNull(namespace, "Required non-null namespace");
         try {
-            return manager.get()
-                          .createNamedQuery("Workspace.getByName", WorkspaceImpl.class)
-                          .setParameter("namespace", namespace)
-                          .setParameter("name", name)
-                          .getSingleResult();
+            return managerProvider.get()
+                                  .createNamedQuery("Workspace.getByName", WorkspaceImpl.class)
+                                  .setParameter("namespace", namespace)
+                                  .setParameter("name", name)
+                                  .getSingleResult();
         } catch (NoResultException noResEx) {
             throw new NotFoundException(format("Workspace with name '%s' in namespace '%s' doesn't exist",
                                                name,
@@ -131,10 +131,10 @@ public class JpaWorkspaceDao implements WorkspaceDao {
     public List<WorkspaceImpl> getByNamespace(String namespace) throws ServerException {
         requireNonNull(namespace, "Required non-null namespace");
         try {
-            return manager.get()
-                          .createNamedQuery("Workspace.getByNamespace", WorkspaceImpl.class)
-                          .setParameter("namespace", namespace)
-                          .getResultList();
+            return managerProvider.get()
+                                  .createNamedQuery("Workspace.getByNamespace", WorkspaceImpl.class)
+                                  .setParameter("namespace", namespace)
+                                  .getResultList();
         } catch (RuntimeException x) {
             throw new ServerException(x.getLocalizedMessage(), x);
         }
@@ -145,7 +145,7 @@ public class JpaWorkspaceDao implements WorkspaceDao {
     public List<WorkspaceImpl> getWorkspaces(String userId) throws ServerException {
         // TODO respect userId when workers become a part of che
         try {
-            return manager.get().createNamedQuery("Workspace.getAll", WorkspaceImpl.class).getResultList();
+            return managerProvider.get().createNamedQuery("Workspace.getAll", WorkspaceImpl.class).getResultList();
         } catch (RuntimeException x) {
             throw new ServerException(x.getLocalizedMessage(), x);
         }
@@ -156,27 +156,28 @@ public class JpaWorkspaceDao implements WorkspaceDao {
         if (workspace.getConfig() != null) {
             workspace.getConfig().getProjects().forEach(ProjectConfigImpl::prePersistAttributes);
         }
-        manager.get().persist(workspace);
+        managerProvider.get().persist(workspace);
     }
 
     @Transactional
     protected void doRemove(String id) {
-        final WorkspaceImpl workspace = manager.get().find(WorkspaceImpl.class, id);
+        final WorkspaceImpl workspace = managerProvider.get().find(WorkspaceImpl.class, id);
         if (workspace != null) {
-            manager.get().remove(workspace);
+            final EntityManager manager = managerProvider.get();
+            manager.remove(workspace);
         }
         eventService.publish(new WorkspaceRemovedEvent(workspace));
     }
 
     @Transactional
     protected WorkspaceImpl doUpdate(WorkspaceImpl update) throws NotFoundException {
-        if (manager.get().find(WorkspaceImpl.class, update.getId()) == null) {
+        if (managerProvider.get().find(WorkspaceImpl.class, update.getId()) == null) {
             throw new NotFoundException(format("Workspace with id '%s' doesn't exist", update.getId()));
         }
         if (update.getConfig() != null) {
             update.getConfig().getProjects().forEach(ProjectConfigImpl::prePersistAttributes);
         }
-        return manager.get().merge(update);
+        return managerProvider.get().merge(update);
     }
 
     @Singleton

@@ -13,7 +13,7 @@ package org.eclipse.che.account.spi.jpa;
 
 import org.eclipse.che.account.event.BeforeAccountRemovedEvent;
 import org.eclipse.che.account.spi.AccountImpl;
-import org.eclipse.che.api.core.jdbc.jpa.CascadeRemovalException;
+import org.eclipse.che.core.db.jpa.CascadeRemovalException;
 import org.eclipse.che.api.core.notification.EventService;
 
 import javax.inject.Inject;

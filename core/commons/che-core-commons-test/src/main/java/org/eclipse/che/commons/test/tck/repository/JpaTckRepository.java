@@ -45,9 +45,9 @@ public class JpaTckRepository<T> implements TckRepository<T> {
     @Inject
     protected UnitOfWork uow;
 
-    private final Class<T> entityClass;
+    private final Class<? extends T> entityClass;
 
-    public JpaTckRepository(Class<T> entityClass) {
+    public JpaTckRepository(Class<? extends T> entityClass) {
         this.entityClass = entityClass;
     }
 

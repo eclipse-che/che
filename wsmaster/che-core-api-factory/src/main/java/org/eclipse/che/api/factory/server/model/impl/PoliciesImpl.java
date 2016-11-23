@@ -25,7 +25,7 @@ import java.util.Objects;
 @Embeddable
 public class PoliciesImpl implements Policies {
 
-    @Basic
+    @Column(name = "referer")
     private String referer;
 
     @Column(name = "match_reopen")
@@ -34,10 +34,10 @@ public class PoliciesImpl implements Policies {
     @Column(name = "creation_strategy")
     private String create;
 
-    @Basic
+    @Column(name = "until")
     private Long until;
 
-    @Basic
+    @Column(name = "since")
     private Long since;
 
     public PoliciesImpl() {}

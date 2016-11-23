@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.user.server.jpa;
 
-import org.eclipse.che.api.core.jdbc.jpa.CascadeRemovalException;
+import org.eclipse.che.core.db.jpa.CascadeRemovalException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.user.server.event.BeforeUserPersistedEvent;
 import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;

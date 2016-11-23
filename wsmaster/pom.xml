@@ -41,5 +41,7 @@
         <module>che-core-api-agent</module>
         <module>che-core-api-agent-shared</module>
         <module>wsmaster-local</module>
+        <module>che-core-sql-schema</module>
+        <module>integration-tests</module>
     </modules>
 </project>
