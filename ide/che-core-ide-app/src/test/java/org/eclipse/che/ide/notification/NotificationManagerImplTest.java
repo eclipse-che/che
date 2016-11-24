@@ -18,8 +18,6 @@ import org.eclipse.che.ide.api.notification.Notification;
 import org.eclipse.che.ide.api.notification.NotificationListener;
 import org.eclipse.che.ide.api.notification.ReadState;
 import org.eclipse.che.ide.api.notification.StatusNotification;
-import org.eclipse.che.ide.api.parts.PartStackType;
-import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.part.PartStackPresenter;
 import org.junit.Before;
 import org.junit.Test;
@@ -56,8 +54,6 @@ public class NotificationManagerImplTest {
     private NotificationContainer   notificationContainer;
     @Mock
     private NotificationPopupStack  notificationMessageStack;
-    @Mock
-    private WorkspaceAgent workspaceAgent;
 
     private NotificationManagerImpl manager;
 
@@ -66,8 +62,7 @@ public class NotificationManagerImplTest {
 
     @Before
     public void disarm() {
-        when(workspaceAgent.getPartStack(eq(PartStackType.INFORMATION))).thenReturn(partStack);
-        manager = new NotificationManagerImpl(view, notificationContainer, notificationMessageStack, resources, workspaceAgent);
+        manager = new NotificationManagerImpl(view, notificationContainer, notificationMessageStack, resources);
         manager.setPartStack(partStack);
         when(partStack.getActivePart()).thenReturn(manager);
         reset(view);

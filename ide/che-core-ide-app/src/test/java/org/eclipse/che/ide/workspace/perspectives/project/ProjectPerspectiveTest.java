@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.PartStackView;
 import org.eclipse.che.ide.part.PartStackPresenter;
 import org.eclipse.che.ide.part.editor.multipart.EditorMultiPartStackPresenter;
@@ -76,6 +77,8 @@ public class ProjectPerspectiveTest {
     private AcceptsOneWidget        container;
     @Mock
     private DynaProvider            dynaProvider;
+    @Mock
+    private NotificationManager     notificationManager;
 
     private ProjectPerspective perspective;
 
@@ -108,7 +111,8 @@ public class ProjectPerspectiveTest {
                                              partViewFactory,
                                              controllerFactory,
                                              eventBus,
-                                             dynaProvider);
+                                             dynaProvider,
+                                             notificationManager);
     }
 
     @Test

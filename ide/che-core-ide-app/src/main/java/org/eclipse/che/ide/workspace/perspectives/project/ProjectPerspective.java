@@ -15,6 +15,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.PartStack;
 import org.eclipse.che.ide.part.editor.multipart.EditorMultiPartStackPresenter;
 import org.eclipse.che.ide.workspace.PartStackPresenterFactory;
@@ -54,10 +55,13 @@ public class ProjectPerspective extends AbstractPerspective {
                               PartStackViewFactory partViewFactory,
                               WorkBenchControllerFactory controllerFactory,
                               EventBus eventBus,
-                              DynaProvider dynaProvider) {
+                              DynaProvider dynaProvider,
+                              NotificationManager notificationManager) {
         super(PROJECT_PERSPECTIVE_ID, view, stackPresenterFactory, partViewFactory, controllerFactory, eventBus, dynaProvider);
 
         partStacks.put(EDITING, editorMultiPartStackPresenter);
+
+        addPart(notificationManager, INFORMATION);
 
         PartStack navigatorPanel = getPartStack(NAVIGATION);
         PartStack editorPanel = getPartStack(EDITING);
