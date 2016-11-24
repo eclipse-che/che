@@ -480,14 +480,13 @@ export class WorkspaceDetailsController {
       .clickOutsideToClose(true)
       .targetEvent(event);
     this.$mdDialog.show(confirm).then(() => {
-      if (this.workspaceDetails.status === 'STOPPED' || this.workspaceDetails.status === 'ERROR') {
-        this.removeWorkspace();
-      } else if (this.workspaceDetails.status === 'RUNNING') {
+      if (this.getWorkspaceStatus() === 'RUNNING') {
         this.cheWorkspace.stopWorkspace(this.workspaceId);
-        this.cheWorkspace.fetchStatusChange(this.workspaceId, 'STOPPED').then(() => {
-          this.removeWorkspace();
-        });
       }
+
+      this.cheWorkspace.fetchStatusChange(this.workspaceId, 'STOPPED').then(() => {
+        this.removeWorkspace();
+      });
     });
   }
 
