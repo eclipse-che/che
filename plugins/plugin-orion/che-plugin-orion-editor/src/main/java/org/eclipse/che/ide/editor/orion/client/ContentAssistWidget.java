@@ -195,20 +195,7 @@ public class ContentAssistWidget implements EventListener {
         final EventListener validateListener = new EventListener() {
             @Override
             public void handleEvent(final Event evt) {
-                CompletionProposal.CompletionCallback callback = new CompletionProposal.CompletionCallback() {
-                    @Override
-                    public void onCompletion(final Completion completion) {
-                        applyCompletion(completion);
-                    }
-                };
-
-                if (proposal instanceof CompletionProposalExtension) {
-                    ((CompletionProposalExtension)proposal).getCompletion(insert, callback);
-                } else {
-                    proposal.getCompletion(callback);
-                }
-
-                hide();
+                applyProposal(proposal);
             }
         };
 
@@ -459,17 +446,9 @@ public class ContentAssistWidget implements EventListener {
             return;
         }
 
+        /* Automatically apply the completion proposal if it only one. */
         if (getTotalItems() == 1) {
-            CompletionProposal.CompletionCallback callback = new CompletionProposal.CompletionCallback() {
-                @Override
-                public void onCompletion(Completion completion) {
-                    applyCompletion(completion);
-                }
-            };
-
-            CompletionProposal proposal = proposals.get(0);
-            proposal.getCompletion(callback);
-
+            applyProposal(proposals.get(0));
             return;
         }
 
@@ -715,6 +694,23 @@ public class ContentAssistWidget implements EventListener {
         if (visible && selectedElement != null) {
             selectedElement.dispatchEvent(createValidateEvent(DOCUMENTATION));
         }
+    }
+
+    private void applyProposal(CompletionProposal proposal) {
+        CompletionProposal.CompletionCallback callback = new CompletionProposal.CompletionCallback() {
+            @Override
+            public void onCompletion(Completion completion) {
+                applyCompletion(completion);
+            }
+        };
+
+        if (proposal instanceof CompletionProposalExtension) {
+            ((CompletionProposalExtension) proposal).getCompletion(insert, callback);
+        } else {
+            proposal.getCompletion(callback);
+        }
+
+        hide();
     }
 
     private void applyCompletion(Completion completion) {
