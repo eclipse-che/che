@@ -76,10 +76,11 @@ public class LatestCompletionResult {
      * <code>isIncomplete</code> property is <code>false</code>.
      * <li>The given document id is the same as in the latest completion
      * result.</li>
-     * <li>The given offset is greater than the one in the latest completion
-     * result.</li>
      * <li>The given word starts with the one in the latest completion
      * result.</li>
+     * <li>The difference between the given offset and the one in the latest
+     * completion result matches the respective difference between the
+     * words.</li>
      * </ol>
      * Only if all checks are satisfied then the latest completion result can be
      * reused for the given document position.
@@ -99,8 +100,8 @@ public class LatestCompletionResult {
         return completionList != null &&
                !completionList.isIncomplete() &&
                this.documentId.getUri().equals(documentId.getUri()) &&
-               offset > this.offset && 
-               word.startsWith(this.word);
+               word.startsWith(this.word) && 
+               offset - this.offset == word.length() - this.word.length();
     }
 
     /**
