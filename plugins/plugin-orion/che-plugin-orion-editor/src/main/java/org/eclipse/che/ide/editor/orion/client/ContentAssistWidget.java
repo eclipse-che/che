@@ -457,7 +457,7 @@ public class ContentAssistWidget implements EventListener {
         popupElement.getStyle().setTop(caretLocation.getY(), PX);
         popupElement.getStyle().setWidth("400px");
         popupElement.getStyle().setHeight("200px");
-        popupElement.getStyle().setOpacity(0);
+        popupElement.getStyle().setOpacity(1);
         Elements.getDocument().getBody().appendChild(this.popupElement);
 
         /* Add the top extra row. */
@@ -470,13 +470,6 @@ public class ContentAssistWidget implements EventListener {
 
         /* Add the bottom extra row. */
         setExtraRowHeight(appendExtraRow(), Math.max(0, getTotalItems() - DOM_ITEMS_SIZE));
-
-        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-            @Override
-            public void execute() {
-                popupElement.getStyle().setOpacity(1);
-            }
-        });
 
         /* Correct popup position (wants to be refactored) */
         final Window window = Elements.getWindow();
