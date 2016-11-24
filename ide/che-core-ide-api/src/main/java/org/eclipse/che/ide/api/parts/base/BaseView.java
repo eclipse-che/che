@@ -221,6 +221,13 @@ public abstract class BaseView<T extends BaseActionDelegate> extends Composite i
                     focusView();
                 }
             });
+        } else {
+            Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+                @Override
+                public void execute() {
+                    blurView();
+                }
+            });
         }
     }
 
@@ -236,6 +243,10 @@ public abstract class BaseView<T extends BaseActionDelegate> extends Composite i
      */
     protected void focusView() {
         getElement().focus();
+    }
+
+    protected void blurView() {
+        getElement().blur();
     }
 
 }
