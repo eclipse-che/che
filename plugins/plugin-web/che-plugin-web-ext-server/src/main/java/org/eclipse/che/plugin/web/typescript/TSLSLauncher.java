@@ -17,6 +17,7 @@ import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncherTemplate;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.che.api.languageserver.shared.model.impl.LanguageDescriptionImpl;
+import org.eclipse.che.plugin.web.shared.Constants;
 
 import javax.inject.Singleton;
 import java.io.IOException;
@@ -31,9 +32,8 @@ import static java.util.Arrays.asList;
  */
 @Singleton
 public class TSLSLauncher extends LanguageServerLauncherTemplate {
-    private static final String   LANGUAGE_ID = "typescript";
-    private static final String[] EXTENSIONS  = new String[] {"ts"};
-    private static final String[] MIME_TYPES  = new String[] {"application/typescript"};
+    private static final String[] EXTENSIONS  = new String[] {Constants.TS_EXT};
+    private static final String[] MIME_TYPES  = new String[] {Constants.TS_MIME_TYPE};
     private static final LanguageDescriptionImpl description;
 
     private final Path launchScript;
@@ -74,7 +74,7 @@ public class TSLSLauncher extends LanguageServerLauncherTemplate {
     static {
         description = new LanguageDescriptionImpl();
         description.setFileExtensions(asList(EXTENSIONS));
-        description.setLanguageId(LANGUAGE_ID);
+        description.setLanguageId(Constants.TS_LANG);
         description.setMimeTypes(asList(MIME_TYPES));
         description.setHighlightingConfiguration("[\n" +
                                                  "  {\"include\":\"orion.js\"},\n" +

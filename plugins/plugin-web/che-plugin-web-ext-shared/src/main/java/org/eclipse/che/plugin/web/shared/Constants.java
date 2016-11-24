@@ -11,7 +11,7 @@
 package org.eclipse.che.plugin.web.shared;
 
 /**
- *
+ * Shared constants for Web plugin
  */
 public final class Constants {
 
@@ -25,6 +25,9 @@ public final class Constants {
 
     /** Default extension for TS files */
     public static String TS_EXT = "ts";
+
+    /** TypeScript file mime type*/
+    public static final String TS_MIME_TYPE = "application/typescript";
 
     private Constants() {
     }
