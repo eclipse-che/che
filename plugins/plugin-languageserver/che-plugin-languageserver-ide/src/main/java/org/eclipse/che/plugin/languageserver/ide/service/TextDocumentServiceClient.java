@@ -16,6 +16,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.languageserver.shared.lsapi.CompletionItemDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.CompletionListDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.DidChangeTextDocumentParamsDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.DidCloseTextDocumentParamsDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.DidOpenTextDocumentParamsDTO;
@@ -95,10 +96,9 @@ public class TextDocumentServiceClient {
      * @param position
      * @return
      */
-    public Promise<List<CompletionItemDTO>> completion(TextDocumentPositionParamsDTO position) {
+    public Promise<CompletionListDTO> completion(TextDocumentPositionParamsDTO position) {
         String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/completion";
-        Unmarshallable<List<CompletionItemDTO>> unmarshaller = unmarshallerFactory
-                .newListUnmarshaller(CompletionItemDTO.class);
+        Unmarshallable<CompletionListDTO> unmarshaller = unmarshallerFactory.newUnmarshaller(CompletionListDTO.class);
         return asyncRequestFactory.createPostRequest(requestUrl, null).header(ACCEPT, APPLICATION_JSON)
                                   .header(CONTENT_TYPE, APPLICATION_JSON).data(((JsonSerializable)position).toJson()).send(unmarshaller);
     }
