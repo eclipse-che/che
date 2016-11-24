@@ -308,7 +308,7 @@ public class OpenShiftConnector {
         dcFirstContainer.get("securityContext").get("runAsUser").set("1000");
 
         // LivenessProbe
-        dcFirstContainer.get("livenessProbe").get("tcpSocket").get("port").set(8080);
+        dcFirstContainer.get("livenessProbe").get("tcpSocket").get("port").set(4401);
         dcFirstContainer.get("livenessProbe").get("initialDelaySeconds").set(120);
         dcFirstContainer.get("livenessProbe").get("timeoutSeconds").set(1);
     }
