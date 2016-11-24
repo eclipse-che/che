@@ -26,8 +26,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.OneToMany;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -184,26 +182,32 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof WorkspaceConfigImpl)) return false;
-        final WorkspaceConfigImpl other = (WorkspaceConfigImpl)obj;
-        return Objects.equals(name, other.name)
-               && Objects.equals(defaultEnv, other.defaultEnv)
-               && getCommands().equals(other.getCommands())
-               && getEnvironments().equals(other.getEnvironments())
-               && getProjects().equals(other.getProjects())
-               && Objects.equals(description, other.description);
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof WorkspaceConfigImpl)) {
+            return false;
+        }
+        final WorkspaceConfigImpl that = (WorkspaceConfigImpl)obj;
+        return Objects.equals(id, that.id)
+               && Objects.equals(name, that.name)
+               && Objects.equals(description, that.description)
+               && Objects.equals(defaultEnv, that.defaultEnv)
+               && getCommands().equals(that.getCommands())
+               && getProjects().equals(that.getProjects())
+               && getEnvironments().equals(that.getEnvironments());
     }
 
     @Override
     public int hashCode() {
         int hash = 7;
+        hash = 31 * hash + Objects.hashCode(id);
         hash = 31 * hash + Objects.hashCode(name);
+        hash = 31 * hash + Objects.hashCode(description);
         hash = 31 * hash + Objects.hashCode(defaultEnv);
         hash = 31 * hash + getCommands().hashCode();
-        hash = 31 * hash + getEnvironments().hashCode();
         hash = 31 * hash + getProjects().hashCode();
-        hash = 31 * hash + Objects.hashCode(description);
+        hash = 31 * hash + getEnvironments().hashCode();
         return hash;
     }
 

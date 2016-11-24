@@ -38,14 +38,17 @@ import org.testng.annotations.Test;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonMap;
+import static java.util.stream.Collectors.toList;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -96,15 +99,15 @@ public class WorkspaceDaoTest {
             // 2 workspaces share 1 namespace
             workspaces[i] = createWorkspace("workspace-" + i, accounts[i / 2], "name-" + i);
         }
-        accountRepo.createAll(asList(accounts));
-        workspaceRepo.createAll(asList(workspaces));
+        accountRepo.createAll(Arrays.asList(accounts));
+        workspaceRepo.createAll(Stream.of(workspaces).map(WorkspaceImpl::new).collect(toList()));
     }
 
     @Test
     public void shouldGetWorkspaceById() throws Exception {
         final WorkspaceImpl workspace = workspaces[0];
 
-        assertEquals(workspaceDao.get(workspace.getId()), workspace);
+        assertEquals(workspaceDao.get(workspace.getId()), new WorkspaceImpl(workspace));
     }
 
     @Test(expectedExceptions = NotFoundException.class)
@@ -142,7 +145,7 @@ public class WorkspaceDaoTest {
     public void shouldGetWorkspaceByNameAndNamespace() throws Exception {
         final WorkspaceImpl workspace = workspaces[0];
 
-        assertEquals(workspaceDao.get(workspace.getConfig().getName(), workspace.getNamespace()), workspace);
+        assertEquals(workspaceDao.get(workspace.getConfig().getName(), workspace.getNamespace()), new WorkspaceImpl(workspace));
     }
 
     @Test(expectedExceptions = NotFoundException.class)
@@ -484,8 +487,6 @@ public class WorkspaceDaoTest {
         wCfg.setCommands(commands);
         wCfg.setProjects(projects);
         wCfg.setEnvironments(new HashMap<>(environments));
-
-        wCfg.getProjects().forEach(ProjectConfigImpl::prePersistAttributes);
 
         return wCfg;
     }

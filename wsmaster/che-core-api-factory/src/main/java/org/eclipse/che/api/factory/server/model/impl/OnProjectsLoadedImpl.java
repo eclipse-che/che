@@ -24,6 +24,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static java.util.stream.Collectors.toList;
 
@@ -75,21 +76,30 @@ public class OnProjectsLoadedImpl implements OnProjectsLoaded {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof OnProjectsLoadedImpl)) return false;
-        final OnProjectsLoadedImpl other = (OnProjectsLoadedImpl)obj;
-        return getActions().equals(other.getActions());
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof OnProjectsLoadedImpl)) {
+            return false;
+        }
+        final OnProjectsLoadedImpl that = (OnProjectsLoadedImpl)obj;
+        return Objects.equals(id, that.id)
+               && getActions().equals(that.getActions());
     }
 
     @Override
     public int hashCode() {
-        return getActions().hashCode();
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(id);
+        hash = 31 * hash + getActions().hashCode();
+        return hash;
     }
 
     @Override
     public String toString() {
         return "OnProjectsLoadedImpl{" +
-               "actions=" + actions +
+               "id=" + id +
+               ", actions=" + actions +
                '}';
     }
 }

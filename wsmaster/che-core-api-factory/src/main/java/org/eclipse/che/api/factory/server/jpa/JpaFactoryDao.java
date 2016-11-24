@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
@@ -65,14 +66,14 @@ public class JpaFactoryDao implements FactoryDao {
         } catch (RuntimeException ex) {
             throw new ServerException(ex.getLocalizedMessage(), ex);
         }
-        return factory;
+        return new FactoryImpl(factory);
     }
 
     @Override
     public FactoryImpl update(FactoryImpl update) throws NotFoundException, ConflictException, ServerException {
         requireNonNull(update);
         try {
-            return doUpdate(update);
+            return new FactoryImpl(doUpdate(update));
         } catch (DuplicateKeyException ex) {
             throw new ConflictException(ex.getLocalizedMessage());
         } catch (RuntimeException ex) {
@@ -99,7 +100,7 @@ public class JpaFactoryDao implements FactoryDao {
             if (factory == null) {
                 throw new NotFoundException(format("Factory with id '%s' doesn't exist", id));
             }
-            return factory;
+            return new FactoryImpl(factory);
         } catch (RuntimeException ex) {
             throw new ServerException(ex.getLocalizedMessage(), ex);
         }
@@ -131,7 +132,10 @@ public class JpaFactoryDao implements FactoryDao {
             for (Map.Entry<String, String> entry : params.entrySet()) {
                 typedQuery.setParameter(entry.getKey(), entry.getValue());
             }
-            return typedQuery.getResultList();
+            return typedQuery.getResultList()
+                             .stream()
+                             .map(FactoryImpl::new)
+                             .collect(Collectors.toList());
         } catch (RuntimeException ex) {
             throw new ServerException(ex.getLocalizedMessage(), ex);
         }
