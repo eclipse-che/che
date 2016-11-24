@@ -13,7 +13,6 @@ package org.eclipse.che.ide.extension.machine.client.perspective.widgets.recipe;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.ide.api.machine.RecipeServiceClient;
 import org.eclipse.che.api.machine.shared.dto.recipe.NewRecipe;
 import org.eclipse.che.api.machine.shared.dto.recipe.RecipeDescriptor;
 import org.eclipse.che.api.machine.shared.dto.recipe.RecipeUpdate;
@@ -21,9 +20,7 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
-import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.notification.StatusNotification;
-import org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode;
+import org.eclipse.che.ide.api.machine.RecipeServiceClient;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
@@ -47,9 +44,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -70,8 +65,6 @@ public class RecipePartPresenterTest {
     @Mock
     private EventBus                    eventBus;
     @Mock
-    private NotificationManager         notificationManager;
-    @Mock
     private RecipeServiceClient         service;
     @Mock
     private MachineLocalizationConstant locale;
@@ -85,8 +78,6 @@ public class RecipePartPresenterTest {
     private RecipeDescriptor  recipeDescriptor1;
     @Mock
     private RecipeDescriptor  recipeDescriptor2;
-    @Mock
-    private RecipeWidget      recipeWidget;
     @Mock
     private RecipeEditorPanel recipeEditorPanel;
     @Mock
@@ -114,8 +105,6 @@ public class RecipePartPresenterTest {
     @Captor
     private ArgumentCaptor<Operation<RecipeDescriptor>>       savedDescriptorCaptor;
     @Captor
-    private ArgumentCaptor<Operation<PromiseError>>           operationErrorArgumentCaptor;
-    @Captor
     private ArgumentCaptor<Operation<Void>>                   deleteCaptor;
 
     RecipePartPresenter recipePartPresenter;
@@ -132,7 +121,6 @@ public class RecipePartPresenterTest {
         recipePartPresenter = new RecipePartPresenter(recipePartView,
                                                       machineResources,
                                                       eventBus,
-                                                      notificationManager,
                                                       locale,
                                                       recipesContainerPresenter,
                                                       dtoFactory,
@@ -324,7 +312,6 @@ public class RecipePartPresenterTest {
         savedDescriptorCaptor.getValue().apply(recipeDescriptor1);
         verify(recipeDescriptor1).setScript("script");
         verify(recipeDescriptor1).setTags(recipeDescriptor1.getTags());
-        verify(notificationManager).notify(eq("Recipe \"name\" was saved."));
     }
 
     @Test
@@ -392,10 +379,5 @@ public class RecipePartPresenterTest {
 
         PromiseError promiseError = mock(PromiseError.class);
         when(promiseError.getMessage()).thenReturn("text");
-
-        verify(recipeDescriptorPromise).catchError(operationErrorArgumentCaptor.capture());
-        operationErrorArgumentCaptor.getValue().apply(promiseError);
-
-        verify(notificationManager).notify(anyString(), anyString(), any(StatusNotification.Status.class), any(DisplayMode.class));
     }
 }

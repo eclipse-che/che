@@ -26,6 +26,8 @@ import org.eclipse.che.ide.api.notification.NotificationObserver;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.notification.StatusNotification.Status;
 import org.eclipse.che.ide.api.notification.StatusNotificationListener;
+import org.eclipse.che.ide.api.parts.PartStackType;
+import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.providers.DynaObject;
 import org.vectomatic.dom.svg.ui.SVGResource;
@@ -34,6 +36,7 @@ import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.eclipse.che.ide.api.notification.ReadState.READ;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
@@ -86,7 +89,8 @@ public class NotificationManagerImpl extends BasePresenter implements Notificati
     public NotificationManagerImpl(NotificationManagerView view,
                                    NotificationContainer nContainer,
                                    NotificationPopupStack nPopupStack,
-                                   Resources resources) {
+                                   Resources resources,
+                                   WorkspaceAgent workspaceAgent) {
         this.view = view;
         this.nContainer = nContainer;
         this.nContainer.setDelegate(this);
@@ -96,6 +100,8 @@ public class NotificationManagerImpl extends BasePresenter implements Notificati
         this.view.setContainer(nContainer);
         this.view.setTitle(TITLE);
         this.resources = resources;
+
+        checkNotNull(workspaceAgent.getPartStack(PartStackType.INFORMATION), "Information part stack should not be a null").addPart(this);
     }
 
     @Inject

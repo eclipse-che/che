@@ -16,8 +16,8 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 
 import javax.validation.constraints.NotNull;
@@ -27,7 +27,7 @@ import javax.validation.constraints.NotNull;
  *
  * @author Dmitry Shnurenko
  */
-final class TerminalViewImpl extends Composite implements TerminalView, RequiresResize{
+final class TerminalViewImpl extends Composite implements TerminalView, Focusable {
 
     interface TerminalViewImplUiBinder extends UiBinder<Widget, TerminalViewImpl> {
     }
@@ -76,12 +76,6 @@ final class TerminalViewImpl extends Composite implements TerminalView, Requires
         terminalPanel.setVisible(false);
     }
 
-    @Override
-    public void onResize() {
-        resizeTimer.cancel();
-        resizeTimer.schedule(200);
-    }
-
     private Timer resizeTimer = new Timer() {
         @Override
         public void run() {
@@ -103,4 +97,23 @@ final class TerminalViewImpl extends Composite implements TerminalView, Requires
         delegate.setTerminalSize(x, y);
     }
 
+    @Override
+    public int getTabIndex() {
+        return 0;
+    }
+
+    @Override
+    public void setAccessKey(char key) {
+
+    }
+
+    @Override
+    public void setFocus(boolean focused) {
+        delegate.setFocus(focused);
+    }
+
+    @Override
+    public void setTabIndex(int index) {
+
+    }
 }

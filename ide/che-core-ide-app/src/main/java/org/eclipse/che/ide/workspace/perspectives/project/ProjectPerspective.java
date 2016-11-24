@@ -15,9 +15,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.PartStack;
-import org.eclipse.che.ide.api.parts.ProjectExplorerPart;
 import org.eclipse.che.ide.part.editor.multipart.EditorMultiPartStackPresenter;
 import org.eclipse.che.ide.workspace.PartStackPresenterFactory;
 import org.eclipse.che.ide.workspace.PartStackViewFactory;
@@ -55,19 +53,13 @@ public class ProjectPerspective extends AbstractPerspective {
                               PartStackPresenterFactory stackPresenterFactory,
                               PartStackViewFactory partViewFactory,
                               WorkBenchControllerFactory controllerFactory,
-                              ProjectExplorerPart projectExplorerPart,
-                              NotificationManager notificationManager,
                               EventBus eventBus,
                               DynaProvider dynaProvider) {
         super(PROJECT_PERSPECTIVE_ID, view, stackPresenterFactory, partViewFactory, controllerFactory, eventBus, dynaProvider);
 
-        notificationManager.addRule(PROJECT_PERSPECTIVE_ID);
-
         partStacks.put(EDITING, editorMultiPartStackPresenter);
 
-        addPart(notificationManager, INFORMATION);
-        addPart(projectExplorerPart, NAVIGATION);
-                PartStack navigatorPanel = getPartStack(NAVIGATION);
+        PartStack navigatorPanel = getPartStack(NAVIGATION);
         PartStack editorPanel = getPartStack(EDITING);
         PartStack toolPanel = getPartStack(TOOLING);
         PartStack infoPanel = getPartStack(INFORMATION);
@@ -76,13 +68,10 @@ public class ProjectPerspective extends AbstractPerspective {
             return;
         }
 
-        infoPanel.updateStack();
-
         navigatorPanel.go(view.getNavigationPanel());
         editorPanel.go(view.getEditorPanel());
         toolPanel.go(view.getToolPanel());
         infoPanel.go(view.getInformationPanel());
-        openActivePart(NAVIGATION);
     }
 
     /** {@inheritDoc} */

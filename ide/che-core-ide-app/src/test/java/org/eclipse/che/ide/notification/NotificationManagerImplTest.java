@@ -12,15 +12,15 @@ package org.eclipse.che.ide.notification;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwtmockito.GwtMockitoTestRunner;
-import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.notification.Notification;
 import org.eclipse.che.ide.api.notification.NotificationListener;
 import org.eclipse.che.ide.api.notification.ReadState;
 import org.eclipse.che.ide.api.notification.StatusNotification;
+import org.eclipse.che.ide.api.parts.PartStackType;
+import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.part.PartStackPresenter;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,15 +51,13 @@ public class NotificationManagerImplTest {
     private Resources resources;
 
     @Mock
-    private EventBus                eventBus;
-    @Mock
     private NotificationManagerView view;
-    @Mock
-    private DialogFactory           dialogFactory;
     @Mock
     private NotificationContainer   notificationContainer;
     @Mock
     private NotificationPopupStack  notificationMessageStack;
+    @Mock
+    private WorkspaceAgent workspaceAgent;
 
     private NotificationManagerImpl manager;
 
@@ -68,7 +66,8 @@ public class NotificationManagerImplTest {
 
     @Before
     public void disarm() {
-        manager = new NotificationManagerImpl(view, notificationContainer, notificationMessageStack, resources);
+        when(workspaceAgent.getPartStack(eq(PartStackType.INFORMATION))).thenReturn(partStack);
+        manager = new NotificationManagerImpl(view, notificationContainer, notificationMessageStack, resources, workspaceAgent);
         manager.setPartStack(partStack);
         when(partStack.getActivePart()).thenReturn(manager);
         reset(view);

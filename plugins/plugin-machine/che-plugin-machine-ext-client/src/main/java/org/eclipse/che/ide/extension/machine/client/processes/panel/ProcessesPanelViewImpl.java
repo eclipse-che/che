@@ -10,10 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.processes.panel;
 
-import com.google.gwt.core.client.Scheduler;
 import elemental.events.KeyboardEvent;
 import elemental.events.MouseEvent;
 
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
@@ -22,6 +22,7 @@ import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
@@ -50,7 +51,6 @@ import org.eclipse.che.ide.util.input.SignalEvent;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -88,6 +88,8 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
     private String activeProcessId = "";
 
+    private Focusable lastFosuced;
+
     @Inject
     public ProcessesPanelViewImpl(PartStackUIResources partStackUIResources,
                                   org.eclipse.che.ide.Resources resources,
@@ -109,7 +111,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
         renderer.setAddTerminalClickHandler(new AddTerminalClickHandler() {
             @Override
             public void onAddTerminalClick(@NotNull String machineId) {
-                delegate.onAddTerminal(machineId);
+                delegate.onAddTerminal(machineId, this);
             }
         });
 
@@ -473,6 +475,16 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
         final ProcessTreeNode processTreeNode = widget2TreeNodes.get(widget);
         if (processTreeNode != null) {
             selectNode(processTreeNode);
+        }
+
+        if (lastFosuced != null && !lastFosuced.equals(widget)) {
+            lastFosuced.setFocus(false);
+        }
+
+        if (widget instanceof Focusable) {
+            ((Focusable)widget).setFocus(true);
+
+            lastFosuced = (Focusable)widget;
         }
     }
 

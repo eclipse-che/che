@@ -25,8 +25,12 @@ import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.data.tree.TreeExpander;
 import org.eclipse.che.ide.api.data.tree.settings.NodeSettings;
 import org.eclipse.che.ide.api.data.tree.settings.SettingsProvider;
+import org.eclipse.che.ide.api.extension.ExtensionsInitializedEvent;
+import org.eclipse.che.ide.api.extension.ExtensionsInitializedEvent.ExtensionsInitializedHandler;
 import org.eclipse.che.ide.api.mvp.View;
-import org.eclipse.che.ide.api.parts.ProjectExplorerPart;
+import org.eclipse.che.ide.api.parts.PartStack;
+import org.eclipse.che.ide.api.parts.PartStackType;
+import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Project;
@@ -54,6 +58,7 @@ import org.vectomatic.dom.svg.ui.SVGResource;
 import javax.validation.constraints.NotNull;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_FROM;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_TO;
@@ -69,7 +74,6 @@ import static org.eclipse.che.ide.api.resources.ResourceDelta.UPDATED;
 @Singleton
 @DynaObject
 public class ProjectExplorerPresenter extends BasePresenter implements ActionDelegate,
-                                                                       ProjectExplorerPart,
                                                                        ResourceChangedHandler,
                                                                        MarkerChangedHandler,
                                                                        SyntheticNodeUpdateEvent.SyntheticNodeUpdateHandler {
@@ -91,7 +95,8 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
                                     Resources resources,
                                     final ResourceNode.NodeFactory nodeFactory,
                                     final SettingsProvider settingsProvider,
-                                    final AppContext appContext) {
+                                    final AppContext appContext,
+                                    final WorkspaceAgent workspaceAgent) {
         this.view = view;
         this.nodeFactory = nodeFactory;
         this.settingsProvider = settingsProvider;
@@ -130,6 +135,19 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
         treeExpander = new ProjectExplorerTreeExpander(view.getTree(), appContext);
 
         registerNative();
+
+        final PartStack partStack = checkNotNull(workspaceAgent.getPartStack(PartStackType.NAVIGATION),
+                                                 "Navigation part stack should not be a null");
+        partStack.addPart(this);
+        partStack.setActivePart(this);
+
+        // when ide has already initialized, then we force set focus to the current part
+        eventBus.addHandler(ExtensionsInitializedEvent.getType(), new ExtensionsInitializedHandler() {
+            @Override
+            public void onExtensionsInitialized(ExtensionsInitializedEvent event) {
+                partStack.setActivePart(ProjectExplorerPresenter.this);
+            }
+        });
     }
 
     /* Expose Project Explorer's internal API to the world, to allow automated Selenium scripts expand all projects tree. */
@@ -162,6 +180,7 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void onResourceChanged(ResourceChangedEvent event) {
         final Tree tree = view.getTree();
         final ResourceDelta delta = event.getDelta();

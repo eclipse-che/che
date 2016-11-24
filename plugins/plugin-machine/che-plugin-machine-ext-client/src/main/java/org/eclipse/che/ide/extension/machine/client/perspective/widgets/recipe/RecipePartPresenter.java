@@ -16,18 +16,16 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.ide.api.machine.RecipeServiceClient;
 import org.eclipse.che.api.machine.shared.dto.recipe.NewRecipe;
 import org.eclipse.che.api.machine.shared.dto.recipe.RecipeDescriptor;
 import org.eclipse.che.api.machine.shared.dto.recipe.RecipeUpdate;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
 import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
-import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.machine.RecipeServiceClient;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
@@ -46,9 +44,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-
 /**
  * The class defines methods which contains business logic to control recipe's script.
  *
@@ -65,7 +60,6 @@ public class RecipePartPresenter extends BasePresenter implements RecipePartView
     private final MachineLocalizationConstant locale;
     private final MachineResources            resources;
     private final RecipesContainerPresenter   recipesContainerPresenter;
-    private final NotificationManager         notificationManager;
     private final RecipeServiceClient         service;
     private final DtoFactory                  dtoFactory;
 
@@ -76,14 +70,12 @@ public class RecipePartPresenter extends BasePresenter implements RecipePartView
     public RecipePartPresenter(RecipePartView view,
                                MachineResources resources,
                                EventBus eventBus,
-                               NotificationManager notificationManager,
                                MachineLocalizationConstant locale,
                                RecipesContainerPresenter recipesContainerPresenter,
                                DtoFactory dtoFactory,
                                RecipeServiceClient service) {
         this.view = view;
         this.locale = locale;
-        this.notificationManager = notificationManager;
         this.resources = resources;
         this.recipesContainerPresenter = recipesContainerPresenter;
         this.service = service;
@@ -139,7 +131,6 @@ public class RecipePartPresenter extends BasePresenter implements RecipePartView
         recipeRemoved.then(new Operation<Void>() {
             @Override
             public void apply(Void arg) throws OperationException {
-                notificationManager.notify("Recipe \"" + selectedRecipeDescriptor.getName() + "\"  was deleted.");
                 recipes.remove(selectedRecipe);
                 view.removeRecipe(selectedRecipe);
                 recipesContainerPresenter.removeRecipePanel(selectedRecipe);
@@ -200,15 +191,6 @@ public class RecipePartPresenter extends BasePresenter implements RecipePartView
                 onRecipeClicked(createdRecipeWidget);
             }
         });
-
-        createRecipe.catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError arg) throws OperationException {
-                if (arg.getMessage() != null) {
-                    notificationManager.notify(locale.failedToCreateRecipe(), arg.getMessage(), FAIL, FLOAT_MODE);
-                }
-            }
-        });
     }
 
     /** {@inheritDoc} */
@@ -232,17 +214,6 @@ public class RecipePartPresenter extends BasePresenter implements RecipePartView
                 selectedRecipeDescriptor.setName(recipeDescriptor.getName());
 
                 selectedRecipe.setName(recipeDescriptor.getName());
-
-                notificationManager.notify("Recipe \"" + recipeDescriptor.getName() + "\" was saved.");
-            }
-        });
-
-        updateRecipe.catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError arg) throws OperationException {
-                if (arg.getMessage() != null) {
-                    notificationManager.notify(locale.failedToSaveRecipe(), arg.getMessage(), FAIL, FLOAT_MODE);
-                }
             }
         });
     }

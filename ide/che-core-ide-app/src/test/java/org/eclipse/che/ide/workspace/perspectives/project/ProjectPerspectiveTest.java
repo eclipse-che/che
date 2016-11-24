@@ -18,10 +18,7 @@ import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.parts.EditorPartStack;
 import org.eclipse.che.ide.api.parts.PartStackView;
-import org.eclipse.che.ide.api.parts.ProjectExplorerPart;
 import org.eclipse.che.ide.part.PartStackPresenter;
 import org.eclipse.che.ide.part.editor.multipart.EditorMultiPartStackPresenter;
 import org.eclipse.che.ide.workspace.PartStackPresenterFactory;
@@ -50,17 +47,11 @@ public class ProjectPerspectiveTest {
     @Mock
     private PerspectiveViewImpl           view;
     @Mock
-    private EditorPartStack               editorPartStackPresenter;
-    @Mock
     private PartStackViewFactory          partViewFactory;
     @Mock
     private WorkBenchControllerFactory    controllerFactory;
     @Mock
     private PartStackPresenterFactory     stackPresenterFactory;
-    @Mock
-    private ProjectExplorerPart           projectExplorerPart;
-    @Mock
-    private NotificationManager           notificationManager;
     @Mock
     private EventBus                      eventBus;
     @Mock
@@ -116,28 +107,8 @@ public class ProjectPerspectiveTest {
                                              stackPresenterFactory,
                                              partViewFactory,
                                              controllerFactory,
-                                             projectExplorerPart,
-                                             notificationManager,
                                              eventBus,
                                              dynaProvider);
-    }
-
-    @Test
-    public void constructorShouldBeVerified() {
-        when(partStackPresenter.containsPart(projectExplorerPart)).thenReturn(true);
-
-        perspective = new ProjectPerspective(view,
-                                             editorMultiPartStackPresenter,
-                                             stackPresenterFactory,
-                                             partViewFactory,
-                                             controllerFactory,
-                                             projectExplorerPart,
-                                             notificationManager,
-                                             eventBus,
-                                             dynaProvider);
-
-        verify(partStackPresenter, times(2)).addPart(notificationManager, null);
-        verify(partStackPresenter).addPart(projectExplorerPart, null);
     }
 
     @Test
@@ -151,7 +122,6 @@ public class ProjectPerspectiveTest {
 
         verify(partStackPresenter, times(2)).go(simplePanel);
         verify(partStackPresenter).go(simpleLayoutPanel);
-        verify(partStackPresenter).openPreviousActivePart();
         verify(container).setWidget(view);
     }
 }
