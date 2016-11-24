@@ -74,6 +74,7 @@ import org.eclipse.che.ide.util.loging.Log;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
+import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
