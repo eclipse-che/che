@@ -104,7 +104,7 @@
                                che-label-name="Delete workspace"
                                che-label-description="This is irreversible. Deleting your workspace will also delete its projects.">
             <che-button-danger che-button-title="Delete"
-                               ng-disabled="!(workspaceDetailsController.isCreationFlow === false || workspaceDetailsController.getWorkspaceStatus() === 'RUNNING' || workspaceDetailsController.getWorkspaceStatus() === 'STOPPED' || workspaceDetailsController.getWorkspaceStatus() === 'ERROR')"
+                               ng-disabled="workspaceDetailsController.isCreationFlow || (workspaceDetailsController.getWorkspaceStatus() !== 'RUNNING' && workspaceDetailsController.getWorkspaceStatus() !== 'STOPPED' && workspaceDetailsController.getWorkspaceStatus() !== 'ERROR')"
                                ng-click="workspaceDetailsController.deleteWorkspace($event)"></che-button-danger>
           </che-label-container>
 
