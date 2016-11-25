@@ -34,7 +34,7 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceRuntime;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.util.AbstractMessageConsumer;
-import org.eclipse.che.api.core.util.LoggingUncaughtExceptionHandler;
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.api.core.util.MessageConsumer;
 import org.eclipse.che.api.core.util.WebsocketMessageConsumer;
 import org.eclipse.che.api.environment.server.CheEnvironmentEngine;

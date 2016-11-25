@@ -13,7 +13,7 @@ package org.eclipse.che.api.vfs.search.impl;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.util.LoggingUncaughtExceptionHandler;
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.api.vfs.VirtualFileFilter;
 import org.eclipse.che.api.vfs.VirtualFileFilters;
 import org.eclipse.che.api.vfs.VirtualFileSystem;

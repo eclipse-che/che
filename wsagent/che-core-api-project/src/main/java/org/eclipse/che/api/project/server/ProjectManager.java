@@ -22,7 +22,7 @@ import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.core.model.project.type.ProjectType;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.util.LineConsumerFactory;
-import org.eclipse.che.api.core.util.LoggingUncaughtExceptionHandler;
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
 import org.eclipse.che.api.project.server.importer.ProjectImportOutputWSLineConsumer;

@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.notification;
 
-import org.eclipse.che.api.core.util.LoggingUncaughtExceptionHandler;
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.lang.Pair;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;

@@ -15,7 +15,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.core.util.LoggingUncaughtExceptionHandler;
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.api.machine.server.event.InstanceStateEvent;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.plugin.docker.client.DockerConnector;

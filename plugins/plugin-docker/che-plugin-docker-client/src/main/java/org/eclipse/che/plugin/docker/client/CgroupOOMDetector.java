@@ -13,7 +13,7 @@ package org.eclipse.che.plugin.docker.client;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.sun.jna.ptr.LongByReference;
 
-import org.eclipse.che.api.core.util.LoggingUncaughtExceptionHandler;
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.api.core.util.SystemInfo;
 import org.eclipse.che.commons.lang.Size;
 import org.slf4j.Logger;

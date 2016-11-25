@@ -12,7 +12,7 @@ package org.eclipse.che.api.vfs.impl.file;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
-import org.eclipse.che.api.core.util.LoggingUncaughtExceptionHandler;
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -21,7 +21,7 @@ import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.model.machine.ServerConf;
 import org.eclipse.che.api.core.util.FileCleaner;
 import org.eclipse.che.api.core.util.LineConsumer;
-import org.eclipse.che.api.core.util.LoggingUncaughtExceptionHandler;
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.api.core.util.SystemInfo;
 import org.eclipse.che.api.environment.server.MachineInstanceProvider;
 import org.eclipse.che.api.environment.server.model.CheServiceImpl;

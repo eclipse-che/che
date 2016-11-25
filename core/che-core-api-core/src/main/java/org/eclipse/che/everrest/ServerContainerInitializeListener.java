@@ -13,6 +13,7 @@ package org.eclipse.che.everrest;
 import com.google.common.base.MoreObjects;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.everrest.core.DependencySupplier;
@@ -174,7 +175,11 @@ public class ServerContainerInitializeListener implements ServletContextListener
         final EverrestConfiguration everrestConfiguration = getEverrestConfiguration(servletContext);
         final String threadNameFormat = "everrest.WSConnection." + servletContext.getServletContextName() + "-%d";
         return Executors.newFixedThreadPool(everrestConfiguration.getAsynchronousPoolSize(),
-                                            new ThreadFactoryBuilder().setNameFormat(threadNameFormat).setDaemon(true).build());
+                                            new ThreadFactoryBuilder().setNameFormat(threadNameFormat)
+                                                                      .setUncaughtExceptionHandler(
+                                                                              LoggingUncaughtExceptionHandler.getInstance())
+                                                                      .setDaemon(true)
+                                                                      .build());
     }
 
     protected SecurityContext createSecurityContext(final HandshakeRequest req) {
