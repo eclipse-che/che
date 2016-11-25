@@ -129,18 +129,18 @@ fi
 ### Install java ###
 ####################
 downloadJava() {
+    echo "Downloading JDK 1.8.0_111"
+    JDK_URL=http://download.oracle.com/otn-pub/java/jdk/8u111-b14/jdk-8u111-linux-x64.tar.gz
+    curl -s -j -k -L -H "Cookie: oraclelicense=accept-securebackup-cookie" "${JDK_URL}" | tar -C ${CHE_DIR} -xzf -
+    mv ${CHE_DIR}/jdk1.8.0_111 ${CHE_DIR}/jdk1.8
+
     export JAVA_HOME=${CHE_DIR}/jdk1.8
-    command -v ${JAVA_HOME}/bin/java >/dev/null 2>&1 || {
-        JDK_URL=http://download.oracle.com/otn-pub/java/jdk/8u111-b14/jdk-8u111-linux-x64.tar.gz
-        curl -s -j -k -L -H "Cookie: oraclelicense=accept-securebackup-cookie" "${JDK_URL}" | tar -C ${CHE_DIR} -xzf -
-        mv ${CHE_DIR}/jdk1.8.0_111 ${CHE_DIR}/jdk1.8
-    }
 }
 
-command -v java >/dev/null 2>&1 || {
-    downloadJava
+command -v ${JAVA_HOME}/bin/java >/dev/null 2>&1 || {
+    downloadJava;
 } && {
-    java_version=$(java -version 2>&1 | sed 's/java version "\\(.*\\)\\.\\(.*\\)\\..*"/\\1\\2/; 1q')
+    java_version=$(${JAVA_HOME}/bin/java -version 2>&1 | sed 's/.* version "\\(.*\\)\\.\\(.*\\)\\..*"/\\1\\2/; 1q')
     if [ "${java_version}" -lt "18" ]; then
         downloadJava;
     fi
