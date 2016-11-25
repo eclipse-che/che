@@ -193,7 +193,10 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         final PartStack partStack = checkNotNull(workspaceAgent.getPartStack(PartStackType.INFORMATION),
                                                  "Information part stack should not be a null");
         partStack.addPart(this);
-        partStack.setActivePart(this);
+
+        if (appContext.getFactory() == null) {
+            partStack.setActivePart(this);
+        }
     }
 
     /**
