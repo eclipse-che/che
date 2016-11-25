@@ -10,14 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.event.ng;
 
-import com.google.inject.Provider;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.core.jsonrpc.shared.JsonRpcRequest;
 import org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto;
-import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.jsonrpc.JsonRpcRequestTransmitter;
+import org.eclipse.che.ide.jsonrpc.RequestTransmitter;
 import org.eclipse.che.ide.util.loging.Log;
 
 import javax.inject.Inject;
@@ -28,13 +25,11 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class ClientServerEventService {
-    private final JsonRpcRequestTransmitter transmitter;
-    private final DtoFactory                dtoFactory;
+    private final RequestTransmitter transmitter;
+    private final DtoFactory         dtoFactory;
 
     @Inject
-    public ClientServerEventService(final JsonRpcRequestTransmitter transmitter,
-                                    final EventBus eventBus,
-                                    final DtoFactory dtoFactory) {
+    public ClientServerEventService(RequestTransmitter transmitter, EventBus eventBus, DtoFactory dtoFactory) {
         this.transmitter = transmitter;
         this.dtoFactory = dtoFactory;
 
@@ -52,17 +47,13 @@ public class ClientServerEventService {
     }
 
     private void transmit(String path, String oldPath, FileTrackingOperationDto.Type type) {
-        final String params = dtoFactory.createDto(FileTrackingOperationDto.class)
-                                        .withPath(path)
-                                        .withType(type)
-                                        .withOldPath(oldPath)
-                                        .toString();
+        final String endpointId = "ws-agent";
+        final String method = "track:editor-file";
+        final FileTrackingOperationDto dto = dtoFactory.createDto(FileTrackingOperationDto.class)
+                                                       .withPath(path)
+                                                       .withType(type)
+                                                       .withOldPath(oldPath);
 
-        final JsonRpcRequest request = dtoFactory.createDto(JsonRpcRequest.class)
-                                                 .withJsonrpc("2.0")
-                                                 .withMethod("track:editor-file")
-                                                 .withParams(params);
-
-        transmitter.transmit(request);
+        transmitter.transmitNotification(endpointId, method, dto);
     }
 }

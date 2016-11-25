@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.git;
 
-import org.eclipse.che.api.core.jsonrpc.JsonRpcRequestTransmitter;
+import org.eclipse.che.api.core.jsonrpc.RequestTransmitter;
 import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,7 +41,7 @@ public class GitCheckoutHiEventDetectorTest extends HiVfsEventDetectorTestHelper
     private static final String GIT_OPERATIONS_CHANNEL = "git-operations-channel";
 
     @Mock
-    private JsonRpcRequestTransmitter transmitter;
+    private RequestTransmitter        transmitter;
     @Mock
     private VirtualFileSystemProvider virtualFileSystemProvider;
 

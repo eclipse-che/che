@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.websocket.impl;
 
+import org.eclipse.che.api.core.websocket.WebSocketMessageReceiver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,21 +30,22 @@ import javax.websocket.server.PathParam;
 public class BasicWebSocketEndpoint {
     private static final Logger LOG = LoggerFactory.getLogger(BasicWebSocketEndpoint.class);
 
-    private final WebSocketSessionRegistry        registry;
-    private final PendingMessagesReSender         reSender;
-    private final WebSocketTransmissionDispatcher dispatcher;
+    private final WebSocketSessionRegistry registry;
+    private final MessagesReSender         reSender;
+    private final WebSocketMessageReceiver receiver;
 
-    protected BasicWebSocketEndpoint(WebSocketSessionRegistry registry,
-                                  PendingMessagesReSender reSender,
-                                  WebSocketTransmissionDispatcher dispatcher) {
+
+    public BasicWebSocketEndpoint(WebSocketSessionRegistry registry,
+                                  MessagesReSender reSender,
+                                  WebSocketMessageReceiver receiver) {
 
         this.registry = registry;
         this.reSender = reSender;
-        this.dispatcher = dispatcher;
+        this.receiver = receiver;
     }
 
     @OnOpen
-    public void onOpen(Session session, @PathParam("endpoint-id") Integer endpointId) {
+    public void onOpen(Session session, @PathParam("endpoint-id") String endpointId) {
         LOG.info("Web socket session opened");
         LOG.info("Endpoint: {}", endpointId);
 
@@ -54,16 +56,16 @@ public class BasicWebSocketEndpoint {
     }
 
     @OnMessage
-    public void onMessage(String message, @PathParam("endpoint-id") Integer endpointId) {
+    public void onMessage(String message, @PathParam("endpoint-id") String endpointId) {
         LOG.debug("Receiving a web socket message.");
         LOG.debug("Endpoint: {}", endpointId);
         LOG.debug("Message: {}", message);
 
-        dispatcher.dispatch(message, endpointId);
+        receiver.receive(endpointId, message);
     }
 
     @OnClose
-    public void onClose(CloseReason closeReason, @PathParam("endpoint-id") Integer endpointId) {
+    public void onClose(CloseReason closeReason, @PathParam("endpoint-id") String endpointId) {
         LOG.info("Web socket session closed");
         LOG.debug("Endpoint: {}", endpointId);
         LOG.debug("Close reason: {}:{}", closeReason.getReasonPhrase(), closeReason.getCloseCode());
@@ -72,7 +74,7 @@ public class BasicWebSocketEndpoint {
     }
 
     @OnError
-    public void onError(Throwable t, @PathParam("endpoint-id") Integer endpointId) {
+    public void onError(Throwable t, @PathParam("endpoint-id") String endpointId) {
         LOG.info("Web socket session error");
         LOG.debug("Endpoint: {}", endpointId);
         LOG.debug("Error: {}", t);
