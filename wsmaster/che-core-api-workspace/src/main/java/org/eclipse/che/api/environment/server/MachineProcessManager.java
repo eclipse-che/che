@@ -22,7 +22,7 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.util.CompositeLineConsumer;
 import org.eclipse.che.api.core.util.FileLineConsumer;
 import org.eclipse.che.api.core.util.LineConsumer;
-import org.eclipse.che.api.core.util.LogWritingUncaughtExceptionHandler;
+import org.eclipse.che.api.core.util.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.api.core.util.WebsocketLineConsumer;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.spi.Instance;
@@ -77,7 +77,7 @@ public class MachineProcessManager {
 
         executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("MachineProcessManager-%d")
                                                                            .setUncaughtExceptionHandler(
-                                                                                   LogWritingUncaughtExceptionHandler.getInstance())
+                                                                                   LoggingUncaughtExceptionHandler.getInstance())
                                                                            .setDaemon(false)
                                                                            .build());
     }

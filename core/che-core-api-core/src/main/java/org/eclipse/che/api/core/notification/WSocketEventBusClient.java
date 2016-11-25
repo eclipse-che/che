@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.notification;
 
-import org.eclipse.che.api.core.util.LogWritingUncaughtExceptionHandler;
+import org.eclipse.che.api.core.util.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.lang.Pair;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -110,7 +110,7 @@ public final class WSocketEventBusClient {
                 if (!cfg.isEmpty()) {
                     executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("WSocketEventBusClient-%d")
                                                                                        .setUncaughtExceptionHandler(
-                                                                                               LogWritingUncaughtExceptionHandler
+                                                                                               LoggingUncaughtExceptionHandler
                                                                                                        .getInstance())
                                                                                        .setDaemon(true).build());
                     for (Map.Entry<URI, Set<String>> entry : cfg.entrySet()) {

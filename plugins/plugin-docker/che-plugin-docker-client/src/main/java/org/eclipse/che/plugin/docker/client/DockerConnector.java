@@ -19,7 +19,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 
 import org.eclipse.che.api.core.util.FileCleaner;
-import org.eclipse.che.api.core.util.LogWritingUncaughtExceptionHandler;
+import org.eclipse.che.api.core.util.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.TarUtils;
 import org.eclipse.che.commons.lang.ws.rs.ExtMediaType;
@@ -149,7 +149,7 @@ public class DockerConnector {
         this.apiVersionPathPrefix = dockerApiVersionPathPrefixProvider.get();
         executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder()
                                                          .setUncaughtExceptionHandler(
-                                                                 LogWritingUncaughtExceptionHandler.getInstance())
+                                                                 LoggingUncaughtExceptionHandler.getInstance())
                                                          .setNameFormat("DockerApiConnector-%d")
                                                          .setDaemon(true)
                                                          .build());

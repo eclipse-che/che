@@ -18,24 +18,22 @@ import org.slf4j.LoggerFactory;
  *
  * @author Max Shaposhnik
  */
-public class LogWritingUncaughtExceptionHandler implements Thread.UncaughtExceptionHandler {
+public class LoggingUncaughtExceptionHandler implements Thread.UncaughtExceptionHandler {
 
-    private static final Logger LOG = LoggerFactory.getLogger(LogWritingUncaughtExceptionHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LoggingUncaughtExceptionHandler.class);
+
+    private static final LoggingUncaughtExceptionHandler INSTANCE = new LoggingUncaughtExceptionHandler();
 
     @Override
     public void uncaughtException(Thread t, Throwable e) {
         LOG.error(String.format("Runtime exception caught in thread %s. Message: %s", t.getName(), e.getLocalizedMessage()), e);
     }
 
-    public static LogWritingUncaughtExceptionHandler getInstance() {
-        return Holder.INSTANCE;
+    public static LoggingUncaughtExceptionHandler getInstance() {
+        return INSTANCE;
     }
 
-    private static class Holder {
-        static final LogWritingUncaughtExceptionHandler INSTANCE = new LogWritingUncaughtExceptionHandler();
-    }
-
-    private LogWritingUncaughtExceptionHandler() {
+    private LoggingUncaughtExceptionHandler() {
     }
 
 }
