@@ -14,10 +14,14 @@ import org.eclipse.che.api.core.model.factory.Action;
 import org.eclipse.che.api.core.model.factory.OnProjectsLoaded;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,13 +33,18 @@ import static java.util.stream.Collectors.toList;
  * @author Anton Korneta
  */
 @Entity(name = "OnProjectsLoaded")
+@Table(name = "onprojectsloaded")
 public class OnProjectsLoadedImpl implements OnProjectsLoaded {
 
     @Id
     @GeneratedValue
+    @Column(name = "id")
     private Long id;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinTable(name = "onprojectsloaded_action",
+               joinColumns = @JoinColumn(name = "onprojectsloaded_id"),
+               inverseJoinColumns = @JoinColumn(name = "actions_entityid"))
     private List<ActionImpl> actions;
 
     public OnProjectsLoadedImpl() {}

@@ -15,13 +15,16 @@ import org.eclipse.che.api.core.model.workspace.EnvironmentRecipe;
 import org.eclipse.che.api.core.model.workspace.ExtendedMachine;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.MapKeyColumn;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -32,17 +35,20 @@ import java.util.stream.Collectors;
  * @author Yevhenii Voevodin
  */
 @Entity(name = "Environment")
+@Table(name = "environment")
 public class EnvironmentImpl implements Environment {
 
     @Id
     @GeneratedValue
+    @Column(name = "id")
     private Long id;
 
     @Embedded
     private EnvironmentRecipeImpl recipe;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JoinColumn
+    @JoinColumn(name = "machines_id")
+    @MapKeyColumn(name = "machines_key")
     private Map<String, ExtendedMachineImpl> machines;
 
     public EnvironmentImpl() {}

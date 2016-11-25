@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server.event;
 
-import org.eclipse.che.api.core.jdbc.jpa.event.CascadeRemovalEvent;
+import org.eclipse.che.core.db.event.CascadeRemovalEvent;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 
 /**

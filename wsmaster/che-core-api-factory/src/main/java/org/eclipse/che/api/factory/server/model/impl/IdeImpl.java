@@ -16,10 +16,13 @@ import org.eclipse.che.api.core.model.factory.OnAppLoaded;
 import org.eclipse.che.api.core.model.factory.OnProjectsLoaded;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
+import javax.persistence.Table;
 import java.util.Objects;
 
 /**
@@ -28,19 +31,24 @@ import java.util.Objects;
  * @author Anton Korneta
  */
 @Entity(name = "Ide")
+@Table(name = "ide")
 public class IdeImpl implements Ide {
 
     @Id
     @GeneratedValue
+    @Column(name = "id")
     private Long id;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "onapploaded_id")
     private OnAppLoadedImpl onAppLoaded;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "onprojectsloaded_id")
     private OnProjectsLoadedImpl onProjectsLoaded;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "onappclosed_id")
     private OnAppClosedImpl onAppClosed;
 
     public IdeImpl() {}

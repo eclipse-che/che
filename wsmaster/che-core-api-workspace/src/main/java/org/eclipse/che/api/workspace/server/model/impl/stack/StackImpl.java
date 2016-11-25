@@ -19,7 +19,6 @@ import org.eclipse.che.api.workspace.shared.stack.StackComponent;
 import org.eclipse.che.api.workspace.shared.stack.StackSource;
 import org.eclipse.che.commons.lang.NameGenerator;
 
-import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -28,10 +27,11 @@ import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.Id;
-import javax.persistence.Index;
+import javax.persistence.JoinColumn;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
+import javax.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -59,6 +59,7 @@ import static java.util.stream.Collectors.toList;
 
 )
 @EntityListeners(StackEntityListener.class)
+@Table(name = "stack")
 public class StackImpl implements Stack {
 
     public static StackBuilder builder() {
@@ -66,32 +67,35 @@ public class StackImpl implements Stack {
     }
 
     @Id
+    @Column(name = "id")
     private String id;
 
-    @Column(unique = true, nullable = false)
+    @Column(name = "name", unique = true, nullable = false)
     private String name;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    @Basic
+    @Column(name = "scope")
     private String scope;
 
-    @Basic
+    @Column(name = "creator")
     private String creator;
 
     @ElementCollection
     @Column(name = "tag")
-    @CollectionTable(indexes = @Index(columnList = "tag"))
+    @CollectionTable(name = "stack_tags", joinColumns = @JoinColumn(name = "stack_id"))
     private List<String> tags;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "workspaceconfig_id")
     private WorkspaceConfigImpl workspaceConfig;
 
     @Embedded
     private StackSourceImpl source;
 
     @ElementCollection
+    @CollectionTable(name = "stack_components", joinColumns = @JoinColumn(name = "stack_id"))
     private List<StackComponentImpl> components;
 
     @Embedded

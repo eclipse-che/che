@@ -1,13 +1,9 @@
 .che-select .che-select-container
-  border-bottom 1px solid $default-border-color
   outline none
 
 .che-select .che-select-mobile,
 .che-select .che-select-desktop
   width 100%
-
-.che-select .che-select-desktop
-  height 21px
 
 .che-select .che-select-desktop .che-select-container
   position relative
@@ -15,7 +11,10 @@
   min-width 200px
 
 .che-select .che-select-desktop md-select
+  min-height 22px
+  height 22px
   margin 0
+  border-bottom 1px solid $default-border-color
 
 .che-select .che-select-desktop md-select > *
   border none !important
@@ -47,3 +46,6 @@
 
 .che-custom-dropdown .md-text
   font-size inherit !important
+
+.che-select [ng-message]
+  color $error-color

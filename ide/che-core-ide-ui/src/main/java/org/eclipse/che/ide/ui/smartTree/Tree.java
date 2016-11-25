@@ -1031,8 +1031,9 @@ public class Tree extends FocusWidget implements HasBeforeExpandNodeHandlers,
                 @Override
                 public void onExecute() {
                     int count = getVisibleRowCount();
+                    List<Node> rootItems = getRootNodes();
+
                     if (count > 0) {
-                        List<Node> rootItems = getRootNodes();
                         List<Node> visible = getAllChildNodes(rootItems, true);
                         int[] vr = getVisibleRows(visible, count);
 
@@ -1053,6 +1054,10 @@ public class Tree extends FocusWidget implements HasBeforeExpandNodeHandlers,
                                 refresh(visible.get(i));
                             }
                         }
+                    }
+
+                    if (selectionModel.getSelectedNodes().isEmpty() && autoSelect && !rootItems.isEmpty()) {
+                        selectionModel.select(rootItems.get(0), false);
                     }
                 }
             };

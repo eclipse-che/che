@@ -13,10 +13,15 @@ package org.eclipse.che.api.factory.server.model.impl;
 import org.eclipse.che.api.core.model.factory.Action;
 
 import javax.persistence.Basic;
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.MapKeyColumn;
+import javax.persistence.Table;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -27,16 +32,21 @@ import java.util.Objects;
  * @author Anton Korneta
  */
 @Entity(name = "Action")
+@Table(name = "action")
 public class ActionImpl implements Action {
 
     @Id
     @GeneratedValue
+    @Column(name = "entityid")
     private Long entityId;
 
-    @Basic
+    @Column(name = "id")
     private String id;
 
     @ElementCollection
+    @CollectionTable(name = "action_properties", joinColumns = @JoinColumn(name = "action_entityid"))
+    @MapKeyColumn(name = "properties_key")
+    @Column(name = "properties")
     private Map<String, String> properties;
 
     public ActionImpl() {}

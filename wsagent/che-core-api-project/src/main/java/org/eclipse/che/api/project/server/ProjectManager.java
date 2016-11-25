@@ -112,7 +112,7 @@ public final class ProjectManager {
     @PostConstruct
     void initWatcher() throws IOException {
         FileWatcherNotificationListener defaultListener =
-                new FileWatcherNotificationListener(file -> !(file.getPath().toString().contains(".codenvy")
+                new FileWatcherNotificationListener(file -> !(file.getPath().toString().contains(".che")
                                                               || file.getPath().toString().contains(".#"))) {
                     @Override
                     public void onFileWatcherEvent(VirtualFile virtualFile, FileWatcherEventType eventType) {

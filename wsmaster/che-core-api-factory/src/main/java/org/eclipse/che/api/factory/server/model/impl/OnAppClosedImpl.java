@@ -13,10 +13,14 @@ package org.eclipse.che.api.factory.server.model.impl;
 import org.eclipse.che.api.core.model.factory.Action;
 import org.eclipse.che.api.core.model.factory.OnAppClosed;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,13 +33,18 @@ import static javax.persistence.CascadeType.ALL;
  * @author Anton Korneta
  */
 @Entity(name = "OnAppClosed")
+@Table(name = "onappclosed")
 public class OnAppClosedImpl implements OnAppClosed {
 
     @Id
     @GeneratedValue
+    @Column(name = "id")
     private Long id;
 
     @OneToMany(cascade = ALL, orphanRemoval = true)
+    @JoinTable(name = "onappclosed_action",
+               joinColumns = @JoinColumn(name = "onappclosed_id"),
+               inverseJoinColumns = @JoinColumn(name = "actions_entityid"))
     private List<ActionImpl> actions;
 
     public OnAppClosedImpl() {}

@@ -13,7 +13,12 @@ package org.eclipse.che.api.machine.server.spi.tck;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
+import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.model.workspace.Workspace;
+import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
+import org.eclipse.che.api.core.model.workspace.WorkspaceRuntime;
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.machine.server.exception.SnapshotException;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
@@ -29,6 +34,7 @@ import org.testng.annotations.Test;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -48,7 +54,8 @@ public class SnapshotDaoTest {
 
     private static final int SNAPSHOTS_SIZE = 6;
 
-    private SnapshotImpl[] snapshots;
+    private SnapshotImpl[]  snapshots;
+    private TestWorkspace[] workspaces;
 
     @Inject
     private SnapshotDao snapshotDao;
@@ -56,21 +63,42 @@ public class SnapshotDaoTest {
     @Inject
     private TckRepository<SnapshotImpl> snaphotRepo;
 
+    @Inject
+    private TckRepository<Workspace> workspaceRepo;
+
+    @Inject
+    private TckRepository<AccountImpl> accountRepo;
+
     @BeforeMethod
     private void createSnapshots() throws TckRepositoryException {
+        // one account for all the workspaces
+        final AccountImpl account = new AccountImpl("account1", "name", "type");
+
+        // workspaces
+        workspaces = new TestWorkspace[SNAPSHOTS_SIZE / 3];
+        for (int i = 0; i < workspaces.length; i++) {
+            workspaces[i] = new TestWorkspace("workspace-" + i, account.getId());
+        }
+
+        // snapshots
         snapshots = new SnapshotImpl[SNAPSHOTS_SIZE];
         for (int i = 0; i < SNAPSHOTS_SIZE; i++) {
             snapshots[i] = createSnapshot("snapshot-" + i,
-                                          "workspace-" + i / 3, // 3 snapshot share the same workspace id
+                                          workspaces[i / 3].getId(), // 3 snapshot share the same workspace id
                                           "environment-" + i / 2, // 2 snapshots share the same env name
                                           "machine-" + i);
         }
+
+        accountRepo.createAll(singletonList(account));
+        workspaceRepo.createAll(asList(workspaces));
         snaphotRepo.createAll(asList(snapshots));
     }
 
     @AfterMethod
     private void removeSnapshots() throws TckRepositoryException {
         snaphotRepo.removeAll();
+        workspaceRepo.removeAll();
+        accountRepo.removeAll();
     }
 
     @Test
@@ -126,7 +154,7 @@ public class SnapshotDaoTest {
     @Test(dependsOnMethods = "shouldGetSnapshotById")
     public void shouldSaveSnapshot() throws Exception {
         final SnapshotImpl newSnapshot = createSnapshot("new-snapshot",
-                                                        "workspace-id",
+                                                        workspaces[0].getId(),
                                                         "env-name",
                                                         "machine-name");
 
@@ -194,8 +222,9 @@ public class SnapshotDaoTest {
                                                                          singletonList(newSnapshot));
 
         assertEquals(new HashSet<>(replaced), Sets.newHashSet(snapshots[0], snapshots[1]));
-        assertEquals(new HashSet<>(snapshotDao.findSnapshots(snapshots[0].getWorkspaceId())),
-                     Sets.newHashSet(newSnapshot, snapshots[2]));
+        final HashSet<SnapshotImpl> actual = new HashSet<>(snapshotDao.findSnapshots(this.snapshots[0].getWorkspaceId()));
+        final HashSet<SnapshotImpl> expected = Sets.newHashSet(newSnapshot, this.snapshots[2]);
+        assertEquals(actual, expected);
     }
 
     @DataProvider(name = "missingSnapshots")
@@ -234,5 +263,37 @@ public class SnapshotDaoTest {
                            .setEnvName(envName)
                            .setMachineName(machineName)
                            .build();
+    }
+
+    private static class TestWorkspace implements Workspace {
+
+        private final String id;
+        private final String accountId;
+
+        public TestWorkspace(String id, String accountId) {
+            this.id = id;
+            this.accountId = accountId;
+        }
+
+        @Override
+        public String getId() { return id; }
+
+        @Override
+        public String getNamespace() { return accountId; }
+
+        @Override
+        public WorkspaceStatus getStatus() { return null; }
+
+        @Override
+        public Map<String, String> getAttributes() { return null; }
+
+        @Override
+        public boolean isTemporary() { return false; }
+
+        @Override
+        public WorkspaceConfig getConfig() { return null; }
+
+        @Override
+        public WorkspaceRuntime getRuntime() { return null; }
     }
 }

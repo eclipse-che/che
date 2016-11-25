@@ -21,7 +21,7 @@ import com.google.inject.name.Named;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.jdbc.jpa.eclipselink.EntityListenerInjectionManagerInitializer;
+import org.eclipse.che.core.db.DBInitializer;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.spi.StackDao;
 import org.eclipse.che.api.workspace.server.stack.image.StackIcon;
@@ -60,7 +60,7 @@ public class StackLoader {
     public StackLoader(@Named("che.stacks.storage") String stacksPath,
                        @Named("che.stacks.images") String stackIconFolder,
                        StackDao stackDao,
-                       EntityListenerInjectionManagerInitializer installer) {
+                       DBInitializer dbInitializer) {
         this.stackJsonPath = Paths.get(stacksPath);
         this.stackIconFolderPath = Paths.get(stackIconFolder);
         this.stackDao = stackDao;

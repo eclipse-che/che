@@ -13,12 +13,14 @@ package org.eclipse.che.api.factory.server.model.impl;
 import org.eclipse.che.api.core.model.factory.Button;
 import org.eclipse.che.api.core.model.factory.ButtonAttributes;
 
+import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Table;
 import java.util.Objects;
 
 /**
@@ -27,16 +29,19 @@ import java.util.Objects;
  * @author Anton Korneta
  */
 @Entity(name = "Button")
+@Table(name = "button")
 public class ButtonImpl implements Button {
 
     @Id
     @GeneratedValue
+    @Column(name = "id")
     private Long id;
 
     @Embedded
     private ButtonAttributesImpl attributes;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "type")
     private Type type;
 
     public ButtonImpl(ButtonAttributes attributes,

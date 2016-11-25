@@ -12,12 +12,16 @@ package org.eclipse.che.api.workspace.server.model.impl;
 
 import org.eclipse.che.api.core.model.workspace.ServerConf2;
 
-import javax.persistence.Basic;
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.MapKeyColumn;
+import javax.persistence.Table;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -26,19 +30,25 @@ import java.util.Objects;
  * @author Alexander Garagatyi
  */
 @Entity(name = "ServerConf")
+@Table(name = "serverconf")
 public class ServerConf2Impl implements ServerConf2 {
 
     @Id
     @GeneratedValue
+    @Column(name = "id")
     private Long id;
 
-    @Basic
+    @Column(name = "port")
     private String port;
 
-    @Basic
+    @Column(name = "protocol")
     private String protocol;
 
     @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "serverconf_properties",
+                     joinColumns = @JoinColumn(name = "serverconf_id"))
+    @MapKeyColumn(name = "properties_key")
+    @Column(name = "properties")
     private Map<String, String> properties;
 
     public ServerConf2Impl() {}

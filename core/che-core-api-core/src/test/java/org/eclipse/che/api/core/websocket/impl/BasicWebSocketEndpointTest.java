@@ -10,9 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.websocket.impl;
 
+import org.eclipse.che.api.core.websocket.WebSocketMessageReceiver;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -21,7 +24,6 @@ import javax.websocket.Session;
 
 import static org.mockito.Mockito.verify;
 
-
 /**
  * Tests for {@link BasicWebSocketEndpoint}
  *
@@ -29,61 +31,55 @@ import static org.mockito.Mockito.verify;
  */
 @Listeners(MockitoTestNGListener.class)
 public class BasicWebSocketEndpointTest {
-    private static final int    ENDPOINT_ID      = 0;
-    private static final String MESSAGE          = "message";
-    private static final int    MAX_IDLE_TIMEOUT = 0;
-
     @Mock
-    private WebSocketSessionRegistry        registry;
+    private WebSocketSessionRegistry registry;
     @Mock
-    private PendingMessagesReSender         reSender;
+    private MessagesReSender         reSender;
     @Mock
-    private WebSocketTransmissionDispatcher dispatcher;
-    @Mock
-    private WebSocketTransmissionValidator  validator;
+    private WebSocketMessageReceiver receiver;
     @InjectMocks
-    private BasicWebSocketEndpoint          endpoint;
+    private BasicWebSocketEndpoint   endpoint;
 
     @Mock
-    private Session     session;
+    private Session session;
     @Mock
     private CloseReason closeReason;
-    @Mock
-    private Throwable   throwable;
 
-    @Test
-    public void shouldSetSessionMaxIdleTimeoutOnOpen() {
-        endpoint.onOpen(session, ENDPOINT_ID);
+    @BeforeMethod
+    public void setUp() throws Exception {
 
-        verify(session).setMaxIdleTimeout(MAX_IDLE_TIMEOUT);
+    }
+
+    @AfterMethod
+    public void tearDown() throws Exception {
+
     }
 
     @Test
-    public void shouldRegisterSessionOnOpen() {
-        endpoint.onOpen(session, ENDPOINT_ID);
+    public void shouldAddToRegistryOnOpen(){
+        endpoint.onOpen(session, "id");
 
-        verify(registry).add(ENDPOINT_ID, session);
+        verify(registry).add("id", session);
     }
 
     @Test
-    public void shouldSendPendingMessagesSessionOnOpen() {
-        endpoint.onOpen(session, ENDPOINT_ID);
+    public void shouldResendOnOpen(){
+        endpoint.onOpen(session, "id");
 
-        verify(reSender).resend(ENDPOINT_ID);
+        verify(reSender).resend("id");
     }
 
     @Test
-    public void shouldRemoveSessionFromRegistryOnClose() {
-        endpoint.onClose(closeReason, ENDPOINT_ID);
+    public void shouldRunReceiveOnMessage(){
+        endpoint.onMessage("message", "id");
 
-        verify(registry).remove(ENDPOINT_ID);
+        verify(receiver).receive("id", "message");
     }
 
     @Test
-    public void shouldRunReceiverOnMessage() {
-        endpoint.onMessage(MESSAGE, ENDPOINT_ID);
+    public void shouldRunRemoveOnClose(){
+        endpoint.onClose(closeReason, "id");
 
-        verify(dispatcher).dispatch(MESSAGE, ENDPOINT_ID);
+        verify(registry).remove("id");
     }
-
 }

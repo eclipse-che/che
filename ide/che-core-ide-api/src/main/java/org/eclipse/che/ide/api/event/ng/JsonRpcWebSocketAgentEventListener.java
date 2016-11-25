@@ -19,7 +19,7 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
-import org.eclipse.che.ide.jsonrpc.impl.JsonRpcInitializer;
+import org.eclipse.che.ide.jsonrpc.JsonRpcInitializer;
 import org.eclipse.che.ide.util.loging.Log;
 
 import javax.inject.Singleton;
@@ -61,17 +61,18 @@ public class JsonRpcWebSocketAgentEventListener implements WsAgentStateHandler {
     }
 
     private void internalInitialize() {
-        final DevMachine devMachine = appContext.getDevMachine();
-        final String wsAgentWebSocketUrl = devMachine.getWsAgentWebSocketUrl();
-        final String url = wsAgentWebSocketUrl.replaceFirst("(api)(/)(ws)", "websocket" + "$2" + ENDPOINT_ID);
+        DevMachine devMachine = appContext.getDevMachine();
+        String wsAgentWebSocketUrl = devMachine.getWsAgentWebSocketUrl();
 
-        initializer.initialize(singletonMap("url", url));
+        String wsAgentUrl = wsAgentWebSocketUrl.replaceFirst("(api)(/)(ws)", "websocket" + "$2" + ENDPOINT_ID);
+
+        initializer.initialize("ws-agent", singletonMap("url", wsAgentUrl));
     }
 
     @Override
     public void onWsAgentStopped(WsAgentStateEvent event) {
         Log.debug(JsonRpcWebSocketAgentEventListener.class, "Web socket agent stopped event caught.");
 
-        initializer.terminate();
+        initializer.terminate("ws-agent");
     }
 }

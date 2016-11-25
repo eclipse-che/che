@@ -30,10 +30,10 @@ public class StackIcon {
     @Column(name = "icon_name")
     private String name;
 
-    @Basic
+    @Column(name = "mediatype")
     private String mediaType;
 
-    @Basic
+    @Column(name = "data")
     private byte[] data;
 
     public StackIcon() {}

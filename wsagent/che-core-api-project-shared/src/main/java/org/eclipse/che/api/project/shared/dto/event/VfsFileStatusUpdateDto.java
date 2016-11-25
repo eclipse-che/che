@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.project.shared.dto.event;
 
-import com.google.common.hash.HashCode;
-
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
