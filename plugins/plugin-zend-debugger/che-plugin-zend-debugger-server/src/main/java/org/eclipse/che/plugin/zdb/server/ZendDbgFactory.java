@@ -24,7 +24,7 @@ import org.eclipse.che.plugin.zdb.server.connection.ZendDbgSettings;
  *
  * @author Bartlomiej Laczkowski
  */
-public class ZendDebuggerFactory implements DebuggerFactory {
+public class ZendDbgFactory implements DebuggerFactory {
 
     public static final String TYPE = "zend-debugger";
 
@@ -64,7 +64,7 @@ public class ZendDebuggerFactory implements DebuggerFactory {
         }
         boolean useSslEncryption = Boolean.valueOf(useSslEncrytpionProp);
         return new ZendDebugger(new ZendDbgSettings(debugPort, clientHostIP, breakAtFirstLine, useSslEncryption),
-                debuggerCallback);
+                new ZendDbgLocationHandler(), debuggerCallback);
     }
 
 }

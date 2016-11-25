@@ -167,7 +167,7 @@ public class ZendDbgConnection {
                     socket.shutdownInput();
                     socket.shutdownOutput();
                 } catch (Exception e) {
-                    ZendDebugger.LOG.error(e.getMessage(), e);
+                    // ignore
                 }
             }
         }

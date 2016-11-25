@@ -24,10 +24,10 @@ import com.google.inject.Singleton;
  */
 @Singleton
 @Extension(title = "Zend Debugger", version = "1.0.0")
-public class ZendDebuggerExtension {
+public class ZendDbgExtension {
 
     @Inject
-    public ZendDebuggerExtension(DebuggerManager debuggerManager, ZendDebugger zendDebugger,
+    public ZendDbgExtension(DebuggerManager debuggerManager, ZendDebugger zendDebugger,
             FqnResolverFactory resolverFactory, ZendDbgFqnResolver zendFqnResolver) {
         debuggerManager.registeredDebugger(ZendDebugger.ID, zendDebugger);
         resolverFactory.addResolver("php", zendFqnResolver);

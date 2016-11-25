@@ -18,9 +18,9 @@ import static org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,7 +38,6 @@ import org.eclipse.che.api.debug.shared.model.action.StepIntoAction;
 import org.eclipse.che.api.debug.shared.model.action.StepOutAction;
 import org.eclipse.che.api.debug.shared.model.action.StepOverAction;
 import org.eclipse.che.api.debug.shared.model.impl.DebuggerInfoImpl;
-import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.debug.shared.model.impl.SimpleValueImpl;
 import org.eclipse.che.api.debug.shared.model.impl.StackFrameDumpImpl;
 import org.eclipse.che.api.debug.shared.model.impl.VariablePathImpl;
@@ -79,6 +78,7 @@ import org.eclipse.che.plugin.zdb.server.expressions.ZendDbgExpression;
 import org.eclipse.che.plugin.zdb.server.expressions.ZendDbgExpressionEvaluator;
 import org.eclipse.che.plugin.zdb.server.utils.ZendDbgConnectionUtils;
 import org.eclipse.che.plugin.zdb.server.utils.ZendDbgFileUtils;
+import org.eclipse.che.plugin.zdb.server.utils.ZendDbgVariableUtils;
 import org.eclipse.che.plugin.zdb.server.variables.IDbgVariable;
 import org.eclipse.che.plugin.zdb.server.variables.ZendDbgVariable;
 import org.eclipse.che.plugin.zdb.server.variables.ZendDbgVariables;
@@ -129,23 +129,51 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
 
     }
 
+    private static final class ZendDbgBreakpoint {
+
+        public static ZendDbgBreakpoint create(Breakpoint vfsBreakpoint, ZendDbgLocationHandler debugLocationHandler) {
+            Location dbgLocation = debugLocationHandler.convertToDBG(vfsBreakpoint.getLocation());
+            return new ZendDbgBreakpoint(dbgLocation, vfsBreakpoint);
+        }
+
+        private Location dbgLocation;
+        private Breakpoint vfsBreakpoint;
+
+        private ZendDbgBreakpoint(Location dbgLocation, Breakpoint vfsBreakpoint) {
+            this.dbgLocation = dbgLocation;
+            this.vfsBreakpoint = vfsBreakpoint;
+        }
+
+        public Location getLocation() {
+            return dbgLocation;
+        }
+
+        public Breakpoint getVfsBreakpoint() {
+            return vfsBreakpoint;
+        }
+
+    }
+
     public static final Logger LOG = LoggerFactory.getLogger(ZendDebugger.class);
     private static final int SUPPORTED_PROTOCOL_ID = 2012121702;
 
     private final DebuggerCallback debugCallback;
     private final ZendDbgSettings debugSettings;
+    private final ZendDbgLocationHandler debugLocationHandler;
     private final ZendDbgConnection debugConnection;
 
     private final ZendDbgExpressionEvaluator debugExpressionEvaluator;
     private VariablesStorage debugVariableStorage;
     private String debugStartFile;
-    private List<Breakpoint> breakpoints;
-    private Map<Breakpoint, Integer> breakpointIds = new HashMap<>();
+    private Map<Breakpoint, ZendDbgBreakpoint> breakpoints = new LinkedHashMap<>();
+    private Map<ZendDbgBreakpoint, Integer> breakpointIds = new LinkedHashMap<>();
     private Integer breakpointAflId = null;
 
-    public ZendDebugger(ZendDbgSettings debugSettings, DebuggerCallback debugCallback) throws DebuggerException {
+    public ZendDebugger(ZendDbgSettings debugSettings, ZendDbgLocationHandler debugLocationHandler,
+            DebuggerCallback debugCallback) throws DebuggerException {
         this.debugCallback = debugCallback;
         this.debugSettings = debugSettings;
+        this.debugLocationHandler = debugLocationHandler;
         this.debugConnection = new ZendDbgConnection(this, debugSettings);
         this.debugExpressionEvaluator = new ZendDbgExpressionEvaluator(debugConnection);
         this.debugVariableStorage = new VariablesStorage(Collections.emptyList());
@@ -189,7 +217,9 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
     public void start(StartAction action) throws DebuggerException {
         // Initialize connection daemon thread
         debugConnection.connect();
-        breakpoints = new ArrayList<>(action.getBreakpoints());
+        for (Breakpoint breakpoint : action.getBreakpoints()) {
+            breakpoints.put(breakpoint, ZendDbgBreakpoint.create(breakpoint, debugLocationHandler));
+        }
         LOG.debug("Connect {}:{}", debugSettings.getClientHostIP(), debugSettings.getDebugPort());
     }
 
@@ -201,7 +231,8 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
 
     @Override
     public DebuggerInfo getInfo() throws DebuggerException {
-        return new DebuggerInfoImpl("", debugSettings.getDebugPort(), "Zend Debugger", "", 0, null);
+        return new DebuggerInfoImpl(debugSettings.getClientHostIP(), debugSettings.getDebugPort(), "Zend Debugger", "",
+                0, null);
     }
 
     @Override
@@ -219,18 +250,16 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
 
     @Override
     public void addBreakpoint(Breakpoint breakpoint) throws DebuggerException {
-        breakpoints.add(breakpoint);
-        sendAddBreakpoint(breakpoint);
+        ZendDbgBreakpoint dbgBreakpoint = ZendDbgBreakpoint.create(breakpoint, debugLocationHandler);
+        breakpoints.put(breakpoint, dbgBreakpoint);
+        sendAddBreakpoint(dbgBreakpoint);
     }
 
     @Override
     public void deleteBreakpoint(Location location) throws DebuggerException {
-        int breakpointLine = location.getLineNumber();
-        String breakpointTarget = location.getTarget();
         Breakpoint matchingBreakpoint = null;
-        for (Breakpoint breakpoint : breakpoints) {
-            if (breakpointLine == breakpoint.getLocation().getLineNumber()
-                    && breakpointTarget.equals(breakpoint.getLocation().getTarget())) {
+        for (Breakpoint breakpoint : breakpoints.keySet()) {
+            if (breakpoint.getLocation().equals(location)) {
                 matchingBreakpoint = breakpoint;
                 break;
             }
@@ -238,10 +267,10 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
         if (matchingBreakpoint == null) {
             return;
         }
-        breakpoints.remove(matchingBreakpoint);
+        ZendDbgBreakpoint dbgBreakpoint = breakpoints.remove(matchingBreakpoint);
         // Unregister breakpoint if it was registered in active session
-        if (breakpointIds.containsKey(matchingBreakpoint)) {
-            int breakpointId = breakpointIds.remove(matchingBreakpoint);
+        if (breakpointIds.containsKey(dbgBreakpoint)) {
+            int breakpointId = breakpointIds.remove(dbgBreakpoint);
             sendDeleteBreakpoint(breakpointId);
         }
     }
@@ -255,7 +284,7 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
 
     @Override
     public List<Breakpoint> getAllBreakpoints() throws DebuggerException {
-        return breakpoints;
+        return new ArrayList<>(breakpoints.keySet());
     }
 
     @Override
@@ -327,19 +356,12 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
             debugConnection.sendRequest(new DeleteBreakpointRequest(breakpointAflId));
             breakpointAflId = null;
         }
-        VirtualFileEntry localFileEntry = ZendDbgFileUtils.findVirtualFileEntry(remoteFilePath);
-        if (localFileEntry == null) {
-            sendCloseSession();
-            LOG.error("Could not found corresponding local file for: " + remoteFilePath);
-            return;
-        }
-        String projectPath = localFileEntry.getProject();
-        String fileName = localFileEntry.getName();
-        String filePath = localFileEntry.getPath().toString();
         int lineNumber = notification.getLineNumber();
-        Location location = new LocationImpl(fileName, lineNumber, filePath, false, -1, projectPath);
+        Location dbgLocation = ZendDbgLocationHandler.createDBG(remoteFilePath, lineNumber);
+        // Convert DBG location from engine to VFS location
+        Location vfsLocation = debugLocationHandler.convertToVFS(dbgLocation);
         // Send suspend event
-        debugCallback.onEvent(new SuspendEventImpl(location));
+        debugCallback.onEvent(new SuspendEventImpl(vfsLocation));
     }
 
     private void handleScriptEnded(ScriptEndedNotification notification) {
@@ -362,8 +384,7 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
                 return new GetLocalFileContentResponse(request.getID(),
                         GetLocalFileContentResponse.STATUS_FILES_IDENTICAL, null);
             }
-            // Remote and local contents are different, send local content to
-            // the engine
+            // Remote and local contents are different, send local content to the engine
             return new GetLocalFileContentResponse(request.getID(), GetLocalFileContentResponse.STATUS_SUCCESS,
                     localFileContent);
         } catch (Exception e) {
@@ -396,47 +417,51 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
         for (IDbgExpression zendVariableExpression : zendVariablesExpression.getChildren()) {
             if (VariablesStorage.GLOBALS_VARIABLE.equalsIgnoreCase(zendVariableExpression.getExpression()))
                 continue;
-            variables.add(new ZendDbgVariable(new VariablePathImpl(String.valueOf(variableId++)), zendVariableExpression));
+            IDbgVariable variable = new ZendDbgVariable(new VariablePathImpl(String.valueOf(variableId++)),
+                    zendVariableExpression);
+            if (ZendDbgVariableUtils.isThis(zendVariableExpression.getExpression())) {
+                // $this always on top
+                variables.add(0, variable);
+            } else {
+                variables.add(variable);
+            }
         }
         debugVariableStorage = new VariablesStorage(variables);
     }
 
     private void sendAddBreakpointFiles() {
         Set<String> breakpointFiles = new HashSet<>();
-        for (Breakpoint breakpoint : breakpoints) {
-            String absoluteRemotePath = ZendDbgFileUtils.findAbsolutePath(breakpoint.getLocation().getResourcePath());
-            breakpointFiles.add(absoluteRemotePath);
+        for (ZendDbgBreakpoint dbgBreakpoint : breakpoints.values()) {
+            breakpointFiles.add(dbgBreakpoint.getLocation().getResourcePath());
         }
         debugConnection.sendRequest(new AddFilesRequest(breakpointFiles));
     }
 
     private void sendAddBreakpoints(String remoteFilePath) {
-        VirtualFileEntry localFileEntry = ZendDbgFileUtils.findVirtualFileEntry(remoteFilePath);
-        List<Breakpoint> fileBreakpoints = new ArrayList<>();
-        for (Breakpoint breakpoint : breakpoints) {
-            if (breakpoint.getLocation().getResourcePath().equals(localFileEntry.getPath().toString())) {
-                fileBreakpoints.add(breakpoint);
+        List<ZendDbgBreakpoint> fileBreakpoints = new ArrayList<>();
+        for (ZendDbgBreakpoint dbgBreakpoint : breakpoints.values()) {
+            if (dbgBreakpoint.getLocation().getResourcePath().equals(remoteFilePath)) {
+                fileBreakpoints.add(dbgBreakpoint);
             }
         }
-        for (Breakpoint breakpoint : fileBreakpoints) {
+        for (ZendDbgBreakpoint dbgBreakpoint : fileBreakpoints) {
             AddBreakpointResponse response = debugConnection.sendRequest(
-                    new AddBreakpointRequest(1, 2, breakpoint.getLocation().getLineNumber(), remoteFilePath));
+                    new AddBreakpointRequest(1, 2, dbgBreakpoint.getLocation().getLineNumber(), remoteFilePath));
             if (isOK(response)) {
                 // Breakpoint was successfully registered in active session, send breakpoint activated event
-                breakpointIds.put(breakpoint, response.getBreakpointID());
-                debugCallback.onEvent(new BreakpointActivatedEventImpl(breakpoint));
+                breakpointIds.put(dbgBreakpoint, response.getBreakpointID());
+                debugCallback.onEvent(new BreakpointActivatedEventImpl(dbgBreakpoint.getVfsBreakpoint()));
             }
         }
     }
 
-    private void sendAddBreakpoint(Breakpoint breakpoint) {
-        String remoteFilePath = ZendDbgFileUtils.findAbsolutePath(breakpoint.getLocation().getResourcePath());
-        AddBreakpointResponse response = debugConnection
-                .sendRequest(new AddBreakpointRequest(1, 2, breakpoint.getLocation().getLineNumber(), remoteFilePath));
+    private void sendAddBreakpoint(ZendDbgBreakpoint dbgBreakpoint) {
+        AddBreakpointResponse response = debugConnection.sendRequest(new AddBreakpointRequest(1, 2,
+                dbgBreakpoint.getLocation().getLineNumber(), dbgBreakpoint.getLocation().getResourcePath()));
         if (isOK(response)) {
             // Breakpoint was successfully registered in active session, send breakpoint activated event
-            breakpointIds.put(breakpoint, response.getBreakpointID());
-            debugCallback.onEvent(new BreakpointActivatedEventImpl(breakpoint));
+            breakpointIds.put(dbgBreakpoint, response.getBreakpointID());
+            debugCallback.onEvent(new BreakpointActivatedEventImpl(dbgBreakpoint.getVfsBreakpoint()));
         }
     }
 

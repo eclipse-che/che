@@ -23,11 +23,11 @@ import com.google.inject.multibindings.Multibinder;
  * @author Bartlomiej Laczkowski
  */
 @DynaModule
-public class ZendDebuggerModule extends AbstractModule {
+public class ZendDbgModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        Multibinder.newSetBinder(binder(), DebuggerFactory.class).addBinding().to(ZendDebuggerFactory.class);
+        Multibinder.newSetBinder(binder(), DebuggerFactory.class).addBinding().to(ZendDbgFactory.class);
         bind(ZendDbgFileUtils.class);
     }
 
