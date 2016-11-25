@@ -123,6 +123,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     private final MachineLocalizationConstant   localizationConstant;
     private final MachineResources              resources;
     private final MachineServiceClient          machineServiceClient;
+    private final WorkspaceAgent                workspaceAgent;
     private final SshServiceClient              sshServiceClient;
     private final AppContext                    appContext;
     private final NotificationManager           notificationManager;
@@ -160,6 +161,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         this.localizationConstant = localizationConstant;
         this.resources = resources;
         this.machineServiceClient = machineServiceClient;
+        this.workspaceAgent = workspaceAgent;
         this.sshServiceClient = sshServiceClient;
         this.appContext = appContext;
         this.notificationManager = notificationManager;
@@ -535,6 +537,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         addOutputConsole(commandId, commandNode, outputConsole, false);
 
         refreshStopButtonState(commandId);
+        workspaceAgent.setActivePart(this);
     }
 
     @Nullable
