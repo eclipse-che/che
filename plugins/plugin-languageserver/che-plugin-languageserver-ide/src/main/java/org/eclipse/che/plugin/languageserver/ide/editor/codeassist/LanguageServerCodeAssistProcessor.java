@@ -78,13 +78,13 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
 
         if (latestCompletionResult.isGoodFor(documentId, offset, currentWord)) {
             // no need to send new completion request
-            computeProposals(currentWord, callback);
+            computeProposals(currentWord, offset - latestCompletionResult.getOffset(), callback);
         } else {
             documentServiceClient.completion(documentPosition).then(new Operation<CompletionListDTO>() {
                 @Override
                 public void apply(CompletionListDTO list) throws OperationException {
                     latestCompletionResult.update(documentId, offset, currentWord, list);
-                    computeProposals(currentWord, callback);
+                    computeProposals(currentWord, 0, callback);
                 }
             }).catchError(new Operation<PromiseError>() {
                 @Override
@@ -138,7 +138,7 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
         return null;
     }
 
-    private void computeProposals(String currentWord, CodeAssistCallback callback) {
+    private void computeProposals(String currentWord, int offset, CodeAssistCallback callback) {
         List<CompletionProposal> proposals = newArrayList();
         for (CompletionItemDTO item : latestCompletionResult.getCompletionList().getItems()) {
             List<Match> highlights = filter(currentWord, item);
@@ -148,7 +148,9 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
                                                                         latestCompletionResult.getDocumentId(),
                                                                         resources, 
                                                                         imageProvider.getIcon(item.getKind()), 
-                                                                        serverCapabilities, highlights));
+                                                                        serverCapabilities,
+                                                                        highlights,
+                                                                        offset));
             }
         }
         callback.proposalComputed(proposals);

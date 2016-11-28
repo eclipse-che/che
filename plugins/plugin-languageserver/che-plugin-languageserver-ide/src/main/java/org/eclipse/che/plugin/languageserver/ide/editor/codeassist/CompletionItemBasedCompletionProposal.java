@@ -17,8 +17,6 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
-import java.util.List;
-
 import org.eclipse.che.api.languageserver.shared.lsapi.CompletionItemDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.RangeDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentIdentifierDTO;
@@ -36,6 +34,8 @@ import org.eclipse.che.plugin.languageserver.ide.LanguageServerResources;
 import org.eclipse.che.plugin.languageserver.ide.filters.Match;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 
+import java.util.List;
+
 /**
  * @author Anatolii Bazko
  */
@@ -48,13 +48,16 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
     private final Icon                      icon;
     private final ServerCapabilities        serverCapabilities;
     private final List<Match>               highlights;
+    private final int                       offset;
 
     CompletionItemBasedCompletionProposal(CompletionItemDTO completionItem,
                                           TextDocumentServiceClient documentServiceClient,
                                           TextDocumentIdentifierDTO documentId,
-                                          LanguageServerResources resources, Icon icon,
+                                          LanguageServerResources resources,
+                                          Icon icon,
                                           ServerCapabilities serverCapabilities,
-                                          List<Match> highlights) {
+                                          List<Match> highlights,
+                                          int offset) {
         this.completionItem = completionItem;
         this.documentServiceClient = documentServiceClient;
         this.documentId = documentId;
@@ -62,6 +65,7 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
         this.icon = icon;
         this.serverCapabilities = serverCapabilities;
         this.highlights = highlights;
+        this.offset = offset;
     }
 
     @Override
@@ -137,42 +141,43 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
             documentServiceClient.resolveCompletionItem(completionItem).then(new Operation<CompletionItemDTO>() {
                 @Override
                 public void apply(CompletionItemDTO arg) throws OperationException {
-                    callback.onCompletion(new CompletionImpl(arg));
+                    callback.onCompletion(new CompletionImpl(arg, offset));
                 }
             }).catchError(new Operation<PromiseError>() {
                 @Override
                 public void apply(PromiseError arg) throws OperationException {
                     Log.error(getClass(), arg);
                     //try to apply with default text
-                    callback.onCompletion(new CompletionImpl(completionItem));
+                    callback.onCompletion(new CompletionImpl(completionItem, offset));
                 }
             });
         } else {
-            callback.onCompletion(new CompletionImpl(completionItem));
+            callback.onCompletion(new CompletionImpl(completionItem, offset));
         }
     }
 
     private static class CompletionImpl implements Completion {
 
         private CompletionItemDTO completionItem;
+        private int               offset;
 
-        public CompletionImpl(CompletionItemDTO completionItem) {
+        public CompletionImpl(CompletionItemDTO completionItem, int offset) {
             this.completionItem = completionItem;
+            this.offset = offset;
         }
 
         @Override
         public void apply(Document document) {
-            //TODO in general resolve completion item may not provide getTextEdit, need to add checks
             if (completionItem.getTextEdit() != null) {
                 RangeDTO range = completionItem.getTextEdit().getRange();
                 int startOffset = document.getIndexFromPosition(
                         new TextPosition(range.getStart().getLine(), range.getStart().getCharacter()));
-                int endOffset = document
-                        .getIndexFromPosition(new TextPosition(range.getEnd().getLine(), range.getEnd().getCharacter()));
+                int endOffset = offset + document.getIndexFromPosition(
+                        new TextPosition(range.getEnd().getLine(), range.getEnd().getCharacter()));
                 document.replace(startOffset, endOffset - startOffset, completionItem.getTextEdit().getNewText());
             } else {
                 String insertText = completionItem.getInsertText() == null ? completionItem.getLabel() : completionItem.getInsertText();
-                document.replace(document.getCursorOffset(), 0, insertText);
+                document.replace(document.getCursorOffset() - offset, offset, insertText);
             }
         }
 
