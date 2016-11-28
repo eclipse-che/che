@@ -182,7 +182,7 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
             }
         });
 
-        Tooltip.create((elemental.dom.Element)collapseAllButton.getElement(), BOTTOM, MIDDLE, "Refresh selected path");
+        Tooltip.create((elemental.dom.Element)refreshPathButton.getElement(), BOTTOM, MIDDLE, "Refresh selected path");
         refreshPathButton.ensureDebugId(REFRESH_BUTTON_ID);
         refreshPathButton.setVisible(true);
         addToolButton(refreshPathButton);
