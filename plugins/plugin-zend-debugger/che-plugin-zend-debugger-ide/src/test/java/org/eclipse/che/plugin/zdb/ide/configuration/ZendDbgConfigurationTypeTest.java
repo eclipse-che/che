@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.zdb.ide.configuration;
 
-import static org.junit.Assert.assertEquals;
+import com.google.gwtmockito.GwtMockitoTestRunner;
 
 import org.eclipse.che.ide.api.debug.DebugConfiguration;
 import org.eclipse.che.ide.api.debug.DebugConfigurationPage;
@@ -22,7 +22,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import com.google.gwtmockito.GwtMockitoTestRunner;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Zend dbg configuration type tests.

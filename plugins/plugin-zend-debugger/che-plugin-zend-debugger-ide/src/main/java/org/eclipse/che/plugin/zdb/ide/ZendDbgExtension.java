@@ -10,15 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.zdb.ide;
 
-import org.eclipse.che.ide.api.extension.Extension;
-import org.eclipse.che.ide.debug.DebuggerManager;
-import org.eclipse.che.plugin.debugger.ide.fqn.FqnResolverFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.ide.api.extension.Extension;
+import org.eclipse.che.ide.debug.DebuggerManager;
+
 /**
- * Extension allows debug PHP applications with the use of Zend Debugger.
+ * Extension allows debugging PHP applications with help of Zend Debugger.
  *
  * @author Bartlomiej Laczkowski
  */
@@ -27,11 +26,7 @@ import com.google.inject.Singleton;
 public class ZendDbgExtension {
 
     @Inject
-    public ZendDbgExtension(DebuggerManager debuggerManager, ZendDebugger zendDebugger,
-            FqnResolverFactory resolverFactory, ZendDbgFqnResolver zendFqnResolver) {
+    public ZendDbgExtension(DebuggerManager debuggerManager, ZendDebugger zendDebugger) {
         debuggerManager.registeredDebugger(ZendDebugger.ID, zendDebugger);
-        resolverFactory.addResolver("php", zendFqnResolver);
-        resolverFactory.addResolver("phtml", zendFqnResolver);
     }
-
 }

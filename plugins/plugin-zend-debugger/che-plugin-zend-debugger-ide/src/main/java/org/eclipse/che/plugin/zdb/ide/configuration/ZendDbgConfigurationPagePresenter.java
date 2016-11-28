@@ -10,16 +10,17 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.zdb.ide.configuration;
 
-import javax.validation.constraints.NotNull;
+import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.debug.DebugConfiguration;
 import org.eclipse.che.ide.api.debug.DebugConfigurationPage;
 import org.eclipse.che.ide.api.debug.DebugConfigurationsManager;
 
-import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.Singleton;
+import javax.validation.constraints.NotNull;
+import java.util.Map;
 
 /**
  * Page allows to edit Zend debugger configuration.
@@ -27,21 +28,21 @@ import com.google.inject.Singleton;
  * @author Bartlomiej Laczkowski
  */
 @Singleton
-public class ZendDbgConfigurationPagePresenter
-        implements ZendDbgConfigurationPageView.ActionDelegate, DebugConfigurationPage<DebugConfiguration> {
+public class ZendDbgConfigurationPagePresenter implements ZendDbgConfigurationPageView.ActionDelegate,
+                                                          DebugConfigurationPage<DebugConfiguration> {
 
-    private final ZendDbgConfigurationPageView view;
-    private DebugConfiguration editedConfiguration;
-    private String originClientHostIp;
-    private int originDebugPort;
-    private boolean originUseSsslEncryption;
-    private boolean originBreakAtFirstLine;
-    private DirtyStateListener listener;
-    private Provider<DebugConfigurationsManager> debugConfigurationsManagerProvider;
+    private final ZendDbgConfigurationPageView         view;
+    private       DebugConfiguration                   editedConfiguration;
+    private       String                               originClientHostIp;
+    private       int                                  originDebugPort;
+    private       boolean                              originUseSsslEncryption;
+    private       boolean                              originBreakAtFirstLine;
+    private       DirtyStateListener                   listener;
+    private       Provider<DebugConfigurationsManager> debugConfigurationsManagerProvider;
 
     @Inject
     public ZendDbgConfigurationPagePresenter(ZendDbgConfigurationPageView view,
-            Provider<DebugConfigurationsManager> debugConfigurationsManagerProvider) {
+                                             Provider<DebugConfigurationsManager> debugConfigurationsManagerProvider) {
         this.view = view;
         this.debugConfigurationsManagerProvider = debugConfigurationsManagerProvider;
         view.setDelegate(this);
@@ -51,38 +52,33 @@ public class ZendDbgConfigurationPagePresenter
     public void resetFrom(DebugConfiguration configuration) {
         setConfigurationDefaults(configuration);
         editedConfiguration = configuration;
-        originBreakAtFirstLine = Boolean.valueOf(
-                configuration.getConnectionProperties().get(ZendDbgConfigurationType.ATTR_BREAK_AT_FIRST_LINE));
-        originClientHostIp = configuration.getConnectionProperties().get(ZendDbgConfigurationType.ATTR_CLIENT_HOST_IP);
-        originDebugPort = Integer
-                .valueOf(configuration.getConnectionProperties().get(ZendDbgConfigurationType.ATTR_DEBUG_PORT));
-        originUseSsslEncryption = Boolean
-                .valueOf(configuration.getConnectionProperties().get(ZendDbgConfigurationType.ATTR_USE_SSL_ENCRYPTION));
+
+        Map<String, String> props = configuration.getConnectionProperties();
+        originBreakAtFirstLine = Boolean.valueOf(props.get(ZendDbgConfigurationType.ATTR_BREAK_AT_FIRST_LINE));
+        originClientHostIp = props.get(ZendDbgConfigurationType.ATTR_CLIENT_HOST_IP);
+        originDebugPort = Integer.valueOf(props.get(ZendDbgConfigurationType.ATTR_DEBUG_PORT));
+        originUseSsslEncryption = Boolean.valueOf(props.get(ZendDbgConfigurationType.ATTR_USE_SSL_ENCRYPTION));
     }
 
     @Override
     public void go(AcceptsOneWidget container) {
         container.setWidget(view);
-        view.setBreakAtFirstLine(Boolean.valueOf(
-                editedConfiguration.getConnectionProperties().get(ZendDbgConfigurationType.ATTR_BREAK_AT_FIRST_LINE)));
-        view.setClientHostIP(
-                editedConfiguration.getConnectionProperties().get(ZendDbgConfigurationType.ATTR_CLIENT_HOST_IP));
-        view.setDebugPort(Integer
-                .valueOf(editedConfiguration.getConnectionProperties().get(ZendDbgConfigurationType.ATTR_DEBUG_PORT)));
-        view.setUseSslEncryption(Boolean.valueOf(
-                editedConfiguration.getConnectionProperties().get(ZendDbgConfigurationType.ATTR_USE_SSL_ENCRYPTION)));
+
+        Map<String, String> props = editedConfiguration.getConnectionProperties();
+        view.setBreakAtFirstLine(Boolean.valueOf(props.get(ZendDbgConfigurationType.ATTR_BREAK_AT_FIRST_LINE)));
+        view.setClientHostIP(props.get(ZendDbgConfigurationType.ATTR_CLIENT_HOST_IP));
+        view.setDebugPort(Integer.valueOf(props.get(ZendDbgConfigurationType.ATTR_DEBUG_PORT)));
+        view.setUseSslEncryption(Boolean.valueOf(props.get(ZendDbgConfigurationType.ATTR_USE_SSL_ENCRYPTION)));
     }
 
     @Override
     public boolean isDirty() {
-        return originBreakAtFirstLine != Boolean.valueOf(
-                editedConfiguration.getConnectionProperties().get(ZendDbgConfigurationType.ATTR_BREAK_AT_FIRST_LINE))
-                || !originClientHostIp.equals(
-                        editedConfiguration.getConnectionProperties().get(ZendDbgConfigurationType.ATTR_CLIENT_HOST_IP))
-                || originDebugPort != Integer.valueOf(
-                        editedConfiguration.getConnectionProperties().get(ZendDbgConfigurationType.ATTR_DEBUG_PORT))
-                || originUseSsslEncryption != Boolean.valueOf(editedConfiguration.getConnectionProperties()
-                        .get(ZendDbgConfigurationType.ATTR_USE_SSL_ENCRYPTION));
+        Map<String, String> props = editedConfiguration.getConnectionProperties();
+
+        return originBreakAtFirstLine != Boolean.valueOf(props.get(ZendDbgConfigurationType.ATTR_BREAK_AT_FIRST_LINE))
+               || !originClientHostIp.equals(props.get(ZendDbgConfigurationType.ATTR_CLIENT_HOST_IP))
+               || originDebugPort != Integer.valueOf(props.get(ZendDbgConfigurationType.ATTR_DEBUG_PORT))
+               || originUseSsslEncryption != Boolean.valueOf(props.get(ZendDbgConfigurationType.ATTR_USE_SSL_ENCRYPTION));
     }
 
     @Override
@@ -92,29 +88,29 @@ public class ZendDbgConfigurationPagePresenter
 
     @Override
     public void onBreakAtFirstLineChanged(boolean value) {
-        editedConfiguration.getConnectionProperties().put(ZendDbgConfigurationType.ATTR_BREAK_AT_FIRST_LINE,
-                String.valueOf(view.getBreakAtFirstLine()));
+        Map<String, String> props = editedConfiguration.getConnectionProperties();
+        props.put(ZendDbgConfigurationType.ATTR_BREAK_AT_FIRST_LINE, String.valueOf(view.getBreakAtFirstLine()));
         listener.onDirtyStateChanged();
     }
 
     @Override
     public void onClientHostIPChanged() {
-        editedConfiguration.getConnectionProperties().put(ZendDbgConfigurationType.ATTR_CLIENT_HOST_IP,
-                view.getClientHostIP());
+        Map<String, String> props = editedConfiguration.getConnectionProperties();
+        props.put(ZendDbgConfigurationType.ATTR_CLIENT_HOST_IP, view.getClientHostIP());
         listener.onDirtyStateChanged();
     }
 
     @Override
     public void onDebugPortChanged() {
-        editedConfiguration.getConnectionProperties().put(ZendDbgConfigurationType.ATTR_DEBUG_PORT,
-                String.valueOf(view.getDebugPort()));
+        Map<String, String> props = editedConfiguration.getConnectionProperties();
+        props.put(ZendDbgConfigurationType.ATTR_DEBUG_PORT, String.valueOf(view.getDebugPort()));
         listener.onDirtyStateChanged();
     }
 
     @Override
     public void onUseSslEncryptionChanged(boolean value) {
-        editedConfiguration.getConnectionProperties().put(ZendDbgConfigurationType.ATTR_USE_SSL_ENCRYPTION,
-                String.valueOf(view.getUseSslEncryption()));
+        Map<String, String> props = editedConfiguration.getConnectionProperties();
+        props.put(ZendDbgConfigurationType.ATTR_USE_SSL_ENCRYPTION, String.valueOf(view.getUseSslEncryption()));
         listener.onDirtyStateChanged();
     }
 
@@ -126,7 +122,8 @@ public class ZendDbgConfigurationPagePresenter
         debugConfigurationsManager.removeConfiguration(configuration);
         ZendDbgConfigurationType.setDefaults(configuration);
         debugConfigurationsManager.createConfiguration(configuration.getType().getId(), configuration.getName(),
-                configuration.getHost(), configuration.getPort(), configuration.getConnectionProperties());
+                                                       configuration.getHost(), configuration.getPort(),
+                                                       configuration.getConnectionProperties());
     }
 
 }

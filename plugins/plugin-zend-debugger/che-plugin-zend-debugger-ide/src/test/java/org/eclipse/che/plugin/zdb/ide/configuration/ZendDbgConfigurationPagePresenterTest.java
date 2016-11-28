@@ -10,6 +10,23 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.zdb.ide.configuration;
 
+import com.google.gwt.user.client.ui.AcceptsOneWidget;
+
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.debug.DebugConfiguration;
+import org.eclipse.che.ide.api.debug.DebugConfigurationPage;
+import org.eclipse.che.ide.api.machine.DevMachine;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.runners.MockitoJUnitRunner;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.eclipse.che.plugin.zdb.ide.configuration.ZendDbgConfigurationType.ATTR_BREAK_AT_FIRST_LINE;
 import static org.eclipse.che.plugin.zdb.ide.configuration.ZendDbgConfigurationType.ATTR_CLIENT_HOST_IP;
 import static org.eclipse.che.plugin.zdb.ide.configuration.ZendDbgConfigurationType.ATTR_DEBUG_PORT;
@@ -24,48 +41,31 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.debug.DebugConfiguration;
-import org.eclipse.che.ide.api.debug.DebugConfigurationPage;
-import org.eclipse.che.ide.api.machine.DevMachine;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import com.google.gwt.user.client.ui.AcceptsOneWidget;
-
 /**
  * Zend dbg configuration page presenter tests.
- * 
+ *
  * @author Bartlomiej Laczkowski
  */
 @RunWith(MockitoJUnitRunner.class)
 public class ZendDbgConfigurationPagePresenterTest {
 
     private static final Map<String, String> CONNECTION_PROPERTIES = new HashMap<>();
-    
+
     static {
         CONNECTION_PROPERTIES.put(ATTR_CLIENT_HOST_IP, DEFAULT_CLIENT_HOST_IP);
         CONNECTION_PROPERTIES.put(ATTR_DEBUG_PORT, DEFAULT_DEBUG_PORT);
         CONNECTION_PROPERTIES.put(ATTR_BREAK_AT_FIRST_LINE, DEFAULT_BREAK_AT_FIRST_LINE);
         CONNECTION_PROPERTIES.put(ATTR_USE_SSL_ENCRYPTION, DEFAULT_USE_SSL_ENCRYPTION);
     }
-    
+
     @Mock
     private ZendDbgConfigurationPageView pageView;
     @Mock
-    private AppContext                     appContext;
+    private AppContext                   appContext;
     @Mock
-    private DevMachine                     devMachine;
+    private DevMachine                   devMachine;
     @Mock
-    private DebugConfiguration configuration;
+    private DebugConfiguration           configuration;
 
     @InjectMocks
     private ZendDbgConfigurationPagePresenter pagePresenter;
@@ -78,7 +78,7 @@ public class ZendDbgConfigurationPagePresenterTest {
 
     @Test
     public void testResetting() throws Exception {
-        verify(configuration, times(5)).getConnectionProperties();
+        verify(configuration, times(2)).getConnectionProperties();
     }
 
     @Test
@@ -86,7 +86,7 @@ public class ZendDbgConfigurationPagePresenterTest {
         AcceptsOneWidget container = Mockito.mock(AcceptsOneWidget.class);
         pagePresenter.go(container);
         verify(container).setWidget(eq(pageView));
-        verify(configuration, times(9)).getConnectionProperties();
+        verify(configuration, times(3)).getConnectionProperties();
     }
 
     @Test
@@ -97,10 +97,10 @@ public class ZendDbgConfigurationPagePresenterTest {
         pagePresenter.setDirtyStateListener(listener);
         pagePresenter.onClientHostIPChanged();
         verify(pageView).getClientHostIP();
-        verify(configuration, times(6)).getConnectionProperties();
+        verify(configuration, times(3)).getConnectionProperties();
         verify(listener).onDirtyStateChanged();
     }
-    
+
     @Test
     public void testOnDebugPortChanged() throws Exception {
         int debugPort = 10000;
@@ -109,10 +109,10 @@ public class ZendDbgConfigurationPagePresenterTest {
         pagePresenter.setDirtyStateListener(listener);
         pagePresenter.onDebugPortChanged();
         verify(pageView).getDebugPort();
-        verify(configuration, times(6)).getConnectionProperties();
+        verify(configuration, times(3)).getConnectionProperties();
         verify(listener).onDirtyStateChanged();
     }
-    
+
     @Test
     public void testOnBreakAtFirstLineChanged() throws Exception {
         boolean breakAtFirstLine = false;
@@ -121,10 +121,10 @@ public class ZendDbgConfigurationPagePresenterTest {
         pagePresenter.setDirtyStateListener(listener);
         pagePresenter.onBreakAtFirstLineChanged(breakAtFirstLine);
         verify(pageView).getBreakAtFirstLine();
-        verify(configuration, times(6)).getConnectionProperties();
+        verify(configuration, times(3)).getConnectionProperties();
         verify(listener).onDirtyStateChanged();
     }
-    
+
     @Test
     public void testOnUseSslEncryptionChanged() throws Exception {
         boolean useSslEncryption = false;
@@ -133,8 +133,8 @@ public class ZendDbgConfigurationPagePresenterTest {
         pagePresenter.setDirtyStateListener(listener);
         pagePresenter.onUseSslEncryptionChanged(useSslEncryption);
         verify(pageView).getUseSslEncryption();
-        verify(configuration, times(6)).getConnectionProperties();
+        verify(configuration, times(3)).getConnectionProperties();
         verify(listener).onDirtyStateChanged();
     }
-    
+
 }

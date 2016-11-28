@@ -225,10 +225,6 @@
             <artifactId>che-plugin-php-lang-shared</artifactId>
         </dependency>
         <dependency>
-        	<groupId>org.eclipse.che.plugin</groupId>
-        	<artifactId>che-plugin-zend-debugger-ide</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-product-info</artifactId>
         </dependency>
@@ -263,6 +259,10 @@
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-web-ext-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-zend-debugger-ide</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.gwt</groupId>

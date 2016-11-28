@@ -32,12 +32,12 @@ public class ZendDbgConfigurationPageViewImpl implements ZendDbgConfigurationPag
     private static final ZendDebugConfigurationPageViewImplUiBinder UI_BINDER = GWT
             .create(ZendDebugConfigurationPageViewImplUiBinder.class);
 
-    private final FlowPanel rootElement;
-    private ActionDelegate delegate;
+    private final FlowPanel      rootElement;
+    private       ActionDelegate delegate;
     @UiField
-    TextBox clientHostIP;
+    TextBox  clientHostIP;
     @UiField
-    TextBox debugPort;
+    TextBox  debugPort;
     @UiField
     CheckBox breakAtFirstLine;
     @UiField
@@ -122,12 +122,12 @@ public class ZendDbgConfigurationPageViewImpl implements ZendDbgConfigurationPag
         clientHostIP.setFocus(true);
     }
 
-    @UiHandler({ "clientHostIP" })
+    @UiHandler({"clientHostIP"})
     void onClientHostIPChanged(KeyUpEvent event) {
         delegate.onClientHostIPChanged();
     }
 
-    @UiHandler({ "debugPort" })
+    @UiHandler({"debugPort"})
     void onDebugPortChanged(KeyUpEvent event) {
         delegate.onDebugPortChanged();
     }

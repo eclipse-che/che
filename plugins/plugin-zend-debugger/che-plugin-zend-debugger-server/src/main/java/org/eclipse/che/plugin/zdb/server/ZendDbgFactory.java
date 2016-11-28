@@ -10,14 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.zdb.server;
 
-import static java.util.stream.Collectors.toMap;
-
-import java.util.Map;
-
 import org.eclipse.che.api.debugger.server.Debugger;
 import org.eclipse.che.api.debugger.server.DebuggerFactory;
 import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
 import org.eclipse.che.plugin.zdb.server.connection.ZendDbgSettings;
+
+import java.util.Map;
+
+import static java.util.stream.Collectors.toMap;
 
 /**
  * Zend debugger for PHP factory.
@@ -34,37 +34,46 @@ public class ZendDbgFactory implements DebuggerFactory {
     }
 
     @Override
-    public Debugger create(Map<String, String> properties, Debugger.DebuggerCallback debuggerCallback)
-            throws DebuggerException {
-        Map<String, String> normalizedProps = properties.entrySet().stream()
-                .collect(toMap(e -> e.getKey().toLowerCase(), Map.Entry::getValue));
+    public Debugger create(Map<String, String> properties,
+                           Debugger.DebuggerCallback debuggerCallback) throws DebuggerException {
+
+        Map<String, String> normalizedProps = properties.entrySet()
+                                                        .stream()
+                                                        .collect(toMap(e -> e.getKey().toLowerCase(), Map.Entry::getValue));
+
         String breakAtFirstLineProp = normalizedProps.get("break-at-first-line");
         if (breakAtFirstLineProp == null) {
             throw new DebuggerException("Can't establish connection: debug break at first line property is unknown.");
         }
+
         boolean breakAtFirstLine = Boolean.valueOf(breakAtFirstLineProp);
         String clientHostIPProp = normalizedProps.get("client-host-ip");
         if (clientHostIPProp == null) {
             throw new DebuggerException("Can't establish connection: client host/IP property is unknown.");
         }
+
         String debugPortProp = normalizedProps.get("debug-port");
         if (debugPortProp == null) {
             throw new DebuggerException("Can't establish connection: debug port property is unknown.");
         }
-        String clientHostIP = clientHostIPProp;
+
         int debugPort;
         try {
             debugPort = Integer.parseInt(debugPortProp);
         } catch (NumberFormatException e) {
             throw new DebuggerException("Unknown debug port property format: " + debugPortProp);
         }
-        String useSslEncrytpionProp = normalizedProps.get("use-ssl-encryption");
-        if (useSslEncrytpionProp == null) {
+
+        String useSslEncryptionProp = normalizedProps.get("use-ssl-encryption");
+        if (useSslEncryptionProp == null) {
             throw new DebuggerException("Can't establish connection: debug use SSL encryption property is unknown.");
         }
-        boolean useSslEncryption = Boolean.valueOf(useSslEncrytpionProp);
-        return new ZendDebugger(new ZendDbgSettings(debugPort, clientHostIP, breakAtFirstLine, useSslEncryption),
-                new ZendDbgLocationHandler(), debuggerCallback);
+
+        boolean useSslEncryption = Boolean.valueOf(useSslEncryptionProp);
+
+        return new ZendDebugger(new ZendDbgSettings(debugPort, clientHostIPProp, breakAtFirstLine, useSslEncryption),
+                                new ZendDbgLocationHandler(),
+                                debuggerCallback);
     }
 
 }

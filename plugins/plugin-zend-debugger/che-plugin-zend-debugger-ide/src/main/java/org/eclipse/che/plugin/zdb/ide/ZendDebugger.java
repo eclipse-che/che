@@ -10,14 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.zdb.ide;
 
-import java.util.Map;
-
-import javax.validation.constraints.NotNull;
+import com.google.inject.Inject;
+import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.DebuggerServiceClient;
-import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.debug.DebuggerDescriptor;
 import org.eclipse.che.ide.debug.DebuggerManager;
@@ -25,12 +23,11 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
 import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.eclipse.che.plugin.debugger.ide.debug.AbstractDebugger;
-import org.eclipse.che.plugin.debugger.ide.fqn.FqnResolver;
-import org.eclipse.che.plugin.debugger.ide.fqn.FqnResolverFactory;
+import org.eclipse.che.plugin.debugger.ide.debug.BasicActiveFileHandler;
 import org.eclipse.che.plugin.zdb.ide.configuration.ZendDbgConfigurationType;
 
-import com.google.inject.Inject;
-import com.google.web.bindery.event.shared.EventBus;
+import javax.validation.constraints.NotNull;
+import java.util.Map;
 
 /**
  * Zend PHP debugger.
@@ -41,18 +38,24 @@ public class ZendDebugger extends AbstractDebugger {
 
     public static final String ID = "zend-debugger";
 
-    public final FqnResolverFactory fqnResolverFactory;
-    public final FileTypeRegistry fileTypeRegistry;
-
     @Inject
-    public ZendDebugger(DebuggerServiceClient service, DtoFactory dtoFactory, LocalStorageProvider localStorageProvider,
-            MessageBusProvider messageBusProvider, EventBus eventBus, FqnResolverFactory fqnResolverFactory,
-            ZendDbgFileHandler zendDebuggerFileHandler, DebuggerManager debuggerManager,
-            FileTypeRegistry fileTypeRegistry, BreakpointManager breakpointManager) {
-        super(service, dtoFactory, localStorageProvider, messageBusProvider, eventBus, zendDebuggerFileHandler,
-                debuggerManager, breakpointManager, ID);
-        this.fqnResolverFactory = fqnResolverFactory;
-        this.fileTypeRegistry = fileTypeRegistry;
+    public ZendDebugger(DebuggerServiceClient service,
+                        DtoFactory dtoFactory,
+                        LocalStorageProvider localStorageProvider,
+                        MessageBusProvider messageBusProvider,
+                        EventBus eventBus,
+                        BasicActiveFileHandler activeFileHandler,
+                        DebuggerManager debuggerManager,
+                        BreakpointManager breakpointManager) {
+        super(service,
+              dtoFactory,
+              localStorageProvider,
+              messageBusProvider,
+              eventBus,
+              activeFileHandler,
+              debuggerManager,
+              breakpointManager,
+              ID);
     }
 
     @Override
@@ -63,12 +66,7 @@ public class ZendDebugger extends AbstractDebugger {
 
     @Override
     protected String pathToFqn(VirtualFile file) {
-        String fileExtension = fileTypeRegistry.getFileTypeByFile(file).getExtension();
-        FqnResolver resolver = fqnResolverFactory.getResolver(fileExtension);
-        if (resolver != null) {
-            return resolver.resolveFqn(file);
-        }
-        return null;
+        return file.getName();
     }
 
     @Override

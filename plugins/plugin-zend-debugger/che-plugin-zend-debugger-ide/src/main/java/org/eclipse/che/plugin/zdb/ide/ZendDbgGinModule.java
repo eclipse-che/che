@@ -10,15 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.zdb.ide;
 
+import com.google.gwt.inject.client.AbstractGinModule;
+import com.google.gwt.inject.client.multibindings.GinMultibinder;
+import com.google.inject.Singleton;
+
 import org.eclipse.che.ide.api.debug.DebugConfigurationType;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.plugin.zdb.ide.configuration.ZendDbgConfigurationPageView;
 import org.eclipse.che.plugin.zdb.ide.configuration.ZendDbgConfigurationPageViewImpl;
 import org.eclipse.che.plugin.zdb.ide.configuration.ZendDbgConfigurationType;
-
-import com.google.gwt.inject.client.AbstractGinModule;
-import com.google.gwt.inject.client.multibindings.GinMultibinder;
-import com.google.inject.Singleton;
 
 /**
  * Zend debugger runtime GIN module.
@@ -30,8 +30,7 @@ public class ZendDbgGinModule extends AbstractGinModule {
 
     @Override
     protected void configure() {
-        GinMultibinder.newSetBinder(binder(), DebugConfigurationType.class).addBinding()
-                .to(ZendDbgConfigurationType.class);
+        GinMultibinder.newSetBinder(binder(), DebugConfigurationType.class).addBinding().to(ZendDbgConfigurationType.class);
         bind(ZendDbgConfigurationPageView.class).to(ZendDbgConfigurationPageViewImpl.class).in(Singleton.class);
     }
 
