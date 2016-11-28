@@ -107,8 +107,10 @@ public interface ProcessesPanelView extends View<ProcessesPanelView.ActionDelega
          *
          * @param machineId
          *         id of machine in which the terminal will be added
+         * @param source
+         *         source object that called current method
          */
-        void onAddTerminal(String machineId);
+        void onAddTerminal(String machineId, Object source);
 
         /**
          * Will be called when user clicks 'Preview Ssh' button

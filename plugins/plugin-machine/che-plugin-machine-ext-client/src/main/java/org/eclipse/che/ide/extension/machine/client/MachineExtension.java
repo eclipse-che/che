@@ -20,7 +20,6 @@ import org.eclipse.che.ide.actions.StopWorkspaceAction;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.action.IdeActions;
-import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.api.icon.Icon;
@@ -29,10 +28,8 @@ import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.keybinding.KeyBuilder;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
-import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.Perspective;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
-import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.extension.machine.client.actions.CreateMachineAction;
@@ -50,10 +47,7 @@ import org.eclipse.che.ide.extension.machine.client.processes.NewTerminalAction;
 import org.eclipse.che.ide.extension.machine.client.processes.actions.CloseConsoleAction;
 import org.eclipse.che.ide.extension.machine.client.processes.actions.ReRunProcessAction;
 import org.eclipse.che.ide.extension.machine.client.processes.actions.StopProcessAction;
-import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.extension.machine.client.targets.EditTargetsAction;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
-import org.eclipse.che.ide.statepersistance.AppStateManager;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
 
 import javax.inject.Named;
@@ -66,7 +60,6 @@ import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RUN;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_WORKSPACE;
 import static org.eclipse.che.ide.api.constraints.Anchor.AFTER;
 import static org.eclipse.che.ide.api.constraints.Constraints.FIRST;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
  * Machine extension entry point.
@@ -85,7 +78,6 @@ public class MachineExtension {
     public static final String GROUP_MACHINES_LIST     = "MachinesListGroup";
 
     private final PerspectiveManager        perspectiveManager;
-    private final Provider<AppStateManager> appStateManagerProvider;
 
     /**
      * Controls central toolbar action group visibility. Use for example next snippet:
@@ -100,16 +92,10 @@ public class MachineExtension {
     @Inject
     public MachineExtension(final MachineResources machineResources,
                             final EventBus eventBus,
-                            final WorkspaceAgent workspaceAgent,
-                            final AppContext appContext,
-                            final ProcessesPanelPresenter processesPanelPresenter,
                             final Provider<ServerPortProvider> machinePortProvider,
                             final PerspectiveManager perspectiveManager,
-                            final Provider<MachineStatusHandler> machineStatusHandlerProvider,
-                            final ProjectExplorerPresenter projectExplorerPresenter,
-                            final Provider<AppStateManager> appStateManagerProvider) {
+                            final Provider<MachineStatusHandler> machineStatusHandlerProvider) {
         this.perspectiveManager = perspectiveManager;
-        this.appStateManagerProvider = appStateManagerProvider;
 
         machineResources.getCss().ensureInjected();
         machineStatusHandlerProvider.get();
@@ -120,20 +106,6 @@ public class MachineExtension {
                 restoreTerminal();
 
                 machinePortProvider.get();
-                /* Do not show terminal on factories by default */
-                if (appContext.getFactory() == null) {
-                    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-                        @Override
-                        public void execute() {
-                            processesPanelPresenter.selectDevMachine();
-                            processesPanelPresenter.newTerminal();
-                        }
-                    });
-                    workspaceAgent.openPart(processesPanelPresenter, PartStackType.INFORMATION);
-                }
-                if (!appStateManagerProvider.get().hasStateForWorkspace(appContext.getWorkspaceId())) {
-                    workspaceAgent.setActivePart(projectExplorerPresenter);
-                }
             }
 
             @Override
@@ -154,23 +126,9 @@ public class MachineExtension {
                 Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
                     @Override
                     public void execute() {
-                        workspaceAgent.setActivePart(projectExplorerPresenter);
-                        processesPanelPresenter.selectDevMachine();
                         maximizeTerminal();
                     }
                 });
-            }
-        });
-
-        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-            @Override
-            public void execute() {
-                // Add Processes part to Project perspective
-                perspectiveManager.setPerspectiveId(PROJECT_PERSPECTIVE_ID);
-                workspaceAgent.openPart(processesPanelPresenter, PartStackType.INFORMATION);
-                if (appContext.getFactory() == null) {
-                    workspaceAgent.setActivePart(processesPanelPresenter);
-                }
             }
         });
     }
