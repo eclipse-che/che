@@ -88,9 +88,9 @@ public class GithubImporterPagePresenterTest {
     private ArgumentCaptor<AsyncRequestCallback<Map<String, List<GitHubRepository>>>> asyncRequestCallbackRepoListCaptor;
 
     @Mock
-    private Wizard.UpdateDelegate           updateDelegate;
+    private Wizard.UpdateDelegate                     updateDelegate;
     @Mock
-    private DtoFactory                      dtoFactory;
+    private DtoFactory                                dtoFactory;
     @Mock
     private GithubImporterPageView                    view;
     @Mock
@@ -124,11 +124,11 @@ public class GithubImporterPagePresenterTest {
     @Mock
     private Response                                  response;
     @Mock
-    private OAuth2Authenticator             gitHubAuthenticator;
+    private OAuth2Authenticator                       gitHubAuthenticator;
     @Mock
-    private OAuth2AuthenticatorRegistry     gitHubAuthenticatorRegistry;
+    private OAuth2AuthenticatorRegistry               gitHubAuthenticatorRegistry;
     @Mock
-    private AppContext                      appContext;
+    private AppContext                                appContext;
 
     private GithubImporterPagePresenter presenter;
 
@@ -261,6 +261,17 @@ public class GithubImporterPagePresenterTest {
     }
 
     @Test
+    public void testUrlWithSlashAtTheEnd() {
+        // test for url with slash at the end of the path
+        String correctUrl = "git://hostname.com/path/to/repo.git/";
+        when(view.getProjectName()).thenReturn("");
+
+        presenter.onProjectUrlChanged(correctUrl);
+
+        verifyInvocationsForCorrectUrl(correctUrl);
+    }
+
+    @Test
     public void testUrlWithoutUsername() {
         String correctUrl = "git@hostname.com:projectName.git";
         when(view.getProjectName()).thenReturn("");
@@ -326,6 +337,72 @@ public class GithubImporterPagePresenterTest {
     }
 
     @Test
+    public void testSshUriWithIpBetweenDoubleSlashAndSlash() {
+        //Check for type uri with ip address between // and /
+        String correctUrl = "ssh://127.0.0.1/some/path";
+        when(view.getProjectName()).thenReturn("");
+
+        presenter.onProjectUrlChanged(correctUrl);
+
+        verifyInvocationsForCorrectUrl(correctUrl);
+    }
+
+    @Test
+    public void testSshUriWithLocalhostBetweenDoubleSlashAndSlash() {
+        //Check for type uri with localhost between // and /
+        String correctUrl = "ssh://localhost/some/path";
+        when(view.getProjectName()).thenReturn("");
+
+        presenter.onProjectUrlChanged(correctUrl);
+
+        verifyInvocationsForCorrectUrl(correctUrl);
+    }
+
+    @Test
+    public void testSshUriWithIpBetweenAtAndSlash() {
+        //Check for type uri with ip address between @ and /
+        String correctUrl = "ssh://user@127.0.0.1/some/path";
+        when(view.getProjectName()).thenReturn("");
+
+        presenter.onProjectUrlChanged(correctUrl);
+
+        verifyInvocationsForCorrectUrl(correctUrl);
+    }
+
+    @Test
+    public void testSshUriWithLocalhostBetweenAtAndSlash() {
+        //Check for type uri with localhost between // and /
+        String correctUrl = "ssh://user@localhost/some/path";
+        when(view.getProjectName()).thenReturn("");
+
+        presenter.onProjectUrlChanged(correctUrl);
+
+        verifyInvocationsForCorrectUrl(correctUrl);
+    }
+
+    @Test
+    public void testUrlWithHostNameWithDotAndDash() {
+        //Check for type uri with localhost between // and /
+        String correctUrl = "git://host-name.com/some/path";
+        when(view.getProjectName()).thenReturn("");
+
+        presenter.onProjectUrlChanged(correctUrl);
+
+        verifyInvocationsForCorrectUrl(correctUrl);
+    }
+
+    @Test
+    public void testUrlWithHostNameWithSeveralDotsAndDashes() {
+        //Check for type uri with localhost between // and /
+        String correctUrl = "git://ho-st.na-me.com/some/path";
+        when(view.getProjectName()).thenReturn("");
+
+        presenter.onProjectUrlChanged(correctUrl);
+
+        verifyInvocationsForCorrectUrl(correctUrl);
+    }
+
+    @Test
     public void projectUrlWithIncorrectProtocolEnteredTest() {
         String correctUrl = "htps://github.com/codenvy/ide.git";
         when(view.getProjectName()).thenReturn("");
@@ -335,6 +412,81 @@ public class GithubImporterPagePresenterTest {
         verify(view).markURLInvalid();
         verify(view).setURLErrorMessage(eq(locale.importProjectMessageProtocolIncorrect()));
         verify(source).setLocation(eq(correctUrl));
+        verify(view).setProjectName(anyString());
+        verify(updateDelegate).updateControls();
+    }
+
+    @Test
+    public void projectUrlWithHostNameThatStartsWithDotEnteredTest() {
+        String incorrectUrl = "https://.github.com/codenvy/ide.git";
+        when(view.getProjectName()).thenReturn("");
+
+        presenter.onProjectUrlChanged(incorrectUrl);
+
+        verify(view).markURLInvalid();
+        verify(view).setURLErrorMessage(eq(locale.importProjectMessageHostIncorrect()));
+
+        verify(source).setLocation(eq(incorrectUrl));
+        verify(view).setProjectName(anyString());
+        verify(updateDelegate).updateControls();
+    }
+
+    @Test
+    public void projectUrlWithHostNameThatStartsWithDashEnteredTest() {
+        String incorrectUrl = "https://-github.com/codenvy/ide.git";
+        when(view.getProjectName()).thenReturn("");
+
+        presenter.onProjectUrlChanged(incorrectUrl);
+
+        verify(view).markURLInvalid();
+        verify(view).setURLErrorMessage(eq(locale.importProjectMessageHostIncorrect()));
+
+        verify(source).setLocation(eq(incorrectUrl));
+        verify(view).setProjectName(anyString());
+        verify(updateDelegate).updateControls();
+    }
+
+    @Test
+    public void projectUrlWithHostNameThatEndsOnDotDashEnteredTest() {
+        String incorrectUrl = "https://github.com./codenvy/ide.git";
+        when(view.getProjectName()).thenReturn("");
+
+        presenter.onProjectUrlChanged(incorrectUrl);
+
+        verify(view).markURLInvalid();
+        verify(view).setURLErrorMessage(eq(locale.importProjectMessageHostIncorrect()));
+
+        verify(source).setLocation(eq(incorrectUrl));
+        verify(view).setProjectName(anyString());
+        verify(updateDelegate).updateControls();
+    }
+
+    @Test
+    public void projectUrlWithHostNameThatEndsOnDashDashEnteredTest() {
+        String incorrectUrl = "https://github.com-/codenvy/ide.git";
+        when(view.getProjectName()).thenReturn("");
+
+        presenter.onProjectUrlChanged(incorrectUrl);
+
+        verify(view).markURLInvalid();
+        verify(view).setURLErrorMessage(eq(locale.importProjectMessageHostIncorrect()));
+
+        verify(source).setLocation(eq(incorrectUrl));
+        verify(view).setProjectName(anyString());
+        verify(updateDelegate).updateControls();
+    }
+
+    @Test
+    public void projectUrlWithEnteredHostNameWithDotAndDashTogetherTest() {
+        String incorrectUrl = "https://github.-com/codenvy/ide.git";
+        when(view.getProjectName()).thenReturn("");
+
+        presenter.onProjectUrlChanged(incorrectUrl);
+
+        verify(view).markURLInvalid();
+        verify(view).setURLErrorMessage(eq(locale.importProjectMessageHostIncorrect()));
+
+        verify(source).setLocation(eq(incorrectUrl));
         verify(view).setProjectName(anyString());
         verify(updateDelegate).updateControls();
     }
