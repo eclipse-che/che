@@ -14,19 +14,11 @@ import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.multibindings.GinMapBinder;
 
 import org.eclipse.che.ide.api.event.ng.JsonRpcWebSocketAgentEventListener;
-import org.eclipse.che.ide.jsonrpc.JsonRpcRequestReceiver;
-import org.eclipse.che.ide.jsonrpc.JsonRpcRequestTransmitter;
-import org.eclipse.che.ide.jsonrpc.JsonRpcResponseReceiver;
-import org.eclipse.che.ide.jsonrpc.JsonRpcResponseTransmitter;
-import org.eclipse.che.ide.jsonrpc.impl.BasicJsonRpcObjectValidator;
-import org.eclipse.che.ide.jsonrpc.impl.JsonRpcDispatcher;
-import org.eclipse.che.ide.jsonrpc.impl.JsonRpcInitializer;
-import org.eclipse.che.ide.jsonrpc.impl.JsonRpcObjectValidator;
+import org.eclipse.che.ide.jsonrpc.JsonRpcInitializer;
+import org.eclipse.che.ide.jsonrpc.RequestHandler;
+import org.eclipse.che.ide.jsonrpc.RequestTransmitter;
 import org.eclipse.che.ide.jsonrpc.impl.WebSocketJsonRpcInitializer;
-import org.eclipse.che.ide.jsonrpc.impl.WebSocketJsonRpcRequestDispatcher;
-import org.eclipse.che.ide.jsonrpc.impl.WebSocketJsonRpcRequestTransmitter;
-import org.eclipse.che.ide.jsonrpc.impl.WebSocketJsonRpcResponseDispatcher;
-import org.eclipse.che.ide.jsonrpc.impl.WebSocketJsonRpcResponseTransmitter;
+import org.eclipse.che.ide.jsonrpc.impl.WebSocketTransmitter;
 
 /**
  * GIN module for configuring Json RPC protocol implementation components.
@@ -38,22 +30,9 @@ public class JsonRpcModule extends AbstractGinModule {
     @Override
     protected void configure() {
         bind(JsonRpcWebSocketAgentEventListener.class).asEagerSingleton();
-
         bind(JsonRpcInitializer.class).to(WebSocketJsonRpcInitializer.class);
+        bind(RequestTransmitter.class).to(WebSocketTransmitter.class);
 
-        bind(JsonRpcRequestTransmitter.class).to(WebSocketJsonRpcRequestTransmitter.class);
-        bind(JsonRpcResponseTransmitter.class).to(WebSocketJsonRpcResponseTransmitter.class);
-
-        bind(JsonRpcObjectValidator.class).to(BasicJsonRpcObjectValidator.class);
-
-        GinMapBinder<String, JsonRpcDispatcher> dispatchers = GinMapBinder.newMapBinder(binder(), String.class, JsonRpcDispatcher.class);
-        dispatchers.addBinding("request").to(WebSocketJsonRpcRequestDispatcher.class);
-        dispatchers.addBinding("response").to(WebSocketJsonRpcResponseDispatcher.class);
-
-        GinMapBinder<String, JsonRpcRequestReceiver> requestReceivers =
-                GinMapBinder.newMapBinder(binder(), String.class, JsonRpcRequestReceiver.class);
-
-        GinMapBinder<String, JsonRpcResponseReceiver> responseReceivers =
-                GinMapBinder.newMapBinder(binder(), String.class, JsonRpcResponseReceiver.class);
+        GinMapBinder.newMapBinder(binder(), String.class, RequestHandler.class);
     }
 }
