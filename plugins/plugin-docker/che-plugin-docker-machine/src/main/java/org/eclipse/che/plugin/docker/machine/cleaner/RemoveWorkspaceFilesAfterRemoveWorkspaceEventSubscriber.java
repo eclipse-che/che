@@ -18,6 +18,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.api.workspace.server.WorkspaceFilesCleaner;
 import org.eclipse.che.api.workspace.server.event.WorkspaceRemovedEvent;
 import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
@@ -49,6 +50,8 @@ public class RemoveWorkspaceFilesAfterRemoveWorkspaceEventSubscriber implements 
         this.workspaceFilesCleaner = workspaceFilesCleaner;
         this.eventService = eventService;
         executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("RemoveWorkspaceFilesAfterRemoveWorkspaceEventSubscriber-%d")
+                                                                           .setUncaughtExceptionHandler(
+                                                                                   LoggingUncaughtExceptionHandler.getInstance())
                                                                            .setDaemon(true)
                                                                            .build());
     }

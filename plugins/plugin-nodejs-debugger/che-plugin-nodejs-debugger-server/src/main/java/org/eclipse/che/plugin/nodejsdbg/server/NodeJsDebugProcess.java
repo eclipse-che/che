@@ -12,6 +12,7 @@ package org.eclipse.che.plugin.nodejsdbg.server;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.plugin.nodejsdbg.server.exception.NodeJsDebuggerException;
 import org.eclipse.che.plugin.nodejsdbg.server.exception.NodeJsDebuggerTerminatedException;
@@ -70,6 +71,8 @@ public class NodeJsDebugProcess implements NodeJsProcessObservable {
         processWriter = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
 
         executor = Executors.newScheduledThreadPool(1, new ThreadFactoryBuilder().setNameFormat("nodejs-debugger-%d")
+                                                                                 .setUncaughtExceptionHandler(
+                                                                                         LoggingUncaughtExceptionHandler.getInstance())
                                                                                  .setDaemon(true)
                                                                                  .build());
         executor.scheduleWithFixedDelay(new OutputReader(), 0, 100, TimeUnit.MILLISECONDS);

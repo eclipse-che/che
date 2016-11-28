@@ -13,6 +13,7 @@ package org.eclipse.che.api.vfs.search.impl;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.api.vfs.VirtualFileFilter;
 import org.eclipse.che.api.vfs.VirtualFileFilters;
 import org.eclipse.che.api.vfs.VirtualFileSystem;
@@ -42,6 +43,8 @@ public abstract class AbstractLuceneSearcherProvider implements SearcherProvider
         this.excludeFileIndexFilters = mergeFileIndexFilters(excludeFileIndexFilters);
         executor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder()
                                                              .setDaemon(true)
+                                                             .setUncaughtExceptionHandler(
+                                                                     LoggingUncaughtExceptionHandler.getInstance())
                                                              .setNameFormat("LuceneSearcherInitThread")
                                                              .build());
     }

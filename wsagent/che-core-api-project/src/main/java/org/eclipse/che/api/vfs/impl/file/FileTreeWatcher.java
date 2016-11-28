@@ -12,6 +12,7 @@ package org.eclipse.che.api.vfs.impl.file;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,7 +86,11 @@ public class FileTreeWatcher {
         this.excludePatterns = newArrayList(excludePatterns);
         this.fileWatcherNotificationHandler = fileWatcherNotificationHandler;
 
-        ThreadFactory threadFactory = new ThreadFactoryBuilder().setDaemon(true).setNameFormat("FileTreeWatcher-%d").build();
+        ThreadFactory threadFactory = new ThreadFactoryBuilder().setDaemon(true)
+                                                                .setUncaughtExceptionHandler(
+                                                                        LoggingUncaughtExceptionHandler.getInstance())
+                                                                .setNameFormat("FileTreeWatcher-%d")
+                                                                .build();
         executor = Executors.newSingleThreadExecutor(threadFactory);
         running = new AtomicBoolean();
         watchedDirectories = newHashMap();

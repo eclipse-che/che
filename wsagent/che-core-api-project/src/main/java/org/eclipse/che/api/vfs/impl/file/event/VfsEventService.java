@@ -13,6 +13,7 @@ package org.eclipse.che.api.vfs.impl.file.event;
 import com.google.common.annotations.Beta;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.slf4j.Logger;
 
 import javax.annotation.PostConstruct;
@@ -41,6 +42,8 @@ abstract class VfsEventService {
     VfsEventService() {
         final String threadName = getClass().getSimpleName().concat("Thread-%d");
         final ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat(threadName)
+                                                                      .setUncaughtExceptionHandler(
+                                                                              LoggingUncaughtExceptionHandler.getInstance())
                                                                       .setDaemon(TRUE)
                                                                       .build();
 
