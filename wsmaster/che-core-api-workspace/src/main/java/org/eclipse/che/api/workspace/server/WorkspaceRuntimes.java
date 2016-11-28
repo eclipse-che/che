@@ -49,6 +49,8 @@ import org.eclipse.che.api.workspace.server.model.impl.ExtendedMachineImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceRuntimeImpl;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.EventType;
+import org.eclipse.che.commons.lang.concurrent.CloseableLock;
+import org.eclipse.che.commons.lang.concurrent.StripedLocks;
 import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
 import org.slf4j.Logger;
 
@@ -154,7 +156,7 @@ public class WorkspaceRuntimes {
     public RuntimeDescriptor get(String workspaceId) throws NotFoundException,
                                                             ServerException {
         WorkspaceState workspaceState;
-        try (StripedLocks.ReadLock lock = stripedLocks.acquireReadLock(workspaceId)) {
+        try (CloseableLock lock = stripedLocks.acquireReadLock(workspaceId)) {
             workspaceState = workspaces.get(workspaceId);
         }
         if (workspaceState == null) {
@@ -268,7 +270,7 @@ public class WorkspaceRuntimes {
         // The double check is required as it is still possible to get unlucky timing
         // between locking and stopping workspace.
         ensurePreDestroyIsNotExecuted();
-        try (StripedLocks.WriteLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
+        try (CloseableLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
             ensurePreDestroyIsNotExecuted();
             WorkspaceState workspaceState = workspaces.get(workspaceId);
             if (workspaceState == null) {
@@ -291,7 +293,7 @@ public class WorkspaceRuntimes {
         } catch (ServerException | RuntimeException e) {
             error = e.getLocalizedMessage();
         } finally {
-            try (StripedLocks.WriteLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
+            try (CloseableLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
                 workspaces.remove(workspaceId);
             }
         }
@@ -329,7 +331,7 @@ public class WorkspaceRuntimes {
      * @return true if workspace is running, otherwise false
      */
     public boolean hasRuntime(String workspaceId) {
-        try (StripedLocks.ReadLock lock = stripedLocks.acquireReadLock(workspaceId)) {
+        try (CloseableLock lock = stripedLocks.acquireReadLock(workspaceId)) {
             return workspaces.containsKey(workspaceId);
         }
     }
@@ -355,7 +357,7 @@ public class WorkspaceRuntimes {
                                                                      NotFoundException,
                                                                      EnvironmentException {
 
-        try (StripedLocks.ReadLock lock = stripedLocks.acquireReadLock(workspaceId)) {
+        try (CloseableLock lock = stripedLocks.acquireReadLock(workspaceId)) {
             getRunningState(workspaceId);
         }
 
@@ -368,7 +370,7 @@ public class WorkspaceRuntimes {
         Instance instance = environmentEngine.startMachine(workspaceId, machineConfigCopy, agents);
         launchAgents(instance, agents);
 
-        try (StripedLocks.WriteLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
+        try (CloseableLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
             WorkspaceState workspaceState = workspaces.get(workspaceId);
             if (workspaceState == null || workspaceState.status != RUNNING) {
                 try {
@@ -395,7 +397,7 @@ public class WorkspaceRuntimes {
      * @see WorkspaceStatus#SNAPSHOTTING
      */
     public void beginSnapshotting(String workspaceId) throws NotFoundException, ConflictException {
-        try (StripedLocks.WriteLock ignored = stripedLocks.acquireWriteLock(workspaceId)) {
+        try (CloseableLock ignored = stripedLocks.acquireWriteLock(workspaceId)) {
             getRunningState(workspaceId).status = SNAPSHOTTING;
         }
     }
@@ -410,7 +412,7 @@ public class WorkspaceRuntimes {
      * @see WorkspaceStatus#SNAPSHOTTING
      */
     public void finishSnapshotting(String workspaceId) {
-        try (StripedLocks.WriteLock ignored = stripedLocks.acquireWriteLock(workspaceId)) {
+        try (CloseableLock ignored = stripedLocks.acquireWriteLock(workspaceId)) {
             final WorkspaceState state = workspaces.get(workspaceId);
             if (state != null && state.status == SNAPSHOTTING) {
                 state.status = RUNNING;
@@ -437,7 +439,7 @@ public class WorkspaceRuntimes {
     public void stopMachine(String workspaceId, String machineId) throws NotFoundException,
                                                                          ServerException,
                                                                          ConflictException {
-        try (StripedLocks.ReadLock lock = stripedLocks.acquireReadLock(workspaceId)) {
+        try (CloseableLock lock = stripedLocks.acquireReadLock(workspaceId)) {
             WorkspaceState workspaceState = workspaces.get(workspaceId);
             if (workspaceState == null || workspaceState.status != RUNNING) {
                 throw new ConflictException(format("Environment of workspace '%s' is not running", workspaceId));
@@ -469,7 +471,7 @@ public class WorkspaceRuntimes {
                                                              ServerException,
                                                              ConflictException {
 
-        try (StripedLocks.ReadLock lock = stripedLocks.acquireReadLock(workspaceId)) {
+        try (CloseableLock lock = stripedLocks.acquireReadLock(workspaceId)) {
             WorkspaceState workspaceState = workspaces.get(workspaceId);
             if (workspaceState == null || !(workspaceState.status == SNAPSHOTTING || workspaceState.status == RUNNING)) {
                 throw new ConflictException(format("Environment of workspace '%s' is not running or snapshotting", workspaceId));
@@ -534,7 +536,7 @@ public class WorkspaceRuntimes {
     void cleanup() {
         isPreDestroyInvoked = true;
 
-        try (StripedLocks.WriteAllLock lock = stripedLocks.acquireWriteAllLock()) {
+        try (CloseableLock lock = stripedLocks.acquireWriteAllLock()) {
             for (Map.Entry<String, WorkspaceState> workspace : workspaces.entrySet()) {
                 if (workspace.getValue().status.equals(RUNNING) ||
                     workspace.getValue().status.equals(WorkspaceStatus.STARTING)) {
@@ -611,7 +613,7 @@ public class WorkspaceRuntimes {
      * saves the state or throws an appropriate exception if the workspace is already initialized.
      */
     private void initState(String workspaceId, String workspaceName, String envName) throws ConflictException, ServerException {
-        try (StripedLocks.WriteLock ignored = stripedLocks.acquireWriteLock(workspaceId)) {
+        try (CloseableLock ignored = stripedLocks.acquireWriteLock(workspaceId)) {
             ensurePreDestroyIsNotExecuted();
             final WorkspaceState state = workspaces.get(workspaceId);
             if (state != null) {
@@ -637,7 +639,7 @@ public class WorkspaceRuntimes {
                                                               getEnvironmentLogger(workspaceId));
             launchAgents(environment, machines);
 
-            try (StripedLocks.WriteLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
+            try (CloseableLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
                 WorkspaceState workspaceState = workspaces.get(workspaceId);
                 workspaceState.status = WorkspaceStatus.RUNNING;
             }
@@ -653,7 +655,7 @@ public class WorkspaceRuntimes {
             }
             String environmentStartError = "Start of environment " + envName +
                                            " failed. Error: " + e.getLocalizedMessage();
-            try (StripedLocks.WriteLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
+            try (CloseableLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
                 workspaces.remove(workspaceId);
             }
             publishWorkspaceEvent(EventType.ERROR,
