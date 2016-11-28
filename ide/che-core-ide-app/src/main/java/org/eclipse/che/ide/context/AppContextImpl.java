@@ -452,8 +452,14 @@ public class AppContextImpl implements AppContext,
                 resourceManager = null;
             }
         });
-
         devMachine = null;
+
+        //goto close all editors
+        final EditorAgent editorAgent = editorAgentProvider.get();
+        final List<EditorPartPresenter> openedEditors = editorAgent.getOpenedEditors();
+        for (EditorPartPresenter editor : openedEditors) {
+            editorAgent.closeEditor(editor);
+        }
     }
 
     @Override
