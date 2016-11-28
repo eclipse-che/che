@@ -91,12 +91,10 @@ public class ProjectExplorerStateComponent implements StateComponent {
             projectExplorer.showHiddenFiles(state.getBoolean(SHOW_HIDDEN_FILES));
         }
 
-        JsonArray paths;
+        JsonArray paths = state.hasKey(PATH_PARAM_ID) ? state.getArray(PATH_PARAM_ID) : Json.createArray();
 
-        if (state.hasKey(PATH_PARAM_ID)) {
-            paths = state.getArray(PATH_PARAM_ID);
-        } else {
-            paths = Json.createArray();
+        if (paths.length() == 0) {
+            return;
         }
 
         Promise<Node> revealPromise = null;
