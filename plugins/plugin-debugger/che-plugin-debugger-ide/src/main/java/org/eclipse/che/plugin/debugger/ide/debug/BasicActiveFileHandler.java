@@ -14,7 +14,6 @@ import com.google.common.base.Optional;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
-import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.promises.client.Operation;
@@ -26,7 +25,6 @@ import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
-import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
@@ -38,13 +36,11 @@ import org.eclipse.che.ide.api.resources.VirtualFile;
 public class BasicActiveFileHandler implements ActiveFileHandler {
 
     private final EditorAgent editorAgent;
-    private final EventBus    eventBus;
     private final AppContext  appContext;
 
     @Inject
-    public BasicActiveFileHandler(EditorAgent editorAgent, EventBus eventBus, AppContext appContext) {
+    public BasicActiveFileHandler(EditorAgent editorAgent, AppContext appContext) {
         this.editorAgent = editorAgent;
-        this.eventBus = eventBus;
         this.appContext = appContext;
     }
 
@@ -76,7 +72,17 @@ public class BasicActiveFileHandler implements ActiveFileHandler {
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        trySearchSource(location, callback);
+                        trySearchSource(location, new AsyncCallback<VirtualFile>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                callback.onFailure(caught);
+                            }
+
+                            @Override
+                            public void onSuccess(VirtualFile result) {
+                                callback.onSuccess(result);
+                            }
+                        });
                     }
                 });
             }
@@ -137,7 +143,7 @@ public class BasicActiveFileHandler implements ActiveFileHandler {
         }
     }
 
-    private void trySearchSource(final Location location, final AsyncCallback<VirtualFile> callback) {
+    protected void trySearchSource(final Location location, final AsyncCallback<VirtualFile> callback) {
         appContext.getWorkspaceRoot().search(location.getTarget(), "").then(new Operation<Resource[]>() {
             @Override
             public void apply(Resource[] resources) throws OperationException {
@@ -179,7 +185,7 @@ public class BasicActiveFileHandler implements ActiveFileHandler {
                 new Timer() {
                     @Override
                     public void run() {
-                        scrollToLine(editorAgent.getActiveEditor(), scrollToLine + 1);
+                        scrollToLine(editorAgent.getActiveEditor(), scrollToLine);
                         callback.onSuccess(virtualFile);
                     }
                 }.schedule(300);
@@ -190,7 +196,7 @@ public class BasicActiveFileHandler implements ActiveFileHandler {
                 new Timer() {
                     @Override
                     public void run() {
-                        scrollToLine(editorAgent.getActiveEditor(), scrollToLine + 1);
+                        scrollToLine(editorAgent.getActiveEditor(), scrollToLine);
                         callback.onSuccess(virtualFile);
                     }
                 }.schedule(300);
@@ -201,8 +207,6 @@ public class BasicActiveFileHandler implements ActiveFileHandler {
                 callback.onFailure(new IllegalStateException("Initialization " + virtualFile.getName() + " in the editor failed"));
             }
         });
-
-        eventBus.fireEvent(FileEvent.createOpenFileEvent(virtualFile));
     }
 
     protected void scrollToLine(EditorPartPresenter editor, int lineNumber) {

@@ -28,6 +28,7 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
 import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.eclipse.che.plugin.debugger.ide.debug.AbstractDebugger;
+import org.eclipse.che.plugin.debugger.ide.debug.BasicActiveFileHandler;
 
 import javax.validation.constraints.NotNull;
 import java.util.Map;
@@ -52,7 +53,7 @@ public class GdbDebugger extends AbstractDebugger {
                        LocalStorageProvider localStorageProvider,
                        MessageBusProvider messageBusProvider,
                        EventBus eventBus,
-                       GdbDebuggerFileHandler activeFileHandler,
+                       BasicActiveFileHandler activeFileHandler,
                        DebuggerManager debuggerManager,
                        BreakpointManager breakpointManager,
                        AppContext appContext) {
