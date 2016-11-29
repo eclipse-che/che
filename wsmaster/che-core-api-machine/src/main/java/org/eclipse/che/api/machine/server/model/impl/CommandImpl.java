@@ -117,30 +117,33 @@ public class CommandImpl implements Command {
         if (!(obj instanceof CommandImpl)) {
             return false;
         }
-        final CommandImpl command = (CommandImpl)obj;
-        return Objects.equals(name, command.name) &&
-               Objects.equals(commandLine, command.commandLine) &&
-               Objects.equals(type, command.type) &&
-               Objects.equals(getAttributes(), command.getAttributes());
+        final CommandImpl that = (CommandImpl)obj;
+        return Objects.equals(id, that.id)
+               && Objects.equals(name, that.name)
+               && Objects.equals(commandLine, that.commandLine)
+               && Objects.equals(type, that.type)
+               && getAttributes().equals(that.getAttributes());
     }
 
     @Override
     public int hashCode() {
         int hash = 7;
+        hash = 31 * hash + Objects.hashCode(id);
         hash = 31 * hash + Objects.hashCode(name);
         hash = 31 * hash + Objects.hashCode(commandLine);
         hash = 31 * hash + Objects.hashCode(type);
-        hash = 31 * hash + Objects.hashCode(getAttributes());
+        hash = 31 * hash + getAttributes().hashCode();
         return hash;
     }
 
     @Override
     public String toString() {
         return "CommandImpl{" +
-               "name='" + name + '\'' +
+               "id=" + id +
+               ", name='" + name + '\'' +
                ", commandLine='" + commandLine + '\'' +
                ", type='" + type + '\'' +
-               ", attributes=" + getAttributes() +
+               ", attributes=" + attributes +
                '}';
     }
 }

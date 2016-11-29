@@ -34,6 +34,7 @@ import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
@@ -64,14 +65,14 @@ public class JpaWorkspaceDao implements WorkspaceDao {
         } catch (RuntimeException x) {
             throw new ServerException(x.getMessage(), x);
         }
-        return workspace;
+        return new WorkspaceImpl(workspace);
     }
 
     @Override
     public WorkspaceImpl update(WorkspaceImpl update) throws NotFoundException, ConflictException, ServerException {
         requireNonNull(update, "Required non-null update");
         try {
-            return doUpdate(update);
+            return new WorkspaceImpl(doUpdate(update));
         } catch (DuplicateKeyException dkEx) {
             throw new ConflictException(format("Workspace with name '%s' in namespace '%s' already exists",
                                                update.getConfig().getName(),
@@ -100,7 +101,7 @@ public class JpaWorkspaceDao implements WorkspaceDao {
             if (workspace == null) {
                 throw new NotFoundException(format("Workspace with id '%s' doesn't exist", id));
             }
-            return workspace;
+            return new WorkspaceImpl(workspace);
         } catch (RuntimeException x) {
             throw new ServerException(x.getLocalizedMessage(), x);
         }
@@ -112,11 +113,11 @@ public class JpaWorkspaceDao implements WorkspaceDao {
         requireNonNull(name, "Required non-null name");
         requireNonNull(namespace, "Required non-null namespace");
         try {
-            return managerProvider.get()
-                                  .createNamedQuery("Workspace.getByName", WorkspaceImpl.class)
-                                  .setParameter("namespace", namespace)
-                                  .setParameter("name", name)
-                                  .getSingleResult();
+            return new WorkspaceImpl(managerProvider.get()
+                                                    .createNamedQuery("Workspace.getByName", WorkspaceImpl.class)
+                                                    .setParameter("namespace", namespace)
+                                                    .setParameter("name", name)
+                                                    .getSingleResult());
         } catch (NoResultException noResEx) {
             throw new NotFoundException(format("Workspace with name '%s' in namespace '%s' doesn't exist",
                                                name,
@@ -134,7 +135,10 @@ public class JpaWorkspaceDao implements WorkspaceDao {
             return managerProvider.get()
                                   .createNamedQuery("Workspace.getByNamespace", WorkspaceImpl.class)
                                   .setParameter("namespace", namespace)
-                                  .getResultList();
+                                  .getResultList()
+                                  .stream()
+                                  .map(WorkspaceImpl::new)
+                                  .collect(Collectors.toList());
         } catch (RuntimeException x) {
             throw new ServerException(x.getLocalizedMessage(), x);
         }
@@ -143,9 +147,13 @@ public class JpaWorkspaceDao implements WorkspaceDao {
     @Override
     @Transactional
     public List<WorkspaceImpl> getWorkspaces(String userId) throws ServerException {
-        // TODO respect userId when workers become a part of che
         try {
-            return managerProvider.get().createNamedQuery("Workspace.getAll", WorkspaceImpl.class).getResultList();
+            return managerProvider.get()
+                                  .createNamedQuery("Workspace.getAll", WorkspaceImpl.class)
+                                  .getResultList()
+                                  .stream()
+                                  .map(WorkspaceImpl::new)
+                                  .collect(Collectors.toList());
         } catch (RuntimeException x) {
             throw new ServerException(x.getLocalizedMessage(), x);
         }
