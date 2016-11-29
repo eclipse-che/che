@@ -192,6 +192,7 @@ public class PreferencesViewImpl extends Window implements PreferencesView {
     /** {@inheritDoc} */
     @Override
     protected void onClose() {
+        delegate.onCloseWindow();
     }
 
     /** {@inheritDoc} */

@@ -25,7 +25,7 @@ import java.util.Set;
  */
 public interface PreferencesView extends View<PreferencesView.ActionDelegate> {
     /** Needs for delegate some function into preferences view. */
-    public interface ActionDelegate {
+    interface ActionDelegate {
         /**
          * Performs actions when user click Save button.
          * Actually when button is pressed, preferences must be stored on the server.
@@ -50,6 +50,11 @@ public interface PreferencesView extends View<PreferencesView.ActionDelegate> {
          *         selected preference
          */
         void onPreferenceSelected(PreferencePagePresenter preference);
+
+        /**
+         * Performs any actions on the preferences window closing.
+         */
+        void onCloseWindow();
 
     }
 
