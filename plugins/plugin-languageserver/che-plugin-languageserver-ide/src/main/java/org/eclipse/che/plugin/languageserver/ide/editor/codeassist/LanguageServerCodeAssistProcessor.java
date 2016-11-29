@@ -68,7 +68,7 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
     }
 
     @Override
-    public void computeCompletionProposals(TextEditor editor, final int offset, final CodeAssistCallback callback) {
+    public void computeCompletionProposals(TextEditor editor, final int offset, final boolean triggered, final CodeAssistCallback callback) {
         this.lastErrorMessage = null;
 
         TextDocumentPositionParamsDTO documentPosition = dtoBuildHelper.createTDPP(editor.getDocument(), offset);
@@ -76,7 +76,7 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
         String currentLine = editor.getDocument().getLineContent(documentPosition.getPosition().getLine());
         final String currentWord = getCurrentWord(currentLine, documentPosition.getPosition().getCharacter());
 
-        if (latestCompletionResult.isGoodFor(documentId, offset, currentWord)) {
+        if (!triggered && latestCompletionResult.isGoodFor(documentId, offset, currentWord)) {
             // no need to send new completion request
             computeProposals(currentWord, offset - latestCompletionResult.getOffset(), callback);
         } else {

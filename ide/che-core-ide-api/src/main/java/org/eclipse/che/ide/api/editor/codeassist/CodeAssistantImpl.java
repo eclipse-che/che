@@ -52,12 +52,12 @@ public class CodeAssistantImpl implements CodeAssistant {
     }
 
     @Override
-    public void computeCompletionProposals(final int offset, final CodeAssistCallback callback) {
+    public void computeCompletionProposals(final int offset, final boolean triggered, final CodeAssistCallback callback) {
         this.lastErrorMessage = "processing";
 
         final CodeAssistProcessor processor = getProcessor(offset);
         if (processor != null) {
-            processor.computeCompletionProposals(textEditor, offset, callback);
+            processor.computeCompletionProposals(textEditor, offset, triggered, callback);
             this.lastErrorMessage = processor.getErrorMessage();
             if (this.lastErrorMessage != null) {
                 notificationManager.notify("", lastErrorMessage, FAIL, EMERGE_MODE);
@@ -66,7 +66,7 @@ public class CodeAssistantImpl implements CodeAssistant {
         } else {
             final CodeAssistProcessor fallbackProcessor = getFallbackProcessor();
             if (fallbackProcessor != null) {
-                fallbackProcessor.computeCompletionProposals(textEditor, offset, callback);
+                fallbackProcessor.computeCompletionProposals(textEditor, offset, triggered, callback);
                 this.lastErrorMessage = fallbackProcessor.getErrorMessage();
                 if (this.lastErrorMessage != null) {
                     this.textEditor.showMessage(this.lastErrorMessage);
