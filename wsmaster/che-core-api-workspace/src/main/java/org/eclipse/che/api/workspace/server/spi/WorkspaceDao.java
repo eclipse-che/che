@@ -147,7 +147,7 @@ public interface WorkspaceDao {
     /**
      * Gets workspaces.
      *
-     * @param temporary
+     * @param isTemporaryOnly
      *         indicates if only temporary workspaces should be retrieved
      * @param skipCount
      *         the number of workspaces to skip
@@ -157,5 +157,5 @@ public interface WorkspaceDao {
      * @throws ServerException
      *         when any other error occurs during workspaces fetching
      */
-    List<WorkspaceImpl> getWorkspaces(boolean temporary, int skipCount, int maxItems) throws ServerException;
+    List<WorkspaceImpl> getWorkspaces(boolean isTemporaryOnly, int skipCount, int maxItems) throws ServerException;
 }
