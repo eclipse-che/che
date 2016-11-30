@@ -37,7 +37,6 @@ import org.eclipse.che.ide.editor.quickfix.QuickAssistAssistantImpl;
 import org.eclipse.che.ide.editor.quickfix.QuickAssistWidgetFactory;
 import org.eclipse.che.ide.editor.synchronization.EditorContentSynchronizer;
 import org.eclipse.che.ide.editor.synchronization.EditorContentSynchronizerImpl;
-import org.eclipse.che.ide.editor.synchronization.EditorGroupSychronizationFactory;
 import org.eclipse.che.ide.editor.synchronization.EditorGroupSynchronization;
 import org.eclipse.che.ide.editor.synchronization.EditorGroupSynchronizationImpl;
 import org.eclipse.che.ide.editor.texteditor.TextEditorPartViewImpl;
@@ -67,10 +66,7 @@ public class EditorApiModule extends AbstractGinModule {
         bind(EditorPartStackView.class);
 
         bind(EditorContentSynchronizer.class).to(EditorContentSynchronizerImpl.class).in(Singleton.class);
-
-        install(new GinFactoryModuleBuilder()
-                        .implement(EditorGroupSynchronization.class, EditorGroupSynchronizationImpl.class)
-                        .build(EditorGroupSychronizationFactory.class));
+        bind(EditorGroupSynchronization.class).to(EditorGroupSynchronizationImpl.class);
 
         // the text editor view
         bind(TextEditorPartView.class).to(TextEditorPartViewImpl.class);
