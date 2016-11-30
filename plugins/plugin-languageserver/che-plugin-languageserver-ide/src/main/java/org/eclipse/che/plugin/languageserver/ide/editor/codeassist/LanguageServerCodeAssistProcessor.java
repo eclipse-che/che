@@ -16,6 +16,7 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.languageserver.shared.lsapi.CompletionItemDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.CompletionListDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentIdentifierDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentPositionParamsDTO;
 import org.eclipse.che.api.promises.client.Operation;
@@ -48,6 +49,7 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
     private final TextDocumentServiceClient documentServiceClient;
     private final FuzzyMatches fuzzyMatches;
     private String lastErrorMessage;
+    private final LatestCompletionResult    latestCompletionResult;
 
     @Inject
     public LanguageServerCodeAssistProcessor(TextDocumentServiceClient documentServiceClient,
@@ -62,40 +64,35 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
         this.imageProvider = imageProvider;
         this.serverCapabilities = serverCapabilities;
         this.fuzzyMatches = fuzzyMatches;
+        this.latestCompletionResult = new LatestCompletionResult();
     }
 
     @Override
-    public void computeCompletionProposals(TextEditor editor, int offset, final CodeAssistCallback callback) {
+    public void computeCompletionProposals(TextEditor editor, final int offset, final boolean triggered, final CodeAssistCallback callback) {
+        this.lastErrorMessage = null;
+
         TextDocumentPositionParamsDTO documentPosition = dtoBuildHelper.createTDPP(editor.getDocument(), offset);
         final TextDocumentIdentifierDTO documentId = documentPosition.getTextDocument();
         String currentLine = editor.getDocument().getLineContent(documentPosition.getPosition().getLine());
-        final String currentIdentifier = getCurrentIdentifier(currentLine, documentPosition.getPosition().getCharacter());
-        this.lastErrorMessage = null;
-        documentServiceClient.completion(documentPosition).then(new Operation<List<CompletionItemDTO>>() {
+        final String currentWord = getCurrentWord(currentLine, documentPosition.getPosition().getCharacter());
 
-            @Override
-            public void apply(List<CompletionItemDTO> items) throws OperationException {
-                List<CompletionProposal> proposals = newArrayList();
-                for (CompletionItemDTO item : items) {
-                    List<Match> highlights = filter(currentIdentifier, item);
-                    if (highlights != null ) {
-                        proposals.add(new CompletionItemBasedCompletionProposal(item,
-                                                                                documentServiceClient,
-                                                                                documentId,
-                                                                                resources,
-                                                                                imageProvider.getIcon(item.getKind()),
-                                                                                serverCapabilities,
-                                                                                highlights));
-                    }
+        if (!triggered && latestCompletionResult.isGoodFor(documentId, offset, currentWord)) {
+            // no need to send new completion request
+            computeProposals(currentWord, offset - latestCompletionResult.getOffset(), callback);
+        } else {
+            documentServiceClient.completion(documentPosition).then(new Operation<CompletionListDTO>() {
+                @Override
+                public void apply(CompletionListDTO list) throws OperationException {
+                    latestCompletionResult.update(documentId, offset, currentWord, list);
+                    computeProposals(currentWord, 0, callback);
                 }
-                callback.proposalComputed(proposals);
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError error) throws OperationException {
-                lastErrorMessage = error.getMessage();
-            }
-        });
+            }).catchError(new Operation<PromiseError>() {
+                @Override
+                public void apply(PromiseError error) throws OperationException {
+                    lastErrorMessage = error.getMessage();
+                }
+            });
+        }
     }
 
     @Override
@@ -103,15 +100,15 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
         return lastErrorMessage;
     }
 
-    private String getCurrentIdentifier(String text, int offset) {
+    private String getCurrentWord(String text, int offset) {
         int i = offset - 1;
-        while (i >= 0 && isIdentifierChar(text.charAt(i))) {
+        while (i >= 0 && isWordChar(text.charAt(i))) {
             i--;
         }
         return text.substring(i + 1, offset);
     }
-    
-    private boolean isIdentifierChar(char c) {
+
+    private boolean isWordChar(char c) {
         return c >= 'a' && c <= 'z' ||
             c >= 'A' && c <= 'Z' ||
             c >= '0' && c <= '9' ||
@@ -120,11 +117,11 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
             c == '_' ||
             c == '-';
     }
-    
+
     private List<Match> filter(String word, CompletionItemDTO item) {
         return filter(word, item.getLabel(), item.getFilterText());
     }
-    
+
     private List<Match> filter(String word, String label, String filterText) {
         if (filterText == null || filterText.isEmpty()) {
             filterText = label;
@@ -139,6 +136,24 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
         }
         
         return null;
+    }
+
+    private void computeProposals(String currentWord, int offset, CodeAssistCallback callback) {
+        List<CompletionProposal> proposals = newArrayList();
+        for (CompletionItemDTO item : latestCompletionResult.getCompletionList().getItems()) {
+            List<Match> highlights = filter(currentWord, item);
+            if (highlights != null) {
+                proposals.add(new CompletionItemBasedCompletionProposal(item, 
+                                                                        documentServiceClient,
+                                                                        latestCompletionResult.getDocumentId(),
+                                                                        resources, 
+                                                                        imageProvider.getIcon(item.getKind()), 
+                                                                        serverCapabilities,
+                                                                        highlights,
+                                                                        offset));
+            }
+        }
+        callback.proposalComputed(proposals);
     }
 
 }

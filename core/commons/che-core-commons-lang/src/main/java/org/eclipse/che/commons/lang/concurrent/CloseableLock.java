@@ -8,13 +8,23 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.parts;
+package org.eclipse.che.commons.lang.concurrent;
 
 /**
- * Part with Project Explorer view.
+ * Lock that is designed to use in try-with-resources statement.
  *
- * @author Nikolay Zamosenchuk
+ * <p>Implementers should lock on instance creation
+ * and unlock when {@link CloseableLock#close()} method invokes.
+ *
+ * @author Sergii Leschenko
  */
-public interface ProjectExplorerPart extends PartPresenter {
-
+public interface CloseableLock extends AutoCloseable {
+    /**
+     * Unlocks this lock.
+     *
+     * This method is invoked automatically on objects managed by the
+     * {@code try}-with-resources statement.
+     */
+    @Override
+    void close();
 }

@@ -31,5 +31,5 @@ public interface TerminalFactory {
      *         machine for which terminal will be created
      * @return an instance of {@link TerminalPresenter}
      */
-    TerminalPresenter create(@NotNull @Assisted MachineEntity machine);
+    TerminalPresenter create(@NotNull @Assisted MachineEntity machine, Object source);
 }

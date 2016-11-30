@@ -598,7 +598,7 @@
       "PHP",
       "mysql",
       "sqlite",
-      "Apaide",
+      "Apache",
       "dockerimager"
     ],
     "components": [
@@ -607,7 +607,7 @@
         "version": "5.5.9"
       },
       {
-        "name": "Apaide",
+        "name": "Apache",
         "version": "2"
       },
       {

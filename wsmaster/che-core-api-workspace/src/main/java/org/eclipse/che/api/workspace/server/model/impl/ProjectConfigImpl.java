@@ -175,42 +175,49 @@ public class ProjectConfigImpl implements ProjectConfig {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ProjectConfigImpl)) return false;
-        final ProjectConfigImpl other = (ProjectConfigImpl)o;
-        return Objects.equals(name, other.name)
-               && Objects.equals(path, other.path)
-               && Objects.equals(description, other.description)
-               && Objects.equals(type, other.type)
-               && getMixins().equals(other.getMixins())
-               && getAttributes().equals(other.getAttributes())
-               && Objects.equals(source, other.getSource());
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof ProjectConfigImpl)) {
+            return false;
+        }
+        final ProjectConfigImpl that = (ProjectConfigImpl)obj;
+        return Objects.equals(id, that.id)
+               && Objects.equals(path, that.path)
+               && Objects.equals(name, that.name)
+               && Objects.equals(type, that.type)
+               && Objects.equals(description, that.description)
+               && Objects.equals(source, that.source)
+               && getMixins().equals(that.getMixins())
+               && getAttributes().equals(that.getAttributes());
     }
 
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = hash * 31 + Objects.hashCode(name);
-        hash = hash * 31 + Objects.hashCode(path);
-        hash = hash * 31 + Objects.hashCode(description);
-        hash = hash * 31 + Objects.hashCode(type);
-        hash = hash * 31 + getMixins().hashCode();
-        hash = hash * 31 + getAttributes().hashCode();
-        hash = hash * 31 + Objects.hashCode(source);
+        hash = 31 * hash + Objects.hashCode(id);
+        hash = 31 * hash + Objects.hashCode(path);
+        hash = 31 * hash + Objects.hashCode(name);
+        hash = 31 * hash + Objects.hashCode(type);
+        hash = 31 * hash + Objects.hashCode(description);
+        hash = 31 * hash + Objects.hashCode(source);
+        hash = 31 * hash + getMixins().hashCode();
+        hash = 31 * hash + getAttributes().hashCode();
         return hash;
     }
 
     @Override
     public String toString() {
         return "ProjectConfigImpl{" +
-               "name='" + name + '\'' +
+               "id=" + id +
                ", path='" + path + '\'' +
-               ", description='" + description + '\'' +
+               ", name='" + name + '\'' +
                ", type='" + type + '\'' +
+               ", description='" + description + '\'' +
+               ", source=" + source +
                ", mixins=" + mixins +
                ", attributes=" + attributes +
-               ", source=" + source +
                '}';
     }
 

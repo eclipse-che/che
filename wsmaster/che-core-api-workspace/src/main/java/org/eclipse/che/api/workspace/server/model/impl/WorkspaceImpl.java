@@ -155,6 +155,10 @@ public class WorkspaceImpl implements Workspace {
              workspace.getStatus());
     }
 
+    public WorkspaceImpl(WorkspaceImpl workspace) {
+        this(workspace, workspace.account);
+    }
+
     @Override
     public String getId() {
         return id;

@@ -26,12 +26,13 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
+import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.collections.Jso;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.tab.content.TabPresenter;
-import org.eclipse.che.ide.util.loging.Log;
+import org.eclipse.che.ide.extension.machine.client.processes.AddTerminalClickHandler;
 import org.eclipse.che.ide.websocket.WebSocket;
 import org.eclipse.che.ide.websocket.events.ConnectionErrorHandler;
 import org.eclipse.che.ide.websocket.events.ConnectionOpenedHandler;
@@ -57,6 +58,7 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
     private static final int    TIME_BETWEEN_CONNECTIONS = 2_000;
 
     private final TerminalView                view;
+    private final Object                      source;
     private final NotificationManager         notificationManager;
     private final MachineLocalizationConstant locale;
     private final MachineEntity               machine;
@@ -77,8 +79,10 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
     public TerminalPresenter(TerminalView view,
                              NotificationManager notificationManager,
                              MachineLocalizationConstant locale,
-                             @Assisted MachineEntity machine) {
+                             @Assisted MachineEntity machine,
+                             @Assisted Object source) {
         this.view = view;
+        this.source = source;
         view.setDelegate(this);
         this.notificationManager = notificationManager;
         this.locale = locale;
@@ -131,7 +135,8 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
             }).catchError(new Operation<PromiseError>() {
                 @Override
                 public void apply(PromiseError arg) throws OperationException {
-                    notificationManager.notify(locale.failedToConnectTheTerminal(), locale.terminalCanNotLoadScript(), FAIL, NOT_EMERGE_MODE);
+                    notificationManager
+                            .notify(locale.failedToConnectTheTerminal(), locale.terminalCanNotLoadScript(), FAIL, NOT_EMERGE_MODE);
                     reconnect();
                 }
             });
@@ -164,6 +169,11 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
                 connected = true;
 
                 view.openTerminal(terminal);
+
+                // if terminal was created programmatically then we don't set focus on it
+                if (source instanceof AddTerminalClickHandler || source instanceof Action) {
+                    setFocus(true);
+                }
 
                 terminal.on(DATA_EVENT_NAME, new Operation<String>() {
                     @Override
@@ -242,7 +252,6 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
         }
 
         terminal.resize(x, y);
-        terminal.focus();
         Jso jso = Jso.create();
         JsArrayInteger arr = Jso.createArray().cast();
         arr.set(0, x);
@@ -252,10 +261,14 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
         socket.send(jso.serialize());
     }
 
-    /** Set focus on terminal */
-    public void setFocus() {
+    @Override
+    public void setFocus(boolean focused) {
         if (connected) {
-            terminal.focus();
+            if (focused) {
+                terminal.focus();
+            } else {
+                terminal.blur();
+            }
         }
     }
 

@@ -8,11 +8,10 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.workspace.server;
+package org.eclipse.che.commons.lang.concurrent;
 
 import com.google.common.util.concurrent.Striped;
 
-import java.io.Closeable;
 import java.util.concurrent.locks.ReadWriteLock;
 
 /**
@@ -21,15 +20,15 @@ import java.util.concurrent.locks.ReadWriteLock;
  * Examples of usage:
  * <pre class="code"><code class="java">
  *     StripedLocks stripedLocks = new StripedLocks(16);
- *     try (StripedLocks.WriteLock lock = stripedLocks.acquireWriteLock(myKey)) {
+ *     try (CloseableLock lock = stripedLocks.acquireWriteLock(myKey)) {
  *         syncedObject.write();
  *     }
  *
- *     try (StripedLocks.ReadLock lock = stripedLocks.acquireReadLock(myKey)) {
+ *     try (CloseableLock lock = stripedLocks.acquireReadLock(myKey)) {
  *         syncedObject.read();
  *     }
  *
- *     try (StripedLocks.WriteAllLock lock = stripedLocks.acquireWriteAllLock(myKey)) {
+ *     try (CloseableLock lock = stripedLocks.acquireWriteAllLock(myKey)) {
  *         for (ObjectToSync objectToSync : allObjectsToSync) {
  *             objectToSync.write();
  *         }
@@ -37,9 +36,9 @@ import java.util.concurrent.locks.ReadWriteLock;
  * </pre>
  *
  * @author Alexander Garagatyi
+ * @author Sergii Leschenko
  */
 // TODO consider usage of plain map with locks instead of Guava's Striped
-// TODO consider moving to the util module of Che core
 public class StripedLocks {
     private final Striped<ReadWriteLock> striped;
 
@@ -50,21 +49,21 @@ public class StripedLocks {
     /**
      * Acquire read lock for provided key.
      */
-    public ReadLock acquireReadLock(String key) {
+    public CloseableLock acquireReadLock(String key) {
         return new ReadLock(key);
     }
 
     /**
      * Acquire write lock for provided key.
      */
-    public WriteLock acquireWriteLock(String key) {
+    public CloseableLock acquireWriteLock(String key) {
         return new WriteLock(key);
     }
 
     /**
      * Acquire write lock for all possible keys.
      */
-    public WriteAllLock acquireWriteAllLock() {
+    public CloseableLock acquireWriteAllLock() {
         return new WriteAllLock();
     }
 
@@ -72,7 +71,7 @@ public class StripedLocks {
      * Represents read lock for the provided key.
      * Can be used as {@link AutoCloseable} to release lock.
      */
-    public class ReadLock implements Closeable {
+    private class ReadLock implements CloseableLock {
         private String key;
 
         private ReadLock(String key) {
@@ -90,7 +89,7 @@ public class StripedLocks {
      * Represents write lock for the provided key.
      * Can be used as {@link AutoCloseable} to release lock.
      */
-    public class WriteLock implements Closeable {
+    private class WriteLock implements CloseableLock {
         private String key;
 
         private WriteLock(String key) {
@@ -108,7 +107,7 @@ public class StripedLocks {
      * Represents write lock for all possible keys.
      * Can be used as {@link AutoCloseable} to release locks.
      */
-    public class WriteAllLock implements Closeable {
+    private class WriteAllLock implements CloseableLock {
         private WriteAllLock() {
             for (int i = 0; i < striped.size(); i++) {
                 striped.getAt(i).writeLock().lock();
