@@ -142,4 +142,20 @@ public interface WorkspaceDao {
      *         when any other error occurs during workspaces fetching
      */
     List<WorkspaceImpl> getWorkspaces(String userId) throws ServerException;
+
+
+    /**
+     * Gets workspaces.
+     *
+     * @param temporary
+     *         indicates if only temporary workspaces should be retrieved
+     * @param skipCount
+     *         the number of workspaces to skip
+     * @param maxItems
+     *         the maximum number of workspaces to return
+     * @return list of workspaces
+     * @throws ServerException
+     *         when any other error occurs during workspaces fetching
+     */
+    List<WorkspaceImpl> getWorkspaces(boolean temporary, int skipCount, int maxItems) throws ServerException;
 }

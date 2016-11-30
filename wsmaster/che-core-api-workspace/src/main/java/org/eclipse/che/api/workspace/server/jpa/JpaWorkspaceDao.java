@@ -35,8 +35,10 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 
 /**
  * JPA based implementation of {@link WorkspaceDao}.
@@ -146,6 +148,25 @@ public class JpaWorkspaceDao implements WorkspaceDao {
         // TODO respect userId when workers become a part of che
         try {
             return managerProvider.get().createNamedQuery("Workspace.getAll", WorkspaceImpl.class).getResultList();
+        } catch (RuntimeException x) {
+            throw new ServerException(x.getLocalizedMessage(), x);
+        }
+    }
+
+    @Override
+    @Transactional
+    public List<WorkspaceImpl> getWorkspaces(boolean temporary, int skipCount, int maxItems) throws ServerException {
+        checkArgument(maxItems >= 0, "The number of items to return can't be negative.");
+        checkArgument(skipCount >= 0 && skipCount <= Integer.MAX_VALUE,
+                      "The number of items to skip can't be negative or greater than " + Integer.MAX_VALUE);
+        try {
+            return managerProvider.get()
+                                  .createNamedQuery(temporary ? "WorkspaceImpl.getAllTemporary" : "Workspace.getAll", WorkspaceImpl.class)
+                                  .setMaxResults(maxItems)
+                                  .setFirstResult(skipCount)
+                                  .getResultList()
+                                  .stream()
+                                  .collect(toList());
         } catch (RuntimeException x) {
             throw new ServerException(x.getLocalizedMessage(), x);
         }
