@@ -24,6 +24,8 @@ import javax.inject.Singleton;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
+ * Removes temporary workspaces on server startup and shutdown.
+ *
  * @author Max Shaposhnik (mshaposhnik@codenvy.com)
  */
 @Singleton
