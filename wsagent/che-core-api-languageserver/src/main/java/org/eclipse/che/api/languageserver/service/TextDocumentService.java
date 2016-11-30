@@ -11,6 +11,7 @@
 package org.eclipse.che.api.languageserver.service;
 
 import io.typefox.lsapi.CompletionItem;
+import io.typefox.lsapi.CompletionList;
 import io.typefox.lsapi.Hover;
 import io.typefox.lsapi.Location;
 import io.typefox.lsapi.SignatureHelp;
@@ -79,17 +80,17 @@ public class TextDocumentService {
     @Path("completion")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<? extends CompletionItem> completion(TextDocumentPositionParamsDTO textDocumentPositionParams) throws InterruptedException,
-                                                                                                                      ExecutionException,
-                                                                                                                      LanguageServerException {
+    public CompletionList completion(TextDocumentPositionParamsDTO textDocumentPositionParams) throws InterruptedException,
+                                                                                                      ExecutionException,
+                                                                                                      LanguageServerException {
         textDocumentPositionParams.getTextDocument().setUri(prefixURI(textDocumentPositionParams.getTextDocument().getUri()));
         textDocumentPositionParams.setUri(prefixURI(textDocumentPositionParams.getUri()));
         LanguageServer server = getServer(textDocumentPositionParams.getTextDocument().getUri());
         if (server == null) {
-            return emptyList();
+            return null;
         }
         return server.getTextDocumentService()
-                     .completion(textDocumentPositionParams).get().getItems();
+                     .completion(textDocumentPositionParams).get();
     }
 
     @POST
@@ -161,7 +162,7 @@ public class TextDocumentService {
     public CompletionItem resolveCompletionItem(CompletionItemDTO unresolved) throws InterruptedException,
                                                                                      ExecutionException,
                                                                                      LanguageServerException {
-        LanguageServer server = getServer(unresolved.getTextDocumentIdentifier().getUri());
+        LanguageServer server = getServer(prefixURI(unresolved.getTextDocumentIdentifier().getUri()));
         if (server != null) {
             return server.getTextDocumentService().resolveCompletionItem(unresolved).get();
         } else {
