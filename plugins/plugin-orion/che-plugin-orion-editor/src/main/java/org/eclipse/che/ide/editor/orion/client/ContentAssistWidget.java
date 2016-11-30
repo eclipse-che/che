@@ -26,6 +26,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -212,22 +213,33 @@ public class ContentAssistWidget implements EventListener {
         element.addEventListener(DOCUMENTATION, new EventListener() {
             @Override
             public void handleEvent(Event event) {
-                Widget info = proposal.getAdditionalProposalInfo();
+                proposal.getAdditionalProposalInfo(new AsyncCallback<Widget>() {
+                    @Override
+                    public void onSuccess(Widget info) {
+                        if (info != null) {
+                            docPopup.clear();
+                            docPopup.add(info);
 
-                if (info != null) {
-                    docPopup.clear();
-                    docPopup.add(info);
+                            if (docPopup.isAttached()) {
+                                return;
+                            }
 
-                    if (docPopup.isAttached()) {
-                        return;
+                            docPopup.getElement().getStyle()
+                                    .setLeft(popupElement.getOffsetLeft() + popupElement.getOffsetWidth() + 3, Style.Unit.PX);
+                            docPopup.getElement().getStyle().setTop(popupElement.getOffsetTop(), Style.Unit.PX);
+                            RootPanel.get().add(docPopup);
+                            docPopup.getElement().getStyle().setOpacity(1);
+                        } else {
+                            docPopup.getElement().getStyle().setOpacity(0);
+                        }
                     }
-
-                    docPopup.getElement().getStyle()
-                            .setLeft(popupElement.getOffsetLeft() + popupElement.getOffsetWidth() + 3, Style.Unit.PX);
-                    docPopup.getElement().getStyle().setTop(popupElement.getOffsetTop(), Style.Unit.PX);
-                    RootPanel.get().add(docPopup);
-                    docPopup.getElement().getStyle().setOpacity(1);
-                }
+                    
+                    @Override
+                    public void onFailure(Throwable e) {
+                        Log.error(getClass(), e);
+                        docPopup.getElement().getStyle().setOpacity(0);
+                    }
+                });
             }
         }, false);
 

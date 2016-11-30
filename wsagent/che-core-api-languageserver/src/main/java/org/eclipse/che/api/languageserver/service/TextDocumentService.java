@@ -162,7 +162,7 @@ public class TextDocumentService {
     public CompletionItem resolveCompletionItem(CompletionItemDTO unresolved) throws InterruptedException,
                                                                                      ExecutionException,
                                                                                      LanguageServerException {
-        LanguageServer server = getServer(unresolved.getTextDocumentIdentifier().getUri());
+        LanguageServer server = getServer(prefixURI(unresolved.getTextDocumentIdentifier().getUri()));
         if (server != null) {
             return server.getTextDocumentService().resolveCompletionItem(unresolved).get();
         } else {
