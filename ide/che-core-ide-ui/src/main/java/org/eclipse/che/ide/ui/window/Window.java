@@ -259,7 +259,7 @@ public abstract class Window implements IsWidget {
         view.setDelegate(new ViewEvents() {
             @Override
             public void onEscapeKey() {
-                if (hideOnEscapeEnabled && !blocked) {
+                if (hideOnEscapeEnabled && !blocked && beforeClose()) {
                     hide();
                     Window.this.onClose();
                 }
@@ -267,7 +267,7 @@ public abstract class Window implements IsWidget {
 
             @Override
             public void onClose() {
-                if (!blocked) {
+                if (!blocked && beforeClose()) {
                     hide();
                     Window.this.onClose();
                 }
@@ -285,6 +285,15 @@ public abstract class Window implements IsWidget {
      * The method was marked as deprecated until an empty implementation is added.
      */
     protected void onClose() {
+    }
+
+    /**
+     * Is called before window closing.
+     *
+     * @return true if window should be closed and false if is needed to prevent closing
+     */
+    protected boolean beforeClose() {
+        return true; // proceed on closing window
     }
 
     @Override

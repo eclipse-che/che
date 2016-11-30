@@ -251,7 +251,6 @@ public class PreferencesPresenter implements PreferencesView.ActionDelegate, Pre
     /** {@inheritDoc} */
     @Override
     public void onCloseWindow() {
-        view.show(); // prevent preferences window closing when user clicks on 'x' button
         onCloseClicked();
     }
 

@@ -191,8 +191,9 @@ public class PreferencesViewImpl extends Window implements PreferencesView {
 
     /** {@inheritDoc} */
     @Override
-    protected void onClose() {
+    protected boolean beforeClose() {
         delegate.onCloseWindow();
+        return false; // cancel closing of preferences window, if it really needed then presenter will do it.
     }
 
     /** {@inheritDoc} */
