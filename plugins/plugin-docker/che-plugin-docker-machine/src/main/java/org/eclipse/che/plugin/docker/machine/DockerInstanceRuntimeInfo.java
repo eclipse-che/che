@@ -140,12 +140,10 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
             md.put("config.workingDir", config.getWorkingDir());
             md.put("config.cmd", Arrays.toString(config.getCmd()));
             md.put("config.volumes", String.valueOf(config.getVolumes()));
-            md.put("config.cpuset", config.getCpuset());
             md.put("config.entrypoint", Arrays.toString(config.getEntrypoint()));
             md.put("config.exposedPorts", String.valueOf(config.getExposedPorts()));
             md.put("config.macAddress", config.getMacAddress());
             md.put("config.securityOpts", Arrays.toString(config.getSecurityOpts()));
-            md.put("config.cpuShares", Integer.toString(config.getCpuShares()));
             md.put("config.env", Arrays.toString(config.getEnv()));
             md.put("config.attachStderr", Boolean.toString(config.isAttachStderr()));
             md.put("config.attachStdin", Boolean.toString(config.isAttachStdin()));
