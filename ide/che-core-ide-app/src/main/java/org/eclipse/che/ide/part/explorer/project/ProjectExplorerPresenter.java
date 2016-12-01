@@ -143,7 +143,6 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
 
                     if (node instanceof ResourceNode && expandQueue.remove(((ResourceNode)node).getData().getLocation())) {
                         view.getTree().setExpanded(node, true);
-                        return;
                     }
 
                 }
