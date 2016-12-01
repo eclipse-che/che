@@ -1,0 +1,4 @@
+IMAGE_PUPPET=puppet/puppet-agent-alpine:4.6.2
+IMAGE_REGISTRY=registry:2.5.0
+IMAGE_INIT=eclipse/che-init:nightly
+IMAGE_CHE=eclipse/che-server:4.7.2
