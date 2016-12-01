@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
@@ -61,7 +63,8 @@ public class TemporaryWorkspaceRemover {
         }
     }
 
-    private void removeTemporaryWs() throws ServerException, ConflictException {
+    @VisibleForTesting
+    void removeTemporaryWs() throws ServerException, ConflictException {
         final int count = 100;
         int skip = 0;
         List<WorkspaceImpl> items = workspaceDao.getWorkspaces(true, skip, count);

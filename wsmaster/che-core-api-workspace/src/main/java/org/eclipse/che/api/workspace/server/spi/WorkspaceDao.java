@@ -145,7 +145,7 @@ public interface WorkspaceDao {
 
 
     /**
-     * Gets workspaces.
+     * Gets workspaces by temporary attribute.
      *
      * @param isTemporary
      *         When {@code true}, only temporary workspaces should be retrieved.
