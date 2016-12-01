@@ -274,9 +274,6 @@ public class SwitchViewImpl extends Window implements SwitchView {
         workingCopyDepth.setEnabled(enabled);
     }
 
-    @Override
-    protected void onClose() { }
-
     @UiHandler("switchToBranch")
     public void onSwitchToBranchClicked(final ClickEvent event) {
         delegate.onSwitchToBranchChanged();
