@@ -163,17 +163,19 @@ public class JpaWorkspaceDao implements WorkspaceDao {
 
     @Override
     @Transactional
-    public List<WorkspaceImpl> getWorkspaces(boolean isTemporaryOnly, int skipCount, int maxItems) throws ServerException {
+    public List<WorkspaceImpl> getWorkspaces(boolean isTemporary, int skipCount, int maxItems) throws ServerException {
         checkArgument(maxItems >= 0, "The number of items to return can't be negative.");
         checkArgument(skipCount >= 0 && skipCount <= Integer.MAX_VALUE,
                       "The number of items to skip can't be negative or greater than " + Integer.MAX_VALUE);
         try {
             return managerProvider.get()
-                                  .createNamedQuery(isTemporaryOnly ? "WorkspaceImpl.getAllTemporary" : "Workspace.getAll", WorkspaceImpl.class)
+                                  .createNamedQuery("Workspace.getByTemporary", WorkspaceImpl.class)
+                                  .setParameter("temporary", isTemporary)
                                   .setMaxResults(maxItems)
                                   .setFirstResult(skipCount)
                                   .getResultList()
                                   .stream()
+                                  .map(WorkspaceImpl::new)
                                   .collect(toList());
         } catch (RuntimeException x) {
             throw new ServerException(x.getLocalizedMessage(), x);

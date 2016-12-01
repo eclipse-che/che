@@ -21,6 +21,8 @@ import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import java.util.List;
+
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -60,8 +62,15 @@ public class TemporaryWorkspaceRemover {
     }
 
     private void removeTemporaryWs() throws ServerException, ConflictException {
-        for (WorkspaceImpl workspace : workspaceDao.getWorkspaces(true, 0, 0)) {
-            workspaceDao.remove(workspace.getId());
+        final int count = 100;
+        int skip = 0;
+        List<WorkspaceImpl> items = workspaceDao.getWorkspaces(true, skip, count);
+        while (!items.isEmpty()) {
+            for (WorkspaceImpl workspace : items) {
+                workspaceDao.remove(workspace.getId());
+            }
+            skip = skip + count;
+            items = workspaceDao.getWorkspaces(true, skip, count);
         }
     }
 

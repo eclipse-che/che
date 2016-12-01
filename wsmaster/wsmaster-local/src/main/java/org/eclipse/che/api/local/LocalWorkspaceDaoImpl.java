@@ -165,11 +165,9 @@ public class LocalWorkspaceDaoImpl implements WorkspaceDao {
     }
 
     @Override
-    public List<WorkspaceImpl> getWorkspaces(boolean isTemporaryOnly, int skipCount, int maxItems) throws ServerException {
+    public List<WorkspaceImpl> getWorkspaces(boolean isTemporary, int skipCount, int maxItems) throws ServerException {
         Stream<WorkspaceImpl> stream = workspaces.values().stream();
-        if (isTemporaryOnly) {
-            stream.filter(WorkspaceImpl::isTemporary);
-        }
+        stream.filter(ws -> ws.isTemporary() == isTemporary);
         stream.skip(skipCount);
         if (maxItems != 0) {
             stream.limit(maxItems);
