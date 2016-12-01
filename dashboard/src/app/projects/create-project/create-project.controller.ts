@@ -653,7 +653,7 @@ export class CreateProjectController {
   processMultiproject(projectData) {
     let currentPath = '/' + projectData.project.name;
 
-    let projects = projectData.projects;
+    let projects = projectData.projects || [];
     let project = angular.copy(projectData.project);
     project.path = currentPath;
     project.source = projectData.source;
