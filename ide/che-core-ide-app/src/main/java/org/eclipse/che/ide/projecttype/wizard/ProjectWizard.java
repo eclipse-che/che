@@ -99,7 +99,7 @@ public class ProjectWizard extends AbstractWizard<MutableProjectConfig> {
             });
         } else if (mode == IMPORT) {
             appContext.getWorkspaceRoot()
-                      .importProject()
+                      .newProject()
                       .withBody(dataObject)
                       .send()
                       .thenPromise(new Function<Project, Promise<Project>>() {

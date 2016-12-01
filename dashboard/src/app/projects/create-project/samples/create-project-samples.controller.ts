@@ -50,6 +50,7 @@ export class CreateProjectSamplesController {
     createProjectCtrl.setProjectDescription(template.description);
     createProjectCtrl.importProjectData.project.type = template.projectType;
     createProjectCtrl.importProjectData.project.commands = template.commands;
+    createProjectCtrl.importProjectData.projects = template.projects;
 
     let name: string = template.displayName;
     // strip space

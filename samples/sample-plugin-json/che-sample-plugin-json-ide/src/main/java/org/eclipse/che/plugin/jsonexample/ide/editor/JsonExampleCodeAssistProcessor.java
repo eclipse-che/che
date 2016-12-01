@@ -47,7 +47,7 @@ public class JsonExampleCodeAssistProcessor implements CodeAssistProcessor {
     }
 
     @Override
-    public void computeCompletionProposals(final TextEditor editor, final int offset, final CodeAssistCallback callback) {
+    public void computeCompletionProposals(final TextEditor editor, final int offset, final boolean triggered, final CodeAssistCallback callback) {
         final List<CompletionProposal> proposals = new ArrayList<>();
 
         proposals.addAll(Arrays.asList(

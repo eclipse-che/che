@@ -79,14 +79,14 @@ public class JavaCompletionProposal implements CompletionProposal, CompletionPro
 
     /** {@inheritDoc} */
     @Override
-    public Widget getAdditionalProposalInfo() {
+    public void getAdditionalProposalInfo(AsyncCallback<Widget> callback) {
         Frame frame = new Frame();
         frame.setSize("100%", "100%");
         frame.getElement().getStyle().setBorderStyle(Style.BorderStyle.NONE);
         frame.getElement().setAttribute("sandbox", ""); // empty value, not null
         frame.getElement().getStyle().setProperty("resize", "both");
         frame.setUrl(client.getProposalDocUrl(id, sessionId));
-        return frame;
+        callback.onSuccess(frame);
     }
 
     /** {@inheritDoc} */

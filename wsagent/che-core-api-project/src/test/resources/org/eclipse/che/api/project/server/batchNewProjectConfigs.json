@@ -1,0 +1,68 @@
+[
+  {
+    "name": "innerProject",
+    "displayName": "innerProject",
+    "path": "/testProject1/innerProject",
+    "description": "someDescription",
+    "type": "testProjectType2",
+    "mixins": [],
+    "attributes": {
+      "new_test_attribute": [
+        "some_attribute_value"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "",
+      "location": "",
+      "parameters": {}
+    },
+    "commands": [],
+    "links": []
+  },
+  {
+    "name": "testProject1",
+    "displayName": "testProject1",
+    "path": "/testProject1",
+    "description": "someDescription",
+    "type": "testProjectType1",
+    "mixins": [],
+    "attributes": {
+      "new_test_attribute": [
+        "some_attribute_value"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "",
+      "location": "",
+      "parameters": {}
+    },
+    "commands": [],
+    "links": []
+  },
+  {
+    "name": "testImportProject",
+    "displayName": "testImportProject",
+    "path": "/testImportProject",
+    "description": "someDescription",
+    "type": "testImportProjectType",
+    "mixins": [],
+    "attributes": {
+      "new_test_attribute": [
+        "some_attribute_value"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "importType",
+      "location": "someLocation",
+      "parameters": {}
+    },
+    "commands": [],
+    "links": []
+  }
+]

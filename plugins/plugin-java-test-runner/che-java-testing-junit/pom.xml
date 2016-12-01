@@ -26,5 +26,15 @@
         <module>che-java-testing-junit-shared</module>
         <module>che-java-testing-junit-ide</module>
     </modules>
-
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.eclipse.che.core</groupId>
+                    <artifactId>che-core-api-dto-maven-plugin</artifactId>
+                    <version>${project.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 </project>

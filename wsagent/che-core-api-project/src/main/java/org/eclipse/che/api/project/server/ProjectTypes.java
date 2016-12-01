@@ -11,13 +11,10 @@
 package org.eclipse.che.api.project.server;
 
 import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.project.type.Attribute;
 import org.eclipse.che.api.project.server.RegisteredProject.Problem;
-import org.eclipse.che.api.project.server.type.ProjectTypeConstraintException;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
-import org.eclipse.che.api.project.server.type.ValueStorageException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,6 +23,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static java.lang.String.format;
+
 /**
  * @author gazarenkov
  */
@@ -33,37 +33,40 @@ public class ProjectTypes {
 
     private final String                      projectPath;
     private final ProjectTypeRegistry         projectTypeRegistry;
-    private ProjectTypeDef                    primary;
+    private       ProjectTypeDef              primary;
     private final Map<String, ProjectTypeDef> mixins;
     private final Map<String, ProjectTypeDef> all;
     private final Map<String, Attribute>      attributeDefs;
+    private final List<Problem>               problems;
 
     ProjectTypes(String projectPath,
-                        String type,
-                        List<String> mixinTypes,
-                        ProjectTypeRegistry projectTypeRegistry,
-                        List<Problem>      problems) throws ProjectTypeConstraintException, NotFoundException {
+                 String type,
+                 List<String> mixinTypes,
+                 ProjectTypeRegistry projectTypeRegistry,
+                 List<Problem> problems) {
         mixins = new HashMap<>();
         all = new HashMap<>();
         attributeDefs = new HashMap<>();
+        this.problems = problems != null ? problems : newArrayList();
 
         this.projectTypeRegistry = projectTypeRegistry;
         this.projectPath = projectPath;
 
         ProjectTypeDef tmpPrimary;
         if (type == null) {
-            problems.add(new Problem(12, "No primary type defined for " + projectPath + " Base Project Type assigned."));
+            this.problems.add(new Problem(12, "No primary type defined for " + projectPath + " Base Project Type assigned."));
             tmpPrimary = ProjectTypeRegistry.BASE_TYPE;
         } else {
             try {
                 tmpPrimary = projectTypeRegistry.getProjectType(type);
             } catch (NotFoundException e) {
-                problems.add(new Problem(12, "Primary type " + type + " defined for " + projectPath + " is not registered. Base Project Type assigned."));
+                this.problems.add(new Problem(12, "Primary type " + type + " defined for " + projectPath +
+                                             " is not registered. Base Project Type assigned."));
                 tmpPrimary = ProjectTypeRegistry.BASE_TYPE;
             }
 
             if (!tmpPrimary.isPrimaryable()) {
-                problems.add(new Problem(12, "Project type " + tmpPrimary.getId() + " is not allowable to be primary type. Base Project Type assigned."));
+                this.problems.add(new Problem(12, "Project type " + tmpPrimary.getId() + " is not allowable to be primary type. Base Project Type assigned."));
                 tmpPrimary = ProjectTypeRegistry.BASE_TYPE;
             }
         }
@@ -90,12 +93,12 @@ public class ProjectTypes {
             try {
                 mixin = projectTypeRegistry.getProjectType(mixinFromConfig);
             } catch (NotFoundException e) {
-                problems.add(new Problem(12, "Project type " + mixinFromConfig + " is not registered. Skipped."));
+                this.problems.add(new Problem(12, "Project type " + mixinFromConfig + " is not registered. Skipped."));
                 continue;
             }
 
             if (!mixin.isMixable()) {
-                problems.add(new Problem(12, "Project type " + mixin + " is not allowable to be mixin. It not mixable. Skipped."));
+                this.problems.add(new Problem(12, "Project type " + mixin + " is not allowable to be mixin. It not mixable. Skipped."));
                 continue;
             }
 
@@ -105,14 +108,15 @@ public class ProjectTypes {
 
             // detect duplicated attributes
             for (Attribute attr : mixin.getAttributes()) {
-                if (attributeDefs.containsKey(attr.getName())) {
-
-                    problems.add(new Problem(13, "Attribute name conflict. Duplicated attributes detected " + projectPath +
-                                                 " Attribute " + attr.getName() + " declared in " + mixin.getId() + " already declared in " +
-                                                 attributeDefs.get(attr.getName()).getProjectType()+" Skipped."));
+                final String attrName = attr.getName();
+                if (attributeDefs.containsKey(attrName)) {
+                    this.problems.add(new Problem(13,
+                                                  format("Attribute name conflict. Duplicated attributes detected for %s. " +
+                                                         "Attribute %s declared in %s already declared in %s. Skipped.",
+                                                         projectPath, attrName, mixin.getId(), attributeDefs.get(attrName).getProjectType())));
                     continue;
                 }
-                attributeDefs.put(attr.getName(), attr);
+                attributeDefs.put(attrName, attr);
             }
 
             // Silently remove repeated items from mixins if any
@@ -147,22 +151,22 @@ public class ProjectTypes {
     void reset(Set<Attribute> attributesToDel) {
 
         Set<String> ptsToDel = new HashSet<>();
-        for(Attribute attr : attributesToDel) {
+        for (Attribute attr : attributesToDel) {
             ptsToDel.add(attr.getProjectType());
         }
 
-        Set <String>attrNamesToDel = new HashSet<>();
-        for(String pt : ptsToDel) {
+        Set<String> attrNamesToDel = new HashSet<>();
+        for (String pt : ptsToDel) {
             ProjectTypeDef typeDef = all.get(pt);
-            for(Attribute attrDef: typeDef.getAttributes()) {
+            for (Attribute attrDef : typeDef.getAttributes()) {
                 attrNamesToDel.add(attrDef.getName());
             }
         }
 
         // remove project types
-        for(String typeId : ptsToDel) {
+        for (String typeId : ptsToDel) {
             this.all.remove(typeId);
-            if(this.primary.getId().equals(typeId)) {
+            if (this.primary.getId().equals(typeId)) {
                 this.primary = ProjectTypeRegistry.BASE_TYPE;
                 this.all.put(ProjectTypeRegistry.BASE_TYPE.getId(), ProjectTypeRegistry.BASE_TYPE);
             } else {
@@ -171,30 +175,27 @@ public class ProjectTypes {
         }
 
         // remove attributes
-        for(String attr : attrNamesToDel) {
+        for (String attr : attrNamesToDel) {
             this.attributeDefs.remove(attr);
         }
     }
 
-    void addTransient(FolderEntry projectFolder) throws ServerException,
-                                                        NotFoundException,
-                                                        ProjectTypeConstraintException,
-                                                        ValueStorageException {
+    void addTransient(FolderEntry projectFolder) {
         for (ProjectTypeDef pt : projectTypeRegistry.getProjectTypes()) {
             // NOTE: Only mixable types allowed
             if (pt.isMixable() && !pt.isPersisted() && pt.resolveSources(projectFolder).matched()) {
                 all.put(pt.getId(), pt);
                 mixins.put(pt.getId(), pt);
                 for (Attribute attr : pt.getAttributes()) {
-                    if (attributeDefs.containsKey(attr.getName())) {
-                        throw new ProjectTypeConstraintException(
-                                "Attribute name conflict. Duplicated attributes detected " + projectPath +
-                                " Attribute " + attr.getName() + " declared in " + pt.getId() + " already declared in " +
-                                attributeDefs.get(attr.getName()).getProjectType()
-                        );
+                    final String attrName = attr.getName();
+                    if (attributeDefs.containsKey(attrName)) {
+                        problems.add(new Problem(13,
+                                                 format("Attribute name conflict. Duplicated attributes detected for %s. " +
+                                                        "Attribute %s declared in %s already declared in %s. Skipped.",
+                                                        projectPath, attrName, pt.getId(), attributeDefs.get(attrName).getProjectType())));
                     }
 
-                    attributeDefs.put(attr.getName(), attr);
+                    attributeDefs.put(attrName, attr);
                 }
             }
         }
