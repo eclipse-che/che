@@ -45,7 +45,7 @@ export class Ssh {
      *         when any other error occurs during ssh pair fetching
      */
     getPair(service: string, name: string):Promise<org.eclipse.che.api.ssh.shared.dto.SshPairDto> {
-        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/ssh/' + service + '/' + name, 200);
+        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/ssh/' + service + '/find?name=' + name, 200);
         return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
             return jsonResponse.asDto(org.eclipse.che.api.ssh.shared.dto.SshPairDtoImpl);
         });
