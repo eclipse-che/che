@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.editor.orion.client;
 
+import com.google.gwt.core.client.Scheduler;
 import elemental.events.KeyboardEvent.KeyCode;
 
 import org.eclipse.che.ide.api.editor.annotation.AnnotationModel;
@@ -28,11 +29,7 @@ import org.eclipse.che.ide.api.editor.codeassist.CompletionsSource;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.document.DocumentHandle;
 import org.eclipse.che.ide.api.editor.editorconfig.TextEditorConfiguration;
-import org.eclipse.che.ide.api.editor.events.CompletionRequestEvent;
-import org.eclipse.che.ide.api.editor.events.CompletionRequestHandler;
-import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
-import org.eclipse.che.ide.api.editor.events.TextChangeEvent;
-import org.eclipse.che.ide.api.editor.events.TextChangeHandler;
+import org.eclipse.che.ide.api.editor.events.*;
 import org.eclipse.che.ide.api.editor.formatter.ContentFormatter;
 import org.eclipse.che.ide.api.editor.keymap.KeyBinding;
 import org.eclipse.che.ide.api.editor.keymap.KeyBindingAction;
@@ -45,10 +42,14 @@ import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.text.TypedRegion;
 import org.eclipse.che.ide.api.editor.texteditor.HasKeyBindings;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
+import org.eclipse.che.ide.editor.preferences.editorproperties.EditorProperties;
+import org.eclipse.che.ide.editor.preferences.editorproperties.EditorPropertiesManager;
 import org.eclipse.che.ide.util.browser.UserAgent;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -57,16 +58,19 @@ import java.util.logging.Logger;
  */
 public class OrionEditorInit {
 
-    /** The logger. */
+    /**
+     * The logger.
+     */
     private static final Logger LOG = Logger.getLogger(OrionEditorInit.class.getName());
 
     private static final String CONTENT_ASSIST = "Content assist";
-    private static final String QUICK_FIX      = "Quick fix";
+    private static final String QUICK_FIX = "Quick fix";
 
     private final TextEditorConfiguration configuration;
-    private final CodeAssistantFactory    codeAssistantFactory;
-    private final OrionEditorPresenter    textEditor;
-    private final QuickAssistAssistant    quickAssist;
+    private final CodeAssistantFactory codeAssistantFactory;
+    private final OrionEditorPresenter textEditor;
+    private EditorPropertiesManager editorPropertiesManager;
+    private final QuickAssistAssistant quickAssist;
 
     /**
      * The quick assist assistant.
@@ -74,11 +78,13 @@ public class OrionEditorInit {
     public OrionEditorInit(final TextEditorConfiguration configuration,
                            final CodeAssistantFactory codeAssistantFactory,
                            final QuickAssistAssistant quickAssist,
-                           final OrionEditorPresenter textEditor) {
+                           final OrionEditorPresenter textEditor,
+                           final EditorPropertiesManager editorPropertiesManager) {
         this.configuration = configuration;
         this.codeAssistantFactory = codeAssistantFactory;
         this.quickAssist = quickAssist;
         this.textEditor = textEditor;
+        this.editorPropertiesManager = editorPropertiesManager;
     }
 
     /**
@@ -127,6 +133,7 @@ public class OrionEditorInit {
 
     /**
      * Configures the editor's DocumentPartitioner.
+     *
      * @param documentHandle the handle to the document
      */
     private void configurePartitioner(final DocumentHandle documentHandle) {
@@ -140,6 +147,7 @@ public class OrionEditorInit {
 
     /**
      * Configures the editor's Reconciler.
+     *
      * @param documentHandle the handle to the document
      */
     private void configureReconciler(final DocumentHandle documentHandle) {
@@ -153,6 +161,7 @@ public class OrionEditorInit {
 
     /**
      * Configures the editor's annotation model.
+     *
      * @param documentHandle the handle on the editor
      */
     private void configureAnnotationModel(final DocumentHandle documentHandle) {
@@ -162,7 +171,7 @@ public class OrionEditorInit {
         }
         // add the renderers (event handler) before the model (event source)
         if (textEditor instanceof HasAnnotationRendering) {
-            ((HasAnnotationRendering)textEditor).configure(annotationModel, documentHandle);
+            ((HasAnnotationRendering) textEditor).configure(annotationModel, documentHandle);
         }
         annotationModel.setDocumentHandle(documentHandle);
         documentHandle.getDocEventBus().addHandler(DocumentChangeEvent.TYPE, annotationModel);
@@ -173,6 +182,7 @@ public class OrionEditorInit {
 
     /**
      * Configure the editor's code assistant.
+     *
      * @param documentHandle the handle on the document
      */
     private void configureCodeAssist(final DocumentHandle documentHandle) {
@@ -185,10 +195,18 @@ public class OrionEditorInit {
             LOG.info("Creating code assistant.");
 
             final CodeAssistant codeAssistant = this.codeAssistantFactory.create(this.textEditor,
-                                                                                 this.configuration.getPartitioner());
+                    this.configuration.getPartitioner());
+            Set<Character> triggerCharacters = new HashSet<>();
             for (String key : processors.keySet()) {
-                codeAssistant.setCodeAssistantProcessor(key, processors.get(key));
+                CodeAssistProcessor processor = processors.get(key);
+                codeAssistant.setCodeAssistantProcessor(key, processor);
+                if (processor.getTriggerCharacters() != null) {
+                    for (char character : processor.getTriggerCharacters()) {
+                        triggerCharacters.add(character);
+                    }
+                }
             }
+            handleTriggerCharacters(triggerCharacters, documentHandle, codeAssistant);
 
             final KeyBindingAction action = new KeyBindingAction() {
                 @Override
@@ -233,10 +251,28 @@ public class OrionEditorInit {
     }
 
     /**
+     * Add listener for document changes to auto invoke auto completion on trigger character
+     */
+    private void handleTriggerCharacters(final Set<Character> triggerCharacters, DocumentHandle documentHandle, final CodeAssistant codeAssistant) {
+        documentHandle.getDocEventBus().addHandler(DocumentChangeEvent.TYPE, new DocumentChangeHandler() {
+            @Override
+            public void onDocumentChange(DocumentChangeEvent event) {
+                if (editorPropertiesManager.getEditorProperties().get(EditorProperties.SHOW_CONTENT_ASSIST_AUTOMATICALLY.toString()).isBoolean().booleanValue()) {
+                    if (event.getText().length() == 1) {
+                        if (triggerCharacters.contains(event.getText().charAt(0))) {
+                            showCompletion(codeAssistant, true);
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    /**
      * Show the available completions.
      *
      * @param codeAssistant the code assistant
-     * @param triggered if triggered by the content assist key binding
+     * @param triggered     if triggered by the content assist key binding
      */
     private void showCompletion(final CodeAssistant codeAssistant, final boolean triggered) {
         final int cursor = textEditor.getCursorOffset();
@@ -264,7 +300,9 @@ public class OrionEditorInit {
         }
     }
 
-    /** Show the available completions. */
+    /**
+     * Show the available completions.
+     */
     private void showCompletion() {
         this.textEditor.showCompletionProposals();
     }
@@ -323,7 +361,7 @@ public class OrionEditorInit {
                     // stop as soon as one interceptors has modified the content
                     for (final TextChangeInterceptor interceptor : filteredInterceptors) {
                         final TextChange result = interceptor.processChange(change,
-                                                                            documentHandle.getDocument().getReadOnlyDocument());
+                                documentHandle.getDocument().getReadOnlyDocument());
                         if (result != null) {
                             event.update(result);
                             break;

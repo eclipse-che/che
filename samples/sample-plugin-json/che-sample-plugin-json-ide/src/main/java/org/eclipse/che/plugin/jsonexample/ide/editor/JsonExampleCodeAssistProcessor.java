@@ -78,4 +78,9 @@ public class JsonExampleCodeAssistProcessor implements CodeAssistProcessor {
     public String getErrorMessage() {
         return errorMessage;
     }
+
+    @Override
+    public char[] getTriggerCharacters() {
+        return null;
+    }
 }

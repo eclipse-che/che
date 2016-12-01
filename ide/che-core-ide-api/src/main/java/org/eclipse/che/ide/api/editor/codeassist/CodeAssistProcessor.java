@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.editor.codeassist;
 
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 
 /**
@@ -49,4 +50,10 @@ public interface CodeAssistProcessor {
      * @return an error message or <code>null</code> if no error occurred
      */
     String getErrorMessage();
+
+    /**
+     * The characters that trigger completion automatically.
+     */
+    @Nullable
+    char[] getTriggerCharacters();
 }

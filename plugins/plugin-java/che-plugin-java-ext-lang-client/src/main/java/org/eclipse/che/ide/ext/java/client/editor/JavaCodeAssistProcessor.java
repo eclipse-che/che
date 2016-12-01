@@ -207,6 +207,11 @@ public class JavaCodeAssistProcessor implements CodeAssistProcessor {
         return this.errorMessage;
     }
 
+    @Override
+    public char[] getTriggerCharacters() {
+        return new char[]{'.'};
+    }
+
     public void disableCodeAssistant(String errorMessage) {
         this.errorMessage = Strings.isNullOrEmpty(errorMessage) ? localizationConstant.codeAssistDefaultErrorMessage() : errorMessage;
     }

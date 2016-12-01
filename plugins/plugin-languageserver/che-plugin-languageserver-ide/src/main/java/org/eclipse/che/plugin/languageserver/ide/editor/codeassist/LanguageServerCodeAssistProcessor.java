@@ -100,6 +100,24 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
         return lastErrorMessage;
     }
 
+    @Override
+    public char[] getTriggerCharacters() {
+        if(serverCapabilities.getCompletionProvider() !=null){
+            List<String> triggerCharacters = serverCapabilities.getCompletionProvider().getTriggerCharacters();
+            StringBuilder result = new StringBuilder();
+            if (triggerCharacters != null) {
+                for (String triggerCharacter : triggerCharacters) {
+                    //skip trigger character which not a char (size > 0)
+                    if (triggerCharacter.length() == 1) {
+                        result.append(triggerCharacter.charAt(0));
+                    }
+                }
+            }
+            return result.toString().toCharArray();
+        }
+        return null;
+    }
+
     private String getCurrentWord(String text, int offset) {
         int i = offset - 1;
         while (i >= 0 && isWordChar(text.charAt(i))) {
