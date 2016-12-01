@@ -31,6 +31,7 @@ import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.annotations.Description;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
+import org.eclipse.che.api.project.server.importer.ProjectImportOutputWSLineConsumer;
 import org.eclipse.che.api.project.server.notification.ProjectItemModifiedEvent;
 import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
 import org.eclipse.che.api.project.shared.dto.CopyOptions;
@@ -230,7 +231,11 @@ public class ProjectService extends Service {
                    BadRequestException {
 
         List<ProjectConfigDto> result = new ArrayList<>(projectConfigList.size());
-        for (RegisteredProject registeredProject : projectManager.createBatchProjects(projectConfigList, rewrite)) {
+        final ProjectOutputLineConsumerFactory outputOutputConsumerFactory = new ProjectOutputLineConsumerFactory(workspace, 300);
+//                () -> new ProjectImportOutputWSLineConsumer("BATCH", workspace, 300);
+
+        for (RegisteredProject registeredProject : projectManager.createBatchProjects(projectConfigList, rewrite, outputOutputConsumerFactory)) {
+
             ProjectConfigDto projectConfig = injectProjectLinks(asDto(registeredProject));
             result.add(projectConfig);
 
@@ -356,7 +361,8 @@ public class ProjectService extends Service {
                                                                      ServerException,
                                                                      NotFoundException,
                                                                      BadRequestException {
-        projectManager.importProject(path, sourceStorage, force);
+        projectManager.importProject(path, sourceStorage, force,
+                                     () -> new ProjectImportOutputWSLineConsumer(path, workspace, 300));
     }
 
     @POST

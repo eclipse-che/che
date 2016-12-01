@@ -23,6 +23,7 @@ import org.eclipse.che.api.core.util.LineConsumerFactory;
 import org.eclipse.che.api.core.util.ValueHolder;
 import org.eclipse.che.api.project.server.RegisteredProject.Problem;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
+import org.eclipse.che.api.project.server.importer.ProjectImportOutputWSLineConsumer;
 import org.eclipse.che.api.project.server.importer.ProjectImporter;
 import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
@@ -87,7 +88,7 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
         configs.add(config1);
         configs.add(config2);
 
-        pm.createBatchProjects(configs, false);
+        pm.createBatchProjects(configs, false, new ProjectOutputLineConsumerFactory("ws", 300));
 
         checkProjectExist(projectPath1);
         checkProjectExist(projectPath2);
@@ -119,7 +120,7 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
         configs.add(config1);
         configs.add(config2);
 
-        pm.createBatchProjects(configs, false);
+        pm.createBatchProjects(configs, false, new ProjectOutputLineConsumerFactory("ws", 300));
 
         final RegisteredProject project1 = projectRegistry.getProject(projectPath1);
         final FolderEntry projectFolder1 = project1.getBaseFolder();
@@ -142,7 +143,7 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
         configs.add(config);
 
         try {
-            pm.createBatchProjects(configs, false);
+            pm.createBatchProjects(configs, false, new ProjectOutputLineConsumerFactory("ws", 300));
             fail("Exception should be thrown when source code is not reachable");
         } catch (Exception e) {
             assertEquals(0, projectRegistry.getProjects().size());
@@ -186,7 +187,7 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
         configs.add(config3); //we be failed - we have not registered importer - source code will not be imported
 
         try {
-            pm.createBatchProjects(configs, false);
+            pm.createBatchProjects(configs, false, new ProjectOutputLineConsumerFactory("ws", 300));
             fail("We should rollback operation of creating batch projects when we could not get source code for at least one project");
         } catch (Exception e) {
             assertEquals(0, projectRegistry.getProjects().size());
@@ -229,7 +230,7 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
         configs.add(config1);
         configs.add(config2);
 
-        pm.createBatchProjects(configs, false);
+        pm.createBatchProjects(configs, false, new ProjectOutputLineConsumerFactory("ws", 300));
 
         RegisteredProject rootProject = projectRegistry.getProject(rootProjectPath);
         FolderEntry rootProjectFolder = rootProject.getBaseFolder();
@@ -280,7 +281,7 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
         configs.add(config2);
         configs.add(config1);
 
-        pm.createBatchProjects(configs, false);
+        pm.createBatchProjects(configs, false, new ProjectOutputLineConsumerFactory("ws", 300));
 
         RegisteredProject rootProject = projectRegistry.getProject(rootProjectPath);
         FolderEntry rootProjectFolder = rootProject.getBaseFolder();
@@ -306,7 +307,7 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
             configs.add(createProjectConfigObject(path.substring(path.length() - 1, path.length()), path, BaseProjectType.ID, null));
         }
 
-        pm.createBatchProjects(configs, false);
+        pm.createBatchProjects(configs, false, new ProjectOutputLineConsumerFactory("ws", 300));
 
         for (String path : projectsPaths) {
             checkProjectExist(path);
@@ -327,7 +328,7 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
         configs.add(config1);
         configs.add(config2);
 
-        pm.createBatchProjects(configs, false);
+        pm.createBatchProjects(configs, false, new ProjectOutputLineConsumerFactory("ws", 300));
 
         checkProjectExist(projectPath1);
         checkProjectExist(projectPath2);
@@ -344,7 +345,7 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
         configs.add(config);
 
         try {
-            pm.createBatchProjects(configs, false);
+            pm.createBatchProjects(configs, false, new ProjectOutputLineConsumerFactory("ws", 300));
             fail("BadRequestException should be thrown : path field is mandatory");
         } catch (BadRequestException e) {
             assertEquals(0, projectRegistry.getProjects().size());
@@ -359,12 +360,12 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
         final List<NewProjectConfig> configs = new ArrayList<>(1);
         configs.add(config);
 
-        pm.createBatchProjects(configs, false);
+        pm.createBatchProjects(configs, false, new ProjectOutputLineConsumerFactory("ws", 300));
         checkProjectExist(path);
         assertEquals(1, projectRegistry.getProjects().size());
 
         try {
-            pm.createBatchProjects(configs, false);
+            pm.createBatchProjects(configs, false, new ProjectOutputLineConsumerFactory("ws", 300));
             fail("ConflictException should be thrown : Project config with the same path is already exists");
         } catch (ConflictException e) {
             assertEquals(1, projectRegistry.getProjects().size());
@@ -381,7 +382,7 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
         final List<NewProjectConfig> configs = new ArrayList<>(2);
         configs.add(config);
 
-        pm.createBatchProjects(configs, false);
+        pm.createBatchProjects(configs, false, new ProjectOutputLineConsumerFactory("ws", 300));
 
         checkProjectExist(nonExistentParentPath);
         checkProjectExist(innerProjectPath);
@@ -411,7 +412,7 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
         final List<NewProjectConfig> configs = new ArrayList<>(1);
         configs.add(config1);
 
-        pm.createBatchProjects(configs, false);
+        pm.createBatchProjects(configs, false, new ProjectOutputLineConsumerFactory("ws", 300));
 
         final FolderEntry projectFolder1 = projectRegistry.getProject(projectPath).getBaseFolder();
         checkProjectExist(projectPath);
@@ -420,7 +421,7 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
 
         configs.clear();
         configs.add(config2);
-        pm.createBatchProjects(configs, true);
+        pm.createBatchProjects(configs, true, new ProjectOutputLineConsumerFactory("ws", 300));
 
         final FolderEntry projectFolder2 = projectRegistry.getProject(projectPath).getBaseFolder();
         checkProjectExist(projectPath);
@@ -442,7 +443,7 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
         final List<NewProjectConfig> configs = new ArrayList<>(1);
         configs.add(config);
 
-        pm.createBatchProjects(configs, false);
+        pm.createBatchProjects(configs, false, new ProjectOutputLineConsumerFactory("ws", 300));
 
         final RegisteredProject project = projectRegistry.getProject(projectPath);
         final List<Problem> problems = project.getProblems();
@@ -466,7 +467,7 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
         final List<NewProjectConfig> configs = new ArrayList<>(1);
         configs.add(config);
 
-        pm.createBatchProjects(configs, false);
+        pm.createBatchProjects(configs, false, new ProjectOutputLineConsumerFactory("ws", 300));
 
         final RegisteredProject project = projectRegistry.getProject(projectPath);
         final List<Problem> problems = project.getProblems();
@@ -837,7 +838,7 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
 
         SourceStorage sourceConfig = DtoFactory.newDto(SourceStorageDto.class).withType(importType);
 
-        pm.importProject("/testImportProject", sourceConfig, false);
+        pm.importProject("/testImportProject", sourceConfig, false, () -> new ProjectImportOutputWSLineConsumer("BATCH", "ws", 300));
 
         RegisteredProject project = projectRegistry.getProject("/testImportProject");
 
@@ -859,7 +860,7 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
 
         SourceStorage sourceConfig = DtoFactory.newDto(SourceStorageDto.class).withType(importType);
         try {
-            pm.importProject(projectPath, sourceConfig, false);
+            pm.importProject(projectPath, sourceConfig, false, () -> new ProjectImportOutputWSLineConsumer("testImportProject", "ws", 300));
         } catch (Exception e) {
         }
 
@@ -872,7 +873,7 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
         SourceStorage sourceConfig = DtoFactory.newDto(SourceStorageDto.class).withType("nothing");
 
         try {
-            pm.importProject("/testImportProject", sourceConfig, false);
+            pm.importProject("/testImportProject", sourceConfig, false, () -> new ProjectImportOutputWSLineConsumer("testImportProject", "ws", 300));
             fail("NotFoundException: Unable import sources project from 'null'. Sources type 'nothing' is not supported.");
         } catch (NotFoundException e) {
         }

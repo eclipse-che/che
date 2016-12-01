@@ -25,10 +25,8 @@ import org.eclipse.che.api.core.model.project.type.ProjectType;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.util.LineConsumerFactory;
 import org.eclipse.che.api.project.server.RegisteredProject.Problem;
-import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
-import org.eclipse.che.api.project.server.importer.ProjectImportOutputWSLineConsumer;
 import org.eclipse.che.api.project.server.importer.ProjectImporter;
 import org.eclipse.che.api.project.server.importer.ProjectImporterRegistry;
 import org.eclipse.che.api.project.server.type.AttributeValue;
@@ -48,6 +46,7 @@ import org.eclipse.che.api.vfs.impl.file.event.LoEvent;
 import org.eclipse.che.api.vfs.impl.file.event.detectors.ProjectTreeChangesDetector;
 import org.eclipse.che.api.vfs.search.Searcher;
 import org.eclipse.che.api.vfs.search.SearcherProvider;
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -314,7 +313,7 @@ public final class ProjectManager {
      * @throws ServerException
      *         if other error occurs
      */
-    public List<RegisteredProject> createBatchProjects(List<? extends NewProjectConfig> projectConfigList, boolean rewrite)
+    public List<RegisteredProject> createBatchProjects(List<? extends NewProjectConfig> projectConfigList, boolean rewrite, ProjectOutputLineConsumerFactory lineConsumerFactory)
             throws BadRequestException, ConflictException, ForbiddenException, NotFoundException, ServerException, UnauthorizedException,
                    IOException {
         projectTreeChangesDetector.suspend();
@@ -335,7 +334,7 @@ public final class ProjectManager {
                 try {
                     final SourceStorage sourceStorage = projectConfig.getSource();
                     if (sourceStorage != null && !isNullOrEmpty(sourceStorage.getLocation())) {
-                        doImportProject(pathToProject, sourceStorage, rewrite);
+                        doImportProject(pathToProject, sourceStorage, rewrite, lineConsumerFactory.setProjectName(projectConfig.getPath()));
                     } else if (!isVirtualFileExist(pathToProject)) {
                         registeredProject = doCreateProject(projectConfig, projectConfig.getOptions());
                         projects.add(registeredProject);
@@ -467,7 +466,7 @@ public final class ProjectManager {
      * @throws ConflictException
      * @throws NotFoundException
      */
-    public RegisteredProject importProject(String path, SourceStorage sourceStorage, boolean rewrite) throws ServerException,
+    public RegisteredProject importProject(String path, SourceStorage sourceStorage, boolean rewrite, LineConsumerFactory lineConsumerFactory) throws ServerException,
                                                                                                              IOException,
                                                                                                              ForbiddenException,
                                                                                                              UnauthorizedException,
@@ -475,14 +474,14 @@ public final class ProjectManager {
                                                                                                              NotFoundException {
         projectTreeChangesDetector.suspend();
         try {
-            return doImportProject(path, sourceStorage, rewrite);
+            return doImportProject(path, sourceStorage, rewrite, lineConsumerFactory);
         } finally {
             projectTreeChangesDetector.resume();
         }
     }
 
     /** Note: Use {@link ProjectTreeChangesDetector#suspend()} and {@link ProjectTreeChangesDetector#resume()} while importing source code */
-    private RegisteredProject doImportProject(String path, SourceStorage sourceStorage, boolean rewrite) throws ServerException,
+    private RegisteredProject doImportProject(String path, SourceStorage sourceStorage, boolean rewrite, LineConsumerFactory lineConsumerFactory) throws ServerException,
                                                                                                                 IOException,
                                                                                                                 ForbiddenException,
                                                                                                                 UnauthorizedException,
@@ -495,8 +494,8 @@ public final class ProjectManager {
         }
 
         // Preparing websocket output publisher to broadcast output of import process to the ide clients while importing
-        final LineConsumerFactory outputOutputConsumerFactory =
-                () -> new ProjectImportOutputWSLineConsumer(path, workspaceProjectsHolder.getWorkspaceId(), 300);
+//        final LineConsumerFactory outputOutputConsumerFactory =
+//                () -> new ProjectImportOutputWSLineConsumer(path, workspaceProjectsHolder.getWorkspaceId(), 300);
 
         String normalizePath = (path.startsWith("/")) ? path : "/".concat(path);
         FolderEntry folder = asFolder(normalizePath);
@@ -509,7 +508,7 @@ public final class ProjectManager {
         }
 
         try {
-            importer.importSources(folder, sourceStorage, outputOutputConsumerFactory);
+            importer.importSources(folder, sourceStorage, lineConsumerFactory);
         } catch (final Exception e) {
             folder.remove();
             throw e;
