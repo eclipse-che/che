@@ -34,7 +34,7 @@ public class ProjectImportOutputWSLineConsumerTest {
 
         //then
         verify(consumer).sendMessageToWS(argumentCaptor.capture());
-        assertEquals(argumentCaptor.getValue().getChannel(), "importProject:output:workspace:project");
-        assertEquals(argumentCaptor.getValue().getBody(), "{\"num\":1, \"line\":\"message\"}");
+        assertEquals(argumentCaptor.getValue().getChannel(), "importProject:output");
+        assertEquals(argumentCaptor.getValue().getBody(), "{\"num\":1,\"line\":\"message\",\"project\":\"project\"}");
     }
 }
