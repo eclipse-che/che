@@ -204,10 +204,10 @@ public class WorkspaceDaoTest {
         workspace.setTemporary(true);
         workspaceDao.update(workspace);
 
-        List<WorkspaceImpl> result1 = workspaceDao.getWorkspaces(true, 0, 0);
+        List<WorkspaceImpl> result = workspaceDao.getWorkspaces(true, 0, 0);
 
-        assertEquals(result1.size(), 1);
-        assertEquals(result1.iterator().next(), workspaceDao.get(workspace.getId()));
+        assertEquals(result.size(), 1);
+        assertEquals(result.iterator().next(), workspaceDao.get(workspace.getId()));
     }
 
     @Test

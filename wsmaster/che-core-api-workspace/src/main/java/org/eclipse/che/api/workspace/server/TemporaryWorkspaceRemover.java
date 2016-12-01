@@ -67,13 +67,13 @@ public class TemporaryWorkspaceRemover {
     void removeTemporaryWs() throws ServerException, ConflictException {
         final int count = 100;
         int skip = 0;
-        List<WorkspaceImpl> items = workspaceDao.getWorkspaces(true, skip, count);
-        while (!items.isEmpty()) {
-            for (WorkspaceImpl workspace : items) {
+        List<WorkspaceImpl> workspaces = workspaceDao.getWorkspaces(true, skip, count);
+        while (!workspaces.isEmpty()) {
+            for (WorkspaceImpl workspace : workspaces) {
                 workspaceDao.remove(workspace.getId());
             }
             skip = skip + count;
-            items = workspaceDao.getWorkspaces(true, skip, count);
+            workspaces = workspaceDao.getWorkspaces(true, skip, count);
         }
     }
 
