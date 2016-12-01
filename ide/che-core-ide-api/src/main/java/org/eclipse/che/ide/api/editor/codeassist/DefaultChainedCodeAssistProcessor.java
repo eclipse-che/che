@@ -80,7 +80,7 @@ public abstract class DefaultChainedCodeAssistProcessor implements CodeAssistPro
     }
 
     @Override
-    public char[] getTriggerCharacters() {
+    public List<String> getTriggerCharacters() {
         return null;
     }
 

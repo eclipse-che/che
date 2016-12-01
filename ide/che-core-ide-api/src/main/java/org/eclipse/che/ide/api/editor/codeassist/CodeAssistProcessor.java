@@ -13,6 +13,8 @@ package org.eclipse.che.ide.api.editor.codeassist;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 
+import java.util.List;
+
 /**
  * A code assist processor proposes completions for a particular content type.
  * <p>
@@ -55,5 +57,5 @@ public interface CodeAssistProcessor {
      * The characters that trigger completion automatically.
      */
     @Nullable
-    char[] getTriggerCharacters();
+    List<String> getTriggerCharacters();
 }

@@ -10,10 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.web.js.editor;
 
-import org.eclipse.che.ide.api.editor.codeassist.DefaultChainedCodeAssistProcessor;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.eclipse.che.ide.api.editor.codeassist.DefaultChainedCodeAssistProcessor;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -31,5 +33,10 @@ public class DefaultCodeAssistProcessor extends DefaultChainedCodeAssistProcesso
     @Inject(optional = true)
     protected void injectProcessors(Set<JsCodeAssistProcessor> jsCodeAssistProcessors) {
         setProcessors(jsCodeAssistProcessors);
+    }
+
+    @Override
+    public List<String> getTriggerCharacters() {
+        return Collections.singletonList(".");
     }
 }

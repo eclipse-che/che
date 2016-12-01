@@ -10,10 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.editor.partition;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Logger;
-
+import org.eclipse.che.ide.api.editor.document.DocumentHandle;
 import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
 import org.eclipse.che.ide.api.editor.text.BadLocationException;
 import org.eclipse.che.ide.api.editor.text.BadPositionCategoryException;
@@ -22,8 +19,11 @@ import org.eclipse.che.ide.api.editor.text.TypedPosition;
 import org.eclipse.che.ide.api.editor.text.TypedRegion;
 import org.eclipse.che.ide.api.editor.text.TypedRegionImpl;
 import org.eclipse.che.ide.api.editor.text.rules.Token;
-import org.eclipse.che.ide.api.editor.document.DocumentHandle;
 import org.eclipse.che.ide.util.loging.Log;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Default implementation of the {@link DocumentPartitioner}.
@@ -56,6 +56,8 @@ public class DefaultPartitioner implements DocumentPartitioner {
     public void initialize() {
         this.documentPositionMap.addPositionCategory(this.positionCategory);
         this.documentPositionMap.setContentLength(this.documentHandle.getDocument().getContentsCharCount());
+        this.scanner.setScannedString(documentHandle.getDocument().getContents());
+        updatePositions();
     }
 
     private void updatePositions() {

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.editor.orion.client;
 
+import com.google.gwt.core.client.Scheduler;
 import elemental.events.KeyboardEvent.KeyCode;
 import org.eclipse.che.ide.api.editor.annotation.AnnotationModel;
 import org.eclipse.che.ide.api.editor.annotation.HasAnnotationRendering;
@@ -199,14 +200,12 @@ public class OrionEditorInit {
 
             final CodeAssistant codeAssistant = this.codeAssistantFactory.create(this.textEditor,
                     this.configuration.getPartitioner());
-            Set<Character> triggerCharacters = new HashSet<>();
+            Set<String> triggerCharacters = new HashSet<>();
             for (String key : processors.keySet()) {
                 CodeAssistProcessor processor = processors.get(key);
                 codeAssistant.setCodeAssistantProcessor(key, processor);
                 if (processor.getTriggerCharacters() != null) {
-                    for (char character : processor.getTriggerCharacters()) {
-                        triggerCharacters.add(character);
-                    }
+                        triggerCharacters.addAll(processor.getTriggerCharacters());
                 }
             }
             handleTriggerCharacters(triggerCharacters, documentHandle, codeAssistant);
@@ -256,19 +255,52 @@ public class OrionEditorInit {
     /**
      * Add listener for document changes to auto invoke auto completion on trigger character
      */
-    private void handleTriggerCharacters(final Set<Character> triggerCharacters, DocumentHandle documentHandle, final CodeAssistant codeAssistant) {
-        documentHandle.getDocEventBus().addHandler(DocumentChangeEvent.TYPE, new DocumentChangeHandler() {
-            @Override
-            public void onDocumentChange(DocumentChangeEvent event) {
-                if (editorPropertiesManager.getEditorProperties().get(EditorProperties.SHOW_CONTENT_ASSIST_AUTOMATICALLY.toString()).isBoolean().booleanValue()) {
-                    if (event.getText().length() == 1) {
-                        if (triggerCharacters.contains(event.getText().charAt(0))) {
-                            showCompletion(codeAssistant, true);
-                        }
-                    }
+    private void handleTriggerCharacters(final Set<String> triggerCharacters, DocumentHandle documentHandle, final CodeAssistant codeAssistant) {
+        if(triggerCharacters.size() != 0) {
+            int len = 0;
+            for (String triggerCharacter : triggerCharacters) {
+                if (len < triggerCharacter.length()) {
+                    len = triggerCharacter.length();
                 }
             }
-        });
+            final int maxLen = len;
+            documentHandle.getDocEventBus().addHandler(DocumentChangeEvent.TYPE, new DocumentChangeHandler() {
+                @Override
+                public void onDocumentChange(final DocumentChangeEvent event) {
+                    if (editorPropertiesManager.getEditorProperties()
+                            .get(EditorProperties.SHOW_CONTENT_ASSIST_AUTOMATICALLY.toString()).isBoolean().booleanValue()) {
+
+                        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+                            @Override
+                            public void execute() {
+                                handleDocumentChange(event, triggerCharacters, codeAssistant, maxLen);
+                            }
+                        });
+                    }
+                }
+            });
+        }
+    }
+
+    private void handleDocumentChange(DocumentChangeEvent event, Set<String> triggers, CodeAssistant codeAssistant, int maxLen){
+        //skip paste test fragments
+        if (event.getText().length() == 1) {
+            if (triggers.contains(event.getText())) {
+                showCompletion(codeAssistant, true);
+            }
+
+            StringBuilder machString = new StringBuilder(event.getText());
+            int offset = event.getOffset();
+            while (machString.length() < maxLen) {
+                machString.insert(0, event.getDocument().getDocument().getContentRange(--offset, 1));
+                if (triggers.contains(machString.toString())) {
+                    showCompletion(codeAssistant, true);
+                    return;
+                }
+            }
+
+
+        }
     }
 
     /**

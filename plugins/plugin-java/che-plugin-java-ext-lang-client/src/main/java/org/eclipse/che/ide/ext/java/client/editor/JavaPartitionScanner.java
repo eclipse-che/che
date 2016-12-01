@@ -11,16 +11,15 @@
 package org.eclipse.che.ide.ext.java.client.editor;
 
 
-import java.util.List;
-
-import javax.inject.Inject;
-
+import org.eclipse.che.ide.api.editor.partition.PartitionScanner;
+import org.eclipse.che.ide.api.editor.partition.StringCharacterScanner;
 import org.eclipse.che.ide.api.editor.text.rules.Token;
 import org.eclipse.che.ide.api.editor.text.rules.TokenImpl;
 import org.eclipse.che.ide.ext.java.jdt.JavaPartitions;
-import org.eclipse.che.ide.api.editor.partition.PartitionScanner;
-import org.eclipse.che.ide.api.editor.partition.StringCharacterScanner;
 import org.eclipse.che.ide.ext.java.jdt.text.rules.CharacterScanner;
+
+import javax.inject.Inject;
+import java.util.List;
 
 /**
  * This scanner recognizes the JavaDoc comments, Java multi line comments, Java single line comments,
@@ -66,7 +65,7 @@ public class JavaPartitionScanner implements PartitionScanner, JavaPartitions {
     private int fJavaLength;
 
     private final Token[] fTokens = new Token[]{
-            new TokenImpl(null),
+            new TokenImpl(JAVA_PARTITIONING),
             new TokenImpl(JAVA_SINGLE_LINE_COMMENT),
             new TokenImpl(JAVA_MULTI_LINE_COMMENT),
             new TokenImpl(JAVA_DOC),

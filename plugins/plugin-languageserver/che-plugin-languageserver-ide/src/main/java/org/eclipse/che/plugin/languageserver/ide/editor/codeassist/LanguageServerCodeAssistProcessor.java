@@ -99,19 +99,9 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
     }
 
     @Override
-    public char[] getTriggerCharacters() {
+    public List<String> getTriggerCharacters() {
         if (serverCapabilities.getCompletionProvider() != null) {
-            List<String> triggerCharacters = serverCapabilities.getCompletionProvider().getTriggerCharacters();
-            StringBuilder result = new StringBuilder();
-            if (triggerCharacters != null) {
-                for (String triggerCharacter : triggerCharacters) {
-                    //skip trigger character which not a char (size > 0)
-                    if (triggerCharacter.length() == 1) {
-                        result.append(triggerCharacter.charAt(0));
-                    }
-                }
-            }
-            return result.toString().toCharArray();
+            return  serverCapabilities.getCompletionProvider().getTriggerCharacters();
         }
         return null;
     }
