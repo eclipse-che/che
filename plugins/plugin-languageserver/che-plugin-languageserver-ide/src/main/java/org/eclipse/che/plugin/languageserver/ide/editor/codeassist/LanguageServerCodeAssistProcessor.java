@@ -10,11 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.editor.codeassist;
 
-import io.typefox.lsapi.ServerCapabilities;
-
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-
+import io.typefox.lsapi.ServerCapabilities;
 import org.eclipse.che.api.languageserver.shared.lsapi.CompletionItemDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.CompletionListDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentIdentifierDTO;
@@ -42,14 +40,14 @@ import static com.google.common.collect.Lists.newArrayList;
  */
 public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
 
-    private final DtoBuildHelper            dtoBuildHelper;
-    private final LanguageServerResources   resources;
-    private final CompletionImageProvider   imageProvider;
+    private final DtoBuildHelper dtoBuildHelper;
+    private final LanguageServerResources resources;
+    private final CompletionImageProvider imageProvider;
     private final ServerCapabilities serverCapabilities;
     private final TextDocumentServiceClient documentServiceClient;
     private final FuzzyMatches fuzzyMatches;
     private String lastErrorMessage;
-    private final LatestCompletionResult    latestCompletionResult;
+    private final LatestCompletionResult latestCompletionResult;
 
     @Inject
     public LanguageServerCodeAssistProcessor(TextDocumentServiceClient documentServiceClient,
@@ -102,7 +100,7 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
 
     @Override
     public char[] getTriggerCharacters() {
-        if(serverCapabilities.getCompletionProvider() !=null){
+        if (serverCapabilities.getCompletionProvider() != null) {
             List<String> triggerCharacters = serverCapabilities.getCompletionProvider().getTriggerCharacters();
             StringBuilder result = new StringBuilder();
             if (triggerCharacters != null) {
@@ -128,12 +126,12 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
 
     private boolean isWordChar(char c) {
         return c >= 'a' && c <= 'z' ||
-            c >= 'A' && c <= 'Z' ||
-            c >= '0' && c <= '9' ||
-            c >= '\u007f' && c <= '\u00ff' ||
-            c == '$' ||
-            c == '_' ||
-            c == '-';
+                c >= 'A' && c <= 'Z' ||
+                c >= '0' && c <= '9' ||
+                c >= '\u007f' && c <= '\u00ff' ||
+                c == '$' ||
+                c == '_' ||
+                c == '-';
     }
 
     private List<Match> filter(String word, CompletionItemDTO item) {
@@ -144,7 +142,7 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
         if (filterText == null || filterText.isEmpty()) {
             filterText = label;
         }
-        
+
         // check if the word matches the filterText
         if (fuzzyMatches.fuzzyMatch(word, filterText) != null) {
             // return the highlights based on the label
@@ -152,7 +150,7 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
             // return empty list of highlights if nothing matches the label
             return (highlights == null) ? new ArrayList<Match>() : highlights;
         }
-        
+
         return null;
     }
 
@@ -161,14 +159,14 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
         for (CompletionItemDTO item : latestCompletionResult.getCompletionList().getItems()) {
             List<Match> highlights = filter(currentWord, item);
             if (highlights != null) {
-                proposals.add(new CompletionItemBasedCompletionProposal(item, 
-                                                                        documentServiceClient,
-                                                                        latestCompletionResult.getDocumentId(),
-                                                                        resources, 
-                                                                        imageProvider.getIcon(item.getKind()), 
-                                                                        serverCapabilities,
-                                                                        highlights,
-                                                                        offset));
+                proposals.add(new CompletionItemBasedCompletionProposal(item,
+                        documentServiceClient,
+                        latestCompletionResult.getDocumentId(),
+                        resources,
+                        imageProvider.getIcon(item.getKind()),
+                        serverCapabilities,
+                        highlights,
+                        offset));
             }
         }
         callback.proposalComputed(proposals);

@@ -10,9 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.editor.orion.client;
 
-import com.google.gwt.core.client.Scheduler;
 import elemental.events.KeyboardEvent.KeyCode;
-
 import org.eclipse.che.ide.api.editor.annotation.AnnotationModel;
 import org.eclipse.che.ide.api.editor.annotation.HasAnnotationRendering;
 import org.eclipse.che.ide.api.editor.annotation.QueryAnnotationsEvent;
@@ -29,7 +27,12 @@ import org.eclipse.che.ide.api.editor.codeassist.CompletionsSource;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.document.DocumentHandle;
 import org.eclipse.che.ide.api.editor.editorconfig.TextEditorConfiguration;
-import org.eclipse.che.ide.api.editor.events.*;
+import org.eclipse.che.ide.api.editor.events.CompletionRequestEvent;
+import org.eclipse.che.ide.api.editor.events.CompletionRequestHandler;
+import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
+import org.eclipse.che.ide.api.editor.events.DocumentChangeHandler;
+import org.eclipse.che.ide.api.editor.events.TextChangeEvent;
+import org.eclipse.che.ide.api.editor.events.TextChangeHandler;
 import org.eclipse.che.ide.api.editor.formatter.ContentFormatter;
 import org.eclipse.che.ide.api.editor.keymap.KeyBinding;
 import org.eclipse.che.ide.api.editor.keymap.KeyBindingAction;
