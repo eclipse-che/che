@@ -4,9 +4,11 @@
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
 #
-# Contributors:
-#   Codenvy, S.A. - Initial implementation
+# build:
+#   docker build -t eclipse/che-lib .
 #
+# use:
+#    docker run -v /var/run/docker.sock:/var/run/docker.sock eclipse/che-lib [command]
 
 FROM mhart/alpine-node:6
 
@@ -29,4 +31,3 @@ RUN cd /lib-typescript/ && npm install \
     && cd /runtime && npm install && /lib-typescript/node_modules/.bin/tsc --project /lib-typescript/ \
     && mv /lib-typescript/lib /che-lib && cd /lib-typescript/src && find . -name "*.properties" -exec install -D {} /che-lib/{} \;\
     && rm -rf /lib-typescript && mv /runtime/node_modules /che-lib && rm -rf /runtime
-

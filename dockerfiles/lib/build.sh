@@ -5,7 +5,7 @@
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
 
-IMAGE_NAME="eclipse/che-lib-typescript"
+IMAGE_NAME="eclipse/che-lib"
 . $(cd "$(dirname "$0")"; pwd)/../build.include
 
 DIR=$(cd "$(dirname "$0")"; pwd)
