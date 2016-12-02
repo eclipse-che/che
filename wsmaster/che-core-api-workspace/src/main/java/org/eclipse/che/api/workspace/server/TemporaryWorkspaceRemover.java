@@ -46,7 +46,7 @@ public class TemporaryWorkspaceRemover {
 
 
     @PostConstruct
-    public void initialize() {
+    void initialize() {
         try {
             removeTemporaryWs();
         } catch (ServerException | ConflictException e) {
@@ -55,7 +55,7 @@ public class TemporaryWorkspaceRemover {
     }
 
     @PreDestroy
-    public void shutdown() {
+    void shutdown() {
         try {
             removeTemporaryWs();
         } catch (ServerException | ConflictException e) {
