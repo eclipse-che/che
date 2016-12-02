@@ -60,7 +60,10 @@ import java.util.Objects;
                 @NamedQuery(name = "Workspace.getByName",
                             query = "SELECT w FROM Workspace w WHERE w.account.name = :namespace AND w.name = :name"),
                 @NamedQuery(name = "Workspace.getAll",
-                            query = "SELECT w FROM Workspace w")
+                            query = "SELECT w FROM Workspace w"),
+                @NamedQuery(name = "Workspace.getByTemporary",
+                            query = "SELECT w FROM Workspace w WHERE w.isTemporary = :temporary")
+
         }
 )
 @EntityListeners({WorkspaceEntityListener.class, WorkspaceImpl.SyncNameOnUpdateAndPersistEventListener.class})

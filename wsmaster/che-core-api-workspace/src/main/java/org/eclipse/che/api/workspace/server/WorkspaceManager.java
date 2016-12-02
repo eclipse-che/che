@@ -698,9 +698,7 @@ public class WorkspaceManager {
             }
             try {
                 runtimes.stop(workspace.getId());
-                if (workspace.isTemporary()) {
-                    workspaceDao.remove(workspace.getId());
-                } else {
+                if (!workspace.isTemporary()) {
                     workspace.getAttributes().put(UPDATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
                     workspaceDao.update(workspace);
                 }
@@ -711,6 +709,15 @@ public class WorkspaceManager {
                          firstNonNull(stoppedBy, "undefined"));
             } catch (RuntimeException | ConflictException | NotFoundException | ServerException ex) {
                 LOG.error(ex.getLocalizedMessage(), ex);
+            } finally {
+                // Remove tmp workspaces even if stop is failed
+                if (workspace.isTemporary()) {
+                    try {
+                        workspaceDao.remove(workspace.getId());
+                    } catch (ConflictException | ServerException e) {
+                        LOG.error("Unable to remove temporary workspace {} after stop.", workspace.getId());
+                    }
+                }
             }
         }));
     }

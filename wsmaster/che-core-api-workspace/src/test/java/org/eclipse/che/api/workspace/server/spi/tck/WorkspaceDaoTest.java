@@ -189,6 +189,38 @@ public class WorkspaceDaoTest {
         workspaceDao.get(workspace.getId());
     }
 
+
+    @Test
+    public void shouldGetWorkspacesByNonTemporary() throws Exception {
+        List<WorkspaceImpl> result = workspaceDao.getWorkspaces(false, 0, 2);
+
+        assertEquals(result.size(), 2);
+        assertEquals(new HashSet<>(result), new HashSet<>(asList(workspaces[0], workspaces[1])));
+    }
+
+    @Test
+    public void shouldGetWorkspacesByTemporary() throws Exception {
+        final WorkspaceImpl workspace = workspaces[0];
+        workspace.setTemporary(true);
+        workspaceDao.update(workspace);
+
+        List<WorkspaceImpl> result = workspaceDao.getWorkspaces(true, 0, 0);
+
+        assertEquals(result.size(), 1);
+        assertEquals(result.iterator().next(), workspaceDao.get(workspace.getId()));
+    }
+
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void shouldThrowIllegalStateExceptionOnNegativeLimit() throws Exception {
+        workspaceDao.getWorkspaces(true, 0, -2);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void shouldThrowIllegalStateExceptionOnNegativeSkipCount() throws Exception {
+        workspaceDao.getWorkspaces(true, -2, 0);
+    }
+
     @Test
     public void shouldPublicRemoveWorkspaceEventAfterRemoveWorkspace() throws Exception {
         final boolean[] isNotified = new boolean[] {false};
