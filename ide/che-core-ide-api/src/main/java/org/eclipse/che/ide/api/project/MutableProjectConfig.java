@@ -12,11 +12,10 @@ package org.eclipse.che.ide.api.project;
 
 import com.google.common.annotations.Beta;
 
+import org.eclipse.che.api.core.model.project.NewProjectConfig;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.model.project.SourceStorage;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +36,7 @@ public class MutableProjectConfig implements ProjectConfig {
     private Map<String, List<String>> attributes;
     private MutableSourceStorage      sourceStorage;
     private Map<String, String>       options;
+    private List<NewProjectConfig>    projects;
 
     public MutableProjectConfig(ProjectConfig source) {
         name = source.getName();
@@ -90,7 +90,7 @@ public class MutableProjectConfig implements ProjectConfig {
     @Override
     public List<String> getMixins() {
         if (mixins == null) {
-            mixins = new ArrayList<>();
+            mixins = newArrayList();
         }
 
         return mixins;
@@ -128,13 +128,35 @@ public class MutableProjectConfig implements ProjectConfig {
 
     public Map<String, String> getOptions() {
         if (options == null) {
-            options = new HashMap<>();
+            options = newHashMap();
         }
         return options;
     }
 
     public void setOptions(Map<String, String> options) {
         this.options = options;
+    }
+
+    /**
+     * Returns the list of configurations to creating projects
+     *
+     * @return the list of {@link NewProjectConfig} to creating projects
+     */
+    public List<NewProjectConfig> getProjects() {
+        if (projects == null) {
+            return newArrayList();
+        }
+        return projects;
+    }
+
+    /**
+     * Sets the list of configurations to creating projects
+     *
+     * @param projects
+     *         the list of {@link NewProjectConfig} to creating projects
+     */
+    public void setProjects(List<NewProjectConfig> projects) {
+        this.projects = projects;
     }
 
     public class MutableSourceStorage implements SourceStorage {

@@ -14,6 +14,7 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.project.NewProjectConfig;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
@@ -181,15 +182,12 @@ public class ProjectRegistry {
      *         whether this is automatically detected or explicitly defined project
      * @return project
      * @throws ServerException
-     * @throws ConflictException
-     * @throws NotFoundException
+     *         when path for project is undefined
      */
     RegisteredProject putProject(ProjectConfig config,
                                  FolderEntry folder,
                                  boolean updated,
-                                 boolean detected) throws ServerException,
-                                                          ConflictException,
-                                                          NotFoundException {
+                                 boolean detected) throws ServerException {
 
         final RegisteredProject project = new RegisteredProject(folder, config, updated, detected, this.projectTypeRegistry);
         projects.put(project.getPath(), project);
@@ -223,8 +221,7 @@ public class ProjectRegistry {
      * Attributes defined with particular Project Type
      * If incoming Project Type is primary and:
      * - If the folder located on projectPath is a Project, its Primary PT will be converted to incoming PT
-     * - If the folder located on projectPath is NOT a Project the folder will be converted to "detected" Project
-     * with incoming Primary PT
+     * - If the folder located on projectPath is NOT a Project the folder will be converted to "detected" Project with incoming Primary PT
      * If incoming Project Type is mixin and:
      * - If the folder located on projectPath is a Project, this PT will be added (if not already there) to its Mixin PTs
      * - If the folder located on projectPath is NOT a Project - ConflictException will be thrown
@@ -268,7 +265,7 @@ public class ProjectRegistry {
                 final String path = absolutizePath(projectPath);
                 final String name = Path.of(projectPath).getName();
 
-                conf = new NewProjectConfig(path, type, newMixins, name, name, null, null);
+                conf = new NewProjectConfigImpl(path, type, newMixins, name, name, null, null, null);
 
                 return putProject(conf, root.getChildFolder(path), true, true);
             }
@@ -283,12 +280,13 @@ public class ProjectRegistry {
                 newType = type;
             }
 
-            conf = new NewProjectConfig(project.getPath(),
+            conf = new NewProjectConfigImpl(project.getPath(),
                                         newType,
                                         newMixins,
                                         project.getName(),
                                         project.getDescription(),
                                         project.getAttributes(),
+                                        null,
                                         project.getSource());
 
             return putProject(conf, project.getBaseFolder(), true, project.isDetected());
@@ -339,12 +337,13 @@ public class ProjectRegistry {
             newType = BaseProjectType.ID;
         }
 
-        final NewProjectConfig conf = new NewProjectConfig(project.getPath(),
+        final NewProjectConfig conf = new NewProjectConfigImpl(project.getPath(),
                                                            newType,
                                                            newMixins,
                                                            project.getName(),
                                                            project.getDescription(),
                                                            project.getAttributes(),
+                                                           null,
                                                            project.getSource());
 
         return putProject(conf, project.getBaseFolder(), true, project.isDetected());
@@ -367,7 +366,7 @@ public class ProjectRegistry {
                     putProject(null, folder, true, false);
                 }
             }
-        } catch (ServerException | ConflictException | NotFoundException e) {
+        } catch (ServerException e) {
             LOG.warn(e.getLocalizedMessage());
         }
     }
