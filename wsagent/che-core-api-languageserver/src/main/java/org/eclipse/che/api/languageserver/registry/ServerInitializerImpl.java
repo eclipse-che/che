@@ -22,6 +22,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.messager.PublishDiagnosticsParamsMessenger;
+import org.eclipse.che.api.languageserver.messager.ShowMessageMessenger;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +36,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 /**
  * @author Anatoliy Bazko
@@ -48,16 +50,19 @@ public class ServerInitializerImpl implements ServerInitializer {
 
     private final List<ServerInitializerObserver>   observers;
     private final PublishDiagnosticsParamsMessenger publishDiagnosticsParamsMessenger;
-
+    private final ShowMessageMessenger showMessageMessenger;
+    
     private final ConcurrentHashMap<String, LanguageServer>           languageIdToServers;
     private final ConcurrentHashMap<LanguageServer, LanguageServerDescription> serversToInitResult;
 
     @Inject
-    public ServerInitializerImpl(PublishDiagnosticsParamsMessenger publishDiagnosticsParamsMessenger) {
+    public ServerInitializerImpl(final PublishDiagnosticsParamsMessenger publishDiagnosticsParamsMessenger,
+    		final ShowMessageMessenger showMessageMessenger) {
         this.observers = new ArrayList<>();
         this.languageIdToServers = new ConcurrentHashMap<>();
         this.serversToInitResult = new ConcurrentHashMap<>();
         this.publishDiagnosticsParamsMessenger = publishDiagnosticsParamsMessenger;
+        this.showMessageMessenger = showMessageMessenger;
     }
 
     private static int getProcessId() {
@@ -137,7 +142,8 @@ public class ServerInitializerImpl implements ServerInitializer {
 
     protected void registerCallbacks(LanguageServer server) {
         server.getTextDocumentService().onPublishDiagnostics(publishDiagnosticsParamsMessenger::onEvent);
-        server.getWindowService().onLogMessage(messageParams -> LOG.error(messageParams.getType() + " " + messageParams.getMessage()));
+		server.getWindowService().onLogMessage(messageParams -> LOG.error(messageParams.getType() + " " + messageParams.getMessage()));
+		server.getWindowService().onShowMessage(showMessageMessenger::onEvent);
         server.onTelemetryEvent(o -> LOG.error(o.toString()));
         
         if (server instanceof ServerInitializerObserver) {
