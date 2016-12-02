@@ -64,7 +64,7 @@ public class RequestDispatcher {
         LOG.debug("Extracted request method: " + method);
 
         final RequestHandler handler = handlers.get(method);
-        if(handler == null) {
+        if (handler == null) {
             LOG.error("Handler not found: " + method);
             // TODO make a centralized standard errors structure
             transmitter.transmit(endpointId, error(-32601, "Method not found: " + method));
@@ -100,24 +100,24 @@ public class RequestDispatcher {
                                        Class<P> paramClass,
                                        Class<R> resultClass) {
 
-        R result;
+        final R result;
 
-        if(paramClass != null) {
+        if (paramClass != null) {
             final P param = DtoFactory.getInstance().createDtoFromJson(params.toString(), paramClass);
             result = handler.handleRequest(endpointId, param);
         } else {
             result = handler.handleRequest(endpointId);
         }
 
-        LOG.debug("Dispatch response: " + result);
+        LOG.debug("Dispatch response: ", result);
 
-        if(result instanceof Void)
+        if (result instanceof Void)
             return new JsonObject();
-        else if(result instanceof String) {
+        else if (result instanceof String) {
             JsonObject response = new JsonObject();
             response.addProperty("text", (String)result);
             return response;
-        } else if(result instanceof Collection) {   // list of DTO objects
+        } else if (result instanceof Collection) {   // list of DTO objects
             JsonArray valueArray = new JsonArray();
             ((Collection)result).stream().filter(r -> r instanceof JsonSerializable).forEach(r -> {
                 String resultString = DtoFactory.getInstance().toJson(r);
