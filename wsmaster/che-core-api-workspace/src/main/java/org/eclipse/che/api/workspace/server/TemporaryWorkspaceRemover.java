@@ -72,8 +72,8 @@ public class TemporaryWorkspaceRemover {
             for (WorkspaceImpl workspace : workspaces) {
                 try {
                     workspaceDao.remove(workspace.getId());
-                } catch (ServerException | ConflictException ignored) {
-                    // continue trying do delete others
+                } catch (ServerException | ConflictException e) {
+                    LOG.error("Unable to cleanup temporary workspace " + workspace.getId(), e);
                 }
             }
             skip = skip + count;
