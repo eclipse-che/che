@@ -42,6 +42,9 @@ import {CreateProjectStackLibraryController} from './workspace-details/select-st
 import {CreateProjectStackLibrary} from './workspace-details/select-stack/stack-library/create-project-stack-library.directive';
 import {WorkspaceSelectStackController} from './workspace-details/select-stack/workspace-select-stack.controller';
 import {WorkspaceSelectStack} from './workspace-details/select-stack/workspace-select-stack.directive';
+import {StackSelectorController} from './workspace-details/stack-selector/stack-selector.controller';
+import {StackSelector} from './workspace-details/stack-selector/stack-selector.directive';
+import {StackSelectorItem} from './workspace-details/stack-selector/stack-selector-item.directive';
 
 import {CheWorkspaceRamAllocationSliderController} from './workspace-ram-slider/che-workspace-ram-allocation-slider.controller';
 import {CheWorkspaceRamAllocationSlider} from './workspace-ram-slider/che-workspace-ram-allocation-slider.directive';
@@ -75,6 +78,8 @@ import {EditCommandDialogController} from  './workspace-details/list-commands/ed
 import {ListAgentsController} from  './workspace-details/environments/list-agents/list-agents.controller';
 import {AddMachineDialogController} from  './workspace-details/environments/add-machine-dialog/add-machine-dialog.controller';
 import {ListAgents} from  './workspace-details/environments/list-agents/list-agents.directive';
+import {StackSelectorScopeFilter} from './workspace-details/stack-selector/stack-selector-scope.filter';
+import {StackSelectorSearchFilter} from './workspace-details/stack-selector/stack-selector-search.filter';
 
 
 /**
@@ -85,9 +90,11 @@ import {ListAgents} from  './workspace-details/environments/list-agents/list-age
  */
 export class WorkspacesConfig {
 
-  constructor(register) {
+  constructor(register: che.IRegisterService) {
 
     new CreateProjectStackLibrarySelectedStackFilter(register);
+    new StackSelectorScopeFilter(register);
+    new StackSelectorSearchFilter(register);
 
     register.controller('WorkspaceDetailsSshCtrl', WorkspaceDetailsSshCtrl);
     register.directive('workspaceDetailsSsh', WorkspaceDetailsSsh);
@@ -141,6 +148,10 @@ export class WorkspacesConfig {
     register.controller('WorkspaceSelectStackController', WorkspaceSelectStackController);
     register.directive('cheWorkspaceSelectStack', WorkspaceSelectStack);
 
+    register.controller('StackSelectorController', StackSelectorController);
+    register.directive('stackSelector', StackSelector);
+    register.directive('stackSelectorItem', StackSelectorItem);
+
     register.controller('CheStackLibraryFilterController', CheStackLibraryFilterController);
     register.directive('cheStackLibraryFilter', CheStackLibraryFilter);
 
@@ -176,7 +187,7 @@ export class WorkspacesConfig {
     };
 
     // config routes
-    register.app.config(function ($routeProvider) {
+    register.app.config(function ($routeProvider: ng.route.IRouteProvider) {
       $routeProvider.accessWhen('/workspaces', {
         title: 'Workspaces',
         templateUrl: 'app/workspaces/list-workspaces/list-workspaces.html',

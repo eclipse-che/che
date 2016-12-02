@@ -52,6 +52,8 @@ declare namespace _che {
   }
 
   export interface IStack {
+    id: string;
+    links: Array<IStackLink>;
     name: string;
     description: string;
     projects: Array<any>;
@@ -59,7 +61,14 @@ declare namespace _che {
     scope: string;
     components: Array<any>;
     source: any;
-    workspaceConfig: IWorkspace;
+    workspaceConfig: IWorkspaceConfig;
+  }
+
+  export interface IStackLink {
+    href: string;
+    method: string;
+    rel: string;
+    parameters: any[];
   }
 
   export interface IWorkspace {
