@@ -1,7 +1,7 @@
 {
-  "name": "che-typescript",
+  "name": "che-cli-library",
   "version": "1.0.0",
-  "description": "TypeScript library used in dockerfiles",
+  "description": "CLI library used in dockerfiles",
   "main": "lib/index.js",
   "author": "Florent Benoit",
   "license": "EPL-1.0",

@@ -13,7 +13,7 @@ set -u
 init
 
 # loop on all libraries first
-for directory in lib-*/ ; do
+for directory in lib*/ ; do
   if [[ -e ${directory}/build.sh ]] ; then
    echo "Call buid.sh from ${directory}"
    ${directory}build.sh "$@"
