@@ -73,7 +73,7 @@ public class TemporaryWorkspaceRemover {
                 try {
                     workspaceDao.remove(workspace.getId());
                 } catch (ServerException | ConflictException e) {
-                    LOG.error("Unable to cleanup temporary workspace " + workspace.getId(), e);
+                    LOG.error("Unable to cleanup temporary workspace {}. Reason is {}",workspace.getId(), e.getLocalizedMessage());
                 }
             }
             skip = skip + count;
