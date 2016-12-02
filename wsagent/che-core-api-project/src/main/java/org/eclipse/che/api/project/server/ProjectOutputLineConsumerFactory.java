@@ -15,7 +15,7 @@ import org.eclipse.che.api.core.util.LineConsumerFactory;
 import org.eclipse.che.api.project.server.importer.ProjectImportOutputWSLineConsumer;
 
 /**
- * LineConsumerFactory dedicated to project related operations long output
+ * {@link LineConsumerFactory} dedicated to project related operations long output
  * extended standard factory with setProjectName method to make it possible
  * change it runtime inside ProjectManager
  *
@@ -23,9 +23,9 @@ import org.eclipse.che.api.project.server.importer.ProjectImportOutputWSLineCons
  */
 public class ProjectOutputLineConsumerFactory implements LineConsumerFactory {
 
-    private String projectName;
+    private       String projectName;
     private final String workspaceId;
-    private final int delay;
+    private final int    delay;
 
     public ProjectOutputLineConsumerFactory(String projectName, String workspaceId, int delay) {
         this.projectName = projectName;

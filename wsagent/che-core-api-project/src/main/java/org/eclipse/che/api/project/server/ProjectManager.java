@@ -493,10 +493,6 @@ public final class ProjectManager {
                                                sourceStorage.getLocation(), sourceStorage.getType()));
         }
 
-        // Preparing websocket output publisher to broadcast output of import process to the ide clients while importing
-//        final LineConsumerFactory outputOutputConsumerFactory =
-//                () -> new ProjectImportOutputWSLineConsumer(path, workspaceProjectsHolder.getWorkspaceId(), 300);
-
         String normalizePath = (path.startsWith("/")) ? path : "/".concat(path);
         FolderEntry folder = asFolder(normalizePath);
         if (folder != null && !rewrite) {

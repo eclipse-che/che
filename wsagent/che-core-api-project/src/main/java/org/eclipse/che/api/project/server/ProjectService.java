@@ -232,7 +232,6 @@ public class ProjectService extends Service {
 
         List<ProjectConfigDto> result = new ArrayList<>(projectConfigList.size());
         final ProjectOutputLineConsumerFactory outputOutputConsumerFactory = new ProjectOutputLineConsumerFactory(workspace, 300);
-//                () -> new ProjectImportOutputWSLineConsumer("BATCH", workspace, 300);
 
         for (RegisteredProject registeredProject : projectManager.createBatchProjects(projectConfigList, rewrite, outputOutputConsumerFactory)) {
 
