@@ -715,7 +715,7 @@ public class WorkspaceManager {
                     try {
                         workspaceDao.remove(workspace.getId());
                     } catch (ConflictException | ServerException e) {
-                        LOG.error("Unable to remove temporary workspace {} after it's stop.", workspace.getId());
+                        LOG.error("Unable to remove temporary workspace {} after stop.", workspace.getId());
                     }
                 }
             }

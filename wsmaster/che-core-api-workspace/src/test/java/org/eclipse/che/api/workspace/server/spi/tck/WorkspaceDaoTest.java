@@ -210,6 +210,17 @@ public class WorkspaceDaoTest {
         assertEquals(result.iterator().next(), workspaceDao.get(workspace.getId()));
     }
 
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void shouldThrowIllegalStateExceptionOnNegativeLimit() throws Exception {
+        workspaceDao.getWorkspaces(true, 0, -2);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void shouldThrowIllegalStateExceptionOnNegativeSkipCount() throws Exception {
+        workspaceDao.getWorkspaces(true, -2, 0);
+    }
+
     @Test
     public void shouldPublicRemoveWorkspaceEventAfterRemoveWorkspace() throws Exception {
         final boolean[] isNotified = new boolean[] {false};
