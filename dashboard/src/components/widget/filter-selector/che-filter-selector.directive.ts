@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,11 +23,8 @@ export class CheFilterSelector {
   private controllerAs: string = 'cheFilterSelectorController';
   private require: Array<string> = ['ngModel'];
 
-  private scope: any = {
-    valueModel: '=ngModel',
-    values: '=cheValues',
-    isDisabled: '=cheDisabled',
-    onChange: '=cheOnChange'
+  private scope: {
+    [propName: string]: string
   };
 
   /**
@@ -35,6 +32,11 @@ export class CheFilterSelector {
    * @ngInject for Dependency injection
    */
   constructor() {
+    this.scope = {
+      valueModel: '=ngModel',
+      values: '=cheValues',
+      isDisabled: '=cheDisabled',
+      onChange: '=cheOnChange'
+    };
   }
-
 }

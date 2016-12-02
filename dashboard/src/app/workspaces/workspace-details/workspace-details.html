@@ -62,8 +62,7 @@
           </che-label-container>
           <!-- Namespace -->
           <che-label-container che-label-name="Team" ng-if="workspaceDetailsController.getNamespaces().length > 0">
-            <che-toggle ng-if="workspaceDetailsController.isCreationFlow" ng-model="workspaceDetailsController.workspaceNamespace" layout="row"
-                        ng-init="workspaceDetailsController.workspaceNamespace = workspaceDetailsController.getNamespaces()[0]">
+            <che-toggle ng-if="workspaceDetailsController.isCreationFlow" ng-model="workspaceDetailsController.workspaceNamespace" layout="row">
               <che-toggle-button ng-repeat="namespace in workspaceDetailsController.getNamespaces()"
                                  che-title="{{namespace}}" class="namespace-button">
               </che-toggle-button>

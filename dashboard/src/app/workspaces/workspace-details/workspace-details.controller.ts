@@ -117,6 +117,7 @@ export class WorkspaceDetailsController {
 
   init(): void {
     let routeParams = this.$route.current.params;
+    this.workspaceNamespace = this.$location.search().namespace || (this.getNamespaces() ? this.getNamespaces()[0] : undefined);
     if (routeParams && routeParams.namespace && routeParams.workspaceName) {
       this.isCreationFlow = false;
       this.namespace = routeParams.namespace;
