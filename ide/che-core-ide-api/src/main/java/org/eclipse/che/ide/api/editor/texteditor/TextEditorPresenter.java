@@ -853,6 +853,7 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
         return this.editorWidget;
     }
 
+    @Override
     public boolean isFocused() {
         return this.isFocused;
     }
