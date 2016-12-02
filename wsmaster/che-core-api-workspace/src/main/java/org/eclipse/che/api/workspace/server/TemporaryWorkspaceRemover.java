@@ -49,7 +49,7 @@ public class TemporaryWorkspaceRemover {
     void initialize() {
         try {
             removeTemporaryWs();
-        } catch (ServerException | ConflictException e) {
+        } catch (ServerException e) {
             LOG.warn("Unable to cleanup temporary workspaces on startup: " + e.getLocalizedMessage(), e);
         }
     }
@@ -58,19 +58,23 @@ public class TemporaryWorkspaceRemover {
     void shutdown() {
         try {
             removeTemporaryWs();
-        } catch (ServerException | ConflictException e) {
+        } catch (ServerException e) {
             LOG.warn("Unable to cleanup temporary workspaces on shutdown: " + e.getLocalizedMessage(), e);
         }
     }
 
     @VisibleForTesting
-    void removeTemporaryWs() throws ServerException, ConflictException {
+    void removeTemporaryWs() throws ServerException {
         final int count = 100;
         int skip = 0;
         List<WorkspaceImpl> workspaces = workspaceDao.getWorkspaces(true, skip, count);
         while (!workspaces.isEmpty()) {
             for (WorkspaceImpl workspace : workspaces) {
-                workspaceDao.remove(workspace.getId());
+                try {
+                    workspaceDao.remove(workspace.getId());
+                } catch (ServerException | ConflictException ignored) {
+                    // continue trying do delete others
+                }
             }
             skip = skip + count;
             workspaces = workspaceDao.getWorkspaces(true, skip, count);

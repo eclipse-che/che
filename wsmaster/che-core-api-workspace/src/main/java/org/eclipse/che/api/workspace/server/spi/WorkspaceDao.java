@@ -154,9 +154,11 @@ public interface WorkspaceDao {
      *         the number of workspaces to skip
      * @param maxItems
      *         the maximum number of workspaces to return
-     * @return list of workspaces
+     * @return list of workspaces or empty list if no workspaces were found
      * @throws ServerException
      *         when any other error occurs during workspaces fetching
+     * @throws IllegalArgumentException
+     *         when {@code maxItems} or {@code skipCount} is negative
      */
     List<WorkspaceImpl> getWorkspaces(boolean isTemporary, int skipCount, int maxItems) throws ServerException;
 }
