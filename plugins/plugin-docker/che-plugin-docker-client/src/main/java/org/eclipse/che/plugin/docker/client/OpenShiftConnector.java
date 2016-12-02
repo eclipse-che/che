@@ -21,7 +21,13 @@ import com.openshift.restclient.IClient;
 import com.openshift.restclient.IResourceFactory;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.images.DockerImageURI;
-import com.openshift.restclient.model.*;
+import com.openshift.restclient.model.IDeploymentConfig;
+import com.openshift.restclient.model.IPod;
+import com.openshift.restclient.model.IPort;
+import com.openshift.restclient.model.IProject;
+import com.openshift.restclient.model.IReplicationController;
+import com.openshift.restclient.model.IService;
+import com.openshift.restclient.model.IServicePort;
 import com.openshift.restclient.model.deploy.DeploymentTriggerType;
 import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
@@ -68,13 +74,13 @@ public class OpenShiftConnector {
     private final String             cheOpenShiftServiceAccount;
 
     public final Map<Integer, String> servicePortNames = ImmutableMap.<Integer, String>builder().
-                                                                put(22, "sshd").
-                                                                put(4401, "wsagent").
-                                                                put(4403, "wsagent-jpda").
-                                                                put(4411, "terminal").
-                                                                put(8080, "tomcat").
-                                                                put(8000, "tomcat-jpda").
-                                                                put(9876, "codeserver").build();
+            put(22, "sshd").
+            put(4401, "wsagent").
+            put(4403, "wsagent-jpda").
+            put(4411, "terminal").
+            put(8080, "tomcat").
+            put(8000, "tomcat-jpda").
+            put(9876, "codeserver").build();
 
     @Inject
     public OpenShiftConnector(@Named("che.openshift.endpoint") String openShiftApiEndpoint,
@@ -109,6 +115,7 @@ public class OpenShiftConnector {
         exposedPorts.addAll(imageExposedPorts);
 
         String[] envVariables = createContainerParams.getContainerConfig().getEnv();
+        String[] volumes = createContainerParams.getContainerConfig().getHostConfig().getBinds();
 
         IProject cheProject = getCheProject();
         createOpenShiftService(cheProject, workspaceID, exposedPorts);
@@ -117,7 +124,8 @@ public class OpenShiftConnector {
                                                                       imageName,
                                                                       containerName,
                                                                       exposedPorts,
-                                                                      envVariables);
+                                                                      envVariables,
+                                                                      volumes);
 
         String containerID = waitAndRetrieveContainerID(cheProject, deploymentConfigName);
         if (containerID == null) {
@@ -269,7 +277,8 @@ public class OpenShiftConnector {
                                                    String imageName,
                                                    String sanitizedContaninerName,
                                                    Set<String> exposedPorts,
-                                                   String[] envVariables) {
+                                                   String[] envVariables,
+                                                   String[] volumes) {
         String dcName = CHE_OPENSHIFT_RESOURCES_PREFIX + workspaceID;
         LOG.info(String.format("Creating OpenShift deploymentConfig %s", dcName));
         IDeploymentConfig dc = openShiftFactory.create(OPENSHIFT_API_VERSION, ResourceKind.DEPLOYMENT_CONFIG);
@@ -283,7 +292,7 @@ public class OpenShiftConnector {
         dc.setServiceAccountName(this.cheOpenShiftServiceAccount);
 
         LOG.info(String.format("Adding container %s to OpenShift deploymentConfig %s", sanitizedContaninerName, dcName));
-        addContainer(dc, workspaceID, imageName, sanitizedContaninerName, exposedPorts, envVariables);
+        addContainer(dc, workspaceID, imageName, sanitizedContaninerName, exposedPorts, envVariables, volumes);
 
         dc.addTrigger(DeploymentTriggerType.CONFIG_CHANGE);
         openShiftClient.create(dc);
@@ -291,7 +300,7 @@ public class OpenShiftConnector {
         return dc.getName();
     }
 
-    private void addContainer(IDeploymentConfig dc, String workspaceID, String imageName, String containerName, Set<String> exposedPorts, String[] envVariables) {
+    private void addContainer(IDeploymentConfig dc, String workspaceID, String imageName, String containerName, Set<String> exposedPorts, String[] envVariables, String[] volumes) {
         Set<IPort> containerPorts = getContainerPortsFrom(exposedPorts);
         Map<String, String> containerEnv = getContainerEnvFrom(envVariables);
         dc.addContainer(containerName,
@@ -311,6 +320,44 @@ public class OpenShiftConnector {
         dcFirstContainer.get("livenessProbe").get("tcpSocket").get("port").set(4401);
         dcFirstContainer.get("livenessProbe").get("initialDelaySeconds").set(120);
         dcFirstContainer.get("livenessProbe").get("timeoutSeconds").set(1);
+
+        // Add volumes
+        for (String volume : volumes) {
+            String hostPath = volume.split(":",3)[0];
+            String mountPath = volume.split(":",3)[1];
+            String volumName = getVolumeName(volume);
+            addVolume((DeploymentConfig)dc, "ws-" + workspaceID + "-" + volumName, hostPath, mountPath);
+        }
+    }
+
+    private String getVolumeName(String volume) {
+        if ( volume.contains("ws-agent") ) {
+            return "wsagent-lib";
+        }
+
+        if ( volume.contains("terminal") ) {
+            return "terminal";
+        }
+
+        if ( volume.contains("workspaces") ) {
+            return "project";
+        }
+
+        return "unknown-volume";
+    }
+
+    private void addVolume(DeploymentConfig dc, String name, String hostPath, String mountPath) {
+        ModelNode dcVolume = dc.getNode().get("spec").get("template").get("spec").get("volumes").add();
+
+        //ModelNode dcFirstVolume = dc.getNode().get("spec").get("template").get("spec").get("volumes").get(0);
+        dcVolume.get("name").set(name);
+        dcVolume.get("hostPath").get("path").set(hostPath);
+
+        ModelNode dcFirstContainer = dc.getNode().get("spec").get("template").get("spec").get("containers").get(0);
+        ModelNode volumeMount = dcFirstContainer.get("volumeMounts").add();
+        //ModelNode firstVolumeMount = dcFirstContainer.get("volumeMounts").get(0);
+        volumeMount.get("name").set(name);
+        volumeMount.get("mountPath").set(mountPath);
     }
 
     private String waitAndRetrieveContainerID(IProject cheproject, String deploymentConfigName) {
