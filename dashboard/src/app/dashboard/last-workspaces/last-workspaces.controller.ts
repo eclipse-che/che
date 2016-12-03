@@ -9,6 +9,8 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {CheWorkspace} from '../../../components/api/che-workspace.factory';
+import {CheNotification} from '../../../components/notification/che-notification.factory';
 
 /**
  * @ngdoc controller
@@ -17,38 +19,49 @@
  * @author Oleksii Orel
  */
 export class DashboardLastWorkspacesController {
-
+  cheWorkspace: CheWorkspace;
+  cheNotification: CheNotification;
+  workspaces: Array<che.IWorkspace>;
+  isLoading: boolean;
 
   /**
    * Default constructor
    * @ngInject for Dependency injection
    */
-  constructor(cheWorkspace) {
+  constructor(cheWorkspace: CheWorkspace, cheNotification: CheNotification) {
     this.cheWorkspace = cheWorkspace;
+    this.cheNotification = cheNotification;
 
-    this.state = 'loading';
     this.workspaces = cheWorkspace.getWorkspaces();
 
-    // fetch workspaces when initializing
-    let promise = cheWorkspace.fetchWorkspaces();
+    if (this.workspaces.length === 0) {
+      this.updateData();
+    }
+  }
+
+  /**
+   * Update workspaces
+   */
+  updateData(): void {
+    this.isLoading = true;
+    let promise = this.cheWorkspace.fetchWorkspaces();
 
     promise.then(() => {
-        this.state = 'OK';
-      },
-      (error) => {
-        if (error.status === 304) {
-          // ok
-          this.state = 'OK';
-          return;
-        }
-        this.state = 'error';
-      });
-
+      this.isLoading = false;
+    }, (error: any) => {
+      this.isLoading = false;
+      if (error.status === 304) {
+        return;
+      }
+      this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Update workspaces failed.');
+    });
   }
 
-  getWorkspaces() {
+  /**
+   * Returns workspaces
+   * @returns {Array<che.IWorkspace>}
+   */
+  getWorkspaces(): Array<che.IWorkspace> {
     return this.workspaces;
   }
-
-
 }
