@@ -29,8 +29,11 @@ import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IService;
 import com.openshift.restclient.model.IServicePort;
 import com.openshift.restclient.model.deploy.DeploymentTriggerType;
+
+import org.apache.commons.lang.RandomStringUtils;
 import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
+import org.eclipse.che.plugin.docker.client.json.ImageConfig;
 import org.eclipse.che.plugin.docker.client.json.PortBinding;
 import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
@@ -43,7 +46,6 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.IOException;
 import java.util.*;
-import java.util.regex.Matcher;
 import java.util.stream.Stream;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -67,6 +69,9 @@ public class OpenShiftConnector {
     public static final String CHE_DEFAULT_EXTERNAL_ADDRESS = "172.17.0.1";
     public static final String CHE_SERVER_INTERNAL_IP_ADB = "172.17.0.5";
     public static final String CHE_CONTAINER_IDENTIFIER_LABEL_KEY = "cheContainerIdentifier";
+    public static final String UID_ROOT = "0";
+    public static final String UID_USER = "1000";
+    public static final int CHE_WORKSPACE_AGENT_PORT = 4401;
 
     private final IClient            openShiftClient;
     private final IResourceFactory   openShiftFactory;
@@ -107,12 +112,16 @@ public class OpenShiftConnector {
 
         String containerName = getNormalizedContainerName(createContainerParams);
         String workspaceID = getCheWorkspaceId(createContainerParams);
+        // Generate workspaceID if CHE_WORKSPACE_ID env var does not exist
+        workspaceID = workspaceID.isEmpty() ? generateWorkspaceID() : workspaceID;
         String imageName = createContainerParams.getContainerConfig().getImage();//"mariolet/che-ws-agent";//"172.30.166.244:5000/eclipse-che/che-ws-agent:latest";//
         Set<String> containerExposedPorts = createContainerParams.getContainerConfig().getExposedPorts().keySet();
         Set<String> imageExposedPorts = docker.inspectImage(imageName).getConfig().getExposedPorts().keySet();
         Set<String> exposedPorts = new HashSet<>();
         exposedPorts.addAll(containerExposedPorts);
         exposedPorts.addAll(imageExposedPorts);
+
+        boolean runContainerAsRoot = runContainerAsRoot(docker, imageName);
 
         String[] envVariables = createContainerParams.getContainerConfig().getEnv();
         String[] volumes = createContainerParams.getContainerConfig().getHostConfig().getBinds();
@@ -125,7 +134,8 @@ public class OpenShiftConnector {
                                                                       containerName,
                                                                       exposedPorts,
                                                                       envVariables,
-                                                                      volumes);
+                                                                      volumes,
+                                                                      runContainerAsRoot);
 
         String containerID = waitAndRetrieveContainerID(cheProject, deploymentConfigName);
         if (containerID == null) {
@@ -278,21 +288,20 @@ public class OpenShiftConnector {
                                                    String sanitizedContaninerName,
                                                    Set<String> exposedPorts,
                                                    String[] envVariables,
-                                                   String[] volumes) {
+                                                   String[] volumes,
+                                                   boolean runContainerAsRoot) {
         String dcName = CHE_OPENSHIFT_RESOURCES_PREFIX + workspaceID;
         LOG.info(String.format("Creating OpenShift deploymentConfig %s", dcName));
         IDeploymentConfig dc = openShiftFactory.create(OPENSHIFT_API_VERSION, ResourceKind.DEPLOYMENT_CONFIG);
         ((DeploymentConfig) dc).setName(dcName);
         ((DeploymentConfig) dc).setNamespace(cheProject.getName());
-//        ((DeploymentConfig) dc).getNode().get("spec").get("template").get("spec").get("dnsPolicy").set("Default");
-        ((DeploymentConfig)dc).getNode().get("spec").get("template").get("spec").get("securityContext").get("runAsUser").set("1000");
 
         dc.setReplicas(1);
         dc.setReplicaSelector("deploymentConfig", dcName);
         dc.setServiceAccountName(this.cheOpenShiftServiceAccount);
 
         LOG.info(String.format("Adding container %s to OpenShift deploymentConfig %s", sanitizedContaninerName, dcName));
-        addContainer(dc, workspaceID, imageName, sanitizedContaninerName, exposedPorts, envVariables, volumes);
+        addContainer(dc, workspaceID, imageName, sanitizedContaninerName, exposedPorts, envVariables, volumes, runContainerAsRoot);
 
         dc.addTrigger(DeploymentTriggerType.CONFIG_CHANGE);
         openShiftClient.create(dc);
@@ -300,7 +309,7 @@ public class OpenShiftConnector {
         return dc.getName();
     }
 
-    private void addContainer(IDeploymentConfig dc, String workspaceID, String imageName, String containerName, Set<String> exposedPorts, String[] envVariables, String[] volumes) {
+    private void addContainer(IDeploymentConfig dc, String workspaceID, String imageName, String containerName, Set<String> exposedPorts, String[] envVariables, String[] volumes, boolean runContainerAsRoot) {
         Set<IPort> containerPorts = getContainerPortsFrom(exposedPorts);
         Map<String, String> containerEnv = getContainerEnvFrom(envVariables);
         dc.addContainer(containerName,
@@ -312,14 +321,18 @@ public class OpenShiftConnector {
 
         ModelNode dcFirstContainer = ((DeploymentConfig)dc).getNode().get("spec").get("template").get("spec").get("containers").get(0);
 
-        // Run as root user
+        String UID = runContainerAsRoot ? UID_ROOT : UID_USER;
+
         dcFirstContainer.get("securityContext").get("privileged").set(true);
-        dcFirstContainer.get("securityContext").get("runAsUser").set("1000");
+        dcFirstContainer.get("securityContext").get("runAsUser").set(UID);
 
         // LivenessProbe
-        dcFirstContainer.get("livenessProbe").get("tcpSocket").get("port").set(4401);
-        dcFirstContainer.get("livenessProbe").get("initialDelaySeconds").set(120);
-        dcFirstContainer.get("livenessProbe").get("timeoutSeconds").set(1);
+        // TODO: CHE-53 Improve workspaces liveness probe for non-dev machines
+        if (isDevMachine(exposedPorts)) {
+            dcFirstContainer.get("livenessProbe").get("tcpSocket").get("port").set(CHE_WORKSPACE_AGENT_PORT);
+            dcFirstContainer.get("livenessProbe").get("initialDelaySeconds").set(120);
+            dcFirstContainer.get("livenessProbe").get("timeoutSeconds").set(1);
+        }
 
         // Add volumes
         for (String volume : volumes) {
@@ -513,5 +526,38 @@ public class OpenShiftConnector {
                     Collections.singletonList(new PortBinding().withHostIp(CHE_DEFAULT_EXTERNAL_ADDRESS).withHostPort(nodePort)));
         }
         return networkSettingsPorts;
+    }
+
+    /**
+     * When container is expected to be run as root, user field from {@link ImageConfig} is empty.
+     * For non-root user it contains "user" value
+     * 
+     * @param dockerConnector
+     * @param imageName
+     * @return true if user property from Image config is empty string, false otherwise
+     * @throws IOException
+     */
+    private boolean runContainerAsRoot(DockerConnector dockerConnector, String imageName) throws IOException {
+        String user = dockerConnector.inspectImage(imageName).getConfig().getUser();
+        return user != null && user.isEmpty();
+    }
+    
+    /**
+     * @param exposedPorts
+     * @return true if machine exposes 4401/tcp port used by Worspace API agent,
+     * false otherwise
+     */
+    private boolean isDevMachine(final Set<String> exposedPorts) {
+        return exposedPorts.contains(CHE_WORKSPACE_AGENT_PORT + "/tcp");
+    }
+    
+    /**
+     * Che workspace id is used as OpenShift service / deployment config name
+     * and must match the regex [a-z]([-a-z0-9]*[a-z0-9]) e.g. "q5iuhkwjvw1w9emg"
+     * 
+     * @return randomly generated workspace id
+     */
+    private String generateWorkspaceID() {
+        return RandomStringUtils.random(16, true, true).toLowerCase();
     }
 }
