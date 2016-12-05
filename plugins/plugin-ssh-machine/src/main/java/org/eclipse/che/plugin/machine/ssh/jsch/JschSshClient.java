@@ -118,6 +118,7 @@ public class JschSshClient implements SshClient {
         try {
             ChannelExec exec = (ChannelExec)session.openChannel("exec");
             exec.setCommand(commandLine);
+            exec.setPty(true);
             envVars.entrySet()
                    .stream()
                    .forEach(envVariableEntry -> exec.setEnv(envVariableEntry.getKey(),

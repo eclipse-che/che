@@ -113,6 +113,12 @@ public class JschSshProcess implements SshProcess {
 
     @Override
     public void kill() throws MachineException {
-        exec.disconnect();
+        try {
+            exec.sendSignal("KILL");
+        } catch (Exception e) {
+            throw new MachineException("Ssh machine signal sending error:" + e.getLocalizedMessage());
+        } finally {
+            exec.disconnect();
+        }
     }
 }
