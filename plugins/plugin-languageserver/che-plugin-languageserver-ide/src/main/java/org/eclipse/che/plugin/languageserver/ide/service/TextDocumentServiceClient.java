@@ -29,6 +29,7 @@ import org.eclipse.che.api.languageserver.shared.lsapi.HoverDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.LocationDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.PublishDiagnosticsParamsDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.ReferenceParamsDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.ShowMessageRequestParamsDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.SignatureHelpDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.SymbolInformationDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentPositionParamsDTO;
@@ -49,6 +50,7 @@ import org.eclipse.che.ide.websocket.MessageBus;
 import org.eclipse.che.ide.websocket.WebSocketException;
 import org.eclipse.che.ide.websocket.rest.SubscriptionHandler;
 import org.eclipse.che.plugin.languageserver.ide.editor.PublishDiagnosticsProcessor;
+import org.eclipse.che.plugin.languageserver.ide.editor.ShowMessageProcessor;
 
 import java.util.List;
 
@@ -68,6 +70,7 @@ public class TextDocumentServiceClient {
     private final AppContext                  appContext;
     private final NotificationManager         notificationManager;
     private final PublishDiagnosticsProcessor publishDiagnosticsProcessor;
+    private final ShowMessageProcessor        showMessageProcessor;
 
     @Inject
     public TextDocumentServiceClient(
@@ -76,7 +79,8 @@ public class TextDocumentServiceClient {
             final AppContext appContext,
             final AsyncRequestFactory asyncRequestFactory,
             final WsAgentStateController wsAgentStateController,
-            final PublishDiagnosticsProcessor publishDiagnosticsProcessor) {
+            final PublishDiagnosticsProcessor publishDiagnosticsProcessor,
+            final ShowMessageProcessor showMessageProcessor) {
         this.unmarshallerFactory = unmarshallerFactory;
         this.notificationManager = notificationManager;
         this.appContext = appContext;
@@ -84,10 +88,12 @@ public class TextDocumentServiceClient {
         this.publishDiagnosticsProcessor = publishDiagnosticsProcessor;
         wsAgentStateController.getMessageBus().then(new Operation<MessageBus>() {
             @Override
-            public void apply(MessageBus arg) throws OperationException {
-                subscribeToPublishDiagnostics(arg);
+            public void apply(MessageBus messageBus) throws OperationException {
+                subscribeToPublishDiagnostics(messageBus);
+                subscribeToShowMessages(messageBus);
             }
         });
+        this.showMessageProcessor = showMessageProcessor;
     }
 
     /**
@@ -310,4 +316,28 @@ public class TextDocumentServiceClient {
         }
     }
 
+    /**
+     * Subscribes to websocket for 'window/showMessage' notifications. 
+     */
+    private void subscribeToShowMessages(final MessageBus messageBus) {
+        final org.eclipse.che.ide.websocket.rest.Unmarshallable<ShowMessageRequestParamsDTO> unmarshaller =
+                unmarshallerFactory.newWSUnmarshaller(ShowMessageRequestParamsDTO.class);
+        try {
+            messageBus.subscribe("languageserver/window/showMessage",
+                                 new SubscriptionHandler<ShowMessageRequestParamsDTO>(unmarshaller) {
+                                     @Override
+                                     protected void onMessageReceived(ShowMessageRequestParamsDTO showMessageRequestParamsDTO) {
+                                         showMessageProcessor.processNotification(showMessageRequestParamsDTO);
+                                     }
+
+                                     @Override
+                                     protected void onErrorReceived(Throwable exception) {
+                                         notificationManager.notify(exception.getMessage(), StatusNotification.Status.FAIL,
+                                                                    StatusNotification.DisplayMode.NOT_EMERGE_MODE);
+                                     }
+                                 });
+        } catch (WebSocketException exception) {
+            Log.error(getClass(), exception);
+        }
+    }
 }
