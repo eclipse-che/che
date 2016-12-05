@@ -133,6 +133,8 @@ elif echo ${MACHINE_TYPE} | grep -qi "arm6"; then
     PREFIX=linux_arm7
 elif echo ${MACHINE_TYPE} | grep -qi "arm7"; then
     PREFIX=linux_arm7
+elif echo ${MACHINE_TYPE} | grep -qi "armv7l"; then
+    PREFIX=linux_arm7
 else
     >&2 echo "Unrecognized Machine Type"
     >&2 uname -a
