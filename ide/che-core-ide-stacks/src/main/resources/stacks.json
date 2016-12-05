@@ -590,7 +590,7 @@
     "id": "php-default",
     "creator": "ide",
     "name": "PHP",
-    "description": "Default PHP Stack with PHP 5.5, most popular extensions and dockerimager.",
+    "description": "Default PHP Stack with PHP 5.6, most popular extensions and dockerimager.",
     "scope": "general",
     "tags": [
       "Ubuntu",
@@ -604,7 +604,7 @@
     "components": [
       {
         "name": "PHP",
-        "version": "5.5.9"
+        "version": "5.6.24"
       },
       {
         "name": "Apache",
@@ -651,6 +651,22 @@
       "defaultEnv": "default",
       "description": null,
       "commands": [
+        {
+          "name": "run php script",
+          "type": "custom",
+          "commandLine": "[ -z ${editor.current.file.path} ] && echo \"Open a PHP file in the editor before executing this command.\" || php ${editor.current.file.path}",
+          "attributes": {
+            "previewUrl": ""
+          }
+        },
+        {
+          "name": "debug php script",
+          "type": "custom",
+          "commandLine": "[ -z ${editor.current.file.path} ] && echo \"Open a PHP file in the editor before executing this command.\" || QUERY_STRING=\"start_debug=1&debug_host=localhost&debug_port=10137\" php ${editor.current.file.path}",
+          "attributes": {
+            "previewUrl": ""
+          }
+        },
         {
           "name": "start apache",
           "type": "custom",
@@ -1858,11 +1874,11 @@
     "components": [
       {
         "name": "PHP",
-        "version": "7.0.6"
+        "version": "7.0.11"
       },
       {
         "name": "Zend Server",
-        "version": "9.0.0"
+        "version": "9.0.1"
       },
       {
         "name": "Composer",
@@ -1897,6 +1913,22 @@
       "defaultEnv": "default",
       "description": null,
       "commands": [
+        {
+          "name": "run php script",
+          "type": "custom",
+          "commandLine": "[ -z ${editor.current.file.path} ] && echo \"Open a PHP file in the editor before executing this command.\" || php ${editor.current.file.path}",
+          "attributes": {
+            "previewUrl": ""
+          }
+        },
+        {
+          "name": "debug php script",
+          "type": "custom",
+          "commandLine": "[ -z ${editor.current.file.path} ] && echo \"Open a PHP file in the editor before executing this command.\" || QUERY_STRING=\"start_debug=1&debug_host=localhost&debug_port=10137\" php ${editor.current.file.path}",
+          "attributes": {
+            "previewUrl": ""
+          }
+        },
         {
           "name": "restart zend server",
           "type": "custom",
