@@ -8,20 +8,15 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.debug.shared.model.action;
+package org.eclipse.che.api.debug.shared.model.impl.action;
+
+import org.eclipse.che.api.debug.shared.model.action.SuspendAction;
 
 /**
- * @author Anatoliy Bazko
+ * @author Roman Nikitenko
  */
-public interface Action {
-    TYPE getType();
-
-    enum TYPE {
-        STEP_INTO,
-        STEP_OUT,
-        STEP_OVER,
-        START,
-        RESUME,
-        SUSPEND
+public class SuspendActionImpl extends ActionImpl implements SuspendAction {
+    public SuspendActionImpl() {
+        super(TYPE.SUSPEND);
     }
 }

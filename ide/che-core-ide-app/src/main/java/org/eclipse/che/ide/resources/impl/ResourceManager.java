@@ -800,7 +800,7 @@ public final class ResourceManager {
     }
 
     protected Promise<Optional<File>> getFile(final Path absolutePath) {
-        return findResource(absolutePath, false).then(new Function<Optional<Resource>, Optional<File>>() {
+        return findResource(absolutePath, true).then(new Function<Optional<Resource>, Optional<File>>() {
             @Override
             public Optional<File> apply(Optional<Resource> optional) throws FunctionException {
                 if (optional.isPresent()) {

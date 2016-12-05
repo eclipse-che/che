@@ -17,6 +17,7 @@ import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.DebuggerServiceClient;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
+import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.debug.DebuggerDescriptor;
 import org.eclipse.che.ide.debug.DebuggerManager;
@@ -55,6 +56,7 @@ public class JavaDebugger extends AbstractDebugger {
                         FqnResolverFactory fqnResolverFactory,
                         JavaDebuggerFileHandler javaDebuggerFileHandler,
                         DebuggerManager debuggerManager,
+                        NotificationManager notificationManager,
                         FileTypeRegistry fileTypeRegistry,
                         BreakpointManager breakpointManager) {
         super(service,
@@ -64,6 +66,7 @@ public class JavaDebugger extends AbstractDebugger {
               eventBus,
               javaDebuggerFileHandler,
               debuggerManager,
+              notificationManager,
               breakpointManager,
               ID);
         this.fqnResolverFactory = fqnResolverFactory;

@@ -16,6 +16,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.DebuggerServiceClient;
+import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.debug.DebuggerDescriptor;
 import org.eclipse.che.ide.debug.DebuggerManager;
@@ -45,6 +46,7 @@ public class NodeJsDebugger extends AbstractDebugger {
                           EventBus eventBus,
                           BasicActiveFileHandler activeFileHandler,
                           DebuggerManager debuggerManager,
+                          NotificationManager notificationManager,
                           BreakpointManager breakpointManager) {
 
         super(service,
@@ -54,6 +56,7 @@ public class NodeJsDebugger extends AbstractDebugger {
               eventBus,
               activeFileHandler,
               debuggerManager,
+              notificationManager,
               breakpointManager,
               ID);
     }
