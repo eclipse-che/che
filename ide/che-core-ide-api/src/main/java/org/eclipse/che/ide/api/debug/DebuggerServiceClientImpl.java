@@ -26,6 +26,7 @@ import org.eclipse.che.api.debug.shared.dto.action.StartActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepIntoActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepOutActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepOverActionDto;
+import org.eclipse.che.api.debug.shared.dto.action.SuspendActionDto;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.json.JsonHelper;
@@ -78,6 +79,11 @@ public class DebuggerServiceClientImpl implements DebuggerServiceClient {
         return asyncRequestFactory.createDeleteRequest(requestUrl)
                                   .loader(loaderFactory.newLoader())
                                   .send();
+    }
+
+    @Override
+    public Promise<Void> suspend(String id, SuspendActionDto action) {
+        return performAction(id, action);
     }
 
     @Override

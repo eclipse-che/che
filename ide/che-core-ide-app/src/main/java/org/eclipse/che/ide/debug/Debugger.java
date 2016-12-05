@@ -26,6 +26,9 @@ import java.util.Map;
  */
 public interface Debugger extends DebuggerObservable {
 
+    /** Returns debugger type */
+    String getDebuggerType();
+
     /**
      * Adds new breakpoint.
      *
@@ -84,6 +87,11 @@ public interface Debugger extends DebuggerObservable {
      * Resumes application.
      */
     void resume();
+
+    /**
+     * Suspends application.
+     */
+    void suspend();
 
     /**
      * Evaluates the given expression

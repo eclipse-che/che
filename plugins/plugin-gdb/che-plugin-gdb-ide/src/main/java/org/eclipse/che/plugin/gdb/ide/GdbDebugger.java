@@ -19,6 +19,7 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.DebuggerServiceClient;
+import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.VirtualFile;
@@ -33,6 +34,8 @@ import org.eclipse.che.plugin.debugger.ide.debug.BasicActiveFileHandler;
 import javax.validation.constraints.NotNull;
 import java.util.Map;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.plugin.gdb.ide.GdbDebugger.ConnectionProperties.HOST;
 import static org.eclipse.che.plugin.gdb.ide.GdbDebugger.ConnectionProperties.PORT;
 
@@ -45,16 +48,19 @@ public class GdbDebugger extends AbstractDebugger {
 
     public static final String ID = "gdb";
 
+    private GdbLocalizationConstant locale;
     private final AppContext appContext;
 
     @Inject
     public GdbDebugger(DebuggerServiceClient service,
+                       GdbLocalizationConstant locale,
                        DtoFactory dtoFactory,
                        LocalStorageProvider localStorageProvider,
                        MessageBusProvider messageBusProvider,
                        EventBus eventBus,
                        BasicActiveFileHandler activeFileHandler,
                        DebuggerManager debuggerManager,
+                       NotificationManager notificationManager,
                        BreakpointManager breakpointManager,
                        AppContext appContext) {
 
@@ -65,8 +71,10 @@ public class GdbDebugger extends AbstractDebugger {
               eventBus,
               activeFileHandler,
               debuggerManager,
+              notificationManager,
               breakpointManager,
               ID);
+        this.locale = locale;
         this.appContext = appContext;
     }
 
@@ -91,6 +99,15 @@ public class GdbDebugger extends AbstractDebugger {
     @Override
     protected String pathToFqn(VirtualFile file) {
         return file.getName();
+    }
+
+    @Override
+    public void addBreakpoint(final VirtualFile file, final int lineNumber) {
+        if (isConnected() && !isSuspended()) {
+            notificationManager.notify(locale.messageSuspendToActivateBreakpoints(), FAIL, FLOAT_MODE);
+        }
+
+        super.addBreakpoint(file, lineNumber);
     }
 
     @Override

@@ -44,6 +44,7 @@ import org.eclipse.che.ide.api.debug.DebuggerServiceClient;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
+import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.VirtualFile;
@@ -117,6 +118,8 @@ public class DebuggerTest extends BaseTest {
     @Mock
     private DebuggerManager       debuggerManager;
     @Mock
+    private NotificationManager   notificationManager;
+    @Mock
     private BreakpointManager     breakpointManager;
 
     @Mock
@@ -127,17 +130,17 @@ public class DebuggerTest extends BaseTest {
     private PromiseError          promiseError;
 
     @Mock
-    private VirtualFile        file;
+    private VirtualFile       file;
     @Mock
-    private LocalStorage       localStorage;
+    private LocalStorage      localStorage;
     @Mock
-    private DebuggerObserver   observer;
+    private DebuggerObserver  observer;
     @Mock
-    private LocationDto        locationDto;
+    private LocationDto       locationDto;
     @Mock
-    private BreakpointDto      breakpointDto;
+    private BreakpointDto     breakpointDto;
     @Mock
-    private Optional<Project>  optional;
+    private Optional<Project> optional;
 
     @Captor
     private ArgumentCaptor<WsAgentStateHandler>             extServerStateHandlerCaptor;
@@ -179,7 +182,7 @@ public class DebuggerTest extends BaseTest {
         doReturn(PATH).when(file).getPath();
 
         debugger = new TestDebugger(service, dtoFactory, localStorageProvider, messageBusProvider, eventBus,
-                                    activeFileHandler, debuggerManager, "id");
+                                    activeFileHandler, debuggerManager, notificationManager, "id");
         doReturn(promiseInfo).when(service).getSessionInfo(SESSION_ID);
         doReturn(promiseInfo).when(promiseInfo).then(any(Operation.class));
 
@@ -586,6 +589,7 @@ public class DebuggerTest extends BaseTest {
                             EventBus eventBus,
                             ActiveFileHandler activeFileHandler,
                             DebuggerManager debuggerManager,
+                            NotificationManager notificationManager,
                             String id) {
             super(service,
                   dtoFactory,
@@ -594,6 +598,7 @@ public class DebuggerTest extends BaseTest {
                   eventBus,
                   activeFileHandler,
                   debuggerManager,
+                  notificationManager,
                   breakpointManager,
                   id);
         }
