@@ -46,6 +46,7 @@
     <inherits name='org.eclipse.che.plugin.gdb.Gdb'/>
     <inherits name='org.eclipse.che.plugin.nodejsdbg.NodeJsDebugger'/>
     <inherits name='org.eclipse.che.plugin.jdb.JavaDebugger'/>
+    <inherits name='org.eclipse.che.plugin.zdb.ZendDebugger'/>
     <inherits name='org.eclipse.che.ide.extension.machine.Machine'/>
     <inherits name='org.eclipse.che.plugin.maven.Maven'/>
     <inherits name='org.eclipse.che.ide.ext.gwt.GWT'/>
