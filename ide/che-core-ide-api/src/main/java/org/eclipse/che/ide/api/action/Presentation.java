@@ -227,7 +227,6 @@ public final class Presentation {
         });
     }
 
-    @Override
     public Presentation clone() {
         Presentation presentation = new Presentation(getText());
         presentation.myDescription = myDescription;
