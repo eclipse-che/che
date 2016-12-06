@@ -167,7 +167,6 @@ wait_until_container_is_running() {
   done
 }
 
-
 check_docker() {
   if ! has_docker; then
     error "Docker not found. Get it at https://docs.docker.com/engine/installation/."
@@ -179,18 +178,20 @@ check_docker() {
     if ! docker ps > /dev/null 2>&1; then
       info "Welcome to ${CHE_FORMAL_PRODUCT_NAME}!"
       info ""
-      info "$CHE_FORMAL_PRODUCT_NAME commands require additional parameters:"
-      info "  Mounting 'docker.sock', which let's us access Docker"
+      info "We need some additional parameters:"
+      info "   1. Mount 'docker.sock', which let's us access Docker using unix sockets."
+      info "   2. Or, set the DOCKER_HOST variable to Docker's location."
       info ""
-      info "Syntax:"
-      info "  docker run -it --rm ${BOLD} -v /var/run/docker.sock:/var/run/docker.sock${NC}"
-      info "                  $CHE_MINI_PRODUCT_NAME/cli $*"
+      info "Mount Syntax:"
+      info "   Start with 'docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock' ..."
+      info ""
+      info "DOCKER_HOST Syntax:"
+      info "   Start with 'docker run -it --rm -e DOCKER_HOST=<daemon-location> ...'"
       return 2;
     fi
   fi
 
   DOCKER_VERSION=($(docker version |  grep  "Version:" | sed 's/Version://'))
-
   MAJOR_VERSION_ID=$(echo ${DOCKER_VERSION[0]:0:1})
   MINOR_VERSION_ID=$(echo ${DOCKER_VERSION[0]:2:2})
 
@@ -217,11 +218,20 @@ check_docker() {
   CHE_VERSION=$CHE_IMAGE_VERSION
 }
 
+check_tty() {
+  # Detect and verify that the CLI container was started with -it option.
+  if [[ ! -t 1 ]]; then
+    info "Welcome to ${CHE_FORMAL_PRODUCT_NAME}!"
+    info ""
+    info "We did not detect a valid TTY."
+    info ""
+    info "TTY Syntax:"
+    info "    Add '-it' to your 'docker run' command."
+    return 2
+  fi
+}
 
 check_mounts() {
-
-  # Verify that we can write to the host file system from the container
-  check_host_volume_mount
 
   DATA_MOUNT=$(get_container_folder ":${CHE_CONTAINER_ROOT}")
   INSTANCE_MOUNT=$(get_container_folder ":${CHE_CONTAINER_ROOT}/instance")
@@ -234,11 +244,8 @@ check_mounts() {
   if [[ "${DATA_MOUNT}" = "not set" ]]; then
     info "Welcome to $CHE_FORMAL_PRODUCT_NAME!"
     info ""
-    info "We need some information before we can start ${CHE_FORMAL_PRODUCT_NAME}."
-    info ""
-    info "$CHE_FORMAL_PRODUCT_NAME commands require additional parameters:"
-    info "  1: Mounting 'docker.sock', which let's us access Docker"
-    info "  2: A local path where ${CHE_FORMAL_PRODUCT_NAME} will save user data"
+    info "We could not detect a location to save data."
+    info "Volume mount a local directory to ':${CHE_CONTAINER_ROOT}'."
     info ""
     info "Simplest syntax:"
     info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock"
@@ -246,7 +253,7 @@ check_mounts() {
     info "                         ${CHE_IMAGE_FULLNAME} $*"
     info ""
     info ""
-    info "Or run with overrides for instance and/or backup:"
+    info "Or, run with additional overrides:"
     info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock"
     info "                      -v <YOUR_LOCAL_PATH>:${CHE_CONTAINER_ROOT}"
     info "                      -v <YOUR_INSTANCE_PATH>:${CHE_CONTAINER_ROOT}/instance"
@@ -254,6 +261,9 @@ check_mounts() {
     info "                         ${CHE_IMAGE_FULLNAME} $*"
     return 2;
   fi
+
+  # Verify that we can write to the host file system from the container
+  check_host_volume_mount
 
   DEFAULT_CHE_CONFIG="${DATA_MOUNT}"
   DEFAULT_CHE_INSTANCE="${DATA_MOUNT}"/instance
@@ -291,7 +301,7 @@ check_mounts() {
       info ""
       info "You volume mounted ':/repo', but we did not detect a valid ${CHE_FORMAL_PRODUCT_NAME} source repo."
       info ""
-      info "Volume mounting ':/repo' activate dev mode, using assembly and CLI files from $CHE_FORMAL_PRODUCT_NAME repo."
+      info "Volume mounting ':/repo' activates dev mode, using assembly and CLI files from $CHE_FORMAL_PRODUCT_NAME repo."
       info ""
       info "Please check the path you mounted to verify that is a valid $CHE_FORMAL_PRODUCT_NAME git repository."
       info ""

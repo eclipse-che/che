@@ -28,7 +28,7 @@ init_constants() {
   CHE_FORMAL_PRODUCT_NAME=${CHE_FORMAL_PRODUCT_NAME:-${DEFAULT_CHE_FORMAL_PRODUCT_NAME}}
 
   # Path to root folder inside the container
-  DEFAULT_CHE_CONTAINER_ROOT="/${CHE_MINI_PRODUCT_NAME}"
+  DEFAULT_CHE_CONTAINER_ROOT="/data"
   CHE_CONTAINER_ROOT=${CHE_CONTAINER_ROOT:-${DEFAULT_CHE_CONTAINER_ROOT}}
 
   # Turns on stack trace
@@ -219,10 +219,14 @@ init() {
   # Make sure Docker is working and we have /var/run/docker.sock mounted or valid DOCKER_HOST
   check_docker "$@"
 
+  # Cannot print out usage information until after we verify Docker is loaded.
   init_usage
   if [[ $# == 0 ]]; then
     usage;
   fi
+
+  # Verify that -it is passed on the command line
+  check_tty
 
   # Only verify mounts after Docker is confirmed to be working.
   check_mounts "$@"
@@ -251,6 +255,21 @@ init() {
   source "${SCRIPTS_CONTAINER_SOURCE_DIR}"/cli.sh
 }
 
+cleanup() {
+  RETURN_CODE=$?
+
+  # CLI developers should only return '3' in code after the init() method has completed.
+  # This will check to see if the CLI directory is not mounted and only offer the error
+  # message if it isn't currently mounted.
+  if [ $RETURN_CODE -eq "3" ]; then
+    error ""
+    if [[ "${DATA_MOUNT}" = "not set" ]]; then
+      error "Unexpected exit: rerun and add '-v <local-path>:/cli' to save the 'cli.log' trace file."
+    else 
+      error "Unexpected exit: Trace output saved to $CLI_MOUNT/'cli.log'."
+    fi
+  fi
+}
 
 start() {
   # Bootstrap enough stuff to load /cli/cli.sh
@@ -258,13 +277,18 @@ start() {
 
   # Begin product-specific CLI calls
   info "cli" "Loading cli..."
+
+  # The pre_init method is unique to each assembly. This method must be provided by 
+  # a custom CLI assembly in their container and can set global variables which are 
+  # specific to that implementation of the CLI.
   cli_pre_init
   cli_init "$@"
   cli_parse "$@"
   cli_execute "$@"
-
 }
 
 # See: https://sipb.mit.edu/doc/safe-shell/
 set -e
 set -u
+
+trap "cleanup" INT TERM EXIT

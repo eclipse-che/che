@@ -84,6 +84,7 @@ generate_configuration_with_puppet() {
                   -v \"${CHE_HOST_DEVELOPMENT_REPO}/dockerfiles/init/manifests\":/etc/puppet/manifests:ro \
                   -v \"${CHE_HOST_DEVELOPMENT_REPO}/dockerfiles/init/modules\":/etc/puppet/modules:ro \
                   -e \"CHE_ENV_FILE=${CHE_ENV_FILE}\" \
+                  -e \"CHE_CONTAINER_ROOT=${CHE_CONTAINER_ROOT}\" \
                   -e \"CHE_ENVIRONMENT=development\" \
                   -e \"CHE_CONFIG=${CHE_HOST_INSTANCE}\" \
                   -e \"CHE_INSTANCE=${CHE_HOST_INSTANCE}\" \
@@ -100,6 +101,7 @@ generate_configuration_with_puppet() {
                   --env-file=/version/$CHE_VERSION/images \
                   -v \"${CHE_HOST_INSTANCE}\":/opt/${CHE_MINI_PRODUCT_NAME}:rw \
                   -e \"CHE_ENV_FILE=${CHE_ENV_FILE}\" \
+                  -e \"CHE_CONTAINER_ROOT=${CHE_CONTAINER_ROOT}\" \
                   -e \"CHE_ENVIRONMENT=production\" \
                   -e \"CHE_CONFIG=${CHE_HOST_INSTANCE}\" \
                   -e \"CHE_INSTANCE=${CHE_HOST_INSTANCE}\" \
