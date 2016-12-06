@@ -40,16 +40,15 @@ import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
 import org.eclipse.che.ide.FontAwesome;
 import org.eclipse.che.ide.ui.Tooltip;
+import org.eclipse.che.ide.util.Pair;
+import org.vectomatic.dom.svg.ui.SVGImage;
+
+import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.gwt.regexp.shared.RegExp.compile;
 import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
 import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
-
-import org.eclipse.che.ide.util.Pair;
-import org.vectomatic.dom.svg.ui.SVGImage;
-
-import java.util.List;
 
 /**
  * View representation of output console.
@@ -293,6 +292,10 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
     @Override
     public void showCommandLine(String commandLine) {
         commandLabel.setText(commandLine);
+        Tooltip.create((elemental.dom.Element)commandLabel.getElement(),
+                       BOTTOM,
+                       MIDDLE,
+                       commandLine);
     }
 
     @Override
@@ -301,8 +304,11 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
             hidePreview();
         } else {
             previewUrlLabel.setText(previewUrl);
-            previewUrlLabel.setTitle(previewUrl);
             previewUrlLabel.setHref(previewUrl);
+            Tooltip.create((elemental.dom.Element)previewUrlLabel.getElement(),
+                           BOTTOM,
+                           MIDDLE,
+                           previewUrl);
         }
     }
 
