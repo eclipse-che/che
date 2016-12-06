@@ -40,6 +40,7 @@ public class Constants {
     public static final String ENVIRONMENT_STATUS_CHANNEL_TEMPLATE = "workspace:%s:machines_statuses";
 
     public static final String TERMINAL_REFERENCE = "terminal";
+    public static final String EXEC_AGENT_REFERENCE = "exec-agent";
 
     public static final String WS_AGENT_PORT = "4401/tcp";
 
