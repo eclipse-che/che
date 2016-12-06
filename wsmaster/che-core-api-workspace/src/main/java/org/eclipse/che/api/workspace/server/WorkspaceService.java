@@ -547,18 +547,28 @@ public class WorkspaceService extends Service {
                                           @PathParam("name")
                                           String envName,
                                           @ApiParam(value = "The environment update", required = true)
-                                          EnvironmentDto update) throws ServerException,
-                                                                        BadRequestException,
-                                                                        NotFoundException,
-                                                                        ConflictException,
-                                                                        ForbiddenException {
+                                          EnvironmentDto update,
+                                          @ApiParam("New name of the environment")
+                                          @QueryParam("new-name")
+                                          String newEnvName) throws ServerException,
+                                                                    BadRequestException,
+                                                                    NotFoundException,
+                                                                    ConflictException,
+                                                                    ForbiddenException {
         requiredNotNull(update, "Environment description");
         relativizeRecipeLinks(update);
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
-        EnvironmentImpl previous = workspace.getConfig().getEnvironments().put(envName, new EnvironmentImpl(update));
+        EnvironmentImpl previous = workspace.getConfig().getEnvironments().remove(envName);
         if (previous == null) {
             throw new NotFoundException(format("Workspace '%s' doesn't contain environment '%s'", id, envName));
         }
+        if (newEnvName != null && !"".equals(newEnvName)) {
+            if (workspace.getConfig().getEnvironments().containsKey(newEnvName)) {
+                throw new ConflictException(format("Environment '%s' already exists", newEnvName));
+            }
+            envName = newEnvName;
+        }
+        workspace.getConfig().getEnvironments().put(envName, new EnvironmentImpl(update));
         validator.validateConfig(workspace.getConfig());
         return linksInjector.injectLinks(asDto(workspaceManager.updateWorkspace(id, workspace)), getServiceContext());
     }

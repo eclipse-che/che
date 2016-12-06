@@ -22,6 +22,7 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
+import org.eclipse.che.api.core.model.workspace.Environment;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
@@ -56,8 +57,10 @@ import javax.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -310,10 +313,84 @@ public class WorkspaceManager {
         requireNonNull(id, "Required non-null workspace id");
         requireNonNull(update, "Required non-null workspace update");
         final WorkspaceImpl workspace = workspaceDao.get(id);
-        workspace.setConfig(new WorkspaceConfigImpl(update.getConfig()));
+        workspace.setConfig(WorkspaceConfigImpl.builder()
+                                               .fromConfig(update.getConfig())
+                                               .setEnvironments(updateEnvironments(id, update.getConfig().getEnvironments()))
+                                               .build());
         update.getAttributes().put(UPDATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
         workspace.setAttributes(update.getAttributes());
         return normalizeState(workspaceDao.update(workspace));
+    }
+
+    /**
+     * Updates workspace environments.
+     *
+     * @param workspaceId
+     *         id of workspace to update environments
+     * @param update
+     *         new environments configs
+     * @return environments of just updated workspace
+     * @throws NotFoundException
+     *         when workspace with specified ID doesn't exist,
+     *         when environment with specified name doesn't exist
+     * @throws ConflictException
+     *         when try to update running environment
+     * @throws ServerException
+     *         when other error occurs
+     */
+    private Map<String, ? extends Environment> updateEnvironments(String workspaceId, Map<String, ? extends Environment> update)
+            throws ServerException, NotFoundException, ConflictException {
+        final WorkspaceImpl workspace = workspaceDao.get(workspaceId);
+        // concurrent maps is used here for removing elements inside foreach loop without iterator
+        final Map<String, ? extends Environment> oldEnvironments = new ConcurrentHashMap<>(workspace.getConfig().getEnvironments());
+        final Map<String, ? extends Environment> newEnvironments = new ConcurrentHashMap<>(update);
+        final Map<String, Environment> result = new HashMap<>();
+
+        // Here update will be done step by step.
+        // Each step will remove precessed items from old nad new environments maps and add them to result map
+
+        // detect not changed environments
+        for (Map.Entry<String, ? extends Environment> environment : oldEnvironments.entrySet()) {
+            String envName = environment.getKey();
+            if (newEnvironments.containsKey(envName) && newEnvironments.get(envName).equals(environment.getValue())) { // no changes
+                result.put(envName, oldEnvironments.remove(envName));
+                newEnvironments.remove(envName);
+            }
+        }
+
+        // detect updated environments
+        for (Map.Entry<String, ? extends Environment> environment : oldEnvironments.entrySet()) {
+            String oldEnvName = environment.getKey();
+            if (newEnvironments.containsKey(oldEnvName)) { // environment updated
+                result.put(oldEnvName, newEnvironments.remove(oldEnvName));
+                oldEnvironments.remove(oldEnvName);
+                // TODO try to save snapshots when it possible
+                removeEnvironmentSnapshots(workspaceId, oldEnvName);
+            }
+        }
+
+        // detect renamed environments
+        for (Map.Entry<String, ? extends Environment> oldEnvironment : oldEnvironments.entrySet()) {
+            Environment old = oldEnvironment.getValue();
+            for (Map.Entry<String, ? extends Environment> newEnvironment : newEnvironments.entrySet()) {
+                if (newEnvironment.getValue().equals(old)) { // environment renamed
+                    String oldNameOfEnv = oldEnvironment.getKey();
+                    String newNameOfEnv = newEnvironment.getKey();
+                    result.put(newNameOfEnv, oldEnvironments.remove(oldNameOfEnv));
+                    updateEnvironmentSnapshots(workspaceId, oldNameOfEnv, newNameOfEnv);
+                }
+            }
+        }
+
+        // now in oldEnvironments we have environments for deletion
+        for (String envNameToDelete : oldEnvironments.keySet()) {
+            removeEnvironmentSnapshots(workspaceId, envNameToDelete);
+        }
+
+        // now in newEnvironments we have only added environments
+        result.putAll(newEnvironments);
+
+        return result;
     }
 
     /**
@@ -571,6 +648,32 @@ public class WorkspaceManager {
     }
 
     /**
+     * Removes all snapshots of all machines of specified environment of workspace.
+     *
+     * @param workspaceId
+     *         workspace id to remove environment snapshots
+     * @param envName
+     *         environment name to remove snapshots from
+     * @throws NotFoundException
+     *           when workspace with given id doesn't exists
+     * @throws ServerException
+     *          when any other error occurs
+     */
+    @VisibleForTesting
+    void removeEnvironmentSnapshots(String workspaceId, String envName) throws NotFoundException, ServerException {
+        getSnapshot(workspaceId).stream()
+                                .filter(snapshot -> snapshot.getEnvName().equals(envName))
+                                .forEach(snapshot -> {
+                                    try {
+                                        runtimes.removeSnapshot(snapshot);
+                                        snapshotDao.removeSnapshot(snapshot.getId());
+                                    } catch (Exception e) {
+                                        LOG.error(e.getLocalizedMessage(), e);
+                                    }
+                                });
+    }
+
+    /**
      * Stops machine in running workspace.
      *
      * @param workspaceId
@@ -800,6 +903,19 @@ public class WorkspaceManager {
         return true;
     }
 
+    /** Updates environment snapshots in database */
+    @VisibleForTesting
+    void updateEnvironmentSnapshots(String workspaceId, String oldEnvName, String newEnvName) throws NotFoundException,
+                                                                                                     ConflictException,
+                                                                                                     SnapshotException {
+        for (SnapshotImpl snapshot : snapshotDao.findSnapshots(workspaceId)) {
+            if (snapshot.getEnvName().equals(oldEnvName)) {
+                snapshot.setEnvName(newEnvName);
+                snapshotDao.updateSnapshot(snapshot);
+            }
+        }
+    }
+
     private void removeSnapshotsBinaries(Collection<? extends SnapshotImpl> snapshots) {
         for (SnapshotImpl snapshot : snapshots) {
             try {
@@ -890,10 +1006,7 @@ public class WorkspaceManager {
         return workspace;
     }
 
-    /*
-    * Get workspace using composite key.
-    *
-    */
+    /** Get workspace using composite key */
     private WorkspaceImpl getByKey(String key) throws NotFoundException, ServerException {
         String[] parts = key.split(":", -1); // -1 is to prevent skipping trailing part
         if (parts.length == 1) {
