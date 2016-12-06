@@ -64,6 +64,8 @@ public class OpenShiftConnector {
     private static final String CHE_OPENSHIFT_RESOURCES_PREFIX = "che-ws-";
 
     private static final String OPENSHIFT_SERVICE_TYPE_NODE_PORT = "NodePort";
+    private static final int OPENSHIFT_LIVENESS_PROBE_DELAY = 120;
+    private static final int OPENSHIFT_LIVENESS_PROBE_TIMEOUT = 1;
     public static final String DOCKER_PROTOCOL_PORT_DELIMITER = "/";
     public static final String IMAGE_PULL_POLICY_IFNOTPRESENT = "IfNotPresent";
     public static final String CHE_DEFAULT_EXTERNAL_ADDRESS = "172.17.0.1";
@@ -72,6 +74,7 @@ public class OpenShiftConnector {
     public static final String UID_ROOT = "0";
     public static final String UID_USER = "1000";
     public static final int CHE_WORKSPACE_AGENT_PORT = 4401;
+    public static final int CHE_TERMINAL_AGENT_PORT = 4411;
 
     private final IClient            openShiftClient;
     private final IResourceFactory   openShiftFactory;
@@ -80,9 +83,9 @@ public class OpenShiftConnector {
 
     public final Map<Integer, String> servicePortNames = ImmutableMap.<Integer, String>builder().
             put(22, "sshd").
-            put(4401, "wsagent").
+            put(CHE_WORKSPACE_AGENT_PORT, "wsagent").
             put(4403, "wsagent-jpda").
-            put(4411, "terminal").
+            put(CHE_TERMINAL_AGENT_PORT, "terminal").
             put(8080, "tomcat").
             put(8000, "tomcat-jpda").
             put(9876, "codeserver").build();
@@ -325,14 +328,8 @@ public class OpenShiftConnector {
 
         dcFirstContainer.get("securityContext").get("privileged").set(true);
         dcFirstContainer.get("securityContext").get("runAsUser").set(UID);
-
-        // LivenessProbe
-        // TODO: CHE-53 Improve workspaces liveness probe for non-dev machines
-        if (isDevMachine(exposedPorts)) {
-            dcFirstContainer.get("livenessProbe").get("tcpSocket").get("port").set(CHE_WORKSPACE_AGENT_PORT);
-            dcFirstContainer.get("livenessProbe").get("initialDelaySeconds").set(120);
-            dcFirstContainer.get("livenessProbe").get("timeoutSeconds").set(1);
-        }
+        
+        addLivenessProbe(dcFirstContainer, exposedPorts);
 
         // Add volumes
         for (String volume : volumes) {
@@ -528,6 +525,35 @@ public class OpenShiftConnector {
         return networkSettingsPorts;
     }
 
+
+    /**
+     * Adds OpenShift liveness probe to the container. Liveness probe is configured
+     * via TCP Socket Check - for dev machines by checking Workspace API agent port
+     * (4401), for non-dev by checking Terminal port (4411)
+     * 
+     * @param container
+     * @param exposedPorts
+     * @see <a href=
+     *      "https://docs.openshift.com/enterprise/3.0/dev_guide/application_health.html">OpenShift
+     *      Application Health</a>
+     * 
+     */
+    private void addLivenessProbe(final ModelNode container, final Set<String> exposedPorts) {
+        int port = 0;
+
+        if (isDevMachine(exposedPorts)) {
+            port = CHE_WORKSPACE_AGENT_PORT;
+        } else if (isTerminalAgentInjected(exposedPorts)) {
+            port = CHE_TERMINAL_AGENT_PORT;
+        }
+
+        if (port != 0) {
+            container.get("livenessProbe").get("tcpSocket").get("port").set(port);
+            container.get("livenessProbe").get("initialDelaySeconds").set(OPENSHIFT_LIVENESS_PROBE_DELAY);
+            container.get("livenessProbe").get("timeoutSeconds").set(OPENSHIFT_LIVENESS_PROBE_TIMEOUT);
+        }
+    }
+
     /**
      * When container is expected to be run as root, user field from {@link ImageConfig} is empty.
      * For non-root user it contains "user" value
@@ -537,9 +563,18 @@ public class OpenShiftConnector {
      * @return true if user property from Image config is empty string, false otherwise
      * @throws IOException
      */
-    private boolean runContainerAsRoot(DockerConnector dockerConnector, String imageName) throws IOException {
+    private boolean runContainerAsRoot(final DockerConnector dockerConnector,final String imageName) throws IOException {
         String user = dockerConnector.inspectImage(imageName).getConfig().getUser();
         return user != null && user.isEmpty();
+    }
+    
+    /**
+     * @param exposedPorts
+     * @return true if machine exposes 4411/tcp port used by Terminal agent,
+     * false otherwise
+     */
+    private boolean isTerminalAgentInjected(final Set<String> exposedPorts) {
+        return exposedPorts.contains(CHE_TERMINAL_AGENT_PORT + "/tcp");
     }
     
     /**
