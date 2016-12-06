@@ -659,7 +659,6 @@ public class WorkspaceManager {
      * @throws ServerException
      *          when any other error occurs
      */
-    @VisibleForTesting
     void removeEnvironmentSnapshots(String workspaceId, String envName) throws NotFoundException, ServerException {
         getSnapshot(workspaceId).stream()
                                 .filter(snapshot -> snapshot.getEnvName().equals(envName))
@@ -904,7 +903,6 @@ public class WorkspaceManager {
     }
 
     /** Updates environment snapshots in database */
-    @VisibleForTesting
     void updateEnvironmentSnapshots(String workspaceId, String oldEnvName, String newEnvName) throws NotFoundException,
                                                                                                      ConflictException,
                                                                                                      SnapshotException {
