@@ -13,6 +13,7 @@ package org.eclipse.che.api.project.server.importer;
 import org.eclipse.che.api.core.util.LineConsumer;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.everrest.core.impl.provider.json.JsonUtils;
 import org.everrest.websockets.WSConnectionContext;
 import org.everrest.websockets.message.ChannelBroadcastMessage;
@@ -44,7 +45,10 @@ public class ProjectImportOutputWSLineConsumer implements LineConsumer {
         this.workspaceId = workspaceId;
         lineToSendQueue = new ArrayBlockingQueue<>(1024);
         executor = Executors.newSingleThreadScheduledExecutor(
-                new ThreadFactoryBuilder().setNameFormat(ProjectImportOutputWSLineConsumer.class.getSimpleName()+"-%d").setDaemon(true).build());
+                new ThreadFactoryBuilder().setNameFormat(ProjectImportOutputWSLineConsumer.class.getSimpleName() + "-%d")
+                                          .setDaemon(true)
+                                          .setUncaughtExceptionHandler(LoggingUncaughtExceptionHandler.getInstance())
+                                          .build());
         executor.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {

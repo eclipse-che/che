@@ -30,7 +30,10 @@ export class ListCommands {
   templateUrl: string;
   controller: string;
   controllerAs: string;
-  scope: Object;
+
+  scope: {
+    [propName: string]: string
+  };
 
   /**
    * Default constructor that is using resource

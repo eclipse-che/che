@@ -13,6 +13,7 @@ package org.eclipse.che.plugin.maven.server.core;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import org.eclipse.che.api.core.util.ListLineConsumer;
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.everrest.websockets.WSConnectionContext;
 import org.everrest.websockets.message.ChannelBroadcastMessage;
 import org.slf4j.Logger;
@@ -40,6 +41,7 @@ public class BufferOutputFixedRateSender extends ListLineConsumer {
     public BufferOutputFixedRateSender(String channel, long delay) {
         this.channel = channel;
         ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat(BufferOutputFixedRateSender.class.getSimpleName() + "-%d")
+                                                                .setUncaughtExceptionHandler(LoggingUncaughtExceptionHandler.getInstance())
                                                                 .setDaemon(true)
                                                                 .build();
 

@@ -27,6 +27,7 @@ import org.eclipse.che.ide.api.wizard.AbstractWizardPage;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.maven.client.MavenArchetype;
 import org.eclipse.che.plugin.maven.client.MavenExtension;
+import org.eclipse.che.plugin.maven.client.MavenLocalizationConstant;
 
 import javax.validation.constraints.NotNull;
 import java.util.Arrays;
@@ -62,18 +63,21 @@ import static org.eclipse.che.plugin.maven.shared.MavenAttributes.VERSION;
  */
 public class MavenPagePresenter extends AbstractWizardPage<MutableProjectConfig> implements MavenPageView.ActionDelegate {
 
-    private final MavenPageView view;
-    private final DialogFactory dialogFactory;
-    private final AppContext    appContext;
+    private final MavenPageView             view;
+    private final DialogFactory             dialogFactory;
+    private final AppContext                appContext;
+    private final MavenLocalizationConstant localization;
 
     @Inject
     public MavenPagePresenter(MavenPageView view,
                               DialogFactory dialogFactory,
-                              AppContext appContext) {
+                              AppContext appContext,
+                              MavenLocalizationConstant localization) {
         super();
         this.view = view;
         this.dialogFactory = dialogFactory;
         this.appContext = appContext;
+        this.localization = localization;
         view.setDelegate(this);
     }
 
@@ -104,6 +108,13 @@ public class MavenPagePresenter extends AbstractWizardPage<MutableProjectConfig>
                 container.get().estimate(MAVEN_ID).then(new Operation<SourceEstimation>() {
                     @Override
                     public void apply(SourceEstimation estimation) throws OperationException {
+                        if (!estimation.isMatched()) {
+                            final String resolution = estimation.getResolution();
+                            final String errorMessage = resolution.isEmpty() ? localization.mavenPageEstimateErrorMessage() : resolution;
+                            dialogFactory.createMessageDialog(localization.mavenPageErrorDialogTitle(), errorMessage, null).show();
+                            return;
+                        }
+
                         Map<String, List<String>> estimatedAttributes = estimation.getAttributes();
                         List<String> artifactIdValues = estimatedAttributes.get(ARTIFACT_ID);
                         if (artifactIdValues != null && !artifactIdValues.isEmpty()) {
@@ -136,7 +147,7 @@ public class MavenPagePresenter extends AbstractWizardPage<MutableProjectConfig>
                 }).catchError(new Operation<PromiseError>() {
                     @Override
                     public void apply(PromiseError arg) throws OperationException {
-                        dialogFactory.createMessageDialog("Not valid Maven project", arg.getMessage(), null).show();
+                        dialogFactory.createMessageDialog(localization.mavenPageErrorDialogTitle(), arg.getMessage(), null).show();
                         Log.error(MavenPagePresenter.class, arg);
                     }
                 });

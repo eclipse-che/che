@@ -13,8 +13,17 @@ unset SUDO
 unset PACKAGES
 test "$(id -u)" = 0 || SUDO="sudo"
 
-LINUX_TYPE=$(cat /etc/os-release | grep ^ID= | tr '[:upper:]' '[:lower:]')
-LINUX_VERSION=$(cat /etc/os-release | grep ^VERSION_ID=)
+if [ -f /etc/centos-release ]; then
+    FILE="/etc/centos-release"
+    LINUX_TYPE=$(cat $FILE | awk '{print $1}')
+ elif [ -f /etc/redhat-release ]; then
+    FILE="/etc/redhat-release"
+    LINUX_TYPE=$(cat $FILE | cut -c 1-8)
+ else
+    FILE="/etc/os-release"
+    LINUX_TYPE=$(cat $FILE | grep ^ID= | tr '[:upper:]' '[:lower:]')
+    LINUX_VERSION=$(cat $FILE | grep ^VERSION_ID=)
+fi
 
 ###############################
 ### Install Needed packaged ###
@@ -23,6 +32,15 @@ LINUX_VERSION=$(cat /etc/os-release | grep ^VERSION_ID=)
 # Red Hat Enterprise Linux 7 
 ############################
 if echo ${LINUX_TYPE} | grep -qi "rhel"; then
+    command -v sshd >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" openssh-server"; }
+    test "${PACKAGES}" = "" || {
+        ${SUDO} yum -y install ${PACKAGES};
+    }
+    ${SUDO} sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
+
+# Red Hat Enterprise Linux 6 
+############################
+elif echo ${LINUX_TYPE} | grep -qi "Red Hat"; then
     command -v sshd >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" openssh-server"; }
     test "${PACKAGES}" = "" || {
         ${SUDO} yum -y install ${PACKAGES};
@@ -86,9 +104,18 @@ elif echo ${LINUX_TYPE} | grep -qi "alpine"; then
         ${SUDO} apk add openssh ${PACKAGES};
     }
 
+# Centos 6.6, 6.7, 6.8
+############
+elif echo ${LINUX_TYPE} | grep -qi "CentOS"; then
+    command -v sshd >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" openssh-server"; }
+    test "${PACKAGES}" = "" || {
+        ${SUDO} yum -y install ${PACKAGES};
+    }
+    ${SUDO} sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
+
 else
     >&2 echo "Unrecognized Linux Type"
-    >&2 cat /etc/os-release
+    >&2 cat $FILE
     exit 1
 fi
 
@@ -100,5 +127,12 @@ command -v pidof >/dev/null 2>&1 && {
 
 
 ${SUDO} mkdir -p /var/run/sshd
-${SUDO} /usr/bin/ssh-keygen -A && ${SUDO} /usr/sbin/sshd -D
+
+if echo ${LINUX_TYPE} | grep -qi "CentOS"; then
+    ${SUDO} /usr/bin/ssh-keygen -q -P '' -t rsa -f ~/.ssh/id_rsa
+else
+    ${SUDO} /usr/bin/ssh-keygen -A
+fi
+
+${SUDO} /usr/sbin/sshd -D
 

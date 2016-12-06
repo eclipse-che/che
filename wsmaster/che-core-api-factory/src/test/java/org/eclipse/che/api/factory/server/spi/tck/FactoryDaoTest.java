@@ -48,16 +48,20 @@ import org.testng.annotations.Test;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static java.util.stream.Collectors.toList;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -95,8 +99,8 @@ public class FactoryDaoTest {
         for (int i = 0; i < ENTRY_COUNT; i++) {
             factories[i] = createFactory(i, users[i].getId());
         }
-        userTckRepository.createAll(asList(users));
-        factoryTckRepository.createAll(asList(factories));
+        userTckRepository.createAll(Arrays.asList(users));
+        factoryTckRepository.createAll(Stream.of(factories).map(FactoryImpl::new).collect(toList()));
     }
 
     @AfterMethod
@@ -111,7 +115,7 @@ public class FactoryDaoTest {
         factory.getCreator().setUserId(factories[0].getCreator().getUserId());
         factoryDao.create(factory);
 
-        assertEquals(factoryDao.getById(factory.getId()), factory);
+        assertEquals(factoryDao.getById(factory.getId()), new FactoryImpl(factory));
     }
 
     @Test(expectedExceptions = NullPointerException.class)
@@ -364,8 +368,6 @@ public class FactoryDaoTest {
         wCfg.setCommands(commands);
         wCfg.setProjects(projects);
         wCfg.setEnvironments(environments);
-
-        wCfg.getProjects().forEach(ProjectConfigImpl::prePersistAttributes);
 
         return wCfg;
     }

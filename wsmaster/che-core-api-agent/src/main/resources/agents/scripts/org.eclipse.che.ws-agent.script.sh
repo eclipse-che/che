@@ -15,10 +15,22 @@ command -v tar >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" tar"; }
 command -v curl >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" curl"; }
 test "$(id -u)" = 0 || SUDO="sudo"
 
-AGENT_BINARIES_URI=file:///mnt/che/ws-agent.tar.gz
+LOCAL_AGENT_BINARIES_URI="/mnt/che/ws-agent.tar.gz"
+DOWNLOAD_AGENT_BINARIES_URI='${WORKSPACE_MASTER_URI}/agent-binaries/ws-agent.tar.gz'
+
 CHE_DIR=$HOME/che
-LINUX_TYPE=$(cat /etc/os-release | grep ^ID= | tr '[:upper:]' '[:lower:]')
-LINUX_VERSION=$(cat /etc/os-release | grep ^VERSION_ID=)
+
+if [ -f /etc/centos-release ]; then
+    FILE="/etc/centos-release"
+    LINUX_TYPE=$(cat $FILE | awk '{print $1}')
+ elif [ -f /etc/redhat-release ]; then
+    FILE="/etc/redhat-release"
+    LINUX_TYPE=$(cat $FILE | cut -c 1-8)
+ else
+    FILE="/etc/os-release"
+    LINUX_TYPE=$(cat $FILE | grep ^ID= | tr '[:upper:]' '[:lower:]')
+    LINUX_VERSION=$(cat $FILE | grep ^VERSION_ID=)
+fi
 MACHINE_TYPE=$(uname -m)
 
 mkdir -p ${CHE_DIR}
@@ -93,23 +105,45 @@ elif echo ${LINUX_TYPE} | grep -qi "alpine"; then
       ln -s /usr/lib/jvm/java-1.8-openjdk $JAVA_HOME
     fi
 
+# Centos 6.6, 6.7, 6.8
+############
+elif echo ${LINUX_TYPE} | grep -qi "CentOS"; then
+     test "${PACKAGES}" = "" || {
+         ${SUDO} yum -y install ${PACKAGES};
+    }
+
+# Red Hat Enterprise Linux 6 
+############################
+elif echo ${LINUX_TYPE} | grep -qi "Red Hat"; then
+    test "${PACKAGES}" = "" || {
+        ${SUDO} yum install ${PACKAGES};
+    }
 
 else
     >&2 echo "Unrecognized Linux Type"
-    >&2 cat /etc/os-release
+    >&2 cat $FILE
     exit 1
 fi
 
 ####################
 ### Install java ###
 ####################
-command -v ${JAVA_HOME}/bin/java >/dev/null 2>&1 || {
+downloadJava() {
+    echo "Downloading JDK 1.8.0_111"
+    JDK_URL=http://download.oracle.com/otn-pub/java/jdk/8u111-b14/jdk-8u111-linux-x64.tar.gz
+    curl -s -j -k -L -H "Cookie: oraclelicense=accept-securebackup-cookie" "${JDK_URL}" | tar -C ${CHE_DIR} -xzf -
+    mv ${CHE_DIR}/jdk1.8.0_111 ${CHE_DIR}/jdk1.8
+
     export JAVA_HOME=${CHE_DIR}/jdk1.8
-    command -v ${JAVA_HOME}/bin/java >/dev/null 2>&1 || {
-        JDK_URL=http://download.oracle.com/otn-pub/java/jdk/8u45-b14/jdk-8u45-linux-x64.tar.gz
-        curl -s -j -k -L -H "Cookie: oraclelicense=accept-securebackup-cookie" "${JDK_URL}" | tar -C ${CHE_DIR} -xzf -
-        mv ${CHE_DIR}/jdk1.8.0_45 ${CHE_DIR}/jdk1.8
-    }
+}
+
+command -v ${JAVA_HOME}/bin/java >/dev/null 2>&1 || {
+    downloadJava;
+} && {
+    java_version=$(${JAVA_HOME}/bin/java -version 2>&1 | sed 's/.* version "\\(.*\\)\\.\\(.*\\)\\..*"/\\1\\2/; 1q')
+    if [ "${java_version}" -lt "18" ]; then
+        downloadJava;
+    fi
 }
 
 ########################
@@ -118,6 +152,23 @@ command -v ${JAVA_HOME}/bin/java >/dev/null 2>&1 || {
 
 rm -rf ${CHE_DIR}/ws-agent
 mkdir -p ${CHE_DIR}/ws-agent
+
+
+# Compute URI of workspace master
+WORKSPACE_MASTER_URI=$(echo $CHE_API | cut -d / -f 1-3)
+
+## Evaluate variables now that prefix is defined
+eval "DOWNLOAD_AGENT_BINARIES_URI=${DOWNLOAD_AGENT_BINARIES_URI}"
+
+
+if [ -f "${LOCAL_AGENT_BINARIES_URI}" ]
+then
+    AGENT_BINARIES_URI="file://${LOCAL_AGENT_BINARIES_URI}"
+else
+    echo "Workspace Agent will be downloaded from Workspace Master"
+    AGENT_BINARIES_URI=${DOWNLOAD_AGENT_BINARIES_URI}
+fi
+
 curl -s  ${AGENT_BINARIES_URI} | tar  xzf - -C ${CHE_DIR}/ws-agent
 
 ###############################################

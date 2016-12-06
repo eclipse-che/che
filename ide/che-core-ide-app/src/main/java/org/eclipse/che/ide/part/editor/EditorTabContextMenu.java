@@ -17,6 +17,7 @@ import com.google.inject.assistedinject.Assisted;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionGroup;
 import org.eclipse.che.ide.api.action.ActionManager;
+import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.action.IdeActions;
 import org.eclipse.che.ide.api.action.Presentation;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
@@ -57,8 +58,6 @@ public class EditorTabContextMenu extends ContextMenu {
         this.editorPart = editorPart;
         this.editorPartStack = editorPartStack;
         this.actionManager = actionManager;
-
-        updateActions();
     }
 
     /** {@inheritDoc} */
@@ -67,10 +66,10 @@ public class EditorTabContextMenu extends ContextMenu {
         return IdeActions.GROUP_EDITOR_TAB_CONTEXT_MENU;
     }
 
-    private void updateActions() {
+    protected ActionGroup updateActions() {
         final ActionGroup mainActionGroup = (ActionGroup)actionManager.getAction(getGroupMenu());
         if (mainActionGroup == null) {
-            return;
+            return new DefaultActionGroup(actionManager);
         }
 
         final Action[] children = mainActionGroup.getChildren(null);
@@ -81,5 +80,6 @@ public class EditorTabContextMenu extends ContextMenu {
             presentation.putClientProperty(CURRENT_TAB_PROP, editorTab);
             presentation.putClientProperty(CURRENT_PANE_PROP, editorPartStack);
         }
+        return super.updateActions();
     }
 }

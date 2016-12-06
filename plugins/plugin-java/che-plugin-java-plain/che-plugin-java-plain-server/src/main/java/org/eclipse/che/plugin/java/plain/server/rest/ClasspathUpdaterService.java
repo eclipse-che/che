@@ -16,7 +16,8 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.project.server.NewProjectConfig;
+import org.eclipse.che.api.core.model.project.NewProjectConfig;
+import org.eclipse.che.api.project.server.NewProjectConfigImpl;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.api.project.server.RegisteredProject;
@@ -104,7 +105,7 @@ public class ClasspathUpdaterService {
                                                                 ServerException {
         RegisteredProject project = projectRegistry.getProject(projectPath);
 
-        NewProjectConfig projectConfig = new NewProjectConfig(projectPath,
+        NewProjectConfig projectConfig = new NewProjectConfigImpl(projectPath,
                                                               project.getName(),
                                                               project.getType(),
                                                               project.getSource());

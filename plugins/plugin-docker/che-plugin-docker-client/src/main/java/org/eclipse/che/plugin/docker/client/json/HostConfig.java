@@ -44,6 +44,7 @@ public class HostConfig {
 
     private Map<String, PortBinding[]> portBindings     = new HashMap<>();
     private int                        memorySwappiness = -1;
+    private int                        pidsLimit        = -1;
 
     public String[] getBinds() {
         return binds;
@@ -85,6 +86,10 @@ public class HostConfig {
         this.publishAllPorts = publishAllPorts;
     }
 
+    public void setPidsLimit(int pidsLimit) {
+        this.pidsLimit = pidsLimit;
+    }
+
     public HostConfig withBinds(String... binds) {
         this.binds = binds;
         return this;
@@ -107,6 +112,11 @@ public class HostConfig {
 
     public HostConfig withPublishAllPorts(boolean publishAllPorts) {
         this.publishAllPorts = publishAllPorts;
+        return this;
+    }
+
+    public HostConfig withPidsLimit(int pidsLimit) {
+        this.pidsLimit = pidsLimit;
         return this;
     }
 
@@ -255,6 +265,10 @@ public class HostConfig {
 
     public long getMemory() {
         return memory;
+    }
+
+    public long getPidsLimit() {
+        return pidsLimit;
     }
 
     public void setMemory(long memory) {
@@ -422,6 +436,7 @@ public class HostConfig {
                ", cpuShares=" + cpuShares +
                ", cpusetCpus='" + cpusetCpus + '\'' +
                ", pidMode='" + pidMode + '\'' +
+               ", pidsLimit='" + pidsLimit + '\'' +
                ", readonlyRootfs=" + readonlyRootfs +
                ", ulimits=" + Arrays.toString(ulimits) +
                ", portBindings=" + portBindings +

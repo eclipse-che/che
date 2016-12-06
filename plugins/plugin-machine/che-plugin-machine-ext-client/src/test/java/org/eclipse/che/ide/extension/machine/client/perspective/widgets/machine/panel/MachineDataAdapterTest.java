@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.panel;
 
-import org.eclipse.che.ide.collections.Array;
 import org.eclipse.che.ide.ui.tree.TreeNodeElement;
 import org.junit.Test;
 import org.junit.runner.RunWith;

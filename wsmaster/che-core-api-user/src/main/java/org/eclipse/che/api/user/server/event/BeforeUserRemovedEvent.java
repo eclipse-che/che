@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.user.server.event;
 
-import org.eclipse.che.api.core.jdbc.jpa.event.CascadeRemovalEvent;
+import org.eclipse.che.api.core.notification.EventOrigin;
+import org.eclipse.che.core.db.event.CascadeRemovalEvent;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 
 /**
@@ -18,6 +19,7 @@ import org.eclipse.che.api.user.server.model.impl.UserImpl;
  *
  * @author Yevhenii Voevodin
  */
+@EventOrigin("user")
 public class BeforeUserRemovedEvent extends CascadeRemovalEvent {
 
     private final UserImpl user;

@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.factory.server;
 
-import javax.persistence.Basic;
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import java.util.Arrays;
 import java.util.Objects;
@@ -19,13 +19,13 @@ import java.util.Objects;
 @Embeddable
 public class FactoryImage {
 
-    @Basic
+    @Column(name = "imagedata")
     private byte[] imageData;
 
-    @Basic
+    @Column(name = "mediatype")
     private String mediaType;
 
-    @Basic
+    @Column(name = "name")
     private String name;
 
     public FactoryImage() {}

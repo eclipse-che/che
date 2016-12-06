@@ -10,13 +10,16 @@
  *******************************************************************************/
 package org.eclipse.che.ide.websocket.ng.impl;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import static org.mockito.Matchers.eq;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -26,42 +29,41 @@ import static org.mockito.Mockito.verify;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class BasicWebSocketEndpointTest {
-    private static final String MESSAGE = "message";
-
     @Mock
-    private WebSocketConnectionSustainer    sustainer;
+    private  WebSocketConnectionSustainer sustainer;
     @Mock
-    private WebSocketTransmissionDispatcher dispatcher;
+    private  MessagesReSender             reSender;
     @Mock
-    private PendingMessagesReSender         reSender;
+    private  WebSocketDispatcher          dispatcher;
     @InjectMocks
-    private BasicWebSocketEndpoint          endpoint;
+    private BasicWebSocketEndpoint        endpoint;
 
     @Test
-    public void shouldResetSustainerOnOpen() {
-        endpoint.onOpen();
+    public void shouldResetSustainerOnOpen(){
+        endpoint.onOpen("url");
 
-        verify(sustainer).reset();
+        verify(sustainer).reset("url");
     }
 
     @Test
-    public void shouldResendMessagesOnOpen() {
-        endpoint.onOpen();
+    public void shouldReSendMessagesOnOpen(){
+        endpoint.onOpen("url");
 
-        verify(reSender).resend();
+        verify(reSender).reSend("url");
     }
 
     @Test
-    public void shouldSustainSessionOnClose() {
-        endpoint.onClose();
+    public void shouldSustainOnClose(){
+        endpoint.onClose("url");
 
-        verify(sustainer).sustain();
+        verify(sustainer).sustain("url");
     }
 
     @Test
-    public void shouldRunReceiverOnMessage() {
-        endpoint.onMessage(MESSAGE);
+    public void shouldDispatchOnMessage(){
+        endpoint.onMessage("url", "message");
 
-        verify(dispatcher).dispatch(eq(MESSAGE));
+        verify(dispatcher).dispatch("url", "message");
     }
+
 }

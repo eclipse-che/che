@@ -22,6 +22,7 @@ import com.google.inject.Inject;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.parts.EditorMultiPartStackState;
 import org.eclipse.che.ide.api.parts.EditorPartStack;
+import org.eclipse.che.ide.part.editor.EmptyEditorsPanel;
 import org.eclipse.che.ide.util.loging.Log;
 
 import javax.validation.constraints.NotNull;
@@ -37,18 +38,21 @@ public class EditorMultiPartStackViewImpl extends ResizeComposite implements Edi
 
     private final BiMap<EditorPartStack, SplitEditorPartView> splitEditorParts;
     private final SplitEditorPartViewFactory                  splitEditorPartViewFactory;
+    private final EmptyEditorsPanel emptyEditorsPanel;
 
     private SplitEditorPartView rootView;
 
     @Inject
-    public EditorMultiPartStackViewImpl(SplitEditorPartViewFactory splitEditorPartViewFactory) {
+    public EditorMultiPartStackViewImpl(SplitEditorPartViewFactory splitEditorPartViewFactory, EmptyEditorsPanel emptyEditorsPanel) {
         this.splitEditorPartViewFactory = splitEditorPartViewFactory;
+        this.emptyEditorsPanel = emptyEditorsPanel;
         this.splitEditorParts = HashBiMap.create();
 
         contentPanel = new LayoutPanel();
         contentPanel.setSize("100%", "100%");
         contentPanel.ensureDebugId("editorMultiPartStack-contentPanel");
         initWidget(contentPanel);
+        contentPanel.add(emptyEditorsPanel);
     }
 
     @Override
@@ -60,6 +64,7 @@ public class EditorMultiPartStackViewImpl extends ResizeComposite implements Edi
                 if (relativePartStack == null) {
                     rootView = splitEditorPartViewFactory.create(widget);
                     splitEditorParts.put(partStack, rootView);
+                    contentPanel.remove(emptyEditorsPanel);
                     contentPanel.add(rootView);
                     return;
                 }
@@ -84,6 +89,9 @@ public class EditorMultiPartStackViewImpl extends ResizeComposite implements Edi
         SplitEditorPartView splitEditorPartView = splitEditorParts.remove(partStack);
         if (splitEditorPartView != null) {
             splitEditorPartView.removeFromParent();
+        }
+        if (splitEditorParts.size() == 0) {
+            contentPanel.add(emptyEditorsPanel);
         }
     }
 

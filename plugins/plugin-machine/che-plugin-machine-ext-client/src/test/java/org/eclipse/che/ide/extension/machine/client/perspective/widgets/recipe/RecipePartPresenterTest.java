@@ -86,8 +86,6 @@ public class RecipePartPresenterTest {
     @Mock
     private RecipeDescriptor  recipeDescriptor2;
     @Mock
-    private RecipeWidget      recipeWidget;
-    @Mock
     private RecipeEditorPanel recipeEditorPanel;
     @Mock
     private OMSVGSVGElement   omsvgsvgElement;

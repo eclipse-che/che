@@ -24,6 +24,8 @@ import org.eclipse.che.ide.util.NameUtils;
 import javax.validation.constraints.NotNull;
 import java.util.Map;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 /**
  * @author Roman Nikitenko
  */
@@ -156,6 +158,11 @@ public class ZipImporterPagePresenter extends AbstractWizardPage<MutableProjectC
      * @return <code>true</code> if url is correct
      */
     private boolean isUrlCorrect(@NotNull String url) {
+        if(isNullOrEmpty(url)) {
+            view.showUrlError("");
+            return false;
+        }
+
         if (!END_URL.test(url)) {
             view.showUrlError(locale.importProjectMessageUrlInvalid());
             return false;

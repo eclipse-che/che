@@ -55,7 +55,7 @@ public class MavenServerManagerTest {
     @BeforeMethod
     public void setUp() throws Exception {
         workspaceCache = new MavenWorkspaceCache();
-        workspaceCache.put(new MavenKey("com.codenvy.ide", "codenvy-ide-subModule", "1.0.0-TEST-SNAPSHOT"),
+        workspaceCache.put(new MavenKey("org.eclipse.che", "che-ide-subModule", "1.0.0-TEST-SNAPSHOT"),
                            new File(MavenServerManagerTest.class.getResource("/multimoduleProject/subModule/pom.xml").getFile()));
         mavenServer = manager.createMavenServer();
         mavenServer.customize(workspaceCache, new MyMavenTerminal(), new MyMavenServerProgressNotifier(), true, false);

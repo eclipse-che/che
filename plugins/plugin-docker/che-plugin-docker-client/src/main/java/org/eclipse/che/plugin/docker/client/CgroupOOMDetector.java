@@ -13,6 +13,7 @@ package org.eclipse.che.plugin.docker.client;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.sun.jna.ptr.LongByReference;
 
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.api.core.util.SystemInfo;
 import org.eclipse.che.commons.lang.Size;
 import org.slf4j.Logger;
@@ -55,6 +56,8 @@ public class CgroupOOMDetector implements DockerOOMDetector {
         this.dockerConnector = dockerConnector;
         this.oomDetectors = new ConcurrentHashMap<>();
         this.executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("CgroupOOMDetector-%d")
+                                                                                .setUncaughtExceptionHandler(
+                                                                                        LoggingUncaughtExceptionHandler.getInstance())
                                                                                 .setDaemon(true)
                                                                                 .build());
     }

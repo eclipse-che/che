@@ -83,14 +83,11 @@ public class WorkspaceRuntimesTest {
 
     private static final String WORKSPACE_ID = "workspace123";
     private static final String ENV_NAME     = "default-env";
-    private static final String NAMESPACE    = "wsNamespace";
 
     @Mock
-    private EventService eventService;
-
+    private EventService         eventService;
     @Mock
     private CheEnvironmentEngine environmentEngine;
-
     @Mock
     private AgentSorter          agentSorter;
     @Mock

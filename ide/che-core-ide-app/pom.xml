@@ -53,6 +53,10 @@
             <artifactId>javax.annotation-api</artifactId>
         </dependency>
         <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+        </dependency>
+        <dependency>
             <groupId>javax.validation</groupId>
             <artifactId>validation-api</artifactId>
         </dependency>
@@ -99,6 +103,10 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-commons-gwt</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-commons-lang</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -275,25 +283,25 @@
                 </executions>
             </plugin>
             <!--<plugin>-->
-                <!--<groupId>org.eclipse.che.core</groupId>-->
-                <!--<artifactId>che-core-api-dto-maven-plugin</artifactId>-->
-                <!--<version>${project.version}</version>-->
-                <!--<executions>-->
-                    <!--<execution>-->
-                        <!--<phase>process-sources</phase>-->
-                        <!--<goals>-->
-                            <!--<goal>generate</goal>-->
-                        <!--</goals>-->
-                    <!--</execution>-->
-                <!--</executions>-->
-                <!--<configuration>-->
-                    <!--<dtoPackages>-->
-                        <!--<package>org.eclipse.che.ide.statepersistance.dto</package>-->
-                    <!--</dtoPackages>-->
-                    <!--<outputDirectory>${dto-generator-out-directory}</outputDirectory>-->
-                    <!--<genClassName>org.eclipse.che.ide.statepersistance.dto.DtoClientImpls</genClassName>-->
-                    <!--<impl>client</impl>-->
-                <!--</configuration>-->
+            <!--<groupId>org.eclipse.che.core</groupId>-->
+            <!--<artifactId>che-core-api-dto-maven-plugin</artifactId>-->
+            <!--<version>${project.version}</version>-->
+            <!--<executions>-->
+            <!--<execution>-->
+            <!--<phase>process-sources</phase>-->
+            <!--<goals>-->
+            <!--<goal>generate</goal>-->
+            <!--</goals>-->
+            <!--</execution>-->
+            <!--</executions>-->
+            <!--<configuration>-->
+            <!--<dtoPackages>-->
+            <!--<package>org.eclipse.che.ide.statepersistance.dto</package>-->
+            <!--</dtoPackages>-->
+            <!--<outputDirectory>${dto-generator-out-directory}</outputDirectory>-->
+            <!--<genClassName>org.eclipse.che.ide.statepersistance.dto.DtoClientImpls</genClassName>-->
+            <!--<impl>client</impl>-->
+            <!--</configuration>-->
             <!--</plugin>-->
             <plugin>
                 <groupId>org.eclipse.che.core</groupId>

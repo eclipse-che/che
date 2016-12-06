@@ -50,8 +50,9 @@ public interface CodeAssistant {
      * appropriate content assist processor to invoke.
      * 
      * @param offset a document offset
+     * @param triggered if triggered by the content assist key binding
      * @param callback the callback to use once completions are ready
      */
-    void computeCompletionProposals(int offset, CodeAssistCallback callback);
+    void computeCompletionProposals(int offset, boolean triggered, CodeAssistCallback callback);
 
 }

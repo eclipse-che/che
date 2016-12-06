@@ -26,7 +26,10 @@ import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
+import org.eclipse.che.api.environment.server.exception.EnvironmentException;
 import org.eclipse.che.api.machine.server.exception.SnapshotException;
+import org.eclipse.che.api.machine.server.exception.SourceNotFoundException;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
@@ -60,6 +63,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
+import static com.google.common.base.Throwables.getCausalChain;
 import static java.lang.Boolean.parseBoolean;
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
@@ -119,6 +123,8 @@ public class WorkspaceManager {
         this.snapshotDao = snapshotDao;
 
         executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("WorkspaceManager-%d")
+                                                                           .setUncaughtExceptionHandler(
+                                                                                   LoggingUncaughtExceptionHandler.getInstance())
                                                                            .setDaemon(true)
                                                                            .build());
     }
@@ -646,6 +652,11 @@ public class WorkspaceManager {
                                   rmEx.getLocalizedMessage());
                     }
                 }
+                for (Throwable cause : getCausalChain(ex)) {
+                    if (cause instanceof SourceNotFoundException) {
+                        return;
+                    }
+                }
                 LOG.error(ex.getLocalizedMessage(), ex);
             }
         }));
@@ -687,9 +698,7 @@ public class WorkspaceManager {
             }
             try {
                 runtimes.stop(workspace.getId());
-                if (workspace.isTemporary()) {
-                    workspaceDao.remove(workspace.getId());
-                } else {
+                if (!workspace.isTemporary()) {
                     workspace.getAttributes().put(UPDATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
                     workspaceDao.update(workspace);
                 }
@@ -700,6 +709,15 @@ public class WorkspaceManager {
                          firstNonNull(stoppedBy, "undefined"));
             } catch (RuntimeException | ConflictException | NotFoundException | ServerException ex) {
                 LOG.error(ex.getLocalizedMessage(), ex);
+            } finally {
+                // Remove tmp workspaces even if stop is failed
+                if (workspace.isTemporary()) {
+                    try {
+                        workspaceDao.remove(workspace.getId());
+                    } catch (ConflictException | ServerException e) {
+                        LOG.error("Unable to remove temporary workspace {} after stop.", workspace.getId());
+                    }
+                }
             }
         }));
     }
@@ -708,7 +726,7 @@ public class WorkspaceManager {
         executor.execute(ThreadLocalPropagateContext.wrap(() -> {
             try {
                 runtimes.startMachine(workspaceId, machineConfig);
-            } catch (ApiException e) {
+            } catch (ApiException | EnvironmentException e) {
                 LOG.error(e.getLocalizedMessage(), e);
             }
         }));

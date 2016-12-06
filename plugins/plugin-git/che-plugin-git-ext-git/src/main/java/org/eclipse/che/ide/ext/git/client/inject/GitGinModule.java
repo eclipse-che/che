@@ -19,7 +19,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.preferences.PreferencePagePresenter;
 import org.eclipse.che.ide.api.project.wizard.ImportWizardRegistrar;
-import org.eclipse.che.ide.ext.git.client.GitCheckoutStatusNotificationReceiver;
+import org.eclipse.che.ide.ext.git.client.GitCheckoutStatusNotificationHandler;
 import org.eclipse.che.ide.ext.git.client.add.AddToIndexView;
 import org.eclipse.che.ide.ext.git.client.add.AddToIndexViewImpl;
 import org.eclipse.che.ide.ext.git.client.branch.BranchView;
@@ -59,11 +59,12 @@ import org.eclipse.che.ide.ext.git.client.reset.commit.ResetToCommitView;
 import org.eclipse.che.ide.ext.git.client.reset.commit.ResetToCommitViewImpl;
 import org.eclipse.che.ide.ext.git.client.reset.files.ResetFilesView;
 import org.eclipse.che.ide.ext.git.client.reset.files.ResetFilesViewImpl;
-import org.eclipse.che.ide.jsonrpc.JsonRpcRequestReceiver;
+import org.eclipse.che.ide.jsonrpc.RequestHandler;
 
 /** @author Andrey Plotnikov */
 @ExtensionGinModule
 public class GitGinModule extends AbstractGinModule {
+
     /** {@inheritDoc} */
     @Override
     protected void configure() {
@@ -91,8 +92,12 @@ public class GitGinModule extends AbstractGinModule {
         install(new GinFactoryModuleBuilder().implement(GitOutputConsole.class, GitOutputConsolePresenter.class)
                                              .build(GitOutputConsoleFactory.class));
 
-        GinMapBinder.newMapBinder(binder(), String.class, JsonRpcRequestReceiver.class)
+        configureGitCheckoutNotifications();
+    }
+
+    private void configureGitCheckoutNotifications() {
+        GinMapBinder.newMapBinder(binder(), String.class, RequestHandler.class)
                     .addBinding("event:git-checkout")
-                    .to(GitCheckoutStatusNotificationReceiver.class);
+                    .to(GitCheckoutStatusNotificationHandler.class);
     }
 }

@@ -20,8 +20,8 @@
  * @description
  * `<che-popup>` defines popup component as wrapper for popup massages
  *
- * @param {string=} che-title the title of popup massage
- * @param {Function=} che-on-close close popup function
+ * @param {string=} title the title of popup massage
+ * @param {Function=} on-close close popup function
  *
  * @author Oleksii Orel
  */
@@ -44,8 +44,8 @@ export class ChePopup {
 
     // scope values
     this.scope = {
-      title: '@cheTitle',
-      onClose: '&cheOnClose'
+      title: '@',
+      onClose: '&'
     };
   }
 

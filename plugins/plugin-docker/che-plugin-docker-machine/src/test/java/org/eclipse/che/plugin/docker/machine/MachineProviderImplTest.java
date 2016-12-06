@@ -20,6 +20,7 @@ import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.machine.server.util.RecipeRetriever;
 import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
@@ -37,7 +38,6 @@ import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
 import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
 import org.eclipse.che.plugin.docker.client.params.TagParams;
 import org.eclipse.che.plugin.docker.machine.node.DockerNode;
-import org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -76,7 +76,6 @@ import static org.testng.Assert.assertTrue;
 
 @Listeners(MockitoTestNGListener.class)
 public class MachineProviderImplTest {
-    private static final String  PROJECT_FOLDER_PATH    = "/projects";
     private static final String  CONTAINER_ID           = "containerId";
     private static final String  WORKSPACE_ID           = "wsId";
     private static final String  MACHINE_NAME           = "machineName";
@@ -103,9 +102,6 @@ public class MachineProviderImplTest {
     private DockerNode dockerNode;
 
     @Mock
-    private WorkspaceFolderPathProvider workspaceFolderPathProvider;
-
-    @Mock
     private UserSpecificDockerRegistryCredentialsProvider credentialsReader;
 
     @Mock
@@ -116,6 +112,9 @@ public class MachineProviderImplTest {
 
     @Mock
     private RecipeRetriever recipeRetriever;
+
+    @Mock
+    private WindowsPathEscaper pathEscaper;
 
     private MachineProviderImpl provider;
 
@@ -297,16 +296,18 @@ public class MachineProviderImplTest {
         assertTrue(argumentCaptor.getValue().getContainerConfig().getHostConfig().isPrivileged());
     }
 
-    @Test(expectedExceptions = ServerException.class)
-    public void shouldRemoveContainerInCaseFailedBindWorkspaceOnCreateInstance() throws Exception {
-        doThrow(ServerException.class).when(dockerNode).bindWorkspace();
-        final boolean isDev = true;
+    @Test
+    public void shouldCreateContainerWithPidsLimit() throws Exception {
+        provider = spy(new MachineProviderBuilder().setPidsLimit(512)
+                                                   .build());
 
-        createInstanceFromRecipe(isDev, WORKSPACE_ID);
+        createInstanceFromRecipe();
 
-        verify(dockerConnector)
-                .removeContainer(RemoveContainerParams.create(CONTAINER_ID).withRemoveVolumes(true).withForce(true));
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        assertEquals(argumentCaptor.getValue().getContainerConfig().getHostConfig().getPidsLimit(), 512);
     }
+
 
     @Test(expectedExceptions = ServerException.class)
     public void shouldRemoveContainerInCaseFailedStartContainer() throws Exception {
@@ -358,42 +359,6 @@ public class MachineProviderImplTest {
                                                     eq("eclipse-che/" + service.getContainerName()),
                                                     eq(dockerNode),
                                                     any(LineConsumer.class));
-    }
-
-    @Test
-    public void shouldBindWorkspaceOnDevInstanceCreationFromRecipe() throws Exception {
-        final boolean isDev = true;
-
-        createInstanceFromRecipe(isDev, WORKSPACE_ID);
-
-        verify(dockerNode).bindWorkspace();
-    }
-
-    @Test
-    public void shouldBindWorkspaceOnDevInstanceCreationFromSnapshot() throws Exception {
-        final boolean isDev = true;
-
-        createInstanceFromSnapshot(isDev, WORKSPACE_ID);
-
-        verify(dockerNode).bindWorkspace();
-    }
-
-    @Test
-    public void shouldNotBindWorkspaceOnNonDevInstanceCreationFromRecipe() throws Exception {
-        final boolean isDev = false;
-
-        createInstanceFromRecipe(isDev, WORKSPACE_ID);
-
-        verify(dockerNode, never()).bindWorkspace();
-    }
-
-    @Test
-    public void shouldNotBindWorkspaceOnNonDevInstanceCreationFromSnapshot() throws Exception {
-        final boolean isDev = false;
-
-        createInstanceFromSnapshot(isDev, WORKSPACE_ID);
-
-        verify(dockerNode, never()).bindWorkspace();
     }
 
     @Test
@@ -612,7 +577,7 @@ public class MachineProviderImplTest {
     }
 
     @Test
-    public void shouldAddServersConfsPortsFromMachineConfigToExposedPortsOnDevInstanceCreationFromRecipe()
+    public void shouldAddServersConfigsPortsFromMachineConfigToExposedPortsOnDevInstanceCreationFromRecipe()
             throws Exception {
         // given
         final boolean isDev = true;
@@ -634,47 +599,7 @@ public class MachineProviderImplTest {
     }
 
     @Test
-    public void shouldBindProjectsFSVolumeToContainerOnDevInstanceCreationFromRecipe() throws Exception {
-        final String expectedHostPathOfProjects = "/tmp/projects";
-        String[] expectedVolumes = new String[] {expectedHostPathOfProjects + ":/projects:Z"};
-
-        when(workspaceFolderPathProvider.getPath(anyString())).thenReturn(expectedHostPathOfProjects);
-
-        final boolean isDev = true;
-
-        CheServiceImpl service = createService();
-        service.setVolumes(null);
-        createInstanceFromRecipe(isDev, service);
-
-
-        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
-        verify(dockerConnector).createContainer(argumentCaptor.capture());
-        verify(dockerConnector).startContainer(any(StartContainerParams.class));
-
-        assertEquals(argumentCaptor.getValue().getContainerConfig().getHostConfig().getBinds(), expectedVolumes);
-    }
-
-    @Test
-    public void shouldNotBindProjectsFSVolumeToContainerOnNonDevInstanceCreationFromRecipe() throws Exception {
-        String[] expectedVolumes = new String[0];
-        final boolean isDev = false;
-
-
-        CheServiceImpl service = createService();
-        service.setVolumes(null);
-        createInstanceFromRecipe(isDev, service);
-
-
-        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
-        verify(dockerConnector).createContainer(argumentCaptor.capture());
-        verify(dockerConnector).startContainer(any(StartContainerParams.class));
-
-        assertEquals(argumentCaptor.getValue().getContainerConfig().getHostConfig().getBinds(), expectedVolumes);
-    }
-
-    @Test
     public void shouldBindCommonAndDevVolumesToContainerOnDevInstanceCreationFromRecipe() throws Exception {
-        final String expectedHostPathOfProjects = "/tmp/projects";
         Set<String> devVolumes = new HashSet<>(asList("/etc:/tmp/etc:ro", "/some/thing:/home/some/thing"));
         Set<String> commonVolumes =
                 new HashSet<>(asList("/some/thing/else:/home/some/thing/else", "/other/path:/home/other/path"));
@@ -682,13 +607,11 @@ public class MachineProviderImplTest {
         final ArrayList<String> expectedVolumes = new ArrayList<>();
         expectedVolumes.addAll(devVolumes);
         expectedVolumes.addAll(commonVolumes);
-        expectedVolumes.add(expectedHostPathOfProjects + ":/projects:Z");
 
         provider = new MachineProviderBuilder().setDevMachineVolumes(devVolumes)
                                                .setAllMachineVolumes(commonVolumes)
                                                .build();
 
-        when(workspaceFolderPathProvider.getPath(anyString())).thenReturn(expectedHostPathOfProjects);
         final boolean isDev = true;
 
         CheServiceImpl service = createService();
@@ -856,28 +779,6 @@ public class MachineProviderImplTest {
         assertFalse(asList(argumentCaptor.getValue().getContainerConfig().getEnv())
                             .contains(DockerInstanceRuntimeInfo.CHE_WORKSPACE_ID + "=" + wsId),
                     "Non dev machine should not contains " + DockerInstanceRuntimeInfo.CHE_WORKSPACE_ID);
-    }
-
-    /**
-     * E.g from https://github.com/boot2docker/boot2docker/blob/master/README.md#virtualbox-guest-additions
-     *
-     * Users should be /Users
-     * /Users should be /Users
-     * c/Users should be /c/Users
-     * /c/Users should be /c/Users
-     * c:/Users should be /c/Users
-     */
-    @Test
-    public void shouldEscapePathForWindowsHost() {
-        assertEquals(provider.escapePath("Users"), "/Users");
-        assertEquals(provider.escapePath("/Users"), "/Users");
-        assertEquals(provider.escapePath("c/Users"), "/c/Users");
-        assertEquals(provider.escapePath("/c/Users"), "/c/Users");
-        assertEquals(provider.escapePath("c:/Users"), "/c/Users");
-        assertEquals(provider.escapePath("C:/Users"), "/c/Users");
-
-        assertEquals(provider.escapePath("C:/Users/path/dir/from/host:/name/of/dir/in/container"),
-                     "/c/Users/path/dir/from/host:/name/of/dir/in/container");
     }
 
     @Test
@@ -1230,6 +1131,7 @@ public class MachineProviderImplTest {
         private String           extraHosts;
         private boolean          doForcePullOnBuild;
         private boolean          privilegedMode;
+        private int              pidsLimit;
         private Set<String>      devMachineEnvVars;
         private Set<String>      allMachineEnvVars;
         private boolean          snapshotUseRegistry;
@@ -1249,6 +1151,7 @@ public class MachineProviderImplTest {
             allMachineVolumes = emptySet();
             extraHosts = null;
             memorySwapMultiplier = MEMORY_SWAP_MULTIPLIER;
+            pidsLimit = -1;
         }
 
         public MachineProviderBuilder setDevMachineEnvVars(Set<String> devMachineEnvVars) {
@@ -1268,6 +1171,11 @@ public class MachineProviderImplTest {
 
         public MachineProviderBuilder setPrivilegedMode(boolean privilegedMode) {
             this.privilegedMode = privilegedMode;
+            return this;
+        }
+
+        public MachineProviderBuilder setPidsLimit(int pidsLimit) {
+            this.pidsLimit = pidsLimit;
             return this;
         }
 
@@ -1312,15 +1220,16 @@ public class MachineProviderImplTest {
                                            devMachineVolumes,
                                            allMachineVolumes,
                                            extraHosts,
-                                           workspaceFolderPathProvider,
-                                           PROJECT_FOLDER_PATH,
                                            doForcePullOnBuild,
                                            privilegedMode,
+                                           pidsLimit,
                                            devMachineEnvVars,
                                            allMachineEnvVars,
                                            snapshotUseRegistry,
                                            memorySwapMultiplier,
-                                           additionalNetworks);
+                                           additionalNetworks,
+                                           null,
+                                           pathEscaper);
         }
     }
 }

@@ -15,9 +15,9 @@ import com.google.inject.persist.Transactional;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.jdbc.jpa.DuplicateKeyException;
-import org.eclipse.che.api.core.jdbc.jpa.IntegrityConstraintViolationException;
-import org.eclipse.che.api.core.jdbc.jpa.event.CascadeRemovalEventSubscriber;
+import org.eclipse.che.core.db.jpa.DuplicateKeyException;
+import org.eclipse.che.core.db.jpa.IntegrityConstraintViolationException;
+import org.eclipse.che.core.db.event.CascadeRemovalEventSubscriber;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.factory.server.model.impl.FactoryImpl;
 import org.eclipse.che.api.factory.server.spi.FactoryDao;
@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
@@ -65,14 +66,14 @@ public class JpaFactoryDao implements FactoryDao {
         } catch (RuntimeException ex) {
             throw new ServerException(ex.getLocalizedMessage(), ex);
         }
-        return factory;
+        return new FactoryImpl(factory);
     }
 
     @Override
     public FactoryImpl update(FactoryImpl update) throws NotFoundException, ConflictException, ServerException {
         requireNonNull(update);
         try {
-            return doUpdate(update);
+            return new FactoryImpl(doUpdate(update));
         } catch (DuplicateKeyException ex) {
             throw new ConflictException(ex.getLocalizedMessage());
         } catch (RuntimeException ex) {
@@ -99,7 +100,7 @@ public class JpaFactoryDao implements FactoryDao {
             if (factory == null) {
                 throw new NotFoundException(format("Factory with id '%s' doesn't exist", id));
             }
-            return factory;
+            return new FactoryImpl(factory);
         } catch (RuntimeException ex) {
             throw new ServerException(ex.getLocalizedMessage(), ex);
         }
@@ -131,7 +132,10 @@ public class JpaFactoryDao implements FactoryDao {
             for (Map.Entry<String, String> entry : params.entrySet()) {
                 typedQuery.setParameter(entry.getKey(), entry.getValue());
             }
-            return typedQuery.getResultList();
+            return typedQuery.getResultList()
+                             .stream()
+                             .map(FactoryImpl::new)
+                             .collect(Collectors.toList());
         } catch (RuntimeException ex) {
             throw new ServerException(ex.getLocalizedMessage(), ex);
         }

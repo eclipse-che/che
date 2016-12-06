@@ -76,7 +76,7 @@ public class SshServiceClientImpl implements SshServiceClient {
 
     @Override
     public Promise<Void> deletePair(String service, String name) {
-        return asyncRequestFactory.createDeleteRequest(sshApi + "/" + service + "/" + name)
+        return asyncRequestFactory.createDeleteRequest(sshApi + "/" + service + "?name=" + name)
                                   .send();
     }
 }

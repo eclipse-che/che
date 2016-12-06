@@ -16,10 +16,13 @@ import org.eclipse.che.api.core.model.factory.OnAppLoaded;
 import org.eclipse.che.api.core.model.factory.OnProjectsLoaded;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
+import javax.persistence.Table;
 import java.util.Objects;
 
 /**
@@ -28,19 +31,24 @@ import java.util.Objects;
  * @author Anton Korneta
  */
 @Entity(name = "Ide")
+@Table(name = "ide")
 public class IdeImpl implements Ide {
 
     @Id
     @GeneratedValue
+    @Column(name = "id")
     private Long id;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "onapploaded_id")
     private OnAppLoadedImpl onAppLoaded;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "onprojectsloaded_id")
     private OnProjectsLoadedImpl onProjectsLoaded;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "onappclosed_id")
     private OnAppClosedImpl onAppClosed;
 
     public IdeImpl() {}
@@ -94,27 +102,34 @@ public class IdeImpl implements Ide {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof IdeImpl)) return false;
-        final IdeImpl other = (IdeImpl)obj;
-        return Objects.equals(onAppLoaded, other.onAppLoaded)
-               && Objects.equals(onProjectsLoaded, other.onProjectsLoaded)
-               && Objects.equals(onAppClosed, other.onAppClosed);
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof IdeImpl)) {
+            return false;
+        }
+        final IdeImpl that = (IdeImpl)obj;
+        return Objects.equals(id, that.id)
+               && Objects.equals(onAppLoaded, that.onAppLoaded)
+               && Objects.equals(onProjectsLoaded, that.onProjectsLoaded)
+               && Objects.equals(onAppClosed, that.onAppClosed);
     }
 
     @Override
     public int hashCode() {
-        int result = 7;
-        result = 31 * result + Objects.hashCode(onAppLoaded);
-        result = 31 * result + Objects.hashCode(onProjectsLoaded);
-        result = 31 * result + Objects.hashCode(onAppClosed);
-        return result;
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(id);
+        hash = 31 * hash + Objects.hashCode(onAppLoaded);
+        hash = 31 * hash + Objects.hashCode(onProjectsLoaded);
+        hash = 31 * hash + Objects.hashCode(onAppClosed);
+        return hash;
     }
 
     @Override
     public String toString() {
         return "IdeImpl{" +
-               "onAppLoaded=" + onAppLoaded +
+               "id=" + id +
+               ", onAppLoaded=" + onAppLoaded +
                ", onProjectsLoaded=" + onProjectsLoaded +
                ", onAppClosed=" + onAppClosed +
                '}';

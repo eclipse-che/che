@@ -31,7 +31,7 @@ public class MavenClasspathUtil {
     private static final Logger            LOG   = LoggerFactory.getLogger(MavenClasspathUtil.class);
 
     public static IClasspathContainer readMavenClasspath(IJavaProject javaProject) {
-        IFile file = javaProject.getProject().getFile(".codenvy/classpath.maven");
+        IFile file = javaProject.getProject().getFile(".che/classpath.maven");
         IClasspathEntry[] entries;
         if (file.exists()) {
             try {

@@ -16,6 +16,7 @@ import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Resource;
@@ -104,6 +105,55 @@ public class FullTextSearchPresenterTest {
         verify(view, never()).showErrorMessage(anyString());
         verify(view).close();
         verify(findResultPresenter).handleResponse(eq(new Resource[0]), eq(SEARCHED_TEXT));
+    }
+
+
+    @Test
+    public void searchWholeWordUnSelect() throws Exception {
+        when(view.getPathToSearch()).thenReturn("/search");
+        when(view.isWholeWordsOnly()).thenReturn(false);
+        when(appContext.getWorkspaceRoot()).thenReturn(workspaceRoot);
+        when(workspaceRoot.getContainer(any(Path.class))).thenReturn(optionalContainerPromise);
+        when(searchContainer.search(anyString(), anyString())).thenReturn(searchResultPromise);
+
+        final String search = NameGenerator.generate("test", 10);
+        fullTextSearchPresenter.search(search);
+
+        verify(optionalContainerPromise).then(optionalContainerCaptor.capture());
+        optionalContainerCaptor.getValue().apply(Optional.of(searchContainer));
+
+        verify(searchResultPromise).then(searchResultCaptor.capture());
+        searchResultCaptor.getValue().apply(new Resource[0]);
+
+        verify(searchContainer).search(anyString(), eq("*" + search + "*"));
+        verify(view).isWholeWordsOnly();
+        verify(view, never()).showErrorMessage(anyString());
+        verify(view).close();
+        verify(findResultPresenter).handleResponse(eq(new Resource[0]), eq(search));
+    }
+
+    @Test
+    public void searchWholeWordSelect() throws Exception {
+        when(view.getPathToSearch()).thenReturn("/search");
+        when(view.isWholeWordsOnly()).thenReturn(true);
+        when(appContext.getWorkspaceRoot()).thenReturn(workspaceRoot);
+        when(workspaceRoot.getContainer(any(Path.class))).thenReturn(optionalContainerPromise);
+        when(searchContainer.search(anyString(), anyString())).thenReturn(searchResultPromise);
+
+        final String search = NameGenerator.generate("test", 10);
+        fullTextSearchPresenter.search(search);
+
+        verify(optionalContainerPromise).then(optionalContainerCaptor.capture());
+        optionalContainerCaptor.getValue().apply(Optional.of(searchContainer));
+
+        verify(searchResultPromise).then(searchResultCaptor.capture());
+        searchResultCaptor.getValue().apply(new Resource[0]);
+
+        verify(searchContainer).search(anyString(), eq(search));
+        verify(view).isWholeWordsOnly();
+        verify(view, never()).showErrorMessage(anyString());
+        verify(view).close();
+        verify(findResultPresenter).handleResponse(eq(new Resource[0]), eq(search));
     }
 
     @Test

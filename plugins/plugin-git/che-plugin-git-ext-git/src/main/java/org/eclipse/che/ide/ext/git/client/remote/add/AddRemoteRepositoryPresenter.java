@@ -66,7 +66,7 @@ public class AddRemoteRepositoryPresenter implements AddRemoteRepositoryView.Act
     @Override
     public void onOkClicked() {
         final String name = view.getName();
-        final String url = view.getUrl();
+        final String url = view.getUrl().trim();
         final Project project = appContext.getRootProject();
 
         service.remoteAdd(appContext.getDevMachine(), project.getLocation(), name, url).then(new Operation<Void>() {

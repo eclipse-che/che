@@ -18,6 +18,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.util.AbstractLineConsumer;
 import org.eclipse.che.api.core.util.LineConsumer;
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
@@ -30,6 +31,7 @@ import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 
 /**
@@ -46,6 +48,8 @@ public abstract class AbstractAgentLauncher implements AgentLauncher {
     private static final Logger          LOG      = LoggerFactory.getLogger(AbstractAgentLauncher.class);
     private static final ExecutorService executor =
             Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("AgentLauncher-%d")
+                                                                    .setUncaughtExceptionHandler(
+                                                                            LoggingUncaughtExceptionHandler.getInstance())
                                                                     .setDaemon(true)
                                                                     .build());
 
@@ -63,6 +67,9 @@ public abstract class AbstractAgentLauncher implements AgentLauncher {
 
     @Override
     public void launch(Instance machine, Agent agent) throws ServerException {
+        if (isNullOrEmpty(agent.getScript())) {
+            return;
+        }
         try {
             final InstanceProcess process = start(machine, agent);
             LOG.debug("Waiting for agent {} is launched. Workspace ID:{}", agent.getId(), machine.getWorkspaceId());

@@ -16,34 +16,76 @@
  * @author Oleksii Orel
  */
 export class CheSelect {
+  restrict: string = 'E';
+  replace: boolean = true;
+  transclude: boolean = true;
+
+  scope: {
+    [propName: string]: string
+  };
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
   constructor() {
-    this.restrict = 'E';
-
-    this.replace = true;
-    this.transclude = true;
-    this.templateUrl = 'components/widget/select/che-select.html';
-
     // scope values
     this.scope = {
       value: '=cheValue',
       labelName: '@?cheLabelName',
       placeHolder: '@chePlaceHolder',
-      optionValues: '=cheOptionValues'
+      optionValues: '=cheOptionValues',
+      myName: '=cheName',
+      myForm: '=cheForm'
     };
   }
 
-  compile(element, attrs) {
+  template(element: ng.IAugmentedJQuery, attrs: any): string {
+    return `<div class="che-select">
+      <!-- Mobile version -->
+      <md-input-container class="che-select-mobile" hide-gt-xs>
+        <label ng-if="labelName">{{value ? labelName : placeHolder}}</label>
+        <md-select ng-model="value"
+                   name="${attrs.cheName}"
+                   md-container-class="che-custom-dropdown"
+                   placeholder="{{placeHolder}}">
+          <md-option ng-value="optionValue.id ? optionValue.id : optionValue.name"
+                     ng-repeat="optionValue in optionValues">{{optionValue.name}}
+          </md-option>
+        </md-select>
+        <!-- display error messages for the form -->
+        <div ng-messages="myForm.${attrs.cheName}.$error"></div>
+      </md-input-container>
+
+      <!-- Desktop version -->
+      <div class="che-select-desktop" hide-xs layout="column" flex>
+        <div layout="row" flex layout-align="start start">
+          <label flex="15" ng-if="labelName">{{labelName}}: </label>
+
+          <div layout="column" class="che-select-container" flex="{{labelName ? 85 : 'none'}}">
+            <md-select ng-model="value"
+                       name="desk${attrs.cheName}"
+                       md-container-class="che-custom-dropdown"
+                       placeholder="{{placeHolder}}">
+              <md-option ng-value="optionValue.id ? optionValue.id : optionValue.name"
+                         ng-repeat="optionValue in optionValues">{{optionValue.name}}
+              </md-option>
+            </md-select>
+            <!-- display error messages for the form -->
+            <div ng-messages="myForm.desk${attrs.cheName}.$error" ng-transclude></div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  compile(element: ng.IAugmentedJQuery, attrs: any): void {
     let keys = Object.keys(attrs);
 
     // search the select field
     let selectElements = element.find('md-select');
 
-    keys.forEach((key) => {
+    keys.forEach((key: string) => {
       // don't reapply internal properties
       if (key.indexOf('$') === 0) {
         return;

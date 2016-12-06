@@ -12,7 +12,7 @@ package org.eclipse.che.api.factory.server.model.impl;
 
 import org.eclipse.che.api.core.model.factory.Author;
 
-import javax.persistence.Basic;
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import java.util.Objects;
 
@@ -24,10 +24,10 @@ import java.util.Objects;
 @Embeddable
 public class AuthorImpl implements Author {
 
-    @Basic
+    @Column(name = "created")
     private Long created;
 
-    @Basic
+    @Column(name = "userid")
     private String userId;
 
     public AuthorImpl() {}
@@ -72,7 +72,7 @@ public class AuthorImpl implements Author {
     public int hashCode() {
         int result = 7;
         result = 31 * result + Objects.hashCode(userId);
-        result = 31 * result + Long.hashCode(created);
+        result = 31 * result + Objects.hashCode(created);
         return result;
     }
 

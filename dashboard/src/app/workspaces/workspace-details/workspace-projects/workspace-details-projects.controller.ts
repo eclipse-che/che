@@ -59,7 +59,15 @@ export class WorkspaceDetailsProjectsCtrl {
 
   updateProjectsData() {
     this.workspace = this.cheWorkspace.getWorkspaceByName(this.namespace, this.workspaceName);
-    this.projects = this.workspace.config.projects;
+    this.projects = [];
+
+    // filter only root projects (do not show sub-projects of multi-project item):
+    this.workspace.config.projects.forEach((project : any) => {
+      let path = project.path.replace('/', '');
+      if (path === project.name) {
+        this.projects.push(project);
+      }
+    });
     this.workspaceId = this.workspace.id;
   }
 

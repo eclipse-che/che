@@ -203,17 +203,17 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
     private void checkStateOfWsAgent(WsAgentHealthStateDto agentHealthStateDto) {
         final int statusCode = agentHealthStateDto.getCode();
         final String infoWindowTitle = "Workspace Agent Not Responding";
-        final ConfirmCallback restartCallback = new StopCallback();
+        final ConfirmCallback stopCallback = new StopCallback();
 
         if (statusCode == 200) {
             dialogFactory.createMessageDialog(infoWindowTitle,
                                               "Our workspace agent is no longer responding. To fix the problem, verify you have a" +
                                               " good network connection and restart the workspace.",
-                                              restartCallback).show();
+                                              stopCallback).show();
         } else {
             dialogFactory.createMessageDialog(infoWindowTitle,
                                               "Our workspace agent is no longer responding. To fix the problem, restart the workspace.",
-                                              restartCallback).show();
+                                              stopCallback).show();
         }
     }
 

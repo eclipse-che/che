@@ -15,6 +15,7 @@ import com.google.inject.name.Named;
 
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
+import org.eclipse.che.ide.api.action.IdeActions;
 import org.eclipse.che.ide.api.constraints.Anchor;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.extension.Extension;
@@ -144,6 +145,14 @@ public class JavaExtension {
         mainContextMenuGroup.addSeparator();
         mainContextMenuGroup.add(markDirectoryAsGroup);
         mainContextMenuGroup.addSeparator();
+
+        DefaultActionGroup editorContextMenuGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_EDITOR_CONTEXT_MENU);
+
+        editorContextMenuGroup.add(quickDocumentationAction, new Constraints(Anchor.AFTER, "format"));
+        editorContextMenuGroup.add(quickFixAction, new Constraints(Anchor.AFTER, "showQuickDoc"));
+        editorContextMenuGroup.add(openDeclarationAction, new Constraints(Anchor.AFTER, "quickFix"));
+        editorContextMenuGroup.add(refactorGroup, new Constraints(Anchor.AFTER, "openJavaDeclaration"));
+        editorContextMenuGroup.add(fileStructureAction, new Constraints(Anchor.AFTER, GROUP_ASSISTANT_REFACTORING));
 
         if (UserAgent.isMac()) {
             keyBinding.getGlobal().addKey(new KeyBuilder().alt().control().charCode('b').build(), "openImplementation");

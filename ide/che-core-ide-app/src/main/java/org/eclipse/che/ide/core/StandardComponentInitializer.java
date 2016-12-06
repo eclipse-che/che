@@ -32,6 +32,7 @@ import org.eclipse.che.ide.actions.FullTextSearchAction;
 import org.eclipse.che.ide.actions.GoIntoAction;
 import org.eclipse.che.ide.actions.HotKeysListAction;
 import org.eclipse.che.ide.actions.ImportProjectAction;
+import org.eclipse.che.ide.actions.LinkWithEditorAction;
 import org.eclipse.che.ide.actions.NavigateToFileAction;
 import org.eclipse.che.ide.actions.OpenFileAction;
 import org.eclipse.che.ide.actions.ProjectConfigurationAction;
@@ -306,6 +307,9 @@ public class StandardComponentInitializer {
     private RefreshPathAction refreshPathAction;
 
     @Inject
+    private LinkWithEditorAction linkWithEditorAction;
+
+    @Inject
     private SignatureHelpAction signatureHelpAction;
 
     @Inject
@@ -568,6 +572,7 @@ public class StandardComponentInitializer {
         DefaultActionGroup resourceOperation = new DefaultActionGroup(actionManager);
         actionManager.registerAction("resourceOperation", resourceOperation);
         actionManager.registerAction("refreshPathAction", refreshPathAction);
+        actionManager.registerAction("linkWithEditor", linkWithEditorAction);
         resourceOperation.addSeparator();
         resourceOperation.add(showReferenceAction);
         resourceOperation.add(goIntoAction);
@@ -581,6 +586,7 @@ public class StandardComponentInitializer {
         resourceOperation.addSeparator();
         resourceOperation.add(downloadResourceAction);
         resourceOperation.add(refreshPathAction);
+        resourceOperation.add(linkWithEditorAction);
         resourceOperation.addSeparator();
         resourceOperation.add(convertFolderToProjectAction);
         resourceOperation.addSeparator();
@@ -649,6 +655,19 @@ public class StandardComponentInitializer {
         actionManager.registerAction("noOpAction", new NoOpAction());
         actionManager.registerAction("signatureHelp", signatureHelpAction);
 
+        DefaultActionGroup editorContextMenuGroup = new DefaultActionGroup(actionManager);
+        actionManager.registerAction(IdeActions.GROUP_EDITOR_CONTEXT_MENU, editorContextMenuGroup);
+
+        editorContextMenuGroup.add(undoAction);
+        editorContextMenuGroup.add(redoAction);
+        editorContextMenuGroup.addSeparator();
+        editorContextMenuGroup.add(formatterAction);
+
+        editorContextMenuGroup.addSeparator();
+        editorContextMenuGroup.add(fullTextSearchAction);
+        editorContextMenuGroup.add(closeActiveEditorAction);
+
+
         // Define hot-keys
         keyBinding.getGlobal().addKey(new KeyBuilder().action().alt().charCode('n').build(), "navigateToFile");
         keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('F').build(), "fullTextSearch");
@@ -662,6 +681,10 @@ public class StandardComponentInitializer {
         keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('e').build(), "openRecentFiles");
         keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('s').build(), "noOpAction");
         keyBinding.getGlobal().addKey(new KeyBuilder().charCode(KeyCodeMap.DELETE).build(), "deleteItem");
+
+        keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode('N').build(), "newFile");
+        keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode('x').build(), "createProject");
+        keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode('A').build(), "importProject");
 
         if (UserAgent.isMac()) {
             keyBinding.getGlobal().addKey(new KeyBuilder().control().charCode('w').build(), "closeActiveEditor");

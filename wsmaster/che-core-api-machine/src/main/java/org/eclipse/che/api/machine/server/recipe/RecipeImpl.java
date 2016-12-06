@@ -14,14 +14,14 @@ import org.eclipse.che.api.core.model.machine.Recipe;
 import org.eclipse.che.api.machine.server.jpa.RecipeEntityListener;
 import org.eclipse.che.api.machine.shared.ManagedRecipe;
 
-import javax.persistence.Basic;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.Id;
-import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -33,30 +33,32 @@ import java.util.Objects;
  * @author Anton Korneta
  */
 @Entity(name = "Recipe")
+@Table(name = "recipe")
 @EntityListeners(RecipeEntityListener.class)
 public class RecipeImpl implements ManagedRecipe {
 
     @Id
+    @Column(name = "id")
     private String id;
 
-    @Basic
+    @Column(name = "name")
     private String name;
 
-    @Basic
+    @Column(name = "creator")
     private String creator;
 
-    @Basic
+    @Column(name = "type")
     private String type;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "script", columnDefinition = "TEXT")
     private String script;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
     @ElementCollection
     @Column(name = "tag")
-    @CollectionTable(indexes = @Index(columnList = "tag"))
+    @CollectionTable(name = "recipe_tags", joinColumns = @JoinColumn(name = "recipe_id"))
     private List<String> tags;
 
     public RecipeImpl() {
