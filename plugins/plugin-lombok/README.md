@@ -31,8 +31,9 @@ Add:
 
 ```
 <dependency>
-     <groupId>org.eclipse.che.plugin</groupId>
-   <artifactId>che-plugin-lombok-server</artifactId>
+    <groupId>org.eclipse.che.plugin</groupId>
+    <artifactId>che-plugin-lombok-server</artifactId>
+    <scope>runtime<scope>
     <exclusions>
         <exclusion>
             <artifactId>lombok</artifactId>
