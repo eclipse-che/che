@@ -472,21 +472,21 @@ public class BuildImageParams {
         return "BuildImageParams{" +
                "repository='" + repository + '\'' +
                ", tag='" + tag + '\'' +
-               ", authConfigs=" + authConfigs +
-               ", doForcePull=" + doForcePull +
-               ", memoryLimit=" + memoryLimit +
-               ", memorySwapLimit=" + memorySwapLimit +
-               ", files=" + files +
+               ", authConfigs='" + authConfigs + '\'' +
+               ", doForcePull='" + doForcePull + '\'' +
+               ", memoryLimit='" + memoryLimit + '\'' +
+               ", memorySwapLimit='" + memorySwapLimit + '\'' +
+               ", files=" + files + '\'' +
                ", dockerfile='" + dockerfile + '\'' +
                ", remote='" + remote + '\'' +
-               ", quiet=" + quiet +
-               ", noCache=" + noCache +
-               ", removeIntermediateContainer=" + removeIntermediateContainer +
-               ", forceRemoveIntermediateContainers=" + forceRemoveIntermediateContainers +
-               ", cpusetCpus=" + cpusetCpus +
-               ", cpuPeriod=" + cpuPeriod +
-               ", cpuQuota=" + cpuQuota +
-               ", buildArgs=" + buildArgs +
+               ", quiet='" + quiet + '\'' +
+               ", noCache='" + noCache + '\'' +
+               ", removeIntermediateContainer='" + removeIntermediateContainer + '\'' +
+               ", forceRemoveIntermediateContainers='" + forceRemoveIntermediateContainers + '\'' +
+               ", cpusetCpus='" + cpusetCpus + '\'' +
+               ", cpuPeriod='" + cpuPeriod + '\'' +
+               ", cpuQuota='" + cpuQuota + '\'' +
+               ", buildArgs='" + buildArgs + '\'' +
                '}';
     }
 
