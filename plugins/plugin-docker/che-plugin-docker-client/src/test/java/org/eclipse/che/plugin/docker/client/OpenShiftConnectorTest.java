@@ -236,4 +236,40 @@ public class OpenShiftConnectorTest {
                         p.getProtocol()).collect(Collectors.toList());
         assertTrue(imageExposedPorts.keySet().stream().anyMatch(portsAndProtocols::contains));
     }
+
+    @Test
+    public void shouldConvertLabelsToValidKubernetesLabelNames() {
+        String validLabelRegex   = "([A-Za-z0-9][-A-Za-z0-9_\\.]*)?[A-Za-z0-9]";
+
+        // Given
+        Map<String, String> labels = new HashMap<>();
+        labels.put(OpenShiftConnector.CHE_SERVER_LABEL_PREFIX + "4401/tcp:path:", "/api");
+        labels.put(OpenShiftConnector.CHE_SERVER_LABEL_PREFIX + "8000/tcp:ref:", "tomcat-debug");
+
+        // When
+        Map<String, String> converted = openShiftConnector.convertLabelsToKubernetesNames(labels);
+
+        // Then
+        for (Map.Entry<String, String> entry : converted.entrySet()) {
+            assertTrue(entry.getKey().matches(validLabelRegex),
+                    String.format("Converted Key %s should be valid Kubernetes label name", entry.getKey()));
+            assertTrue(entry.getValue().matches(validLabelRegex),
+                    String.format("Converted Value %s should be valid Kubernetes label name", entry.getValue()));
+        }
+    }
+
+    @Test
+    public void shouldBeAbleToRecoverOriginalLabelsAfterConversion() {
+        // Given
+        Map<String, String> originalLabels = new HashMap<>();
+        originalLabels.put(OpenShiftConnector.CHE_SERVER_LABEL_PREFIX + "4401/tcp:path:", "/api");
+        originalLabels.put(OpenShiftConnector.CHE_SERVER_LABEL_PREFIX + "8000/tcp:ref:", "tomcat-debug");
+
+        // When
+        Map<String, String> converted   = openShiftConnector.convertLabelsToKubernetesNames(originalLabels);
+        Map<String, String> unconverted = openShiftConnector.convertKubernetesNamesToLabels(converted);
+
+        // Then
+        assertEquals(originalLabels, unconverted);
+    }
 }
