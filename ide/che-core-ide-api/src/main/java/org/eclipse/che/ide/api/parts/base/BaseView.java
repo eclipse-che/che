@@ -109,8 +109,8 @@ public abstract class BaseView<T extends BaseActionDelegate> extends Composite i
         titleLabel.setStyleName(resources.partStackCss().ideBasePartTitleLabel());
         toolbarHeader.addWest(titleLabel, 200);
 
-        addMinimizeButton();
         addMaximizeButton();
+        addMinimizeButton();
 
         /**
          * Handle double clicking on the toolbar header
@@ -145,8 +145,9 @@ public abstract class BaseView<T extends BaseActionDelegate> extends Composite i
     }
 
     private void addMaximizeButton() {
-        ToolButton maximizeButton = new ToolButton(FontAwesome.ARROWS_ALT);
-        maximizeButton.getElement().setAttribute("name", "maximizePart");
+        SVGImage maximize = new SVGImage(resources.maximizePart());
+        maximize.getElement().setAttribute("name", "workBenchIconMaximize");
+        ToolButton maximizeButton = new ToolButton(maximize);
         maximizeButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {

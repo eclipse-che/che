@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.part;
 
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
@@ -22,6 +23,7 @@ import org.eclipse.che.ide.api.event.EditorDirtyStateChangedEvent;
 import org.eclipse.che.ide.api.mvp.Presenter;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStack;
+import org.eclipse.che.ide.api.parts.PartStackStateChangedEvent;
 import org.eclipse.che.ide.api.parts.PartStackView;
 import org.eclipse.che.ide.api.parts.PartStackView.TabItem;
 import org.eclipse.che.ide.api.parts.PropertyListener;
@@ -296,6 +298,14 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
         if (delegate != null) {
             delegate.onMaximize(this);
         }
+
+        // Notify the part stack state has been changed.
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                eventBus.fireEvent(new PartStackStateChangedEvent(PartStackPresenter.this));
+            }
+        });
     }
 
     @Override
@@ -317,6 +327,14 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
         if (activeTab != null) {
             activeTab.unSelect();
         }
+
+        // Notify the part stack state has been changed.
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                eventBus.fireEvent(new PartStackStateChangedEvent(PartStackPresenter.this));
+            }
+        });
     }
 
     @Override
@@ -347,6 +365,14 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
         if (activeTab != null) {
             activeTab.unSelect();
         }
+
+        // Notify the part stack state has been changed.
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                eventBus.fireEvent(new PartStackStateChangedEvent(PartStackPresenter.this));
+            }
+        });
     }
 
     @Override
@@ -375,6 +401,14 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
         if (activeTab != null) {
             activeTab.select();
         }
+
+        // Notify the part stack state has been changed.
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                eventBus.fireEvent(new PartStackStateChangedEvent(PartStackPresenter.this));
+            }
+        });
     }
 
     /** {@inheritDoc} */
