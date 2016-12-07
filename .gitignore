@@ -62,3 +62,4 @@ Thumbs.db
 
 # Che files
 .che
+dockerfiles/che/assembly
