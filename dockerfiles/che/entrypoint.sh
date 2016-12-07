@@ -10,53 +10,6 @@
 #   Codenvy, S.A. - initial API and implementation
 #
 
-set -e
-set +o posix
-
-check_docker() {
-  if ! has_docker; then
-    error "Docker not found. Get it at https://docs.docker.com/engine/installation/."
-    return 1;
-  fi
-
-  if ! docker ps > /dev/null 2>&1; then
-    output=$(docker ps)
-    error "Docker not installed properly: \n${output}"
-    echo "Check: Does /var/run/docker.sock have r/w permissions?"
-    echo "Check: Does your Docker client & version match?"
-    DOCKER_PERMS=$(stat -c %A /var/run/docker.sock)
-    DOCKER_SERVER_VERSION=$(docker version --format '{{.Server.Version}}') 
-    DOCKER_CLIENT_VERSION=$(docker version --format '{{.Client.Version}}')
-    echo "Docker /var/run/docker.sock Permissions: $DOCKER_PERMS"
-    echo "Docker Server: $DOCKER_SERVER_VERSION"
-    echo "Docker Client: $DOCKER_CLIENT_VERSION"
-    return 1;
-  fi
-}
-
-has_docker() {
-  hash docker 2>/dev/null && return 0 || return 1
-}
-
-determine_os () {
-  case "${OSTYPE}" in
-     linux*|freebsd*)
-       HOST="linux" 
-     ;;
-     darwin*)
-       HOST="mac" 
-     ;;
-     cygwin|msys|win32)
-       HOST="windows" 
-     ;;
-     *)
-       # unknown option
-       error "We could not detect your operating system. Che is unlikely to work properly."
-       return 1
-     ;;
-  esac
-}
-
 init_global_variables () {
   # For coloring console output
   BLUE='\033[1;34m'
@@ -76,12 +29,10 @@ Variables:
     CHE_IP                              The IP address of the host - must be set if remote clients connecting
     CHE_LOCAL_CONF_DIR                  If set, will load che.properties from folder
     CHE_BLOCKING_ENTROPY                Starts Tomcat with blocking entropy: -Djava.security.egd=file:/dev/./urandom
-    CHE_IN_CONTAINER                    Set to true if this server is running inside of a Docker container
     CHE_LAUNCH_DOCKER_REGISTRY          If true, uses Docker registry to save ws snapshots instead of disk
     CHE_REGISTRY_HOST                   Hostname of Docker registry to launch, otherwise 'localhost'
     CHE_LOG_LEVEL                       [INFO | DEBUG] Sets the output level of Tomcat messages
     CHE_DEBUG_SERVER                    If true, activates Tomcat's JPDA debugging mode
-    CHE_SKIP_JAVA_VERSION_CHECK         If true, skips the pre-flight check for a valid JAVA_HOME
     CHE_HOME                            Where the Che assembly resides - self-determining if not set
 "
 
@@ -91,9 +42,6 @@ Variables:
 
   DEFAULT_CHE_SERVER_ACTION=run
   CHE_SERVER_ACTION=${CHE_SERVER_ACTION:-${DEFAULT_CHE_SERVER_ACTION}}
-
-  DEFAULT_CHE_IN_CONTAINER=false
-  CHE_IN_CONTAINER=${CHE_IN_CONTAINER:-${DEFAULT_CHE_IN_CONTAINER}}
 
   DEFAULT_CHE_LAUNCH_DOCKER_REGISTRY=false
   CHE_LAUNCH_DOCKER_REGISTRY=${CHE_LAUNCH_DOCKER_REGISTRY:-${DEFAULT_CHE_LAUNCH_DOCKER_REGISTRY}}
@@ -114,9 +62,6 @@ Variables:
   DEFAULT_CHE_DEBUG_SERVER=false
   CHE_DEBUG_SERVER=${CHE_DEBUG_SERVER:-${DEFAULT_CHE_DEBUG_SERVER}}
 
-  DEFAULT_CHE_SKIP_JAVA_VERSION_CHECK=false
-  CHE_SKIP_JAVA_VERSION_CHECK=${CHE_SKIP_JAVA_VERSION_CHECK:-${DEFAULT_CHE_SKIP_JAVA_VERSION_CHECK}}
-
   DEFAULT_CHE_HOME=$(get_default_che_home)
   export CHE_HOME=${CHE_HOME:-${DEFAULT_CHE_HOME}}
 
@@ -127,13 +72,7 @@ Variables:
 get_default_che_home () {
   # The base directory of Che
   if [ -z "${CHE_HOME}" ]; then
-    if [ "${HOST}" == "windows" ]; then
-      # che-497: Determine windows short directory name in bash
-      echo `(cd "$( dirname "${BASH_SOURCE[0]}" )" && \
-                      cmd //C 'FOR %i in (..) do @echo %~Si')`
-    else
-      echo "$(dirname "$(cd "$(dirname "${0}")" && pwd -P)")"
-    fi
+    echo "$(dirname "$(cd "$(dirname "${0}")" && pwd -P)")"
   else
     echo "/home/user/che"
   fi
@@ -144,29 +83,6 @@ get_default_che_data () {
   if [ -z "${CHE_DATA}" ]; then
     echo "/data"
   fi
-}
-
-parse_command_line () {
-  if [ $# -gt 1 ]; then
-    error "'--<name>' parameters are deprecated - use CHE_ variables instead."
-    usage
-    return 1
-  fi
-
-  case $1 in
-    start|stop|run)
-      CHE_SERVER_ACTION=$1
-    ;;
-    -h|--help)
-      usage
-      return 1
-    ;;
-    *)
-      # unknown option
-      usage
-      return 1
-    ;;
-  esac
 }
 
 error () {
@@ -189,11 +105,6 @@ set_environment_variables () {
     export CHE_DOCKER_MACHINE_HOST="${CHE_IP}"
   fi
 
-  #if [ "${WIN}" == "true" ] && [ ! -z "${JAVA_HOME}" ]; then
-    # che-497: Determine windows short directory name in bash
-    # export JAVA_HOME=`(cygpath -u $(cygpath -w --short-name "${JAVA_HOME}"))`
-  #fi
-
   # Convert Tomcat environment variables to POSIX format.
   if [[ "${JAVA_HOME}" == *":"* ]]; then
     JAVA_HOME=$(echo /"${JAVA_HOME}" | sed  's|\\|/|g' | sed 's|:||g')
@@ -202,22 +113,6 @@ set_environment_variables () {
   # Convert Che environment variables to POSIX format.
   if [[ "${CHE_HOME}" == *":"* ]]; then
     CHE_HOME=$(echo /"${CHE_HOME}" | sed  's|\\|/|g' | sed 's|:||g')
-  fi
-
-  if [[ "${CHE_HOME}" =~ \ |\' ]] && [[ "${HOST}" == "windows" ]]; then
-    echo "!!!"
-    echo "!!! Ohhhhh boy."
-    echo "!!! You are on Windows and installed Che into a directory that contains a space."
-    echo "!!! Tomcat behaves badly because of this."
-    echo "!!!"
-    echo "!!! We attempted to work around this by converting your path to one without a space."
-    echo "!!! However, it seems that the drive where Che is installed does not allow this."
-    echo "!!! So we seem to be buggered."
-    echo "!!!"
-    echo "!!! You can fix this issue by installing Che into a directory without spaces in the name."
-    echo "!!! Isn't Windows fun?  Long live William Shatner."
-    echo "!!!"
-    return 1
   fi
 
   # Che configuration directory - where che.properties lives
@@ -241,24 +136,12 @@ set_environment_variables () {
   export CHE_LOGS_DIR="${CATALINA_HOME}/logs/"
 }
 
-get_docker_ready () {
-  if [ "${HOST}" == "windows" ]; then
-    if [ -z ${DOCKER_HOST+x} ]; then
-      export DOCKER_HOST=tcp://localhost:2375
-    fi
-  fi
-}
-
 docker_exec() {
-  if [ "${HOST}" == "windows" ]; then
-    MSYS_NO_PATHCONV=1 docker.exe "$@"
-  else
-    "$(which docker)" "$@"
-  fi
+  "$(which docker)" "$@"
 }
 
 start_che_server () {
-  if ${CHE_LAUNCH_DOCKER_REGISTRY} ; then
+ if ${CHE_LAUNCH_DOCKER_REGISTRY} ; then
     # Export the value of host here
     launch_docker_registry
   fi
@@ -269,6 +152,7 @@ start_che_server () {
 }
 
 stop_che_server () {
+  CHE_SERVER_ACTION="stop"
   echo -e "Stopping Che server running on localhost:${CHE_PORT}"
   call_catalina >/dev/null 2>&1
 }
@@ -278,32 +162,6 @@ call_catalina () {
   if [ ! -d "${ASSEMBLY_BIN_DIR}" ]; then
     error "Could not find Che's application server."
     return 1;
-  fi
-
-  if [ -z "${JAVA_HOME}" ]; then
-    error "JAVA_HOME is not set. Please set to directory of JVM or JRE."
-    return 1;
-  fi
-
-  # Test to see that Java is installed and working
-  "${JAVA_HOME}"/bin/java &>/dev/null || JAVA_EXIT=$? || true
-  if [ "${JAVA_EXIT}" != "1" ]; then
-    error "We could not find a working Java JVM. 'java' command fails."
-    return 1;
-  fi
-
-  if [[ "${CHE_SKIP_JAVA_VERSION_CHECK}" == false ]]; then
-    # Che requires Java version 1.8 or higher.
-    JAVA_VERSION=$("${JAVA_HOME}"/bin/java -version 2>&1 | awk -F '"' '/version/ {print $2}')
-    if [  -z "${JAVA_VERSION}" ]; then
-      error "Failure running JAVA_HOME/bin/java -version. We received ${JAVA_VERSION}."
-      return 1;
-    fi
-
-    if [[ "${JAVA_VERSION}" < "1.8" ]]; then
-      error "Che requires Java version 1.8 or higher. We found ${JAVA_VERSION}."
-      return 1;
-    fi
   fi
 
   ### Initialize default JVM arguments to run che
@@ -364,20 +222,155 @@ launch_docker_registry () {
     fi
 }
 
-execute_che () { 
-  check_docker
-  determine_os
-  init_global_variables
-  parse_command_line "$@"
-  set_environment_variables
-  get_docker_ready
+init() {
+  ### Any variables with export is a value that native Tomcat che.sh startup script requires
+  export CHE_IP=${CHE_IP}
 
-  if [ "${CHE_SERVER_ACTION}" == "stop" ]; then
-    stop_che_server
+  if [ -f "/assembly/bin/che.sh" ]; then
+    echo "Found custom assembly..."
+    export CHE_HOME="/assembly"
   else
-    start_che_server
+    echo "Using embedded assembly..."
+    export CHE_HOME="/home/user/che"
+  fi
+
+  ### Are we using the included assembly or did user provide their own?
+  if [ ! -f $CHE_HOME/conf/che.properties ]; then
+    echo "!!!"
+    echo "!!! Error: Could not find $CHE_HOME/conf/che.properties."
+    echo "!!! Error: Did you use CHE_ASSEMBLY with a typo?"
+    echo "!!!"
+    exit 1
+  fi
+
+  ### We need to discover the host mount provided by the user for `/data`
+  export CHE_DATA="/data"
+  CHE_DATA_HOST=$(get_che_data_from_host)
+
+  ### Are we going to use the embedded che.properties or one provided by user?`
+  ### CHE_LOCAL_CONF_DIR is internal Che variable that sets where to load
+  if [ -f "/conf/che.properties" ]; then
+    echo "Found custom che.properties..."
+    export CHE_LOCAL_CONF_DIR="/conf"
+  else
+    echo "Using embedded che.properties... Copying template to ${CHE_DATA_HOST}/conf."
+    mkdir -p /data/conf
+    cp -rf "${CHE_HOME}/conf/che.properties" /data/conf/che.properties
+    export CHE_LOCAL_CONF_DIR="/data/conf"
+  fi
+
+  # Update the provided che.properties with the location of the /data mounts
+  sed -i "/che.workspace.storage=/c\che.workspace.storage=/data/workspaces" $CHE_LOCAL_CONF_DIR/che.properties
+  sed -i "/che.database=/c\che.database=/data/storage" $CHE_LOCAL_CONF_DIR/che.properties
+  sed -i "/che.template.storage=/c\che.template.storage=/data/templates" $CHE_LOCAL_CONF_DIR/che.properties
+  sed -i "/che.stacks.storage=/c\che.stacks.storage=/data/stacks/stacks.json" $CHE_LOCAL_CONF_DIR/che.properties
+  sed -i "/che.stacks.images=/c\che.stacks.images=/data/stacks/images" $CHE_LOCAL_CONF_DIR/che.properties
+  sed -i "/che.workspace.agent.dev=/c\che.workspace.agent.dev=${CHE_DATA_HOST}/lib/ws-agent.tar.gz" $CHE_LOCAL_CONF_DIR/che.properties
+  sed -i "/che.workspace.terminal_linux_amd64=/c\che.workspace.terminal_linux_amd64=${CHE_DATA_HOST}/lib/linux_amd64/terminal" $CHE_LOCAL_CONF_DIR/che.properties
+  sed -i "/che.workspace.terminal_linux_arm7=/c\che.workspace.terminal_linux_arm7=${CHE_DATA_HOST}/lib/linux_arm7/terminal" $CHE_LOCAL_CONF_DIR/che.properties
+
+  # CHE_DOCKER_MACHINE_HOST_EXTERNAL must be set if you are in a VM.
+  HOSTNAME=${CHE_DOCKER_MACHINE_HOST_EXTERNAL:-$(get_docker_external_hostname)}
+  if has_external_hostname; then
+    # Internal property used by Che to set hostname.
+    # See: LocalDockerInstanceRuntimeInfo.java#L9
+    export CHE_DOCKER_MACHINE_HOST_EXTERNAL=${HOSTNAME}
+  fi
+  ### Necessary to allow the container to write projects to the folder
+  export CHE_WORKSPACE_STORAGE="${CHE_DATA_HOST}/workspaces"
+  export CHE_WORKSPACE_STORAGE_CREATE_FOLDERS=false
+
+  # Move files from /lib to /lib-copy.  This puts files onto the host.
+  rm -rf ${CHE_DATA}/lib/*
+  mkdir -p ${CHE_DATA}/lib  
+  cp -rf ${CHE_HOME}/lib/* "${CHE_DATA}"/lib
+
+  if [[ ! -f "${CHE_DATA}"/stacks/stacks.json ]];then
+    rm -rf "${CHE_DATA}"/stacks/*
+    mkdir -p "${CHE_DATA}"/stacks
+    cp -rf "${CHE_HOME}"/stacks/* "${CHE_DATA}"/stacks
+  fi
+
+  if [[ ! -f "${CHE_DATA}"/templates/samples.json ]];then
+    rm -rf "${CHE_DATA}"/templates/*
+    mkdir -p "${CHE_DATA}"/templates
+    cp -rf "${CHE_HOME}"/templates/* "${CHE_DATA}"/templates
+  fi
+
+  # A che property, which names the Docker network used for che + ws to communicate
+  export JAVA_OPTS="${JAVA_OPTS} -Dche.docker.network=bridge"
+}
+
+get_che_data_from_host() {
+  DEFAULT_DATA_HOST_PATH=/home/user/che
+  CHE_SERVER_CONTAINER_ID=$(get_che_server_container_id)
+  # If `docker inspect` fails $DEFAULT_DATA_HOST_PATH is returned
+  echo $(docker inspect --format='{{(index .Volumes "/data")}}' $CHE_SERVER_CONTAINER_ID 2>/dev/null || echo $DEFAULT_DATA_HOST_PATH)
+}
+
+get_che_server_container_id() {
+  # Returning `hostname` doesn't work when running Che on OpenShift/Kubernetes.
+  # In these cases `hostname` correspond to the pod ID that is different from
+  # the container ID
+  hostname
+}
+
+is_docker_for_mac_or_windows() {
+  if uname -r | grep -q 'moby'; then
+    return 0
+  else
+    return 1
   fi
 }
 
-# Run the finish function if exit signal initiated
-execute_che "$@"
+get_docker_external_hostname() {
+  if is_docker_for_mac_or_windows; then
+    echo "localhost"
+  else
+    echo ""
+  fi
+}
+
+has_external_hostname() {
+  if [ "${HOSTNAME}" = "" ]; then
+    return 1
+  else
+    return 0
+  fi
+}
+
+# SITTERM / SIGINT
+responsible_shutdown() {
+  echo ""
+  echo "Received SIGTERM"
+  stop_che_server &
+  wait ${PID}
+  exit;
+}
+
+set -e
+set +o posix
+
+# setup handlers
+# on callback, kill the last background process, which is `tail -f /dev/null` and execute the specified handler
+trap 'responsible_shutdown' SIGHUP SIGTERM SIGINT
+
+init
+init_global_variables
+set_environment_variables
+
+# run che
+start_che_server &
+
+PID=$!
+
+# See: http://veithen.github.io/2014/11/16/sigterm-propagation.html
+wait ${PID}
+wait ${PID}
+EXIT_STATUS=$?
+
+# wait forever
+while true
+do
+  tail -f /dev/null & wait ${!}
+done
