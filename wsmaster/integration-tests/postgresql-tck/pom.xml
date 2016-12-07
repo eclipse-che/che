@@ -16,7 +16,7 @@
     <parent>
         <artifactId>integration-tests-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>5.0.0-M8</version>
+        <version>5.0.0-M9-SNAPSHOT</version>
     </parent>
     <artifactId>postgresql-tck</artifactId>
     <packaging>jar</packaging>
