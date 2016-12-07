@@ -21,7 +21,6 @@ get_container_folder() {
   echo "${FOLDER:=not set}"
 }
 
-
 get_this_container_id() {
   hostname
 }
@@ -56,7 +55,6 @@ get_container_host_bind_folder() {
     esac
   done
 }
-
 
 get_docker_install_type() {
   debug $FUNCNAME
@@ -216,6 +214,11 @@ check_docker() {
   fi
 
   CHE_VERSION=$CHE_IMAGE_VERSION
+}
+
+check_docker_networking() {
+  curl
+  return 3;
 }
 
 check_tty() {

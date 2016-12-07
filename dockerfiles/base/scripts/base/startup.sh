@@ -265,7 +265,7 @@ cleanup() {
   # message if it isn't currently mounted.
   if [ $RETURN_CODE -eq "3" ]; then
     error ""
-    error "Unexpected exit: Trace output saved to $CHE_HOST_CONFIG/'cli.log'."
+    error "Unexpected exit: Trace output saved to $CHE_HOST_CONFIG/cli.log."
   fi
 }
 
