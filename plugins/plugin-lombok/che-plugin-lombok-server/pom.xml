@@ -21,14 +21,10 @@
     <artifactId>che-plugin-lombok-server</artifactId>
     <packaging>jar</packaging>
     <name>Che Plugin :: Lombok :: Server</name>
-    <properties>
-        <org.projectlombok.lombok.version>1.16.10</org.projectlombok.lombok.version>
-    </properties>
     <dependencies>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>${org.projectlombok.lombok.version}</version>
         </dependency>
     </dependencies>
     <build>
@@ -57,7 +53,6 @@
                                 <artifactItem>
                                     <groupId>org.projectlombok</groupId>
                                     <artifactId>lombok</artifactId>
-                                    <version>${org.projectlombok.lombok.version}</version>
                                     <type>jar</type>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}/packager-conf/jar</outputDirectory>
