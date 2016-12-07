@@ -59,6 +59,8 @@ init_constants() {
   DEFAULT_CHE_LICENSE_URL="https://www.eclipse.org/legal/epl-v10.html"
   CHE_LICENSE_URL=${CHE_LICENSE_URL:-${DEFAULT_CHE_LICENSE_URL}}
 
+  DEFAULT_CHE_IMAGE_FULLNAME="eclipse/che-cli:<version>"
+  CHE_IMAGE_FULLNAME=${CHE_IMAGE_FULLNAME:-${DEFAULT_CHE_IMAGE_FULLNAME}}
 }
 
 
@@ -73,8 +75,9 @@ log() {
   fi
 }
 
-usage () {
+usage() {
   debug $FUNCNAME
+  init_usage
   printf "%s" "${USAGE}"
   return 1;
 }
@@ -209,6 +212,11 @@ init_logging() {
 init() {
   init_constants
 
+  # If there are no parameters, immediately display usage
+  if [[ $# == 0 ]]; then
+    usage;
+  fi
+
   SCRIPTS_BASE_CONTAINER_SOURCE_DIR="/scripts/base"
   # add helper scripts
   for HELPER_FILE in "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/*.sh
@@ -218,13 +226,7 @@ init() {
 
   # Make sure Docker is working and we have /var/run/docker.sock mounted or valid DOCKER_HOST
   check_docker "$@"
-
-  # Cannot print out usage information until after we verify Docker is loaded.
-  init_usage
-  if [[ $# == 0 ]]; then
-    usage;
-  fi
-
+  
   # Verify that -it is passed on the command line
   check_tty
 
