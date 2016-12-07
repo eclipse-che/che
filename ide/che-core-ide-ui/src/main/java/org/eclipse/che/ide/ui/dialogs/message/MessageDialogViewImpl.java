@@ -56,11 +56,6 @@ public class MessageDialogViewImpl extends Window implements MessageDialogView {
 
     /** {@inheritDoc} */
     @Override
-    protected void onClose() {
-    }
-
-    /** {@inheritDoc} */
-    @Override
     public void showDialog() {
         show(footer.okButton);
     }

@@ -36,13 +36,13 @@ public abstract class DefaultChainedCodeAssistProcessor implements CodeAssistPro
     }
 
     @Override
-    public void computeCompletionProposals(final TextEditor textEditor, final int offset, final CodeAssistCallback callback) {
+    public void computeCompletionProposals(final TextEditor textEditor, final int offset, final boolean triggered, final CodeAssistCallback callback) {
         if (!this.codeAssistProcessors.isEmpty()) {
             final List<CompletionProposal> proposalList = new ArrayList<>();
             final List<CodeAssistProcessor> expected = new ArrayList<>();
             for (final CodeAssistProcessor processor : this.codeAssistProcessors) {
                 expected.add(processor);
-                processor.computeCompletionProposals(textEditor, offset, new CodeAssistCallback() {
+                processor.computeCompletionProposals(textEditor, offset, triggered, new CodeAssistCallback() {
                     @Override
                     public void proposalComputed(final List<CompletionProposal> processorProposals) {
                         expected.remove(processor);

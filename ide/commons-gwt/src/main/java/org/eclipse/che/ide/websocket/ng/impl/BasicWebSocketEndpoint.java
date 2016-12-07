@@ -22,43 +22,41 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class BasicWebSocketEndpoint implements WebSocketEndpoint {
-    private final WebSocketConnectionSustainer    sustainer;
-    private final PendingMessagesReSender         reSender;
-    private final WebSocketTransmissionDispatcher dispatcher;
+    private final WebSocketConnectionSustainer sustainer;
+    private final MessagesReSender             reSender;
+    private final WebSocketDispatcher          dispatcher;
 
     @Inject
-    public BasicWebSocketEndpoint(WebSocketConnectionSustainer sustainer,
-                                  PendingMessagesReSender pending,
-                                  WebSocketTransmissionDispatcher dispatcher) {
+    public BasicWebSocketEndpoint(WebSocketConnectionSustainer sustainer, MessagesReSender reSender, WebSocketDispatcher dispatcher) {
         this.sustainer = sustainer;
-        this.reSender = pending;
+        this.reSender = reSender;
         this.dispatcher = dispatcher;
     }
 
     @Override
-    public void onOpen() {
+    public void onOpen(String url) {
         Log.debug(getClass(), "Session opened.");
 
-        sustainer.reset();
-        reSender.resend();
+        sustainer.reset(url);
+        reSender.reSend(url);
     }
 
     @Override
-    public void onClose() {
+    public void onClose(String url) {
         Log.debug(getClass(), "Session closed.");
 
-        sustainer.sustain();
+        sustainer.sustain(url);
     }
 
     @Override
-    public void onError() {
-        Log.warn(getClass(), "Error occurred.");
+    public void onError(String url) {
+        Log.warn(getClass(), "Error occurred for endpoint " + url);
     }
 
     @Override
-    public void onMessage(String message) {
+    public void onMessage(String url, String message) {
         Log.debug(getClass(), "Message received: " + message);
 
-        dispatcher.dispatch(message);
+        dispatcher.dispatch(url, message);
     }
 }

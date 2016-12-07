@@ -37,6 +37,7 @@ import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.api.workspace.server.jpa.JpaStackDao;
 import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao;
+import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.spi.StackDao;
@@ -140,8 +141,8 @@ public class PostgreSqlTckModule extends TckModule {
         // workspace
         bind(WorkspaceDao.class).to(JpaWorkspaceDao.class);
         bind(StackDao.class).to(JpaStackDao.class);
-        bind(new TypeLiteral<TckRepository<WorkspaceImpl>>() {}).toInstance(new JpaTckRepository<>(WorkspaceImpl.class));
-        bind(new TypeLiteral<TckRepository<StackImpl>>() {}).toInstance(new JpaTckRepository<>(StackImpl.class));
+        bind(new TypeLiteral<TckRepository<WorkspaceImpl>>() {}).toInstance(new WorkspaceRepository());
+        bind(new TypeLiteral<TckRepository<StackImpl>>() {}).toInstance(new StackRepository());
     }
 
     private static void waitConnectionIsEstablished(String dbUrl, String dbUser, String dbPassword) {
@@ -227,6 +228,30 @@ public class PostgreSqlTckModule extends TckModule {
                                                                                    w.getNamespace(),
                                                                                    "simple")))
                                     .collect(Collectors.toList()));
+        }
+    }
+
+    private static class WorkspaceRepository extends JpaTckRepository<WorkspaceImpl> {
+        public WorkspaceRepository() { super(WorkspaceImpl.class); }
+
+        @Override
+        public void createAll(Collection<? extends WorkspaceImpl> entities) throws TckRepositoryException {
+            for (WorkspaceImpl entity : entities) {
+                entity.getConfig().getProjects().forEach(ProjectConfigImpl::prePersistAttributes);
+            }
+            super.createAll(entities);
+        }
+    }
+
+    private static class StackRepository extends JpaTckRepository<StackImpl> {
+        public StackRepository() { super(StackImpl.class); }
+
+        @Override
+        public void createAll(Collection<? extends StackImpl> entities) throws TckRepositoryException {
+            for (StackImpl stack : entities) {
+                stack.getWorkspaceConfig().getProjects().forEach(ProjectConfigImpl::prePersistAttributes);
+            }
+            super.createAll(entities);
         }
     }
 }

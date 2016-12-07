@@ -92,8 +92,7 @@ public interface ProjectConfigDto extends ProjectConfig {
     ProjectConfigDto withLinks(List<Link> links);
 
     /** Provides information about project errors. If project doesn't have any error this field is empty. */
-    @ApiModelProperty(value = "Optional information about project errors. If project doesn't have any error this field is empty",
-                      position = 17)
+    @ApiModelProperty(value = "Optional information about project errors. If project doesn't have any error this field is empty")
     List<ProjectProblemDto> getProblems();
 
     /** @see #getProblems */

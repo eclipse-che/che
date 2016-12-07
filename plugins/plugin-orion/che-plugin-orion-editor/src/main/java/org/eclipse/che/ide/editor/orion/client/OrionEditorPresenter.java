@@ -348,20 +348,18 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
             return;
         }
 
-        //file moved directly
-        if (delta.getFromPath().equals(document.getFile().getLocation())) {
-            final Resource resource = delta.getResource();
-            final Path movedFrom = delta.getFromPath();
+        final Resource resource = delta.getResource();
+        final Path movedFrom = delta.getFromPath();
 
-            if (document.getFile().getLocation().equals(movedFrom)) {
-                deletedFilesController.add(movedFrom.toString());
-                document.setFile((File)resource);
-                input.setFile((File)resource);
-            }
+        //file moved directly
+        if (document.getFile().getLocation().equals(movedFrom)) {
+            deletedFilesController.add(movedFrom.toString());
+            document.setFile((File)resource);
+            input.setFile((File)resource);
 
             updateContent();
-        } else if (delta.getFromPath().isPrefixOf(document.getFile().getLocation())) { //directory where file moved
-            final Path relPath = document.getFile().getLocation().removeFirstSegments(delta.getFromPath().segmentCount());
+        } else if (movedFrom.isPrefixOf(document.getFile().getLocation())) { //directory where file moved
+            final Path relPath = document.getFile().getLocation().removeFirstSegments(movedFrom.segmentCount());
             final Path newPath = delta.getToPath().append(relPath);
 
             appContext.getWorkspaceRoot().getFile(newPath).then(new Operation<Optional<File>>() {
@@ -381,7 +379,6 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
                 }
             });
         }
-
     }
 
     private void updateTabReference(File file, Path oldPath) {

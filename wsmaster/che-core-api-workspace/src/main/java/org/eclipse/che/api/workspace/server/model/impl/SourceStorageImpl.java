@@ -94,28 +94,35 @@ public class SourceStorageImpl implements SourceStorage {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof SourceStorageImpl)) return false;
-        final SourceStorageImpl other = (SourceStorageImpl)o;
-        return Objects.equals(type, other.type) &&
-               Objects.equals(location, other.location) &&
-               getParameters().equals(other.getParameters());
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof SourceStorageImpl)) {
+            return false;
+        }
+        final SourceStorageImpl that = (SourceStorageImpl)obj;
+        return Objects.equals(id, that.id)
+               && Objects.equals(type, that.type)
+               && Objects.equals(location, that.location)
+               && getParameters().equals(that.getParameters());
     }
 
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = hash * 31 + Objects.hashCode(type);
-        hash = hash * 31 + Objects.hashCode(location);
-        hash = hash * 31 + getParameters().hashCode();
+        hash = 31 * hash + Objects.hashCode(id);
+        hash = 31 * hash + Objects.hashCode(type);
+        hash = 31 * hash + Objects.hashCode(location);
+        hash = 31 * hash + getParameters().hashCode();
         return hash;
     }
 
     @Override
     public String toString() {
         return "SourceStorageImpl{" +
-               "type='" + type + '\'' +
+               "id=" + id +
+               ", type='" + type + '\'' +
                ", location='" + location + '\'' +
                ", parameters=" + parameters +
                '}';

@@ -14,6 +14,7 @@ import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.project.shared.dto.TreeElement;
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.workspace.shared.dto.NewProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.ide.resource.Path;
@@ -91,6 +92,24 @@ public interface ProjectServiceClient {
      * @since 4.4.0
      */
     Promise<ProjectConfigDto> createProject(ProjectConfigDto configuration, Map<String, String> options);
+
+    /**
+     * Create batch of projects according to their configurations.
+     * <p/>
+     * Notes: a project will be created by importing when project configuration contains {@link SourceStorageDto}
+     * object, otherwise this one will be created corresponding its {@link NewProjectConfigDto}:
+     * <li> - {@link NewProjectConfigDto} object contains only one mandatory {@link NewProjectConfigDto#setPath(String)} field.
+     * In this case Project will be created as project of "blank" type </li>
+     * <li> - a project will be created as project of "blank" type when declared primary project type is not registered, </li>
+     * <li> - a project will be created without mixin project type when declared mixin project type is not registered</li>
+     * <li> - for creating a project by generator {@link NewProjectConfigDto#getOptions()} should be specified.</li>
+     *
+     * @param configurations
+     *         the list of configurations to creating projects
+     * @return {@link Promise} with the list of {@link ProjectConfigDto}
+     * @see ProjectConfigDto
+     */
+    Promise<List<ProjectConfigDto>> createBatchProjects(List<NewProjectConfigDto> configurations);
 
     /**
      * Returns the item description by given {@code path}.

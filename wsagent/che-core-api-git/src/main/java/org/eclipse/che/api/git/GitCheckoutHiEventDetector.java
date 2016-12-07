@@ -14,8 +14,7 @@ import com.google.common.annotations.Beta;
 
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.jsonrpc.JsonRpcRequestTransmitter;
-import org.eclipse.che.api.core.jsonrpc.shared.JsonRpcRequest;
+import org.eclipse.che.api.core.jsonrpc.RequestTransmitter;
 import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto;
 import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto.Type;
 import org.eclipse.che.api.vfs.Path;
@@ -61,17 +60,15 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class GitCheckoutHiEventDetector implements HiEventDetector<GitCheckoutEventDto> {
     private static final Logger LOG = getLogger(GitCheckoutHiEventDetector.class);
 
-    private static final String  GIT_DIR                  = ".git";
-    private static final String  HEAD_FILE                = "HEAD";
-    private static final Pattern PATTERN                  = compile("ref: refs/heads/");
+    private static final String  GIT_DIR   = ".git";
+    private static final String  HEAD_FILE = "HEAD";
+    private static final Pattern PATTERN   = compile("ref: refs/heads/");
 
     private final VirtualFileSystemProvider virtualFileSystemProvider;
-
-    private final JsonRpcRequestTransmitter transmitter;
+    private final RequestTransmitter        transmitter;
 
     @Inject
-    public GitCheckoutHiEventDetector(VirtualFileSystemProvider virtualFileSystemProvider,
-                                      JsonRpcRequestTransmitter transmitter) {
+    public GitCheckoutHiEventDetector(VirtualFileSystemProvider virtualFileSystemProvider, RequestTransmitter transmitter) {
         this.virtualFileSystemProvider = virtualFileSystemProvider;
         this.transmitter = transmitter;
     }
@@ -93,10 +90,7 @@ public class GitCheckoutHiEventDetector implements HiEventDetector<GitCheckoutEv
                 final Type type = getType(fileContent);
                 final String name = getName(fileContent, type);
 
-                transmitter.transmit(newDto(JsonRpcRequest.class)
-                                             .withMethod("event:git-checkout")
-                                             .withJsonrpc("2.0")
-                                             .withParams(newDto(GitCheckoutEventDto.class).withName(name).withType(type).toString()));
+                transmitter.broadcast("event:git-checkout", newDto(GitCheckoutEventDto.class).withName(name).withType(type));
 
             }
         }

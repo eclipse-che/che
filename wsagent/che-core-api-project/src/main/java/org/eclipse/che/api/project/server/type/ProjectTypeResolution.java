@@ -21,10 +21,16 @@ public abstract class ProjectTypeResolution {
 
     private String             type;
     private Map<String, Value> attributes;
+    private String             resolution;
 
     public ProjectTypeResolution(String type, Map<String, Value> attributes) {
+        this(type, attributes, "");
+    }
+
+    public ProjectTypeResolution(String type, Map<String, Value> attributes, String resolution) {
         this.type = type;
         this.attributes = attributes;
+        this.resolution = resolution;
     }
 
     /**
@@ -32,6 +38,13 @@ public abstract class ProjectTypeResolution {
      */
     public String getType() {
         return type;
+    }
+
+    /**
+     * @return the reason that current source code NOT matches project type requirements
+     */
+    public String getResolution() {
+        return resolution;
     }
 
     /**

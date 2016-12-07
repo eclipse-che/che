@@ -49,8 +49,8 @@ export class CheSsh {
 
     // remote call
     this.remoteSshAPI = this.$resource('/api/ssh', {}, {
-      getKeyPair: { method: 'GET', url: '/api/ssh/:serviceId/:nameId'},
-      removeKey: { method: 'DELETE', url: '/api/ssh/:serviceId/:nameId'},
+      getKeyPair: { method: 'GET', url: '/api/ssh/:serviceId/find?name=:nameId'},
+      removeKey: { method: 'DELETE', url: '/api/ssh/:serviceId/?name=:nameId'},
       generateKey: { method: 'POST', url: '/api/ssh/generate'},
     });
   }

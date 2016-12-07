@@ -29,6 +29,7 @@ import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
@@ -69,7 +70,7 @@ public class JpaStackDao implements StackDao {
             if (stack == null) {
                 throw new NotFoundException(format("Stack with id '%s' doesn't exist", id));
             }
-            return stack;
+            return new StackImpl(stack);
         } catch (RuntimeException x) {
             throw new ServerException(x.getLocalizedMessage(), x);
         }
@@ -89,7 +90,7 @@ public class JpaStackDao implements StackDao {
     public StackImpl update(StackImpl update) throws NotFoundException, ServerException, ConflictException {
         requireNonNull(update, "Required non-null update");
         try {
-            return doUpdate(update);
+            return new StackImpl(doUpdate(update));
         } catch (DuplicateKeyException x) {
             throw new ConflictException(format("Stack with name '%s' already exists", update.getName()));
         } catch (RuntimeException x) {
@@ -115,7 +116,10 @@ public class JpaStackDao implements StackDao {
         try {
             return query.setMaxResults(maxItems)
                         .setFirstResult(skipCount)
-                        .getResultList();
+                        .getResultList()
+                        .stream()
+                        .map(StackImpl::new)
+                        .collect(Collectors.toList());
         } catch (RuntimeException x) {
             throw new ServerException(x.getLocalizedMessage(), x);
         }

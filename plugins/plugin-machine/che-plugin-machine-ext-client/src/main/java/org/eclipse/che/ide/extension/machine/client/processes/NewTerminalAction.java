@@ -78,7 +78,7 @@ public class NewTerminalAction extends AbstractPerspectiveAction implements Proc
 
     @Override
     public void actionPerformed(ActionEvent event) {
-        processesPanelPresenter.newTerminal();
+        processesPanelPresenter.newTerminal(this);
     }
 
     @Override

@@ -10,63 +10,59 @@
  *******************************************************************************/
 package org.eclipse.che.ide.websocket.ng.impl;
 
-import com.google.inject.Inject;
-
-import org.eclipse.che.api.core.websocket.shared.WebSocketTransmission;
-import org.eclipse.che.ide.util.loging.Log;
-
-import javax.inject.Singleton;
-
 /**
- * Entry point for high level WEB SOCKET connection operations.
+ * This interface is purposed to split WEB SOCKET API and implementations,
+ * that is needed because here we are wrapping native implementations which
+ * potentially may require switching to some javascript library.
  *
  * @author Dmitry Kuleshov
  */
-@Singleton
-public class WebSocketConnection {
-    public static final int IMMEDIATELY = 0;
+public interface WebSocketConnection {
 
-    private final WebSocketCreator webSocketCreator;
+    /**
+     * Open a WEB SOCKET connection
+     */
+    void open();
 
-    private WebSocket webSocket;
-    private String    url;
+    /**
+     * Close a WEB SOCKET connection
+     */
+    void close();
 
-    @Inject
-    public WebSocketConnection(WebSocketCreator webSocketCreator) {
-        this.webSocketCreator = webSocketCreator;
-    }
+    /**
+     * Send a text message over WEB SOCKET
+     *
+     * @param message
+     *         text message to send
+     */
+    void send(final String message);
 
-    public WebSocketConnection initialize(String url){
-        this.url = url;
-        return this;
-    }
+    /**
+     * Checks if WEB SOCKET connection is closed
+     *
+     * @return <code>true</code> if closed
+     */
+    boolean isClosed();
 
-    public void open(int delay) {
-        if (url == null){
-            Log.error(WebSocketConnection.class, "Cannot open connection because no URL is set");
+    /**
+     * Checks if WEB SOCKET connection is closing
+     *
+     * @return <code>true</code> if closing
+     */
+    boolean isClosing();
 
-            throw new IllegalStateException("No URL is set");
-        }
+    /**
+     * Checks if WEB SOCKET connection is open
+     *
+     * @return <code>true</code> if open
+     */
+    boolean isOpen();
 
-        webSocket = webSocketCreator.create(url, delay);
-        webSocket.open();
+    /**
+     * Checks if WEB SOCKET connection is connecting
+     *
+     * @return <code>true</code> if connecting
+     */
+    boolean isConnecting();
 
-        Log.debug(getClass(), "Opening connection. Url: " + url);
-    }
-
-    public void close() {
-        webSocket.close();
-
-        Log.debug(WebSocketConnection.class, "Closing connection.");
-    }
-
-    public void send(WebSocketTransmission message) {
-        webSocket.send(message.toString());
-
-        Log.debug(getClass(), "Sending message: " + message);
-    }
-
-    public boolean isOpen() {
-        return webSocket != null && webSocket.isOpen();
-    }
 }

@@ -14,16 +14,16 @@ import io.typefox.lsapi.ServerCapabilities;
 
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-
-import java.util.List;
 
 import org.eclipse.che.api.languageserver.shared.lsapi.CompletionItemDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.RangeDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentIdentifierDTO;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.editor.codeassist.Completion;
 import org.eclipse.che.ide.api.editor.codeassist.CompletionProposal;
@@ -31,30 +31,36 @@ import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.text.LinearRange;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.icon.Icon;
-import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerResources;
 import org.eclipse.che.plugin.languageserver.ide.filters.Match;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 
+import java.util.List;
+
 /**
  * @author Anatolii Bazko
+ * @author Kaloyan Raev
  */
 public class CompletionItemBasedCompletionProposal implements CompletionProposal {
 
-    private final CompletionItemDTO         completionItem;
+    private CompletionItemDTO               completionItem;
     private final TextDocumentServiceClient documentServiceClient;
     private final TextDocumentIdentifierDTO documentId;
     private final LanguageServerResources   resources;
     private final Icon                      icon;
     private final ServerCapabilities        serverCapabilities;
     private final List<Match>               highlights;
+    private final int                       offset;
+    private boolean resolved;
 
     CompletionItemBasedCompletionProposal(CompletionItemDTO completionItem,
                                           TextDocumentServiceClient documentServiceClient,
                                           TextDocumentIdentifierDTO documentId,
-                                          LanguageServerResources resources, Icon icon,
+                                          LanguageServerResources resources,
+                                          Icon icon,
                                           ServerCapabilities serverCapabilities,
-                                          List<Match> highlights) {
+                                          List<Match> highlights,
+                                          int offset) {
         this.completionItem = completionItem;
         this.documentServiceClient = documentServiceClient;
         this.documentId = documentId;
@@ -62,18 +68,43 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
         this.icon = icon;
         this.serverCapabilities = serverCapabilities;
         this.highlights = highlights;
+        this.offset = offset;
+        this.resolved = false;
     }
 
     @Override
-    public Widget getAdditionalProposalInfo() {
-        if (completionItem.getDocumentation() != null && !completionItem.getDocumentation().isEmpty()) {
-            Label label = new Label(completionItem.getDocumentation());
-            label.setWordWrap(true);
-            label.getElement().getStyle().setFontSize(13, Style.Unit.PX);
-            label.setSize("100%", "100%");
-            return label;
+    public void getAdditionalProposalInfo(final AsyncCallback<Widget> callback) {
+        if (completionItem.getDocumentation() == null && canResolve()) {
+            resolve().then(new Operation<CompletionItemDTO>() {
+                @Override
+                public void apply(CompletionItemDTO item) throws OperationException {
+                    completionItem = item;
+                    resolved = true;
+                    callback.onSuccess(createAdditionalInfoWidget());
+                }
+            }).catchError(new Operation<PromiseError>() {
+                @Override
+                public void apply(PromiseError e) throws OperationException {
+                    callback.onFailure(e.getCause());
+                }
+            });
+        } else {
+            callback.onSuccess(createAdditionalInfoWidget());
         }
-        return null;
+    }
+
+    private Widget createAdditionalInfoWidget() {
+        String documentation = completionItem.getDocumentation();
+        if (documentation == null || documentation.trim().isEmpty()) {
+            documentation = "No documentation found.";
+        }
+
+        Label label = new Label(documentation);
+        label.setWordWrap(true);
+        label.getElement().getStyle().setFontSize(13, Style.Unit.PX);
+        label.getElement().getStyle().setMarginLeft(4, Style.Unit.PX);
+        label.setSize("100%", "100%");
+        return label;
     }
 
     @Override
@@ -129,50 +160,43 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
 
     @Override
     public void getCompletion(final CompletionCallback callback) {
+        callback.onCompletion(new CompletionImpl(completionItem, offset));
+    }
 
-        if (serverCapabilities.getCompletionProvider() != null &&
-            serverCapabilities.getCompletionProvider().getResolveProvider() != null &&
-            serverCapabilities.getCompletionProvider().getResolveProvider()) {
-            completionItem.setTextDocumentIdentifier(documentId);
-            documentServiceClient.resolveCompletionItem(completionItem).then(new Operation<CompletionItemDTO>() {
-                @Override
-                public void apply(CompletionItemDTO arg) throws OperationException {
-                    callback.onCompletion(new CompletionImpl(arg));
-                }
-            }).catchError(new Operation<PromiseError>() {
-                @Override
-                public void apply(PromiseError arg) throws OperationException {
-                    Log.error(getClass(), arg);
-                    //try to apply with default text
-                    callback.onCompletion(new CompletionImpl(completionItem));
-                }
-            });
-        } else {
-            callback.onCompletion(new CompletionImpl(completionItem));
-        }
+    private boolean canResolve() {
+        return !resolved &&
+               serverCapabilities.getCompletionProvider() != null &&
+               serverCapabilities.getCompletionProvider().getResolveProvider() != null &&
+               serverCapabilities.getCompletionProvider().getResolveProvider();
+    }
+
+    private Promise<CompletionItemDTO> resolve() {
+        completionItem.setTextDocumentIdentifier(documentId);
+        return documentServiceClient.resolveCompletionItem(completionItem);
     }
 
     private static class CompletionImpl implements Completion {
 
         private CompletionItemDTO completionItem;
+        private int               offset;
 
-        public CompletionImpl(CompletionItemDTO completionItem) {
+        public CompletionImpl(CompletionItemDTO completionItem, int offset) {
             this.completionItem = completionItem;
+            this.offset = offset;
         }
 
         @Override
         public void apply(Document document) {
-            //TODO in general resolve completion item may not provide getTextEdit, need to add checks
             if (completionItem.getTextEdit() != null) {
                 RangeDTO range = completionItem.getTextEdit().getRange();
                 int startOffset = document.getIndexFromPosition(
                         new TextPosition(range.getStart().getLine(), range.getStart().getCharacter()));
-                int endOffset = document
-                        .getIndexFromPosition(new TextPosition(range.getEnd().getLine(), range.getEnd().getCharacter()));
+                int endOffset = offset + document.getIndexFromPosition(
+                        new TextPosition(range.getEnd().getLine(), range.getEnd().getCharacter()));
                 document.replace(startOffset, endOffset - startOffset, completionItem.getTextEdit().getNewText());
             } else {
                 String insertText = completionItem.getInsertText() == null ? completionItem.getLabel() : completionItem.getInsertText();
-                document.replace(document.getCursorOffset(), 0, insertText);
+                document.replace(document.getCursorOffset() - offset, offset, insertText);
             }
         }
 

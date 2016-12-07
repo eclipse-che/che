@@ -55,10 +55,6 @@ public class ChoiceDialogViewImpl extends Window implements ChoiceDialogView {
     }
 
     @Override
-    protected void onClose() {
-    }
-
-    @Override
     public void showDialog() {
         this.show();
     }

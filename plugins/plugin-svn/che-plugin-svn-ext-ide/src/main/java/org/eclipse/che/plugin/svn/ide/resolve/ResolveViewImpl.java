@@ -136,5 +136,6 @@ public class ResolveViewImpl extends Window implements ResolveView {
     @Override
     protected void onClose() {
         mainPanel.getElement().removeAllChildren();
+        super.onClose();
     }
 }

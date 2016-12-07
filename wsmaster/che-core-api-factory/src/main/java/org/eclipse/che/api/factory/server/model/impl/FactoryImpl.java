@@ -135,6 +135,10 @@ public class FactoryImpl implements Factory {
              images);
     }
 
+    public FactoryImpl(FactoryImpl factory) {
+        this(factory, factory.images);
+    }
+
     @Override
     public String getId() {
         return id;
