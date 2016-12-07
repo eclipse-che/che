@@ -217,8 +217,34 @@ check_docker() {
 }
 
 check_docker_networking() {
-  curl
-  return 3;
+  # Check to see if HTTP_PROXY, HTTPS_PROXY, and NO_PROXY is set within the Docker daemon.
+  OUTPUT=$(docker info)
+  HTTP_PROXY=$(grep "Http Proxy" <<< "$OUTPUT" || true) 
+  if [ ! -z "$HTTP_PROXY" ]; then
+    HTTP_PROXY=${HTTP_PROXY#"Http Proxy: "}
+  else 
+    HTTP_PROXY=""
+  fi
+
+  HTTPS_PROXY=$(grep "Https Proxy" <<< "$OUTPUT" || true) 
+  if [ ! -z "$HTTPS_PROXY" ]; then
+    HTTPS_PROXY=${HTTPS_PROXY#"Https Proxy: "}
+  else
+    HTTPS_PROXY=""
+  fi
+
+  NO_PROXY=$(grep "No Proxy" <<< "$OUTPUT" || true) 
+  if [ ! -z "$NO_PROXY" ]; then
+    NO_PROXY=${NO_PROXY#"No Proxy: "}
+  else
+    NO_PROXY=""
+  fi
+
+  if [[ ! ${HTTP_PROXY} = "" ]] ||
+     [[ ! ${HTTPS_PROXY} = "" ]] ||
+     [[ ! ${NO_PROXY} = "" ]]; then
+     info "Proxy: HTTP_PROXY=${HTTP_PROXY}, HTTPS_PROXY=${HTTPS_PROXY}, NO_PROXY=${NO_PROXY}"
+  fi
 }
 
 check_tty() {

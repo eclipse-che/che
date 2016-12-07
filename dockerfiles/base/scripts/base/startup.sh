@@ -227,6 +227,9 @@ init() {
   # Make sure Docker is working and we have /var/run/docker.sock mounted or valid DOCKER_HOST
   check_docker "$@"
   
+  # Check to see if Docker is configured with a proxy and pull values
+  check_docker_networking
+
   # Verify that -it is passed on the command line
   check_tty
 

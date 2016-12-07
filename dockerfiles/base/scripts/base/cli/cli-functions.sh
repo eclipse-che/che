@@ -193,15 +193,17 @@ initiate_offline_or_networking_mode(){
     if [[ ! $HTTP_STATUS_CODE -eq "301" ]]; then
       info "Welcome to $CHE_FORMAL_PRODUCT_NAME!"
       info ""
-      info "We could resolve DockerHub using DNS."
-      info "Either we cannot reach the Internet or Docker's DNS resolver needs a a modification."
+      info "We could not resolve DockerHub using DNS."
+      info "Either we cannot reach the Internet or Docker's DNS resolver needs a modification."
       info ""
       info "You can:"
       info "  1. Modify Docker's DNS settings." 
       info "     a. Docker for Windows & Mac have GUIs for this."
       info "     b. Typically setting DNS to 8.8.8.8 fixes resolver issues."
-      info "  2. Verify that you have access to DockerHub."
-      info "     a. Try 'curl --head dockerhub.com"
+      info "  2. Does your network require Docker to use a proxy?"
+      info "     a. Docker for Windows & Mac have GUIs to set proxies."
+      info "  3. Verify that you have access to DockerHub."
+      info "     a. Try 'curl --head dockerhub.com'"
       return 2;
     fi
   fi
