@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-java-testing-junit</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>5.0.0-M8-SNAPSHOT</version>
+        <version>5.0.0-M8</version>
     </parent>
     <artifactId>che-java-testing-junit-shared</artifactId>
     <name>Che Plugin :: Java Testing :: JUnit Shared</name>

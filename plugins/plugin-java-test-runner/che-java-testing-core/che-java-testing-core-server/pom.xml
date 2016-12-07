@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-java-testing-core</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>5.0.0-M8-SNAPSHOT</version>
+        <version>5.0.0-M8</version>
     </parent>
     <artifactId>che-java-testing-core-server</artifactId>
     <name>Che Plugin :: Java Testing :: Core Server</name>
