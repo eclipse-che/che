@@ -6,7 +6,11 @@
 che:
   image: <%= ENV["IMAGE_CHE"] %>
   env_file:
+<% if @compose_file_for_containers == true -%>
+    - '/che/instance/config/che.env'
+<% else -%>
     - '<%= ENV["CHE_ENV_FILE"] %>'
+<% end -%>
   volumes:
     - '/var/run/docker.sock:/var/run/docker.sock'
     - '<%= scope.lookupvar('che::che_instance') -%>/data:/data'
