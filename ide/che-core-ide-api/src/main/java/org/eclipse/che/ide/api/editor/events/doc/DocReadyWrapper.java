@@ -43,6 +43,7 @@ public class DocReadyWrapper<T> {
         this.docReadyRegistration = generalEventBus.addHandler(DocumentReadyEvent.TYPE,
                                                                new DocumentReadyHandler() {
 
+                                                                   @Override
                                                                    public void onDocumentReady(final DocumentReadyEvent event) {
                                                                        if (event == null) {
                                                                            return;

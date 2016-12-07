@@ -69,6 +69,7 @@ public class DevMachine implements MachineEntity {
         return true;
     }
 
+    @Override
     public String getType() {
         return devMachineDescriptor.getConfig().getType();
     }
@@ -95,6 +96,7 @@ public class DevMachine implements MachineEntity {
         throw new RuntimeException(message);
     }
 
+    @Override
     public String getTerminalUrl() {
         for (Link link : devMachineLinks) {
             if (Constants.TERMINAL_REFERENCE.equals(link.getRel())) {
@@ -153,6 +155,7 @@ public class DevMachine implements MachineEntity {
         return machineConfig;
     }
 
+    @Override
     public String getId() {
         return devMachineDescriptor.getId();
     }

@@ -33,24 +33,31 @@ import org.eclipse.che.ide.resource.Path;
 public interface File extends Resource, VirtualFile, ModificationTracker {
 
     /** @see VirtualFile#getPath() */
+    @Override
     String getPath();
 
     /** @see VirtualFile#getDisplayName() */
+    @Override
     String getDisplayName();
 
     /** @see VirtualFile#getMediaType() */
+    @Override
     String getMediaType();
 
     /** @see VirtualFile#isReadOnly() */
+    @Override
     boolean isReadOnly();
 
     /** @see VirtualFile#getContentUrl() */
+    @Override
     String getContentUrl();
 
     /** @see VirtualFile#getContent() */
+    @Override
     Promise<String> getContent();
 
     /** @see VirtualFile#updateContent(String) */
+    @Override
     Promise<Void> updateContent(String content);
 
     /**

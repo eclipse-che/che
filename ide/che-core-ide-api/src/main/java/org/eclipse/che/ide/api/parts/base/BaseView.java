@@ -267,6 +267,7 @@ public abstract class BaseView<T extends BaseActionDelegate> extends Composite i
      * @param title
      *         part title
      */
+    @Override
     public void setTitle(@NotNull String title) {
         titleLabel.setText(title);
     }
