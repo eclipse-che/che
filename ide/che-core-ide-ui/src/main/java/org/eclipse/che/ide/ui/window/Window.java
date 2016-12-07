@@ -260,7 +260,6 @@ public abstract class Window implements IsWidget {
             @Override
             public void onEscapeKey() {
                 if (hideOnEscapeEnabled && !blocked) {
-                    hide();
                     Window.this.onClose();
                 }
             }
@@ -268,7 +267,6 @@ public abstract class Window implements IsWidget {
             @Override
             public void onClose() {
                 if (!blocked) {
-                    hide();
                     Window.this.onClose();
                 }
             }
@@ -282,9 +280,9 @@ public abstract class Window implements IsWidget {
 
     /**
      * Is called when user closes the Window.
-     * The method was marked as deprecated until an empty implementation is added.
      */
     protected void onClose() {
+        hide();
     }
 
     @Override

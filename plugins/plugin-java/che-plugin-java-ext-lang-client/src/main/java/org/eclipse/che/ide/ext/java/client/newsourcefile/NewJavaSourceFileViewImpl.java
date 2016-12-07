@@ -139,10 +139,6 @@ public class NewJavaSourceFileViewImpl extends Window implements NewJavaSourceFi
         this.delegate = delegate;
     }
 
-    @Override
-    protected void onClose() {
-    }
-
     interface AddToIndexViewImplUiBinder extends UiBinder<Widget, NewJavaSourceFileViewImpl> {
     }
 }
