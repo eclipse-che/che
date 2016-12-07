@@ -205,9 +205,7 @@ public class PartStackPresenterTest {
     public void partShouldBeHidden() {
         presenter.addPart(partPresenter);
 
-        presenter.hidePart(partPresenter);
-
-        verify(partButton).unSelect();
+        presenter.minimize();
 
         verify(workBenchPartController).getSize();
         verify(workBenchPartController).setSize(0);
@@ -256,7 +254,6 @@ public class PartStackPresenterTest {
 
         presenter.onTabClicked(partButton);
 
-        verify(workBenchPartController).setSize(anyDouble());
         verify(workBenchPartController).setHidden(false);
 
         verify(view).selectTab(partPresenter);
@@ -270,7 +267,6 @@ public class PartStackPresenterTest {
 
         presenter.onTabClicked(partButton);
 
-        verify(workBenchPartController).setSize(eq(presenter.currentSize));
         verify(workBenchPartController).setHidden(false);
 
         verify(view).selectTab(partPresenter);
@@ -284,7 +280,6 @@ public class PartStackPresenterTest {
 
         presenter.onTabClicked(partButton);
 
-        verify(workBenchPartController).setSize(eq(PART_SIZE));
         verify(workBenchPartController).setHidden(false);
 
         verify(view).selectTab(partPresenter);

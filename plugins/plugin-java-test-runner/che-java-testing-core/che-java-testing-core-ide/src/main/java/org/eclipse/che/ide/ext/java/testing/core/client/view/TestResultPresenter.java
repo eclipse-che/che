@@ -52,11 +52,6 @@ public class TestResultPresenter extends BasePresenter implements TestResultView
     }
 
     @Override
-    public void setVisible(boolean visible) {
-        view.setVisible(visible);
-    }
-
-    @Override
     public IsWidget getView() {
         return view;
     }

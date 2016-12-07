@@ -204,12 +204,6 @@ public class MachinePanelPresenter extends BasePresenter implements MachinePanel
 
     /** {@inheritDoc} */
     @Override
-    public void setVisible(boolean visible) {
-        view.setVisible(visible);
-    }
-
-    /** {@inheritDoc} */
-    @Override
     public IsWidget getView() {
         return view;
     }

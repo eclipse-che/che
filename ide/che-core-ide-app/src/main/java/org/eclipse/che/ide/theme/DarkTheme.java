@@ -1472,23 +1472,23 @@ public class DarkTheme implements Theme {
     }
 
     @Override
-    public String toolButtonBorder() {
-        return "1px solid transparent";
-    }
-
-    @Override
     public String toolButtonActiveBorder() {
-        return "1px solid #24272c";
+        return "1px solid #262626";
     }
 
     @Override
     public String toolButtonHoverBackgroundColor() {
-        return "#44484D";
+        return "#262626";
     }
 
     @Override
     public String toolButtonActiveBackgroundColor() {
-        return "#33373B";
+        return "#262626";
+    }
+
+    @Override
+    public String toolButtonActiveColor() {
+        return "#4eabff";
     }
 
     @Override

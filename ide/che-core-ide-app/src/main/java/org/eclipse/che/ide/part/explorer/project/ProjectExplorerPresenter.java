@@ -307,12 +307,6 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
     }
 
     /** {@inheritDoc} */
-    @Override
-    public void setVisible(boolean visible) {
-        view.setVisible(visible);
-    }
-
-    /** {@inheritDoc} */
     @NotNull
     @Override
     public String getTitle() {

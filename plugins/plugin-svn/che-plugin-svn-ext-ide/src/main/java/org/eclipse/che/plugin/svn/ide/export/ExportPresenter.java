@@ -172,16 +172,4 @@ public class ExportPresenter extends SubversionActionPresenter implements Export
         notification.setStatus(SUCCESS);
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public void minimize() {
-
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void activatePart() {
-
-    }
-
 }

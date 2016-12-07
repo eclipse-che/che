@@ -273,12 +273,6 @@ public class RecipePartPresenter extends BasePresenter implements RecipePartView
 
     /** {@inheritDoc} */
     @Override
-    public void setVisible(boolean visible) {
-        view.setVisible(visible);
-    }
-
-    /** {@inheritDoc} */
-    @Override
     public IsWidget getView() {
         return view;
     }

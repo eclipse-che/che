@@ -56,6 +56,8 @@ public class MachineApplianceViewImpl extends Composite implements MachineApplia
         this.tabContainers = new ArrayList<>();
 
         addContainer(unavailableLabel);
+
+        setMaximized(false);
     }
 
     /** {@inheritDoc} */
@@ -130,6 +132,11 @@ public class MachineApplianceViewImpl extends Composite implements MachineApplia
     @Override
     public void setFocus(boolean focused) {
         //to do nothing
+    }
+
+    @Override
+    public void setMaximized(boolean maximized) {
+        getElement().setAttribute("maximized", "" + maximized);
     }
 
     /** {@inheritDoc} */

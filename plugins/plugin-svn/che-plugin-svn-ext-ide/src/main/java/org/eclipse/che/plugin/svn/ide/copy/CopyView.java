@@ -26,7 +26,7 @@ import org.eclipse.che.ide.api.resources.Resource;
 public interface CopyView extends View<CopyView.ActionDelegate> {
 
     /** Action handler for the view actions/controls. */
-    interface ActionDelegate extends BaseActionDelegate {
+    interface ActionDelegate {
         /** Perform actions when copy button clicked. */
         void onCopyClicked();
 

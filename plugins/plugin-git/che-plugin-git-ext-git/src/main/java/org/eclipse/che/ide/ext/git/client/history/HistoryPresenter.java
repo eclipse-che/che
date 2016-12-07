@@ -161,7 +161,7 @@ public class HistoryPresenter extends BasePresenter implements HistoryView.Actio
                     consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                     notificationManager.notify(constant.logFailed(), FAIL, FLOAT_MODE);
                 }
-                partStack.hidePart(HistoryPresenter.this);
+                partStack.minimize();
                 workspaceAgent.removePart(HistoryPresenter.this);
                 isViewClosed = true;
             }
@@ -432,11 +432,6 @@ public class HistoryPresenter extends BasePresenter implements HistoryView.Actio
         DIFF_WITH_INDEX,
         DIFF_WITH_WORK_TREE,
         DIFF_WITH_PREV_VERSION
-    }
-
-    @Override
-    public void setVisible(boolean visible) {
-        view.setVisible(visible);
     }
 
     @Override

@@ -71,11 +71,6 @@ public class FindResultPresenter extends BasePresenter implements FindResultView
     }
 
     @Override
-    public void setVisible(boolean visible) {
-        view.setVisible(visible);
-    }
-
-    @Override
     public IsWidget getView() {
         return view;
     }

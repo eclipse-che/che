@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.ui;
+package org.eclipse.che.ide;
 
 /**
  * Font awesome icons.
@@ -16,6 +16,11 @@ package org.eclipse.che.ide.ui;
  * @author Vitaliy Guliy
  */
 public class FontAwesome {
+
+    /**
+     * http://fortawesome.github.io/Font-Awesome/icon/arrows-alt/
+     */
+    public static final String ARROWS_ALT = "<i class=\"fa fa-arrows-alt\"></i>";
 
     /**
      * http://fortawesome.github.io/Font-Awesome/icon/arrow-circle-o-left/
@@ -46,6 +51,11 @@ public class FontAwesome {
      * http://fortawesome.github.io/Font-Awesome/icon/download/
      */
     public static final String DOWNLOAD = "<i class=\"fa fa-download\"></i>";
+
+    /**
+     * http://fortawesome.github.io/Font-Awesome/icon/ellipsis-v/
+     */
+    public static final String ELLIPSIS_V = "<i class=\"fa fa-ellipsis-v\"></i>";
 
     /**
      * http://fortawesome.github.io/Font-Awesome/icon/expand/
@@ -121,4 +131,5 @@ public class FontAwesome {
      * http://fontawesome.io/icon/square-o/
      */
     public static final String SQUARE_O = "<i class=\"fa fa-square-o\"></i>";
+
 }
