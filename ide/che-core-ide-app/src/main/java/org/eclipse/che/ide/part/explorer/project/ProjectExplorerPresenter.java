@@ -45,6 +45,7 @@ import org.eclipse.che.ide.part.explorer.project.ProjectExplorerView.ActionDeleg
 import org.eclipse.che.ide.project.node.SyntheticNode;
 import org.eclipse.che.ide.project.node.SyntheticNodeUpdateEvent;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.resources.reveal.RevealResourceEvent;
 import org.eclipse.che.ide.resources.tree.ResourceNode;
 import org.eclipse.che.ide.ui.smartTree.NodeDescriptor;
 import org.eclipse.che.ide.ui.smartTree.Tree;
@@ -79,6 +80,7 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
                                                                        MarkerChangedHandler,
                                                                        SyntheticNodeUpdateEvent.SyntheticNodeUpdateHandler {
     private final ProjectExplorerView      view;
+    private final EventBus                 eventBus;
     private final ResourceNode.NodeFactory nodeFactory;
     private final SettingsProvider         settingsProvider;
     private final CoreLocalizationConstant locale;
@@ -102,6 +104,7 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
                                     final AppContext appContext,
                                     final WorkspaceAgent workspaceAgent) {
         this.view = view;
+        this.eventBus = eventBus;
         this.nodeFactory = nodeFactory;
         this.settingsProvider = settingsProvider;
         this.locale = locale;
@@ -181,6 +184,10 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
             that.@org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter::doCollapse()();
         })
 
+        ProjectExplorer.reveal = $entry(function (path) {
+            that.@org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter::doReveal(*)(path);
+        })
+
         $wnd.IDE.ProjectExplorer = ProjectExplorer;
     }-*/;
 
@@ -194,6 +201,10 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
         if (treeExpander.isCollapseEnabled()) {
             treeExpander.collapseTree();
         }
+    }
+
+    private void doReveal(String path) {
+        eventBus.fireEvent(new RevealResourceEvent(Path.valueOf(path)));
     }
 
     @Override
