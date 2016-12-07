@@ -11,7 +11,7 @@
 package org.eclipse.che.account.event;
 
 import org.eclipse.che.account.spi.AccountImpl;
-import org.eclipse.che.api.core.jdbc.jpa.event.CascadeRemovalEvent;
+import org.eclipse.che.core.db.event.CascadeRemovalEvent;
 
 /**
  * Published before {@link AccountImpl account} removed.

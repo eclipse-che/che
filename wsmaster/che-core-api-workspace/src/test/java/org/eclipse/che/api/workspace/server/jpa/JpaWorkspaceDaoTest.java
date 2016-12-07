@@ -14,7 +14,9 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 
 import org.eclipse.che.account.spi.AccountImpl;
-import org.eclipse.che.api.core.jdbc.jpa.DuplicateKeyException;
+import org.eclipse.che.commons.test.db.H2JpaCleaner;
+import org.eclipse.che.commons.test.tck.JpaCleaner;
+import org.eclipse.che.core.db.jpa.DuplicateKeyException;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.testng.annotations.AfterMethod;
@@ -39,12 +41,14 @@ public class JpaWorkspaceDaoTest {
 
     private EntityManager   manager;
     private JpaWorkspaceDao workspaceDao;
+    private JpaCleaner      cleaner;
 
     @BeforeMethod
     private void setUpManager() {
         final Injector injector = Guice.createInjector(new WorkspaceTckModule());
         manager = injector.getInstance(EntityManager.class);
         workspaceDao = injector.getInstance(JpaWorkspaceDao.class);
+        cleaner = injector.getInstance(H2JpaCleaner.class);
     }
 
     @AfterMethod
@@ -57,7 +61,7 @@ public class JpaWorkspaceDaoTest {
             manager.remove(entity);
         }
         manager.getTransaction().commit();
-        manager.getEntityManagerFactory().close();
+        cleaner.clean();
     }
 
     @Test

@@ -18,6 +18,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.util.AbstractLineConsumer;
 import org.eclipse.che.api.core.util.LineConsumer;
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
@@ -47,6 +48,8 @@ public abstract class AbstractAgentLauncher implements AgentLauncher {
     private static final Logger          LOG      = LoggerFactory.getLogger(AbstractAgentLauncher.class);
     private static final ExecutorService executor =
             Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("AgentLauncher-%d")
+                                                                    .setUncaughtExceptionHandler(
+                                                                            LoggingUncaughtExceptionHandler.getInstance())
                                                                     .setDaemon(true)
                                                                     .build());
 

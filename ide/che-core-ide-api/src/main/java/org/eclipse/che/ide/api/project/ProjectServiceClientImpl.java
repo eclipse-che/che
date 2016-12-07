@@ -26,6 +26,7 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
 import org.eclipse.che.api.promises.client.callback.PromiseHelper;
+import org.eclipse.che.api.workspace.shared.dto.NewProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.ide.MimeType;
@@ -65,7 +66,8 @@ import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
  */
 public class ProjectServiceClientImpl implements ProjectServiceClient {
 
-    private static final String PROJECT = "/project";
+    private static final String PROJECT        = "/project";
+    private static final String BATCH_PROJECTS = "/batch";
 
     private static final String ITEM     = "/item";
     private static final String TREE     = "/tree";
@@ -211,6 +213,16 @@ public class ProjectServiceClientImpl implements ProjectServiceClient {
                          .header(ACCEPT, MimeType.APPLICATION_JSON)
                          .loader(loaderFactory.newLoader("Creating project..."))
                          .send(unmarshaller.newUnmarshaller(ProjectConfigDto.class));
+    }
+
+    @Override
+    public Promise<List<ProjectConfigDto>> createBatchProjects(List<NewProjectConfigDto> configurations) {
+        final String url = getBaseUrl() + BATCH_PROJECTS;
+        final String loaderMessage = configurations.size() > 1 ? "Creating the batch of projects..." : "Creating project...";
+        return reqFactory.createPostRequest(url, configurations)
+                         .header(ACCEPT, MimeType.APPLICATION_JSON)
+                         .loader(loaderFactory.newLoader(loaderMessage))
+                         .send(unmarshaller.newListUnmarshaller(ProjectConfigDto.class));
     }
 
     /** {@inheritDoc} */

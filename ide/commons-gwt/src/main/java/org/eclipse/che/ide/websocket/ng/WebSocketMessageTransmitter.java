@@ -11,18 +11,27 @@
 package org.eclipse.che.ide.websocket.ng;
 
 /**
- * Transmits WEB SOCKET messages
+ * Plain text transmitter over a web socket protocol. In current specification
+ * it is not required from and the implementor to fulfill strict ordering of
+ * sequential transmissions along with message delivery notification. The only
+ * guarantee that is required is to send a text message to predefined endpoint.
  *
  * @author Dmitry Kuleshov
  */
 public interface WebSocketMessageTransmitter {
     /**
-     * Transmits WEB SOCKET messages
+     * Transmit a string message to an endpoint over wer socket protocol. The
+     * connection should be considered to be opened at the moment of calling,
+     * however the some of implementation may provide ability to cache messages
+     * until the connection is opened.
      *
-     * @param protocol
-     *         message protocol
+     * @param endpointId
+     *         identifier of an endpoint known to an transmitter implementation
      * @param message
-     *         message body
+     *         plain text message
+     *
+     * @see org.eclipse.che.ide.websocket.ng.impl.UrlResolver
+     * @see org.eclipse.che.ide.websocket.ng.impl.MessagesReSender
      */
-    void transmit(String protocol, String message);
+    void transmit(String endpointId, String message);
 }

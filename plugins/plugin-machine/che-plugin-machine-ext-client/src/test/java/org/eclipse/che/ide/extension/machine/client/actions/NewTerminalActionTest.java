@@ -24,6 +24,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -58,7 +59,7 @@ public class NewTerminalActionTest {
     public void actionShouldBePerformed() throws Exception {
         action.actionPerformed(actionEvent);
 
-        verify(processesPanelPresenter).newTerminal();
+        verify(processesPanelPresenter).newTerminal(eq(action));
     }
 
 }

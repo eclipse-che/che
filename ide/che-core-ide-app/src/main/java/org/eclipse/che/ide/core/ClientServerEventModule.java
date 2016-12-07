@@ -14,10 +14,10 @@ import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.multibindings.GinMapBinder;
 
 import org.eclipse.che.ide.api.event.ng.ClientServerEventService;
-import org.eclipse.che.ide.api.event.ng.EditorFileStatusNotificationReceiver;
+import org.eclipse.che.ide.api.event.ng.EditorFileStatusNotificationHandler;
 import org.eclipse.che.ide.api.event.ng.FileOpenCloseEventListener;
-import org.eclipse.che.ide.api.event.ng.ProjectTreeStatusNotificationReceiver;
-import org.eclipse.che.ide.jsonrpc.JsonRpcRequestReceiver;
+import org.eclipse.che.ide.api.event.ng.ProjectTreeStatusNotificationHandler;
+import org.eclipse.che.ide.jsonrpc.RequestHandler;
 
 /**
  * GIN module for configuring client server events.
@@ -31,10 +31,12 @@ public class ClientServerEventModule extends AbstractGinModule {
         bind(FileOpenCloseEventListener.class).asEagerSingleton();
         bind(ClientServerEventService.class).asEagerSingleton();
 
-        GinMapBinder<String, JsonRpcRequestReceiver> requestReceivers =
-                GinMapBinder.newMapBinder(binder(), String.class, JsonRpcRequestReceiver.class);
+        GinMapBinder.newMapBinder(binder(), String.class, RequestHandler.class)
+                    .addBinding("event:file-in-vfs-status-changed")
+                    .to(EditorFileStatusNotificationHandler.class);
 
-        requestReceivers.addBinding("event:file-in-vfs-status-changed").to(EditorFileStatusNotificationReceiver.class);
-        requestReceivers.addBinding("event:project-tree-status-changed").to(ProjectTreeStatusNotificationReceiver.class);
+        GinMapBinder.newMapBinder(binder(), String.class, RequestHandler.class)
+                    .addBinding("event:project-tree-status-changed")
+                    .to(ProjectTreeStatusNotificationHandler.class);
     }
 }

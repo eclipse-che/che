@@ -19,6 +19,7 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.workspace.server.event.StackPersistedEvent;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackSourceImpl;
@@ -35,8 +36,10 @@ import org.testng.annotations.Test;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.workspace.server.spi.tck.WorkspaceDaoTest.createWorkspaceConfig;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -71,7 +74,7 @@ public class StackDaoTest {
         for (int i = 0; i < STACKS_SIZE; i++) {
             stacks[i] = createStack("stack-" + i, "name-" + i);
         }
-        stackRepo.createAll(asList(stacks));
+        stackRepo.createAll(Stream.of(stacks).map(StackImpl::new).collect(toList()));
     }
 
     @AfterMethod
@@ -102,7 +105,7 @@ public class StackDaoTest {
 
         stackDao.create(stack);
 
-        assertEquals(stackDao.getById(stack.getId()), stack);
+        assertEquals(stackDao.getById(stack.getId()), new StackImpl(stack));
     }
 
     @Test(expectedExceptions = ConflictException.class)

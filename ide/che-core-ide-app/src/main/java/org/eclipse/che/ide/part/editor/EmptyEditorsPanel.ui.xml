@@ -15,6 +15,7 @@
 
     <ui:style type='org.eclipse.che.ide.part.editor.EmptyEditorsPanel.Css'>
         @eval lineColor org.eclipse.che.ide.api.theme.Style.theme.iconColor();
+        @eval fontColor org.eclipse.che.ide.api.theme.Style.getMainFontColor();
         .center{
             display: flex;
             justify-content: center;
@@ -32,25 +33,35 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
+            width: 215px;
         }
         .list {
             padding-left: 26px;
             margin: 0;
+            margin-top: 5px;
         }
 
         .listElement{
-            font-size: 11px;
-            margin-bottom: 2px;
-        }
-
-        .line{
-            margin-top: 5px;
-            margin-bottom: 5px;
-            border-bottom: 1px solid lineColor;
+            font-size: 10px;
+            margin-bottom: 3px;
         }
 
         .title{
-            margin-left: 8px;
+            padding-left: 8px;
+            border-bottom: 1px solid lineColor;
+            font-size: 13px;
+            width: 138px;
+        }
+
+        .hotKey{
+            border: 1px solid fontColor;
+            color: fontColor;
+            border-radius: 2px;
+            margin-left: 50px;
+        }
+        .actionLabel {
+            display: inline-block;
+            width: 77px;
         }
 
     </ui:style>
@@ -58,7 +69,6 @@
         <div ui:field="root" class="{style.child}">
             <div ui:field="logo" class="{style.center}"/>
             <div ui:field="title" class="{style.title}"/>
-            <div class="{style.line}"/>
             <div ui:field="container"/>
         </div>
     </g:HTMLPanel>

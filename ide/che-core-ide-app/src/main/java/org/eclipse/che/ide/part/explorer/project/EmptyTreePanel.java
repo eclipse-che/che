@@ -16,11 +16,14 @@ import com.google.inject.Provider;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.CoreLocalizationConstant;
+import org.eclipse.che.ide.actions.CreateProjectAction;
+import org.eclipse.che.ide.actions.ImportProjectAction;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
+import org.eclipse.che.ide.newresource.NewFileAction;
 import org.eclipse.che.ide.part.editor.EmptyEditorsPanel;
 
 import javax.inject.Inject;
@@ -36,8 +39,12 @@ public class EmptyTreePanel extends EmptyEditorsPanel {
                           KeyBindingAgent keyBindingAgent,
                           AppContext appContext,
                           EventBus eventBus,
-                          CoreLocalizationConstant localizationConstant) {
-        super(actionManager, perspectiveManagerProvider, keyBindingAgent, appContext, localizationConstant);
+                          CoreLocalizationConstant localizationConstant,
+                          NewFileAction newFileAction,
+                          CreateProjectAction createProjectAction,
+                          ImportProjectAction importProjectAction) {
+        super(actionManager, perspectiveManagerProvider, keyBindingAgent, appContext, localizationConstant, newFileAction,
+              createProjectAction, importProjectAction);
         eventBus.addHandler(ResourceChangedEvent.getType(), this);
         root.getStyle().setTop(46, Style.Unit.PX);
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
@@ -53,7 +60,7 @@ public class EmptyTreePanel extends EmptyEditorsPanel {
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             @Override
             public void execute() {
-                if(appContext.getProjects().length!= 0) {
+                if (appContext.getProjects().length != 0) {
                     getElement().removeFromParent();
                 }
             }

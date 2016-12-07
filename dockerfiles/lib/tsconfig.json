@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "sourceMap": true,
+    "outDir": "lib",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "types": [
+      "node",
+      "mocha"
+    ]
+  },
+  "include": [
+    "src/**/*"
+  ],"exclude": [
+  "node_modules",
+  "jspm_packages",
+  "dependencies"
+]
+}

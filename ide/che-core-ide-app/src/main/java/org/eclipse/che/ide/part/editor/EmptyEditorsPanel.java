@@ -30,11 +30,11 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
+import org.eclipse.che.ide.actions.CreateProjectAction;
+import org.eclipse.che.ide.actions.ImportProjectAction;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionManager;
-import org.eclipse.che.ide.api.action.DefaultActionGroup;
-import org.eclipse.che.ide.api.action.IdeActions;
 import org.eclipse.che.ide.api.action.Presentation;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
@@ -43,15 +43,15 @@ import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
 import org.eclipse.che.ide.api.resources.ResourceDelta;
 import org.eclipse.che.ide.api.theme.Style;
+import org.eclipse.che.ide.newresource.NewFileAction;
 import org.eclipse.che.ide.ui.toolbar.PresentationFactory;
-import org.eclipse.che.ide.ui.toolbar.Utils;
 import org.eclipse.che.ide.util.dom.Elements;
 import org.eclipse.che.ide.util.input.KeyMapUtil;
 import org.vectomatic.dom.svg.ui.SVGImage;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.eclipse.che.ide.api.resources.Resource.PROJECT;
 
@@ -66,17 +66,20 @@ public class EmptyEditorsPanel extends Composite implements ResourceChangedEvent
     private final   Provider<PerspectiveManager> perspectiveManagerProvider;
     private final   KeyBindingAgent              keyBindingAgent;
     private final   PresentationFactory          presentationFactory;
-    private final CoreLocalizationConstant localizationConstant;
+    private final   CoreLocalizationConstant     localizationConstant;
+
+    private final Map<String, Action> noFiles = new HashMap<>();
+    private final Map<String, Action> noProjects = new HashMap<>();
     @UiField
-    protected DivElement title;
+    protected       DivElement                   title;
     @UiField
-    protected DivElement root;
+    protected       DivElement                   root;
     @UiField
-    protected DivElement container;
+    protected       DivElement                   container;
     @UiField
-    protected DivElement logo;
+    protected       DivElement                   logo;
     @UiField
-    Css        style;
+    Css style;
 
     @Inject
     public EmptyEditorsPanel(ActionManager actionManager,
@@ -85,8 +88,12 @@ public class EmptyEditorsPanel extends Composite implements ResourceChangedEvent
                              AppContext appContext,
                              EventBus eventBus,
                              Resources resources,
-                             CoreLocalizationConstant localizationConstant) {
-        this(actionManager, perspectiveManagerProvider, keyBindingAgent, appContext, localizationConstant);
+                             CoreLocalizationConstant localizationConstant,
+                             NewFileAction newFileAction,
+                             CreateProjectAction createProjectAction,
+                             ImportProjectAction importProjectAction) {
+        this(actionManager, perspectiveManagerProvider, keyBindingAgent, appContext, localizationConstant, newFileAction,
+             createProjectAction, importProjectAction);
 
 
         eventBus.addHandler(ResourceChangedEvent.getType(), this);
@@ -103,12 +110,22 @@ public class EmptyEditorsPanel extends Composite implements ResourceChangedEvent
                              Provider<PerspectiveManager> perspectiveManagerProvider,
                              KeyBindingAgent keyBindingAgent,
                              AppContext appContext,
-                             CoreLocalizationConstant localizationConstant) {
+                             CoreLocalizationConstant localizationConstant,
+                             NewFileAction newFileAction,
+                             CreateProjectAction createProjectAction,
+                             ImportProjectAction importProjectAction) {
         this.actionManager = actionManager;
         this.perspectiveManagerProvider = perspectiveManagerProvider;
         this.keyBindingAgent = keyBindingAgent;
         this.appContext = appContext;
         this.localizationConstant = localizationConstant;
+
+        noFiles.put("Create File...", newFileAction);
+        noFiles.put("Create Project...", createProjectAction);
+
+        noProjects.put("Import Project...", importProjectAction);
+        noProjects.put("Create Project...", createProjectAction);
+
         presentationFactory = new PresentationFactory();
 
         Widget rootElement = ourUiBinder.createAndBindUi(this);
@@ -142,40 +159,29 @@ public class EmptyEditorsPanel extends Composite implements ResourceChangedEvent
     }
 
     protected void renderNoProjects() {
-        DefaultActionGroup
-                actionGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_EMPTY_PROJECT_PANEL);
-        render(localizationConstant.emptyStateNoProjects(), actionGroup);
+        render(localizationConstant.emptyStateNoProjects(), noProjects);
     }
 
     protected void renderNoFiles() {
-        DefaultActionGroup
-                actionGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_EMPTY_EDITOR_PANEL);
-        render(localizationConstant.emptyStateNoFiles(), actionGroup);
+        render(localizationConstant.emptyStateNoFiles(), noFiles);
     }
 
-    private void render(String title, DefaultActionGroup actionGroup) {
+    private void render(String title, Map<String, Action> actions) {
         this.title.setInnerText(title);
         container.removeAllChildren();
         Element listElement = Elements.createElement("ul", new String[] {style.list()});
 
-        List<Utils.VisibleActionGroup> visibleActionGroups =
-                Utils.renderActionGroup(actionGroup, presentationFactory, actionManager, perspectiveManagerProvider.get());
 
-        List<Action> list = new ArrayList<>();
-        for (Utils.VisibleActionGroup groupActions : visibleActionGroups) {
-            list.addAll(groupActions.getActionList());
-        }
-
-        for (Action action : list) {
+        for (Map.Entry<String, Action> pair : actions.entrySet()) {
             LIElement liElement = Elements.createLiElement();
-            liElement.appendChild(renderAction(action));
+            liElement.appendChild(renderAction(pair.getKey(), pair.getValue()));
             listElement.appendChild(liElement);
         }
 
         container.appendChild((com.google.gwt.dom.client.Node)listElement);
     }
 
-    private Node renderAction(final Action action) {
+    private Node renderAction(String title, final Action action) {
         final Presentation presentation = presentationFactory.getPresentation(action);
         Element divElement = Elements.createDivElement(style.listElement());
         divElement.addEventListener("click", new EventListener() {
@@ -187,8 +193,8 @@ public class EmptyEditorsPanel extends Composite implements ResourceChangedEvent
         }, true);
         divElement.getStyle().setCursor("pointer");
         divElement.getStyle().setColor(Style.getOutputLinkColor());
-        SpanElement label = Elements.createSpanElement();
-        label.setInnerText(presentation.getText());
+        Element label = Elements.createDivElement(style.actionLabel());
+        label.setInnerText(title);
         divElement.appendChild(label);
 
         String hotKey = KeyMapUtil.getShortcutText(keyBindingAgent.getKeyBinding(actionManager.getId(action)));
@@ -198,7 +204,7 @@ public class EmptyEditorsPanel extends Composite implements ResourceChangedEvent
             hotKey =
                     "<nobr>&nbsp;" + hotKey + "&nbsp;</nobr>";
         }
-        SpanElement hotKeyElement = Elements.createSpanElement();
+        SpanElement hotKeyElement = Elements.createSpanElement(style.hotKey());
         hotKeyElement.setInnerHTML(hotKey);
         divElement.appendChild(hotKeyElement);
         return divElement;
@@ -214,6 +220,12 @@ public class EmptyEditorsPanel extends Composite implements ResourceChangedEvent
         String child();
 
         String listElement();
+
+        String title();
+
+        String hotKey();
+
+        String actionLabel();
     }
 
     interface EmptyEditorsPanelUiBinder extends UiBinder<Widget, EmptyEditorsPanel> {}

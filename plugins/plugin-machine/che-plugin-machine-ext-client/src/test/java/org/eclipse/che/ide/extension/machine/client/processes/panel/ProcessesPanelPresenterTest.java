@@ -39,6 +39,8 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
+import org.eclipse.che.ide.api.parts.PartStack;
+import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.ssh.SshServiceClient;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
@@ -98,35 +100,37 @@ public class ProcessesPanelPresenterTest {
     @Mock
     private DialogFactory                 dialogFactory;
     @Mock
-    private WorkspaceAgent              workspaceAgent;
+    private WorkspaceAgent                workspaceAgent;
     @Mock
-    private NotificationManager         notificationManager;
+    private NotificationManager           notificationManager;
     @Mock
-    private MachineLocalizationConstant localizationConstant;
+    private MachineLocalizationConstant   localizationConstant;
     @Mock
-    private TerminalFactory             terminalFactory;
+    private TerminalFactory               terminalFactory;
     @Mock
-    private ProcessesPanelView          view;
+    private ProcessesPanelView            view;
     @Mock
-    private MachineResources            resources;
+    private MachineResources              resources;
     @Mock
-    private AppContext                  appContext;
+    private AppContext                    appContext;
     @Mock
-    private MachineServiceClient        machineService;
+    private MachineServiceClient          machineService;
     @Mock
-    private SshServiceClient            sshService;
+    private SshServiceClient              sshService;
     @Mock
-    private EventBus                    eventBus;
+    private EventBus                      eventBus;
     @Mock
-    private WorkspaceDto                workspace;
+    private WorkspaceDto                  workspace;
     @Mock
-    private OutputConsole               outputConsole;
+    private OutputConsole                 outputConsole;
     @Mock
-    private MachineManager              machineManager;
+    private MachineManager                machineManager;
     @Mock
-    private EntityFactory               entityFactory;
+    private EntityFactory                 entityFactory;
     @Mock
-    private WorkspaceRuntimeDto         workspaceRuntime;
+    private WorkspaceRuntimeDto           workspaceRuntime;
+    @Mock
+    private PartStack                     partStack;
 
     @Mock
     private Promise<List<MachineProcessDto>> processesPromise;
@@ -155,6 +159,7 @@ public class ProcessesPanelPresenterTest {
         when(commandConsoleFactory.create(anyString())).thenReturn(mock(OutputConsole.class));
 
         when(appContext.getWorkspaceId()).thenReturn(WORKSPACE_ID);
+        when(workspaceAgent.getPartStack(eq(PartStackType.INFORMATION))).thenReturn(partStack);
 
         presenter = new ProcessesPanelPresenter(view,
                                                 localizationConstant,
@@ -193,7 +198,6 @@ public class ProcessesPanelPresenterTest {
         IsWidget widget = mock(IsWidget.class);
         acceptsOneWidgetCaptor.getValue().setWidget(widget);
 
-        verify(workspaceAgent).setActivePart(anyObject());
         verify(commandConsoleFactory).create(eq(MACHINE_NAME));
         verify(view).addWidget(anyString(), anyString(), anyObject(), anyObject(), anyBoolean());
         verify(view).setProcessesData(eq(presenter.rootNode));
@@ -318,14 +322,14 @@ public class ProcessesPanelPresenterTest {
         presenter.rootNode = new ProcessTreeNode(ROOT_NODE, null, null, null, children);
 
         TerminalPresenter terminal = mock(TerminalPresenter.class);
-        when(terminalFactory.create(machine)).thenReturn(terminal);
+        when(terminalFactory.create(machine, presenter)).thenReturn(terminal);
         IsWidget terminalWidget = mock(IsWidget.class);
         when(terminal.getView()).thenReturn(terminalWidget);
 
         presenter.addCommandOutput(MACHINE_ID, outputConsole);
-        presenter.onAddTerminal(MACHINE_ID);
+        presenter.onAddTerminal(MACHINE_ID, presenter);
 
-        verify(terminalFactory).create(eq(machine));
+        verify(terminalFactory).create(eq(machine), eq(presenter));
         verify(terminal).getView();
         verify(view, times(2)).setProcessesData(anyObject());
         verify(view, times(2)).selectNode(anyObject());
@@ -387,13 +391,13 @@ public class ProcessesPanelPresenterTest {
         presenter.rootNode = new ProcessTreeNode(ROOT_NODE, null, null, null, new ArrayList<ProcessTreeNode>());
 
         TerminalPresenter terminal = mock(TerminalPresenter.class);
-        when(terminalFactory.create(machine)).thenReturn(terminal);
+        when(terminalFactory.create(machine, presenter)).thenReturn(terminal);
         IsWidget terminalWidget = mock(IsWidget.class);
         when(terminal.getView()).thenReturn(terminalWidget);
 
-        presenter.onAddTerminal(MACHINE_ID);
+        presenter.onAddTerminal(MACHINE_ID, presenter);
 
-        verify(terminalFactory).create(eq(machine));
+        verify(terminalFactory).create(eq(machine), eq(presenter));
         verify(terminal).getView();
         verify(view, times(2)).setProcessesData(anyObject());
         verify(view).selectNode(anyObject());

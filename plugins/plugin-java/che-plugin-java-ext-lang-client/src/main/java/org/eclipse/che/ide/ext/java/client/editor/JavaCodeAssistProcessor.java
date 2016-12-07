@@ -155,7 +155,9 @@ public class JavaCodeAssistProcessor implements CodeAssistProcessor {
     }
 
     @Override
-    public void computeCompletionProposals(final TextEditor textEditor, final int offset,
+    public void computeCompletionProposals(final TextEditor textEditor,
+                                           final int offset,
+                                           final boolean triggered,
                                            final CodeAssistCallback callback) {
         if (errorMessage != null) {
             return;

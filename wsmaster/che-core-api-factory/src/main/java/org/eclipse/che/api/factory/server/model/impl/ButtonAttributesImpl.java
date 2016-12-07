@@ -12,7 +12,7 @@ package org.eclipse.che.api.factory.server.model.impl;
 
 import org.eclipse.che.api.core.model.factory.ButtonAttributes;
 
-import javax.persistence.Basic;
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import java.util.Objects;
 
@@ -24,16 +24,16 @@ import java.util.Objects;
 @Embeddable
 public class ButtonAttributesImpl implements ButtonAttributes {
 
-    @Basic
+    @Column(name = "color")
     private String color;
 
-    @Basic
+    @Column(name = "logo")
     private String logo;
 
-    @Basic
+    @Column(name = "style")
     private String style;
 
-    @Basic
+    @Column(name = "counter")
     private Boolean counter;
 
     public ButtonAttributesImpl() {}
@@ -99,7 +99,7 @@ public class ButtonAttributesImpl implements ButtonAttributes {
         return Objects.equals(color, other.color)
                && Objects.equals(logo, other.logo)
                && Objects.equals(style, other.style)
-               && counter == other.counter;
+               && Objects.equals(counter, other.counter);
     }
 
     @Override
@@ -108,7 +108,7 @@ public class ButtonAttributesImpl implements ButtonAttributes {
         result = 31 * result + Objects.hashCode(color);
         result = 31 * result + Objects.hashCode(logo);
         result = 31 * result + Objects.hashCode(style);
-        result = 31 * result + Boolean.hashCode(counter);
+        result = 31 * result + Objects.hashCode(counter);
         return result;
     }
 

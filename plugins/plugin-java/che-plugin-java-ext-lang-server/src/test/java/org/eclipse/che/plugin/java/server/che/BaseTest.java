@@ -82,7 +82,7 @@ public abstract class BaseTest {
         if (project != null) {
             project.close();
         }
-        File pref = new File(wsPath + "/test/.codenvy/project.preferences");
+        File pref = new File(wsPath + "/test/.che/project.preferences");
         if (pref.exists()) {
             pref.delete();
         }

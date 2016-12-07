@@ -13,12 +13,17 @@ package org.eclipse.che.api.factory.server.model.impl;
 import org.eclipse.che.api.core.model.factory.Action;
 import org.eclipse.che.api.core.model.factory.OnAppClosed;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static java.util.stream.Collectors.toList;
 import static javax.persistence.CascadeType.ALL;
@@ -29,13 +34,18 @@ import static javax.persistence.CascadeType.ALL;
  * @author Anton Korneta
  */
 @Entity(name = "OnAppClosed")
+@Table(name = "onappclosed")
 public class OnAppClosedImpl implements OnAppClosed {
 
     @Id
     @GeneratedValue
+    @Column(name = "id")
     private Long id;
 
     @OneToMany(cascade = ALL, orphanRemoval = true)
+    @JoinTable(name = "onappclosed_action",
+               joinColumns = @JoinColumn(name = "onappclosed_id"),
+               inverseJoinColumns = @JoinColumn(name = "actions_entityid"))
     private List<ActionImpl> actions;
 
     public OnAppClosedImpl() {}
@@ -66,21 +76,30 @@ public class OnAppClosedImpl implements OnAppClosed {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof OnAppClosedImpl)) return false;
-        final OnAppClosedImpl other = (OnAppClosedImpl)obj;
-        return getActions().equals(other.getActions());
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof OnAppClosedImpl)) {
+            return false;
+        }
+        final OnAppClosedImpl that = (OnAppClosedImpl)obj;
+        return Objects.equals(id, that.id)
+               && getActions().equals(that.getActions());
     }
 
     @Override
     public int hashCode() {
-        return getActions().hashCode();
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(id);
+        hash = 31 * hash + getActions().hashCode();
+        return hash;
     }
 
     @Override
     public String toString() {
         return "OnAppClosedImpl{" +
-               "actions=" + actions +
+               "id=" + id +
+               ", actions=" + actions +
                '}';
     }
 }
