@@ -19,7 +19,6 @@ OPTIONAL DOCKER PARAMETERS:
   -e CHE_PORT=<YOUR_PORT>              Port where ${CHE_MINI_PRODUCT_NAME} will bind itself to
   -v <LOCAL_PATH>:${CHE_CONTAINER_ROOT}/instance       Where instance, user, log data will be saved
   -v <LOCAL_PATH>:${CHE_CONTAINER_ROOT}/backup         Where backup files will be saved
-  -v <LOCAL_PATH>:/cli                 Where the CLI trace log is saved
   -v <LOCAL_PATH>:/repo                ${CHE_MINI_PRODUCT_NAME} git repo to activate dev mode
   -v <LOCAL_PATH>:/sync                Where remote ws files will be copied with sync command
   -v <LOCAL_PATH>:/unison              Where unison profile for optimzing sync command resides

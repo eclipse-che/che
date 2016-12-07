@@ -265,11 +265,7 @@ cleanup() {
   # message if it isn't currently mounted.
   if [ $RETURN_CODE -eq "3" ]; then
     error ""
-    if [[ "${DATA_MOUNT}" = "not set" ]]; then
-      error "Unexpected exit: rerun and add '-v <local-path>:/cli' to save the 'cli.log' trace file."
-    else 
-      error "Unexpected exit: Trace output saved to $CLI_MOUNT/'cli.log'."
-    fi
+    error "Unexpected exit: Trace output saved to $CHE_HOST_CONFIG/'cli.log'."
   fi
 }
 

@@ -418,14 +418,7 @@ We currently do not support migrating from the puppet-based configuration of Che
 We maintain a disaster recovery [policy and best practices](http://che.readme.io/v5.0/docs/disaster-recovery).
 
 ## CLI Reference
-The CLI is configured to hide most error conditions from the output screen. The CLI prints internal stack traces and error output to `cli.log`. To see the output of this log, you will need to volume mount a local path to `:/cli`. For example:
-
-```
-docker run --rm -it 
-           -v /var/run/docker.sock:/var/run/docker.sock 
-           -v /c/che:/data 
-           -v /c/eclipse/che-cli:/cli eclipse/che-cli:nightly [COMMAND]
-```
+The CLI is configured to hide most error conditions from the output screen. The CLI prints internal stack traces and error output to `cli.log`. The 'cli.log' is saved in the same folder where you mounted `:/data`.
 
 ### `che-cli init`
 Initializes an empty directory with a Che configuration and instance folder where user data and runtime configuration will be stored. You must provide a `<path>:/data` volume mount, then Che creates an `instance` and `backup` subfolder of `<path>`. You can optionally override the location of `instance` by volume mounting an additional local folder to `:/data/instance`. You can optionally override the location of where backups are stored by volume mounting an additional local folder to `:/data/backup`.  After initialization, a `che.env` file is placed into the root of the path that you mounted to `:/data`. 
@@ -471,7 +464,7 @@ Performs a `che-cli stop` followed by a `che-cli start`, respecting `--pull`, `-
 ### `che-cli destroy`
 Deletes `/docs`, `che.env` and `/data/instance`, including destroying all user workspaces, projects, data, and user database. If you pass `--quiet` then the confirmation warning will be skipped. 
 
-If you have mounted the `:/cli` path, then we write the `cli.log` to your host directory. By default, this log is not destroyed in a `che-cli destroy` command so that you can maintain a record of all CLI executions. You can also have this file removed from your host by mounting `:/cli` and passing the `--cli` parameter to this command.
+We write the `cli.log` to your ':/data' directory. By default, this log is not destroyed in a `che-cli destroy` command so that you can maintain a record of all CLI executions. You can have this file removed from your host with the `--cli` parameter.
 
 ### `che-cli offline`
 Saves all of the Docker images that Che requires into `/backup/*.tar` files. Each image is saved as its own file. If the `backup` folder is available on a machine that is disconnected from the Internet and you start Che with `--offline`, the CLI pre-boot sequence will load all of the Docker images in the `/backup/` folder.
