@@ -237,7 +237,7 @@ check_mounts() {
   INSTANCE_MOUNT=$(get_container_folder ":${CHE_CONTAINER_ROOT}/instance")
   BACKUP_MOUNT=$(get_container_folder ":${CHE_CONTAINER_ROOT}/backup")
   REPO_MOUNT=$(get_container_folder ":/repo")
-  CLI_MOUNT=$(get_container_folder ":/cli")
+#  CLI_MOUNT=$(get_container_folder ":/cli")
   SYNC_MOUNT=$(get_container_folder ":/sync")
   UNISON_PROFILE_MOUNT=$(get_container_folder ":/unison")
 

@@ -196,7 +196,7 @@ is_debug() {
 
 init_logging() {
   # Initialize CLI folder
-  CLI_DIR="/cli"
+  CLI_DIR=$CHE_CONTAINER_ROOT
   test -d "${CLI_DIR}" || mkdir -p "${CLI_DIR}"
 
   # Ensure logs folder exists
