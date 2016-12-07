@@ -185,6 +185,7 @@ public class UploadFolderFromZipViewImpl extends Window implements UploadFolderF
     @Override
     protected void onClose() {
         uploadPanel.remove(file);
+        super.onClose();
     }
 
     private void addFileUploadForm() {

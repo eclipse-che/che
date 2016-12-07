@@ -168,6 +168,7 @@ public class UploadFileViewImpl extends Window implements UploadFileView {
     @Override
     protected void onClose() {
         uploadPanel.remove(file);
+        super.onClose();
     }
 
     private void addFile() {

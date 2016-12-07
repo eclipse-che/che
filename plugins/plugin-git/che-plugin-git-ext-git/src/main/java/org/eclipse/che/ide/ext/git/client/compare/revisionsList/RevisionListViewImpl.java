@@ -121,13 +121,13 @@ public class RevisionListViewImpl extends Window implements RevisionListView {
     /** {@inheritDoc} */
     @Override
     public void close() {
-        this.hide();
         onClose();
     }
 
     @Override
     protected void onClose() {
         selectionModel.clear();
+        super.onClose();
     }
 
     /** {@inheritDoc} */
