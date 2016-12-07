@@ -115,9 +115,10 @@ cmd_init() {
 }
 
 cmd_init_reinit_pre_action() {
-  HTTP_PROXY=8.8.8.8
-  HTTPS_PROXY=http://4.4.4.4:9090
-  NO_PROXY="locahost, *.local, swarm-mode"
+  # For testing purposes only
+  #HTTP_PROXY=8.8.8.8
+  #HTTPS_PROXY=http://4.4.4.4:9090
+  #NO_PROXY="locahost, *.local, swarm-mode"
 
   if [[ ! ${HTTP_PROXY} = "" ]]; then
     sed -i'.bak' "s|#${CHE_PRODUCT_NAME}_HTTP_PROXY_FOR_${CHE_PRODUCT_NAME}=.*|${CHE_PRODUCT_NAME}_HTTP_PROXY_FOR_${CHE_PRODUCT_NAME}=\"${HTTP_PROXY}\"|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
