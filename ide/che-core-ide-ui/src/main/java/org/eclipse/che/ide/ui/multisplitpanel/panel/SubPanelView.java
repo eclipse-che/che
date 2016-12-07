@@ -68,7 +68,11 @@ public interface SubPanelView extends View<SubPanelView.ActionDelegate> {
         /** Called when the {@code widget} gains the focus. */
         void onWidgetFocused(IsWidget widget);
 
+        /** Called when the widget tab was double clicked. */
+        void onWidgetDoubleClicked(IsWidget widget);
+
         /** Called when the {@code widget} is going to be removed from the panel. */
         void onWidgetRemoving(IsWidget widget, SubPanel.RemoveCallback removeCallback);
     }
+
 }

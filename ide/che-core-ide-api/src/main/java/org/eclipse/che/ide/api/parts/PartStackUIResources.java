@@ -71,4 +71,8 @@ public interface PartStackUIResources extends ClientBundle {
 
     @Source("close-icon.svg")
     SVGResource closeIcon();
+
+    @Source("maximize-part.svg")
+    SVGResource maximizePart();
+
 }

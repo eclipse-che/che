@@ -132,6 +132,10 @@ div[maximized="true"] div[name="maximizePart"] i {
     color: blueIconColor;
 }
 
+div[maximized="true"] svg[name="workBenchIconMaximize"] {
+    fill: blueIconColor;
+}
+
 .ide-Base-Part-Title-Label {
     display: inline-block;
     line-height: 20px;

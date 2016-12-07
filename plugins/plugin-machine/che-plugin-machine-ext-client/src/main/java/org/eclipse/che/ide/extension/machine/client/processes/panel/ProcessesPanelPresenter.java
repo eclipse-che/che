@@ -47,6 +47,7 @@ import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
 import org.eclipse.che.ide.api.parts.PartStack;
+import org.eclipse.che.ide.api.parts.PartStackStateChangedEvent;
 import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
@@ -74,10 +75,10 @@ import org.eclipse.che.ide.util.loging.Log;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
-import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -107,7 +108,8 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                                                                       MachineStateEvent.Handler,
                                                                       WsAgentStateHandler,
                                                                       EnvironmentOutputEvent.Handler,
-                                                                      DownloadWorkspaceOutputEvent.Handler {
+                                                                      DownloadWorkspaceOutputEvent.Handler,
+                                                                      PartStackStateChangedEvent.Handler {
 
     public static final  String SSH_PORT                    = "22";
     private static final String DEFAULT_TERMINAL_NAME       = "Terminal";
@@ -189,6 +191,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         eventBus.addHandler(MachineStateEvent.TYPE, this);
         eventBus.addHandler(EnvironmentOutputEvent.TYPE, this);
         eventBus.addHandler(DownloadWorkspaceOutputEvent.TYPE, this);
+        eventBus.addHandler(PartStackStateChangedEvent.TYPE, this);
 
         updateMachineList();
 
@@ -1003,6 +1006,27 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
             if (entry.getValue().isFinished()) {
                 view.setStopButtonVisibility(entry.getKey(), false);
             }
+        }
+    }
+
+    @Override
+    public void onToggleMaximizeConsole() {
+        super.onToggleMaximize();
+
+        if (partStack != null) {
+            if (partStack.getPartStackState() == PartStack.State.MAXIMIZED) {
+                view.setProcessesTreeVisible(false);
+            } else {
+                view.setProcessesTreeVisible(true);
+            }
+        }
+    }
+
+    @Override
+    public void onPartStackStateChanged(PartStackStateChangedEvent event) {
+        if (partStack.equals(event.getPartStack()) &&
+                partStack.getPartStackState() == PartStack.State.NORMAL) {
+            view.setProcessesTreeVisible(true);
         }
     }
 

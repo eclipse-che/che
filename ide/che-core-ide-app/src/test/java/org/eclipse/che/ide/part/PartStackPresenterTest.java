@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.part;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.constraints.Constraints;
@@ -51,7 +52,7 @@ import static org.mockito.Mockito.when;
  * @author Roman Nikitenko
  * @author Dmitry Shnurenko
  */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(GwtMockitoTestRunner.class)
 public class PartStackPresenterTest {
 
     private static final String SOME_TEXT = "someText";
