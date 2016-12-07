@@ -1269,6 +1269,86 @@
     }
   },
   {
+    "id": "flux",
+    "creator": "rnavagamuwa",
+    "name": "Flux",
+    "description": "Eclipse flux stack with java, node and rabbitmq.",
+    "scope": "advanced",
+    "tags": [
+      "Java",
+      "JDK",
+      "Maven",
+      "Tomcat",
+      "Subversion",
+      "Ubuntu",
+      "Git",
+      "Node",
+      "RabbitMQ",
+      "Flux"
+    ],
+    "components": [
+      {
+        "name": "JDK",
+        "version": "1.8.0_45"
+      },
+      {
+        "name": "Maven",
+        "version": "3.2.2"
+      },
+      {
+        "name": "Tomcat",
+        "version": "8.0.24"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "rnavagamuwa/fluxworkspace"
+    },
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "machines": {
+            "dev-machine": {
+              "agents": [
+                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+              ],
+              "servers": {},
+              "attributes" : {
+                "memoryLimitBytes": "2147483648"
+              }
+            }
+          },
+          "recipe": {
+            "location": "rnavagamuwa/fluxworkspace",
+            "type": "dockerimage"
+          }
+        }
+      },
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "commands": [
+        {
+          "name": "flux",
+          "type": "custom",
+          "commandLine": "sudo service rabbitmq-server start && cd /home/user/flux-master/node.server && npm start"
+        }
+      ]
+    },
+    "acl": [
+      {
+        "user": "*",
+        "actions": [
+          "search"
+        ]
+      }
+    ],
+    "stackIcon": {
+      "name": "type-flux.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
     "id": "selenium",
     "creator": "ide",
     "name": "Selenium",
