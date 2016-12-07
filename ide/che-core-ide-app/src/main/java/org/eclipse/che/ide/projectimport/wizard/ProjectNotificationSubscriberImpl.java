@@ -10,8 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.ide.projectimport.wizard;
 
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
+import elemental.json.Json;
+import elemental.json.JsonObject;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -19,16 +20,14 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.WsAgentStateController;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
-import org.eclipse.che.ide.commons.exception.UnmarshallerException;
 import org.eclipse.che.ide.util.loging.Log;
-import org.eclipse.che.ide.websocket.Message;
 import org.eclipse.che.ide.websocket.MessageBus;
 import org.eclipse.che.ide.websocket.WebSocketException;
+import org.eclipse.che.ide.websocket.rest.StringUnmarshallerWS;
 import org.eclipse.che.ide.websocket.rest.SubscriptionHandler;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
@@ -48,7 +47,6 @@ public class ProjectNotificationSubscriberImpl implements ProjectNotificationSub
     private final Operation<PromiseError>  logErrorHandler;
     private final CoreLocalizationConstant locale;
     private final NotificationManager      notificationManager;
-    private final String                   workspaceId;
     private final WsAgentStateController   wsAgentStateController;
 
     private String                      wsChannel;
@@ -58,12 +56,10 @@ public class ProjectNotificationSubscriberImpl implements ProjectNotificationSub
 
     @Inject
     public ProjectNotificationSubscriberImpl(CoreLocalizationConstant locale,
-                                             AppContext appContext,
                                              NotificationManager notificationManager,
                                              WsAgentStateController wsAgentStateController) {
         this.locale = locale;
         this.notificationManager = notificationManager;
-        this.workspaceId = appContext.getWorkspace().getId();
         this.wsAgentStateController = wsAgentStateController;
         this.logErrorHandler = new Operation<PromiseError>() {
             @Override
@@ -75,19 +71,32 @@ public class ProjectNotificationSubscriberImpl implements ProjectNotificationSub
 
     @Override
     public void subscribe(final String projectName) {
-        notification = notificationManager.notify(locale.importingProject(), PROGRESS, FLOAT_MODE);
+        notification = notificationManager.notify(locale.importingProject(projectName), PROGRESS, FLOAT_MODE);
         subscribe(projectName, notification);
     }
 
     @Override
-    public void subscribe(final String projectName, final StatusNotification existingNotification) {
-        this.projectName = projectName;
-        this.wsChannel = "importProject:output:" + workspaceId + ":" + projectName;
+    public void subscribe(final String name, final StatusNotification existingNotification) {
+        this.projectName = name;
+        this.wsChannel = "importProject:output";
         this.notification = existingNotification;
-        this.subscriptionHandler = new SubscriptionHandler<String>(new LineUnmarshaller()) {
+        this.subscriptionHandler = new SubscriptionHandler<String>(new StringUnmarshallerWS()) {
             @Override
             protected void onMessageReceived(String result) {
-                notification.setContent(result);
+                JsonObject jsonObject = Json.parse(result);
+
+                if (jsonObject == null) {
+                    return;
+                }
+
+                if (jsonObject.hasKey("project")) {
+                    projectName = jsonObject.getString("project");
+                    notification.setTitle(locale.importingProject(projectName));
+                }
+
+                if (jsonObject.hasKey("line")) {
+                    notification.setContent(jsonObject.getString("line"));
+                }
             }
 
             @Override
@@ -153,25 +162,4 @@ public class ProjectNotificationSubscriberImpl implements ProjectNotificationSub
             }
         }).catchError(logErrorHandler);
     }
-
-    static class LineUnmarshaller implements org.eclipse.che.ide.websocket.rest.Unmarshallable<String> {
-        private String line;
-
-        @Override
-        public void unmarshal(Message response) throws UnmarshallerException {
-            JSONObject jsonObject = JSONParser.parseStrict(response.getBody()).isObject();
-            if (jsonObject == null) {
-                return;
-            }
-            if (jsonObject.containsKey("line")) {
-                line = jsonObject.get("line").isString().stringValue();
-            }
-        }
-
-        @Override
-        public String getPayload() {
-            return line;
-        }
-    }
-
 }
