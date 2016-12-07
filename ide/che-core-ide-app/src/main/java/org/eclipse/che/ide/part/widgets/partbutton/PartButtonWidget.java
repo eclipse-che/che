@@ -13,6 +13,7 @@ package org.eclipse.che.ide.part.widgets.partbutton;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.DoubleClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -70,6 +71,7 @@ public class PartButtonWidget extends Composite implements PartButton {
         setStyleName(resources.partStackCss().idePartStackTab());
         ensureDebugId("partButton-" + title);
 
+        addDomHandler(this, DoubleClickEvent.getType());
         addDomHandler(this, ClickEvent.getType());
 
         tabName.setText(title);
@@ -181,13 +183,19 @@ public class PartButtonWidget extends Composite implements PartButton {
         delegate.onTabClicked(this);
     }
 
+    @Override
+    public void onDoubleClick(DoubleClickEvent event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
+
     /** {@inheritDoc} */
     @Override
     public void select() {
         tabSelected = true;
 
         addStyleName(tabPosition == BELOW ? resources.partStackCss().selectedBottomTab()
-                                          : resources.partStackCss().selectedRightOrLeftTab());
+                : resources.partStackCss().selectedRightOrLeftTab());
 
         updateBadge();
     }
@@ -236,4 +244,5 @@ public class PartButtonWidget extends Composite implements PartButton {
 
     interface PartButtonWidgetUiBinder extends UiBinder<Widget, PartButtonWidget> {
     }
+
 }

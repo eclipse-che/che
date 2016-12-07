@@ -24,7 +24,8 @@ import org.eclipse.che.plugin.svn.shared.Depth;
  */
 public interface PropertyEditorView extends View<PropertyEditorView.ActionDelegate> {
 
-    public interface ActionDelegate extends BaseActionDelegate {
+    interface ActionDelegate {
+
         void onCancelClicked();
 
         void onOkClicked();
@@ -32,6 +33,7 @@ public interface PropertyEditorView extends View<PropertyEditorView.ActionDelega
         void onPropertyNameChanged(String propertyName);
 
         void obtainExistingPropertiesForPath();
+
     }
 
     /** Perform actions when close window performed. */

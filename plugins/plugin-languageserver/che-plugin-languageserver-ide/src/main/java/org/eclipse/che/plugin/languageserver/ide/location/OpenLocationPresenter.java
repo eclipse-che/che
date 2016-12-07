@@ -100,10 +100,6 @@ public class OpenLocationPresenter extends BasePresenter implements OpenLocation
     }
 
     @Override
-    public void setVisible(boolean visible) {
-    }
-
-    @Override
     public IsWidget getView() {
         return view;
     }

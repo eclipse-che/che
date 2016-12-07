@@ -18,7 +18,6 @@ import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.PartStackView;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.appliance.MachineAppliancePresenter;
@@ -60,8 +59,6 @@ public class OperationsPerspectiveTest {
     private MachinePanelPresenter      machinePanel;
     @Mock
     private MachineAppliancePresenter  infoContainer;
-    @Mock
-    private NotificationManager        notificationManager;
     @Mock
     private RecipePartPresenter        recipePanel;
     @Mock

@@ -33,6 +33,7 @@ import org.eclipse.che.ide.api.parts.EditorTab;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStackView.TabItem;
 import org.eclipse.che.ide.api.parts.PropertyListener;
+import org.eclipse.che.ide.api.parts.base.MaximizePartEvent;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent.ResourceChangedHandler;
 import org.eclipse.che.ide.api.resources.ResourceDelta;
@@ -116,7 +117,6 @@ public class EditorPartStackPresenter extends PartStackPresenter implements Edit
                                     ActionManager actionManager,
                                     ClosePaneAction closePaneAction,
                                     CloseAllTabsPaneAction closeAllTabsPaneAction) {
-        //noinspection ConstantConditions
         super(eventBus, partStackEventHandler, tabItemFactory, partsComparator, view, null);
         this.editorPaneMenuItemFactory = editorPaneMenuItemFactory;
         this.eventBus = eventBus;
@@ -279,6 +279,11 @@ public class EditorPartStackPresenter extends PartStackPresenter implements Edit
     public void onTabClicked(@NotNull TabItem tab) {
         activePart = parts.get(tab);
         view.selectTab(parts.get(tab));
+    }
+
+    @Override
+    public void onTabDoubleClicked(@NotNull TabItem tab) {
+        eventBus.fireEvent(new MaximizePartEvent(parts.get(tab)));
     }
 
     /** {@inheritDoc} */

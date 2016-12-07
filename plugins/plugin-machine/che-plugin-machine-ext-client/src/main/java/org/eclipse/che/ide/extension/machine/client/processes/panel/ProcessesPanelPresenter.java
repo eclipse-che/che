@@ -246,11 +246,6 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     }
 
     @Override
-    public void setVisible(boolean visible) {
-        view.setVisible(visible);
-    }
-
-    @Override
     public IsWidget getView() {
         return view;
     }

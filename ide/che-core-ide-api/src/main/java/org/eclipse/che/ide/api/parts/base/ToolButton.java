@@ -13,6 +13,8 @@ package org.eclipse.che.ide.api.parts.base;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.DoubleClickEvent;
+import com.google.gwt.event.dom.client.DoubleClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -49,6 +51,8 @@ public class ToolButton extends Composite implements HasClickHandlers {
     public ToolButton(SVGImage image) {
         initWidget(uiBinder.createAndBindUi(this));
         iconPanel.add(image);
+
+        blockDoubleClicking();
     }
 
     /**
@@ -63,11 +67,26 @@ public class ToolButton extends Composite implements HasClickHandlers {
         FlowPanel image = new FlowPanel();
         image.getElement().setInnerHTML(htmlImageResource);
         iconPanel.add(image);
+
+        blockDoubleClicking();
     }
 
     @Override
     public HandlerRegistration addClickHandler(ClickHandler clickHandler) {
         return iconPanel.addDomHandler(clickHandler, ClickEvent.getType());
+    }
+
+    /**
+     * Blocks double clicking on the button and on the parent element.
+     */
+    private void blockDoubleClicking() {
+        addDomHandler(new DoubleClickHandler() {
+            @Override
+            public void onDoubleClick(DoubleClickEvent event) {
+                event.stopPropagation();
+                event.preventDefault();
+            }
+        }, DoubleClickEvent.getType());
     }
 
 }

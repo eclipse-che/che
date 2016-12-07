@@ -26,14 +26,20 @@ import javax.validation.constraints.NotNull;
  */
 public interface Perspective extends StateComponent {
 
-    /** Maximizes central part */
-    void maximizeCentralPart();
+    /** Maximizes central part stack */
+    void maximizeCentralPartStack();
 
-    /** Maximizes bottom part */
-    void maximizeBottomPart();
+    /** Maximize left part stack */
+    void maximizeLeftPartStack();
 
-    /** Restores parts to their states before maximizing */
-    void restoreParts();
+    /** Maximize right part stack */
+    void maximizeRightPartStack();
+
+    /** Maximizes bottom part stack */
+    void maximizeBottomPartStack();
+
+    /** Restores perspective to the state before maximizing */
+    void restore();
 
     /** Store perspective state before changing. */
     void storeState();
@@ -114,4 +120,5 @@ public interface Perspective extends StateComponent {
      *         container in which need expose view
      */
     void go(@NotNull AcceptsOneWidget container);
+
 }

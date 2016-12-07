@@ -158,18 +158,6 @@ public class MovePresenter extends SubversionActionPresenter implements MoveView
 
     /** {@inheritDoc} */
     @Override
-    public void minimize() {
-        //stub
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void activatePart() {
-        //stub
-    }
-
-    /** {@inheritDoc} */
-    @Override
     public void onUrlsChanged() {
         if (Strings.isNullOrEmpty(view.getSourceUrl())) {
             view.showErrorMarker(locale.moveSourceUrlEmpty());

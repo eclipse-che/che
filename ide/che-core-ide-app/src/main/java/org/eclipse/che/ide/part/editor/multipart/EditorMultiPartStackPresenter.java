@@ -45,6 +45,8 @@ public class EditorMultiPartStackPresenter implements EditorMultiPartStack,
     private       PartPresenter               activeEditor;
     private       EditorPartStack             activeEditorPartStack;
 
+    private       State state = State.NORMAL;
+
     @Inject
     public EditorMultiPartStackPresenter(EventBus eventBus,
                                          EditorMultiPartStackView view,
@@ -56,6 +58,9 @@ public class EditorMultiPartStackPresenter implements EditorMultiPartStack,
         eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
     }
 
+    @Override
+    public void setDelegate(ActionDelegate delegate) {
+    }
 
     @Override
     public void go(AcceptsOneWidget container) {
@@ -138,11 +143,28 @@ public class EditorMultiPartStackPresenter implements EditorMultiPartStack,
     }
 
     @Override
-    public void hidePart(PartPresenter part) {
-        EditorPartStack editorPartStack = getPartStackByPart(part);
-        if (editorPartStack != null) {
-            editorPartStack.hidePart(part);
-        }
+    public void maximize() {
+        state = State.MAXIMIZED;
+    }
+
+    @Override
+    public void collapse() {
+        state = State.COLLAPSED;
+    }
+
+    @Override
+    public void minimize() {
+        state = State.MINIMIZED;
+    }
+
+    @Override
+    public void restore() {
+        state = State.NORMAL;
+    }
+
+    @Override
+    public State getPartStackState() {
+        return state;
     }
 
     /** {@inheritDoc} */
@@ -292,4 +314,5 @@ public class EditorMultiPartStackPresenter implements EditorMultiPartStack,
             activeEditorPartStack = getPartStackByPart(activePart);
         }
     }
+
 }
