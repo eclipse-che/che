@@ -171,6 +171,24 @@ check_docker() {
     return 1;
   fi
 
+  # If DOCKER_HOST is not set, then it should bind mounted
+  if [ -z "${DOCKER_HOST+x}" ]; then
+    if ! docker ps > /dev/null 2>&1; then
+      info "Welcome to ${CHE_FORMAL_PRODUCT_NAME}!"
+      info ""
+      info "You are missing a mandatory parameter:"
+      info "   1. Mount 'docker.sock' for accessing Docker with unix sockets."
+      info "   2. Or, set DOCKER_HOST to Docker's daemon location (unix or tcp)."
+      info ""
+      info "Mount Syntax:"
+      info "   Start with 'docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock' ..."
+      info ""
+      info "DOCKER_HOST Syntax:"
+      info "   Start with 'docker run -it --rm -e DOCKER_HOST=<daemon-location> ...'"
+      return 2;
+    fi
+  fi
+
   DOCKER_VERSION=($(docker version |  grep  "Version:" | sed 's/Version://'))
   MAJOR_VERSION_ID=$(echo ${DOCKER_VERSION[0]:0:1})
   MINOR_VERSION_ID=$(echo ${DOCKER_VERSION[0]:2:2})
@@ -196,24 +214,6 @@ check_docker() {
   fi
 
   CHE_VERSION=$CHE_IMAGE_VERSION
-
-  # If DOCKER_HOST is not set, then it should bind mounted
-  if [ -z "${DOCKER_HOST+x}" ]; then
-    if ! docker ps > /dev/null 2>&1; then
-      info "Welcome to ${CHE_FORMAL_PRODUCT_NAME}!"
-      info ""
-      info "We need some additional parameters:"
-      info "   1. Mount 'docker.sock', which let's us access Docker using unix sockets."
-      info "   2. Or, set the DOCKER_HOST variable to Docker's location."
-      info ""
-      info "Mount Syntax:"
-      info "   Start with 'docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock' ..."
-      info ""
-      info "DOCKER_HOST Syntax:"
-      info "   Start with 'docker run -it --rm -e DOCKER_HOST=<daemon-location> ...'"
-      return 2;
-    fi
-  fi
 }
 
 check_docker_networking() {
