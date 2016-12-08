@@ -8,48 +8,41 @@
 
 init_usage() {
   USAGE="
-Usage: docker run -it --rm
-                  -v /var/run/docker.sock:/var/run/docker.sock
-                  -v <LOCAL_DATA_PATH>:${CHE_CONTAINER_ROOT}
-                  ${CHE_IMAGE_FULLNAME} [COMMAND]
+USAGE: 
+  docker run -it --rm <DOCKER_PARAMETERS> ${CHE_IMAGE_FULLNAME} [COMMAND]
 
-    help                                 This message
-    version                              Installed version and upgrade paths
-    init                                 Initializes a directory with a ${CHE_FORMAL_PRODUCT_NAME} install
-         [--no-force                         Default - uses cached local Docker images
-          --pull                             Checks for newer images from DockerHub
-          --force                            Removes all images and re-pulls all images from DockerHub
-          --offline                          Uses images saved to disk from the offline command
-          --accept-license                   Auto accepts the ${CHE_FORMAL_PRODUCT_NAME} license during installation
-          --reinit]                          Reinstalls using existing $CHE_MINI_PRODUCT_NAME.env configuration
-    start [--pull | --force | --offline] Starts ${CHE_FORMAL_PRODUCT_NAME} services
-    stop                                 Stops ${CHE_FORMAL_PRODUCT_NAME} services
-    restart [--pull | --force]           Restart ${CHE_FORMAL_PRODUCT_NAME} services
-    destroy                              Stops services, and deletes ${CHE_FORMAL_PRODUCT_NAME} instance data
-            [--quiet                         Does not ask for confirmation before destroying instance data
-             --cli]                          If :/cli is mounted, will destroy the cli.log
-    rmi [--quiet]                        Removes the Docker images for <version>, forcing a repull
-    config                               Generates a ${CHE_FORMAL_PRODUCT_NAME} config from vars; run on any start / restart
-    upgrade                              Upgrades ${CHE_FORMAL_PRODUCT_NAME} from one version to another with migrations and backups
-    download [--pull|--force|--offline]  Pulls Docker images for the current ${CHE_FORMAL_PRODUCT_NAME} version
-    backup [--quiet | --skip-data]       Backups ${CHE_FORMAL_PRODUCT_NAME} configuration and data to ${CHE_CONTAINER_ROOT}/backup volume mount
-    restore [--quiet]                    Restores ${CHE_FORMAL_PRODUCT_NAME} configuration and data from ${CHE_CONTAINER_ROOT}/backup mount
-    offline                              Saves ${CHE_FORMAL_PRODUCT_NAME} Docker images into TAR files for offline install
-    info                                 Displays info about ${CHE_FORMAL_PRODUCT_NAME} and the CLI
-         [ --all                             Run all debugging tests
-           --debug                           Displays system information
-           --network]                        Test connectivity between ${CHE_FORMAL_PRODUCT_NAME} sub-systems
-    ssh <wksp-name> [machine-name]       SSH to a workspace if SSH agent enabled
-    mount <wksp-name>                    Synchronize workspace with current working directory
-    action <action-name> [--help]        Start action on ${CHE_FORMAL_PRODUCT_NAME} instance
-    test <test-name> [--help]            Start test on ${CHE_FORMAL_PRODUCT_NAME} instance
+MANDATORY DOCKER PARAMETERS:
+  -v <LOCAL_PATH>:${CHE_CONTAINER_ROOT}                Where user, instance, and log data saved
 
-Variables:
-    CHE_HOST                             IP address or hostname where ${CHE_FORMAL_PRODUCT_NAME} will serve its users
-    CLI_DEBUG                            Default=false. Prints stack trace during execution
-    CLI_INFO                             Default=true. Prints out INFO messages to standard out
-    CLI_WARN                             Default=true. Prints WARN messages to standard out
-    CLI_LOG                              Default=true. Prints messages to cli.log file
+OPTIONAL DOCKER PARAMETERS:
+  -e CHE_HOST=<YOUR_HOST>              IP address or hostname where ${CHE_MINI_PRODUCT_NAME} will serve its users
+  -e CHE_PORT=<YOUR_PORT>              Port where ${CHE_MINI_PRODUCT_NAME} will bind itself to
+  -v <LOCAL_PATH>:${CHE_CONTAINER_ROOT}/instance       Where instance, user, log data will be saved
+  -v <LOCAL_PATH>:${CHE_CONTAINER_ROOT}/backup         Where backup files will be saved
+  -v <LOCAL_PATH>:/repo                ${CHE_MINI_PRODUCT_NAME} git repo to activate dev mode
+  -v <LOCAL_PATH>:/sync                Where remote ws files will be copied with sync command
+  -v <LOCAL_PATH>:/unison              Where unison profile for optimzing sync command resides
+    
+COMMANDS:
+  action <action-name>                 Start action on ${CHE_MINI_PRODUCT_NAME} instance
+  backup                               Backups ${CHE_MINI_PRODUCT_NAME} configuration and data to ${CHE_CONTAINER_ROOT}/backup volume mount
+  config                               Generates a ${CHE_MINI_PRODUCT_NAME} config from vars; run on any start / restart
+  destroy                              Stops services, and deletes ${CHE_MINI_PRODUCT_NAME} instance data
+  download                             Pulls Docker images for the current ${CHE_MINI_PRODUCT_NAME} version
+  help                                 This message
+  info                                 Displays info about ${CHE_MINI_PRODUCT_NAME} and the CLI
+  init                                 Initializes a directory with a ${CHE_MINI_PRODUCT_NAME} install
+  offline                              Saves ${CHE_MINI_PRODUCT_NAME} Docker images into TAR files for offline install
+  restart                              Restart ${CHE_MINI_PRODUCT_NAME} services
+  restore                              Restores ${CHE_MINI_PRODUCT_NAME} configuration and data from ${CHE_CONTAINER_ROOT}/backup mount
+  rmi                                  Removes the Docker images for <version>, forcing a repull
+  ssh <wksp-name> [machine-name]       SSH to a workspace if SSH agent enabled
+  start                                Starts ${CHE_MINI_PRODUCT_NAME} services
+  stop                                 Stops ${CHE_MINI_PRODUCT_NAME} services
+  sync <wksp-name>                     Synchronize workspace with current working directory
+  test <test-name>                     Start test on ${CHE_MINI_PRODUCT_NAME} instance
+  upgrade                              Upgrades ${CHE_MINI_PRODUCT_NAME} from one version to another with migrations and backups
+  version                              Installed version and upgrade paths
 "
 }
 

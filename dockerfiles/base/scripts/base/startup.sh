@@ -28,7 +28,7 @@ init_constants() {
   CHE_FORMAL_PRODUCT_NAME=${CHE_FORMAL_PRODUCT_NAME:-${DEFAULT_CHE_FORMAL_PRODUCT_NAME}}
 
   # Path to root folder inside the container
-  DEFAULT_CHE_CONTAINER_ROOT="/${CHE_MINI_PRODUCT_NAME}"
+  DEFAULT_CHE_CONTAINER_ROOT="/data"
   CHE_CONTAINER_ROOT=${CHE_CONTAINER_ROOT:-${DEFAULT_CHE_CONTAINER_ROOT}}
 
   # Turns on stack trace
@@ -59,6 +59,8 @@ init_constants() {
   DEFAULT_CHE_LICENSE_URL="https://www.eclipse.org/legal/epl-v10.html"
   CHE_LICENSE_URL=${CHE_LICENSE_URL:-${DEFAULT_CHE_LICENSE_URL}}
 
+  DEFAULT_CHE_IMAGE_FULLNAME="eclipse/che-cli:<version>"
+  CHE_IMAGE_FULLNAME=${CHE_IMAGE_FULLNAME:-${DEFAULT_CHE_IMAGE_FULLNAME}}
 }
 
 
@@ -73,8 +75,9 @@ log() {
   fi
 }
 
-usage () {
+usage() {
   debug $FUNCNAME
+  init_usage
   printf "%s" "${USAGE}"
   return 1;
 }
@@ -193,7 +196,7 @@ is_debug() {
 
 init_logging() {
   # Initialize CLI folder
-  CLI_DIR="/cli"
+  CLI_DIR=$CHE_CONTAINER_ROOT
   test -d "${CLI_DIR}" || mkdir -p "${CLI_DIR}"
 
   # Ensure logs folder exists
@@ -209,6 +212,11 @@ init_logging() {
 init() {
   init_constants
 
+  # If there are no parameters, immediately display usage
+  if [[ $# == 0 ]]; then
+    usage;
+  fi
+
   SCRIPTS_BASE_CONTAINER_SOURCE_DIR="/scripts/base"
   # add helper scripts
   for HELPER_FILE in "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/*.sh
@@ -218,11 +226,12 @@ init() {
 
   # Make sure Docker is working and we have /var/run/docker.sock mounted or valid DOCKER_HOST
   check_docker "$@"
+  
+  # Check to see if Docker is configured with a proxy and pull values
+  check_docker_networking
 
-  init_usage
-  if [[ $# == 0 ]]; then
-    usage;
-  fi
+  # Verify that -it is passed on the command line
+  check_tty
 
   # Only verify mounts after Docker is confirmed to be working.
   check_mounts "$@"
@@ -251,6 +260,17 @@ init() {
   source "${SCRIPTS_CONTAINER_SOURCE_DIR}"/cli.sh
 }
 
+cleanup() {
+  RETURN_CODE=$?
+
+  # CLI developers should only return '3' in code after the init() method has completed.
+  # This will check to see if the CLI directory is not mounted and only offer the error
+  # message if it isn't currently mounted.
+  if [ $RETURN_CODE -eq "3" ]; then
+    error ""
+    error "Unexpected exit: Trace output saved to $CHE_HOST_CONFIG/cli.log."
+  fi
+}
 
 start() {
   # Bootstrap enough stuff to load /cli/cli.sh
@@ -258,13 +278,18 @@ start() {
 
   # Begin product-specific CLI calls
   info "cli" "Loading cli..."
+
+  # The pre_init method is unique to each assembly. This method must be provided by 
+  # a custom CLI assembly in their container and can set global variables which are 
+  # specific to that implementation of the CLI.
   cli_pre_init
   cli_init "$@"
   cli_parse "$@"
   cli_execute "$@"
-
 }
 
 # See: https://sipb.mit.edu/doc/safe-shell/
 set -e
 set -u
+
+trap "cleanup" INT TERM EXIT

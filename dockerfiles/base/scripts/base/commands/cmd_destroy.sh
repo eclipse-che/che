@@ -32,7 +32,7 @@ cmd_destroy() {
     esac
   done
 
-  WARNING="destroy !!! Stopping services and !!! deleting data !!! this is unrecoverable !!!"
+  WARNING="${RED}!!!${NC} Stopping services and ${RED}!!!${NC} deleting data ${RED}!!!${NC} this is unrecoverable ${RED}!!!${NC}"
   if ! confirm_operation "${WARNING}" "${QUIET}"; then
     return;
   fi
@@ -73,12 +73,8 @@ cmd_destroy() {
   # Sometimes users want the CLI after they have destroyed their instance
   # If they pass destroy --cli then we will also destroy the CLI
   if [[ "${DESTROY_CLI}" = "true" ]]; then
-    if [[ "${CLI_MOUNT}" = "not set" ]]; then
-      info "destroy" "Did not delete cli.log - ':/cli' not mounted"
-    else
-      info "destroy" "Deleting cli.log..."
-      docker_run -v "${CLI_MOUNT}":/root/cli alpine:3.4 sh -c "rm -rf /root/cli/cli.log"
-    fi
+    info "destroy" "Deleting cli.log..."
+    docker_run -v "${CLI_DIR}":/root/cli alpine:3.4 sh -c "rm -rf /root/cli/cli.log"
   fi
 }
 

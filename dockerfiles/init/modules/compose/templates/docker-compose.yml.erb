@@ -7,7 +7,7 @@ che:
   image: <%= ENV["IMAGE_CHE"] %>
   env_file:
 <% if @compose_file_for_containers == true -%>
-    - '/che/instance/config/che.env'
+    - '<%= ENV["CHE_CONTAINER_ROOT"] %>/instance/config/che.env'
 <% else -%>
     - '<%= ENV["CHE_ENV_FILE"] %>'
 <% end -%>

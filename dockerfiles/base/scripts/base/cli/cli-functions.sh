@@ -6,7 +6,6 @@
 # http://www.eclipse.org/legal/epl-v10.html
 
 
-
 cli_init() {
 
   # Constants
@@ -22,7 +21,7 @@ cli_init() {
   CHE_BACKUP_FILE_NAME="${CHE_MINI_PRODUCT_NAME}_backup.tar.gz"
   CHE_COMPOSE_STOP_TIMEOUT="180"
 
-  grab_offline_images "$@"
+  initiate_offline_or_networking_mode "$@"
   grab_initial_images
 
   DEFAULT_CHE_CLI_ACTION="help"
@@ -129,7 +128,6 @@ get_display_url() {
   fi
 }
 
-
 check_if_booted() {
   CURRENT_CHE_SERVER_CONTAINER_ID=$(get_server_container_id $CHE_SERVER_CONTAINER_NAME)
   wait_until_container_is_running 20 ${CURRENT_CHE_SERVER_CONTAINER_ID}
@@ -166,8 +164,7 @@ server_is_booted() {
   fi
 }
 
-
-grab_offline_images(){
+initiate_offline_or_networking_mode(){
   # If you are using ${CHE_FORMAL_PRODUCT_NAME} in offline mode, images must be loaded here
   # This is the point where we know that docker is working, but before we run any utilities
   # that require docker.
@@ -188,6 +185,27 @@ grab_offline_images(){
       fi
       info "init" "Loading ${file##*/}..."
     done
+  else
+    # If we are here, then we want to run in networking mode.
+    # If we are in networking mode, we have had some issues where users have failed DNS networking.
+    # See: https://github.com/eclipse/che/issues/3266#issuecomment-265464165
+    local HTTP_STATUS_CODE=$(curl -I -k dockerhub.com -s -o /dev/null --write-out "%{http_code}")
+    if [[ ! $HTTP_STATUS_CODE -eq "301" ]]; then
+      info "Welcome to $CHE_FORMAL_PRODUCT_NAME!"
+      info ""
+      info "We could not resolve DockerHub using DNS."
+      info "Either we cannot reach the Internet or Docker's DNS resolver needs a modification."
+      info ""
+      info "You can:"
+      info "  1. Modify Docker's DNS settings." 
+      info "     a. Docker for Windows & Mac have GUIs for this."
+      info "     b. Typically setting DNS to 8.8.8.8 fixes resolver issues."
+      info "  2. Does your network require Docker to use a proxy?"
+      info "     a. Docker for Windows & Mac have GUIs to set proxies."
+      info "  3. Verify that you have access to DockerHub."
+      info "     a. Try 'curl --head dockerhub.com'"
+      return 2;
+    fi
   fi
 }
 
@@ -204,17 +222,6 @@ grab_initial_images() {
     fi
   fi
 
-  if [ "$(docker images -q appropriate/curl 2> /dev/null)" = "" ]; then
-    info "cli" "Pulling image appropriate/curl:latest"
-    log "docker pull appropriate/curl:latest >> \"${LOGS}\" 2>&1"
-    TEST=""
-    docker pull appropriate/curl >> "${LOGS}" 2>&1 || TEST=$?
-    if [ "$TEST" = "1" ]; then
-      error "Image appropriate/curl:latest unavailable. Not on dockerhub or built locally."
-      return 2;
-    fi
-  fi
-
   if [ "$(docker images -q eclipse/che-ip:nightly 2> /dev/null)" = "" ]; then
     info "cli" "Pulling image eclipse/che-ip:nightly"
     log "docker pull eclipse/che-ip:nightly >> \"${LOGS}\" 2>&1"
@@ -226,7 +233,6 @@ grab_initial_images() {
     fi
   fi
 }
-
 
 has_env_variables() {
   debug $FUNCNAME
