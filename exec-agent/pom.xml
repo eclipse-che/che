@@ -199,6 +199,7 @@
                                 <configuration>
                                     <target unless="skipTests">
                                         <exec dir="${project.build.directory}/${go.workspace.name}/src/github.com/eclipse/che/exec-agent" executable="go" failonerror="true">
+                                            <env key="GOPATH" value="${project.build.directory}/${go.workspace.name}"/>
                                             <arg value="test" />
                                             <arg value="-v" />
                                             <arg value="./..." />
