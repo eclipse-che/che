@@ -32,11 +32,11 @@ node default {
   # leave those fields empty if no configuration needed
   #
   # http proxy for CHE
-  $http_proxy_for_che = getValue("CHE_HTTP_PROXY_FOR_CHE","")
-  $https_proxy_for_che = getValue("CHE_HTTPS_PROXY_FOR_CHE","")
+  $http_proxy_for_che = getValue("CHE_HTTP_PROXY","")
+  $https_proxy_for_che = getValue("CHE_HTTPS_PROXY","")
   # provide dns which proxy should not be used for.
   # please leave this empty if you don't need no_proxy configuration
-  $no_proxy_for_che = getValue("CHE_NO_PROXY_FOR_CHE","")
+  $no_proxy_for_che = getValue("CHE_NO_PROXY","")
   #
   # http proxy for CHE workspaces
   $http_proxy_for_che_workspaces = getValue("CHE_WORKSPACE_HTTP__PROXY","")
