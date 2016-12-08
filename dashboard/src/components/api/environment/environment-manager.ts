@@ -104,7 +104,7 @@ export class EnvironmentManager {
    * @returns {boolean}
    */
   isDev(machine: any): boolean {
-    return machine.agents && machine.agents.includes(WS_AGENT_NAME);
+    return machine.agents && machine.agents.indexOf(WS_AGENT_NAME) >= 0;
   }
 
   /**
@@ -120,10 +120,10 @@ export class EnvironmentManager {
       if (!hasWsAgent) {
         machine.agents.push(WS_AGENT_NAME);
       }
-      if (!machine.agents.includes(SSH_AGENT_NAME)) {
+      if (machine.agents.indexOf(SSH_AGENT_NAME) < 0) {
         machine.agents.push(SSH_AGENT_NAME);
       }
-      if (!machine.agents.includes(TERMINAL_AGENT_NAME)) {
+      if (machine.agents.indexOf(TERMINAL_AGENT_NAME) < 0) {
         machine.agents.push(TERMINAL_AGENT_NAME);
       }
       return;

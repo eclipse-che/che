@@ -291,7 +291,7 @@ export class CheWorkspace {
     }
 
     let devMachine = this.lodash.find(defaultEnvironment.machines, (machine) => {
-      return machine.agents.includes('org.eclipse.che.ws-agent');
+      return machine.agents.indexOf('org.eclipse.che.ws-agent') >= 0;
     });
 
     // check dev machine is provided and add if there is no:
@@ -482,7 +482,7 @@ export class CheWorkspace {
    * @param workspaceId
      */
   startUpdateWorkspaceStatus(workspaceId) {
-    if (!this.subscribedWorkspacesIds.includes(workspaceId)) {
+    if (this.subscribedWorkspacesIds.indexOf(workspaceId) < 0) {
       let bus = this.cheWebsocket.getBus();
       this.subscribedWorkspacesIds.push(workspaceId);
 
