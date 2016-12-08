@@ -600,9 +600,10 @@ public class WorkspaceService extends Service {
                                                          ConflictException,
                                                          ForbiddenException {
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
-        if (workspace.getConfig().getEnvironments().remove(envName) != null) {
-            workspaceManager.updateWorkspace(id, workspace);
+        if (workspace.getConfig().getEnvironments().remove(envName) == null) {
+            throw new NotFoundException(format("Workspace '%s' doesn't contain environment '%s'", id, envName));
         }
+        workspaceManager.updateWorkspace(id, workspace);
     }
 
     @POST

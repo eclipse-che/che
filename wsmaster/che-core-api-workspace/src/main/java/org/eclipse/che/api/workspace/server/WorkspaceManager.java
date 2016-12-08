@@ -27,6 +27,7 @@ import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.api.environment.server.exception.EnvironmentException;
 import org.eclipse.che.api.machine.server.exception.SnapshotException;
@@ -342,9 +343,15 @@ public class WorkspaceManager {
             throws ServerException, NotFoundException, ConflictException {
         final WorkspaceImpl workspace = workspaceDao.get(workspaceId);
         // concurrent maps is used here for removing elements inside foreach loop without iterator
-        final Map<String, ? extends Environment> oldEnvironments = new ConcurrentHashMap<>(workspace.getConfig().getEnvironments());
-        final Map<String, ? extends Environment> newEnvironments = new ConcurrentHashMap<>(update);
+        final Map<String, EnvironmentImpl> oldEnvironments = new ConcurrentHashMap<>(workspace.getConfig().getEnvironments());
+        final Map<String, EnvironmentImpl> newEnvironments = new ConcurrentHashMap<>();
         final Map<String, Environment> result = new HashMap<>();
+
+        // this is needed to convert DTO into EnvironmentImpl object, otherwise equals will fail
+        for (Map.Entry<String, ? extends Environment> environment : update.entrySet()) {
+            newEnvironments.put(environment.getKey(), new EnvironmentImpl(environment.getValue().getRecipe(),
+                                                                          environment.getValue().getMachines()));
+        }
 
         // Here update will be done step by step.
         // Each step will remove precessed items from old nad new environments maps and add them to result map
