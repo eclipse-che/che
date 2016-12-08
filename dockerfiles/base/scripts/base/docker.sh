@@ -245,6 +245,10 @@ check_docker_networking() {
      [[ ! ${NO_PROXY} = "" ]]; then
      info "Proxy: HTTP_PROXY=${HTTP_PROXY}, HTTPS_PROXY=${HTTPS_PROXY}, NO_PROXY=${NO_PROXY}"
   fi
+
+  export http_proxy=$HTTP_PROXY
+  export https_proxy=$HTTPS_PROXY
+  export no_proxy=$NO_PROXY
 }
 
 check_tty() {
