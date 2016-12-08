@@ -57,7 +57,8 @@ import org.eclipse.che.api.machine.server.spi.InstanceProvider;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.machine.server.util.RecipeDownloader;
 import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
-import org.eclipse.che.api.workspace.server.StripedLocks;
+import org.eclipse.che.commons.lang.concurrent.CloseableLock;
+import org.eclipse.che.commons.lang.concurrent.StripedLocks;
 import org.eclipse.che.api.workspace.server.model.impl.ExtendedMachineImpl;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.IoUtil;
@@ -165,7 +166,7 @@ public class CheEnvironmentEngine {
      */
     public List<Instance> getMachines(String workspaceId) throws EnvironmentNotRunningException {
         EnvironmentHolder environment;
-        try (StripedLocks.ReadLock lock = stripedLocks.acquireReadLock(workspaceId)) {
+        try (CloseableLock lock = stripedLocks.acquireReadLock(workspaceId)) {
             environment = environments.get(workspaceId);
             if (environment == null) {
                 throw new EnvironmentNotRunningException("Environment with ID '" + workspaceId + "' is not found");
@@ -189,7 +190,7 @@ public class CheEnvironmentEngine {
      */
     public Instance getMachine(String workspaceId, String machineId) throws NotFoundException {
         EnvironmentHolder environment;
-        try (StripedLocks.ReadLock lock = stripedLocks.acquireReadLock(workspaceId)) {
+        try (CloseableLock lock = stripedLocks.acquireReadLock(workspaceId)) {
             environment = environments.get(workspaceId);
         }
         if (environment == null) {
@@ -253,7 +254,7 @@ public class CheEnvironmentEngine {
                               networkId,
                               recover);
 
-        try (StripedLocks.WriteLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
+        try (CloseableLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
             EnvironmentHolder environmentHolder = environments.get(workspaceId);
             // possible only if environment was stopped during its start
             if (environmentHolder == null) {
@@ -279,14 +280,13 @@ public class CheEnvironmentEngine {
                                                 ServerException {
         List<Instance> machinesCopy = null;
         EnvironmentHolder environmentHolder;
-        try (StripedLocks.WriteLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
+        try (CloseableLock lock = stripedLocks.acquireReadLock(workspaceId)) {
             environmentHolder = environments.get(workspaceId);
             if (environmentHolder == null || environmentHolder.status != EnvStatus.RUNNING) {
                 throw new EnvironmentNotRunningException(
                         format("Stop of not running environment of workspace with ID '%s' is not allowed.",
                                workspaceId));
             }
-            environments.remove(workspaceId);
             List<Instance> machines = environmentHolder.machines;
             if (machines != null && !machines.isEmpty()) {
                 machinesCopy = new ArrayList<>(machines);
@@ -296,6 +296,10 @@ public class CheEnvironmentEngine {
         // long operation - perform out of lock
         if (machinesCopy != null) {
             destroyEnvironment(environmentHolder.networkId, machinesCopy);
+        }
+
+        try (CloseableLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
+            environments.remove(workspaceId);
         }
     }
 
@@ -325,7 +329,7 @@ public class CheEnvironmentEngine {
 
         MachineConfig machineConfigCopy = new MachineConfigImpl(machineConfig);
         EnvironmentHolder environmentHolder;
-        try (StripedLocks.ReadLock lock = stripedLocks.acquireReadLock(workspaceId)) {
+        try (CloseableLock lock = stripedLocks.acquireReadLock(workspaceId)) {
             environmentHolder = environments.get(workspaceId);
             if (environmentHolder == null || environmentHolder.status != EnvStatus.RUNNING) {
                 throw new EnvironmentNotRunningException(format("Environment '%s' is not running", workspaceId));
@@ -420,7 +424,7 @@ public class CheEnvironmentEngine {
                                                                          ServerException,
                                                                          ConflictException {
         Instance targetMachine = null;
-        try (StripedLocks.WriteLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
+        try (CloseableLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
             EnvironmentHolder environmentHolder = environments.get(workspaceId);
             if (environmentHolder == null || environmentHolder.status != EnvStatus.RUNNING) {
                 throw new EnvironmentNotRunningException(format("Environment '%s' is not running", workspaceId));
@@ -470,7 +474,7 @@ public class CheEnvironmentEngine {
         EnvironmentHolder environmentHolder;
         SnapshotImpl snapshot = null;
         Instance instance = null;
-        try (StripedLocks.ReadLock lock = stripedLocks.acquireReadLock(workspaceId)) {
+        try (CloseableLock lock = stripedLocks.acquireReadLock(workspaceId)) {
             environmentHolder = environments.get(workspaceId);
             if (environmentHolder == null || environmentHolder.status != EnvStatus.RUNNING) {
                 throw new EnvironmentNotRunningException(format("Environment '%s' is not running", workspaceId));
@@ -555,7 +559,7 @@ public class CheEnvironmentEngine {
                                                                     envName,
                                                                     networkId);
 
-        try (StripedLocks.WriteLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
+        try (CloseableLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
             if (environments.putIfAbsent(workspaceId, environmentHolder) != null) {
                 throw new ConflictException(format("Environment of workspace '%s' already exists", workspaceId));
             }
@@ -716,7 +720,7 @@ public class CheEnvironmentEngine {
         // Config will be null only if there are no machines left in the queue
         String envName;
         MessageConsumer<MachineLogMessage> envLogger;
-        try (StripedLocks.ReadLock lock = stripedLocks.acquireReadLock(workspaceId)) {
+        try (CloseableLock lock = stripedLocks.acquireReadLock(workspaceId)) {
             EnvironmentHolder environmentHolder = environments.get(workspaceId);
             if (environmentHolder == null) {
                 throw new ServerException("Environment start is interrupted.");
@@ -737,7 +741,7 @@ public class CheEnvironmentEngine {
                 String creator = EnvironmentContext.getCurrent().getSubject().getUserId();
 
                 CheServiceImpl service;
-                try (StripedLocks.ReadLock lock = stripedLocks.acquireReadLock(workspaceId)) {
+                try (CloseableLock lock = stripedLocks.acquireReadLock(workspaceId)) {
                     EnvironmentHolder environmentHolder = environments.get(workspaceId);
                     if (environmentHolder == null) {
                         throw new ServerException("Environment start is interrupted.");
@@ -795,7 +799,7 @@ public class CheEnvironmentEngine {
                 // polled flag to true if the environment wasn't stopped.
                 // Also polls the proceeded machine configuration from the queue
                 boolean queuePolled = false;
-                try (StripedLocks.WriteLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
+                try (CloseableLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
                     ensurePreDestroyIsNotExecuted();
                     EnvironmentHolder environmentHolder = environments.get(workspaceId);
                     if (environmentHolder != null) {
@@ -840,7 +844,7 @@ public class CheEnvironmentEngine {
             }
         } catch (RuntimeException | ServerException e) {
             EnvironmentHolder env;
-            try (StripedLocks.WriteLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
+            try (CloseableLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
                 env = environments.remove(workspaceId);
             }
 
@@ -996,7 +1000,7 @@ public class CheEnvironmentEngine {
 
     private void addMachine(MachineImpl machine) throws ServerException {
         Instance instance = new NoOpMachineInstance(machine);
-        try (StripedLocks.WriteLock lock = stripedLocks.acquireWriteLock(machine.getWorkspaceId())) {
+        try (CloseableLock lock = stripedLocks.acquireWriteLock(machine.getWorkspaceId())) {
             ensurePreDestroyIsNotExecuted();
             EnvironmentHolder environmentHolder = environments.get(machine.getWorkspaceId());
             if (environmentHolder != null && environmentHolder.status != EnvStatus.STOPPING) {
@@ -1015,7 +1019,7 @@ public class CheEnvironmentEngine {
 
     private void removeMachine(String workspaceId,
                                String machineId) {
-        try (StripedLocks.WriteLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
+        try (CloseableLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
             EnvironmentHolder environmentHolder = environments.get(workspaceId);
             if (environmentHolder != null) {
                 for (Instance machine : environmentHolder.machines) {
@@ -1029,7 +1033,7 @@ public class CheEnvironmentEngine {
     }
 
     private void replaceMachine(Instance machine) throws ServerException {
-        try (StripedLocks.WriteLock lock = stripedLocks.acquireWriteLock(machine.getWorkspaceId())) {
+        try (CloseableLock lock = stripedLocks.acquireWriteLock(machine.getWorkspaceId())) {
             ensurePreDestroyIsNotExecuted();
             EnvironmentHolder environmentHolder = environments.get(machine.getWorkspaceId());
             if (environmentHolder != null) {
@@ -1069,7 +1073,7 @@ public class CheEnvironmentEngine {
      *         if pre destroy has been invoked before peek config retrieved
      */
     private String queuePeekOrFail(String workspaceId) throws ServerException {
-        try (StripedLocks.ReadLock lock = stripedLocks.acquireReadLock(workspaceId)) {
+        try (CloseableLock lock = stripedLocks.acquireReadLock(workspaceId)) {
             ensurePreDestroyIsNotExecuted();
             EnvironmentHolder environmentHolder = environments.get(workspaceId);
             if (environmentHolder == null || environmentHolder.startQueue == null) {
@@ -1275,7 +1279,7 @@ public class CheEnvironmentEngine {
         public void onEvent(InstanceStateEvent event) {
             if ((event.getType() == OOM) || (event.getType() == DIE)) {
                 EnvironmentHolder environmentHolder;
-                try (StripedLocks.ReadLock lock = stripedLocks.acquireReadLock("workspaceId")) {
+                try (CloseableLock lock = stripedLocks.acquireReadLock("workspaceId")) {
                     environmentHolder = environments.get(event.getWorkspaceId());
                 }
                 if (environmentHolder != null) {

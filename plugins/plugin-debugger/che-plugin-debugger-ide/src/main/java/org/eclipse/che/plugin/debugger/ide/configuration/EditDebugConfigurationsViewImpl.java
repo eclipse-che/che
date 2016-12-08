@@ -487,6 +487,7 @@ public class EditDebugConfigurationsViewImpl extends Window implements EditDebug
 
     @Override
     protected void onClose() {
+        super.onClose();
         setSelectedConfiguration(selectedConfiguration);
     }
 

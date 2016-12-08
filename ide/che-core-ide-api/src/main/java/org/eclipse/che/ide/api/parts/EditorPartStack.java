@@ -99,5 +99,6 @@ public interface EditorPartStack extends PartStack {
      *
      * @return the parts list.
      */
+    @Override
     List<EditorPartPresenter> getParts();
 }

@@ -86,8 +86,6 @@ public class RecipePartPresenterTest {
     @Mock
     private RecipeDescriptor  recipeDescriptor2;
     @Mock
-    private RecipeWidget      recipeWidget;
-    @Mock
     private RecipeEditorPanel recipeEditorPanel;
     @Mock
     private OMSVGSVGElement   omsvgsvgElement;
@@ -332,13 +330,6 @@ public class RecipePartPresenterTest {
         recipePartPresenter.getTitle();
 
         verify(locale).viewRecipePanelTitle();
-    }
-
-    @Test
-    public void panelShouldBeHidden() throws Exception {
-        recipePartPresenter.setVisible(false);
-
-        verify(recipePartView).setVisible(false);
     }
 
     @Test

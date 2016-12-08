@@ -20,7 +20,6 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.Unmarshallable;
-
 import java.util.List;
 
 import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
@@ -35,11 +34,13 @@ public class WorkspaceServiceClient {
     private final DtoUnmarshallerFactory unmarshallerFactory;
     private final AppContext appContext;
     private final AsyncRequestFactory asyncRequestFactory;
-
+    
+    
     @Inject
     public WorkspaceServiceClient(final DtoUnmarshallerFactory unmarshallerFactory,
                                   final AppContext appContext,
-                                  final AsyncRequestFactory asyncRequestFactory) {
+                                  final AsyncRequestFactory asyncRequestFactory
+                                  ) {
         this.unmarshallerFactory = unmarshallerFactory;
         this.appContext = appContext;
         this.asyncRequestFactory = asyncRequestFactory;
@@ -59,4 +60,5 @@ public class WorkspaceServiceClient {
                                   .header(CONTENT_TYPE, APPLICATION_JSON)
                                   .send(unmarshaller);
     }
+    
 }

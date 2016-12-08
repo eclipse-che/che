@@ -10,8 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.vfs.impl.file.event.detectors;
 
-import org.eclipse.che.api.core.jsonrpc.JsonRpcRequestTransmitter;
-import org.eclipse.che.api.core.jsonrpc.shared.JsonRpcRequest;
+import org.eclipse.che.api.core.jsonrpc.RequestTransmitter;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType;
@@ -39,13 +38,11 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class FileTrackingOperationTransmitter {
     private static final Logger LOG = getLogger(FileTrackingOperationTransmitter.class);
 
-    private final JsonRpcRequestTransmitter transmitter;
-    private final FileTrackingRegistry      registry;
+    private final RequestTransmitter   transmitter;
+    private final FileTrackingRegistry registry;
 
     @Inject
-    public FileTrackingOperationTransmitter(EventService eventService,
-                                            JsonRpcRequestTransmitter transmitter,
-                                            FileTrackingRegistry registry) {
+    public FileTrackingOperationTransmitter(EventService eventService, RequestTransmitter transmitter, FileTrackingRegistry registry) {
         this.transmitter = transmitter;
         this.registry = registry;
 
@@ -60,7 +57,7 @@ public class FileTrackingOperationTransmitter {
             final String path = event.getPath();
             final FileWatcherEventType type = event.getType();
 
-            if (!registry.contains(path)){
+            if (!registry.contains(path)) {
                 return;
             }
 
@@ -88,31 +85,28 @@ public class FileTrackingOperationTransmitter {
         }
 
         private void transmitDeleted(String path) {
-            final String params = getParams(path, null, DELETED);
-            final JsonRpcRequest request = getJsonRpcRequest(params);
+            final VfsFileStatusUpdateDto params = getParams(path, null, DELETED);
 
-            registry.getEndpoints(path).forEach(endpoint -> transmitter.transmit(request, endpoint));
+            registry.getEndpoints(path).forEach(endpoint -> {
+                final String method = "event:file-in-vfs-status-changed";
+                transmitter.transmitNotification(endpoint, method, params);
+            });
         }
 
         private void transmitModified(String path) {
             if (registry.updateHash(path)) {
                 final String hashCode = registry.getHashCode(path);
-                final String params = getParams(path, hashCode, MODIFIED);
-                final JsonRpcRequest request = getJsonRpcRequest(params);
+                final VfsFileStatusUpdateDto params = getParams(path, hashCode, MODIFIED);
 
-                registry.getEndpoints(path).forEach(endpoint -> transmitter.transmit(request, endpoint));
+                registry.getEndpoints(path).forEach(endpoint -> {
+                    final String method = "event:file-in-vfs-status-changed";
+                    transmitter.transmitNotification(endpoint, method, params);
+                });
             }
         }
 
-        private String getParams(String path, String hashCode, FileWatcherEventType type) {
-            return newDto(VfsFileStatusUpdateDto.class).withPath(path).withType(type).withHashCode(hashCode).toString();
-        }
-
-        private JsonRpcRequest getJsonRpcRequest(String params) {
-            return newDto(JsonRpcRequest.class)
-                    .withMethod("event:file-in-vfs-status-changed")
-                    .withJsonrpc("2.0")
-                    .withParams(params);
+        private VfsFileStatusUpdateDto getParams(String path, String hashCode, FileWatcherEventType type) {
+            return newDto(VfsFileStatusUpdateDto.class).withPath(path).withType(type).withHashCode(hashCode);
         }
     }
 }

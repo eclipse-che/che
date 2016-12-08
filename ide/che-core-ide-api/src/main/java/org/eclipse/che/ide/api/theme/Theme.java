@@ -1493,7 +1493,6 @@ public interface Theme {
      */
     String loaderProgressStatusColor();
 
-
     /**
      * The placeholder color for input fields.
      *
@@ -1529,6 +1528,8 @@ public interface Theme {
 
     String notificationPopupProgressBackground();
 
+    String notificationPopupWarningBackground();
+    
     String notificationPopupPanelShadow();
 
     String notificationPopupIconSuccessFill();
@@ -1537,6 +1538,8 @@ public interface Theme {
 
     String notificationPopupIconProgressFill();
 
+    String notificationPopupIconWarningFill();
+    
     String notificationPopupIconSvgFill();
 
     String notificationPopupTextColor();
@@ -1574,13 +1577,13 @@ public interface Theme {
 
     String toolButtonHoverColor();
 
-    String toolButtonBorder();
-
     String toolButtonActiveBorder();
 
     String toolButtonHoverBackgroundColor();
 
     String toolButtonActiveBackgroundColor();
+
+    String toolButtonActiveColor();
 
     String toolButtonHoverBoxShadow();
 

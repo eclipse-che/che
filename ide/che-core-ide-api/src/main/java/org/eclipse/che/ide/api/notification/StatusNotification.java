@@ -23,6 +23,7 @@ public class StatusNotification extends Notification {
     public enum Status {
         PROGRESS,
         SUCCESS,
+        WARNING,
         FAIL
     }
 

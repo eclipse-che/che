@@ -25,17 +25,22 @@ import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 public interface CodeAssistProcessor {
 
     /**
-     * Returns a list of completion proposals based on the
-     * specified location within the document that corresponds
-     * to the current cursor position within the text view.
+     * Returns a list of completion proposals based on the specified location
+     * within the document that corresponds to the current cursor position
+     * within the text view.
      *
      * @param editor
-     *         the editor whose document is used to compute the proposals
+     *            the editor whose document is used to compute the proposals
      * @param offset
-     *         an offset within the document for which completions should be computed
-     * @return an array of completion proposals or <code>null</code> if no proposals are possible
+     *            an offset within the document for which completions should be
+     *            computed
+     * @param triggered
+     *            if triggered by the content assist key binding
+     * 
+     * @return an array of completion proposals or <code>null</code> if no
+     *         proposals are possible
      */
-    void computeCompletionProposals(TextEditor editor, int offset, CodeAssistCallback callback);
+    void computeCompletionProposals(TextEditor editor, int offset, boolean triggered, CodeAssistCallback callback);
 
     /**
      * Returns the reason why this content assist processor

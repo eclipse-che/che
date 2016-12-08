@@ -54,12 +54,6 @@ public abstract class AbstractEditorPresenter extends AbstractPartPresenter impl
 
     /** {@inheritDoc} */
     @Override
-    public void setVisible(boolean visible) {
-        throw new UnsupportedOperationException("This method isn't supported in this class " + getClass());
-    }
-
-    /** {@inheritDoc} */
-    @Override
     public IsWidget getView() {
         throw new UnsupportedOperationException("This method isn't supported in this class " + getClass());
     }

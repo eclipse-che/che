@@ -13,12 +13,10 @@ package org.eclipse.che.account.spi;
 import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.account.spi.jpa.AccountEntityListener;
 
-import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.Id;
-import javax.persistence.Index;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
@@ -28,6 +26,7 @@ import java.util.Objects;
  * Data object for {@link Account}.
  *
  * @author Sergii Leschenko
+ * @author Yevhenii Voevodin
  */
 @Entity(name = "Account")
 @NamedQueries(
@@ -38,17 +37,18 @@ import java.util.Objects;
                                     "WHERE a.name = :name")
         }
 )
-@Table(indexes = @Index(columnList = "name", unique = true))
+@Table(name = "account")
 @EntityListeners(AccountEntityListener.class)
 public class AccountImpl implements Account {
 
     @Id
+    @Column(name = "id")
     protected String id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "name")
     protected String name;
 
-    @Basic
+    @Column(name = "type")
     private String type;
 
     public AccountImpl() {}

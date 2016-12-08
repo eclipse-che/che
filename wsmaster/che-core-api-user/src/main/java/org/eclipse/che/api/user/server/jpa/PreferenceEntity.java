@@ -10,15 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.api.user.server.jpa;
 
-import org.eclipse.che.api.user.server.model.impl.UserImpl;
 
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.Lob;
+import javax.persistence.JoinColumn;
 import javax.persistence.MapKeyColumn;
-import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.Table;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -27,17 +27,18 @@ import java.util.Objects;
  * Describes JPA implementation of user's preferences.
  *
  * @author Anton Korneta
+ * @author Yevhenii Voevodin
  */
 @Entity(name = "Preference")
+@Table(name = "preference")
 public class PreferenceEntity {
 
     @Id
+    @Column(name = "userid")
     private String userId;
 
-    @PrimaryKeyJoinColumn
-    private UserImpl user;
-
     @ElementCollection
+    @CollectionTable(name = "preference_preferences", joinColumns = @JoinColumn(name = "preference_userid"))
     @MapKeyColumn(name = "name")
     @Column(name = "value", columnDefinition = "TEXT")
     private Map<String, String> preferences;

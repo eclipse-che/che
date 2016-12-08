@@ -17,7 +17,7 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.Resources;
-import org.eclipse.che.ide.api.event.ng.EditorFileStatusNotificationReceiver;
+import org.eclipse.che.ide.api.event.ng.EditorFileStatusNotificationHandler;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.notification.Notification;
 import org.eclipse.che.ide.api.notification.NotificationListener;
@@ -100,8 +100,8 @@ public class NotificationManagerImpl extends BasePresenter implements Notificati
 
     @Inject
     @PostConstruct
-    public void inject(EditorFileStatusNotificationReceiver editorFileStatusNotificationReceiver) {
-        editorFileStatusNotificationReceiver.inject(this);
+    public void inject(EditorFileStatusNotificationHandler editorFileStatusNotificationHandler) {
+        editorFileStatusNotificationHandler.inject(this);
     }
 
     /** {@inheritDoc} */
@@ -351,12 +351,6 @@ public class NotificationManagerImpl extends BasePresenter implements Notificati
 
     /** {@inheritDoc} */
     @Override
-    public void setVisible(boolean visible) {
-        view.setVisible(visible);
-    }
-
-    /** {@inheritDoc} */
-    @Override
     public SVGResource getTitleImage() {
         return resources.eventsPartIcon();
     }
@@ -390,4 +384,5 @@ public class NotificationManagerImpl extends BasePresenter implements Notificati
             nPopupStack.push(notification);
         }
     }
+
 }

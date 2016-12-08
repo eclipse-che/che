@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server.jpa;
 
-import org.eclipse.che.api.core.jdbc.jpa.CascadeRemovalException;
+import org.eclipse.che.core.db.jpa.CascadeRemovalException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.event.BeforeStackRemovedEvent;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;

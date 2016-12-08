@@ -93,10 +93,6 @@ public class NewXFileViewImpl extends Window implements NewXFileView {
         this.delegate = delegate;
     }
 
-    @Override
-    protected void onClose() {
-    }
-
     interface NewJavaSourceFileViewImplUiBinder extends UiBinder<Widget, NewXFileViewImpl> {
     }
 }

@@ -173,12 +173,6 @@ public class ImageViewer extends AbstractEditorPresenter implements FileEventHan
 
     /** {@inheritDoc} */
     @Override
-    public void setVisible(boolean visible) {
-        editorView.setVisible(visible);
-    }
-
-    /** {@inheritDoc} */
-    @Override
     public IsWidget getView() {
         return editorView;
     }
@@ -196,4 +190,5 @@ public class ImageViewer extends AbstractEditorPresenter implements FileEventHan
             workspaceAgent.removePart(this);
         }
     }
+
 }

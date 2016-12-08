@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.websocket.ng.impl;
 
-import org.eclipse.che.api.core.websocket.shared.WebSocketTransmission;
-import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.websocket.ng.WebSocketMessageTransmitter;
 
@@ -19,44 +17,35 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 /**
- * Transmits messages over WEB SOCKET to a specific endpoint or broadcasts them.
- * If WEB SOCKET session is not opened adds messages to re-sender to try to send
- * them when session will be opened again.
+ * Web socket transmitter implementation that can transmit a message into opened connection
+ * or send a message to pending message re-sender so it could be possible to send it later
  *
  * @author Dmitry Kuleshov
  */
 @Singleton
 public class BasicWebSocketMessageTransmitter implements WebSocketMessageTransmitter {
-    private final WebSocketConnection            connection;
-    private final PendingMessagesReSender        reSender;
-    private final WebSocketTransmissionValidator validator;
-    private final DtoFactory                     dtoFactory;
+    private final WebSocketConnectionManager connectionManager;
+    private final MessagesReSender           reSender;
+    private final UrlResolver                urlResolver;
 
     @Inject
-    public BasicWebSocketMessageTransmitter(WebSocketConnection connection,
-                                            PendingMessagesReSender reSender,
-                                            WebSocketTransmissionValidator validator,
-                                            DtoFactory dtoFactory) {
-        this.connection = connection;
+    public BasicWebSocketMessageTransmitter(WebSocketConnectionManager connectionManager, MessagesReSender reSender, UrlResolver resolver) {
+        this.connectionManager = connectionManager;
         this.reSender = reSender;
-        this.validator = validator;
-        this.dtoFactory = dtoFactory;
+        this.urlResolver = resolver;
     }
 
     @Override
-    public void transmit(String protocol, String message) {
-        final WebSocketTransmission transmission = dtoFactory.createDto(WebSocketTransmission.class).withProtocol(protocol).withMessage(message);
-        validator.validate(transmission);
+    public void transmit(String endpointId, String message) {
+        final String url = urlResolver.getUrl(endpointId);
 
-        if (connection.isOpen()) {
-            Log.debug(getClass(), "Connection is opened, transmitting");
-
-            connection.send(transmission);
+        if (connectionManager.isConnectionOpen(url)) {
+            Log.debug(getClass(), "Connection is opened, transmitting: " + message);
+            connectionManager.sendMessage(url, message);
 
         } else {
-            Log.debug(getClass(), "Connection is closed, adding to pending");
-
-            reSender.add(transmission);
+            Log.debug(getClass(), "Connection is closed, adding to pending: " + message);
+            reSender.add(url, message);
         }
     }
 }

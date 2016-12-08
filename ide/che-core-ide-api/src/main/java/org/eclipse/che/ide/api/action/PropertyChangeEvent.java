@@ -113,6 +113,7 @@ public class PropertyChangeEvent {
      *
      * @return a string representation of the object
      */
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(getClass().getName());
         sb.append("[propertyName=").append(getPropertyName());

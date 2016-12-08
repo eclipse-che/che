@@ -20,6 +20,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.collect.Maps.newHashMap;
+import static java.lang.String.format;
+
 /**
  * @author gazarenkov
  */
@@ -169,7 +172,7 @@ public abstract class ProjectTypeDef implements ProjectType {
         this.ancestors.add(ancestor);
     }
 
-    public ProjectTypeResolution resolveSources(FolderEntry projectFolder) throws ValueStorageException {
+    public ProjectTypeResolution resolveSources(FolderEntry projectFolder) {
         Map<String, Value> matchAttrs = new HashMap<>();
         for (Map.Entry<String, Attribute> entry : attributes.entrySet()) {
             Attribute attr = entry.getValue();
@@ -178,11 +181,22 @@ public abstract class ProjectTypeDef implements ProjectType {
                 Variable var = (Variable)attr;
                 ValueProviderFactory factory = var.getValueProviderFactory();
                 if (factory != null) {
-                    Value value = new AttributeValue(factory.newInstance(projectFolder).getValues(name));
-                    if (value.isEmpty()) {
+
+                    Value value;
+                    String errorMessage = "";
+                    try {
+                        value = new AttributeValue(factory.newInstance(projectFolder).getValues(name));
+                    } catch (ValueStorageException e) {
+                        value = null;
+                        errorMessage = e.getLocalizedMessage();
+                    }
+
+                    if (value == null || value.isEmpty()) {
                         if (var.isRequired()) {
                             // this PT is not match
-                            return new DefaultResolution(id, new HashMap<>(), false);
+                            errorMessage = errorMessage.isEmpty() ? format("Value for required attribute %s is not initialized", name)
+                                                                  : errorMessage;
+                            return new DefaultResolution(id, errorMessage);
                         }
                     } else {
                         // add one more matched attribute
@@ -202,6 +216,12 @@ public abstract class ProjectTypeDef implements ProjectType {
         public DefaultResolution(String type, Map<String, Value> attributes, boolean match) {
             super(type, attributes);
             this.match = match;
+        }
+
+        /** Use this one when source code not matches project type requirements */
+        public DefaultResolution(String type, String resolution) {
+            super(type, newHashMap(), resolution);
+            this.match = false;
         }
 
         @Override

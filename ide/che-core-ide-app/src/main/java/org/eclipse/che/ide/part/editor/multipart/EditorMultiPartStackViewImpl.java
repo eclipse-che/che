@@ -32,7 +32,7 @@ import static com.google.gwt.dom.client.Style.Unit.PCT;
 /**
  * @author Roman Nikitenko
  */
-public class EditorMultiPartStackViewImpl extends ResizeComposite implements EditorMultiPartStackView{
+public class EditorMultiPartStackViewImpl extends ResizeComposite implements EditorMultiPartStackView {
 
     private LayoutPanel contentPanel;
 
@@ -64,6 +64,7 @@ public class EditorMultiPartStackViewImpl extends ResizeComposite implements Edi
                 if (relativePartStack == null) {
                     rootView = splitEditorPartViewFactory.create(widget);
                     splitEditorParts.put(partStack, rootView);
+                    contentPanel.remove(emptyEditorsPanel);
                     contentPanel.add(rootView);
                     return;
                 }
@@ -73,7 +74,6 @@ public class EditorMultiPartStackViewImpl extends ResizeComposite implements Edi
                     Log.error(getClass(), "Can not find container for specified editor");
                     return;
                 }
-
 
                 relativePartStackView.split(widget, constraints.direction, size);
                 splitEditorParts.put(partStack, relativePartStackView.getReplica());
@@ -88,6 +88,9 @@ public class EditorMultiPartStackViewImpl extends ResizeComposite implements Edi
         SplitEditorPartView splitEditorPartView = splitEditorParts.remove(partStack);
         if (splitEditorPartView != null) {
             splitEditorPartView.removeFromParent();
+        }
+        if (splitEditorParts.size() == 0) {
+            contentPanel.add(emptyEditorsPanel);
         }
     }
 

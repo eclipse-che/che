@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-assembly-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>5.0.0-M8-SNAPSHOT</version>
+        <version>5.0.0-M9-SNAPSHOT</version>
     </parent>
     <artifactId>assembly-main</artifactId>
     <packaging>pom</packaging>
@@ -36,6 +36,18 @@
             <groupId>org.eclipse.che</groupId>
             <artifactId>assembly-wsmaster-war</artifactId>
             <type>war</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che</groupId>
+            <artifactId>exec-agent</artifactId>
+            <type>tar.gz</type>
+            <classifier>linux_amd64</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che</groupId>
+            <artifactId>exec-agent</artifactId>
+            <type>tar.gz</type>
+            <classifier>linux_arm7</classifier>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -61,18 +73,6 @@
             <groupId>org.eclipse.che.lib</groupId>
             <artifactId>che-tomcat8-slf4j-logback</artifactId>
             <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.lib</groupId>
-            <artifactId>che-websocket-terminal</artifactId>
-            <type>tar.gz</type>
-            <classifier>linux_amd64</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.lib</groupId>
-            <artifactId>che-websocket-terminal</artifactId>
-            <type>tar.gz</type>
-            <classifier>linux_arm7</classifier>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>

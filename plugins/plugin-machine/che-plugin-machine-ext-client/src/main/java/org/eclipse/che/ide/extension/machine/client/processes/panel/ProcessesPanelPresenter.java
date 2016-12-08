@@ -46,6 +46,9 @@ import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
+import org.eclipse.che.ide.api.parts.PartStack;
+import org.eclipse.che.ide.api.parts.PartStackStateChangedEvent;
+import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.ide.api.ssh.SshServiceClient;
@@ -79,6 +82,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Collections.emptyList;
 import static org.eclipse.che.api.core.model.machine.MachineStatus.RUNNING;
@@ -104,7 +108,8 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                                                                       MachineStateEvent.Handler,
                                                                       WsAgentStateHandler,
                                                                       EnvironmentOutputEvent.Handler,
-                                                                      DownloadWorkspaceOutputEvent.Handler {
+                                                                      DownloadWorkspaceOutputEvent.Handler,
+                                                                      PartStackStateChangedEvent.Handler {
 
     public static final  String SSH_PORT                    = "22";
     private static final String DEFAULT_TERMINAL_NAME       = "Terminal";
@@ -120,8 +125,8 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     private final MachineLocalizationConstant   localizationConstant;
     private final MachineResources              resources;
     private final MachineServiceClient          machineServiceClient;
-    private final SshServiceClient              sshServiceClient;
     private final WorkspaceAgent                workspaceAgent;
+    private final SshServiceClient              sshServiceClient;
     private final AppContext                    appContext;
     private final NotificationManager           notificationManager;
     private final EntityFactory                 entityFactory;
@@ -158,8 +163,8 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         this.localizationConstant = localizationConstant;
         this.resources = resources;
         this.machineServiceClient = machineServiceClient;
-        this.sshServiceClient = sshServiceClient;
         this.workspaceAgent = workspaceAgent;
+        this.sshServiceClient = sshServiceClient;
         this.appContext = appContext;
         this.notificationManager = notificationManager;
         this.entityFactory = entityFactory;
@@ -186,8 +191,17 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         eventBus.addHandler(MachineStateEvent.TYPE, this);
         eventBus.addHandler(EnvironmentOutputEvent.TYPE, this);
         eventBus.addHandler(DownloadWorkspaceOutputEvent.TYPE, this);
+        eventBus.addHandler(PartStackStateChangedEvent.TYPE, this);
 
         updateMachineList();
+
+        final PartStack partStack = checkNotNull(workspaceAgent.getPartStack(PartStackType.INFORMATION),
+                                                 "Information part stack should not be a null");
+        partStack.addPart(this);
+
+        if (appContext.getFactory() == null) {
+            partStack.setActivePart(this);
+        }
     }
 
     /**
@@ -222,8 +236,6 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
         view.selectNode(machineToSelect);
         notifyTreeNodeSelected(machineToSelect);
-
-        workspaceAgent.setActivePart(ProcessesPanelPresenter.this);
     }
 
     @Override
@@ -234,11 +246,6 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     @Override
     public String getTitle() {
         return localizationConstant.viewProcessesTitle();
-    }
-
-    @Override
-    public void setVisible(boolean visible) {
-        view.setVisible(visible);
     }
 
     @Override
@@ -259,7 +266,6 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
     @Override
     public void onMachineCreating(MachineStateEvent event) {
-        workspaceAgent.setActivePart(this);
         provideMachineNode(event.getMachine(), false);
     }
 
@@ -318,13 +324,11 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     }
 
     /** Opens new terminal for the selected machine. */
-    public void newTerminal() {
-        workspaceAgent.setActivePart(this);
-
+    public void newTerminal(Object source) {
         final ProcessTreeNode selectedTreeNode = view.getSelectedTreeNode();
         final MachineEntity devMachine = appContext.getDevMachine();
         if (selectedTreeNode == null && devMachine != null) {
-            onAddTerminal(devMachine.getId());
+            onAddTerminal(devMachine.getId(), source);
             return;
         }
 
@@ -337,14 +341,14 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
         if (selectedTreeNode.getType() == MACHINE_NODE) {
             MachineEntity machine = (MachineEntity)selectedTreeNode.getData();
-            onAddTerminal(machine.getId());
+            onAddTerminal(machine.getId(), source);
             return;
         }
 
         ProcessTreeNode parent = selectedTreeNode.getParent();
         if (parent != null && parent.getType() == MACHINE_NODE) {
             MachineEntity machine = (MachineEntity)parent.getData();
-            onAddTerminal(machine.getId());
+            onAddTerminal(machine.getId(), source);
         }
     }
 
@@ -369,7 +373,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
      *         id of machine in which the terminal will be added
      */
     @Override
-    public void onAddTerminal(final String machineId) {
+    public void onAddTerminal(final String machineId, Object source) {
         final MachineEntity machine = getMachine(machineId);
         if (machine == null) {
             notificationManager.notify(localizationConstant.failedToConnectTheTerminal(),
@@ -379,7 +383,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         }
 
         final ProcessTreeNode machineTreeNode = provideMachineNode(machine, false);
-        final TerminalPresenter newTerminal = terminalFactory.create(machine);
+        final TerminalPresenter newTerminal = terminalFactory.create(machine, source);
         final IsWidget terminalWidget = newTerminal.getView();
         final String terminalName = getUniqueTerminalName(machineTreeNode);
         final ProcessTreeNode terminalNode = new ProcessTreeNode(TERMINAL_NODE,
@@ -891,8 +895,6 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
             notifyTreeNodeSelected(machineToSelect);
         }
 
-        workspaceAgent.setActivePart(ProcessesPanelPresenter.this);
-
         for (MachineEntity machine : machines.values()) {
             if (RUNNING.equals(machine.getStatus()) && !wsMachines.contains(machine)) {
                 provideMachineNode(machine, true);
@@ -954,6 +956,9 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         for (MachineEntity machine : machines) {
             restoreState(machine);
         }
+
+        selectDevMachine();
+        newTerminal(this);
     }
 
     private void restoreState(final MachineEntity machine) {
@@ -1001,6 +1006,27 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
             if (entry.getValue().isFinished()) {
                 view.setStopButtonVisibility(entry.getKey(), false);
             }
+        }
+    }
+
+    @Override
+    public void onToggleMaximizeConsole() {
+        super.onToggleMaximize();
+
+        if (partStack != null) {
+            if (partStack.getPartStackState() == PartStack.State.MAXIMIZED) {
+                view.setProcessesTreeVisible(false);
+            } else {
+                view.setProcessesTreeVisible(true);
+            }
+        }
+    }
+
+    @Override
+    public void onPartStackStateChanged(PartStackStateChangedEvent event) {
+        if (partStack.equals(event.getPartStack()) &&
+                partStack.getPartStackState() == PartStack.State.NORMAL) {
+            view.setProcessesTreeVisible(true);
         }
     }
 

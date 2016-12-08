@@ -37,6 +37,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
@@ -162,6 +163,18 @@ public class LocalWorkspaceDaoImpl implements WorkspaceDao {
     public List<WorkspaceImpl> getWorkspaces(String userId) throws ServerException {
         return new ArrayList<>(workspaces.values());
     }
+
+    @Override
+    public List<WorkspaceImpl> getWorkspaces(boolean isTemporary, int skipCount, int maxItems) throws ServerException {
+        Stream<WorkspaceImpl> stream = workspaces.values().stream();
+        stream.filter(ws -> ws.isTemporary() == isTemporary);
+        stream.skip(skipCount);
+        if (maxItems != 0) {
+            stream.limit(maxItems);
+        }
+        return  stream.collect(toList());
+    }
+
 
     private Optional<WorkspaceImpl> find(String name, String owner) {
         return workspaces.values()

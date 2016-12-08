@@ -41,6 +41,8 @@ public class HostConfig {
     private String         pidMode;
     private boolean        readonlyRootfs;
     private Ulimit[]       ulimits;
+    private Long           cpuQuota;
+    private Long           cpuPeriod;
 
     private Map<String, PortBinding[]> portBindings     = new HashMap<>();
     private int                        memorySwappiness = -1;
@@ -371,6 +373,32 @@ public class HostConfig {
         return this;
     }
 
+    public Long getCpuQuota() {
+        return cpuQuota;
+    }
+
+    public void setCpuQuota(Long cpuQuota) {
+        this.cpuQuota = cpuQuota;
+    }
+
+    public HostConfig withCpuQuota(Long cpuQuota) {
+        this.cpuQuota = cpuQuota;
+        return this;
+    }
+
+    public Long getCpuPeriod() {
+        return cpuPeriod;
+    }
+
+    public void setCpuPeriod(Long cpuPeriod) {
+        this.cpuPeriod = cpuPeriod;
+    }
+
+    public HostConfig withCpuPeriod(Long cpuPeriod) {
+        this.cpuPeriod = cpuPeriod;
+        return this;
+    }
+
     public String getPidMode() {
         return pidMode;
     }
@@ -441,6 +469,8 @@ public class HostConfig {
                ", ulimits=" + Arrays.toString(ulimits) +
                ", portBindings=" + portBindings +
                ", memorySwappiness=" + memorySwappiness +
+               ", cpuPeriod='" + cpuPeriod + '\'' +
+               ", cpuQuota='" + cpuQuota + '\'' +
                '}';
     }
 }

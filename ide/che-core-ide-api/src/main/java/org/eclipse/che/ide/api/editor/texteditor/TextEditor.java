@@ -45,6 +45,7 @@ public interface TextEditor extends EditorPartPresenter {
     /**
      * @return the text editor view implementation
      */
+    @Override
     TextEditorPartView getView();
 
     /**
@@ -66,6 +67,7 @@ public interface TextEditor extends EditorPartPresenter {
      * @param save
      *         <code>true</code> if unsaved changed should be saved, and <code>false</code> if unsaved changed should be discarded
      */
+    @Override
     void close(boolean save);
 
     /**

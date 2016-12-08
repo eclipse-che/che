@@ -13,32 +13,34 @@ package org.eclipse.che.api.ssh.server.jpa;
 import com.google.inject.TypeLiteral;
 import com.google.inject.persist.jpa.JpaPersistModule;
 
-import org.eclipse.che.api.core.jdbc.jpa.eclipselink.EntityListenerInjectionManagerInitializer;
-import org.eclipse.che.api.core.jdbc.jpa.guice.JpaInitializer;
 import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
 import org.eclipse.che.api.ssh.server.spi.SshDao;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
-import org.eclipse.che.commons.test.tck.JpaCleaner;
+import org.eclipse.che.commons.test.db.H2JpaCleaner;
+import org.eclipse.che.commons.test.db.H2TestHelper;
 import org.eclipse.che.commons.test.tck.TckModule;
 import org.eclipse.che.commons.test.tck.TckResourcesCleaner;
 import org.eclipse.che.commons.test.tck.repository.JpaTckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
+import org.eclipse.che.core.db.DBInitializer;
+import org.eclipse.che.core.db.schema.SchemaInitializer;
+import org.eclipse.che.core.db.schema.impl.flyway.FlywaySchemaInitializer;
 
 /**
  * @author Mihail Kuznyetsov
+ * @author Yevhenii Voevodin
  */
 public class SshTckModule extends TckModule {
 
     @Override
     protected void configure() {
+        install(new JpaPersistModule("main"));
+        bind(DBInitializer.class).asEagerSingleton();
+        bind(SchemaInitializer.class).toInstance(new FlywaySchemaInitializer(H2TestHelper.inMemoryDefault(), "che-schema"));
+        bind(TckResourcesCleaner.class).to(H2JpaCleaner.class);
+
         bind(SshDao.class).to(JpaSshDao.class);
         bind(new TypeLiteral<TckRepository<SshPairImpl>>(){}).toInstance(new JpaTckRepository<>(SshPairImpl.class));
         bind(new TypeLiteral<TckRepository<UserImpl>>(){}).toInstance(new JpaTckRepository<>(UserImpl.class));
-
-        install(new JpaPersistModule("main"));
-        bind(JpaInitializer.class).asEagerSingleton();
-        bind(EntityListenerInjectionManagerInitializer.class).asEagerSingleton();
-        bind(org.eclipse.che.api.core.h2.jdbc.jpa.eclipselink.H2ExceptionHandler.class);
-        bind(TckResourcesCleaner.class).to(JpaCleaner.class);
     }
 }

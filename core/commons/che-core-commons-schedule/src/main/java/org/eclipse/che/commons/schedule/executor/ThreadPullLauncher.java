@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.commons.schedule.executor;
 
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.schedule.Launcher;
 import org.eclipse.che.inject.ConfigurationException;
 
@@ -44,7 +45,10 @@ public class ThreadPullLauncher implements Launcher {
     @Inject
     public ThreadPullLauncher(@Named("schedule.core_pool_size") Integer corePoolSize) {
         this.service = new CronThreadPoolExecutor(corePoolSize,
-                                                  new ThreadFactoryBuilder().setNameFormat("Annotated-scheduler-%d").setDaemon(false)
+                                                  new ThreadFactoryBuilder().setNameFormat("Annotated-scheduler-%d")
+                                                                            .setUncaughtExceptionHandler(
+                                                                                    LoggingUncaughtExceptionHandler.getInstance())
+                                                                            .setDaemon(false)
                                                                             .build());
     }
 

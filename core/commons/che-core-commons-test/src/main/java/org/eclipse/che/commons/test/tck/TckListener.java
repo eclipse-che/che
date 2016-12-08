@@ -105,7 +105,7 @@ import static java.lang.String.format;
  * @see org.testng.IInvokedMethodListener
  * @see TckResourcesCleaner
  */
-public class TckListener extends AbstractTestListener {
+public class TckListener extends TestListenerAdapter {
     private Injector injector;
     private Object   instance;
 
@@ -158,7 +158,7 @@ public class TckListener extends AbstractTestListener {
         if (!moduleIterator.hasNext()) {
             throw new IllegalStateException(format("Couldn't find a TckModule configuration. " +
                                                    "You probably forgot to configure resources/META-INF/services/%s, or even " +
-                                                   "provide an implementation of the TckModule which is required by the tck test class %s",
+                                                   "provide an implementation of the TckModule which is required by the jpa test class %s",
                                                    TckModule.class.getName(),
                                                    name));
         }

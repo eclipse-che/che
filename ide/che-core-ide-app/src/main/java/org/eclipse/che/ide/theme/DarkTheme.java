@@ -1362,6 +1362,11 @@ public class DarkTheme implements Theme {
     }
 
     @Override
+    public String notificationPopupWarningBackground() {
+    	return "#F0AD4E";
+    }
+    
+    @Override
     public String notificationPopupPanelShadow() {
         return "0 0 10px rgba(0,0,0,0.6)";
     }
@@ -1381,6 +1386,11 @@ public class DarkTheme implements Theme {
         return "#9b9b9b";
     }
 
+    @Override
+    public String notificationPopupIconWarningFill() {
+    	return "#F0AD4E";
+    }
+    
     @Override
     public String notificationPopupIconSvgFill() {
         return "#FFFFFF";
@@ -1462,23 +1472,23 @@ public class DarkTheme implements Theme {
     }
 
     @Override
-    public String toolButtonBorder() {
-        return "1px solid transparent";
-    }
-
-    @Override
     public String toolButtonActiveBorder() {
-        return "1px solid #24272c";
+        return "1px solid #262626";
     }
 
     @Override
     public String toolButtonHoverBackgroundColor() {
-        return "#44484D";
+        return "#262626";
     }
 
     @Override
     public String toolButtonActiveBackgroundColor() {
-        return "#33373B";
+        return "#262626";
+    }
+
+    @Override
+    public String toolButtonActiveColor() {
+        return "#4eabff";
     }
 
     @Override

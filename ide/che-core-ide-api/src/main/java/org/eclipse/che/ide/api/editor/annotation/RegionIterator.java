@@ -59,10 +59,12 @@ final class RegionIterator implements Iterator<Annotation> {
         next = findNext();
     }
 
+    @Override
     public boolean hasNext() {
         return next != null;
     }
 
+    @Override
     public Annotation next() {
         if (!hasNext()) {
             throw new NoSuchElementException();
@@ -73,6 +75,7 @@ final class RegionIterator implements Iterator<Annotation> {
         return result;
     }
 
+    @Override
     public void remove() {
         throw new UnsupportedOperationException();
     }

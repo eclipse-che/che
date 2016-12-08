@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+import static java.lang.String.format;
 import static java.lang.System.lineSeparator;
 
 /**
@@ -30,6 +31,8 @@ import static java.lang.System.lineSeparator;
  * @author Tareq Sharafy (tareq.sha@sap.com)
  */
 class JGitConfigImpl extends Config {
+
+    private final String CONFIGURATION_NOT_FOUND_MESSAGE = "Can not find property '%s' in Git configuration settings.";
 
     private final Repository repository;
 
@@ -40,22 +43,22 @@ class JGitConfigImpl extends Config {
 
     @Override
     public String get(String name) throws GitException {
-        return getInternalValues(name)[0];
+        ConfigKey key = parseName(name);
+        String value = repository.getConfig().getString(key.section, key.subsection, key.name);
+        if (value == null) {
+            throw new GitException(format(CONFIGURATION_NOT_FOUND_MESSAGE, name));
+        }
+        return value;
     }
 
     @Override
     public List<String> getAll(String name) throws GitException {
-        return Arrays.asList(getInternalValues(name));
-    }
-
-    private String[] getInternalValues(String name) throws GitException {
         ConfigKey key = parseName(name);
         String[] values = repository.getConfig().getStringList(key.section, key.subsection, key.name);
-        // Make sure the property exists
         if (values == null || values.length == 0) {
-            throw new GitException("Can not find property '" + name + "' in repository configuration");
+            throw new GitException(format(CONFIGURATION_NOT_FOUND_MESSAGE, name));
         }
-        return values;
+        return Arrays.asList(values);
     }
 
     @Override

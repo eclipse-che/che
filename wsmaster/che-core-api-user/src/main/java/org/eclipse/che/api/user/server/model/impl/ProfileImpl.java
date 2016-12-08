@@ -20,7 +20,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.PrimaryKeyJoinColumn;
-import javax.persistence.UniqueConstraint;
+import javax.persistence.Table;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -31,9 +31,11 @@ import java.util.Objects;
  * @author Yevhenii Voevodin
  */
 @Entity(name = "Profile")
+@Table(name = "profile")
 public class ProfileImpl implements Profile {
 
     @Id
+    @Column(name = "userid")
     private String userId;
 
     @PrimaryKeyJoinColumn
@@ -42,8 +44,7 @@ public class ProfileImpl implements Profile {
     @ElementCollection
     @MapKeyColumn(name = "name")
     @Column(name = "value", nullable = false)
-    @CollectionTable(joinColumns = @JoinColumn(name = "user_id"),
-                     uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "name"}))
+    @CollectionTable(name = "profile_attributes", joinColumns = @JoinColumn(name = "user_id"))
     private Map<String, String> attributes;
 
     public ProfileImpl() {}

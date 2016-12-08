@@ -12,7 +12,6 @@ package org.eclipse.che.api.machine.server.model.impl;
 
 import org.eclipse.che.api.core.model.machine.MachineSource;
 
-import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import java.util.Objects;
@@ -30,10 +29,10 @@ public class MachineSourceImpl implements MachineSource {
     @Column(name = "source_type")
     private String type;
 
-    @Basic
+    @Column(name = "location")
     private String location;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "content", columnDefinition = "TEXT")
     private String content;
 
     public MachineSourceImpl() {}

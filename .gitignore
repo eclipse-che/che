@@ -21,7 +21,7 @@ config/
 
 # Compiled source #
 ###################
-*.com
+!*.com/
 *.class
 *.dll
 *.exe
@@ -48,8 +48,8 @@ config/
 # Logs and databases #
 ######################
 *.log
-*.sql
 *.sqlite
+npm-debug.log.*
 
 # OS generated files #
 ######################

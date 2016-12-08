@@ -32,21 +32,21 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class WebSocketSessionRegistry {
     private static final Logger LOG = getLogger(WebSocketSessionRegistry.class);
 
-    private final Map<Integer, Session> sessionsMap = new ConcurrentHashMap<>();
+    private final Map<String, Session> sessionsMap = new ConcurrentHashMap<>();
 
-    public void add(Integer endpointId, Session session) {
+    public void add(String endpointId, Session session) {
         LOG.debug("Registering session with endpoint {}", session.getId(), endpointId);
 
         sessionsMap.put(endpointId, session);
     }
 
-    public void remove(Integer endpointId) {
+    public void remove(String endpointId) {
         LOG.debug("Cancelling registration for session with endpoint {}", endpointId);
 
         sessionsMap.remove(endpointId);
     }
 
-    public Optional<Session> get(Integer endpointId) {
+    public Optional<Session> get(String endpointId) {
         return Optional.ofNullable(sessionsMap.get(endpointId));
     }
 

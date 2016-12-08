@@ -42,10 +42,8 @@
 
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
-            <property name="eclipselink.exception-handler" value="org.eclipse.che.api.core.h2.jdbc.jpa.eclipselink.H2ExceptionHandler"/>
+            <property name="eclipselink.exception-handler" value="org.eclipse.che.core.db.h2.jpa.eclipselink.H2ExceptionHandler"/>
             <property name="eclipselink.target-server" value="None"/>
-            <property name="eclipselink.ddl-generation" value="create-or-extend-tables"/>
-            <property name="eclipselink.ddl-generation.output-mode" value="database"/>
             <property name="eclipselink.logging.logger" value="DefaultLogger"/>
             <property name="eclipselink.logging.level" value="SEVERE"/>
         </properties>

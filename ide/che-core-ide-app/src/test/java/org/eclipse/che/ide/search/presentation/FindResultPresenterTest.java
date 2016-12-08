@@ -59,13 +59,6 @@ public class FindResultPresenterTest {
     }
 
     @Test
-    public void visibilityShouldBeUpdated() {
-        findResultPresenter.setVisible(false);
-
-        verify(view).setVisible(false);
-    }
-
-    @Test
     public void viewShouldBeReturned() {
         assertEquals(findResultPresenter.getView(), view);
     }

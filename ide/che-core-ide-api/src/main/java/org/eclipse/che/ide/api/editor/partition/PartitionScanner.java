@@ -27,5 +27,6 @@ public interface PartitionScanner extends TokenScanner {
      * Set the string to scan.
      * @param content the new content to parse
      */
+    @Override
     void setScannedString(String content);
 }

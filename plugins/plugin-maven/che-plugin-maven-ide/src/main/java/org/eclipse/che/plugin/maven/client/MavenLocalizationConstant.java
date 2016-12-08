@@ -61,4 +61,10 @@ public interface MavenLocalizationConstant extends Messages {
 
     @Key("window.loader.title")
     String windowLoaderTitle();
+
+    @Key("maven.page.estimate.errorMessage")
+    String mavenPageEstimateErrorMessage();
+
+    @Key("maven.page.errorDialog.title")
+    String mavenPageErrorDialogTitle();
 }
