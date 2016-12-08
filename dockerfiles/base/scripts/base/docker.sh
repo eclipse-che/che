@@ -177,8 +177,8 @@ check_docker() {
 
   # Docker needs to be greater than or equal to 1.11
   if [[ ${MAJOR_VERSION_ID} -lt 1 ]] ||
-     [[ ${MINOR_VERSION_ID} -lt 11 ]]; then
-       error "Error - Docker engine 1.11+ required."
+     [[ ${MINOR_VERSION_ID} -lt 10 ]]; then
+       error "Error - Docker engine 1.10+ required."
        return 2;
   fi
 
