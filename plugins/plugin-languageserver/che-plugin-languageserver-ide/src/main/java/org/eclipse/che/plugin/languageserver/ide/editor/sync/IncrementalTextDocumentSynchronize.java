@@ -51,7 +51,7 @@ class IncrementalTextDocumentSynchronize implements TextDocumentSynchronize {
         if (event.getRemoveCharCount() != 0) {
             endPosition = new TextPosition(startPosition.getLine(), startPosition.getCharacter() + event.getRemoveCharCount());
         } else {
-            endPosition = new TextPosition(startPosition.getLine(), startPosition.getCharacter() + event.getLength());
+            endPosition = new TextPosition(startPosition.getLine(), startPosition.getCharacter());
         }
 
         DidChangeTextDocumentParamsDTO changeDTO = dtoFactory.createDto(DidChangeTextDocumentParamsDTO.class);

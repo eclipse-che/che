@@ -590,7 +590,7 @@
     "id": "php-default",
     "creator": "ide",
     "name": "PHP",
-    "description": "Default PHP Stack with PHP 5.5, most popular extensions and dockerimager.",
+    "description": "Default PHP Stack with PHP 5.5, most popular extensions and dockerimager and xtext.",
     "scope": "general",
     "tags": [
       "Ubuntu",
@@ -633,7 +633,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.php", "org.eclipse.che.ls.json"
+                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.php", "org.eclipse.che.ls.json", "org.eclipse.che.ls.mydsl"
               ],
               "servers": {},
               "attributes" : {
