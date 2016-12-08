@@ -48,7 +48,7 @@ public class PomEditorReconciler {
                 Set<String> pomPaths = getPomPath(updatedProjects);
                 List<EditorPartPresenter> openedEditors = editorAgent.getOpenedEditors();
                 for (EditorPartPresenter openedEditor : openedEditors) {
-                    String path = openedEditor.getEditorInput().getFile().getPath();
+                    String path = openedEditor.getEditorInput().getFile().getLocation().toString();
                     if (pomPaths.contains(path)) {
                         if (openedEditor instanceof TextEditor) {
                             final Reconciler reconciler = ((TextEditor)openedEditor).getConfiguration().getReconciler();

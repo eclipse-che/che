@@ -82,7 +82,7 @@ public class FindReferencesAction extends AbstractPerspectiveAction {
             return;
         }
         TextEditor textEditor = ((TextEditor)activeEditor);
-        String path = activeEditor.getEditorInput().getFile().getPath();
+        String path = activeEditor.getEditorInput().getFile().getLocation().toString();
         ReferenceParamsDTO paramsDTO = dtoFactory.createDto(ReferenceParamsDTO.class);
 
         PositionDTO positionDTO = dtoFactory.createDto(PositionDTO.class);

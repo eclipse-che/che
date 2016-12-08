@@ -62,6 +62,6 @@ public class RecentFileAction extends AbstractPerspectiveAction {
      * @return action id
      */
     public String getId() {
-        return "recent/" + file.getPath();
+        return "recent/" + file.getLocation();
     }
 }

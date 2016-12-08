@@ -249,7 +249,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
                                        @Override
                                        public void onSuccess(VirtualFile result) {
                                            for (DebuggerObserver observer : observers) {
-                                               observer.onBreakpointStopped(result.getPath(),
+                                               observer.onBreakpointStopped(result.getLocation().toString(),
                                                                             currentLocation.getTarget(),
                                                                             currentLocation.getLineNumber());
                                            }
@@ -351,7 +351,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
                 }
             });
         } else {
-            Breakpoint breakpoint = new Breakpoint(Breakpoint.Type.BREAKPOINT, lineNumber, file.getPath(), file, false);
+            Breakpoint breakpoint = new Breakpoint(Breakpoint.Type.BREAKPOINT, lineNumber, file.getLocation().toString(), file, false);
             for (DebuggerObserver observer : observers) {
                 observer.onBreakpointAdded(breakpoint);
             }
@@ -377,7 +377,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
             @Override
             public void apply(Void arg) throws OperationException {
                 for (DebuggerObserver observer : observers) {
-                    Breakpoint breakpoint = new Breakpoint(Breakpoint.Type.BREAKPOINT, lineNumber, file.getPath(), file, false);
+                    Breakpoint breakpoint = new Breakpoint(Breakpoint.Type.BREAKPOINT, lineNumber, file.getLocation().toString(), file, false);
                     observer.onBreakpointDeleted(breakpoint);
                 }
             }
