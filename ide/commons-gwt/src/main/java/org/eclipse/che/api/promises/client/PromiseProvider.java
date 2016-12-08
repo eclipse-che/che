@@ -14,8 +14,10 @@ import elemental.util.ArrayOf;
 
 import com.google.common.annotations.Beta;
 import com.google.gwt.core.client.JsArrayMixed;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.ImplementedBy;
 
+import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
 import org.eclipse.che.api.promises.client.js.Executor;
 import org.eclipse.che.api.promises.client.js.JsPromiseProvider;
 
@@ -39,6 +41,17 @@ public interface PromiseProvider {
      * @return a promise
      */
     <V> Promise<V> create(Executor<V> executor);
+
+    /**
+     * Creates a new promise using the {@link AsyncCallback}.
+     *
+     * @param call
+     *         the request caller
+     * @param <V>
+     *         the type of the promised value
+     * @return a promise
+     */
+    <V> Promise<V> create(AsyncPromiseHelper.RequestCall<V> call);
 
     /**
      * Creates a promise that resolves as soon as all the promises used as parameters are resolved or
