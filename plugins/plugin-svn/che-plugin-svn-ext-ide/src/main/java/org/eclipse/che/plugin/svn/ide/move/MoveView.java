@@ -25,7 +25,7 @@ import org.eclipse.che.ide.api.resources.Resource;
 @ImplementedBy(MoveViewImpl.class)
 public interface MoveView extends View<MoveView.ActionDelegate> {
     /** Action handler for the view actions/controls. */
-    interface ActionDelegate extends BaseActionDelegate {
+    interface ActionDelegate {
         void onMoveClicked();
 
         /** Perform actions when cancel button clicked. */

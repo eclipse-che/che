@@ -121,11 +121,6 @@ public class DebuggerPresenter extends BasePresenter implements DebuggerView.Act
     }
 
     @Override
-    public void setVisible(boolean visible) {
-        view.setVisible(visible);
-    }
-
-    @Override
     public IsWidget getView() {
         return view;
     }
@@ -183,7 +178,7 @@ public class DebuggerPresenter extends BasePresenter implements DebuggerView.Act
     }
 
     public void hideDebuggerPanel() {
-        partStack.hidePart(this);
+        partStack.minimize();
     }
 
     public boolean isDebuggerPanelOpened() {

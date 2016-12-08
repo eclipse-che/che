@@ -351,12 +351,6 @@ public class NotificationManagerImpl extends BasePresenter implements Notificati
 
     /** {@inheritDoc} */
     @Override
-    public void setVisible(boolean visible) {
-        view.setVisible(visible);
-    }
-
-    /** {@inheritDoc} */
-    @Override
     public SVGResource getTitleImage() {
         return resources.eventsPartIcon();
     }
@@ -390,4 +384,5 @@ public class NotificationManagerImpl extends BasePresenter implements Notificati
             nPopupStack.push(notification);
         }
     }
+
 }

@@ -35,7 +35,7 @@ export class EditPortDialogController {
   }
 
   isUnique(port) {
-    return !this.usedPorts.includes(port);
+    return this.usedPorts.indexOf(port) < 0;
   }
 
   fillInUsedPorts() {

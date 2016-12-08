@@ -65,6 +65,7 @@ import static org.eclipse.che.ide.extension.machine.client.processes.ProcessTree
  */
 public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDelegate> implements ProcessesPanelView,
                                                                                                    SubPanel.FocusListener,
+                                                                                                   SubPanel.DoubleClickListener,
                                                                                                    RequiresResize {
 
     @UiField(provided = true)
@@ -195,6 +196,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
         final SubPanel subPanel = subPanelFactory.newPanel();
         subPanel.setFocusListener(this);
+        subPanel.setDoubleClickListener(this);
         splitLayoutPanel.add(subPanel.getView());
         focusedSubPanel = subPanel;
 
@@ -490,6 +492,11 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
     }
 
     @Override
+    public void onDoubleClicked(final SubPanel panel, final IsWidget widget) {
+        delegate.onToggleMaximizeConsole();
+    }
+
+    @Override
     public void onResize() {
         for (WidgetToShow widgetToShow : widget2Panels.keySet()) {
             final IsWidget widget = widgetToShow.getWidget();
@@ -497,6 +504,11 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
                 ((RequiresResize)widget).onResize();
             }
         }
+    }
+
+    @Override
+    public void setProcessesTreeVisible(boolean visible) {
+        splitLayoutPanel.setWidgetHidden(navigationPanel, !visible);
     }
 
     interface ProcessesPartViewImplUiBinder extends UiBinder<Widget, ProcessesPanelViewImpl> {

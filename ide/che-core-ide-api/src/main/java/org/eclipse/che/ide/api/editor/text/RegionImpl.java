@@ -33,16 +33,19 @@ public class RegionImpl implements Region {
     }
 
     /* @see org.eclipse.jface.text.IRegion#getLength() */
+    @Override
     public int getLength() {
         return fLength;
     }
 
     /* @see org.eclipse.jface.text.IRegion#getOffset() */
+    @Override
     public int getOffset() {
         return fOffset;
     }
 
     /* @see java.lang.Object#isEquals(java.lang.Object) */
+    @Override
     public boolean equals(Object o) {
         if (o instanceof Region) {
             Region r = (Region)o;
@@ -52,11 +55,13 @@ public class RegionImpl implements Region {
     }
 
     /* @see java.lang.Object#hashCode() */
+    @Override
     public int hashCode() {
         return (fOffset << 24) | (fLength << 16);
     }
 
     /* @see java.lang.Object#toString() */
+    @Override
     public String toString() {
         return "offset: " + fOffset + ", length: " + fLength; //$NON-NLS-1$ //$NON-NLS-2$;
     }

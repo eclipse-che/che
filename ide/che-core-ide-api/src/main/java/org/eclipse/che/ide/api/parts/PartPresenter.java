@@ -24,12 +24,14 @@ import java.util.List;
 /**
  * Part is a main UI block of the IDE.
  *
- * @author <a href="mailto:nzamosenchuk@exoplatform.com">Nikolay Zamosenchuk</a>
+ * @author Nikolay Zamosenchuk
  * @author Stéphane Daviet
  */
 public interface PartPresenter extends Presenter {
+
     /** The property id for <code>getTitle</code>, <code>getTitleImage</code> and <code>getTitleToolTip</code>. */
     int TITLE_PROPERTY     = 0x001;
+
     /** The property id for <code>getSelection</code>. */
     int SELECTION_PROPERTY = 0x002;
 
@@ -46,8 +48,6 @@ public interface PartPresenter extends Presenter {
     void addRule(@NotNull String perspectiveId);
 
     List<String> getRules();
-
-    void setVisible(boolean visible);
 
     IsWidget getView();
 
@@ -124,4 +124,5 @@ public interface PartPresenter extends Presenter {
      *         a property listener
      */
     void removePropertyListener(@NotNull PropertyListener listener);
+
 }

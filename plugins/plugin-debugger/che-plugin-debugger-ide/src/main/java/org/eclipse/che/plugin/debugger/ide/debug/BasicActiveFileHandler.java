@@ -8,13 +8,12 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.nodejsdbg.ide;
+package org.eclipse.che.plugin.debugger.ide.debug;
 
 import com.google.common.base.Optional;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
-import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.promises.client.Operation;
@@ -26,100 +25,130 @@ import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
-import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.VirtualFile;
-import org.eclipse.che.plugin.debugger.ide.debug.ActiveFileHandler;
 
 /**
- * Responsible to open files in editor when debugger stopped at breakpoint.
- *
  * @author Anatoliy Bazko
  */
-public class NodeJsDebuggerFileHandler implements ActiveFileHandler {
+public class BasicActiveFileHandler implements ActiveFileHandler {
 
     private final EditorAgent editorAgent;
-    private final EventBus    eventBus;
     private final AppContext  appContext;
 
     @Inject
-    public NodeJsDebuggerFileHandler(EditorAgent editorAgent,
-                                     EventBus eventBus,
-                                     AppContext appContext) {
+    public BasicActiveFileHandler(EditorAgent editorAgent, AppContext appContext) {
         this.editorAgent = editorAgent;
-        this.eventBus = eventBus;
         this.appContext = appContext;
     }
 
+    /**
+     * Tries to open file in the editor.
+     * To perform the operation the following sequence of methods invocation are processed:
+     *
+     * {@link BasicActiveFileHandler#tryFindFileInProject(Location, AsyncCallback)}
+     * {@link BasicActiveFileHandler#tryFindFileInWorkspace(Location, AsyncCallback)}
+     * {@link BasicActiveFileHandler#trySearchSource(Location, AsyncCallback)}
+     *
+     * @see ActiveFileHandler#openFile(Location, AsyncCallback)
+     */
     @Override
     public void openFile(final Location location, final AsyncCallback<VirtualFile> callback) {
-        final Resource resource = appContext.getResource();
+        tryFindFileInProject(location, new AsyncCallback<VirtualFile>() {
+            @Override
+            public void onSuccess(VirtualFile virtualFile) {
+                callback.onSuccess(virtualFile);
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                tryFindFileInWorkspace(location, new AsyncCallback<VirtualFile>() {
+                    @Override
+                    public void onSuccess(VirtualFile virtualFile) {
+                        callback.onSuccess(virtualFile);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        trySearchSource(location, new AsyncCallback<VirtualFile>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                callback.onFailure(caught);
+                            }
+
+                            @Override
+                            public void onSuccess(VirtualFile result) {
+                                callback.onSuccess(result);
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    protected void tryFindFileInProject(final Location location,
+                                        final AsyncCallback<VirtualFile> callback) {
+        Resource resource = appContext.getResource();
         if (resource == null) {
             callback.onFailure(new IllegalStateException("Resource is undefined"));
             return;
         }
-        final Optional<Project> project = resource.getRelatedProject();
+
+        Optional<Project> project = resource.getRelatedProject();
         if (!project.isPresent()) {
             callback.onFailure(new IllegalStateException("Project is undefined"));
             return;
         }
 
-        findFileInProject(project.get(), location, callback);
-    }
-
-    private void findFileInProject(final Project project,
-                                   final Location location,
-                                   final AsyncCallback<VirtualFile> callback) {
-        project.getFile(location.getTarget()).then(new Operation<Optional<File>>() {
+        project.get().getFile(location.getTarget()).then(new Operation<Optional<File>>() {
             @Override
             public void apply(Optional<File> file) throws OperationException {
                 if (file.isPresent()) {
-                    openFileInEditorAndScrollToLine(file.get(), callback, location.getLineNumber());
-                    callback.onSuccess(file.get());
+                    openFileAndScrollToLine(file.get(), location.getLineNumber(), callback);
                 } else {
-                    findFileInWorkspace(location, callback);
+                    callback.onFailure(new IllegalArgumentException(location.getTarget() + " not found."));
                 }
             }
         }).catchError(new Operation<PromiseError>() {
             @Override
-            public void apply(PromiseError arg) throws OperationException {
-                callback.onFailure(new IllegalArgumentException("File not found." + arg.getMessage()));
+            public void apply(PromiseError error) throws OperationException {
+                callback.onFailure(new IllegalArgumentException(location.getTarget() + " not found."));
             }
         });
     }
 
-    private void findFileInWorkspace(final Location location,
-                                     final AsyncCallback<VirtualFile> callback) {
+    protected void tryFindFileInWorkspace(final Location location,
+                                          final AsyncCallback<VirtualFile> callback) {
         try {
             appContext.getWorkspaceRoot().getFile(location.getTarget()).then(new Operation<Optional<File>>() {
                 @Override
                 public void apply(Optional<File> file) throws OperationException {
                     if (file.isPresent()) {
-                        openFileInEditorAndScrollToLine(file.get(), callback, location.getLineNumber());
-                        callback.onSuccess(file.get());
+                        openFileAndScrollToLine(file.get(), location.getLineNumber(), callback);
                     } else {
-                        searchSource(location, callback);
+                        callback.onFailure(new IllegalArgumentException(location.getTarget() + " not found."));
                     }
                 }
             }).catchError(new Operation<PromiseError>() {
                 @Override
                 public void apply(PromiseError arg) throws OperationException {
-                    callback.onFailure(new IllegalArgumentException("File not found." + arg.getMessage()));
+                    callback.onFailure(new IllegalArgumentException(location.getTarget() + " not found."));
                 }
             });
         } catch (IllegalStateException ignored) {
-            searchSource(location, callback);
+            callback.onFailure(new IllegalArgumentException(location.getTarget() + " not found."));
         }
     }
 
-    private void searchSource(final Location location, final AsyncCallback<VirtualFile> callback) {
+    protected void trySearchSource(final Location location, final AsyncCallback<VirtualFile> callback) {
         appContext.getWorkspaceRoot().search(location.getTarget(), "").then(new Operation<Resource[]>() {
             @Override
             public void apply(Resource[] resources) throws OperationException {
                 if (resources.length == 0) {
-                    callback.onFailure(new IllegalArgumentException("File not found."));
+                    callback.onFailure(new IllegalArgumentException(location.getTarget() + " not found."));
                     return;
                 }
 
@@ -127,37 +156,36 @@ public class NodeJsDebuggerFileHandler implements ActiveFileHandler {
                     @Override
                     public void apply(Optional<File> file) throws OperationException {
                         if (file.isPresent()) {
-                            openFileInEditorAndScrollToLine(file.get(), callback, location.getLineNumber());
-                            callback.onSuccess(file.get());
+                            openFileAndScrollToLine(file.get(), location.getLineNumber(), callback);
                         } else {
-                            callback.onFailure(new IllegalArgumentException("File not found."));
+                            callback.onFailure(new IllegalArgumentException(location.getTarget() + " not found."));
                         }
                     }
                 }).catchError(new Operation<PromiseError>() {
                     @Override
                     public void apply(PromiseError arg) throws OperationException {
-                        callback.onFailure(new IllegalArgumentException("File not found. " + arg.getMessage()));
+                        callback.onFailure(new IllegalArgumentException(location.getTarget() + " not found."));
                     }
                 });
             }
         }).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError arg) throws OperationException {
-                callback.onFailure(new IllegalArgumentException("File not found. " + arg.getMessage()));
+                callback.onFailure(new IllegalArgumentException(location.getTarget() + " not found."));
             }
         });
     }
 
-    private void openFileInEditorAndScrollToLine(final VirtualFile virtualFile,
-                                                 final AsyncCallback<VirtualFile> callback,
-                                                 final int scrollToLine) {
+    protected void openFileAndScrollToLine(final VirtualFile virtualFile,
+                                           final int scrollToLine,
+                                           final AsyncCallback<VirtualFile> callback) {
         editorAgent.openEditor(virtualFile, new EditorAgent.OpenEditorCallback() {
             @Override
             public void onEditorOpened(EditorPartPresenter editor) {
                 new Timer() {
                     @Override
                     public void run() {
-                        scrollEditorToExecutionPoint((TextEditor)editorAgent.getActiveEditor(), scrollToLine);
+                        scrollToLine(editorAgent.getActiveEditor(), scrollToLine);
                         callback.onSuccess(virtualFile);
                     }
                 }.schedule(300);
@@ -168,7 +196,7 @@ public class NodeJsDebuggerFileHandler implements ActiveFileHandler {
                 new Timer() {
                     @Override
                     public void run() {
-                        scrollEditorToExecutionPoint((TextEditor)editorAgent.getActiveEditor(), scrollToLine);
+                        scrollToLine(editorAgent.getActiveEditor(), scrollToLine);
                         callback.onSuccess(virtualFile);
                     }
                 }.schedule(300);
@@ -176,18 +204,19 @@ public class NodeJsDebuggerFileHandler implements ActiveFileHandler {
 
             @Override
             public void onInitializationFailed() {
-                callback.onFailure(null);
+                callback.onFailure(new IllegalStateException("Initialization " + virtualFile.getName() + " in the editor failed"));
             }
         });
-
-        eventBus.fireEvent(FileEvent.createOpenFileEvent(virtualFile));
     }
 
-    private void scrollEditorToExecutionPoint(TextEditor editor, int lineNumber) {
-        Document document = editor.getDocument();
-        if (document != null) {
-            TextPosition newPosition = new TextPosition(lineNumber, 0);
-            document.setCursorPosition(newPosition);
+    protected void scrollToLine(EditorPartPresenter editor, int lineNumber) {
+        if (editor instanceof TextEditor) {
+            TextEditor textEditor = (TextEditor)editor;
+            Document document = textEditor.getDocument();
+            if (document != null) {
+                TextPosition newPosition = new TextPosition(lineNumber, 0);
+                document.setCursorPosition(newPosition);
+            }
         }
     }
 }

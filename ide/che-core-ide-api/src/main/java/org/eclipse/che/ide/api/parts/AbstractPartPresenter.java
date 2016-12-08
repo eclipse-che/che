@@ -26,7 +26,7 @@ import java.util.List;
 /**
  * Abstract base implementation of all PartPresenter
  *
- * @author <a href="mailto:evidolob@exoplatform.com">Evgen Vidolob</a>
+ * @author Evgen Vidolob
  * @author Stéphane Daviet
  * @author Valeriy Svydenko
  */

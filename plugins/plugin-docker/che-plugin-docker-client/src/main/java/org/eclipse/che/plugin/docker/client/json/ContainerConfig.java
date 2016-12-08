@@ -71,10 +71,18 @@ public class ContainerConfig {
         this.env = env;
     }
 
+    /**
+     * @deprecated Use {@link HostConfig#getCpuShares()}
+     */
+    @Deprecated
     public int getCpuShares() {
         return cpuShares;
     }
 
+    /**
+     * @deprecated Use {@link HostConfig#setCpuShares(int)}
+     */
+    @Deprecated
     public void setCpuShares(int cpuShares) {
         this.cpuShares = cpuShares;
     }
@@ -182,6 +190,10 @@ public class ContainerConfig {
         return this;
     }
 
+    /**
+     * @deprecated Use {@link HostConfig#withCpuShares(int)}
+     */
+    @Deprecated
     public ContainerConfig withCpuShares(int cpuShares) {
         this.cpuShares = cpuShares;
         return this;
@@ -268,14 +280,26 @@ public class ContainerConfig {
         return this;
     }
 
+    /**
+     * @deprecated Use {@link HostConfig#getCpusetCpus()}
+     */
+    @Deprecated
     public String getCpuset() {
         return cpuset;
     }
 
+    /**
+     * @deprecated Use {@link HostConfig#setCpusetCpus(String)}
+     */
+    @Deprecated
     public void setCpuset(String cpuset) {
         this.cpuset = cpuset;
     }
 
+    /**
+     * @deprecated Use {@link HostConfig#withCpusetCpus(String)}
+     */
+    @Deprecated
     public ContainerConfig withCpuset(String cpuset) {
         this.cpuset = cpuset;
         return this;

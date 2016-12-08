@@ -1,5 +1,5 @@
 node default {
-##################################################################################################
+  ##################################################################################################
   $che_ip = getValue("CHE_HOST", "localhost")
   $che_port = getValue("CHE_PORT", "8080")
   $che_version = getValue("CHE_VERSION","nightly")
@@ -12,9 +12,8 @@ node default {
   $docker_ip = getValue("CHE_DOCKER_IP","172.17.0.1")
   $docker_host = getValue("DOCKER_HOST","tcp://localhost:2375")
 
-  
-###############################
-# oAuth configurations
+  ###############################
+  # oAuth configurations
   $google_client_id = getValue("CHE_GOOGLE_CLIENT_ID","your_google_client_id")
   $google_secret = getValue("CHE_GOOGLE_SECRET","your_google_secret")
   $github_client_id = getValue("CHE_GITHUB_CLIENT_ID","423531cf41d6c13e1b3b")
@@ -28,8 +27,26 @@ node default {
   $microsoft_client_id = getValue("CHE_MICROSOFT_CLIENT_ID","your_microsoft_client_id")
   $microsoft_secret = getValue("CHE_MICROSOFT_SECRET","your_microsoft_secret")
 
-###############################
-# Include base module
+  ###############################
+  # Http proxy configuration
+  # leave those fields empty if no configuration needed
+  #
+  # http proxy for CHE
+  $che_http_proxy = getValue("CHE_HTTP_PROXY","")
+  $che_https_proxy = getValue("CHE_HTTPS_PROXY","")
+  # provide dns which proxy should not be used for.
+  # please leave this empty if you don't need no_proxy configuration
+  $che_no_proxy = getValue("CHE_NO_PROXY","")
+  #
+  # http proxy for CHE workspaces
+  $http_proxy_for_che_workspaces = getValue("CHE_WORKSPACE_HTTP__PROXY","")
+  $https_proxy_for_che_workspaces = getValue("CHE_WORKSPACE_HTTPS__PROXY","")
+  # provide dns which proxy should not be used for.
+  # please leave this as it is if you don't need no_proxy configuration
+  $no_proxy_for_che_workspaces = getValue("CHE_WORKSPACE_NO__PROXY","")
+
+  ###############################
+  # Include base module
   include base
 }
 

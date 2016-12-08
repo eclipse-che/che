@@ -215,6 +215,7 @@ public class ReconcilerWithAutoSave implements Reconciler {
         return partition;
     }
 
+    @Override
     public void addReconcilingStrategy(final String contentType, final ReconcilingStrategy strategy) {
         strategies.put(contentType, strategy);
     }

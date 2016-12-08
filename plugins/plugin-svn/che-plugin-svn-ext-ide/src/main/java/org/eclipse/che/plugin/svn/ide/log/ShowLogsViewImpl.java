@@ -98,8 +98,4 @@ public class ShowLogsViewImpl extends Window implements ShowLogsView {
         return revisionField;
     }
 
-    @Override
-    protected void onClose() {
-    }
-
 }

@@ -24,20 +24,28 @@ public abstract class BasePresenter extends AbstractPartPresenter implements Bas
 
     protected PartStack partStack;
 
-    protected BasePresenter() {
-    }
-
-    /** {@inheritDoc} */
     @Override
-    public void minimize() {
+    public void onToggleMaximize() {
         if (partStack != null) {
-            partStack.hidePart(this);
+            if (partStack.getPartStackState() == PartStack.State.MAXIMIZED) {
+                partStack.restore();
+            } else {
+                partStack.maximize();
+            }
         }
     }
 
     /** {@inheritDoc} */
     @Override
-    public void activatePart() {
+    public void onMinimize() {
+        if (partStack != null) {
+            partStack.minimize();
+        }
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void onActivate() {
         partStack.setActivePart(this);
     }
 

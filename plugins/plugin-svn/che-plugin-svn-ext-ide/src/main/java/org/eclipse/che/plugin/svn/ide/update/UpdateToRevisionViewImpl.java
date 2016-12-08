@@ -208,7 +208,4 @@ public class UpdateToRevisionViewImpl extends Window implements UpdateToRevision
         delegate.onRevisionChanged();
     }
 
-    @Override
-    protected void onClose() { }
-
 }
