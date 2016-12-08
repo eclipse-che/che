@@ -40,11 +40,6 @@ public class HelloWorldPresenter extends BasePresenter {
     }
 
     @Override
-    public void setVisible(boolean visible) {
-        view.setVisible(visible);
-    }
-
-    @Override
     public SVGResource getTitleImage() {
         return (SamplePartsResources.INSTANCE.icon());
     }

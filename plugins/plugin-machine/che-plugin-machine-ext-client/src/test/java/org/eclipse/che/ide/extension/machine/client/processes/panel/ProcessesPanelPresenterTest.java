@@ -190,7 +190,7 @@ public class ProcessesPanelPresenterTest {
 
         MachineStateEvent machineStateEvent = mock(MachineStateEvent.class);
         when(machineStateEvent.getMachine()).thenReturn(machine);
-        verify(eventBus, times(7)).addHandler(anyObject(), machineStateHandlerCaptor.capture());
+        verify(eventBus, times(8)).addHandler(anyObject(), machineStateHandlerCaptor.capture());
         MachineStateEvent.Handler machineStateHandler = machineStateHandlerCaptor.getAllValues().get(0);
         machineStateHandler.onMachineCreating(machineStateEvent);
 

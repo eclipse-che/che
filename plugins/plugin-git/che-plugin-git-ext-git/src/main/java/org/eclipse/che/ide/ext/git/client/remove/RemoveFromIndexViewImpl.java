@@ -135,8 +135,4 @@ public class RemoveFromIndexViewImpl extends Window implements RemoveFromIndexVi
         this.delegate = delegate;
     }
 
-    /** {@inheritDoc} */
-    @Override
-    protected void onClose() {
-    }
 }

@@ -129,22 +129,6 @@ public class PropertyEditorPresenter extends SubversionActionPresenter implement
                 });
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void minimize() {
-        // stub
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void activatePart() {
-        // stub
-    }
-
     private void editProperty(Project project) {
         final String propertyName = view.getSelectedProperty();
         final Depth depth = view.getDepth();

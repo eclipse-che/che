@@ -561,7 +561,7 @@ export class CreateProjectController {
     this.createProjectSvc.setCurrentProgressStep(3);
 
     var promise;
-    var channel = null;
+    let channel: string = null;
     // select mode (create or import)
     if (this.selectSourceOption === 'select-source-new' && this.templatesChoice === 'templates-wizard') {
 
@@ -578,7 +578,7 @@ export class CreateProjectController {
       }
 
       // websocket channel
-      channel = 'importProject:output:' + workspaceId + ':' + projectName;
+      channel = 'importProject:output';
 
       // on import
       bus.subscribe(channel, (message: any) => {
@@ -1223,7 +1223,7 @@ export class CreateProjectController {
 
   isResourceProblem(): boolean {
     let currentCreationStep = this.getCreationSteps()[this.getCurrentProgressStep()];
-    return currentCreationStep.hasError && currentCreationStep.logs.includes('You can stop other workspaces');
+    return currentCreationStep.hasError && currentCreationStep.logs.indexOf('You can stop other workspaces') >= 0;
   }
 
   setStackTab(stackTab: string): void {

@@ -228,8 +228,4 @@ public class PushToRemoteViewImpl extends Window implements PushToRemoteView {
         }
     }
 
-    /** {@inheritDoc} */
-    @Override
-    protected void onClose() {
-    }
 }

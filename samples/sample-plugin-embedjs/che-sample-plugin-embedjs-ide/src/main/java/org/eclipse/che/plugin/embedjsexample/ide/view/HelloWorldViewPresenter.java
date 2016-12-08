@@ -67,11 +67,6 @@ public class HelloWorldViewPresenter extends BasePresenter implements HelloWorld
     }
 
     @Override
-    public void setVisible(boolean visible) {
-        helloWorldView.setVisible(visible);
-    }
-
-    @Override
     public View getView() {
         return helloWorldView;
     }

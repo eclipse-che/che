@@ -208,6 +208,7 @@ public class SelectPathViewImpl extends Window implements SelectPathView {
     @Override
     protected void onClose() {
         delegate.onCancel();
+        super.onClose();
     }
 
     public interface Styles extends ClientBundle {

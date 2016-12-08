@@ -118,11 +118,6 @@ public class TestSelectionAgent {
             }
 
             @Override
-            public void setVisible(boolean visible) {
-                //to do nothing
-            }
-
-            @Override
             public IsWidget getView() {
                 return null;
             }
@@ -163,11 +158,6 @@ public class TestSelectionAgent {
             @Override
             public String getTitle() {
                 return null;
-            }
-
-            @Override
-            public void setVisible(boolean visible) {
-                //to do nothing
             }
 
             @Override

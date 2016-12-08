@@ -139,6 +139,7 @@ public class ProjectClasspathViewImpl extends Window implements ProjectClasspath
     @Override
     protected void onClose() {
         delegate.onCloseClicked();
+        super.onClose();
     }
 
     @Override

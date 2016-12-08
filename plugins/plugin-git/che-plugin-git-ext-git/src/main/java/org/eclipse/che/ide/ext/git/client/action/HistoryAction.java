@@ -19,7 +19,7 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.history.HistoryPresenter;
-import org.eclipse.che.ide.ui.FontAwesome;
+import org.eclipse.che.ide.FontAwesome;
 
 import static com.google.common.base.Preconditions.checkState;
 

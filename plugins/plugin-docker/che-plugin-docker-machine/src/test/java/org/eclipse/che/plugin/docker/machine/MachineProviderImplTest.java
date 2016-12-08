@@ -264,6 +264,17 @@ public class MachineProviderImplTest {
     }
 
     @Test
+    public void shouldPublishAllExposedPortsOnCreateContainerOnInstanceCreationFromRecipe() throws Exception {
+        // when
+        createInstanceFromRecipe();
+
+        // then
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        assertTrue(argumentCaptor.getValue().getContainerConfig().getHostConfig().isPublishAllPorts());
+    }
+
+    @Test
     public void shouldStartContainerOnCreateInstanceFromRecipe() throws Exception {
         createInstanceFromRecipe();
 
@@ -285,7 +296,18 @@ public class MachineProviderImplTest {
     }
 
     @Test
-    public void shouldCreateContainerWithPrivilegeMode() throws Exception {
+    public void shouldPublishAllExposedPortsOnCreateContainerOnInstanceCreationFromSnapshot() throws Exception {
+        // when
+        createInstanceFromSnapshot();
+
+        // then
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        assertTrue(argumentCaptor.getValue().getContainerConfig().getHostConfig().isPublishAllPorts());
+    }
+
+    @Test
+    public void shouldBeAbleToCreateContainerWithPrivilegeMode() throws Exception {
         provider = spy(new MachineProviderBuilder().setPrivilegedMode(true)
                                                    .build());
 
@@ -294,6 +316,54 @@ public class MachineProviderImplTest {
         ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
         verify(dockerConnector).createContainer(argumentCaptor.capture());
         assertTrue(argumentCaptor.getValue().getContainerConfig().getHostConfig().isPrivileged());
+    }
+
+    @Test
+    public void shouldBeAbleToCreateContainerWithCpuSet() throws Exception {
+        provider = spy(new MachineProviderBuilder().setCpuSet("0-3")
+                                                   .build());
+
+        createInstanceFromRecipe();
+
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        assertEquals(argumentCaptor.getValue().getContainerConfig().getHostConfig().getCpusetCpus(), "0-3");
+    }
+
+    @Test
+    public void shouldBeAbleToCreateContainerWithCpuPeriod() throws Exception {
+        provider = spy(new MachineProviderBuilder().setCpuPeriod(200)
+                                                   .build());
+
+        createInstanceFromRecipe();
+
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        assertEquals(((long)argumentCaptor.getValue().getContainerConfig().getHostConfig().getCpuPeriod()), 200);
+    }
+
+    @Test
+    public void shouldBeAbleToCreateContainerWithCpuQuota() throws Exception {
+        provider = spy(new MachineProviderBuilder().setCpuQuota(200)
+                                                   .build());
+
+        createInstanceFromRecipe();
+
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        assertEquals(((long)argumentCaptor.getValue().getContainerConfig().getHostConfig().getCpuQuota()), 200);
+    }
+
+    @Test
+    public void shouldBeAbleToCreateContainerWithCgroupParent() throws Exception {
+        provider = spy(new MachineProviderBuilder().setParentCgroup("some_parent")
+                                                   .build());
+
+        createInstanceFromRecipe();
+
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        assertEquals(argumentCaptor.getValue().getContainerConfig().getHostConfig().getCgroupParent(), "some_parent");
     }
 
     @Test
@@ -992,7 +1062,6 @@ public class MachineProviderImplTest {
     public void shouldAddLinksToContainerOnCreation() throws Exception {
         // given
         String links[] = new String[] {"container1", "container2:alias"};
-        String networkName = "network";
 
         CheServiceImpl service = createService();
         service.setLinks(asList(links));
@@ -1137,6 +1206,11 @@ public class MachineProviderImplTest {
         private boolean          snapshotUseRegistry;
         private Set<Set<String>> additionalNetworks;
         private double           memorySwapMultiplier;
+        private String           networkDriver;
+        private String           parentCgroup;
+        private String           cpuSet;
+        private long             cpuPeriod;
+        private long             cpuQuota;
 
         public MachineProviderBuilder() {
             devMachineEnvVars = emptySet();
@@ -1209,6 +1283,31 @@ public class MachineProviderImplTest {
             return this;
         }
 
+        public MachineProviderBuilder setNetworkDriver(String networkDriver) {
+            this.networkDriver = networkDriver;
+            return this;
+        }
+
+        public MachineProviderBuilder setParentCgroup(String parentCgroup) {
+            this.parentCgroup = parentCgroup;
+            return this;
+        }
+
+        public MachineProviderBuilder setCpuSet(String cpuSet) {
+            this.cpuSet = cpuSet;
+            return this;
+        }
+
+        public MachineProviderBuilder setCpuPeriod(long cpuPeriod) {
+            this.cpuPeriod = cpuPeriod;
+            return this;
+        }
+
+        public MachineProviderBuilder setCpuQuota(long cpuQuota) {
+            this.cpuQuota = cpuQuota;
+            return this;
+        }
+
         MachineProviderImpl build() throws IOException {
             return new MachineProviderImpl(dockerConnector,
                                            dockerConnectorConfiguration,
@@ -1228,7 +1327,11 @@ public class MachineProviderImplTest {
                                            snapshotUseRegistry,
                                            memorySwapMultiplier,
                                            additionalNetworks,
-                                           null,
+                                           networkDriver,
+                                           parentCgroup,
+                                           cpuSet,
+                                           cpuPeriod,
+                                           cpuQuota,
                                            pathEscaper);
         }
     }

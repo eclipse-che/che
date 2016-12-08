@@ -18,15 +18,15 @@
 
         @eval toolButtonColor org.eclipse.che.ide.api.theme.Style.theme.toolButtonColor();
         @eval toolButtonHoverColor org.eclipse.che.ide.api.theme.Style.theme.toolButtonHoverColor();
-        @eval toolButtonBorder org.eclipse.che.ide.api.theme.Style.theme.toolButtonBorder();
         @eval toolButtonActiveBorder org.eclipse.che.ide.api.theme.Style.theme.toolButtonActiveBorder();
+        @eval toolButtonActiveColor org.eclipse.che.ide.api.theme.Style.theme.toolButtonActiveColor();
         @eval toolButtonHoverBackgroundColor org.eclipse.che.ide.api.theme.Style.theme.toolButtonHoverBackgroundColor();
         @eval toolButtonActiveBackgroundColor org.eclipse.che.ide.api.theme.Style.theme.toolButtonActiveBackgroundColor();
         @eval toolButtonHoverBoxShadow org.eclipse.che.ide.api.theme.Style.theme.toolButtonHoverBoxShadow();
         @eval toolButtonActiveBoxShadow org.eclipse.che.ide.api.theme.Style.theme.toolButtonActiveBoxShadow();
 
         .button {
-            width: 22px;
+            width: 18px;
             height: 22px;
         }
 
@@ -47,7 +47,7 @@
             margin: auto;
             padding: 3px;
             box-sizing: content-box;
-            border: toolButtonBorder;
+            border: 1px solid transparent;
             border-radius: 3px;
             fill: toolButtonColor;
             font-size: 8px;
@@ -60,7 +60,6 @@
         .button:hover > div {
             border: toolButtonActiveBorder;
             background-color: toolButtonHoverBackgroundColor;
-            box-shadow: toolButtonHoverBoxShadow;
             fill: toolButtonHoverColor;
             color: toolButtonHoverColor;
         }
@@ -69,9 +68,8 @@
         .button:active > div {
             border: toolButtonActiveBorder;
             background-color: toolButtonActiveBackgroundColor;
-            box-shadow: toolButtonActiveBoxShadow;
-            fill: toolButtonHoverColor;
-            color: toolButtonHoverColor;
+            fill: toolButtonActiveColor;
+            color: toolButtonActiveColor;
         }
 
         .button:active > svg > *,

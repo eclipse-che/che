@@ -37,7 +37,7 @@ export class AddPortDialogController {
   }
 
   isUnique(port) {
-    return !this.usedPorts.includes(port);
+    return this.usedPorts.indexOf(port) < 0;
   }
 
   fillInUsedPorts() {
@@ -49,7 +49,7 @@ export class AddPortDialogController {
   getLowestFreePort() {
     let port;
     for (port=this.portMin; port<=this.portMax; port++) {
-      if (!this.usedPorts.includes(port)) {
+      if (this.usedPorts.indexOf(port) < 0) {
         break;
       }
     }

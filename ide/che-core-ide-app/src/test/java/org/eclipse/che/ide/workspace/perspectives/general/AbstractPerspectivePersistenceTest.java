@@ -122,7 +122,7 @@ public class AbstractPerspectivePersistenceTest {
 
         perspective =
                 new AbstractPerspectiveTest.DummyPerspective(view, stackPresenterFactory, partStackViewFactory, controllerFactory, eventBus,
-                                                             partStackPresenter, dynaProvider);
+                                                             null, partStackPresenter, dynaProvider);
         perspective.onActivePartChanged(new ActivePartChangedEvent(activePart));
     }
 

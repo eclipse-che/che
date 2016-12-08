@@ -66,13 +66,6 @@ public class TestResultPresenterTest {
     }
 
     @Test
-    public void visibilityShouldBeUpdated() {
-        testResultPresenter.setVisible(false);
-
-        verify(view).setVisible(false);
-    }
-
-    @Test
     public void viewShouldBeReturned() {
         assertEquals(testResultPresenter.getView(), view);
     }
