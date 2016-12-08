@@ -11,7 +11,8 @@
 
 -->
 <md-content md-scroll-y flex
-            md-theme="default">
+            md-theme="default"
+            class="demo-components">
   <md-tabs md-selected="selectedIndex"
            md-dynamic-height
            md-stretch-tabs="auto"
@@ -234,6 +235,15 @@ Ultima Syriarum est Palaestina per intervalla magna protenta, cultis abundans te
         </che-html-source>
       </div>
 
+    </md-tab>
+
+    <md-tab label="Stack Selector">
+      <div layout="column">
+        <che-label-container che-label-name="{{createProjectCtrl.workspaces.length ? 'Select Workspace' : 'Select Stack'}}"
+                             che-label-description="{{createProjectCtrl.workspaces.length ? 'Select existing workspace or create it from stack' : 'Select stack'}}, recipe or image used to define your environment runtime. Workspace environments are used to build and run your project.">
+          <stack-selector></stack-selector>
+        </che-label-container>
+      </div>
     </md-tab>
 
   </md-tabs>
