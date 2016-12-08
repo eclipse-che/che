@@ -1421,5 +1421,37 @@
     "tags": [
       "Platformio"
     ]
+  },
+  {
+    "name": "typescript-greeter",
+    "displayName": "typescript-greeter",
+    "path": "/mbed-blink",
+    "description": "TypeScript greeter sample",
+    "projectType": "typescript",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "typescript"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/Microsoft/TypeScriptSamples.git",
+      "parameters": {
+        "keepDir":"greeter",
+        "keepVcs": "false",
+        "convertToTopLevelProject": "true"
+      }
+    },
+    "commands": [
+
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "TypeScript","ts"
+    ]
   }
 ]

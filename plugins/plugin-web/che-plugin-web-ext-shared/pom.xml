@@ -14,17 +14,26 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>che-plugin-parent</artifactId>
+        <artifactId>che-plugin-web-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>5.0.0-M9-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
+        <version>5.0.0-M8-SNAPSHOT</version>
     </parent>
-    <artifactId>che-plugin-web-parent</artifactId>
-    <packaging>pom</packaging>
-    <name>Che Plugin :: Web :: Parent</name>
-    <modules>
-        <module>che-plugin-web-ext-shared</module>
-        <module>che-plugin-web-ext-web</module>
-        <module>che-plugin-web-ext-server</module>
-    </modules>
+    <artifactId>che-plugin-web-ext-shared</artifactId>
+    <build>
+        <sourceDirectory>src/main/java</sourceDirectory>
+        <outputDirectory>target/classes</outputDirectory>
+        <resources>
+            <resource>
+                <directory>src/main/java</directory>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+            </testResource>
+        </testResources>
+    </build>
 </project>
