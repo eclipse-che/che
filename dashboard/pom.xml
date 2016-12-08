@@ -70,10 +70,6 @@
                                 <exec dir="${basedir}" executable="bower" failonerror="true">
                                     <arg value="install" />
                                 </exec>
-                                <!-- Run unit tests -->
-                                <exec dir="${basedir}" executable="gulp" failonerror="true">
-                                    <arg value="test" />
-                                </exec>
                                 <!-- Build the application -->
                                 <exec dir="${basedir}" executable="gulp" failonerror="true">
                                     <arg value="build" />
@@ -83,6 +79,21 @@
                                     <replacetoken><![CDATA[<base href="/">]]></replacetoken>
                                     <replacevalue><![CDATA[<base href="/dashboard/">]]></replacevalue>
                                 </replace>
+                            </target>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>compilation</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target unless="skipTests">
+                                <!-- Run unit tests -->
+                                <exec dir="${basedir}" executable="gulp" failonerror="true">
+                                    <arg value="test" />
+                                </exec>
                             </target>
                         </configuration>
                     </execution>
