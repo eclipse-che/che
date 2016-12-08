@@ -53,11 +53,11 @@ public class TerminalContainerTest {
 
     @Test
     public void terminalShouldBeAdded() {
-        when(terminalFactory.create(machineState)).thenReturn(terminal);
+        when(terminalFactory.create(machineState, container)).thenReturn(terminal);
 
         container.addOrShowTerminal(machineState);
 
-        verify(terminalFactory).create(machineState);
+        verify(terminalFactory).create(machineState, container);
         verify(view).addTerminal(terminal);
 
         verify(terminal, never()).connect();
@@ -66,7 +66,7 @@ public class TerminalContainerTest {
 
     @Test
     public void terminalShouldBeShown() {
-        when(terminalFactory.create(machineState)).thenReturn(terminal);
+        when(terminalFactory.create(machineState, container)).thenReturn(terminal);
 
         container.addOrShowTerminal(machineState);
         reset(view, terminalFactory);
@@ -76,7 +76,7 @@ public class TerminalContainerTest {
         verify(terminal).connect();
         verify(view).showTerminal(terminal);
 
-        verify(terminalFactory, never()).create(machineState);
+        verify(terminalFactory, never()).create(machineState, container);
         verify(view, never()).addTerminal(terminal);
     }
 
@@ -96,20 +96,20 @@ public class TerminalContainerTest {
 
     @Test
     public void onMachineShouldBeDestroyed() {
-        when(terminalFactory.create(machineState)).thenReturn(terminal);
+        when(terminalFactory.create(machineState, container)).thenReturn(terminal);
 
         container.addOrShowTerminal(machineState);
 
-        verify(terminalFactory).create(machineState);
+        verify(terminalFactory).create(machineState, container);
         reset(terminalFactory);
 
-        when(terminalFactory.create(machineState)).thenReturn(terminal);
+        when(terminalFactory.create(machineState, container)).thenReturn(terminal);
 
         container.onMachineDestroyed(machineStateEvent);
 
         container.addOrShowTerminal(machineState);
 
-        verify(terminalFactory).create(machineState);
+        verify(terminalFactory).create(machineState, container);
     }
 
 }

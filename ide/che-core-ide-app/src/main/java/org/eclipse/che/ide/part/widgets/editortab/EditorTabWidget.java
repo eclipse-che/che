@@ -237,16 +237,8 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
     /** {@inheritDoc} */
     @Override
     public void onDoubleClick(@NotNull DoubleClickEvent event) {
-        expandEditor();
+        delegate.onTabDoubleClicked(this);
     }
-
-    private native void expandEditor() /*-{
-        try {
-            $wnd.IDE.eventHandlers.expandEditor();
-        } catch (e) {
-            console.log(e.message);
-        }
-    }-*/;
 
     /** {@inheritDoc} */
     @Override
@@ -335,4 +327,5 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
             delegate.onTabClose(this);
         }
     }
+
 }

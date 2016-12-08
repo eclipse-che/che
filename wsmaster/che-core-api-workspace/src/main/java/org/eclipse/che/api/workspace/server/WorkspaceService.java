@@ -18,6 +18,7 @@ import io.swagger.annotations.ApiResponses;
 import io.swagger.annotations.Example;
 import io.swagger.annotations.ExampleProperty;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
 import org.eclipse.che.api.agent.server.WsAgentHealthChecker;
@@ -83,13 +84,16 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 @Api(value = "/workspace", description = "Workspace REST API")
 @Path("/workspace")
 public class WorkspaceService extends Service {
+    private static final String CHE_WORKSPACE_AUTO_SNAPSHOT= "che.workspace.auto_snapshot";
+    private static final String CHE_WORKSPACE_AUTO_RESTORE= "che.workspace.auto_restore";
 
     private final WorkspaceManager              workspaceManager;
     private final WorkspaceValidator            validator;
     private final WsAgentHealthChecker          agentHealthChecker;
     private final WorkspaceServiceLinksInjector linksInjector;
     private final String                        apiEndpoint;
-
+    private final boolean                       cheWorkspaceAutoSnapshot;
+    private final boolean                       cheWorkspaceAutoRestore;
     @Context
     private SecurityContext securityContext;
 
@@ -98,12 +102,16 @@ public class WorkspaceService extends Service {
                             WorkspaceManager workspaceManager,
                             WorkspaceValidator validator,
                             WsAgentHealthChecker agentHealthChecker,
-                            WorkspaceServiceLinksInjector workspaceServiceLinksInjector) {
+                            WorkspaceServiceLinksInjector workspaceServiceLinksInjector,
+                            @Named(CHE_WORKSPACE_AUTO_SNAPSHOT) boolean cheWorkspaceAutoSnapshot,
+                            @Named(CHE_WORKSPACE_AUTO_RESTORE) boolean cheWorkspaceAutoRestore) {
         this.apiEndpoint = apiEndpoint;
         this.workspaceManager = workspaceManager;
         this.validator = validator;
         this.agentHealthChecker = agentHealthChecker;
         this.linksInjector = workspaceServiceLinksInjector;
+        this.cheWorkspaceAutoSnapshot = cheWorkspaceAutoSnapshot;
+        this.cheWorkspaceAutoRestore = cheWorkspaceAutoRestore;
     }
 
     @POST
@@ -702,6 +710,16 @@ public class WorkspaceService extends Service {
         final WsAgentHealthStateDto check = agentHealthChecker.check(devMachine);
         check.setWorkspaceStatus(workspace.getStatus());
         return check;
+    }
+
+    @GET
+    @Path("/settings")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = "Get workspace server configuration values")
+    @ApiResponses({@ApiResponse(code = 200, message = "The response contains server settings")})
+    public Map<String, String> getSettings() {
+        return ImmutableMap.of(CHE_WORKSPACE_AUTO_SNAPSHOT, Boolean.toString(cheWorkspaceAutoSnapshot),
+                               CHE_WORKSPACE_AUTO_RESTORE, Boolean.toString(cheWorkspaceAutoRestore));
     }
 
     private static Map<String, String> parseAttrs(List<String> attributes) throws BadRequestException {

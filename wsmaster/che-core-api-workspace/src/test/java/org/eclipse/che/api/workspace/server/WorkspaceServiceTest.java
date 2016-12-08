@@ -13,6 +13,8 @@ package org.eclipse.che.api.workspace.server;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.jayway.restassured.response.Response;
 
 import org.eclipse.che.account.shared.model.Account;
@@ -149,7 +151,9 @@ public class WorkspaceServiceTest {
                                        wsManager,
                                        validator,
                                        wsAgentHealthChecker,
-                                       new WorkspaceServiceLinksInjector(new MachineServiceLinksInjector()));
+                                       new WorkspaceServiceLinksInjector(new MachineServiceLinksInjector()),
+                                       true,
+                                       false);
     }
 
     @Test
@@ -957,6 +961,20 @@ public class WorkspaceServiceTest {
         List<SnapshotDto> snapshotDtos = unwrapDtoList(response, SnapshotDto.class);
         assertTrue(snapshotDtos.isEmpty());
         verify(wsManager).getSnapshot(workspaceId);
+    }
+
+    @Test
+    public void shouldBeAbleToGetSettings() throws Exception {
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .when()
+                                         .get(SECURE_PATH + "/workspace/settings");
+
+        assertEquals(response.getStatusCode(), 200);
+        final Map<String, String> settings = new Gson().fromJson(response.print(),
+                                                                 new TypeToken<Map<String, String>>() {}.getType());
+        assertEquals(settings, ImmutableMap.of("che.workspace.auto_snapshot", "true",
+                                               "che.workspace.auto_restore", "false"));
     }
 
     private static String unwrapError(Response response) {

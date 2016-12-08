@@ -276,8 +276,4 @@ public class FetchViewImpl extends Window implements FetchView {
         }
     }
 
-    /** {@inheritDoc} */
-    @Override
-    protected void onClose() {
-    }
 }

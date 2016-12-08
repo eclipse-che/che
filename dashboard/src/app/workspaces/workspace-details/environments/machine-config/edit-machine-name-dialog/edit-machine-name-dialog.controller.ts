@@ -27,7 +27,7 @@ export class EditMachineNameDialogController {
   }
 
   isUnique(name) {
-    return !this.machinesNames.includes(name);
+    return this.machinesNames.indexOf(name) < 0;
   }
 
   /**

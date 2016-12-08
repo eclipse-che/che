@@ -121,10 +121,6 @@ init() {
     export CHE_WORKSPACE_STORAGE_CREATE_FOLDERS=false
   fi
 
-  # Ensure that the user "user" has permissions for CHE_HOME and CHE_DATA
-  sudo chown -R user:user ${CHE_HOME}
-  sudo chown -R user:user ${CHE_DATA}
-
   # Move files from /lib to /lib-copy.  This puts files onto the host.
   rm -rf ${CHE_DATA}/lib/*
   mkdir -p ${CHE_DATA}/lib  

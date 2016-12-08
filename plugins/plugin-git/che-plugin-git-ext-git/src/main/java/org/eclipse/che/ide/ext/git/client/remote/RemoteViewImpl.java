@@ -231,5 +231,6 @@ public class RemoteViewImpl extends Window implements RemoteView {
     @Override
     protected void onClose() {
         this.isShown = false;
+        super.onClose();
     }
 }

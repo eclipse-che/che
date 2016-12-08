@@ -89,10 +89,12 @@ public class ConstantPartitioner implements DocumentPartitioner {
         return new TypedRegionImpl(offset, this.documentLength, this.contentType);
     }
 
+    @Override
     public DocumentHandle getDocumentHandle() {
         return documentHandle;
     }
 
+    @Override
     public void setDocumentHandle(DocumentHandle handle) {
         this.documentHandle = handle;
     }

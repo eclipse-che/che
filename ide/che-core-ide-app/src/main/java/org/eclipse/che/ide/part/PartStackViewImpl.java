@@ -73,6 +73,8 @@ public class PartStackViewImpl extends ResizeComposite implements PartStackView,
 
         addDomHandler(this, MouseDownEvent.getType());
         addDomHandler(this, ContextMenuEvent.getType());
+
+        setMaximized(false);
     }
 
     /** {@inheritDoc} */
@@ -175,6 +177,11 @@ public class PartStackViewImpl extends ResizeComposite implements PartStackView,
         TabItem tabItem = tabs.get(partPresenter);
 
         tabItem.update(partPresenter);
+    }
+
+    @Override
+    public void setMaximized(boolean maximized) {
+        getElement().setAttribute("maximized", "" + maximized);
     }
 
 }

@@ -10,10 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.processes.panel;
 
-import com.google.gwt.core.client.Scheduler;
 import elemental.events.KeyboardEvent;
 import elemental.events.MouseEvent;
 
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
@@ -22,6 +22,7 @@ import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
@@ -64,6 +65,7 @@ import static org.eclipse.che.ide.extension.machine.client.processes.ProcessTree
  */
 public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDelegate> implements ProcessesPanelView,
                                                                                                    SubPanel.FocusListener,
+                                                                                                   SubPanel.DoubleClickListener,
                                                                                                    RequiresResize {
 
     @UiField(provided = true)
@@ -88,6 +90,8 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
     private String activeProcessId = "";
 
+    private Focusable lastFosuced;
+
     @Inject
     public ProcessesPanelViewImpl(PartStackUIResources partStackUIResources,
                                   org.eclipse.che.ide.Resources resources,
@@ -109,7 +113,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
         renderer.setAddTerminalClickHandler(new AddTerminalClickHandler() {
             @Override
             public void onAddTerminalClick(@NotNull String machineId) {
-                delegate.onAddTerminal(machineId);
+                delegate.onAddTerminal(machineId, this);
             }
         });
 
@@ -192,6 +196,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
         final SubPanel subPanel = subPanelFactory.newPanel();
         subPanel.setFocusListener(this);
+        subPanel.setDoubleClickListener(this);
         splitLayoutPanel.add(subPanel.getView());
         focusedSubPanel = subPanel;
 
@@ -474,6 +479,21 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
         if (processTreeNode != null) {
             selectNode(processTreeNode);
         }
+
+        if (lastFosuced != null && !lastFosuced.equals(widget)) {
+            lastFosuced.setFocus(false);
+        }
+
+        if (widget instanceof Focusable) {
+            ((Focusable)widget).setFocus(true);
+
+            lastFosuced = (Focusable)widget;
+        }
+    }
+
+    @Override
+    public void onDoubleClicked(final SubPanel panel, final IsWidget widget) {
+        delegate.onToggleMaximizeConsole();
     }
 
     @Override
@@ -484,6 +504,11 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
                 ((RequiresResize)widget).onResize();
             }
         }
+    }
+
+    @Override
+    public void setProcessesTreeVisible(boolean visible) {
+        splitLayoutPanel.setWidgetHidden(navigationPanel, !visible);
     }
 
     interface ProcessesPartViewImplUiBinder extends UiBinder<Widget, ProcessesPanelViewImpl> {

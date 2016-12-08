@@ -47,16 +47,19 @@ final class AnnotationsIterator implements Iterator<Annotation> {
         next = findNext();
     }
 
+    @Override
     public boolean hasNext() {
         return next != null;
     }
 
+    @Override
     public Annotation next() {
         final Annotation result = next;
         next = findNext();
         return result;
     }
 
+    @Override
     public void remove() {
         throw new UnsupportedOperationException();
     }

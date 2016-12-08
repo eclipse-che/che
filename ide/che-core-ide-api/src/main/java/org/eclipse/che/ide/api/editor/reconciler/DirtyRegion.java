@@ -69,16 +69,19 @@ public class DirtyRegion implements TypedRegion {
     }
 
     /** Returns the offset of the region. */
+    @Override
     public int getOffset() {
         return fOffset;
     }
 
     /** Returns the length of the region. */
+    @Override
     public int getLength() {
         return fLength;
     }
 
     /** Returns the content type of the region. */
+    @Override
     public String getType() {
         return fType;
     }

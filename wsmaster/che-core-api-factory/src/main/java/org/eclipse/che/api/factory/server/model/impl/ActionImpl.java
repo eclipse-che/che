@@ -12,7 +12,6 @@ package org.eclipse.che.api.factory.server.model.impl;
 
 import org.eclipse.che.api.core.model.factory.Action;
 
-import javax.persistence.Basic;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -53,7 +52,9 @@ public class ActionImpl implements Action {
 
     public ActionImpl(String id, Map<String, String> properties) {
         this.id = id;
-        this.properties = properties;
+        if (properties != null) {
+            this.properties = new HashMap<>(properties);
+        }
     }
 
     public ActionImpl(Action action) {
@@ -83,25 +84,32 @@ public class ActionImpl implements Action {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof ActionImpl)) return false;
-        final ActionImpl other = (ActionImpl)obj;
-        return Objects.equals(id, other.getId())
-               && getProperties().equals(other.getProperties());
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof ActionImpl)) {
+            return false;
+        }
+        final ActionImpl that = (ActionImpl)obj;
+        return Objects.equals(entityId, that.entityId)
+               && Objects.equals(id, that.id)
+               && getProperties().equals(that.getProperties());
     }
 
     @Override
     public int hashCode() {
-        int result = 7;
-        result = 31 * result + Objects.hashCode(id);
-        result = 31 * result + getProperties().hashCode();
-        return result;
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(entityId);
+        hash = 31 * hash + Objects.hashCode(id);
+        hash = 31 * hash + getProperties().hashCode();
+        return hash;
     }
 
     @Override
     public String toString() {
         return "ActionImpl{" +
-               "id='" + id + '\'' +
+               "entityId=" + entityId +
+               ", id='" + id + '\'' +
                ", properties=" + properties +
                '}';
     }

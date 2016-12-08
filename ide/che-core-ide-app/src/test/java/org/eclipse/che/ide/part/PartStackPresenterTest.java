@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.part;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.constraints.Constraints;
@@ -51,7 +52,7 @@ import static org.mockito.Mockito.when;
  * @author Roman Nikitenko
  * @author Dmitry Shnurenko
  */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(GwtMockitoTestRunner.class)
 public class PartStackPresenterTest {
 
     private static final String SOME_TEXT = "someText";
@@ -205,9 +206,7 @@ public class PartStackPresenterTest {
     public void partShouldBeHidden() {
         presenter.addPart(partPresenter);
 
-        presenter.hidePart(partPresenter);
-
-        verify(partButton).unSelect();
+        presenter.minimize();
 
         verify(workBenchPartController).getSize();
         verify(workBenchPartController).setSize(0);
@@ -256,7 +255,6 @@ public class PartStackPresenterTest {
 
         presenter.onTabClicked(partButton);
 
-        verify(workBenchPartController).setSize(anyDouble());
         verify(workBenchPartController).setHidden(false);
 
         verify(view).selectTab(partPresenter);
@@ -270,7 +268,6 @@ public class PartStackPresenterTest {
 
         presenter.onTabClicked(partButton);
 
-        verify(workBenchPartController).setSize(eq(presenter.currentSize));
         verify(workBenchPartController).setHidden(false);
 
         verify(view).selectTab(partPresenter);
@@ -284,7 +281,6 @@ public class PartStackPresenterTest {
 
         presenter.onTabClicked(partButton);
 
-        verify(workBenchPartController).setSize(eq(PART_SIZE));
         verify(workBenchPartController).setHidden(false);
 
         verify(view).selectTab(partPresenter);

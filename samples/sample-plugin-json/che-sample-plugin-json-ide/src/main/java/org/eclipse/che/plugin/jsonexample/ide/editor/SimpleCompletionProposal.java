@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.jsonexample.ide.editor;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
 
 import org.eclipse.che.ide.api.editor.codeassist.CompletionProposal;
@@ -35,8 +36,8 @@ public class SimpleCompletionProposal implements CompletionProposal {
     }
 
     @Override
-    public Widget getAdditionalProposalInfo() {
-        return null;
+    public void getAdditionalProposalInfo(AsyncCallback<Widget> callback) {
+        callback.onSuccess(null);
     }
 
     @Override

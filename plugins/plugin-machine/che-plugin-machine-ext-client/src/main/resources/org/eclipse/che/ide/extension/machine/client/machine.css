@@ -35,6 +35,7 @@
     color: outputFontColor;
     line-height: 13px;
     padding: 3px;
+    white-space: nowrap;
 }
 
 .terminal-cursor {

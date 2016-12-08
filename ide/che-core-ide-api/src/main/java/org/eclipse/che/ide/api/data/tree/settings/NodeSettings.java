@@ -30,6 +30,7 @@ public interface NodeSettings {
             return showHiddenFiles;
         }
 
+        @Override
         public void setShowHiddenFiles(boolean show) {
             this.showHiddenFiles = show;
         }

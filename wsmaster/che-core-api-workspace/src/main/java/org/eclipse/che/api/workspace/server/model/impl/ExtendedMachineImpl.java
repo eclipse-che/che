@@ -87,6 +87,9 @@ public class ExtendedMachineImpl implements ExtendedMachine {
 
     @Override
     public List<String> getAgents() {
+        if (agents == null) {
+            agents = new ArrayList<>();
+        }
         return agents;
     }
 
@@ -118,6 +121,9 @@ public class ExtendedMachineImpl implements ExtendedMachine {
 
     @Override
     public Map<String, String> getAttributes() {
+        if (attributes == null) {
+            attributes = new HashMap<>();
+        }
         return attributes;
     }
 
@@ -131,26 +137,37 @@ public class ExtendedMachineImpl implements ExtendedMachine {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ExtendedMachineImpl)) return false;
-        ExtendedMachineImpl that = (ExtendedMachineImpl)o;
-        return Objects.equals(agents, that.agents) &&
-               Objects.equals(servers, that.servers) &&
-               Objects.equals(attributes, that.attributes);
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof ExtendedMachineImpl)) {
+            return false;
+        }
+        final ExtendedMachineImpl that = (ExtendedMachineImpl)obj;
+        return Objects.equals(id, that.id)
+               && getAgents().equals(that.getAgents())
+               && getAttributes().equals(that.getAttributes())
+               && getServers().equals(that.getServers());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(agents, servers, attributes);
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(id);
+        hash = 31 * hash + getAgents().hashCode();
+        hash = 31 * hash + getAttributes().hashCode();
+        hash = 31 * hash + getServers().hashCode();
+        return hash;
     }
 
     @Override
     public String toString() {
         return "ExtendedMachineImpl{" +
-               "agents=" + agents +
-               ", servers=" + servers +
+               "id=" + id +
+               ", agents=" + agents +
                ", attributes=" + attributes +
+               ", servers=" + servers +
                '}';
     }
 }

@@ -38,7 +38,7 @@ import com.google.inject.Inject;
 
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
-import org.eclipse.che.ide.ui.FontAwesome;
+import org.eclipse.che.ide.FontAwesome;
 import org.eclipse.che.ide.ui.Tooltip;
 
 import static com.google.common.collect.Lists.newArrayList;

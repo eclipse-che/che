@@ -49,6 +49,7 @@ config/
 ######################
 *.log
 *.sqlite
+npm-debug.log.*
 
 # OS generated files #
 ######################

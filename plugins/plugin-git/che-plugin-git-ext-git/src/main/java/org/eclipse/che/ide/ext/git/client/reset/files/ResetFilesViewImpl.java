@@ -179,8 +179,4 @@ public class ResetFilesViewImpl extends Window implements ResetFilesView {
         this.delegate = delegate;
     }
 
-    /** {@inheritDoc} */
-    @Override
-    protected void onClose() {
-    }
 }

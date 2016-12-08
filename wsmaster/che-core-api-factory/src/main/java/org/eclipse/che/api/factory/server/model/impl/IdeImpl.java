@@ -102,27 +102,34 @@ public class IdeImpl implements Ide {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof IdeImpl)) return false;
-        final IdeImpl other = (IdeImpl)obj;
-        return Objects.equals(onAppLoaded, other.onAppLoaded)
-               && Objects.equals(onProjectsLoaded, other.onProjectsLoaded)
-               && Objects.equals(onAppClosed, other.onAppClosed);
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof IdeImpl)) {
+            return false;
+        }
+        final IdeImpl that = (IdeImpl)obj;
+        return Objects.equals(id, that.id)
+               && Objects.equals(onAppLoaded, that.onAppLoaded)
+               && Objects.equals(onProjectsLoaded, that.onProjectsLoaded)
+               && Objects.equals(onAppClosed, that.onAppClosed);
     }
 
     @Override
     public int hashCode() {
-        int result = 7;
-        result = 31 * result + Objects.hashCode(onAppLoaded);
-        result = 31 * result + Objects.hashCode(onProjectsLoaded);
-        result = 31 * result + Objects.hashCode(onAppClosed);
-        return result;
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(id);
+        hash = 31 * hash + Objects.hashCode(onAppLoaded);
+        hash = 31 * hash + Objects.hashCode(onProjectsLoaded);
+        hash = 31 * hash + Objects.hashCode(onAppClosed);
+        return hash;
     }
 
     @Override
     public String toString() {
         return "IdeImpl{" +
-               "onAppLoaded=" + onAppLoaded +
+               "id=" + id +
+               ", onAppLoaded=" + onAppLoaded +
                ", onProjectsLoaded=" + onProjectsLoaded +
                ", onAppClosed=" + onAppClosed +
                '}';

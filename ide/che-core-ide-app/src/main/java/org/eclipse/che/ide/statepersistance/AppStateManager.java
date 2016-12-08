@@ -112,7 +112,6 @@ public class AppStateManager {
 
     private Promise<Void> writeStateToPreferences(JsonObject state) {
         final String json = state.toJson();
-        Log.info(getClass(), "write: " + json);
         preferencesManager.setValue(PREFERENCE_PROPERTY_NAME, json);
         return preferencesManager.flushPreferences().catchError(new Operation<PromiseError>() {
             @Override

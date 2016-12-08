@@ -201,18 +201,6 @@ public class CopyPresenter extends SubversionActionPresenter implements CopyView
         validate();
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public void minimize() {
-        //stub
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void activatePart() {
-        //stub
-    }
-
     private void validate() {
         ValidationStrategy strategy;
 

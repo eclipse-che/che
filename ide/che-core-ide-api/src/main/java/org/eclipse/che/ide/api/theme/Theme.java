@@ -1577,13 +1577,13 @@ public interface Theme {
 
     String toolButtonHoverColor();
 
-    String toolButtonBorder();
-
     String toolButtonActiveBorder();
 
     String toolButtonHoverBackgroundColor();
 
     String toolButtonActiveBackgroundColor();
+
+    String toolButtonActiveColor();
 
     String toolButtonHoverBoxShadow();
 

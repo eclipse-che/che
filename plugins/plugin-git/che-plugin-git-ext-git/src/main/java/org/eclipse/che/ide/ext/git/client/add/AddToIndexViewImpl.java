@@ -149,8 +149,4 @@ public class AddToIndexViewImpl extends Window implements AddToIndexView {
         this.delegate = delegate;
     }
 
-    /** {@inheritDoc} */
-    @Override
-    protected void onClose() {
-    }
 }

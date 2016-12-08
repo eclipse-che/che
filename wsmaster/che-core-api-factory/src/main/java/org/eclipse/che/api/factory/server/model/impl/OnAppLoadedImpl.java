@@ -23,6 +23,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Data object for {@link OnAppLoaded}.
@@ -75,21 +76,30 @@ public class OnAppLoadedImpl implements OnAppLoaded {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof OnAppLoadedImpl)) return false;
-        final OnAppLoadedImpl other = (OnAppLoadedImpl)obj;
-        return getActions().equals(other.getActions());
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof OnAppLoadedImpl)) {
+            return false;
+        }
+        final OnAppLoadedImpl that = (OnAppLoadedImpl)obj;
+        return Objects.equals(id, that.id)
+               && getActions().equals(that.getActions());
     }
 
     @Override
     public int hashCode() {
-        return getActions().hashCode();
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(id);
+        hash = 31 * hash + getActions().hashCode();
+        return hash;
     }
 
     @Override
     public String toString() {
         return "OnAppLoadedImpl{" +
-               "actions=" + actions +
+               "id=" + id +
+               ", actions=" + actions +
                '}';
     }
 }

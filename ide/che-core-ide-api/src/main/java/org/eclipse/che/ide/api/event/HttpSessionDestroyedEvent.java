@@ -20,10 +20,12 @@ import com.google.gwt.event.shared.GwtEvent;
 public class HttpSessionDestroyedEvent extends GwtEvent<HttpSessionDestroyedHandler> {
     public static Type<HttpSessionDestroyedHandler> TYPE = new Type<HttpSessionDestroyedHandler>();
 
+    @Override
     public Type<HttpSessionDestroyedHandler> getAssociatedType() {
         return TYPE;
     }
 
+    @Override
     protected void dispatch(HttpSessionDestroyedHandler handler) {
         handler.onHttpSessionDestroyed(this);
     }

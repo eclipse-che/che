@@ -26,6 +26,7 @@ import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.api.environment.server.exception.EnvironmentException;
 import org.eclipse.che.api.machine.server.exception.SnapshotException;
 import org.eclipse.che.api.machine.server.exception.SourceNotFoundException;
@@ -122,6 +123,8 @@ public class WorkspaceManager {
         this.snapshotDao = snapshotDao;
 
         executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("WorkspaceManager-%d")
+                                                                           .setUncaughtExceptionHandler(
+                                                                                   LoggingUncaughtExceptionHandler.getInstance())
                                                                            .setDaemon(true)
                                                                            .build());
     }
@@ -695,9 +698,7 @@ public class WorkspaceManager {
             }
             try {
                 runtimes.stop(workspace.getId());
-                if (workspace.isTemporary()) {
-                    workspaceDao.remove(workspace.getId());
-                } else {
+                if (!workspace.isTemporary()) {
                     workspace.getAttributes().put(UPDATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
                     workspaceDao.update(workspace);
                 }
@@ -708,6 +709,15 @@ public class WorkspaceManager {
                          firstNonNull(stoppedBy, "undefined"));
             } catch (RuntimeException | ConflictException | NotFoundException | ServerException ex) {
                 LOG.error(ex.getLocalizedMessage(), ex);
+            } finally {
+                // Remove tmp workspaces even if stop is failed
+                if (workspace.isTemporary()) {
+                    try {
+                        workspaceDao.remove(workspace.getId());
+                    } catch (ConflictException | ServerException e) {
+                        LOG.error("Unable to remove temporary workspace {} after stop.", workspace.getId());
+                    }
+                }
             }
         }));
     }

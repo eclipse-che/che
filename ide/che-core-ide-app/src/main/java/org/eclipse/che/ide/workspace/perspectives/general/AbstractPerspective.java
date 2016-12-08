@@ -25,8 +25,11 @@ import org.eclipse.che.ide.api.mvp.Presenter;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStack;
 import org.eclipse.che.ide.api.parts.PartStackType;
+import static org.eclipse.che.ide.api.parts.PartStackType.EDITING;
 import org.eclipse.che.ide.api.parts.PartStackView;
 import org.eclipse.che.ide.api.parts.Perspective;
+import org.eclipse.che.ide.api.parts.PerspectiveView;
+import org.eclipse.che.ide.api.parts.base.MaximizePartEvent;
 import org.eclipse.che.ide.workspace.PartStackPresenterFactory;
 import org.eclipse.che.ide.workspace.PartStackViewFactory;
 import org.eclipse.che.ide.workspace.WorkBenchControllerFactory;
@@ -52,33 +55,24 @@ import static org.eclipse.che.ide.api.parts.PartStackView.TabPosition.RIGHT;
  * @author Dmitry Shnurenko
  */
 //TODO need rewrite this, remove direct dependency on PerspectiveViewImpl and other GWT Widgets
-public abstract class AbstractPerspective implements Presenter, Perspective, ActivePartChangedHandler {
-
-    private enum State {
-        NORMAL,
-        MAXIMIZED_LEFT_PART,
-        MAXIMIZED_RIGHT_PART,
-        MAXIMIZED_BOTTOM_PART,
-        MAXIMIZED_CENTRAL_PART
-    }
+public abstract class AbstractPerspective implements Presenter, Perspective,
+        ActivePartChangedHandler, MaximizePartEvent.Handler,
+        PerspectiveView.ActionDelegate, PartStack.ActionDelegate {
 
     protected final Map<PartStackType, PartStack> partStacks;
     protected final PerspectiveViewImpl           view;
 
     private final String                  perspectiveId;
     private final DynaProvider            dynaProvider;
+
     private final WorkBenchPartController leftPartController;
     private final WorkBenchPartController rightPartController;
     private final WorkBenchPartController belowPartController;
 
-    private double        leftPartSize;
-    private double        rightPartSize;
-    private double        belowPartSize;
-
-    private State         layoutState = State.NORMAL;
-
     private PartPresenter activePart;
     private PartPresenter activePartBeforeChangePerspective;
+
+    private PartStack maximizedPartStack;
 
     protected AbstractPerspective(@NotNull String perspectiveId,
                                   @NotNull PerspectiveViewImpl view,
@@ -92,25 +86,28 @@ public abstract class AbstractPerspective implements Presenter, Perspective, Act
         this.dynaProvider = dynaProvider;
         this.partStacks = new HashMap<>();
 
-        PartStackView navigationView = partViewFactory.create(LEFT, view.getLeftPanel());
+        view.setDelegate(this);
 
+        PartStackView navigationView = partViewFactory.create(LEFT, view.getLeftPanel());
         leftPartController = controllerFactory.createController(view.getSplitPanel(), view.getNavigationPanel());
         PartStack navigationPartStack = stackPresenterFactory.create(navigationView, leftPartController);
+        navigationPartStack.setDelegate(this);
         partStacks.put(NAVIGATION, navigationPartStack);
 
         PartStackView informationView = partViewFactory.create(BELOW, view.getBottomPanel());
-
         belowPartController = controllerFactory.createController(view.getSplitPanel(), view.getInformationPanel());
         PartStack informationStack = stackPresenterFactory.create(informationView, belowPartController);
+        informationStack.setDelegate(this);
         partStacks.put(INFORMATION, informationStack);
 
         PartStackView toolingView = partViewFactory.create(RIGHT, view.getRightPanel());
-
         rightPartController = controllerFactory.createController(view.getSplitPanel(), view.getToolPanel());
         PartStack toolingPartStack = stackPresenterFactory.create(toolingView, rightPartController);
+        toolingPartStack.setDelegate(this);
         partStacks.put(TOOLING, toolingPartStack);
 
         eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
+        eventBus.addHandler(MaximizePartEvent.TYPE, this);
     }
 
     /**
@@ -160,58 +157,82 @@ public abstract class AbstractPerspective implements Presenter, Perspective, Act
     public void hidePart(@NotNull PartPresenter part) {
         PartStack destPartStack = findPartStackByPart(part);
         if (destPartStack != null) {
-            destPartStack.hidePart(part);
+            destPartStack.minimize();
         }
     }
 
     /** {@inheritDoc} */
     @Override
-    public void maximizeCentralPart() {
-        if (layoutState == State.MAXIMIZED_CENTRAL_PART) {
-            return;
-        }
-
-        leftPartSize = leftPartController.getSize();
-        rightPartSize = rightPartController.getSize();
-        belowPartSize = belowPartController.getSize();
-
-        leftPartController.setHidden(true);
-        rightPartController.setHidden(true);
-        belowPartController.setHidden(true);
-
-        layoutState = State.MAXIMIZED_CENTRAL_PART;
+    public void maximizeCentralPartStack() {
+        onMaximize(partStacks.get(EDITING));
     }
 
     /** {@inheritDoc} */
     @Override
-    public void maximizeBottomPart() {
-        if (layoutState == State.MAXIMIZED_BOTTOM_PART) {
-            return;
-        }
-
-        leftPartSize = leftPartController.getSize();
-        rightPartSize = rightPartController.getSize();
-        belowPartSize = belowPartController.getSize();
-
-        leftPartController.setHidden(true);
-        rightPartController.setHidden(true);
-        belowPartController.maximize();
-
-        layoutState = State.MAXIMIZED_BOTTOM_PART;
+    public void maximizeLeftPartStack() {
+        onMaximize(partStacks.get(NAVIGATION));
     }
 
     /** {@inheritDoc} */
     @Override
-    public void restoreParts() {
-        if (layoutState == State.NORMAL) {
+    public void maximizeRightPartStack() {
+        onMaximize(partStacks.get(TOOLING));
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void maximizeBottomPartStack() {
+        onMaximize(partStacks.get(INFORMATION));
+    }
+
+    @Override
+    public void onMaximizePart(MaximizePartEvent event) {
+        PartStack partStack = findPartStackByPart(event.getPart());
+        if (partStack == null) {
             return;
         }
 
-        leftPartController.setSize(leftPartSize);
-        rightPartController.setSize(rightPartSize);
-        belowPartController.setSize(belowPartSize);
+        if (partStack.getPartStackState() == PartStack.State.MAXIMIZED) {
+            onRestore(partStack);
+        } else {
+            onMaximize(partStack);
+        }
+    }
 
-        layoutState = State.NORMAL;
+    @Override
+    public void onMaximize(PartStack partStack) {
+        if (partStack == null) {
+            return;
+        }
+
+        if (partStack.equals(maximizedPartStack)) {
+            return;
+        }
+
+        maximizedPartStack = partStack;
+
+        for (PartStack ps : partStacks.values()) {
+            if (!ps.equals(partStack)) {
+                ps.collapse();
+            }
+        }
+
+        partStack.maximize();
+    }
+
+    @Override
+    public void onRestore(PartStack partStack) {
+        for (PartStack ps : partStacks.values()) {
+            ps.restore();
+        }
+
+        maximizedPartStack = null;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void restore() {
+        onRestore(null);
     }
 
     /** {@inheritDoc} */
@@ -239,12 +260,10 @@ public abstract class AbstractPerspective implements Presenter, Perspective, Act
      */
     public PartStack findPartStackByPart(@NotNull PartPresenter part) {
         for (PartStackType partStackType : PartStackType.values()) {
-
             if (partStacks.get(partStackType).containsPart(part)) {
                 return partStacks.get(partStackType);
             }
         }
-
         return null;
     }
 
@@ -263,12 +282,18 @@ public abstract class AbstractPerspective implements Presenter, Perspective, Act
 
         if (rules.isEmpty() && !destPartStack.containsPart(part)) {
             destPartStack.addPart(part, constraint);
-
             return;
         }
 
         if (rules.contains(perspectiveId)) {
             destPartStack.addPart(part, constraint);
+        }
+    }
+
+    @Override
+    public void onResize(int width, int height) {
+        if (maximizedPartStack != null) {
+            maximizedPartStack.maximize();
         }
     }
 
@@ -285,7 +310,6 @@ public abstract class AbstractPerspective implements Presenter, Perspective, Act
         JsonObject partStacks = Json.createObject();
         state.put("ACTIVE_PART", activePart.getClass().getName());
         state.put("PART_STACKS", partStacks);
-
 
         partStacks.put(PartStackType.INFORMATION.name(), getPartStackState(this.partStacks.get(INFORMATION), belowPartController));
         partStacks.put(PartStackType.NAVIGATION.name(), getPartStackState(this.partStacks.get(NAVIGATION), leftPartController));
@@ -325,13 +349,13 @@ public abstract class AbstractPerspective implements Presenter, Perspective, Act
                 JsonObject partStack = part_stacks.getObject(partStackType);
                 switch (PartStackType.valueOf(partStackType)) {
                     case INFORMATION:
-                        belowPartSize = restorePartController(partStacks.get(INFORMATION), belowPartController, partStack, activeParts);
+                        restorePartController(partStacks.get(INFORMATION), belowPartController, partStack, activeParts);
                         break;
                     case NAVIGATION:
-                        leftPartSize = restorePartController(partStacks.get(NAVIGATION), leftPartController, partStack, activeParts);
+                        restorePartController(partStacks.get(NAVIGATION), leftPartController, partStack, activeParts);
                         break;
                     case TOOLING:
-                        rightPartSize = restorePartController(partStacks.get(TOOLING), rightPartController, partStack, activeParts);
+                        restorePartController(partStacks.get(TOOLING), rightPartController, partStack, activeParts);
                         break;
                 }
             }
@@ -339,6 +363,7 @@ public abstract class AbstractPerspective implements Presenter, Perspective, Act
                 setActivePart(part);
             }
         }
+
         if (state.hasKey("ACTIVE_PART")) {
             String activePart = state.getString("ACTIVE_PART");
             Provider<PartPresenter> provider = dynaProvider.getProvider(activePart);
@@ -346,10 +371,9 @@ public abstract class AbstractPerspective implements Presenter, Perspective, Act
                 setActivePart(provider.get());
             }
         }
-
     }
 
-    private double restorePartController(PartStack stack, WorkBenchPartController controller, JsonObject partStack,
+    private void restorePartController(PartStack stack, WorkBenchPartController controller, JsonObject partStack,
                                          List<PartPresenter> activeParts) {
         double size = 0;
         if (partStack.hasKey("SIZE")) {
@@ -390,6 +414,6 @@ public abstract class AbstractPerspective implements Presenter, Perspective, Act
                 activeParts.add(provider.get());
             }
         }
-        return size;
     }
+
 }

@@ -402,7 +402,7 @@ export class WorkspaceDetailsController {
         iterations = 100;
     while (iterations--) {
       name = 'wksp-' + (('0000' + (Math.random() * Math.pow(36, 4) << 0).toString(36)).slice(-4)); // jshint ignore:line
-      if (!this.usedNamesList.includes(name)) {
+      if (!this.usedNamesList.indexOf(name) >= 0) {
         break;
       }
     }

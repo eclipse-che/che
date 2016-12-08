@@ -53,6 +53,7 @@ public class DefaultPartitioner implements DocumentPartitioner {
         this.positionCategory = DocumentPositionMap.Categories.DEFAULT_CATEGORY;
     }
 
+    @Override
     public void initialize() {
         this.documentPositionMap.addPositionCategory(this.positionCategory);
         this.documentPositionMap.setContentLength(this.documentHandle.getDocument().getContentsCharCount());
@@ -415,10 +416,12 @@ public class DefaultPartitioner implements DocumentPartitioner {
         return getDocumentHandle().getDocument().getContentsCharCount();
     }
 
+    @Override
     public DocumentHandle getDocumentHandle() {
         return documentHandle;
     }
 
+    @Override
     public void setDocumentHandle(DocumentHandle handle) {
         this.documentHandle = handle;
     }
