@@ -1,34 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-
-    Copyright (c) 2012-2016 Codenvy, S.A.
+    Copyright (c) 2016 Rogue Wave Software, Inc.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
     http://www.eclipse.org/legal/epl-v10.html
-
     Contributors:
-      Codenvy, S.A. - initial API and implementation
-
+      Rogue Wave Software, Inc. - initial API and implementation
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>che-java-testing-core</artifactId>
+        <artifactId>che-plugin-zend-debugger-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
         <version>5.0.0-M9-SNAPSHOT</version>
     </parent>
-    <artifactId>che-java-testing-core-ide</artifactId>
-    <name>Che Plugin :: Java Testing :: Core IDE</name>
+    <artifactId>che-plugin-zend-debugger-ide</artifactId>
+    <packaging>jar</packaging>
+    <name>Che Plugin :: PHP :: Zend Debugger IDE</name>
     <dependencies>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.google.gwt</groupId>
-            <artifactId>gwt-user</artifactId>
-        </dependency>
         <dependency>
             <groupId>com.google.gwt.inject</groupId>
             <artifactId>gin</artifactId>
@@ -38,12 +29,12 @@
             <artifactId>guice</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.google.inject.extensions</groupId>
-            <artifactId>guice-assistedinject</artifactId>
-        </dependency>
-        <dependency>
             <groupId>javax.validation</groupId>
             <artifactId>validation-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-debug-shared</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -55,19 +46,11 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-ide-ui</artifactId>
+            <artifactId>che-core-ide-app</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-java-testing-core-shared</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-java-ext-lang-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-maven-shared</artifactId>
+            <artifactId>che-plugin-debugger-ide</artifactId>
         </dependency>
         <dependency>
             <groupId>org.vectomatic</groupId>
@@ -75,8 +58,13 @@
         </dependency>
         <dependency>
             <groupId>com.google.gwt</groupId>
-            <artifactId>gwt-dev</artifactId>
+            <artifactId>gwt-user</artifactId>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-dev</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.google.gwt.gwtmockito</groupId>
@@ -84,8 +72,18 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>com.googlecode.gwt-test-utils</groupId>
+            <artifactId>gwt-test-utils</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-core</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -98,9 +96,6 @@
         <resources>
             <resource>
                 <directory>src/main/java</directory>
-                <includes>
-                    <include>**/*.java</include>
-                </includes>
             </resource>
             <resource>
                 <directory>src/main/resources</directory>
@@ -109,17 +104,16 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>analyze</id>
-                        <configuration>
-                            <ignoredDependencies>
-                                <ignoredDependency>org.eclipse.che.plugin:che-plugin-maven-shared</ignoredDependency>
-                            </ignoredDependencies>
-                        </configuration>
-                    </execution>
-                </executions>
+                <artifactId>maven-surefire-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>**/*.png</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
         </plugins>
     </build>
