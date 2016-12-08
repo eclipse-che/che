@@ -1,0 +1,25 @@
+/*******************************************************************************
+ * Copyright (c) 2012-2016 Codenvy, S.A.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Codenvy, S.A. - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.che.ide.jsonrpc;
+
+public class NotificationHandlerOneToNone<P> implements NotificationHandler {
+    private final Class<P>                     paramsClass;
+    private final JsonRpcRequestBiOperation<P> biOperation;
+
+    public NotificationHandlerOneToNone(Class<P> paramsClass, JsonRpcRequestBiOperation<P> biOperation) {
+        this.paramsClass = paramsClass;
+        this.biOperation = biOperation;
+    }
+
+    public void handle(String endpointId, JsonRpcParams params) throws JsonRpcException {
+        biOperation.apply(endpointId, params.getAs(paramsClass));
+    }
+}

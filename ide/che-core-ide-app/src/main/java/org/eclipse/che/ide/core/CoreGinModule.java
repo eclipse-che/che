@@ -29,10 +29,15 @@ import org.eclipse.che.ide.api.extension.ExtensionRegistry;
 import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.git.GitServiceClientImpl;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
+import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
+import org.eclipse.che.ide.api.machine.ExecAgentEventManager;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.machine.MachineServiceClientImpl;
 import org.eclipse.che.ide.api.machine.RecipeServiceClient;
 import org.eclipse.che.ide.api.machine.RecipeServiceClientImpl;
+import org.eclipse.che.ide.api.machine.execagent.ConnectedEventHandler;
+import org.eclipse.che.ide.api.machine.execagent.JsonRpcExecAgentCommandManager;
+import org.eclipse.che.ide.api.machine.execagent.JsonRpcExecAgentEventManager;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.reference.FqnProvider;
 import org.eclipse.che.ide.api.selection.SelectionAgent;
@@ -138,6 +143,11 @@ public class CoreGinModule extends AbstractGinModule {
         bind(SelectionAgent.class).to(SelectionAgentImpl.class).asEagerSingleton();
         bind(KeyBindingAgent.class).to(KeyBindingManager.class).in(Singleton.class);
         bind(WorkspaceAgent.class).to(WorkspacePresenter.class).in(Singleton.class);
+
+        // Exec agent
+        bind(ExecAgentCommandManager.class).to(JsonRpcExecAgentCommandManager.class);
+        bind(ExecAgentEventManager.class).to(JsonRpcExecAgentEventManager.class);
+        bind(ConnectedEventHandler.class).asEagerSingleton();
     }
 
     @Provides

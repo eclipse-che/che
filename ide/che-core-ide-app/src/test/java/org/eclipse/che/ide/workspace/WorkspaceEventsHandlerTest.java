@@ -21,6 +21,7 @@ import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.MachineLogMessageDto;
 import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
 import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
+import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessesResponseDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
@@ -34,6 +35,7 @@ import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.dialogs.MessageDialog;
+import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.machine.MachineManager;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -79,6 +81,7 @@ import static org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEven
 import static org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.EventType.STARTING;
 import static org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.EventType.STOPPED;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
@@ -161,14 +164,18 @@ public class WorkspaceEventsHandlerTest {
     @Mock
     private MessageBus                           messageBus;
     @Mock
+    private ExecAgentCommandManager              execAgentCommandManager;
+    @Mock
     private Promise<WorkspaceDto>                workspacePromise;
     @Mock
     private Promise<List<WorkspaceDto>>          workspacesPromise;
 
     @Mock
-    private AsyncRequestFactory                  asyncRequestFactory;
+    private AsyncRequestFactory                    asyncRequestFactory;
     @Mock
-    private LoaderPresenter                      loader;
+    private LoaderPresenter                        loader;
+    @Mock
+    private Promise<List<GetProcessesResponseDto>> promise;
 
     @Captor
     private ArgumentCaptor<Operation<WorkspaceDto>>       workspaceCaptor;
@@ -193,7 +200,8 @@ public class WorkspaceEventsHandlerTest {
                                                             startWorkspaceNotification,
                                                             wsComponentProvider,
                                                             asyncRequestFactory,
-															loader);
+                                                            execAgentCommandManager,
+                                                            loader);
         when(wsComponentProvider.get()).thenReturn(workspaceComponent);
         when(workspace.getId()).thenReturn(WORKSPACE_ID);
         when(workspaceStatusEvent.getWorkspaceId()).thenReturn(WORKSPACE_ID);
@@ -202,6 +210,8 @@ public class WorkspaceEventsHandlerTest {
         when(workspace.getLink(anyString())).thenReturn(workspaceEventsLink);
         when(workspaceEventsLink.getParameter("channel")).thenReturn(linkParameter);
         when(linkParameter.getDefaultValue()).thenReturn(WORKSPACE_STATUS_CHANNEL);
+
+        when(execAgentCommandManager.getProcesses(anyString(), anyBoolean())).thenReturn(promise);
     }
 
     //    @Test disabled because of GWT timer usage
@@ -245,8 +255,6 @@ public class WorkspaceEventsHandlerTest {
         when(workspaceConfig.getEnvironments()).thenReturn(environments);
         MachineConfigDto devMachineConfig = mock(MachineConfigDto.class);
         when(devMachineConfig.getName()).thenReturn(MACHINE_NAME);
-
-        when(machineServiceClient.getProcesses(WORKSPACE_ID, MACHINE_NAME)).thenReturn(processPromise);
 
         workspaceEventsHandler.trackWorkspaceEvents(workspace, callback);
 
@@ -395,11 +403,8 @@ public class WorkspaceEventsHandlerTest {
         MachineConfigDto devMachineConfig = mock(MachineConfigDto.class);
         when(devMachineConfig.getName()).thenReturn(MACHINE_NAME);
 
-        when(machineServiceClient.getProcesses(WORKSPACE_ID, MACHINE_NAME)).thenReturn(processPromise);
-
         workspaceEventsHandler.trackWorkspaceEvents(workspace, callback);
         workspaceEventsHandler.wsAgentLogSubscriptionHandler.onMessageReceived("");
-        verify(processPromise).then(processCaptor.capture());
 
         verify(eventBus).fireEvent(Matchers.<EnvironmentOutputEvent> anyObject());
     }
