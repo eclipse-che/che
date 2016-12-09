@@ -12,7 +12,6 @@ package org.eclipse.che.plugin.languageserver.ide.editor.sync;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.api.languageserver.shared.lsapi.DidChangeTextDocumentParamsDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.PositionDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.RangeDTO;
@@ -51,7 +50,7 @@ class IncrementalTextDocumentSynchronize implements TextDocumentSynchronize {
         if (event.getRemoveCharCount() != 0) {
             endPosition = new TextPosition(startPosition.getLine(), startPosition.getCharacter() + event.getRemoveCharCount());
         } else {
-            endPosition = new TextPosition(startPosition.getLine(), startPosition.getCharacter() + event.getLength());
+            endPosition = new TextPosition(startPosition.getLine(), startPosition.getCharacter());
         }
 
         DidChangeTextDocumentParamsDTO changeDTO = dtoFactory.createDto(DidChangeTextDocumentParamsDTO.class);
