@@ -6,26 +6,10 @@
 # http://www.eclipse.org/legal/epl-v10.html
 
 IMAGE_NAME="eclipse/che-server"
-source $(cd "$(dirname "$0")"; pwd)/../build.include
-
-# grab assembly
 DIR=$(cd "$(dirname "$0")"; pwd)
-if [[ ! -d "${DIR}/../../assembly/assembly-main/target" ]]; then
-  echo "${ERRO}Have you built assembly/assemby-main in ${DIR}/../assembly/assembly-main 'mvn clean install'?"
-  exit 2
-fi
-
-# Use of folder
-ASSEMBLY_DIR=$(echo ${DIR}/../../assembly/assembly-main/target/eclipse-che-*/eclipse-che-*)
-
-# Remove current copy of the assembly if present
-if [[ -d "${DIR}/assembly" ]]; then
-  echo "Remove previous assembly folder"
-  rm -rf ${DIR}/assembly
-fi
-
-# Copy assembly
-cp -r ${ASSEMBLY_DIR} ${DIR}/assembly
+source ${DIR}/../build.include
+BUILD_CONTEXT="${DIR}/../../"
+DOCKERFILE="${DIR}/Dockerfile"
 
 init
 build

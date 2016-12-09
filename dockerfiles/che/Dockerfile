@@ -9,7 +9,7 @@
 #   Codenvy S.A
 #
 # To build it, run in the repository root:
-#  `docker build -t eclipse/che-server .`
+#  `docker build -t eclipse/che-server -f dockerfiles/che/Dockerfile .`
 #
 # To run it:
 #  docker run --net=host \
@@ -38,6 +38,6 @@ RUN echo "http://dl-4.alpinelinux.org/alpine/edge/community" >> /etc/apk/reposit
     rm -rf /tmp/* /var/cache/apk/*
 
 EXPOSE 8000 8080
-COPY entrypoint.sh /entrypoint.sh
-ADD assembly /home/user/che
+COPY dockerfiles/che/entrypoint.sh /entrypoint.sh
+COPY assembly/assembly-main/target/eclipse-che-*/eclipse-che-* /home/user/che/
 ENTRYPOINT ["/entrypoint.sh"]
