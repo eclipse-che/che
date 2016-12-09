@@ -22,7 +22,6 @@ import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.resources.Project;
-import org.eclipse.che.ide.api.resources.marker.Marker;
 import org.eclipse.che.ide.resource.Path;
 
 import java.util.List;
@@ -127,15 +126,15 @@ class ProjectImpl extends ContainerImpl implements Project {
     /** {@inheritDoc} */
     @Override
     public boolean isProblem() {
-        return getMarker(ProblemProjectMarker.PROBLEM_PROJECT).isPresent();
+        return resourceManager.getProblemMarker(this).isPresent();
     }
 
     /** {@inheritDoc} */
     @Override
     public boolean exists() {
-        final Optional<Marker> problemMarker = getMarker(ProblemProjectMarker.PROBLEM_PROJECT);
+        final Optional<ProblemProjectMarker> problemMarker = resourceManager.getProblemMarker(this);
 
-        return !problemMarker.isPresent() || !((ProblemProjectMarker)problemMarker.get()).getProblems().containsKey(FOLDER_NOT_EXISTS_ON_FS);
+        return !problemMarker.isPresent() || !problemMarker.get().getProblems().containsKey(FOLDER_NOT_EXISTS_ON_FS);
     }
 
     /** {@inheritDoc} */

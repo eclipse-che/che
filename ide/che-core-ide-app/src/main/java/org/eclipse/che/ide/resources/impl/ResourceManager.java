@@ -41,7 +41,6 @@ import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.ProjectServiceClient;
 import org.eclipse.che.ide.api.project.QueryExpression;
-import org.eclipse.che.ide.api.project.type.ProjectTypeRegistry;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Folder;
@@ -136,7 +135,6 @@ public final class ResourceManager {
     private final ResourceFactory        resourceFactory;
     private final PromiseProvider        promises;
     private final DtoFactory             dtoFactory;
-    private final ProjectTypeRegistry    typeRegistry;
     private       DevMachine             devMachine;
 
     /**
@@ -164,7 +162,6 @@ public final class ResourceManager {
                            ResourceFactory resourceFactory,
                            PromiseProvider promises,
                            DtoFactory dtoFactory,
-                           ProjectTypeRegistry typeRegistry,
                            ResourceStore store,
                            WsAgentURLModifier urlModifier) {
         this.devMachine = devMachine;
@@ -175,7 +172,6 @@ public final class ResourceManager {
         this.resourceFactory = resourceFactory;
         this.promises = promises;
         this.dtoFactory = dtoFactory;
-        this.typeRegistry = typeRegistry;
         this.store = store;
         this.urlModifier = urlModifier;
 
@@ -208,12 +204,6 @@ public final class ResourceManager {
                     if (Path.valueOf(config.getPath()).segmentCount() == 1) {
                         final Project project = resourceFactory.newProjectImpl(config, ResourceManager.this);
                         store.register(project);
-
-                        final Optional<ProblemProjectMarker> optionalMarker = getProblemMarker(config);
-
-                        if (optionalMarker.isPresent()) {
-                            project.addMarker(optionalMarker.get());
-                        }
 
                         Project[] tmpProjects = copyOf(projects, projects.length + 1);
                         tmpProjects[projects.length] = project;
@@ -410,9 +400,8 @@ public final class ResourceManager {
 
     Promise<Project> createProject(final Project.ProjectRequest createRequest) {
         checkArgument(checkProjectName(createRequest.getBody().getName()), "Invalid project name");
-        checkArgument(typeRegistry.getProjectType(createRequest.getBody().getType()) != null, "Invalid project type");
 
-        final Path path = Path.valueOf(createRequest.getBody().getPath());
+        final Path path = Path.valueOf(createRequest.getBody().getPath()).makeAbsolute();
         return findResource(path, true).thenPromise(new Function<Optional<Resource>, Promise<Project>>() {
             @Override
             public Promise<Project> apply(Optional<Resource> resource) throws FunctionException {
@@ -699,18 +688,6 @@ public final class ResourceManager {
 
                     @Override
                     public void visit(Resource resource) {
-                        if (resource.getResourceType() == PROJECT) {
-                            final Optional<ProjectConfigDto> optionalConfig = findProjectConfigDto(resource.getLocation());
-
-                            if (optionalConfig.isPresent()) {
-                                final Optional<ProblemProjectMarker> optionalMarker = getProblemMarker(optionalConfig.get());
-
-                                if (optionalMarker.isPresent()) {
-                                    resource.addMarker(optionalMarker.get());
-                                }
-                            }
-                        }
-
                         if (size > resources.length - 1) { //check load factor and increase resource array
                             resources = copyOf(resources, resources.length + incStep);
                         }
@@ -956,6 +933,16 @@ public final class ResourceManager {
         }
 
         return of(new ProblemProjectMarker(code2Message));
+    }
+
+    Optional<ProblemProjectMarker> getProblemMarker(Project project) {
+        final Optional<ProjectConfigDto> optionalConfig = findProjectConfigDto(project.getLocation());
+
+        if (optionalConfig.isPresent()) {
+            return getProblemMarker(optionalConfig.get());
+        }
+
+        return absent();
     }
 
     protected Promise<Resource[]> synchronize(final Container container) {
