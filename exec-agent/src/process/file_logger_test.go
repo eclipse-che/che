@@ -102,17 +102,13 @@ func TestLogsAreFlushedOnClose(t *testing.T) {
 		Time: now,
 		Text: "stdout",
 	}
-	if stdout != expectedStdout {
-		t.Fatalf("Expected %v but found %v", expectedStdout, stdout)
-	}
 	expectedStderr := process.LogMessage{
 		Kind: process.StderrKind,
 		Time: now,
 		Text: "stderr",
 	}
-	if stdout != expectedStdout {
-		t.Fatalf("Expected %v but found %v", expectedStderr, stderr)
-	}
+	failIfDifferent(t, expectedStdout, stdout)
+	failIfDifferent(t, expectedStderr, stderr)
 }
 
 func randomName(length int) string {
