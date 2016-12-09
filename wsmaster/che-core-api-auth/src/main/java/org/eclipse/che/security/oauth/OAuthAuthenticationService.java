@@ -40,14 +40,9 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.net.URLDecoder;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -56,6 +51,9 @@ import java.util.Set;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
+import static org.eclipse.che.security.OAuthUtils.getParameter;
+import static org.eclipse.che.security.OAuthUtils.getRequestParameters;
+import static org.eclipse.che.security.OAuthUtils.getRequestUrl;
 
 /** RESTful wrapper for OAuthAuthenticator. */
 @Path("oauth")
@@ -115,7 +113,7 @@ public class OAuthAuthenticationService {
     @Path("callback")
     public Response callback(@QueryParam("errorValues") List<String> errorValues) throws OAuthAuthenticationException, BadRequestException {
         URL requestUrl = getRequestUrl(uriInfo);
-        Map<String, List<String>> params = getRequestParameters(getState(requestUrl));
+        Map<String, List<String>> params = getRequestParameters(requestUrl);
         if (errorValues != null && errorValues.contains("access_denied")) {
             return Response.temporaryRedirect(uriInfo.getRequestUriBuilder().replacePath(errorPage).replaceQuery(null).build()).build();
         }
@@ -200,84 +198,6 @@ public class OAuthAuthenticationService {
         } catch (IOException e) {
             throw new ServerException(e.getMessage());
         }
-    }
-
-    protected URL getRequestUrl(UriInfo uriInfo) {
-        try {
-            return uriInfo.getRequestUri().toURL();
-        } catch (MalformedURLException e) {
-            // should never happen
-            throw new RuntimeException(e.getMessage(), e);
-        }
-    }
-
-    /**
-     * OAuth 2.0 support pass query parameters 'state' to OAuth authorization server. Authorization server sends it
-     * back
-     * to callback URL. Here restore all parameters specified in initial request to {@link * #authenticate} .
-     *
-     * @param state
-     *         query parameter state
-     * @return map contains request parameters to method {@link #authenticate}
-     */
-    protected Map<String, List<String>> getRequestParameters(String state) {
-        Map<String, List<String>> params = new HashMap<>();
-        if (!(state == null || state.isEmpty())) {
-            String decodedState;
-            try {
-                decodedState = URLDecoder.decode(state, "UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                // should never happen, UTF-8 supported.
-                throw new RuntimeException(e.getMessage(), e);
-            }
-
-            for (String pair : decodedState.split("&")) {
-                if (!pair.isEmpty()) {
-                    String name;
-                    String value;
-                    int eq = pair.indexOf('=');
-                    if (eq < 0) {
-                        name = pair;
-                        value = "";
-                    } else {
-                        name = pair.substring(0, eq);
-                        value = pair.substring(eq + 1);
-                    }
-
-                    List<String> paramValues = params.get(name);
-                    if (paramValues == null) {
-                        paramValues = new ArrayList<>();
-                        params.put(name, paramValues);
-                    }
-                    paramValues.add(value);
-                }
-            }
-        }
-        return params;
-    }
-
-    protected String getState(URL requestUrl) {
-        final String query = requestUrl.getQuery();
-        if (!(query == null || query.isEmpty())) {
-            int start = query.indexOf("state=");
-            if (start < 0) {
-                return null;
-            }
-            int end = query.indexOf('&', start);
-            if (end < 0) {
-                end = query.length();
-            }
-            return query.substring(start + 6, end);
-        }
-        return null;
-    }
-
-    protected String getParameter(Map<String, List<String>> params, String name) {
-        List<String> l = params.get(name);
-        if (!(l == null || l.isEmpty())) {
-            return l.get(0);
-        }
-        return null;
     }
 
     protected OAuthAuthenticator getAuthenticator(String oauthProviderName) throws BadRequestException {
