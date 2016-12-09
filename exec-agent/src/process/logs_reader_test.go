@@ -53,8 +53,12 @@ func TestReadLogs(t *testing.T) {
 		{Kind: process.StderrKind, Time: now.Add(time.Second * 4), Text: "line4"},
 	}
 	for i := 0; i < len(logs); i++ {
-		if *logs[i] != expected[i] {
-			t.Fatalf("Expected: '%v' Found '%v'", expected[i], *logs[i])
-		}
+		failIfDifferent(t, *logs[i], expected[i])
+	}
+}
+
+func failIfDifferent(t *testing.T, expected process.LogMessage, actual process.LogMessage) {
+	if expected.Kind != actual.Kind || expected.Text != actual.Text || expected.Time.Unix() != actual.Time.Unix() {
+		t.Fatalf("Expected: '%v' Found '%v'", expected, actual)
 	}
 }
