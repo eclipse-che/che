@@ -17,11 +17,6 @@ package org.eclipse.che.api.machine.server.spi;
  */
 public interface InstanceNode {
     /**
-     * Get path of folder on machine node with workspace fs
-     */
-    String getProjectsFolder();
-
-    /**
      * Host of the server where machine is launched
      */
     String getHost();
