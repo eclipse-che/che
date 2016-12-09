@@ -251,16 +251,11 @@ check_docker_networking() {
   export no_proxy=$NO_PROXY
 }
 
-check_tty() {
+check_interactive() {
+
   # Detect and verify that the CLI container was started with -it option.
-  if [[ ! -t 1 ]]; then
-    info "Welcome to ${CHE_FORMAL_PRODUCT_NAME}!"
-    info ""
-    info "We did not detect a valid TTY."
-    info ""
-    info "TTY Syntax:"
-    info "    Add '-it' to your 'docker run' command."
-    return 2
+  if [ ! -t 1 ]; then
+    warning "Did not detect TTY - interactive mode disabled"
   fi
 }
 

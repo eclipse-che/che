@@ -230,8 +230,8 @@ init() {
   # Check to see if Docker is configured with a proxy and pull values
   check_docker_networking
 
-  # Verify that -it is passed on the command line
-  check_tty
+  # Verify that -i is passed on the command line
+  check_interactive "$@"
 
   # Only verify mounts after Docker is confirmed to be working.
   check_mounts "$@"
