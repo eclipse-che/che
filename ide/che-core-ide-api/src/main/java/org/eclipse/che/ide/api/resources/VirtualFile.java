@@ -33,20 +33,8 @@ public interface VirtualFile {
      * Path should always be non-null or non-empty.
      *
      * @return non-null unique path.
-     * @deprecated use {@link #getLocation()}
-     */
-    @Deprecated
-    String getPath();
-
-    /**
-     * Returns path for the virtual file. Path may in various representation based on implementation.
-     * Usually it something like physical file or folder path, e.g. `/path/to/som/file`.
-     * Path should always be non-null or non-empty.
-     *
-     * @return non-null unique path.
      * @since 4.4.0
      */
-    @Beta
     Path getLocation();
 
     /**

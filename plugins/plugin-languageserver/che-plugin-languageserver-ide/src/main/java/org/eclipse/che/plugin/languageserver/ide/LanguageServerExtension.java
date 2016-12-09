@@ -137,14 +137,14 @@ public class LanguageServerExtension {
             @Override
             public void apply(String text) throws OperationException {
                 TextDocumentItemDTO documentItem = dtoFactory.createDto(TextDocumentItemDTO.class);
-                documentItem.setUri(event.getFile().getPath());
+                documentItem.setUri(event.getFile().getLocation().toString());
                 documentItem.setVersion(LanguageServerEditorConfiguration.INITIAL_DOCUMENT_VERSION);
                 documentItem.setText(text);
                 documentItem.setLanguageId(fileTypeRegister.findLangId(event.getFile().getLocation().getFileExtension()));
 
                 DidOpenTextDocumentParamsDTO openEvent = dtoFactory.createDto(DidOpenTextDocumentParamsDTO.class);
                 openEvent.setTextDocument(documentItem);
-                openEvent.setUri(event.getFile().getPath());
+                openEvent.setUri(event.getFile().getLocation().toString());
                 openEvent.setText(text);
 
                 serviceClient.didOpen(openEvent);

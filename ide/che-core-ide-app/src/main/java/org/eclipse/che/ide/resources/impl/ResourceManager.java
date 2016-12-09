@@ -890,8 +890,8 @@ public final class ResourceManager {
         File file = (File)resource;
 
         for (EditorPartPresenter editor : editorAgent.getOpenedEditors()) {
-            String editorPath = editor.getEditorInput().getFile().getLocation().toString();
-            if (editorPath.equals(file.getPath())) {
+            Path editorPath = editor.getEditorInput().getFile().getLocation();
+            if (editorPath.equals(file.getLocation())) {
                 return true;
             }
         }

@@ -179,7 +179,7 @@ public class DebuggerTest extends BaseTest {
         doReturn(DEBUG_INFO).when(localStorage).getItem(AbstractDebugger.LOCAL_STORAGE_DEBUGGER_SESSION_KEY);
         doReturn(debugSessionDto).when(dtoFactory).createDtoFromJson(anyString(), eq(DebugSessionDto.class));
 
-        doReturn(PATH).when(file).getPath();
+        doReturn(Path.valueOf(PATH)).when(file).getLocation();
 
         debugger = new TestDebugger(service, dtoFactory, localStorageProvider, messageBusProvider, eventBus,
                                     activeFileHandler, debuggerManager, notificationManager, "id");

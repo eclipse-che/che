@@ -107,7 +107,7 @@ public class ClassFileSourcesDownloader implements EditorOpenedEventHandler {
     }
 
     private void downloadSources(JarFileNode jarFileNode, final HasNotificationPanel.NotificationRemover remover) {
-        final String path = jarFileNode.getPath();
+        final String path = jarFileNode.getLocation().toString();
         Promise<Boolean> promise = client.downloadSources(jarFileNode.getProjectLocation().toString(), path);
         promise.then(new Operation<Boolean>() {
             @Override

@@ -125,7 +125,7 @@ public class LanguageServerFormatter implements ContentFormatter {
         DocumentFormattingParamsDTO params = dtoFactory.createDto(DocumentFormattingParamsDTO.class);
 
         TextDocumentIdentifierDTO identifier = dtoFactory.createDto(TextDocumentIdentifierDTO.class);
-        identifier.setUri(document.getFile().getPath());
+        identifier.setUri(document.getFile().getLocation().toString());
 
         params.setTextDocument(identifier);
         params.setOptions(getFormattingOptions());
@@ -189,7 +189,7 @@ public class LanguageServerFormatter implements ContentFormatter {
         DocumentRangeFormattingParamsDTO params = dtoFactory.createDto(DocumentRangeFormattingParamsDTO.class);
 
         TextDocumentIdentifierDTO identifier = dtoFactory.createDto(TextDocumentIdentifierDTO.class);
-        identifier.setUri(document.getFile().getPath());
+        identifier.setUri(document.getFile().getLocation().toString());
 
         params.setTextDocument(identifier);
         params.setOptions(getFormattingOptions());
