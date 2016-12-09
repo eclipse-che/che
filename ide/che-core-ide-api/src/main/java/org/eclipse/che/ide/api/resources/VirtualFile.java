@@ -71,7 +71,9 @@ public interface VirtualFile {
      * don't have media type.
      *
      * @return media type or null.
+     * @deprecated this method is going to be removed soon, because we don't use media type for any purposes
      */
+    @Deprecated
     String getMediaType();
 
     /**
