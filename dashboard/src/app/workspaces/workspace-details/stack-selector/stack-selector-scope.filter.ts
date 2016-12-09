@@ -9,38 +9,36 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
-import {StackSelectorScope, IStackSelectorItem} from './stack-selector.controller';
+import {StackSelectorScope} from './stack-selector-scope.enum';
 
+/**
+ * Returns stacks list which belongs to one of specified scope.
+ *
+ * @author Oleksii Kurinnyi
+ */
 export class StackSelectorScopeFilter {
 
   constructor(register: che.IRegisterService) {
     // register this factory
     register.filter('stackScopeFilter', () => {
-      return (stacksList: IStackSelectorItem[], scope: number) => {
+      return (stacksList: che.IStack[], scope: number, stackMachines: {[stackId: string]: any[]}) => {
 
-        if (scope === StackSelectorScope.ALL) {
-          return angular.copy(stacksList);
+        switch (scope) {
+          case StackSelectorScope.QUICK_START:
+            return stacksList.filter((stack: che.IStack) => {
+              return stack.scope === 'general';
+            });
+          case StackSelectorScope.SINGLE_MACHINE:
+            return stacksList.filter((stack: che.IStack) => {
+              return stackMachines[stack.id].length === 1;
+            });
+          case StackSelectorScope.MULTI_MACHINE:
+            return stacksList.filter((stack: che.IStack) => {
+              return stackMachines[stack.id].length > 1;
+            });
+          default:
+            return angular.copy(stacksList);
         }
-
-        if (scope === StackSelectorScope.QUICK_START) {
-          return stacksList.filter((stack: IStackSelectorItem) => {
-            return stack.scope === 'general';
-          });
-        }
-
-        if (scope === StackSelectorScope.SINGLE_MACHINE) {
-          return stacksList.filter((stack: IStackSelectorItem) => {
-            return stack.isMultiMachine === false;
-          });
-        }
-
-        if (scope === StackSelectorScope.MULTI_MACHINE) {
-          return stacksList.filter((stack: IStackSelectorItem) => {
-            return stack.isMultiMachine === true;
-          });
-        }
-
-        return stacksList;
       };
     });
   }

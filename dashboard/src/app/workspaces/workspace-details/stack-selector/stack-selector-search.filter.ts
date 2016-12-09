@@ -11,7 +11,9 @@
 'use strict';
 
 /**
- * Returns stacks which contain search
+ * Returns stacks which contain given substring in title, description, tags or components.
+ *
+ * @author Oleksii Kurinnyi
  */
 export class StackSelectorSearchFilter {
 

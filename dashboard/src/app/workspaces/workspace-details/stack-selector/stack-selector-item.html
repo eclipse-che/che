@@ -53,7 +53,7 @@
           <!-- RAM -->
           <div flex="10">
             <span class="stack-selector-item-secondary-color"
-                  ng-if="stackMachines.length === 1">{{stackMachines[0].memoryLimitGB}}&nbsp;GB</span>
+                  ng-if="stackMachines.length === 1">{{stackMachines[0].memoryLimitBytes | changeUnit:['B','GB']}}</span>
           </div>
 
           <!-- todo Pull number -->
@@ -74,7 +74,7 @@
                  class="stack-selector-item-machine-name">{{machine.name}}
             </div>
             <div flex="10"
-                 class="stack-selector-item-secondary-color">{{machine.memoryLimitGB}}&nbsp;GB</div>
+                 class="stack-selector-item-secondary-color">{{machine.memoryLimitBytes | changeUnit:['B','GB']}}</div>
           </div>
         </div>
 

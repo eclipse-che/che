@@ -12,17 +12,7 @@
 import {CheStack} from '../../../../components/api/che-stack.factory';
 import {CheEnvironmentRegistry} from '../../../../components/api/environment/che-environment-registry.factory';
 import {EnvironmentManager} from '../../../../components/api/environment/environment-manager';
-
-export interface IStackSelectorItem extends che.IStack {
-  isMultiMachine: boolean;
-}
-
-export enum StackSelectorScope {
-  ALL = 1,
-  QUICK_START,
-  SINGLE_MACHINE,
-  MULTI_MACHINE
-}
+import {StackSelectorScope} from './stack-selector-scope.enum';
 
 /**
  * @ngdoc controller
@@ -100,7 +90,7 @@ export class StackSelectorController {
    * Get stack icons.
    */
   updateStacks(): void {
-    this.stacks.forEach((stack: IStackSelectorItem) => {
+    this.stacks.forEach((stack: che.IStack) => {
       // get icon link
       let findLink = this.lodash.find(stack.links, (link: che.IStackLink) => {
         return link.rel === 'get icon link';
@@ -116,15 +106,11 @@ export class StackSelectorController {
           machines = environmentManager.getMachines(environment);
       this.stackMachines[stack.id] = [];
       machines.forEach((machine: any) => {
-        let memoryLimitGB = this.memoryToGB(environmentManager.getMemoryLimit(machine));
         this.stackMachines[stack.id].push({
           name: machine.name,
-          memoryLimitGB: memoryLimitGB
+          memoryLimitBytes: environmentManager.getMemoryLimit(machine)
         });
       });
-
-      // set multi machine field
-      stack.isMultiMachine = machines.length > 1;
     });
   }
 
@@ -140,19 +126,6 @@ export class StackSelectorController {
     }
 
     return this.environmentManagers[recipeType];
-  }
-
-  /**
-   * Cast bytes to GB.
-   *
-   * @param memoryLimitBytes {number} memory limit in bytes
-   * @return {number}
-   */
-  memoryToGB(memoryLimitBytes: number): number {
-    let memoryLimitGB = memoryLimitBytes / Math.pow(1024, 3),
-        tempValue = memoryLimitGB * 10,
-        roundedTempValue = Math.round(tempValue);
-    return roundedTempValue / 10;
   }
 
   /**
@@ -186,7 +159,7 @@ export class StackSelectorController {
    */
   buildFilteredList(): void {
     this.stacksFiltered.length = 0;
-    this.stacksFiltered = this.$filter('stackScopeFilter')(this.stacks, this.selectedScope);
+    this.stacksFiltered = this.$filter('stackScopeFilter')(this.stacks, this.selectedScope, this.stackMachines);
     this.stacksFiltered = this.$filter('stackSearchFilter')(this.stacksFiltered, this.searchString);
     this.stacksFiltered = this.$filter('orderBy')(this.stacksFiltered, this.stackOrderBy);
 
