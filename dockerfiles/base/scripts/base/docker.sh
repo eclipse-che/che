@@ -171,6 +171,12 @@ check_docker() {
     return 1;
   fi
 
+  CHECK_VERSION=$(docker ps 2>&1 || true)
+  if [[ "$CHECK_VERSION" = *"Error response from daemon: client is newer"* ]]; then
+    error "Error - Docker engine 1.10+ required."
+    return 2;
+  fi
+
   # If DOCKER_HOST is not set, then it should bind mounted
   if [ -z "${DOCKER_HOST+x}" ]; then
     if ! docker ps > /dev/null 2>&1; then
@@ -187,17 +193,6 @@ check_docker() {
       info "   Start with 'docker run -it --rm -e DOCKER_HOST=<daemon-location> ...'"
       return 2;
     fi
-  fi
-
-  DOCKER_VERSION=($(docker version |  grep  "Version:" | sed 's/Version://'))
-  MAJOR_VERSION_ID=$(echo ${DOCKER_VERSION[0]:0:1})
-  MINOR_VERSION_ID=$(echo ${DOCKER_VERSION[0]:2:2})
-
-  # Docker needs to be greater than or equal to 1.11
-  if [[ ${MAJOR_VERSION_ID} -lt 1 ]] ||
-     [[ ${MINOR_VERSION_ID} -lt 10 ]]; then
-       error "Error - Docker engine 1.10+ required."
-       return 2;
   fi
 
   # Detect version so that we can provide better error warnings
