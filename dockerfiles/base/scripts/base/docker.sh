@@ -247,7 +247,6 @@ check_docker_networking() {
 }
 
 check_interactive() {
-
   # Detect and verify that the CLI container was started with -it option.
   if [ ! -t 1 ]; then
     warning "Did not detect TTY - interactive mode disabled"
@@ -255,7 +254,6 @@ check_interactive() {
 }
 
 check_mounts() {
-
   DATA_MOUNT=$(get_container_folder ":${CHE_CONTAINER_ROOT}")
   INSTANCE_MOUNT=$(get_container_folder ":${CHE_CONTAINER_ROOT}/instance")
   BACKUP_MOUNT=$(get_container_folder ":${CHE_CONTAINER_ROOT}/backup")
