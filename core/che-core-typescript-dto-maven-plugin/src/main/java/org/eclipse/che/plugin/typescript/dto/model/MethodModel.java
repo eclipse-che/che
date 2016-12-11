@@ -12,9 +12,11 @@ package org.eclipse.che.plugin.typescript.dto.model;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import static java.util.Objects.hash;
 import static org.eclipse.che.plugin.typescript.dto.DTOHelper.convertType;
 
 /**
@@ -142,5 +144,22 @@ public class MethodModel {
 
     public String getFieldType() {
         return fieldType;
+    }
+
+    public int hashCode() {
+        return hash(this.parameters.toString(), this.returnType);
+    }
+
+    public boolean equals(Object other) {
+        if (other == null) {
+            return false;
+        }
+        if (!(other instanceof MethodModel)) {
+            return false;
+        }
+        MethodModel methodModelOther = (MethodModel) other;
+        return this.getName().equals(methodModelOther.getName())
+               && this.returnType.equals(methodModelOther.returnType)
+               && Arrays.equals(this.parameters.toArray(), methodModelOther.parameters.toArray());
     }
 }

@@ -10,15 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.typescript.dto;
 
-import org.eclipse.che.dto.shared.DTO;
-
 /**
  * @author Florent Benoit
  */
-@DTO
-public interface MyOtherDTO extends MySuperClassDTO, MySuperSuperClass {
+public interface MySuperSuperClass {
 
-    void setName(String name);
-    MyOtherDTO withName(String name);
+    String getName();
 
 }
