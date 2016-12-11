@@ -75,13 +75,17 @@ public class DtoModel {
               .filter(method -> !method.isBridge() && (isDtoGetter(method) || isDtoSetter(method) || isDtoWith(method)))
               .forEach(method -> {
                   MethodModel methodModel = new MethodModel(method);
-                  methods.add(methodModel);
-                  if (isDtoGetter(method)) {
-                      analyzeDtoGetterMethod(method, methodModel);
-                  } else if (isDtoSetter(method)) {
-                      analyzeDtoSetterMethod(method, methodModel);
-                  } else if (isDtoWith(method)) {
-                      analyzeDtoWithMethod(method, methodModel);
+
+                  // check method with same name already exist
+                  if (!methods.contains(methodModel)) {
+                      methods.add(methodModel);
+                      if (isDtoGetter(method)) {
+                          analyzeDtoGetterMethod(method, methodModel);
+                      } else if (isDtoSetter(method)) {
+                          analyzeDtoSetterMethod(method, methodModel);
+                      } else if (isDtoWith(method)) {
+                          analyzeDtoWithMethod(method, methodModel);
+                      }
                   }
               });
 
