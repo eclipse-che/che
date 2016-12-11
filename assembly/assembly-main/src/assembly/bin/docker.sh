@@ -153,7 +153,12 @@ get_che_server_container_id() {
   # Returning `hostname` doesn't work when running Che on OpenShift/Kubernetes.
   # In these cases `hostname` correspond to the pod ID that is different from
   # the container ID
-  hostname
+
+  if [[ -z "${KUBERNETES_SERVICE_HOST+x}" ]]; then
+    hostname
+  else
+    docker ps | grep -v POD | grep $HOSTNAME | awk '{print $NF}'
+  fi
 }
 
 get_docker_host_ip() {
