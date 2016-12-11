@@ -28,6 +28,6 @@
     "istanbul": "^0.4.5",
     "mocha": "^2.2.32",
     "remap-istanbul": "^0.6.4",
-    "typescript": "^2.0.3"
+    "typescript": "2.1.4"
   }
 }
