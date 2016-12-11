@@ -16,21 +16,15 @@ if [ ! -d "${DIR}/../../assembly/assembly-main/target" ]; then
 fi
 
 # Use of folder
-ASSEMBLY_DIR=$(echo ${DIR}/../../assembly/assembly-main/target/eclipse-che-*/eclipse-che-*)
-LOCAL_ASSEMBLY=${DIR}/assembly
+BUILD_ASSEMBLY_ZIP=$(echo ${DIR}/../../assembly/assembly-main/target/eclipse-che-*.tar.gz)
+LOCAL_ASSEMBLY_ZIP=${DIR}/eclipse-che.tar.gz
 
-if [ -d "${DIR}/assembly" ]; then
-  if [ ${ASSEMBLY_DIR} -nt ${DIR}/assembly ]; then
-    echo "There is new version of che-assembly, need to copy again"
-    rm -rf ${LOCAL_ASSEMBLY}
-    cp -r ${ASSEMBLY_DIR} ${LOCAL_ASSEMBLY}
-  else
-    echo "Copy of current assembly is up-to-date, skip copy."
-  fi
-  else
-    echo "Copying assembly file"
-    cp -r ${ASSEMBLY_DIR} ${LOCAL_ASSEMBLY}
+if [ -f "${LOCAL_ASSEMBLY_ZIP}" ]; then
+  rm ${LOCAL_ASSEMBLY_ZIP}
 fi
+
+echo "Linking assembly ${BUILD_ASSEMBLY_ZIP} --> ${LOCAL_ASSEMBLY_ZIP}"
+ln ${BUILD_ASSEMBLY_ZIP} ${LOCAL_ASSEMBLY_ZIP}
 
 init
 build

@@ -62,27 +62,6 @@ Variables:
   DEFAULT_CHE_DEBUG_SERVER=false
   CHE_DEBUG_SERVER=${CHE_DEBUG_SERVER:-${DEFAULT_CHE_DEBUG_SERVER}}
 
-  DEFAULT_CHE_HOME=$(get_default_che_home)
-  export CHE_HOME=${CHE_HOME:-${DEFAULT_CHE_HOME}}
-
-  DEFAULT_CHE_DATA=$(get_default_che_data)
-  export CHE_DATA=${CHE_DATA:-${DEFAULT_CHE_DATA}}
-}
-
-get_default_che_home () {
-  # The base directory of Che
-  if [ -z "${CHE_HOME}" ]; then
-    echo "$(dirname "$(cd "$(dirname "${0}")" && pwd -P)")"
-  else
-    echo "/home/user/che"
-  fi
-}
-
-get_default_che_data () {
-  # The base directory of Che
-  if [ -z "${CHE_DATA}" ]; then
-    echo "/data"
-  fi
 }
 
 error () {
@@ -226,12 +205,12 @@ init() {
   ### Any variables with export is a value that native Tomcat che.sh startup script requires
   export CHE_IP=${CHE_IP}
 
-  if [ -f "/assembly/bin/che.sh" ]; then
+  if [ -f "/assembly/conf/che.properties" ]; then
     echo "Found custom assembly..."
     export CHE_HOME="/assembly"
   else
     echo "Using embedded assembly..."
-    export CHE_HOME="/home/user/che"
+    export CHE_HOME=$(echo /home/user/eclipse-che-*)
   fi
 
   ### Are we using the included assembly or did user provide their own?
@@ -302,7 +281,7 @@ init() {
 }
 
 get_che_data_from_host() {
-  DEFAULT_DATA_HOST_PATH=/home/user/che
+  DEFAULT_DATA_HOST_PATH=/data
   CHE_SERVER_CONTAINER_ID=$(get_che_server_container_id)
   # If `docker inspect` fails $DEFAULT_DATA_HOST_PATH is returned
   echo $(docker inspect --format='{{(index .Volumes "/data")}}' $CHE_SERVER_CONTAINER_ID 2>/dev/null || echo $DEFAULT_DATA_HOST_PATH)
