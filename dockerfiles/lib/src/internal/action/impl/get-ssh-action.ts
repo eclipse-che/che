@@ -61,10 +61,8 @@ export class GetSshDataAction {
     run() : Promise<any> {
         // first, login
         return this.authData.login().then(() => {
-
             let foundWorkspaceDTO : org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 
-            // then, search workspace
             return this.workspace.searchWorkspace(this.workspaceName).then((workspaceDto) => {
 
                 // check status
@@ -82,7 +80,7 @@ export class GetSshDataAction {
 
                 foundWorkspaceDTO = workspaceDto;
 
-            }).then((sshPairDto : org.eclipse.che.api.ssh.shared.dto.SshPairDto) => {
+            }).then((workspaceDto) => {
 
                 // need to get ssh key for the workspace
                 let ssh:Ssh = new Ssh(this.authData);
