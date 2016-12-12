@@ -8,7 +8,7 @@
 #   Dharmit Shah  - Initial implementation
 #   Mario Loriedo - Improvements
 #
-# To build it, run in the repository root:
+# To build it, run in the current folder after executing build.sh:
 #  `docker build -t registry.centos.org/eclipse/che-server -f Dockerfile.centos .`
 #
 # To run it:
@@ -34,20 +34,12 @@ RUN yum -y update && \
     curl -sSL "https://${DOCKER_BUCKET}/builds/Linux/x86_64/docker-${DOCKER_VERSION}" -o /usr/bin/docker && \
     chmod +x /usr/bin/docker && \
     yum -y remove openssl && \
-    yum clean all
-RUN useradd user -d /home/user -s /bin/bash -u 1000 -G root && \
-    groupadd docker -g 101 && \
-    usermod -aG ftp,users,docker user && \
+    yum clean all && \
     echo "%root ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
     sed -i 's/Defaults    requiretty/#Defaults    requiretty/g' /etc/sudoers && \
     rm -rf /tmp/* /var/cache/yum
 
 EXPOSE 8000 8080
-
-USER user
-
-ADD assembly/assembly-main/target/eclipse-che-*/eclipse-che-* /home/user/che/
-
-ENTRYPOINT [ "/home/user/che/bin/che.sh", "-c" ]
-
-CMD [ "run" ]
+COPY entrypoint.sh /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
+ADD eclipse-che.tar.gz /home/user/
