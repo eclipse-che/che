@@ -61,6 +61,24 @@ init_constants() {
 
   DEFAULT_CHE_IMAGE_FULLNAME="eclipse/che-cli:<version>"
   CHE_IMAGE_FULLNAME=${CHE_IMAGE_FULLNAME:-${DEFAULT_CHE_IMAGE_FULLNAME}}
+
+  # Constants
+  CHE_MANIFEST_DIR="/version"
+  CHE_VERSION_FILE="${CHE_MINI_PRODUCT_NAME}.ver.do_not_modify"
+  CHE_ENVIRONMENT_FILE="${CHE_MINI_PRODUCT_NAME}.env"
+  CHE_COMPOSE_FILE="docker-compose-container.yml"
+
+  DEFAULT_CHE_SERVER_CONTAINER_NAME="${CHE_MINI_PRODUCT_NAME}"
+  CHE_SERVER_CONTAINER_NAME="${CHE_SERVER_CONTAINER_NAME:-${DEFAULT_CHE_SERVER_CONTAINER_NAME}}"
+
+  CHE_BACKUP_FILE_NAME="${CHE_MINI_PRODUCT_NAME}_backup.tar.gz"
+  CHE_COMPOSE_STOP_TIMEOUT="180"
+
+  DEFAULT_CHE_CLI_ACTION="help"
+  CHE_CLI_ACTION=${CHE_CLI_ACTION:-${DEFAULT_CHE_CLI_ACTION}}
+
+  DEFAULT_CHE_LICENSE=false
+  CHE_LICENSE=${CHE_LICENSE:-${DEFAULT_CHE_LICENSE}}
 }
 
 
@@ -230,8 +248,8 @@ init() {
   # Check to see if Docker is configured with a proxy and pull values
   check_docker_networking
 
-  # Verify that -it is passed on the command line
-  check_tty
+  # Verify that -i is passed on the command line
+  check_interactive "$@"
 
   # Only verify mounts after Docker is confirmed to be working.
   check_mounts "$@"
@@ -258,6 +276,68 @@ init() {
   done
 
   source "${SCRIPTS_CONTAINER_SOURCE_DIR}"/cli.sh
+
+  # If offline mode, then load dependent images from disk and populate the local Docker cache.
+  # If not in offline mode, verify that we have access to DockerHub.
+  initiate_offline_or_network_mode "$@"
+
+  # Pull the list of images that are necessary. If in offline mode, verifies that the images
+  # are properly loaded into the cache.
+  grab_initial_images
+}
+
+cli_init() {
+  CHE_HOST=$(eval "echo \$${CHE_PRODUCT_NAME}_HOST")
+  CHE_PORT=$(eval "echo \$${CHE_PRODUCT_NAME}_PORT")
+
+  if [[ "$(eval "echo \$${CHE_PRODUCT_NAME}_HOST")" = "" ]]; then
+    info "Welcome to $CHE_FORMAL_PRODUCT_NAME!"
+    info ""
+    info "We did not auto-detect a valid HOST or IP address."
+    info "Pass ${CHE_PRODUCT_NAME}_HOST with your hostname or IP address."
+    info ""
+    info "Rerun the CLI:"
+    info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock"
+    info "                      -v <local-path>:${CHE_CONTAINER_ROOT}"
+    info "                      -e ${CHE_PRODUCT_NAME}_HOST=<your-ip-or-host>"
+    info "                         $CHE_IMAGE_FULLNAME $*"
+    return 2;
+  fi
+
+  # Derived variablea
+  REFERENCE_HOST_ENVIRONMENT_FILE="${CHE_HOST_CONFIG}/${CHE_ENVIRONMENT_FILE}"
+  REFERENCE_HOST_COMPOSE_FILE="${CHE_HOST_INSTANCE}/${CHE_COMPOSE_FILE}"
+  REFERENCE_CONTAINER_ENVIRONMENT_FILE="${CHE_CONTAINER_CONFIG}/${CHE_ENVIRONMENT_FILE}"
+  REFERENCE_CONTAINER_COMPOSE_FILE="${CHE_CONTAINER_INSTANCE}/${CHE_COMPOSE_FILE}"
+
+  CHE_CONTAINER_OFFLINE_FOLDER="/${CHE_CONTAINER_INSTANCE}/backup"
+  CHE_HOST_OFFLINE_FOLDER="${CHE_HOST_INSTANCE}/backup"
+
+  CHE_HOST_CONFIG_MANIFESTS_FOLDER="${CHE_HOST_INSTANCE}/manifests"
+  CHE_CONTAINER_CONFIG_MANIFESTS_FOLDER="${CHE_CONTAINER_INSTANCE}/manifests"
+
+  CHE_HOST_CONFIG_MODULES_FOLDER="${CHE_HOST_INSTANCE}/modules"
+  CHE_CONTAINER_CONFIG_MODULES_FOLDER="${CHE_CONTAINER_INSTANCE}/modules"
+
+  # TODO: Change this to use the current folder or perhaps ~?
+  if is_boot2docker && has_docker_for_windows_client; then
+    if [[ "${CHE_HOST_INSTANCE,,}" != *"${USERPROFILE,,}"* ]]; then
+      CHE_HOST_INSTANCE=$(get_mount_path "${USERPROFILE}/.${CHE_MINI_PRODUCT_NAME}/")
+      warning "Boot2docker for Windows - CHE_INSTANCE set to $CHE_HOST_INSTANCE"
+    fi
+    if [[ "${CHE_HOST_CONFIG,,}" != *"${USERPROFILE,,}"* ]]; then
+      CHE_HOST_CONFIG=$(get_mount_path "${USERPROFILE}/.${CHE_MINI_PRODUCT_NAME}/")
+      warning "Boot2docker for Windows - CHE_CONFIG set to $CHE_HOST_CONFIG"
+    fi
+  fi
+
+  # Do not perform a version compatibility check if running upgrade command.
+  # The upgrade command has its own internal checks for version compatibility.
+  if [ $1 != "upgrade" ]; then
+    verify_version_compatibility
+  else
+    verify_version_upgrade_compatibility
+  fi
 }
 
 cleanup() {
@@ -281,8 +361,10 @@ start() {
 
   # The pre_init method is unique to each assembly. This method must be provided by 
   # a custom CLI assembly in their container and can set global variables which are 
-  # specific to that implementation of the CLI.
+  # specific to that implementation of the CLI. This method must be called after
+  # networking has been established and initial images downloaded.
   cli_pre_init
+
   cli_init "$@"
   cli_parse "$@"
   cli_execute "$@"
