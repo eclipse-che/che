@@ -35,15 +35,9 @@ cli_parse () {
 }
 
 
-cmd_init_reinit_pre_action() {
-    sed -i'.bak' "s|#CHE_HOST=.*|CHE_HOST=${CHE_HOST}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
-}
-
-
 get_boot_url() {
   echo "$CHE_HOST:$CHE_PORT/api/"
 }
-
 
 get_display_url() {
   if ! is_docker_for_mac; then
