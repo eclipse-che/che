@@ -8,17 +8,18 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.typescript.dto;
+package org.eclipse.che.ide.resources;
 
-import org.eclipse.che.dto.shared.DTO;
+import com.google.gwt.core.client.Callback;
+
+import org.eclipse.che.ide.resources.impl.ResourceManager;
 
 /**
- * @author Florent Benoit
+ * Initializes the {@link ResourceManager} instance.
+ *
+ * @author Vlad Zhukovskyi
+ * @since 5.0.0
  */
-@DTO
-public interface MyOtherDTO extends MySuperClassDTO, MySuperSuperClass {
-
-    void setName(String name);
-    MyOtherDTO withName(String name);
-
+public interface ResourceManagerInitializer {
+    void initResourceManager(Callback<ResourceManager, Exception> callback);
 }

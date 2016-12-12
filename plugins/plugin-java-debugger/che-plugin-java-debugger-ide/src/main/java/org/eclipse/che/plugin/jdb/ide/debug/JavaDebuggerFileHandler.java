@@ -74,7 +74,7 @@ public class JavaDebuggerFileHandler implements ActiveFileHandler {
         final EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
         if (activeEditor != null) {
             activeFile = editorAgent.getActiveEditor().getEditorInput().getFile();
-            activePath = activeFile.getPath();
+            activePath = activeFile.getLocation().toString();
         }
         if (activePath != null && !activePath.equals(location.getTarget()) && !activePath.equals(location.getResourcePath())) {
             if (location.isExternalResource()) {

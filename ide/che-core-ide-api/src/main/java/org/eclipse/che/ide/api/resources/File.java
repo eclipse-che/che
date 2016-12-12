@@ -32,10 +32,6 @@ import org.eclipse.che.ide.resource.Path;
 @Beta
 public interface File extends Resource, VirtualFile, ModificationTracker {
 
-    /** @see VirtualFile#getPath() */
-    @Override
-    String getPath();
-
     /** @see VirtualFile#getDisplayName() */
     @Override
     String getDisplayName();

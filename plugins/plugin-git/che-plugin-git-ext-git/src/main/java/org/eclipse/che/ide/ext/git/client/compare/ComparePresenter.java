@@ -157,7 +157,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
                             parent.get().synchronize();
                         }
 
-                        eventBus.fireEvent(new FileContentUpdateEvent(comparedFile.getPath()));
+                        eventBus.fireEvent(new FileContentUpdateEvent(comparedFile.getLocation().toString()));
                         view.hide();
                     }
                 });

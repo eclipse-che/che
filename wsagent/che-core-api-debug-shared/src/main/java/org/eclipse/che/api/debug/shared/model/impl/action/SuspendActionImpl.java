@@ -8,17 +8,15 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.typescript.dto;
+package org.eclipse.che.api.debug.shared.model.impl.action;
 
-import org.eclipse.che.dto.shared.DTO;
+import org.eclipse.che.api.debug.shared.model.action.SuspendAction;
 
 /**
- * @author Florent Benoit
+ * @author Roman Nikitenko
  */
-@DTO
-public interface MyOtherDTO extends MySuperClassDTO, MySuperSuperClass {
-
-    void setName(String name);
-    MyOtherDTO withName(String name);
-
+public class SuspendActionImpl extends ActionImpl implements SuspendAction {
+    public SuspendActionImpl() {
+        super(TYPE.SUSPEND);
+    }
 }

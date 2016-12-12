@@ -115,6 +115,9 @@ public class DebuggerService {
             case RESUME:
                 debugger.resume((ResumeAction)action);
                 break;
+            case SUSPEND:
+                debugger.suspend();
+                break;
             case STEP_INTO:
                 debugger.stepInto((StepIntoAction)action);
                 break;

@@ -33,6 +33,7 @@ import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.event.FileEvent.FileEventHandler;
 import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
+import org.eclipse.che.ide.resource.Path;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
@@ -184,8 +185,8 @@ public class ImageViewer extends AbstractEditorPresenter implements FileEventHan
             return;
         }
 
-        final String eventFilePath = event.getFile().getPath();
-        final String filePath = input.getFile().getPath();
+        final Path eventFilePath = event.getFile().getLocation();
+        final Path filePath = input.getFile().getLocation();
         if (filePath.equals(eventFilePath)) {
             workspaceAgent.removePart(this);
         }

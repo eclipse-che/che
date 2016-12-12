@@ -109,16 +109,9 @@ public class JarFileNode extends SyntheticNode<JarEntry> implements VirtualFile,
         return true;
     }
 
-    /** {@inheritDoc} */
-    @NotNull
-    @Override
-    public String getPath() {
-        return getData().getPath();
-    }
-
     @Override
     public Path getLocation() {
-        return Path.valueOf(getPath());
+        return Path.valueOf(getData().getPath());
     }
 
     /** {@inheritDoc} */

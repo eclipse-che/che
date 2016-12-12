@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.typescript.dto.model;
 
+import static java.util.Objects.hash;
+
 /**
  * Defines the model link to parameter of a method
  *
@@ -57,5 +59,25 @@ public class ParameterMethodModel {
     public String getType() {
         return this.parameterType;
     }
+
+    public int hashCode() {
+        return hash(this.parameterName, this.parameterType);
+    }
+
+    public boolean equals(Object other) {
+        if (other == null) {
+            return false;
+        }
+        if (!(other instanceof ParameterMethodModel)) {
+            return false;
+        }
+        ParameterMethodModel parameterMethodModelOther = (ParameterMethodModel) other;
+        return this.parameterName.equals(parameterMethodModelOther.parameterName) && this.parameterType.equals(((ParameterMethodModel)other).parameterType);
+    }
+
+    public String toString() {
+        return "ParameterMethodModel[" + this.parameterName + "/" + this.parameterType + "]";
+    }
+
 
 }
