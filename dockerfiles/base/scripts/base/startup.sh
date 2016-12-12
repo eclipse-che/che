@@ -266,6 +266,7 @@ init() {
      SCRIPTS_CONTAINER_SOURCE_DIR="/scripts"
   fi
 
+
   # Primary source directory
   source "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/cli/cli-functions.sh
 
@@ -279,6 +280,7 @@ init() {
 
   # If offline mode, then load dependent images from disk and populate the local Docker cache.
   # If not in offline mode, verify that we have access to DockerHub.
+  # This is also the first usage of curl
   initiate_offline_or_network_mode "$@"
 
   # Pull the list of images that are necessary. If in offline mode, verifies that the images

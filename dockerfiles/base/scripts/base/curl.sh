@@ -12,11 +12,23 @@ has_curl() {
 }
 
 curl() {
+
+  # In situations where we are performing internal pings using curl, then 
+  # we should append the CHE_HOST as a no proxy. It seems that curl does
+  # not respect the NO_PROXY environment variable set on the system.
+  NO_PROXY_CONFIG_FOR_CURL=""
+  if [[ ! "${HTTP_PROXY}" = "" ]] ||
+  	 [[ ! "${HTTPS_PROXY}" = "" ]]; then
+  	 if [ ! -z ${CHE_HOST+x} ]; then
+  	   NO_PROXY_CONFIG_FOR_CURL="--noproxy ${CHE_HOST} "
+  	fi
+  fi
+
   if ! has_curl; then
     log "docker run --rm --net=host appropriate/curl \"$@\""
-    docker run --rm --net=host appropriate/curl "$@"
+    docker run --rm --net=host appropriate/curl ${NO_PROXY_CONFIG_FOR_CURL} "$@"
   else
-    log "$(which curl) \"$@\""
-    $(which curl) "$@"
+    log "$(which curl) ${NO_PROXY_CONFIG_FOR_CURL} \"$@\""
+    $(which curl) ${NO_PROXY_CONFIG_FOR_CURL} "$@"
   fi
 }
