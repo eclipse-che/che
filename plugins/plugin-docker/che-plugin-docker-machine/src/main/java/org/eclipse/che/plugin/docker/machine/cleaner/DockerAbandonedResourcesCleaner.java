@@ -65,7 +65,7 @@ public class DockerAbandonedResourcesCleaner implements Runnable {
         this.nameGenerator = nameGenerator;
     }
 
-    @ScheduleRate(periodParameterName = "che.docker.unused_resources_cleanup_period_minutes", // TODO rename 'che.docker.unused_containers_cleanup_min' to 'che.docker.unused_resources_cleanup_period_minutes'
+    @ScheduleRate(periodParameterName = "che.docker.unused_resources_cleanup_period_minutes",
                   initialDelay = 0L,
                   unit = TimeUnit.MINUTES)
     @Override
