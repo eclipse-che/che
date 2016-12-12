@@ -10,29 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.security.oauth1;
 
-
 import org.eclipse.che.api.auth.oauth.OAuthAuthorizationHeaderProvider;
-import org.eclipse.che.api.core.BadRequestException;
-import org.eclipse.che.api.core.ConflictException;
-import org.eclipse.che.api.core.ForbiddenException;
-import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
-import org.eclipse.che.api.core.rest.shared.dto.Link;
-import org.eclipse.che.dto.server.DtoFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.UriBuilder;
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 import java.util.Map;
-
 
 /**
  * Allow get authorization header from OAuth1 service over http.
@@ -53,25 +39,24 @@ public class RemoteOAuthAuthorizationHeaderProvider implements OAuthAuthorizatio
     }
 
     @Override
-    public String getAuthorizationHeader(@NotNull String oauthProviderName,
-                                         @NotNull String userId,
-                                         @NotNull String requestMethod,
-                                         @NotNull String requestUrl,
-                                         @NotNull Map<String, String> requestParameters)
-            throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
-        if (userId.isEmpty()) {
+    public String getAuthorizationHeader(String oauthProviderName,
+                                         String userId,
+                                         String requestType,
+                                         String requestUrl,
+                                         Map<String, String> requestParameters) {
+        if (oauthProviderName.isEmpty() || userId.isEmpty()) {
             return null;
         }
-        UriBuilder ub = UriBuilder.fromUri(apiEndpoint)
-                                  .path(OAuthAuthenticationService.class)
-                                  .path(OAuthAuthenticationService.class, "signature")
-                                  .queryParam("oauth_provider", oauthProviderName)
-                                  .queryParam("user_id", userId)
-                                  .queryParam("request_method", requestMethod)
-                                  .queryParam("request_url", requestUrl);
+        UriBuilder uriBuilder = UriBuilder.fromUri(apiEndpoint)
+                                          .path(OAuthAuthenticationService.class)
+                                          .path(OAuthAuthenticationService.class, "signature")
+                                          .queryParam("user_id", userId)
+                                          .queryParam("oauth_provider", oauthProviderName)
+                                          .queryParam("request_method", requestType)
+                                          .queryParam("request_url", requestUrl);
         try {
-            Link link = DtoFactory.newDto(Link.class).withHref(ub.build().toString()).withMethod("GET");
-            return httpJsonRequestFactory.fromLink(link)
+            return httpJsonRequestFactory.fromUrl(uriBuilder.build().toString())
+                                         .useGetMethod()
                                          .request()
                                          .asString();
         } catch (Exception e) {

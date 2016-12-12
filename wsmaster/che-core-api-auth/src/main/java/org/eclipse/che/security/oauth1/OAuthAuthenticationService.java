@@ -10,29 +10,26 @@
  *******************************************************************************/
 package org.eclipse.che.security.oauth1;
 
+import org.eclipse.che.api.core.BadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 import java.util.List;
 import java.util.Map;
 
-import static org.eclipse.che.security.OAuthUtils.getParameter;
-import static org.eclipse.che.security.OAuthUtils.getRequestParameters;
-import static org.eclipse.che.security.OAuthUtils.getRequestUrl;
+import static org.eclipse.che.commons.lang.UrlUtils.getParameter;
+import static org.eclipse.che.commons.lang.UrlUtils.getQueryParametersFromState;
+import static org.eclipse.che.commons.lang.UrlUtils.getRequestUrl;
+import static org.eclipse.che.commons.lang.UrlUtils.getState;
 
 /**
  * RESTful wrapper for OAuth 1.0.
@@ -44,58 +41,95 @@ import static org.eclipse.che.security.OAuthUtils.getRequestUrl;
 public class OAuthAuthenticationService {
     private static final Logger LOG = LoggerFactory.getLogger(OAuthAuthenticationService.class);
 
+    private final static String USER_ID_PARAMETER               = "user_id";
+    private final static String REQUEST_URL_PARAMETER           = "request_url";
+    private final static String PROVIDER_NAME_PARAMETER         = "oauth_provider";
+    private final static String REQUEST_METHOD_PARAMETER        = "request_method";
+    private final static String SIGNATURE_METHOD_PARAMETER      = "signature_method";
+    private final static String REDIRECT_AFTER_LOGIN_PARAMETER  = "redirect_after_login";
+    private final static String UNSUPORTED_OAUTH_PROVIDER_ERROR = "Unsupported OAuth provider: ";
+
     @Inject
     protected OAuthAuthenticatorProvider providers;
 
     @GET
     @Path("authenticate")
-    public Response authenticate(@Context UriInfo uriInfo)
-            throws OAuthAuthenticationException, InvalidKeySpecException, NoSuchAlgorithmException {
-        final OAuthAuthenticator oauth = getAuthenticator(uriInfo.getQueryParameters().getFirst("oauth_provider"));
-        final String authUrl = oauth.getAuthenticateUrl(getRequestUrl(uriInfo));
+    public Response authenticate(@Context UriInfo uriInfo) throws OAuthAuthenticationException, BadRequestException {
+        MultivaluedMap<String, String> parameters = uriInfo.getQueryParameters();
+
+        final String providerName = parameters.getFirst(PROVIDER_NAME_PARAMETER);
+        final String requestMethod = parameters.getFirst(REQUEST_METHOD_PARAMETER);
+        final String signatureMethod = parameters.getFirst(SIGNATURE_METHOD_PARAMETER);
+        final String redirectAfterLogin = parameters.getFirst(REDIRECT_AFTER_LOGIN_PARAMETER);
+
+        requiredNotNull(providerName, PROVIDER_NAME_PARAMETER);
+        requiredNotNull(redirectAfterLogin, REDIRECT_AFTER_LOGIN_PARAMETER);
+
+        final OAuthAuthenticator oauth = getAuthenticator(providerName);
+        final String authUrl = oauth.getAuthenticateUrl(getRequestUrl(uriInfo), requestMethod, signatureMethod);
 
         return Response.temporaryRedirect(URI.create(authUrl)).build();
     }
 
     @GET
     @Path("callback")
-    public Response callback(@Context UriInfo uriInfo)
-            throws OAuthAuthenticationException, InvalidKeySpecException, NoSuchAlgorithmException {
+    public Response callback(@Context UriInfo uriInfo) throws OAuthAuthenticationException, BadRequestException {
         final URL requestUrl = getRequestUrl(uriInfo);
-        final Map<String, List<String>> params = getRequestParameters(requestUrl);
+        final Map<String, List<String>> parameters = getQueryParametersFromState(getState(requestUrl));
 
-        final String providerName = getParameter(params, "oauth_provider");
+        final String providerName = getParameter(parameters, PROVIDER_NAME_PARAMETER);
+        final String redirectAfterLogin = getParameter(parameters, REDIRECT_AFTER_LOGIN_PARAMETER);
+
         final OAuthAuthenticator oauth = getAuthenticator(providerName);
-
         oauth.callback(requestUrl);
 
-        final String redirectAfterLogin = getParameter(params, "redirect_after_login");
         return Response.temporaryRedirect(URI.create(redirectAfterLogin)).build();
     }
 
     @GET
     @Path("signature")
-    public String signature(@QueryParam("oauth_provider") String oauthProviderName,
-                            @QueryParam("request_method") String requestMethod,
-                            @QueryParam("request_url") String requestUrl,
-                            @QueryParam("user_id") String userId)
-            throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
+    public String signature(@Context UriInfo uriInfo) throws OAuthAuthenticationException, BadRequestException {
+        MultivaluedMap<String, String> parameters = uriInfo.getQueryParameters();
 
-        final OAuthAuthenticator oAuthAuthenticator = providers.getAuthenticator(oauthProviderName);
+        String providerName = parameters.getFirst(PROVIDER_NAME_PARAMETER);
+        String userId = parameters.getFirst(USER_ID_PARAMETER);
+        String requestUrl = parameters.getFirst(REQUEST_URL_PARAMETER);
+        String requestMethod = parameters.getFirst(REQUEST_METHOD_PARAMETER);
+
+        requiredNotNull(providerName, PROVIDER_NAME_PARAMETER);
+        requiredNotNull(userId, USER_ID_PARAMETER);
+        requiredNotNull(requestUrl, REQUEST_URL_PARAMETER);
+        requiredNotNull(requestMethod, REQUEST_METHOD_PARAMETER);
+
+        final OAuthAuthenticator oAuthAuthenticator = getAuthenticator(providerName);
         if (oAuthAuthenticator != null) {
             return oAuthAuthenticator.computeAuthorizationHeader(userId, requestMethod, requestUrl);
         }
         return null;
     }
 
-    private OAuthAuthenticator getAuthenticator(String oauthProviderName) {
+    private OAuthAuthenticator getAuthenticator(String oauthProviderName) throws BadRequestException {
         OAuthAuthenticator oauth = providers.getAuthenticator(oauthProviderName);
         if (oauth == null) {
-            LOG.error("Unsupported OAuth provider {} ", oauthProviderName);
-            throw new WebApplicationException(Response.status(400).entity("Unsupported OAuth provider " +
-                                                                          oauthProviderName).type(MediaType.TEXT_PLAIN)
-                                                      .build());
+            LOG.warn(UNSUPORTED_OAUTH_PROVIDER_ERROR + oauthProviderName);
+            throw new BadRequestException(UNSUPORTED_OAUTH_PROVIDER_ERROR + oauthProviderName);
         }
         return oauth;
+    }
+
+    /**
+     * Checks object reference is not {@code null}
+     *
+     * @param object
+     *         object reference to check
+     * @param subject
+     *         used as subject of exception message "{subject} required"
+     * @throws BadRequestException
+     *         when object reference is {@code null}
+     */
+    private void requiredNotNull(Object object, String subject) throws BadRequestException {
+        if (object == null) {
+            throw new BadRequestException(subject + " required");
+        }
     }
 }

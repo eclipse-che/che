@@ -11,15 +11,13 @@
 package org.eclipse.che.api.auth.oauth;
 
 import javax.validation.constraints.NotNull;
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 import java.util.Map;
 
 /**
  * Provides the Authorization header value from the OAuth 1 providers.
  *
  * @author Kevin Pollet
+ * @author Igor Vinokur
  */
 public interface OAuthAuthorizationHeaderProvider {
     /**
@@ -42,6 +40,5 @@ public interface OAuthAuthorizationHeaderProvider {
                                   @NotNull String userId,
                                   @NotNull String requestMethod,
                                   @NotNull String requestUrl,
-                                  @NotNull Map<String, String> requestParameters)
-            throws IOException, InvalidKeySpecException, NoSuchAlgorithmException;
+                                  @NotNull Map<String, String> requestParameters);
 }

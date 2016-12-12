@@ -20,6 +20,7 @@ import java.util.Set;
  * Allow store and provide services with implementations of {@link OAuthAuthenticator} for OAuth 1.
  *
  * @author Kevin Pollet
+ * @author Igor Vinokur
  */
 @Singleton
 public class OAuthAuthenticatorProvider {
@@ -27,16 +28,15 @@ public class OAuthAuthenticatorProvider {
 
     @Inject
     public OAuthAuthenticatorProvider(final Set<OAuthAuthenticator> oAuthAuthenticators) {
-        for (final OAuthAuthenticator oneOAuthAuthenticator : oAuthAuthenticators) {
-            this.oAuthAuthenticators.put(oneOAuthAuthenticator.getOAuthProvider(), oneOAuthAuthenticator);
-        }
+        oAuthAuthenticators.forEach(oAuthAuthenticator -> this.oAuthAuthenticators.put(oAuthAuthenticator.getOAuthProvider(),
+                                                                                       oAuthAuthenticator));
     }
 
     /**
      * Get the OAuth authentication service by name.
      *
      * @param oauthProviderName
-     *         name of OAuth provider.
+     *         name of the OAuth provider.
      * @return {@link OAuthAuthenticator} instance or {@code null} if specified OAuth provider is not supported.
      */
     public OAuthAuthenticator getAuthenticator(String oauthProviderName) {

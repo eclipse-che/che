@@ -50,10 +50,11 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static org.eclipse.che.commons.lang.UrlUtils.getParameter;
+import static org.eclipse.che.commons.lang.UrlUtils.getQueryParametersFromState;
+import static org.eclipse.che.commons.lang.UrlUtils.getRequestUrl;
+import static org.eclipse.che.commons.lang.UrlUtils.getState;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
-import static org.eclipse.che.security.OAuthUtils.getParameter;
-import static org.eclipse.che.security.OAuthUtils.getRequestParameters;
-import static org.eclipse.che.security.OAuthUtils.getRequestUrl;
 
 /** RESTful wrapper for OAuthAuthenticator. */
 @Path("oauth")
@@ -101,8 +102,9 @@ public class OAuthAuthenticationService {
 
         OAuthAuthenticator oauth = getAuthenticator(oauthProvider);
         if (!isNullOrEmpty(userId) && !userId.equals(EnvironmentContext.getCurrent().getSubject().getUserId())) {
-            throw new ForbiddenException(
-                    "Provided userId " + userId + " is not related to current user " + EnvironmentContext.getCurrent().getSubject().getUserId());
+            throw new ForbiddenException("Provided userId " + userId + " is not related to current user " + EnvironmentContext.getCurrent()
+                                                                                                                              .getSubject()
+                                                                                                                              .getUserId());
         }
 
         final String authUrl = oauth.getAuthenticateUrl(getRequestUrl(uriInfo), scopes == null ? Collections.<String>emptyList() : scopes);
@@ -113,7 +115,7 @@ public class OAuthAuthenticationService {
     @Path("callback")
     public Response callback(@QueryParam("errorValues") List<String> errorValues) throws OAuthAuthenticationException, BadRequestException {
         URL requestUrl = getRequestUrl(uriInfo);
-        Map<String, List<String>> params = getRequestParameters(requestUrl);
+        Map<String, List<String>> params = getQueryParametersFromState(getState(requestUrl));
         if (errorValues != null && errorValues.contains("access_denied")) {
             return Response.temporaryRedirect(uriInfo.getRequestUriBuilder().replacePath(errorPage).replaceQuery(null).build()).build();
         }
@@ -203,7 +205,7 @@ public class OAuthAuthenticationService {
     protected OAuthAuthenticator getAuthenticator(String oauthProviderName) throws BadRequestException {
         OAuthAuthenticator oauth = providers.getAuthenticator(oauthProviderName);
         if (oauth == null) {
-            LOG.error("Unsupported OAuth provider {} ", oauthProviderName);
+            LOG.warn("Unsupported OAuth provider {} ", oauthProviderName);
             throw new BadRequestException("Unsupported OAuth provider " + oauthProviderName);
         }
         return oauth;

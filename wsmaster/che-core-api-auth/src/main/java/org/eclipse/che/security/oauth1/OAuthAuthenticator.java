@@ -52,7 +52,7 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
  */
 public abstract class OAuthAuthenticator {
     private static final String USER_ID_PARAM_KEY          = "userId";
-    private static final String REQUEST_TYPE_PARAM_KEY     = "request_type";
+    private static final String REQUEST_METHOD_PARAM_KEY   = "request_method";
     private static final String SIGNATURE_METHOD_PARAM_KEY = "signature_method";
     private static final String STATE_PARAM_KEY            = "state";
     private static final String OAUTH_TOKEN_PARAM_KEY      = "oauth_token";
@@ -97,34 +97,36 @@ public abstract class OAuthAuthenticator {
      *         URL of current HTTP request. This parameter required to be able determine URL for redirection after
      *         authentication. If URL contains query parameters they will be copied to 'state' parameter and returned to
      *         callback method.
+     * @param requestMethod
+     *         HTTP request method that will be used to request temporary token
+     * @param signatureMethod
+     *         OAuth signature algorithm
      * @return URL for authentication.
+     * @throws OAuthAuthenticationException
+     *         if authentication failed.
      */
-    String getAuthenticateUrl(final URL requestUrl)
-            throws OAuthAuthenticationException, InvalidKeySpecException, NoSuchAlgorithmException {
+    String getAuthenticateUrl(@NotNull final URL requestUrl,
+                              @Nullable final String requestMethod,
+                              @Nullable final String signatureMethod) throws OAuthAuthenticationException {
 
         final GenericUrl callbackUrl = new GenericUrl(redirectUri);
         callbackUrl.put(STATE_PARAM_KEY, requestUrl.getQuery());
 
-        final String state = (String)callbackUrl.getFirst(STATE_PARAM_KEY);
-        String requestType = getRequestTypeFromStateParameter(state);
-        String signatureMethod = getSignatureMethodFromStateParameter(state);
-
-        OAuthGetTemporaryToken temporaryToken;
-        if (requestType != null && "post".equals(requestType.toLowerCase())) {
-            temporaryToken = new OAuthPostTemporaryToken(requestTokenUri);
-        } else {
-            temporaryToken = new OAuthGetTemporaryToken(requestTokenUri);
-        }
-        if (signatureMethod != null && "rsa".equals(signatureMethod.toLowerCase())) {
-            temporaryToken.signer = getOAuthRsaSigner();
-        } else {
-            temporaryToken.signer = getOAuthHmacSigner(null, null);
-        }
-        temporaryToken.consumerKey = clientId;
-        temporaryToken.callback = callbackUrl.build();
-        temporaryToken.transport = httpTransport;
-
         try {
+            OAuthGetTemporaryToken temporaryToken;
+            if (requestMethod != null && "post".equals(requestMethod.toLowerCase())) {
+                temporaryToken = new OAuthPostTemporaryToken(requestTokenUri);
+            } else {
+                temporaryToken = new OAuthGetTemporaryToken(requestTokenUri);
+            }
+            if (signatureMethod != null && "rsa".equals(signatureMethod.toLowerCase())) {
+                temporaryToken.signer = getOAuthRsaSigner();
+            } else {
+                temporaryToken.signer = getOAuthHmacSigner(null, null);
+            }
+            temporaryToken.consumerKey = clientId;
+            temporaryToken.callback = callbackUrl.build();
+            temporaryToken.transport = httpTransport;
             final OAuthCredentialsResponse credentialsResponse = temporaryToken.execute();
             final OAuthAuthorizeTemporaryTokenUrl authorizeTemporaryTokenUrl = new OAuthAuthorizeTemporaryTokenUrl(authorizeTokenUri);
             authorizeTemporaryTokenUrl.temporaryToken = credentialsResponse.token;
@@ -132,8 +134,8 @@ public abstract class OAuthAuthenticator {
             sharedTokenSecrets.put(credentialsResponse.token, credentialsResponse.tokenSecret);
 
             return authorizeTemporaryTokenUrl.build();
-        } catch (final IOException e) {
-            throw new OAuthAuthenticationException(e);
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException | IOException e) {
+            throw new OAuthAuthenticationException(e.getMessage());
         }
     }
 
@@ -146,7 +148,7 @@ public abstract class OAuthAuthenticator {
      * @throws OAuthAuthenticationException
      *         if authentication failed or {@code requestUrl} does not contain required parameters.
      */
-    String callback(final URL requestUrl) throws OAuthAuthenticationException, InvalidKeySpecException, NoSuchAlgorithmException {
+    String callback(@NotNull final URL requestUrl) throws OAuthAuthenticationException {
         try {
             final GenericUrl callbackUrl = new GenericUrl(requestUrl.toString());
 
@@ -188,13 +190,12 @@ public abstract class OAuthAuthenticator {
             credentialsStoreLock.lock();
             try {
 
-                final OAuthCredentialsResponse currentCredentials = credentialsStore.get(userId);
-                if (currentCredentials == null) {
+                final OAuthCredentialsResponse userId2Credential = credentialsStore.get(userId);
+                if (userId2Credential == null) {
                     credentialsStore.put(userId, credentials);
-
                 } else {
-                    currentCredentials.token = credentials.token;
-                    currentCredentials.tokenSecret = credentials.tokenSecret;
+                    userId2Credential.token = credentials.token;
+                    userId2Credential.tokenSecret = credentials.tokenSecret;
                 }
 
             } finally {
@@ -203,8 +204,8 @@ public abstract class OAuthAuthenticator {
 
             return userId;
 
-        } catch (final IOException e) {
-            throw new OAuthAuthenticationException(e);
+        } catch (final IOException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+            throw new OAuthAuthenticationException(e.getMessage());
         }
     }
 
@@ -224,15 +225,13 @@ public abstract class OAuthAuthenticator {
      *         the HTTP request method.
      * @param requestUrl
      *         the HTTP request url with encoded query parameters.
-     * @return the authorization header value, or {@code null}.
-     * @throws IOException
-     *         if something wrong occurs.
+     * @return the authorization header value, or {@code null} if token was not found for given user id.
+     * @throws OAuthAuthenticationException
+     *         if authentication failed.
      */
     String computeAuthorizationHeader(@NotNull final String userId,
                                       @NotNull final String requestMethod,
-                                      @NotNull final String requestUrl)
-            throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
-
+                                      @NotNull final String requestUrl) throws OAuthAuthenticationException {
         final OAuthCredentialsResponse credentials = new OAuthCredentialsResponse();
         OAuthToken oauthToken = getToken(userId);
         credentials.token = oauthToken != null ? oauthToken.getToken() : null;
@@ -242,7 +241,7 @@ public abstract class OAuthAuthenticator {
         return null;
     }
 
-    private OAuthToken getToken(final String userId) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
+    private OAuthToken getToken(final String userId) {
         OAuthCredentialsResponse credentials;
         credentialsStoreLock.lock();
         try {
@@ -250,7 +249,10 @@ public abstract class OAuthAuthenticator {
         } finally {
             credentialsStoreLock.unlock();
         }
-        return newDto(OAuthToken.class).withToken(credentials.token).withScope(credentials.tokenSecret);
+        if (credentials != null) {
+            return newDto(OAuthToken.class).withToken(credentials.token).withScope(credentials.tokenSecret);
+        }
+        return null;
     }
 
     /**
@@ -269,21 +271,21 @@ public abstract class OAuthAuthenticator {
     private String computeAuthorizationHeader(@NotNull final String requestMethod,
                                               @NotNull final String requestUrl,
                                               @NotNull final String token,
-                                              @NotNull final String tokenSecret) throws InvalidKeySpecException, NoSuchAlgorithmException {
-
-        final OAuthParameters oauthParameters = new OAuthParameters();
-        oauthParameters.consumerKey = clientId;
-        oauthParameters.signer = clientSecret == null ? getOAuthRsaSigner() : getOAuthHmacSigner(clientSecret, tokenSecret);
-        oauthParameters.token = token;
-        oauthParameters.version = "1.0";
-
-        oauthParameters.computeNonce();
-        oauthParameters.computeTimestamp();
-
+                                              @NotNull final String tokenSecret) throws OAuthAuthenticationException {
+        OAuthParameters oauthParameters;
         try {
+            oauthParameters = new OAuthParameters();
+            oauthParameters.consumerKey = clientId;
+            oauthParameters.signer = clientSecret == null ? getOAuthRsaSigner() : getOAuthHmacSigner(clientSecret, tokenSecret);
+            oauthParameters.token = token;
+            oauthParameters.version = "1.0";
+
+            oauthParameters.computeNonce();
+            oauthParameters.computeTimestamp();
+
             oauthParameters.computeSignature(requestMethod, new GenericUrl(requestUrl));
         } catch (GeneralSecurityException e) {
-            throw new RuntimeException(e);
+            throw new OAuthAuthenticationException(e);
         }
 
         return oauthParameters.getAuthorizationHeader();
@@ -294,7 +296,7 @@ public abstract class OAuthAuthenticator {
             final String[] params = extractStateParams(state);
             for (final String param : params) {
                 if (param.startsWith(USER_ID_PARAM_KEY + "=")) {
-                    return param.substring(USER_ID_PARAM_KEY.length() + 1, param.length());
+                    return param.substring(USER_ID_PARAM_KEY.length() + 1);
                 }
             }
         }
@@ -306,7 +308,7 @@ public abstract class OAuthAuthenticator {
             final String[] params = extractStateParams(state);
             for (final String param : params) {
                 if (param.startsWith(SIGNATURE_METHOD_PARAM_KEY + "=")) {
-                    return param.substring(SIGNATURE_METHOD_PARAM_KEY.length() + 1, param.length());
+                    return param.substring(SIGNATURE_METHOD_PARAM_KEY.length() + 1);
                 }
             }
         }
@@ -317,8 +319,8 @@ public abstract class OAuthAuthenticator {
         if (!isNullOrEmpty(state)) {
             final String[] params = extractStateParams(state);
             for (final String param : params) {
-                if (param.startsWith(REQUEST_TYPE_PARAM_KEY + "=")) {
-                    return param.substring(REQUEST_TYPE_PARAM_KEY.length() + 1, param.length());
+                if (param.startsWith(REQUEST_METHOD_PARAM_KEY + "=")) {
+                    return param.substring(REQUEST_METHOD_PARAM_KEY.length() + 1);
                 }
             }
         }
@@ -326,14 +328,13 @@ public abstract class OAuthAuthenticator {
     }
 
     private String[] extractStateParams(String state) {
-        final String decodedState;
         try {
-            decodedState = decode(state, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
+            String decodedState = decode(state, "UTF-8");
+            return decodedState.split("&");
+        } catch (UnsupportedEncodingException ignored) {
+            // should never happen, UTF-8 supported.
         }
-
-        return decodedState.split("&");
+        return null;
     }
 
     private OAuthRsaSigner getOAuthRsaSigner() throws NoSuchAlgorithmException, InvalidKeySpecException {

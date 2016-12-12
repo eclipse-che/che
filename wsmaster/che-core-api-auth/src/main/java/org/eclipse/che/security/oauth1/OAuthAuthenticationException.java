@@ -16,6 +16,7 @@ package org.eclipse.che.security.oauth1;
  * @author Kevin Pollet
  */
 public final class OAuthAuthenticationException extends Exception {
+
     /**
      * Constructs an instance of {@link OAuthAuthenticationException}.
      *
