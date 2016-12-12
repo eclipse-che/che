@@ -115,6 +115,10 @@ cmd_init() {
 }
 
 cmd_init_reinit_pre_action() {
+  
+  # One time only, set the value of CHE_HOST within the environment file.
+  sed -i'.bak' "s|#${CHE_PRODUCT_NAME}_HOST=.*|${CHE_PRODUCT_NAME}_HOST=${CHE_HOST}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
+
   # For testing purposes only
   #HTTP_PROXY=8.8.8.8
   #HTTPS_PROXY=http://4.4.4.4:9090
