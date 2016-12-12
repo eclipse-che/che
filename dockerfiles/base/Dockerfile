@@ -15,11 +15,12 @@ FROM alpine:3.4
 ENV DOCKER_BUCKET get.docker.com
 ENV DOCKER_VERSION 1.10.3
 
-# install docker
+# install packages
+# coreutils is required for iso8601 compliant date utility
 RUN mkdir -p /version \
     && mkdir -p /cli \
     && mkdir /scripts/ \
-    && apk add --no-cache ca-certificates curl openssl jq \
+    && apk add --no-cache ca-certificates coreutils curl openssl jq \
     && apk add --update bash \
     && rm -rf /var/cache/apk/* \
     && set -x \
