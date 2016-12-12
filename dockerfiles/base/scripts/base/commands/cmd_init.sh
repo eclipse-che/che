@@ -56,7 +56,7 @@ cmd_init() {
       info ""
       info "init" "Do you accept the ${CHE_FORMAL_PRODUCT_NAME} license? (${CHE_LICENSE_URL})"
       text "\n"
-      read -p "      I accept the license: [Y/n] " -n 1 -r
+      read -p "      I accept the license: [Y/n] " -n 1 -r || { error "Shell is not in interactive mode. Add -i flag to the docker run command"; return 2; }
       text "\n"
       if [[ $REPLY =~ ^[Nn]$ ]]; then
         return 2;
