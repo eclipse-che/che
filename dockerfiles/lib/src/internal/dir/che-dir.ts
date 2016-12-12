@@ -399,7 +399,7 @@ export class CheDir {
         if (!isRunning) {
           return Promise.reject('No Eclipse Che Instance Running.');
         }
-
+      }).then(() => {
         // check workspace exists
         this.workspace = new Workspace(this.authData);
         return this.workspace.existsWorkspace(':' + this.chefileStructWorkspace.name);
@@ -489,6 +489,7 @@ export class CheDir {
         if (!isRunning) {
           return Promise.reject(this.i18n.get('down.not-running'));
         }
+      }).then(() => {
         Log.getLogger().info(this.i18n.get('down.found', this.buildLocalCheURL()));
         this.workspace = new Workspace(this.authData);
         // now, check if there is a workspace
@@ -533,7 +534,7 @@ export class CheDir {
   }
 
 
-  up() : Promise<string> {
+  up() : Promise<boolean> {
   let start : number = Date.now();
     // call init if not initialized and then call up
     return this.isInitialized().then((isInitialized) => {
@@ -732,7 +733,7 @@ setupSSHKeys(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto
         return Promise.reject('This directory has not been initialized. So, ssh is not available.');
       }
 
-      return new Promise<string>((resolve, reject) => {
+      return new Promise<any>((resolve, reject) => {
         this.parse();
         resolve('parsed');
       }).then(() => {

@@ -171,4 +171,6 @@ if [ -f /bin/bash ]; then
     SHELL_INTERPRETER="/bin/bash"
 fi
 
-$HOME/che/terminal/che-websocket-terminal -addr :4411 -cmd ${SHELL_INTERPRETER} -static $HOME/che/terminal/
+#####################################################
+### terminal-agent run command will be added here ###
+#####################################################

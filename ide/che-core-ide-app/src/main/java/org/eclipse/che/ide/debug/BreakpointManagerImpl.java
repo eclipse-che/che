@@ -119,7 +119,7 @@ public class BreakpointManagerImpl implements BreakpointManager,
 
         final VirtualFile activeFile = editor.getEditorInput().getFile();
 
-        List<Breakpoint> pathBreakpoints = breakpoints.get(activeFile.getPath());
+        List<Breakpoint> pathBreakpoints = breakpoints.get(activeFile.getLocation().toString());
         if (pathBreakpoints != null) {
             for (final Breakpoint breakpoint : pathBreakpoints) {
                 if (breakpoint.getLineNumber() == lineNumber) {
@@ -133,7 +133,7 @@ public class BreakpointManagerImpl implements BreakpointManager,
         if (isLineNotEmpty(activeFile, lineNumber)) {
             Breakpoint breakpoint = new Breakpoint(BREAKPOINT,
                                                    lineNumber,
-                                                   activeFile.getPath(),
+                                                   activeFile.getLocation().toString(),
                                                    activeFile,
                                                    false);
             addBreakpoint(breakpoint);
@@ -234,7 +234,7 @@ public class BreakpointManagerImpl implements BreakpointManager,
      * Indicates if line of code to add breakpoint at is executable.
      */
     private boolean isLineNotEmpty(final VirtualFile activeFile, int lineNumber) {
-        EditorPartPresenter editor = getEditorForFile(activeFile.getPath());
+        EditorPartPresenter editor = getEditorForFile(activeFile.getLocation().toString());
         if (editor instanceof TextEditor) {
             Document document = ((TextEditor)editor).getDocument();
             return !document.getLineContent(lineNumber).trim().isEmpty();
@@ -273,9 +273,9 @@ public class BreakpointManagerImpl implements BreakpointManager,
     }
 
     private void doSetCurrentBreakpoint(VirtualFile activeFile, int lineNumber) {
-        currentBreakpoint = new Breakpoint(Type.CURRENT, lineNumber, activeFile.getPath(), activeFile, true);
+        currentBreakpoint = new Breakpoint(Type.CURRENT, lineNumber, activeFile.getLocation().toString(), activeFile, true);
 
-        BreakpointRenderer breakpointRenderer = getBreakpointRendererForFile(activeFile.getPath());
+        BreakpointRenderer breakpointRenderer = getBreakpointRendererForFile(activeFile.getLocation().toString());
         if (breakpointRenderer != null) {
             breakpointRenderer.setLineActive(lineNumber, true);
         }
@@ -347,11 +347,11 @@ public class BreakpointManagerImpl implements BreakpointManager,
      */
     @Override
     public void onLineChange(final VirtualFile file, final int firstLine, final int linesAdded, final int linesRemoved) {
-        final List<Breakpoint> fileBreakpoints = breakpoints.get(file.getPath());
+        final List<Breakpoint> fileBreakpoints = breakpoints.get(file.getLocation().toString());
         final int delta = linesAdded - linesRemoved;
 
         if (fileBreakpoints != null) {
-            LOG.fine("Change in file with breakpoints " + file.getPath());
+            LOG.fine("Change in file with breakpoints " + file.getLocation().toString());
 
             final List<Breakpoint> toRemove = new ArrayList<>();
             final List<Breakpoint> toAdd = new ArrayList<>();

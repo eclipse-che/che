@@ -189,7 +189,7 @@ public class PreviewPresenterTest {
         verify(view, never()).hide();
         verify(editor, never()).getEditorInput();
         verify(editorInput, never()).getFile();
-        verify(virtualFile, never()).getPath();
+        verify(virtualFile, never()).getLocation();
         verify(view).showErrorMessage(refactoringStatus);
     }
 

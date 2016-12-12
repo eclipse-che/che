@@ -69,6 +69,17 @@ public interface Debugger {
     void start(StartAction action) throws DebuggerException;
 
     /**
+     * Suspends the application is being debugged.
+     * When process stops then {@link SuspendEvent} must be fired.
+     *
+     * @throws DebuggerException
+     *         if any error occur
+     */
+    default void suspend() throws DebuggerException {
+        throw new DebuggerException("Unsupported operation for current debugger implementation.");
+    }
+
+    /**
      * Adds given breakpoint. When breakpoint is accepted by server
      * then {@link BreakpointActivatedEvent} must be fired. If breakpoint becomes
      * deferred or just ignored then no events should be fired.

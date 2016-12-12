@@ -38,6 +38,10 @@
             <artifactId>che-core-ide-api</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-web-ext-shared</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.google.gwt</groupId>
             <artifactId>gwt-elemental</artifactId>
             <scope>provided</scope>

@@ -102,6 +102,10 @@ public class AgentImpl implements Agent {
         return script;
     }
 
+    public void setScript(String script) {
+        this.script = script;
+    }
+
     @Override
     public Map<String, ? extends ServerConf2> getServers() {
         if (servers == null) {

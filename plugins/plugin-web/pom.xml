@@ -23,6 +23,8 @@
     <packaging>pom</packaging>
     <name>Che Plugin :: Web :: Parent</name>
     <modules>
+        <module>che-plugin-web-ext-shared</module>
         <module>che-plugin-web-ext-web</module>
+        <module>che-plugin-web-ext-server</module>
     </modules>
 </project>

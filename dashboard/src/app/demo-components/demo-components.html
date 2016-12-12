@@ -10,27 +10,46 @@
       Codenvy, S.A. - initial API and implementation
 
 -->
-<md-tabs md-selected="selectedIndex">
-  <md-tab label="Font">
+<md-content md-scroll-y flex
+            md-theme="default">
+  <md-tabs md-selected="selectedIndex"
+           md-dynamic-height
+           md-stretch-tabs="auto"
+           md-center-tabs="">
 
-    <p>Headings</p>
-    <che-html-source>
-      <h1>This is h1 <small>Secondary text</small></h1>
-      <h2>This is h2 <small>Secondary text</small></h2>
-      <h3>This is h3 <small>Secondary text</small></h3>
-      <h4>This is h4 <small>Secondary text</small></h4>
-      <h5>This is h5 <small>Secondary text</small></h5>
-      <h6>This is h6 <small>Secondary text</small></h6>
-    </che-html-source>
-  </md-tab>
-  <md-tab label="Panel">
-    <che-html-source>
+    <md-tab label="Font">
+      <p>Headings</p>
+      <che-html-source>
+        <h1>This is h1
+          <small>Secondary text</small>
+        </h1>
+        <h2>This is h2
+          <small>Secondary text</small>
+        </h2>
+        <h3>This is h3
+          <small>Secondary text</small>
+        </h3>
+        <h4>This is h4
+          <small>Secondary text</small>
+        </h4>
+        <h5>This is h5
+          <small>Secondary text</small>
+        </h5>
+        <h6>This is h6
+          <small>Secondary text</small>
+        </h6>
+      </che-html-source>
+    </md-tab>
 
-      <che-panel che-title="My first panel"></che-panel>
+    <md-tab label="Panel">
+      <che-html-source>
 
-      <che-panel che-title="Another panel" che-title-icon="material-design icon-ic_check_box_outline_blank_24px"></che-panel>
-      <che-panel che-title="Another panel" che-title-icon="material-design icon-ic_check_24px"></che-panel>
-      <che-panel che-title="Yet another panel"><span>Haec igitur lex in amicitia sanciatur, ut neque rogemus res turpes nec faciamus rogati. Turpis enim excusatio est et minime accipienda cum in ceteris peccatis, tum si quis contra rem publicam se amici causa fecisse fateatur. Etenim eo loco, Fanni et Scaevola, locati sumus ut nos longe prospicere oporteat futuros casus rei publicae. Deflexit iam aliquantum de spatio curriculoque consuetudo maiorum.
+        <che-panel che-title="My first panel"></che-panel>
+
+        <che-panel che-title="Another panel"
+                   che-title-icon="material-design icon-ic_check_box_outline_blank_24px"></che-panel>
+        <che-panel che-title="Another panel" che-title-icon="material-design icon-ic_check_24px"></che-panel>
+        <che-panel che-title="Yet another panel"><span>Haec igitur lex in amicitia sanciatur, ut neque rogemus res turpes nec faciamus rogati. Turpis enim excusatio est et minime accipienda cum in ceteris peccatis, tum si quis contra rem publicam se amici causa fecisse fateatur. Etenim eo loco, Fanni et Scaevola, locati sumus ut nos longe prospicere oporteat futuros casus rei publicae. Deflexit iam aliquantum de spatio curriculoque consuetudo maiorum.
 
 Isdem diebus Apollinaris Domitiani gener, paulo ante agens palatii Caesaris curam, ad Mesopotamiam missus a socero per militares numeros immodice scrutabatur, an quaedam altiora meditantis iam Galli secreta susceperint scripta, qui conpertis Antiochiae gestis per minorem Armeniam lapsus Constantinopolim petit exindeque per protectores retractus artissime tenebatur.
 
@@ -39,120 +58,183 @@ Sed tamen haec cum ita tutius observentur, quidam vigore artuum inminuto rogati 
 Dumque ibi diu moratur commeatus opperiens, quorum translationem ex Aquitania verni imbres solito crebriores prohibebant auctique torrentes, Herculanus advenit protector domesticus, Hermogenis ex magistro equitum filius, apud Constantinopolim, ut supra rettulimus, populari quondam turbela discerpti. quo verissime referente quae Gallus egerat, damnis super praeteritis maerens et futurorum timore suspensus angorem animi quam diu potuit emendabat.
 
 Ultima Syriarum est Palaestina per intervalla magna protenta, cultis abundans terris et nitidis et civitates habens quasdam egregias, nullam nulli cedentem sed sibi vicissim velut ad perpendiculum aemulas: Caesaream, quam ad honorem Octaviani principis exaedificavit Herodes, et Eleutheropolim et Neapolim itidemque Ascalonem Gazam aevo superiore exstructas.</span>
-      </che-panel>
-
-    </che-html-source>
-  </md-tab>
-  <md-tab label="Selecter" >
-    <div>Selected book is {{demoComponentsCtrl.selectedBook}}</div>
-
-    <div layout="row" layout-wrap>
-      <che-selecter ng-repeat="(author, books) in demoComponentsCtrl.booksByAuthor"
-                     ng-model="demoComponentsCtrl.selectedBook"
-                     che-values="books"
-                     che-name="PickupBook"
-                     che-title="{{author}}"
-                     che-icon="fa fa-cube"
-                     che-callback-controller="demoComponentsCtrl"
-                     che-options="book.title for book in values" />
-    </div>
-  </md-tab>
-
-  <md-tab label="Icons" >
-    <div>Material design icons</div>
-    <che-html-source>
-
-      <md-icon md-font-icon="material-design icon-ic_account_balance_24px"></md-icon>
-      <md-icon md-font-icon="material-design icon-ic_lock_24px"></md-icon>
-      <md-icon md-font-icon="material-design icon-ic_lock_open_24px"></md-icon>
-      <md-icon md-font-icon="chefont cheico-blank"></md-icon>
-      <md-icon md-font-icon="chefont cheico-cpp"></md-icon>
-      <md-icon md-font-icon="chefont cheico-java"></md-icon>
-    </che-html-source>
-    </div>
-  </md-tab>
-
-
-  <md-tab label="Buttons" >
-    <div layout="column" >
-      <che-html-source>
-
-        <che-panel che-title="Buttons" layout="column">
-          <che-button-primary che-button-title="Primary button"></che-button-primary>
-          <che-button-primary che-button-title="Primary button with icon" che-button-icon="fa fa-file-text-o"></che-button-primary>
-
-          <che-button-default che-button-title="default disabled button"
-                               ng-click="demoComponentsCtrl.toggleDisabled2()"
-                               ng-disabled="!demoComponentsCtrl.isToggleDisabled2()">
-          </che-button-default>
-
-          <che-button-default che-button-title="default button icon" che-button-icon="fa fa-check-square">
-          </che-button-default>
-
-
-
-          <che-button-danger che-button-title="Danger button"></che-button-danger>
-          <che-button-danger che-button-title="Danger button icon" che-button-icon="fa fa-trash"></che-button-danger>
         </che-panel>
+
       </che-html-source>
+    </md-tab>
 
-      <p>Selected value of toggle is : {{demoComponentsCtrl.selectedToggle}}</p>
-      <che-toggle ng-init="demoComponentsCtrl.selectedToggle='Public'" ng-model="demoComponentsCtrl.selectedToggle">
-        <che-toggle-button che-font-icon="fa fa-lock" che-title="Public"></che-toggle-button>
-        <che-toggle-button che-font-icon="fa fa-unlock" che-title="Private"></che-toggle-button>
-      </che-toggle>
+    <md-tab label="Selecter">
+      <div>Selected book is {{demoComponentsCtrl.selectedBook}}</div>
 
+      <div layout="row" layout-wrap>
+        <che-selecter ng-repeat="(author, books) in demoComponentsCtrl.booksByAuthor"
+                      ng-model="demoComponentsCtrl.selectedBook"
+                      che-values="books"
+                      che-name="PickupBook"
+                      che-title="{{author}}"
+                      che-icon="fa fa-cube"
+                      che-callback-controller="demoComponentsCtrl"
+                      che-options="book.title for book in values"/>
+      </div>
+    </md-tab>
 
-
-    </div>
-  </md-tab>
-  <md-tab label="Input" >
-
-    <div layout="column" flex ng-form="demoForm">
+    <md-tab label="Icons">
+      <div>Material design icons</div>
       <che-html-source>
 
-        <che-input che-form="demoForm"
-                    che-name="demoinput"
-                    che-label-name="Name"
-                    che-place-holder="Name of this demo"
-                    ng-model="demoComponentsCtrl.selectedInput"
-                    required
-                    ng-maxlength="128"
-                    ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
-          <div ng-message="required">A name is required.</div>
-          <div ng-message="pattern">The name should not contain special characters like space, dollar, etc.</div>
-          <div ng-message="maxlength">The name has to be less than 128 characters long.</div>
-          <div ng-message="md-maxlength">The name has to be less than 128 characters long.</div>
-        </che-input>
+        <md-icon md-font-icon="material-design icon-ic_account_balance_24px"></md-icon>
+        <md-icon md-font-icon="material-design icon-ic_lock_24px"></md-icon>
+        <md-icon md-font-icon="material-design icon-ic_lock_open_24px"></md-icon>
+        <md-icon md-font-icon="chefont cheico-blank"></md-icon>
+        <md-icon md-font-icon="chefont cheico-cpp"></md-icon>
+        <md-icon md-font-icon="chefont cheico-java"></md-icon>
       </che-html-source>
-    </div>
+      </div>
+    </md-tab>
 
-  </md-tab>
 
-  <md-tab label="List" >
+    <md-tab label="Buttons">
+      <div layout="column">
 
-    <div layout="column">
-    <che-html-source>
+        <!-- Cancel Button -->
+        <textarea demo-source-render>
+          <che-button-cancel-flat che-button-title="Cancel Button Flat"></che-button-cancel-flat>
+        </textarea>
 
-        <che-list style="margin: 10px; width: 200px">
-          <che-list-item ng-repeat="document in demoComponentsCtrl.listItemsDocs">
-            <div layout="row" flex="100" style="height: 24px; margin: 5px">
-              <che-list-item-checked flex="20" che-icon="md-font fa fa-file-text-o" style="font-size: 20px"></che-list-item-checked>
-              <div flex="80" style="height: 20px">{{document}}</div>
-            </div>
-          </che-list-item>
-        </che-list>
+        <textarea demo-source-render>
+          <che-button-cancel-flat che-button-title="Cancel Button Flat With Icon"
+                                  che-button-icon="fa fa-ban"></che-button-cancel-flat>
+        </textarea>
 
-      <che-list style="margin: 10px; width: 200px">
-        <che-list-item ng-repeat="task in demoComponentsCtrl.listItemsTasks">
-          <div layout="row" flex="100" style="height: 24px; margin: 5px">
-            <div flex="70">{{task.name}}</div>
-            <che-list-item-checked flex="30" ng-model="task.done"></che-list-item-checked>
-          </div>
-        </che-list-item>
-      </che-list>
-      </che-html-source>
-  </div>
+        <!-- Danger Button -->
+        <textarea demo-source-render>
+          <che-button-danger che-button-title="Danger Button"></che-button-danger>
+        </textarea>
 
-  </md-tab>
-</md-tabs>
+        <textarea demo-source-render>
+          <che-button-danger che-button-title="Danger Button With Icon"
+                             che-button-icon="fa fa-trash"></che-button-danger>
+        </textarea>
+
+        <!-- Default Button -->
+        <textarea demo-source-render>
+          <che-button-default che-button-title="Default Button"></che-button-default>
+        </textarea>
+
+        <textarea demo-source-render>
+          <che-button-default che-button-title="Default Button With Icon"
+                              che-button-icon="fa fa-check-square"></che-button-default>
+        </textarea>
+
+        <!-- Notice Button -->
+        <textarea demo-source-render="">
+          <che-button-notice che-button-title="Notice Button"></che-button-notice>
+        </textarea>
+
+        <textarea demo-source-render="">
+          <che-button-notice che-button-title="Notice Button With Icon"
+                             che-button-icon="fa fa-check-square"></che-button-notice>
+        </textarea>
+
+        <!-- Primary Button -->
+        <textarea demo-source-render="">
+          <che-button-primary che-button-title="Primary Button"></che-button-primary>
+        </textarea>
+
+        <textarea demo-source-render="">
+          <che-button-primary che-button-title="Primary Button With Icon"
+                              che-button-icon="fa fa-file-text-o"></che-button-primary>
+        </textarea>
+
+        <!-- Primary Button Flat -->
+        <textarea demo-source-render="">
+          <che-button-primary-flat che-button-title="Primary Button Flat"></che-button-primary-flat>
+        </textarea>
+
+        <textarea demo-source-render="">
+          <che-button-primary-flat che-button-title="Primary Button Flat With Icon"
+                                   che-button-icon="fa fa-file-text-o"></che-button-primary-flat>
+        </textarea>
+
+        <!-- Save Button -->
+        <textarea demo-source-render="">
+          <che-button-save-flat che-button-title="Save Button Flat"></che-button-save-flat>
+        </textarea>
+
+        <textarea demo-source-render="">
+          <che-button-save-flat che-button-title="Save Button Flat With Icon"
+                                che-button-icon="fa fa-floppy-o"></che-button-save-flat>
+        </textarea>
+
+        <!-- Warning Button -->
+        <textarea demo-source-render="">
+          <che-button-warning che-button-title="Warning Button"></che-button-warning>
+        </textarea>
+
+        <textarea demo-source-render="">
+          <che-button-warning che-button-title="Warning Button"
+                              che-button-icon="fa fa-trash"></che-button-warning>
+        </textarea>
+
+        <p>Selected value of toggle is : {{demoComponentsCtrl.selectedToggle}}</p>
+        <che-toggle ng-init="demoComponentsCtrl.selectedToggle='Public'" ng-model="demoComponentsCtrl.selectedToggle">
+          <che-toggle-button che-font-icon="fa fa-lock" che-title="Public"></che-toggle-button>
+          <che-toggle-button che-font-icon="fa fa-unlock" che-title="Private"></che-toggle-button>
+        </che-toggle>
+
+      </div>
+    </md-tab>
+
+    <md-tab label="Input">
+
+      <div layout="column" flex ng-form="demoForm">
+        <che-html-source>
+
+          <che-input che-form="demoForm"
+                     che-name="demoinput"
+                     che-label-name="Name"
+                     che-place-holder="Name of this demo"
+                     ng-model="demoComponentsCtrl.selectedInput"
+                     required
+                     ng-maxlength="128"
+                     ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
+            <div ng-message="required">A name is required.</div>
+            <div ng-message="pattern">The name should not contain special characters like space, dollar, etc.</div>
+            <div ng-message="maxlength">The name has to be less than 128 characters long.</div>
+            <div ng-message="md-maxlength">The name has to be less than 128 characters long.</div>
+          </che-input>
+        </che-html-source>
+      </div>
+
+    </md-tab>
+
+    <md-tab label="List">
+
+      <div layout="column">
+        <che-html-source>
+
+          <che-list style="margin: 10px; width: 200px">
+            <che-list-item ng-repeat="document in demoComponentsCtrl.listItemsDocs">
+              <div layout="row" flex="100" style="height: 24px; margin: 5px">
+                <che-list-item-checked flex="20" che-icon="md-font fa fa-file-text-o"
+                                       style="font-size: 20px"></che-list-item-checked>
+                <div flex="80" style="height: 20px">{{document}}</div>
+              </div>
+            </che-list-item>
+          </che-list>
+
+          <che-list style="margin: 10px; width: 200px">
+            <che-list-item ng-repeat="task in demoComponentsCtrl.listItemsTasks">
+              <div layout="row" flex="100" style="height: 24px; margin: 5px">
+                <div flex="70">{{task.name}}</div>
+                <che-list-item-checked flex="30" ng-model="task.done"></che-list-item-checked>
+              </div>
+            </che-list-item>
+          </che-list>
+        </che-html-source>
+      </div>
+
+    </md-tab>
+
+  </md-tabs>
+</md-content>

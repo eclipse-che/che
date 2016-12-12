@@ -800,7 +800,7 @@ public final class ResourceManager {
     }
 
     protected Promise<Optional<File>> getFile(final Path absolutePath) {
-        return findResource(absolutePath, false).then(new Function<Optional<Resource>, Optional<File>>() {
+        return findResource(absolutePath, true).then(new Function<Optional<Resource>, Optional<File>>() {
             @Override
             public Optional<File> apply(Optional<Resource> optional) throws FunctionException {
                 if (optional.isPresent()) {
@@ -890,8 +890,8 @@ public final class ResourceManager {
         File file = (File)resource;
 
         for (EditorPartPresenter editor : editorAgent.getOpenedEditors()) {
-            String editorPath = editor.getEditorInput().getFile().getLocation().toString();
-            if (editorPath.equals(file.getPath())) {
+            Path editorPath = editor.getEditorInput().getFile().getLocation();
+            if (editorPath.equals(file.getLocation())) {
                 return true;
             }
         }

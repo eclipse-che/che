@@ -101,7 +101,7 @@ public class GoToSymbolAction extends AbstractPerspectiveAction implements Quick
     public void actionPerformed(ActionEvent e) {
         DocumentSymbolParamsDTO paramsDTO = dtoFactory.createDto(DocumentSymbolParamsDTO.class);
         TextDocumentIdentifierDTO identifierDTO = dtoFactory.createDto(TextDocumentIdentifierDTO.class);
-        identifierDTO.setUri(editorAgent.getActiveEditor().getEditorInput().getFile().getPath());
+        identifierDTO.setUri(editorAgent.getActiveEditor().getEditorInput().getFile().getLocation().toString());
         paramsDTO.setTextDocument(identifierDTO);
         activeEditor = (TextEditor)editorAgent.getActiveEditor();
         cursorPosition = activeEditor.getDocument().getCursorPosition();
