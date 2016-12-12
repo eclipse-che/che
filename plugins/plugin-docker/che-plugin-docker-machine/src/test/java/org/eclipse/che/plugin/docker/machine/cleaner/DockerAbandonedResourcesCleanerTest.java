@@ -16,6 +16,8 @@ import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.json.ContainerListEntry;
+import org.eclipse.che.plugin.docker.client.json.network.ContainerInNetwork;
+import org.eclipse.che.plugin.docker.client.json.network.Network;
 import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator;
 import org.mockito.InjectMocks;
@@ -27,24 +29,30 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static java.util.Arrays.asList;
 import static java.util.Optional.of;
 import static org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator.ContainerNameInfo;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * Test for {@link DockerContainerCleaner}
+ * Test for {@link DockerAbandonedResourcesCleaner}
  *
  * @author Alexander Andrienko
  */
 @Listeners(MockitoTestNGListener.class)
-public class DockerContainerCleanerTest {
+public class DockerAbandonedResourcesCleanerTest {
 
     private static final String machineId1   = "machineid1";
     private static final String workspaceId1 = "workspaceid1";
@@ -93,7 +101,7 @@ public class DockerContainerCleanerTest {
     private ContainerNameInfo containerNameInfo3;
 
     @InjectMocks
-    private DockerContainerCleaner cleaner;
+    private DockerAbandonedResourcesCleaner cleaner;
 
     @BeforeMethod
     public void setUp() throws Exception {
@@ -177,4 +185,40 @@ public class DockerContainerCleanerTest {
 
         verify(dockerConnector, never()).removeContainer(Matchers.anyObject());
     }
+
+    @Test
+    public void shouldRemoveOnlyAbandonedNetworks() throws IOException {
+        // given
+        final String abandonedNetworkId = "network1234";
+        final String usedNetworkId = "network4321";
+
+        final Map<String, ContainerInNetwork> abandonedNetworkContainers = new HashMap<>();
+        final Map<String, ContainerInNetwork> usedNetworkContainers = new HashMap<>();
+        usedNetworkContainers.put("containerId4321", new ContainerInNetwork());
+
+        final Network abandonedNetwork = mock(Network.class);
+        final Network usedNetwork = mock(Network.class);
+        final List<Network> networks = new ArrayList<>();
+        networks.add(abandonedNetwork);
+        networks.add(usedNetwork);
+
+        when(dockerConnector.getNetworks(any())).thenReturn(networks);
+
+        when(abandonedNetwork.getName()).thenReturn("workspace1234_an12id");
+        when(usedNetwork.getName()).thenReturn("workspace4321_un21id");
+
+        when(abandonedNetwork.getId()).thenReturn(abandonedNetworkId);
+        when(usedNetwork.getId()).thenReturn(usedNetworkId);
+
+        when(abandonedNetwork.getContainers()).thenReturn(abandonedNetworkContainers);
+        when(usedNetwork.getContainers()).thenReturn(usedNetworkContainers);
+
+        // when
+        cleaner.run();
+
+        // then
+        verify(dockerConnector).removeNetwork(abandonedNetworkId);
+        verify(dockerConnector, never()).removeNetwork(usedNetworkId);
+    }
+
 }

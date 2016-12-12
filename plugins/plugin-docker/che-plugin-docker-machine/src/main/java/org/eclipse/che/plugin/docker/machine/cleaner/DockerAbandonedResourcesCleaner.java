@@ -18,6 +18,8 @@ import org.eclipse.che.api.environment.server.CheEnvironmentEngine;
 import org.eclipse.che.commons.schedule.ScheduleRate;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.json.ContainerListEntry;
+import org.eclipse.che.plugin.docker.client.json.Filters;
+import org.eclipse.che.plugin.docker.client.params.network.GetNetworksParams;
 import org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,14 +35,21 @@ import static org.eclipse.che.plugin.docker.client.params.RemoveContainerParams.
 import static org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator.ContainerNameInfo;
 
 /**
- * Job for periodically clean up inactive docker containers and log list active containers.
+ * Job for periodically clean up abandoned docker containers and networks created by CHE.
+ * Also, logs active containers list.
  *
  * @author Alexander Andrienko
+ * @author Mykola Morhun
  */
 @Singleton
-public class DockerContainerCleaner implements Runnable {
+public class DockerAbandonedResourcesCleaner implements Runnable {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DockerContainerCleaner.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DockerAbandonedResourcesCleaner.class);
+
+    private static final String            CHE_NETWORK_NAME_PREFIX = "workspace";
+    private static final Filters           NETWORK_FILTERS         = new Filters().withFilter("type", "custom")
+                                                                                  .withFilter("name", CHE_NETWORK_NAME_PREFIX);
+    private static final GetNetworksParams GET_NETWORKS_PARAMS     = GetNetworksParams.create().withFilters(NETWORK_FILTERS);
 
     // TODO replace with WorkspaceManager
     private final CheEnvironmentEngine         environmentEngine;
@@ -48,19 +57,27 @@ public class DockerContainerCleaner implements Runnable {
     private final DockerContainerNameGenerator nameGenerator;
 
     @Inject
-    public DockerContainerCleaner(CheEnvironmentEngine environmentEngine,
-                                  DockerConnector dockerConnector,
-                                  DockerContainerNameGenerator nameGenerator) {
+    public DockerAbandonedResourcesCleaner(CheEnvironmentEngine environmentEngine,
+                                           DockerConnector dockerConnector,
+                                           DockerContainerNameGenerator nameGenerator) {
         this.environmentEngine = environmentEngine;
         this.dockerConnector = dockerConnector;
         this.nameGenerator = nameGenerator;
     }
 
-    @ScheduleRate(periodParameterName = "che.docker.unused_containers_cleanup_min",
-                  initialDelayParameterName = "che.docker.unused_containers_cleanup_min",
+    @ScheduleRate(periodParameterName = "che.docker.unused_resources_cleanup_period_minutes", // TODO rename 'che.docker.unused_containers_cleanup_min' to 'che.docker.unused_resources_cleanup_period_minutes'
+                  initialDelay = 0L,
                   unit = TimeUnit.MINUTES)
     @Override
     public void run() {
+        cleanContainers();
+        cleanNetworks();
+    }
+
+    /**
+     * Cleans up CHE docker containers which don't tracked by API any more.
+     */
+    private void cleanContainers() {
         List<String> activeContainers = new ArrayList<>();
         try {
             for (ContainerListEntry container : dockerConnector.listContainers()) {
@@ -73,7 +90,7 @@ public class DockerContainerCleaner implements Runnable {
                                                      optional.get().getMachineId());
                         activeContainers.add(containerName);
                     } catch (NotFoundException e) {
-                        cleanUp(container);
+                        cleanUpContainer(container);
                     } catch (Exception e) {
                         LOG.error(format("Failed to check activity for container with name '%s'. Cause: %s",
                                          containerName, e.getLocalizedMessage()), e);
@@ -88,7 +105,7 @@ public class DockerContainerCleaner implements Runnable {
         LOG.info("List containers registered in the api: " + activeContainers);
     }
 
-    private void cleanUp(ContainerListEntry container) {
+    private void cleanUpContainer(ContainerListEntry container) {
         String containerId = container.getId();
         String containerName = container.getNames()[0];
 
@@ -115,4 +132,28 @@ public class DockerContainerCleaner implements Runnable {
             LOG.error(format("Failed to delete unused container with 'id': '%s' and 'name': '%s'", containerId, containerName), e);
         }
     }
+
+    /**
+     * Deletes all abandoned CHE networks.
+     * Abandoned networks appear when workspaces were stopped unexpectedly,
+     * for example, restart docker, turn off PC, etc.
+     * A network is considered abandoned when it doesn't contain a container.
+     * To do this job more efficiently, it should be invoked after cleaning of abandoned containers.
+     */
+    private void cleanNetworks() {
+        try {
+            dockerConnector.getNetworks(GET_NETWORKS_PARAMS).stream()
+                           .filter(network -> network.getName().startsWith(CHE_NETWORK_NAME_PREFIX) && network.getContainers().isEmpty())
+                           .forEach(network -> {
+                               try {
+                                   dockerConnector.removeNetwork(network.getId());
+                               } catch (IOException e) {
+                                   LOG.warn("Failed to remove abandoned network: %s", network.getName());
+                               }
+                           });
+        } catch (IOException e) {
+            LOG.error("Failed to get list of docker networks", e);
+        }
+    }
+
 }

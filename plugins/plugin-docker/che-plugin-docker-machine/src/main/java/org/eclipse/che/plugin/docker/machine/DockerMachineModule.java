@@ -18,6 +18,7 @@ import com.google.inject.name.Names;
 
 import org.eclipse.che.api.core.model.machine.ServerConf;
 import org.eclipse.che.api.environment.server.TypeSpecificEnvironmentParser;
+import org.eclipse.che.plugin.docker.machine.cleaner.DockerAbandonedResourcesCleaner;
 import org.eclipse.che.plugin.docker.machine.parser.DockerImageEnvironmentParser;
 import org.eclipse.che.plugin.docker.machine.parser.DockerfileEnvironmentParser;
 
@@ -31,7 +32,7 @@ import java.util.Set;
 public class DockerMachineModule extends AbstractModule {
     @Override
     protected void configure() {
-        bind(org.eclipse.che.plugin.docker.machine.cleaner.DockerContainerCleaner.class);
+        bind(DockerAbandonedResourcesCleaner.class);
         bind(org.eclipse.che.plugin.docker.machine.cleaner.RemoveWorkspaceFilesAfterRemoveWorkspaceEventSubscriber.class);
 
         Multibinder<String> devMachineEnvVars = Multibinder.newSetBinder(binder(),
