@@ -17,7 +17,7 @@ public final class Constants {
     /**
      * Options for run command
      */
-    public static final String RUN_PARAMETERS_ATTRIBUTE = "run-parameters";
+    public static final String RUN_PARAMETERS_ATTRIBUTE = "run.parameters";
     /**
      * Language attribute name
      */
