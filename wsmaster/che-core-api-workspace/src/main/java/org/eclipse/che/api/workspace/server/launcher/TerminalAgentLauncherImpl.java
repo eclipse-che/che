@@ -44,8 +44,9 @@ public class TerminalAgentLauncherImpl extends AbstractAgentLauncher {
 
     @Override
     public void launch(Instance machine, Agent agent) throws ServerException {
-        final AgentImpl agentWithRunCommand = addRunCommandToAgentScript(agent);
-        super.launch(machine, agentWithRunCommand);
+        final AgentImpl agentCopy = new AgentImpl(agent);
+        agentCopy.setScript(agent.getScript() + "\n" + runCommand);
+        super.launch(machine, agentCopy);
     }
 
     @Override
@@ -56,11 +57,5 @@ public class TerminalAgentLauncherImpl extends AbstractAgentLauncher {
     @Override
     public String getAgentId() {
         return "org.eclipse.che.terminal";
-    }
-
-    protected AgentImpl addRunCommandToAgentScript(Agent agent) {
-        final AgentImpl agentCopy = new AgentImpl(agent);
-        agentCopy.setScript(agent.getScript() + "\n" + runCommand);
-        return agentCopy;
     }
 }

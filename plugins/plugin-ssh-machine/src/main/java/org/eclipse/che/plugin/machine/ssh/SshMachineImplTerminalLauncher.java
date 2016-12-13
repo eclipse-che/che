@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.machine.ssh;
 
-import org.eclipse.che.api.agent.server.model.impl.AgentImpl;
 import org.eclipse.che.api.agent.server.terminal.WebsocketTerminalFilesPathProvider;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.core.ConflictException;
@@ -73,8 +72,7 @@ public class SshMachineImplTerminalLauncher extends TerminalAgentLauncherImpl {
             String architecture = detectArchitecture(machine);
             machine.copy(archivePathProvider.getPath(architecture), terminalLocation);
 
-            final AgentImpl agentWithRunCommand = addRunCommandToAgentScript(agent);
-            super.launch(machine, agentWithRunCommand);
+            super.launch(machine, agent);
         } catch (ConflictException e) {
             // should never happen
             throw new ServerException("Internal server error occurs on terminal launching.");
