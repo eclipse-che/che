@@ -17,7 +17,7 @@ import org.eclipse.che.api.environment.server.model.CheServiceImpl;
 import org.eclipse.che.api.environment.server.model.CheServicesEnvironmentImpl;
 
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -29,7 +29,8 @@ import static java.lang.String.format;
 /**
  * Finds order of Che services to start that respects dependencies between services.
  *
- * author Alexander Garagatyi
+ * @author Alexander Garagatyi
+ * @author Alexander Andrienko
  */
 public class DefaultServicesStartStrategy {
     /**
@@ -55,7 +56,6 @@ public class DefaultServicesStartStrategy {
             throws IllegalArgumentException {
 
         HashMap<String, Integer> weights = new HashMap<>();
-        Set<String> machinesLeft = new HashSet<>(services.keySet());
 
         // create machines dependency graph
         Map<String, Set<String>> dependencies = new HashMap<>(services.size());
@@ -67,32 +67,20 @@ public class DefaultServicesStartStrategy {
                                                                               service.getVolumesFrom().size());
 
             for (String dependsOn : service.getDependsOn()) {
-                if (!services.containsKey(dependsOn)) {
-                    throw new IllegalArgumentException(
-                            format("Dependency '%s' in machine '%s' points to not known machine.",
-                                   dependsOn, serviceEntry.getKey()));
-                }
+                checkDependency(dependsOn, serviceEntry.getKey(), services, "A machine can not depend on itself");
                 machineDependencies.add(dependsOn);
             }
 
             // links also counts as dependencies
             for (String link : service.getLinks()) {
                 String dependency = getServiceFromLink(link);
-                if (!services.containsKey(dependency)) {
-                    throw new IllegalArgumentException(
-                            format("Dependency '%s' in machine '%s' points to not known machine.",
-                                   dependency, serviceEntry.getKey()));
-                }
+                checkDependency(dependency, serviceEntry.getKey(), services, "A machine can not link to itself");
                 machineDependencies.add(dependency);
             }
             // volumesFrom also counts as dependencies
             for (String volumesFrom : service.getVolumesFrom()) {
                 String dependency = getServiceFromVolumesFrom(volumesFrom);
-                if (!services.containsKey(dependency)) {
-                    throw new IllegalArgumentException(
-                            format("Dependency '%s' in machine '%s' points to not known machine.",
-                                   dependency, serviceEntry.getKey()));
-                }
+                checkDependency(dependency, serviceEntry.getKey(), services, "A machine can not contain 'volumes_from' to itself");
                 machineDependencies.add(dependency);
             }
             dependencies.put(serviceEntry.getKey(), machineDependencies);
@@ -101,48 +89,36 @@ public class DefaultServicesStartStrategy {
         // Find weight of each machine in graph.
         // Weight of machine is calculated as sum of all weights of machines it depends on.
         // Nodes with no dependencies gets weight 0
-
-        // If this flag is not set during cycle of machine evaluation loop
-        // then no more weight of machine can be evaluated
-        boolean weightEvaluatedInCycleRun = true;
-        while (weights.size() != dependencies.size() && weightEvaluatedInCycleRun) {
-            weightEvaluatedInCycleRun = false;
-            for (String service : dependencies.keySet()) {
+        while (!dependencies.isEmpty()) {
+            int previousSize = dependencies.size();
+            for (Iterator<Map.Entry<String, Set<String>>> it = dependencies.entrySet().iterator(); it.hasNext();) {
                 // process not yet processed machines only
-                if (machinesLeft.contains(service)) {
-                    if (dependencies.get(service).size() == 0) {
-                        // no links - smallest weight 0
-                        weights.put(service, 0);
-                        machinesLeft.remove(service);
-                        weightEvaluatedInCycleRun = true;
-                    } else {
-                        // machine has dependencies - check if it has not weighted dependencies
-                        Optional<String> nonWeightedLink = dependencies.get(service)
-                                                                       .stream()
-                                                                       .filter(machinesLeft::contains)
-                                                                       .findAny();
-                        if (!nonWeightedLink.isPresent()) {
-                            // all connections are weighted - lets evaluate current machine
-                            Optional<String> maxWeight = dependencies.get(service)
-                                                                     .stream()
-                                                                     .max((o1, o2) -> weights.get(o1).compareTo(weights.get(o2)));
-                            // optional can't be empty because size of the list is checked above
-                            //noinspection OptionalGetWithoutIsPresent
-                            weights.put(service, weights.get(maxWeight.get()) + 1);
-                            machinesLeft.remove(service);
-                            weightEvaluatedInCycleRun = true;
-                        }
+                Map.Entry<String, Set<String>> serviceEntry = it.next();
+                String service = serviceEntry.getKey();
+                Set<String> serviceDependencies = serviceEntry.getValue();
+
+                if (serviceDependencies.isEmpty()) {
+                    // no links - smallest weight 0
+                    weights.put(service, 0);
+                    it.remove();
+                } else {
+                    // machine has dependencies - check if it has not weighted dependencies
+                    if (weights.keySet().containsAll(serviceDependencies)) {
+                        // all connections are weighted - lets evaluate current machine
+                        Optional<String> maxWeight = serviceDependencies.stream()
+                                                                        .max((o1, o2) -> weights.get(o1).compareTo(weights.get(o2)));
+                        // optional can't be empty because size of the list is checked above
+                        //noinspection OptionalGetWithoutIsPresent
+                        weights.put(service, weights.get(maxWeight.get()) + 1);
+                        it.remove();
                     }
                 }
             }
-        }
-
-        // Not evaluated weights of machines left.
-        // Probably because of circular dependency.
-        if (weights.size() != services.size()) {
-            throw new IllegalArgumentException("Launch order of machines '" +
-                                               Joiner.on(", ").join(machinesLeft) +
-                                               "' can't be evaluated");
+            if (dependencies.size() == previousSize) {
+                throw new IllegalArgumentException("Launch order of machines '" +
+                                                   Joiner.on(", ").join(dependencies.keySet()) +
+                                                   "' can't be evaluated. Circular dependency.");
+            }
         }
 
         return weights;
@@ -184,5 +160,16 @@ public class DefaultServicesStartStrategy {
                       .sorted((o1, o2) -> o1.getValue().compareTo(o2.getValue()))
                       .map(Map.Entry::getKey)
                       .collect(Collectors.toList());
+    }
+
+    private void checkDependency(String dependency, String serviceName, Map<String, CheServiceImpl> services, String errorMessage) {
+        if (serviceName.equals(dependency)) {
+            throw new IllegalArgumentException(errorMessage + ": " + serviceName);
+        }
+        if (!services.containsKey(dependency)) {
+            throw new IllegalArgumentException(
+                    format("Dependency '%s' in machine '%s' points to unknown machine.",
+                           dependency, serviceName));
+        }
     }
 }
