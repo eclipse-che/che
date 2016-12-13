@@ -47,8 +47,9 @@ public class DockerAbandonedResourcesCleaner implements Runnable {
     private static final Logger LOG = LoggerFactory.getLogger(DockerAbandonedResourcesCleaner.class);
 
     private static final String            CHE_NETWORK_NAME_PREFIX = "workspace";
-    private static final Filters           NETWORK_FILTERS         = new Filters().withFilter("type", "custom")
-                                                                                  .withFilter("name", CHE_NETWORK_NAME_PREFIX);
+    private static final Filters           NETWORK_FILTERS         = new Filters().withFilter("type", "custom");
+                                                                                  // TODO name filter doesn't work with pure docker swarm
+                                                                                  // .withFilter("name", CHE_NETWORK_NAME_PREFIX);
     private static final GetNetworksParams GET_NETWORKS_PARAMS     = GetNetworksParams.create().withFilters(NETWORK_FILTERS);
 
     // TODO replace with WorkspaceManager
@@ -65,7 +66,7 @@ public class DockerAbandonedResourcesCleaner implements Runnable {
         this.nameGenerator = nameGenerator;
     }
 
-    @ScheduleRate(periodParameterName = "che.docker.unused_resources_cleanup_period_minutes",
+    @ScheduleRate(periodParameterName = "che.docker.cleanup_period_mins",
                   initialDelay = 0L,
                   unit = TimeUnit.MINUTES)
     @Override
@@ -142,7 +143,8 @@ public class DockerAbandonedResourcesCleaner implements Runnable {
      */
     private void cleanNetworks() {
         try {
-            dockerConnector.getNetworks(GET_NETWORKS_PARAMS).stream()
+            dockerConnector.getNetworks(GET_NETWORKS_PARAMS)
+                           .stream()
                            .filter(network -> network.getName().startsWith(CHE_NETWORK_NAME_PREFIX) && network.getContainers().isEmpty())
                            .forEach(network -> {
                                try {
