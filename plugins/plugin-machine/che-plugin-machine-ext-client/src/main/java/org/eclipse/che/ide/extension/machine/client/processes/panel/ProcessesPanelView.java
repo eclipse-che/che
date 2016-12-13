@@ -90,6 +90,9 @@ public interface ProcessesPanelView extends View<ProcessesPanelView.ActionDelega
     /** Removes all process widgets from the view */
     void clear();
 
+    /** Sets visibility for processes tree */
+    void setProcessesTreeVisible(boolean visible);
+
     interface ActionDelegate extends BaseActionDelegate {
 
         /**
@@ -147,7 +150,7 @@ public interface ProcessesPanelView extends View<ProcessesPanelView.ActionDelega
         void onCommandTabClosing(ProcessTreeNode node, SubPanel.RemoveCallback removeCallback);
 
         /**
-         * Is called when user clicked right mouse button.
+         * Is called when user has clicked right mouse button.
          *
          * @param mouseX
          *         mouse x coordinate
@@ -157,5 +160,12 @@ public interface ProcessesPanelView extends View<ProcessesPanelView.ActionDelega
          *         process tree node
          */
         void onContextMenu(int mouseX, int mouseY, ProcessTreeNode node);
+
+        /**
+         * Is called when user has double clicked on console tab to maximize/restore the console.
+         */
+        void onToggleMaximizeConsole();
+
     }
+
 }

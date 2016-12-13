@@ -21,7 +21,6 @@ get_container_folder() {
   echo "${FOLDER:=not set}"
 }
 
-
 get_this_container_id() {
   hostname
 }
@@ -56,7 +55,6 @@ get_container_host_bind_folder() {
     esac
   done
 }
-
 
 get_docker_install_type() {
   debug $FUNCNAME
@@ -167,11 +165,16 @@ wait_until_container_is_running() {
   done
 }
 
-
 check_docker() {
   if ! has_docker; then
     error "Docker not found. Get it at https://docs.docker.com/engine/installation/."
     return 1;
+  fi
+
+  CHECK_VERSION=$(docker ps 2>&1 || true)
+  if [[ "$CHECK_VERSION" = *"Error response from daemon: client is newer"* ]]; then
+    error "Error - Docker engine 1.10+ required."
+    return 2;
   fi
 
   # If DOCKER_HOST is not set, then it should bind mounted
@@ -179,26 +182,17 @@ check_docker() {
     if ! docker ps > /dev/null 2>&1; then
       info "Welcome to ${CHE_FORMAL_PRODUCT_NAME}!"
       info ""
-      info "$CHE_FORMAL_PRODUCT_NAME commands require additional parameters:"
-      info "  Mounting 'docker.sock', which let's us access Docker"
+      info "You are missing a mandatory parameter:"
+      info "   1. Mount 'docker.sock' for accessing Docker with unix sockets."
+      info "   2. Or, set DOCKER_HOST to Docker's daemon location (unix or tcp)."
       info ""
-      info "Syntax:"
-      info "  docker run -it --rm ${BOLD} -v /var/run/docker.sock:/var/run/docker.sock${NC}"
-      info "                  $CHE_MINI_PRODUCT_NAME/cli $*"
+      info "Mount Syntax:"
+      info "   Start with 'docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock' ..."
+      info ""
+      info "DOCKER_HOST Syntax:"
+      info "   Start with 'docker run -it --rm -e DOCKER_HOST=<daemon-location> ...'"
       return 2;
     fi
-  fi
-
-  DOCKER_VERSION=($(docker version |  grep  "Version:" | sed 's/Version://'))
-
-  MAJOR_VERSION_ID=$(echo ${DOCKER_VERSION[0]:0:1})
-  MINOR_VERSION_ID=$(echo ${DOCKER_VERSION[0]:2:2})
-
-  # Docker needs to be greater than or equal to 1.11
-  if [[ ${MAJOR_VERSION_ID} -lt 1 ]] ||
-     [[ ${MINOR_VERSION_ID} -lt 11 ]]; then
-       error "Error - Docker engine 1.11+ required."
-       return 2;
   fi
 
   # Detect version so that we can provide better error warnings
@@ -217,28 +211,61 @@ check_docker() {
   CHE_VERSION=$CHE_IMAGE_VERSION
 }
 
+check_docker_networking() {
+  # Check to see if HTTP_PROXY, HTTPS_PROXY, and NO_PROXY is set within the Docker daemon.
+  OUTPUT=$(docker info)
+  HTTP_PROXY=$(grep "Http Proxy" <<< "$OUTPUT" || true) 
+  if [ ! -z "$HTTP_PROXY" ]; then
+    HTTP_PROXY=${HTTP_PROXY#"Http Proxy: "}
+  else 
+    HTTP_PROXY=""
+  fi
+
+  HTTPS_PROXY=$(grep "Https Proxy" <<< "$OUTPUT" || true) 
+  if [ ! -z "$HTTPS_PROXY" ]; then
+    HTTPS_PROXY=${HTTPS_PROXY#"Https Proxy: "}
+  else
+    HTTPS_PROXY=""
+  fi
+
+  NO_PROXY=$(grep "No Proxy" <<< "$OUTPUT" || true) 
+  if [ ! -z "$NO_PROXY" ]; then
+    NO_PROXY=${NO_PROXY#"No Proxy: "}
+  else
+    NO_PROXY=""
+  fi
+
+  if [[ ! ${HTTP_PROXY} = "" ]] ||
+     [[ ! ${HTTPS_PROXY} = "" ]] ||
+     [[ ! ${NO_PROXY} = "" ]]; then
+     info "Proxy: HTTP_PROXY=${HTTP_PROXY}, HTTPS_PROXY=${HTTPS_PROXY}, NO_PROXY=${NO_PROXY}"
+  fi
+
+  export http_proxy=$HTTP_PROXY
+  export https_proxy=$HTTPS_PROXY
+  export no_proxy=$NO_PROXY
+}
+
+check_interactive() {
+  # Detect and verify that the CLI container was started with -it option.
+  if [ ! -t 1 ]; then
+    warning "Did not detect TTY - interactive mode disabled"
+  fi
+}
 
 check_mounts() {
-
-  # Verify that we can write to the host file system from the container
-  check_host_volume_mount
-
   DATA_MOUNT=$(get_container_folder ":${CHE_CONTAINER_ROOT}")
   INSTANCE_MOUNT=$(get_container_folder ":${CHE_CONTAINER_ROOT}/instance")
   BACKUP_MOUNT=$(get_container_folder ":${CHE_CONTAINER_ROOT}/backup")
   REPO_MOUNT=$(get_container_folder ":/repo")
-  CLI_MOUNT=$(get_container_folder ":/cli")
   SYNC_MOUNT=$(get_container_folder ":/sync")
   UNISON_PROFILE_MOUNT=$(get_container_folder ":/unison")
 
   if [[ "${DATA_MOUNT}" = "not set" ]]; then
     info "Welcome to $CHE_FORMAL_PRODUCT_NAME!"
     info ""
-    info "We need some information before we can start ${CHE_FORMAL_PRODUCT_NAME}."
-    info ""
-    info "$CHE_FORMAL_PRODUCT_NAME commands require additional parameters:"
-    info "  1: Mounting 'docker.sock', which let's us access Docker"
-    info "  2: A local path where ${CHE_FORMAL_PRODUCT_NAME} will save user data"
+    info "We could not detect a location to save data."
+    info "Volume mount a local directory to ':${CHE_CONTAINER_ROOT}'."
     info ""
     info "Simplest syntax:"
     info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock"
@@ -246,7 +273,7 @@ check_mounts() {
     info "                         ${CHE_IMAGE_FULLNAME} $*"
     info ""
     info ""
-    info "Or run with overrides for instance and/or backup:"
+    info "Or, run with additional overrides:"
     info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock"
     info "                      -v <YOUR_LOCAL_PATH>:${CHE_CONTAINER_ROOT}"
     info "                      -v <YOUR_INSTANCE_PATH>:${CHE_CONTAINER_ROOT}/instance"
@@ -254,6 +281,9 @@ check_mounts() {
     info "                         ${CHE_IMAGE_FULLNAME} $*"
     return 2;
   fi
+
+  # Verify that we can write to the host file system from the container
+  check_host_volume_mount
 
   DEFAULT_CHE_CONFIG="${DATA_MOUNT}"
   DEFAULT_CHE_INSTANCE="${DATA_MOUNT}"/instance
@@ -291,7 +321,7 @@ check_mounts() {
       info ""
       info "You volume mounted ':/repo', but we did not detect a valid ${CHE_FORMAL_PRODUCT_NAME} source repo."
       info ""
-      info "Volume mounting ':/repo' activate dev mode, using assembly and CLI files from $CHE_FORMAL_PRODUCT_NAME repo."
+      info "Volume mounting ':/repo' activates dev mode, using assembly and CLI files from $CHE_FORMAL_PRODUCT_NAME repo."
       info ""
       info "Please check the path you mounted to verify that is a valid $CHE_FORMAL_PRODUCT_NAME git repository."
       info ""

@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.context;
 
 import com.google.common.collect.Sets;
+import com.google.gwt.core.client.Callback;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -20,6 +21,7 @@ import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentUser;
 import org.eclipse.che.ide.api.app.StartUpAction;
@@ -45,6 +47,7 @@ import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.project.node.SyntheticNode;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.resources.ResourceManagerInitializer;
 import org.eclipse.che.ide.resources.impl.ResourceDeltaImpl;
 import org.eclipse.che.ide.resources.impl.ResourceManager;
 import org.eclipse.che.ide.statepersistance.AppStateManager;
@@ -79,7 +82,8 @@ public class AppContextImpl implements AppContext,
                                        ResourceChangedHandler,
                                        WindowActionHandler,
                                        WorkspaceStartedEvent.Handler,
-                                       WorkspaceStoppedEvent.Handler {
+                                       WorkspaceStoppedEvent.Handler,
+                                       ResourceManagerInitializer {
 
     private final BrowserQueryFieldRenderer browserQueryFieldRenderer;
     private final List<String>              projectsInImport;
@@ -193,6 +197,16 @@ public class AppContextImpl implements AppContext,
             return;
         }
 
+        this.devMachine = devMachine;
+    }
+
+    @Override
+    public void initResourceManager(final Callback<ResourceManager, Exception> callback) {
+        if (devMachine == null) {
+            //should never happened, but anyway
+            callback.onFailure(new NullPointerException("Dev machine is not initialized"));
+        }
+
         browserQueryFieldRenderer.setProjectName("");
 
         if (projects != null) {
@@ -202,15 +216,19 @@ public class AppContextImpl implements AppContext,
             projects = null;
         }
 
-        this.devMachine = devMachine;
-
         resourceManager = resourceManagerFactory.newResourceManager(devMachine);
         resourceManager.getWorkspaceProjects().then(new Operation<Project[]>() {
             @Override
             public void apply(Project[] projects) throws OperationException {
                 AppContextImpl.this.projects = projects;
                 java.util.Arrays.sort(AppContextImpl.this.projects, ResourcePathComparator.getInstance());
+                callback.onSuccess(resourceManager);
                 eventBus.fireEvent(new WorkspaceReadyEvent(projects));
+            }
+        }).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError error) throws OperationException {
+                callback.onFailure((Exception)error.getCause());
             }
         });
     }

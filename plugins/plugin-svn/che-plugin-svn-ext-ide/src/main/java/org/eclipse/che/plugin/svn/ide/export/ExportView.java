@@ -22,7 +22,7 @@ import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
 public interface ExportView extends View<ExportView.ActionDelegate> {
 
     /** Action handler for the view actions/controls. */
-    public interface ActionDelegate extends BaseActionDelegate {
+    interface ActionDelegate {
         /** Perform actions when cancel button clicked. */
         void onCancelClicked();
 

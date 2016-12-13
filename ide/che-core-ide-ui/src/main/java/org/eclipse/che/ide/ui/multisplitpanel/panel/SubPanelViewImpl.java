@@ -319,6 +319,15 @@ public class SubPanelViewImpl extends Composite implements SubPanelView,
         }
     }
 
+    @Override
+    public void onTabDoubleClicked(Tab tab) {
+        final WidgetToShow widget = tabs2Widgets.get(tab);
+        if (widget != null) {
+            activateWidget(widget);
+            delegate.onWidgetDoubleClicked(widget.getWidget());
+        }
+    }
+
     private void selectTab(Tab tab) {
         for (Tab tabItem : tabs2Widgets.keySet()) {
             tabItem.unSelect();

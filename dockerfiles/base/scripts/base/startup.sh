@@ -28,7 +28,7 @@ init_constants() {
   CHE_FORMAL_PRODUCT_NAME=${CHE_FORMAL_PRODUCT_NAME:-${DEFAULT_CHE_FORMAL_PRODUCT_NAME}}
 
   # Path to root folder inside the container
-  DEFAULT_CHE_CONTAINER_ROOT="/${CHE_MINI_PRODUCT_NAME}"
+  DEFAULT_CHE_CONTAINER_ROOT="/data"
   CHE_CONTAINER_ROOT=${CHE_CONTAINER_ROOT:-${DEFAULT_CHE_CONTAINER_ROOT}}
 
   # Turns on stack trace
@@ -59,6 +59,26 @@ init_constants() {
   DEFAULT_CHE_LICENSE_URL="https://www.eclipse.org/legal/epl-v10.html"
   CHE_LICENSE_URL=${CHE_LICENSE_URL:-${DEFAULT_CHE_LICENSE_URL}}
 
+  DEFAULT_CHE_IMAGE_FULLNAME="eclipse/che-cli:<version>"
+  CHE_IMAGE_FULLNAME=${CHE_IMAGE_FULLNAME:-${DEFAULT_CHE_IMAGE_FULLNAME}}
+
+  # Constants
+  CHE_MANIFEST_DIR="/version"
+  CHE_VERSION_FILE="${CHE_MINI_PRODUCT_NAME}.ver.do_not_modify"
+  CHE_ENVIRONMENT_FILE="${CHE_MINI_PRODUCT_NAME}.env"
+  CHE_COMPOSE_FILE="docker-compose-container.yml"
+
+  DEFAULT_CHE_SERVER_CONTAINER_NAME="${CHE_MINI_PRODUCT_NAME}"
+  CHE_SERVER_CONTAINER_NAME="${CHE_SERVER_CONTAINER_NAME:-${DEFAULT_CHE_SERVER_CONTAINER_NAME}}"
+
+  CHE_BACKUP_FILE_NAME="${CHE_MINI_PRODUCT_NAME}_backup.tar.gz"
+  CHE_COMPOSE_STOP_TIMEOUT="180"
+
+  DEFAULT_CHE_CLI_ACTION="help"
+  CHE_CLI_ACTION=${CHE_CLI_ACTION:-${DEFAULT_CHE_CLI_ACTION}}
+
+  DEFAULT_CHE_LICENSE=false
+  CHE_LICENSE=${CHE_LICENSE:-${DEFAULT_CHE_LICENSE}}
 }
 
 
@@ -73,8 +93,9 @@ log() {
   fi
 }
 
-usage () {
+usage() {
   debug $FUNCNAME
+  init_usage
   printf "%s" "${USAGE}"
   return 1;
 }
@@ -193,7 +214,7 @@ is_debug() {
 
 init_logging() {
   # Initialize CLI folder
-  CLI_DIR="/cli"
+  CLI_DIR=$CHE_CONTAINER_ROOT
   test -d "${CLI_DIR}" || mkdir -p "${CLI_DIR}"
 
   # Ensure logs folder exists
@@ -209,6 +230,11 @@ init_logging() {
 init() {
   init_constants
 
+  # If there are no parameters, immediately display usage
+  if [[ $# == 0 ]]; then
+    usage;
+  fi
+
   SCRIPTS_BASE_CONTAINER_SOURCE_DIR="/scripts/base"
   # add helper scripts
   for HELPER_FILE in "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/*.sh
@@ -218,11 +244,12 @@ init() {
 
   # Make sure Docker is working and we have /var/run/docker.sock mounted or valid DOCKER_HOST
   check_docker "$@"
+  
+  # Check to see if Docker is configured with a proxy and pull values
+  check_docker_networking
 
-  init_usage
-  if [[ $# == 0 ]]; then
-    usage;
-  fi
+  # Verify that -i is passed on the command line
+  check_interactive "$@"
 
   # Only verify mounts after Docker is confirmed to be working.
   check_mounts "$@"
@@ -249,8 +276,81 @@ init() {
   done
 
   source "${SCRIPTS_CONTAINER_SOURCE_DIR}"/cli.sh
+
+  # If offline mode, then load dependent images from disk and populate the local Docker cache.
+  # If not in offline mode, verify that we have access to DockerHub.
+  initiate_offline_or_network_mode "$@"
+
+  # Pull the list of images that are necessary. If in offline mode, verifies that the images
+  # are properly loaded into the cache.
+  grab_initial_images
 }
 
+cli_init() {
+  CHE_HOST=$(eval "echo \$${CHE_PRODUCT_NAME}_HOST")
+  CHE_PORT=$(eval "echo \$${CHE_PRODUCT_NAME}_PORT")
+
+  if [[ "$(eval "echo \$${CHE_PRODUCT_NAME}_HOST")" = "" ]]; then
+    info "Welcome to $CHE_FORMAL_PRODUCT_NAME!"
+    info ""
+    info "We did not auto-detect a valid HOST or IP address."
+    info "Pass ${CHE_PRODUCT_NAME}_HOST with your hostname or IP address."
+    info ""
+    info "Rerun the CLI:"
+    info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock"
+    info "                      -v <local-path>:${CHE_CONTAINER_ROOT}"
+    info "                      -e ${CHE_PRODUCT_NAME}_HOST=<your-ip-or-host>"
+    info "                         $CHE_IMAGE_FULLNAME $*"
+    return 2;
+  fi
+
+  # Derived variablea
+  REFERENCE_HOST_ENVIRONMENT_FILE="${CHE_HOST_CONFIG}/${CHE_ENVIRONMENT_FILE}"
+  REFERENCE_HOST_COMPOSE_FILE="${CHE_HOST_INSTANCE}/${CHE_COMPOSE_FILE}"
+  REFERENCE_CONTAINER_ENVIRONMENT_FILE="${CHE_CONTAINER_CONFIG}/${CHE_ENVIRONMENT_FILE}"
+  REFERENCE_CONTAINER_COMPOSE_FILE="${CHE_CONTAINER_INSTANCE}/${CHE_COMPOSE_FILE}"
+
+  CHE_CONTAINER_OFFLINE_FOLDER="/${CHE_CONTAINER_INSTANCE}/backup"
+  CHE_HOST_OFFLINE_FOLDER="${CHE_HOST_INSTANCE}/backup"
+
+  CHE_HOST_CONFIG_MANIFESTS_FOLDER="${CHE_HOST_INSTANCE}/manifests"
+  CHE_CONTAINER_CONFIG_MANIFESTS_FOLDER="${CHE_CONTAINER_INSTANCE}/manifests"
+
+  CHE_HOST_CONFIG_MODULES_FOLDER="${CHE_HOST_INSTANCE}/modules"
+  CHE_CONTAINER_CONFIG_MODULES_FOLDER="${CHE_CONTAINER_INSTANCE}/modules"
+
+  # TODO: Change this to use the current folder or perhaps ~?
+  if is_boot2docker && has_docker_for_windows_client; then
+    if [[ "${CHE_HOST_INSTANCE,,}" != *"${USERPROFILE,,}"* ]]; then
+      CHE_HOST_INSTANCE=$(get_mount_path "${USERPROFILE}/.${CHE_MINI_PRODUCT_NAME}/")
+      warning "Boot2docker for Windows - CHE_INSTANCE set to $CHE_HOST_INSTANCE"
+    fi
+    if [[ "${CHE_HOST_CONFIG,,}" != *"${USERPROFILE,,}"* ]]; then
+      CHE_HOST_CONFIG=$(get_mount_path "${USERPROFILE}/.${CHE_MINI_PRODUCT_NAME}/")
+      warning "Boot2docker for Windows - CHE_CONFIG set to $CHE_HOST_CONFIG"
+    fi
+  fi
+
+  # Do not perform a version compatibility check if running upgrade command.
+  # The upgrade command has its own internal checks for version compatibility.
+  if [ $1 != "upgrade" ]; then
+    verify_version_compatibility
+  else
+    verify_version_upgrade_compatibility
+  fi
+}
+
+cleanup() {
+  RETURN_CODE=$?
+
+  # CLI developers should only return '3' in code after the init() method has completed.
+  # This will check to see if the CLI directory is not mounted and only offer the error
+  # message if it isn't currently mounted.
+  if [ $RETURN_CODE -eq "3" ]; then
+    error ""
+    error "Unexpected exit: Trace output saved to $CHE_HOST_CONFIG/cli.log."
+  fi
+}
 
 start() {
   # Bootstrap enough stuff to load /cli/cli.sh
@@ -258,13 +358,20 @@ start() {
 
   # Begin product-specific CLI calls
   info "cli" "Loading cli..."
+
+  # The pre_init method is unique to each assembly. This method must be provided by 
+  # a custom CLI assembly in their container and can set global variables which are 
+  # specific to that implementation of the CLI. This method must be called after
+  # networking has been established and initial images downloaded.
   cli_pre_init
+
   cli_init "$@"
   cli_parse "$@"
   cli_execute "$@"
-
 }
 
 # See: https://sipb.mit.edu/doc/safe-shell/
 set -e
 set -u
+
+trap "cleanup" INT TERM EXIT

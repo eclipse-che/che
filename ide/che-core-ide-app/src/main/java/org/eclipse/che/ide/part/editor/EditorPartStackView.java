@@ -83,6 +83,8 @@ public class EditorPartStackView extends ResizeComposite implements PartStackVie
         };
 
         addDomHandler(this, MouseDownEvent.getType());
+
+        setMaximized(false);
     }
 
     /** {@inheritDoc} */
@@ -246,6 +248,11 @@ public class EditorPartStackView extends ResizeComposite implements PartStackVie
         } else {
             activeTab.unSelect();
         }
+    }
+
+    @Override
+    public void setMaximized(boolean maximized) {
+        getElement().setAttribute("maximized", Boolean.toString(maximized));
     }
 
     /** {@inheritDoc} */

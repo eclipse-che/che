@@ -110,22 +110,44 @@ docker_run() {
     -v "$CHE_DATA_LOCATION" \
     -p "${CHE_PORT}":"${CHE_PORT}" \
     --restart="${CHE_RESTART_POLICY}" \
-    --user="${CHE_USER}" \
     -e "CHE_LOG_LEVEL=${CHE_LOG_LEVEL}" \
     -e "CHE_IP=$CHE_HOST_IP" \
     --env-file=$ENV_FILE \
     "$@"
- 
    rm -rf $ENV_FILE > /dev/null
+}
+
+get_user_id() {
+   CHE_USER_UID=$(docker run -t \
+     -v /etc/passwd:/etc/passwd:ro,Z \
+     -v /etc/group:/etc/group:ro,Z \
+     alpine id -u ${CHE_USER})
+   CHE_USER_GID=$(docker run -t \
+     -v /etc/passwd:/etc/passwd:ro,Z \
+     -v /etc/group:/etc/group:ro,Z \
+      alpine getent group docker | cut -d: -f3)
+   echo -n "${CHE_USER_UID}" | tr '\r' ':'; echo -n ${CHE_USER_GID}
+}
+
+docker_run_with_che_user() {
+   if [ "${CHE_USER}" != "root" ]; then
+     docker_run -e CHE_USER=${CHE_USER} \
+      -v /etc/group:/etc/group:ro,Z \
+      -v /etc/passwd:/etc/passwd:ro,Z \
+      --user=$(get_user_id) \
+      "$@"
+   else
+     docker_run --user="${CHE_USER}" "$@"
+   fi
 }
 
 docker_run_if_in_vm() {
   # If the container will run inside of a VM, additional parameters must be set.
   # Setting CHE_IN_VM=true will have the che-server container set the values.
   if is_docker_for_mac || is_docker_for_windows || is_boot2docker; then
-    docker_run -e "CHE_IN_VM=true" "$@"
+    docker_run_with_che_user -e "CHE_IN_VM=true" "$@"
   else
-    docker_run "$@"
+    docker_run_with_che_user "$@"
   fi
 }
 

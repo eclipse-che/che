@@ -13,7 +13,6 @@ package org.eclipse.che.plugin.languageserver.ide;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
-
 import org.eclipse.che.api.languageserver.shared.lsapi.DidCloseTextDocumentParamsDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.DidOpenTextDocumentParamsDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.DidSaveTextDocumentParamsDTO;
@@ -101,7 +100,7 @@ public class LanguageServerExtension {
                 documentId.setUri(location.toString());
                 switch (event.getOperationType()) {
                     case OPEN:
-                        onOpen(event, dtoFactory, serviceClient);
+                        onOpen(event, dtoFactory, serviceClient, fileTypeRegister);
                         break;
                     case CLOSE:
                         onClose(documentId, dtoFactory, serviceClient);
@@ -132,18 +131,20 @@ public class LanguageServerExtension {
 
     private void onOpen(final FileEvent event,
                         final DtoFactory dtoFactory,
-                        final TextDocumentServiceClient serviceClient) {
+                        final TextDocumentServiceClient serviceClient,
+                        final LanguageServerFileTypeRegister fileTypeRegister) {
         event.getFile().getContent().then(new Operation<String>() {
             @Override
             public void apply(String text) throws OperationException {
                 TextDocumentItemDTO documentItem = dtoFactory.createDto(TextDocumentItemDTO.class);
-                documentItem.setUri(event.getFile().getPath());
+                documentItem.setUri(event.getFile().getLocation().toString());
                 documentItem.setVersion(LanguageServerEditorConfiguration.INITIAL_DOCUMENT_VERSION);
                 documentItem.setText(text);
+                documentItem.setLanguageId(fileTypeRegister.findLangId(event.getFile().getLocation().getFileExtension()));
 
                 DidOpenTextDocumentParamsDTO openEvent = dtoFactory.createDto(DidOpenTextDocumentParamsDTO.class);
                 openEvent.setTextDocument(documentItem);
-                openEvent.setUri(event.getFile().getPath());
+                openEvent.setUri(event.getFile().getLocation().toString());
                 openEvent.setText(text);
 
                 serviceClient.didOpen(openEvent);

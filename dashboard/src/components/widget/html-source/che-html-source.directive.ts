@@ -15,29 +15,34 @@
  * @author Florent Benoit
  */
 export class CheHtmlSource {
+  $sce: ng.ISCEService;
+
+  restrict: string = 'E';
+  transclude: boolean = true;
+  templateUrl: string = 'components/widget/html-source/che-html-source.html';
+
+  scope: {
+    [propName: string]: string
+  } = {};
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor ($sce) {
+  constructor ($sce: ng.ISCEService) {
     this.$sce = $sce;
-    this.restrict='E';
-    //this.replace= true;
-    this.transclude= true;
-    this.templateUrl = 'components/widget/html-source/che-html-source.html';
   }
 
-  link(scope, element, attributes, controller, transclude) {
+  link(scope: ng.IScope, element: ng.IAugmentedJQuery, attributes: any, controller: ng.IControllerService, transclude: Function) {
     // use transclude to get the inner HTML value
-    transclude(scope, (clone) => {
+    transclude(scope, (clone: ng.IAugmentedJQuery) => {
 
       // we're not using clone.text as it may remove h1, h2 for example
-      var htmlValue = '';
+      let htmlValue = '';
       for (let i = 0; i < clone.length; i++) {
         htmlValue += clone[i].outerHTML  || '\n';
       }
-      scope.originalContent = htmlValue;
+      (<any>scope).originalContent = htmlValue;
     });
   }
 

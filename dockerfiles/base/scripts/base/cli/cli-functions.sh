@@ -6,82 +6,7 @@
 # http://www.eclipse.org/legal/epl-v10.html
 
 
-
-cli_init() {
-
-  # Constants
-  CHE_MANIFEST_DIR="/version"
-  CHE_CONTAINER_OFFLINE_FOLDER="/${CHE_MINI_PRODUCT_NAME}/backup"
-  CHE_VERSION_FILE="${CHE_MINI_PRODUCT_NAME}.ver.do_not_modify"
-  CHE_ENVIRONMENT_FILE="${CHE_MINI_PRODUCT_NAME}.env"
-  CHE_COMPOSE_FILE="docker-compose-container.yml"
-
-  DEFAULT_CHE_SERVER_CONTAINER_NAME="${CHE_MINI_PRODUCT_NAME}"
-  CHE_SERVER_CONTAINER_NAME="${CHE_SERVER_CONTAINER_NAME:-${DEFAULT_CHE_SERVER_CONTAINER_NAME}}"
-
-  CHE_BACKUP_FILE_NAME="${CHE_MINI_PRODUCT_NAME}_backup.tar.gz"
-  CHE_COMPOSE_STOP_TIMEOUT="180"
-
-  grab_offline_images "$@"
-  grab_initial_images
-
-  DEFAULT_CHE_CLI_ACTION="help"
-  CHE_CLI_ACTION=${CHE_CLI_ACTION:-${DEFAULT_CHE_CLI_ACTION}}
-
-  DEFAULT_CHE_LICENSE=false
-  CHE_LICENSE=${CHE_LICENSE:-${DEFAULT_CHE_LICENSE}}
-
-  CHE_HOST=$(eval "echo \$${CHE_PRODUCT_NAME}_HOST")
-  CHE_PORT=$(eval "echo \$${CHE_PRODUCT_NAME}_PORT")
-
-  if [[ "$(eval "echo \$${CHE_PRODUCT_NAME}_HOST")" = "" ]]; then
-    info "Welcome to $CHE_FORMAL_PRODUCT_NAME!"
-    info ""
-    info "We did not auto-detect a valid HOST or IP address."
-    info "Pass ${CHE_PRODUCT_NAME}_HOST with your hostname or IP address."
-    info ""
-    info "Rerun the CLI:"
-    info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock"
-    info "                      -v <local-path>:${CHE_CONTAINER_ROOT}"
-    info "                      -e ${CHE_PRODUCT_NAME}_HOST=<your-ip-or-host>"
-    info "                         $CHE_IMAGE_FULLNAME $*"
-    return 2;
-  fi
-
-  REFERENCE_HOST_ENVIRONMENT_FILE="${CHE_HOST_CONFIG}/${CHE_ENVIRONMENT_FILE}"
-  REFERENCE_HOST_COMPOSE_FILE="${CHE_HOST_INSTANCE}/${CHE_COMPOSE_FILE}"
-  REFERENCE_CONTAINER_ENVIRONMENT_FILE="${CHE_CONTAINER_CONFIG}/${CHE_ENVIRONMENT_FILE}"
-  REFERENCE_CONTAINER_COMPOSE_FILE="${CHE_CONTAINER_INSTANCE}/${CHE_COMPOSE_FILE}"
-
-  CHE_HOST_CONFIG_MANIFESTS_FOLDER="$CHE_HOST_INSTANCE/manifests"
-  CHE_CONTAINER_CONFIG_MANIFESTS_FOLDER="$CHE_CONTAINER_INSTANCE/manifests"
-
-  CHE_HOST_CONFIG_MODULES_FOLDER="$CHE_HOST_INSTANCE/modules"
-  CHE_CONTAINER_CONFIG_MODULES_FOLDER="$CHE_CONTAINER_INSTANCE/modules"
-
-  # TODO: Change this to use the current folder or perhaps ~?
-  if is_boot2docker && has_docker_for_windows_client; then
-    if [[ "${CHE_HOST_INSTANCE,,}" != *"${USERPROFILE,,}"* ]]; then
-      CHE_HOST_INSTANCE=$(get_mount_path "${USERPROFILE}/.${CHE_MINI_PRODUCT_NAME}/")
-      warning "Boot2docker for Windows - CHE_INSTANCE set to $CHE_HOST_INSTANCE"
-    fi
-    if [[ "${CHE_HOST_CONFIG,,}" != *"${USERPROFILE,,}"* ]]; then
-      CHE_HOST_CONFIG=$(get_mount_path "${USERPROFILE}/.${CHE_MINI_PRODUCT_NAME}/")
-      warning "Boot2docker for Windows - CHE_CONFIG set to $CHE_HOST_CONFIG"
-    fi
-  fi
-
-  # Do not perform a version compatibility check if running upgrade command.
-  # The upgrade command has its own internal checks for version compatibility.
-  if [ $1 != "upgrade" ]; then
-    verify_version_compatibility
-  else
-    verify_version_upgrade_compatibility
-  fi
-}
-
 cli_execute() {
-
   COMMAND="cmd_$1"
 
   # Need to load all files in advance so commands can invoke other commands.
@@ -92,7 +17,6 @@ cli_execute() {
 
   shift
   eval $COMMAND "$@"
-
 }
 
 cli_parse () {
@@ -111,15 +35,9 @@ cli_parse () {
 }
 
 
-cmd_init_reinit_pre_action() {
-    sed -i'.bak' "s|#CHE_HOST=.*|CHE_HOST=${CHE_HOST}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
-}
-
-
 get_boot_url() {
   echo "$CHE_HOST:$CHE_PORT/api/"
 }
-
 
 get_display_url() {
   if ! is_docker_for_mac; then
@@ -128,7 +46,6 @@ get_display_url() {
     echo "http://localhost:${CHE_PORT}"
   fi
 }
-
 
 check_if_booted() {
   CURRENT_CHE_SERVER_CONTAINER_ID=$(get_server_container_id $CHE_SERVER_CONTAINER_NAME)
@@ -166,8 +83,7 @@ server_is_booted() {
   fi
 }
 
-
-grab_offline_images(){
+initiate_offline_or_network_mode(){
   # If you are using ${CHE_FORMAL_PRODUCT_NAME} in offline mode, images must be loaded here
   # This is the point where we know that docker is working, but before we run any utilities
   # that require docker.
@@ -188,6 +104,27 @@ grab_offline_images(){
       fi
       info "init" "Loading ${file##*/}..."
     done
+  else
+    # If we are here, then we want to run in networking mode.
+    # If we are in networking mode, we have had some issues where users have failed DNS networking.
+    # See: https://github.com/eclipse/che/issues/3266#issuecomment-265464165
+    local HTTP_STATUS_CODE=$(curl -I -k dockerhub.com -s -o /dev/null --write-out "%{http_code}")
+    if [[ ! $HTTP_STATUS_CODE -eq "301" ]]; then
+      info "Welcome to $CHE_FORMAL_PRODUCT_NAME!"
+      info ""
+      info "We could not resolve DockerHub using DNS."
+      info "Either we cannot reach the Internet or Docker's DNS resolver needs a modification."
+      info ""
+      info "You can:"
+      info "  1. Modify Docker's DNS settings." 
+      info "     a. Docker for Windows & Mac have GUIs for this."
+      info "     b. Typically setting DNS to 8.8.8.8 fixes resolver issues."
+      info "  2. Does your network require Docker to use a proxy?"
+      info "     a. Docker for Windows & Mac have GUIs to set proxies."
+      info "  3. Verify that you have access to DockerHub."
+      info "     a. Try 'curl --head dockerhub.com'"
+      return 2;
+    fi
   fi
 }
 
@@ -197,20 +134,9 @@ grab_initial_images() {
     info "cli" "Pulling image alpine:3.4"
     log "docker pull alpine:3.4 >> \"${LOGS}\" 2>&1"
     TEST=""
-    docker pull alpine:3.4 >> "${LOGS}" 2>&1 || TEST=$?
+    docker pull alpine:3.4 >> "${LOGS}" > /dev/null 2>&1 || TEST=$?
     if [ "$TEST" = "1" ]; then
       error "Image alpine:3.4 unavailable. Not on dockerhub or built locally."
-      return 2;
-    fi
-  fi
-
-  if [ "$(docker images -q appropriate/curl 2> /dev/null)" = "" ]; then
-    info "cli" "Pulling image appropriate/curl:latest"
-    log "docker pull appropriate/curl:latest >> \"${LOGS}\" 2>&1"
-    TEST=""
-    docker pull appropriate/curl >> "${LOGS}" 2>&1 || TEST=$?
-    if [ "$TEST" = "1" ]; then
-      error "Image appropriate/curl:latest unavailable. Not on dockerhub or built locally."
       return 2;
     fi
   fi
@@ -219,14 +145,13 @@ grab_initial_images() {
     info "cli" "Pulling image eclipse/che-ip:nightly"
     log "docker pull eclipse/che-ip:nightly >> \"${LOGS}\" 2>&1"
     TEST=""
-    docker pull eclipse/che-ip:nightly >> "${LOGS}" 2>&1 || TEST=$?
+    docker pull eclipse/che-ip:nightly >> "${LOGS}" > /dev/null 2>&1 || TEST=$?
     if [ "$TEST" = "1" ]; then
       error "Image eclipse/che-ip:nightly unavailable. Not on dockerhub or built locally."
       return 2;
     fi
   fi
 }
-
 
 has_env_variables() {
   debug $FUNCNAME
@@ -442,12 +367,32 @@ verify_version_compatibility() {
     # what is on DockerHub, even if you just pulled it.
     # Solution is to compare the dates, and only print warning message if the locally created ate
     # is less than the updated date on dockerhub.
-    if $(less_than ${LOCAL_CREATION_DATE:8:2} ${REMOTE_CREATION_DATE:8:2}); then
+
+    if $(date_less_than ${LOCAL_CREATION_DATE} ${REMOTE_CREATION_DATE}); then
       warning "Your local ${CHE_IMAGE_FULLNAME} image is older than the version on DockerHub."
       warning "Run 'docker pull ${CHE_IMAGE_FULLNAME}' to update your CLI."
     fi
   fi
 }
+
+# Convert a ISO 8601 date to timestamp
+timestamp_date_iso8601() {
+  local TMP_DATE=$(date -d "${1}" +%s)
+  echo ${TMP_DATE}
+}
+
+# Compare two dates with ISO 8601 format and return true if the first date is less than the second date
+date_less_than() {
+  local FIRST_DATE=$(timestamp_date_iso8601 $1)
+  local SECOND_DATE=$(timestamp_date_iso8601 $2)
+
+  if [[ ${FIRST_DATE} -lt ${SECOND_DATE} ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
 
 verify_version_upgrade_compatibility() {
   ## Two levels of checks

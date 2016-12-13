@@ -100,7 +100,7 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
     let services: any = Object.keys(recipe.services);
     services.forEach((serviceName: string) => {
       let serviceFields: any = Object.keys(recipe.services[serviceName] || {});
-      if (!serviceFields || (serviceFields.includes('build') === false && serviceFields.includes('image') === false)) {
+      if (!serviceFields || (serviceFields.indexOf('build') < 0 && serviceFields.indexOf('image') < 0)) {
         throw new Error('Service \'' + serviceName + '\' should contain \'build\' or \'image\' section.');
       }
     });

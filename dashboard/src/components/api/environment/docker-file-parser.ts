@@ -116,7 +116,7 @@ export class DockerfileParser {
 
     switch (instruction) {
       case 'ENV':
-        if (argumentStr.includes('=')) {
+        if (argumentStr.indexOf('=') >= 0) {
           // this argument string contains one or more environment variables
           let match;
           while (match = this.envVariablesRE.exec(argumentStr)) {

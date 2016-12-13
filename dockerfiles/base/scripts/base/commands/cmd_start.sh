@@ -56,11 +56,35 @@ cmd_start() {
 
 
 cmd_start_check_ports() {
+
+  # If dev mode is on, then we also need to check the debug port set by the user for availability
+  if [ "${CHE_DEVELOPMENT_MODE}" = "on" ]; then
+    USER_DEBUG_PORT=$(docker_run --env-file="${REFERENCE_CONTAINER_ENVIRONMENT_FILE}" alpine sh -c 'echo $CHE_DEBUG_PORT')
+
+    if [[ "$USER_DEBUG_PORT" = "" ]]; then
+      # If the user has not set a debug port, then use the default
+      CHE_DEBUG_PORT=8000
+    else 
+      # Otherwise, this is the value set by the user
+      CHE_DEBUG_PORT=$USER_DEBUG_PORT
+    fi
+  fi
+
   text   "         port ${CHE_PORT} (http):       $(port_open ${CHE_PORT} && echo "${GREEN}[AVAILABLE]${NC}" || echo "${RED}[ALREADY IN USE]${NC}") \n"
+  if [ "${CHE_DEVELOPMENT_MODE}" = "on" ]; then
+    text   "         port ${CHE_DEBUG_PORT} (debug):       $(port_open ${CHE_DEBUG_PORT} && echo "${GREEN}[AVAILABLE]${NC}" || echo "${RED}[ALREADY IN USE]${NC}") \n"
+  fi
   if ! $(port_open ${CHE_PORT}); then
     echo ""
     error "Ports required to run $CHE_MINI_PRODUCT_NAME are used by another program."
     return 1;
+  fi
+  if [ "${CHE_DEVELOPMENT_MODE}" = "on" ]; then
+    if ! $(port_open ${CHE_DEBUG_PORT}); then
+      echo ""
+      error "Ports required to run $CHE_MINI_PRODUCT_NAME are used by another program."
+      return 1;
+    fi
   fi
 }
 

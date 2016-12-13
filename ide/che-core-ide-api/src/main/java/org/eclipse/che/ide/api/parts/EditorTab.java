@@ -22,7 +22,7 @@ import javax.validation.constraints.NotNull;
 /**
  * @author Dmitry Shnurenko
  */
-public interface EditorTab extends View<EditorTab.ActionDelegate>, TabItem, DoubleClickHandler {
+public interface EditorTab extends View<EditorTab.ActionDelegate>, TabItem {
 
     void setReadOnlyMark(boolean isVisible);
 
@@ -74,5 +74,9 @@ public interface EditorTab extends View<EditorTab.ActionDelegate>, TabItem, Doub
         void onTabClicked(@NotNull TabItem tab);
 
         void onTabClose(@NotNull TabItem tab);
+
+        void onTabDoubleClicked(@NotNull TabItem tab);
+
     }
+
 }

@@ -40,7 +40,6 @@ public class HelloWorldAction extends Action {
     public void actionPerformed(ActionEvent e) {
         workspaceAgent.openPart(helloWorldViewPresenter, PartStackType.INFORMATION);
         workspaceAgent.setActivePart(helloWorldViewPresenter);
-        helloWorldViewPresenter.setVisible(true);
     }
 
 }

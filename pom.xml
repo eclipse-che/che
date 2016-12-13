@@ -28,6 +28,7 @@
         <module>wsmaster</module>
         <module>wsagent</module>
         <module>ide</module>
+        <module>exec-agent</module>
         <module>plugins</module>
         <module>samples</module>
         <module>dashboard</module>
@@ -79,6 +80,20 @@
                 <artifactId>assembly-wsmaster-war</artifactId>
                 <version>${che.version}</version>
                 <type>war</type>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che</groupId>
+                <artifactId>exec-agent</artifactId>
+                <version>${project.version}</version>
+                <type>tar.gz</type>
+                <classifier>linux_amd64</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che</groupId>
+                <artifactId>exec-agent</artifactId>
+                <version>${project.version}</version>
+                <type>tar.gz</type>
+                <classifier>linux_arm7</classifier>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
@@ -389,27 +404,6 @@
                 <artifactId>che-tomcat8-slf4j-logback</artifactId>
                 <version>${che.lib.version}</version>
                 <type>zip</type>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.lib</groupId>
-                <artifactId>che-websocket-terminal</artifactId>
-                <version>${che.lib.version}</version>
-                <type>tar.gz</type>
-                <classifier>linux_amd64</classifier>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.lib</groupId>
-                <artifactId>che-websocket-terminal</artifactId>
-                <version>${che.lib.version}</version>
-                <type>zip</type>
-                <classifier>linux_amd64</classifier>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.lib</groupId>
-                <artifactId>che-websocket-terminal</artifactId>
-                <version>${che.lib.version}</version>
-                <type>tar.gz</type>
-                <classifier>linux_arm7</classifier>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.lib</groupId>
@@ -784,7 +778,27 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-web-ext-server</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-web-ext-shared</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-web-ext-web</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-zend-debugger-ide</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-zend-debugger-server</artifactId>
                 <version>${che.version}</version>
             </dependency>
             <dependency>

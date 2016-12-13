@@ -20,6 +20,7 @@ import com.google.gwt.core.client.JsArrayMixed;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.PromiseProvider;
+import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
 
 /**
  * Default implementation of {@link PromiseProvider}.
@@ -34,6 +35,12 @@ public class JsPromiseProvider implements PromiseProvider {
     public native <V> Promise<V> create(Executor<V> executor) /*-{
         return new Promise(executor);
     }-*/;
+
+    /** {@inheritDoc} */
+    @Override
+    public <V> Promise<V> create(AsyncPromiseHelper.RequestCall<V> call) {
+        return AsyncPromiseHelper.createFromAsyncRequest(call);
+    }
 
     /** {@inheritDoc} */
     @Override

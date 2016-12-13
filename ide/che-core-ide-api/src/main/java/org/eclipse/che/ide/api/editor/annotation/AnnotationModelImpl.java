@@ -306,6 +306,7 @@ public class AnnotationModelImpl implements AnnotationModel {
         this.annotations.putAll(modified);
     }
 
+    @Override
     public void clear() {
         this.annotations.clear();
         this.positions.clear();

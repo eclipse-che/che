@@ -1223,7 +1223,7 @@ export class CreateProjectController {
 
   isResourceProblem(): boolean {
     let currentCreationStep = this.getCreationSteps()[this.getCurrentProgressStep()];
-    return currentCreationStep.hasError && currentCreationStep.logs.includes('You can stop other workspaces');
+    return currentCreationStep.hasError && currentCreationStep.logs.indexOf('You can stop other workspaces') >= 0;
   }
 
   setStackTab(stackTab: string): void {

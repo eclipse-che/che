@@ -30,7 +30,7 @@ generate_dto() {
     fi
   fi
 
-  DTO_CONTENT=$(cd $DIR && docker run -i --rm -v "$HOME/.m2:/root/.m2" -v "$PWD"/dto-pom.xml:/usr/src/mymaven/pom.xml -w /usr/src/mymaven maven:3.3-jdk-8 /bin/bash -c "mvn -q -DskipTests=true -Dfindbugs.skip=true -Dskip-validate-sources install  && cat target/dto-typescript.ts")
+  DTO_CONTENT=$(cd $DIR && docker run -i --rm -v "$HOME/.m2:/root/.m2" -v "$PWD"/dto-pom.xml:/usr/src/mymaven/pom.xml -w /usr/src/mymaven maven:3.3-jdk-8 /bin/bash -c "mvn -q -U -DskipTests=true -Dfindbugs.skip=true -Dskip-validate-sources install  && cat target/dto-typescript.ts")
 
   # Check if maven command has worked or not
   if [ $? -eq 0 ]; then

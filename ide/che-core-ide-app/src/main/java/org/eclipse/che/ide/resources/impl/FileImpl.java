@@ -87,12 +87,6 @@ class FileImpl extends ResourceImpl implements File {
 
     /** {@inheritDoc} */
     @Override
-    public String getPath() {
-        return getLocation().toString();
-    }
-
-    /** {@inheritDoc} */
-    @Override
     public String getExtension() {
         final String entryName = getName();
         int lastDotIndex = entryName.lastIndexOf('.');

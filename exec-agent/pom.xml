@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2012-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>che-parent</artifactId>
+        <groupId>org.eclipse.che</groupId>
+        <version>5.0.0-M9-SNAPSHOT</version>
+    </parent>
+    <artifactId>exec-agent</artifactId>
+    <name>Exec Agent</name>
+    <properties>
+        <go.workspace.name>go-workspace</go.workspace.name>
+    </properties>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>src/term/server.go</exclude>
+                        <exclude>src/docs/**</exclude>
+                        <exclude>src/vendor/**</exclude>
+                        <exclude>src/Godeps/**</exclude>
+                        <exclude>src/static/term.js</exclude>
+                        <exclude>src/.idea/**</exclude>
+                        <exclude>src/exec-agent</exclude>
+                        <exclide>src/exec-agent.iml</exclide>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-sources</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <copy todir="${project.build.directory}/${go.workspace.name}/src">
+                                    <fileset dir="./src/vendor/" includes="**/*" />
+                                </copy>
+                                <copy todir="${project.build.directory}/${go.workspace.name}/src/github.com/eclipse/che/exec-agent">
+                                    <fileset dir="./src/" excludes="vendor/ target/" includes="**/*.*go **/static/*" />
+                                </copy>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.soebes.maven.plugins</groupId>
+                <artifactId>iterator-maven-plugin</artifactId>
+                <version>0.4</version>
+                <executions>
+                    <execution>
+                        <id>compile-exec-agent</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>iterator</goal>
+                        </goals>
+                        <configuration>
+                            <itemsWithProperties>
+                                <itemWithProperty>
+                                    <name>linux_arm5</name>
+                                    <properties>
+                                        <terminal.target.os>linux</terminal.target.os>
+                                        <terminal.target.architecture>arm</terminal.target.architecture>
+                                        <terminal.target.arm.version>5</terminal.target.arm.version>
+                                    </properties>
+                                </itemWithProperty>
+                                <itemWithProperty>
+                                    <name>linux_arm6</name>
+                                    <properties>
+                                        <terminal.target.os>linux</terminal.target.os>
+                                        <terminal.target.architecture>arm</terminal.target.architecture>
+                                        <terminal.target.arm.version>6</terminal.target.arm.version>
+                                    </properties>
+                                </itemWithProperty>
+                                <itemWithProperty>
+                                    <name>linux_arm7</name>
+                                    <properties>
+                                        <terminal.target.os>linux</terminal.target.os>
+                                        <terminal.target.architecture>arm</terminal.target.architecture>
+                                        <terminal.target.arm.version>7</terminal.target.arm.version>
+                                    </properties>
+                                </itemWithProperty>
+                                <itemWithProperty>
+                                    <name>linux_amd64</name>
+                                    <properties>
+                                        <terminal.target.os>linux</terminal.target.os>
+                                        <terminal.target.architecture>amd64</terminal.target.architecture>
+                                    </properties>
+                                </itemWithProperty>
+                                <itemWithProperty>
+                                    <name>linux_i386</name>
+                                    <properties>
+                                        <terminal.target.os>linux</terminal.target.os>
+                                        <terminal.target.architecture>386</terminal.target.architecture>
+                                    </properties>
+                                </itemWithProperty>
+                            </itemsWithProperties>
+                            <pluginExecutors>
+                                <pluginExecutor>
+                                    <plugin>
+                                        <groupId>org.codehaus.mojo</groupId>
+                                        <artifactId>exec-maven-plugin</artifactId>
+                                    </plugin>
+                                    <goal>exec</goal>
+                                    <configuration>
+                                        <executable>go</executable>
+                                        <workingDirectory>${project.build.directory}/${go.workspace.name}/src/github.com/eclipse/che/exec-agent</workingDirectory>
+                                        <arguments>
+                                            <argument>build</argument>
+                                            <argument>-a</argument>
+                                            <argument>-installsuffix</argument>
+                                            <argument>cgo</argument>
+                                            <argument>-o</argument>
+                                            <argument>${project.build.directory}/${item}/che-websocket-terminal</argument>
+                                        </arguments>
+                                        <environmentVariables>
+                                            <GOPATH>${project.build.directory}/${go.workspace.name}</GOPATH>
+                                            <GOOS>${terminal.target.os}</GOOS>
+                                            <GOARCH>${terminal.target.architecture}</GOARCH>
+                                            <GOARM>${terminal.target.arm.version}</GOARM>
+                                        </environmentVariables>
+                                    </configuration>
+                                </pluginExecutor>
+                            </pluginExecutors>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>iterator</goal>
+                        </goals>
+                        <configuration>
+                            <items>
+                                <item>linux_arm5</item>
+                                <item>linux_arm6</item>
+                                <item>linux_arm7</item>
+                                <item>linux_amd64</item>
+                                <item>linux_i386</item>
+                            </items>
+                            <pluginExecutors>
+                                <pluginExecutor>
+                                    <plugin>
+                                        <artifactId>maven-assembly-plugin</artifactId>
+                                    </plugin>
+                                    <goal>single</goal>
+                                    <configuration>
+                                        <descriptors>
+                                            <descriptor>${basedir}/src/assembly/assembly.xml</descriptor>
+                                        </descriptors>
+                                    </configuration>
+                                </pluginExecutor>
+                            </pluginExecutors>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+    <profiles>
+        <profile>
+            <id>integration</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>run-tests</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target unless="skipTests">
+                                        <exec dir="${project.build.directory}/${go.workspace.name}/src/github.com/eclipse/che/exec-agent" executable="go" failonerror="true">
+                                            <env key="GOPATH" value="${project.build.directory}/${go.workspace.name}"/>
+                                            <arg value="test" />
+                                            <arg value="-v" />
+                                            <arg value="./..." />
+                                        </exec>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>
