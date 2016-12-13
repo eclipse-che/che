@@ -12,6 +12,8 @@
 
 /**
  * Defines a directive for displaying stack selector's item.
+ *
+ * @author Oleksii Kurinnyi
  */
 
 export class StackSelectorItem {

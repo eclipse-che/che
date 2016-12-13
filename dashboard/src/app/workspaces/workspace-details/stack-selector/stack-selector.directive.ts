@@ -12,6 +12,8 @@
 
 /**
  * Defines a directive for displaying stack selector widget.
+ *
+ * @author Oleksii Kurinnyi
  */
 
 export class StackSelector {
