@@ -570,7 +570,7 @@ export class CreateProjectController {
       promise = deferred.promise;
       deferred.resolve(true);
 
-    } else if (projectData.source.location.length > 0) {
+    } else {
 
       // if it's a user-defined location we need to cleanup commands that may have been configured by templates
       if (this.selectSourceOption === 'select-source-existing') {
