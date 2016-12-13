@@ -15,22 +15,29 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.environment.server.CheEnvironmentEngine;
+import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.commons.schedule.ScheduleRate;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.json.ContainerListEntry;
 import org.eclipse.che.plugin.docker.client.json.Filters;
+import org.eclipse.che.plugin.docker.client.json.network.Network;
 import org.eclipse.che.plugin.docker.client.params.network.GetNetworksParams;
 import org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Named;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.lang.String.format;
+import static java.util.stream.Collectors.toSet;
 import static org.eclipse.che.plugin.docker.client.params.RemoveContainerParams.create;
 import static org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator.ContainerNameInfo;
 
@@ -46,24 +53,35 @@ public class DockerAbandonedResourcesCleaner implements Runnable {
 
     private static final Logger LOG = LoggerFactory.getLogger(DockerAbandonedResourcesCleaner.class);
 
-    private static final String            CHE_NETWORK_NAME_PREFIX = "workspace";
-    private static final Filters           NETWORK_FILTERS         = new Filters().withFilter("type", "custom");
+    private static final String            CHE_NETWORK_NAME_PREFIX  = "workspace";
+    private static final Filters           NETWORK_FILTERS          = new Filters().withFilter("type", "custom");
                                                                                   // TODO name filter doesn't work with pure docker swarm
                                                                                   // .withFilter("name", CHE_NETWORK_NAME_PREFIX);
-    private static final GetNetworksParams GET_NETWORKS_PARAMS     = GetNetworksParams.create().withFilters(NETWORK_FILTERS);
+    private static final GetNetworksParams GET_NETWORKS_PARAMS      = GetNetworksParams.create().withFilters(NETWORK_FILTERS);
+    private static final String            WORKSPACE_ID_REGEX_GROUP = "workspaceId";
+    private static final String            CHE_NETWORK_REGEX        = "^(?<" + WORKSPACE_ID_REGEX_GROUP + ">workspace[a-z\\d]{16})_[a-z\\d]{16}$";
+    private static final Pattern           CHE_NETWORK_PATTERN      = Pattern.compile(CHE_NETWORK_REGEX);
 
     // TODO replace with WorkspaceManager
     private final CheEnvironmentEngine         environmentEngine;
     private final DockerConnector              dockerConnector;
     private final DockerContainerNameGenerator nameGenerator;
+    private final WorkspaceRuntimes            runtimes;
+    private final Set<String>                  additionalNetworks;
 
     @Inject
     public DockerAbandonedResourcesCleaner(CheEnvironmentEngine environmentEngine,
                                            DockerConnector dockerConnector,
-                                           DockerContainerNameGenerator nameGenerator) {
+                                           DockerContainerNameGenerator nameGenerator,
+                                           WorkspaceRuntimes workspaceRuntimes,
+                                           @Named("machine.docker.networks") Set<Set<String>> additionalNetworks) {
         this.environmentEngine = environmentEngine;
         this.dockerConnector = dockerConnector;
         this.nameGenerator = nameGenerator;
+        this.runtimes = workspaceRuntimes;
+        this.additionalNetworks = additionalNetworks.stream()
+                                                    .flatMap(Set::stream)
+                                                    .collect(toSet());
     }
 
     @ScheduleRate(periodParameterName = "che.docker.cleanup_period_mins",
@@ -137,22 +155,23 @@ public class DockerAbandonedResourcesCleaner implements Runnable {
     /**
      * Deletes all abandoned CHE networks.
      * Abandoned networks appear when workspaces were stopped unexpectedly,
-     * for example, restart docker, turn off PC, etc.
+     * for example, force stop che, restart docker, turn off PC, etc.
      * A network is considered abandoned when it doesn't contain a container.
      * To do this job more efficiently, it should be invoked after cleaning of abandoned containers.
      */
     private void cleanNetworks() {
         try {
-            dockerConnector.getNetworks(GET_NETWORKS_PARAMS)
-                           .stream()
-                           .filter(network -> network.getName().startsWith(CHE_NETWORK_NAME_PREFIX) && network.getContainers().isEmpty())
-                           .forEach(network -> {
-                               try {
-                                   dockerConnector.removeNetwork(network.getId());
-                               } catch (IOException e) {
-                                   LOG.warn("Failed to remove abandoned network: %s", network.getName());
-                               }
-                           });
+            for (Network network : dockerConnector.getNetworks(GET_NETWORKS_PARAMS)) {
+                Matcher cheNetworkMatcher = CHE_NETWORK_PATTERN.matcher(network.getName());
+                if (cheNetworkMatcher.matches() && network.getContainers().isEmpty() && !additionalNetworks.contains(network.getName()) &&
+                    !runtimes.hasRuntime(cheNetworkMatcher.group(WORKSPACE_ID_REGEX_GROUP))) {
+                    try {
+                        dockerConnector.removeNetwork(network.getId());
+                    } catch (IOException e) {
+                        LOG.warn("Failed to remove abandoned network: %s", network.getName());
+                    }
+                }
+            }
         } catch (IOException e) {
             LOG.error("Failed to get list of docker networks", e);
         }

@@ -14,6 +14,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.environment.server.CheEnvironmentEngine;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
+import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.json.ContainerListEntry;
 import org.eclipse.che.plugin.docker.client.json.network.ContainerInNetwork;
@@ -30,10 +31,13 @@ import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static java.util.Arrays.asList;
 import static java.util.Optional.of;
@@ -42,6 +46,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -72,12 +77,16 @@ public class DockerAbandonedResourcesCleanerTest {
     private static final String EXITED_STATUS  = "exited";
     private static final String RUNNING_STATUS = "Up 6 hour ago";
 
+    private static final String ADDITIONAL_NETWORK_NAME = "AdditionalNetwork";
+
     @Mock
     private CheEnvironmentEngine         environmentEngine;
     @Mock
     private DockerConnector              dockerConnector;
     @Mock
     private DockerContainerNameGenerator nameGenerator;
+    @Mock
+    private WorkspaceRuntimes            workspaceRuntimes;
 
     @Mock
     private Instance instance;
@@ -100,11 +109,20 @@ public class DockerAbandonedResourcesCleanerTest {
     @Mock
     private ContainerNameInfo containerNameInfo3;
 
-    @InjectMocks
+    private Set<Set<String>> additionalNetworks = new HashSet<>();
+    private Set<String>      userNetworks       = new HashSet<>(Arrays.asList(ADDITIONAL_NETWORK_NAME));
+
     private DockerAbandonedResourcesCleaner cleaner;
 
     @BeforeMethod
     public void setUp() throws Exception {
+        additionalNetworks.add(userNetworks);
+        cleaner = spy(new DockerAbandonedResourcesCleaner(environmentEngine,
+                                                          dockerConnector,
+                                                          nameGenerator,
+                                                          workspaceRuntimes,
+                                                          additionalNetworks));
+
         when(environmentEngine.getMachine(workspaceId1, machineId1)).thenReturn(instance);
         when(environmentEngine.getMachine(workspaceId2, machineId2)).thenThrow(new NotFoundException("test"));
         when(machineImpl1.getId()).thenReturn(machineId1);
@@ -204,8 +222,8 @@ public class DockerAbandonedResourcesCleanerTest {
 
         when(dockerConnector.getNetworks(any())).thenReturn(networks);
 
-        when(abandonedNetwork.getName()).thenReturn("workspace1234_an12id");
-        when(usedNetwork.getName()).thenReturn("workspace4321_un21id");
+        when(abandonedNetwork.getName()).thenReturn("workspace1234567890abcdef_1234567890abcdef");
+        when(usedNetwork.getName()).thenReturn("workspace0987654321zyxwvu_09876543210zyxwvu");
 
         when(abandonedNetwork.getId()).thenReturn(abandonedNetworkId);
         when(usedNetwork.getId()).thenReturn(usedNetworkId);
