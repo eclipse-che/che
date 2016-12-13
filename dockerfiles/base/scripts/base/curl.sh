@@ -19,7 +19,7 @@ curl() {
  local NO_PROXY_CONFIG_FOR_CURL=("")
  if [[ ! "${HTTP_PROXY}" = "" ]] ||
     [[ ! "${HTTPS_PROXY}" = "" ]]; then
-	  if is_var_defined "${CHE_PRODUCT_NAME}_HOST"; then
+      if is_var_defined "${CHE_PRODUCT_NAME}_HOST"; then
         NO_PROXY_CONFIG_FOR_CURL=("--noproxy" $(eval "echo \$${CHE_PRODUCT_NAME}_HOST"))
       fi
  fi
