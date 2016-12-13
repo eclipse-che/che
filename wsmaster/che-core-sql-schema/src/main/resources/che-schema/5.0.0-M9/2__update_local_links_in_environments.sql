@@ -10,4 +10,4 @@
 --
 
 UPDATE environment
-SET location=regexp_replace(location, '${api.endpoint}', '');
+SET location=regexp_replace(location, '${che.api}', '');
