@@ -48,7 +48,8 @@ export class CheBranding {
                 helpPath : brandingData.helpPath,
                 helpTitle : brandingData.helpTitle,
                 supportEmail: brandingData.supportEmail,
-                oauthDocs: brandingData.oauthDocs
+                oauthDocs: brandingData.oauthDocs,
+                version: brandingData.version
             };
 
             this.productName = this.$rootScope.branding.title;
@@ -61,6 +62,7 @@ export class CheBranding {
             this.helpTitle = this.$rootScope.branding.helpTitle;
             this.supportEmail = this.$rootScope.branding.supportEmail;
             this.oauthDocs = this.$rootScope.branding.oauthDocs;
+            this.version = this.$rootScope.branding.version;
             this.deferred.resolve(this.$rootScope.branding);
         });
 
@@ -96,6 +98,10 @@ export class CheBranding {
 
     getProductSupportEmail() {
         return this.supportEmail;
+    }
+
+    getProductVersion() {
+      return this.version;
     }
 }
 

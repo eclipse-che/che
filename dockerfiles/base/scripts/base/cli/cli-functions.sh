@@ -367,12 +367,32 @@ verify_version_compatibility() {
     # what is on DockerHub, even if you just pulled it.
     # Solution is to compare the dates, and only print warning message if the locally created ate
     # is less than the updated date on dockerhub.
-    if $(less_than ${LOCAL_CREATION_DATE:8:2} ${REMOTE_CREATION_DATE:8:2}); then
+
+    if $(date_less_than ${LOCAL_CREATION_DATE} ${REMOTE_CREATION_DATE}); then
       warning "Your local ${CHE_IMAGE_FULLNAME} image is older than the version on DockerHub."
       warning "Run 'docker pull ${CHE_IMAGE_FULLNAME}' to update your CLI."
     fi
   fi
 }
+
+# Convert a ISO 8601 date to timestamp
+timestamp_date_iso8601() {
+  local TMP_DATE=$(date -d "${1}" +%s)
+  echo ${TMP_DATE}
+}
+
+# Compare two dates with ISO 8601 format and return true if the first date is less than the second date
+date_less_than() {
+  local FIRST_DATE=$(timestamp_date_iso8601 $1)
+  local SECOND_DATE=$(timestamp_date_iso8601 $2)
+
+  if [[ ${FIRST_DATE} -lt ${SECOND_DATE} ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
 
 verify_version_upgrade_compatibility() {
   ## Two levels of checks

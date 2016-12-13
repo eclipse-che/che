@@ -79,6 +79,10 @@
                                     <replacetoken><![CDATA[<base href="/">]]></replacetoken>
                                     <replacevalue><![CDATA[<base href="/dashboard/">]]></replacevalue>
                                 </replace>
+                                <replaceregexp file="${basedir}/dist/assets/branding/product.json" flags="m">
+                                  <regexp pattern="project_version" />
+                                  <substitution expression="${project.version}" />
+                                </replaceregexp>
                             </target>
                         </configuration>
                     </execution>
