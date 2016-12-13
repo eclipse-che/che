@@ -36,7 +36,6 @@ import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.Size;
 import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
-import org.eclipse.che.plugin.docker.client.OpenShiftConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
 import org.eclipse.che.plugin.docker.client.ProgressLineFormatterImpl;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
@@ -109,7 +108,6 @@ public class MachineProviderImpl implements MachineInstanceProvider {
     public static final Pattern SNAPSHOT_LOCATION_PATTERN = Pattern.compile("(.+/)?" + MACHINE_SNAPSHOT_PREFIX + ".+");
 
     private final DockerConnector                               docker;
-    private final OpenShiftConnector                            openShift;
     private final UserSpecificDockerRegistryCredentialsProvider dockerCredentials;
     private final ExecutorService                               executor;
     private final DockerInstanceStopDetector                    dockerInstanceStopDetector;
@@ -132,7 +130,6 @@ public class MachineProviderImpl implements MachineInstanceProvider {
 
     @Inject
     public MachineProviderImpl(DockerConnector docker,
-                               OpenShiftConnector openShift,
                                DockerConnectorConfiguration dockerConnectorConfiguration,
                                UserSpecificDockerRegistryCredentialsProvider dockerCredentials,
                                DockerMachineFactory dockerMachineFactory,
@@ -154,7 +151,6 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                WindowsPathEscaper windowsPathEscaper)
             throws IOException {
         this.docker = docker;
-        this.openShift = openShift;
         this.dockerCredentials = dockerCredentials;
         this.dockerMachineFactory = dockerMachineFactory;
         this.dockerInstanceStopDetector = dockerInstanceStopDetector;
@@ -526,7 +522,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                               .map(entry -> entry.getKey() + "=" + entry.getValue())
                               .toArray(String[]::new));
 
-        return openShift.createContainer(docker, CreateContainerParams.create(config)
+        return docker.createContainer(CreateContainerParams.create(config)
                                                            .withContainerName(service.getContainerName()))
                      .getId();
     }
@@ -623,7 +619,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
     private void cleanUpContainer(String containerId) {
         try {
             if (containerId != null) {
-                openShift.removeContainer(RemoveContainerParams.create(containerId)
+                docker.removeContainer(RemoveContainerParams.create(containerId)
                                                             .withRemoveVolumes(true)
                                                             .withForce(true));
             }
