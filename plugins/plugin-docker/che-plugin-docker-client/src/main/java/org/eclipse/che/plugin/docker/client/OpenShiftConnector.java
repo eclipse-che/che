@@ -31,6 +31,7 @@ import com.openshift.restclient.model.IServicePort;
 import com.openshift.restclient.model.deploy.DeploymentTriggerType;
 
 import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.json.ImageConfig;
@@ -77,6 +78,11 @@ public class OpenShiftConnector {
     private static final String OPENSHIFT_SERVICE_TYPE_NODE_PORT = "NodePort";
     private static final int OPENSHIFT_LIVENESS_PROBE_DELAY = 120;
     private static final int OPENSHIFT_LIVENESS_PROBE_TIMEOUT = 1;
+    private static final int OPENSHIFT_WAIT_POD_DELAY = 1000;
+    private static final int OPENSHIFT_WAIT_POD_TIMEOUT = 120;
+    private static final String OPENSHIFT_POD_STATUS_RUNNING = "Running";
+    private static final String OPENSHIFT_DEPLOYMENT_CONFIG = "deploymentConfig";
+    private static final String DOCKER_PREFIX = "docker://";
     public static final String DOCKER_PROTOCOL_PORT_DELIMITER = "/";
     public static final String IMAGE_PULL_POLICY_IFNOTPRESENT = "IfNotPresent";
     public static final String CHE_DEFAULT_EXTERNAL_ADDRESS = "172.17.0.1";
@@ -410,26 +416,24 @@ public class OpenShiftConnector {
     }
 
     private String waitAndRetrieveContainerID(IProject cheproject, String deploymentConfigName) {
-        String deployerLabelKey = "openshift.io/deployer-pod-for.name";
-        for (int i = 0; i < 120; i++) {
+        for (int i = 0; i < OPENSHIFT_WAIT_POD_TIMEOUT; i++) {
             try {
-                Thread.sleep(1000);                 //1000 milliseconds is one second.
+                Thread.sleep(OPENSHIFT_WAIT_POD_DELAY);
             } catch (InterruptedException ex) {
                 Thread.currentThread().interrupt();
             }
 
             List<IPod> pods = openShiftClient.list(ResourceKind.POD, cheproject.getNamespace(), Collections.emptyMap());
-            long deployPodNum = pods.stream().filter(p -> p.getLabels().keySet().contains(deployerLabelKey)).count();
-
-            if (deployPodNum == 0) {
-                LOG.info("Pod has been deployed.");
-                for (IPod pod : pods) {
-                    if (pod.getLabels().get("deploymentConfig").equals(deploymentConfigName)) {
-                        ModelNode containerID = ((Pod) pod).getNode().get("status").get("containerStatuses").get(0).get("containerID");
-                        pod.addLabel(CHE_CONTAINER_IDENTIFIER_LABEL_KEY, containerID.toString().substring(10,22));
-                        openShiftClient.update(pod);
-                        return containerID.toString().substring(10, 74);
-                    }
+            
+            for (IPod p : pods) {
+                String status = p.getStatus();
+                String dc = p.getLabels().get(OPENSHIFT_DEPLOYMENT_CONFIG);
+                if (OPENSHIFT_POD_STATUS_RUNNING.equals(status) && deploymentConfigName.equals(dc)) {
+                    ModelNode containerID = ((Pod) p).getNode().get("status").get("containerStatuses").get(0).get("containerID");
+                    String normalizedID = normalizeContainerID(containerID.toString());
+                    p.addLabel(CHE_CONTAINER_IDENTIFIER_LABEL_KEY, getLabelFromContainerID(normalizedID));
+                    openShiftClient.update(p);
+                    return normalizedID;
                 }
             }
         }
@@ -604,6 +608,22 @@ public class OpenShiftConnector {
      */
     private String generateWorkspaceID() {
         return RandomStringUtils.random(16, true, true).toLowerCase();
+    }
+
+    /**
+     * @param containerID
+     * @return label based on 'ContainerID' (first 12 chars of ID)
+     */
+    private String getLabelFromContainerID(final String containerID) {
+        return StringUtils.substring(containerID, 0, 12);
+    }
+
+    /**
+     * @param containerID
+     * @return normalized version of 'ContainerID' without 'docker://' prefix and double quotes
+     */
+    private String normalizeContainerID(final String containerID) {
+        return StringUtils.replaceOnce(containerID, DOCKER_PREFIX, "").replace("\"", "");
     }
 
     /**
