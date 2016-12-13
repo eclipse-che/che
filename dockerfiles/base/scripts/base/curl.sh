@@ -20,7 +20,7 @@ curl() {
   if [[ ! "${HTTP_PROXY}" = "" ]] ||
   	 [[ ! "${HTTPS_PROXY}" = "" ]]; then
   	 if [ ! -z ${CHE_HOST+x} ]; then
-  	   NO_PROXY_CONFIG_FOR_CURL=("--noproxy" "${CHE_HOST} ")
+  	   NO_PROXY_CONFIG_FOR_CURL=("--noproxy" $(eval "echo \$${CHE_PRODUCT_NAME}_HOST"))
   	fi
   fi
 
