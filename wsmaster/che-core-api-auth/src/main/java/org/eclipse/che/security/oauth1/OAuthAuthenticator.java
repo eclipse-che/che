@@ -27,7 +27,6 @@ import org.eclipse.che.commons.annotation.Nullable;
 
 import javax.validation.constraints.NotNull;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
@@ -108,11 +107,10 @@ public abstract class OAuthAuthenticator {
     String getAuthenticateUrl(@NotNull final URL requestUrl,
                               @Nullable final String requestMethod,
                               @Nullable final String signatureMethod) throws OAuthAuthenticationException {
-
-        final GenericUrl callbackUrl = new GenericUrl(redirectUri);
-        callbackUrl.put(STATE_PARAM_KEY, requestUrl.getQuery());
-
         try {
+            final GenericUrl callbackUrl = new GenericUrl(redirectUri);
+            callbackUrl.put(STATE_PARAM_KEY, requestUrl.getQuery());
+
             OAuthGetTemporaryToken temporaryToken;
             if (requestMethod != null && "post".equals(requestMethod.toLowerCase())) {
                 temporaryToken = new OAuthPostTemporaryToken(requestTokenUri);
@@ -134,7 +132,7 @@ public abstract class OAuthAuthenticator {
             sharedTokenSecrets.put(credentialsResponse.token, credentialsResponse.tokenSecret);
 
             return authorizeTemporaryTokenUrl.build();
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException | IOException e) {
+        } catch (Exception e) {
             throw new OAuthAuthenticationException(e.getMessage());
         }
     }
@@ -204,7 +202,7 @@ public abstract class OAuthAuthenticator {
 
             return userId;
 
-        } catch (final IOException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+        } catch (Exception e) {
             throw new OAuthAuthenticationException(e.getMessage());
         }
     }

@@ -20,6 +20,7 @@ import java.util.Map;
  * @author Igor Vinokur
  */
 public interface OAuthAuthorizationHeaderProvider {
+
     /**
      * Returns the Authorization header value used to sign the request with OAuth.
      *

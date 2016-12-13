@@ -11,6 +11,7 @@
 package org.eclipse.che.security.oauth1;
 
 import org.eclipse.che.api.core.BadRequestException;
+import org.eclipse.che.api.core.rest.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +27,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
+import static java.lang.String.format;
 import static org.eclipse.che.commons.lang.UrlUtils.getParameter;
 import static org.eclipse.che.commons.lang.UrlUtils.getQueryParametersFromState;
 import static org.eclipse.che.commons.lang.UrlUtils.getRequestUrl;
@@ -38,7 +40,7 @@ import static org.eclipse.che.commons.lang.UrlUtils.getState;
  * @author Igor Vinokur
  */
 @Path("oauth/1.0")
-public class OAuthAuthenticationService {
+public class OAuthAuthenticationService extends Service {
     private static final Logger LOG = LoggerFactory.getLogger(OAuthAuthenticationService.class);
 
     private final static String USER_ID_PARAMETER               = "user_id";
@@ -47,7 +49,7 @@ public class OAuthAuthenticationService {
     private final static String REQUEST_METHOD_PARAMETER        = "request_method";
     private final static String SIGNATURE_METHOD_PARAMETER      = "signature_method";
     private final static String REDIRECT_AFTER_LOGIN_PARAMETER  = "redirect_after_login";
-    private final static String UNSUPORTED_OAUTH_PROVIDER_ERROR = "Unsupported OAuth provider: ";
+    private final static String UNSUPPORTED_OAUTH_PROVIDER_ERROR = "Unsupported OAuth provider: %s";
 
     @Inject
     protected OAuthAuthenticatorProvider providers;
@@ -111,8 +113,8 @@ public class OAuthAuthenticationService {
     private OAuthAuthenticator getAuthenticator(String oauthProviderName) throws BadRequestException {
         OAuthAuthenticator oauth = providers.getAuthenticator(oauthProviderName);
         if (oauth == null) {
-            LOG.warn(UNSUPORTED_OAUTH_PROVIDER_ERROR + oauthProviderName);
-            throw new BadRequestException(UNSUPORTED_OAUTH_PROVIDER_ERROR + oauthProviderName);
+            LOG.warn(format(UNSUPPORTED_OAUTH_PROVIDER_ERROR, oauthProviderName));
+            throw new BadRequestException(format(UNSUPPORTED_OAUTH_PROVIDER_ERROR, oauthProviderName));
         }
         return oauth;
     }

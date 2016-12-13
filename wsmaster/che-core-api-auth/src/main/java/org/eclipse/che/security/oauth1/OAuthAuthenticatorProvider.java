@@ -28,8 +28,7 @@ public class OAuthAuthenticatorProvider {
 
     @Inject
     public OAuthAuthenticatorProvider(final Set<OAuthAuthenticator> oAuthAuthenticators) {
-        oAuthAuthenticators.forEach(oAuthAuthenticator -> this.oAuthAuthenticators.put(oAuthAuthenticator.getOAuthProvider(),
-                                                                                       oAuthAuthenticator));
+        oAuthAuthenticators.forEach(authenticator -> this.oAuthAuthenticators.put(authenticator.getOAuthProvider(), authenticator));
     }
 
     /**
