@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.machine.ssh;
 
-import org.eclipse.che.api.agent.server.launcher.AbstractAgentLauncher;
-import org.eclipse.che.api.agent.server.launcher.ProcessIsLaunchedChecker;
 import org.eclipse.che.api.agent.server.model.impl.AgentImpl;
 import org.eclipse.che.api.agent.server.terminal.WebsocketTerminalFilesPathProvider;
 import org.eclipse.che.api.agent.shared.model.Agent;
@@ -22,6 +20,7 @@ import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceProcess;
+import org.eclipse.che.api.workspace.server.launcher.TerminalAgentLauncherImpl;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -38,7 +37,7 @@ import static org.slf4j.LoggerFactory.getLogger;
  * @author Alexander Garagatyi
  * @author Anatolii Bazko
  */
-public class SshMachineImplTerminalLauncher extends AbstractAgentLauncher {
+public class SshMachineImplTerminalLauncher extends TerminalAgentLauncherImpl {
     private static final Logger LOG = getLogger(SshMachineImplTerminalLauncher.class);
 
     // Regex to parse output of command 'uname -sm'
@@ -51,7 +50,6 @@ public class SshMachineImplTerminalLauncher extends AbstractAgentLauncher {
 
     private final WebsocketTerminalFilesPathProvider archivePathProvider;
     private final String                             terminalLocation;
-    private final String                             terminalRunCommand;
 
     @Inject
     public SshMachineImplTerminalLauncher(@Named("che.agent.dev.max_start_time_ms") long agentMaxStartTimeMs,
@@ -59,10 +57,9 @@ public class SshMachineImplTerminalLauncher extends AbstractAgentLauncher {
                                           @Named("machine.ssh.server.terminal.location") String terminalLocation,
                                           @Named("machine.terminal_agent.run_command") String terminalRunCommand,
                                           WebsocketTerminalFilesPathProvider terminalPathProvider) {
-        super(agentMaxStartTimeMs, agentPingDelayMs, new ProcessIsLaunchedChecker("che-websocket-terminal"));
+        super(agentMaxStartTimeMs, agentPingDelayMs, terminalRunCommand);
         this.archivePathProvider = terminalPathProvider;
         this.terminalLocation = terminalLocation;
-        this.terminalRunCommand = terminalRunCommand;
     }
 
     @Override
@@ -71,20 +68,13 @@ public class SshMachineImplTerminalLauncher extends AbstractAgentLauncher {
     }
 
     @Override
-    public String getAgentId() {
-        return "org.eclipse.che.terminal";
-    }
-
-    @Override
     public void launch(Instance machine, Agent agent) throws ServerException {
         try {
             String architecture = detectArchitecture(machine);
             machine.copy(archivePathProvider.getPath(architecture), terminalLocation);
 
-            final AgentImpl agentCopy = new AgentImpl(agent);
-            agentCopy.setScript(agent.getScript() + "\n" + terminalRunCommand);
-
-            super.launch(machine, agentCopy);
+            final AgentImpl agentWithRunCommand = addRunCommandToAgentScript(agent);
+            super.launch(machine, agentWithRunCommand);
         } catch (ConflictException e) {
             // should never happen
             throw new ServerException("Internal server error occurs on terminal launching.");
