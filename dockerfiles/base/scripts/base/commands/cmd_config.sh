@@ -77,7 +77,7 @@ generate_configuration_with_puppet() {
 
   if [ "${CHE_DEVELOPMENT_MODE}" = "on" ]; then
     # Note - bug in docker requires relative path for env, not absolute
-    GENERATE_CONFIG_COMMAND="docker_run -it \
+    GENERATE_CONFIG_COMMAND="docker_run \
                   --env-file=\"${REFERENCE_CONTAINER_ENVIRONMENT_FILE}\" \
                   --env-file=/version/$CHE_VERSION/images \
                   -v \"${CHE_HOST_INSTANCE}\":/opt/${CHE_MINI_PRODUCT_NAME}:rw \
