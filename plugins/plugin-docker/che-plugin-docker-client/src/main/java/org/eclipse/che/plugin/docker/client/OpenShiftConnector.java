@@ -32,12 +32,15 @@ import com.openshift.restclient.model.deploy.DeploymentTriggerType;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.che.plugin.docker.client.connection.DockerConnectionFactory;
 import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.json.ImageConfig;
 import org.eclipse.che.plugin.docker.client.json.PortBinding;
 import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
+import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
+import org.eclipse.che.plugin.docker.client.params.network.ConnectContainerToNetworkParams;
 import org.jboss.dmr.ModelNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,7 +64,7 @@ import static javax.ws.rs.core.Response.Status.NO_CONTENT;
  * @author ML
  */
 @Singleton
-public class OpenShiftConnector {
+public class OpenShiftConnector extends DockerConnector {
     private static final Logger LOG = LoggerFactory.getLogger(OpenShiftConnector.class);
     private static final String OPENSHIFT_API_VERSION = "v1";
     private static final String CHE_WORKSPACE_ID_ENV_VAR = "CHE_WORKSPACE_ID";
@@ -108,11 +111,16 @@ public class OpenShiftConnector {
             put(9876, "codeserver").build();
 
     @Inject
-    public OpenShiftConnector(@Named("che.openshift.endpoint") String openShiftApiEndpoint,
+    public OpenShiftConnector(DockerConnectorConfiguration connectorConfiguration,
+                              DockerConnectionFactory connectionFactory,
+                              DockerRegistryAuthResolver authResolver,
+                              DockerApiVersionPathPrefixProvider dockerApiVersionPathPrefixProvider,
+                              @Named("che.openshift.endpoint") String openShiftApiEndpoint,
                               @Named("che.openshift.username") String openShiftUserName,
                               @Named("che.openshift.password") String openShiftUserPassword,
                               @Named("che.openshift.project") String cheOpenShiftProjectName,
                               @Named("che.openshift.serviceaccountname") String cheOpenShiftServiceAccount) {
+        super(connectorConfiguration, connectionFactory, authResolver, dockerApiVersionPathPrefixProvider);
         this.cheOpenShiftProjectName = cheOpenShiftProjectName;
         this.cheOpenShiftServiceAccount = cheOpenShiftServiceAccount;
 
@@ -128,7 +136,8 @@ public class OpenShiftConnector {
      * @return
      * @throws IOException
      */
-    public ContainerCreated createContainer(DockerConnector docker, CreateContainerParams createContainerParams) throws IOException {
+    @Override
+    public ContainerCreated createContainer(CreateContainerParams createContainerParams) throws IOException {
 
         String containerName = getNormalizedContainerName(createContainerParams);
         String workspaceID = getCheWorkspaceId(createContainerParams);
@@ -136,12 +145,12 @@ public class OpenShiftConnector {
         workspaceID = workspaceID.isEmpty() ? generateWorkspaceID() : workspaceID;
         String imageName = createContainerParams.getContainerConfig().getImage();//"mariolet/che-ws-agent";//"172.30.166.244:5000/eclipse-che/che-ws-agent:latest";//
         Set<String> containerExposedPorts = createContainerParams.getContainerConfig().getExposedPorts().keySet();
-        Set<String> imageExposedPorts = docker.inspectImage(imageName).getConfig().getExposedPorts().keySet();
+        Set<String> imageExposedPorts = inspectImage(imageName).getConfig().getExposedPorts().keySet();
         Set<String> exposedPorts = new HashSet<>();
         exposedPorts.addAll(containerExposedPorts);
         exposedPorts.addAll(imageExposedPorts);
 
-        boolean runContainerAsRoot = runContainerAsRoot(docker, imageName);
+        boolean runContainerAsRoot = runContainerAsRoot(imageName);
 
         String[] envVariables = createContainerParams.getContainerConfig().getEnv();
         String[] volumes = createContainerParams.getContainerConfig().getHostConfig().getBinds();
@@ -167,15 +176,21 @@ public class OpenShiftConnector {
         return new ContainerCreated(containerID, null);
     }
 
+    @Override
+    public void startContainer(final StartContainerParams params) throws IOException {
+        // Not used in OpenShift
+    }
+
     /**
      * @param docker
      * @param container
      * @return
      * @throws IOException
      */
-    public ContainerInfo inspectContainer(DockerConnector docker, String container) throws IOException {
+    @Override
+    public ContainerInfo inspectContainer(String container) throws IOException {
         // Proxy to DockerConnector
-        ContainerInfo info = docker.inspectContainer(container);
+        ContainerInfo info = super.inspectContainer(container);
         if (info == null) {
             return null;
         }
@@ -203,6 +218,7 @@ public class OpenShiftConnector {
         return info;
     }
 
+    @Override
     public void removeContainer(final RemoveContainerParams params) throws IOException {
         String containerId = params.getContainer();
         boolean useForce = params.isForce();
@@ -228,6 +244,11 @@ public class OpenShiftConnector {
 
         LOG.info("Removing OpenShift Pod " + pod.getName());
         openShiftClient.delete(pod);
+    }
+
+    @Override
+    public void connectContainerToNetwork(ConnectContainerToNetworkParams params) throws IOException {
+        // Not used in OpenShift
     }
 
     private IService getCheServiceBySelector(String selectorKey, String selectorValue) {
@@ -424,7 +445,7 @@ public class OpenShiftConnector {
             }
 
             List<IPod> pods = openShiftClient.list(ResourceKind.POD, cheproject.getNamespace(), Collections.emptyMap());
-            
+
             for (IPod p : pods) {
                 String status = p.getStatus();
                 String dc = p.getLabels().get(OPENSHIFT_DEPLOYMENT_CONFIG);
@@ -577,8 +598,8 @@ public class OpenShiftConnector {
      * @return true if user property from Image config is empty string, false otherwise
      * @throws IOException
      */
-    private boolean runContainerAsRoot(final DockerConnector dockerConnector,final String imageName) throws IOException {
-        String user = dockerConnector.inspectImage(imageName).getConfig().getUser();
+    private boolean runContainerAsRoot(final String imageName) throws IOException {
+        String user = inspectImage(imageName).getConfig().getUser();
         return user != null && user.isEmpty();
     }
 

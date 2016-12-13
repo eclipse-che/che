@@ -24,7 +24,6 @@ import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.Exec;
 import org.eclipse.che.plugin.docker.client.LogMessage;
 import org.eclipse.che.plugin.docker.client.MessageProcessor;
-import org.eclipse.che.plugin.docker.client.OpenShiftConnector;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
 import org.eclipse.che.plugin.docker.client.params.CommitParams;
 import org.eclipse.che.plugin.docker.client.params.CreateExecParams;
@@ -78,8 +77,6 @@ public class DockerInstanceTest {
     private Exec                       execMock;
     @Mock
     private DockerConnector            dockerConnectorMock;
-    @Mock
-    private OpenShiftConnector         openShiftConnectorMock;
     @Mock
     private DockerInstanceStopDetector dockerInstanceStopDetectorMock;
     @Mock
@@ -211,7 +208,6 @@ public class DockerInstanceTest {
                                              String image,
                                              boolean snapshotUseRegistry) {
         return new DockerInstance(dockerConnectorMock,
-                                  openShiftConnectorMock,
                                   registry,
                                   USERNAME,
                                   mock(DockerMachineFactory.class),
