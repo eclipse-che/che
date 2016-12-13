@@ -9,5 +9,6 @@
   "helpPath": "https://www.eclipse.org/che/",
   "helpTitle": "Community",
   "supportEmail": "wish@codenvy.com",
-  "oauthDocs": "Configure OAuth in the che.properties file."
+  "oauthDocs": "Configure OAuth in the che.properties file.",
+  "version": "project_version"
 }

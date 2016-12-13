@@ -66,6 +66,7 @@ export class CheFooter {
    */
   template(element, attrs) {
     var logo = attrs.cheLogo;
+    var version = attrs.cheVersion;
     var productName  = attrs.cheProductName;
     var supportEmail = attrs.cheSupportEmail;
     var supportHelpPath = attrs.cheSupportHelpPath;
@@ -74,6 +75,9 @@ export class CheFooter {
     var template = '<div class=\"che-footer\" layout=\"row\" layout-align=\"start center\">';
     if (logo) {
       template += '<img class=\"che-footer-logo\" ng-src=\"' + logo + '\" alt=\"logo\">';
+    }
+    if (version) {
+      template += '<span class=\"che-footer-version\">' + version + '</span>';
     }
     template += '<div flex />';
     template += '<ng-transclude></ng-transclude>';
