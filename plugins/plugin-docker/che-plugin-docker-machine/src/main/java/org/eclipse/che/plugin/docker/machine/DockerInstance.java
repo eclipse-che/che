@@ -102,13 +102,11 @@ public class DockerInstance extends AbstractInstance {
     private final DockerInstanceProcessesCleaner              processesCleaner;
     private final ConcurrentHashMap<Integer, InstanceProcess> machineProcesses;
     private final boolean                                     snapshotUseRegistry;
-    private final OpenShiftConnector                          openShift;
 
     private MachineRuntimeInfoImpl machineRuntime;
 
     @Inject
     public DockerInstance(DockerConnector docker,
-                          OpenShiftConnector openShift,
                           @Named("che.docker.registry") String registry,
                           @Named("che.docker.namespace") @Nullable String registryNamespace,
                           DockerMachineFactory dockerMachineFactory,
@@ -124,7 +122,6 @@ public class DockerInstance extends AbstractInstance {
         this.dockerMachineFactory = dockerMachineFactory;
         this.container = container;
         this.docker = docker;
-        this.openShift = openShift;
         this.image = image;
         this.outputConsumer = outputConsumer;
         this.registry = registry;
@@ -147,8 +144,7 @@ public class DockerInstance extends AbstractInstance {
         // if runtime info is not evaluated yet
         if (machineRuntime == null) {
             try {
-//                final ContainerInfo containerInfo = docker.inspectContainer(container);
-                final ContainerInfo containerInfo = openShift.inspectContainer(docker, container);
+                final ContainerInfo containerInfo = docker.inspectContainer(container);
                 machineRuntime = new MachineRuntimeInfoImpl(dockerMachineFactory.createMetadata(containerInfo,
                                                                                                 null,
                                                                                                 node.getHost(),
@@ -287,7 +283,7 @@ public class DockerInstance extends AbstractInstance {
             }
 
             // kill container is not needed here, because we removing container with force flag
-            openShift.removeContainer(RemoveContainerParams.create(container)
+            docker.removeContainer(RemoveContainerParams.create(container)
                                                         .withRemoveVolumes(true)
                                                         .withForce(true));
         } catch (IOException e) {

@@ -17,7 +17,6 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.environment.server.CheEnvironmentEngine;
 import org.eclipse.che.commons.schedule.ScheduleRate;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
-import org.eclipse.che.plugin.docker.client.OpenShiftConnector;
 import org.eclipse.che.plugin.docker.client.json.ContainerListEntry;
 import org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator;
 import org.slf4j.Logger;
@@ -47,17 +46,14 @@ public class DockerContainerCleaner implements Runnable {
     private final CheEnvironmentEngine         environmentEngine;
     private final DockerConnector              dockerConnector;
     private final DockerContainerNameGenerator nameGenerator;
-    private final OpenShiftConnector           openShiftConnector;
 
     @Inject
     public DockerContainerCleaner(CheEnvironmentEngine environmentEngine,
                                   DockerConnector dockerConnector,
-                                  OpenShiftConnector openShiftConnector,
                                   DockerContainerNameGenerator nameGenerator) {
         this.environmentEngine = environmentEngine;
         this.dockerConnector = dockerConnector;
         this.nameGenerator = nameGenerator;
-        this.openShiftConnector = openShiftConnector;
     }
 
     @ScheduleRate(periodParameterName = "che.docker.unused_containers_cleanup_min",
@@ -113,7 +109,7 @@ public class DockerContainerCleaner implements Runnable {
 
     private void removeContainer(String containerId, String containerName) {
         try {
-            openShiftConnector.removeContainer(create(containerId).withForce(true).withRemoveVolumes(true));
+            dockerConnector.removeContainer(create(containerId).withForce(true).withRemoveVolumes(true));
             LOG.warn("Unused container with 'id': '{}' and 'name': '{}' was removed", containerId, containerName);
         } catch (IOException e) {
             LOG.error(format("Failed to delete unused container with 'id': '%s' and 'name': '%s'", containerId, containerName), e);

@@ -5,6 +5,8 @@ import com.openshift.restclient.IClient;
 import com.openshift.restclient.IResourceFactory;
 import com.openshift.restclient.model.IPort;
 import com.openshift.restclient.model.IServicePort;
+
+import org.eclipse.che.plugin.docker.client.connection.DockerConnectionFactory;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.ExposedPort;
 import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
@@ -30,6 +32,14 @@ public class OpenShiftConnectorTest {
     private static final String   OPENSHIFT_DEFAULT_USER_NAME = "openshift-dev";
     private static final String   OPENSHIFT_DEFAULT_USER_PASSWORD = "devel";
 
+    @Mock
+    private DockerConnectorConfiguration       dockerConnectorConfiguration;
+    @Mock
+    private DockerConnectionFactory            dockerConnectionFactory;
+    @Mock
+    private DockerRegistryAuthResolver         authManager;
+    @Mock
+    private DockerApiVersionPathPrefixProvider dockerApiVersionPathPrefixProvider;
 
     @Mock
     private CreateContainerParams createContainerParams;
@@ -45,7 +55,11 @@ public class OpenShiftConnectorTest {
     @BeforeMethod
     public void setup() {
         openShiftResourceFactory = spy(new ResourceFactory(openShiftClient));
-        openShiftConnector = spy(new OpenShiftConnector(OPENSHIFT_API_ENDPOINT_MINISHIFT,
+        openShiftConnector = spy(new OpenShiftConnector(dockerConnectorConfiguration,
+                                                        dockerConnectionFactory,
+                                                        authManager,
+                                                        dockerApiVersionPathPrefixProvider,
+                                                        OPENSHIFT_API_ENDPOINT_MINISHIFT,
                                                         OPENSHIFT_DEFAULT_USER_NAME,
                                                         OPENSHIFT_DEFAULT_USER_PASSWORD,
                                                         CHE_DEFAULT_OPENSHIFT_PROJECT_NAME,
