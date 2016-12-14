@@ -20,6 +20,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Dispatches JSON RPC responses
+ */
 @Singleton
 public class ResponseDispatcher {
     private final Map<String, ResolveFunction> resolveFunctionsOfOne  = new HashMap<>();

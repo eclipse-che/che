@@ -18,25 +18,38 @@ import org.eclipse.che.ide.jsonrpc.RequestHandlerRegistry;
 
 import java.util.List;
 
+/**
+ * Function configurator to define a function to be applied when we
+ * handle incoming JSON RPC request with params object that is
+ * represented by a list. The result of a function is also a list.
+ *
+ * @param <P>
+ *         type of params list items
+ * @param <R>
+ *         type of resulting list items
+ */
 public class FunctionConfiguratorListToList<P, R> {
     private final RequestHandlerRegistry registry;
     private final JsonRpcFactory         jsonRpcFactory;
     private final String                 method;
     private final Class<P>               paramsClass;
-    private final Class<R>               resultClass;
 
 
-    FunctionConfiguratorListToList(RequestHandlerRegistry registry, JsonRpcFactory jsonRpcFactory, String method, Class<P> paramsClass,
-                                   Class<R> resultClass) {
+    FunctionConfiguratorListToList(RequestHandlerRegistry registry, JsonRpcFactory jsonRpcFactory, String method, Class<P> paramsClass) {
         this.registry = registry;
         this.jsonRpcFactory = jsonRpcFactory;
         this.method = method;
         this.paramsClass = paramsClass;
-        this.resultClass = resultClass;
     }
 
+    /**
+     * Define a function to be applied
+     *
+     * @param function
+     *         function
+     */
     public void withFunction(JsonRpcRequestBiFunction<List<P>, List<R>> function) {
-        RequestHandler handler = new RequestHandlerListToList<>(paramsClass, resultClass, function, jsonRpcFactory);
+        RequestHandler handler = new RequestHandlerListToList<>(paramsClass, function, jsonRpcFactory);
         registry.register(method, handler);
     }
 }

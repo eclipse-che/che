@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.ide.jsonrpc;
 
+/**
+ * Handler corresponding to processing JSON RPC requests.
+ */
 public interface RequestHandler {
     JsonRpcResult handle(String endpointId, JsonRpcParams params) throws JsonRpcException;
 }

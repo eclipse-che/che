@@ -16,6 +16,10 @@ import org.eclipse.che.ide.websocket.ng.WebSocketMessageTransmitter;
 
 import javax.inject.Inject;
 
+/**
+ * Endpoint ID configurator to defined endpoint id that the request
+ * should be addressed to.
+ */
 public class EndpointIdConfigurator {
     private final ResponseDispatcher          responseDispatcher;
     private final WebSocketMessageTransmitter transmitter;

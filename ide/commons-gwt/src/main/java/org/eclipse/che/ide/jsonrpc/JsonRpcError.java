@@ -16,6 +16,12 @@ import elemental.json.JsonObject;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
+/**
+ * Represents JSON RPC error object. Can be constructed out of
+ * stringified json object or by passing specific parameters.
+ * Use {@link JsonRpcFactory#createError(int, String)} or
+ * {@link JsonRpcFactory#createError(String)} to get an instance.
+ */
 public class JsonRpcError {
     private final int         code;
     private final String      message;

@@ -10,17 +10,25 @@
  *******************************************************************************/
 package org.eclipse.che.ide.jsonrpc;
 
+/**
+ * Handler to contain a function and all related metadata required for
+ * processing incoming requests. This handler is used when we have
+ * parameters represented by a single object while result is also represented
+ * by a single object
+ *
+ * @param <P>
+ *         type of request params object
+ * @param <R>
+ *         type of request result object
+ */
 public class RequestHandlerOneToOne<P, R> implements RequestHandler {
     private final Class<P>                       paramsClass;
-    private final Class<R>                       resultClass;
     private final JsonRpcRequestBiFunction<P, R> biFunction;
     private final JsonRpcFactory                 jsonRpcFactory;
 
-    public RequestHandlerOneToOne(Class<P> paramsClass, Class<R> resultClass, JsonRpcRequestBiFunction<P, R> biFunction,
-                                  JsonRpcFactory jsonRpcFactory) {
+    public RequestHandlerOneToOne(Class<P> paramsClass, JsonRpcRequestBiFunction<P, R> biFunction, JsonRpcFactory jsonRpcFactory) {
 
         this.paramsClass = paramsClass;
-        this.resultClass = resultClass;
         this.biFunction = biFunction;
         this.jsonRpcFactory = jsonRpcFactory;
     }

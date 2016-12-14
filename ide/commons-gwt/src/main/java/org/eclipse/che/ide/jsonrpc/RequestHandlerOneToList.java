@@ -12,17 +12,25 @@ package org.eclipse.che.ide.jsonrpc;
 
 import java.util.List;
 
+/**
+ * Handler to contain a function and all related metadata required for
+ * processing incoming requests. This handler is used when we have
+ * parameters represented by a single object while result is represented by
+ * a list of items.
+ *
+ * @param <P>
+ *         type of request params object
+ * @param <R>
+ *         type of request result list items
+ */
 public class RequestHandlerOneToList<P, R> implements RequestHandler {
     private final Class<P>                             paramsClass;
-    private final Class<R>                             resultClass;
     private final JsonRpcRequestBiFunction<P, List<R>> biFunction;
     private final JsonRpcFactory                       jsonRpcFactory;
 
-    public RequestHandlerOneToList(Class<P> paramsClass, Class<R> resultClass, JsonRpcRequestBiFunction<P, List<R>> biFunction,
-                                   JsonRpcFactory jsonRpcFactory) {
+    public RequestHandlerOneToList(Class<P> paramsClass, JsonRpcRequestBiFunction<P, List<R>> biFunction, JsonRpcFactory jsonRpcFactory) {
 
         this.paramsClass = paramsClass;
-        this.resultClass = resultClass;
         this.biFunction = biFunction;
         this.jsonRpcFactory = jsonRpcFactory;
     }

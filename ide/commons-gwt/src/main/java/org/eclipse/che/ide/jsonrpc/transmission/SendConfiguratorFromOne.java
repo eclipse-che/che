@@ -23,6 +23,14 @@ import org.eclipse.che.ide.websocket.ng.WebSocketMessageTransmitter;
 
 import java.util.List;
 
+/**
+ * Configurator defines the type of a result (if present) and send a request.
+ * Result types that are supported: {@link String}, {@link Boolean},
+ * {@link Double}, {@link Void} and DTO. This configurator is used when we
+ * have defined request params as a single object.
+ *
+ * @param <P> type of params objects
+ */
 public class SendConfiguratorFromOne<P> {
     private final ResponseDispatcher          responseDispatcher;
     private final WebSocketMessageTransmitter transmitter;

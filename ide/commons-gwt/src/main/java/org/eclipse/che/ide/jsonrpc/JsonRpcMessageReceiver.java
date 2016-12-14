@@ -20,6 +20,13 @@ import java.util.List;
 
 import static org.eclipse.che.ide.jsonrpc.JsonRpcList.isArray;
 
+/**
+ * Receives and process messages coming from web socket service. Basically
+ * it validates, qualifies and transforms a raw web socket message to a JSON
+ * RPC known structure and pass it further to appropriate dispatchers. In case
+ * of any {@link JsonRpcException} happens during request/response processing
+ * this class is also responsible for an error transmission.
+ */
 @Singleton
 public class JsonRpcMessageReceiver implements WebSocketMessageReceiver {
     private final RequestDispatcher       requestDispatcher;

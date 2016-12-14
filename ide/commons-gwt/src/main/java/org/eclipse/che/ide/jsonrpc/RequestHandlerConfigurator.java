@@ -12,6 +12,9 @@ package org.eclipse.che.ide.jsonrpc;
 
 import org.eclipse.che.ide.jsonrpc.reception.MethodNameConfigurator;
 
+/**
+ * Factory to provide facilities for dynamic configuring request handlers.
+ */
 public interface RequestHandlerConfigurator {
     MethodNameConfigurator newConfiguration();
 }

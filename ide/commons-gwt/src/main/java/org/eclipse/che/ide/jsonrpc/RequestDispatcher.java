@@ -15,6 +15,11 @@ import org.eclipse.che.ide.websocket.ng.WebSocketMessageTransmitter;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+/**
+ * Dispatches incoming JSON RPC requests and notifications. If during
+ * dispatching happens any kind of error related to JSON RPC it throws
+ * appropriate exception {@link JsonRpcException}.
+ */
 @Singleton
 public class RequestDispatcher {
     private final RequestHandlerRegistry      requestHandlerRegistry;

@@ -13,6 +13,13 @@ package org.eclipse.che.ide.jsonrpc.reception;
 import org.eclipse.che.ide.jsonrpc.JsonRpcFactory;
 import org.eclipse.che.ide.jsonrpc.RequestHandlerRegistry;
 
+/**
+ * Result configurator provide means to configure result type in a
+ * response that is to be received. Result types that are supported:
+ * {@link String}, {@link Boolean}, {@link Double}, {@link Void} and
+ * DTO. This configurator is used when we have defined request params
+ * as a single object.
+ */
 public class ResultConfiguratorFromOne<P> {
     private final RequestHandlerRegistry registry;
     private final JsonRpcFactory         jsonRpcFactory;
@@ -28,42 +35,42 @@ public class ResultConfiguratorFromOne<P> {
     }
 
     public <R> FunctionConfiguratorOneToList<P, R> resultAsListOfDto(Class<R> resultClass) {
-        return new FunctionConfiguratorOneToList<>(registry, jsonRpcFactory, method, paramsClass, resultClass);
+        return new FunctionConfiguratorOneToList<>(registry, jsonRpcFactory, method, paramsClass);
     }
 
     public FunctionConfiguratorOneToOne<P, String> resultAsDtoString() {
-        return new FunctionConfiguratorOneToOne<>(registry, jsonRpcFactory, method, paramsClass, String.class);
+        return new FunctionConfiguratorOneToOne<>(registry, jsonRpcFactory, method, paramsClass);
     }
 
     public FunctionConfiguratorOneToOne<P, Double> resultAsDtoDouble() {
-        return new FunctionConfiguratorOneToOne<>(registry, jsonRpcFactory, method, paramsClass, Double.class);
+        return new FunctionConfiguratorOneToOne<>(registry, jsonRpcFactory, method, paramsClass);
     }
 
     public FunctionConfiguratorOneToOne<P, Boolean> resultAsDtoBoolean() {
-        return new FunctionConfiguratorOneToOne<>(registry, jsonRpcFactory, method, paramsClass, Boolean.class);
+        return new FunctionConfiguratorOneToOne<>(registry, jsonRpcFactory, method, paramsClass);
     }
 
     public <R> FunctionConfiguratorOneToOne<P, R> resultAsDto(Class<R> resultClass) {
-        return new FunctionConfiguratorOneToOne<>(registry, jsonRpcFactory, method, paramsClass, resultClass);
+        return new FunctionConfiguratorOneToOne<>(registry, jsonRpcFactory, method, paramsClass);
     }
 
     public FunctionConfiguratorOneToOne<P, Void> resultAsEmpty() {
-        return new FunctionConfiguratorOneToOne<>(registry, jsonRpcFactory, method, paramsClass, Void.class);
+        return new FunctionConfiguratorOneToOne<>(registry, jsonRpcFactory, method, paramsClass);
     }
 
     public FunctionConfiguratorOneToOne<P, String> resultAsString() {
-        return new FunctionConfiguratorOneToOne<>(registry, jsonRpcFactory, method, paramsClass, String.class);
+        return new FunctionConfiguratorOneToOne<>(registry, jsonRpcFactory, method, paramsClass);
     }
 
     public FunctionConfiguratorOneToOne<P, Double> resultAsDouble() {
-        return new FunctionConfiguratorOneToOne<>(registry, jsonRpcFactory, method, paramsClass, Double.class);
+        return new FunctionConfiguratorOneToOne<>(registry, jsonRpcFactory, method, paramsClass);
     }
 
     public FunctionConfiguratorOneToOne<P, Boolean> resultAsBoolean() {
-        return new FunctionConfiguratorOneToOne<>(registry, jsonRpcFactory, method, paramsClass, Boolean.class);
+        return new FunctionConfiguratorOneToOne<>(registry, jsonRpcFactory, method, paramsClass);
     }
 
-    public OperationConfiguratorOne<P> noResult() {
-        return new OperationConfiguratorOne<>(registry, method, paramsClass);
+    public OperationConfiguratorOneToNone<P> noResult() {
+        return new OperationConfiguratorOneToNone<>(registry, method, paramsClass);
     }
 }

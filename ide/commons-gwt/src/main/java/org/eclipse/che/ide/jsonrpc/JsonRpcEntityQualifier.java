@@ -13,14 +13,18 @@ package org.eclipse.che.ide.jsonrpc;
 import elemental.json.JsonFactory;
 import elemental.json.JsonObject;
 
-import com.google.gwt.json.client.JSONParser;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
+/**
+ * Qualifier is used to qualify JSON RPC incoming entity. Entities can be of
+ * several types: {@link JsonRpcEntityType#REQUEST},
+ * {@link JsonRpcEntityType#RESPONSE}, {@link JsonRpcEntityType#UNDEFINED}.
+ * This implementations uses {@link JsonFactory} to parse and analyze incoming
+ * entities and expects that message that is to be qualified is a valid json.
+ */
 @Singleton
 public class JsonRpcEntityQualifier {
 

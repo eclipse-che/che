@@ -16,6 +16,11 @@ import elemental.json.JsonFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+/**
+ * Simple class to validate if we're dealing with a properly constructed
+ * json represented by a string. We use {@link JsonFactory} to parse string
+ * message and to rise exception if json is incorrect.
+ */
 @Singleton
 public class JsonRpcEntityValidator {
     private final JsonFactory jsonFactory;

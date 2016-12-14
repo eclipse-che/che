@@ -10,6 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.ide.jsonrpc;
 
+/**
+ * Handler to contain an operation and all related metadata required for
+ * processing incoming notification. This handler is used when we have
+ * parameters represented by a single object.
+ *
+ * @param <P>
+ *         type of notification params object
+ */
 public class NotificationHandlerOneToNone<P> implements NotificationHandler {
     private final Class<P>                     paramsClass;
     private final JsonRpcRequestBiOperation<P> biOperation;

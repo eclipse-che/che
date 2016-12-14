@@ -24,6 +24,14 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Represents JSON RPC result object. Can be constructed out of
+ * stringified json object or by passing specific parameters.
+ * Use {@link JsonRpcFactory#createResult(Object)},
+ * {@link JsonRpcFactory#createResult(String)} or
+ * {@link JsonRpcFactory#createResultList(List)}
+ * to get an instance of this entity.
+ */
 public class JsonRpcResult {
     private static final JsonValue EMPTY_OBJECT = Json.instance().parse("{}");
     private static final JsonValue EMPTY_ARRAY  = Json.instance().parse("[]");
@@ -61,7 +69,7 @@ public class JsonRpcResult {
         } else if (result instanceof Double) {
             this.result = jsonFactory.create((Double)result);
         } else if (result instanceof Boolean) {
-            this.result = jsonFactory.create((Double)result);
+            this.result = jsonFactory.create((Boolean)result);
         } else if (result == null) {
             this.result = jsonFactory.createObject();
         } else {

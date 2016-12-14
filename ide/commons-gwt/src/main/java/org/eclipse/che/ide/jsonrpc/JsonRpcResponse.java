@@ -20,6 +20,13 @@ import com.google.inject.assistedinject.AssistedInject;
 
 import org.eclipse.che.ide.dto.DtoFactory;
 
+/**
+ * Represents JSON RPC response object. Can be constructed out of
+ * stringified json object or by passing specific parameters.
+ * Use {@link JsonRpcFactory#createResponse(String)} or
+ * {@link JsonRpcFactory#createResponse(String, JsonRpcResult, JsonRpcError)}
+ * to get an instance of this entity.
+ */
 public class JsonRpcResponse {
     private final JsonFactory jsonFactory;
     private final DtoFactory  dtoFactory;

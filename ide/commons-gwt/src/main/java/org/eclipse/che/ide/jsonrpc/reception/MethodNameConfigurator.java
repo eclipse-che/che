@@ -15,6 +15,10 @@ import org.eclipse.che.ide.jsonrpc.RequestHandlerRegistry;
 
 import javax.inject.Inject;
 
+/**
+ * Method configurator is used to define method name that the request handler
+ * will be associated with.
+ */
 public class MethodNameConfigurator {
     private final RequestHandlerRegistry registry;
     private final JsonRpcFactory         jsonRpcFactory;

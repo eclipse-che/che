@@ -12,6 +12,14 @@ package org.eclipse.che.ide.jsonrpc;
 
 import java.util.List;
 
+/**
+ * Handler to contain an operation and all related metadata required for
+ * processing incoming notification. This handler is used when we have
+ * parameters represented by a list.
+ *
+ * @param <P>
+ *         type of notification params list items
+ */
 public class NotificationHandlerListToNone<P> implements NotificationHandler {
     private final Class<P>                           paramsClass;
     private final JsonRpcRequestBiOperation<List<P>> biOperation;

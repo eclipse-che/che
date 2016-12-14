@@ -17,6 +17,10 @@ import org.eclipse.che.ide.websocket.ng.WebSocketMessageTransmitter;
 import javax.inject.Inject;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Method name configurator to defined method name that the request
+ * will have.
+ */
 public class MethodNameConfigurator {
     public static AtomicInteger id = new AtomicInteger(0);
 

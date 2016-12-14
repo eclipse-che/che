@@ -29,6 +29,13 @@ import java.util.List;
 
 import static elemental.json.JsonType.ARRAY;
 
+/**
+ * Represents list object that is related to any JSON RPC entity like incoming
+ * list of requests or params value represented by a list. Can be constructed
+ * out of a stringified json object or by passing specific parameters.
+ * Use {@link JsonRpcFactory#createList(String)} or
+ * {@link JsonRpcFactory#createList(List)}} to get an instance.
+ */
 public class JsonRpcList {
     private final DtoFactory       dtoFactory;
     private final List<JsonValue> jsonObjectList;

@@ -24,6 +24,13 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Represents JSON RPC params object. Can be constructed out of
+ * stringified json object or by passing specific parameters.
+ * Use {@link JsonRpcFactory#createParams(Object)},
+ * {@link JsonRpcFactory#createParamsList(List)} or
+ * {@link JsonRpcFactory#createParams(String)} to get an instance.
+ */
 public class JsonRpcParams {
     private static final JsonValue EMPTY_OBJECT = Json.instance().parse("{}");
     private static final JsonValue EMPTY_ARRAY  = Json.instance().parse("[]");
@@ -90,7 +97,7 @@ public class JsonRpcParams {
     }
 
     public boolean emptyOrAbsent() {
-        return (paramsList == null || EMPTY_OBJECT.jsEquals(toJsonValue())) && (params == null || EMPTY_OBJECT.jsEquals(toJsonValue()));
+        return (paramsList == null || EMPTY_ARRAY.jsEquals(toJsonValue())) && (params == null || EMPTY_OBJECT.jsEquals(toJsonValue()));
     }
 
     public JsonValue toJsonValue() {

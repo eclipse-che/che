@@ -16,26 +16,38 @@ import org.eclipse.che.ide.jsonrpc.RequestHandler;
 import org.eclipse.che.ide.jsonrpc.RequestHandlerOneToOne;
 import org.eclipse.che.ide.jsonrpc.RequestHandlerRegistry;
 
+/**
+ * Function configurator to define a function to be applied when we
+ * handle incoming JSON RPC request with params object that is
+ * represented by a single object while the result of a function is
+ * also a single object.
+ *
+ * @param <P>
+ *         type of params object
+ * @param <R>
+ *         type of result object
+ */
 public class FunctionConfiguratorOneToOne<P, R> {
     private final RequestHandlerRegistry registry;
     private final JsonRpcFactory         jsonRpcFactory;
     private final String                 method;
     private final Class<P>               paramsClass;
-    private final Class<R>               resultClass;
 
-    public FunctionConfiguratorOneToOne(RequestHandlerRegistry registry,
-                                        JsonRpcFactory jsonRpcFactory,
-                                        String method, Class<P> paramsClass,
-                                        Class<R> resultClass) {
+    FunctionConfiguratorOneToOne(RequestHandlerRegistry registry, JsonRpcFactory jsonRpcFactory, String method, Class<P> paramsClass) {
         this.registry = registry;
         this.jsonRpcFactory = jsonRpcFactory;
         this.method = method;
         this.paramsClass = paramsClass;
-        this.resultClass = resultClass;
     }
 
+    /**
+     * Define a function to be applied
+     *
+     * @param function
+     *         function
+     */
     public void withFunction(JsonRpcRequestBiFunction<P, R> function) {
-        RequestHandler handler = new RequestHandlerOneToOne<>(paramsClass, resultClass, function, jsonRpcFactory);
+        RequestHandler handler = new RequestHandlerOneToOne<>(paramsClass, function, jsonRpcFactory);
         registry.register(method, handler);
     }
 }

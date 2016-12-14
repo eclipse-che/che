@@ -18,12 +18,19 @@ import elemental.json.JsonValue;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
+/**
+ * Represents JSON RPC request object. Can be constructed out of
+ * stringified json object or by passing specific parameters.
+ * Use {@link JsonRpcFactory#createRequest(String, String, JsonRpcParams)}
+ * {@link JsonRpcFactory#createRequest(String)} or
+ * {@link JsonRpcFactory#createRequest(String, JsonRpcParams)} to get an instance.
+ */
 public class JsonRpcRequest {
     private final String        id;
     private final String        method;
     private final JsonRpcParams params;
 
-    private final JsonFactory    jsonFactory;
+    private final JsonFactory jsonFactory;
 
     @AssistedInject
     public JsonRpcRequest(@Assisted("message") String message, JsonFactory jsonFactory, JsonRpcFactory jsonRpcFactory) {

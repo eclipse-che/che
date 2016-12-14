@@ -15,6 +15,9 @@ import org.eclipse.che.ide.websocket.ng.WebSocketMessageTransmitter;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+/**
+ * Transmits an instance of {@link JsonRpcException} to specific endpoint
+ */
 @Singleton
 public class JsonRpcErrorTransmitter {
     private final WebSocketMessageTransmitter transmitter;

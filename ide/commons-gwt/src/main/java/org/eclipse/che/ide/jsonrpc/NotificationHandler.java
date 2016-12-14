@@ -10,8 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.ide.jsonrpc;
 
-import org.eclipse.che.ide.dto.DtoFactory;
-
+/**
+ * Handler corresponding to processing JSON RPC requests that have no ID
+ * specified (notifications).
+ */
 public interface NotificationHandler {
     void handle(String endpointId, JsonRpcParams params) throws JsonRpcException;
 }

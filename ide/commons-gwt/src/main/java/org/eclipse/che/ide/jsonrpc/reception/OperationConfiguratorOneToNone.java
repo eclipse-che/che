@@ -12,25 +12,30 @@ package org.eclipse.che.ide.jsonrpc.reception;
 
 import org.eclipse.che.ide.jsonrpc.JsonRpcRequestBiOperation;
 import org.eclipse.che.ide.jsonrpc.NotificationHandler;
-import org.eclipse.che.ide.jsonrpc.NotificationHandlerListToNone;
+import org.eclipse.che.ide.jsonrpc.NotificationHandlerOneToNone;
 import org.eclipse.che.ide.jsonrpc.RequestHandlerRegistry;
 
-import java.util.List;
-
-public class OperationConfiguratorList<P> {
+/**
+ * Operation configurator to define an operation to be applied when we
+ * handle incoming JSON RPC notification with params object that is
+ * represented by a single object. As it is an operation there is no result.
+ *
+ * @param <P> type of params object
+ */
+public class OperationConfiguratorOneToNone<P> {
     private final RequestHandlerRegistry registry;
     private final String                 method;
     private final Class<P>               paramsClass;
 
 
-    OperationConfiguratorList(RequestHandlerRegistry registry, String method, Class<P> paramsClass) {
+    OperationConfiguratorOneToNone(RequestHandlerRegistry registry, String method, Class<P> paramsClass) {
         this.registry = registry;
         this.method = method;
         this.paramsClass = paramsClass;
     }
 
-    public void withOperation(JsonRpcRequestBiOperation<List<P>> operation) {
-        NotificationHandler handler = new NotificationHandlerListToNone<>(paramsClass, operation);
+    public void withOperation(JsonRpcRequestBiOperation<P> operation) {
+        NotificationHandler handler = new NotificationHandlerOneToNone<>(paramsClass, operation);
         registry.register(method, handler);
     }
 }

@@ -16,6 +16,12 @@ import org.eclipse.che.ide.websocket.ng.WebSocketMessageTransmitter;
 
 import java.util.List;
 
+/**
+ * Params configurator provide means to configure params type in a
+ * request that is to be sent. Params types that are supported:
+ * {@link String}, {@link Boolean}, {@link Double}, {@link Void} and
+ * DTO.
+ */
 public class ParamsConfigurator {
     private final ResponseDispatcher          responseDispatcher;
     private final WebSocketMessageTransmitter transmitter;

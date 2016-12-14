@@ -14,6 +14,10 @@ import javax.inject.Singleton;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Registry to store request and notification handlers associated with a
+ * specific method names
+ */
 @Singleton
 public class RequestHandlerRegistry {
 
@@ -39,6 +43,7 @@ public class RequestHandlerRegistry {
     public RequestHandler getRequestHandler(String method) {
         return requestHandlers.get(method);
     }
+
     public NotificationHandler getNotificationHandler(String method) {
         return notificationHandlers.get(method);
     }

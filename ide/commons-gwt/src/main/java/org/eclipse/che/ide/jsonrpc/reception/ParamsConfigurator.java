@@ -13,6 +13,12 @@ package org.eclipse.che.ide.jsonrpc.reception;
 import org.eclipse.che.ide.jsonrpc.JsonRpcFactory;
 import org.eclipse.che.ide.jsonrpc.RequestHandlerRegistry;
 
+/**
+ * Params configurator provide means to configure params type in a
+ * request that is to be handled. Params types that are supported:
+ * {@link String}, {@link Boolean}, {@link Double}, {@link Void} and
+ * DTO.
+ */
 public class ParamsConfigurator {
     private final RequestHandlerRegistry registry;
     private final JsonRpcFactory         jsonRpcFactory;

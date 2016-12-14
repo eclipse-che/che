@@ -10,6 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.ide.jsonrpc;
 
+/**
+ * Specific to JSON RPC exception that is to be raised when
+ * any JSON RPC related error is met. According to the spec
+ * there should be an error code and an error message.
+ */
 public class JsonRpcException extends Exception {
     private final int    code;
     private final String id;

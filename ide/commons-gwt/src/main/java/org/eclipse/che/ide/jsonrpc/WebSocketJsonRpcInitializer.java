@@ -20,8 +20,6 @@ import java.util.Map;
 
 /**
  * Web socket based json rpc initializer.
- *
- * @author Dmitry Kuleshov
  */
 @Singleton
 public class WebSocketJsonRpcInitializer implements JsonRpcInitializer {

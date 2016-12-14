@@ -17,6 +17,13 @@ import org.eclipse.che.api.promises.client.Promise;
 import javax.inject.Inject;
 import java.util.List;
 
+/**
+ * Transmits json rpc requests containing DTO objects.
+ *
+ * Note: if you need to transmit or receive {@link String}, {@link Boolean},
+ * {@link Double} use {@link BuildingRequestTransmitter} instance as it
+ * provides more general facilities for that.
+ */
 @Singleton
 public class RequestTransmitter {
     private final BuildingRequestTransmitter transmitter;
@@ -26,6 +33,14 @@ public class RequestTransmitter {
         this.transmitter = transmitter;
     }
 
+    /**
+     * Transmit a notification with empty params section
+     *
+     * @param endpointId
+     *         endpoint to address a transmission
+     * @param method
+     *         method name to address a transmission
+     */
     public void transmitNoneToNone(String endpointId, String method) {
         transmitter.newRequest()
                    .endpointId(endpointId)
@@ -34,6 +49,18 @@ public class RequestTransmitter {
                    .sendAndSkipResult();
     }
 
+    /**
+     * Transmit a notification with params as a single object
+     *
+     * @param endpointId
+     *         endpoint to address a transmission
+     * @param method
+     *         method name to address a transmission
+     * @param pValue
+     *         params value
+     * @param <P>
+     *         params class
+     */
     public <P> void transmitOneToNone(String endpointId, String method, P pValue) {
         transmitter.newRequest()
                    .endpointId(endpointId)
@@ -43,6 +70,18 @@ public class RequestTransmitter {
 
     }
 
+    /**
+     * Transmit a notification with params as a list of objects
+     *
+     * @param endpointId
+     *         endpoint to address a transmission
+     * @param method
+     *         method name to address a transmission
+     * @param pValue
+     *         params value
+     * @param <P>
+     *         params class
+     */
     public <P> void transmitManyToNone(String endpointId, String method, List<P> pValue) {
         transmitter.newRequest()
                    .endpointId(endpointId)
@@ -51,6 +90,20 @@ public class RequestTransmitter {
                    .sendAndSkipResult();
     }
 
+    /**
+     * Transmit a request with an empty params section and a result as a single object
+     *
+     * @param endpointId
+     *         endpoint to address a transmission
+     * @param method
+     *         method name to address a transmission
+     * @param rClass
+     *         result class
+     * @param <R>
+     *         result class
+     *
+     * @return
+     */
     public <R> Promise<R> transmitNoneToOne(String endpointId, String method, Class<R> rClass) {
         return transmitter.newRequest()
                           .endpointId(endpointId)
@@ -59,6 +112,20 @@ public class RequestTransmitter {
                           .sendAndReceiveResultAsDto(rClass);
     }
 
+    /**
+     * Transmit a request with an empty params section and a result as a list of objects
+     *
+     * @param endpointId
+     *         endpoint to address a transmission
+     * @param method
+     *         method name to address a transmission
+     * @param rClass
+     *         result class
+     * @param <R>
+     *         result class
+     *
+     * @return
+     */
     public <R> Promise<List<R>> transmitNoneToMany(String endpointId, String method, Class<R> rClass) {
         return transmitter.newRequest()
                           .endpointId(endpointId)
@@ -67,6 +134,24 @@ public class RequestTransmitter {
                           .sendAndReceiveResultAsListOfDto(rClass);
     }
 
+    /**
+     * Transmit a request with params as a single object and result as a single object
+     *
+     * @param endpointId
+     *         endpoint to address a transmission
+     * @param method
+     *         method name to address a transmission
+     * @param pValue
+     *         params value
+     * @param rClass
+     *         result class
+     * @param <P>
+     *         params class
+     * @param <R>
+     *         result class
+     *
+     * @return
+     */
     public <P, R> Promise<R> transmitOneToOne(String endpointId, String method, P pValue, Class<R> rClass) {
         return transmitter.newRequest()
                           .endpointId(endpointId)
@@ -75,6 +160,24 @@ public class RequestTransmitter {
                           .sendAndReceiveResultAsDto(rClass);
     }
 
+    /**
+     * Transmit a request with params as s list of objects and result as a single object
+     *
+     * @param endpointId
+     *         endpoint to address a transmission
+     * @param method
+     *         method name to address a transmission
+     * @param pValue
+     *         params value
+     * @param rClass
+     *         result class
+     * @param <P>
+     *         params class
+     * @param <R>
+     *         result class
+     *
+     * @return
+     */
     public <P, R> Promise<R> transmitManyToOne(String endpointId, String method, List<P> pValue, Class<R> rClass) {
         return transmitter.newRequest()
                           .endpointId(endpointId)
@@ -83,6 +186,24 @@ public class RequestTransmitter {
                           .sendAndReceiveResultAsDto(rClass);
     }
 
+    /**
+     * Transmit a request with params as a single object and result as a list of objects
+     *
+     * @param endpointId
+     *         endpoint to address a transmission
+     * @param method
+     *         method name to address a transmission
+     * @param pValue
+     *         params value
+     * @param rClass
+     *         result class
+     * @param <P>
+     *         params class
+     * @param <R>
+     *         result class
+     *
+     * @return
+     */
     public <P, R> Promise<List<R>> transmitOneToMany(String endpointId, String method, P pValue, Class<R> rClass) {
         return transmitter.newRequest()
                           .endpointId(endpointId)
@@ -91,6 +212,24 @@ public class RequestTransmitter {
                           .sendAndReceiveResultAsListOfDto(rClass);
     }
 
+    /**
+     * Transmit a request with params as a list of objects and result as a list of objects
+     *
+     * @param endpointId
+     *         endpoint to address a transmission
+     * @param method
+     *         method name to address a transmission
+     * @param pValue
+     *         params value
+     * @param rClass
+     *         result class
+     * @param <P>
+     *         params class
+     * @param <R>
+     *         result class
+     *
+     * @return
+     */
     public <P, R> Promise<List<R>> transmitManyToMany(String endpointId, String method, List<P> pValue, Class<R> rClass) {
         return transmitter.newRequest()
                           .endpointId(endpointId)
