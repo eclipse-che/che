@@ -27,6 +27,8 @@ import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandProducer;
 import org.eclipse.che.ide.api.component.Component;
+import org.eclipse.che.ide.api.constraints.Anchor;
+import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.machine.events.MachineStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
@@ -112,7 +114,7 @@ public class CommandProducerActionManager implements MachineStateEvent.Handler, 
         DefaultActionGroup commandActionsToolbarGroup = new CommandActionsToolbarGroup(actionManager);
         commandActionsToolbarGroup.add(commandActionsPopUpGroup);
         DefaultActionGroup mainToolbarGroup = (DefaultActionGroup)actionManager.getAction(GROUP_MAIN_TOOLBAR);
-        mainToolbarGroup.add(commandActionsToolbarGroup);
+        mainToolbarGroup.add(commandActionsToolbarGroup, new Constraints(Anchor.AFTER, "changeResourceGroup"));
     }
 
     @Override
