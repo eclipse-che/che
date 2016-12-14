@@ -173,7 +173,7 @@ check_docker() {
 
   CHECK_VERSION=$(docker ps 2>&1 || true)
   if [[ "$CHECK_VERSION" = *"Error response from daemon: client is newer"* ]]; then
-    error "Error - Docker engine 1.10+ required."
+    error "Error - Docker engine 1.11+ required."
     return 2;
   fi
 
