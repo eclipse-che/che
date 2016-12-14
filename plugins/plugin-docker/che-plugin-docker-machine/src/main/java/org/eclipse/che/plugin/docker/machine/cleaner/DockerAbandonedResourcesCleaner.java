@@ -19,6 +19,7 @@ import org.eclipse.che.api.environment.server.CheEnvironmentEngine;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.commons.schedule.ScheduleRate;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
+import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
 import org.eclipse.che.plugin.docker.client.json.ContainerListEntry;
 import org.eclipse.che.plugin.docker.client.json.Filters;
 import org.eclipse.che.plugin.docker.client.json.network.Network;
@@ -69,12 +70,12 @@ public class DockerAbandonedResourcesCleaner implements Runnable {
 
     @Inject
     public DockerAbandonedResourcesCleaner(CheEnvironmentEngine environmentEngine,
-                                           DockerConnector dockerConnector,
+                                           DockerConnectorProvider dockerConnectorProvider,
                                            DockerContainerNameGenerator nameGenerator,
                                            WorkspaceRuntimes workspaceRuntimes,
                                            @Named("machine.docker.networks") Set<Set<String>> additionalNetworks) {
         this.environmentEngine = environmentEngine;
-        this.dockerConnector = dockerConnector;
+        this.dockerConnector = dockerConnectorProvider.get();
         this.nameGenerator = nameGenerator;
 		this.runtimes = workspaceRuntimes;
         this.additionalNetworks = additionalNetworks.stream()
