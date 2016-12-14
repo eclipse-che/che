@@ -15,6 +15,7 @@ import org.eclipse.che.api.environment.server.CheEnvironmentEngine;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
+import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
 import org.eclipse.che.plugin.docker.client.json.ContainerListEntry;
 import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator;
@@ -27,6 +28,8 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
 
 import static java.util.Arrays.asList;
@@ -92,7 +95,18 @@ public class DockerContainerCleanerTest {
     @Mock
     private ContainerNameInfo containerNameInfo3;
 
-    @InjectMocks
+    private class MockConnectorProvider extends DockerConnectorProvider {
+
+        public MockConnectorProvider() {
+            super(Collections.emptyMap(), "default");
+        }
+
+        @Override
+        public DockerConnector get() {
+            return dockerConnector;
+        }
+    }
+
     private DockerContainerCleaner cleaner;
 
     @BeforeMethod
@@ -128,6 +142,10 @@ public class DockerContainerCleanerTest {
 
         when(containerNameInfo3.getMachineId()).thenReturn(machineId2);
         when(containerNameInfo3.getWorkspaceId()).thenReturn(workspaceId2);
+
+        cleaner = new DockerContainerCleaner(environmentEngine,
+                                             new MockConnectorProvider(),
+                                             nameGenerator);
     }
 
     @Test
