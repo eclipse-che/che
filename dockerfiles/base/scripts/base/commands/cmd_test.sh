@@ -5,11 +5,8 @@
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
 #
-# Contributors:
-#   Tyler Jewell - Initial Implementation
-#
 
-cmd_action() {
+cmd_test() {
   debug $FUNCNAME
 
   if container_exist_by_name $CHE_SERVER_CONTAINER_NAME; then
@@ -18,12 +15,12 @@ cmd_action() {
        server_is_booted ${CURRENT_CHE_SERVER_CONTAINER_ID}; then
 
         # Not loaded as part of the init process to save on download time
-        update_image_if_not_found eclipse/che-action:nightly
-        docker_run -it eclipse/che-action:nightly "$@"
+        update_image_if_not_found eclipse/che-test:nightly
+        docker_run -it eclipse/che-test:nightly "$@"
 
        return
     fi
   fi
 
-  info "action" "The system is not running."
+  info "test" "The system is not running."
 }
