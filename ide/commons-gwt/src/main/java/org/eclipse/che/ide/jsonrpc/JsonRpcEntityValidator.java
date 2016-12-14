@@ -13,8 +13,13 @@ package org.eclipse.che.ide.jsonrpc;
 import elemental.json.JsonException;
 import elemental.json.JsonFactory;
 
+import org.eclipse.che.ide.util.loging.Log;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Simple class to validate if we're dealing with a properly constructed
@@ -31,9 +36,18 @@ public class JsonRpcEntityValidator {
     }
 
     public void validate(String message) throws JsonRpcException {
+        checkNotNull(message, "Message must not be null");
+        checkArgument(!message.isEmpty(), "Message must not be empty");
+
+        Log.debug(getClass(), "Validating message: " + message);
+
         try {
             jsonFactory.parse(message);
+
+            Log.debug(getClass(), "Validation successful");
         } catch (JsonException e) {
+            Log.debug(getClass(), "Validation failed: " + e.getMessage());
+
             throw new JsonRpcException(-32700, "An error occurred on the server while parsing the JSON text:", e.getMessage());
         }
     }

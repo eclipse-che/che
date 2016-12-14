@@ -18,6 +18,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.eclipse.che.ide.jsonrpc.JsonRpcList.isArray;
 
 /**
@@ -53,24 +55,37 @@ public class JsonRpcMessageReceiver implements WebSocketMessageReceiver {
 
     @Override
     public void receive(String endpointId, String message) {
+        checkNotNull(endpointId, "Endpoint ID must not be null");
+        checkArgument(!endpointId.isEmpty(), "Endpoint ID name must not be empty");
+        checkNotNull(message, "Message must not be null");
+        checkArgument(!message.isEmpty(), "Message must not be empty");
+
+
+        Log.debug(getClass(), "Receiving message: " + message + ", from endpoint: " + endpointId);
         try {
             entityValidator.validate(message);
 
             if (isArray(message)) {
+                Log.debug(getClass(), "Message is an array, processing an array");
+
                 JsonRpcList list = jsonRpcFactory.createList(message);
                 List<String> messages = list.toStringifiedList();
                 for (String listMessage : messages) {
-                    processMessage(endpointId, listMessage);
+                    processObject(endpointId, listMessage);
                 }
             } else {
-                processMessage(endpointId, message);
+                Log.debug(getClass(), "Message is not an array");
+
+                processObject(endpointId, message);
             }
         } catch (JsonRpcException e) {
             errorTransmitter.transmit(endpointId, e);
         }
     }
 
-    private void processMessage(String endpointId, String message) throws JsonRpcException {
+    private void processObject(String endpointId, String message) throws JsonRpcException {
+        Log.debug(getClass(), "Processing end object: " + message);
+
         JsonRpcEntityType type = entityQualifier.qualify(message);
 
         switch (type) {

@@ -10,6 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.ide.jsonrpc;
 
+import org.eclipse.che.ide.util.loging.Log;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Handler to contain an operation and all related metadata required for
  * processing incoming notification. This handler is used when we have
@@ -22,12 +27,21 @@ public class NotificationHandlerOneToNone<P> implements NotificationHandler {
     private final Class<P>                     paramsClass;
     private final JsonRpcRequestBiOperation<P> biOperation;
 
-    public NotificationHandlerOneToNone(Class<P> paramsClass, JsonRpcRequestBiOperation<P> biOperation) {
-        this.paramsClass = paramsClass;
+    public NotificationHandlerOneToNone(Class<P> pClass, JsonRpcRequestBiOperation<P> biOperation) {
+        checkNotNull(pClass, "Params class must not be null");
+        checkNotNull(biOperation, "Binary operation must not be null");
+
+        this.paramsClass = pClass;
         this.biOperation = biOperation;
     }
 
     public void handle(String endpointId, JsonRpcParams params) throws JsonRpcException {
+        checkNotNull(endpointId, "Endpoint ID must not be null");
+        checkArgument(!endpointId.isEmpty(), "Endpoint ID must not be empty");
+        checkNotNull(params, "Params must not be null");
+
+        Log.debug(getClass(), "Handling notification from: " + endpointId + ", with params: " + params);
+
         biOperation.apply(endpointId, params.getAs(paramsClass));
     }
 }

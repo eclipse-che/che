@@ -18,6 +18,9 @@ import elemental.json.JsonValue;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Represents JSON RPC request object. Can be constructed out of
  * stringified json object or by passing specific parameters.
@@ -34,6 +37,9 @@ public class JsonRpcRequest {
 
     @AssistedInject
     public JsonRpcRequest(@Assisted("message") String message, JsonFactory jsonFactory, JsonRpcFactory jsonRpcFactory) {
+        checkNotNull(message, "Message must not be null");
+        checkArgument(!message.isEmpty(), "Message must not be empty");
+
         this.jsonFactory = jsonFactory;
 
         JsonObject jsonObject = jsonFactory.parse(message);
@@ -61,6 +67,9 @@ public class JsonRpcRequest {
     @AssistedInject
     public JsonRpcRequest(@Assisted("id") String id, @Assisted("method") String method, @Assisted("params") JsonRpcParams params,
                           JsonFactory jsonFactory) {
+        checkNotNull(method, "Method name must not be null");
+        checkArgument(!method.isEmpty(), "Method name must not be empty");
+
         this.jsonFactory = jsonFactory;
 
         this.id = id;

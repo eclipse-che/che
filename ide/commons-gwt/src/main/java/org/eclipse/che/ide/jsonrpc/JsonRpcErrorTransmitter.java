@@ -10,10 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.ide.jsonrpc;
 
+import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.websocket.ng.WebSocketMessageTransmitter;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Transmits an instance of {@link JsonRpcException} to specific endpoint
@@ -30,6 +34,11 @@ public class JsonRpcErrorTransmitter {
     }
 
     public void transmit(String endpointId, JsonRpcException e) {
+        checkNotNull(endpointId, "Endpoint ID must not be null");
+        checkArgument(!endpointId.isEmpty(), "Endpoint ID must not be empty");
+
+        Log.debug(getClass(), "Transmitting a JSON RPC error out of: " + e.getMessage());
+
         JsonRpcError error = jsonRpcFactory.createError(e.getCode(), e.getMessage());
         JsonRpcResponse response = jsonRpcFactory.createResponse(e.getId(), null, error);
         transmitter.transmit(endpointId, response.toString());

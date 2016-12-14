@@ -21,101 +21,103 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * response that is to be received. Result types that are supported:
  * {@link String}, {@link Boolean}, {@link Double}, {@link Void} and
  * DTO. This configurator is used when we have defined request params
- * as a single object.
+ * as a list.
  */
-public class ResultConfiguratorFromOne<P> {
+public class ResultConfiguratorFromMany<P> {
     private final RequestHandlerRegistry registry;
     private final JsonRpcFactory         jsonRpcFactory;
     private final String                 method;
     private final Class<P>               paramsClass;
 
-    public ResultConfiguratorFromOne(RequestHandlerRegistry registry, JsonRpcFactory jsonRpcFactory, String method,
-                                     Class<P> paramsClass) {
+    public ResultConfiguratorFromMany(RequestHandlerRegistry registry,
+                                      JsonRpcFactory jsonRpcFactory,
+                                      String method,
+                                      Class<P> paramsClass) {
         this.registry = registry;
         this.jsonRpcFactory = jsonRpcFactory;
         this.method = method;
         this.paramsClass = paramsClass;
     }
 
-    public <R> FunctionConfiguratorOneToMany<P, R> resultAsListOfDto(Class<R> rClass) {
+    public <R> FunctionConfiguratorManyToMany<P, R> resultAsListOfDto(Class<R> rClass) {
         checkNotNull(rClass, "Result class must not be null");
 
         Log.debug(getClass(), "Configuring incoming request result: " +
                               "method: " + method + ", " +
                               "result list items class: " + rClass);
 
-        return new FunctionConfiguratorOneToMany<>(registry, jsonRpcFactory, method, paramsClass, rClass);
+        return new FunctionConfiguratorManyToMany<>(registry, jsonRpcFactory, method, paramsClass, rClass);
     }
 
-    public FunctionConfiguratorOneToOne<P, String> resultAsDtoString() {
+    public FunctionConfiguratorManyToMany<P, String> resultAsListOfString() {
         Log.debug(getClass(), "Configuring incoming request result: " +
                               "method: " + method + ", " +
-                              "result list items class: " +  String.class);
+                              "result list items class: " + String.class);
 
-        return new FunctionConfiguratorOneToOne<>(registry, jsonRpcFactory, method, paramsClass, String.class);
+        return new FunctionConfiguratorManyToMany<>(registry, jsonRpcFactory, method, paramsClass, String.class);
     }
 
-    public FunctionConfiguratorOneToOne<P, Double> resultAsDtoDouble() {
+    public FunctionConfiguratorManyToMany<P, Double> resultAsListOfDouble() {
         Log.debug(getClass(), "Configuring incoming request result: " +
                               "method: " + method + ", " +
-                              "result list items class: " +  Double.class);
+                              "result list items class: " + Double.class);
 
-        return new FunctionConfiguratorOneToOne<>(registry, jsonRpcFactory, method, paramsClass, Double.class);
+        return new FunctionConfiguratorManyToMany<>(registry, jsonRpcFactory, method, paramsClass, Double.class);
     }
 
-    public FunctionConfiguratorOneToOne<P, Boolean> resultAsDtoBoolean() {
+    public FunctionConfiguratorManyToMany<P, Boolean> resultAsListOfBoolean() {
         Log.debug(getClass(), "Configuring incoming request result: " +
                               "method: " + method + ", " +
-                              "result list items class: " +  Boolean.class);
+                              "result list items class: " + Boolean.class);
 
-        return new FunctionConfiguratorOneToOne<>(registry, jsonRpcFactory, method, paramsClass, Boolean.class);
+        return new FunctionConfiguratorManyToMany<>(registry, jsonRpcFactory, method, paramsClass, Boolean.class);
     }
 
-    public <R> FunctionConfiguratorOneToOne<P, R> resultAsDto(Class<R> rClass) {
+    public <R> FunctionConfiguratorManyToOne<P, R> resultAsDto(Class<R> rClass) {
         checkNotNull(rClass, "Result class must not be null");
 
         Log.debug(getClass(), "Configuring incoming request result: " +
                               "method: " + method + ", " +
                               "result object class: " + rClass);
 
-        return new FunctionConfiguratorOneToOne<>(registry, jsonRpcFactory, method, paramsClass, rClass);
+        return new FunctionConfiguratorManyToOne<>(registry, jsonRpcFactory, method, paramsClass, rClass);
     }
 
-    public FunctionConfiguratorOneToOne<P, Void> resultAsEmpty() {
+    public FunctionConfiguratorManyToOne<P, Void> resultAsEmpty() {
         Log.debug(getClass(), "Configuring incoming request result: " +
                               "method: " + method + ", " +
                               "result object class: " + Void.class);
 
-        return new FunctionConfiguratorOneToOne<>(registry, jsonRpcFactory, method, paramsClass, Void.class);
+        return new FunctionConfiguratorManyToOne<>(registry, jsonRpcFactory, method, paramsClass, Void.class);
     }
 
-    public FunctionConfiguratorOneToOne<P, String> resultAsString() {
+    public FunctionConfiguratorManyToOne<P, String> resultAsString() {
         Log.debug(getClass(), "Configuring incoming request result: " +
                               "method: " + method + ", " +
                               "result object class: " + String.class);
 
-        return new FunctionConfiguratorOneToOne<>(registry, jsonRpcFactory, method, paramsClass, String.class);
+        return new FunctionConfiguratorManyToOne<>(registry, jsonRpcFactory, method, paramsClass, String.class);
     }
 
-    public FunctionConfiguratorOneToOne<P, Double> resultAsDouble() {
+    public FunctionConfiguratorManyToOne<P, Double> resultAsDouble() {
         Log.debug(getClass(), "Configuring incoming request result: " +
                               "method: " + method + ", " +
                               "result object class: " + Double.class);
 
-        return new FunctionConfiguratorOneToOne<>(registry, jsonRpcFactory, method, paramsClass, Double.class);
+        return new FunctionConfiguratorManyToOne<>(registry, jsonRpcFactory, method, paramsClass, Double.class);
     }
 
-    public FunctionConfiguratorOneToOne<P, Boolean> resultAsBoolean() {
+    public FunctionConfiguratorManyToOne<P, Boolean> resultAsBoolean() {
         Log.debug(getClass(), "Configuring incoming request result: " +
                               "method: " + method + ", " +
                               "result object class: " + Boolean.class);
 
-        return new FunctionConfiguratorOneToOne<>(registry, jsonRpcFactory, method, paramsClass, Boolean.class);
+        return new FunctionConfiguratorManyToOne<>(registry, jsonRpcFactory, method, paramsClass, Boolean.class);
     }
 
-    public OperationConfiguratorOneToNone<P> noResult()    {
+    public OperationConfiguratorManyToNone<P> noResult() {
         Log.debug(getClass(), "Configuring incoming request having no result");
 
-        return new OperationConfiguratorOneToNone<>(registry, method, paramsClass);
+        return new OperationConfiguratorManyToNone<>(registry, method, paramsClass);
     }
 }

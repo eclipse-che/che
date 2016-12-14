@@ -10,7 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.ide.jsonrpc;
 
+import org.eclipse.che.ide.util.loging.Log;
+
 import java.util.List;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Handler to contain a function and all related metadata required for
@@ -24,20 +29,32 @@ import java.util.List;
  *         type of request result list items
  */
 public class RequestHandlerListToList<P, R> implements RequestHandler {
-    private final Class<P>                                   paramsClass;
-    private final JsonRpcRequestBiFunction<List<P>, List<R>> biFunction;
     private final JsonRpcFactory                             jsonRpcFactory;
 
-    public RequestHandlerListToList(Class<P> paramsClass, JsonRpcRequestBiFunction<List<P>, List<R>> biFunction,
-                                    JsonRpcFactory jsonRpcFactory) {
+    private final Class<P>                                   paramsClass;
+    private final JsonRpcRequestBiFunction<List<P>, List<R>> biFunction;
 
-        this.paramsClass = paramsClass;
+    public RequestHandlerListToList(Class<P> pClass, JsonRpcRequestBiFunction<List<P>, List<R>> biFunction, JsonRpcFactory factory) {
+        checkNotNull(pClass, "Params class must not be null");
+        checkNotNull(biFunction, "Binary function must not be null");
+
+        this.paramsClass = pClass;
         this.biFunction = biFunction;
-        this.jsonRpcFactory = jsonRpcFactory;
+        this.jsonRpcFactory = factory;
     }
 
     public JsonRpcResult handle(String endpointId, JsonRpcParams params) throws JsonRpcException {
-        List<R> resultList = biFunction.apply(endpointId, params.getAsListOf(paramsClass));
+        checkNotNull(endpointId, "Endpoint ID must not be null");
+        checkArgument(!endpointId.isEmpty(), "Endpoint ID must not be empty");
+        checkNotNull(params, "Params must not be null");
+
+        Log.debug(getClass(), "Handling request from: " + endpointId + ", with params: " + params);
+
+        List<P> paramsList = params.getAsListOf(paramsClass);
+        Log.debug(getClass(), "Created raw params list: " + paramsList);
+        List<R> resultList = biFunction.apply(endpointId, paramsList);
+        Log.debug(getClass(), "Received list result: " + resultList);
+
         return jsonRpcFactory.createResult(resultList);
     }
 }

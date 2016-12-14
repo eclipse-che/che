@@ -20,6 +20,9 @@ import com.google.inject.assistedinject.AssistedInject;
 
 import org.eclipse.che.ide.dto.DtoFactory;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Represents JSON RPC response object. Can be constructed out of
  * stringified json object or by passing specific parameters.
@@ -29,7 +32,6 @@ import org.eclipse.che.ide.dto.DtoFactory;
  */
 public class JsonRpcResponse {
     private final JsonFactory jsonFactory;
-    private final DtoFactory  dtoFactory;
 
     private final String        id;
     private final JsonRpcResult result;
@@ -37,8 +39,10 @@ public class JsonRpcResponse {
 
     @AssistedInject
     public JsonRpcResponse(@Assisted("message") String message, JsonFactory jsonFactory, DtoFactory dtoFactory) {
+        checkNotNull(message, "Message must not be null");
+        checkArgument(!message.isEmpty(), "Message must not be empty");
+
         this.jsonFactory = jsonFactory;
-        this.dtoFactory = dtoFactory;
 
         JsonObject jsonObject = jsonFactory.parse(message);
 
@@ -60,12 +64,15 @@ public class JsonRpcResponse {
 
     @AssistedInject
     public JsonRpcResponse(@Assisted("id") String id, @Assisted("result") JsonRpcResult result, @Assisted("error") JsonRpcError error,
-                           JsonFactory jsonFactory, DtoFactory dtoFactory) {
+                           JsonFactory jsonFactory) {
+        checkNotNull(id, "ID must not be null");
+        checkArgument(!id.isEmpty(), "ID must not be empty");
+        checkArgument((result == null) != (error == null), "Must be either error or result");
+
         this.id = id;
         this.result = result;
         this.error = error;
         this.jsonFactory = jsonFactory;
-        this.dtoFactory = dtoFactory;
     }
 
     public boolean hasError() {

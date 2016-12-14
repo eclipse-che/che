@@ -14,6 +14,9 @@ import org.eclipse.che.ide.jsonrpc.JsonRpcRequestBiOperation;
 import org.eclipse.che.ide.jsonrpc.NotificationHandler;
 import org.eclipse.che.ide.jsonrpc.NotificationHandlerOneToNone;
 import org.eclipse.che.ide.jsonrpc.RequestHandlerRegistry;
+import org.eclipse.che.ide.util.loging.Log;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Operation configurator to define an operation to be applied when we
@@ -25,17 +28,23 @@ import org.eclipse.che.ide.jsonrpc.RequestHandlerRegistry;
 public class OperationConfiguratorOneToNone<P> {
     private final RequestHandlerRegistry registry;
     private final String                 method;
-    private final Class<P>               paramsClass;
+    private final Class<P>               pClass;
 
 
-    OperationConfiguratorOneToNone(RequestHandlerRegistry registry, String method, Class<P> paramsClass) {
+    OperationConfiguratorOneToNone(RequestHandlerRegistry registry, String method, Class<P> pClass) {
         this.registry = registry;
         this.method = method;
-        this.paramsClass = paramsClass;
+        this.pClass = pClass;
     }
 
     public void withOperation(JsonRpcRequestBiOperation<P> operation) {
-        NotificationHandler handler = new NotificationHandlerOneToNone<>(paramsClass, operation);
+        checkNotNull(operation, "Notification operation must not be null");
+
+        Log.debug(getClass(), "Configuring incoming request binary operation for " +
+                              "method: " + method + ", " +
+                              "params object class: " + pClass);
+
+        NotificationHandler handler = new NotificationHandlerOneToNone<>(pClass, operation);
         registry.register(method, handler);
     }
 }

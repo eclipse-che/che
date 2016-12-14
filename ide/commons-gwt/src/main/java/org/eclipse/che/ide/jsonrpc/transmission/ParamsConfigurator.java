@@ -12,9 +12,13 @@ package org.eclipse.che.ide.jsonrpc.transmission;
 
 import org.eclipse.che.ide.jsonrpc.JsonRpcFactory;
 import org.eclipse.che.ide.jsonrpc.ResponseDispatcher;
+import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.websocket.ng.WebSocketMessageTransmitter;
 
 import java.util.List;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Params configurator provide means to configure params type in a
@@ -23,55 +27,129 @@ import java.util.List;
  * DTO.
  */
 public class ParamsConfigurator {
-    private final ResponseDispatcher          responseDispatcher;
+    private final ResponseDispatcher          dispatcher;
     private final WebSocketMessageTransmitter transmitter;
-    private final JsonRpcFactory              jsonRpcFactory;
+    private final JsonRpcFactory              factory;
+
     private final String                      method;
     private final String                      endpointId;
 
-    public ParamsConfigurator(ResponseDispatcher responseDispatcher, WebSocketMessageTransmitter transmitter,
-                              JsonRpcFactory jsonRpcFactory, String method, String endpointId) {
-        this.responseDispatcher = responseDispatcher;
+    public ParamsConfigurator(ResponseDispatcher dispatcher, WebSocketMessageTransmitter transmitter,
+                              JsonRpcFactory factory, String method, String endpointId) {
+        this.dispatcher = dispatcher;
         this.transmitter = transmitter;
-        this.jsonRpcFactory = jsonRpcFactory;
+        this.factory = factory;
         this.method = method;
         this.endpointId = endpointId;
     }
 
-    public <P> SendConfiguratorFromOne<P> paramsAsDto(P paramsValue) {
-        return new SendConfiguratorFromOne<>(responseDispatcher, transmitter, jsonRpcFactory, method, paramsValue, endpointId);
+    public <P> SendConfiguratorFromOne<P> paramsAsDto(P pValue) {
+        checkNotNull(pValue, "Params value must not be null");
+
+        Log.debug(getClass(), "Configuring outgoing request params: " +
+                              "endpoint ID: " + endpointId + ", " +
+                              "method: " + method + ", " +
+                              "params object class: " + pValue.getClass() + ", " +
+                              "params object value: " + pValue);
+
+        return new SendConfiguratorFromOne<>(dispatcher, transmitter, factory, method, pValue, endpointId);
     }
 
-    public SendConfiguratorFromOne<Double> paramsAsDouble(Double paramsValue) {
-        return new SendConfiguratorFromOne<>(responseDispatcher, transmitter, jsonRpcFactory, method, paramsValue, endpointId);
+    public SendConfiguratorFromOne<Double> paramsAsDouble(Double pValue) {
+        checkNotNull(pValue, "Params value must not be null");
+
+        Log.debug(getClass(), "Configuring outgoing request params: " +
+                              "endpoint ID: " + endpointId + ", " +
+                              "method: " + method + ", " +
+                              "params object class: " + pValue.getClass() + ", " +
+                              "params object value: " + pValue);
+
+        return new SendConfiguratorFromOne<>(dispatcher, transmitter, factory, method, pValue, endpointId);
 
     }
 
-    public SendConfiguratorFromOne<String> paramsAsString(String paramsValue) {
-        return new SendConfiguratorFromOne<>(responseDispatcher, transmitter, jsonRpcFactory, method, paramsValue, endpointId);
+    public SendConfiguratorFromOne<String> paramsAsString(String pValue) {
+        checkNotNull(pValue, "Params value must not be null");
+
+        Log.debug(getClass(), "Configuring outgoing request params: " +
+                              "endpoint ID: " + endpointId + ", " +
+                              "method: " + method + ", " +
+                              "params object class: " + pValue.getClass() + ", " +
+                              "params object value: " + pValue);
+
+        return new SendConfiguratorFromOne<>(dispatcher, transmitter, factory, method, pValue, endpointId);
     }
 
-    public SendConfiguratorFromOne<Boolean> paramsAsBoolean(Boolean paramsValue) {
-        return new SendConfiguratorFromOne<>(responseDispatcher, transmitter, jsonRpcFactory, method, paramsValue, endpointId);
+    public SendConfiguratorFromOne<Boolean> paramsAsBoolean(Boolean pValue) {
+        checkNotNull(pValue, "Params value must not be null");
+
+        Log.debug(getClass(), "Configuring outgoing request params: " +
+                              "endpoint ID: " + endpointId + ", " +
+                              "method: " + method + ", " +
+                              "params object class: " + pValue.getClass() + ", " +
+                              "params object value: " + pValue);
+
+        return new SendConfiguratorFromOne<>(dispatcher, transmitter, factory, method, pValue, endpointId);
     }
 
     public SendConfiguratorFromOne<Void> paramsAsEmpty() {
-        return new SendConfiguratorFromOne<>(responseDispatcher, transmitter, jsonRpcFactory, method, null, endpointId);
+        Log.debug(getClass(), "Configuring outgoing request params: " +
+                              "endpoint ID: " + endpointId + ", " +
+                              "method: " + method + ", " +
+                              "params object class: " + Void.class);
+
+        return new SendConfiguratorFromOne<>(dispatcher, transmitter, factory, method, null, endpointId);
     }
 
-    public <P> SendConfiguratorFromList<P> paramsAsListOfDto(List<P> paramsValue) {
-        return new SendConfiguratorFromList<>(responseDispatcher, transmitter, jsonRpcFactory, method, paramsValue, endpointId);
+    public <P> SendConfiguratorFromList<P> paramsAsListOfDto(List<P> pListValue) {
+        checkNotNull(pListValue, "Params list value must not be null");
+        checkArgument(!pListValue.isEmpty(), "Params list value must not be empty");
+
+        Log.debug(getClass(), "Configuring outgoing request params: " +
+                              "endpoint ID: " + endpointId + ", " +
+                              "method: " + method + ", " +
+                              "params list items class: " + pListValue.iterator().next().getClass() + ", " +
+                              "params list value: " + pListValue);
+
+        return new SendConfiguratorFromList<>(dispatcher, transmitter, factory, method, pListValue, endpointId);
     }
 
-    public SendConfiguratorFromList<String> paramsAsListOfString(List<String> paramsValue) {
-        return new SendConfiguratorFromList<>(responseDispatcher, transmitter, jsonRpcFactory, method, paramsValue, endpointId);
+    public SendConfiguratorFromList<String> paramsAsListOfString(List<String> pListValue) {
+        checkNotNull(pListValue, "Params list value must not be null");
+        checkArgument(!pListValue.isEmpty(), "Params list value must not be empty");
+
+        Log.debug(getClass(), "Configuring outgoing request params: " +
+                              "endpoint ID: " + endpointId + ", " +
+                              "method: " + method + ", " +
+                              "params list items class: " + String.class + ", " +
+                              "params list value: " + pListValue);
+
+        return new SendConfiguratorFromList<>(dispatcher, transmitter, factory, method, pListValue, endpointId);
     }
 
-    public SendConfiguratorFromList<Double> paramsAsListOfDouble(List<Double> paramsValue) {
-        return new SendConfiguratorFromList<>(responseDispatcher, transmitter, jsonRpcFactory, method, paramsValue, endpointId);
+    public SendConfiguratorFromList<Double> paramsAsListOfDouble(List<Double> pListValue) {
+        checkNotNull(pListValue, "Params list value must not be null");
+        checkArgument(!pListValue.isEmpty(), "Params list value must not be empty");
+
+        Log.debug(getClass(), "Configuring outgoing request params: " +
+                              "endpoint ID: " + endpointId + ", " +
+                              "method: " + method + ", " +
+                              "params list items class: " + Double.class + ", " +
+                              "params list value: " + pListValue);
+
+        return new SendConfiguratorFromList<>(dispatcher, transmitter, factory, method, pListValue, endpointId);
     }
 
-    public SendConfiguratorFromList<Boolean> paramsAsListOfBoolean(List<Boolean> paramsValue) {
-        return new SendConfiguratorFromList<>(responseDispatcher, transmitter, jsonRpcFactory, method, paramsValue, endpointId);
+    public SendConfiguratorFromList<Boolean> paramsAsListOfBoolean(List<Boolean> pListValue) {
+        checkNotNull(pListValue, "Params list value must not be null");
+        checkArgument(!pListValue.isEmpty(), "Params list value must not be empty");
+
+        Log.debug(getClass(), "Configuring outgoing request params: " +
+                              "endpoint ID: " + endpointId + ", " +
+                              "method: " + method + ", " +
+                              "params list items class: " + Boolean.class + ", " +
+                              "params list value: " + pListValue);
+
+        return new SendConfiguratorFromList<>(dispatcher, transmitter, factory, method, pListValue, endpointId);
     }
 }

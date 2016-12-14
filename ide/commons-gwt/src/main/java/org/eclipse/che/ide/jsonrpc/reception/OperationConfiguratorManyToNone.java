@@ -14,8 +14,11 @@ import org.eclipse.che.ide.jsonrpc.JsonRpcRequestBiOperation;
 import org.eclipse.che.ide.jsonrpc.NotificationHandler;
 import org.eclipse.che.ide.jsonrpc.NotificationHandlerListToNone;
 import org.eclipse.che.ide.jsonrpc.RequestHandlerRegistry;
+import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.List;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Operation configurator to define an operation to be applied when we
@@ -24,20 +27,26 @@ import java.util.List;
  *
  * @param <P> type of params list items
  */
-public class OperationConfiguratorListToNone<P> {
+public class OperationConfiguratorManyToNone<P> {
     private final RequestHandlerRegistry registry;
     private final String                 method;
-    private final Class<P>               paramsClass;
+    private final Class<P>               pClass;
 
 
-    OperationConfiguratorListToNone(RequestHandlerRegistry registry, String method, Class<P> paramsClass) {
+    OperationConfiguratorManyToNone(RequestHandlerRegistry registry, String method, Class<P> pClass) {
         this.registry = registry;
         this.method = method;
-        this.paramsClass = paramsClass;
+        this.pClass = pClass;
     }
 
     public void withOperation(JsonRpcRequestBiOperation<List<P>> operation) {
-        NotificationHandler handler = new NotificationHandlerListToNone<>(paramsClass, operation);
+        checkNotNull(operation, "Notification operation must not be null");
+
+        Log.debug(getClass(), "Configuring incoming request binary operation for " +
+                              "method: " + method + ", " +
+                              "params list items class: " + pClass);
+
+        NotificationHandler handler = new NotificationHandlerListToNone<>(pClass, operation);
         registry.register(method, handler);
     }
 }

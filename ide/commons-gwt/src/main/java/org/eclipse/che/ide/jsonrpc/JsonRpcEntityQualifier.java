@@ -13,10 +13,15 @@ package org.eclipse.che.ide.jsonrpc;
 import elemental.json.JsonFactory;
 import elemental.json.JsonObject;
 
+import org.eclipse.che.ide.util.loging.Log;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.Arrays;
 import java.util.List;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Arrays.asList;
 
 /**
  * Qualifier is used to qualify JSON RPC incoming entity. Entities can be of
@@ -36,13 +41,27 @@ public class JsonRpcEntityQualifier {
     }
 
     public JsonRpcEntityType qualify(String message) {
+        checkNotNull(message, "Message must not be null");
+        checkArgument(!message.isEmpty(), "Message must not be empty");
+
+        Log.debug(getClass(), "Qualifying message: " + message);
+
         JsonObject jsonObject = jsonFactory.parse(message);
-        List<String> keys = Arrays.asList(jsonObject.keys());
+        List<String> keys = asList(jsonObject.keys());
+
+        Log.debug(getClass(), "Json keys: " + keys);
+
         if (keys.contains("method")) {
+            Log.debug(getClass(), "Qualified to request");
+
             return JsonRpcEntityType.REQUEST;
         } else if (keys.contains("error") != keys.contains("result")) {
+            Log.debug(getClass(), "Qualified to response");
+
             return JsonRpcEntityType.RESPONSE;
         } else {
+            Log.debug(getClass(), "Qualified to undefined");
+
             return JsonRpcEntityType.UNDEFINED;
         }
     }

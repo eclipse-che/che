@@ -12,10 +12,14 @@ package org.eclipse.che.ide.jsonrpc.transmission;
 
 import org.eclipse.che.ide.jsonrpc.JsonRpcFactory;
 import org.eclipse.che.ide.jsonrpc.ResponseDispatcher;
+import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.websocket.ng.WebSocketMessageTransmitter;
 
 import javax.inject.Inject;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Method name configurator to defined method name that the request
@@ -38,8 +42,13 @@ public class MethodNameConfigurator {
         this.endpointId = endpointId;
     }
 
-    public ParamsConfigurator methodName(String method) {
-        return new ParamsConfigurator(responseDispatcher, transmitter, jsonRpcFactory, method, endpointId);
+    public ParamsConfigurator methodName(String name) {
+        checkNotNull(name, "Method name must not be null");
+        checkArgument(!name.isEmpty(), "Method name must not be empty");
+
+        Log.debug(getClass(), "Configuring outgoing request method name name: " + name);
+
+        return new ParamsConfigurator(responseDispatcher, transmitter, jsonRpcFactory, name, endpointId);
     }
 
 

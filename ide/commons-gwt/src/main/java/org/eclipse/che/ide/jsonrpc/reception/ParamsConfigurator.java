@@ -12,6 +12,9 @@ package org.eclipse.che.ide.jsonrpc.reception;
 
 import org.eclipse.che.ide.jsonrpc.JsonRpcFactory;
 import org.eclipse.che.ide.jsonrpc.RequestHandlerRegistry;
+import org.eclipse.che.ide.util.loging.Log;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Params configurator provide means to configure params type in a
@@ -21,48 +24,88 @@ import org.eclipse.che.ide.jsonrpc.RequestHandlerRegistry;
  */
 public class ParamsConfigurator {
     private final RequestHandlerRegistry registry;
-    private final JsonRpcFactory         jsonRpcFactory;
+    private final JsonRpcFactory         factory;
     private final String                 method;
 
-    public ParamsConfigurator(RequestHandlerRegistry registry, JsonRpcFactory jsonRpcFactory, String method) {
+    public ParamsConfigurator(RequestHandlerRegistry registry, JsonRpcFactory factory, String method) {
         this.registry = registry;
-        this.jsonRpcFactory = jsonRpcFactory;
+        this.factory = factory;
         this.method = method;
     }
 
-    public <P> ResultConfiguratorFromList<P> paramsAsListOfDto(Class<P> paramsClass) {
-        return new ResultConfiguratorFromList<>(registry, jsonRpcFactory, method, paramsClass);
+    public <P> ResultConfiguratorFromMany<P> paramsAsListOfDto(Class<P> pClass) {
+        checkNotNull(pClass, "Params class must not be null");
+
+        Log.debug(getClass(), "Configuring incoming request params: " +
+                              "method: " + method + ", " +
+                              "params list items class: " + pClass);
+
+        return new ResultConfiguratorFromMany<>(registry, factory, method, pClass);
     }
 
-    public ResultConfiguratorFromList<Double> paramsAsListOfDouble() {
-        return new ResultConfiguratorFromList<>(registry, jsonRpcFactory, method, Double.class);
+    public ResultConfiguratorFromMany<Double> paramsAsListOfDouble() {
+        Log.debug(getClass(), "Configuring incoming request params: " +
+                              "method: " + method + ", " +
+                              "params list items class: " + Double.class);
+
+        return new ResultConfiguratorFromMany<>(registry, factory, method, Double.class);
     }
 
-    public ResultConfiguratorFromList<String> paramsAsListOfString() {
-        return new ResultConfiguratorFromList<>(registry, jsonRpcFactory, method, String.class);
+    public ResultConfiguratorFromMany<String> paramsAsListOfString() {
+        Log.debug(getClass(), "Configuring incoming request params: " +
+                              "method: " + method + ", " +
+                              "params list items class: " + String.class);
+
+        return new ResultConfiguratorFromMany<>(registry, factory, method, String.class);
     }
 
-    public ResultConfiguratorFromList<Boolean> paramsAsListOfBoolean() {
-        return new ResultConfiguratorFromList<>(registry, jsonRpcFactory, method, Boolean.class);
+    public ResultConfiguratorFromMany<Boolean> paramsAsListOfBoolean() {
+        Log.debug(getClass(), "Configuring incoming request params: " +
+                              "method: " + method + ", " +
+                              "params list items class: " + Boolean.class);
+
+        return new ResultConfiguratorFromMany<>(registry, factory, method, Boolean.class);
     }
 
-    public <P> ResultConfiguratorFromOne<P> paramsAsDto(Class<P> paramsClass) {
-        return new ResultConfiguratorFromOne<>(registry, jsonRpcFactory, method, paramsClass);
+    public <P> ResultConfiguratorFromOne<P> paramsAsDto(Class<P> pClass) {
+        checkNotNull(pClass, "Params class must not be null");
+
+        Log.debug(getClass(), "Configuring incoming request params: " +
+                              "method: " + method + ", " +
+                              "params object class: " + pClass);
+
+        return new ResultConfiguratorFromOne<>(registry, factory, method, pClass);
     }
 
     public ResultConfiguratorFromOne<Void> paramsAsEmpty() {
-        return new ResultConfiguratorFromOne<>(registry, jsonRpcFactory, method, Void.class);
+        Log.debug(getClass(), "Configuring incoming request params: " +
+                              "method: " + method + ", " +
+                              "params object class: " + Void.class);
+
+        return new ResultConfiguratorFromOne<>(registry, factory, method, Void.class);
     }
 
     public ResultConfiguratorFromOne<String> paramsAsString() {
-        return new ResultConfiguratorFromOne<>(registry, jsonRpcFactory, method, String.class);
+        Log.debug(getClass(), "Configuring incoming request params: " +
+                              "method: " + method + ", " +
+                              "params object class: " + String.class);
+
+        return new ResultConfiguratorFromOne<>(registry, factory, method, String.class);
     }
 
     public ResultConfiguratorFromOne<Double> paramsAsDouble() {
-        return new ResultConfiguratorFromOne<>(registry, jsonRpcFactory, method, Double.class);
+        Log.debug(getClass(), "Configuring incoming request params: " +
+                              "method: " + method + ", " +
+                              "params object class: " + Double.class);
+
+        return new ResultConfiguratorFromOne<>(registry, factory, method, Double.class);
     }
 
-    public ResultConfiguratorFromOne<Double> paramsAsBoolean() {
-        return new ResultConfiguratorFromOne<>(registry, jsonRpcFactory, method, Double.class);
+    public ResultConfiguratorFromOne<Boolean> paramsAsBoolean() {
+        Log.debug(getClass(), "Configuring incoming request params: " +
+                              "method: " + method + ", " +
+                              "params object class: " + Boolean.class);
+
+        return new ResultConfiguratorFromOne<>(registry, factory, method, Boolean.class);
     }
 }

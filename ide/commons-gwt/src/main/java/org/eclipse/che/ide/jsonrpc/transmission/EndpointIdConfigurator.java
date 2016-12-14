@@ -12,29 +12,37 @@ package org.eclipse.che.ide.jsonrpc.transmission;
 
 import org.eclipse.che.ide.jsonrpc.JsonRpcFactory;
 import org.eclipse.che.ide.jsonrpc.ResponseDispatcher;
+import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.websocket.ng.WebSocketMessageTransmitter;
 
 import javax.inject.Inject;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Endpoint ID configurator to defined endpoint id that the request
  * should be addressed to.
  */
 public class EndpointIdConfigurator {
-    private final ResponseDispatcher          responseDispatcher;
+    private final ResponseDispatcher          dispatcher;
     private final WebSocketMessageTransmitter transmitter;
-    private final JsonRpcFactory              jsonRpcFactory;
+    private final JsonRpcFactory              factory;
 
     @Inject
-    public EndpointIdConfigurator(ResponseDispatcher responseDispatcher, WebSocketMessageTransmitter transmitter,
-                                  JsonRpcFactory jsonRpcFactory) {
-        this.responseDispatcher = responseDispatcher;
+    public EndpointIdConfigurator(ResponseDispatcher dispatcher, WebSocketMessageTransmitter transmitter, JsonRpcFactory factory) {
+        this.dispatcher = dispatcher;
         this.transmitter = transmitter;
-        this.jsonRpcFactory = jsonRpcFactory;
+        this.factory = factory;
     }
 
-    public MethodNameConfigurator endpointId(String endpointId) {
-        return new MethodNameConfigurator(responseDispatcher, transmitter, jsonRpcFactory, endpointId);
+    public MethodNameConfigurator endpointId(String id) {
+        checkNotNull(id, "Endpoint ID must not be null");
+        checkArgument(!id.isEmpty(), "Endpoint ID must not be empty");
+
+        Log.debug(getClass(), "Configuring outgoing request endpoint ID: " + id);
+
+        return new MethodNameConfigurator(dispatcher, transmitter, factory, id);
     }
 
 

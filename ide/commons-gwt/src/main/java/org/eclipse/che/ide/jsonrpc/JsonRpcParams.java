@@ -24,6 +24,9 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Represents JSON RPC params object. Can be constructed out of
  * stringified json object or by passing specific parameters.
@@ -43,6 +46,9 @@ public class JsonRpcParams {
 
     @AssistedInject
     public JsonRpcParams(@Assisted("message") String message, JsonFactory jsonFactory, DtoFactory dtoFactory) {
+        checkNotNull(message, "Message must not be null");
+        checkArgument(!message.isEmpty(), "Message must not be empty");
+
         this.jsonFactory = jsonFactory;
         this.dtoFactory = dtoFactory;
 
@@ -78,6 +84,9 @@ public class JsonRpcParams {
 
     @AssistedInject
     public JsonRpcParams(@Assisted("params") List<?> params, JsonFactory jsonFactory, DtoFactory dtoFactory) {
+        checkNotNull(params, "Params must not be null");
+        checkArgument(!params.isEmpty(), "Params must not be empty");
+
         this.jsonFactory = jsonFactory;
         this.dtoFactory = dtoFactory;
 
@@ -114,8 +123,11 @@ public class JsonRpcParams {
     }
 
     public <T> T getAs(Class<T> type) {
+        checkNotNull(params, "Type must not be null");
+
         if (type.equals(String.class)) {
-            return (T)params.asString();
+            String s = params.asString();
+            return (T)s;
         } else if (type.equals(Double.class)) {
             Double d = params.asNumber();
             return (T)d;
@@ -130,6 +142,8 @@ public class JsonRpcParams {
     }
 
     public <T> List<T> getAsListOf(Class<T> type) {
+        checkNotNull(type, "Type must not be null");
+
         List<T> list = new ArrayList<>(paramsList.size());
 
         for (int i = 0; i < paramsList.size(); i++) {

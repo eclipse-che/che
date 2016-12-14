@@ -24,6 +24,9 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Represents JSON RPC result object. Can be constructed out of
  * stringified json object or by passing specific parameters.
@@ -44,6 +47,9 @@ public class JsonRpcResult {
 
     @AssistedInject
     public JsonRpcResult(@Assisted("message") String message, JsonFactory jsonFactory, DtoFactory dtoFactory) {
+        checkNotNull(message, "Message must not be null");
+        checkArgument(!message.isEmpty(), "Message must not be empty");
+
         this.jsonFactory = jsonFactory;
         this.dtoFactory = dtoFactory;
 
@@ -79,6 +85,9 @@ public class JsonRpcResult {
 
     @AssistedInject
     public JsonRpcResult(@Assisted("result") List<?> result, JsonFactory jsonFactory, DtoFactory dtoFactory) {
+        checkNotNull(result, "Result must not be null");
+        checkArgument(!result.isEmpty(), "Result must not be empty");
+
         this.jsonFactory = jsonFactory;
         this.dtoFactory = dtoFactory;
 

@@ -15,7 +15,6 @@ import elemental.json.JsonArray;
 import elemental.json.JsonBoolean;
 import elemental.json.JsonFactory;
 import elemental.json.JsonNumber;
-import elemental.json.JsonObject;
 import elemental.json.JsonString;
 import elemental.json.JsonValue;
 
@@ -27,6 +26,8 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static elemental.json.JsonType.ARRAY;
 
 /**
@@ -43,6 +44,9 @@ public class JsonRpcList {
 
     @AssistedInject
     public JsonRpcList(@Assisted("message") String message, JsonFactory jsonFactory, DtoFactory dtoFactory) {
+        checkNotNull(message, "Message must not be null");
+        checkArgument(!message.isEmpty(), "Message must not be empty");
+
         this.dtoFactory = dtoFactory;
         this.jsonFactory = jsonFactory;
 
@@ -55,6 +59,9 @@ public class JsonRpcList {
 
     @AssistedInject
     public JsonRpcList(@Assisted("dtoObjectList") List<?> dtoObjectList, JsonFactory jsonFactory, DtoFactory dtoFactory) {
+        checkNotNull(dtoObjectList, "List must not be null");
+        checkArgument(!dtoObjectList.isEmpty(), "List must not be empty");
+
         this.dtoFactory = dtoFactory;
         this.jsonFactory = jsonFactory;
 
@@ -80,22 +87,34 @@ public class JsonRpcList {
     }
 
     public static boolean isArray(String message, JsonFactory jsonFactory) {
+        checkNotNull(message, "Message must not be null");
+        checkArgument(!message.isEmpty(), "Message must not be empty");
+
         return ARRAY.equals(jsonFactory.parse(message).getType());
     }
 
     private <T> T getDto(int i, Class<T> type) {
+        checkNotNull(type, "DTO type must not be null");
+        checkArgument(i >= 0, "Index must not be negative");
+
         return dtoFactory.createDtoFromJson(jsonObjectList.get(i).toJson(), type);
     }
 
     private String getString(int i) {
+        checkArgument(i >= 0, "Index must not be negative");
+
         return ((JsonString)jsonObjectList.get(0)).getString();
     }
 
     private Double getNumber(int i) {
+        checkArgument(i >= 0, "Index must not be negative");
+
         return ((JsonNumber)jsonObjectList.get(0)).getNumber();
     }
 
     private Boolean getBoolean(int i) {
+        checkArgument(i >= 0, "Index must not be negative");
+
         return ((JsonBoolean)jsonObjectList.get(0)).getBoolean();
     }
 
@@ -104,6 +123,9 @@ public class JsonRpcList {
     }
 
     public <T> T get(int i, Class<T> type) {
+        checkNotNull(type, "Item type must not be null");
+        checkArgument(i >= 0, "Index must not be negative");
+
         if (type.equals(String.class)) {
             return (T)getString(i);
         } else if (type.equals(Double.class)) {
@@ -116,6 +138,8 @@ public class JsonRpcList {
     }
 
     public <T> List<T> toList(Class<T> type) {
+        checkNotNull(type, "List Item type must not be null");
+
         List<T> list = new ArrayList<>(size());
         for (int i = 0; i < size(); i++) {
             list.add(get(i, type));

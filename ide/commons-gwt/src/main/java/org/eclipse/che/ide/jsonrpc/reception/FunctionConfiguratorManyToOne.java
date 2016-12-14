@@ -13,33 +13,38 @@ package org.eclipse.che.ide.jsonrpc.reception;
 import org.eclipse.che.ide.jsonrpc.JsonRpcFactory;
 import org.eclipse.che.ide.jsonrpc.JsonRpcRequestBiFunction;
 import org.eclipse.che.ide.jsonrpc.RequestHandler;
-import org.eclipse.che.ide.jsonrpc.RequestHandlerOneToList;
+import org.eclipse.che.ide.jsonrpc.RequestHandlerListToOne;
 import org.eclipse.che.ide.jsonrpc.RequestHandlerRegistry;
+import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.List;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Function configurator to define a function to be applied when we
  * handle incoming JSON RPC request with params object that is
- * represented by a single object while the result of a function is a
- * list of objects.
+ * represented by a list. The result of a function is a single object.
  *
  * @param <P>
- *         type of params object
+ *         type of params list items
  * @param <R>
- *         type of result list items
+ *         type of result object
  */
-public class FunctionConfiguratorOneToList<P, R> {
+public class FunctionConfiguratorManyToOne<P, R> {
     private final RequestHandlerRegistry registry;
-    private final JsonRpcFactory         jsonRpcFactory;
+    private final JsonRpcFactory         factory;
     private final String                 method;
-    private final Class<P>               paramsClass;
+    private final Class<P>               pClass;
+    private final Class<R>               rClass;
 
-    FunctionConfiguratorOneToList(RequestHandlerRegistry registry, JsonRpcFactory jsonRpcFactory, String method, Class<P> paramsClass) {
+    FunctionConfiguratorManyToOne(RequestHandlerRegistry registry, JsonRpcFactory factory, String method, Class<P> pClass,
+                                  Class<R> rClass) {
         this.registry = registry;
-        this.jsonRpcFactory = jsonRpcFactory;
+        this.factory = factory;
         this.method = method;
-        this.paramsClass = paramsClass;
+        this.pClass = pClass;
+        this.rClass = rClass;
     }
 
     /**
@@ -48,8 +53,14 @@ public class FunctionConfiguratorOneToList<P, R> {
      * @param function
      *         function
      */
-    public void withFunction(JsonRpcRequestBiFunction<P, List<R>> function) {
-        RequestHandler handler = new RequestHandlerOneToList<>(paramsClass, function, jsonRpcFactory);
+    public void withFunction(JsonRpcRequestBiFunction<List<P>, R> function) {
+        checkNotNull(function, "Request function must not be null");
+
+        Log.debug(getClass(), "Configuring incoming request binary function for " +
+                              "method: " + method + ", " +
+                              "params list items class: " + pClass + ", " +
+                              "result object class: " + rClass);
+        RequestHandler handler = new RequestHandlerListToOne<>(pClass, function, factory);
         registry.register(method, handler);
     }
 }

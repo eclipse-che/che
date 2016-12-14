@@ -133,7 +133,7 @@ public class JsonRpcResponseTest {
     public void shouldHaveErrorWhenPassingParametersWithError() throws Exception {
         response.remove("result");
 
-        JsonRpcResponse jsonRpcResponse = new JsonRpcResponse(ID, null, error, jsonFactory, dtoFactory);
+        JsonRpcResponse jsonRpcResponse = new JsonRpcResponse(ID, null, error, jsonFactory);
 
         assertTrue(jsonRpcResponse.hasError());
         assertFalse(jsonRpcResponse.hasResult());
@@ -143,7 +143,7 @@ public class JsonRpcResponseTest {
     public void shouldHaveResultWhenPassingParametersWithResult() throws Exception {
         response.remove("error");
 
-        JsonRpcResponse jsonRpcResponse = new JsonRpcResponse(ID, result, null, jsonFactory, dtoFactory);
+        JsonRpcResponse jsonRpcResponse = new JsonRpcResponse(ID, result, null, jsonFactory);
 
         assertTrue(jsonRpcResponse.hasResult());
         assertFalse(jsonRpcResponse.hasError());
@@ -154,7 +154,7 @@ public class JsonRpcResponseTest {
         JsonObject expected = response;
         expected.remove("error");
 
-        JsonRpcResponse jsonRpcResponse = new JsonRpcResponse(ID, result, null, jsonFactory, dtoFactory);
+        JsonRpcResponse jsonRpcResponse = new JsonRpcResponse(ID, result, null, jsonFactory);
         JsonObject actual = jsonRpcResponse.toJsonObject();
 
         assertTrue(expected.jsEquals(actual));
@@ -165,7 +165,7 @@ public class JsonRpcResponseTest {
         JsonObject expected = response;
         expected.remove("result");
 
-        JsonRpcResponse jsonRpcResponse = new JsonRpcResponse(ID, null, error, jsonFactory, dtoFactory);
+        JsonRpcResponse jsonRpcResponse = new JsonRpcResponse(ID, null, error, jsonFactory);
         JsonObject actual = jsonRpcResponse.toJsonObject();
 
         assertTrue(expected.jsEquals(actual));
@@ -176,7 +176,7 @@ public class JsonRpcResponseTest {
         JsonObject expected = response;
         expected.remove("error");
 
-        JsonRpcResponse jsonRpcResponse = new JsonRpcResponse(ID, result, null, jsonFactory, dtoFactory);
+        JsonRpcResponse jsonRpcResponse = new JsonRpcResponse(ID, result, null, jsonFactory);
         JsonValue actual = jsonFactory.parse(jsonRpcResponse.toString());
 
         assertTrue(expected.jsEquals(actual));
@@ -187,7 +187,7 @@ public class JsonRpcResponseTest {
         JsonObject expected = response;
         expected.remove("result");
 
-        JsonRpcResponse jsonRpcResponse = new JsonRpcResponse(ID, null, error, jsonFactory, dtoFactory);
+        JsonRpcResponse jsonRpcResponse = new JsonRpcResponse(ID, null, error, jsonFactory);
         JsonValue actual = jsonFactory.parse(jsonRpcResponse.toString());
 
         assertTrue(expected.jsEquals(actual));
