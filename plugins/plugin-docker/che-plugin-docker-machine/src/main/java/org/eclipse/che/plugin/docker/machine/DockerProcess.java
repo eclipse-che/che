@@ -23,6 +23,7 @@ import org.eclipse.che.api.machine.server.spi.InstanceProcess;
 import org.eclipse.che.api.machine.server.spi.impl.AbstractMachineProcess;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
+import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
 import org.eclipse.che.plugin.docker.client.Exec;
 import org.eclipse.che.plugin.docker.client.LogMessage;
 import org.eclipse.che.plugin.docker.client.MessageProcessor;
@@ -53,14 +54,14 @@ public class DockerProcess extends AbstractMachineProcess implements InstancePro
     private volatile boolean started;
 
     @Inject
-    public DockerProcess(DockerConnector docker,
+    public DockerProcess(DockerConnectorProvider dockerProvider,
                          @Assisted Command command,
                          @Assisted("container") String container,
                          @Nullable @Assisted("outputChannel") String outputChannel,
                          @Assisted("pid_file_path") String pidFilePath,
                          @Assisted int pid) {
         super(command, pid, outputChannel);
-        this.docker = docker;
+        this.docker = dockerProvider.get();
         this.container = container;
         this.commandLine = command.getCommandLine();
         this.shellInvoker = firstNonNull(command.getAttributes().get("shell"), "/bin/sh");
