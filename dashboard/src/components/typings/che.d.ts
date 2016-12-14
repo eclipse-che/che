@@ -93,6 +93,8 @@ declare namespace _che {
     commands: Array<any>;
     projectType: string;
     tags: Array<string>;
+    attributes: Array<any>;
+    options: Array<any>;
   }
 
   export interface IImportProject {
@@ -106,6 +108,8 @@ declare namespace _che {
       type: string;
       description: string;
       commands: Array<any>;
+      attributes: Array<any>;
+      options: Array<any>;
     };
   }
 
