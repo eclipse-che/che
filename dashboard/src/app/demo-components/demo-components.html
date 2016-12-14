@@ -193,26 +193,47 @@ Ultima Syriarum est Palaestina per intervalla magna protenta, cultis abundans te
 
     <md-tab label="Input"
             md-on-select="demoComponentsController.setDemoTab(demoComponentsController.tab.INPUT)">
-
-      <div layout="column" flex ng-form="demoForm">
-        <che-html-source>
+      <ng-form name="demoForm">
+        <textarea demo-source-render>
+          <!-- che-input -->
 
           <che-input che-form="demoForm"
                      che-name="demoinput"
-                     che-label-name="Name"
                      che-place-holder="Name of this demo"
-                     ng-model="demoComponentsController.selectedInput"
-                     required
-                     ng-maxlength="128"
-                     ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
-            <div ng-message="required">A name is required.</div>
-            <div ng-message="pattern">The name should not contain special characters like space, dollar, etc.</div>
-            <div ng-message="maxlength">The name has to be less than 128 characters long.</div>
-            <div ng-message="md-maxlength">The name has to be less than 128 characters long.</div>
+                     ng-model="demoComponentsController.demoInput">
           </che-input>
-        </che-html-source>
-      </div>
 
+        </textarea>
+
+        <textarea demo-source-render>
+          <!-- che-input -->
+          <!-- type="number" -->
+
+          <che-input che-form="demoForm"
+                     che-name="demoinput2"
+                     che-place-holder="Name of this demo"
+                     ng-model="demoComponentsController.demoInput"
+                     type="number">
+          </che-input>
+        </textarea>
+
+        <textarea demo-source-render>
+          <!-- che-input -->
+          <!-- validation messages -->
+
+          <che-input che-form="demoForm"
+                     che-name="demoinput2"
+                     che-place-holder="Name of this demo"
+                     ng-model="demoComponentsController.demoInput"
+                     ng-minlength="3"
+                     ng-maxlength="8"
+                     required>
+            <div ng-message="minlength">The value has to be more than 3 characters long.</div>
+            <div ng-message="maxlength">The value has to be less than 8 characters long.</div>
+            <div ng-message="required">A value is required.</div>
+          </che-input>
+        </textarea>
+      </ng-form>
     </md-tab>
 
     <md-tab label="List"
