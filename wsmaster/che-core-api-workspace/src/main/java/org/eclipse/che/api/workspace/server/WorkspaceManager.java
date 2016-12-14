@@ -11,6 +11,7 @@
 package org.eclipse.che.api.workspace.server;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 
@@ -58,13 +59,12 @@ import javax.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Throwables.getCausalChain;
@@ -314,90 +314,64 @@ public class WorkspaceManager {
         requireNonNull(id, "Required non-null workspace id");
         requireNonNull(update, "Required non-null workspace update");
         final WorkspaceImpl workspace = workspaceDao.get(id);
-        workspace.setConfig(WorkspaceConfigImpl.builder()
-                                               .fromConfig(update.getConfig())
-                                               .setEnvironments(updateEnvironments(id, update.getConfig().getEnvironments()))
-                                               .build());
+        updateWorkspaceSnapshots(id, workspace, update);
+        workspace.setConfig(new WorkspaceConfigImpl(update.getConfig()));
         update.getAttributes().put(UPDATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
         workspace.setAttributes(update.getAttributes());
         return normalizeState(workspaceDao.update(workspace));
     }
 
     /**
-     * Updates workspace environments.
+     * Updates workspace snapshots corresponding to update environments.
+     * Snapshots are deleted on any environment update except rename.
+     * Also they will be deleted if it is impossible to find one correspondence between old and new environment,
+     * but if in current and in update configuration the same environment is present, it supposed as untouched.
      *
      * @param workspaceId
-     *         id of workspace to update environments
+     *         id of workspace under update
+     * @param current
+     *         current workspace configuration
      * @param update
-     *         new environments configs
-     * @return environments of just updated workspace
-     * @throws NotFoundException
-     *         when workspace with specified ID doesn't exist,
-     *         when environment with specified name doesn't exist
-     * @throws ConflictException
-     *         when try to update running environment
-     * @throws ServerException
-     *         when other error occurs
+     *         new workspace configuration
      */
-    private Map<String, ? extends Environment> updateEnvironments(String workspaceId, Map<String, ? extends Environment> update)
-            throws ServerException, NotFoundException, ConflictException {
-        final WorkspaceImpl workspace = workspaceDao.get(workspaceId);
-        // concurrent maps is used here for removing elements inside foreach loop without iterator
-        final Map<String, EnvironmentImpl> oldEnvironments = new ConcurrentHashMap<>(workspace.getConfig().getEnvironments());
-        final Map<String, EnvironmentImpl> newEnvironments = new ConcurrentHashMap<>();
-        final Map<String, Environment> result = new HashMap<>();
-
+    private void updateWorkspaceSnapshots(String workspaceId, Workspace current, Workspace update) {
         // this is needed to convert DTO into EnvironmentImpl object, otherwise equals will fail
-        for (Map.Entry<String, ? extends Environment> environment : update.entrySet()) {
-            newEnvironments.put(environment.getKey(), new EnvironmentImpl(environment.getValue().getRecipe(),
-                                                                          environment.getValue().getMachines()));
-        }
+        final Map<String, Environment> updateEnvironments = update.getConfig()
+                                                                  .getEnvironments()
+                                                                  .entrySet()
+                                                                  .stream()
+                                                                  .collect(Collectors.toMap(Map.Entry::getKey,
+                                                                                            env -> new EnvironmentImpl(env.getValue())));
 
-        // Here update will be done step by step.
-        // Each step will remove precessed items from old nad new environments maps and add them to result map
+        final Map <String, Environment> currentDiff = Sets.difference(current.getConfig().getEnvironments().entrySet(),
+                                                                      updateEnvironments.entrySet())
+                                                          .stream()
+                                                          .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        final Map <String, Environment> updateDiff = Sets.difference(updateEnvironments.entrySet(),
+                                                                     current.getConfig().getEnvironments().entrySet())
+                                                         .stream()
+                                                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-        // detect not changed environments
-        for (Map.Entry<String, ? extends Environment> environment : oldEnvironments.entrySet()) {
-            String envName = environment.getKey();
-            if (newEnvironments.containsKey(envName) && newEnvironments.get(envName).equals(environment.getValue())) { // no changes
-                result.put(envName, oldEnvironments.remove(envName));
-                newEnvironments.remove(envName);
-            }
-        }
-
-        // detect updated environments
-        for (Map.Entry<String, ? extends Environment> environment : oldEnvironments.entrySet()) {
-            String oldEnvName = environment.getKey();
-            if (newEnvironments.containsKey(oldEnvName)) { // environment updated
-                result.put(oldEnvName, newEnvironments.remove(oldEnvName));
-                oldEnvironments.remove(oldEnvName);
-                // TODO try to save snapshots when it possible
-                removeEnvironmentSnapshots(workspaceId, oldEnvName);
-            }
-        }
-
-        // detect renamed environments
-        for (Map.Entry<String, ? extends Environment> oldEnvironment : oldEnvironments.entrySet()) {
-            Environment old = oldEnvironment.getValue();
-            for (Map.Entry<String, ? extends Environment> newEnvironment : newEnvironments.entrySet()) {
-                if (newEnvironment.getValue().equals(old)) { // environment renamed
-                    String oldNameOfEnv = oldEnvironment.getKey();
-                    String newNameOfEnv = newEnvironment.getKey();
-                    result.put(newNameOfEnv, oldEnvironments.remove(oldNameOfEnv));
-                    updateEnvironmentSnapshots(workspaceId, oldNameOfEnv, newNameOfEnv);
+        for (Map.Entry<String, Environment> env : currentDiff.entrySet()) {
+            Environment envValue = env.getValue();
+            if (Collections.frequency(currentDiff.values(), envValue) == 1 &&
+                Collections.frequency(updateDiff.values(), envValue) == 1 &&
+                !updateDiff.containsKey(env.getKey())) {
+                try {
+                    updateEnvironmentSnapshots(workspaceId, env.getKey(), updateDiff.entrySet()
+                                                                                    .stream()
+                                                                                    .filter(e -> e.getValue().equals(envValue))
+                                                                                    .findAny()
+                                                                                    .orElse(null) // should never happens
+                                                                                    .getKey());
+                } catch (ConflictException | SnapshotException | NotFoundException err) {
+                    LOG.error("Failed to update snapshots of '%s' environment in '%s' workspace.", env.getKey(), workspaceId, err);
+                    safeRemoveEnvironmentSnapshots(workspaceId, env.getKey());
                 }
+            } else {
+                safeRemoveEnvironmentSnapshots(workspaceId, env.getKey());
             }
         }
-
-        // now in oldEnvironments we have environments for deletion
-        for (String envNameToDelete : oldEnvironments.keySet()) {
-            removeEnvironmentSnapshots(workspaceId, envNameToDelete);
-        }
-
-        // now in newEnvironments we have only added environments
-        result.putAll(newEnvironments);
-
-        return result;
     }
 
     /**
@@ -666,6 +640,7 @@ public class WorkspaceManager {
      * @throws ServerException
      *          when any other error occurs
      */
+    @VisibleForTesting
     void removeEnvironmentSnapshots(String workspaceId, String envName) throws NotFoundException, ServerException {
         getSnapshot(workspaceId).stream()
                                 .filter(snapshot -> snapshot.getEnvName().equals(envName))
@@ -677,6 +652,20 @@ public class WorkspaceManager {
                                         LOG.error(e.getLocalizedMessage(), e);
                                     }
                                 });
+    }
+
+    /**
+     * The same as {@link #removeEnvironmentSnapshots(String, String)}, but log error instead of throwing any exception.
+     */
+    private void safeRemoveEnvironmentSnapshots(String workspaceId, String envName) {
+        try {
+            removeEnvironmentSnapshots(workspaceId, envName);
+        } catch (NotFoundException e) {
+            LOG.error("Failed to delete snapshots of '%s' environment because workspace with '%s' id doesn't exist",
+                      envName, workspaceId, e);
+        } catch (ServerException e) {
+            LOG.error("Failed to delete snapshots of '%s' environment in '%s' workspace.", envName, workspaceId, e);
+        }
     }
 
     /**
