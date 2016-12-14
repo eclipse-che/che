@@ -17,6 +17,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.environment.server.CheEnvironmentEngine;
 import org.eclipse.che.commons.schedule.ScheduleRate;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
+import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
 import org.eclipse.che.plugin.docker.client.json.ContainerListEntry;
 import org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator;
 import org.slf4j.Logger;
@@ -49,10 +50,10 @@ public class DockerContainerCleaner implements Runnable {
 
     @Inject
     public DockerContainerCleaner(CheEnvironmentEngine environmentEngine,
-                                  DockerConnector dockerConnector,
+                                  DockerConnectorProvider dockerConnectorProvider,
                                   DockerContainerNameGenerator nameGenerator) {
         this.environmentEngine = environmentEngine;
-        this.dockerConnector = dockerConnector;
+        this.dockerConnector = dockerConnectorProvider.get();
         this.nameGenerator = nameGenerator;
     }
 
