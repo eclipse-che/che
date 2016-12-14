@@ -22,6 +22,7 @@ import org.eclipse.che.api.ssh.server.SshManager;
 import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
+import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
 import org.eclipse.che.plugin.docker.client.Exec;
 import org.eclipse.che.plugin.docker.client.LogMessage;
 import org.eclipse.che.plugin.docker.client.params.CreateExecParams;
@@ -55,12 +56,12 @@ public class KeysInjector {
 
     @Inject
     public KeysInjector(EventService eventService,
-                        DockerConnector docker,
+                        DockerConnectorProvider provider,
                         SshManager sshManager,
                         CheEnvironmentEngine environmentEngine,
                         UserManager userManager) {
         this.eventService = eventService;
-        this.docker = docker;
+        this.docker = provider.get();
         this.sshManager = sshManager;
         this.environmentEngine = environmentEngine;
         this.userManager = userManager;

@@ -13,12 +13,14 @@ package org.eclipse.che.plugin.docker.machine.local;
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
+import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
 import org.eclipse.che.api.environment.server.MachineService;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceProcess;
+import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.machine.DockerInstance;
 import org.eclipse.che.plugin.docker.machine.DockerInstanceRuntimeInfo;
 import org.eclipse.che.plugin.docker.machine.DockerProcess;
@@ -55,6 +57,10 @@ public class LocalDockerModule extends AbstractModule {
         bind(org.eclipse.che.plugin.docker.client.DockerRegistryDynamicAuthResolver.class)
                 .to(org.eclipse.che.plugin.docker.client.NoOpDockerRegistryDynamicAuthResolverImpl.class);
         bind(org.eclipse.che.plugin.docker.client.DockerRegistryChecker.class).asEagerSingleton();
+
+        MapBinder<String, DockerConnector> dockerConnectors = MapBinder.newMapBinder(binder(), String.class, DockerConnector.class);
+        dockerConnectors.addBinding("default").to(DockerConnector.class);
+        dockerConnectors.addBinding("openshift").to(org.eclipse.che.plugin.docker.client.OpenShiftConnector.class);
 
         Multibinder<String> devMachineEnvVars = Multibinder.newSetBinder(binder(),
                                                                          String.class,

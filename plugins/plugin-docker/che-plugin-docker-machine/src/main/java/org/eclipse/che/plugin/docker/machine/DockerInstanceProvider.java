@@ -26,6 +26,7 @@ import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceProvider;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
+import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,9 +74,9 @@ public class DockerInstanceProvider implements InstanceProvider {
     private final boolean                                       snapshotUseRegistry;
 
     @Inject
-    public DockerInstanceProvider(DockerConnector docker,
+    public DockerInstanceProvider(DockerConnectorProvider dockerProvider,
                                   @Named("che.docker.registry_for_snapshots") boolean snapshotUseRegistry) throws IOException {
-        this.docker = docker;
+        this.docker = dockerProvider.get();
         this.snapshotUseRegistry = snapshotUseRegistry;
     }
 
