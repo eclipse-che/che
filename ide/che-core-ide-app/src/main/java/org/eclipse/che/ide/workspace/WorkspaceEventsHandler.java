@@ -97,7 +97,6 @@ public class WorkspaceEventsHandler {
     private final Provider<MachineManager>            machineManagerProvider;
     private final Provider<DefaultWorkspaceComponent> wsComponentProvider;
     private final AsyncRequestFactory                 asyncRequestFactory;
-    private final MachineServiceClient                machineServiceClient;
     private final WorkspaceSnapshotCreator            snapshotCreator;
     private final WorkspaceServiceClient              workspaceServiceClient;
     private final StartWorkspaceNotification          startWorkspaceNotification;
@@ -131,7 +130,6 @@ public class WorkspaceEventsHandler {
                            final NotificationManager notificationManager,
                            final MessageBusProvider messageBusProvider,
                            final Provider<MachineManager> machineManagerProvider,
-                           final MachineServiceClient machineServiceClient,
                            final WorkspaceSnapshotCreator snapshotCreator,
                            final WorkspaceServiceClient workspaceServiceClient,
                            final StartWorkspaceNotification startWorkspaceNotification,
@@ -142,7 +140,6 @@ public class WorkspaceEventsHandler {
         this.eventBus = eventBus;
         this.locale = locale;
         this.messageBusProvider = messageBusProvider;
-        this.machineServiceClient = machineServiceClient;
         this.snapshotCreator = snapshotCreator;
         this.notificationManager = notificationManager;
         this.dialogFactory = dialogFactory;
@@ -245,25 +242,6 @@ public class WorkspaceEventsHandler {
                             execAgentCommandManager.getProcessLogs(devMachineId, pid, from, till, limit, skip).then(operation);
                         }
                     }
-                }
-            });
-        }
-    }
-
-    /**
-     * Get log of ws-agent launch process and send it to the output panel
-     * @param process
-     * @param devMachine
-     */
-    private void getLogsOfWsAgent(MachineProcessDto process, final Machine devMachine) {
-        final Link link = process.getLink(Constants.LINK_REL_GET_PROCESS_LOGS);
-        if (link != null) {
-            asyncRequestFactory.createGetRequest(link.getHref()).send(new StringUnmarshaller()).then(new Operation<String>() {
-                @Override
-                public void apply(String log) throws OperationException {
-                    final String fixedLog = log.replaceAll("\\[STDOUT\\] ", ""); //logs comes from server side with "[STDOUT] " in start
-                                                                                 //so we will remove it in this brutal way
-                    eventBus.fireEvent(new EnvironmentOutputEvent(fixedLog, devMachine.getConfig().getName()));
                 }
             });
         }

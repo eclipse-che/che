@@ -69,6 +69,6 @@ public class JsonRpcEntityQualifier {
     public enum JsonRpcEntityType {
         REQUEST,
         RESPONSE,
-        UNDEFINED;
+        UNDEFINED
     }
 }

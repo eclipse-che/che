@@ -99,7 +99,6 @@ public class NotificationManagerImpl extends BasePresenter implements Notificati
     }
 
     @Inject
-    @PostConstruct
     public void inject(EditorFileStatusNotificationOperation editorFileStatusNotificationOperation) {
         editorFileStatusNotificationOperation.inject(this);
     }

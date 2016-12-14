@@ -9,13 +9,8 @@
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.che.api.machine.shared.dto.execagent;
+package org.eclipse.che.api.machine.shared.dto.execagent.event;
 
-import org.eclipse.che.dto.shared.DTO;
-
-@DTO
-public interface GetProcessesRequestDto {
-    boolean isAll();
-
-    GetProcessesRequestDto withAll(boolean all);
+public interface DtoWithPid {
+    int getPid();
 }

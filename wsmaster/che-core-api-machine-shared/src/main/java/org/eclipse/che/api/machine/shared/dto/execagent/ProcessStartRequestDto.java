@@ -12,9 +12,6 @@ package org.eclipse.che.api.machine.shared.dto.execagent;
 
 import org.eclipse.che.dto.shared.DTO;
 
-/**
- * @author Dmitry Kuleshov
- */
 @DTO
 public interface ProcessStartRequestDto {
     String getName();

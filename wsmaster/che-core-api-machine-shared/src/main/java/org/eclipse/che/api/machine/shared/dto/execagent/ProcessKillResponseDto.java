@@ -10,14 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.shared.dto.execagent;
 
-import org.eclipse.che.api.machine.shared.dto.execagent.event.DtoWithPidDto;
+import org.eclipse.che.api.machine.shared.dto.execagent.event.DtoWithPid;
 import org.eclipse.che.dto.shared.DTO;
 
-/**
- * @author Dmitry Kuleshov
- */
 @DTO
-public interface ProcessKillResponseDto extends DtoWithPidDto {
+public interface ProcessKillResponseDto extends DtoWithPid {
+    ProcessKillResponseDto withPid(int pid);
+
     String getText();
 
     ProcessKillResponseDto withText(String text);

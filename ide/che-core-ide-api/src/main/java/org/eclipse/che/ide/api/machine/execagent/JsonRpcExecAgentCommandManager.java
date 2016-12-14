@@ -29,7 +29,7 @@ import org.eclipse.che.api.machine.shared.dto.execagent.ProcessUnSubscribeReques
 import org.eclipse.che.api.machine.shared.dto.execagent.ProcessUnSubscribeResponseDto;
 import org.eclipse.che.api.machine.shared.dto.execagent.UpdateSubscriptionRequestDto;
 import org.eclipse.che.api.machine.shared.dto.execagent.UpdateSubscriptionResponseDto;
-import org.eclipse.che.api.machine.shared.dto.execagent.event.DtoWithPidDto;
+import org.eclipse.che.api.machine.shared.dto.execagent.event.DtoWithPid;
 import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessDiedEventDto;
 import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStartedEventDto;
 import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStdErrEventDto;
@@ -193,7 +193,7 @@ public class JsonRpcExecAgentCommandManager implements ExecAgentCommandManager {
         return transmitter.transmitOneToMany(endpointId, PROCESS_GET_PROCESSES, dto, GetProcessesResponseDto.class);
     }
 
-    private <T extends DtoWithPidDto> void subscribe(String endpointId, ExecAgentPromise<T> promise, T arg) throws OperationException {
+    private <T extends DtoWithPid> void subscribe(String endpointId, ExecAgentPromise<T> promise, T arg) throws OperationException {
         final int pid = arg.getPid();
 
         if (promise.hasProcessDiedEventOperation()) {

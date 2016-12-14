@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.jsonrpc;
 
-import org.eclipse.che.ide.jsonrpc.JsonRpcInitializer;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.websocket.ng.impl.WebSocketInitializer;
 

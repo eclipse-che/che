@@ -10,19 +10,18 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.shared.dto.execagent;
 
+import org.eclipse.che.api.machine.shared.dto.execagent.event.DtoWithPid;
 import org.eclipse.che.dto.shared.DTO;
 
-/**
- * @author Dmitry Kuleshov
- */
 @DTO
-public interface ProcessSubscribeRequestDto {
-    Integer getPid();
-    ProcessSubscribeRequestDto withPid(Integer pid);
+public interface ProcessSubscribeRequestDto extends DtoWithPid {
+    ProcessSubscribeRequestDto withPid(int pid);
 
     String getEventTypes();
+
     ProcessSubscribeRequestDto withEventTypes(String eventTypes);
 
     String getAfter();
+
     ProcessSubscribeRequestDto withAfter(String after);
 }

@@ -10,11 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.machine.execagent;
 
-import org.eclipse.che.api.machine.shared.dto.execagent.event.DtoWithPidDto;
+import org.eclipse.che.api.machine.shared.dto.execagent.event.DtoWithPid;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.jsonrpc.JsonRpcRequestBiOperation;
-import org.eclipse.che.ide.jsonrpc.RequestHandler;
 import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.HashMap;
@@ -25,7 +24,7 @@ import java.util.Set;
 /**
  * @author Dmitry Kuleshov
  */
-public abstract class AbstractExecAgentEventHandler<P extends DtoWithPidDto> implements JsonRpcRequestBiOperation<P> {
+public abstract class AbstractExecAgentEventHandler<P extends DtoWithPid> implements JsonRpcRequestBiOperation<P> {
 
     private final Map<String, Set<Operation<P>>> operationRegistry = new HashMap<>();
 
