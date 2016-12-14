@@ -79,6 +79,8 @@ public class DockerInstanceTest {
     @Mock
     private DockerConnector            dockerConnectorMock;
     @Mock
+    private DockerConnectorProvider    dockerConnectorProviderMock;
+    @Mock
     private DockerInstanceStopDetector dockerInstanceStopDetectorMock;
     @Mock
     private LineConsumer               outputConsumer;
@@ -87,6 +89,7 @@ public class DockerInstanceTest {
 
     @BeforeMethod
     public void setUp() throws IOException {
+        when(dockerConnectorProviderMock.get()).thenReturn(dockerConnectorMock);
         dockerInstance = getDockerInstance();
         when(dockerConnectorMock.createExec(any(CreateExecParams.class))).thenReturn(execMock);
         when(execMock.getId()).thenReturn(EXEC_ID);
@@ -208,7 +211,7 @@ public class DockerInstanceTest {
                                              String container,
                                              String image,
                                              boolean snapshotUseRegistry) {
-        return new DockerInstance(dockerConnectorMock,
+        return new DockerInstance(dockerConnectorProviderMock,
                                   registry,
                                   USERNAME,
                                   mock(DockerMachineFactory.class),
