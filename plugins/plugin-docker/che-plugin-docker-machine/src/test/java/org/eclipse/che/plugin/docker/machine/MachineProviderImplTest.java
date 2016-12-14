@@ -24,6 +24,7 @@ import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
+import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
 import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredentialsProvider;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
@@ -50,6 +51,7 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -117,6 +119,18 @@ public class MachineProviderImplTest {
     private WindowsPathEscaper pathEscaper;
 
     private MachineProviderImpl provider;
+
+    private class MockConnectorProvider extends DockerConnectorProvider {
+
+        public MockConnectorProvider() {
+            super(Collections.emptyMap(), "default");
+        }
+
+        @Override
+        public DockerConnector get() {
+            return dockerConnector;
+        }
+    }
 
     @BeforeMethod
     public void setUp() throws Exception {
@@ -1210,7 +1224,7 @@ public class MachineProviderImplTest {
         }
 
         MachineProviderImpl build() throws IOException {
-            return new MachineProviderImpl(dockerConnector,
+            return new MachineProviderImpl(new MockConnectorProvider(),
                                            dockerConnectorConfiguration,
                                            credentialsReader,
                                            dockerMachineFactory,
