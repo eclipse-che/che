@@ -28,7 +28,7 @@ import org.eclipse.che.api.machine.server.spi.impl.AbstractInstance;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
-import org.eclipse.che.plugin.docker.client.OpenShiftConnector;
+import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
 import org.eclipse.che.plugin.docker.client.Exec;
 import org.eclipse.che.plugin.docker.client.LogMessage;
 import org.eclipse.che.plugin.docker.client.ProgressLineFormatterImpl;
@@ -105,7 +105,7 @@ public class DockerInstance extends AbstractInstance {
     private final MachineRuntimeInfoImpl                      machineRuntime;
 
     @Inject
-    public DockerInstance(DockerConnector docker,
+    public DockerInstance(DockerConnectorProvider dockerProvider,
                           @Named("che.docker.registry") String registry,
                           @Named("che.docker.namespace") @Nullable String registryNamespace,
                           DockerMachineFactory dockerMachineFactory,
@@ -120,7 +120,7 @@ public class DockerInstance extends AbstractInstance {
         super(machine);
         this.dockerMachineFactory = dockerMachineFactory;
         this.container = container;
-        this.docker = docker;
+        this.docker = dockerProvider.get();
         this.image = image;
         this.outputConsumer = outputConsumer;
         this.registry = registry;

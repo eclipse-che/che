@@ -22,6 +22,7 @@ import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.ssh.server.SshManager;
 import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
+import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
 import org.eclipse.che.plugin.docker.client.Exec;
 import org.eclipse.che.plugin.docker.client.LogMessage;
 import org.eclipse.che.plugin.docker.client.MessageProcessor;
@@ -93,7 +94,18 @@ public class KeysInjectorTest {
 
     EventSubscriber<MachineStatusEvent> subscriber;
 
-    @InjectMocks
+    private class MockConnectorProvider extends DockerConnectorProvider {
+
+        public MockConnectorProvider() {
+            super(Collections.emptyMap(), "default");
+        }
+
+        @Override
+        public DockerConnector get() {
+            return docker;
+        }
+    }
+
     KeysInjector keysInjector;
 
     @BeforeMethod
@@ -106,6 +118,12 @@ public class KeysInjectorTest {
         when(instance.getOwner()).thenReturn(OWNER);
         when(instance.getRuntime()).thenReturn(machineRuntime);
         when(instance.getLogger()).thenReturn(lineConsumer);
+
+        keysInjector = new KeysInjector(eventService,
+                                        new MockConnectorProvider(),
+                                        sshManager,
+                                        environmentEngine,
+                                        userManager);
 
         keysInjector.start();
         verify(eventService).subscribe(subscriberCaptor.capture());

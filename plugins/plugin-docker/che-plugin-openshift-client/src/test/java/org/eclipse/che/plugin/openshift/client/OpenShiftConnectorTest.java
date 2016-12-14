@@ -1,31 +1,51 @@
-package org.eclipse.che.plugin.docker.client;
+/*******************************************************************************
+ * Copyright (c) 2012-2016 Red Hat, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.che.plugin.openshift.client;
 
-import com.openshift.internal.restclient.ResourceFactory;
-import com.openshift.restclient.IClient;
-import com.openshift.restclient.IResourceFactory;
-import com.openshift.restclient.model.IPort;
-import com.openshift.restclient.model.IServicePort;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.eclipse.che.plugin.docker.client.DockerApiVersionPathPrefixProvider;
+import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
+import org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver;
 import org.eclipse.che.plugin.docker.client.connection.DockerConnectionFactory;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.ExposedPort;
 import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
 import org.mockito.Mock;
+import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
+import io.fabric8.kubernetes.api.model.ContainerPort;
+import io.fabric8.kubernetes.api.model.EnvVar;
+import io.fabric8.kubernetes.api.model.ServicePort;
 
-import static org.mockito.Mockito.*;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-
+@Listeners(MockitoTestNGListener.class)
 public class OpenShiftConnectorTest {
 
     private static final String[] CONTAINER_ENV_VARIABLES = {"CHE_WORKSPACE_ID=abcd1234"};
-    private static final String   CONTAINER_NAME          = "workspace33c89znmqidvzol8_machineyytelq6lni7mndlf_che_dev-machine";
     private static final String   CHE_DEFAULT_OPENSHIFT_PROJECT_NAME = "eclipse-che";
     private static final String   CHE_DEFAULT_OPENSHIFT_SERVICEACCOUNT = "cheserviceaccount";
     private static final String   OPENSHIFT_API_ENDPOINT_MINISHIFT = "https://192.168.64.2:8443/";
@@ -44,17 +64,13 @@ public class OpenShiftConnectorTest {
     @Mock
     private CreateContainerParams createContainerParams;
 
-    @Mock
-    private IClient openShiftClient;
-
-    @Mock
-    private IResourceFactory openShiftResourceFactory;
-
     private OpenShiftConnector openShiftConnector;
+    
+    private KubernetesLabelConverter kubernetesLabelConverter;
 
     @BeforeMethod
     public void setup() {
-        openShiftResourceFactory = spy(new ResourceFactory(openShiftClient));
+        kubernetesLabelConverter = new KubernetesLabelConverter();
         openShiftConnector = spy(new OpenShiftConnector(dockerConnectorConfiguration,
                                                         dockerConnectionFactory,
                                                         authManager,
@@ -93,7 +109,7 @@ public class OpenShiftConnectorTest {
         exposedPorts.put("4403/tcp",null);
 
         // When
-        List<IServicePort> servicePorts = openShiftConnector.getServicePortsFrom(exposedPorts.keySet());
+        List<ServicePort> servicePorts = openShiftConnector.getServicePortsFrom(exposedPorts.keySet());
 
         // Then
         List<String> portsAndProtocols = servicePorts.stream().
@@ -125,7 +141,7 @@ public class OpenShiftConnectorTest {
         expectedPortNames.add("codeserver");
 
         // When
-        List<IServicePort> servicePorts = openShiftConnector.getServicePortsFrom(exposedPorts.keySet());
+        List<ServicePort> servicePorts = openShiftConnector.getServicePortsFrom(exposedPorts.keySet());
         List<String> actualPortNames = servicePorts.stream().
                 map(p -> p.getName()).collect(Collectors.toList());
 
@@ -143,7 +159,7 @@ public class OpenShiftConnectorTest {
         expectedPortNames.add("55-tcp");
 
         // When
-        List<IServicePort> servicePorts = openShiftConnector.getServicePortsFrom(exposedPorts.keySet());
+        List<ServicePort> servicePorts = openShiftConnector.getServicePortsFrom(exposedPorts.keySet());
         List<String> actualPortNames = servicePorts.stream().
                 map(p -> p.getName()).collect(Collectors.toList());
 
@@ -161,7 +177,7 @@ public class OpenShiftConnectorTest {
         exposedPorts.add("4403/tcp");
 
         // When
-        Set<IPort> containerPorts = openShiftConnector.getContainerPortsFrom(exposedPorts);
+        List<ContainerPort> containerPorts = openShiftConnector.getContainerPortsFrom(exposedPorts);
 
         // Then
         List<String> portsAndProtocols = containerPorts.stream().
@@ -192,29 +208,11 @@ public class OpenShiftConnectorTest {
         };
 
         // When
-        Map<String, String> env = openShiftConnector.getContainerEnvFrom(envVariables);
+        List<EnvVar> env = openShiftConnector.getContainerEnvFrom(envVariables);
 
         // Then
-        List<String> keysAndValues = env.keySet().stream().map(k -> k + "=" + env.get(k)).collect(Collectors.toList());
+        List<String> keysAndValues = env.stream().map(k -> k.getName() + "=" + k.getValue()).collect(Collectors.toList());
         assertTrue(Arrays.stream(envVariables).anyMatch(keysAndValues::contains));
-    }
-
-    @Test
-    public void shouldUpdateCheApiEndpointVariable() {
-        // Given
-        String[] envVariablesIn = {
-                "CHE_API_ENDPOINT=http://che-host:8080/wsmaster/api"
-        };
-        String[] envVariablesOut = {
-                "CHE_API_ENDPOINT=http://che-server:8080/wsmaster/api"
-        };
-
-        // When
-        Map<String, String> env = openShiftConnector.getContainerEnvFrom(envVariablesIn);
-
-        // Then
-        List<String> keysAndValues = env.keySet().stream().map(k -> k + "=" + env.get(k)).collect(Collectors.toList());
-        assertTrue(Arrays.stream(envVariablesOut).anyMatch(keysAndValues::contains));
     }
 
     @Test
@@ -224,7 +222,7 @@ public class OpenShiftConnectorTest {
         imageExposedPorts.put("8080/tcp",new ExposedPort());
 
         // When
-        Set<IPort> containerPorts = openShiftConnector.getContainerPortsFrom(imageExposedPorts.keySet());
+        List<ContainerPort> containerPorts = openShiftConnector.getContainerPortsFrom(imageExposedPorts.keySet());
 
         // Then
         List<String> portsAndProtocols = containerPorts.stream().
@@ -241,7 +239,7 @@ public class OpenShiftConnectorTest {
         imageExposedPorts.put("8080/tcp",new ExposedPort());
 
         // When
-        List<IServicePort> servicePorts = openShiftConnector.getServicePortsFrom(imageExposedPorts.keySet());
+        List<ServicePort> servicePorts = openShiftConnector.getServicePortsFrom(imageExposedPorts.keySet());
 
         // Then
         List<String> portsAndProtocols = servicePorts.stream().
@@ -254,14 +252,15 @@ public class OpenShiftConnectorTest {
     @Test
     public void shouldConvertLabelsToValidKubernetesLabelNames() {
         String validLabelRegex   = "([A-Za-z0-9][-A-Za-z0-9_\\.]*)?[A-Za-z0-9]";
+        String prefix = kubernetesLabelConverter.getCheServerLabelPrefix();
 
         // Given
         Map<String, String> labels = new HashMap<>();
-        labels.put(OpenShiftConnector.CHE_SERVER_LABEL_PREFIX + "4401/tcp:path:", "/api");
-        labels.put(OpenShiftConnector.CHE_SERVER_LABEL_PREFIX + "8000/tcp:ref:", "tomcat-debug");
+        labels.put(prefix + "4401/tcp:path:", "/api");
+        labels.put(prefix + "8000/tcp:ref:", "tomcat-debug");
 
         // When
-        Map<String, String> converted = openShiftConnector.convertLabelsToKubernetesNames(labels);
+        Map<String, String> converted = kubernetesLabelConverter.labelsToNames(labels);
 
         // Then
         for (Map.Entry<String, String> entry : converted.entrySet()) {
@@ -275,13 +274,14 @@ public class OpenShiftConnectorTest {
     @Test
     public void shouldBeAbleToRecoverOriginalLabelsAfterConversion() {
         // Given
+        String prefix = kubernetesLabelConverter.getCheServerLabelPrefix();
         Map<String, String> originalLabels = new HashMap<>();
-        originalLabels.put(OpenShiftConnector.CHE_SERVER_LABEL_PREFIX + "4401/tcp:path:", "/api");
-        originalLabels.put(OpenShiftConnector.CHE_SERVER_LABEL_PREFIX + "8000/tcp:ref:", "tomcat-debug");
+        originalLabels.put(prefix + "4401/tcp:path:", "/api");
+        originalLabels.put(prefix + "8000/tcp:ref:", "tomcat-debug");
 
         // When
-        Map<String, String> converted   = openShiftConnector.convertLabelsToKubernetesNames(originalLabels);
-        Map<String, String> unconverted = openShiftConnector.convertKubernetesNamesToLabels(converted);
+        Map<String, String> converted   = kubernetesLabelConverter.labelsToNames(originalLabels);
+        Map<String, String> unconverted = kubernetesLabelConverter.namesToLabels(converted);
 
         // Then
         assertEquals(originalLabels, unconverted);
