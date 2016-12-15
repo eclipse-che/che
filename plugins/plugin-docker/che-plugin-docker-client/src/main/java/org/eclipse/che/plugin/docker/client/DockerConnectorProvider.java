@@ -28,7 +28,7 @@ public class DockerConnectorProvider implements Provider<DockerConnector> {
 
     @Inject
     public DockerConnectorProvider(Map<String, DockerConnector> connectors,
-                                   @Named("che.docker_connector.provider") String property) {
+                                   @Named("che.docker.connector") String property) {
         if (connectors.containsKey(property)) {
             this.connector = connectors.get(property);
         } else {
