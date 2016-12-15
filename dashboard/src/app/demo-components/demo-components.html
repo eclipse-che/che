@@ -241,7 +241,62 @@ Ultima Syriarum est Palaestina per intervalla magna protenta, cultis abundans te
           </che-list>
         </che-html-source>
       </div>
+    </md-tab>
 
+    <md-tab label="Label Container"
+            md-on-select="demoComponentsController.setDemoTab(demoComponentsController.tab.LABEL_CONTAINER)">
+      <div layout="column">
+        <textarea demo-source-render>
+          <!-- che-label-container -->
+
+          <che-label-container che-label-name="container name"
+                               che-label-description="This text describes container content.">
+            <p>
+             Mel no ullum appareat, est ex virtute indoctum, duo fabulas epicuri principes at. Vis option recteque vulputate eu, harum voluptaria intellegebat pro in, vix cu graeci vivendum intellegebat. Ius docendi invidunt convenire ad. Nam nibh expetendis cu, congue molestiae dissentiunt pri eu, eu virtute alterum repudiandae nec. Te eam vitae libris, nec ut suas errem volumus, ei numquam phaedrum rationibus pri. Verear dissentiunt theophrastus eum ex, ex adhuc appareat moderatius est.
+            </p>
+          </che-label-container>
+
+        </textarea>
+
+        <textarea demo-source-render>
+
+          <!-- che-label-container -->
+          <!-- changes layout on 'gt-sm' breakpoint -->
+
+          <che-label-container che-label-name="container name"
+                               che-label-description="This text describes container content."
+                               che-transclude-layout="true"
+                               layout="column" layout-gt-sm="row">
+            <p>
+             Mel no ullum appareat, est ex virtute indoctum, duo fabulas epicuri principes at. Vis option recteque vulputate eu, harum voluptaria intellegebat pro in, vix cu graeci vivendum intellegebat. Ius docendi invidunt convenire ad. Nam nibh expetendis cu, congue molestiae dissentiunt pri eu, eu virtute alterum repudiandae nec. Te eam vitae libris, nec ut suas errem volumus, ei numquam phaedrum rationibus pri. Verear dissentiunt theophrastus eum ex, ex adhuc appareat moderatius est.
+            </p>
+          </che-label-container>
+
+        </textarea>
+
+        <textarea demo-source-render>
+          <!-- che-label-container -->
+          <!-- aligning of che-input -->
+
+          <che-label-container che-label-name="container name"
+                               che-label-description="This text describes container content."
+                               che-transclude-layout="true"
+                               layout="column" layout-gt-sm="row">
+            <div style="margin-top: -12px;">
+              <che-input che-form="demoForm"
+                         che-name="demoinput2"
+                         che-place-holder="Name of this demo"
+                         ng-model="demoComponentsController.demoInput"
+                         required>
+                <div ng-message="required">A name is required.</div>
+              </che-input>
+            </div>
+            <p>
+             Mel no ullum appareat, est ex virtute indoctum, duo fabulas epicuri principes at. Vis option recteque vulputate eu, harum voluptaria intellegebat pro in, vix cu graeci vivendum intellegebat. Ius docendi invidunt convenire ad. Nam nibh expetendis cu, congue molestiae dissentiunt pri eu, eu virtute alterum repudiandae nec. Te eam vitae libris, nec ut suas errem volumus, ei numquam phaedrum rationibus pri. Verear dissentiunt theophrastus eum ex, ex adhuc appareat moderatius est.
+            </p>
+          </che-label-container>
+        </textarea>
+      </div>
     </md-tab>
 
   </md-tabs>

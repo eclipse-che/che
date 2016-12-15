@@ -17,7 +17,8 @@ enum Tab {
   ICONS,
   BUTTONS,
   INPUT,
-  LIST
+  LIST,
+  LABEL_CONTAINER
 }
 
 /**
