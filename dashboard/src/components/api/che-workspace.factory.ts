@@ -550,8 +550,7 @@ export class CheWorkspace {
         } else if (message.eventType === 'SNAPSHOT_CREATING') {
           this.getWorkspaceById(workspaceId).status = 'SNAPSHOTTING';
         } else if (message.eventType === 'SNAPSHOT_CREATED') {
-          // snapshot can be created for RUNNING workspace only. As far as snapshot creation is only the events, not the state,
-          // we introduced SNAPSHOT_CREATING status to be handled by UI, though it is fake one, and end of it is indicated by SNAPSHOT_CREATED.
+          // snapshot can be created for RUNNING workspace only.
           this.getWorkspaceById(workspaceId).status = 'RUNNING';
         }
 
