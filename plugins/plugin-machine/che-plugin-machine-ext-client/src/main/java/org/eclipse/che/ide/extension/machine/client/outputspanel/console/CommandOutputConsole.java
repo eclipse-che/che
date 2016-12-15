@@ -17,8 +17,8 @@ import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStartedEven
 import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStdErrEventDto;
 import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStdOutEventDto;
 import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.ide.api.outputconsole.OutputConsole;
 import org.eclipse.che.ide.api.command.CommandImpl;
+import org.eclipse.che.ide.api.outputconsole.OutputConsole;
 
 /**
  * Describes requirements for the console for command output.
@@ -32,6 +32,18 @@ public interface CommandOutputConsole extends OutputConsole {
      * @return corresponding command
      */
     CommandImpl getCommand();
+
+    /**
+     * Start listening to the output on the given WebSocket channel.
+     */
+    @Deprecated
+    void listenToOutput(String wsChannel);
+
+    /**
+     * Attaches to the process launched by the command.
+     */
+    @Deprecated
+    void attachToProcess(MachineProcessDto process);
 
     /**
      * Get an output console related operations that should be performed when
