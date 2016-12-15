@@ -10,9 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.zdb.server.utils;
 
-import java.io.File;
-
-import javax.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.project.server.ProjectManager;
@@ -20,7 +19,8 @@ import org.eclipse.che.api.project.server.VirtualFileEntry;
 import org.eclipse.che.api.vfs.Path;
 import org.eclipse.che.plugin.zdb.server.ZendDebugger;
 
-import com.google.inject.Singleton;
+import javax.inject.Inject;
+import java.io.File;
 
 /**
  * Zend debug utils.
@@ -30,12 +30,13 @@ import com.google.inject.Singleton;
 @Singleton
 public class ZendDbgFileUtils {
 
-    private static ProjectManager projectManager;
+    private static Provider<ProjectManager> projectManagerProvider;
 
     @Inject
-    public ZendDbgFileUtils(ProjectManager projectManager) {
-        ZendDbgFileUtils.projectManager = projectManager;
+    public ZendDbgFileUtils(Provider<ProjectManager> projectManagerProvider) {
+        ZendDbgFileUtils.projectManagerProvider = projectManagerProvider;
     }
+
 
     /**
      * Finds local file entry that corresponds to remote file path.
@@ -81,7 +82,7 @@ public class ZendDbgFileUtils {
     private static VirtualFileEntry getVirtualFileEntry(String path) {
         VirtualFileEntry virtualFileEntry = null;
         try {
-            virtualFileEntry = projectManager.getProjectsRoot().getChild(path);
+            virtualFileEntry = projectManagerProvider.get().getProjectsRoot().getChild(path);
         } catch (ServerException e) {
             ZendDebugger.LOG.error(e.getMessage(), e);
         }
