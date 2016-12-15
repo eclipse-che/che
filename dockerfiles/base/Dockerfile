@@ -25,13 +25,13 @@ RUN mkdir -p /version \
     && apk add --update bash \
     && rm -rf /var/cache/apk/* \
     && set -x \
-	&& curl -fSL "https://${DOCKER_BUCKET}/builds/Linux/x86_64/docker-${DOCKER_VERSION}.tgz" -o docker.tgz \
+    && curl -fSL "https://${DOCKER_BUCKET}/builds/Linux/x86_64/docker-${DOCKER_VERSION}.tgz" -o docker.tgz \
     && echo "${DOCKER_SHA256} *docker.tgz" | sha256sum -c - \
-	&& tar -xzvf docker.tgz \
+    && tar -xzvf docker.tgz \
     && mv docker/docker /usr/local/bin/ \
-	&& rm -rf docker \
-	&& rm docker.tgz \
-	&& docker -v
+    && rm -rf docker \
+    && rm docker.tgz \
+    && docker -v
 
 COPY scripts/base /scripts/base/
 
