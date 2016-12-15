@@ -10,23 +10,56 @@
  */
 'use strict';
 
+enum Tab {
+  FONT,
+  PANEL,
+  SELECTER,
+  ICONS,
+  BUTTONS,
+  INPUT,
+  LIST
+}
+
 /**
  * This class is handling the controller for the demo of components
  * @author Florent Benoit
  */
-export class DemoComponentsCtrl {
+export class DemoComponentsController {
+  $location: ng.ILocationService;
+  $routeParams: ng.route.IRouteParamsService;
+
+  selectedTabIndex: number = 0;
+  tab: Object = Tab;
+
+  booksByAuthor: {
+    [author: string]: any[];
+  };
+
+  button2Disabled: boolean;
+
+  listItemsDocs: string[];
+
+  listItemsTasks: any[];
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor() {
+  constructor($location: ng.ILocationService, $routeParams: ng.route.IRouteParamsService) {
+    this.$location = $location;
 
+    let requestedDemoTab = ($routeParams as any).demo || Tab[Tab.FONT];
+    this.selectedTabIndex = Tab[requestedDemoTab.toUpperCase()] || 0;
+
+    this.init();
+  }
+
+  init(): void {
     // selecter
     this.booksByAuthor = {};
-    this.booksByAuthor['St Exupery'] = [{title:'The little prince'}];
-    this.booksByAuthor['V. Hugo'] = [{title:'Les miserables'}, {title:'The Hunchback of Notre-Dame'}];
-    this.booksByAuthor['A. Dumas'] = [{title:'The count of Monte Cristo'}, {title:'The Three Musketeers'}];
+    this.booksByAuthor['St Exupery'] = [{title: 'The little prince'}];
+    this.booksByAuthor['V. Hugo'] = [{title: 'Les miserables'}, {title: 'The Hunchback of Notre-Dame'}];
+    this.booksByAuthor['A. Dumas'] = [{title: 'The count of Monte Cristo'}, {title: 'The Three Musketeers'}];
 
 
     this.button2Disabled = true;
@@ -37,12 +70,23 @@ export class DemoComponentsCtrl {
       {name : 'Task 4', done: true}, {name : 'Task 5', done: false}];
   }
 
+  /**
+   * Keep current tab selected after page refreshing.
+   *
+   * @param tabIndex {number} current tab index
+   */
+  setDemoTab(tabIndex: number): void {
+    // remove any query from url
+    this.$location.url(this.$location.path());
 
-  toggleDisabled2() {
+    this.$location.search('demo', Tab[tabIndex]);
+  }
+
+  toggleDisabled2(): void {
     this.button2Disabled = !this.button2Disabled;
   }
 
-  isToggleDisabled2() {
+  isToggleDisabled2(): boolean {
     return this.button2Disabled;
   }
 
