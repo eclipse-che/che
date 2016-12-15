@@ -16,15 +16,14 @@
  * @author Florent Benoit
  */
 export class CheButton {
+  restrict: string = 'E';
+  bindToController: boolean = true;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor () {
-    this.restrict = 'E';
-    this.bindToController = true;
-  }
+  constructor () {}
 
   /**
    * Template for the current toolbar
@@ -32,8 +31,8 @@ export class CheButton {
    * @param attrs
    * @returns {string} the template
    */
-  template(element, attrs) {
-    var template = this.getTemplateStart();
+  template(element: ng.IAugmentedJQuery, attrs: any) {
+    let template: string = this.getTemplateStart();
 
     if (attrs.href) {
       template = template + ` href="${attrs.href}"`;
@@ -62,11 +61,15 @@ export class CheButton {
     }
 
 
-    template = template + attrs['cheButtonTitle'] + '</md-button>';
+    template = template + attrs.cheButtonTitle + '</md-button>';
     return template;
   }
 
-  compile(element, attrs) {
+  getTemplateStart(): string {
+    return '<md-button md-theme=\"chedefault\" class=\"che-button md-accent md-raised md-hue-2\"';
+  }
+
+  compile(element: ng.IAugmentedJQuery, attrs: any) {
     let button = element.find('button');
     if (attrs && attrs.tabindex) {
       button.attr('tabindex', attrs.tabindex);
@@ -82,8 +85,8 @@ export class CheButton {
   /**
    * Re-apply ng-disabled on child
    */
-  link($scope, element, attrs) {
-    $scope.$watch(attrs.ngDisabled, function (isDisabled) {
+  link($scope: ng.IScope, element: ng.IAugmentedJQuery, attrs: any) {
+    $scope.$watch(attrs.ngDisabled, function (isDisabled: boolean) {
       element.find('button').prop('disabled', isDisabled);
     });
 

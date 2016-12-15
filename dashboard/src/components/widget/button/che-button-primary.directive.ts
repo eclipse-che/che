@@ -29,12 +29,12 @@ import {CheButton} from './che-button.directive';
  *   <che-button-primary che-button-title="hello"></che-button-primary>
  *
  * @example
- <example module="userDashboard">
- <file name="index.html">
- <che-button-primary che-button-title="Hello"></che-button-primary>
- <che-button-primary che-button-title="Hello" che-button-icon="fa fa-file-text-o"></che-button-primary>
- </file>
- </example>
+ * <example module="userDashboard">
+ * <file name="index.html">
+ * <che-button-primary che-button-title="Hello"></che-button-primary>
+ * <che-button-primary che-button-title="Hello" che-button-icon="fa fa-file-text-o"></che-button-primary>
+ * </file>
+ * </example>
  * @author Florent Benoit
  */
 export class CheButtonPrimary extends CheButton {
@@ -50,7 +50,7 @@ export class CheButtonPrimary extends CheButton {
   /**
    * Template for the buttons
    */
-  getTemplateStart() {
+  getTemplateStart(): string {
     return '<md-button md-theme=\"default\" class=\"che-button md-accent md-raised md-hue-2\"';
   }
 
