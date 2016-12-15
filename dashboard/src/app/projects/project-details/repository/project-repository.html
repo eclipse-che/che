@@ -13,8 +13,7 @@
 <div class="project-repositories" ng-if="!projectRepositoryController.isEmptyState">
 
   <che-label-container che-label-name="Remote SVN Repository"
-                       ng-if="projectRepositoryController.remoteSvnRepository.name"
-                       class="che-label-container-not-last">
+                       ng-if="projectRepositoryController.remoteSvnRepository.name">
     <div class="repository-desktop" layout="row" flex>
       <div class="label-name">{{projectRepositoryController.remoteSvnRepository.name}}</div>
       <che-text-info che-text="projectRepositoryController.remoteSvnRepository.url"
@@ -24,8 +23,7 @@
   </che-label-container>
 
   <che-label-container che-label-name="Remote GIT {{projectRepositoryController.remoteGitRepositories.length === 1 ? 'Repository' : 'Repositories'}}"
-                       ng-if="projectRepositoryController.remoteGitRepositories.length > 0"
-                       class="che-label-container-not-last">
+                       ng-if="projectRepositoryController.remoteGitRepositories.length > 0">
     <div class="repository-desktop" ng-repeat="remoteRepository in projectRepositoryController.remoteGitRepositories"
          layout="row" flex>
       <div class="label-name">{{remoteRepository.name}}</div>
