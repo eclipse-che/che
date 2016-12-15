@@ -21,9 +21,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * @author Dmitry Kuleshov
- */
+
 public abstract class AbstractExecAgentEventHandler<P extends DtoWithPid> implements JsonRpcRequestBiOperation<P> {
 
     private final Map<String, Set<Operation<P>>> operationRegistry = new HashMap<>();

@@ -49,7 +49,8 @@ import java.util.List;
 import static org.eclipse.che.ide.util.StringUtils.join;
 
 /**
- * @author Dmitry Kuleshov
+ * Implementation of exec-agent command manager based on JSON RPC protocol that
+ * uses bi-directional request/response transporting. 
  */
 @Singleton
 public class JsonRpcExecAgentCommandManager implements ExecAgentCommandManager {
@@ -61,6 +62,7 @@ public class JsonRpcExecAgentCommandManager implements ExecAgentCommandManager {
     public static final String PROCESS_GET_LOGS          = "process.getLogs";
     public static final String PROCESS_GET_PROCESS       = "process.getProcess";
     public static final String PROCESS_GET_PROCESSES     = "process.getProcesses";
+
     private final DtoFactory            dtoFactory;
     private final RequestTransmitter    transmitter;
     private final ExecAgentEventManager eventManager;
