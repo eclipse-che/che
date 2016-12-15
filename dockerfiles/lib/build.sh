@@ -51,7 +51,7 @@ native_build() {
   ./node_modules/typescript/bin/tsc --project .
 }
 
-init
+init "$@"
 generate_dto
 
 DIR=$(cd "$(dirname "$0")"; pwd)
