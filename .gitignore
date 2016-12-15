@@ -63,3 +63,4 @@ Thumbs.db
 # Che files
 .che
 dockerfiles/che/eclipse-che.tar.gz
+.unison*

@@ -1,0 +1,541 @@
+
+
+
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="generator" content="Jekyll v3.2.1">
+  <link type="application/atom+xml" rel="alternate" href="https://codenvy.com/feed.xml" title="Codenvy Docs" />
+  <link rel="alternate" type="application/atom+xml" title="Recent commits to Jekyll’s master branch" href="https://github.com/codenvy/codenvy/commits/master.atom">
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic,900">
+  <link rel="stylesheet" href="../../assets/css/screen.css">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <!--[if lt IE 9]>
+  <script src="/js/html5shiv.min.js"></script>
+  <script src="/js/respond.min.js"></script>
+  <![endif]-->
+</head>
+
+
+<body class="wrap">
+  <header>
+  <nav class="mobile-nav show-on-mobiles">
+    <ul>
+  <li class="">
+    <a href="../../docs/index.html">Home</a>
+  </li>
+  <li class="">
+    <a href="../../docs/setup/intro/index.html">Docs</a>
+  </li>
+  <li class="current">
+    <a href="../../tutorials/multi-machine/index.html">Tutorials</a>
+  </li>
+  <li class="">
+    <a href="../../artik/start-windows/index.html">Artik</a>
+  </li>
+  <li class="">
+    <a href="../../openshift/config/index.html">Openshift</a>
+  </li>
+  <li>
+    <a href="https://github.com/eclipse/che/tree/master/docs/"><span class="hide-on-mobiles">View on </span>GitHub</a>
+  </li>
+</ul>
+
+  </nav>
+  <div class="grid">
+    <div class="unit one-third center-on-mobiles">
+        <a href="/">
+          <span class="sr-only">Codenvy</span>
+          <img src="../../assets/imgs/logo-eclipseche.svg" alt="Codenvy Logo"  width="249" height="115">
+        </a>
+    </div>
+    <nav class="main-nav unit two-thirds hide-on-mobiles">
+      <ul>
+  <li class="">
+    <a href="../../docs/index.html">Home</a>
+  </li>
+  <li class="">
+    <a href="../../docs/setup/intro/index.html">Docs</a>
+  </li>
+  <li class="current">
+    <a href="../../tutorials/multi-machine/index.html">Tutorials</a>
+  </li>
+  <li class="">
+    <a href="../../artik/start-windows/index.html">Artik</a>
+  </li>
+  <li class="">
+    <a href="../../openshift/config/index.html">Openshift</a>
+  </li>
+  <li>
+    <a href="https://github.com/eclipse/che/tree/master/docs/"><span class="hide-on-mobiles">View on </span>GitHub</a>
+  </li>
+</ul>
+
+    </nav>
+  </div>
+</header>
+
+
+    <section class="tutorials">
+    <div class="grid">
+
+      <div class="docs-nav-mobile unit whole show-on-mobiles">
+  <select onchange="if (this.value) window.location.href=this.value">
+    <option value="">Navigate the docs…</option>
+    
+    
+    
+    <optgroup label="User Tutorials">
+      
+
+
+
+
+    </optgroup>
+    
+  </select>
+</div>
+
+
+      <div class="unit four-fifths">
+        <article>
+          <div class="improve right hide-on-mobiles">
+            <a href="https://github.com/eclipse/che/blob/master/docs/_docs/tutorials/tutorial-spring-boot.md"><i class="fa fa-pencil"></i> &nbsp;Improve this page</a>
+          </div>
+          <div class="doc-title">
+            <h1>Spring Boot in Che</h1>
+            <div class="doc-title-border">
+            </div>
+          </div>
+          <p>Spring Boot is Spring’s convention-over-configuration solution for creating stand-alone, production-grade Spring based Applications that you can “just run”. This page provides a quick configuration guide to get started with Spring Boot within Che.</p>
+<div class="language-text highlighter-rouge"><pre class="highlight"><code># In the dashboard, create a new project and import from source:
+https://github.com/che-samples/web-java-spring-boot
+
+# Choose the Java stack.
+# Create the workspace.\
+</code></pre>
+</div>
+
+<div class="language-text highlighter-rouge"><pre class="highlight"><code># In the IDE, create a new Maven command. Give it the syntax:
+Title:    run
+Command:  spring-boot:run
+Preview:  http://${server.port.8080}\
+</code></pre>
+</div>
+
+<div class="language-text highlighter-rouge"><pre class="highlight"><code># Test your application
+1. Run the `run` command.
+2. See the application on the preview URL.
+
+# Stopping the Spring Boot application
+# In the Che terminal:
+ps ax | grep java
+sudo kill -9 pid\
+</code></pre>
+</div>
+
+          
+
+
+
+
+
+
+        </article>
+      </div>
+
+      <div class="unit one-fifth hide-on-mobiles">
+  <aside>
+    
+    
+    <h4>User Tutorials</h4>
+     
+    
+
+
+<ul>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/multi-machine/index.html">Multi-Machine Workspaces in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/maven/index.html">Java+Maven in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/gradle/index.html">Java+Gradle in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/java/index.html">Java Console Apps in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/swing/index.html">Java Swing in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/nodejs/index.html">Node.js in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/meteor/index.html">Meteor in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/wordpress/index.html">Wordpress in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/php/index.html">PHP in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/android/index.html">Android in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class="current"><a href="../../tutorials/spring-boot/index.html">Spring Boot in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/rails/index.html">Rails in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/laravel/index.html">Laravel in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/tomee/index.html">TomEE in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/che-in-che/index.html">Che in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/gae/index.html">Google App Engine and Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/che-and-appfog/index.html">AppFog and Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/subversion/index.html">Subversion Repos in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/ftpsftp/index.html">FTP/SFTP and Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/cuba/index.html">Cuba Platform in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/sourcegraph/index.html">Sourcegraph in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/vaadin/index.html">Vaadin in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/platformio/index.html">PlatformIO in Che</a></li>
+  
+  
+
+</ul>
+
+    
+    
+    
+    
+  </aside>
+</div>
+
+
+      <div class="clear"></div>
+
+    </div>
+  </section>
+
+
+=======
+
+=======
+  <script>
+  var anchorForId = function (id) {
+    var anchor = document.createElement("a");
+    anchor.className = "header-link";
+    anchor.href      = "#" + id;
+    anchor.innerHTML = "<span class=\"sr-only\">Permalink</span><i class=\"fa fa-link\"></i>";
+    anchor.title = "Permalink";
+    return anchor;
+  };
+
+  var linkifyAnchors = function (level, containingElement) {
+    var headers = containingElement.getElementsByTagName("h" + level);
+    for (var h = 0; h < headers.length; h++) {
+      var header = headers[h];
+
+      if (typeof header.id !== "undefined" && header.id !== "") {
+        header.appendChild(anchorForId(header.id));
+      }
+    }
+  };
+
+  document.onreadystatechange = function () {
+    if (this.readyState === "complete") {
+      var contentBlock = document.getElementsByClassName("docs")[0] || document.getElementsByClassName("news")[0];
+      if (!contentBlock) {
+        return;
+      }
+      for (var level = 1; level <= 6; level++) {
+        linkifyAnchors(level, contentBlock);
+      }
+    }
+  };
+</script>
+
+  
+
+
+
+
+</body>
+</html>

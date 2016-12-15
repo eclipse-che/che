@@ -1,0 +1,575 @@
+
+
+
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="generator" content="Jekyll v3.2.1">
+  <link type="application/atom+xml" rel="alternate" href="https://codenvy.com/feed.xml" title="Codenvy Docs" />
+  <link rel="alternate" type="application/atom+xml" title="Recent commits to Jekyll’s master branch" href="https://github.com/codenvy/codenvy/commits/master.atom">
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic,900">
+  <link rel="stylesheet" href="../../assets/css/screen.css">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <!--[if lt IE 9]>
+  <script src="/js/html5shiv.min.js"></script>
+  <script src="/js/respond.min.js"></script>
+  <![endif]-->
+</head>
+
+
+<body class="wrap">
+  <header>
+  <nav class="mobile-nav show-on-mobiles">
+    <ul>
+  <li class="">
+    <a href="../../docs/index.html">Home</a>
+  </li>
+  <li class="">
+    <a href="../../docs/setup/intro/index.html">Docs</a>
+  </li>
+  <li class="current">
+    <a href="../../tutorials/multi-machine/index.html">Tutorials</a>
+  </li>
+  <li class="">
+    <a href="../../artik/start-windows/index.html">Artik</a>
+  </li>
+  <li class="">
+    <a href="../../openshift/config/index.html">Openshift</a>
+  </li>
+  <li>
+    <a href="https://github.com/eclipse/che/tree/master/docs/"><span class="hide-on-mobiles">View on </span>GitHub</a>
+  </li>
+</ul>
+
+  </nav>
+  <div class="grid">
+    <div class="unit one-third center-on-mobiles">
+        <a href="/">
+          <span class="sr-only">Codenvy</span>
+          <img src="../../assets/imgs/logo-eclipseche.svg" alt="Codenvy Logo"  width="249" height="115">
+        </a>
+    </div>
+    <nav class="main-nav unit two-thirds hide-on-mobiles">
+      <ul>
+  <li class="">
+    <a href="../../docs/index.html">Home</a>
+  </li>
+  <li class="">
+    <a href="../../docs/setup/intro/index.html">Docs</a>
+  </li>
+  <li class="current">
+    <a href="../../tutorials/multi-machine/index.html">Tutorials</a>
+  </li>
+  <li class="">
+    <a href="../../artik/start-windows/index.html">Artik</a>
+  </li>
+  <li class="">
+    <a href="../../openshift/config/index.html">Openshift</a>
+  </li>
+  <li>
+    <a href="https://github.com/eclipse/che/tree/master/docs/"><span class="hide-on-mobiles">View on </span>GitHub</a>
+  </li>
+</ul>
+
+    </nav>
+  </div>
+</header>
+
+
+    <section class="tutorials">
+    <div class="grid">
+
+      <div class="docs-nav-mobile unit whole show-on-mobiles">
+  <select onchange="if (this.value) window.location.href=this.value">
+    <option value="">Navigate the docs…</option>
+    
+    
+    
+    <optgroup label="User Tutorials">
+      
+
+
+
+
+    </optgroup>
+    
+  </select>
+</div>
+
+
+      <div class="unit four-fifths">
+        <article>
+          <div class="improve right hide-on-mobiles">
+            <a href="https://github.com/eclipse/che/blob/master/docs/_docs/tutorials/tutorial-meteor.md"><i class="fa fa-pencil"></i> &nbsp;Improve this page</a>
+          </div>
+          <div class="doc-title">
+            <h1>Meteor in Che</h1>
+            <div class="doc-title-border">
+            </div>
+          </div>
+          <h1 id="1-start-che">1. Start Che</h1>
+<p>Run <code class="highlighter-rouge">docker run --rm -t -v /var/run/docker.sock:/var/run/docker.sock eclipse/che start</code> and open your browser at <code class="highlighter-rouge">http://&lt;your-che-host&gt;:8080</code></p>
+
+<h1 id="2-start-workspace">2. Start Workspace</h1>
+<p>When in User Dashboard, go to <code class="highlighter-rouge">Workspaces</code> tab and click <code class="highlighter-rouge">(+)</code> button. It will take you to a Wizard with all the steps to create a new workspace.</p>
+
+<h3 id="select-source">Select Source</h3>
+<p>We’ll create a new workspace using recipe, so choose an appropriate option in the menu.</p>
+
+<p>###Select Stack
+Our workspace will be created from a <strong>Custom Stack</strong> (tab on the far right). We’ll use a certified Debian based Codenvy image with NodeJS 5.6.0 and Meteor installed (<a href="https://raw.githubusercontent.com/eclispe/che-dockerfiles/master/meteor/latest/Dockerfile">Recipe</a>).</p>
+
+<p>Our custom recipe will be:</p>
+
+<p><code class="highlighter-rouge">FROM eclipse/meteor</code></p>
+
+<p>(There’s also <code class="highlighter-rouge">eclipse/meteor:ubuntu</code> tag for those who love Ubuntu). There’s only one instruction since all the commands are executed in the base image.</p>
+
+<p>Finally, give your workspace a nice name, configure RAM and you are all good to go.</p>
+
+<h1 id="3-create-meteor-project">3. Create Meteor Project</h1>
+<p>Once you workspace is created, open it in the IDE with <code class="highlighter-rouge">(&gt;)</code> button (it will take a while for Docker to pull the base image). When in the IDE, go to the Consoles panel on the bottom of the IDE, click (+) button to open a new terminal tab and run meteor –version to check if it’s successfully installed.</p>
+
+<p>Go to the projects directory and run meteor create {your-app-name} command to create a new Meteor app:</p>
+
+<p><code class="highlighter-rouge">cd /projects &amp;&amp; meteor create simple-todo</code></p>
+
+<p>Click Refresh project tree button on the Project Explorer panel and find your soon-to-be project. Click <code class="highlighter-rouge">(&gt;)</code> button to configure it. Choose Blank project type and save changes.</p>
+
+<h1 id="4-run-meteor-project">4. Run Meteor Project</h1>
+<p>In the Commands Widget, go to <code class="highlighter-rouge">CMD &gt; Edit commands…</code> and click <code class="highlighter-rouge">(+)</code> button to create a custom command. Name the command, a definite it:</p>
+
+<p><code class="highlighter-rouge">cd ${current.project.path} &amp;&amp; meteor</code></p>
+
+<p>Here, we use a special IDE macro that will be interpreted as an absolute path to a currently selected project.</p>
+
+<p>Preview URL is very important. When a process starts on a particular port in the container, we can only access it from outside the container, on a mapped port that Docker has randomly chosen when launching the container. Here we will use a few more macros to build a preview URL:</p>
+
+<p><code class="highlighter-rouge">http://${server.port.3000}</code></p>
+
+<p><code class="highlighter-rouge">${server.port.3000}</code> will return <code class="highlighter-rouge">currentHost:mappedPort</code>. See: IDE Macros.</p>
+
+<p>If you switch to a Machine perspective, Servers tab, you will find all available port mappings, including the meteor one.</p>
+
+<p>Save your custom command, run it and click the preview URL. Congrats! Your first Meteor app is running.</p>
+<h1 id="qa">Q&amp;A</h1>
+<h2 id="what-if-i-need-a-different-node-version">What if I need a different Node version?</h2>
+
+<p><code class="highlighter-rouge">eclipse/node</code> image is built on top of eclipse/debian_jre that has all the things required to run a Che workspace. Node installation was performed according to instructions in the official <code class="highlighter-rouge">node</code> Dockerfiles on DockerHub.</p>
+
+<p>If you need a different node version, we recommend taking a look at the original <a href="https://github.com/eclipse/che-dockerfiles/blob/master/meteor/debian/Dockerfile">Dockerfile</a> and grab instructions from official <a href="https://github.com/nodejs/docker-node/tree/0c722500f66fb5f606a57824babe9798ae98667b">Node Dockerfiles</a>.</p>
+
+<h2 id="can-i-install-anything-through-npm">Can I install anything through npm?</h2>
+
+<p>Yes, if you need things like bower, gulp, ionic and what not, just add an extra RUN instruction to your custom recipe:</p>
+<div class="language-shell highlighter-rouge"><pre class="highlight"><code>FROM eclipse/meteor
+RUN sudo npm install -g gulp bower grunt ionic<span class="se">\</span>
+</code></pre>
+</div>
+<h2 id="can-i-override-the-default-cmd">Can I override the default CMD?</h2>
+
+          
+
+
+
+
+
+
+        </article>
+      </div>
+
+      <div class="unit one-fifth hide-on-mobiles">
+  <aside>
+    
+    
+    <h4>User Tutorials</h4>
+     
+    
+
+
+<ul>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/multi-machine/index.html">Multi-Machine Workspaces in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/maven/index.html">Java+Maven in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/gradle/index.html">Java+Gradle in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/java/index.html">Java Console Apps in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/swing/index.html">Java Swing in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/nodejs/index.html">Node.js in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class="current"><a href="../../tutorials/meteor/index.html">Meteor in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/wordpress/index.html">Wordpress in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/php/index.html">PHP in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/android/index.html">Android in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/spring-boot/index.html">Spring Boot in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/rails/index.html">Rails in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/laravel/index.html">Laravel in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/tomee/index.html">TomEE in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/che-in-che/index.html">Che in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/gae/index.html">Google App Engine and Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/che-and-appfog/index.html">AppFog and Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/subversion/index.html">Subversion Repos in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/ftpsftp/index.html">FTP/SFTP and Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/cuba/index.html">Cuba Platform in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/sourcegraph/index.html">Sourcegraph in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/vaadin/index.html">Vaadin in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/platformio/index.html">PlatformIO in Che</a></li>
+  
+  
+
+</ul>
+
+    
+    
+    
+    
+  </aside>
+</div>
+
+
+      <div class="clear"></div>
+
+    </div>
+  </section>
+
+
+=======
+
+=======
+  <script>
+  var anchorForId = function (id) {
+    var anchor = document.createElement("a");
+    anchor.className = "header-link";
+    anchor.href      = "#" + id;
+    anchor.innerHTML = "<span class=\"sr-only\">Permalink</span><i class=\"fa fa-link\"></i>";
+    anchor.title = "Permalink";
+    return anchor;
+  };
+
+  var linkifyAnchors = function (level, containingElement) {
+    var headers = containingElement.getElementsByTagName("h" + level);
+    for (var h = 0; h < headers.length; h++) {
+      var header = headers[h];
+
+      if (typeof header.id !== "undefined" && header.id !== "") {
+        header.appendChild(anchorForId(header.id));
+      }
+    }
+  };
+
+  document.onreadystatechange = function () {
+    if (this.readyState === "complete") {
+      var contentBlock = document.getElementsByClassName("docs")[0] || document.getElementsByClassName("news")[0];
+      if (!contentBlock) {
+        return;
+      }
+      for (var level = 1; level <= 6; level++) {
+        linkifyAnchors(level, contentBlock);
+      }
+    }
+  };
+</script>
+
+  
+
+
+
+
+</body>
+</html>

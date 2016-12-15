@@ -1,0 +1,652 @@
+
+
+
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="generator" content="Jekyll v3.2.1">
+  <link type="application/atom+xml" rel="alternate" href="https://codenvy.com/feed.xml" title="Codenvy Docs" />
+  <link rel="alternate" type="application/atom+xml" title="Recent commits to Jekyll’s master branch" href="https://github.com/codenvy/codenvy/commits/master.atom">
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic,900">
+  <link rel="stylesheet" href="../../assets/css/screen.css">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <!--[if lt IE 9]>
+  <script src="/js/html5shiv.min.js"></script>
+  <script src="/js/respond.min.js"></script>
+  <![endif]-->
+</head>
+
+
+<body class="wrap">
+  <header>
+  <nav class="mobile-nav show-on-mobiles">
+    <ul>
+  <li class="">
+    <a href="../../docs/index.html">Home</a>
+  </li>
+  <li class="">
+    <a href="../../docs/setup/intro/index.html">Docs</a>
+  </li>
+  <li class="current">
+    <a href="../../tutorials/multi-machine/index.html">Tutorials</a>
+  </li>
+  <li class="">
+    <a href="../../artik/start-windows/index.html">Artik</a>
+  </li>
+  <li class="">
+    <a href="../../openshift/config/index.html">Openshift</a>
+  </li>
+  <li>
+    <a href="https://github.com/eclipse/che/tree/master/docs/"><span class="hide-on-mobiles">View on </span>GitHub</a>
+  </li>
+</ul>
+
+  </nav>
+  <div class="grid">
+    <div class="unit one-third center-on-mobiles">
+        <a href="/">
+          <span class="sr-only">Codenvy</span>
+          <img src="../../assets/imgs/logo-eclipseche.svg" alt="Codenvy Logo"  width="249" height="115">
+        </a>
+    </div>
+    <nav class="main-nav unit two-thirds hide-on-mobiles">
+      <ul>
+  <li class="">
+    <a href="../../docs/index.html">Home</a>
+  </li>
+  <li class="">
+    <a href="../../docs/setup/intro/index.html">Docs</a>
+  </li>
+  <li class="current">
+    <a href="../../tutorials/multi-machine/index.html">Tutorials</a>
+  </li>
+  <li class="">
+    <a href="../../artik/start-windows/index.html">Artik</a>
+  </li>
+  <li class="">
+    <a href="../../openshift/config/index.html">Openshift</a>
+  </li>
+  <li>
+    <a href="https://github.com/eclipse/che/tree/master/docs/"><span class="hide-on-mobiles">View on </span>GitHub</a>
+  </li>
+</ul>
+
+    </nav>
+  </div>
+</header>
+
+
+    <section class="tutorials">
+    <div class="grid">
+
+      <div class="docs-nav-mobile unit whole show-on-mobiles">
+  <select onchange="if (this.value) window.location.href=this.value">
+    <option value="">Navigate the docs…</option>
+    
+    
+    
+    <optgroup label="User Tutorials">
+      
+
+
+
+
+    </optgroup>
+    
+  </select>
+</div>
+
+
+      <div class="unit four-fifths">
+        <article>
+          <div class="improve right hide-on-mobiles">
+            <a href="https://github.com/eclipse/che/blob/master/docs/_docs/tutorials/tutorial-maven.md"><i class="fa fa-pencil"></i> &nbsp;Improve this page</a>
+          </div>
+          <div class="doc-title">
+            <h1>Java+Maven in Che</h1>
+            <div class="doc-title-border">
+            </div>
+          </div>
+          <h1 id="1-start-che">1. Start Che</h1>
+<p>Use your SaaS account for the following, or if you have <a href="https://eclipse-che.readme.io/v5.0/docs/che-getting-started">installed Che</a>, open a terminal and use the Che startup script:</p>
+<div class="language-shell highlighter-rouge"><pre class="highlight"><code><span class="c"># Launch Che</span>
+che start<span class="se">\</span>
+</code></pre>
+</div>
+<p>When you execute this command, you’ll see the URL for the user dashboard.</p>
+
+<p>The Che dashboard will open. It is where you manage your projects and workspaces. If you do not have any projects in Che, you’ll be asked to create a new project.  If you already have projects in Che, click on <code class="highlighter-rouge">New Project</code> button in the menu bar.</p>
+<h1 id="2-create-console-java-project">2. Create Console Java Project</h1>
+<p>From the Dashboard page click “Create Workspace”.</p>
+
+<h3 id="select-source">Select Source</h3>
+<p><img src="/assets/imgs/ScreenShot2016-09-30at5.56.22PM.png" alt="ScreenShot2016-09-30at5.56.22PM.png" />
+This informs Che where the source code for your project is going to come from. It is possible to start a new blank, template, sample project or import one from another location. Choosing the first option will present you with a set of samples that are preconfigured. If you already have a project at a valid URL, choose the second option. Che gives you choices on how to source the project from Git, GitHub, ZIP, etc..</p>
+
+<p>We will create a project from a provided template.</p>
+
+<p>###Select Stack
+<img src="/assets/imgs/ScreenShot2016-09-30at5.52.21PM.png" alt="ScreenShot2016-09-30at5.52.21PM.png" />
+Your project will be inserted into a workspace, which has a provided Docker runtime. Stacks are the recipes or images used to define the runtime environment for the workspace where your project will be placed. There are three ways to choose a stack:</p>
+<ol>
+  <li><em>Ready-To-Go Stacks.</em> Environments that have a large variety of tools already installed optimized for projects of a particular type. For this example, we will select the Java stack which will create a container with Ubuntu git, java-jdk, maven, tomcat installed.</li>
+  <li><em>Stack Library.</em> Offers finer grained stacks that can be used to create specific technology layers needed for a project. Ubuntu and Debian stacks, for example, are minimal stacks with only an operating system and Che tools installed.</li>
+  <li><em>Custom Stack.</em> You can provide your own custom stack. You’ll have the ability to upload a recipe (dockerfile) or directly edit it from there.</li>
+</ol>
+
+<p>Choose the <code class="highlighter-rouge">Ready-To-Go</code> category and select the <code class="highlighter-rouge">JAVA</code> stack.</p>
+
+<h3 id="configure-workspace">Configure Workspace</h3>
+<p><img src="/assets/imgs/ScreenShot2016-09-30at5.55.07PM.png" alt="ScreenShot2016-09-30at5.55.07PM.png" />
+Provide a name to your workspace and configure its RAM. RAM will be the memory limit applied to the machines running your workspace environment. For this tutorial, create a new workspace with name <code class="highlighter-rouge">tutorial-java</code> and set its RAM to 1GB.</p>
+
+<p>###Select Template (Code Sample)
+<img src="/assets/imgs/ScreenShot2016-09-30at5.55.58PM.png" alt="ScreenShot2016-09-30at5.55.58PM.png" />
+A template is a set of code, configuration, and commands that can be imported to operate within Che. There are two types of templates:</p>
+<ol>
+  <li><strong>Ready-to-run project samples</strong>. These samples have a compilable source tree and embedded commands. The list of templates available are filtered based upon the stack chosen.</li>
+  <li><strong>Wizard-driven project configuration</strong>. This creates a blank project and then opens the IDE’s project configuration wizard to let you scaffold a new project based upon a set of configurable parameters. This option is only available if there an appropriate project type available for the stack chosen.</li>
+</ol>
+
+<p>Choose <code class="highlighter-rouge">Ready-to-run project samples</code> and select <code class="highlighter-rouge">console-java-simple</code>, those options should be preselected by default.</p>
+
+<h3 id="project-metadata">Project Metadata</h3>
+<p><img src="/assets/imgs/ScreenShot2016-09-30at5.56.22PM.png" alt="ScreenShot2016-09-30at5.56.22PM.png" />
+You can set a name and description of your project. The name is what will appear as the root node in the project explorer in the IDE.  Keep the default values.</p>
+
+<h3 id="create-the-project">Create the Project</h3>
+
+<p>Hit the button <strong>Create</strong> at the bottom of the flow. The project construction will start.</p>
+
+<p>The project construction process goes through a number of steps including creating a new workspace, downloading an image to use for the workspace environment, instantiating that environment, installing Che services into the workspace, and then creating your project.</p>
+<h1 id="3-develop-in-the-ide">3. Develop in the IDE</h1>
+<p>The project created is a Maven project. Once you open it in the IDE, you’ll see the dependencies updated from the <code class="highlighter-rouge">pom.xml</code> file.
+<img src="/assets/imgs/ide-update-dep.png" alt="ide-update-dep.png" /></p>
+<h3 id="project-explorer">Project Explorer</h3>
+<p><img src="/assets/imgs/project-tree.png" alt="project-tree.png" />
+On the left side of the IDE, a panel is displaying the project explorer which allow you to browse the sources of your project. You can use your mouse to expand/collapse the folders and packages, but you are also able to navigate in the project explorer using your keyboard. Use:</p>
+<ul>
+  <li><code class="highlighter-rouge">up arrow</code> and <code class="highlighter-rouge">down arrow</code> to navigate in the tree,</li>
+  <li><code class="highlighter-rouge">left arrow</code> and <code class="highlighter-rouge">right arrow</code> to expand/collapse folders and packages,</li>
+  <li><code class="highlighter-rouge">enter</code> to open a file.</li>
+</ul>
+
+<h3 id="editor-overview">Editor Overview</h3>
+<p>Open the file <code class="highlighter-rouge">HelloWorld.java</code> in the package <code class="highlighter-rouge">org.eclipse.che.examples</code>. The file is displayed with syntax coloration.
+<img src="/assets/imgs/editor-simple.png" alt="editor-simple.png" />
+The editor is structured in a common way:</p>
+<ul>
+  <li>at the top: the list of all opened files,</li>
+  <li>on the left: line number, breakpoints and error marks,</li>
+  <li>on the right: the file’s minimap and the cursor position bar to navigate in the file,</li>
+  <li>at the bottom: file information (cursor exact position, encoding and file’s type).</li>
+</ul>
+
+<p>If you have error in your files, the editor will display error and warning marks:
+<img src="/assets/imgs/editor-errors.png" alt="editor-errors.png" />
+You can use your keyboard to navigate in the file content, but also between files. You can get the complete list of all keyboard shortcut by going into the menu <code class="highlighter-rouge">Assistant</code> &gt; <code class="highlighter-rouge">Key Bindings</code> and scrolling to the category <code class="highlighter-rouge">Editor</code>
+<img src="/assets/imgs/keybindings.png" alt="keybindings.png" /></p>
+<h3 id="java-intellisense">Java Intellisense</h3>
+<p>There is an Assistant menu that includes language specific capabilities. You can perform auto-complete by hitting <code class="highlighter-rouge">ctrl-space</code>.</p>
+
+<h3 id="jump-to-definition">Jump to Definition</h3>
+<p>While you are editing your Java code, you may want a documentation lookup for a particular symbol (class, attribute or method). Get quick documentation by <code class="highlighter-rouge">Assistant</code> &gt; <code class="highlighter-rouge">Quick Documentation</code> or <code class="highlighter-rouge">^j</code>.
+<img src="/assets/imgs/quick-documentation.png" alt="quick-documentation.png" />
+If you need more information about the symbol, you can also navigate to its definition with <code class="highlighter-rouge">Assistant</code> &gt; <code class="highlighter-rouge">Open Declaration</code> or <code class="highlighter-rouge">F4</code>.  The <code class="highlighter-rouge">String</code> class will open in a new editor.
+<img src="/assets/imgs/open-declaration.png" alt="open-declaration.png" /></p>
+<h3 id="search">Search</h3>
+<p>Che editor provides various ways to search your projects and workspace.</p>
+
+<h4 id="search-with-editor">Search with Editor</h4>
+<p>Use the editor search to find and replace in a particular file via <code class="highlighter-rouge">CTRL+f</code> keyboard shortcut. You can also use regular expressions.
+<img src="/assets/imgs/find-editor.png" alt="find-editor.png" /></p>
+
+<h4 id="find-usages">Find Usages</h4>
+<p>This will find all references of a particular class, method, field or attribute and search for its usage in your various project’s files. Do this with <code class="highlighter-rouge">Assistant</code> &gt; <code class="highlighter-rouge">Find Usages</code>. A new panel will open and list all references for <code class="highlighter-rouge">String</code> into your project. If you select one of the occurrence and double-click on it, the editor will open the file to the position of the found reference.</p>
+
+<p><img src="/assets/imgs/find-usages.png" alt="find-usages.png" /></p>
+
+<h3 id="refactoring">Refactoring</h3>
+<p>Che provides the ability to refactor your source code.</p>
+
+<h4 id="rename">Rename</h4>
+<p>Put cursor on method, variable or field that you want to rename, and hit Shift + F6. If this hotkey is pressed once, the selected keyword will be highlighted which means it’s ready for refactoring. You can type a new name and press Enter.</p>
+
+<p>If you press Shift + F6 twice, an advanced Rename mode is called out:
+<img src="/assets/imgs/rename.png" alt="rename.png" />
+Preview button will open a side by side comparison window that will show changes that you are about to apply.</p>
+
+<h4 id="move">Move</h4>
+<p>Choose any Java class you want to move and hit F6. It will call a Move item menu. Choose destination for your class and click OK.</p>
+
+<p><img src="/assets/imgs/move-item.png" alt="move-item.png" />
+It’s also possible to preview changes. Choose destination for your class and click Preview. It will show all Java classes and non-Java files (optional), that the replaced class is referenced in.
+<img src="/assets/imgs/preview.png" alt="preview.png" />
+###Manage Maven Modules
+Maven Plugin provides the ability to manage Maven modules in multi-module projects entirely through <code class="highlighter-rouge">pom.xml</code>.</p>
+
+<p>Open any Java multi-module project and create a new folder with a simple Maven project in it. It will be seen as folder in the project tree first. Open your parent project POM and add your newly imported module there:
+<code class="highlighter-rouge">&lt;module&gt;new-module&lt;/module&gt;</code></p>
+
+<p>As a result, it will be automatically configured as a Maven module in your project tree. Maven plugin watches changes in <code class="highlighter-rouge">pom.xml</code> and automatically imports changes (dependencies, configuration etc).</p>
+
+<p>###Dependency Management
+If you make changes to dependencies in POM, they will be automatically updated. You can also manually reimport the project: right click on your Maven project, choose <code class="highlighter-rouge">Maven &gt; Reimport</code>.</p>
+
+<p>If you have errors in your POM or add some nonexistent dependency to your POM, the following error will be displayed in the editor:
+<img src="/assets/imgs/nonexistent-dependency.png" alt="nonexistent-dependency.png" />
+###Configure Classpath
+It’s possible to view project dependencies at <code class="highlighter-rouge">Project &gt; Configure Classpath</code>. Dependencies in the classpath will be categorized as follows:</p>
+<ul>
+  <li>JRE_CONTAINER - Java 1.8 jars;</li>
+  <li>MAVEN2_CLASSPATH_CONFIGURATION - project dependencies.
+<img src="/assets/imgs/configure-classpath.png" alt="configure-classpath.png" />
+###Generate Effective POM
+There is also a possibility to display POM that results from the application of interpolation, inheritance and active profiles. Just open your Maven project and go to <code class="highlighter-rouge">Assistant &gt; Generate Effective Pom</code>.</li>
+</ul>
+
+          
+
+
+
+
+
+
+        </article>
+      </div>
+
+      <div class="unit one-fifth hide-on-mobiles">
+  <aside>
+    
+    
+    <h4>User Tutorials</h4>
+     
+    
+
+
+<ul>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/multi-machine/index.html">Multi-Machine Workspaces in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class="current"><a href="../../tutorials/maven/index.html">Java+Maven in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/gradle/index.html">Java+Gradle in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/java/index.html">Java Console Apps in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/swing/index.html">Java Swing in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/nodejs/index.html">Node.js in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/meteor/index.html">Meteor in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/wordpress/index.html">Wordpress in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/php/index.html">PHP in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/android/index.html">Android in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/spring-boot/index.html">Spring Boot in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/rails/index.html">Rails in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/laravel/index.html">Laravel in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/tomee/index.html">TomEE in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/che-in-che/index.html">Che in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/gae/index.html">Google App Engine and Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/che-and-appfog/index.html">AppFog and Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/subversion/index.html">Subversion Repos in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/ftpsftp/index.html">FTP/SFTP and Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/cuba/index.html">Cuba Platform in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/sourcegraph/index.html">Sourcegraph in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/vaadin/index.html">Vaadin in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/platformio/index.html">PlatformIO in Che</a></li>
+  
+  
+
+</ul>
+
+    
+    
+    
+    
+  </aside>
+</div>
+
+
+      <div class="clear"></div>
+
+    </div>
+  </section>
+
+
+=======
+
+=======
+  <script>
+  var anchorForId = function (id) {
+    var anchor = document.createElement("a");
+    anchor.className = "header-link";
+    anchor.href      = "#" + id;
+    anchor.innerHTML = "<span class=\"sr-only\">Permalink</span><i class=\"fa fa-link\"></i>";
+    anchor.title = "Permalink";
+    return anchor;
+  };
+
+  var linkifyAnchors = function (level, containingElement) {
+    var headers = containingElement.getElementsByTagName("h" + level);
+    for (var h = 0; h < headers.length; h++) {
+      var header = headers[h];
+
+      if (typeof header.id !== "undefined" && header.id !== "") {
+        header.appendChild(anchorForId(header.id));
+      }
+    }
+  };
+
+  document.onreadystatechange = function () {
+    if (this.readyState === "complete") {
+      var contentBlock = document.getElementsByClassName("docs")[0] || document.getElementsByClassName("news")[0];
+      if (!contentBlock) {
+        return;
+      }
+      for (var level = 1; level <= 6; level++) {
+        linkifyAnchors(level, contentBlock);
+      }
+    }
+  };
+</script>
+
+  
+
+
+
+
+</body>
+</html>

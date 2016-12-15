@@ -1,0 +1,586 @@
+
+
+
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="generator" content="Jekyll v3.2.1">
+  <link type="application/atom+xml" rel="alternate" href="https://codenvy.com/feed.xml" title="Codenvy Docs" />
+  <link rel="alternate" type="application/atom+xml" title="Recent commits to Jekyll’s master branch" href="https://github.com/codenvy/codenvy/commits/master.atom">
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic,900">
+  <link rel="stylesheet" href="../../assets/css/screen.css">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <!--[if lt IE 9]>
+  <script src="/js/html5shiv.min.js"></script>
+  <script src="/js/respond.min.js"></script>
+  <![endif]-->
+</head>
+
+
+<body class="wrap">
+  <header>
+  <nav class="mobile-nav show-on-mobiles">
+    <ul>
+  <li class="">
+    <a href="../../docs/index.html">Home</a>
+  </li>
+  <li class="">
+    <a href="../../docs/setup/intro/index.html">Docs</a>
+  </li>
+  <li class="current">
+    <a href="../../tutorials/multi-machine/index.html">Tutorials</a>
+  </li>
+  <li class="">
+    <a href="../../artik/start-windows/index.html">Artik</a>
+  </li>
+  <li class="">
+    <a href="../../openshift/config/index.html">Openshift</a>
+  </li>
+  <li>
+    <a href="https://github.com/eclipse/che/tree/master/docs/"><span class="hide-on-mobiles">View on </span>GitHub</a>
+  </li>
+</ul>
+
+  </nav>
+  <div class="grid">
+    <div class="unit one-third center-on-mobiles">
+        <a href="/">
+          <span class="sr-only">Codenvy</span>
+          <img src="../../assets/imgs/logo-eclipseche.svg" alt="Codenvy Logo"  width="249" height="115">
+        </a>
+    </div>
+    <nav class="main-nav unit two-thirds hide-on-mobiles">
+      <ul>
+  <li class="">
+    <a href="../../docs/index.html">Home</a>
+  </li>
+  <li class="">
+    <a href="../../docs/setup/intro/index.html">Docs</a>
+  </li>
+  <li class="current">
+    <a href="../../tutorials/multi-machine/index.html">Tutorials</a>
+  </li>
+  <li class="">
+    <a href="../../artik/start-windows/index.html">Artik</a>
+  </li>
+  <li class="">
+    <a href="../../openshift/config/index.html">Openshift</a>
+  </li>
+  <li>
+    <a href="https://github.com/eclipse/che/tree/master/docs/"><span class="hide-on-mobiles">View on </span>GitHub</a>
+  </li>
+</ul>
+
+    </nav>
+  </div>
+</header>
+
+
+    <section class="tutorials">
+    <div class="grid">
+
+      <div class="docs-nav-mobile unit whole show-on-mobiles">
+  <select onchange="if (this.value) window.location.href=this.value">
+    <option value="">Navigate the docs…</option>
+    
+    
+    
+    <optgroup label="User Tutorials">
+      
+
+
+
+
+    </optgroup>
+    
+  </select>
+</div>
+
+
+      <div class="unit four-fifths">
+        <article>
+          <div class="improve right hide-on-mobiles">
+            <a href="https://github.com/eclipse/che/blob/master/docs/_docs/tutorials/tutorial-che-in-che.md"><i class="fa fa-pencil"></i> &nbsp;Improve this page</a>
+          </div>
+          <div class="doc-title">
+            <h1>Che in Che</h1>
+            <div class="doc-title-border">
+            </div>
+          </div>
+          <p>You can build and run Che using Che!  Since Che runs within a Docker container and its workspaces are generated as Docker containers, there is extra configuration that is needed to enable the Che that you build in Che to generate its own workspaces!</p>
+<h1 id="concepts">Concepts</h1>
+<p>We are going to setup Che to have the Che launcher, the Che server, your primary development workspace, and the new Che you will compile be Docker containers. All of these Docker containers will be launched and managed by a shared Docker daemon, which is running on your host system.
+<img src="/assets/imgs/Capture.PNG" alt="Capture.PNG" /></p>
+<ul>
+  <li><strong>Native</strong>: The CLI that launches your main instance of Che with the <code class="highlighter-rouge">che-launcher</code>.</li>
+  <li><strong>Che Launcher</strong>: A Docker container, which provides cross-platform management of your Che server.</li>
+  <li><strong>Che Server</strong>: A Docker container running your primary Che server.</li>
+  <li><strong>Che Workspace</strong>: A Docker container which containers your development workspace. The Che source code is cloned into this workspace, compiled here, and acts as the launch point. It includes the CLI that launches the launcher (creating a type of recursive behavior). The new inner Che will be able to launch its own workspaces.</li>
+</ul>
+
+<p>All of these containers share a common Docker daemon that is running on the host operating system. This means that even though we are doing Che-in-Che (or why not Che-in-Che-in-Che), all of the containers created are siblings of one another managed by the same daemon.</p>
+<h1 id="step-by-step-guide">Step By Step Guide</h1>
+<h3 id="configure-che">Configure Che</h3>
+<p>There are two values that you must set as environment variables. This requires the 4.7 CLI - previous versions of the CLI do not support converting environment variables into Che properties.</p>
+<div class="language-text highlighter-rouge"><pre class="highlight"><code># This will create a che.properties value
+export CHE_PROPERTY_machine_server_extra_volume=/var/run/docker.sock:/var/run/docker.sock
+
+# Set CHE_DATA_FOLDER to a directory that you will remember.
+# This value will be needed inside of the workspace
+export CHE_DATA_FOLDER=/Users/tyler/data\
+</code></pre>
+</div>
+<h3 id="start-che">Start Che</h3>
+<div class="language-shell highlighter-rouge"><pre class="highlight"><code><span class="c"># Start Che</span>
+che start<span class="se">\</span>
+</code></pre>
+</div>
+<p>Now, all workspaces started in this Che server will have access to the host’s Docker daemon. Because workspaces will share access to the host daemon, be careful with sharing workspaces in this configuration. It’s possible that workspaces can send commands to the daemon that gain privileges to the host that you may not want to give.</p>
+
+<h3 id="get-a-che-workspace">Get a Che Workspace</h3>
+<p>1: Create a workspace using the Eclipse Che ready-to-go stack. It will have the Che logo next to it. This stack is based upon Alpine and <a href="https://github.com/eclipse/che-dockerfiles/tree/master/recipes/alpine_jdk8">includes Java 8, maven, and the Docker client</a>.</p>
+
+<p>2: Choose the Eclipse Che template. This will clone source from <code class="highlighter-rouge">http://github.com/eclipse/che</code> and give the resulting project a <code class="highlighter-rouge">maven</code> project type. Setting the type to maven will trigger dependencies being downloaded. It’s a big project - so it will take a moment to finish the clone and create the workspace.</p>
+
+<p>4: Project &gt; Set Configuration.  Set the project configuration to be <code class="highlighter-rouge">maven</code>. This will add Java intellisense and the maven plugin so that your dependencies are managed properly.</p>
+
+<p>5:  Compile Che by adding a maven command.  In the toolbar, choose “Edit Commands…”.  Create a new maven command.  Set the working directory to be /che/assembly/assembly-main.  The command should be <code class="highlighter-rouge">clean install</code>.</p>
+
+<h3 id="run-che-in-che">Run Che-in-Che</h3>
+<p>Now that you have a compiled Che binary, you need to run it.  We will use the Che Launcher Docker container to run the binary. Your workspace project has all of its files mounted onto the host. So while you see the files inside your workspace, they are also running on the host - where the Docker daemon is.</p>
+
+<p>We will launch the Che Launcher from inside the workspace, but pass environment variables that allow the launcher to create a new Che server on the host, and that new Che server will be started with the binaries that you just compiled (also on the host).</p>
+<div class="language-shell highlighter-rouge"><pre class="highlight"><code><span class="c"># First, find the location where Che built itself in your workspace.</span>
+<span class="nb">cd</span> /projects
+
+<span class="c"># Replace &lt;proj-name&gt; and &lt;version&gt; with your setup</span>
+<span class="nb">set </span><span class="nv">MY_CHE_BINARY</span><span class="o">=</span><span class="s2">"/&lt;proj-name&gt;/assembly/assembly-main/target/&lt;version&gt;/&lt;version&gt;"</span>
+
+<span class="c"># Your che-in-che will launch itself with the name "che-server"</span>
+<span class="c"># Temporary fix - to avoid collisions, rename your dev server container.</span>
+docker rename che-server che-primary-server
+
+<span class="c"># Create a new data directory.</span>
+mkdir /home/user/che-did
+
+<span class="c"># Inside your Che workspace, launch Che-in-Che with:</span>
+sudo docker run --rm -t -v /var/run/docker.sock:/var/run/docker.sock
+                --env <span class="nv">CHE_LOCAL_BINARY</span><span class="o">=</span>/home/user/che/workspaces/&lt;ws-name&gt;<span class="nv">$MY_CHE_BINARY</span>
+                --env <span class="nv">CHE_DATA_FOLDER</span><span class="o">=</span>/home/user/che-did
+                --env <span class="nv">CHE_HOST_IP</span><span class="o">=</span><span class="k">$(</span>curl -s https://4.ifcfg.me/<span class="k">)</span>
+                --env <span class="nv">CHE_PORT</span><span class="o">=</span>50000
+                   eclipse/che start
+
+<span class="c"># NOTE: Set the CHE_PORT to any value &gt;33,000</span>
+<span class="c"># NOTE: Set the CHE_PORT to a value not used by your primary Che server or workspace</span>
+<span class="c"># NOTE: CHE_HOST_IP only necessary if you are running Che as a shared server</span>
+
+<span class="c"># CHE-IN-CHE will be running at http://$CHE_HOST_IP:50000</span>
+</code></pre>
+</div>
+
+          
+
+
+
+
+
+
+        </article>
+      </div>
+
+      <div class="unit one-fifth hide-on-mobiles">
+  <aside>
+    
+    
+    <h4>User Tutorials</h4>
+     
+    
+
+
+<ul>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/multi-machine/index.html">Multi-Machine Workspaces in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/maven/index.html">Java+Maven in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/gradle/index.html">Java+Gradle in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/java/index.html">Java Console Apps in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/swing/index.html">Java Swing in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/nodejs/index.html">Node.js in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/meteor/index.html">Meteor in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/wordpress/index.html">Wordpress in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/php/index.html">PHP in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/android/index.html">Android in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/spring-boot/index.html">Spring Boot in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/rails/index.html">Rails in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/laravel/index.html">Laravel in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/tomee/index.html">TomEE in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class="current"><a href="../../tutorials/che-in-che/index.html">Che in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/gae/index.html">Google App Engine and Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/che-and-appfog/index.html">AppFog and Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/subversion/index.html">Subversion Repos in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/ftpsftp/index.html">FTP/SFTP and Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/cuba/index.html">Cuba Platform in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/sourcegraph/index.html">Sourcegraph in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/vaadin/index.html">Vaadin in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/platformio/index.html">PlatformIO in Che</a></li>
+  
+  
+
+</ul>
+
+    
+    
+    
+    
+  </aside>
+</div>
+
+
+      <div class="clear"></div>
+
+    </div>
+  </section>
+
+
+=======
+
+=======
+  <script>
+  var anchorForId = function (id) {
+    var anchor = document.createElement("a");
+    anchor.className = "header-link";
+    anchor.href      = "#" + id;
+    anchor.innerHTML = "<span class=\"sr-only\">Permalink</span><i class=\"fa fa-link\"></i>";
+    anchor.title = "Permalink";
+    return anchor;
+  };
+
+  var linkifyAnchors = function (level, containingElement) {
+    var headers = containingElement.getElementsByTagName("h" + level);
+    for (var h = 0; h < headers.length; h++) {
+      var header = headers[h];
+
+      if (typeof header.id !== "undefined" && header.id !== "") {
+        header.appendChild(anchorForId(header.id));
+      }
+    }
+  };
+
+  document.onreadystatechange = function () {
+    if (this.readyState === "complete") {
+      var contentBlock = document.getElementsByClassName("docs")[0] || document.getElementsByClassName("news")[0];
+      if (!contentBlock) {
+        return;
+      }
+      for (var level = 1; level <= 6; level++) {
+        linkifyAnchors(level, contentBlock);
+      }
+    }
+  };
+</script>
+
+  
+
+
+
+
+</body>
+</html>

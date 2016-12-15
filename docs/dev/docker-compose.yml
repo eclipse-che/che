@@ -1,0 +1,9 @@
+version: '2'
+services:
+  docs:
+    build: .
+    ports:
+      - "${JEKYLL_BIND_PORT}4000"
+      - "22"
+    container_name: ${CONTAINER_NAME}
+    network_mode: "bridge"

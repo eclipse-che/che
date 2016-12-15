@@ -1,0 +1,572 @@
+
+
+
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="generator" content="Jekyll v3.2.1">
+  <link type="application/atom+xml" rel="alternate" href="https://codenvy.com/feed.xml" title="Codenvy Docs" />
+  <link rel="alternate" type="application/atom+xml" title="Recent commits to Jekyll’s master branch" href="https://github.com/codenvy/codenvy/commits/master.atom">
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic,900">
+  <link rel="stylesheet" href="../../assets/css/screen.css">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <!--[if lt IE 9]>
+  <script src="/js/html5shiv.min.js"></script>
+  <script src="/js/respond.min.js"></script>
+  <![endif]-->
+</head>
+
+
+<body class="wrap">
+  <header>
+  <nav class="mobile-nav show-on-mobiles">
+    <ul>
+  <li class="">
+    <a href="../../docs/index.html">Home</a>
+  </li>
+  <li class="">
+    <a href="../../docs/setup/intro/index.html">Docs</a>
+  </li>
+  <li class="current">
+    <a href="../../tutorials/multi-machine/index.html">Tutorials</a>
+  </li>
+  <li class="">
+    <a href="../../artik/start-windows/index.html">Artik</a>
+  </li>
+  <li class="">
+    <a href="../../openshift/config/index.html">Openshift</a>
+  </li>
+  <li>
+    <a href="https://github.com/eclipse/che/tree/master/docs/"><span class="hide-on-mobiles">View on </span>GitHub</a>
+  </li>
+</ul>
+
+  </nav>
+  <div class="grid">
+    <div class="unit one-third center-on-mobiles">
+        <a href="/">
+          <span class="sr-only">Codenvy</span>
+          <img src="../../assets/imgs/logo-eclipseche.svg" alt="Codenvy Logo"  width="249" height="115">
+        </a>
+    </div>
+    <nav class="main-nav unit two-thirds hide-on-mobiles">
+      <ul>
+  <li class="">
+    <a href="../../docs/index.html">Home</a>
+  </li>
+  <li class="">
+    <a href="../../docs/setup/intro/index.html">Docs</a>
+  </li>
+  <li class="current">
+    <a href="../../tutorials/multi-machine/index.html">Tutorials</a>
+  </li>
+  <li class="">
+    <a href="../../artik/start-windows/index.html">Artik</a>
+  </li>
+  <li class="">
+    <a href="../../openshift/config/index.html">Openshift</a>
+  </li>
+  <li>
+    <a href="https://github.com/eclipse/che/tree/master/docs/"><span class="hide-on-mobiles">View on </span>GitHub</a>
+  </li>
+</ul>
+
+    </nav>
+  </div>
+</header>
+
+
+    <section class="tutorials">
+    <div class="grid">
+
+      <div class="docs-nav-mobile unit whole show-on-mobiles">
+  <select onchange="if (this.value) window.location.href=this.value">
+    <option value="">Navigate the docs…</option>
+    
+    
+    
+    <optgroup label="User Tutorials">
+      
+
+
+
+
+    </optgroup>
+    
+  </select>
+</div>
+
+
+      <div class="unit four-fifths">
+        <article>
+          <div class="improve right hide-on-mobiles">
+            <a href="https://github.com/eclipse/che/blob/master/docs/_docs/tutorials/tutorial-android.md"><i class="fa fa-pencil"></i> &nbsp;Improve this page</a>
+          </div>
+          <div class="doc-title">
+            <h1>Android in Che</h1>
+            <div class="doc-title-border">
+            </div>
+          </div>
+          <h1 id="1-select-android-stack-and-sample">1. Select Android Stack and Sample</h1>
+<p>When in User Dashboard, create a project with Android stack. There are two sample applications to get started with. Both are Maven projects.</p>
+<h1 id="2-run-android-app-emulator">2. Run Android App (Emulator)</h1>
+<p>Android stack has everything one needs to package <code class="highlighter-rouge">.apk</code> (Java, Maven, Android SDK), run Android emulator and install the <code class="highlighter-rouge">.apk</code> in an emulator.</p>
+
+<p>When in the IDE, run <code class="highlighter-rouge">build</code> command that will package the project as <code class="highlighter-rouge">apk</code>. You will also see a preview URL, which is a VNC URL to get into the environment with x-server running.</p>
+
+<p>The final instructions are documented in a sample README file:
+[block:embed]
+{
+  “html”: false,
+  “url”: “https://github.com/che-samples/mobile-android-hello-world/blob/master/README.md”,
+  “title”: “che-samples/mobile-android-hello-world”,
+  “favicon”: “https://assets-cdn.github.com/favicon.ico”,
+  “image”: “https://avatars1.githubusercontent.com/u/16560000?v=3&amp;s=400”,
+  “iframe”: false,
+  “width”: “450px”,
+  “height”: “450px”
+}</p>
+
+<h1 id="3-run-android-app-on-device">3. Run Android App on Device</h1>
+<p>It is possible to connect your Android phone or tabled to your machine and use <code class="highlighter-rouge">adb</code> commands to install <code class="highlighter-rouge">apk</code> right into a connected device.</p>
+
+<p>There are a few pre-requisites:</p>
+
+<ul>
+  <li>in <code class="highlighter-rouge">/conf/che.properties</code>:
+add <code class="highlighter-rouge">machine.server.extra.volume=/dev/bus/usb:/dev/bus/usb</code>
+set <code class="highlighter-rouge">machine.docker.privilege_mode</code> to <code class="highlighter-rouge">true</code></li>
+</ul>
+
+<p>Vagrant users and those running Che natively on Windows and Mac (i.e. where Virtual Box is involved) need to make sure that the VM can see USB devices connected to the host machine.</p>
+
+<p>There are two pre-reqs here:</p>
+
+<ol>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>Install VirtualBox Extension Pack. <a href="http://www.htpcbeginner.com/install-virtualbox-extension-pack-on-linux-windows/">Instructions</a></td>
+          <td><a href="http://download.virtualbox.org/virtualbox/5.0.16/Oracle_VM_VirtualBox_Extension_Pack-5.0.16.vbox-extpack">Download Link</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>Enable USB in VM settings.
+Vagrant users may either add the following to a Vagrantfile - https://github.com/codenvy/artik-ide/blob/master/Vagrantfile#L16-20 (then destroy the current box and create a new one) - or manually enable USB at Settings &gt; USB (create an empty filter).</li>
+</ol>
+
+<p>When a workspace starts, you may check if adb can see your phone:</p>
+
+<p><code class="highlighter-rouge">adb devices</code></p>
+
+<p>If the phone is there, you may install <code class="highlighter-rouge">apk</code> right into it:</p>
+
+<p><code class="highlighter-rouge">adb install -r /path/to/your.apk</code></p>
+
+          
+
+
+
+
+
+
+        </article>
+      </div>
+
+      <div class="unit one-fifth hide-on-mobiles">
+  <aside>
+    
+    
+    <h4>User Tutorials</h4>
+     
+    
+
+
+<ul>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/multi-machine/index.html">Multi-Machine Workspaces in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/maven/index.html">Java+Maven in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/gradle/index.html">Java+Gradle in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/java/index.html">Java Console Apps in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/swing/index.html">Java Swing in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/nodejs/index.html">Node.js in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/meteor/index.html">Meteor in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/wordpress/index.html">Wordpress in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/php/index.html">PHP in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class="current"><a href="../../tutorials/android/index.html">Android in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/spring-boot/index.html">Spring Boot in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/rails/index.html">Rails in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/laravel/index.html">Laravel in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/tomee/index.html">TomEE in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/che-in-che/index.html">Che in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/gae/index.html">Google App Engine and Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/che-and-appfog/index.html">AppFog and Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/subversion/index.html">Subversion Repos in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/ftpsftp/index.html">FTP/SFTP and Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/cuba/index.html">Cuba Platform in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/sourcegraph/index.html">Sourcegraph in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/vaadin/index.html">Vaadin in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/platformio/index.html">PlatformIO in Che</a></li>
+  
+  
+
+</ul>
+
+    
+    
+    
+    
+  </aside>
+</div>
+
+
+      <div class="clear"></div>
+
+    </div>
+  </section>
+
+
+=======
+
+=======
+  <script>
+  var anchorForId = function (id) {
+    var anchor = document.createElement("a");
+    anchor.className = "header-link";
+    anchor.href      = "#" + id;
+    anchor.innerHTML = "<span class=\"sr-only\">Permalink</span><i class=\"fa fa-link\"></i>";
+    anchor.title = "Permalink";
+    return anchor;
+  };
+
+  var linkifyAnchors = function (level, containingElement) {
+    var headers = containingElement.getElementsByTagName("h" + level);
+    for (var h = 0; h < headers.length; h++) {
+      var header = headers[h];
+
+      if (typeof header.id !== "undefined" && header.id !== "") {
+        header.appendChild(anchorForId(header.id));
+      }
+    }
+  };
+
+  document.onreadystatechange = function () {
+    if (this.readyState === "complete") {
+      var contentBlock = document.getElementsByClassName("docs")[0] || document.getElementsByClassName("news")[0];
+      if (!contentBlock) {
+        return;
+      }
+      for (var level = 1; level <= 6; level++) {
+        linkifyAnchors(level, contentBlock);
+      }
+    }
+  };
+</script>
+
+  
+
+
+
+
+</body>
+</html>

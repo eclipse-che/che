@@ -1,0 +1,56 @@
+markdown: kramdown
+highlighter: rouge
+destination: target/_site
+
+kramdown:
+  toc_levels:     1..6
+  smart_quotes:   lsquo,rsquo,ldquo,rdquo
+  input:          GFM
+
+repository: https://github.com/codenvy/codenvy
+
+timezone: America/Los_Angeles
+
+collections:
+  docs:
+    output: true
+  tutorials:
+    output: true
+  posts:
+    permalink: /news/:year/:month/:day/:title/
+    output: true
+
+name: Codenvy Docs
+description: Cloud workspaces for development teams
+url: https://codenvy.com
+
+twitter:
+  username: codenvyhq
+
+logo: /img/logo-2x.png
+
+gems:
+  - jekyll-feed
+  - jekyll-redirect-from
+  - jekyll-sitemap
+
+exclude:
+  - /dev/
+  - README.md
+  - .gitignore
+  - docs.sh
+  - assembly/*
+  - target/*
+  - pom.xml
+  - docs.iml
+
+syntax_highlighter_opts:
+  css_class: 'highlight'
+  line_format: '%i'
+  start_line: 1
+  span:
+    line_format: '%i'
+    start_line: 1
+  block:
+    line_format: '%i'
+    start_line: 1

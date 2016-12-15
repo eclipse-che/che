@@ -1,0 +1,27 @@
+<div class="unit one-fifth hide-on-mobiles">
+  <aside>
+    {% if page.layout == 'tutorials' %} 
+    {% assign layout_docs = site.data.tutorials %}
+    {% elsif page.layout == 'artik' %} 
+    {% assign layout_docs = site.data.artik %}
+    {% elsif page.layout == 'openshift' %} 
+    {% assign layout_docs = site.data.openshift %}
+    {% elsif page.layout == 'docs' %}
+    {% assign layout_docs = site.data.docs %}
+    {% endif %}
+    {% for section in layout_docs %}
+    <h4>{{ section.title }}</h4>
+    {% if page.layout == 'tutorials' %} 
+    {% include docs_ul.html items=section.tutorials %}
+    {% elsif page.layout == 'artik' %} 
+    {% include docs_ul.html items=section.artik %}
+    {% elsif page.layout == 'openshift' %} 
+    {% include docs_ul.html items=section.openshift %}
+    {% elsif page.layout == 'docs' %}
+    {% include docs_ul.html items=section.docs %}
+    {% endif %}
+    
+    
+    {% endfor %}
+  </aside>
+</div>

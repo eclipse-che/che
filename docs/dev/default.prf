@@ -1,0 +1,23 @@
+# Arguments
+batch = true
+fat = false
+auto = true
+prefer = newer
+log = false
+retry = 10
+perms = 0
+group = false
+owner = false
+dontchmod = true
+
+# Some regexps specifying names and paths to ignore
+# ignore = Path _site/*
+# ignore = Path _site
+ignore = Path docs/images/*
+ignore = Path docs/images
+ignore = Path dev/*
+ignore = Path dev
+#ignore = Name temp.*
+
+# Use this command for displaying diffs
+# diff = diff -y -W 79 --suppress-common-lines

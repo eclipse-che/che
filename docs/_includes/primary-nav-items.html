@@ -1,0 +1,20 @@
+<ul>
+  <li class="{% if page.overview == true %}current{% endif %}">
+    <a href="{{ base }}/docs/index.html">Home</a>
+  </li>
+  <li class="{% if page.url contains '/docs/' and page.overview == null %}current{% endif %}">
+    <a href="{{ base }}/docs/setup/intro/index.html">Docs</a>
+  </li>
+  <li class="{% if page.url contains '/tutorials/' %}current{% endif %}">
+    <a href="{{ base }}/tutorials/multi-machine/index.html">Tutorials</a>
+  </li>
+  <li class="{% if page.url contains '/artik/' %}current{% endif %}">
+    <a href="{{ base }}/artik/start-windows/index.html">Artik</a>
+  </li>
+  <li class="{% if page.url contains '/openshift/' %}current{% endif %}">
+    <a href="{{ base }}/openshift/config/index.html">Openshift</a>
+  </li>
+  <li>
+    <a href="https://github.com/{{ page.tags[0] }}/{{ page.tags[1] }}/tree/master/docs/"><span class="hide-on-mobiles">View on </span>GitHub</a>
+  </li>
+</ul>

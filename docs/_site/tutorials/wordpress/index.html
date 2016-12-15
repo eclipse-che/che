@@ -1,0 +1,578 @@
+
+
+
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="generator" content="Jekyll v3.2.1">
+  <link type="application/atom+xml" rel="alternate" href="https://codenvy.com/feed.xml" title="Codenvy Docs" />
+  <link rel="alternate" type="application/atom+xml" title="Recent commits to Jekyll’s master branch" href="https://github.com/codenvy/codenvy/commits/master.atom">
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic,900">
+  <link rel="stylesheet" href="../../assets/css/screen.css">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <!--[if lt IE 9]>
+  <script src="/js/html5shiv.min.js"></script>
+  <script src="/js/respond.min.js"></script>
+  <![endif]-->
+</head>
+
+
+<body class="wrap">
+  <header>
+  <nav class="mobile-nav show-on-mobiles">
+    <ul>
+  <li class="">
+    <a href="../../docs/index.html">Home</a>
+  </li>
+  <li class="">
+    <a href="../../docs/setup/intro/index.html">Docs</a>
+  </li>
+  <li class="current">
+    <a href="../../tutorials/multi-machine/index.html">Tutorials</a>
+  </li>
+  <li class="">
+    <a href="../../artik/start-windows/index.html">Artik</a>
+  </li>
+  <li class="">
+    <a href="../../openshift/config/index.html">Openshift</a>
+  </li>
+  <li>
+    <a href="https://github.com/eclipse/che/tree/master/docs/"><span class="hide-on-mobiles">View on </span>GitHub</a>
+  </li>
+</ul>
+
+  </nav>
+  <div class="grid">
+    <div class="unit one-third center-on-mobiles">
+        <a href="/">
+          <span class="sr-only">Codenvy</span>
+          <img src="../../assets/imgs/logo-eclipseche.svg" alt="Codenvy Logo"  width="249" height="115">
+        </a>
+    </div>
+    <nav class="main-nav unit two-thirds hide-on-mobiles">
+      <ul>
+  <li class="">
+    <a href="../../docs/index.html">Home</a>
+  </li>
+  <li class="">
+    <a href="../../docs/setup/intro/index.html">Docs</a>
+  </li>
+  <li class="current">
+    <a href="../../tutorials/multi-machine/index.html">Tutorials</a>
+  </li>
+  <li class="">
+    <a href="../../artik/start-windows/index.html">Artik</a>
+  </li>
+  <li class="">
+    <a href="../../openshift/config/index.html">Openshift</a>
+  </li>
+  <li>
+    <a href="https://github.com/eclipse/che/tree/master/docs/"><span class="hide-on-mobiles">View on </span>GitHub</a>
+  </li>
+</ul>
+
+    </nav>
+  </div>
+</header>
+
+
+    <section class="tutorials">
+    <div class="grid">
+
+      <div class="docs-nav-mobile unit whole show-on-mobiles">
+  <select onchange="if (this.value) window.location.href=this.value">
+    <option value="">Navigate the docs…</option>
+    
+    
+    
+    <optgroup label="User Tutorials">
+      
+
+
+
+
+    </optgroup>
+    
+  </select>
+</div>
+
+
+      <div class="unit four-fifths">
+        <article>
+          <div class="improve right hide-on-mobiles">
+            <a href="https://github.com/eclipse/che/blob/master/docs/_docs/tutorials/tutorial-wordpress.md"><i class="fa fa-pencil"></i> &nbsp;Improve this page</a>
+          </div>
+          <div class="doc-title">
+            <h1>Wordpress in Che</h1>
+            <div class="doc-title-border">
+            </div>
+          </div>
+          <h1 id="1-start-che">1. Start Che</h1>
+
+<div class="language-smarty highlighter-rouge"><pre class="highlight"><code># Launch Che
+docker run --rm -t -v /var/run/docker.sock:/var/run/docker.sock eclipse/che start
+
+# Che will be available at:
+http://<span class="nt">&lt;your-che-host&gt;</span>:8080\
+</code></pre>
+</div>
+<p>If you do not have any projects in Che, you’ll be redirected to a startup page to create a new project.</p>
+<h1 id="2-import-a-wordpress-project">2. Import a Wordpress Project</h1>
+<p>Click <code class="highlighter-rouge">New Project</code> and import a Wordpress repository and set up the right environment for it.</p>
+
+<h3 id="select-source">Select Source</h3>
+<p>Let’s import WP from an <a href="https://github.com/WordPress/WordPress.git">official WordPress GitHub repo</a>.</p>
+
+<p>###Select Stack
+Che offers a certified PHP image with Apache2, MySQL, git, curl and a number of popular PHP extensions.
+<a href="https://github.com/eclipse/che-dockerfiles/blob/master/php/ubuntu/Dockerfile">Dockerfile</a>.</p>
+
+<h3 id="configure-workspace">Configure Workspace</h3>
+<p>Give your workspace a nice name and configure RAM, i.e. apply the memory limit to a workspace machine.</p>
+
+<h3 id="create-the-project">Create the Project</h3>
+<p>Select <code class="highlighter-rouge">Create Project</code>.  The project construction process goes through a number of steps including creating a new workspace, downloading an image to use for the workspace environment, instantiating that environment, installing Che services into the workspace, and then creating your project.
+<img src="/assets/imgs/Capture.PNG" alt="Capture.PNG" />
+Click the <code class="highlighter-rouge">Open in IDE</code> button to open your project in the IDE.</p>
+<h1 id="3-start-mysql-server">3. Start MySQL Server</h1>
+<p>After the project is successfully created, you can start MySQL server either in the terminal (you can find it on the Consoles panel and open it by clicking <code class="highlighter-rouge">+</code> button) or using a command widget (CMD) - <code class="highlighter-rouge">sudo service mysql start</code></p>
+
+<p>We have already created a sample DB in the base image:</p>
+<div class="language-text highlighter-rouge"><pre class="highlight"><code>ENV CHE_MYSQL_PASSWORD=che
+ENV CHE_MYSQL_DB=che_db
+ENV CHE_MYSQL_USER=che\
+</code></pre>
+</div>
+<p>You may verify that the db is there and MYSQL is running: <code class="highlighter-rouge">mysql -u che -p che</code></p>
+<h1 id="4-run-your-project">4. Run Your Project</h1>
+<p>Let’s start Apache server. You can do that in the terminal, however, using a Commands Widget is a better option. Go to <code class="highlighter-rouge">CMD &gt; Edit Commands…</code> menu, click <code class="highlighter-rouge">+</code> button at Custom section and paste your command name, command itself here.
+Here are some commands that you may use:</p>
+<div class="language-shell highlighter-rouge"><pre class="highlight"><code><span class="c"># Apache start</span>
+  sudo service apache2 start <span class="o">&amp;&amp;</span> sudo tail -f /var/log/apache2/access.log -f /var/log/apache2/error.log
+
+<span class="c"># Apache restart</span>
+  sudo service apache2 restart
+
+<span class="c"># Apache stop</span>
+  sudo service apache2 stop <span class="se">\</span>
+</code></pre>
+</div>
+<p>Preview URL is another important object. It will be <code class="highlighter-rouge">http://${server.port.80}/${current.project.relpath}</code>.</p>
+
+<p><code class="highlighter-rouge">${server.port.80}</code> returns host and port, while <code class="highlighter-rouge">${current.project.relpath}</code> will be interpreted as a relative path to your project (relative to <code class="highlighter-rouge">/projects</code> which is DocumentRoot for Apache in this environment).
+<img src="/assets/imgs/Screenshot2.png" alt="Screenshot2.png" />
+Run Apache, click the preview URL and find your WordPress project started there. Follow the WordPress guide to start your first site.
+<img src="/assets/imgs/Screenshot3.png" alt="Screenshot3.png" />
+You will be prompted to connect your MySQL database (see details above). You can also connect an external database.</p>
+
+<p>A few steps to install WP and voilà, it’s done.</p>
+<h1 id="5-snapshot-workspace">5. Snapshot Workspace</h1>
+<p>The last step is to save your workspace.</p>
+
+<p>Go to Machine Perspective, choose <code class="highlighter-rouge">Machine &gt; Create Snapshot</code>. It will create a new image which will be used to load the workspace, based upon the current contents of the environment.</p>
+
+          
+
+
+
+
+
+
+        </article>
+      </div>
+
+      <div class="unit one-fifth hide-on-mobiles">
+  <aside>
+    
+    
+    <h4>User Tutorials</h4>
+     
+    
+
+
+<ul>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/multi-machine/index.html">Multi-Machine Workspaces in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/maven/index.html">Java+Maven in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/gradle/index.html">Java+Gradle in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/java/index.html">Java Console Apps in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/swing/index.html">Java Swing in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/nodejs/index.html">Node.js in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/meteor/index.html">Meteor in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class="current"><a href="../../tutorials/wordpress/index.html">Wordpress in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/php/index.html">PHP in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/android/index.html">Android in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/spring-boot/index.html">Spring Boot in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/rails/index.html">Rails in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/laravel/index.html">Laravel in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/tomee/index.html">TomEE in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/che-in-che/index.html">Che in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/gae/index.html">Google App Engine and Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/che-and-appfog/index.html">AppFog and Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/subversion/index.html">Subversion Repos in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/ftpsftp/index.html">FTP/SFTP and Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/cuba/index.html">Cuba Platform in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/sourcegraph/index.html">Sourcegraph in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/vaadin/index.html">Vaadin in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/platformio/index.html">PlatformIO in Che</a></li>
+  
+  
+
+</ul>
+
+    
+    
+    
+    
+  </aside>
+</div>
+
+
+      <div class="clear"></div>
+
+    </div>
+  </section>
+
+
+=======
+
+=======
+  <script>
+  var anchorForId = function (id) {
+    var anchor = document.createElement("a");
+    anchor.className = "header-link";
+    anchor.href      = "#" + id;
+    anchor.innerHTML = "<span class=\"sr-only\">Permalink</span><i class=\"fa fa-link\"></i>";
+    anchor.title = "Permalink";
+    return anchor;
+  };
+
+  var linkifyAnchors = function (level, containingElement) {
+    var headers = containingElement.getElementsByTagName("h" + level);
+    for (var h = 0; h < headers.length; h++) {
+      var header = headers[h];
+
+      if (typeof header.id !== "undefined" && header.id !== "") {
+        header.appendChild(anchorForId(header.id));
+      }
+    }
+  };
+
+  document.onreadystatechange = function () {
+    if (this.readyState === "complete") {
+      var contentBlock = document.getElementsByClassName("docs")[0] || document.getElementsByClassName("news")[0];
+      if (!contentBlock) {
+        return;
+      }
+      for (var level = 1; level <= 6; level++) {
+        linkifyAnchors(level, contentBlock);
+      }
+    }
+  };
+</script>
+
+  
+
+
+
+
+</body>
+</html>

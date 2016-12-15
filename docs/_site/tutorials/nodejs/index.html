@@ -1,0 +1,618 @@
+
+
+
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="generator" content="Jekyll v3.2.1">
+  <link type="application/atom+xml" rel="alternate" href="https://codenvy.com/feed.xml" title="Codenvy Docs" />
+  <link rel="alternate" type="application/atom+xml" title="Recent commits to Jekyll’s master branch" href="https://github.com/codenvy/codenvy/commits/master.atom">
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic,900">
+  <link rel="stylesheet" href="../../assets/css/screen.css">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <!--[if lt IE 9]>
+  <script src="/js/html5shiv.min.js"></script>
+  <script src="/js/respond.min.js"></script>
+  <![endif]-->
+</head>
+
+
+<body class="wrap">
+  <header>
+  <nav class="mobile-nav show-on-mobiles">
+    <ul>
+  <li class="">
+    <a href="../../docs/index.html">Home</a>
+  </li>
+  <li class="">
+    <a href="../../docs/setup/intro/index.html">Docs</a>
+  </li>
+  <li class="current">
+    <a href="../../tutorials/multi-machine/index.html">Tutorials</a>
+  </li>
+  <li class="">
+    <a href="../../artik/start-windows/index.html">Artik</a>
+  </li>
+  <li class="">
+    <a href="../../openshift/config/index.html">Openshift</a>
+  </li>
+  <li>
+    <a href="https://github.com/eclipse/che/tree/master/docs/"><span class="hide-on-mobiles">View on </span>GitHub</a>
+  </li>
+</ul>
+
+  </nav>
+  <div class="grid">
+    <div class="unit one-third center-on-mobiles">
+        <a href="/">
+          <span class="sr-only">Codenvy</span>
+          <img src="../../assets/imgs/logo-eclipseche.svg" alt="Codenvy Logo"  width="249" height="115">
+        </a>
+    </div>
+    <nav class="main-nav unit two-thirds hide-on-mobiles">
+      <ul>
+  <li class="">
+    <a href="../../docs/index.html">Home</a>
+  </li>
+  <li class="">
+    <a href="../../docs/setup/intro/index.html">Docs</a>
+  </li>
+  <li class="current">
+    <a href="../../tutorials/multi-machine/index.html">Tutorials</a>
+  </li>
+  <li class="">
+    <a href="../../artik/start-windows/index.html">Artik</a>
+  </li>
+  <li class="">
+    <a href="../../openshift/config/index.html">Openshift</a>
+  </li>
+  <li>
+    <a href="https://github.com/eclipse/che/tree/master/docs/"><span class="hide-on-mobiles">View on </span>GitHub</a>
+  </li>
+</ul>
+
+    </nav>
+  </div>
+</header>
+
+
+    <section class="tutorials">
+    <div class="grid">
+
+      <div class="docs-nav-mobile unit whole show-on-mobiles">
+  <select onchange="if (this.value) window.location.href=this.value">
+    <option value="">Navigate the docs…</option>
+    
+    
+    
+    <optgroup label="User Tutorials">
+      
+
+
+
+
+    </optgroup>
+    
+  </select>
+</div>
+
+
+      <div class="unit four-fifths">
+        <article>
+          <div class="improve right hide-on-mobiles">
+            <a href="https://github.com/eclipse/che/blob/master/docs/_docs/tutorials/tutorial-nodejs.md"><i class="fa fa-pencil"></i> &nbsp;Improve this page</a>
+          </div>
+          <div class="doc-title">
+            <h1>Node.js in Che</h1>
+            <div class="doc-title-border">
+            </div>
+          </div>
+          <h1 id="1-start-che">1. Start Che</h1>
+<p>Use your SaaS account for the following, or if you have <a href="https://eclipse-che.readme.io/v5.0/docs/che-getting-started">installed Che</a>, open a terminal and use the Che startup script:</p>
+<div class="language-smarty highlighter-rouge"><pre class="highlight"><code># Launch Che
+che start\
+</code></pre>
+</div>
+<p>When you execute this command, you’ll see the URL for the user dashboard.</p>
+
+<p>The Che dashboard will open. It is where you manage your projects and workspaces. If you do not have any projects in Che, you’ll be asked to create a new project.  If you already have projects in Che, click on <code class="highlighter-rouge">New Project</code> button in the menu bar.</p>
+<h1 id="2-create-a-node-project">2. Create a Node Project</h1>
+<p>There are several options which you can choose to start your Node.js project:</p>
+
+<h3 id="select-source">Select Source</h3>
+<p><img src="/assets/imgs/ScreenShot2016-09-30at5.53.20PM.png" alt="ScreenShot2016-09-30at5.53.20PM.png" />
+This informs Che where the source code for your project is going to come from. It is possible to start a new blank, template, sample project or import one from another location. Choosing the first option will present you with a set of samples that are preconfigured. If you already have a project at a valid URL, choose the second option.  Che gives you choices on how to source the project from Git, GitHub, ZIP, etc..</p>
+
+<p>We will create a project from a provided template.</p>
+
+<p>###Select Stack
+<img src="/assets/imgs/ScreenShot2016-09-30at6.13.02PM.png" alt="ScreenShot2016-09-30at6.13.02PM.png" />
+Your project will be inserted into a workspace, which has a provided Docker runtime. Stacks are the recipes or images used to define the runtime environment for the workspace where your project will be placed. There are three ways to choose a stack:</p>
+
+<p>There are three different options provided in here:</p>
+<ol>
+  <li><em>Ready-To-Go Stacks.</em> Environments that have a large variety of tools already installed optimized for projects of a particular type. For this example, we will select the Node stack which will create a container with Ubuntu git, nodejs, npm, gulp, bower, grunt, yeoman, angular, and karma installed.</li>
+  <li><em>Stack Library.</em> Offers finer grained stacks that can be used to create specific technology layers needed for a project. Ubuntu and Debian stacks, for example, are minimal stacks with only an operating system and Che tools installed.</li>
+  <li><em>Custom Stack.</em> You can provide your own custom stack.</li>
+</ol>
+
+<p>Choose the <code class="highlighter-rouge">Ready-To-Go Node</code> stack.</p>
+
+<h3 id="configure-workspace">Configure Workspace</h3>
+<p><img src="/assets/imgs/ScreenShot2016-09-30at5.55.07PM.png" alt="ScreenShot2016-09-30at5.55.07PM.png" />
+Paste your workspace name and configure its RAM. RAM will be the memory limit applied to the machines running your workspace environment. Create a new workspace with any name and set its RAM to 1GB.</p>
+
+<h3 id="select-template">Select Template.</h3>
+<p><img src="/assets/imgs/ScreenShot2016-09-30at6.15.03PM.png" alt="ScreenShot2016-09-30at6.15.03PM.png" />
+A template is a Che-provided set of code, configuration, and commands that can be imported to operate within Che. There are two types of templates:</p>
+<ol>
+  <li>Ready-to-run project samples. These samples have a compilable source tree and embedded commands. The list of templates available are filtered based upon the stack chosen.</li>
+  <li>Wizard-driven project configuration. This creates a blank project and then opens the IDE’s project configuration wizard to let you scaffold a new project based upon a set of configurable parameters. This option is only available if there an appropriate project type available for the stack chosen.</li>
+</ol>
+
+<p>Choose the <code class="highlighter-rouge">web-nodejs-simple</code> template.</p>
+
+<h3 id="project-metadata">Project Metadata</h3>
+<p>You can set a name and description of your project. The name is what will appear as the root node in the project explorer in the IDE.</p>
+
+<h3 id="create-the-project">Create the Project</h3>
+
+<p>Select <code class="highlighter-rouge">Create</code>.  The project construction process goes through a number of steps including creating a new workspace, downloading an image to use for the workspace environment, instantiating that environment, installing Che services into the workspace, and then creating your project.</p>
+<h1 id="3-run-your-project">3. Run Your Project</h1>
+<p>The project explorer gives you navigation to the various files that make up the project. The editor provides a variety of JavaScript, CSS, and HTML intellisense, multiple key bindings, and a sublime-style navigator.
+<img src="/assets/imgs/Capture.PNG" alt="Capture.PNG" />
+This project has two custom commands (located in the <code class="highlighter-rouge">CMD</code> drop-down selector in the toolbar:</p>
+<ol>
+  <li><code class="highlighter-rouge">install dependencies</code>. This will execute a <code class="highlighter-rouge">npm install --no-bin-links &amp;&amp; bower install</code> process in your workspace. There are quite a few dependencies that will be downloaded and installed into your workspace. Be patient as this command runs.</li>
+  <li><code class="highlighter-rouge">run</code>. This will start the grunt server.</li>
+</ol>
+
+<p>Go ahead and run your project. The output will be displayed in the <code class="highlighter-rouge">Consoles</code> panel. If you run the project, the commands have an embedded <code class="highlighter-rouge">Preview URL</code> that will be displayed for your application. It will look something like: <code class="highlighter-rouge">http://192.168.99.100:32768/</code>. After the grunt server has started, your application will load in another browser tab when you click on that link.
+<img src="/assets/imgs/Capture.PNG" alt="Capture.PNG" />
+You can change the content of any command by editing it. The option to modify commands is available from the <code class="highlighter-rouge">CMD</code> drop-down in the toolbar.</p>
+<h1 id="4-install-new-npm-modules">4. Install New NPM Modules</h1>
+<p>Now let’s install some new NPM modules, such as <a href="https://www.npmjs.com/package/express">Express</a>.</p>
+
+<p>Che provides a terminal with access to your machine. In the <code class="highlighter-rouge">Consoles</code> panel, click <code class="highlighter-rouge">New Terminal (+)</code> button.  This will open up a bash terminal.</p>
+
+<p>, go to projects/{your-project-name} directory and run commands there..</p>
+<div class="language-shell highlighter-rouge"><pre class="highlight"><code><span class="nb">cd</span> /projects/your-project-name
+
+<span class="c"># Install express</span>
+sudo npm install --no-bin-links express
+
+<span class="c"># Verify express is working</span>
+express<span class="se">\</span>
+</code></pre>
+</div>
+<p>The <code class="highlighter-rouge">--no-bin-links</code> flag is necessary to avoid causing problems if your machine is running on the Windows operating system.</p>
+
+<p>You can now use the express generator to create a new application with express.</p>
+<div class="language-shell highlighter-rouge"><pre class="highlight"><code><span class="c"># Install the generator</span>
+sudo npm  install -g express-generator@4
+
+<span class="c"># Create the app</span>
+express /tmp/foo <span class="o">&amp;&amp;</span> <span class="nb">cd</span> /tmp/foo
+
+<span class="c"># Install app dependencies</span>
+npm install
+
+<span class="c"># Start the server</span>
+npm start<span class="se">\</span>
+</code></pre>
+</div>
+<p>Your express application will be started on port <code class="highlighter-rouge">3000</code>. But how do you reach it?</p>
+
+<p>Docker exposes your express server port to a random port in the ephemeral range. Each time you launch Che, this port will be different. Switch to <code class="highlighter-rouge">Operations Perspective</code> (button in upper right corner of toolbar). In the Servers tab, look for an entry where the initial exposed port is <code class="highlighter-rouge">3000</code>.  The table will provide for you an appropriate server address such as <code class="highlighter-rouge">192.168.99.100:32787</code>. Copy this address into your browser, and you should see your express app!</p>
+<h1 id="5-snapshot-workspace">5. Snapshot Workspace</h1>
+<p>Che synchronizes your projects in and out of your workspace in between executions of the server. Changes made to projects are synchronized to long term storage. However, if your workspace is shut down, the internal state of the environment will not be saved to disk unless you snapshot it. The internal stage of the environment is any file that is not part of your project tree. For example, the express application installed in the previous steps will update the NPM repository within the environment. If the workspace is stopped (by you or the server), then when the workspace is restarted, it is restarted from the originating image that we downloaded when creating the project.</p>
+
+<p>A snapshot creates a new image that will be used to load the workspace, based upon the current contents of the environment.</p>
+
+<p>To snapshot the workspace right-click on the workspace in the left nav bar and choose “Snapshot.”  The workspace will be stopped and snapshotted.</p>
+
+          
+
+
+
+
+
+
+        </article>
+      </div>
+
+      <div class="unit one-fifth hide-on-mobiles">
+  <aside>
+    
+    
+    <h4>User Tutorials</h4>
+     
+    
+
+
+<ul>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/multi-machine/index.html">Multi-Machine Workspaces in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/maven/index.html">Java+Maven in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/gradle/index.html">Java+Gradle in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/java/index.html">Java Console Apps in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/swing/index.html">Java Swing in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class="current"><a href="../../tutorials/nodejs/index.html">Node.js in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/meteor/index.html">Meteor in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/wordpress/index.html">Wordpress in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/php/index.html">PHP in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/android/index.html">Android in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/spring-boot/index.html">Spring Boot in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/rails/index.html">Rails in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/laravel/index.html">Laravel in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/tomee/index.html">TomEE in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/che-in-che/index.html">Che in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/gae/index.html">Google App Engine and Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/che-and-appfog/index.html">AppFog and Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/subversion/index.html">Subversion Repos in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/ftpsftp/index.html">FTP/SFTP and Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/cuba/index.html">Cuba Platform in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/sourcegraph/index.html">Sourcegraph in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/vaadin/index.html">Vaadin in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/platformio/index.html">PlatformIO in Che</a></li>
+  
+  
+
+</ul>
+
+    
+    
+    
+    
+  </aside>
+</div>
+
+
+      <div class="clear"></div>
+
+    </div>
+  </section>
+
+
+=======
+
+=======
+  <script>
+  var anchorForId = function (id) {
+    var anchor = document.createElement("a");
+    anchor.className = "header-link";
+    anchor.href      = "#" + id;
+    anchor.innerHTML = "<span class=\"sr-only\">Permalink</span><i class=\"fa fa-link\"></i>";
+    anchor.title = "Permalink";
+    return anchor;
+  };
+
+  var linkifyAnchors = function (level, containingElement) {
+    var headers = containingElement.getElementsByTagName("h" + level);
+    for (var h = 0; h < headers.length; h++) {
+      var header = headers[h];
+
+      if (typeof header.id !== "undefined" && header.id !== "") {
+        header.appendChild(anchorForId(header.id));
+      }
+    }
+  };
+
+  document.onreadystatechange = function () {
+    if (this.readyState === "complete") {
+      var contentBlock = document.getElementsByClassName("docs")[0] || document.getElementsByClassName("news")[0];
+      if (!contentBlock) {
+        return;
+      }
+      for (var level = 1; level <= 6; level++) {
+        linkifyAnchors(level, contentBlock);
+      }
+    }
+  };
+</script>
+
+  
+
+
+
+
+</body>
+</html>

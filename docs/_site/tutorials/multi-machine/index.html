@@ -1,0 +1,651 @@
+
+
+
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="generator" content="Jekyll v3.2.1">
+  <link type="application/atom+xml" rel="alternate" href="https://codenvy.com/feed.xml" title="Codenvy Docs" />
+  <link rel="alternate" type="application/atom+xml" title="Recent commits to Jekyll’s master branch" href="https://github.com/codenvy/codenvy/commits/master.atom">
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic,900">
+  <link rel="stylesheet" href="../../assets/css/screen.css">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <!--[if lt IE 9]>
+  <script src="/js/html5shiv.min.js"></script>
+  <script src="/js/respond.min.js"></script>
+  <![endif]-->
+</head>
+
+
+<body class="wrap">
+  <header>
+  <nav class="mobile-nav show-on-mobiles">
+    <ul>
+  <li class="">
+    <a href="../../docs/index.html">Home</a>
+  </li>
+  <li class="">
+    <a href="../../docs/setup/intro/index.html">Docs</a>
+  </li>
+  <li class="current">
+    <a href="../../tutorials/multi-machine/index.html">Tutorials</a>
+  </li>
+  <li class="">
+    <a href="../../artik/start-windows/index.html">Artik</a>
+  </li>
+  <li class="">
+    <a href="../../openshift/config/index.html">Openshift</a>
+  </li>
+  <li>
+    <a href="https://github.com/eclipse/che/tree/master/docs/"><span class="hide-on-mobiles">View on </span>GitHub</a>
+  </li>
+</ul>
+
+  </nav>
+  <div class="grid">
+    <div class="unit one-third center-on-mobiles">
+        <a href="/">
+          <span class="sr-only">Codenvy</span>
+          <img src="../../assets/imgs/logo-eclipseche.svg" alt="Codenvy Logo"  width="249" height="115">
+        </a>
+    </div>
+    <nav class="main-nav unit two-thirds hide-on-mobiles">
+      <ul>
+  <li class="">
+    <a href="../../docs/index.html">Home</a>
+  </li>
+  <li class="">
+    <a href="../../docs/setup/intro/index.html">Docs</a>
+  </li>
+  <li class="current">
+    <a href="../../tutorials/multi-machine/index.html">Tutorials</a>
+  </li>
+  <li class="">
+    <a href="../../artik/start-windows/index.html">Artik</a>
+  </li>
+  <li class="">
+    <a href="../../openshift/config/index.html">Openshift</a>
+  </li>
+  <li>
+    <a href="https://github.com/eclipse/che/tree/master/docs/"><span class="hide-on-mobiles">View on </span>GitHub</a>
+  </li>
+</ul>
+
+    </nav>
+  </div>
+</header>
+
+
+    <section class="tutorials">
+    <div class="grid">
+
+      <div class="docs-nav-mobile unit whole show-on-mobiles">
+  <select onchange="if (this.value) window.location.href=this.value">
+    <option value="">Navigate the docs…</option>
+    
+    
+    
+    <optgroup label="User Tutorials">
+      
+
+
+
+
+    </optgroup>
+    
+  </select>
+</div>
+
+
+      <div class="unit four-fifths">
+        <article>
+          <div class="improve right hide-on-mobiles">
+            <a href="https://github.com/eclipse/che/blob/master/docs/_docs/tutorials/tutorial-multi-machine.md"><i class="fa fa-pencil"></i> &nbsp;Improve this page</a>
+          </div>
+          <div class="doc-title">
+            <h1>Multi-Machine Workspaces in Che</h1>
+            <div class="doc-title-border">
+            </div>
+          </div>
+          <p>A multi-machine recipe allows multiple runtimes to communicate/share data. In this tutorial we will be looking at an existing Java and MySQL application called Pet Clinic. The tutorial will help show how to create a multi-machine from an existing <a href="doc:stacks">runtime stack</a> called “Java-MySQL”, execute commands on different target runtimes, startup the Pet Clinic Tomcat server, view/interact with the Pet Clinic web page, and take a closer look at the “Java-MySQL” <a href="doc:stacks">runtime stack</a> /<a href="doc:recipes">runtime recipe</a> to get a better understanding of how multi-machine runtimes are created.</p>
+
+<h1 id="1-start-che">1. Start Che</h1>
+<p>Use your SaaS account for the following, or if you have <a href="https://eclipse-che.readme.io/docs/che-getting-started">installed Che</a>, open a terminal and use the Che startup script:</p>
+<div class="language-shell highlighter-rouge"><pre class="highlight"><code><span class="c"># Launch Che</span>
+che start<span class="se">\</span>
+</code></pre>
+</div>
+<p>When you execute this command, you’ll see the URL for the Che server.</p>
+
+<p>This URL can be used to open Che server’s dashboard. It is where you manage your projects and workspaces.</p>
+<h1 id="2-create-workspace">2. Create Workspace</h1>
+<p>Click the “Dasboard” menu item in the dashboard. Click the “New Workspace” button if there are existing workspaces or make sure “Select Source” category is set to “New from blank, template, or sample project” if one or more workspace exists.
+<img src="/assets/imgs/che-multimachine-tutorial3.jpg" alt="che-multimachine-tutorial3.jpg" />
+Select “Java-MySQL” from the list of available stacks.
+<img src="/assets/imgs/che-multimachine-tutorial1.jpg" alt="che-multimachine-tutorial1.jpg" />
+The other workspace information can remain as it is. Click the “create” button at the bottom to create the workspace.
+<img src="/assets/imgs/che-multimachine-tutorial2.jpg" alt="che-multimachine-tutorial2.jpg" /></p>
+
+<h1 id="3-using-ide">3. Using IDE</h1>
+<p>Once the workspace is created, the IDE will be loaded in the browser.</p>
+
+<p>Each runtime can be identified in the processes section of the IDE. It will list the runtimes of “dev-machine” and “db” of our multi-machine workspace. The “db” runtime for this tutorial provides the database for the Java Spring application to use.</p>
+
+<p>To make sure that the database is running we will issue the “show database” command to the “db” runtime. Select the “db” runtime item from the target drop down menu. Then make sure that “show databases” is selected in the command drop down menu and hit the play button.
+<img src="/assets/imgs/che-multimachine-tutorial4.jpg" alt="che-multimachine-tutorial4.jpg" />
+This will run the “show databases” command in the “db” runtime and display the available database. Note that it is not required to know the database listed for this tutorial. This step merely shows how to successfully target different runtimes.</p>
+
+<p>Switch the target back to “dev-machine”, select the “web-java-petclinic: build and deploy” command, and click the play button. The Pet Clinic Java code will be compiled and the tomcat server started. Give the server ample amount of time to start as the server output may stay on <code class="highlighter-rouge">INFO  Version - HCANN000001: Hibernate Commons Annotations {4.0.5.Final}</code> for awhile. The tomcat server when it is ready will output <code class="highlighter-rouge">Server startup in &lt;time&gt; ms</code>. Click on the preview url link after the tomcat server is started to open the Pet Clinic web page.
+<img src="/assets/imgs/che-multimachine-tutorial6.jpg" alt="che-multimachine-tutorial6.jpg" />
+The web page can interact in various ways with the database. Data can be added to the data by clicking the “Find owner” link, clicking the “Add owner” link, and filing in the form.
+<img src="/assets/imgs/che-multimachine-tutorial7.jpg" alt="che-multimachine-tutorial7.jpg" /></p>
+
+<h1 id="4-editing-building-and-debugging">4. Editing, Building and Debugging</h1>
+<p>Che is a fully featured IDE that just happens to be in the browser. You can explore the <a href="https://eclipse-che.readme.io/docs/editor-settings">editor</a> which includes <a href="https://eclipse-che.readme.io/docs/intellisense">intellisense</a> for some languages and <a href="https://eclipse-che.readme.io/docs/intellisense#section-refactoring">refactoring</a>.  It also includes <a href="https://eclipse-che.readme.io/docs/git">git and svn</a> support built-in.</p>
+
+<p>The example app has built in commands for <a href="https://eclipse-che.readme.io/docs/build">building</a> and <a href="https://eclipse-che.readme.io/docs/run#web-apps">running</a> the app.  You can also <a href="https://eclipse-che.readme.io/docs/debug">debug</a> right inside Che.</p>
+<h1 id="5-about-docker-and-compose">5. About Docker and Compose</h1>
+<p>Read this section to understand more about the multi-machine “Java-MySQL” <a href="doc:stacks">runtime stack</a> used and it’s <a href="doc:recipes">runtime recipe</a>. The “Java-MySQL” stack configuration is located in the “stacks” section in the dashboard. This stack can be found easier by typing “java” in the filter form.
+<img src="/assets/imgs/che-multimachine-tutorial8.jpg" alt="che-multimachine-tutorial8.jpg" />
+Click on the “Java-MySQL” menu item which will bring up the stack’s configuration page. There is various useful configuration information provided on this page as well as the <a href="doc:stacks">Runtime Stacks</a> and <a href="doc:recipes">Runtime Recipes</a> documentation pages. For this tutorial, we will be focusing on the recipe configuration and the “codenvy/mysql” dockerfile provided in the “Java-MySQL” stack.</p>
+
+<p>The recipe uses docker compose syntax. Due to the limitation of the JSON syntax the compose recipe is written as a single line with <code class="highlighter-rouge">\n</code> indicating carriage return. The following is the recipe in expanded form to make reading easier.</p>
+
+<div class="language-yaml highlighter-rouge"><pre class="highlight"><code><span class="s">services</span><span class="pi">:</span>
+  <span class="s">db</span><span class="pi">:</span>
+    <span class="s">image</span><span class="pi">:</span> <span class="s">codenvy/mysql</span>
+    <span class="s">environment</span><span class="pi">:</span>
+      <span class="s">MYSQL_DATABASE</span><span class="pi">:</span> <span class="s">petclinic</span>
+      <span class="s">MYSQL_USER</span><span class="pi">:</span> <span class="s">petclinic</span>
+      <span class="s">MYSQL_PASSWORD</span><span class="pi">:</span> <span class="s">password</span>
+    <span class="s">mem_limit</span><span class="pi">:</span> <span class="s">1073741824</span>
+  <span class="s">dev-machine</span><span class="pi">:</span>
+    <span class="s">image</span><span class="pi">:</span> <span class="s">codenvy/ubuntu_jdk8</span>
+    <span class="s">mem_limit</span><span class="pi">:</span> <span class="s">2147483648</span>
+    <span class="s">depends_on</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">db\</span>
+</code></pre>
+</div>
+
+<p>Examining the code above you will see our two runtime machines “db” and “dev-machine”. Every workspace requires a <a href="doc:machines">machine</a> named “dev-machine”.</p>
+
+<p>In the recipe the <code class="highlighter-rouge">depends_on</code> parameter of the “dev-machine” allows it to connect to the “db” machine MySQL process’ port 3306. The “dev-machine” configures it’s MySQL client connection in the projects source code at <code class="highlighter-rouge">src/main/resources/spring/data-access.properties</code>. The url is defined by <code class="highlighter-rouge">jdbc.url=jdbc:mysql://db:3306/petclinic</code> which uses the database machine’s name “db” and the MySQL server default port 3306.</p>
+
+<p>Port 3306 is exposed in the “db” machines Dockerfile during build but is not required for “dev-machine” to connect to it. Exposing port 3306 is done to provide access to database that is external to “db” machine network via a random ephemeral port assigned by docker. The “dev-machine” by setting <code class="highlighter-rouge">depends_on: - db</code> creates a private network that allows it use of “db” machine’s name as hostname and port 3306 without having to determine the ephemeral port docker assigned.</p>
+
+<p>Exposing port 3306 is done to provide an option for an external administrator to log into the “db” machine MySQL server through a MySQL client on the ephemeral port assigned. The operations perspective interface provides the external ephemeral ports assigned by docker for all machines’ exposed ports. Image below indicates only external ephemeral port 32800 assigned to “db” machine’s exposed port 3306.
+<img src="/assets/imgs/che-mysql-tutorial1.jpg" alt="che-mysql-tutorial1.jpg" />
+The “db” machine contains a MySQL database created by the Docker image “codenvy/mysql”. Taking a closer look at the “codenvy/mysql” image Dockerfile’s entry point script will show how the “db” machine configures the MySQL server at the workspace startup.</p>
+
+<div class="language-text highlighter-rouge"><pre class="highlight"><code>FROM alpine:3.4
+EXPOSE 3306/tcp
+ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+ADD entrypoint.sh /
+CMD mkdir /docker-entrypoint-initdb.d
+CMD ln -s /usr/local/bin/docker-entrypoint.sh /entrypoint.sh # backwards compat
+
+........
+
+CMD ["mysqld"]
+
+........
+
+VOLUME /var/lib/mysql
+ENTRYPOINT ["docker-entrypoint.sh"]
+</code></pre>
+</div>
+<p>The “docker-entrypoint.sh” script shown partly below uses environment variables to configure the MySQL server. In this stack’s compose recipe, shown above, environment variables set the MySQL database’s name and user/password information that is referenced in the “db” machine’s entry point script (<code class="highlighter-rouge">$MYSQL_DATABASE</code>, <code class="highlighter-rouge">$MYSQL_USER</code>, and <code class="highlighter-rouge">$MYSQL_PASSWORD</code>).</p>
+<div class="language-shell highlighter-rouge"><pre class="highlight"><code><span class="c">#!/bin/bash</span>
+
+.....
+
+                <span class="k">if</span> <span class="o">[</span> ! -z <span class="s2">"</span><span class="nv">$MYSQL_RANDOM_ROOT_PASSWORD</span><span class="s2">"</span> <span class="o">]</span>; <span class="k">then
+                        </span><span class="nv">MYSQL_ROOT_PASSWORD</span><span class="o">=</span><span class="s2">"</span><span class="k">$(</span>pwgen -1 32<span class="k">)</span><span class="s2">"</span>
+                        <span class="nb">echo</span> <span class="s2">"GENERATED ROOT PASSWORD: </span><span class="nv">$MYSQL_ROOT_PASSWORD</span><span class="s2">"</span>
+                <span class="k">fi</span>
+                <span class="s2">"</span><span class="k">${</span><span class="nv">mysql</span><span class="p">[@]</span><span class="k">}</span><span class="s2">"</span> <span class="sh">&lt;&lt;-EOSQL
+                        -- What's done in this file shouldn't be replicated
+                        --  or products like mysql-fabric won't work
+                        SET @@SESSION.SQL_LOG_BIN=0;
+
+                        DELETE FROM mysql.user ;
+                        CREATE USER 'root'@'%' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}' ;
+                        GRANT ALL ON *.* TO 'root'@'%' WITH GRANT OPTION ;
+                        DROP DATABASE IF EXISTS test ;
+                        FLUSH PRIVILEGES ;
+                EOSQL
+
+</span>                <span class="k">if</span> <span class="o">[</span> ! -z <span class="s2">"</span><span class="nv">$MYSQL_ROOT_PASSWORD</span><span class="s2">"</span> <span class="o">]</span>; <span class="k">then
+                        </span>mysql+<span class="o">=(</span> -p<span class="s2">"</span><span class="k">${</span><span class="nv">MYSQL_ROOT_PASSWORD</span><span class="k">}</span><span class="s2">"</span> <span class="o">)</span>
+                <span class="k">fi
+
+                if</span> <span class="o">[</span> <span class="s2">"</span><span class="nv">$MYSQL_DATABASE</span><span class="s2">"</span> <span class="o">]</span>; <span class="k">then
+             			</span><span class="nb">echo</span> <span class="s2">"CREATE DATABASE IF NOT EXISTS </span><span class="se">\`</span><span class="nv">$MYSQL_DATABASE</span><span class="se">\`</span><span class="s2"> ;"</span> <span class="se">\</span>
+            			| <span class="s2">"</span><span class="k">${</span><span class="nv">mysql</span><span class="p">[@]</span><span class="k">}</span><span class="s2">"</span>
+                        mysql+<span class="o">=(</span> <span class="s2">"</span><span class="nv">$MYSQL_DATABASE</span><span class="s2">"</span> <span class="o">)</span>
+                <span class="k">fi
+
+                if</span> <span class="o">[</span> <span class="s2">"</span><span class="nv">$MYSQL_USER</span><span class="s2">"</span> -a <span class="s2">"</span><span class="nv">$MYSQL_PASSWORD</span><span class="s2">"</span> <span class="o">]</span>; <span class="k">then
+                        </span><span class="nb">echo</span> <span class="s2">"CREATE USER '</span><span class="nv">$MYSQL_USER</span><span class="s2">'@'%' IDENTIFIED BY </span><span class="se">\</span><span class="s2">
+                          '</span><span class="nv">$MYSQL_PASSWORD</span><span class="s2">' ;"</span> | <span class="s2">"</span><span class="k">${</span><span class="nv">mysql</span><span class="p">[@]</span><span class="k">}</span><span class="s2">"</span>
+
+                        <span class="k">if</span> <span class="o">[</span> <span class="s2">"</span><span class="nv">$MYSQL_DATABASE</span><span class="s2">"</span> <span class="o">]</span>; <span class="k">then
+                                </span><span class="nb">echo</span> <span class="s2">"GRANT ALL ON </span><span class="se">\`</span><span class="nv">$MYSQL_DATABASE</span><span class="se">\`</span><span class="s2">.* TO </span><span class="se">\</span><span class="s2">
+                                  '</span><span class="nv">$MYSQL_USER</span><span class="s2">'@'%' ;"</span> | <span class="s2">"</span><span class="k">${</span><span class="nv">mysql</span><span class="p">[@]</span><span class="k">}</span><span class="s2">"</span>
+                        <span class="k">fi
+
+                        </span><span class="nb">echo</span> <span class="s1">'FLUSH PRIVILEGES ;'</span> | <span class="s2">"</span><span class="k">${</span><span class="nv">mysql</span><span class="p">[@]</span><span class="k">}</span><span class="s2">"</span>
+                <span class="k">fi</span>
+
+.....
+
+<span class="nb">exec</span> <span class="s2">"</span><span class="nv">$@</span><span class="s2">"</span>
+</code></pre>
+</div>
+
+          
+
+
+
+
+
+
+        </article>
+      </div>
+
+      <div class="unit one-fifth hide-on-mobiles">
+  <aside>
+    
+    
+    <h4>User Tutorials</h4>
+     
+    
+
+
+<ul>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class="current"><a href="../../tutorials/multi-machine/index.html">Multi-Machine Workspaces in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/maven/index.html">Java+Maven in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/gradle/index.html">Java+Gradle in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/java/index.html">Java Console Apps in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/swing/index.html">Java Swing in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/nodejs/index.html">Node.js in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/meteor/index.html">Meteor in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/wordpress/index.html">Wordpress in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/php/index.html">PHP in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/android/index.html">Android in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/spring-boot/index.html">Spring Boot in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/rails/index.html">Rails in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/laravel/index.html">Laravel in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/tomee/index.html">TomEE in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/che-in-che/index.html">Che in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/gae/index.html">Google App Engine and Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/che-and-appfog/index.html">AppFog and Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/subversion/index.html">Subversion Repos in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/ftpsftp/index.html">FTP/SFTP and Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/cuba/index.html">Cuba Platform in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/sourcegraph/index.html">Sourcegraph in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/vaadin/index.html">Vaadin in Che</a></li>
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+    <li class=""><a href="../../tutorials/platformio/index.html">PlatformIO in Che</a></li>
+  
+  
+
+</ul>
+
+    
+    
+    
+    
+  </aside>
+</div>
+
+
+      <div class="clear"></div>
+
+    </div>
+  </section>
+
+
+=======
+
+=======
+  <script>
+  var anchorForId = function (id) {
+    var anchor = document.createElement("a");
+    anchor.className = "header-link";
+    anchor.href      = "#" + id;
+    anchor.innerHTML = "<span class=\"sr-only\">Permalink</span><i class=\"fa fa-link\"></i>";
+    anchor.title = "Permalink";
+    return anchor;
+  };
+
+  var linkifyAnchors = function (level, containingElement) {
+    var headers = containingElement.getElementsByTagName("h" + level);
+    for (var h = 0; h < headers.length; h++) {
+      var header = headers[h];
+
+      if (typeof header.id !== "undefined" && header.id !== "") {
+        header.appendChild(anchorForId(header.id));
+      }
+    }
+  };
+
+  document.onreadystatechange = function () {
+    if (this.readyState === "complete") {
+      var contentBlock = document.getElementsByClassName("docs")[0] || document.getElementsByClassName("news")[0];
+      if (!contentBlock) {
+        return;
+      }
+      for (var level = 1; level <= 6; level++) {
+        linkifyAnchors(level, contentBlock);
+      }
+    }
+  };
+</script>
+
+  
+
+
+
+
+</body>
+</html>
