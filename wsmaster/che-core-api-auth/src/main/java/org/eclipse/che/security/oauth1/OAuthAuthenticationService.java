@@ -43,12 +43,12 @@ import static org.eclipse.che.commons.lang.UrlUtils.getState;
 public class OAuthAuthenticationService extends Service {
     private static final Logger LOG = LoggerFactory.getLogger(OAuthAuthenticationService.class);
 
-    private final static String USER_ID_PARAMETER               = "user_id";
-    private final static String REQUEST_URL_PARAMETER           = "request_url";
-    private final static String PROVIDER_NAME_PARAMETER         = "oauth_provider";
-    private final static String REQUEST_METHOD_PARAMETER        = "request_method";
-    private final static String SIGNATURE_METHOD_PARAMETER      = "signature_method";
-    private final static String REDIRECT_AFTER_LOGIN_PARAMETER  = "redirect_after_login";
+    private final static String USER_ID_PARAMETER                = "user_id";
+    private final static String REQUEST_URL_PARAMETER            = "request_url";
+    private final static String PROVIDER_NAME_PARAMETER          = "oauth_provider";
+    private final static String REQUEST_METHOD_PARAMETER         = "request_method";
+    private final static String SIGNATURE_METHOD_PARAMETER       = "signature_method";
+    private final static String REDIRECT_AFTER_LOGIN_PARAMETER   = "redirect_after_login";
     private final static String UNSUPPORTED_OAUTH_PROVIDER_ERROR = "Unsupported OAuth provider: %s";
 
     @Inject
@@ -82,8 +82,7 @@ public class OAuthAuthenticationService extends Service {
         final String providerName = getParameter(parameters, PROVIDER_NAME_PARAMETER);
         final String redirectAfterLogin = getParameter(parameters, REDIRECT_AFTER_LOGIN_PARAMETER);
 
-        final OAuthAuthenticator oauth = getAuthenticator(providerName);
-        oauth.callback(requestUrl);
+        getAuthenticator(providerName).callback(requestUrl);
 
         return Response.temporaryRedirect(URI.create(redirectAfterLogin)).build();
     }
@@ -103,11 +102,7 @@ public class OAuthAuthenticationService extends Service {
         requiredNotNull(requestUrl, REQUEST_URL_PARAMETER);
         requiredNotNull(requestMethod, REQUEST_METHOD_PARAMETER);
 
-        final OAuthAuthenticator oAuthAuthenticator = getAuthenticator(providerName);
-        if (oAuthAuthenticator != null) {
-            return oAuthAuthenticator.computeAuthorizationHeader(userId, requestMethod, requestUrl);
-        }
-        return null;
+        return getAuthenticator(providerName).computeAuthorizationHeader(userId, requestMethod, requestUrl);
     }
 
     private OAuthAuthenticator getAuthenticator(String oauthProviderName) throws BadRequestException {
