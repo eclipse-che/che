@@ -16,7 +16,7 @@ enum Tab {
   SELECTER,
   ICONS,
   BUTTONS,
-  INPUT,
+  INPUTS,
   LIST,
   LABEL_CONTAINER
 }
@@ -41,6 +41,10 @@ export class DemoComponentsController {
   listItemsDocs: string[];
 
   listItemsTasks: any[];
+
+  // number spinner
+  number: number;
+  numberIsChanged: number;
 
   /**
    * Default constructor that is using resource
@@ -69,6 +73,10 @@ export class DemoComponentsController {
 
     this.listItemsTasks = [{name : 'Task 1', done: false}, {name : 'Task 2', done: true}, {name : 'Task 3', done: false},
       {name : 'Task 4', done: true}, {name : 'Task 5', done: false}];
+
+    // number spinner
+    this.number = 0;
+    this.numberIsChanged = 0;
   }
 
   /**
@@ -91,5 +99,8 @@ export class DemoComponentsController {
     return this.button2Disabled;
   }
 
+  numberChanged(): void {
+    this.numberIsChanged++;
+  }
 
 }

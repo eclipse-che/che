@@ -191,9 +191,29 @@ Ultima Syriarum est Palaestina per intervalla magna protenta, cultis abundans te
       </div>
     </md-tab>
 
-    <md-tab label="Input"
-            md-on-select="demoComponentsController.setDemoTab(demoComponentsController.tab.INPUT)">
+    <md-tab label="Inputs"
+            md-on-select="demoComponentsController.setDemoTab(demoComponentsController.tab.INPUTS)">
       <ng-form name="demoForm">
+        <textarea demo-source-render>
+          <!-- <che-number-spinner> -->
+
+          <che-number-spinner che-form="demoForm"
+                              che-name="spin"
+                              che-step="5"
+                              che-tofixed="2"
+                              che-minvalue="0"
+                              che-maxvalue="99"
+                              che-unit="GB"
+                              ng-model="demoComponentsController.number"
+                              ng-change="demoComponentsController.numberChanged()"
+                              required>
+          <div ng-message="required">A value is required.</div>
+          <div ng-message="min">The value has to be greater than 0.</div>
+          <div ng-message="max">The value has to be less than 99.</div>
+          </che-number-spinner>
+
+        </textarea>
+
         <textarea demo-source-render>
           <!-- che-input -->
 
