@@ -36,6 +36,7 @@ import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.dialogs.MessageDialog;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.machine.MachineManager;
+import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
@@ -297,7 +298,8 @@ public class WorkspaceEventsHandlerTest {
 
         verify(loader).setError(eq(LoaderPresenter.Phase.STARTING_WORKSPACE_RUNTIME));
 
-        verify(eventBus).fireEvent(Matchers.<WorkspaceStoppedEvent>anyObject());
+        verify(eventBus, times(2)).fireEvent(Matchers.<WorkspaceStoppedEvent>anyObject());
+        verify(eventBus, times(2)).fireEvent(Matchers.<WsAgentStateEvent> anyObject());
         verify(errorDialog).show();
     }
 
@@ -308,7 +310,8 @@ public class WorkspaceEventsHandlerTest {
         workspaceEventsHandler.trackWorkspaceEvents(workspace, callback);
         workspaceEventsHandler.workspaceStatusSubscriptionHandler.onMessageReceived(workspaceStatusEvent);
 
-        verify(eventBus).fireEvent(Matchers.<WorkspaceStoppedEvent>anyObject());
+        verify(eventBus, times(2)).fireEvent(Matchers.<WorkspaceStoppedEvent>anyObject());
+        verify(eventBus, times(2)).fireEvent(Matchers.<WsAgentStateEvent> anyObject());
     }
 
     @Test
