@@ -13,8 +13,14 @@ package org.eclipse.che.plugin.composer.server;
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 
-import org.eclipse.che.api.project.server.importer.ProjectImporter;
+import org.eclipse.che.api.project.server.handlers.ProjectHandler;
+import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.inject.DynaModule;
+import org.eclipse.che.plugin.composer.server.projecttype.ComposerProjectGenerator;
+import org.eclipse.che.plugin.composer.server.projecttype.ComposerProjectInitializer;
+import org.eclipse.che.plugin.composer.server.projecttype.ComposerProjectType;
+
+import static com.google.inject.multibindings.Multibinder.newSetBinder;
 
 /**
  * The module that contains configuration of the server side part of the
@@ -28,7 +34,11 @@ public class ComposerModule extends AbstractModule {
     /** {@inheritDoc} */
     @Override
     protected void configure() {
-        Multibinder<ProjectImporter> projectImporterMultibinder = Multibinder.newSetBinder(binder(), ProjectImporter.class);
-        projectImporterMultibinder.addBinding().to(ComposerProjectImporter.class);
+        Multibinder<ProjectTypeDef> projectTypeMultibinder = Multibinder.newSetBinder(binder(), ProjectTypeDef.class);
+        projectTypeMultibinder.addBinding().to(ComposerProjectType.class);
+
+        Multibinder<ProjectHandler> projectHandlerMultibinder = newSetBinder(binder(), ProjectHandler.class);
+        projectHandlerMultibinder.addBinding().to(ComposerProjectGenerator.class);
+        projectHandlerMultibinder.addBinding().to(ComposerProjectInitializer.class);
     }
 }

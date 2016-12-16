@@ -8,20 +8,30 @@
  * Contributors:
  *   Rogue Wave Software, Inc. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.composer.shared;
+package org.eclipse.che.plugin.composer.server.projecttype;
+
+import org.eclipse.che.plugin.composer.shared.dto.ComposerOutput;
 
 /**
  * @author Kaloyan Raev
  */
-public class Constants {
+public class ComposerOutputImpl implements ComposerOutput {
 
-    public final static String COMPOSER_PROJECT_TYPE_ID = "composer";
-    public final static String PACKAGE                  = "package";
+    private String output;
+    private State  state;
 
-    /** Name of WebSocket channel for Composer output */
-    public final static String COMPOSER_CHANNEL_NAME    = "composer:output";
-
-    private Constants() {
+    public ComposerOutputImpl(String output, State state) {
+        this.output = output;
+        this.state = state;
     }
 
+    @Override
+    public String getOutput() {
+        return output;
+    }
+
+    @Override
+    public State getState() {
+        return state;
+    }
 }

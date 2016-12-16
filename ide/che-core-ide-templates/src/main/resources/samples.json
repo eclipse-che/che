@@ -1312,7 +1312,7 @@
     "displayName": "astro-splash",
     "path": "/astro-splash",
     "description": "An app that uses the Astronomy Picture of the Day API provided by NASA and the Zend Expressive framework.",
-    "projectType": "php",
+    "projectType": "composer",
     "mixins": [],
     "attributes": {
       "language": [
@@ -1322,8 +1322,8 @@
     "modules": [],
     "problems": [],
     "source": {
-      "type": "composer",
-      "location": "kaloyan-raev/astrosplash",
+      "type": "git",
+      "location": "https://github.com/kaloyan-raev/astrosplash.git",
       "parameters": {}
     },
     "commands": [
@@ -1363,20 +1363,19 @@
     "displayName": "zend-expressive",
     "path": "/zend-expressive",
     "description": "A skeleton application using the Zend Exressive framework. Expressive is a minimalist PSR-7 middleware framework for PHP with routing, DI container, optional templating, and optional error handling capabilities.",
-    "projectType": "php",
+    "projectType": "composer",
     "mixins": [],
     "attributes": {
       "language": [
         "php"
+      ],
+      "package": [
+        "zendframework/zend-expressive-skeleton"
       ]
     },
     "modules": [],
     "problems": [],
-    "source": {
-      "type": "composer",
-      "location": "zendframework/zend-expressive-skeleton",
-      "parameters": {}
-    },
+    "source": {},
     "commands": [
       {
         "name": "configure",
@@ -1398,20 +1397,19 @@
     "displayName": "zend-framework",
     "path": "/zend-framework",
     "description": "A skeleton application using the Zend Framework MVC layer and module systems. It is meant to be used as a starting place for those looking to get their feet wet with Zend Framework.",
-    "projectType": "php",
+    "projectType": "composer",
     "mixins": [],
     "attributes": {
       "language": [
         "php"
+      ],
+      "package": [
+        "zendframework/skeleton-application"
       ]
     },
     "modules": [],
     "problems": [],
-    "source": {
-      "type": "composer",
-      "location": "zendframework/skeleton-application",
-      "parameters": {}
-    },
+    "source": {},
     "commands": [
       {
         "name": "configure",

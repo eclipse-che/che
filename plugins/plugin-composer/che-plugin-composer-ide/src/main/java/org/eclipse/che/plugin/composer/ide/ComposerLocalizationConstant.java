@@ -8,20 +8,17 @@
  * Contributors:
  *   Rogue Wave Software, Inc. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.composer.shared;
+package org.eclipse.che.plugin.composer.ide;
+
+import com.google.gwt.i18n.client.Messages;
 
 /**
+ * Localization constants. Interface to represent the constants defined in
+ * resource bundle: 'ComposerLocalizationConstant.properties'.
+ *
  * @author Kaloyan Raev
  */
-public class Constants {
-
-    public final static String COMPOSER_PROJECT_TYPE_ID = "composer";
-    public final static String PACKAGE                  = "package";
-
-    /** Name of WebSocket channel for Composer output */
-    public final static String COMPOSER_CHANNEL_NAME    = "composer:output";
-
-    private Constants() {
-    }
-
+public interface ComposerLocalizationConstant extends Messages {
+    @Key("package.attribute.label.name")
+    String packageAttribute();
 }

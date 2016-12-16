@@ -8,20 +8,38 @@
  * Contributors:
  *   Rogue Wave Software, Inc. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.composer.shared;
+package org.eclipse.che.plugin.composer.shared.dto;
+
+import org.eclipse.che.dto.shared.DTO;
 
 /**
+ * Provide output of Composer dependencies installation.
+ * 
  * @author Kaloyan Raev
  */
-public class Constants {
+@DTO
+public interface ComposerOutput {
 
-    public final static String COMPOSER_PROJECT_TYPE_ID = "composer";
-    public final static String PACKAGE                  = "package";
-
-    /** Name of WebSocket channel for Composer output */
-    public final static String COMPOSER_CHANNEL_NAME    = "composer:output";
-
-    private Constants() {
+    enum State {
+        START,
+        IN_PROGRESS,
+        DONE,
+        ERROR
     }
+
+    /**
+     * Output line
+     * @return
+     */
+    String getOutput();
+
+    /**
+     * Before start will be State.START
+     * During generation - State.IN_PROGRESS
+     * After generation will be State.DONE
+     * In case error - State.ERROR
+     * @return
+     */
+    State getState();
 
 }

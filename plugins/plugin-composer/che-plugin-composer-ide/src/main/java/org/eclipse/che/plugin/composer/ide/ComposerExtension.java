@@ -8,20 +8,23 @@
  * Contributors:
  *   Rogue Wave Software, Inc. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.composer.shared;
+package org.eclipse.che.plugin.composer.ide;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
+import org.eclipse.che.ide.api.extension.Extension;
+import org.eclipse.che.plugin.composer.ide.communication.ComposerOutputHandler;
 
 /**
  * @author Kaloyan Raev
  */
-public class Constants {
+@Singleton
+@Extension(title = "Composer")
+public class ComposerExtension {
 
-    public final static String COMPOSER_PROJECT_TYPE_ID = "composer";
-    public final static String PACKAGE                  = "package";
-
-    /** Name of WebSocket channel for Composer output */
-    public final static String COMPOSER_CHANNEL_NAME    = "composer:output";
-
-    private Constants() {
+    @Inject
+    public ComposerExtension(ComposerOutputHandler composerOutputHandler) {
     }
 
 }

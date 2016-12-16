@@ -25,6 +25,7 @@
     <modules>
         <module>che-plugin-composer-shared</module>
         <module>che-plugin-composer-server</module>
+        <module>che-plugin-composer-ide</module>
     </modules>
     <build>
         <plugins>
