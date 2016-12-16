@@ -207,12 +207,12 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
 
         if (statusCode == 200) {
             dialogFactory.createMessageDialog(infoWindowTitle,
-                                              "Our workspace agent is no longer responding. To fix the problem, verify you have a" +
+                                              "Workspace agent is no longer responding. To fix the problem, verify you have a" +
                                               " good network connection and restart the workspace.",
                                               stopCallback).show();
         } else {
             dialogFactory.createMessageDialog(infoWindowTitle,
-                                              "Our workspace agent is no longer responding. To fix the problem, restart the workspace.",
+                                              "Workspace agent is no longer responding. To fix the problem, restart the workspace.",
                                               stopCallback).show();
         }
     }

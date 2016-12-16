@@ -16,24 +16,91 @@ cmd_offline() {
     return 1;
   fi
 
+  # Read in core system images
+  IMAGE_LIST=$(cat "$CHE_MANIFEST_DIR"/$CHE_VERSION/images)
+
+  # Read in optional stack images
+  readarray -t STACK_IMAGE_LIST < /version/$CHE_VERSION/images-stacks
+
+  # List all images to be saved
+  if [ $1 = "--list" ]; then
+    # First display mandatory 
+    info "offline" "Listing images to save for offline usage"
+    info ""
+    info "offline" "Always:"
+    info "offline" "  CLI:   ${CHE_IMAGE_FULLNAME}"
+
+    IFS=$'\n'
+    for SINGLE_IMAGE in $IMAGE_LIST; do
+      IMAGE_NAME=$(echo $SINGLE_IMAGE | cut -d'=' -f2)
+      info "offline" "  CORE:  ${IMAGE_NAME}"
+    done
+    
+    info ""
+    info "offline" "Optional: (repeat --image:<name> for stack, --all-stacks, or --no-stacks)"
+    for STACK in $(seq 0 $((${#STACK_IMAGE_LIST[@]}-1)))
+    do
+      info "offline" "  STACK: ${STACK_IMAGE_LIST[$STACK]}"
+    done
+
+    return 1
+  fi
+
   # Make sure the images have been pulled and are in your local Docker registry
   cmd_download
 
   mkdir -p $CHE_CONTAINER_OFFLINE_FOLDER
 
-  IMAGE_LIST=$(cat "$CHE_MANIFEST_DIR"/$CHE_VERSION/images)
-  IFS=$'\n'
-  info "offline" "Saving ${CHE_MINI_PRODUCT_NAME} Docker images as tar files..."
+  info "offline" "Saving ${CHE_MINI_PRODUCT_NAME} cli image..."
+  save_image ${CHE_IMAGE_FULLNAME}
 
+  info "offline" "Saving ${CHE_MINI_PRODUCT_NAME} system images..."
+  IFS=$'\n'
   for SINGLE_IMAGE in $IMAGE_LIST; do
-    VALUE_IMAGE=$(echo $SINGLE_IMAGE | cut -d'=' -f2)
-    TAR_NAME=$(echo $VALUE_IMAGE | sed "s|\/|_|")
-    info "offline" "Saving $CHE_HOST_BACKUP/$TAR_NAME.tar..."
-    if ! $(docker save $VALUE_IMAGE > $CHE_CONTAINER_OFFLINE_FOLDER/$TAR_NAME.tar); then
-      error "Docker was interrupted while saving $CHE_CONTAINER_OFFLINE_FOLDER/$TAR_NAME.tar"
-      return 1;
-    fi
+    IMAGE_NAME=$(echo $SINGLE_IMAGE | cut -d'=' -f2)
+    save_image $IMAGE_NAME
+  done
+
+  info "offline" "Saving ${CHE_MINI_PRODUCT_NAME} stack images..."
+  STACK_SAVE="--no-stacks"
+  while [ $# -gt 0 ]; do
+    case $1 in
+      --all-stacks)
+        for STACK in $(seq 0 $((${#STACK_IMAGE_LIST[@]}-1)))
+        do
+          download_and_save_image ${STACK_IMAGE_LIST[$STACK]}
+        done
+        break
+        shift ;;
+      --no-stacks)
+        info "offline" "  --no-stacks indicated...skipping"
+        break
+        shift ;;
+      --image:*|-i:*)
+        download_and_save_image "${1#*:}"
+        shift ;;
+      *) error "Unknown parameter: $1" ; return 2 ;;
+    esac
   done
 
   info "offline" "Done!"
+}
+
+download_and_save_image() {
+  update_image_if_not_found ${1}
+  save_image ${1}
+}
+
+save_image(){
+  TAR_NAME=$(echo $1 | sed "s|\/|_|")
+
+  if [ ! -f $CHE_CONTAINER_OFFLINE_FOLDER/$TAR_NAME.tar ]; then
+    info "offline" "Saving $CHE_HOST_OFFLINE_FOLDER/$TAR_NAME.tar..."
+    if ! $(docker save $1 > $CHE_CONTAINER_OFFLINE_FOLDER/$TAR_NAME.tar); then
+      error "Docker was interrupted while saving $CHE_CONTAINER_OFFLINE_FOLDER/$TAR_NAME.tar"
+      return 1;
+    fi
+  else
+    info "offline" "  Image $1 already saved...skipping"
+  fi
 }

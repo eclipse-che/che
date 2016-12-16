@@ -892,7 +892,7 @@ public class CheEnvironmentEngineTest {
         doReturn(new MachineSourceImpl("someType").setContent("some content")).when(instance).saveToSnapshot();
 
         // when
-        engine.saveSnapshot("someNamespace", instance.getWorkspaceId(), instance.getId());
+        engine.saveSnapshot(instance.getWorkspaceId(), instance.getId());
 
         // then
         verify(instance).saveToSnapshot();
@@ -901,7 +901,7 @@ public class CheEnvironmentEngineTest {
     @Test(expectedExceptions = EnvironmentNotRunningException.class,
           expectedExceptionsMessageRegExp = "Environment .*' is not running")
     public void shouldThrowExceptionOnSaveSnapshotIfEnvIsNotRunning() throws Exception {
-        engine.saveSnapshot("someNamespace", "wsIdOfNotRunningEnv", "someId");
+        engine.saveSnapshot("wsIdOfNotRunningEnv", "someId");
     }
 
     @Test(expectedExceptions = NotFoundException.class,
@@ -912,7 +912,7 @@ public class CheEnvironmentEngineTest {
         Instance instance = instances.get(0);
 
         // when
-        engine.saveSnapshot("someNamespace", instance.getWorkspaceId(), "idOfNonExistingMachine");
+        engine.saveSnapshot(instance.getWorkspaceId(), "idOfNonExistingMachine");
     }
 
     @Test

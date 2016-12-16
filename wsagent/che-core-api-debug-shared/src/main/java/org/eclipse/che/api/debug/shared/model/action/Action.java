@@ -21,6 +21,7 @@ public interface Action {
         STEP_OUT,
         STEP_OVER,
         START,
-        RESUME
+        RESUME,
+        SUSPEND
     }
 }

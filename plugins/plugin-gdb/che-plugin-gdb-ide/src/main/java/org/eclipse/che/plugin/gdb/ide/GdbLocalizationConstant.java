@@ -32,4 +32,7 @@ public interface GdbLocalizationConstant extends com.google.gwt.i18n.client.Mess
 
     @Key("view.gdbConfigurationPage.devHostCheckbox")
     String gdbConfigurationPageViewDevMachineCheckbox();
+
+    @Key("gdbDebugger.message.suspendToActivateBreakpoints")
+    String messageSuspendToActivateBreakpoints();
 }

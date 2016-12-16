@@ -52,6 +52,7 @@ export class CheHttpBackend {
       this.addWorkspaceAgent(key, tmpWorkspace.runtime);
       this.httpBackend.when('GET', '/api/workspace/' + key).respond(tmpWorkspace);
     }
+    this.httpBackend.when('OPTIONS', '/api/').respond({});
 
     this.httpBackend.when('GET', '/api/workspace').respond(workspaceReturn);
 

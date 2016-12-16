@@ -178,6 +178,24 @@ class MessageBus { // jshint ignore:line
   }
 
   /**
+   * Handles websocket closed event.
+   *
+   * @param callback
+   */
+  onClose(callback: Function) {
+    this.datastream.onClose(callback);
+  }
+
+  /**
+   * Handles websocket error event.
+   *
+   * @param callback
+   */
+  onError(callback: Function) {
+    this.datastream.onError(callback);
+  }
+
+  /**
    * Restart ping timer (cancel previous and start again).
    */
   restartPing () {

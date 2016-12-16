@@ -402,7 +402,7 @@ export class WorkspaceDetailsController {
         iterations = 100;
     while (iterations--) {
       name = 'wksp-' + (('0000' + (Math.random() * Math.pow(36, 4) << 0).toString(36)).slice(-4)); // jshint ignore:line
-      if (!this.usedNamesList.includes(name)) {
+      if (!this.usedNamesList.indexOf(name) >= 0) {
         break;
       }
     }
@@ -480,14 +480,13 @@ export class WorkspaceDetailsController {
       .clickOutsideToClose(true)
       .targetEvent(event);
     this.$mdDialog.show(confirm).then(() => {
-      if (this.workspaceDetails.status === 'STOPPED' || this.workspaceDetails.status === 'ERROR') {
-        this.removeWorkspace();
-      } else if (this.workspaceDetails.status === 'RUNNING') {
+      if (this.getWorkspaceStatus() === 'RUNNING') {
         this.cheWorkspace.stopWorkspace(this.workspaceId);
-        this.cheWorkspace.fetchStatusChange(this.workspaceId, 'STOPPED').then(() => {
-          this.removeWorkspace();
-        });
       }
+
+      this.cheWorkspace.fetchStatusChange(this.workspaceId, 'STOPPED').then(() => {
+        this.removeWorkspace();
+      });
     });
   }
 

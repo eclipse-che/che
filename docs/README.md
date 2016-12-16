@@ -6,7 +6,11 @@ With Docker 1.11+ on Windows, Mac, or Linux:
 ```
 $ docker run eclipse/che-cli start
 ```
-This command will give you additional instructions on how to run the Che CLI while setting your hostname, configuring volume mounts, and testing your Docker setup.
+This command will give you additional instructions on how to run the Che CLI while setting your hostname, configuring volume mounts, and testing your Docker setup. For example, a complete execution might be:
+
+```
+$ docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock -v /c/che:/data eclipse/che-cli start
+```
 
 ### TOC
 - [Beta](#beta)
@@ -154,7 +158,7 @@ While connected to the Internet, download Che's Docker images:
 ```
 docker run eclipse/che-cli offline
 ``` 
-The CLI will download images and save them to `/che/backup/*.tar` with each image saved as its own file. The `/backup` folder will be created as a subdirectory of the folder you volume mounted to `:/che`. You can optionally save these files to a differnet location by volume mounting that folder to `:/backup`. The version tag of the CLI Docker image will be used to determine which versions of dependent images to download. There is about 1GB of data that will be saved.
+The CLI will download images and save them to `/data/backup/*.tar` with each image saved as its own file. The `/backup` folder will be created as a subdirectory of the folder you volume mounted to `:/data`. You can optionally save these files to a differnet location by volume mounting that folder to `:/backup`. The version tag of the CLI Docker image will be used to determine which versions of dependent images to download. There is about 1GB of data that will be saved.
 
 ##### Save Che CLI
 ```
@@ -178,58 +182,51 @@ When invoked with the `--offline` parameter, the CLI performs a preboot sequence
 ## Usage
 #### Syntax
 ```
-Usage: docker run -it --rm 
-                  -v /var/run/docker.sock:/var/run/docker.sock
-                  -v <host-path-for-data>:/che
-                  ${CHE_MINI_PRODUCT_NAME}/che-cli:<version> [COMMAND]
+USAGE: 
+  docker run <DOCKER_PARAMETERS> ${CHE_IMAGE_FULLNAME} [COMMAND]
 
-    help                                 This message
-    version                              Installed version and upgrade paths
-    init                                 Initializes a directory with a ${CHE_MINI_PRODUCT_NAME} install
-         [--no-force                         Default - uses cached local Docker images
-          --pull                             Checks for newer images from DockerHub  
-          --force                            Removes all images and re-pulls all images from DockerHub
-          --offline                          Uses images saved to disk from the offline command
-          --accept-license                   Auto accepts the Che license during installation
-          --reinit]                          Reinstalls using existing $CHE_MINI_PRODUCT_NAME.env configuration
-    start [--pull | --force | --offline] Starts ${CHE_MINI_PRODUCT_NAME} services
-    stop                                 Stops ${CHE_MINI_PRODUCT_NAME} services
-    restart [--pull | --force]           Restart ${CHE_MINI_PRODUCT_NAME} services
-    destroy                              Stops services, and deletes ${CHE_MINI_PRODUCT_NAME} instance data
-            [--quiet                         Does not ask for confirmation before destroying instance data
-             --cli]                          If :/cli is mounted, will destroy the cli.log
-    rmi [--quiet]                        Removes the Docker images for <version>, forcing a repull
-    config                               Generates a ${CHE_MINI_PRODUCT_NAME} config from vars; run on any start / restart
-    add-node                             Adds a physical node to serve workspaces intto the ${CHE_MINI_PRODUCT_NAME} cluster
-    remove-node <ip>                     Removes the physical node from the ${CHE_MINI_PRODUCT_NAME} cluster
-    upgrade                              Upgrades Che from one version to another with migrations and backups
-    download [--pull|--force|--offline]  Pulls Docker images for the current che-cli version
-    backup [--quiet | --skip-data]       Backups ${CHE_MINI_PRODUCT_NAME} configuration and data to /che/backup volume mount
-    restore [--quiet]                    Restores ${CHE_MINI_PRODUCT_NAME} configuration and data from /che/backup mount
-    offline                              Saves ${CHE_MINI_PRODUCT_NAME} Docker images into TAR files for offline install
-    info                                 Displays info about ${CHE_MINI_PRODUCT_NAME} and the CLI 
-         [ --all                             Run all debugging tests
-           --debug                           Displays system information
-           --network]                        Test connectivity between ${CHE_MINI_PRODUCT_NAME} sub-systems
-    ssh <wksp-name> [machine-name]       SSH to a workspace if SSH agent enabled
-    mount <wksp-name>                    Synchronize workspace with current working directory
-    action <action-name> [--help]        Start action on ${CHE_MINI_PRODUCT_NAME} instance
-    compile <mvn-command>                SDK - Builds Che source code or modules
-    test <test-name> [--help]            Start test on ${CHE_MINI_PRODUCT_NAME} instance
+MANDATORY DOCKER PARAMETERS:
+  -v <LOCAL_PATH>:${CHE_CONTAINER_ROOT}         Where user, instance, and log data saved
+  -v /var/run/docker.sock:/var/run/docker.sock
+  -it
 
-Variables:
-    CHE_HOST                             IP address or hostname where ${CHE_MINI_PRODUCT_NAME} will serve its users
-    CLI_DEBUG                            Default=false.Prints stack trace during execution
-    CLI_INFO                             Default=true. Prints out INFO messages to standard out
-    CLI_WARN                             Default=true. Prints WARN messages to standard out
-    CLI_LOG                              Default=true. Prints messages to cli.log file
+OPTIONAL DOCKER PARAMETERS:
+  -e CHE_HOST=<YOUR_HOST>              IP address or hostname where ${CHE_FORMAL_PRODUCT_NAME} will serve its users
+  -e CHE_PORT=<YOUR_PORT>              Port where ${CHE_FORMAL_PRODUCT_NAME} will bind itself to
+  -v <LOCAL_PATH>:/data/instance       Where instance, user, log data will be saved
+  -v <LOCAL_PATH>:/data/backup         Where backup files will be saved
+  -v <LOCAL_PATH>:/cli                 Where the CLI trace log is saved
+  -v <LOCAL_PATH>:/repo                ${CHE_FORMAL_PRODUCT_NAME} git repo to activate dev mode
+  -v <LOCAL_PATH>:/sync                Where remote ws files will be copied with sync command
+  -v <LOCAL_PATH>:/unison              Where unison profile for optimzing sync command resides
+    
+COMMANDS:
+  help                                 This message
+  version                              Installed version and upgrade paths
+  init                                 Initializes a directory with a ${CHE_FORMAL_PRODUCT_NAME} install
+  start                                Starts ${CHE_FORMAL_PRODUCT_NAME} services
+  stop                                 Stops ${CHE_FORMAL_PRODUCT_NAME} services
+  restart                              Restart ${CHE_FORMAL_PRODUCT_NAME} services
+  destroy                              Stops services, and deletes ${CHE_FORMAL_PRODUCT_NAME} instance data
+  rmi                                  Removes the Docker images for <version>, forcing a repull
+  config                               Generates a ${CHE_FORMAL_PRODUCT_NAME} config from vars; run on any start / restart
+  upgrade                              Upgrades ${CHE_FORMAL_PRODUCT_NAME} from one version to another with migrations and backups
+  download                             Pulls Docker images for the current ${CHE_FORMAL_PRODUCT_NAME} version
+  backup                               Backups ${CHE_FORMAL_PRODUCT_NAME} configuration and data to ${CHE_CONTAINER_ROOT}/backup volume mount
+  restore                              Restores ${CHE_FORMAL_PRODUCT_NAME} configuration and data from ${CHE_CONTAINER_ROOT}/backup mount
+  offline                              Saves ${CHE_FORMAL_PRODUCT_NAME} Docker images into TAR files for offline install
+  info                                 Displays info about ${CHE_FORMAL_PRODUCT_NAME} and the CLI
+  ssh <wksp-name> [machine-name]       SSH to a workspace if SSH agent enabled
+  sync <wksp-name>                     Synchronize workspace with current working directory
+  action <action-name>                 Start action on ${CHE_FORMAL_PRODUCT_NAME} instance
+  test <test-name>                     Start test on ${CHE_FORMAL_PRODUCT_NAME} instance
 ```
 
 In these docs, when you see `che-cli [COMMAND]`, it is assumed that you run the CLI with the full `docker run ...` syntax. We short hand the docs for readability.
 
 #### Sample Start
 For example, to start the nightly build of Che with its data saved on Windows in `C:\tmp`:
-`docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock -v /c/tmp:/che eclipse/che-cli:5.0.0-latest start`
+`docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock -v /c/tmp:/data eclipse/che-cli:5.0.0-latest start`
 
 This installs a configuration, downloads Che's Docker images, run pre-flight port checks, boot Che's services, and run post-flight checks. You do not need root access to start Che, unless your environment requires it for Docker operations.
 
@@ -255,15 +252,15 @@ INFO: (che-cli start): API: http://10.0.75.2/swagger
 While we provide `nightly`, `latest`, and `5.0.0-latest` [redirection versions](#nightly-and-latest) which are tags that simplify helping you retrieve a certain build, you should always run Cche with a specific version label to avoid [redirection caching issues](#nightly-and-latest). So, running `docker run eclipse/che-cli` is great syntax for testing and getting started quickly, you should always run `docker run eclipse/che-cli:<version>` for production usage.
 
 #### Volume Mounts
-If you volume mount a single local folder to `<your-local-path>:/che`, then Che creates `/che/che.env` (configuration file), `/che/instance` (user data, projects, runtime logs, and database folder), and `/che/backup` (data backup folder).
+If you volume mount a single local folder to `<your-local-path>:/data`, then Che creates `/data/che.env` (configuration file), `/data/instance` (user data, projects, runtime logs, and database folder), and `/data/backup` (data backup folder).
 
 However, if you do not want your `/instance`, and `/backup` folder to all be children of the same parent folder, you can set them individually with separate overrides.
 
 ```
 docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock
-                    -v <local-Che-folder>:/che
-                    -v <local-instance-path>:/che/instance
-                    -v <local-backup-path>:/che/backup
+                    -v <local-Che-folder>:/data
+                    -v <local-instance-path>:/data/instance
+                    -v <local-backup-path>:/data/backup
                        eclipse/che-cli:<version> [COMMAND]    
 
 ```
@@ -273,7 +270,7 @@ If you are hosting Che at a cloud service like DigitalOcean, set `CHE_HOST` to t
 
 ```
 docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock
-                    -v <local-path>:/che
+                    -v <local-path>:/data
                     -e CHE_HOST=<your-ip-or-host>
                        eclipse/che-cli:<version> [COMMAND]
 ``` 
@@ -288,13 +285,13 @@ docker run eclipse/che-cli rmi
 ```
 
 ## Configuration
-Configuration is done with environment variables in `che.env` placed into the root of the folder you volume mounted to `:/che`. Environment variables are stored in `che.env`, a file that is generated during the `che-cli init` phase. If you rerun `che-cli init` in an already initialized folder, the process will abort unless you pass `--force`, `--pull`, or `--reinit`. 
+Configuration is done with environment variables in `che.env` placed into the root of the folder you volume mounted to `:/data`. Environment variables are stored in `che.env`, a file that is generated during the `che-cli init` phase. If you rerun `che-cli init` in an already initialized folder, the process will abort unless you pass `--force`, `--pull`, or `--reinit`. 
 
 Each variable is documented with an explanation and usually commented out. If you need to set a variable, uncomment it and configure it with your value. You can then run `che-cli config` to apply this configuration to your system. `che-cli start` also reapplies the latest configuration.
 
 You can run `che-cli init` to install a new configuration into an empty directory. This command uses the `che-cli/init:<version>` Docker container to deliver a version-specific set of puppet templates into the folder.
 
-If you run `che-cli config`, Che runs puppet to transform your puppet templates into a Che instance configuration, placing the results into `/che/instance` if you volume mounted that, or into a `instance` subdirectory of the path you mounted to `/che`.  Each time you start Che, `che-cli config` is run to ensure instance configuration files are properly generated and consistent with the configuration you have specified in `che.env`.
+If you run `che-cli config`, Che runs puppet to transform your puppet templates into a Che instance configuration, placing the results into `/data/instance` if you volume mounted that, or into a `instance` subdirectory of the path you mounted to `/data`.  Each time you start Che, `che-cli config` is run to ensure instance configuration files are properly generated and consistent with the configuration you have specified in `che.env`.
 
 #### Saving Configuration in Version Control
 Administration teams that want to version control your che-cli configuration should save `che.env`. This is the only file that should be saved with version control. It is not necessary, and even discouraged, to save the other files. If you were to perform a `che-cli upgrade` we may replace these files with templates that are specific to the version that is being upgraded. The `che.env` file maintains fidelity between versions and we can generate instance configurations from that.
@@ -303,11 +300,11 @@ The version control sequence would be:
 1. `che-cli init` to get an initial configuration for a particular version.
 2. Edit `che.env` with your environment-specific configuration.
 3. Save `che.env` to version control.
-4. When pulling from version control, copy `che.env` into the root of the folder you volume mount to `:/che`.
+4. When pulling from version control, copy `che.env` into the root of the folder you volume mount to `:/data`.
 5. You can then run `che-cli config` or `che-cli start` and the instance configuration will be generated from this file.
     
 #### Logs and User Data
-When Che initializes itself, it stores logs, user data, database data, and instance-specific configuration in the folder mounted to `/che/instance` or an `instance` subfolder of what you mounted to `/che`.  
+When Che initializes itself, it stores logs, user data, database data, and instance-specific configuration in the folder mounted to `/data/instance` or an `instance` subfolder of what you mounted to `/data`.  
 
 Che's containers save their logs in the same location:
 ```
@@ -318,7 +315,7 @@ Che's containers save their logs in the same location:
 User data is stored in:
 ```
 /data/che                      # Project backups (we synchronize projs from remote ws here)
-/data/registry                     # Workspace snapshots
+/data/registry                 # Workspace snapshots
 ```
 
 Instance configuration is generated by Che and is updated by our internal configuration utilities. These 'generated' configuration files should not be modified and stored in:
@@ -338,7 +335,7 @@ For Che developers that are building and customizing Che from its source reposit
 Dev mode is activated by volume mounting the Che git repository to `:/repo` in your Docker run command.
 ```
 docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock \
-                    -v <local-path>:/che \
+                    -v <local-path>:/data \
                     -v <local-repo>:/repo \
                        eclipse/che-cli:<version> [COMMAND]
 ``` 
@@ -366,10 +363,6 @@ The IP address or DNS name of where the Che endpoint will service your users. If
 ```
 docker run <other-syntax-here> -e CHE_HOST=<ip address or dns entry> eclipse/che-cli:<version> start
 ```
-
-#### HTTP/S
-TODO: GET CONFIRMATION
-
 
 #### Workspace Limits
 TODO: REVIEW LIST OF LIMITS
@@ -425,17 +418,10 @@ We currently do not support migrating from the puppet-based configuration of Che
 We maintain a disaster recovery [policy and best practices](http://che.readme.io/v5.0/docs/disaster-recovery).
 
 ## CLI Reference
-The CLI is configured to hide most error conditions from the output screen. The CLI prints internal stack traces and error output to `cli.log`. To see the output of this log, you will need to volume mount a local path to `:/cli`. For example:
-
-```
-docker run --rm -it 
-           -v /var/run/docker.sock:/var/run/docker.sock 
-           -v /c/che:/che 
-           -v /c/eclipse/che-cli:/cli eclipse/che-cli:nightly [COMMAND]
-```
+The CLI is configured to hide most error conditions from the output screen. The CLI prints internal stack traces and error output to `cli.log`. The 'cli.log' is saved in the same folder where you mounted `:/data`.
 
 ### `che-cli init`
-Initializes an empty directory with a Che configuration and instance folder where user data and runtime configuration will be stored. You must provide a `<path>:/che` volume mount, then Che creates an `instance` and `backup` subfolder of `<path>`. You can optionally override the location of `instance` by volume mounting an additional local folder to `:/che/instance`. You can optionally override the location of where backups are stored by volume mounting an additional local folder to `:/che/backup`.  After initialization, a `che.env` file is placed into the root of the path that you mounted to `:/che`. 
+Initializes an empty directory with a Che configuration and instance folder where user data and runtime configuration will be stored. You must provide a `<path>:/data` volume mount, then Che creates an `instance` and `backup` subfolder of `<path>`. You can optionally override the location of `instance` by volume mounting an additional local folder to `:/data/instance`. You can optionally override the location of where backups are stored by volume mounting an additional local folder to `:/data/backup`.  After initialization, a `che.env` file is placed into the root of the path that you mounted to `:/data`. 
 
 These variables can be set in your local environment shell before running and they will be respected during initialization:
 
@@ -457,10 +443,10 @@ You can control the nature of how che-cli downloads these images with command li
 | `--force` | Performs a forced removal of the local image using `docker rmi` and then pulls it again (anew) from DockerHub. You can use this as a way to clean your local cache and ensure that all images are new. |
 | `--offline` | Loads Docker images from `backup/*.tar` folder during a pre-boot mode of the CLI. Used if you are performing an installation or start while disconnected from the Internet. |
 
-You can reinstall Che on a folder that is already initialized and preserve your `/che/che.env` values by passing the `--reinit` flag.
+You can reinstall Che on a folder that is already initialized and preserve your `/data/che.env` values by passing the `--reinit` flag.
 
 ### `che-cli config`
-Generates a Che instance configuration thta is placed in `/che/instance`. This command uses puppet to generate configuration files for the Che server and Docker swarm This command is executed on every `start` or `restart`.
+Generates a Che instance configuration thta is placed in `/data/instance`. This command uses puppet to generate configuration files for the Che server and Docker swarm This command is executed on every `start` or `restart`.
 
 If you are using a `eclipse/che-cli:<version>` image and it does not match the version that is in `/instance/che.ver`, then the configuration will abort to prevent you from running a configuration for a different version than what is currently installed.
 
@@ -476,9 +462,9 @@ Stops all of the Che service containers and removes them.
 Performs a `che-cli stop` followed by a `che-cli start`, respecting `--pull`, `--force`, and `--offline`.
 
 ### `che-cli destroy`
-Deletes `/docs`, `che.env` and `/che/instance`, including destroying all user workspaces, projects, data, and user database. If you pass `--quiet` then the confirmation warning will be skipped. 
+Deletes `/docs`, `che.env` and `/data/instance`, including destroying all user workspaces, projects, data, and user database. If you pass `--quiet` then the confirmation warning will be skipped. 
 
-If you have mounted the `:/cli` path, then we write the `cli.log` to your host directory. By default, this log is not destroyed in a `che-cli destroy` command so that you can maintain a record of all CLI executions. You can also have this file removed from your host by mounting `:/cli` and passing the `--cli` parameter to this command.
+We write the `cli.log` to your ':/data' directory. By default, this log is not destroyed in a `che-cli destroy` command so that you can maintain a record of all CLI executions. You can have this file removed from your host with the `--cli` parameter.
 
 ### `che-cli offline`
 Saves all of the Docker images that Che requires into `/backup/*.tar` files. Each image is saved as its own file. If the `backup` folder is available on a machine that is disconnected from the Internet and you start Che with `--offline`, the CLI pre-boot sequence will load all of the Docker images in the `/backup/` folder.

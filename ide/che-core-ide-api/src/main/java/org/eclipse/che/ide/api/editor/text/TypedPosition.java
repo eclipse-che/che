@@ -62,6 +62,7 @@ public class TypedPosition extends Position {
     /*
      * @see java.lang.Object#isEquals(java.lang.Object)
      */
+    @Override
     public boolean equals(Object o) {
         if (o instanceof TypedPosition) {
             if (super.equals(o)) {
@@ -75,6 +76,7 @@ public class TypedPosition extends Position {
     /*
     * @see java.lang.Object#hashCode()
     */
+    @Override
     public int hashCode() {
         int type = fType == null ? 0 : fType.hashCode();
         return super.hashCode() | type;
@@ -83,6 +85,7 @@ public class TypedPosition extends Position {
     /*
      * @see org.eclipse.jface.text.Region#toString()
      */
+    @Override
     public String toString() {
         return fType + " - " + super.toString(); //$NON-NLS-1$
     }

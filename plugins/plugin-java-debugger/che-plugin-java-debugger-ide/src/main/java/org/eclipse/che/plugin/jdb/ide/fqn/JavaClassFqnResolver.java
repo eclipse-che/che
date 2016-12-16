@@ -28,6 +28,6 @@ public class JavaClassFqnResolver implements FqnResolver {
     @NotNull
     @Override
     public String resolveFqn(@NotNull final VirtualFile file) {
-        return file.getPath();
+        return file.getLocation().toString();
     }
 }

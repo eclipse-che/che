@@ -12,37 +12,25 @@
 cmd_sync() {
   debug $FUNCNAME
 
+  if [[ "${SYNC_MOUNT}" = "not set" ]]; then
+    info "Welcome to $CHE_FORMAL_PRODUCT_NAME!"
+    info ""
+    info "We could not detect a location to do the sync."
+    info "Volume mount a local directory to ':/sync'."
+    info ""
+    info "  docker run .... -v <YOUR_LOCAL_SYNC_PATH>:/sync ...."
+    return 2;
+  fi
+
   # Determine the mount path to do the mount
   info "mount" "Starting sync process to ${SYNC_MOUNT}"
 
-  # TODO: How to take connection parameters for Codenvy?
-  
-  # Only volume mount the unison profile if it is set
-  if [[ "${UNISON_PROFILE_MOUNT}" = "not set" ]]; then
-    docker_run --cap-add SYS_ADMIN \
-               --device /dev/fuse \
-               --name che-mount \
-               -v ${HOME}/.ssh:${HOME}/.ssh \
-               -v /etc/group:/etc/group:ro \
-               -v /etc/passwd:/etc/passwd:ro \
-               -u $(id -u ${USER}) \
-               -v "${UNISON_PROFILE_MOUNT}":/profile \
-               -v "${SYNC_MOUNT}":/mnthost \
+  docker_run --cap-add SYS_ADMIN \
+             --device /dev/fuse \
+             -e CHE_VERSION=${CHE_VERSION} \
+             --name che-mount \
+             -v "${SYNC_MOUNT}":/mnthost \
                   eclipse/che-mount:nightly $*
-
-  else  
-
-    docker_run --cap-add SYS_ADMIN \
-               --device /dev/fuse \
-               --name che-mount \
-               -v ${HOME}/.ssh:${HOME}/.ssh \
-               -v /etc/group:/etc/group:ro \
-               -v /etc/passwd:/etc/passwd:ro \
-               -u $(id -u ${USER}) \
-               -v "${SYNC_MOUNT}":/mnthost \
-                  eclipse/che-mount:nightly $*
-
-  fi
 
   # Docker doesn't seem to normally clean up this container
   docker rm -f che-mount

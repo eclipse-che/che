@@ -8,5 +8,5 @@
 IMAGE_NAME="eclipse/che-action"
 . $(cd "$(dirname "$0")"; pwd)/../build.include
 
-init
-build
+init "$@"
+build "$@"

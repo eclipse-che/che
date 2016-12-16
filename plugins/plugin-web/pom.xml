@@ -16,13 +16,15 @@
     <parent>
         <artifactId>che-plugin-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>5.0.0-M8-SNAPSHOT</version>
+        <version>5.0.0-M9-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>che-plugin-web-parent</artifactId>
     <packaging>pom</packaging>
     <name>Che Plugin :: Web :: Parent</name>
     <modules>
+        <module>che-plugin-web-ext-shared</module>
         <module>che-plugin-web-ext-web</module>
+        <module>che-plugin-web-ext-server</module>
     </modules>
 </project>

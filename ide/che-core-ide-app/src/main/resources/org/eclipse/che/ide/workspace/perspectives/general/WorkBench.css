@@ -17,6 +17,7 @@
 
 @eval toolButtonColor org.eclipse.che.ide.api.theme.Style.theme.toolButtonColor();
 @eval toolButtonHoverColor org.eclipse.che.ide.api.theme.Style.theme.toolButtonHoverColor();
+@eval toolButtonActiveColor org.eclipse.che.ide.api.theme.Style.theme.toolButtonActiveColor();
 
 .ide-work-bench-tool-panel-left,
 .ide-work-bench-tool-panel-right,
@@ -74,6 +75,11 @@ svg[name="workBenchIconMinimize"] g {
 svg[name="workBenchIconMinimize"]:HOVER,
 svg[name="workBenchIconMinimize"]:HOVER g {
     fill: toolButtonHoverColor;
+}
+
+svg[name="workBenchIconMinimize"]:ACTIVE,
+svg[name="workBenchIconMinimize"]:ACTIVE g {
+    fill: toolButtonActiveColor;
 }
 
 .ide-work-bench-split-panel-left svg[name="workBenchIconMinimize"] {

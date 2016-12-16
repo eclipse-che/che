@@ -21,6 +21,7 @@ import org.eclipse.che.api.debug.shared.dto.action.StartActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepIntoActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepOutActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepOverActionDto;
+import org.eclipse.che.api.debug.shared.dto.action.SuspendActionDto;
 import org.eclipse.che.api.promises.client.Promise;
 
 import java.util.List;
@@ -51,6 +52,16 @@ public interface DebuggerServiceClient {
      *      debug session id
      */
     Promise<Void> disconnect(String id);
+
+    /**
+     * Suspends the application is being debugged.
+     *
+     * @param id
+     *         debug session id
+     * @param action
+     *         the suspend action parameters
+     */
+    Promise<Void> suspend(String id, SuspendActionDto action);
 
     /**
      * Gets debug session info.

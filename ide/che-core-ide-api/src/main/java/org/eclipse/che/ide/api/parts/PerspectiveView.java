@@ -50,5 +50,9 @@ public interface PerspectiveView<T> extends View<T> {
 
     /** Handle View events */
     interface ActionDelegate {
+
+        void onResize(int width, int height);
+
     }
+
 }

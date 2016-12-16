@@ -333,13 +333,6 @@ public class RecipePartPresenterTest {
     }
 
     @Test
-    public void panelShouldBeHidden() throws Exception {
-        recipePartPresenter.setVisible(false);
-
-        verify(recipePartView).setVisible(false);
-    }
-
-    @Test
     public void toolTipShouldBeShowed() throws Exception {
         recipePartPresenter.getTitleToolTip();
 

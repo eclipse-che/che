@@ -28,6 +28,7 @@ import {ProjectsConfig} from './projects/projects-config';
 import {ProxySettingsConfig} from './proxy/proxy-settings.constant';
 import {WorkspacesConfig} from './workspaces/workspaces-config';
 import {StacksConfig} from './stacks/stacks-config';
+import {DemoComponentsCtrl} from './demo-components/demo-components.controller';
 
 
 // init module
@@ -358,6 +359,10 @@ initModule.config(['$routeProvider', '$locationProvider', '$httpProvider', ($rou
 
 
 var instanceRegister = new Register(initModule);
+
+if (DEV) {
+  instanceRegister.controller('DemoComponentsCtrl', DemoComponentsCtrl);
+}
 
 new ProxySettingsConfig(instanceRegister);
 new CheColorsConfig(instanceRegister);

@@ -14,6 +14,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.DoubleClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -69,6 +70,7 @@ public class TabWidget extends Composite implements Tab {
         iconPanel.add(new SVGImage(getIcon()));
 
         addDomHandler(this, ClickEvent.getType());
+        addDomHandler(this, DoubleClickEvent.getType());
 
         if (closable) {
             closeButton.addDomHandler(new ClickHandler() {
@@ -112,10 +114,16 @@ public class TabWidget extends Composite implements Tab {
     }
 
     @Override
+    public void onDoubleClick(DoubleClickEvent event) {
+        delegate.onTabDoubleClicked(this);
+    }
+
+    @Override
     public void setDelegate(ActionDelegate delegate) {
         this.delegate = delegate;
     }
 
     interface TabItemWidgetUiBinder extends UiBinder<Widget, TabWidget> {
     }
+
 }

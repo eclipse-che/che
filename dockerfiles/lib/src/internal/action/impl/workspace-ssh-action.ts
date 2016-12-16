@@ -101,7 +101,7 @@ export class WorkspaceSshAction {
 
                 foundWorkspaceDTO = workspaceDto;
 
-            }).then((sshPairDto : org.eclipse.che.api.ssh.shared.dto.SshPairDto) => {
+            }).then(() => {
 
                 // need to get ssh key for the workspace
                 let ssh:Ssh = new Ssh(this.authData);

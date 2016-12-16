@@ -123,7 +123,7 @@ public class FindSymbolAction extends AbstractPerspectiveAction implements Quick
     private Promise<List<SymbolEntry>> searchSymbols(final String value) {
         WorkspaceSymbolParamsDTO params = dtoFactory.createDto(WorkspaceSymbolParamsDTO.class);
         params.setQuery(value);
-        params.setFileUri(editorAgent.getActiveEditor().getEditorInput().getFile().getPath());
+        params.setFileUri(editorAgent.getActiveEditor().getEditorInput().getFile().getLocation().toString());
         return workspaceServiceClient.symbol(params).then(new Function<List<SymbolInformationDTO>, List<SymbolEntry>>() {
             @Override
             public List<SymbolEntry> apply(List<SymbolInformationDTO> types) throws FunctionException {

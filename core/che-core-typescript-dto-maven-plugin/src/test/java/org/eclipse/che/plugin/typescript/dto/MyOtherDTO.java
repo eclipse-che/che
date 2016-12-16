@@ -16,9 +16,8 @@ import org.eclipse.che.dto.shared.DTO;
  * @author Florent Benoit
  */
 @DTO
-public interface MyOtherDTO {
+public interface MyOtherDTO extends MySuperClassDTO, MySuperSuperClass {
 
-    String getName();
     void setName(String name);
     MyOtherDTO withName(String name);
 

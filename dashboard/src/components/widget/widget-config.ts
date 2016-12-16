@@ -66,6 +66,7 @@ import {CheInfoNotification} from './notification/che-info-notification.directiv
 import {ChePopup} from './popup/che-popup.directive';
 import {CheModalPopup} from './popup/che-modal-popup.directive';
 import {CheShowArea} from './show-area/che-show-area.directive';
+import {DemoSourceRender} from './html-source/demo-source-render.directive';
 
 
 export class WidgetConfig {
@@ -98,6 +99,7 @@ export class WidgetConfig {
       .directive('cheFrame', CheFrame)
       .directive('cheFooter', CheFooter)
       .directive('cheHtmlSource', CheHtmlSource)
+      .directive('demoSourceRender', DemoSourceRender)
       .directive('cheInput', CheInput)
       .directive('cheInputBox', CheInputBox)
       .directive('cheTextarea', CheTextarea)

@@ -77,13 +77,14 @@ generate_configuration_with_puppet() {
 
   if [ "${CHE_DEVELOPMENT_MODE}" = "on" ]; then
     # Note - bug in docker requires relative path for env, not absolute
-    GENERATE_CONFIG_COMMAND="docker_run -it \
+    GENERATE_CONFIG_COMMAND="docker_run \
                   --env-file=\"${REFERENCE_CONTAINER_ENVIRONMENT_FILE}\" \
                   --env-file=/version/$CHE_VERSION/images \
                   -v \"${CHE_HOST_INSTANCE}\":/opt/${CHE_MINI_PRODUCT_NAME}:rw \
                   -v \"${CHE_HOST_DEVELOPMENT_REPO}/dockerfiles/init/manifests\":/etc/puppet/manifests:ro \
                   -v \"${CHE_HOST_DEVELOPMENT_REPO}/dockerfiles/init/modules\":/etc/puppet/modules:ro \
                   -e \"CHE_ENV_FILE=${CHE_ENV_FILE}\" \
+                  -e \"CHE_CONTAINER_ROOT=${CHE_CONTAINER_ROOT}\" \
                   -e \"CHE_ENVIRONMENT=development\" \
                   -e \"CHE_CONFIG=${CHE_HOST_INSTANCE}\" \
                   -e \"CHE_INSTANCE=${CHE_HOST_INSTANCE}\" \
@@ -95,11 +96,12 @@ generate_configuration_with_puppet() {
                                 /etc/puppet/modules/ \
                                 /etc/puppet/manifests/${CHE_MINI_PRODUCT_NAME}.pp --show_diff"
   else
-    GENERATE_CONFIG_COMMAND="docker_run -it \
+    GENERATE_CONFIG_COMMAND="docker_run \
                   --env-file=\"${REFERENCE_CONTAINER_ENVIRONMENT_FILE}\" \
                   --env-file=/version/$CHE_VERSION/images \
                   -v \"${CHE_HOST_INSTANCE}\":/opt/${CHE_MINI_PRODUCT_NAME}:rw \
                   -e \"CHE_ENV_FILE=${CHE_ENV_FILE}\" \
+                  -e \"CHE_CONTAINER_ROOT=${CHE_CONTAINER_ROOT}\" \
                   -e \"CHE_ENVIRONMENT=production\" \
                   -e \"CHE_CONFIG=${CHE_HOST_INSTANCE}\" \
                   -e \"CHE_INSTANCE=${CHE_HOST_INSTANCE}\" \

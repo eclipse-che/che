@@ -15,13 +15,17 @@ package org.eclipse.che.plugin.nodejs.shared;
  */
 public final class Constants {
     /**
+     * Options for run command
+     */
+    public static final String RUN_PARAMETERS_ATTRIBUTE = "run.parameters";
+    /**
      * Language attribute name
      */
-    public static String LANGUAGE                = "language";
+    public static       String LANGUAGE                 = "language";
     /**
      * Node JS Project Type ID
      */
-    public static String NODE_JS_PROJECT_TYPE_ID = "node-js";
+    public static       String NODE_JS_PROJECT_TYPE_ID  = "node-js";
 
     /**
      * Default extension for C files

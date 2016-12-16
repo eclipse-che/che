@@ -25,6 +25,9 @@
 
         .terminalPanel {
             position: absolute;
+            -moz-user-select: text;
+            -webkit-user-select: auto;
+            user-select: text;
             width: 100%;
             height: 100%;
             overflow: hidden;

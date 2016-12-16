@@ -38,6 +38,7 @@ public abstract class AbstractDocument implements Document, DocumentHandle {
         return this;
     }
 
+    @Override
     public DocumentHandle getDocumentHandle() {
         return this;
     }

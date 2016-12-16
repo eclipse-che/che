@@ -28,7 +28,9 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.editor.JavaCodeAssistClient;
 import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
+import org.eclipse.che.ide.ext.java.shared.dto.Change;
 import org.eclipse.che.ide.ext.java.shared.dto.ConflictImportDTO;
+import org.eclipse.che.ide.ext.java.shared.dto.OrganizeImportResult;
 import org.eclipse.che.ide.resource.Path;
 import org.junit.Before;
 import org.junit.Test;
@@ -84,16 +86,20 @@ public class OrganizeImportsPresenterTest {
     @Mock
     private Document    document;
     @Mock
-    private Promise<List<ConflictImportDTO>> importsPromise;
+    private Promise<OrganizeImportResult> importsPromise;
     @Mock
-    private Promise<Void>                    resolveConflictsPromise;
+    private Promise<List<Change>> resolveConflictsPromise;
     @Mock
     private Promise<String>                  contentPromise;
+    @Mock
+    private OrganizeImportResult organizeImportResult;
+    @Mock
+    private Change change;
 
     @Captor
-    private ArgumentCaptor<Operation<List<ConflictImportDTO>>> importsOperation;
+    private ArgumentCaptor<Operation<OrganizeImportResult>> importsOperation;
     @Captor
-    private ArgumentCaptor<Operation<Void>>                    resolveConflictsOperation;
+    private ArgumentCaptor<Operation<List<Change>>>                    resolveConflictsOperation;
     @Captor
     private ArgumentCaptor<Operation<String>>                  contentCaptor;
 
@@ -117,7 +123,7 @@ public class OrganizeImportsPresenterTest {
         when(relatedProject.getLocation()).thenReturn(Path.valueOf("/project"));
 
         when(javaCodeAssistClient.organizeImports(anyString(), anyString())).thenReturn(importsPromise);
-        when(importsPromise.then(Matchers.<Operation<List<ConflictImportDTO>>>anyObject())).thenReturn(importsPromise);
+        when(importsPromise.then(Matchers.<Operation<OrganizeImportResult>>anyObject())).thenReturn(importsPromise);
 
         presenter = new OrganizeImportsPresenter(view,
                                                  javaCodeAssistClient,
@@ -134,15 +140,16 @@ public class OrganizeImportsPresenterTest {
     public void organizeImportsShouldBeDoneWithoutConflicts() throws Exception {
         when(file.getContent()).thenReturn(contentPromise);
         when(contentPromise.then(any(Operation.class))).thenReturn(contentPromise);
-
+        when(organizeImportResult.getConflicts()).thenReturn(null);
+        when(organizeImportResult.getChanges()).thenReturn(Collections.singletonList(change));
+        when(change.getOffset()).thenReturn(0);
+        when(change.getLength()).thenReturn("content".length());
+        when(change.getText()).thenReturn("content");
         presenter.organizeImports(editor);
 
         verify(javaCodeAssistClient).organizeImports(eq("/project"), eq("a.b.A"));
         verify(importsPromise).then(importsOperation.capture());
-        importsOperation.getValue().apply(Collections.emptyList());
-
-        verify(file.getContent()).then(contentCaptor.capture());
-        contentCaptor.getValue().apply("content");
+        importsOperation.getValue().apply(organizeImportResult);
 
         verify(document).replace(eq(0), eq("content".length()), eq("content"));
     }
@@ -176,10 +183,11 @@ public class OrganizeImportsPresenterTest {
         presenter.organizeImports(editor);
 
         List<ConflictImportDTO> result = Arrays.asList(conflict1, conflict2);
+        when(organizeImportResult.getConflicts()).thenReturn(result);
 
         verify(javaCodeAssistClient).organizeImports(eq("/project"), eq("a.b.A"));
         verify(importsPromise).then(importsOperation.capture());
-        importsOperation.getValue().apply(result);
+        importsOperation.getValue().apply(organizeImportResult);
     }
 
     @Test
@@ -230,7 +238,7 @@ public class OrganizeImportsPresenterTest {
         when(dtoFactory.createDto(ConflictImportDTO.class)).thenReturn(conflict1);
         when(conflict1.withTypeMatches(Matchers.<List<String>>anyObject())).thenReturn(conflict1);
         when(javaCodeAssistClient.applyChosenImports(anyString(), anyString(), any())).thenReturn(resolveConflictsPromise);
-        when(resolveConflictsPromise.then(Matchers.<Operation<Void>>anyObject())).thenReturn(resolveConflictsPromise);
+        when(resolveConflictsPromise.then(Matchers.<Operation<List<Change>>>anyObject())).thenReturn(resolveConflictsPromise);
 
         showOrganizeImportsWindow();
         presenter.onFinishButtonClicked();

@@ -77,8 +77,6 @@ public class WorkspaceRuntimeIntegrationTest {
     @Mock
     private EventService              eventService;
     @Mock
-    private SnapshotDao               snapshotDao;
-    @Mock
     private MachineInstanceProviders  machineInstanceProviders;
     @Mock
     private EnvironmentParser         environmentParser;
@@ -96,9 +94,13 @@ public class WorkspaceRuntimeIntegrationTest {
     private AgentSorter               agentSorter;
     @Mock
     private AgentLauncherFactory      launcherFactory;
+    @Mock
+    private WorkspaceSharedPool       sharedPool;
+    @Mock
+    private SnapshotDao               snapshotDao;
 
-    private ExecutorService      executor;
-    private WorkspaceRuntimes    runtimes;
+    private ExecutorService   executor;
+    private WorkspaceRuntimes runtimes;
 
     @BeforeMethod
     public void setUp() throws Exception {
@@ -120,7 +122,9 @@ public class WorkspaceRuntimeIntegrationTest {
                                          environmentEngine,
                                          agentSorter,
                                          launcherFactory,
-                                         agentRegistry);
+                                         agentRegistry,
+                                         snapshotDao,
+                                         sharedPool);
 
         executor = Executors.newFixedThreadPool(
                 1, new ThreadFactoryBuilder().setNameFormat(this.getClass().toString() + "-%d").build());
