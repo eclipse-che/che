@@ -34,16 +34,18 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceRuntime;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.util.AbstractMessageConsumer;
-import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.api.core.util.MessageConsumer;
 import org.eclipse.che.api.core.util.WebsocketMessageConsumer;
 import org.eclipse.che.api.environment.server.CheEnvironmentEngine;
 import org.eclipse.che.api.environment.server.exception.EnvironmentException;
 import org.eclipse.che.api.environment.server.exception.EnvironmentNotRunningException;
 import org.eclipse.che.api.machine.server.exception.MachineException;
+import org.eclipse.che.api.machine.server.exception.SnapshotException;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
+import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
+import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ExtendedMachineImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceRuntimeImpl;
@@ -51,13 +53,15 @@ import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.EventType;
 import org.eclipse.che.commons.lang.concurrent.CloseableLock;
 import org.eclipse.che.commons.lang.concurrent.StripedLocks;
-import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
+import org.eclipse.che.dto.server.DtoFactory;
 import org.slf4j.Logger;
 
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -68,12 +72,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static java.lang.String.format;
+import static java.util.Comparator.comparing;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.SNAPSHOTTING;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPING;
 import static org.eclipse.che.api.machine.shared.Constants.ENVIRONMENT_OUTPUT_CHANNEL_TEMPLATE;
-import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -101,38 +107,36 @@ public class WorkspaceRuntimes {
 
     private static final Logger LOG = getLogger(WorkspaceRuntimes.class);
 
-    @VisibleForTesting
-    final         Map<String, WorkspaceState> workspaces;
-    private final EventService                eventService;
-    private final StripedLocks                stripedLocks;
-    private final CheEnvironmentEngine        environmentEngine;
+    private final Map<String, WorkspaceState> workspaces;
+    private final EventService                eventsService;
+    private final StripedLocks                locks;
+    private final CheEnvironmentEngine        envEngine;
     private final AgentSorter                 agentSorter;
     private final AgentLauncherFactory        launcherFactory;
     private final AgentRegistry               agentRegistry;
-    private final ExecutorService             executor;
+    private final SnapshotDao                 snapshotDao;
+    private final WorkspaceSharedPool         sharedPool;
 
     private volatile boolean isPreDestroyInvoked;
 
     @Inject
-    public WorkspaceRuntimes(EventService eventService,
-                             CheEnvironmentEngine environmentEngine,
+    public WorkspaceRuntimes(EventService eventsService,
+                             CheEnvironmentEngine envEngine,
                              AgentSorter agentSorter,
                              AgentLauncherFactory launcherFactory,
-                             AgentRegistry agentRegistry) {
-        this.eventService = eventService;
-        this.environmentEngine = environmentEngine;
+                             AgentRegistry agentRegistry,
+                             SnapshotDao snapshotDao,
+                             WorkspaceSharedPool sharedPool) {
+        this.eventsService = eventsService;
+        this.envEngine = envEngine;
         this.agentSorter = agentSorter;
         this.launcherFactory = launcherFactory;
         this.agentRegistry = agentRegistry;
+        this.snapshotDao = snapshotDao;
         this.workspaces = new HashMap<>();
         // 16 - experimental value for stripes count, it comes from default hash map size
-        this.stripedLocks = new StripedLocks(16);
-        executor = Executors.newFixedThreadPool(2 * Runtime.getRuntime().availableProcessors(),
-                                                new ThreadFactoryBuilder().setNameFormat("WorkspaceRuntimes-%d")
-                                                                          .setUncaughtExceptionHandler(
-                                                                                  LoggingUncaughtExceptionHandler.getInstance())
-                                                                          .setDaemon(false)
-                                                                          .build());
+        this.locks = new StripedLocks(16);
+        this.sharedPool = sharedPool;
     }
 
     /**
@@ -156,7 +160,7 @@ public class WorkspaceRuntimes {
     public RuntimeDescriptor get(String workspaceId) throws NotFoundException,
                                                             ServerException {
         WorkspaceState workspaceState;
-        try (CloseableLock lock = stripedLocks.acquireReadLock(workspaceId)) {
+        try (CloseableLock lock = locks.acquireReadLock(workspaceId)) {
             workspaceState = workspaces.get(workspaceId);
         }
         if (workspaceState == null) {
@@ -168,7 +172,7 @@ public class WorkspaceRuntimes {
                                                                                              null,
                                                                                              Collections.emptyList(),
                                                                                              null));
-        List<Instance> machines = environmentEngine.getMachines(workspaceId);
+        List<Instance> machines = envEngine.getMachines(workspaceId);
         Optional<Instance> devMachineOptional = machines.stream()
                                                         .filter(machine -> machine.getConfig().isDev())
                                                         .findAny();
@@ -241,10 +245,10 @@ public class WorkspaceRuntimes {
         final EnvironmentImpl environment = copyEnv(workspace, envName);
         final String workspaceId = workspace.getId();
         initState(workspaceId, workspace.getConfig().getName(), envName);
-        return executor.submit(ThreadLocalPropagateContext.wrap(() -> {
+        return sharedPool.submit(() -> {
             doStart(environment, workspaceId, envName, recover);
             return get(workspaceId);
-        }));
+        });
     }
 
     /**
@@ -270,38 +274,50 @@ public class WorkspaceRuntimes {
         // The double check is required as it is still possible to get unlucky timing
         // between locking and stopping workspace.
         ensurePreDestroyIsNotExecuted();
-        try (CloseableLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
+        try (CloseableLock lock = locks.acquireWriteLock(workspaceId)) {
             ensurePreDestroyIsNotExecuted();
             WorkspaceState workspaceState = workspaces.get(workspaceId);
             if (workspaceState == null) {
                 throw new NotFoundException("Workspace with id '" + workspaceId + "' is not running.");
             }
             if (workspaceState.status != WorkspaceStatus.RUNNING) {
-                throw new ConflictException(
-                        format("Couldn't stop '%s' workspace because its status is '%s'. Workspace can be stopped only if it is 'RUNNING'",
-                               workspaceId,
-                               workspaceState.status));
+                throw new ConflictException(format("Couldn't stop '%s' workspace because its status is '%s'. " +
+                                                   "Workspace can be stopped only if it is 'RUNNING'",
+                                                   workspaceId,
+                                                   workspaceState.status));
             }
 
             workspaceState.status = WorkspaceStatus.STOPPING;
         }
 
-        publishWorkspaceEvent(EventType.STOPPING, workspaceId, null);
+        eventsService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
+                                        .withWorkspaceId(workspaceId)
+                                        .withPrevStatus(WorkspaceStatus.RUNNING)
+                                        .withStatus(WorkspaceStatus.STOPPING)
+                                        .withEventType(EventType.STOPPING));
         String error = null;
         try {
-            environmentEngine.stop(workspaceId);
+            envEngine.stop(workspaceId);
         } catch (ServerException | RuntimeException e) {
             error = e.getLocalizedMessage();
         } finally {
-            try (CloseableLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
+            try (CloseableLock lock = locks.acquireWriteLock(workspaceId)) {
                 workspaces.remove(workspaceId);
             }
         }
+
+        final WorkspaceStatusEvent event = DtoFactory.newDto(WorkspaceStatusEvent.class)
+                                                     .withWorkspaceId(workspaceId)
+                                                     .withPrevStatus(WorkspaceStatus.STOPPING);
         if (error == null) {
-            publishWorkspaceEvent(EventType.STOPPED, workspaceId, null);
+            event.setStatus(WorkspaceStatus.STOPPED);
+            event.setEventType(EventType.STOPPED);
         } else {
-            publishWorkspaceEvent(EventType.ERROR, workspaceId, error);
+            event.setStatus(WorkspaceStatus.STOPPED);
+            event.setEventType(EventType.ERROR);
+            event.setError(error);
         }
+        eventsService.publish(event);
     }
 
     /**
@@ -331,7 +347,7 @@ public class WorkspaceRuntimes {
      * @return true if workspace is running, otherwise false
      */
     public boolean hasRuntime(String workspaceId) {
-        try (CloseableLock lock = stripedLocks.acquireReadLock(workspaceId)) {
+        try (CloseableLock lock = locks.acquireReadLock(workspaceId)) {
             return workspaces.containsKey(workspaceId);
         }
     }
@@ -357,7 +373,7 @@ public class WorkspaceRuntimes {
                                                                      NotFoundException,
                                                                      EnvironmentException {
 
-        try (CloseableLock lock = stripedLocks.acquireReadLock(workspaceId)) {
+        try (CloseableLock lock = locks.acquireReadLock(workspaceId)) {
             getRunningState(workspaceId);
         }
 
@@ -367,14 +383,15 @@ public class WorkspaceRuntimes {
 
         List<String> agents = Collections.singletonList("org.eclipse.che.terminal");
 
-        Instance instance = environmentEngine.startMachine(workspaceId, machineConfigCopy, agents);
+        Instance instance = envEngine.startMachine(workspaceId, machineConfigCopy, agents);
         launchAgents(instance, agents);
 
-        try (CloseableLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
+        try (CloseableLock lock = locks.acquireWriteLock(workspaceId)) {
+            ensurePreDestroyIsNotExecuted();
             WorkspaceState workspaceState = workspaces.get(workspaceId);
             if (workspaceState == null || workspaceState.status != RUNNING) {
                 try {
-                    environmentEngine.stopMachine(workspaceId, instance.getId());
+                    envEngine.stopMachine(workspaceId, instance.getId());
                 } catch (NotFoundException | ServerException | ConflictException e) {
                     LOG.error(e.getLocalizedMessage(), e);
                 }
@@ -386,36 +403,87 @@ public class WorkspaceRuntimes {
     }
 
     /**
-     * Changes workspace runtimes status from RUNNING to SNAPSHOTTING.
+     * Synchronously creates a snapshot of a given workspace,
+     * the workspace must be {@link WorkspaceStatus#RUNNING}.
+     *
+     * <p>Publishes {@link EventType#SNAPSHOT_CREATING}, {@link EventType#SNAPSHOT_CREATED},
+     * {@link EventType#SNAPSHOT_CREATION_ERROR} like defined by {@link EventType}.
      *
      * @param workspaceId
-     *         the id of the workspace to begin snapshotting for
+     *         the id of workspace to create snapshot
      * @throws NotFoundException
-     *         when workspace with such id doesn't have runtime
+     *         when workspace doesn't have a runtime
      * @throws ConflictException
-     *         when workspace status is different from SNAPSHOTTING
-     * @see WorkspaceStatus#SNAPSHOTTING
+     *         when workspace status is different from {@link WorkspaceStatus#RUNNING}
+     * @throws ServerException
+     *         when any other error occurs
      */
-    public void beginSnapshotting(String workspaceId) throws NotFoundException, ConflictException {
-        try (CloseableLock ignored = stripedLocks.acquireWriteLock(workspaceId)) {
+    public void snapshot(String workspaceId) throws NotFoundException,
+                                                    ConflictException,
+                                                    ServerException {
+        try (@SuppressWarnings("unused") CloseableLock l = locks.acquireWriteLock(workspaceId)) {
             getRunningState(workspaceId).status = SNAPSHOTTING;
         }
+        snapshotAndUpdateStatus(workspaceId);
     }
 
     /**
-     * Changes workspace runtimes status from SNAPSHOTTING back to RUNNING.
-     * This method won't affect workspace runtime or throw any exception
-     * if workspace is not in running status or doesn't have runtime.
+     * Asynchronously creates a snapshot of a given workspace,
+     * but synchronously toggles workspace status to {@link WorkspaceStatus#SNAPSHOTTING}
+     * or throws an error if it is impossible to do so.
      *
-     * @param workspaceId
-     *         the id of the workspace to finish snapshotting for
-     * @see WorkspaceStatus#SNAPSHOTTING
+     * @see #snapshot(String)
      */
-    public void finishSnapshotting(String workspaceId) {
-        try (CloseableLock ignored = stripedLocks.acquireWriteLock(workspaceId)) {
-            final WorkspaceState state = workspaces.get(workspaceId);
-            if (state != null && state.status == SNAPSHOTTING) {
-                state.status = RUNNING;
+    public Future<Void> snapshotAsync(String workspaceId) throws NotFoundException, ConflictException {
+        try (@SuppressWarnings("unused") CloseableLock l = locks.acquireWriteLock(workspaceId)) {
+            getRunningState(workspaceId).status = SNAPSHOTTING;
+        }
+        return sharedPool.submit(() -> {
+            try {
+                snapshotAndUpdateStatus(workspaceId);
+            } catch (Exception x) {
+                LOG.error(format("Couldn't create a snapshot of workspace '%s'", workspaceId), x);
+                throw x;
+            }
+            return null;
+        });
+    }
+
+    /**
+     * Removes snapshot binaries in implementation specific way.
+     *
+     * @param snapshot
+     *         snapshot that will be removed
+     * @return true if binaries are successfully removed,
+     * otherwise if binaries not found returns false
+     * @throws ServerException
+     *         if any error occurs during binaries removal
+     * @see CheEnvironmentEngine#removeSnapshot(SnapshotImpl)
+     */
+    public boolean removeBinaries(SnapshotImpl snapshot) throws ServerException {
+        try {
+            envEngine.removeSnapshot(snapshot);
+        } catch (NotFoundException x) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Removes binaries of all the snapshots, continues to remove
+     * snapshots if removal of binaries for a single snapshot fails.
+     *
+     * @param snapshots
+     *         the list of snapshots to remove binaries
+     */
+    public void removeBinaries(Collection<? extends SnapshotImpl> snapshots) {
+        for (SnapshotImpl snapshot : snapshots) {
+            try {
+                if (!removeBinaries(snapshot)) {
+                    LOG.warn("An attempt to remove binaries of the snapshot '{}' while there are no binaries", snapshot.getId());
+                }
+            } catch (ServerException x) {
+                LOG.error(format("Couldn't remove snapshot '%s', workspace id '%s'", snapshot.getId(), snapshot.getWorkspaceId()), x);
             }
         }
     }
@@ -429,6 +497,7 @@ public class WorkspaceRuntimes {
      *         ID of machine that should be stopped
      * @throws NotFoundException
      *         if machine is not found in the environment
+     *         or workspace doesn't have a runtime
      * @throws ConflictException
      *         if environment is not running
      * @throws ConflictException
@@ -439,59 +508,10 @@ public class WorkspaceRuntimes {
     public void stopMachine(String workspaceId, String machineId) throws NotFoundException,
                                                                          ServerException,
                                                                          ConflictException {
-        try (CloseableLock lock = stripedLocks.acquireReadLock(workspaceId)) {
-            WorkspaceState workspaceState = workspaces.get(workspaceId);
-            if (workspaceState == null || workspaceState.status != RUNNING) {
-                throw new ConflictException(format("Environment of workspace '%s' is not running", workspaceId));
-            }
+        try (CloseableLock lock = locks.acquireReadLock(workspaceId)) {
+            getRunningState(workspaceId);
         }
-        environmentEngine.stopMachine(workspaceId, machineId);
-    }
-
-    /**
-     * Save snapshot of running machine.
-     *
-     * @param namespace
-     *         namespace of workspace
-     * @param workspaceId
-     *         ID of workspace that owns machine
-     * @param machineId
-     *         ID of machine that should be saved
-     * @return snapshot description
-     * @throws NotFoundException
-     *         if machine is not running
-     * @throws ConflictException
-     *         if environment of machine is not running
-     * @throws ServerException
-     *         if another error occurs
-     */
-    public SnapshotImpl saveMachine(String namespace,
-                                    String workspaceId,
-                                    String machineId) throws NotFoundException,
-                                                             ServerException,
-                                                             ConflictException {
-
-        try (CloseableLock lock = stripedLocks.acquireReadLock(workspaceId)) {
-            WorkspaceState workspaceState = workspaces.get(workspaceId);
-            if (workspaceState == null || !(workspaceState.status == SNAPSHOTTING || workspaceState.status == RUNNING)) {
-                throw new ConflictException(format("Environment of workspace '%s' is not running or snapshotting", workspaceId));
-            }
-        }
-        return environmentEngine.saveSnapshot(namespace, workspaceId, machineId);
-    }
-
-    /**
-     * Removes implementation specific representation of snapshot.
-     *
-     * @param snapshot
-     *         description of snapshot that should be removed
-     * @throws NotFoundException
-     *         if snapshot is not found
-     * @throws ServerException
-     *         if error occurs
-     */
-    public void removeSnapshot(SnapshotImpl snapshot) throws ServerException, NotFoundException {
-        environmentEngine.removeSnapshot(snapshot);
+        envEngine.stopMachine(workspaceId, machineId);
     }
 
     /**
@@ -506,7 +526,7 @@ public class WorkspaceRuntimes {
      *         if environment or machine is not running
      */
     public Instance getMachine(String workspaceId, String machineId) throws NotFoundException {
-        return environmentEngine.getMachine(workspaceId, machineId);
+        return envEngine.getMachine(workspaceId, machineId);
     }
 
     /**
@@ -536,43 +556,52 @@ public class WorkspaceRuntimes {
     void cleanup() {
         isPreDestroyInvoked = true;
 
-        try (CloseableLock lock = stripedLocks.acquireWriteAllLock()) {
-            for (Map.Entry<String, WorkspaceState> workspace : workspaces.entrySet()) {
-                if (workspace.getValue().status.equals(RUNNING) ||
-                    workspace.getValue().status.equals(WorkspaceStatus.STARTING)) {
-                    executor.execute(() -> {
-                        try {
-                            environmentEngine.stop(workspace.getKey());
-                        } catch (ServerException | NotFoundException e) {
-                            LOG.error(e.getLocalizedMessage(), e);
-                        }
-                    });
-                }
-            }
+        // wait existing tasks to complete
+        sharedPool.terminateAndWait();
 
+        List<String> idsToStop;
+        try (@SuppressWarnings("unused") CloseableLock l = locks.acquireWriteAllLock()) {
+            idsToStop = workspaces.entrySet()
+                                  .stream()
+                                  .filter(e -> e.getValue().status != STOPPING)
+                                  .map(Map.Entry::getKey)
+                                  .collect(Collectors.toList());
             workspaces.clear();
-
-            executor.shutdown();
         }
+
+        // nothing to stop
+        if (idsToStop.isEmpty()) {
+            return;
+        }
+
+        LOG.info("Shutdown running workspaces, workspaces to shutdown '{}'", idsToStop.size());
+        ExecutorService executor =
+                Executors.newFixedThreadPool(2 * Runtime.getRuntime().availableProcessors(),
+                                             new ThreadFactoryBuilder().setNameFormat("StopEnvironmentsPool-%d")
+                                                                       .setDaemon(false)
+                                                                       .build());
+        for (String id : idsToStop) {
+            executor.execute(() -> {
+                try {
+                    envEngine.stop(id);
+                } catch (Exception x) {
+                    LOG.error(x.getMessage(), x);
+                }
+            });
+        }
+
+        executor.shutdown();
         try {
-            if (!executor.awaitTermination(50, TimeUnit.SECONDS)) {
+            if (!executor.awaitTermination(30, TimeUnit.SECONDS)) {
                 executor.shutdownNow();
-                if (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
-                    LOG.warn("Unable terminate destroy machines pool");
+                if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
+                    LOG.error("Unable terminate machines pool");
                 }
             }
         } catch (InterruptedException e) {
             executor.shutdownNow();
             Thread.currentThread().interrupt();
         }
-    }
-
-    @VisibleForTesting
-    void publishWorkspaceEvent(EventType type, String workspaceId, String error) {
-        eventService.publish(newDto(WorkspaceStatusEvent.class)
-                                     .withEventType(type)
-                                     .withWorkspaceId(workspaceId)
-                                     .withError(error));
     }
 
     private void ensurePreDestroyIsNotExecuted() throws ServerException {
@@ -587,7 +616,7 @@ public class WorkspaceRuntimes {
             throw new NotFoundException("Workspace with id '" + workspaceId + "' is not running");
         }
         if (state.getStatus() != RUNNING) {
-            throw new ConflictException(format("Workspace with id '%s' is not in 'RUNNING', it's status is '%s'",
+            throw new ConflictException(format("Workspace with id '%s' is not 'RUNNING', it's status is '%s'",
                                                workspaceId,
                                                state.getStatus()));
         }
@@ -613,7 +642,7 @@ public class WorkspaceRuntimes {
      * saves the state or throws an appropriate exception if the workspace is already initialized.
      */
     private void initState(String workspaceId, String workspaceName, String envName) throws ConflictException, ServerException {
-        try (CloseableLock ignored = stripedLocks.acquireWriteLock(workspaceId)) {
+        try (CloseableLock ignored = locks.acquireWriteLock(workspaceId)) {
             ensurePreDestroyIsNotExecuted();
             final WorkspaceState state = workspaces.get(workspaceId);
             if (state != null) {
@@ -630,37 +659,48 @@ public class WorkspaceRuntimes {
                          String workspaceId,
                          String envName,
                          boolean recover) throws ServerException {
-        publishWorkspaceEvent(EventType.STARTING, workspaceId, null);
+        eventsService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
+                                        .withWorkspaceId(workspaceId)
+                                        .withStatus(WorkspaceStatus.STARTING)
+                                        .withEventType(EventType.STARTING)
+                                        .withPrevStatus(WorkspaceStatus.STOPPED));
+
         try {
-            List<Instance> machines = environmentEngine.start(workspaceId,
-                                                              envName,
-                                                              environment,
-                                                              recover,
-                                                              getEnvironmentLogger(workspaceId));
+            List<Instance> machines = envEngine.start(workspaceId,
+                                                      envName,
+                                                      environment,
+                                                      recover,
+                                                      getEnvironmentLogger(workspaceId));
             launchAgents(environment, machines);
 
-            try (CloseableLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
+            try (CloseableLock lock = locks.acquireWriteLock(workspaceId)) {
+                ensurePreDestroyIsNotExecuted();
                 WorkspaceState workspaceState = workspaces.get(workspaceId);
                 workspaceState.status = WorkspaceStatus.RUNNING;
             }
-            // Event publication should be performed outside of the lock
-            // as it may take some time to notify subscribers
-            publishWorkspaceEvent(EventType.RUNNING, workspaceId, null);
+
+            eventsService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
+                                            .withWorkspaceId(workspaceId)
+                                            .withStatus(WorkspaceStatus.RUNNING)
+                                            .withEventType(EventType.RUNNING)
+                                            .withPrevStatus(WorkspaceStatus.STARTING));
         } catch (ApiException | EnvironmentException | RuntimeException e) {
             try {
-                environmentEngine.stop(workspaceId);
+                envEngine.stop(workspaceId);
             } catch (EnvironmentNotRunningException ignore) {
             } catch (Exception ex) {
                 LOG.error(ex.getLocalizedMessage(), ex);
             }
             String environmentStartError = "Start of environment " + envName +
                                            " failed. Error: " + e.getLocalizedMessage();
-            try (CloseableLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
+            try (CloseableLock lock = locks.acquireWriteLock(workspaceId)) {
                 workspaces.remove(workspaceId);
             }
-            publishWorkspaceEvent(EventType.ERROR,
-                                  workspaceId,
-                                  environmentStartError);
+            eventsService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
+                                            .withWorkspaceId(workspaceId)
+                                            .withEventType(EventType.ERROR)
+                                            .withPrevStatus(WorkspaceStatus.STARTING)
+                                            .withError(environmentStartError));
 
             throw new ServerException(environmentStartError, e);
         }
@@ -687,6 +727,89 @@ public class WorkspaceRuntimes {
                                                       envName));
         }
         return new EnvironmentImpl(environment);
+    }
+
+    /**
+     * Safely compares current status of given workspace
+     * with {@code from} and if they are equal sets the status to {@code to}.
+     * Returns true if the status of workspace was updated with {@code to} value.
+     */
+    private boolean compareAndSetStatus(String id, WorkspaceStatus from, WorkspaceStatus to) {
+        try (@SuppressWarnings("unused") CloseableLock l = locks.acquireWriteLock(id)) {
+            WorkspaceState state = workspaces.get(id);
+            if (state != null && state.getStatus() == from) {
+                state.status = to;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Creates a snapshot and changes status SNAPSHOTTING -> RUNNING . */
+    private void snapshotAndUpdateStatus(String workspaceId) throws NotFoundException,
+                                                                    ConflictException,
+                                                                    ServerException {
+        eventsService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
+                                        .withWorkspaceId(workspaceId)
+                                        .withStatus(WorkspaceStatus.SNAPSHOTTING)
+                                        .withEventType(EventType.SNAPSHOT_CREATING)
+                                        .withPrevStatus(WorkspaceStatus.RUNNING));
+
+        WorkspaceRuntimeImpl runtime = get(workspaceId).getRuntime();
+        List<MachineImpl> machines = runtime.getMachines();
+        machines.sort(comparing(m -> !m.getConfig().isDev(), Boolean::compare));
+
+        LOG.info("Creating snapshot of workspace '{}', machines to snapshot: '{}'", workspaceId, machines.size());
+        List<SnapshotImpl> newSnapshots = new ArrayList<>(machines.size());
+        for (MachineImpl machine : machines) {
+            try {
+                newSnapshots.add(envEngine.saveSnapshot(workspaceId, machine.getId()));
+            } catch (ServerException | NotFoundException x) {
+                if (machine.getConfig().isDev()) {
+                    compareAndSetStatus(workspaceId, WorkspaceStatus.SNAPSHOTTING, WorkspaceStatus.RUNNING);
+                    eventsService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
+                                                    .withWorkspaceId(workspaceId)
+                                                    .withStatus(WorkspaceStatus.RUNNING)
+                                                    .withEventType(EventType.SNAPSHOT_CREATION_ERROR)
+                                                    .withPrevStatus(WorkspaceStatus.SNAPSHOTTING)
+                                                    .withError(x.getMessage()));
+                    throw x;
+                }
+                LOG.warn(format("Couldn't create snapshot of machine '%s:%s' in workspace '%s'",
+                                machine.getEnvName(),
+                                machine.getConfig().getName(),
+                                workspaceId));
+            }
+        }
+
+        LOG.info("Saving new snapshots metadata, workspace id '{}'", workspaceId);
+        try {
+            List<SnapshotImpl> removed = snapshotDao.replaceSnapshots(workspaceId,
+                                                                      runtime.getActiveEnv(),
+                                                                      newSnapshots);
+            if (!removed.isEmpty()) {
+                LOG.info("Removing old snapshots binaries, workspace id '{}', snapshots to remove '{}'", workspaceId, removed.size());
+                removeBinaries(removed);
+            }
+        } catch (SnapshotException x) {
+            LOG.error(format("Couldn't remove existing snapshots metadata for workspace '%s'", workspaceId), x);
+            LOG.info("Removing newly created snapshots, workspace id '{}', snapshots to remove '{}'", workspaceId, newSnapshots.size());
+            removeBinaries(newSnapshots);
+            compareAndSetStatus(workspaceId, WorkspaceStatus.SNAPSHOTTING, WorkspaceStatus.RUNNING);
+            eventsService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
+                                            .withWorkspaceId(workspaceId)
+                                            .withStatus(WorkspaceStatus.RUNNING)
+                                            .withEventType(EventType.SNAPSHOT_CREATION_ERROR)
+                                            .withPrevStatus(WorkspaceStatus.SNAPSHOTTING)
+                                            .withError(x.getMessage()));
+            throw x;
+        }
+        compareAndSetStatus(workspaceId, WorkspaceStatus.SNAPSHOTTING, WorkspaceStatus.RUNNING);
+        eventsService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
+                                        .withStatus(WorkspaceStatus.RUNNING)
+                                        .withWorkspaceId(workspaceId)
+                                        .withEventType(EventType.SNAPSHOT_CREATED)
+                                        .withPrevStatus(WorkspaceStatus.SNAPSHOTTING));
     }
 
     public static class WorkspaceState {
