@@ -105,7 +105,7 @@ It provides a docker runtime. Link to the Dockerfile recipe can be provided by a
 ```json  
 "source": {
   "type": "dockerfile",
-  "content": "FROM codenvy/ubuntu_jdk8
+  "content": "FROM eclipse/ubuntu_jdk8
               RUN echo hello world
               ENV MYCUSTOM=VALUE"
 }
@@ -116,14 +116,14 @@ location can include the dockerhub image name
 ```json  
 "source": {
   "type": "image",
-  "location": "codenvy/ubuntu_jdk8"
+  "location": "eclipse/ubuntu_jdk8"
 }
 ```
  or for example include a registry url with a custom tag or a custom digest
 ```text  
 "source": {
   "type": "image",
-  "location": "myregistry:5000/codenvy/ubuntu_jdk8:myCustomTag"
+  "location": "myregistry:5000/eclipse/ubuntu_jdk8:myCustomTag"
 }
 ```
 
@@ -143,7 +143,7 @@ A mixin adds additional behaviors to a project as a set of new project type attr
 | --- | ---
 | `git`   | Initiates the project with a git repository. Adds git menu functionality to the IDE. If a user in the IDE creates a new project and then initializes a git repository, then this mixin is added to that project.   
 | `tour`  | Enables walk-me style guided tour functionality. You can author custom step by step tours that execute when users create a new workspace.  See [Tour](../../docs/tour) for specification and examples.   
-| `pullrequest`   | Enables pull request workflow where Codenvy handles local & remote branching, forking, and pull request issuance. Pull requests generated from within Codenvy have another Factory placed into the comments of pull requests that a PR reviewer can consume. Adds contribution panel to the IDE. If this mixin is set, then it uses attribute values for `project.attributes.local_branch` and `project.attributes.contribute_to_branch`.   
+| `pullrequest`   | Enables pull request workflow where server handles local & remote branching, forking, and pull request issuance. Pull requests generated from within server have another Factory placed into the comments of pull requests that a PR reviewer can consume. Adds contribution panel to the IDE. If this mixin is set, then it uses attribute values for `project.attributes.local_branch` and `project.attributes.contribute_to_branch`.   
 
 The `pullrequest` mixin requires additional configuration from the `attributes` object of the project.  
 
@@ -176,7 +176,7 @@ factory.workspace.project : {
 
   "source" : {
     "type"       : "git",
-    "location"   : "https://github.com/codenvy/che.git",
+    "location"   : "https://github.com/eclipse/che.git",
     "parameters" : {
       "keepVcs" : "true"
     }
@@ -272,30 +272,7 @@ project.modules : [{
 }]
 
 ```
-In the IDE, you can set a module with the "context root". When a module has the context root, the project tree is redrawn with the module at the root node. You can step into or step out of a module.  Each module can have its own project type, attributes and mixins. If you create a project with a set of modules, the entire repository will be cloned into the workspace even if you choose to only display a single module.
-```json  
-"projects" : [{  
-  "name"        : "che-core",
-  "attributes"  : {},
-  "type"        : "maven",
-    "source":{  
-    "location"   : "https://github.com/codenvy/che-core.git",
-    "type"       : "git",
-    "parameters" : {}
-  },
 
-  "path"        : "/che-core";
-  "description" : "test project description",
-  "mixins"      : [],
-
-  "modules"     : [{  
-    "name"       : "platform-api",
-    "type"       : "maven",
-    "path"       : "/che-core/platform-api"
-  }]
-}]
-
-```
 ## Commands
 When authoring a project template we recommend to predefine commands to register build and run actions. [Learn more about commands.](../../docs/commands)
 ```json  
@@ -366,7 +343,7 @@ JSON:
   "description": "Default Java Stack with JDK 8, Maven and Tomcat.",
   "scope": "general",
   "source": {
-    "origin": "codenvy/ubuntu_jdk8",
+    "origin": "eclipse/ubuntu_jdk8",
     "type": "image"
   },
   "tags": [
@@ -382,7 +359,7 @@ JSON:
     "environments": {
       "default": {
         "recipe": {
-          "location": "codenvy/ubuntu_jdk8",
+          "location": "eclipse/ubuntu_jdk8",
           "type": "dockerimage"
         },
         "machines": {

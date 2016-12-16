@@ -77,13 +77,13 @@ docker run --rm -it --cap-add SYS_ADMIN --device /dev/fuse
             -v /etc/passwd:/etc/passwd:ro
             -v <path-to-sync-profile>:/profile
             -u $(id -u ${USER})
-            -v <host-dir>:/mnthost codenvy/che-mount <ws-id|ws-name>
+            -v <host-dir>:/mnthost eclipse/che-mount <ws-id|ws-name>
 
 # On Mac or Windows:
 docker run --rm -it --cap-add SYS_ADMIN --device /dev/fuse
            --name che-mount
            -v <path-to-sync-profile>:/profile
-           -v <host-dir>:/mnthost codenvy/che-mount <ip> <ws-id|ws-name>
+           -v <host-dir>:/mnthost eclipse/che-mount <ip> <ws-id|ws-name>
 
 # where <ip> is the IP address of your Docker daemon discoverable by:
 docker run --rm --net host \

@@ -8,9 +8,9 @@ permalink: /:categories/docker-server/
 #### Requires Eclipse Che 5.0.0-M6+
 Starting in Eclipse Che M6 release, we altered the structure of the Che container. The launching syntax is simplified to consolidate data into a single folder and to use environment variables more. This syntax will not work with the eclipse/che-server:latest and you may have to use eclipse/che-server:nightly or eclipse/che-server:5.0.0-M6 or eclipse/che-server:5.0.0-latest to get the right version.  
 
-Eclipse Che has an [image available within Docker Hub](https://hub.docker.com/r/codenvy/che-server/). This image only runs the Che server and requires your Docker clients to have additional configuration that varies by operating system.
+Eclipse Che has an [image available within Docker Hub](https://hub.docker.com/r/eclipse/che-server/). This image only runs the Che server and requires your Docker clients to have additional configuration that varies by operating system.
 
-!!!NOTE:  This is a new syntax that is not available on Docker Hub yet. To get this new approach, you need to build a codenvy/che-server:nightly directly.  Please see this [pull request](https://github.com/eclipse/che/pull/2786) for details on how to run it.
+!!!NOTE:  This is a new syntax that is not available on Docker Hub yet. To get this new approach, you need to build a eclipse/che-server:nightly directly.  Please see this [pull request](https://github.com/eclipse/che/pull/2786) for details on how to run it.
 
 The preferred technique for running Eclipse Che is with our [Usage: Docker](doc:usage-docker) launcher which simplifies the syntax and provides a consistent client that works on any operating system. There are quirks to running the Che server container on Windows and Mac, so the `che-launcher` is encouraged.
 
@@ -28,10 +28,10 @@ docker run -p 8080:8080 \
            -v <path-for-data>:/data \
            eclipse/che-server:5.0.0-latest
 
-# To run the nightly version of Che, replace codenvy/che with
+# To run the nightly version of Che, replace eclipse/che-server:5.0.0-latest with
 eclipse/che-server:nightly
 
-# To run a specific tagged version of Che, replace codenvy/che with
+# To run a specific tagged version of Che, replace eclipse/che-server:5.0.0-latest with
 eclipse/che-server:<version>
 
 # Stop the container running Che

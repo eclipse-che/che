@@ -86,7 +86,7 @@ Start the ARTIK-IDE:
 ```shell  
 artik-ide start
 
-INFO: ARTIK-IDE: Found image codenvy/che-launcher
+INFO: ARTIK-IDE: Found image eclipse/che-launcher
 INFO: ARTIK-IDE: Starting launcher
 INFO: ARTIK-IDE: Already have image codenvy/artikide
 INFO: ARTIK-IDE: Starting container...

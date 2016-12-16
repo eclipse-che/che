@@ -6,9 +6,6 @@ kramdown:
   toc_levels:     1..6
   smart_quotes:   lsquo,rsquo,ldquo,rdquo
   input:          GFM
-#gauges_id: 503c5af6613f5d0f19000027
-#google_analytics_id: UA-50755011-1
-#google_site_verification: onQcXpAvtHBrUI5LlroHNE_FP0b2qvFyPq7VZw36iEY
 
 repository: https://github.com/codenvy/codenvy
 #help_url: https://github.com/jekyll/jekyll-help
@@ -20,16 +17,17 @@ collections:
     output: true
   tutorials:
     output: true
-  posts:
-    permalink: /news/:year/:month/:day/:title/
+  openshift:
+    output: true
+  artik:
     output: true
 
-name: Codenvy Docs
+name: Eclipse Che Docs
 description: Cloud workspaces for development teams
-url: https://codenvy.com
+url: https://www.eclipse.org/che/
 
 twitter:
-  username: codenvyhq
+  username: eclipse_che
 
 logo: /img/logo-2x.png
 
@@ -37,10 +35,6 @@ gems:
   - jekyll-feed
   - jekyll-redirect-from
   - jekyll-sitemap
-#  - jekyll-mentions
-#  - jekyll-avatar
-#  - jekyll-seo-tag
-#  - jemoji
 
 exclude:
   - /dev/

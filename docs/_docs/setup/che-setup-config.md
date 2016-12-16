@@ -34,7 +34,7 @@ You can set environment variables that will affect the behavior of the CLI. Thes
 | `CHE_SERVER_CONTAINER_NAME`   | Changes the pretty-name of the container used to start the Che server. Change the name if you want to have multiple Che servers running as containers at the same time.   | `che-server`   
 | `CHE_DATA_FOLDER`   | Folder where user workspaces and Che preferences are saved.   | `/home/user/che`   
 | `CHE_LOG_LEVEL`   | Logging level of output for Che server. Can be `debug` or `info`.   | `info`   
-| `CHE_LAUNCHER_IMAGE_NAME`\n`CHE_SERVER_IMAGE_NAME`\n`CHE_FILE_IMAGE_NAME`\n`CHE_MOUNT_IMAGE_NAME`\n`CHE_TEST_IMAGE_NAME`   | Che uses various Docker images as utilities. Each image provides a different capability and is when launched as a container, given a container name. You can change the image names if you want to use one that you have built locally   | `eclipse/che`\n`codenvy/che-server`\n`codenvy/che-file`\n`codenvy/che-mount`\n`codenvy/che-test`   
+| `CHE_LAUNCHER_IMAGE_NAME`\n`CHE_SERVER_IMAGE_NAME`\n`CHE_FILE_IMAGE_NAME`\n`CHE_MOUNT_IMAGE_NAME`\n`CHE_TEST_IMAGE_NAME`   | Che uses various Docker images as utilities. Each image provides a different capability and is when launched as a container, given a container name. You can change the image names if you want to use one that you have built locally   | `eclipse/che`\n`eclipse/che-server`\n`eclipse/che-file`\n`eclipse/che-mount`\n`eclipse/che-test`   
 | `CHE_IS_INTERACTIVE`   | Set to `false` if you want the CLI to work in environments where there is no interactivivity available, such as part of a provisioner within Vagrant.   | `true`   
 | `CHE_PRODUCT_NAME`\n`CHE_MINI_PRODUCT_NAME`   | Sets the miniature and full product names used by the utilities in their output to the console.   | `ECLIPSE CHE`\n`che`   
 | `CHE_HOST_IP`   | IP address Che server will bind to. Used by browsers to contact workspaces. You must set this IP address if you want to bind the Che server to an external IP address that is not the same as Docker's.   | The IP address set to the Docker host.   
@@ -66,13 +66,13 @@ If you set the `CHE_LOCAL_CONF` environment variable, it will point to a directo
 ## Other Customizations
 Additionally, there are a number of other areas you can customize inside Che through [System properties](https://eclipse-che.readme.io/docs/configuration#configure-che-using-the-che-server)
 # Configure Che Using the Che Launcher  
-If you are using our `docker run eclipse/che start` or `docker run codenvy/che-launcher start` syntax, there is a smaller set of environment variables that are available and all `che.properties` must be provided in a custom file.  See [Usage: Docker Launcher](https://eclipse-che.readme.io/docs/usage-docker) for specifics.
+If you are using our `docker run eclipse/che start` or `docker run eclipse/che-launcher start` syntax, there is a smaller set of environment variables that are available and all `che.properties` must be provided in a custom file.  See [Usage: Docker Launcher](https://eclipse-che.readme.io/docs/usage-docker) for specifics.
 
 Additionally, there are a number of other areas you can customize inside Che through [System properties](https://eclipse-che.readme.io/docs/configuration#configure-che-using-the-che-server)
 # Configure Che Using the Che Server  
 This method is not recommended as it is the most error prone and complex.
 
-If you are using our `docker run codenvy/che-server` syntax, you can customize the Che server by passing in a `che.properties` file and with some limited command line options. See [Usage: Docker Server](https://eclipse-che.readme.io/docs/usage-docker-server#section-pass-che-command-line-options) for specifics.
+If you are using our `docker run eclipse/che-server` syntax, you can customize the Che server by passing in a `che.properties` file and with some limited command line options. See [Usage: Docker Server](https://eclipse-che.readme.io/docs/usage-docker-server#section-pass-che-command-line-options) for specifics.
 
 Additionally, there are a number of other areas you can customize inside Che through [System properties](https://eclipse-che.readme.io/docs/configuration#configure-che-using-the-che-server)
 # Custom Workspace Properties  
