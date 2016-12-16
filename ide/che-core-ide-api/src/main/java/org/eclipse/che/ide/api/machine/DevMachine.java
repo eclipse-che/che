@@ -69,7 +69,6 @@ public class DevMachine implements MachineEntity {
         return true;
     }
 
-    @Override
     public String getType() {
         return devMachineDescriptor.getConfig().getType();
     }
@@ -96,7 +95,6 @@ public class DevMachine implements MachineEntity {
         throw new RuntimeException(message);
     }
 
-    @Override
     public String getTerminalUrl() {
         for (Link link : devMachineLinks) {
             if (Constants.TERMINAL_REFERENCE.equals(link.getRel())) {
@@ -105,6 +103,18 @@ public class DevMachine implements MachineEntity {
         }
         //should not be
         final String message = "Reference " + Constants.TERMINAL_REFERENCE + " not found in DevMachine description";
+        Log.error(getClass(), message);
+        throw new RuntimeException(message);
+    }
+
+    public String getExecAgentUrl() {
+        for (Link link : devMachineLinks) {
+            if (Constants.EXEC_AGENT_REFERENCE.equals(link.getRel())) {
+                return link.getHref();
+            }
+        }
+        //should not be
+        final String message = "Reference " + Constants.EXEC_AGENT_REFERENCE + " not found in DevMachine description";
         Log.error(getClass(), message);
         throw new RuntimeException(message);
     }
@@ -155,7 +165,6 @@ public class DevMachine implements MachineEntity {
         return machineConfig;
     }
 
-    @Override
     public String getId() {
         return devMachineDescriptor.getId();
     }

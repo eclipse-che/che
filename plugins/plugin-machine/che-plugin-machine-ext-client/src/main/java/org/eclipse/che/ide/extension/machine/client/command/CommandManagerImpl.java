@@ -28,6 +28,7 @@ import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandPage;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
+import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
@@ -58,11 +59,11 @@ public class CommandManagerImpl implements CommandManager {
     private final CommandTypeRegistry     commandTypeRegistry;
     private final AppContext              appContext;
     private final WorkspaceServiceClient  workspaceServiceClient;
-    private final MachineServiceClient    machineServiceClient;
     private final DtoFactory              dtoFactory;
     private final MacroProcessor          macroProcessor;
     private final CommandConsoleFactory   commandConsoleFactory;
     private final ProcessesPanelPresenter processesPanelPresenter;
+    private final ExecAgentCommandManager execAgentCommandManager;
 
     private final Map<String, CommandImpl>    commands;
     private final Set<CommandChangedListener> commandChangedListeners;
@@ -71,19 +72,19 @@ public class CommandManagerImpl implements CommandManager {
     public CommandManagerImpl(CommandTypeRegistry commandTypeRegistry,
                               AppContext appContext,
                               WorkspaceServiceClient workspaceServiceClient,
-                              MachineServiceClient machineServiceClient,
                               DtoFactory dtoFactory,
                               MacroProcessor macroProcessor,
                               CommandConsoleFactory commandConsoleFactory,
-                              ProcessesPanelPresenter processesPanelPresenter) {
+                              ProcessesPanelPresenter processesPanelPresenter,
+                              ExecAgentCommandManager execAgentCommandManager) {
         this.commandTypeRegistry = commandTypeRegistry;
         this.appContext = appContext;
         this.workspaceServiceClient = workspaceServiceClient;
-        this.machineServiceClient = machineServiceClient;
         this.dtoFactory = dtoFactory;
         this.macroProcessor = macroProcessor;
         this.commandConsoleFactory = commandConsoleFactory;
         this.processesPanelPresenter = processesPanelPresenter;
+        this.execAgentCommandManager = execAgentCommandManager;
 
         commands = new HashMap<>();
         commandChangedListeners = new HashSet<>();
@@ -214,43 +215,24 @@ public class CommandManagerImpl implements CommandManager {
 
     @Override
     public void executeCommand(final CommandImpl command, final Machine machine) {
-        final String outputChannel = "process:output:" + UUID.uuid();
+        final String name = command.getName();
+        final String type = command.getType();
+        final String commandLine = command.getCommandLine();
 
         final CommandOutputConsole console = commandConsoleFactory.create(command, machine);
-        console.listenToOutput(outputChannel);
-        processesPanelPresenter.addCommandOutput(machine.getId(), console);
+        final String machineId = machine.getId();
 
-        macroProcessor.expandMacros(command.getCommandLine()).then(new Operation<String>() {
+        processesPanelPresenter.addCommandOutput(machineId, console);
+        macroProcessor.expandMacros(commandLine).then(new Operation<String>() {
             @Override
-            public void apply(String arg) throws OperationException {
-                final CommandImpl toExecute = new CommandImpl(command);
-                toExecute.setCommandLine(arg);
+            public void apply(String expandedCommandLine) throws OperationException {
+                Command expandedCommand = new CommandImpl(name, expandedCommandLine, type);
 
-                // if command line has not specified the shell attribute, use bash to be backward compliant for user commands
-                Map<String, String> attributes = toExecute.getAttributes();
-                if (attributes == null) {
-                    attributes = new HashMap<>(1);
-                    attributes.put("shell", "/bin/bash");
-                    toExecute.setAttributes(attributes);
-                } else if (!attributes.containsKey("shell")){
-                    attributes = new HashMap<>(attributes.size() + 1);
-                    attributes.put("shell", "/bin/bash");
-                    attributes.putAll(toExecute.getAttributes());
-                    toExecute.setAttributes(attributes);
-                }
-
-                Log.info(CommandManagerImpl.class, "Using shell " + toExecute.getAttributes().get("shell") + " for invoking command '" + command.getName() + "'");
-
-                Promise<MachineProcessDto> processPromise = machineServiceClient.executeCommand(machine.getWorkspaceId(),
-                                                                                                machine.getId(),
-                                                                                                toExecute,
-                                                                                                outputChannel);
-                processPromise.then(new Operation<MachineProcessDto>() {
-                    @Override
-                    public void apply(MachineProcessDto process) throws OperationException {
-                        console.attachToProcess(process);
-                    }
-                });
+                execAgentCommandManager.startProcess(machineId, expandedCommand)
+                                       .thenIfProcessStartedEvent(console.getProcessStartedOperation())
+                                       .thenIfProcessDiedEvent(console.getProcessDiedOperation())
+                                       .thenIfProcessStdOutEvent(console.getStdOutOperation())
+                                       .thenIfProcessStdErrEvent(console.getStdErrOperation());
             }
         });
     }
