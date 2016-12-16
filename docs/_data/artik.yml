@@ -1,0 +1,15 @@
+- title: ARTIK IDE
+  artik:
+  - artik-start-windows                                                                                                 
+  - artik-start-mac                                                                                                     
+  - artik-proxies                                                                                                       
+  - artik-config                                                                                                        
+  - artik-network                                                                                                       
+  - artik-usb-connection-setup                                                                                          
+  - artik-docker                                                                                                        
+  - artik-tutorial-blink-led                                                                                            
+  - artik-apisdk-management                                                                                             
+  - artik-api-docs                                                                                                      
+  - artik-release-notes                                                                                                 
+  - artik-wireless-setup                                                                                                
+  - artik-download-ide 

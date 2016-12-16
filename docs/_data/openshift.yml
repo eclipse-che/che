@@ -1,0 +1,4 @@
+- title: OPENSHIFT PLUG-IN FOR ECLIPSE CHE
+  openshift:
+  - openshift-config
+  - openshift-user-guide
