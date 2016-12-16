@@ -114,14 +114,18 @@
             text-decoration: underline;
         }
 
+        a.value,
         div.value {
             white-space: nowrap;
             text-overflow: ellipsis;
             -webkit-user-select: text;
             user-select: text;
             -moz-user-select: text;
-            width: literal("calc(100% - 60px)");
+            max-width: literal("calc(100% - 70px)");
             overflow: hidden;
+        }
+
+        div.value {
             color: successColor;
         }
 
@@ -211,7 +215,7 @@
         <g:north size="14">
             <g:FlowPanel ui:field="previewPanel" styleName="{style.header}">
                 <g:Label text="preview:" addStyleNames="{style.label} {style.commandTitle}"/>
-                <g:Anchor ui:field="previewUrlLabel" target="_blank" title="Open in new window"
+                <g:Anchor ui:field="previewUrlLabel" target="_blank"
                           addStyleNames="{style.link} {style.value} {style.commandTitle}"/>
             </g:FlowPanel>
         </g:north>

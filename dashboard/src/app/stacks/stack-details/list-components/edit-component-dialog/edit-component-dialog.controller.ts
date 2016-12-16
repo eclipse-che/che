@@ -9,7 +9,7 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
-import {ListComponentsController} from "../list-components.controller";
+import {ListComponentsController} from '../list-components.controller';
 
 /**
  * @ngdoc controller
@@ -52,7 +52,7 @@ export class EditComponentDialogController {
 
   /**
    * Check if the name is unique.
-   * @param name
+   * @param name {string}
    * @returns {boolean}
    */
   isUnique(name: string): boolean {
