@@ -43,6 +43,7 @@ import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.machine.MachineManager;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.machine.OutputMessageUnmarshaller;
+import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.api.workspace.event.EnvironmentOutputEvent;
@@ -405,6 +406,7 @@ public class WorkspaceEventsHandler {
                     final String error = statusEvent.getError();
                     workspaceServiceClient.getWorkspaces(SKIP_COUNT, MAX_COUNT).then(showErrorDialog(workspaceName, error));
                     eventBus.fireEvent(new WorkspaceStoppedEvent(workspace));
+                    eventBus.fireEvent(WsAgentStateEvent.createWsAgentStoppedEvent());
                     break;
 
                 case STOPPING:
@@ -415,6 +417,7 @@ public class WorkspaceEventsHandler {
                     loader.setSuccess(LoaderPresenter.Phase.STOPPING_WORKSPACE);
                     startWorkspaceNotification.show(statusEvent.getWorkspaceId());
                     eventBus.fireEvent(new WorkspaceStoppedEvent(workspace));
+                    eventBus.fireEvent(WsAgentStateEvent.createWsAgentStoppedEvent());
                     break;
 
                 case SNAPSHOT_CREATING:
