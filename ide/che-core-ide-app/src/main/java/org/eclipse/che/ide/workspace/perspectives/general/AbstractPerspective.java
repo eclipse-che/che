@@ -364,9 +364,9 @@ public abstract class AbstractPerspective implements Presenter, Perspective,
         }
     }
 
-    private void restorePartController(PartStack stack, WorkBenchPartController controller, JsonObject partStack) {
-        if (partStack.hasKey("PARTS")) {
-            JsonArray parts = partStack.get("PARTS");
+    private void restorePartController(PartStack partStack, WorkBenchPartController controller, JsonObject partStackJSON) {
+        if (partStackJSON.hasKey("PARTS")) {
+            JsonArray parts = partStackJSON.get("PARTS");
             for (int i = 0; i < parts.length(); i++) {
                 JsonObject value = parts.get(i);
                 if (value.hasKey("CLASS")) {
@@ -374,27 +374,27 @@ public abstract class AbstractPerspective implements Presenter, Perspective,
                     Provider<PartPresenter> provider = dynaProvider.getProvider(className);
                     if (provider != null) {
                         PartPresenter partPresenter = provider.get();
-                        if (!stack.containsPart(partPresenter)) {
-                            stack.addPart(partPresenter);
+                        if (!partStack.containsPart(partPresenter)) {
+                            partStack.addPart(partPresenter);
                         }
                     }
                 }
             }
         }
 
-        //hide part stack if we cannot restore opened parts
-        if (stack.getParts().isEmpty()) {
+        //hide part stack if it has no parts
+        if (partStack.getParts().isEmpty()) {
             controller.setHidden(true);
             return;
         }
 
-        if (partStack.hasKey("HIDDEN") && partStack.getBoolean("HIDDEN")) {
-            stack.minimize();
+        if (partStackJSON.hasKey("HIDDEN") && partStackJSON.getBoolean("HIDDEN")) {
+            partStack.minimize();
             return;
         }
 
-        if (partStack.hasKey("SIZE")) {
-            double size = partStack.getNumber("SIZE");
+        if (partStackJSON.hasKey("SIZE")) {
+            double size = partStackJSON.getNumber("SIZE");
 
             // Size of the part must not be less 100 pixels.
             if (size == 0) {
