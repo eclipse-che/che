@@ -42,19 +42,16 @@ public class MachineServiceClientImpl implements MachineServiceClient {
     private final AsyncRequestFactory    asyncRequestFactory;
     private final LoaderFactory          loaderFactory;
     private final String                 baseHttpUrl;
-    private final DtoFactory             dtoFactory;
 
     @Inject
     protected MachineServiceClientImpl(@RestContext String restContext,
                                        DtoUnmarshallerFactory dtoUnmarshallerFactory,
                                        AsyncRequestFactory asyncRequestFactory,
-                                       LoaderFactory loaderFactory,
-                                       DtoFactory dtoFactory) {
+                                       LoaderFactory loaderFactory) {
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.asyncRequestFactory = asyncRequestFactory;
         this.loaderFactory = loaderFactory;
         this.baseHttpUrl = restContext + "/workspace/";
-        this.dtoFactory = dtoFactory;
     }
 
     @Override
@@ -74,48 +71,6 @@ public class MachineServiceClientImpl implements MachineServiceClient {
                                                  null,
                                                  false)
                                   .loader(loaderFactory.newLoader("Destroying machine..."))
-                                  .send();
-    }
-
-    @Override
-    public Promise<MachineProcessDto> executeCommand(@NotNull final String workspaceId,
-                                                     @NotNull final String machineId,
-                                                     @NotNull final Command command,
-                                                     @Nullable final String outputChannel) {
-        final CommandDto commandDto = dtoFactory.createDto(CommandDto.class)
-                                                .withType(command.getType())
-                                                .withName(command.getName())
-                                                .withCommandLine(command.getCommandLine())
-                                                .withAttributes(command.getAttributes());
-
-        return asyncRequestFactory.createPostRequest(baseHttpUrl + workspaceId +
-                                                     "/machine/" + machineId +
-                                                     "/command?outputChannel=" + outputChannel,
-                                                     commandDto)
-                                  .header(ACCEPT, APPLICATION_JSON)
-                                  .loader(loaderFactory.newLoader("Executing command..."))
-                                  .send(dtoUnmarshallerFactory.newUnmarshaller(MachineProcessDto.class));
-    }
-
-    @Override
-    public Promise<List<MachineProcessDto>> getProcesses(@NotNull final String workspaceId,
-                                                         @NotNull final String machineId) {
-        return asyncRequestFactory.createGetRequest(baseHttpUrl + workspaceId +
-                                                    "/machine/" + machineId +
-                                                    "/process")
-                                  .header(ACCEPT, APPLICATION_JSON)
-                                  .loader(loaderFactory.newLoader("Getting machine processes..."))
-                                  .send(dtoUnmarshallerFactory.newListUnmarshaller(MachineProcessDto.class));
-    }
-
-    @Override
-    public Promise<Void> stopProcess(@NotNull final String workspaceId,
-                                     @NotNull final String machineId,
-                                     final int processId) {
-        return asyncRequestFactory.createDeleteRequest(baseHttpUrl + workspaceId +
-                                                       "/machine/" + machineId +
-                                                       "/process/" + processId)
-                                  .loader(loaderFactory.newLoader("Stopping process..."))
                                   .send();
     }
 }

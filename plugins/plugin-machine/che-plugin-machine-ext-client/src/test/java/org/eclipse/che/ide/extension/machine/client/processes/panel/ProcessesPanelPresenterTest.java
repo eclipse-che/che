@@ -19,6 +19,7 @@ import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
+import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessesResponseDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
@@ -30,6 +31,7 @@ import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.dialogs.ConfirmDialog;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.machine.DevMachine;
+import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.machine.MachineManager;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
@@ -131,9 +133,13 @@ public class ProcessesPanelPresenterTest {
     private WorkspaceRuntimeDto           workspaceRuntime;
     @Mock
     private PartStack                     partStack;
+    @Mock
+    private ExecAgentCommandManager       execAgentCommandManager;
 
     @Mock
     private Promise<List<MachineProcessDto>> processesPromise;
+    @Mock
+    private Promise<List<GetProcessesResponseDto>> promise;
 
     @Captor
     private ArgumentCaptor<AcceptsOneWidget>                   acceptsOneWidgetCaptor;
@@ -154,12 +160,14 @@ public class ProcessesPanelPresenterTest {
         when(appContext.getWorkspace()).thenReturn(workspace);
         when(workspace.getRuntime()).thenReturn(workspaceRuntime);
 
-        when(machineService.getProcesses(anyString(), anyString())).thenReturn(processesPromise);
         when(processesPromise.then(Matchers.<Operation<List<MachineProcessDto>>>anyObject())).thenReturn(processesPromise);
         when(commandConsoleFactory.create(anyString())).thenReturn(mock(OutputConsole.class));
 
         when(appContext.getWorkspaceId()).thenReturn(WORKSPACE_ID);
         when(workspaceAgent.getPartStack(eq(PartStackType.INFORMATION))).thenReturn(partStack);
+
+        when(execAgentCommandManager.getProcesses(anyString(), anyBoolean())).thenReturn(promise);
+        when(promise.then(any(Operation.class))).thenReturn(promise);
 
         presenter = new ProcessesPanelPresenter(view,
                                                 localizationConstant,
@@ -175,7 +183,8 @@ public class ProcessesPanelPresenterTest {
                                                 dialogFactory,
                                                 consoleTreeContextMenuFactory,
                                                 commandTypeRegistry,
-                                                sshService);
+                                                sshService,
+                                                execAgentCommandManager);
     }
 
     @Test
@@ -614,12 +623,6 @@ public class ProcessesPanelPresenterTest {
                                           any(org.eclipse.che.api.core.model.machine.Machine.class))).thenReturn(outputConsole);
 
         presenter.onWsAgentStarted(event);
-
-        verify(machineService.getProcesses(WORKSPACE_ID, MACHINE_ID)).then(processesCaptor.capture());
-        processesCaptor.getValue().apply(processes);
-
-        verify(outputConsole).listenToOutput(eq(OUTPUT_CHANNEL));
-        verify(outputConsole).attachToProcess(machineProcessDto);
     }
 
 }

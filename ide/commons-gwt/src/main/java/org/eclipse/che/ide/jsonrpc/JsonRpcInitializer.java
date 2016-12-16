@@ -16,8 +16,6 @@ import java.util.Map;
 /**
  * Performs all needed preparations to initialize and terminate the json rpc
  * service.
- *
- * @author Dmitry Kuleshov
  */
 @Singleton
 public interface JsonRpcInitializer {

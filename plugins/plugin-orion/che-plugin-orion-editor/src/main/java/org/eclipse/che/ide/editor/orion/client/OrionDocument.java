@@ -196,7 +196,7 @@ public class OrionDocument extends AbstractDocument {
     }
 
     public void replace(int offset, int length, String text) {
-        this.editorOverlay.setText(text, offset, offset + length);
+        this.editorOverlay.getModel().setText(text, offset, offset + length);
     }
 
     @Override

@@ -11,14 +11,14 @@
 package org.eclipse.che.ide.core;
 
 import com.google.gwt.inject.client.AbstractGinModule;
-import com.google.gwt.inject.client.multibindings.GinMapBinder;
+import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 
 import org.eclipse.che.ide.api.event.ng.JsonRpcWebSocketAgentEventListener;
+import org.eclipse.che.ide.jsonrpc.BuildingRequestTransmitter;
+import org.eclipse.che.ide.jsonrpc.JsonRpcFactory;
 import org.eclipse.che.ide.jsonrpc.JsonRpcInitializer;
-import org.eclipse.che.ide.jsonrpc.RequestHandler;
-import org.eclipse.che.ide.jsonrpc.RequestTransmitter;
-import org.eclipse.che.ide.jsonrpc.impl.WebSocketJsonRpcInitializer;
-import org.eclipse.che.ide.jsonrpc.impl.WebSocketTransmitter;
+import org.eclipse.che.ide.jsonrpc.RequestHandlerConfigurator;
+import org.eclipse.che.ide.jsonrpc.WebSocketJsonRpcInitializer;
 
 /**
  * GIN module for configuring Json RPC protocol implementation components.
@@ -31,8 +31,9 @@ public class JsonRpcModule extends AbstractGinModule {
     protected void configure() {
         bind(JsonRpcWebSocketAgentEventListener.class).asEagerSingleton();
         bind(JsonRpcInitializer.class).to(WebSocketJsonRpcInitializer.class);
-        bind(RequestTransmitter.class).to(WebSocketTransmitter.class);
 
-        GinMapBinder.newMapBinder(binder(), String.class, RequestHandler.class);
+        install(new GinFactoryModuleBuilder().build(JsonRpcFactory.class));
+        install(new GinFactoryModuleBuilder().build(RequestHandlerConfigurator.class));
+        install(new GinFactoryModuleBuilder().build(BuildingRequestTransmitter.class));
     }
 }

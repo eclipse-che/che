@@ -20,6 +20,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.ide.ext.java.shared.dto.Change;
 import org.eclipse.che.ide.ext.java.shared.dto.ConflictImportDTO;
+import org.eclipse.che.ide.ext.java.shared.dto.OrganizeImportResult;
 import org.eclipse.che.ide.ext.java.shared.dto.Problem;
 import org.eclipse.che.ide.ext.java.shared.dto.ProposalApplyResult;
 import org.eclipse.che.ide.ext.java.shared.dto.ProposalPresentation;
@@ -55,6 +56,7 @@ import org.eclipse.jdt.internal.core.DocumentAdapter;
 import org.eclipse.jdt.internal.core.JavaModelStatus;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation;
+import org.eclipse.jdt.internal.corext.format.DocumentChangeListener;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MoveCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameCompilationUnitChange;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -66,6 +68,7 @@ import org.eclipse.jdt.internal.ui.text.java.TemplateCompletionProposalComputer;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jdt.ui.text.java.correction.ChangeCorrectionProposal;
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
@@ -233,7 +236,7 @@ public class CodeAssist {
      *         fully qualified name of the java file
      * @return list of imports which have conflicts
      */
-    public List<ConflictImportDTO> organizeImports(IJavaProject project, String fqn) throws CoreException, BadLocationException {
+    public OrganizeImportResult organizeImports(IJavaProject project, String fqn) throws CoreException, BadLocationException {
         ICompilationUnit compilationUnit = prepareCompilationUnit(project, fqn);
         return createOrganizeImportOperation(compilationUnit, null);
     }
@@ -248,13 +251,14 @@ public class CodeAssist {
      * @param  chosen
      *          list of chosen imports as result of resolving conflicts which needed to add to all imports.
      */
-    public void applyChosenImports(IJavaProject project, String fqn, List<String> chosen) throws CoreException, BadLocationException {
+    public List<Change> applyChosenImports(IJavaProject project, String fqn, List<String> chosen) throws CoreException, BadLocationException {
         ICompilationUnit compilationUnit = prepareCompilationUnit(project, fqn);
-        createOrganizeImportOperation(compilationUnit, chosen);
+        OrganizeImportResult result = createOrganizeImportOperation(compilationUnit, chosen);
+        return result.getChanges();
     }
 
-    private List<ConflictImportDTO> createOrganizeImportOperation(ICompilationUnit compilationUnit,
-                                                                 List<String> chosen) throws CoreException {
+    private OrganizeImportResult createOrganizeImportOperation(ICompilationUnit compilationUnit,
+                                                               List<String> chosen) throws CoreException {
         CodeGenerationSettings settings = JavaPreferencesSettings.getCodeGenerationSettings(compilationUnit.getJavaProject());
 
         OrganizeImportsOperation operation = new OrganizeImportsOperation(compilationUnit,
@@ -267,16 +271,25 @@ public class CodeAssist {
 
         NullProgressMonitor monitor = new NullProgressMonitor();
         TextEdit edit = operation.createTextEdit(monitor);
-
+        OrganizeImportResult result = DtoFactory.newDto(OrganizeImportResult.class);
         TypeNameMatch[][] choices = operation.getChoices();
         //Apply organize import declarations if operation doesn't have conflicts (choices.length == 0)
         //or all conflicts were resolved (!chosen.isEmpty())
         if ((chosen != null && !chosen.isEmpty()) || choices == null || choices.length == 0) {
-            operation.applyChanges(edit, monitor);
-            return Collections.emptyList();
+            IBuffer buffer = compilationUnit.getBuffer();
+            IDocument document = new Document(buffer.getContents());
+            DocumentChangeListener documentChangeListener = new DocumentChangeListener(document);
+            try {
+                edit.apply(document);
+            } catch (BadLocationException e) {
+                LOG.debug("Applying Organize import text edits goes wrong:", e);
+            }
+            result.setChanges(documentChangeListener.getChanges());
+            return result;
         }
 
-        return createListOfDTOMatches(choices);
+        result.setConflicts(createListOfDTOMatches(choices));
+        return result;
     }
 
     private List<ConflictImportDTO> createListOfDTOMatches(TypeNameMatch[][] choices) {
