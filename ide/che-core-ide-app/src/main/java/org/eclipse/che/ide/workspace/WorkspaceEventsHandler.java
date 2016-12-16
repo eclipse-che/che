@@ -40,6 +40,7 @@ import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.machine.MachineManager;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.machine.OutputMessageUnmarshaller;
+import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.api.workspace.event.EnvironmentOutputEvent;
@@ -56,6 +57,7 @@ import org.eclipse.che.ide.websocket.MessageBus;
 import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.eclipse.che.ide.websocket.WebSocketException;
 import org.eclipse.che.ide.websocket.rest.SubscriptionHandler;
+import org.eclipse.che.ide.workspace.start.StartWorkspaceNotification;
 
 import java.util.List;
 import java.util.Map;
@@ -68,7 +70,6 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMod
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import org.eclipse.che.ide.workspace.start.StartWorkspaceNotification;
 
 /**
  * <ul> Notifies about the events which occur in the workspace:
@@ -411,6 +412,7 @@ public class WorkspaceEventsHandler {
                     final String error = statusEvent.getError();
                     workspaceServiceClient.getWorkspaces(SKIP_COUNT, MAX_COUNT).then(showErrorDialog(workspaceName, error));
                     eventBus.fireEvent(new WorkspaceStoppedEvent(workspace));
+                    eventBus.fireEvent(WsAgentStateEvent.createWsAgentStoppedEvent());
                     break;
 
                 case STOPPING:
@@ -421,6 +423,7 @@ public class WorkspaceEventsHandler {
                     loader.setSuccess(LoaderPresenter.Phase.STOPPING_WORKSPACE);
                     startWorkspaceNotification.show(statusEvent.getWorkspaceId());
                     eventBus.fireEvent(new WorkspaceStoppedEvent(workspace));
+                    eventBus.fireEvent(WsAgentStateEvent.createWsAgentStoppedEvent());
                     break;
 
                 case SNAPSHOT_CREATING:
