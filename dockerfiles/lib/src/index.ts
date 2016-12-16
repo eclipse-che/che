@@ -56,44 +56,51 @@ export class EntryPoint {
             Log.disablePrefix();
         }
 
-
-        var promise : Promise<any>;
-
-        switch(this.commandName) {
-            case 'che-test':
-                let cheTest: CheTest = new CheTest(this.args);
-                promise = cheTest.run();
-                break;
-            case 'che-action':
-                let cheAction: CheAction = new CheAction(this.args);
-                promise = cheAction.run();
-                break;
-            case 'che-dir':
-                let cheDir: CheDir = new CheDir(this.args);
-                promise = cheDir.run();
-                break;
-            default:
-                Log.getLogger().error('Invalid choice of command-name');
-                process.exit(1);
-        }
-
-        // handle error of the promise
-        promise.catch((error) => {
-            try {
-                let errorMessage = JSON.parse(error);
-                if (errorMessage.message) {
-                    Log.getLogger().error(errorMessage.message);
-                } else {
-                    Log.getLogger().error(error.toString());
-                }
-            } catch (e) {
-                Log.getLogger().error(error.toString());
-                if (error instanceof TypeError || error instanceof SyntaxError) {
-                    console.log(error.stack);
-                }
+        try {
+            var promise : Promise<any>;
+            switch(this.commandName) {
+                case 'che-test':
+                    let cheTest: CheTest = new CheTest(this.args);
+                    promise = cheTest.run();
+                    break;
+                case 'che-action':
+                    let cheAction: CheAction = new CheAction(this.args);
+                    promise = cheAction.run();
+                    break;
+                case 'che-dir':
+                    let cheDir: CheDir = new CheDir(this.args);
+                    promise = cheDir.run();
+                    break;
+                default:
+                    Log.getLogger().error('Invalid choice of command-name');
+                    process.exit(1);
             }
-            process.exit(1);
-        });
+
+
+            // handle error of the promise
+            promise.catch((error) => {
+                try {
+                    let errorMessage = JSON.parse(error);
+                    if (errorMessage.message) {
+                        Log.getLogger().error(errorMessage.message);
+                    } else {
+                        Log.getLogger().error(error.toString());
+                    }
+                } catch (e) {
+                    Log.getLogger().error(error.toString());
+                    if (error instanceof TypeError || error instanceof SyntaxError) {
+                        console.log(error.stack);
+                    }
+                }
+                process.exit(1);
+            });
+
+        } catch (e) {
+            Log.getLogger().error(e);
+            if (e instanceof TypeError || e instanceof SyntaxError) {
+                console.log(e.stack);
+            }
+        }
 
     }
 
