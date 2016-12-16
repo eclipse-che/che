@@ -123,9 +123,7 @@ public class LocalSnapshotDaoImpl implements SnapshotDao {
 
     @Override
     public SnapshotImpl updateSnapshot(SnapshotImpl update) throws NotFoundException, ConflictException, SnapshotException {
-        requireNonNull(update, "Required non-null snapshot");
-        requireNonNull(update.getId(), "Required non-null snapshot id");
-        return snapshots.put(update.getId(), update);
+        throw new RuntimeException("Not implemented");
     }
 
     @Override

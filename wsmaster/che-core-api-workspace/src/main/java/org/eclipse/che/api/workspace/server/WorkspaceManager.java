@@ -366,10 +366,10 @@ public class WorkspaceManager {
                                                                                     .getKey());
                 } catch (ConflictException | SnapshotException | NotFoundException err) {
                     LOG.error("Failed to update snapshots of '%s' environment in '%s' workspace.", env.getKey(), workspaceId, err);
-                    safeRemoveEnvironmentSnapshots(workspaceId, env.getKey());
+                    quietlyRemoveEnvironmentSnapshots(workspaceId, env.getKey());
                 }
             } else {
-                safeRemoveEnvironmentSnapshots(workspaceId, env.getKey());
+                quietlyRemoveEnvironmentSnapshots(workspaceId, env.getKey());
             }
         }
     }
@@ -657,7 +657,7 @@ public class WorkspaceManager {
     /**
      * The same as {@link #removeEnvironmentSnapshots(String, String)}, but log error instead of throwing any exception.
      */
-    private void safeRemoveEnvironmentSnapshots(String workspaceId, String envName) {
+    private void quietlyRemoveEnvironmentSnapshots(String workspaceId, String envName) {
         try {
             removeEnvironmentSnapshots(workspaceId, envName);
         } catch (NotFoundException e) {
