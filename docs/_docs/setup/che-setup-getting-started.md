@@ -5,44 +5,38 @@ excerpt: ""
 layout: docs
 permalink: /:categories/getting-started/
 ---
+Eclipse Che is a developer workspace server and cloud IDE. You install, run, and manage Eclipse Che with Docker.
+
+##### Download
+This is the administration guide for the on-premises installation of Eclipse Che. This document discusses the installation, configuration, and operation of Che that you host on your own hardware or IaaS provider.
+
+You can get a hosted version of Eclipse Che with Codenvy at [codenvy.io](http://codenvy.io).
+
 # How to Get Help  
-**Support:** If the unthinkable happens, or you have a question, you can post [issues on our GitHub page](https://github.com/eclipse/che/issues). Please follow the [guidelines on issue reporting](https://github.com/eclipse/che/blob/master/CONTRIBUTING.md).
+**Support:** If the unthinkable happens, or you have a question, you can post [issues on our GitHub page](https://github.com/eclipse/che/issues). Please follow the [guidelines on issue reporting](https://github.com/eclipse/che/blob/master/CONTRIBUTING.md) and provide:
+* your OS distribution and version
+- output of `docker version` command
+- output of `docker info` command
+- the full `docker run ...` syntax you used on the command line
+- the output of `cli.log`
 
 **Documentation:** We put a lot of effort into our docs. Please add suggestions on areas for improvement.
-# 0. Pre-Reqs  
-To run Eclipse Che, you need:
-1. Docker 1.8+ for [Linux](https://docs.docker.com/engine/installation/), [Windows](https://docs.docker.com/engine/installation/windows/) or [Mac](https://docs.docker.com/engine/installation/mac/).
-2. Bash.
-
-If you are using boot2docker for Windows or Mac, environment variables must be set in each terminal session.
-
-Once Docker and bash are installed:
+# Pre-Reqs  
+The only system requirement is Docker 1.11+ for [Linux](https://docs.docker.com/engine/installation/), [Windows](https://docs.docker.com/engine/installation/windows/) or [Mac](https://docs.docker.com/engine/installation/mac/). If you are using boot2docker for Windows or Mac, environment variables must be set in each terminal session. Verify that Docker is installed with:
 ```shell  
 # Should print "Hello from Docker!"
 docker run hello-world
-
-# Should open a bash shell (Windows too! - Docker installs Git Bash for Windows)
-bash
-
-# Windows users may have to add Git Bash to their path in system environment variables
-# set PATH=<path-to-git>;%PATH%
-set PATH=C:\Program Files\Git\bin\;%PATH%
 ```
 
-# 1. Get the Eclipse Che CLI  
+# Quick Start
+```shell
+# Interactive help
+docker run -it eclipse/che-cli start
 
-```shell  
-sudo curl -sL https://raw.githubusercontent.com/eclipse/che/master/che.sh > /usr/local/bin/che
-sudo chmod +x /usr/local/bin/che\
-```
+# Or, full syntax where <path> should be replaced with local directory
+docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock -v <path>:/data eclipse/che-cli start
 
-```shell  
-# You need both che.bat and che.sh
-> curl -sL https://raw.githubusercontent.com/eclipse/che/master/che.sh > che.sh
-> curl -sL https://raw.githubusercontent.com/eclipse/che/master/che.bat > che.bat
-
-# Add the files to your PATH
-set PATH=<path-to-cli>;%PATH%\
+# Che will save its installation files, user data, and server logs in <path>
 ```
 
 # 2. Start Che  

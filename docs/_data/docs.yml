@@ -1,10 +1,14 @@
 - title: SETUP
   docs:
-  - che-setup-intro                                                                                                
+  - che-setup-intro                                                                                       
   - che-setup-getting-started                                                                                         
   - che-setup-getting-started-saas-cloud                                                                                                   
-  - che-setup-bitnami  
-  - che-setup-cli                                                                                                           
+  - che-setup-bitnami
+  - che-setup-introduction 
+  - che-setup-configuration
+  - che-setup-managing 
+  - che-setup-cli                                                                                                  
+  - che-setupalt-docker-server                                                                                             
   - che-setup-ssh                                                                                                         
   - che-setup-desktop-ide-mounting                                                                                            
   - che-setup-config                                                                                                          
@@ -18,7 +22,6 @@
   docs:
   - che-setupalt-docker                                                                                                    
   - che-setupalt-native                                                                                                    
-  - che-setupalt-docker-server                                                                                             
   - che-setupalt-electron 
 - title: WORKSPACE ADMINISTRATION
   docs:                                                                           
