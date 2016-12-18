@@ -4,6 +4,12 @@
 # 
 # Optionally - you can run 'jekyll/jekyll jekyll serve' to get a local server on port 9080
 # NOTE - these files will not work without a hosted server right now - they are not static stand alone 
+#
+# Usage: bash docs.sh [--build|--run\
+#
+#  --build - one-time generation of the Web site into _site
+#  --run   - runs jekyll's Web server on port 9080
+# 
 GLOBAL_HOST_ARCH=$(docker version --format {{.Client}} | cut -d" " -f5)
 
 docker() {
