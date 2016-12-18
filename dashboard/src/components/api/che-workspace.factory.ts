@@ -29,6 +29,7 @@ interface ICHELicenseResource<T> extends ng.resource.IResourceClass<T> {
   startWorkspace: any;
   startTemporaryWorkspace: any;
   addCommand: any;
+  getSettings: any;
 }
 
 /**
@@ -49,6 +50,7 @@ export class CheWorkspace {
   lodash: any;
   cheWebsocket: CheWebsocket;
   statusDefers: Object;
+  workspaceSettings: any;
 
   /**
    * Default constructor that is using resource
@@ -89,16 +91,19 @@ export class CheWorkspace {
         updateWorkspace: {method: 'PUT', url: '/api/workspace/:workspaceId'},
         addProject: {method: 'POST', url: '/api/workspace/:workspaceId/project'},
         deleteProject: {method: 'DELETE', url: '/api/workspace/:workspaceId/project/:path'},
-        stopWorkspace: {method: 'DELETE', url: '/api/workspace/:workspaceId/runtime'},
+        stopWorkspace: {method: 'DELETE', url: '/api/workspace/:workspaceId/runtime?create-snapshot=:createSnapshot'},
         startWorkspace: {method: 'POST', url: '/api/workspace/:workspaceId/runtime?environment=:envName'},
         startTemporaryWorkspace: {method: 'POST', url: '/api/workspace/runtime?temporary=true'},
-        addCommand: {method: 'POST', url: '/api/workspace/:workspaceId/command'}
+        addCommand: {method: 'POST', url: '/api/workspace/:workspaceId/command'},
+        getSettings: {method: 'GET', url: '/api/workspace/settings'}
       }
     );
 
     cheEnvironmentRegistry.addEnvironmentManager('compose', new ComposeEnvironmentManager($log));
     cheEnvironmentRegistry.addEnvironmentManager('dockerfile', new DockerFileEnvironmentManager($log));
     cheEnvironmentRegistry.addEnvironmentManager('dockerimage', new DockerImageEnvironmentManager($log));
+
+    this.fetchWorkspaceSettings();
   }
 
   /**
@@ -411,8 +416,9 @@ export class CheWorkspace {
    * @param workspaceId {string}
    * @returns {ng.IPromise<any>} promise
    */
-  stopWorkspace(workspaceId: string): ng.IPromise<any> {
-    return this.remoteWorkspaceAPI.stopWorkspace({workspaceId: workspaceId}, {}).$promise;
+  stopWorkspace(workspaceId: string, createSnapshot: boolean): ng.IPromise<any> {
+    createSnapshot = createSnapshot === undefined ? this.getAutoSnapshotSettings() : createSnapshot;
+    return this.remoteWorkspaceAPI.stopWorkspace({workspaceId: workspaceId, createSnapshot: createSnapshot}, {}).$promise;
   }
 
   /**
@@ -567,5 +573,37 @@ export class CheWorkspace {
         this.statusDefers[workspaceId][message.eventType].length = 0;
       });
     }
+  }
+
+  /**
+   * Fetches the system settings for workspaces.
+   *
+   * @returns {IPromise<TResult>}
+   */
+  fetchWorkspaceSettings(): ng.IPromise {
+    let promise = this.remoteWorkspaceAPI.getSettings().$promise;
+    let resultPromise = promise.then((settings: any) => {
+      this.workspaceSettings = settings;
+    });
+
+    return resultPromise;
+  }
+
+  /**
+   * Returns the system settings for workspaces.
+   *
+   * @returns {any} the system settings for workspaces
+   */
+  getWorkspaceSettings(): any {
+    return this.workspaceSettings;
+  }
+
+  /**
+   * Returns the value of autosnapshot system property.
+   *
+   * @returns {boolean} 'che.workspace.auto_snapshot' property value
+   */
+  getAutoSnapshotSettings(): boolean {
+    return this.workspaceSettings ? this.workspaceSettings['che.workspace.auto_snapshot'] : true;
   }
 }
