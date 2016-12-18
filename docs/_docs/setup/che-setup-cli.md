@@ -4,9 +4,49 @@ excerpt: "Manage your Che installation on the command line."
 layout: docs
 permalink: /:categories/cli/
 ---
+The Docker image which runs Che is the Che CLI. It has various commands for running Che and also for allowing your end users to interact with their workspaces on the command line.
+
+```
+USAGE:
+  docker run -it --rm <DOCKER_PARAMETERS> eclipse/che-cli:<version> [COMMAND]
+
+MANDATORY DOCKER PARAMETERS:
+  -v <LOCAL_PATH>:/data                Where user, instance, and log data saved
+
+OPTIONAL DOCKER PARAMETERS:
+  -e CHE_HOST=<YOUR_HOST>              IP address or hostname where che will serve its users
+  -e CHE_PORT=<YOUR_PORT>              Port where che will bind itself to
+  -v <LOCAL_PATH>:/data/instance       Where instance, user, log data will be saved
+  -v <LOCAL_PATH>:/data/backup         Where backup files will be saved
+  -v <LOCAL_PATH>:/repo                che git repo to activate dev mode
+  -v <LOCAL_PATH>:/sync                Where remote ws files will be copied with sync command
+  -v <LOCAL_PATH>:/unison              Where unison profile for optimzing sync command resides
+
+COMMANDS:
+  action <action-name>                 Start action on che instance
+  backup                               Backups che configuration and data to /data/backup volume mount
+  config                               Generates a che config from vars; run on any start / restart
+  destroy                              Stops services, and deletes che instance data
+  download                             Pulls Docker images for the current che version
+  help                                 This message
+  info                                 Displays info about che and the CLI
+  init                                 Initializes a directory with a che install
+  offline                              Saves che Docker images into TAR files for offline install
+  restart                              Restart che services
+  restore                              Restores che configuration and data from /data/backup mount
+  rmi                                  Removes the Docker images for <version>, forcing a repull
+  ssh <wksp-name> [machine-name]       SSH to a workspace if SSH agent enabled
+  start                                Starts che services
+  stop                                 Stops che services
+  sync <wksp-name>                     Synchronize workspace with current working directory
+  test <test-name>                     Start test on che instance
+  upgrade                              Upgrades che from one version to another with migrations and backups
+  version                              Installed version and upgrade paths
+```
+
 The CLI will hide most error conditions from standard out. Internal stack traces and error output is redirected to `cli.log`, which is saved in the host folder where `:/data` is mounted.
 
-## init  
+## init 
 Initializes an empty directory with a Che configuration and instance folder where user data and runtime configuration will be stored. You must provide a `<path>:/data` volume mount, then Che creates a `instance` and `backup` subfolder of `<path>`. You can optionally override the location of `instance` by volume mounting an additional local folder to `/data/instance`. You can optionally override the location of where backups are stored by volume mounting an additional local folder to `/data/backup`.  After initialization, a `che.env` file is placed into the root of the path that you mounted to `/data`.
 
 These variables can be set in your local environment shell before running and they will be respected during initialization:
@@ -22,14 +62,14 @@ Che depends upon Docker images. We use Docker images to:
 
 You can control how Che downloads these images with command line options. All image downloads are performed with `docker pull`.
 
-| Mode | Description |
+| Mode>>>>>>>>>>>> | Description |
 |------|-------------|
 | `--no-force` | Default behavior. Will download an image if not found locally. A local check of the image will see if an image of a matching name is in your local registry and then skip the pull if it is found. This mode does not check DockerHub for a newer version of the same image. |
 | `--pull` | Will always perform a `docker pull` when an image is requested. If there is a newer version of the same tagged image at DockerHub, it will pull it, or use the one in local cache. This keeps your images up to date, but execution is slower. |
 | `--force` | Performs a forced removal of the local image using `docker rmi` and then pulls it again (anew) from DockerHub. You can use this as a way to clean your local cache and ensure that all images are new. |
 | `--offline` | Loads Docker images from `backup/*.tar` folder during a pre-boot mode of the CLI. Used if you are performing an installation or start while disconnected from the Internet. |
 
-You can reinstall Che on a folder that is already initialized and preserve your `/data/che.env` values by passing the `--reinit` flag.
+You can reinstall Che on a folder that is already initialized and preserve your `che.env` values by passing the `--reinit` flag.
 
 ## config
 Generates a Che instance configuration thta is placed in `/instance`. This command uses puppet to generate Docker Compose configuration files to run Che and its associated server. Che's server configuration is generated as a che.properties file that is volume mounted into the Che server when it boots. This command is executed on every `start` or `restart`.
@@ -55,19 +95,19 @@ Saves all of the Docker images that Che requires into `/backup/*.tar` files. Eac
 
 `--list` option will list all of the core images and optional stack images that can be downloaded. The core system images and the CLI will always be saved, if an existing TAR file is not found. `--image:<image-name>` will download a single stack image and can be used multiple times on the command line. You can use `--all-stacks` or `--no-stacks` to download all or none of the optional stack images.
 
-## Che rmi
+## rmi
 Deletes the Docker images from the local registry that Che has downloaded for this version.
 
-## Che download
-Used to download Docker images that will be stored in your Docker images repository. This command downloads images that are used by the CLI as utilities, for Che to do initialization and configuration, and for the runtime images that Che needs when it starts.  This command respects `--offline`, `--pull`, `--force`, and `--no-force` (default).  This command is invoked by `Che init`, `Che config`, and `Che start`.
+## download
+Used to download Docker images that will be stored in your Docker images repository. This command downloads images that are used by the CLI as utilities, for Che to do initialization and configuration, and for the runtime images that Che needs when it starts.  This command respects `--offline`, `--pull`, `--force`, and `--no-force` (default).  This command is invoked by `che init`, `che config`, and `che start`.
 
-This command is invoked by `Che init` before initialization to download the images for the version specified by `eclipse/che-cli:<version>`.
+`download` is invoked by `che init` before initialization to download images for the version specified by `eclipse/che-cli:<version>`.
 
-## Che version
-Provides information on the current version and the available versions that are hosted in Che's repositories. `Che upgrade` enforces upgrade sequences and will prevent you from upgrading one version to another version where data migrations cannot be guaranteed.
+## version
+Provides information on the current version and the available versions that are hosted in Che's repositories. `che upgrade` enforces upgrade sequences and will prevent you from upgrading one version to another version where data migrations cannot be guaranteed.
 
-## Che upgrade
-Manages the sequence of upgrading Che from one version to another. Run `Che version` to get a list of available versions that you can upgrade to.
+## upgrade
+Manages the sequence of upgrading Che from one version to another. Run `che version` to get a list of available versions that you can upgrade to.
 
 Upgrading Che is done by using a `eclipse/che-cli:<version>` that is newer than the version you currently have installed. For example, if you have 5.0.0-M2 installed and want to upgrade to 5.0.0-M7, then:
 ```
@@ -79,25 +119,21 @@ docker pull eclipse/che-cli:5.0.0-M7
 docker run <volume-mounts> eclipse/che-cli:5.0.0-M7 upgrade
 ```
 
-The upgrade command has numerous checks to prevent you from upgrading Che if the new image and the old version are not compatiable. In order for the upgrade procedure to proceed, the CLI image must be newer than the value of '/instance/Che.ver'.
+The upgrade command has numerous checks to prevent you from upgrading Che if the new image and the old version are not compatiable. In order for the upgrade procedure to proceed, the CLI image must be newer than the value of '/instance/che.ver'.
 
 The upgrade process: a) performs a version compatibility check, b) downloads new Docker images that are needed to run the new version of Che, c) stops Che if it is currently running triggering a maintenance window, d) backs up your installation, e) initializes the new version, and f) starts Che.
 
-You can run `Che version` to see the list of available versions that you can upgrade to.
+You can run `che version` to see the list of available versions that you can upgrade to.
 
-## Che info
-Displays system state and debugging information. `--network` runs a test to take your `Che_HOST` value to test for networking connectivity simulating browser > Che and Che > workspace connectivity.
+## info
+Displays system state and debugging information. `--network` runs a test to take your `CHE_HOST` value to test for networking connectivity simulating browser > Che and Che > workspace connectivity.
 
-## Che backup
-Tars your `/instance` into files and places them into `/backup`. These files are restoration-ready.
+## backup
+TARS your `/instance` into files and places them into `/backup`. These files are restoration-ready.
 
-## Che restore
+## restore
 Restores `/instance` to its previous state. You do not need to worry about having the right Docker images. The normal start / stop / restart cycle ensures that the proper Docker images are available or downloaded, if not found.
 
 This command will destroy your existing `/instance` folder, so use with caution, or set these values to different folders when performing a restore.
 
-## Che add-node
-Adds a new physical node into the Che cluster. That node must have Docker pre-configured similar to how you have Docker configured on the master node, including any configurations that you add for proxies or an alternative key-value store like Consul. Che generates an automated script that can be run on each new node which prepares the node by installing some dependencies, adding the Che SSH key, and registering itself within the Che cluster.
-
-## Che remove-node
-Takes a single parameter, `ip`, which is the external IP address of the remote physical node to be removed from the Che cluster. This utility does not remove any software from the remote node, but it does ensure that workspace runtimes are not executing on that node.
+TODO: NEED SYNTAX FOR SSH, TEST, SYNC, DIR COMMANDS
