@@ -72,6 +72,7 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <tarLongFileMode>posix</tarLongFileMode>
                     <appendAssemblyId>false</appendAssemblyId>
                     <updateOnly>false</updateOnly>
                     <descriptor>${project.basedir}/src/assembly/assembly.xml</descriptor>
