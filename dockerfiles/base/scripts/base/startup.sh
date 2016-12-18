@@ -17,7 +17,7 @@ init_constants() {
   NC='\033[0m'
   LOG_INITIALIZED=false
   FAST_BOOT=false
-  
+
   DEFAULT_CHE_PRODUCT_NAME="CHE"
   CHE_PRODUCT_NAME=${CHE_PRODUCT_NAME:-${DEFAULT_CHE_PRODUCT_NAME}}
 
@@ -343,7 +343,11 @@ cli_init() {
   # Do not perform a version compatibility check if running upgrade command.
   # The upgrade command has its own internal checks for version compatibility.
   if [ $1 != "upgrade" ]; then
-    verify_version_compatibility
+  	if [[ "${FAST_BOOT}" = "false" ]]; then
+      verify_version_compatibility
+    else
+      warning "Skipping version compatibility check..."
+    fi
   else
     verify_version_upgrade_compatibility
   fi
