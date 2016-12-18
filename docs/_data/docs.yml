@@ -7,7 +7,8 @@
   - che-setup-configuration
   - che-setup-managing 
   - che-setup-cli                                                                                                  
-  - che-setup-glossary     
+  - che-setup-glossary
+  - che-setup-docker   
 - title: WORKSPACE ADMINISTRATION
   docs:                                                                           
   - ws-admin-intro
@@ -17,15 +18,14 @@
   - ws-machines                                                                                                              
   - ws-volume-mounts                                                                                                      
   - ws-agents 
-  - che-data-model-stack
-  - che-data-model-samples
+  - ws-data-model-stacks
+  - ws-data-model-samples
 - title: USER GUIDE
   docs:                                                                               
-  - che-setupalt-electron 
-  - che-setup-ssh                                                                                                         
-  - che-setup-desktop-ide-mounting                                                                                            
   - ide-projects                                                                                                            
   - ide-import-a-project                                                                                                    
+  - ide-ssh                                                                                                        
+  - ide-sync                                                                                            
   - ide-editor-settings                                                                                                     
   - ide-intellisense                                                                                                        
   - ide-commands                                                                                                            
@@ -36,6 +36,7 @@
   - ide-sharing
   - ide-debug                                                                                                               
   - ide-docker    
+  - ide-electron 
 - title: CHEDIR - PORTABLE WORKSPACES
   docs:                                                                               
   - chedir-getting-started                                                                                               
@@ -48,12 +49,12 @@
   - chedir-factories 
 - title: DEVELOPER GUIDE - REST API
   docs:                                                                               
+  - server-rest-api                                          
   - server-api-projects                                                                                                 
   - server-build-run                                                                                                    
   - server-create-workspaces                                                                                   
   - server-events                                                                                                       
   - server-project-types                                                                                                
-  - server-rest-api                                                                                                     
   - server-stack                                                                                                        
   - server-websocket-api
 - title: DEVELOPER GUIDE - IDE PLUGINS

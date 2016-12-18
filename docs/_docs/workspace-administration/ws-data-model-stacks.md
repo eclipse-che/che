@@ -1,13 +1,13 @@
 ---
 tags: [ "eclipse" , "che" ]
-title: Stack
-excerpt: "Sample code that can be used to bootstrap the content of a new project."
+title: Runtime Stacks Data Model
+excerpt: "Defines the runtimes for a workspace."
 layout: docs
-permalink: /:categories/stack/
+permalink: /:categories/data-model-stacks/
 ---
-JSON workspace object defines the contents and structure of a workspace. A workspace configuration is used to define the workspace to be generated.
+Admins and users typically use our graphical dashboard for adding and configuring stacks within the product. However, you can also add these directly with REST or in the product using a JSON data model. 
 
-## Stack Object
+# Stack Object
 Stacks are referenced in JSON format:
 ```json  
 {

@@ -137,3 +137,47 @@ Restores `/instance` to its previous state. You do not need to worry about havin
 This command will destroy your existing `/instance` folder, so use with caution, or set these values to different folders when performing a restore.
 
 TODO: NEED SYNTAX FOR SSH, TEST, SYNC, DIR COMMANDS
+
+# CLI Development
+You can customize the CLI using a variety of techniques. This section discusses how engineers develop and test the CLI on their local machines.
+
+## Structure
+The Che CLI is constructed of multiple Docker images within the Che source repository.
+```
+/dockerfiles/base  # Common functions and commands
+/dockerfiles/cli   # CLI entrypoint, overrides, and version information
+/dockerfiles/init  # Manifests used to configure Che on a host installation
+```
+
+The Che CLI is authored in `bash`. The `cli` image depends upon both the `base` image and the `init` image. In the source repository, we have `build.sh` commands which will build these Docker images for you either one at a time or collectively as a group.
+
+It can become tedious rebuilding images every time you want to test a small change to a bash script. You can avoid having to rebuild images each time for every change to a bash script by volume mounting the contents during the image execution. You cannot volume mount the `entrypoint.sh` file which is where each container has a launch point, but you can volume mount others:
+```
+# Volume mount the contents of the base image
+-v <path-to-che-repo>/dockerfiles/scripts/base/scripts:/base/scripts
+
+# Volume mount the contents of the init image
+-v <path-to-che-repo>:/repo
+```
+
+If you run the Che CLI in this configuration, then any changes made to the bash files or templates in those repositories will be used without having to first rebuild the CLI image.
+
+## Custom CLI Assemblies
+The Che CLI was designed to easily be overridden to allow different CLIs to be created from the same base structure. This is how Codenvy and ARTIK has an identical CLIs to Che. The CLI is created with a few minimal assets:
+```
+/dockerfiles/cli/build.sh               # Local file to build the image
+/dockerfiles/cli/Dockerfile             # Image definition, must FROM eclipse/che-base:nightly
+/dockerfiles/cli/scripts                # Contains additional commands in form of cmd_<name>.sh
+/dockerfiles/cli/scripts/entrypoint.sh  # The entrypoint of the CLI container, with usage() method
+/dockerfiles/cli/scripts/cli.sh         # Defines CLI-specific product names & variables
+/dockerfiles/cli/version                # Contains version-specific data the CLI requires
+```
+
+You can add additional commands to the Che CLI beyond the base set of commands that are provided by adding a file of the name `cmd_<name>.sh` into the `scripts` folder. Codenvy is an [example that adds additional commands](https://github.com/codenvy/codenvy/tree/master/dockerfiles/cli/scripts).
+
+The `version` folder has information that details the latest version and a sub-folder for each version that is available for installation. Each version subfolder has version-specific data that the CLI depends upon to create a manifest of Docker images that must be downloaded to support the product that is going to be run. When we generate a release of the Che CLI, we have our CI systems automatically update the `/version` folder with the version-specific information contained in a release.
+
+## Puppet Templates
+The Che CLI uses Puppet to generate OS-specific configuration files based upon environment variables set by the user either with `-e <VALUE>` options on the command line, or by modifying their `che.env` file. We pass all of these values into Puppet and then run a puppet configuration utility across the files contained in the `/dockerfiles/init/modules` and `/dockerfiles/init/manifests` folder to take the templates contained within the `/init` module, marry them with user-specific variables, and then generate an instance-specific configuration in `/instance`. Puppet has logic constructs that allow us to generate different kinds of constructs with logic based upon the values provided by end users. 
+
+This puppet-based approach allow us to simplify the outputs for end users and limit the locations where end users need to configure various parts of the system. One powerful example of this is that we generate two `docker-compose.yml` files from a single Puppet template. In the user's `/instance` folder is `docker-compose.yml` and `docker-compose-container.yml`. The first one is a configuration file that allows a user to run Docker compose for Che on their host. They can just `docker-compose up` in that folder. The second file is for running Docker compose from within a container, which is what the CLI does. The syntax of Docker compose changes in each of these scenarios as the files being referenced from within the compose syntax are different. In the `init` image, we have a single template for Docker Compose and then apply it in two configurations using Puppet.
