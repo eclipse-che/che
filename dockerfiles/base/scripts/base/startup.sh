@@ -369,6 +369,9 @@ start() {
   # Bootstrap enough stuff to load /cli/cli.sh
   init "$@"
 
+  # Removes "--fast" from the positional arguments if it is set.
+  set -- "${@/\-\-fast/}"
+  
   # Begin product-specific CLI calls
   info "cli" "Loading cli..."
 
