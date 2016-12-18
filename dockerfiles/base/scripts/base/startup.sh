@@ -16,7 +16,8 @@ init_constants() {
   UNDERLINE='\033[4m'
   NC='\033[0m'
   LOG_INITIALIZED=false
-
+  FAST_BOOT=false
+  
   DEFAULT_CHE_PRODUCT_NAME="CHE"
   CHE_PRODUCT_NAME=${CHE_PRODUCT_NAME:-${DEFAULT_CHE_PRODUCT_NAME}}
 
@@ -236,6 +237,10 @@ init() {
     usage;
   fi
 
+  if [[ "$@" == *"--fast"* ]]; then
+  	FAST_BOOT=true
+  fi
+
   SCRIPTS_BASE_CONTAINER_SOURCE_DIR="/scripts/base"
   # add helper scripts
   for HELPER_FILE in "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/*.sh
@@ -362,6 +367,7 @@ start() {
 
   # Begin product-specific CLI calls
   info "cli" "Loading cli..."
+
 
   # The pre_init method is unique to each assembly. This method must be provided by 
   # a custom CLI assembly in their container and can set global variables which are 

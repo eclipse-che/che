@@ -108,22 +108,26 @@ initiate_offline_or_network_mode(){
     # If we are here, then we want to run in networking mode.
     # If we are in networking mode, we have had some issues where users have failed DNS networking.
     # See: https://github.com/eclipse/che/issues/3266#issuecomment-265464165
-    local HTTP_STATUS_CODE=$(curl -I -k dockerhub.com -s -o /dev/null --write-out "%{http_code}")
-    if [[ ! $HTTP_STATUS_CODE -eq "301" ]]; then
-      info "Welcome to $CHE_FORMAL_PRODUCT_NAME!"
-      info ""
-      info "We could not resolve DockerHub using DNS."
-      info "Either we cannot reach the Internet or Docker's DNS resolver needs a modification."
-      info ""
-      info "You can:"
-      info "  1. Modify Docker's DNS settings." 
-      info "     a. Docker for Windows & Mac have GUIs for this."
-      info "     b. Typically setting DNS to 8.8.8.8 fixes resolver issues."
-      info "  2. Does your network require Docker to use a proxy?"
-      info "     a. Docker for Windows & Mac have GUIs to set proxies."
-      info "  3. Verify that you have access to DockerHub."
-      info "     a. Try 'curl --head dockerhub.com'"
-      return 2;
+    if [[ "${FAST_BOOT}" = "false" ]]; then
+      local HTTP_STATUS_CODE=$(curl -I -k dockerhub.com -s -o /dev/null --write-out "%{http_code}")
+      if [[ ! $HTTP_STATUS_CODE -eq "301" ]]; then
+        info "Welcome to $CHE_FORMAL_PRODUCT_NAME!"
+        info ""
+        info "We could not resolve DockerHub using DNS."
+        info "Either we cannot reach the Internet or Docker's DNS resolver needs a modification."
+        info ""
+        info "You can:"
+        info "  1. Modify Docker's DNS settings." 
+        info "     a. Docker for Windows & Mac have GUIs for this."
+        info "     b. Typically setting DNS to 8.8.8.8 fixes resolver issues."
+        info "  2. Does your network require Docker to use a proxy?"
+        info "     a. Docker for Windows & Mac have GUIs to set proxies."
+        info "  3. Verify that you have access to DockerHub."
+        info "     a. Try 'curl --head dockerhub.com'"
+        return 2;
+      fi
+    else
+      warning "Skipping dockerhub.com networking check..."
     fi
   fi
 }
