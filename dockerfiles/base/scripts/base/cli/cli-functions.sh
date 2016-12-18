@@ -127,7 +127,7 @@ initiate_offline_or_network_mode(){
         return 2;
       fi
     else
-      warning "Skipping dockerhub.com networking check..."
+      warning "Skipping dockerhub network check..."
     fi
   fi
 }
