@@ -60,10 +60,11 @@ Thumbs.db
 */overlays
 *~
 
-# Che files
+# Che files #
+#############
 .che
 dockerfiles/che/eclipse-che.tar.gz
 .unison*
 docs/_site
 docs/.sass-cache
-
+docs/.jekyll-metadata
