@@ -404,6 +404,8 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         view.addWidget(terminalId, terminalName, terminalNode.getTitleIcon(), terminalWidget, false);
         refreshStopButtonState(terminalId);
 
+        workspaceAgent.setActivePart(this);
+
         newTerminal.setVisible(true);
         newTerminal.connect();
         newTerminal.setListener(new TerminalPresenter.TerminalStateListener() {
