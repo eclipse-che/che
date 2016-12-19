@@ -63,6 +63,18 @@
             width: 100%;
             height: 450px;
         }
+        
+        .header-panel {
+            margin-top: 5px;
+            width: literal("calc(100% - 12px)");
+            height: 30px;
+        }
+        
+        .label {
+            font-weight: bold;
+            line-height: 35px;
+            font-size: largeLabel;
+        }
 
         .attribute-name {
             width: 90px;
@@ -71,8 +83,8 @@
         }
 
         .attribute-container {
+            margin-top: 15px;
             height: 60px;
-            margin-top: 20px;
         }
 
         .margin {
@@ -88,6 +100,9 @@
     </ui:style>
 
     <g:FlowPanel addStyleNames="{style.main-panel}">
+	    <g:FlowPanel addStyleNames="{style.header-panel}">
+	        <g:Label text="{locale.attributesHeader}" addStyleNames="{style.label} {style.margin}"/>
+	    </g:FlowPanel>
         <g:FlowPanel addStyleNames="{style.attribute-container}">
             <g:Label text="{locale.packageAttribute}" addStyleNames="{style.attribute-name} {style.margin}"/>
             <g:TextBox ui:field="packageField" debugId="composerPageView-package" addStyleNames="{style.field} {style.margin}"/>

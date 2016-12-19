@@ -121,14 +121,14 @@ public class ComposerPagePresenter extends AbstractWizardPage<MutableProjectConf
         }
 
         updateView();
-        validateCoordinates();
+        validateAttributes();
     }
 
     @Override
     public void onAttributesChanged() {
         setAttribute(PACKAGE, Arrays.asList(view.getPackage()));
 
-        validateCoordinates();
+        validateAttributes();
         updateDelegate.updateControls();
     }
 
@@ -172,7 +172,7 @@ public class ComposerPagePresenter extends AbstractWizardPage<MutableProjectConf
                 : result.delete(result.lastIndexOf(ATTRIBUTE_VALUE_SEPARATOR), result.length()).toString();
     }
 
-    private void validateCoordinates() {
+    private void validateAttributes() {
         view.showPackageMissingIndicator(view.getPackage().isEmpty());
     }
 }

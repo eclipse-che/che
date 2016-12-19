@@ -19,6 +19,9 @@ import com.google.gwt.i18n.client.Messages;
  * @author Kaloyan Raev
  */
 public interface ComposerLocalizationConstant extends Messages {
+    @Key("attributes.header.label.name")
+    String attributesHeader();
+
     @Key("package.attribute.label.name")
     String packageAttribute();
 
