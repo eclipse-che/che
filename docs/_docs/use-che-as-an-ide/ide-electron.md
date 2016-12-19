@@ -1,11 +1,11 @@
 ---
 tags: [ "eclipse" , "che" ]
-title: Usage&#58 Electron Clients
-excerpt: "Install Electron, a fast OS-specific desktop client for Eclipse Che"
+title: Install Che Desktop Client
+excerpt: "Install an electron application, a fast desktop client for Eclipse Che"
 layout: docs
 permalink: /:categories/electron/
 ---
-We have created Electron clients that you can use instead of your browser. Electron applications are native OS applications that run a Chromium client. Electron is small and loads faster than a browser. It has all the power of Chrome packaged as an OS-specific binary. You can distribute these clients such that they are pre-configured with the URL of your Che server.
+You can install a desktop application client for Che. The Che desktop clients are Electron applications, which runs a lightweight chrome browser client packaged as a native application that you install for your operating system. Electron is small and loads faster than a browser. It has all the power of Chrome packaged as an OS-specific binary. You can distribute these clients such that they are pre-configured with the URL of your Che server.
 ![Capture2.PNG]({{ base }}/assets/imgs/Capture2.PNG)
 
 #### Eclipse Che Electron Clients
