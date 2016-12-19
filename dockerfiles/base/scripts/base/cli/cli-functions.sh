@@ -74,7 +74,7 @@ check_if_booted() {
 
 server_is_booted() {
   PING_URL=$(get_boot_url)
-  HTTP_STATUS_CODE=$(curl -I -k ${PING_URL} -s -o /dev/null --write-out "%{http_code}")
+  HTTP_STATUS_CODE=$(curl -I -k ${PING_URL} -s -o /dev/null --write-out '%{http_code}')
   log "${HTTP_STATUS_CODE}"
   if [[ "${HTTP_STATUS_CODE}" = "200" ]] || [[ "${HTTP_STATUS_CODE}" = "302" ]]; then
     return 0
@@ -109,7 +109,8 @@ initiate_offline_or_network_mode(){
     # If we are in networking mode, we have had some issues where users have failed DNS networking.
     # See: https://github.com/eclipse/che/issues/3266#issuecomment-265464165
     if [[ "${FAST_BOOT}" = "false" ]]; then
-      local HTTP_STATUS_CODE=$(curl -I -k dockerhub.com -s -o /dev/null --write-out "%{http_code}")
+      info "cli" "Checking network... (hint: '--fast' skips version and network checks)"
+      local HTTP_STATUS_CODE=$(curl -I -k dockerhub.com -s -o /dev/null --write-out '%{http_code}')
       if [[ ! $HTTP_STATUS_CODE -eq "301" ]]; then
         info "Welcome to $CHE_FORMAL_PRODUCT_NAME!"
         info ""
