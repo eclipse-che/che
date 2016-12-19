@@ -532,7 +532,9 @@ public class WorkspaceService extends Service {
         requiredNotNull(envName, "New environment name");
         relativizeRecipeLinks(newEnvironment);
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
-        workspace.getConfig().getEnvironments().put(envName, new EnvironmentImpl(newEnvironment));
+        if (workspace.getConfig().getEnvironments().put(envName, new EnvironmentImpl(newEnvironment)) != null) {
+            throw new ConflictException(format("Environment '%s' already exists", envName));
+        }
         validator.validateConfig(workspace.getConfig());
         return linksInjector.injectLinks(asDto(workspaceManager.updateWorkspace(id, workspace)), getServiceContext());
     }

@@ -114,14 +114,14 @@ public class WorkspaceManagerTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
-        workspaceManager = new WorkspaceManager(workspaceDao,
-                                                runtimes,
-                                                eventService,
-                                                accountManager,
-                                                false,
-                                                false,
-                                                snapshotDao,
-                                                sharedPool);
+        workspaceManager = spy(new WorkspaceManager(workspaceDao,
+                                                    runtimes,
+                                                    eventService,
+                                                    accountManager,
+                                                    false,
+                                                    false,
+                                                    snapshotDao,
+                                                    sharedPool));
         when(accountManager.getByName(NAMESPACE)).thenReturn(new AccountImpl("accountId", NAMESPACE, "test"));
         when(accountManager.getByName(NAMESPACE_2)).thenReturn(new AccountImpl("accountId2", NAMESPACE_2, "test"));
         when(workspaceDao.create(any(WorkspaceImpl.class))).thenAnswer(invocation -> invocation.getArguments()[0]);

@@ -12,7 +12,6 @@ package org.eclipse.che.api.workspace.server;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 
 import org.eclipse.che.account.api.AccountManager;
@@ -28,8 +27,8 @@ import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.machine.server.exception.SnapshotException;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
-import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.api.environment.server.exception.EnvironmentException;
 import org.eclipse.che.api.machine.server.exception.SourceNotFoundException;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
@@ -50,6 +49,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
@@ -347,10 +347,10 @@ public class WorkspaceManager {
                                                                                     .getKey());
                 } catch (ConflictException | SnapshotException | NotFoundException err) {
                     LOG.error("Failed to update snapshots of '%s' environment in '%s' workspace.", env.getKey(), workspaceId, err);
-                    quietlyRemoveEnvironmentSnapshots(workspaceId, env.getKey());
+                    removeEnvironmentSnapshotsQuietly(workspaceId, env.getKey());
                 }
             } else {
-                quietlyRemoveEnvironmentSnapshots(workspaceId, env.getKey());
+                removeEnvironmentSnapshotsQuietly(workspaceId, env.getKey());
             }
         }
     }
@@ -625,22 +625,26 @@ public class WorkspaceManager {
      */
     @VisibleForTesting
     void removeEnvironmentSnapshots(String workspaceId, String envName) throws NotFoundException, ServerException {
+        List<SnapshotImpl> removed = new ArrayList<>();
         getSnapshot(workspaceId).stream()
                                 .filter(snapshot -> snapshot.getEnvName().equals(envName))
                                 .forEach(snapshot -> {
                                     try {
-                                        runtimes.removeSnapshot(snapshot);
                                         snapshotDao.removeSnapshot(snapshot.getId());
+                                        removed.add(snapshot);
                                     } catch (Exception e) {
-                                        LOG.error(e.getLocalizedMessage(), e);
+                                        LOG.error(format("Couldn't remove snapshot '%s' meta data, " +
+                                                         "binaries won't be removed either", snapshot.getId()), e);
                                     }
                                 });
+        // binaries removal may take some time, do it asynchronously
+        sharedPool.execute(() -> runtimes.removeBinaries(removed));
     }
 
     /**
      * The same as {@link #removeEnvironmentSnapshots(String, String)}, but log error instead of throwing any exception.
      */
-    private void quietlyRemoveEnvironmentSnapshots(String workspaceId, String envName) {
+    private void removeEnvironmentSnapshotsQuietly(String workspaceId, String envName) {
         try {
             removeEnvironmentSnapshots(workspaceId, envName);
         } catch (NotFoundException e) {
@@ -818,8 +822,6 @@ public class WorkspaceManager {
         }
     }
 
-    @VisibleForTesting
-    void checkWorkspaceIsRunning(WorkspaceImpl workspace, String operation) throws ConflictException {
     private void checkWorkspaceIsRunning(WorkspaceImpl workspace, String operation) throws ConflictException {
         if (workspace.getStatus() != RUNNING) {
             throw new ConflictException(format("Could not %s the workspace '%s:%s' because its status is '%s'.",
