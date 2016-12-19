@@ -179,7 +179,7 @@ public class AbstractPerspectivePersistenceTest {
 
         perspective.loadState(state);
 
-        verify(workBenchController).setSize(42d);
+        verify(workBenchController).setSize(100d);
     }
 
     @Test
