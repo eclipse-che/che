@@ -15,10 +15,12 @@ import com.google.inject.multibindings.Multibinder;
 
 import org.eclipse.che.api.project.server.handlers.ProjectHandler;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
+import org.eclipse.che.api.project.server.type.ValueProviderFactory;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.plugin.composer.server.projecttype.ComposerProjectGenerator;
 import org.eclipse.che.plugin.composer.server.projecttype.ComposerProjectInitializer;
 import org.eclipse.che.plugin.composer.server.projecttype.ComposerProjectType;
+import org.eclipse.che.plugin.composer.server.projecttype.ComposerValueProviderFactory;
 
 import static com.google.inject.multibindings.Multibinder.newSetBinder;
 
@@ -34,8 +36,11 @@ public class ComposerModule extends AbstractModule {
     /** {@inheritDoc} */
     @Override
     protected void configure() {
-        Multibinder<ProjectTypeDef> projectTypeMultibinder = Multibinder.newSetBinder(binder(), ProjectTypeDef.class);
+        Multibinder<ProjectTypeDef> projectTypeMultibinder = newSetBinder(binder(), ProjectTypeDef.class);
         projectTypeMultibinder.addBinding().to(ComposerProjectType.class);
+
+        Multibinder<ValueProviderFactory> valueProviderMultibinder = newSetBinder(binder(), ValueProviderFactory.class);
+        valueProviderMultibinder.addBinding().to(ComposerValueProviderFactory.class);
 
         Multibinder<ProjectHandler> projectHandlerMultibinder = newSetBinder(binder(), ProjectHandler.class);
         projectHandlerMultibinder.addBinding().to(ComposerProjectGenerator.class);

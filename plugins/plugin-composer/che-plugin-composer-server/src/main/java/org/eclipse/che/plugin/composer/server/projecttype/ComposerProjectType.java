@@ -25,10 +25,10 @@ import static org.eclipse.che.plugin.php.shared.Constants.PHP_PROJECT_TYPE_ID;
  */
 public class ComposerProjectType extends ProjectTypeDef {
     @Inject
-    public ComposerProjectType() {
+    public ComposerProjectType(ComposerValueProviderFactory valueProviderFactory) {
         super(COMPOSER_PROJECT_TYPE_ID, "Composer", true, false, true);
 
-        addVariableDefinition(PACKAGE, "Package name", true);
+        addVariableDefinition(PACKAGE, "Package name", true, valueProviderFactory);
 
         addParent(PHP_PROJECT_TYPE_ID);
     }

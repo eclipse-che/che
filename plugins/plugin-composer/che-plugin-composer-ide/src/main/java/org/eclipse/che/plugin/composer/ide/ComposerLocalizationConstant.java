@@ -21,4 +21,10 @@ import com.google.gwt.i18n.client.Messages;
 public interface ComposerLocalizationConstant extends Messages {
     @Key("package.attribute.label.name")
     String packageAttribute();
+
+    @Key("composer.page.estimate.errorMessage")
+    String composerPageEstimateErrorMessage();
+
+    @Key("composer.page.errorDialog.title")
+    String composerPageErrorDialogTitle();
 }
