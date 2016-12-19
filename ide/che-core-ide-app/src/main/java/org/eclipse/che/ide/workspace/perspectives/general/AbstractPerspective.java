@@ -397,7 +397,7 @@ public abstract class AbstractPerspective implements Presenter, Perspective,
             double size = partStackJSON.getNumber("SIZE");
 
             // Size of the part must not be less 100 pixels.
-            if (size == 0) {
+            if (size < 100) {
                 size = 100;
             }
 
