@@ -198,8 +198,6 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         eventBus.addHandler(DownloadWorkspaceOutputEvent.TYPE, this);
         eventBus.addHandler(PartStackStateChangedEvent.TYPE, this);
 
-        updateMachineList();
-
         final PartStack partStack = checkNotNull(workspaceAgent.getPartStack(PartStackType.INFORMATION),
                                                  "Information part stack should not be a null");
         partStack.addPart(this);
@@ -207,6 +205,13 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         if (appContext.getFactory() == null) {
             partStack.setActivePart(this);
         }
+
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                updateMachineList();
+            }
+        });
     }
 
     /**
@@ -276,11 +281,8 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
     @Override
     public void onMachineRunning(MachineStateEvent event) {
-        final MachineEntity machine = event.getMachine();
-        if (!machine.isDev()) {
-            machines.put(event.getMachineId(), event.getMachine());
-            provideMachineNode(machine, true);
-        }
+        machines.put(event.getMachineId(), event.getMachine());
+        provideMachineNode(event.getMachine(), true);
     }
 
     @Override
