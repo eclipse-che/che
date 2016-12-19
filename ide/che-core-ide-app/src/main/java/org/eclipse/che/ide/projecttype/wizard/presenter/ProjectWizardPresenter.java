@@ -216,6 +216,8 @@ public class ProjectWizardPresenter implements Wizard.UpdateDelegate,
         final NewProjectConfig newProjectConfig = new NewProjectConfigImpl(projectTemplate);
         dataObject.setType(newProjectConfig.getType());
         dataObject.setSource(newProjectConfig.getSource());
+        dataObject.setAttributes(newProjectConfig.getAttributes());
+        dataObject.setOptions(newProjectConfig.getOptions());
     }
 
     /** Creates or returns project wizard for the specified projectType with the given dataObject. */

@@ -6,7 +6,7 @@
 # http://www.eclipse.org/legal/epl-v10.html
 
 IMAGE_NAME="eclipse/che-server"
-source $(cd "$(dirname "$0")"; pwd)/../build.include
+. $(cd "$(dirname "$0")"; pwd)/../build.include
 
 # grab assembly
 DIR=$(cd "$(dirname "$0")"; pwd)
@@ -26,5 +26,5 @@ fi
 echo "Linking assembly ${BUILD_ASSEMBLY_ZIP} --> ${LOCAL_ASSEMBLY_ZIP}"
 ln ${BUILD_ASSEMBLY_ZIP} ${LOCAL_ASSEMBLY_ZIP}
 
-init
-build
+init "$@"
+build "$@"

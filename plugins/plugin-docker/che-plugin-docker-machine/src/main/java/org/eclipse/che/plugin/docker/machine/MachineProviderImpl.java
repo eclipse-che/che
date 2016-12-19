@@ -305,6 +305,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                                       service.getId(),
                                                       workspaceId);
 
+            final String userId = EnvironmentContext.getCurrent().getSubject().getUserId();
             MachineImpl machine = new MachineImpl(MachineConfigImpl.builder()
                                                                    .setDev(isDev)
                                                                    .setName(machineName)
@@ -323,7 +324,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                                   service.getId(),
                                                   workspaceId,
                                                   envName,
-                                                  namespace,
+                                                  userId,
                                                   MachineStatus.RUNNING,
                                                   null);
 

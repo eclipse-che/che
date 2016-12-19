@@ -24,7 +24,7 @@ cli_parse () {
   COMMAND="cmd_$1"
 
   case $1 in
-      init|config|start|stop|restart|backup|restore|info|offline|destroy|download|rmi|upgrade|version|ssh|mount|action|test|compile|help)
+      init|config|start|stop|restart|backup|restore|info|offline|destroy|download|rmi|upgrade|version|ssh|sync|action|test|compile|help)
       ;;
       *)
          error "You passed an unknown command."
@@ -368,9 +368,10 @@ verify_version_compatibility() {
     # Solution is to compare the dates, and only print warning message if the locally created ate
     # is less than the updated date on dockerhub.
 
-    if $(date_less_than ${LOCAL_CREATION_DATE} ${REMOTE_CREATION_DATE}); then
-      warning "Your local ${CHE_IMAGE_FULLNAME} image is older than the version on DockerHub."
-      warning "Run 'docker pull ${CHE_IMAGE_FULLNAME}' to update your CLI."
+    if [[ -z ${REMOTE_CREATION_DATE} ]]; then
+      warning "Unable to get published date on hub.docker.com for ${CHE_IMAGE_FULLNAME}"
+    elif $(newer_date_period ${LOCAL_CREATION_DATE} ${REMOTE_CREATION_DATE}); then
+      warning "There is a newer ${CHE_IMAGE_FULLNAME} image on DockerHub."
     fi
   fi
 }
@@ -381,12 +382,14 @@ timestamp_date_iso8601() {
   echo ${TMP_DATE}
 }
 
-# Compare two dates with ISO 8601 format and return true if the first date is less than the second date
-date_less_than() {
+# Compare two dates with ISO 8601 format and return
+# true if the first date is less than the second date (with a 1hour period)
+# else false
+newer_date_period() {
   local FIRST_DATE=$(timestamp_date_iso8601 $1)
   local SECOND_DATE=$(timestamp_date_iso8601 $2)
 
-  if [[ ${FIRST_DATE} -lt ${SECOND_DATE} ]]; then
+  if [[ $(expr ${FIRST_DATE} + 3600) -lt ${SECOND_DATE} ]]; then
     return 0
   else
     return 1

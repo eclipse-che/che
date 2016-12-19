@@ -11,11 +11,14 @@
 package org.eclipse.che.plugin.docker.machine.ext.provider;
 
 import org.eclipse.che.api.core.util.SystemInfo;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.inject.CheBootstrap;
 import org.eclipse.che.plugin.docker.machine.WindowsHostUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Strings;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -43,8 +46,8 @@ public class DockerExtConfBindingProvider implements Provider<String> {
     private static final Logger LOG              = LoggerFactory.getLogger(DockerExtConfBindingProvider.class);
 
     @Inject
-    @Named("che.docker.volumes_agent_options")
-    private String volumeOptions;
+    @Nullable @Named("che.docker.volumes_agent_options")
+    private String agentVolumeOptions;
 
     @Override
     public String get() {
@@ -76,7 +79,11 @@ public class DockerExtConfBindingProvider implements Provider<String> {
     }
 
     private String getTargetOptions(final String path) {
-        return path + CONTAINER_TARGET + ":" + volumeOptions;
+        if (!Strings.isNullOrEmpty(agentVolumeOptions)) {
+            return path + CONTAINER_TARGET + ":" + agentVolumeOptions;
+        } else {
+            return path + CONTAINER_TARGET;
+        }
     }
 
 }

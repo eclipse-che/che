@@ -24,7 +24,7 @@ import {NavbarNotification} from './notification/navbar-notification.directive';
 
 export class NavbarConfig {
 
-  constructor(register) {
+  constructor(register: che.IRegisterService) {
     register.controller('CheNavBarCtrl', CheNavBarCtrl);
     register.controller('NavBarSelectedCtrl', NavBarSelectedCtrl);
     register.directive('cheNavBar', CheNavBar);

@@ -67,6 +67,7 @@ init_constants() {
   CHE_VERSION_FILE="${CHE_MINI_PRODUCT_NAME}.ver.do_not_modify"
   CHE_ENVIRONMENT_FILE="${CHE_MINI_PRODUCT_NAME}.env"
   CHE_COMPOSE_FILE="docker-compose-container.yml"
+  CHE_HOST_COMPOSE_FILE="docker-compose.yml"
 
   DEFAULT_CHE_SERVER_CONTAINER_NAME="${CHE_MINI_PRODUCT_NAME}"
   CHE_SERVER_CONTAINER_NAME="${CHE_SERVER_CONTAINER_NAME:-${DEFAULT_CHE_SERVER_CONTAINER_NAME}}"
@@ -266,6 +267,7 @@ init() {
      SCRIPTS_CONTAINER_SOURCE_DIR="/scripts"
   fi
 
+
   # Primary source directory
   source "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/cli/cli-functions.sh
 
@@ -279,6 +281,7 @@ init() {
 
   # If offline mode, then load dependent images from disk and populate the local Docker cache.
   # If not in offline mode, verify that we have access to DockerHub.
+  # This is also the first usage of curl
   initiate_offline_or_network_mode "$@"
 
   # Pull the list of images that are necessary. If in offline mode, verifies that the images
@@ -309,9 +312,10 @@ cli_init() {
   REFERENCE_HOST_COMPOSE_FILE="${CHE_HOST_INSTANCE}/${CHE_COMPOSE_FILE}"
   REFERENCE_CONTAINER_ENVIRONMENT_FILE="${CHE_CONTAINER_CONFIG}/${CHE_ENVIRONMENT_FILE}"
   REFERENCE_CONTAINER_COMPOSE_FILE="${CHE_CONTAINER_INSTANCE}/${CHE_COMPOSE_FILE}"
+  REFERENCE_CONTAINER_COMPOSE_HOST_FILE="${CHE_CONTAINER_INSTANCE}/${CHE_HOST_COMPOSE_FILE}"
 
-  CHE_CONTAINER_OFFLINE_FOLDER="/${CHE_CONTAINER_INSTANCE}/backup"
-  CHE_HOST_OFFLINE_FOLDER="${CHE_HOST_INSTANCE}/backup"
+  CHE_CONTAINER_OFFLINE_FOLDER="${CHE_CONTAINER_BACKUP}"
+  CHE_HOST_OFFLINE_FOLDER="${CHE_HOST_BACKUP}"
 
   CHE_HOST_CONFIG_MANIFESTS_FOLDER="${CHE_HOST_INSTANCE}/manifests"
   CHE_CONTAINER_CONFIG_MANIFESTS_FOLDER="${CHE_CONTAINER_INSTANCE}/manifests"

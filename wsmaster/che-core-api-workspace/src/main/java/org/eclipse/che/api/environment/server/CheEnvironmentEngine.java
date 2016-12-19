@@ -467,8 +467,7 @@ public class CheEnvironmentEngine {
      * @throws ServerException
      *         if another error occurs
      */
-    public SnapshotImpl saveSnapshot(String namespace,
-                                     String workspaceId,
+    public SnapshotImpl saveSnapshot(String workspaceId,
                                      String machineId) throws ServerException,
                                                               NotFoundException {
         EnvironmentHolder environmentHolder;
