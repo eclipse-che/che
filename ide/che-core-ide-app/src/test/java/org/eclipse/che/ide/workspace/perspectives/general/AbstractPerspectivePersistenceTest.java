@@ -165,7 +165,7 @@ public class AbstractPerspectivePersistenceTest {
                         partsArray.set(0, part);
                         part.put("CLASS", "foo.Bar");
 
-                    partStack.put("SIZE", 42);
+                    partStack.put("SIZE", 142);
 
         // partStackPresenter.getParts() must return non empty list
         final List<PartPresenter> partPresenters = new ArrayList<>();
@@ -179,7 +179,7 @@ public class AbstractPerspectivePersistenceTest {
 
         perspective.loadState(state);
 
-        verify(workBenchController).setSize(42d);
+        verify(workBenchController).setSize(142d);
     }
 
     @Test
