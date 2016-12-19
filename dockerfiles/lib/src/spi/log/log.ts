@@ -83,6 +83,10 @@ export class Log {
         } else if ('multiline:info' === type) {
             prefix = Log.INFO_PREFIX;
             displayEachLine = true;
+        } else if ('multiline:direct' === type) {
+            prefix = '';
+            useContext = false;
+            displayEachLine = true;
         }
 
         if (useContext && Log.context) {
@@ -125,4 +129,4 @@ export class Log {
 }
 
 
-export type LogType = 'info' | 'debug' | 'warn' | 'error' | 'direct' | 'multiline:info';
+export type LogType = 'info' | 'debug' | 'warn' | 'error' | 'direct' | 'multiline:info' | 'multiline:direct';
