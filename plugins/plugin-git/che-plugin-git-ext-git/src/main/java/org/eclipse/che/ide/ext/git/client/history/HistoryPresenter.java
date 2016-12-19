@@ -132,10 +132,7 @@ public class HistoryPresenter extends BasePresenter implements HistoryView.Actio
         if (isViewClosed) {
             workspaceAgent.openPart(this, PartStackType.TOOLING);
             isViewClosed = false;
-        }
-
-        PartPresenter activePart = partStack.getActivePart();
-        if (activePart == null || !activePart.equals(this)) {
+        } else {
             partStack.setActivePart(this);
         }
     }

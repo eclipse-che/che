@@ -47,7 +47,6 @@ import java.util.List;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -56,6 +55,7 @@ import static org.mockito.Mockito.when;
  */
 @RunWith(GwtMockitoTestRunner.class)
 public class AbstractPerspectivePersistenceTest {
+
     //constructor mocks
     @Mock
     private PerspectiveViewImpl        view;
@@ -95,7 +95,6 @@ public class AbstractPerspectivePersistenceTest {
     private DynaProvider            dynaProvider;
     @Mock
     private Provider<PartPresenter> partProvider;
-
 
     private AbstractPerspective perspective;
 
@@ -152,38 +151,51 @@ public class AbstractPerspectivePersistenceTest {
     @Test
     public void shouldRestorePartStackSize() throws Exception {
         JsonObject state = Json.createObject();
-        JsonObject parts = Json.createObject();
-        state.put("PART_STACKS", parts);
-        JsonObject partStack = Json.createObject();
-        parts.put("INFORMATION", partStack);
-        partStack.put("SIZE", 42);
+
+            JsonObject parts = Json.createObject();
+            state.put("PART_STACKS", parts);
+
+                JsonObject partStack = Json.createObject();
+                parts.put("INFORMATION", partStack);
+
+                    JsonArray partsArray = Json.createArray();
+                    partStack.put("PARTS", partsArray);
+
+                        JsonObject part = Json.createObject();
+                        partsArray.set(0, part);
+                        part.put("CLASS", "foo.Bar");
+
+                    partStack.put("SIZE", 42);
+
+        // partStackPresenter.getParts() must return non empty list
+        final List<PartPresenter> partPresenters = new ArrayList<>();
+        partPresenters.add(partPresenter);
+        when(partStackPresenter.getParts()).thenAnswer(new Answer<List<? extends PartPresenter>>() {
+            @Override
+            public List<? extends PartPresenter> answer(InvocationOnMock invocationOnMock) throws Throwable {
+                return partPresenters;
+            }
+        });
 
         perspective.loadState(state);
 
         verify(workBenchController).setSize(42d);
-
     }
 
     @Test
     public void shouldRestoreHiddenPartStackState() throws Exception {
         JsonObject state = Json.createObject();
-        JsonObject parts = Json.createObject();
-        state.put("PART_STACKS", parts);
-        JsonObject partStack = Json.createObject();
-        parts.put("INFORMATION", partStack);
-        partStack.put("HIDDEN", true);
 
-        //PartStackPresenter should not be empty otherwise setHidden() will call twice
-        final List<PartPresenter> partPresenters = new ArrayList<>();
-        partPresenters.add(mock(PartPresenter.class));
-        when(partStackPresenter.getParts()).thenAnswer(new Answer<List<? extends PartPresenter>>() {
-            public List<? extends PartPresenter> answer(InvocationOnMock invocation) throws Throwable {
-                return partPresenters;
-            }
+            JsonObject parts = Json.createObject();
+            state.put("PART_STACKS", parts);
 
-        });
+                JsonObject partStack = Json.createObject();
+                parts.put("INFORMATION", partStack);
+
+                partStack.put("HIDDEN", true);
 
         perspective.loadState(state);
+
         verify(workBenchController).setHidden(true);
     }
 
@@ -210,6 +222,6 @@ public class AbstractPerspectivePersistenceTest {
         verify(partProvider).get();
 
         verify(partStackPresenter).addPart(partPresenter);
-
     }
+
 }
