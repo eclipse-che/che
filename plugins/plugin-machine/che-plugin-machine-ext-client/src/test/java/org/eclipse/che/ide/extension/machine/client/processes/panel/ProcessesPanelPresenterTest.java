@@ -407,6 +407,7 @@ public class ProcessesPanelPresenterTest {
         presenter.onAddTerminal(MACHINE_ID, presenter);
 
         verify(terminalFactory).create(eq(machine), eq(presenter));
+        verify(workspaceAgent).setActivePart(presenter);
         verify(terminal).getView();
         verify(view, times(2)).setProcessesData(anyObject());
         verify(view).selectNode(anyObject());
