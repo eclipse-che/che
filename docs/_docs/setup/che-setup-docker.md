@@ -1,22 +1,13 @@
 ---
 tags: [ "eclipse" , "che" ]
-title: Usage&#58 Docker Server
-excerpt: "Run the Che server inside a Docker image with workspaces mounted on your host."
+title: Docker Installation
+excerpt: "Run the Che server with Docker bypassing the CLI with workspaces mounted on your host."
 layout: docs
-permalink: /:categories/docker-server/
+permalink: /:categories/docker/
 ---
-#### Requires Eclipse Che 5.0.0-M6+
-Starting in Eclipse Che M6 release, we altered the structure of the Che container. The launching syntax is simplified to consolidate data into a single folder and to use environment variables more. This syntax will not work with the eclipse/che-server:latest and you may have to use eclipse/che-server:nightly or eclipse/che-server:5.0.0-M6 or eclipse/che-server:5.0.0-latest to get the right version.  
+You can run the Che server directly by launching a Docker image. This approach bypasses the CLI, which has additional utilities to simplify administration and operation. The `eclipse/che-server` Docker image is appropriate for running Che within clusters, orchestrators, or by third party tools with automation.
 
-Eclipse Che has an [image available within Docker Hub](https://hub.docker.com/r/eclipse/che-server/). This image only runs the Che server and requires your Docker clients to have additional configuration that varies by operating system.
-
-!!!NOTE:  This is a new syntax that is not available on Docker Hub yet. To get this new approach, you need to build a eclipse/che-server:nightly directly.  Please see this [pull request](https://github.com/eclipse/che/pull/2786) for details on how to run it.
-
-The preferred technique for running Eclipse Che is with our [Usage: Docker](doc:usage-docker) launcher which simplifies the syntax and provides a consistent client that works on any operating system. There are quirks to running the Che server container on Windows and Mac, so the `che-launcher` is encouraged.
-
-As of 5.0.0-M7, this syntax has changed. The che-server container provides an error message if you try to use it with the old syntax.
 # Run the Image  
-
 ```shell  
 # Run the latest released version of Che
 # Replace <path-for-data> with any host folder
