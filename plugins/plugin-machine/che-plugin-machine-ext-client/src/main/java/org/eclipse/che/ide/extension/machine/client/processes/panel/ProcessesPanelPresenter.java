@@ -980,10 +980,8 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                 for (GetProcessesResponseDto process : processes) {
                     final int pid = process.getPid();
                     final String type = process.getType();
-//                    String name = process.getName();
-//                    String commandLine = process.getCommandLine();
 
-                                                /*
+                    /*
                      * Do not show the process if the command line has prefix #hidden
                      */
                     if (!isNullOrEmpty(process.getCommandLine()) &&
@@ -992,8 +990,8 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                     }
 
                     /*
-+                     *hide the processes which are launched by command of unknown type
-+                     */
+                     * Hide the processes which are launched by command of unknown type
+                     */
                     if (isProcessLaunchedByCommandOfKnownType(type)) {
                         final String processName = process.getName();
                         final CommandImpl commandByName = getWorkspaceCommandByName(processName);
