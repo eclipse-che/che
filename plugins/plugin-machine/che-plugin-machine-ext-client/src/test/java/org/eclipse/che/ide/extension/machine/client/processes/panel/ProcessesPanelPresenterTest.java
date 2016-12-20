@@ -46,6 +46,7 @@ import org.eclipse.che.ide.api.parts.PartStack;
 import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.ssh.SshServiceClient;
+import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
@@ -117,8 +118,6 @@ public class ProcessesPanelPresenterTest {
     @Mock
     private AppContext                    appContext;
     @Mock
-    private MachineServiceClient          machineService;
-    @Mock
     private SshServiceClient              sshService;
     @Mock
     private EventBus                      eventBus;
@@ -138,6 +137,8 @@ public class ProcessesPanelPresenterTest {
     private ExecAgentCommandManager       execAgentCommandManager;
     @Mock
     private MacroProcessor                macroProcessor;
+    @Mock
+    private DtoFactory                    dtoFactory;
 
     @Mock
     private Promise<List<MachineProcessDto>> processesPromise;
@@ -176,7 +177,6 @@ public class ProcessesPanelPresenterTest {
                                                 localizationConstant,
                                                 resources,
                                                 eventBus,
-                                                machineService,
                                                 workspaceAgent,
                                                 appContext,
                                                 notificationManager,
@@ -188,7 +188,8 @@ public class ProcessesPanelPresenterTest {
                                                 commandTypeRegistry,
                                                 sshService,
                                                 execAgentCommandManager,
-                                                macroProcessor);
+                                                macroProcessor,
+                                                dtoFactory);
     }
 
     @Test

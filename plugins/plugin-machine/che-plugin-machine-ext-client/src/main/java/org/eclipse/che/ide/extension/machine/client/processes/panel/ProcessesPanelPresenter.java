@@ -20,12 +20,14 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.model.machine.Machine;
+import static org.eclipse.che.api.core.model.machine.MachineStatus.CREATING;
 import org.eclipse.che.api.core.model.machine.Server;
 import org.eclipse.che.api.core.model.workspace.Environment;
 import org.eclipse.che.api.core.model.workspace.ExtendedMachine;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceRuntime;
+import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessLogsResponseDto;
 import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessesResponseDto;
@@ -42,7 +44,6 @@ import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.machine.MachineEntity;
-import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.machine.events.MachineStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
@@ -58,10 +59,12 @@ import org.eclipse.che.ide.api.ssh.SshServiceClient;
 import org.eclipse.che.ide.api.workspace.event.EnvironmentOutputEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
+import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.TerminalFactory;
+import org.eclipse.che.ide.extension.machine.client.machine.MachineEntityImpl;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandConsoleFactory;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandOutputConsole;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandOutputConsolePresenter;
@@ -128,7 +131,6 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     private final ProcessesPanelView            view;
     private final MachineLocalizationConstant   localizationConstant;
     private final MachineResources              resources;
-    private final MachineServiceClient          machineServiceClient;
     private final WorkspaceAgent                workspaceAgent;
     private final SshServiceClient              sshServiceClient;
     private final AppContext                    appContext;
@@ -142,6 +144,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     private final ExecAgentCommandManager       execAgentCommandManager;
     private final MacroProcessor macroProcessor;
     private final EventBus                      eventBus;
+    private final DtoFactory                    dtoFactory;
 
     ProcessTreeNode                             rootNode;
     private final Map<String, ProcessTreeNode>  machineNodes;
@@ -154,7 +157,6 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                                    MachineLocalizationConstant localizationConstant,
                                    MachineResources resources,
                                    EventBus eventBus,
-                                   MachineServiceClient machineServiceClient,
                                    WorkspaceAgent workspaceAgent,
                                    AppContext appContext,
                                    NotificationManager notificationManager,
@@ -166,11 +168,11 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                                    CommandTypeRegistry commandTypeRegistry,
                                    SshServiceClient sshServiceClient,
                                    ExecAgentCommandManager execAgentCommandManager,
-                                   MacroProcessor macroProcessor) {
+                                   MacroProcessor macroProcessor,
+                                   DtoFactory dtoFactory) {
         this.view = view;
         this.localizationConstant = localizationConstant;
         this.resources = resources;
-        this.machineServiceClient = machineServiceClient;
         this.workspaceAgent = workspaceAgent;
         this.sshServiceClient = sshServiceClient;
         this.appContext = appContext;
@@ -184,6 +186,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         this.commandTypeRegistry = commandTypeRegistry;
         this.execAgentCommandManager = execAgentCommandManager;
         this.macroProcessor = macroProcessor;
+        this.dtoFactory = dtoFactory;
 
         machineNodes = new HashMap<>();
         machines = new HashMap<>();
@@ -203,8 +206,6 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         eventBus.addHandler(DownloadWorkspaceOutputEvent.TYPE, this);
         eventBus.addHandler(PartStackStateChangedEvent.TYPE, this);
 
-        updateMachineList();
-
         final PartStack partStack = checkNotNull(workspaceAgent.getPartStack(PartStackType.INFORMATION),
                                                  "Information part stack should not be a null");
         partStack.addPart(this);
@@ -212,6 +213,13 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         if (appContext.getFactory() == null) {
             partStack.setActivePart(this);
         }
+
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                updateMachineList();
+            }
+        });
     }
 
     /**
@@ -281,11 +289,8 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
     @Override
     public void onMachineRunning(MachineStateEvent event) {
-        final MachineEntity machine = event.getMachine();
-        if (!machine.isDev()) {
-            machines.put(event.getMachineId(), event.getMachine());
-            provideMachineNode(machine, true);
-        }
+        machines.put(event.getMachineId(), event.getMachine());
+        provideMachineNode(event.getMachine(), true);
     }
 
     @Override
@@ -1126,7 +1131,19 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
      * @param text
      *          text to be printed
      */
-    public void printMachineOutput(String machineName, String text) {
+    public void printMachineOutput(final String machineName, final String text) {
+        // Create a temporary machine node to display outputs.
+        if (!consoles.containsKey(machineName)) {
+            MachineDto machineDto = dtoFactory.createDto(MachineDto.class)
+                    .withId(machineName)
+                    .withStatus(CREATING)
+                    .withConfig(dtoFactory.createDto(MachineConfigDto.class)
+                                    .withDev("dev-machine".equals(machineName))
+                                    .withName(machineName)
+                    );
+            provideMachineNode(new MachineEntityImpl(machineDto), true);
+        }
+
         OutputConsole console = consoles.get(machineName);
         if (console != null && console instanceof DefaultOutputConsole) {
             ((DefaultOutputConsole)console).printText(text);
