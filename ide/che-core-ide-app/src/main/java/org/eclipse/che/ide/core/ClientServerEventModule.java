@@ -15,7 +15,7 @@ import com.google.gwt.inject.client.AbstractGinModule;
 import org.eclipse.che.ide.api.event.ng.ClientServerEventService;
 import org.eclipse.che.ide.api.event.ng.EditorFileStatusNotificationOperation;
 import org.eclipse.che.ide.api.event.ng.FileOpenCloseEventListener;
-import org.eclipse.che.ide.api.event.ng.ProjectTreeStatusNotificationOperation;
+import org.eclipse.che.ide.api.event.ng.ProjectTreeStateNotificationOperation;
 
 /**
  * GIN module for configuring client server events.
@@ -38,6 +38,6 @@ public class ClientServerEventModule extends AbstractGinModule {
 
     private void notificationOperations() {
         bind(EditorFileStatusNotificationOperation.class).asEagerSingleton();
-        bind(ProjectTreeStatusNotificationOperation.class).asEagerSingleton();
+        bind(ProjectTreeStateNotificationOperation.class).asEagerSingleton();
     }
 }

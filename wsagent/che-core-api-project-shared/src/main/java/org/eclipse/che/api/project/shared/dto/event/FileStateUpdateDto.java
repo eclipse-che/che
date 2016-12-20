@@ -13,16 +13,16 @@ package org.eclipse.che.api.project.shared.dto.event;
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
-public interface VfsFileStatusUpdateDto {
+public interface FileStateUpdateDto {
     FileWatcherEventType getType();
 
-    VfsFileStatusUpdateDto withType(FileWatcherEventType type);
+    FileStateUpdateDto withType(FileWatcherEventType type);
 
     String getPath();
 
-    VfsFileStatusUpdateDto withPath(String path);
+    FileStateUpdateDto withPath(String path);
 
     String getHashCode();
 
-    VfsFileStatusUpdateDto withHashCode(String hashCode);
+    FileStateUpdateDto withHashCode(String hashCode);
 }

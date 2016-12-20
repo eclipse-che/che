@@ -12,7 +12,7 @@ package org.eclipse.che.ide.api.event.ng;
 
 
 import org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType;
-import org.eclipse.che.api.project.shared.dto.event.ProjectTreeStatusUpdateDto;
+import org.eclipse.che.api.project.shared.dto.event.ProjectTreeStateUpdateDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.ExternalResourceDelta;
@@ -37,25 +37,25 @@ import static org.eclipse.che.ide.api.resources.ResourceDelta.UPDATED;
  * @author Dmitry Kuleshov
  */
 @Singleton
-public class ProjectTreeStatusNotificationOperation implements JsonRpcRequestBiOperation<ProjectTreeStatusUpdateDto> {
+public class ProjectTreeStateNotificationOperation implements JsonRpcRequestBiOperation<ProjectTreeStateUpdateDto> {
     private final AppContext appContext;
 
     @Inject
-    public ProjectTreeStatusNotificationOperation(AppContext appContext) {
+    public ProjectTreeStateNotificationOperation(AppContext appContext) {
         this.appContext = appContext;
     }
 
     @Inject
     public void configureHandler(RequestHandlerConfigurator configurator) {
         configurator.newConfiguration()
-                    .methodName("event:project-tree-status-changed")
-                    .paramsAsDto(ProjectTreeStatusUpdateDto.class)
+                    .methodName("event:project-tree-state-changed")
+                    .paramsAsDto(ProjectTreeStateUpdateDto.class)
                     .noResult()
                     .withOperation(this);
     }
 
     @Override
-    public void apply(String endpointId, ProjectTreeStatusUpdateDto params) throws JsonRpcException {
+    public void apply(String endpointId, ProjectTreeStateUpdateDto params) throws JsonRpcException {
         final String path = params.getPath();
         final FileWatcherEventType type = params.getType();
 
