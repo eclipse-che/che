@@ -121,12 +121,31 @@ docker_run() {
       DOCKER_HOST="/var/run/docker.sock"
   fi
 
+  echo "" > /tmp/docker_run_vars
+  # Add environment variables for CHE
+  while IFS='=' read -r -d '' key value; do
+    if [[ ${key} == "CHE_"* ]]; then
+      echo ${key}=${value} >> /tmp/docker_run_vars
+    fi
+  done < <(env -0)
+
+  # Add scripts global variables for CHE
+  while read key; do
+    if [[ ${key} == "CHE_"* ]]; then
+      local ENV_VAL="${!key}"
+      echo ${key}=${ENV_VAL} >> /tmp/docker_run_vars
+    fi
+  done < <(compgen -v)
+
+
   if [ -S "$DOCKER_HOST" ]; then
-    docker run --rm -v $DOCKER_HOST:$DOCKER_HOST \
+    docker run --rm --env-file /tmp/docker_run_vars \
+                    -v $DOCKER_HOST:$DOCKER_HOST \
                     -v $HOME:$HOME \
                     -w "$(pwd)" "$@"
   else
-    docker run --rm -e DOCKER_HOST -e DOCKER_TLS_VERIFY -e DOCKER_CERT_PATH \
+    docker run --rm --env-file /tmp/docker_run_vars \
+                    -e DOCKER_HOST -e DOCKER_TLS_VERIFY -e DOCKER_CERT_PATH \
                     -v $HOME:$HOME \
                     -w "$(pwd)" "$@"
   fi
@@ -173,7 +192,7 @@ check_docker() {
 
   CHECK_VERSION=$(docker ps 2>&1 || true)
   if [[ "$CHECK_VERSION" = *"Error response from daemon: client is newer"* ]]; then
-    error "Error - Docker engine 1.10+ required."
+    error "Error - Docker engine 1.11+ required."
     return 2;
   fi
 

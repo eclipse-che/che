@@ -67,7 +67,7 @@ elif echo ${LINUX_TYPE} | grep -qi "debian"; then
 # Fedora 23
 ###########
 elif echo ${LINUX_TYPE} | grep -qi "fedora"; then
-    PACKAGES=${PACKAGES}" procps-ng"
+    command -v ps >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" procps-ng"; }
     test "${PACKAGES}" = "" || {
         ${SUDO} dnf -y install ${PACKAGES};
     }

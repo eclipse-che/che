@@ -29,9 +29,9 @@ import com.google.inject.Provider;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.actions.CreateProjectAction;
 import org.eclipse.che.ide.actions.ImportProjectAction;
+import org.eclipse.che.ide.api.ProductInfoDataProvider;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionManager;
@@ -85,9 +85,9 @@ public class EmptyEditorsPanel extends Composite implements ResourceChangedEvent
     public EmptyEditorsPanel(ActionManager actionManager,
                              Provider<PerspectiveManager> perspectiveManagerProvider,
                              KeyBindingAgent keyBindingAgent,
+                             ProductInfoDataProvider productInfoDataProvider,
                              AppContext appContext,
                              EventBus eventBus,
-                             Resources resources,
                              CoreLocalizationConstant localizationConstant,
                              NewFileAction newFileAction,
                              CreateProjectAction createProjectAction,
@@ -97,7 +97,7 @@ public class EmptyEditorsPanel extends Composite implements ResourceChangedEvent
 
 
         eventBus.addHandler(ResourceChangedEvent.getType(), this);
-        logo.appendChild(new SVGImage(resources.cheLogo()).getSvgElement().getElement());
+        logo.appendChild(new SVGImage(productInfoDataProvider.getLogo()).getSvgElement().getElement());
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             @Override
             public void execute() {

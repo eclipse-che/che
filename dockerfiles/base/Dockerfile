@@ -13,7 +13,8 @@
 FROM alpine:3.4
 
 ENV DOCKER_BUCKET get.docker.com
-ENV DOCKER_VERSION 1.10.3
+ENV DOCKER_VERSION 1.11.2
+ENV DOCKER_SHA256 8c2e0c35e3cda11706f54b2d46c2521a6e9026a7b13c7d4b8ae1f3a706fc55e1
 
 # install packages
 # coreutils is required for iso8601 compliant date utility
@@ -24,15 +25,13 @@ RUN mkdir -p /version \
     && apk add --update bash \
     && rm -rf /var/cache/apk/* \
     && set -x \
-	&& curl -fSL "https://${DOCKER_BUCKET}/builds/Linux/x86_64/docker-${DOCKER_VERSION}.tgz" -o docker.tgz \
-	&& tar -xzvf docker.tgz \
-	&& rm -rf docker \
-	&& rm docker.tgz \
-	&& docker -v
+    && curl -fSL "https://${DOCKER_BUCKET}/builds/Linux/x86_64/docker-${DOCKER_VERSION}.tgz" -o docker.tgz \
+    && echo "${DOCKER_SHA256} *docker.tgz" | sha256sum -c - \
+    && tar -xzvf docker.tgz \
+    && mv docker/docker /usr/local/bin/ \
+    && rm -rf docker \
+    && rm docker.tgz \
+    && docker -v
 
 COPY scripts/base /scripts/base/
 
-# Necessary if you are installing a 1.11 client
-#ENV DOCKER_SHA256 8c2e0c35e3cda11706f54b2d46c2521a6e9026a7b13c7d4b8ae1f3a706fc55e1
-#	&& echo "${DOCKER_SHA256} *docker.tgz" | sha256sum -c - \
-#	&& mv docker/docker /usr/local/bin/ \

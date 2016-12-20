@@ -109,7 +109,7 @@ export class StackController {
   /**
    * Update stack's data
    */
-  updateData() {
+  updateData(): void {
     if (this.isCreation) {
       this.stack = this.getNewStackTemplate();
       this.stackTags = angular.copy(this.stack.tags);
@@ -122,7 +122,7 @@ export class StackController {
 
   /**
    * Check if the name is unique.
-   * @param name
+   * @param name {string}
    * @returns {boolean}
    */
   isUniqueName(name: string): boolean {
@@ -135,7 +135,7 @@ export class StackController {
   /**
    * Cancels stack's changes
    */
-  cancelStackChanges() {
+  cancelStackChanges(): void {
     if (!this.copyStack) {
       return;
     }
@@ -158,10 +158,10 @@ export class StackController {
   /**
    * Returns template for the new stack.
    *
-   * @returns {{stack}} new stack template
+   * @returns {che.IStack} new stack template
    */
-  getNewStackTemplate(): any {
-    let stack: any = this.cheStack.getStackTemplate();
+  getNewStackTemplate(): che.IStack {
+    let stack: che.IStack = this.cheStack.getStackTemplate();
     this.stackName = stack.name;
     return stack;
   }
@@ -226,7 +226,7 @@ export class StackController {
    * Updates stack name info.
    * @param isFormValid {Boolean} true if form is valid
    */
-  updateStackName(isFormValid: boolean) {
+  updateStackName(isFormValid: boolean): void {
     if (isFormValid === false) {
       return;
     }
@@ -237,7 +237,7 @@ export class StackController {
   /**
    * Updates stack tags info.
    */
-  updateStackTags() {
+  updateStackTags(): void {
     if (!this.stack.tags) {
       this.stack.tags = [];
     }
@@ -329,7 +329,7 @@ export class StackController {
 
   /**
    * Show dialog to select project templates for stack's testing
-   * @param $event: MouseEvent
+   * @param $event {MouseEvent}
    */
   showSelectTemplateDialog($event: MouseEvent): void {
     this.$mdDialog.show({
@@ -348,7 +348,7 @@ export class StackController {
 
   /**
    * Show popup for stack's testing
-   * @param stack: che.IStack
+   * @param stack {che.IStack}
    */
   showStackTestPopup(stack: che.IStack): void {
     this.showIDE = false;

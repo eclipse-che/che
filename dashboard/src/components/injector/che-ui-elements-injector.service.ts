@@ -147,7 +147,7 @@ export class CheUIElementsInjectorService {
    * @param elementId {string} - the ID of element
    * @returns {boolean} - true if successful
    */
-  deleteElementById(elementId: string): void {
+  deleteElementById(elementId: string): boolean {
     return this.$document.find('#' + elementId).remove().length > 0;
   }
 }

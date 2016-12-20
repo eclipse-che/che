@@ -6,7 +6,7 @@
 # http://www.eclipse.org/legal/epl-v10.html
 
 IMAGE_NAME="eclipse/che-init"
-source $(cd "$(dirname "$0")"; pwd)/../build.include
+. $(cd "$(dirname "$0")"; pwd)/../build.include
 
-init
-build
+init "$@"
+build "$@"
