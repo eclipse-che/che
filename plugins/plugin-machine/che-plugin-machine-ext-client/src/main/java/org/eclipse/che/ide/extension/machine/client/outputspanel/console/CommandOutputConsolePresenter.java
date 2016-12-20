@@ -121,6 +121,8 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
         } else {
             view.hidePreview();
         }
+
+        view.showCommandLine(command.getCommandLine());
     }
 
     @Override

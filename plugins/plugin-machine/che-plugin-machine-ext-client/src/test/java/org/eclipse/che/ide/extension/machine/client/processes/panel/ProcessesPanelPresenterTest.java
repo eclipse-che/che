@@ -37,6 +37,7 @@ import org.eclipse.che.ide.api.machine.MachineManager;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.machine.events.MachineStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
+import org.eclipse.che.ide.api.macro.MacroProcessor;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode;
@@ -135,6 +136,8 @@ public class ProcessesPanelPresenterTest {
     @Mock
     private ExecAgentCommandManager       execAgentCommandManager;
     @Mock
+    private MacroProcessor                macroProcessor;
+    @Mock
     private DtoFactory                    dtoFactory;
 
     @Mock
@@ -185,6 +188,7 @@ public class ProcessesPanelPresenterTest {
                                                 commandTypeRegistry,
                                                 sshService,
                                                 execAgentCommandManager,
+                                                macroProcessor,
                                                 dtoFactory);
     }
 
