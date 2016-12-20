@@ -53,10 +53,7 @@ public class DockerAbandonedResourcesCleaner implements Runnable {
 
     private static final Logger LOG = LoggerFactory.getLogger(DockerAbandonedResourcesCleaner.class);
 
-    private static final String            CHE_NETWORK_NAME_PREFIX  = "workspace";
     private static final Filters           NETWORK_FILTERS          = new Filters().withFilter("type", "custom");
-                                                                                  // TODO name filter doesn't work with pure docker swarm
-                                                                                  // .withFilter("name", CHE_NETWORK_NAME_PREFIX);
     private static final GetNetworksParams GET_NETWORKS_PARAMS      = GetNetworksParams.create().withFilters(NETWORK_FILTERS);
     private static final String            WORKSPACE_ID_REGEX_GROUP = "workspaceId";
     private static final String            CHE_NETWORK_REGEX        = "^(?<" + WORKSPACE_ID_REGEX_GROUP + ">workspace[a-z\\d]{16})_[a-z\\d]{16}$";
@@ -84,7 +81,7 @@ public class DockerAbandonedResourcesCleaner implements Runnable {
                                                     .collect(toSet());
     }
 
-    @ScheduleRate(periodParameterName = "che.docker.cleanup_period_mins",
+    @ScheduleRate(periodParameterName = "che.docker.cleanup_period_min",
                   initialDelay = 0L,
                   unit = TimeUnit.MINUTES)
     @Override
