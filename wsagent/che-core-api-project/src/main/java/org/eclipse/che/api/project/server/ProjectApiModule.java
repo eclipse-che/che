@@ -11,7 +11,6 @@
 package org.eclipse.che.api.project.server;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
@@ -29,14 +28,8 @@ import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
 import org.eclipse.che.api.vfs.impl.file.DefaultFileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
-import org.eclipse.che.api.vfs.impl.file.event.HiEventDetector;
-import org.eclipse.che.api.vfs.impl.file.event.HiEventService;
-import org.eclipse.che.api.vfs.impl.file.event.LoEventListener;
-import org.eclipse.che.api.vfs.impl.file.event.LoEventService;
-import org.eclipse.che.api.vfs.impl.file.event.detectors.FileStatusDetector;
 import org.eclipse.che.api.vfs.impl.file.event.detectors.FileTrackingOperationReceiver;
-import org.eclipse.che.api.vfs.impl.file.event.detectors.FileTrackingOperationTransmitter;
-import org.eclipse.che.api.vfs.impl.file.event.detectors.ProjectTreeChangesDetector;
+import org.eclipse.che.api.vfs.impl.file.event.detectors.ProjectTreeTrackingOperationReceiver;
 import org.eclipse.che.api.vfs.search.MediaTypeFilter;
 import org.eclipse.che.api.vfs.search.SearcherProvider;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
@@ -80,6 +73,8 @@ public class ProjectApiModule extends AbstractModule {
         filtersMultibinder.addBinding().to(MediaTypeFilter.class);
 
         Multibinder<PathMatcher> excludeMatcher = newSetBinder(binder(), PathMatcher.class, Names.named("vfs.index_filter_matcher"));
+        Multibinder<PathMatcher> fileWatcherExcludes =
+                newSetBinder(binder(), PathMatcher.class, Names.named("che.user.workspaces.storage.excludes"));
 
         bind(SearcherProvider.class).to(FSLuceneSearcherProvider.class);
         bind(VirtualFileSystemProvider.class).to(LocalVirtualFileSystemProvider.class);
@@ -87,6 +82,7 @@ public class ProjectApiModule extends AbstractModule {
         bind(FileWatcherNotificationHandler.class).to(DefaultFileWatcherNotificationHandler.class);
 
         configureVfsFilters(excludeMatcher);
+        configureVfsFilters(fileWatcherExcludes);
         configureVfsEvent();
     }
 
@@ -107,22 +103,12 @@ public class ProjectApiModule extends AbstractModule {
     }
 
     private void configureVfsEvent() {
-        bind(LoEventListener.class);
-        bind(LoEventService.class);
-        bind(HiEventService.class);
-
-        Multibinder<HiEventDetector<?>> highLevelVfsEventDetectorMultibinder =
-                newSetBinder(binder(), new TypeLiteral<HiEventDetector<?>>() {
-                });
-
-        highLevelVfsEventDetectorMultibinder.addBinding().to(FileStatusDetector.class);
-        highLevelVfsEventDetectorMultibinder.addBinding().to(ProjectTreeChangesDetector.class);
-
-        bind(FileTrackingOperationTransmitter.class).asEagerSingleton();
-
-
         MapBinder.newMapBinder(binder(), String.class, RequestHandler.class)
                  .addBinding("track:editor-file")
                  .to(FileTrackingOperationReceiver.class);
+
+        MapBinder.newMapBinder(binder(), String.class, RequestHandler.class)
+                 .addBinding("track:project-tree")
+                 .to(ProjectTreeTrackingOperationReceiver.class);
     }
 }

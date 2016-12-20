@@ -12,6 +12,7 @@ package org.eclipse.che.ide.ext.java.testing.core.server;
 
 
 import com.jayway.restassured.response.Response;
+
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.api.project.server.RegisteredProject;
@@ -34,8 +35,8 @@ import static com.jayway.restassured.RestAssured.given;
 import static org.mockito.Matchers.anyMapOf;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.testng.Assert.assertEquals;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotEquals;
 
 /**
@@ -99,7 +100,7 @@ public class TestingServiceTest {
 
         when(classpathRegistry.getTestClasspathProvider(PROJECT_TYPE_MAVEN)).thenReturn(classpathProviderMaven);
 
-        projectManager = new ProjectManager(vfsProvider, null, null, projectRegistry, null, null, null, null, null,null);
+        projectManager = new ProjectManager(vfsProvider, null, null, projectRegistry, null, null, null, null, null, null);
         resourcesPlugin = new ResourcesPlugin(null, wsPath, null, null);
 
 

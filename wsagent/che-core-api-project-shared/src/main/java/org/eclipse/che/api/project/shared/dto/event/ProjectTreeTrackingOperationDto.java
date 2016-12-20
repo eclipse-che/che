@@ -8,17 +8,24 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.vfs.impl.file.event;
+package org.eclipse.che.api.project.shared.dto.event;
 
-import com.google.common.annotations.Beta;
+import org.eclipse.che.dto.shared.DTO;
 
-/**
- * @author Dmitry Kuleshov
- *
- * @since 4.5
- */
-@Beta
-@FunctionalInterface
-public interface HiEventBroadcaster {
-    void broadcast(HiEvent event);
+@DTO
+public interface ProjectTreeTrackingOperationDto {
+    String getPath();
+
+    ProjectTreeTrackingOperationDto withPath(String path);
+
+    Type getType();
+
+    ProjectTreeTrackingOperationDto withType(Type type);
+
+    enum Type {
+        START,
+        STOP,
+        SUSPEND,
+        RESUME,
+    }
 }

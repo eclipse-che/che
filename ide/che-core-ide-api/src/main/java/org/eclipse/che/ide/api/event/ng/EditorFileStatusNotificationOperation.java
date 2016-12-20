@@ -13,8 +13,8 @@ package org.eclipse.che.ide.api.event.ng;
 
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.project.shared.dto.event.FileStateUpdateDto;
 import org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType;
-import org.eclipse.che.api.project.shared.dto.event.VfsFileStatusUpdateDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.event.FileContentUpdateEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -40,7 +40,7 @@ import static org.eclipse.che.ide.api.resources.ResourceDelta.REMOVED;
  * @author Dmitry Kuleshov
  */
 @Singleton
-public class EditorFileStatusNotificationOperation implements JsonRpcRequestBiOperation<VfsFileStatusUpdateDto> {
+public class EditorFileStatusNotificationOperation implements JsonRpcRequestBiOperation<FileStateUpdateDto> {
 
     private final EventBus               eventBus;
     private final DeletedFilesController deletedFilesController;
@@ -58,8 +58,8 @@ public class EditorFileStatusNotificationOperation implements JsonRpcRequestBiOp
     @Inject
     public void configureHandler(RequestHandlerConfigurator configurator) {
         configurator.newConfiguration()
-                    .methodName("event:file-in-vfs-status-changed")
-                    .paramsAsDto(VfsFileStatusUpdateDto.class)
+                    .methodName("event:file-state-changed")
+                    .paramsAsDto(FileStateUpdateDto.class)
                     .noResult()
                     .withOperation(this);
     }
@@ -68,7 +68,7 @@ public class EditorFileStatusNotificationOperation implements JsonRpcRequestBiOp
         this.notificationManager = notificationManager;
     }
 
-    public void apply(String endpointId, VfsFileStatusUpdateDto params) {
+    public void apply(String endpointId, FileStateUpdateDto params) {
         final FileWatcherEventType status = params.getType();
         final String stringPath = params.getPath();
         final String name = stringPath.substring(stringPath.lastIndexOf("/") + 1);
