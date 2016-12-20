@@ -11,6 +11,8 @@
 package org.eclipse.che.api.project.server;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
@@ -33,11 +35,16 @@ import org.eclipse.che.api.vfs.impl.file.event.detectors.ProjectTreeTrackingOper
 import org.eclipse.che.api.vfs.search.MediaTypeFilter;
 import org.eclipse.che.api.vfs.search.SearcherProvider;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
+import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
+import java.nio.file.WatchService;
 
 import static com.google.inject.multibindings.Multibinder.newSetBinder;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Guice module contains configuration of Project API components.
@@ -110,5 +117,16 @@ public class ProjectApiModule extends AbstractModule {
         MapBinder.newMapBinder(binder(), String.class, RequestHandler.class)
                  .addBinding("track:project-tree")
                  .to(ProjectTreeTrackingOperationReceiver.class);
+    }
+
+    @Provides
+    @Singleton
+    protected WatchService watchService() {
+        try {
+            return FileSystems.getDefault().newWatchService();
+        } catch (IOException e) {
+            getLogger(ProjectApiModule.class).error("Error provisioning watch service", e);
+            return null;
+        }
     }
 }

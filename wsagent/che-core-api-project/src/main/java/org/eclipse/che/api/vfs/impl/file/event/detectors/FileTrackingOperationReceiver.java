@@ -87,10 +87,10 @@ public class FileTrackingOperationReceiver extends RequestHandler<FileTrackingOp
         switch (type) {
             case START: {
                 LOG.debug("Received file tracking operation START trigger.");
-                int id = fileWatcherManager.startWatchingByPath(path,
-                                                                EMPTY_CONSUMER,
-                                                                getModifyConsumer(endpointId, path),
-                                                                getDeleteConsumer(endpointId, path));
+                int id = fileWatcherManager.registerByPath(path,
+                                                           EMPTY_CONSUMER,
+                                                           getModifyConsumer(endpointId, path),
+                                                           getDeleteConsumer(endpointId, path));
                 watchIdRegistry.put(path + endpointId, id);
                 break;
             }
@@ -98,7 +98,7 @@ public class FileTrackingOperationReceiver extends RequestHandler<FileTrackingOp
                 LOG.debug("Received file tracking operation STOP trigger.");
 
                 int id = watchIdRegistry.remove(path + endpointId);
-                fileWatcherManager.stopWatchingByPath(id);
+                fileWatcherManager.unRegisterByPath(id);
 
                 break;
             }
@@ -120,12 +120,12 @@ public class FileTrackingOperationReceiver extends RequestHandler<FileTrackingOp
                 LOG.debug("Received file tracking operation MOVE trigger.");
 
                 int oldId = watchIdRegistry.remove(oldPath + endpointId);
-                fileWatcherManager.stopWatchingByPath(oldId);
+                fileWatcherManager.unRegisterByPath(oldId);
 
-                int newId = fileWatcherManager.startWatchingByPath(path,
-                                                                   EMPTY_CONSUMER,
-                                                                   getModifyConsumer(endpointId, path),
-                                                                   getDeleteConsumer(endpointId, path));
+                int newId = fileWatcherManager.registerByPath(path,
+                                                              EMPTY_CONSUMER,
+                                                              getModifyConsumer(endpointId, path),
+                                                              getDeleteConsumer(endpointId, path));
                 watchIdRegistry.put(path + endpointId, newId);
 
 

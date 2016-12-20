@@ -22,7 +22,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.IOException;
-import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.WatchEvent;
@@ -34,18 +33,29 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Predicate;
 
 import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 import static java.nio.file.StandardWatchEventKinds.OVERFLOW;
+import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.eclipse.che.api.vfs.ng.FileWatcherUtils.isExcluded;
 
+/**
+ * Watches directories for interactions with their entries. Based on
+ * {@link WatchService} that uses underlying filesystem implementations. Does
+ * not perform any data modification (including filesystem items) except for
+ * tracking and notification the upper layers. Service operates with ordinary
+ * java file system paths in counter to che virtual file system which may have
+ * custom root element and structure. Transforming one we of path representation
+ * into another and backwards is the responsibility of upper services.
+ */
 @Singleton
-public class FileWatcherService implements Runnable {
+public class FileWatcherService {
     private static final Logger LOG = LoggerFactory.getLogger(FileWatcherService.class);
 
     private final AtomicBoolean suspended = new AtomicBoolean(false);
@@ -56,15 +66,16 @@ public class FileWatcherService implements Runnable {
 
     private final Set<PathMatcher>        excludes;
     private final FileWatcherEventHandler handler;
+    private final WatchService            service;
 
     private ExecutorService executor;
-    private WatchService    service;
 
     @Inject
     public FileWatcherService(@Named("che.user.workspaces.storage.excludes") Set<PathMatcher> excludes,
-                              FileWatcherEventHandler handler) {
+                              FileWatcherEventHandler handler, WatchService service) {
         this.excludes = excludes;
         this.handler = handler;
+        this.service = service;
     }
 
 
@@ -75,14 +86,13 @@ public class FileWatcherService implements Runnable {
 
     @PostConstruct
     public void start() throws IOException {
-        service = FileSystems.getDefault().newWatchService();
-
-        executor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder()
-                                                             .setDaemon(true)
-                                                             .setUncaughtExceptionHandler(LoggingUncaughtExceptionHandler.getInstance())
-                                                             .setNameFormat("DynamicFileWatcherService-%d")
-                                                             .build());
-        executor.execute(this);
+        ThreadFactoryBuilder builder = new ThreadFactoryBuilder();
+        ThreadFactory factory = builder.setUncaughtExceptionHandler(LoggingUncaughtExceptionHandler.getInstance())
+                                       .setNameFormat(FileWatcherService.class.getSimpleName())
+                                       .setDaemon(true)
+                                       .build();
+        executor = newSingleThreadExecutor(factory);
+        executor.execute(this::run);
     }
 
     @PreDestroy
@@ -90,10 +100,10 @@ public class FileWatcherService implements Runnable {
         boolean interrupted = false;
         executor.shutdown();
         try {
-            if (!executor.awaitTermination(3, SECONDS)) {
+            if (!executor.awaitTermination(3L, SECONDS)) {
                 executor.shutdownNow();
-                if (!executor.awaitTermination(3, SECONDS)) {
-                    LOG.error("Unable terminate Executor");
+                if (!executor.awaitTermination(3L, SECONDS)) {
+                    LOG.error("Unable to terminate executor");
                 }
             }
         } catch (InterruptedException e) {
@@ -113,12 +123,27 @@ public class FileWatcherService implements Runnable {
     }
 
 
+    /**
+     * Registers a directory for tracking of corresponding entry creation,
+     * modification or deletion events. Each call of this method increase
+     * by one registration counter that corresponds to each folder being
+     * watched. Any event related to such directory entry is passed further to
+     * the specific handler only if registration counter related to the
+     * directory is above zero, otherwise registration watch key is canceled
+     * and no further directory watching is being performed.
+     *
+     * @param dir
+     *         directory
+     */
     public void register(Path dir) {
+        LOG.debug("Registering directory '{}'", dir);
         if (keys.values().contains(dir)) {
             int previous = registrations.get(dir);
+            LOG.info("Directory is already being watched, increasing watch counter, previous value: {}", previous);
             registrations.put(dir, previous + 1);
         } else {
             try {
+                LOG.debug("Starting watching directory '{}'", dir);
                 WatchKey watchKey = dir.register(service, ENTRY_DELETE, ENTRY_MODIFY, ENTRY_CREATE);
                 keys.put(watchKey, dir);
                 registrations.put(dir, 1);
@@ -128,42 +153,62 @@ public class FileWatcherService implements Runnable {
         }
     }
 
+    /**
+     * Cancels registration of a directory for being watched. Each call of this
+     * method decreases by one registration counter that corresponds to
+     * directory specified by the argument. If registration counter comes to
+     * zero directory watching is totally cancelled.
+     *
+     * @param dir
+     *         directory
+     */
     public void unRegister(Path dir) {
+        LOG.debug("Canceling directory '{}' registration", dir);
+
         int previous = registrations.get(dir);
         if (previous == 1) {
+            LOG.debug("Stopping watching directory '{}'", dir);
             registrations.remove(dir);
-            for (Entry<WatchKey, Path> entry : keys.entrySet()) {
-                WatchKey watchKey = entry.getKey();
-                Path value = entry.getValue();
 
-                if (value.equals(dir)) {
-                    watchKey.cancel();
-                    keys.remove(watchKey);
-                    break;
-                }
-            }
+            Predicate<Entry<WatchKey, Path>> equalsDir = it -> it.getValue().equals(dir);
+
+            keys.entrySet().stream().filter(equalsDir).map(Entry::getKey).forEach(WatchKey::cancel);
+            keys.entrySet().removeIf(equalsDir);
         } else {
+            LOG.debug("Directory is being watched by someone else, decreasing watch counter, previous value: {}", previous);
             registrations.put(dir, previous - 1);
         }
     }
 
+    /**
+     * Resumes service after it was in suspended state. If method is called
+     * when the service is already not in a suspended state nothing happens.
+     */
     public void resume() {
-        suspended.set(false);
+        if (suspended.compareAndSet(true, false)) {
+            LOG.debug("Resuming service.");
+        }
     }
 
+    /**
+     * Temporary suspends service of generating any events. Events received by
+     * service in suspended state are totally skipped. If method is called when
+     * the service is already in a suspended state nothing happens.
+     */
     public void suspend() {
-        suspended.set(true);
+        if (suspended.compareAndSet(false, true)) {
+            LOG.debug("Suspending service.");
+        }
     }
 
-    @Override
-    public void run() {
+    private void run() {
         while (running.get()) {
             try {
                 WatchKey watchKey = service.take();
                 Path dir = keys.get(watchKey);
 
                 if (suspended.get()) {
-                    reset(watchKey, dir);
+                    resetAndRemove(watchKey, dir);
 
                     LOG.debug("File watchers are running in suspended mode - skipping.");
                     continue;
@@ -181,7 +226,7 @@ public class FileWatcherService implements Runnable {
                     Path item = ev.context();
                     Path path = dir.resolve(item).toAbsolutePath();
 
-                    if (isExcluded(excludes, path)){
+                    if (isExcluded(excludes, path)) {
                         LOG.debug("Path is within exclude list, skipping...");
                         continue;
                     }
@@ -189,7 +234,7 @@ public class FileWatcherService implements Runnable {
                     handler.handle(path, kind);
                 }
 
-                reset(watchKey, dir);
+                resetAndRemove(watchKey, dir);
             } catch (InterruptedException e) {
                 running.compareAndSet(true, false);
                 LOG.error("Error during running file watcher or taking watch key instance", e);
@@ -197,9 +242,10 @@ public class FileWatcherService implements Runnable {
         }
     }
 
-    private void reset(WatchKey watchKey, Path dir) {
+    private void resetAndRemove(WatchKey watchKey, Path dir) {
         if (!watchKey.reset()) {
             registrations.remove(dir);
+
             keys.remove(watchKey);
         }
     }

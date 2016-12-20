@@ -11,8 +11,6 @@
 package org.eclipse.che.api.vfs.ng;
 
 import java.nio.file.WatchEvent;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -20,23 +18,35 @@ import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 
-public class FileWatcherOperation {
-    private final int id;
-    private Map<String, Consumer<String>> consumers = new HashMap<>();
+/**
+ * Simple class to keep all consumers in one place with ability to identify them
+ */
+class FileWatcherOperation {
+    private final int              id;
+    private final Consumer<String> create;
+    private final Consumer<String> modify;
+    private final Consumer<String> delete;
 
-    public FileWatcherOperation(int id, Consumer<String> create, Consumer<String> modify, Consumer<String> delete) {
+    FileWatcherOperation(int id, Consumer<String> create, Consumer<String> modify, Consumer<String> delete) {
         this.id = id;
-        consumers.put(ENTRY_CREATE.name(), create);
-        consumers.put(ENTRY_MODIFY.name(), modify);
-        consumers.put(ENTRY_DELETE.name(), delete);
-
+        this.create = create;
+        this.modify = modify;
+        this.delete = delete;
     }
 
-    public int getId() {
+    int getId() {
         return id;
     }
 
     Optional<Consumer<String>> get(WatchEvent.Kind<?> kind) {
-        return Optional.ofNullable(consumers.get(kind.name()));
+        Consumer<String> result = null;
+        if (ENTRY_CREATE.name().equals(kind.name())) {
+            result = create;
+        } else if (ENTRY_MODIFY.name().equals(kind.name())) {
+            result = modify;
+        } else if (ENTRY_DELETE.name().equals(kind.name())) {
+            result = delete;
+        }
+        return Optional.ofNullable(result);
     }
 }

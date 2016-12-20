@@ -59,15 +59,15 @@ public class GitCheckoutDetector {
 
     @PostConstruct
     public void startWatcher() {
-        id = manager.startWatchingByMatcher(getMatcher(),
-                                            getModifyOperation(),
-                                            getModifyOperation(),
-                                            EMPTY_CONSUMER);
+        id = manager.registerByMatcher(getMatcher(),
+                                       getModifyOperation(),
+                                       getModifyOperation(),
+                                       EMPTY_CONSUMER);
     }
 
     @PreDestroy
     public void stopWatcher() {
-        manager.stopWatchingByMatcher(id);
+        manager.unRegisterByMatcher(id);
     }
 
 

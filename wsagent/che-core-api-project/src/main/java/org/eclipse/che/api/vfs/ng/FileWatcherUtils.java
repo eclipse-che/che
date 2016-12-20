@@ -16,14 +16,44 @@ import java.util.Set;
 
 public class FileWatcherUtils {
 
-    public static Path toNormalPath(Path root, String name) {
-        return root.resolve(name.startsWith("/") ? name.substring(1) : name).toAbsolutePath();
+    /**
+     * Transform internal path representation into normal path representation
+     *
+     * @param root
+     *         root of virtual file system
+     * @param path
+     *         internal path representation
+     *
+     * @return normal path
+     */
+    public static Path toNormalPath(Path root, String path) {
+        return root.resolve(path.startsWith("/") ? path.substring(1) : path).toAbsolutePath();
     }
 
+    /**
+     * Transforms normal path representation into internal virtual file system
+     *
+     * @param root
+     *         root of virtual file system
+     * @param path
+     *         normal path representation
+     *
+     * @return internal path
+     */
     public static String toInternalPath(Path root, Path path) {
         return "/" + root.toAbsolutePath().relativize(path);
     }
 
+    /**
+     * Checks if specified path is within excludes
+     *
+     * @param excludes
+     *         set of exclude matchers
+     * @param path
+     *         path being examined
+     *
+     * @return true if path is within excludes, false otherwise
+     */
     public static boolean isExcluded(Set<PathMatcher> excludes, Path path) {
         for (PathMatcher matcher : excludes) {
             if (matcher.matches(path)) {
