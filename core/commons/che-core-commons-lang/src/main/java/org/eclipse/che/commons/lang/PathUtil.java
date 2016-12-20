@@ -8,9 +8,8 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.maven.server.core.project;
+package org.eclipse.che.commons.lang;
 
-import org.apache.commons.io.output.NullWriter;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,7 +51,7 @@ public class PathUtil {
 
         if (index == -1) {
             if (removeLastSlash) {
-                int start = processRoot(path, NullWriter.NULL_WRITER);
+                int start = processRoot(path, NullWriter.INSTANCE);
                 int slashIndex = path.lastIndexOf('/');
                 return slashIndex != -1 && slashIndex > start ? StringUtils.trimEnd(path, '/') : path;
             }
@@ -153,5 +152,23 @@ public class PathUtil {
         return 0;
     }
 
+    private static final class NullWriter implements Appendable {
 
+        public static final NullWriter INSTANCE = new NullWriter();
+
+        @Override
+        public Appendable append(CharSequence csq) throws IOException {
+            return this;
+        }
+
+        @Override
+        public Appendable append(CharSequence csq, int start, int end) throws IOException {
+            return this;
+        }
+
+        @Override
+        public Appendable append(char c) throws IOException {
+            return this;
+        }
+    }
 }

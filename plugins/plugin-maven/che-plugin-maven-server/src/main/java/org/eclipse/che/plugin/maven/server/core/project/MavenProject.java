@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.maven.server.core.project;
 
+import org.eclipse.che.commons.lang.PathUtil;
 import org.eclipse.che.maven.data.MavenArtifact;
 import org.eclipse.che.maven.data.MavenConstants;
 import org.eclipse.che.maven.data.MavenKey;

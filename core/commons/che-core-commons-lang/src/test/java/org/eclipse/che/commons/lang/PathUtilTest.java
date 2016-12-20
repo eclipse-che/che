@@ -8,12 +8,13 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.maven.server;
+package org.eclipse.che.commons.lang;
 
-import org.eclipse.che.plugin.maven.server.core.project.PathUtil;
 import org.testng.annotations.Test;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
 
 /**
  * Tests for {@link PathUtil}
@@ -23,25 +24,32 @@ public class PathUtilTest {
     @Test
     public void testCanonicalPath() throws Exception {
         String path = PathUtil.toCanonicalPath("/foo/../bar", false);
-        assertThat(path).isNotNull().isNotEmpty().isEqualTo("/bar");
+        assertNotNull(path);
+        assertFalse(path.isEmpty());
+        assertEquals(path, "/bar");
     }
 
     @Test
     public void testRemoveLastSlash() throws Exception {
         String path = PathUtil.toCanonicalPath("/foo/bar/", true);
-        assertThat(path).isNotNull().isNotEmpty().isEqualTo("/foo/bar");
+        assertNotNull(path);
+        assertFalse(path.isEmpty());
+        assertEquals(path, "/foo/bar");
     }
 
     @Test
     public void testEliminationDot() throws Exception {
         String path = PathUtil.toCanonicalPath("./bar", false);
-        assertThat(path).isNotNull().isNotEmpty().isEqualTo("bar");
-
+        assertNotNull(path);
+        assertFalse(path.isEmpty());
+        assertEquals(path, "bar");
     }
 
     @Test
     public void testCanonicalPathWithFile() throws Exception {
         String path = PathUtil.toCanonicalPath("/foo/../bar/pom.xml", false);
-        assertThat(path).isNotNull().isNotEmpty().isEqualTo("/bar/pom.xml");
+        assertNotNull(path);
+        assertFalse(path.isEmpty());
+        assertEquals(path, "/bar/pom.xml");
     }
 }

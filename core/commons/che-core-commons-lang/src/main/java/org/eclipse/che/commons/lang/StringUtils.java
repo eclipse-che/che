@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.maven.server.core.project;
+package org.eclipse.che.commons.lang;
 
 /**
  * Set of useful String methods
