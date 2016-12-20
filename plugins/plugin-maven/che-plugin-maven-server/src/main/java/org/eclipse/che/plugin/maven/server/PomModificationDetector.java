@@ -39,15 +39,15 @@ public class PomModificationDetector {
 
     @PostConstruct
     public void startWatcher() {
-        id = manager.startWatchingByMatcher(it -> !isDirectory(it) && POM_XML.equals(it.getFileName().toString()),
-                                            EMPTY_CONSUMER,
+        id = manager.registerByMatcher(it -> !isDirectory(it) && POM_XML.equals(it.getFileName().toString()),
+                                       EMPTY_CONSUMER,
                                             it -> eventService.publish(newDto(PomModifiedEventDto.class).withPath(it)),
-                                            EMPTY_CONSUMER);
+                                       EMPTY_CONSUMER);
     }
 
     @PreDestroy
     public void stopWatcher() {
-        manager.stopWatchingByMatcher(id);
+        manager.unRegisterByMatcher(id);
     }
 
 }

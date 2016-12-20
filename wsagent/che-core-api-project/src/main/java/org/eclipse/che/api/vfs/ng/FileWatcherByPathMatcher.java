@@ -84,6 +84,7 @@ public class FileWatcherByPathMatcher {
     }
 
     public int watch(PathMatcher matcher, Consumer<String> create, Consumer<String> modify, Consumer<String> delete) {
+        LOG.debug("Watching matcher '{}'", matcher);
         int operationId = operationIdCounter.getAndIncrement();
 
         matchers.putIfAbsent(matcher, newConcurrentHashSet());
@@ -91,10 +92,12 @@ public class FileWatcherByPathMatcher {
 
         operations.put(operationId, new Operation(create, modify, delete));
 
+        LOG.debug("Registered matcher operation set with id '{}'", operationId);
         return operationId;
     }
 
     public void unwatch(int operationId) {
+        LOG.debug("Unwatching matcher operation set with id '{}'", operationId);
         for (Entry<PathMatcher, Set<Integer>> entry : matchers.entrySet()) {
             PathMatcher matcher = entry.getKey();
             Set<Integer> operationsIdList = entry.getValue();

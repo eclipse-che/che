@@ -35,12 +35,17 @@ public class FileWatcherByPathValue {
     }
 
     public int watch(Path path, Consumer<String> create, Consumer<String> modify, Consumer<String> delete) {
+        LOG.debug("Watching path '{}'", path);
         service.register(isDirectory(path) ? path : path.getParent());
-        return handler.register(path, create, modify, delete);
+        int operationId = handler.register(path, create, modify, delete);
+        LOG.debug("Registered an operation set with id '{}'", operationId);
+        return operationId;
     }
 
-    public void unwatch(int pathRegistrationId) {
-        Path dir = handler.unRegister(pathRegistrationId);
+    public void unwatch(int operationId) {
+        LOG.debug("Unregisterng an operation set with id '{}'", operationId);
+        Path dir = handler.unRegister(operationId);
+        LOG.debug("Unwatching path '{}'");
         service.unRegister(dir);
     }
 }

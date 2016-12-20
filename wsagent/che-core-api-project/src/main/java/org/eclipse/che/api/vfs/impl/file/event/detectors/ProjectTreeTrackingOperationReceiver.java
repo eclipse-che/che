@@ -22,8 +22,13 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toSet;
 import static org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType.CREATED;
 import static org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType.DELETED;
 import static org.eclipse.che.api.vfs.ng.FileWatcherManager.EMPTY_CONSUMER;
@@ -57,18 +62,26 @@ public class ProjectTreeTrackingOperationReceiver extends RequestHandler<Project
             case START: {
                 LOG.debug("Received project tree tracking operation START trigger.");
 
-                int pathRegistrationId = fileWatcherManager.startWatchingByPath(path,
-                                                                                getCreateOperation(endpointId),
-                                                                                EMPTY_CONSUMER,
-                                                                                getDeleteOperation(endpointId));
+                int pathRegistrationId = fileWatcherManager.registerByPath(path,
+                                                                           getCreateOperation(endpointId),
+                                                                           EMPTY_CONSUMER,
+                                                                           getDeleteOperation(endpointId));
                 watchIdRegistry.put(path + endpointId, pathRegistrationId);
                 break;
             }
             case STOP: {
                 LOG.debug("Received project tree tracking operation STOP trigger.");
 
-                int pathRegistrationId = watchIdRegistry.remove(path + endpointId);
-                fileWatcherManager.stopWatchingByPath(pathRegistrationId);
+                Predicate<Entry<String, Integer>> isSubPath = it -> it.getKey().startsWith(path) && it.getKey().endsWith(endpointId);
+
+                watchIdRegistry.entrySet()
+                               .stream()
+                               .filter(isSubPath)
+                               .map(Entry::getKey)
+                               .collect(toSet())
+                               .stream()
+                               .map(watchIdRegistry::remove)
+                               .forEach(fileWatcherManager::unRegisterByPath);
 
                 break;
             }

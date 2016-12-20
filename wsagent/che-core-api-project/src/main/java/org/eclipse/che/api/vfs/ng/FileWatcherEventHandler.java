@@ -19,7 +19,6 @@ import javax.inject.Singleton;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.WatchEvent;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -28,6 +27,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static java.nio.file.Files.isDirectory;
@@ -48,7 +48,27 @@ public class FileWatcherEventHandler {
         this.root = root;
     }
 
-    public int register(Path path, Consumer<String> create, Consumer<String> modify, Consumer<String> delete) {
+    /**
+     * Registers create, modify and delete operations when item defined by path
+     * parameter is correspondingly being created, modified or deleted. If path
+     * parameter denotes directory than listed operations are considered to
+     * correspond any directory entry related event. Return value corresponds to
+     * identifier that is used to distinguish different operation sets registered
+     * for the same path and can be later used to unregister those operations.
+     *
+     * @param path
+     *         path
+     * @param create
+     *         consumer for entry create event
+     * @param modify
+     *         consumer for entry modify event
+     * @param delete
+     *         consumer for entry delete event
+     *
+     * @return number identifier of operations set
+     */
+    int register(Path path, Consumer<String> create, Consumer<String> modify, Consumer<String> delete) {
+        LOG.debug("Registering operations for path '{}'");
         int id = idCounter.incrementAndGet();
         FileWatcherOperation operation = new FileWatcherOperation(id, create, modify, delete);
 
@@ -58,23 +78,28 @@ public class FileWatcherEventHandler {
         return id;
     }
 
-    public Path unRegister(int id) {
+    /**
+     * Cancels registration of operations identified by parameter. Identifier
+     * is unique and generated during registration phase. If there left no
+     * operation sets registered for a path it is also removed.
+     *
+     * @param id
+     *         identifier
+     *
+     * @return path that corresponds to operations set identified by parameter
+     */
+    Path unRegister(int id) {
         Path dir = null;
         for (Entry<Path, Set<FileWatcherOperation>> entry : operations.entrySet()) {
             Path path = entry.getKey();
-            Set<FileWatcherOperation> fileWatcherOperations = entry.getValue();
+            Set<FileWatcherOperation> operationsSet = entry.getValue();
+            Predicate<FileWatcherOperation> predicate = it -> Objects.equals(id, it.getId());
 
-            Iterator<FileWatcherOperation> iterator = fileWatcherOperations.iterator();
-            while (iterator.hasNext()) {
-                int candidateId = iterator.next().getId();
-                if (Objects.equals(id, candidateId)) {
-                    dir = isDirectory(path) ? path : path.getParent();
-                    iterator.remove();
-                    break;
-                }
+            if (operationsSet.removeIf(predicate)) {
+                dir = isDirectory(path) ? path : path.getParent();
             }
 
-            if (fileWatcherOperations.isEmpty()) {
+            if (operationsSet.isEmpty()) {
                 operations.remove(path);
             }
         }
@@ -82,7 +107,18 @@ public class FileWatcherEventHandler {
         return dir;
     }
 
-    public void handle(Path path, WatchEvent.Kind<?> kind) {
+    /**
+     * Handles event passed form file watcher system. Path parameter is expected
+     * to be passed in a normal operation system file system form and is
+     * transformed into internal virtual file system format before further
+     * processing.
+     *
+     * @param path
+     *         path that the event is originated from
+     * @param kind
+     *         kind of event (e.g. created, modified, removed)
+     */
+    void handle(Path path, WatchEvent.Kind<?> kind) {
         Path dir = path.getParent();
         String internalPath = toInternalPath(root.toPath(), path);
         Set<FileWatcherOperation> dirOperations = operations.get(dir);
