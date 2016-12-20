@@ -911,7 +911,7 @@ public class WorkspaceManagerTest {
     }
 
     @Test
-    public void shouldBeAbleToPerformComplexUpdate() throws Exception {
+    public void shouldBeAbleToPerformComplexUpdateOfEnvironments() throws Exception {
         // def  env1  env2  env3       def  env1  envX  envZ  | env name
         //  W    A     B     C    -->   W    D     B     F    | env
         //  s0   s1    s2    s3         s0         s2         | snapshots
