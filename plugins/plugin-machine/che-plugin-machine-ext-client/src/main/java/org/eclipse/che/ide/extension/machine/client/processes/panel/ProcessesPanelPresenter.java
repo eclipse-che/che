@@ -142,7 +142,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     private final ConsoleTreeContextMenuFactory consoleTreeContextMenuFactory;
     private final CommandTypeRegistry           commandTypeRegistry;
     private final ExecAgentCommandManager       execAgentCommandManager;
-    private final MacroProcessor macroProcessor;
+    private final MacroProcessor                macroProcessor;
     private final EventBus                      eventBus;
     private final DtoFactory                    dtoFactory;
 
