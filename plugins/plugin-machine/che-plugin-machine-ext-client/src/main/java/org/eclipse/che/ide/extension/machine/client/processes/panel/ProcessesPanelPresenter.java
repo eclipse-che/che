@@ -1003,8 +1003,8 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
                         if (commandByName == null) {
                             final String commandLine = process.getCommandLine();
-                            final CommandImpl virtualCommand = new CommandImpl(processName, commandLine, type);
-                            final CommandOutputConsole console = commandConsoleFactory.create(virtualCommand, machine);
+                            final CommandImpl command = new CommandImpl(processName, commandLine, type);
+                            final CommandOutputConsole console = commandConsoleFactory.create(command, machine);
 
                             getAndPrintProcessLogs(console, pid);
                             subscribeToProcess(console, pid);
@@ -1014,12 +1014,12 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                             macroProcessor.expandMacros(commandByName.getCommandLine()).then(new Operation<String>() {
                                 @Override
                                 public void apply(String expandedCommandLine) throws OperationException {
-                                    final CommandImpl virtualCommand = new CommandImpl(commandByName.getName(),
+                                    final CommandImpl command = new CommandImpl(commandByName.getName(),
                                                                                        expandedCommandLine,
                                                                                        commandByName.getType(),
                                                                                        commandByName.getAttributes());
 
-                                    final CommandOutputConsole console = commandConsoleFactory.create(virtualCommand, machine);
+                                    final CommandOutputConsole console = commandConsoleFactory.create(command, machine);
 
                                     getAndPrintProcessLogs(console, pid);
                                     subscribeToProcess(console, pid);
