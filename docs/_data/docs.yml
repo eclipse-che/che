@@ -1,25 +1,14 @@
 - title: SETUP
   docs:
-  - che-setup-intro                                                                                                
+  - che-setup-intro                                                                                       
   - che-setup-getting-started                                                                                         
   - che-setup-getting-started-saas-cloud                                                                                                   
-  - che-setup-bitnami  
-  - che-setup-cli                                                                                                           
-  - che-setup-ssh                                                                                                         
-  - che-setup-desktop-ide-mounting                                                                                            
-  - che-setup-config                                                                                                          
-  - che-setup-config-proxies                                                                                                  
-  - che-setup-networking                                                                                                      
-  - che-setup-config-docker                                                                                                       
-  - che-setup-config-security                                                                                                       
-  - che-setup-scaling                                                                                                       
-  - che-setup-glossary     
-- title: SETUP - ALTERNATIVES
-  docs:
-  - che-setupalt-docker                                                                                                    
-  - che-setupalt-native                                                                                                    
-  - che-setupalt-docker-server                                                                                             
-  - che-setupalt-electron 
+  - che-setup-bitnami
+  - che-setup-configuration
+  - che-setup-managing 
+  - che-setup-cli                                                                                                  
+  - che-setup-glossary
+  - che-setup-docker   
 - title: WORKSPACE ADMINISTRATION
   docs:                                                                           
   - ws-admin-intro
@@ -29,20 +18,14 @@
   - ws-machines                                                                                                              
   - ws-volume-mounts                                                                                                      
   - ws-agents 
-- title: CHEDIR - PORTABLE WORKSPACES
-  docs:                                                                               
-  - chedir-getting-started                                                                                               
-  - chedir-why
-  - chedir-installation                                                                                                 
-  - chedir-project-setup                                                                                                
-  - chedir-up-and-down                                                                                                  
-  - chedir-chefiles                                                                                                     
-  - chedir-ssh                                                                                                          
-  - chedir-factories 
-- title: USE CHE AS AN IDE
+  - ws-data-model-stacks
+  - ws-data-model-samples
+- title: USER GUIDE
   docs:                                                                               
   - ide-projects                                                                                                            
   - ide-import-a-project                                                                                                    
+  - ide-ssh                                                                                                        
+  - ide-sync                                                                                            
   - ide-editor-settings                                                                                                     
   - ide-intellisense                                                                                                        
   - ide-commands                                                                                                            
@@ -53,17 +36,28 @@
   - ide-sharing
   - ide-debug                                                                                                               
   - ide-docker    
-- title: USE CHE AS A WORKSPACE SERVER
+  - ide-electron 
+- title: CHEDIR - PORTABLE WORKSPACES
   docs:                                                                               
+  - chedir-getting-started                                                                                               
+  - chedir-why
+  - chedir-installation                                                                                                 
+  - chedir-project-setup                                                                                                
+  - chedir-up-and-down                                                                                                  
+  - chedir-chefiles                                                                                                     
+  - chedir-ssh                                                                                                          
+  - chedir-factories 
+- title: DEVELOPER GUIDE - REST API
+  docs:                                                                               
+  - server-rest-api                                          
   - server-api-projects                                                                                                 
   - server-build-run                                                                                                    
   - server-create-workspaces                                                                                   
   - server-events                                                                                                       
   - server-project-types                                                                                                
-  - server-rest-api                                                                                                     
   - server-stack                                                                                                        
   - server-websocket-api
-- title: WRITE CHE IDE PLUGINS
+- title: DEVELOPER GUIDE - IDE PLUGINS
   docs:                                                                               
   - plugins-introduction                                                                                                      
   - plugins-setup-che-workspace                                                                                                 
@@ -82,7 +76,3 @@
   - plugins-embed-htmljs                                                                                                        
   - plugins-helloworld-extension                                                                                                
   - plugins-themes 
-- title: CHE DATA MODEL
-  docs:
-  - che-data-model-stack
-  - che-data-model-samples

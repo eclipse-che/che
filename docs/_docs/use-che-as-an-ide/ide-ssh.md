@@ -1,14 +1,13 @@
 ---
 tags: [ "eclipse" , "che" ]
-title: Usage&#58 SSH
-excerpt: "Connect to your workspace runtimes"
+title: SSH
+excerpt: "Connect to your workspaces using SSH"
 layout: docs
 permalink: /:categories/ssh/
 ---
-#### Requires 5.0.0-M7
-}  
+Workspaces are configured with an SSH agent, which runs an SSH daemon within your workspace runtime. You can connect to your workspace on the command line and get root access to the runtime (similar to what the Web terminal provides) from other machines. You can optionally disable the SSH agent for your workspace from within the dashboard.
 
-## Public / Private Key Generation
+# Public / Private Key Generation
 If your workspace has the SSH agent activated in the dashboard, then Che runs an SSH daemon within the machines that are part of your workspace. The SSH agent is activated by default with all new workspaces and you can manually disable it within the dashboard. If your workspace is powered by Docker Compose, then the SSH agent is deployed into every container that makes up your compose services. You can optionally remove the agent from selected machines of your compose services from within the dashboard.
 
 Each new workspace has a default key-pair generated for it. The private key for the workspace is inserted into each machine and they will all share the same public key. You can generate a new key-pair in the dashboard, or remove the default one to be replaced with yours.
@@ -16,6 +15,7 @@ Each new workspace has a default key-pair generated for it. The private key for 
 Eclipse Che does not have any user authentication, so any client can connect to the Che server REST API and then request the public key for the workspace. In Codenvy, API clients must be authenticated with appropriate permissions before they can request the public key for a workspace.
 
 We then provide various client utilities (authored in Docker!) for connecting to a workspace using SSH.
+
 # List Workspaces  
 You can get a list of workspaces in a Che server that have an SSH agent deployed. These are the workspaces that you can SSH into.
 ```shell  

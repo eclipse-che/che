@@ -1,12 +1,10 @@
 ---
 tags: [ "eclipse" , "che" ]
-title: Usage&#58 Local IDE Sync
-excerpt: "Using your desktop IDE with an Eclipse Che workspace."
+title: Local IDE Sync
+excerpt: "Synchronize Che workspaces with your desktop IDE with live sync."
 layout: docs
-permalink: /:categories/desktop-ide-mounting/
+permalink: /:categories/sync/
 ---
-#### Requires 5.0.0-M7
-}  
 
 Che ships a super fast Fuse-based mount and sync mechanism. This is delivered as a Docker container that combines `sshfs` with `unison`. You can perform a mount on any operating system that supports Docker. However, if you are on Windows using Boot2Docker, you can only mount directories in `%userprofile%`.
 # List Workspaces  

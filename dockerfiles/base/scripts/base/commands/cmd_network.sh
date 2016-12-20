@@ -33,7 +33,7 @@ cmd_network() {
   ### TEST 1: Simulate browser ==> workspace agent HTTP connectivity
   HTTP_CODE=$(curl -I localhost:${AGENT_EXTERNAL_PORT}/alpine-release \
                           -s -o "${LOGS}" --connect-timeout 5 \
-                          --write-out "%{http_code}") || echo "28" >> "${LOGS}"
+                          --write-out '%{http_code}') || echo "28" >> "${LOGS}"
 
   if [ "${HTTP_CODE}" = "200" ]; then
       info "Browser    => Workspace Agent (localhost): Connection succeeded"
@@ -44,7 +44,7 @@ cmd_network() {
   ### TEST 1a: Simulate browser ==> workspace agent HTTP connectivity
   HTTP_CODE=$(curl -I ${AGENT_EXTERNAL_IP}:${AGENT_EXTERNAL_PORT}/alpine-release \
                           -s -o "${LOGS}" --connect-timeout 5 \
-                          --write-out "%{http_code}") || echo "28" >> "${LOGS}"
+                          --write-out '%{http_code}') || echo "28" >> "${LOGS}"
 
   if [ "${HTTP_CODE}" = "200" ]; then
       info "Browser    => Workspace Agent ($AGENT_EXTERNAL_IP): Connection succeeded"
@@ -55,10 +55,10 @@ cmd_network() {
   ### TEST 2: Simulate Che server ==> workspace agent (external IP) connectivity
   export HTTP_CODE=$(docker_run --name fakeserver \
                                 --entrypoint=curl \
-                                ${IMAGE_CODENVY} \
+                                $(eval "echo \${IMAGE_${CHE_PRODUCT_NAME}}") \
                                   -I ${AGENT_EXTERNAL_IP}:${AGENT_EXTERNAL_PORT}/alpine-release \
                                   -s -o "${LOGS}" \
-                                  --write-out "%{http_code}")
+                                  --write-out '%{http_code}')
 
   if [ "${HTTP_CODE}" = "200" ]; then
       info "Server     => Workspace Agent (External IP): Connection succeeded"
@@ -69,10 +69,10 @@ cmd_network() {
   ### TEST 3: Simulate Che server ==> workspace agent (internal IP) connectivity
   export HTTP_CODE=$(docker_run --name fakeserver \
                                 --entrypoint=curl \
-                                ${IMAGE_CODENVY} \
+                                $(eval "echo \${IMAGE_${CHE_PRODUCT_NAME}}") \
                                   -I ${AGENT_INTERNAL_IP}:${AGENT_INTERNAL_PORT}/alpine-release \
                                   -s -o "${LOGS}" \
-                                  --write-out "%{http_code}")
+                                  --write-out '%{http_code}')
 
   if [ "${HTTP_CODE}" = "200" ]; then
       info "Server     => Workspace Agent (Internal IP): Connection succeeded"

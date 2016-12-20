@@ -32,7 +32,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Matchers;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import java.util.List;
@@ -41,8 +40,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.anyDouble;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -157,17 +154,13 @@ public class PartStackPresenterTest {
     }
 
     @Test
-    public void partShouldNotBeAddedWhenItAlreadyExist() {
+    public void partShouldBeSelectedIfItIsAddedTwice() {
         presenter.addPart(partPresenter);
         reset(view);
 
         presenter.addPart(partPresenter);
 
-        verify(workBenchPartController).setHidden(true);
-
-        verify(partButton).unSelect();
-
-        verify(view, never()).addTab(partButton, partPresenter);
+        verify(view).selectTab(partPresenter);
     }
 
     @Test

@@ -16,6 +16,7 @@ init_constants() {
   UNDERLINE='\033[4m'
   NC='\033[0m'
   LOG_INITIALIZED=false
+  FAST_BOOT=false
 
   DEFAULT_CHE_PRODUCT_NAME="CHE"
   CHE_PRODUCT_NAME=${CHE_PRODUCT_NAME:-${DEFAULT_CHE_PRODUCT_NAME}}
@@ -236,6 +237,10 @@ init() {
     usage;
   fi
 
+  if [[ "$@" == *"--fast"* ]]; then
+  	FAST_BOOT=true
+  fi
+
   SCRIPTS_BASE_CONTAINER_SOURCE_DIR="/scripts/base"
   # add helper scripts
   for HELPER_FILE in "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/*.sh
@@ -338,7 +343,11 @@ cli_init() {
   # Do not perform a version compatibility check if running upgrade command.
   # The upgrade command has its own internal checks for version compatibility.
   if [ $1 != "upgrade" ]; then
-    verify_version_compatibility
+  	if [[ "${FAST_BOOT}" = "false" ]]; then
+      verify_version_compatibility
+    else
+      warning "Skipping version compatibility check..."
+    fi
   else
     verify_version_upgrade_compatibility
   fi
@@ -360,8 +369,12 @@ start() {
   # Bootstrap enough stuff to load /cli/cli.sh
   init "$@"
 
+  # Removes "--fast" from the positional arguments if it is set.
+  set -- "${@/\-\-fast/}"
+  
   # Begin product-specific CLI calls
   info "cli" "Loading cli..."
+
 
   # The pre_init method is unique to each assembly. This method must be provided by 
   # a custom CLI assembly in their container and can set global variables which are 

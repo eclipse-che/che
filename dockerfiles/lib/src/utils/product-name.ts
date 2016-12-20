@@ -22,4 +22,12 @@ export class ProductName {
         return productName;
     }
 
+    static getMiniDisplayName() : string {
+        let miniProductName: string = process.env.CHE_MINI_PRODUCT_NAME;
+        if (!miniProductName) {
+            return 'Eclipse Che';
+        }
+        return miniProductName;
+    }
+
 }
