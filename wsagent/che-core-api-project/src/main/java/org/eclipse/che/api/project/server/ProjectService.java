@@ -54,6 +54,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
@@ -120,12 +121,16 @@ public class ProjectService extends Service {
 
     private final ProjectManager projectManager;
     private final EventService   eventService;
+    private final String         apiEndpoint;
     private final String         workspace;
 
     @Inject
-    public ProjectService(ProjectManager projectManager, EventService eventService) {
+    public ProjectService(ProjectManager projectManager,
+                          EventService eventService,
+                          @Named("che.api") String apiEndpoint) {
         this.projectManager = projectManager;
         this.eventService = eventService;
+        this.apiEndpoint = apiEndpoint;
         this.workspace = WorkspaceIdProvider.getWorkspaceId();
     }
 
@@ -1072,6 +1077,7 @@ public class ProjectService extends Service {
 
         links.add(createLink(GET,
                              uriBuilder.clone()
+                                       .host(apiEndpoint)
                                        .path(ProjectService.class, "getFile")
                                        .build(new String[]{relPath}, false)
                                        .toString(),
@@ -1079,6 +1085,7 @@ public class ProjectService extends Service {
                              LINK_REL_GET_CONTENT));
         links.add(createLink(PUT,
                              uriBuilder.clone()
+                                       .host(apiEndpoint)
                                        .path(ProjectService.class, "updateFile")
                                        .build(new String[]{relPath}, false)
                                        .toString(),
@@ -1087,6 +1094,7 @@ public class ProjectService extends Service {
                              LINK_REL_UPDATE_CONTENT));
         links.add(createLink(DELETE,
                              uriBuilder.clone()
+                                       .host(apiEndpoint)
                                        .path(ProjectService.class, "delete")
                                        .build(new String[]{relPath}, false)
                                        .toString(),
@@ -1102,6 +1110,7 @@ public class ProjectService extends Service {
 
         links.add(createLink(GET,
                              uriBuilder.clone()
+                                       .host(apiEndpoint)
                                        .path(ProjectService.class, "getChildren")
                                        .build(new String[]{relPath}, false)
                                        .toString(),
@@ -1109,6 +1118,7 @@ public class ProjectService extends Service {
                              LINK_REL_CHILDREN));
         links.add(createLink(GET,
                              uriBuilder.clone()
+                                       .host(apiEndpoint)
                                        .path(ProjectService.class, "getTree")
                                        .build(new String[]{relPath}, false)
                                        .toString(),
@@ -1116,6 +1126,7 @@ public class ProjectService extends Service {
                              LINK_REL_TREE));
         links.add(createLink(DELETE,
                              uriBuilder.clone()
+                                       .host(apiEndpoint)
                                        .path(ProjectService.class, "delete")
                                        .build(new String[]{relPath}, false)
                                        .toString(),
@@ -1131,6 +1142,7 @@ public class ProjectService extends Service {
 
         links.add(createLink(PUT,
                              uriBuilder.clone()
+                                       .host(apiEndpoint)
                                        .path(ProjectService.class, "updateProject")
                                        .build(new String[]{relPath}, false)
                                        .toString(),
@@ -1139,6 +1151,7 @@ public class ProjectService extends Service {
                              LINK_REL_UPDATE_PROJECT));
         links.add(createLink(GET,
                              uriBuilder.clone()
+                                       .host(apiEndpoint)
                                        .path(ProjectService.class, "getChildren")
                                        .build(new String[]{relPath}, false)
                                        .toString(),
@@ -1146,6 +1159,7 @@ public class ProjectService extends Service {
                              LINK_REL_CHILDREN));
         links.add(createLink(GET,
                              uriBuilder.clone()
+                                       .host(apiEndpoint)
                                        .path(ProjectService.class, "getTree")
                                        .build(new String[]{relPath}, false)
                                        .toString(),
@@ -1153,6 +1167,7 @@ public class ProjectService extends Service {
                              LINK_REL_TREE));
         links.add(createLink(DELETE,
                              uriBuilder.clone()
+                                       .host(apiEndpoint)
                                        .path(ProjectService.class, "delete")
                                        .build(new String[]{relPath}, false)
                                        .toString(),
