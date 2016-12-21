@@ -64,39 +64,34 @@ You can configure Google, GitHub, Microsoft, BitBucket, or WSO2 oAuth for use wh
 
 Che is shipped with a preconfigured GitHub oAuth application for the `che.onprem` hostname. To enable GitHub oAuth, add `che_HOST=che.onprem` to `che.env` and restart. If you have a custom DNS, you need to register a GitHub oAuth application with GitHub's oAuth registration service. You will be asked for the callback URL, which is `http://<your_hostname>/api/oauth/callback`. You will receive from GitHub a client ID and secret, which must be added to `che.env`:
 ```
-che_GITHUB_CLIENT_ID=yourID
-che_GITHUB_SECRET=yourSecret
+CHE_GITHUB_CLIENT_ID=yourID
+CHE_GITHUB_SECRET=yourSecret
 ```
 
 Google oAuth (and others) are configured the same:
 ```
-che_GOOGLE_CLIENT_ID=yourID
-che_GOOGLE_SECRET=yourSecret
+CHE_GOOGLE_CLIENT_ID=yourID
+CHE_GOOGLE_SECRET=yourSecret
 ```
 
 #### GitHub oAuth
-Refer to [GitHub using OAuth](https://eclipse-che.readme.io/docs/git#section-github-oauth) for configuration information.
+Refer to [GitHub using OAuth]() for configuration information.
 
 #### GitLab oAuth
-Refer to [GitHub using OAuth](https://eclipse-che.readme.io/docs/git#section-gitlab-oauth) for configuration information.
+Refer to [GitHub using OAuth]() for configuration information.
 
 
 # Stacks
-[Stacks](https://eclipse-che.readme.io/docs/stacks) define the recipes used to create workspace runtimes. They appear in the stack library of the dashboard. You can create your own.
-```shell  
-# File name containing default stacks definitions
-che.stacks.default=${che.home}/stacks/stacks.json
+[Stacks]() define the recipes used to create workspace runtimes. They appear in the stack library of the dashboard. You can create your own.
 
-# Folder name where stack images are stored
-che.stacks.images.storage=${che.home}/stacks/images\
-```
-# Templates
-Code [templates](doc:templates) allow you to define sample projects that are cloned into a workspace if the user chooses it when creating a new project. You can add your own.
-```json  
-# Folder that contains JSON files with code templates and samples
-project.template_description.location_dir=${che.home}/templates\
-```
+TODO: UPDATE THIS
+ONE: WHERE ARE STACKS DEFINED FOR CONFIGURATION PURPOSES WITH NEW CLI?
+TWO: LINK TO DOC ON ADDING OR REMOVING
 
+# Sample Projects
+Code [sampes]() allow you to define sample projects that are cloned into a workspace if the user chooses it when creating a new project. You can add your own.
+
+TODO: UPDATE THIS FOR THE NEW LOCATION WITH THE CLI ON HOW TO ADD
 
 # Development Mode
 For che developers that are building and customizing che from its source repository, you can run che in development mode where your local assembly is used instead of the one that is provided in the default containers downloaded from DockerHub. This allows for a rapid edit / build / run cycle.
@@ -137,26 +132,10 @@ You can also set limits on Docker's allocation of CPU to workspaces, which may b
 # Docker
 Eclipse Che workspace runtimes are powered by one or more Docker containers. When a user creates a workpace, they do so from a [stack]() which includes a Dockerfile or reference to a Docker image which will be used to create the containers for the workspace runtimes. Che stacks can pull that image from a public registry, like DockerHub, or a private registry. Images in a registry can be publicly visible or private, which require user credentials to access. You can also set up a private registry to act as a mirror to Docker Hub.  And, if you are running Eclipse Che behind a proxy, you can configure the Docker daemon registry to operate behind a proxy.
 
-### Private Docker Images  
-When users create a workspace in Eclipse Che, they must select a Docker image to power the workspace. We provide ready-to-go stacks which reference images hosted at the public Docker Hub. You can provide your own images that are stored in a local private registry or at Docker Hub. The images may be publicly or privately visible, even if they are part of a private registry.
+### Private Images  
+When users create a workspace in Eclipse Che, they must select a Docker image to power the workspace. We provide ready-to-go stacks which reference images hosted at the public Docker Hub, which do not require any authenticated access to pull. You can provide your own images that are stored in a local private registry or at Docker Hub. The images may be publicly or privately visible, even if they are part of a private registry.
 
-#### Accessing Private Images
-You can configure Che to access private images in a public or private registry. In the `che.env`:
-```shell  
-# Docker registry configuration.
-# Note that you can configure many registries with different names.
-TODO: GET THE REGISTRY CONFIG FROM THE FILE
-
-# You can add as many registries as you need, e.g.:
-TODO: GET FROM FILE
-```
-
-### Private Docker Registries
-When creating a workspace, a user must reference a Docker image. The default location for images is located at Docker Hub. However, you can install your own Docker registry and host custom images within your organization.
-
-Some enterprises use a trusted Docker registry to store their Docker images. If you want your workspace stacks and machines to be powered by these images, then you need to configure each registry and the credentialed access. Once these registries are configured, then you can have users or team leaders create stacks that use recipes with Dockerfiles or images using the `FROM <your-registry>/<your-repo>` syntax.
-
-There are different configurations for AWS EC2 and the Docker regsitry. You can define as many different registries as you'd like, using the numerical indicator in the environment variable. In case of adding several registries just copy set of properties and append `REGISTRY[n]` for each variable.
+If your stack images that Che wants to pull require authenticated access to any registry, or if you want Che to push snapshot images into a registry (also requiring authenticated access), then you must configure registry authentication. 
 
 In `che.env`:
 ```
@@ -170,34 +149,37 @@ CHE_DOCKER_REGISTRY_AWS_REGISTRY1_ACCESS__KEY__ID=key_id1
 CHE_DOCKER_REGISTRY_AWS_REGISTRY1_SECRET__ACCESS__KEY=secret1
 ```
 
-#### Accessing Images From Private Registries in Stacks
-When users create their workspace, they must reference the custom image in your registry. Whether you provide a custom stack, or you have users reference a custom workspace recipe from the dashboard, to access a private registry, you must provide the domain of the private registry in the `FROM` syntax of any referenced Dockerfiles.
+There are different configurations for AWS EC2 and the Docker regsitry. You can define as many different registries as you'd like, using the numerical indicator in the environment variable. In case of adding several registries just copy set of properties and append `REGISTRY[n]` for each variable.
+
+
+#### Pulling Private Images in Stacks
+Once you have configured private registry access, any Che stack that has a `FROM <registry>/<repository>` that requires authenticated access will use the provided credentials within `che.env` to access the registry.
+
 ```text  
 # Syntax
 FROM <repository>/<image>:<tag>
 
-# Where repository is the hostname:port of your registry:
+# Example:
 FROM my.registry.url:9000/image:latest
 ```
 
-TODO: PRIVATE REGISTRY BEFORE PRIVATE IMAGES?  SHOULD PRIVATE REGISTRY BE ADDED TO ACCESS TO A PRIVATE IMAGE?
+### Using Snapshots with Private Registries
+You can configure Che to save your workspace snapshots to a private registry that you have installed, such as JFrog's Artifactory or Docker's Enterprise Registry. The default configuration of workspace snapshots is to save to local disk.
 
-#### Custom Images in Private Registries
-Most admins create a set of custom workspace stacks as Docker images. They have these pre-built to make the workspace boot sequence faster. These custom Docker images can be placed in a private registry. To push your custom image into a private registry, you will need to build it, tag it with the registry repository name, and push it into the registry. When tagging images into a private registry, they are always tagged with the fully qualified hostname of the registry that will host them. So it is not uncommon to see an image named `ops.codenvy.org:9000/myimage`.  
+#### Save Workspace Snapshots in a Private Registry
+The default configuration for workspace snapshots is to have them written to disk as TAR files. This is faster, but not centralized. You can have workspace snapshots saved in a private registry. In `che.env`:
 
-#### Start Your Own Private Docker Registry
-You can launch a private Docker registry with Docker.
-```shell  
-# Launches a docker registry instance on port 5000
-docker run -d -p 5000:5000 --restart=always --name registry registry:2\
 ```
-The `--restart=always` policy causes this container to be started any time a Docker daemon starts. You can change the location of where this registry will save the snapshots. By default images are stored in a registry container (`/var/lib/registry`). It is possible to mount this directory when [starting Docker Registry](https://docs.docker.com/registry/deploying/).
+CHE_DOCKER_REGISTRY__FOR__SNAPSHOTS=true
+CHE_DOCKER_REGISTRY=<registry-url>
+```
 
 ### Custom Dockerfiles and Composefiles for Workspaces
 Within Che, your workspaces are powered by a set of runtime environments. The default runtime is Docker. Typically, admins have pre-built images in DockerHub or another registry which are pulled when the workspace is created. You can optionally provide custom Dockerfiles (or let your users provide their own Dockerfiles), which will dynamically create a workspace image when a user creates a new workspace. 
 
 To use your custom Dockerfiles, you can:
-1. Create a [custom stack], which includes a [recipe] with your Dockerfile. 
+
+1. Create a [custom stack](), which includes a [recipe]() with your Dockerfile. 
 2. Or, users can create a custom recipe when creating a workspace that references your registry.
 
 ### Privileged Mode
@@ -211,10 +193,11 @@ CHE_DOCKER_PRIVILEGED_MODE=true
 ```
 
 ### Mirroring Docker Hub  
-TODO: GRAB MISSING STUFF FROM README
+If you are running a private registry internally to your company, you can [optionally mirror Docker Hub](https://docs.docker.com/registry/mirror/). Your private registry will download and cache any images that your users reference from the public Docker Hub. You need to [configure your Docker daemon to make use of mirroring](https://docs.docker.com/registry/mirror/).
 
 ### Using Docker In Workspaces
 If you'd like your users to work with projects which have their own Docker images and Docker build capabilities inside of their workspace, then you need to configure the workspace to work with Docker. You have two options:
+
 1. Activate Docker's prvileged mode, where your user workspaces have access to the host.
 2. Configure Che to setup workspaces to volume mount your host Daemon
 
@@ -222,25 +205,6 @@ These two tactics will allow user workspaces to perform `docker` commands from w
 
 You will need to make sure that your user's workspaces are powered from a stack that has Docker installed inside of it. Che's default images do not have Docker installed, but we have sample stacks (see the Che in Che stack).
 
-### Workspace Snapshots as Docker Images
-In the IDE and dashboard, it is possible to snapshot workspace runtimes. Your projects are saved outside the snapshot and then re-mounted into the runtime after it is reactivated from the snapshot.
-
-Che stores snapshots as Docker images. These images can be saved to disk (default) or into a Docker registry. Workspaces that are restarted will automatically use a snapshot as the base image instead of the originating image used to create the runtime. Snapshots let you store internal state, such as contents of a database, which are not part of your project tree.
-
-TODO: UPDATE FOR CHE.ENV
-```shell
-# If false, snapshots are saved to disk.
-# If true, snapshots are saved in a Docker registry
-machine.docker.snapshot_use_registry=false
-
-# Automatically creates a snapshot when workspace stopped if the value is {true},
-# Otherwise, just stops the workspace.
-workspace.runtime.auto_snapshot=true
-
-# Automatically restore workspace from snapshot if {true},
-# Otherwise, create a workspace from base image.
-workspace.runtime.auto_restore=true\
-```
 
 # Networking
 Eclipse Che makes connections between three entities: the browser, the Che server running in a Docker container, and a workspace running in a Docker container.
@@ -281,15 +245,38 @@ Additionally, if services are started within the workspace that expose their own
 
 ### Firewalls  
 On Linux, a firewall may block inbound connections from within Docker containers to your localhost network. As a result, the workspace agent is unable to ping the Che server. You can check for the firewall and then disable it.
-```shell  
-# Check firewall status
-sudo ufw status
 
-# Disable firewall
-sudo ufw disable
+Firewalls will typically cause traffic problems to appear when you are starting a new workspace. There are certain network configurations where we direct networking traffic between workspaces and Che through external IP addresses, which can flow through routers or firewalls. If ports or protocols are blocked, then certain functions will be unavailable.
 
-# Allow 8080 port of Che server
-sudo ufw allow 8080/tcp\
+#### Running Behind a Firewall (Linux/Mac)
+```shell
+# Check to see if firewall is running:
+systemctl status firewalld
+
+# Check for list of open ports
+# Verify that ports 8080tcp, 7946tcp/udp, 32768-65535tcp are open
+firewall-cmd --list-ports
+
+# Optionally open ports on your local firewall:
+firewall-cmd --permanent --add-port=8080/tcp
+... and so on
+
+# You can also verify that ports are open:
+nmap -Pn -p <port> localhost
+
+# If the port is closed, then you need to open it by editing /etc/pf.conf.
+# For example, open port 1234 for TCP for all interfaces:
+pass in proto tcp from any to any port 1234
+
+# And then restart your firewall
 ```
 
-TODO: UPDATE WITH RUNBOOK INFORMATION FROM CODENVY ON FIREWALL DETECTION
+#### Running Che Behind a Firewall (Windows)
+
+There are many third party firewall services. Different versions of Windows OS also have different firewall configurations. The built-in Windows firewall can be configured in the control panel under "System and Security":
+1. In the left pane, right-click `Inbound Rules`, and then click `New Rule` in the action pane.
+2. In the `Rule Type` dialog box, select `Port`, and then click `Next`.
+3. In the `Protocol and Ports` dialog box, select `TCP`. 
+4. Select speicfic local ports, enter the port number to be opened and click `Next`.
+5. In the `Action` dialog box, select `Allow the Connection`, and then click `Next`.
+6. In the `Name` dialog box, type a name and description for this rule, and then click `Finish`.
