@@ -168,7 +168,7 @@ public class DockerAbandonedResourcesCleaner implements Runnable {
                     try {
                         dockerConnector.removeNetwork(network.getId());
                     } catch (IOException e) {
-                        LOG.warn("Failed to remove abandoned network: %s", network.getName(), e);
+                        LOG.warn("Failed to remove abandoned network: " + network.getName(), e);
                     }
                 }
             }
