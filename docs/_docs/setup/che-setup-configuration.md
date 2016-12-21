@@ -245,15 +245,38 @@ Additionally, if services are started within the workspace that expose their own
 
 ### Firewalls  
 On Linux, a firewall may block inbound connections from within Docker containers to your localhost network. As a result, the workspace agent is unable to ping the Che server. You can check for the firewall and then disable it.
-```shell  
-# Check firewall status
-sudo ufw status
 
-# Disable firewall
-sudo ufw disable
+Firewalls will typically cause traffic problems to appear when you are starting a new workspace. There are certain network configurations where we direct networking traffic between workspaces and Che through external IP addresses, which can flow through routers or firewalls. If ports or protocols are blocked, then certain functions will be unavailable.
 
-# Allow 8080 port of Che server
-sudo ufw allow 8080/tcp\
+#### Running Behind a Firewall (Linux/Mac)
+```shell
+# Check to see if firewall is running:
+systemctl status firewalld
+
+# Check for list of open ports
+# Verify that ports 8080tcp, 7946tcp/udp, 32768-65535tcp are open
+firewall-cmd --list-ports
+
+# Optionally open ports on your local firewall:
+firewall-cmd --permanent --add-port=8080/tcp
+... and so on
+
+# You can also verify that ports are open:
+nmap -Pn -p <port> localhost
+
+# If the port is closed, then you need to open it by editing /etc/pf.conf.
+# For example, open port 1234 for TCP for all interfaces:
+pass in proto tcp from any to any port 1234
+
+# And then restart your firewall
 ```
 
-TODO: UPDATE WITH RUNBOOK INFORMATION FROM CODENVY ON FIREWALL DETECTION
+#### Running Che Behind a Firewall (Windows)
+
+There are many third party firewall services. Different versions of Windows OS also have different firewall configurations. The built-in Windows firewall can be configured in the control panel under "System and Security":
+1. In the left pane, right-click `Inbound Rules`, and then click `New Rule` in the action pane.
+2. In the `Rule Type` dialog box, select `Port`, and then click `Next`.
+3. In the `Protocol and Ports` dialog box, select `TCP`. 
+4. Select speicfic local ports, enter the port number to be opened and click `Next`.
+5. In the `Action` dialog box, select `Allow the Connection`, and then click `Next`.
+6. In the `Name` dialog box, type a name and description for this rule, and then click `Finish`.
