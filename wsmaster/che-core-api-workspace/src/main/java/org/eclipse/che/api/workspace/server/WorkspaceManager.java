@@ -323,16 +323,28 @@ public class WorkspaceManager {
                                                                   .stream()
                                                                   .collect(Collectors.toMap(Map.Entry::getKey,
                                                                                             env -> new EnvironmentImpl(env.getValue())));
-
+        // gets current environments which were changed or removed
         final Map <String, Environment> currentDiff = Sets.difference(current.getConfig().getEnvironments().entrySet(),
                                                                       updateEnvironments.entrySet())
                                                           .stream()
                                                           .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        // gets environments which were updated or added
         final Map <String, Environment> updateDiff = Sets.difference(updateEnvironments.entrySet(),
                                                                      current.getConfig().getEnvironments().entrySet())
                                                          .stream()
                                                          .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
+        // Here we should update or delete current environments snapshots.
+        // Assumed, that the same environments in current and new configuration is untouched (and don't affect on an environment
+        // configuration unicity in the diff, that is why they were deleted before).
+        // Snapshots should be deleted when:
+        //  - environment deleted
+        //  - environment configuration updated (TODO try to keep snapshots when it possible)
+        //  - impossible to establish one correspondence between current and new/updated environments
+        // Snapshots should be updated when:
+        //  - environment is only renamed and we can find one correspondence between current and renamed environments
+        // In other words, we should update snapshots only if environment was renamed i.e. environment configuration present and unique in
+        // both (current and new) configs but under different names. Also must be no environment in new config with old environment name
+        // (otherwise we don't know who is who and should delete snapshots).
         for (Map.Entry<String, Environment> env : currentDiff.entrySet()) {
             Environment envValue = env.getValue();
             if (Collections.frequency(currentDiff.values(), envValue) == 1 &&
