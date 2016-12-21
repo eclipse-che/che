@@ -220,7 +220,7 @@ func sendPtyOutputToConnection(conn *websocket.Conn, reader io.ReadCloser, final
 		}
 		i, err := normalizeBuffer(&buffer, buf, n)
 		if err != nil {
-			log.Printf("Cound't normalize byte buffer to UTF-8 sequence, due to an error: %s", err.Error())
+			log.Printf("Couldn't normalize byte buffer to UTF-8 sequence, due to an error: %s", err.Error())
 			return
 		}
 		if err = conn.WriteMessage(websocket.TextMessage, buffer.Bytes()); err != nil {
@@ -256,7 +256,7 @@ func ptyHandler(w http.ResponseWriter, r *http.Request) {
 	//write input to terminal
 	go sendConnectionInputToPty(conn, reader, wp.PtyFile, &finalizer)
 
-	fmt.Println("New terminal succesfully initialized.")
+	fmt.Println("New terminal successfully initialized.")
 }
 
 func waitAndClose(wp *wsPty, finalizer *ReadWriteRoutingFinalizer, conn *websocket.Conn, reader io.ReadCloser) {

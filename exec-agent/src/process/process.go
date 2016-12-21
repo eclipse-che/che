@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/eclipse/che/exec-agent/rpc"
+	"github.com/eclipse/che/exec-agent/term"
 )
 
 const (
@@ -138,7 +139,7 @@ type processesMap struct {
 
 func Start(process MachineProcess) (MachineProcess, error) {
 	// wrap command to be able to kill child processes see https://github.com/golang/go/issues/8854
-	cmd := exec.Command("setsid", "sh", "-c", process.CommandLine)
+	cmd := exec.Command("setsid", term.Cmd, "-c", process.CommandLine)
 
 	// getting stdout pipe
 	stdout, err := cmd.StdoutPipe()
