@@ -401,7 +401,6 @@ footer {
     .pane:after {
       content: " ";
       float: right;
-      background: url(../../imgs/footer-arrow.png) top left no-repeat;
       width: 73px;
       height: 186px;
       position: absolute;
@@ -687,9 +686,12 @@ pre,
 code {
   white-space: pre-wrap;
   display: inline-block;
-  margin: 0;
+  margin-top: -3px;
   font: 14px Consolas, Menlo, "Courier New", Courier, "Liberation Mono", monospace;
-  padding: 0 0.5em;
+  padding-top: 0.2em;
+  padding-bottom: 0;
+  padding-left: 0.5em;
+  padding-right: 0.5em;
   //border: 1px solid #cacaca;
 }
 
@@ -705,8 +707,8 @@ li > code,
 li> pre,
 h5 > code,
 .note > code {
-  background-color: #f7f7f7;
-  color: #000;
+  background-color: #444;
+  color: #fff;
   max-width: 100%;
   overflow-x: auto;
   vertical-align: middle;
@@ -788,12 +790,12 @@ article {
 
   h2, h3, h4, h5, h6 {
     margin-top: 0;
-    margin-bottom: -10px;
+    margin-bottom: 0px;
     margin-left: 0;
     margin-right: 0;
   }
 
-  h4 { color: #949AA2; }
+  h4 { font-weight: 500; }
 
   ul li {
 
