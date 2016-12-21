@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.machine.cleaner;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -93,7 +94,8 @@ public class DockerAbandonedResourcesCleaner implements Runnable {
     /**
      * Cleans up CHE docker containers which don't tracked by API any more.
      */
-    private void cleanContainers() {
+    @VisibleForTesting
+    void cleanContainers() {
         List<String> activeContainers = new ArrayList<>();
         try {
             for (ContainerListEntry container : dockerConnector.listContainers()) {
@@ -156,7 +158,8 @@ public class DockerAbandonedResourcesCleaner implements Runnable {
      * A network is considered abandoned when it doesn't contain a container.
      * To do this job more efficiently, it should be invoked after cleaning of abandoned containers.
      */
-    private void cleanNetworks() {
+    @VisibleForTesting
+    void cleanNetworks() {
         try {
             for (Network network : dockerConnector.getNetworks(GET_NETWORKS_PARAMS)) {
                 Matcher cheNetworkMatcher = CHE_NETWORK_PATTERN.matcher(network.getName());
@@ -165,7 +168,7 @@ public class DockerAbandonedResourcesCleaner implements Runnable {
                     try {
                         dockerConnector.removeNetwork(network.getId());
                     } catch (IOException e) {
-                        LOG.warn("Failed to remove abandoned network: %s", network.getName());
+                        LOG.warn("Failed to remove abandoned network: %s", network.getName(), e);
                     }
                 }
             }

@@ -21,7 +21,6 @@ import org.eclipse.che.plugin.docker.client.json.network.ContainerInNetwork;
 import org.eclipse.che.plugin.docker.client.json.network.Network;
 import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator;
-import org.mockito.InjectMocks;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -44,6 +43,8 @@ import static java.util.Optional.of;
 import static org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator.ContainerNameInfo;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -77,7 +78,13 @@ public class DockerAbandonedResourcesCleanerTest {
     private static final String EXITED_STATUS  = "exited";
     private static final String RUNNING_STATUS = "Up 6 hour ago";
 
-    private static final String ADDITIONAL_NETWORK_NAME = "AdditionalNetwork";
+    private static final String abandonedNetworkId    = "abandonedNetworkId";
+    private static final String usedNetworkId         = "usedNetworkId";
+    private static final String additionalNetworkId   = "CheAdditionalNetworkId";
+
+    private static final String abandonedNetworkName  = "workspace1234567890abcdef_1234567890abcdef";
+    private static final String usedNetworkName       = "workspace0987654321zyxwvu_0987654321zyxwvu";
+    private static final String additionalNetworkName = "CheAdditionalNetwork";
 
     @Mock
     private CheEnvironmentEngine         environmentEngine;
@@ -109,14 +116,32 @@ public class DockerAbandonedResourcesCleanerTest {
     @Mock
     private ContainerNameInfo containerNameInfo3;
 
+    @Mock
+    private Network abandonedNetwork;
+    @Mock
+    private Network usedNetwork;
+    @Mock
+    private Network additionalNetwork;
+
+    @Mock
+    private ContainerInNetwork containerInNetwork1;
+
+    private List<Network>                   networks;
+    private Map<String, ContainerInNetwork> abandonedNetworkContainers;
+    private Map<String, ContainerInNetwork> usedNetworkContainers;
+    private Map<String, ContainerInNetwork> additionalNetworkContainers = new HashMap<>();
+
     private Set<Set<String>> additionalNetworks = new HashSet<>();
-    private Set<String>      userNetworks       = new HashSet<>(Arrays.asList(ADDITIONAL_NETWORK_NAME));
+    private Set<String>      userNetworks       = new HashSet<>(Arrays.asList(additionalNetworkName));
 
     private DockerAbandonedResourcesCleaner cleaner;
 
     @BeforeMethod
     public void setUp() throws Exception {
-        additionalNetworks.add(userNetworks);
+        networks = new ArrayList<>();
+        abandonedNetworkContainers = new HashMap<>();
+        usedNetworkContainers = new HashMap<>();
+
         cleaner = spy(new DockerAbandonedResourcesCleaner(environmentEngine,
                                                           dockerConnector,
                                                           nameGenerator,
@@ -154,12 +179,48 @@ public class DockerAbandonedResourcesCleanerTest {
 
         when(containerNameInfo3.getMachineId()).thenReturn(machineId2);
         when(containerNameInfo3.getWorkspaceId()).thenReturn(workspaceId2);
+
+        when(dockerConnector.getNetworks(any())).thenReturn(networks);
+
+        when(abandonedNetwork.getId()).thenReturn(abandonedNetworkId);
+        when(usedNetwork.getId()).thenReturn(usedNetworkId);
+        when(additionalNetwork.getId()).thenReturn(abandonedNetworkId);
+
+        when(abandonedNetwork.getName()).thenReturn(abandonedNetworkName);
+        when(usedNetwork.getName()).thenReturn(usedNetworkName);
+        when(additionalNetwork.getName()).thenReturn(abandonedNetworkName);
+
+        when(abandonedNetwork.getContainers()).thenReturn(abandonedNetworkContainers);
+        when(usedNetwork.getContainers()).thenReturn(usedNetworkContainers);
+        when(additionalNetwork.getContainers()).thenReturn(additionalNetworkContainers);
+    }
+
+    @Test
+    public void cleanerShouldRunCleanOfContainerAndThenCleanOfNetworks() {
+        // when
+        cleaner.run();
+
+        // then
+        verify(cleaner).cleanContainers();
+        verify(cleaner).cleanNetworks();
+    }
+
+    @Test
+    public void cleanerShouldRunCleanNetworksEvenIfCleanOfContainersFailed() throws IOException {
+        // given
+        when(dockerConnector.listContainers()).thenThrow(new IOException("Error while fetching docker containers list"));
+
+        // when
+        cleaner.run();
+
+        // then
+        verify(cleaner).cleanNetworks();
     }
 
     @Test
     public void cleanerShouldKillAndRemoveContainerIfThisContainerIsRunningAndContainerNameInfoIsNotEmptyAndContainerIsNotExistInTheAPI()
             throws Exception {
-        cleaner.run();
+        cleaner.cleanContainers();
 
         verify(dockerConnector).listContainers();
 
@@ -176,7 +237,7 @@ public class DockerAbandonedResourcesCleanerTest {
     @Test
     public void cleanerShouldRemoveButShouldNotKillContainerWithStatusNotRunning() throws Exception {
         when(container2.getStatus()).thenReturn(EXITED_STATUS);
-        cleaner.run();
+        cleaner.cleanContainers();
 
         verify(dockerConnector, never()).killContainer(containerId2);
         verify(dockerConnector).removeContainer(RemoveContainerParams.create(containerId2).withForce(true).withRemoveVolumes(true));
@@ -186,7 +247,7 @@ public class DockerAbandonedResourcesCleanerTest {
     public void cleanerShouldNotKillAndRemoveContainerIfMachineManagerDetectedExistingThisContainerInTheAPI() throws Exception {
         when(environmentEngine.getMachine(anyString(), anyString())).thenReturn(instance);
 
-        cleaner.run();
+        cleaner.cleanContainers();
 
         verify(dockerConnector, never()).killContainer(anyString());
 
@@ -197,7 +258,7 @@ public class DockerAbandonedResourcesCleanerTest {
     public void cleanerShouldNotKillAndRemoveContainerIfContainerNameInfoIsEmpty() throws IOException {
         when(nameGenerator.parse(anyString())).thenReturn(Optional.empty());
 
-        cleaner.run();
+        cleaner.cleanContainers();
 
         verify(dockerConnector, never()).killContainer(anyString());
 
@@ -205,38 +266,161 @@ public class DockerAbandonedResourcesCleanerTest {
     }
 
     @Test
+    public void shouldRemoveAbandonedNetwork() throws IOException {
+        // given
+        networks.add(abandonedNetwork);
+
+        // when
+        cleaner.cleanNetworks();
+
+        // then
+        verify(dockerConnector).removeNetwork(eq(abandonedNetworkId));
+    }
+
+    @Test
+    public void shouldNotRemoveNetworkIfItNameNotMatchCheNetworkPattern() throws IOException {
+        // given
+        when(abandonedNetwork.getName()).thenReturn("UserNetwork");
+        networks.add(abandonedNetwork);
+
+        // when
+        cleaner.cleanNetworks();
+
+        // then
+        verify(dockerConnector, never()).removeNetwork(eq(abandonedNetworkId));
+    }
+
+    @Test
+    public void shouldNotRemoveNetworkWhenItContainsContainer() throws IOException {
+        // given
+        usedNetworkContainers.put(containerId1, containerInNetwork1);
+
+        networks.add(usedNetwork);
+
+        // when
+        cleaner.cleanNetworks();
+
+        // then
+        verify(dockerConnector, never()).removeNetwork(eq(usedNetworkId));
+    }
+
+    @Test
+    public void shouldNotRemoveNetworkWhichIsInWorkspaceRuntime() throws IOException {
+        // given
+        final String usedNetworkWorkspace = usedNetworkName.substring(0, 25);
+        when(workspaceRuntimes.hasRuntime(usedNetworkWorkspace)).thenReturn(true);
+
+        networks.add(usedNetwork);
+
+        // when
+        cleaner.cleanNetworks();
+
+        // then
+        verify(dockerConnector, never()).removeNetwork(eq(usedNetworkId));
+    }
+
+    @Test
     public void shouldRemoveOnlyAbandonedNetworks() throws IOException {
         // given
-        final String abandonedNetworkId = "network1234";
-        final String usedNetworkId = "network4321";
+        usedNetworkContainers.put(containerId1, containerInNetwork1);
 
-        final Map<String, ContainerInNetwork> abandonedNetworkContainers = new HashMap<>();
-        final Map<String, ContainerInNetwork> usedNetworkContainers = new HashMap<>();
-        usedNetworkContainers.put("containerId4321", new ContainerInNetwork());
-
-        final Network abandonedNetwork = mock(Network.class);
-        final Network usedNetwork = mock(Network.class);
-        final List<Network> networks = new ArrayList<>();
         networks.add(abandonedNetwork);
         networks.add(usedNetwork);
 
-        when(dockerConnector.getNetworks(any())).thenReturn(networks);
-
-        when(abandonedNetwork.getName()).thenReturn("workspace1234567890abcdef_1234567890abcdef");
-        when(usedNetwork.getName()).thenReturn("workspace0987654321zyxwvu_09876543210zyxwvu");
-
-        when(abandonedNetwork.getId()).thenReturn(abandonedNetworkId);
-        when(usedNetwork.getId()).thenReturn(usedNetworkId);
-
-        when(abandonedNetwork.getContainers()).thenReturn(abandonedNetworkContainers);
-        when(usedNetwork.getContainers()).thenReturn(usedNetworkContainers);
-
         // when
-        cleaner.run();
+        cleaner.cleanNetworks();
 
         // then
         verify(dockerConnector).removeNetwork(abandonedNetworkId);
         verify(dockerConnector, never()).removeNetwork(usedNetworkId);
+    }
+
+    @Test
+    public void shouldNotRemoveNetworkIfItInAdditionalNetworksList() throws IOException {
+        // given
+        additionalNetworks.add(userNetworks);
+        cleaner = spy(new DockerAbandonedResourcesCleaner(environmentEngine,
+                                                          dockerConnector,
+                                                          nameGenerator,
+                                                          workspaceRuntimes,
+                                                          additionalNetworks));
+        networks.add(additionalNetwork);
+
+        // when
+        cleaner.cleanNetworks();
+
+        // then
+        verify(dockerConnector, never()).removeNetwork(additionalNetworkId);
+    }
+
+    @Test
+    public void shouldNotRemoveNetworkIfItInAdditionalNetworksListAndHasNameAsNetworkToRemove() throws IOException {
+        // given
+        final String additionalNetworkName = "workspace1additional1netw_ork1name4test148";
+        userNetworks = new HashSet<>(Arrays.asList(additionalNetworkName));
+        additionalNetworks.add(userNetworks);
+        cleaner = spy(new DockerAbandonedResourcesCleaner(environmentEngine,
+                                                          dockerConnector,
+                                                          nameGenerator,
+                                                          workspaceRuntimes,
+                                                          additionalNetworks));
+
+        when(additionalNetwork.getName()).thenReturn(additionalNetworkName);
+        networks.add(additionalNetwork);
+
+        // when
+        cleaner.cleanNetworks();
+
+        // then
+        verify(dockerConnector, never()).removeNetwork(additionalNetworkId);
+    }
+
+    @Test
+    public void shouldRemoveAbandonedNetworkEvenIfRemovingOfPreviousOneFailed() throws IOException {
+        // given
+        doThrow(new IOException("Failed to remove docker network")).when(dockerConnector).removeNetwork(usedNetworkId);
+
+        networks.add(abandonedNetwork);
+        networks.add(usedNetwork);
+
+        // when
+        cleaner.cleanNetworks();
+
+        // then
+        verify(dockerConnector).removeNetwork(abandonedNetworkId);
+        verify(dockerConnector).removeNetwork(usedNetworkId);
+    }
+
+    @Test
+    public void shouldBeAbleToRemoveSeveralAbandonedNetworks() throws IOException {
+        // given
+        final Network abandonedNetwork2 = mock(Network.class);
+        final String abandonedNetwork2Id = "network2";
+        when(abandonedNetwork2.getId()).thenReturn(abandonedNetwork2Id);
+        when(abandonedNetwork2.getName()).thenReturn("workspace0w5kg95j93kd9a1l_cjmd8rbnf9j9dnso");
+        when(abandonedNetwork2.getContainers()).thenReturn(new HashMap<>());
+
+        final Network userNetwork = mock(Network.class);
+        final String userNetworkId = "network4";
+        when(userNetwork.getId()).thenReturn(userNetworkId);
+        when(userNetwork.getName()).thenReturn("userNetwork");
+        when(userNetwork.getContainers()).thenReturn(new HashMap<>());
+
+        usedNetworkContainers.put(containerId1, containerInNetwork1);
+
+        networks.add(usedNetwork);
+        networks.add(abandonedNetwork);
+        networks.add(abandonedNetwork2);
+        networks.add(userNetwork);
+
+        // when
+        cleaner.cleanNetworks();
+
+        // then
+        verify(dockerConnector, never()).removeNetwork(usedNetworkId);
+        verify(dockerConnector, never()).removeNetwork(userNetworkId);
+        verify(dockerConnector).removeNetwork(abandonedNetworkId);
+        verify(dockerConnector).removeNetwork(abandonedNetworkId);
     }
 
 }
