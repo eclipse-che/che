@@ -12,9 +12,9 @@
 git clone https://github.com/JamesDrummond/che-doc-images.git /tmp/che-doc-images
 cp -rf /tmp/che-doc-images/imgs /tmp/main/assets/
 cp -rf /tmp/main/* /srv/jekyll/
+rm -f /srv/jekyll/build.sh
 chown -R jekyll:jekyll /srv/jekyll
 jekyll build
-rm -f /srv/jekyll/build.sh
 rm -f /srv/jekyll/_site/feed.xml
 rm -f /srv/jekyll/_site/feed.xslt.xml
 rm -f /srv/jekyll/_site/sitemap.xml
