@@ -18,16 +18,17 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.util.AbstractLineConsumer;
 import org.eclipse.che.api.core.util.LineConsumer;
-import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceProcess;
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -97,18 +98,20 @@ public abstract class AbstractAgentLauncher implements AgentLauncher {
     }
 
 
-    protected InstanceProcess start(final Instance machine, final Agent agent) throws ServerException {
-        final Command command = new CommandImpl(agent.getId(), agent.getScript(), "agent");
-        final InstanceProcess process = machine.createProcess(command, null);
-        final LineConsumer lineConsumer = new AbstractLineConsumer() {
+    protected InstanceProcess start(Instance machine, Agent agent) throws ServerException {
+        Command command = new CommandImpl(agent.getId(), agent.getScript(), "agent");
+        InstanceProcess process = machine.createProcess(command, null);
+        LineConsumer lineConsumer = new AbstractLineConsumer() {
             @Override
             public void writeLine(String line) throws IOException {
                 machine.getLogger().writeLine(line);
             }
         };
 
+        CountDownLatch countDownLatch = new CountDownLatch(1);
         executor.execute(ThreadLocalPropagateContext.wrap(() -> {
             try {
+                countDownLatch.countDown();
                 process.start(lineConsumer);
             } catch (ConflictException | MachineException e) {
                 try {
@@ -122,6 +125,12 @@ public abstract class AbstractAgentLauncher implements AgentLauncher {
                 }
             }
         }));
+        try {
+            // ensure that code inside of task submitted to executor is called before end of this method
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
 
         return process;
     }

@@ -218,15 +218,17 @@ public class CommandManagerImpl implements CommandManager {
         final String name = command.getName();
         final String type = command.getType();
         final String commandLine = command.getCommandLine();
+        final Map<String, String> attributes = command.getAttributes();
 
-        final CommandOutputConsole console = commandConsoleFactory.create(command, machine);
-        final String machineId = machine.getId();
-
-        processesPanelPresenter.addCommandOutput(machineId, console);
         macroProcessor.expandMacros(commandLine).then(new Operation<String>() {
             @Override
             public void apply(String expandedCommandLine) throws OperationException {
-                Command expandedCommand = new CommandImpl(name, expandedCommandLine, type);
+                CommandImpl expandedCommand = new CommandImpl(name, expandedCommandLine, type, attributes);
+
+                final CommandOutputConsole console = commandConsoleFactory.create(expandedCommand, machine);
+                final String machineId = machine.getId();
+
+                processesPanelPresenter.addCommandOutput(machineId, console);
 
                 execAgentCommandManager.startProcess(machineId, expandedCommand)
                                        .thenIfProcessStartedEvent(console.getProcessStartedOperation())

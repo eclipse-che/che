@@ -189,6 +189,7 @@ public class LocalWorkspaceFolderPathProvider implements WorkspaceFolderPathProv
                 }
             } else {
                 try {
+                    // TODO we should not create folders in this provider
                     Files.createDirectories(folder);
                 } catch (AccessDeniedException e) {
                     throw new IOException(
