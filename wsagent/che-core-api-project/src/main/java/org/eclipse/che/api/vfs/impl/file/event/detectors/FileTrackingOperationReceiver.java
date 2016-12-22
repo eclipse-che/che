@@ -22,7 +22,7 @@ import org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Typ
 import org.eclipse.che.api.vfs.Path;
 import org.eclipse.che.api.vfs.VirtualFile;
 import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
-import org.eclipse.che.api.vfs.ng.FileWatcherManager;
+import org.eclipse.che.api.vfs.watcher.FileWatcherManager;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -35,7 +35,7 @@ import java.util.function.Consumer;
 import static java.nio.charset.Charset.defaultCharset;
 import static org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType.DELETED;
 import static org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType.MODIFIED;
-import static org.eclipse.che.api.vfs.ng.FileWatcherManager.EMPTY_CONSUMER;
+import static org.eclipse.che.api.vfs.watcher.FileWatcherManager.EMPTY_CONSUMER;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.slf4j.LoggerFactory.getLogger;
 

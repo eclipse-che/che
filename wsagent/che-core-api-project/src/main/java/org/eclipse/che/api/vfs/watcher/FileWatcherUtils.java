@@ -8,13 +8,13 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.vfs.ng;
+package org.eclipse.che.api.vfs.watcher;
 
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.util.Set;
 
-public class FileWatcherUtils {
+class FileWatcherUtils {
 
     /**
      * Transform internal path representation into normal path representation
@@ -26,7 +26,7 @@ public class FileWatcherUtils {
      *
      * @return normal path
      */
-    public static Path toNormalPath(Path root, String path) {
+    static Path toNormalPath(Path root, String path) {
         return root.resolve(path.startsWith("/") ? path.substring(1) : path).toAbsolutePath();
     }
 
@@ -40,7 +40,7 @@ public class FileWatcherUtils {
      *
      * @return internal path
      */
-    public static String toInternalPath(Path root, Path path) {
+    static String toInternalPath(Path root, Path path) {
         return "/" + root.toAbsolutePath().relativize(path);
     }
 
@@ -54,7 +54,7 @@ public class FileWatcherUtils {
      *
      * @return true if path is within excludes, false otherwise
      */
-    public static boolean isExcluded(Set<PathMatcher> excludes, Path path) {
+    static boolean isExcluded(Set<PathMatcher> excludes, Path path) {
         for (PathMatcher matcher : excludes) {
             if (matcher.matches(path)) {
                 return true;

@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.vfs.ng;
+package org.eclipse.che.api.vfs.watcher;
 
 import com.google.inject.Inject;
 
@@ -83,7 +83,7 @@ public class FileWatcherByPathMatcher {
         }
     }
 
-    public int watch(PathMatcher matcher, Consumer<String> create, Consumer<String> modify, Consumer<String> delete) {
+    int watch(PathMatcher matcher, Consumer<String> create, Consumer<String> modify, Consumer<String> delete) {
         LOG.debug("Watching matcher '{}'", matcher);
         int operationId = operationIdCounter.getAndIncrement();
 
@@ -96,7 +96,7 @@ public class FileWatcherByPathMatcher {
         return operationId;
     }
 
-    public void unwatch(int operationId) {
+    void unwatch(int operationId) {
         LOG.debug("Unwatching matcher operation set with id '{}'", operationId);
         for (Entry<PathMatcher, Set<Integer>> entry : matchers.entrySet()) {
             PathMatcher matcher = entry.getKey();

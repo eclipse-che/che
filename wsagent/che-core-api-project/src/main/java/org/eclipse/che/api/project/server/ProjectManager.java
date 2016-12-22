@@ -42,9 +42,9 @@ import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
 import org.eclipse.che.api.vfs.impl.file.FileTreeWatcher;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationListener;
-import org.eclipse.che.api.vfs.ng.FileWatcherManager;
 import org.eclipse.che.api.vfs.search.Searcher;
 import org.eclipse.che.api.vfs.search.SearcherProvider;
+import org.eclipse.che.api.vfs.watcher.FileWatcherManager;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,7 +76,6 @@ public class ProjectManager {
     private static final Logger LOG = LoggerFactory.getLogger(ProjectManager.class);
 
     private final VirtualFileSystem              vfs;
-    private final EventService                   eventService;
     private final ProjectTypeRegistry            projectTypeRegistry;
     private final ProjectRegistry                projectRegistry;
     private final ProjectHandlerRegistry         handlers;
@@ -99,7 +98,6 @@ public class ProjectManager {
                           WorkspaceProjectsSyncer workspaceProjectsHolder,
                           FileWatcherManager fileWatcherManager) throws ServerException {
         this.vfs = vfsProvider.getVirtualFileSystem();
-        this.eventService = eventService;
         this.projectTypeRegistry = projectTypeRegistry;
         this.projectRegistry = projectRegistry;
         this.handlers = handlers;

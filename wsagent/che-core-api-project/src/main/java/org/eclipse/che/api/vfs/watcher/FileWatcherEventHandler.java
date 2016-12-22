@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.vfs.ng;
+package org.eclipse.che.api.vfs.watcher;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +31,7 @@ import java.util.function.Predicate;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static java.nio.file.Files.isDirectory;
-import static org.eclipse.che.api.vfs.ng.FileWatcherUtils.toInternalPath;
+import static org.eclipse.che.api.vfs.watcher.FileWatcherUtils.toInternalPath;
 
 @Singleton
 public class FileWatcherEventHandler {

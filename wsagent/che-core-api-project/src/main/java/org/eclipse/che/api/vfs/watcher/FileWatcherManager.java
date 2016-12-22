@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.vfs.ng;
+package org.eclipse.che.api.vfs.watcher;
 
 import com.google.inject.Inject;
 
@@ -18,10 +18,11 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.File;
+import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.util.function.Consumer;
 
-import static org.eclipse.che.api.vfs.ng.FileWatcherUtils.toNormalPath;
+import static org.eclipse.che.api.vfs.watcher.FileWatcherUtils.toNormalPath;
 
 /**
  * Facade for all dynamic file watcher system related operations.
@@ -36,7 +37,7 @@ public class FileWatcherManager {
     private final FileWatcherByPathValue   fileWatcherByPathValue;
     private final FileWatcherByPathMatcher fileWatcherByPathMatcher;
     private final FileWatcherService       service;
-    private final File                     root;
+    private final Path                     root;
 
     @Inject
     public FileWatcherManager(@Named("che.user.workspaces.storage") File root, FileWatcherByPathValue watcherByPathValue,
@@ -44,7 +45,7 @@ public class FileWatcherManager {
         this.fileWatcherByPathMatcher = watcherByPathMatcher;
         this.fileWatcherByPathValue = watcherByPathValue;
         this.service = service;
-        this.root = root;
+        this.root = root.toPath().normalize().toAbsolutePath();
     }
 
     /**
@@ -91,7 +92,7 @@ public class FileWatcherManager {
     public int registerByPath(String path, Consumer<String> create, Consumer<String> modify, Consumer<String> delete) {
         LOG.debug("Registering operations to an item with path '{}'", path);
 
-        return fileWatcherByPathValue.watch(toNormalPath(root.toPath(), path), create, modify, delete);
+        return fileWatcherByPathValue.watch(toNormalPath(root, path), create, modify, delete);
     }
 
     /**

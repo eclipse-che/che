@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.vfs.ng;
+package org.eclipse.che.api.vfs.watcher;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
@@ -22,10 +22,13 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.nio.file.ClosedWatchServiceException;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchEvent.Kind;
+import java.nio.file.WatchEvent.Modifier;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.Map;
@@ -37,13 +40,14 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
+import static java.lang.Thread.currentThread;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 import static java.nio.file.StandardWatchEventKinds.OVERFLOW;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.eclipse.che.api.vfs.ng.FileWatcherUtils.isExcluded;
+import static org.eclipse.che.api.vfs.watcher.FileWatcherUtils.isExcluded;
 
 /**
  * Watches directories for interactions with their entries. Based on
@@ -58,8 +62,8 @@ import static org.eclipse.che.api.vfs.ng.FileWatcherUtils.isExcluded;
 public class FileWatcherService {
     private static final Logger LOG = LoggerFactory.getLogger(FileWatcherService.class);
 
-    private final AtomicBoolean suspended = new AtomicBoolean(false);
-    private final AtomicBoolean running   = new AtomicBoolean(true);
+    private final AtomicBoolean suspended = new AtomicBoolean(true);
+    private final AtomicBoolean running   = new AtomicBoolean();
 
     private final Map<WatchKey, Path> keys          = new ConcurrentHashMap<>();
     private final Map<Path, Integer>  registrations = new ConcurrentHashMap<>();
@@ -67,6 +71,8 @@ public class FileWatcherService {
     private final Set<PathMatcher>        excludes;
     private final FileWatcherEventHandler handler;
     private final WatchService            service;
+    private final Modifier[]              eventModifiers;
+    private final Kind<?>[]               eventKinds;
 
     private ExecutorService executor;
 
@@ -76,16 +82,51 @@ public class FileWatcherService {
         this.excludes = excludes;
         this.handler = handler;
         this.service = service;
+
+        this.eventModifiers = getWatchEventModifiers();
+        this.eventKinds = getWatchEventKinds();
+
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> WatchEvent<T> cast(WatchEvent<?> event) {
+        return (WatchEvent<T>)event;
     }
 
 
     @SuppressWarnings("unchecked")
-    static private <T> WatchEvent<T> cast(WatchEvent<?> event) {
-        return (WatchEvent<T>)event;
+    private static <T> T cast(Object event) {
+        return (T)event;
+    }
+
+    private static Kind<?>[] getWatchEventKinds() {
+        return new Kind<?>[]{ENTRY_DELETE, ENTRY_MODIFY, ENTRY_CREATE};
+    }
+
+    /**
+     * This is required to speed up mac based file watcher implementations
+     *
+     * @return sensitivity watch event modifier
+     */
+    private static Modifier[] getWatchEventModifiers() {
+        String className = "com.sun.nio.file.SensitivityWatchEventModifier";
+
+        try {
+            Class<?> c = Class.forName(className);
+            Field f = c.getField("HIGH");
+            Modifier modifier = cast(f.get(c));
+            LOG.debug("Class '{}' is found in classpath setting corresponding watch modifier", className);
+
+            return new Modifier[]{modifier};
+        } catch (Exception e) {
+            LOG.debug("Class '{}' is not found in classpath, falling to default mode", className, e);
+
+            return new Modifier[]{};
+        }
     }
 
     @PostConstruct
-    public void start() throws IOException {
+    void start() throws IOException {
         ThreadFactoryBuilder builder = new ThreadFactoryBuilder();
         ThreadFactory factory = builder.setUncaughtExceptionHandler(LoggingUncaughtExceptionHandler.getInstance())
                                        .setNameFormat(FileWatcherService.class.getSimpleName())
@@ -96,32 +137,30 @@ public class FileWatcherService {
     }
 
     @PreDestroy
-    public void shutdown() {
-        boolean interrupted = false;
-        executor.shutdown();
+    void stop() {
         try {
-            if (!executor.awaitTermination(3L, SECONDS)) {
-                executor.shutdownNow();
-                if (!executor.awaitTermination(3L, SECONDS)) {
-                    LOG.error("Unable to terminate executor");
-                }
-            }
-        } catch (InterruptedException e) {
-            interrupted = true;
-            executor.shutdownNow();
-        }
-
-        try {
+            LOG.debug("Closing java watch service");
             service.close();
         } catch (IOException e) {
-            LOG.error(e.getMessage());
+            LOG.error("Closing of java watch service failed: ", e.getMessage());
         }
 
-        if (interrupted) {
-            Thread.currentThread().interrupt();
+        try {
+            LOG.debug("Executor task shutdown started");
+            executor.shutdown();
+            executor.awaitTermination(5, SECONDS);
+        } catch (InterruptedException e) {
+            currentThread().interrupt();
+            LOG.debug("Executor task is interrupted");
+        } finally {
+            if (!executor.isTerminated()) {
+                LOG.debug("Executor task is not shutdown yet");
+            }
+            executor.shutdownNow();
+            LOG.debug("Executor tasks have been shutdown");
+
         }
     }
-
 
     /**
      * Registers a directory for tracking of corresponding entry creation,
@@ -139,12 +178,12 @@ public class FileWatcherService {
         LOG.debug("Registering directory '{}'", dir);
         if (keys.values().contains(dir)) {
             int previous = registrations.get(dir);
-            LOG.info("Directory is already being watched, increasing watch counter, previous value: {}", previous);
+            LOG.debug("Directory is already being watched, increasing watch counter, previous value: {}", previous);
             registrations.put(dir, previous + 1);
         } else {
             try {
                 LOG.debug("Starting watching directory '{}'", dir);
-                WatchKey watchKey = dir.register(service, ENTRY_DELETE, ENTRY_MODIFY, ENTRY_CREATE);
+                WatchKey watchKey = dir.register(service, eventKinds, eventModifiers);
                 keys.put(watchKey, dir);
                 registrations.put(dir, 1);
             } catch (IOException e) {
@@ -162,7 +201,7 @@ public class FileWatcherService {
      * @param dir
      *         directory
      */
-    public void unRegister(Path dir) {
+    void unRegister(Path dir) {
         LOG.debug("Canceling directory '{}' registration", dir);
 
         int previous = registrations.get(dir);
@@ -184,7 +223,7 @@ public class FileWatcherService {
      * Resumes service after it was in suspended state. If method is called
      * when the service is already not in a suspended state nothing happens.
      */
-    public void resume() {
+    void resume() {
         if (suspended.compareAndSet(true, false)) {
             LOG.debug("Resuming service.");
         }
@@ -195,13 +234,16 @@ public class FileWatcherService {
      * service in suspended state are totally skipped. If method is called when
      * the service is already in a suspended state nothing happens.
      */
-    public void suspend() {
+    void suspend() {
         if (suspended.compareAndSet(false, true)) {
             LOG.debug("Suspending service.");
         }
     }
 
     private void run() {
+        suspended.compareAndSet(true, false);
+        running.compareAndSet(false, true);
+
         while (running.get()) {
             try {
                 WatchKey watchKey = service.take();
@@ -237,7 +279,10 @@ public class FileWatcherService {
                 resetAndRemove(watchKey, dir);
             } catch (InterruptedException e) {
                 running.compareAndSet(true, false);
-                LOG.error("Error during running file watcher or taking watch key instance", e);
+                LOG.debug("Interruption error when running file watcher, most likely caused by stopping it", e);
+            } catch (ClosedWatchServiceException e) {
+                running.compareAndSet(true, false);
+                LOG.debug("Closing watch service while some of keys may be processing", e);
             }
         }
     }
