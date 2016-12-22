@@ -19,7 +19,7 @@ cmd_action() {
 
         # Not loaded as part of the init process to save on download time
         update_image_if_not_found eclipse/che-action:nightly
-        docker_run eclipse/che-action:nightly "$@"
+        docker_run -it eclipse/che-action:nightly "$@"
 
        return
     fi

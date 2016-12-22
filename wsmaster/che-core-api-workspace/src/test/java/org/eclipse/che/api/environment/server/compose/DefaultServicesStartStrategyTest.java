@@ -26,6 +26,7 @@ import static org.testng.Assert.assertTrue;
 
 /**
  * @author Alexander Garagatyi
+ * @author Alexander Andrienko
  */
 public class DefaultServicesStartStrategyTest {
     DefaultServicesStartStrategy strategy = new DefaultServicesStartStrategy();
@@ -40,6 +41,24 @@ public class DefaultServicesStartStrategyTest {
         composeEnvironment.getServices().put("forth", new CheServiceImpl().withDependsOn(singletonList("third")));
         composeEnvironment.getServices().put("fifth", new CheServiceImpl().withDependsOn(asList("forth", "first")));
         List<String> expected = asList("first", "second", "third", "forth", "fifth");
+
+        // when
+        List<String> actual = strategy.order(composeEnvironment);
+
+        // then
+        assertEquals(actual, expected);
+    }
+
+    @Test
+    public void shouldOrderServicesWithDependenciesWhereOrderIsStrict2() {
+        // given
+        CheServicesEnvironmentImpl composeEnvironment = new CheServicesEnvironmentImpl();
+        composeEnvironment.getServices().put("web", new CheServiceImpl().withDependsOn(asList("db", "redis")));
+        composeEnvironment.getServices().put("redis", new CheServiceImpl().withDependsOn(singletonList("dev-machine")));
+        composeEnvironment.getServices().put("db", new CheServiceImpl().withDependsOn(singletonList("redis")));
+        composeEnvironment.getServices().put("dev-machine", new CheServiceImpl().withDependsOn(emptyList()));
+
+        List<String> expected = asList("dev-machine", "redis", "db", "web");
 
         // when
         List<String> actual = strategy.order(composeEnvironment);
@@ -87,13 +106,44 @@ public class DefaultServicesStartStrategyTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "Launch order of machines '.*, .*' can't be evaluated")
+          expectedExceptionsMessageRegExp = "Launch order of machines '.*, .*' can't be evaluated. Circular dependency.")
     public void shouldFailIfCircularDependencyFound() throws Exception {
         // given
         CheServicesEnvironmentImpl composeEnvironment = new CheServicesEnvironmentImpl();
         composeEnvironment.getServices().put("second", new CheServiceImpl().withDependsOn(singletonList("third")));
         composeEnvironment.getServices().put("third", new CheServiceImpl().withDependsOn(singletonList("second")));
         composeEnvironment.getServices().put("first", new CheServiceImpl());
+
+        // when
+        strategy.order(composeEnvironment);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "A machine can not link to itself: .*")
+    public void shouldFailIfMachineLinksByItSelf() {
+        // given
+        CheServicesEnvironmentImpl composeEnvironment = new CheServicesEnvironmentImpl();
+        composeEnvironment.getServices().put("first", new CheServiceImpl().withLinks(singletonList("first")));
+
+        // when
+        strategy.order(composeEnvironment);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "A machine can not depend on itself: .*")
+    public void shouldFailIfMachineDependsOnByItSelf() {
+        // given
+        CheServicesEnvironmentImpl composeEnvironment = new CheServicesEnvironmentImpl();
+        composeEnvironment.getServices().put("first", new CheServiceImpl().withDependsOn(singletonList("first")));
+
+        // when
+        strategy.order(composeEnvironment);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class,
+          expectedExceptionsMessageRegExp = "A machine can not contain 'volumes_from' to itself:.*")
+    public void shouldFailIfMachineContainsVolumesFromByItSelf() {
+        // given
+        CheServicesEnvironmentImpl composeEnvironment = new CheServicesEnvironmentImpl();
+        composeEnvironment.getServices().put("first", new CheServiceImpl().withVolumesFrom(singletonList("first")));
 
         // when
         strategy.order(composeEnvironment);
@@ -203,7 +253,7 @@ public class DefaultServicesStartStrategyTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "Dependency 'fifth' in machine 'second' points to not known machine.")
+          expectedExceptionsMessageRegExp = "Dependency 'fifth' in machine 'second' points to unknown machine.")
     public void shouldFailIfDependsOnFieldContainsNonExistingService() throws Exception {
         // given
         CheServicesEnvironmentImpl composeEnvironment = new CheServicesEnvironmentImpl();
@@ -216,7 +266,7 @@ public class DefaultServicesStartStrategyTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "Dependency 'fifth' in machine 'third' points to not known machine.")
+          expectedExceptionsMessageRegExp = "Dependency 'fifth' in machine 'third' points to unknown machine.")
     public void shouldFailIfVolumesFromFieldContainsNonExistingService() throws Exception {
         // given
         CheServicesEnvironmentImpl composeEnvironment = new CheServicesEnvironmentImpl();
@@ -244,7 +294,7 @@ public class DefaultServicesStartStrategyTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "Dependency 'fifth' in machine 'second' points to not known machine.")
+          expectedExceptionsMessageRegExp = "Dependency 'fifth' in machine 'second' points to unknown machine.")
     public void shouldFailIfLinksFieldContainsNonExistingService() throws Exception {
         // given
         CheServicesEnvironmentImpl composeEnvironment = new CheServicesEnvironmentImpl();

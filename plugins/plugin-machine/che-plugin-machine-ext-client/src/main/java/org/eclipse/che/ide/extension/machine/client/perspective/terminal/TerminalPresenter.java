@@ -27,10 +27,10 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
 import org.eclipse.che.ide.api.action.Action;
+import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.collections.Jso;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
-import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.tab.content.TabPresenter;
 import org.eclipse.che.ide.extension.machine.client.processes.AddTerminalClickHandler;
 import org.eclipse.che.ide.websocket.WebSocket;
@@ -69,6 +69,8 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
     private int                   countRetry;
     private TerminalJso           terminal;
     private TerminalStateListener terminalStateListener;
+    private int                   width;
+    private int                   height;
 
     /**
      * Indicates javascript term.js is injected in the page.
@@ -251,7 +253,14 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
             return;
         }
 
+        if (width == x && height == y) {
+            return;
+        }
+
         terminal.resize(x, y);
+        width = x;
+        height = y;
+
         Jso jso = Jso.create();
         JsArrayInteger arr = Jso.createArray().cast();
         arr.set(0, x);

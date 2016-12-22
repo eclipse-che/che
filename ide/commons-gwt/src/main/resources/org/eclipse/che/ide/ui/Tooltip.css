@@ -25,7 +25,8 @@
     display: inline-block;
     position: relative;
     margin: 0;
-    max-width: 250px;
+    max-width: 500px;
+    word-wrap: break-word;
 }
 
 /*

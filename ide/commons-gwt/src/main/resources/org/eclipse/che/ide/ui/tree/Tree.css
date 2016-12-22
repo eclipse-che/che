@@ -55,6 +55,8 @@
     position: relative;
     white-space: nowrap;
     height: 18px;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .treeNodeBody:HOVER {
@@ -93,6 +95,10 @@
 
 .treeNodeLabel {
     height: 18px;
+}
+
+.treeNodeLabel > div {
+    float: left;
 }
 
 .treeNode a:hover {

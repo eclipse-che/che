@@ -12,14 +12,15 @@ package org.eclipse.che.plugin.nativeaccessexample.machine.client.command;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
-import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
+import org.eclipse.che.api.machine.shared.dto.execagent.ProcessStartResponseDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.MachineServiceClient;
+import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
+import org.eclipse.che.ide.api.machine.execagent.ExecAgentPromise;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.util.UUID;
@@ -35,15 +36,16 @@ import javax.validation.constraints.NotNull;
 @Singleton
 public class CommandManager {
 
-    private final DtoFactory dtoFactory;
-    private final MachineServiceClient machineServiceClient;
-    private final NotificationManager notificationManager;
-    private final AppContext appContext;
+    private final DtoFactory              dtoFactory;
+    private final ExecAgentCommandManager commandManager;
+    private final NotificationManager     notificationManager;
+    private final AppContext              appContext;
 
     @Inject
-    public CommandManager(DtoFactory dtoFactory, MachineServiceClient machineServiceClient, NotificationManager notificationManager, AppContext appContext) {
+    public CommandManager(DtoFactory dtoFactory, ExecAgentCommandManager commandManager, NotificationManager notificationManager,
+                          AppContext appContext) {
         this.dtoFactory = dtoFactory;
-        this.machineServiceClient = machineServiceClient;
+        this.commandManager = commandManager;
         this.notificationManager = notificationManager;
         this.appContext = appContext;
     }
@@ -56,25 +58,22 @@ public class CommandManager {
         if (machine == null) {
             return;
         }
-        String workspaceID = appContext.getWorkspaceId();
         String machineID = machine.getId();
         final CommandDto command = dtoFactory.createDto(CommandDto.class)
                 .withName("some-command")
                 .withCommandLine(commandLine)
                 .withType("arbitrary-type");
-        final String outputChannel = "process:output:" + UUID.uuid();
-        executeCommand(command, workspaceID, machineID, outputChannel);
+        executeCommand(command, machineID);
     }
 
-    public void executeCommand(final CommandDto command, @NotNull final String workspaceID, @NotNull final String machineID, String outputChannel) {
-        final Promise<MachineProcessDto> processPromise = machineServiceClient.executeCommand(workspaceID, machineID, command, outputChannel);
-        processPromise.then(new Operation<MachineProcessDto>() {
+    public void executeCommand(final CommandDto command, @NotNull final String machineID) {
+        final ExecAgentPromise<ProcessStartResponseDto> promise = commandManager.startProcess(machineID, command);
+
+        promise.then(new Operation<ProcessStartResponseDto>() {
             @Override
-            public void apply(MachineProcessDto process) throws OperationException
-            {
+            public void apply(ProcessStartResponseDto arg) throws OperationException {
                 //Do nothing in this example
             }
-
         });
 
     }

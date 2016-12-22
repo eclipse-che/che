@@ -94,6 +94,7 @@ public class DockerProcess extends AbstractMachineProcess implements InstancePro
         if (started) {
             throw new ConflictException("Process already started.");
         }
+        started = true;
         // Trap is invoked when bash session ends. Here we kill all sub-processes of shell and remove pid-file.
         final String trap = format("trap '[ -z \"$(jobs -p)\" ] || kill $(jobs -p); [ -e %1$s ] && rm %1$s' EXIT", pidFilePath);
         // 'echo' saves shell pid in file, then run command
@@ -106,7 +107,6 @@ public class DockerProcess extends AbstractMachineProcess implements InstancePro
             throw new MachineException(format("Error occurs while initializing command %s in docker container %s: %s",
                                               Arrays.toString(command), container, e.getMessage()), e);
         }
-        started = true;
         try {
             docker.startExec(StartExecParams.create(exec.getId()), output == null ? null : new LogMessagePrinter(output));
         } catch (IOException e) {

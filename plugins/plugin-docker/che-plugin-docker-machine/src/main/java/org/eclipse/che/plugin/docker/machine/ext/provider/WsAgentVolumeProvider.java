@@ -11,9 +11,12 @@
 package org.eclipse.che.plugin.docker.machine.ext.provider;
 
 import org.eclipse.che.api.core.util.SystemInfo;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.docker.machine.WindowsHostUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Strings;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -42,13 +45,20 @@ public class WsAgentVolumeProvider implements Provider<String> {
 
     private static final Logger LOG = LoggerFactory.getLogger(WsAgentVolumeProvider.class);
 
-    @Inject
-    @Named("che.workspace.agent.dev")
-    private String wsAgentArchivePath;
+    private final String wsAgentArchivePath;
+
+    private final String agentVolumeOptions;
 
     @Inject
-    @Named("che.docker.volumes_agent_options")
-    private String volumeOptions;
+    public WsAgentVolumeProvider(@Nullable @Named("che.docker.volumes_agent_options") String agentVolumeOptions,
+                                 @Named("che.workspace.agent.dev") String wsAgentArchivePath) {
+        if (!Strings.isNullOrEmpty(agentVolumeOptions)) {
+            this.agentVolumeOptions = ":" + agentVolumeOptions;
+        } else {
+            this.agentVolumeOptions = "";
+        }
+        this.wsAgentArchivePath = wsAgentArchivePath;
+    }
 
     @Override
     public String get() {
@@ -68,6 +78,6 @@ public class WsAgentVolumeProvider implements Provider<String> {
     }
 
     private String getTargetOptions(final String path) {
-        return path + CONTAINER_TARGET + ":" + volumeOptions;
+        return path + CONTAINER_TARGET + agentVolumeOptions;
     }
 }

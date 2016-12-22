@@ -9,23 +9,37 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {CheService} from '../api/che-service.factory';
 
 /**
  * This class is handling the branding data in Che
  * @author Florent Benoit
  */
 export class CheBranding {
+  $q: ng.IQService;
+  $rootScope: che.IRootScopeService;
+  $http: ng.IHttpService;
+  cheService: CheService;
 
     /**
      * Default constructor that is using resource
      * @ngInject for Dependency injection
      */
-    constructor($http, $rootScope, $q) {
+    constructor($http: ng.IHttpService, $rootScope: che.IRootScopeService, $q: ng.IQService, cheService: CheService) {
         this.$http = $http;
         this.$rootScope = $rootScope;
         this.deferred = $q.defer();
         this.promise = this.deferred.promise;
+        this.cheService = cheService;
         this.updateData();
+        this.getVersion();
+    }
+
+    getVersion() {
+      this.cheService.fetchServicesInfo().then(() => {
+        let info = this.cheService.getServicesInfo();
+        this.$rootScope.productVersion = (info && info.implementationVersion) ? info.implementationVersion : '';
+      });
     }
 
     updateData() {
@@ -48,8 +62,7 @@ export class CheBranding {
                 helpPath : brandingData.helpPath,
                 helpTitle : brandingData.helpTitle,
                 supportEmail: brandingData.supportEmail,
-                oauthDocs: brandingData.oauthDocs,
-                version: brandingData.version
+                oauthDocs: brandingData.oauthDocs
             };
 
             this.productName = this.$rootScope.branding.title;
@@ -62,7 +75,6 @@ export class CheBranding {
             this.helpTitle = this.$rootScope.branding.helpTitle;
             this.supportEmail = this.$rootScope.branding.supportEmail;
             this.oauthDocs = this.$rootScope.branding.oauthDocs;
-            this.version = this.$rootScope.branding.version;
             this.deferred.resolve(this.$rootScope.branding);
         });
 
@@ -98,10 +110,6 @@ export class CheBranding {
 
     getProductSupportEmail() {
         return this.supportEmail;
-    }
-
-    getProductVersion() {
-      return this.version;
     }
 }
 

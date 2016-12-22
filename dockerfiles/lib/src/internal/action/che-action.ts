@@ -51,7 +51,7 @@ export class CheAction {
 
 
     static init() : Map<string,any> {
-        Log.context = ProductName.getDisplayName() + '(action)';
+        Log.context = '(' + ProductName.getMiniDisplayName() + ' action)';
         let actionMap : Map<string, any> = new Map<string, any>();
         actionMap.set('create-start-workspace', CreateStartWorkspaceAction);
         actionMap.set('add-user', AddUserAction);
@@ -71,7 +71,7 @@ export class CheAction {
     run() : Promise<any> {
        let classOfAction: any = this.mapOfActions.get(this.actionName);
        if (classOfAction) {
-           Log.context = ProductName.getDisplayName() + '(action/' + this.actionName + ')';
+           Log.context = '(' + ProductName.getMiniDisplayName() + ' action/' + this.actionName + ')';
            var instance = new classOfAction(this.args);
            return instance.run();
        } else {
@@ -86,7 +86,7 @@ export class CheAction {
     help() : void {
         Log.getLogger().info("Available actions are : ");
         for (var [key, value] of this.mapOfActions.entries()) {
-            Log.getLogger().info('\u001b[1m' + key + '\u001b[0m');
+            Log.getLogger().direct('\u001b[1m' + key + '\u001b[0m');
             ArgumentProcessor.help(Object.create(value.prototype));
         }
     }
