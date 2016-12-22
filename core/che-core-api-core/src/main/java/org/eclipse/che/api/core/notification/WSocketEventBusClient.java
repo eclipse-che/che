@@ -10,11 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.notification;
 
-import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
-import org.eclipse.che.commons.lang.Pair;
-
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
+import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.commons.lang.IoUtil;
+import org.eclipse.che.commons.lang.Pair;
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.everrest.websockets.client.BaseClientMessageListener;
 import org.everrest.websockets.client.WSClient;
 import org.everrest.websockets.message.JsonMessageConverter;
@@ -22,13 +23,14 @@ import org.everrest.websockets.message.RestOutputMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.eclipse.che.commons.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.websocket.DeploymentException;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -57,6 +59,13 @@ public final class WSocketEventBusClient {
     private static final Logger LOG = LoggerFactory.getLogger(WSocketEventBusClient.class);
 
     private static final long WS_CONNECTION_TIMEOUT = 2;
+    private static final long MAX_ATTEMPTS          = 10;
+
+    public static final String WORKSPACE_AGENT_STOPPED_MESSAGE = "The workspace agent has been forcefully stopped. " +
+                                                                 "This error happens when the agent cannot resolve the location of the Che server. " +
+                                                                 "This error can usually be fixed with additional configuration settings in /conf/che.properties. " +
+                                                                 "The Che server will stop this workspace after a short timeout. " +
+                                                                 "You can get help by posting your config, stacktrace and workspace /etc/hosts below as a GitHub issue.";
 
     private final EventService                         eventService;
     private final Pair<String, String>[]               eventSubscriptions;
@@ -246,6 +255,7 @@ public final class WSocketEventBusClient {
 
         @Override
         public void run() {
+            int reconnectAttempts = 0;
             for (; ; ) {
 
                 if (Thread.currentThread().isInterrupted()) {
@@ -254,11 +264,26 @@ public final class WSocketEventBusClient {
                 LOG.debug("Start connection loop {} channels {} ", wsUri, channels);
                 try {
                     connect(wsUri, channels);
+                    reconnectAttempts = 0;
                     LOG.debug("Connection complete");
                     return;
                 } catch (IOException | DeploymentException e) {
                     LOG.warn("Not able to connect to {} because {}. Retrying ", wsUri, e.getLocalizedMessage());
                     LOG.debug(e.getLocalizedMessage(), e);
+
+                    if (reconnectAttempts++ > MAX_ATTEMPTS) {
+                        LOG.error(WORKSPACE_AGENT_STOPPED_MESSAGE);
+
+                        try {
+                            // content of /etc/hosts file may provide clues on why the connection failed, e.g. how che-host is resolved
+                            LOG.info("Workspace /etc/hosts: " + IoUtil.readAndCloseQuietly(new FileInputStream(new File("/etc/hosts"))));
+                        } catch (Exception ex) {
+                            LOG.info(e.getLocalizedMessage(), ex);
+                        }
+
+                        System.exit(0);
+                    }
+
                     synchronized (this) {
                         try {
                             wait(WS_CONNECTION_TIMEOUT * 2 * 1000);

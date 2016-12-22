@@ -11,6 +11,7 @@
 package org.eclipse.che;
 
 import org.eclipse.che.api.core.ApiException;
+import org.eclipse.che.api.core.notification.WSocketEventBusClient;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.commons.lang.IoUtil;
@@ -22,10 +23,10 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.ws.rs.HttpMethod;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.io.File;
 
 /**
  * Checks whether API is accessible from WS agent or not on app start to prevent usage of illegal configuration.
@@ -63,11 +64,7 @@ public class ApiEndpointAccessibilityChecker {
             }
 
             LOG.error("The workspace agent has attempted to start, but it is unable to ping the Che server at " + apiEndpoint);
-            LOG.error("The workspace agent has been forcefully stopped. " +
-                      "This error happens when the agent cannot resolve the location of the Che server. " +
-                      "This error can usually be fixed with additional configuration settings in /conf/che.properties. " +
-                      "The Che server will stop this workspace after a short timeout. " +
-                      "You can get help by posting your config, stacktrace and workspace /etc/hosts below as a GitHub issue.");
+            LOG.error(WSocketEventBusClient.WORKSPACE_AGENT_STOPPED_MESSAGE);
 
             // content of /etc/hosts file may provide clues on why the connection failed, e.g. how che-host is resolved
             try {
