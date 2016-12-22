@@ -134,7 +134,7 @@ public class HistoryPresenter extends BasePresenter implements HistoryView.Actio
             isViewClosed = false;
         }
 
-        partStack.setActivePart(HistoryPresenter.this);
+        partStack.setActivePart(this);
     }
 
     /** Get the log of the commits. If successfully received, then display in revision grid, otherwise - show error in output panel. */
