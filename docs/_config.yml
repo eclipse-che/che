@@ -27,7 +27,8 @@ description: Cloud workspaces for development teams
 url: https://www.eclipse.org/che/
 
 product_name: "CHE"
-product_mini_name:  "Che"
+product_mini_name:  "che"
+product_mini_name_capitalized:  "Che"
 product_formal_name: "Eclipse Che"
 
 twitter:
