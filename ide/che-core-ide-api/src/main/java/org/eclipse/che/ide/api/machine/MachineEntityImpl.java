@@ -45,18 +45,26 @@ public class MachineEntityImpl implements MachineEntity {
 
     public MachineEntityImpl(@NotNull Machine machineDescriptor) {
         this.machineDescriptor = machineDescriptor;
-        this.machineConfig = machineDescriptor.getConfig();
+        this.machineConfig = machineDescriptor != null ? machineDescriptor.getConfig() : null;
         this.machineLinks = machineDescriptor instanceof Hyperlinks ? ((Hyperlinks)machineDescriptor).getLinks() : null;
 
-        Map<String, ? extends Server> serverDtoMap = machineDescriptor.getRuntime().getServers();
-        servers = new HashMap<>(serverDtoMap.size());
-        for (String s : serverDtoMap.keySet()) {
-            servers.put(s, new MachineServer(serverDtoMap.get(s)));
+        if (machineDescriptor == null || machineDescriptor.getRuntime() == null) {
+            servers = null;
+            runtimeProperties = null;
+            envVariables = null;
+        } else {
+            MachineRuntimeInfo machineRuntime = machineDescriptor.getRuntime();
+            Map<String, ? extends Server> serverDtoMap = machineRuntime.getServers();
+            servers = new HashMap<>(serverDtoMap.size());
+            for (String s : serverDtoMap.keySet()) {
+                servers.put(s, new MachineServer(serverDtoMap.get(s)));
+            }
+            runtimeProperties = machineRuntime.getProperties();
+            envVariables = machineRuntime.getEnvVariables();
         }
 
-        MachineRuntimeInfo machineRuntime = machineDescriptor.getRuntime();
-        runtimeProperties = machineRuntime != null ? machineRuntime.getProperties() : null;
-        envVariables = machineRuntime != null ? machineRuntime.getEnvVariables() : null;
+
+
     }
 
 

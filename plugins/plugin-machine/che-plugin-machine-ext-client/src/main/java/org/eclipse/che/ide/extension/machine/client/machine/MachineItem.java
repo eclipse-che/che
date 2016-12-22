@@ -14,6 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
+import org.eclipse.che.ide.api.machine.MachineEntityImpl;
 
 /**
  * The class which describes machine entity.
@@ -21,10 +22,10 @@ import org.eclipse.che.api.machine.shared.dto.MachineDto;
  * @author Dmitry Shnurenko
  * @author Roman Nikitenko
  */
-public class MachineEntityImpl extends org.eclipse.che.ide.api.machine.MachineEntityImpl {
+public class MachineItem extends MachineEntityImpl {
 
     @Inject
-    public MachineEntityImpl(@Assisted MachineDto descriptor) {
+    public MachineItem(@Assisted MachineDto descriptor) {
         super(descriptor);
     }
 

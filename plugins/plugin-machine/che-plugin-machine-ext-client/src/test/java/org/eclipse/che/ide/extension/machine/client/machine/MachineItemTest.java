@@ -32,6 +32,7 @@ import java.util.Map;
 
 import static org.eclipse.che.api.machine.shared.Constants.TERMINAL_REFERENCE;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -40,7 +41,7 @@ import static org.mockito.Mockito.when;
  * @author Dmitry Shnurenko
  */
 @RunWith(MockitoJUnitRunner.class)
-public class MachineEntityImplTest {
+public class MachineItemTest {
 
     private final static String SOME_TEXT = "someText";
 
@@ -59,7 +60,7 @@ public class MachineEntityImplTest {
     @Mock
     private AppContext                  appContext;
 
-    private MachineEntityImpl machine;
+    private MachineItem machine;
 
     @Before
     public void setUp() {
@@ -71,7 +72,7 @@ public class MachineEntityImplTest {
         when(serverDescriptor.getAddress()).thenReturn(SOME_TEXT);
         when(machineRuntimeDto.getServers()).thenReturn(servers);
 
-        machine = new MachineEntityImpl(descriptor);
+        machine = new MachineItem(descriptor);
     }
 
     @Test
@@ -127,7 +128,7 @@ public class MachineEntityImplTest {
         when(terminalLink.getRel()).thenReturn(TERMINAL_REFERENCE);
         when(descriptor.getLinks()).thenReturn(links);
 
-        machine = new MachineEntityImpl(descriptor);
+        machine = new MachineItem(descriptor);
         String terminalUrl = machine.getTerminalUrl();
 
         assertEquals(terminalHref, terminalUrl);
@@ -138,7 +139,7 @@ public class MachineEntityImplTest {
         Map<String, String> properties = Collections.emptyMap();
         when(machineRuntimeDto.getProperties()).thenReturn(properties);
 
-        machine = new MachineEntityImpl(descriptor);
+        machine = new MachineItem(descriptor);
         Map<String, String> result = machine.getProperties();
 
         assertEquals(properties, result);
@@ -146,11 +147,11 @@ public class MachineEntityImplTest {
 
     @Test
     public void shouldAvoidNPEWhenMachineRuntimeIsNull() {
-//        when(descriptor.getRuntime()).thenReturn(null);
-//        machine = new MachineEntityImpl(descriptor);
-//
-//        Map<String, String> result = machine.getProperties();
-//
-//        assertNull(result);
+        when(descriptor.getRuntime()).thenReturn(null);
+        machine = new MachineItem(descriptor);
+
+        Map<String, String> result = machine.getProperties();
+
+        assertNull(result);
     }
 }
