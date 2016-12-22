@@ -16,13 +16,13 @@ In a Debug Dialog (**Run > Edit Debug Configurations...**), choose if you want t
 
 To debug console apps, pass debug arguments to JVM:
 ```shell  
-mvn clean install && java -jar -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y ${current.project.path}/target/*.jar\
+mvn clean install && java -jar -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y ${current.project.path}/target/*.jar
 ```
 ## Java Web Apps
 
 To debug a web application, you need to start a web server in a debug mode. Debug arguments may vary depending on the web server in use. For example, to start Tomcat in a debug mode, run:
 ```text  
-$TOMCAT_HOME/bin/catalina.sh jpda run\
+$TOMCAT_HOME/bin/catalina.sh jpda run
 ```
 You can add debug commands to CMD widget to permanently save them with the workspace config.
 # GDB  

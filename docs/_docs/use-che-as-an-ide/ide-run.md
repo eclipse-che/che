@@ -7,8 +7,10 @@ permalink: /:categories/run/
 ---
 There are two ways to run your application in Che:
 
-* using [commands](/docs/commands)
+* using [Commands]({{base}}/docs/ide/commands/index.html)
 * in a Terminal
+
+
 # Console Apps  
 Create a command using `${current.project.path}` macro to execute jars, python scripts, run gulp or grunt commands etc:
 ```shell  
@@ -39,8 +41,8 @@ mvn -f ${current.project.path} clean install
 cp ${current.project.path}/target/*.war /home/user/tomcat8/webapps/ROOT.war\
 ```
 
-#### $TOMCAT_HOME
-Pre-defined Java images have Tomcat 8 on board with $TOMCAT_HOME environment variable pointing to `home/user/tomcat8`  
+### $TOMCAT_HOME
+Pre-defined Java stacks have Tomcat 8 on board with $TOMCAT_HOME environment variable pointing to `home/user/tomcat8`  
 
 
 ```shell  
@@ -54,6 +56,6 @@ Use startup scripts (usually in `/bin` directory of a webserver). You can start 
 
 ## Preview URL
 
-When sources/build artifacts are deployed to a webserver and the server is up, get application preview URL in **Servers** tab (Machine perspective icon in the top right corner - ![Machine perspective](https://files.readme.io/5gHpdHAMSNig96lwduwf_machine-perspective.png) :
+When sources/build artifacts are deployed to a webserver and the server is up, get application preview URL in **Servers** tab (Machine perspective icon in the top right corner - ![Machine perspective]({{ base }}/assets/imgs/5gHpdHAMSNig96lwduwf_machine-perspective.png) :
 ![server.png]({{ base }}/assets/imgs/server.png)
 If you use pre-built Che images, preview URLs are marked with Labels, like `tomcat8`, `apache2`, `asp.net.server` etc.

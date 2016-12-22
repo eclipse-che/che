@@ -5,7 +5,8 @@ excerpt: ""
 layout: docs
 permalink: /:categories/git-svn/
 ---
-Che natively supports Git and SVN, which is installed in all pre-defined Che images. Versioning functionality is available in the IDE and in the terminal. When using the Git and SVN menu, commands are injected into the workspace runtime and all output is streamed into the consoles panels. The following sections are in reference to Che's IDE Git and SVN Menu.
+{{ site.product_formal_name }} natively supports Git and SVN, which is installed in all pre-defined stacks. Versioning functionality is available in the IDE and in the terminal. When using the Git and SVN menu, commands are injected into the workspace runtime and all output is streamed into the consoles panels. The following sections are in reference to {{site.product_mini_name_capitalized}}'s IDE Git and SVN Menu.
+
 # Using Private Repositories  
 Private repositories will require a secure SSH connection, so an SSH key pair needs to be generated. SSH keys are saved in user preferences, so you need to generate the SSH key only once and it will be used in all workspaces.
 
@@ -16,9 +17,11 @@ SSH keys can be generated at `Profile > Preferences > SSH > VCS`. Use the `Gener
 After the key has been generated, you can view and copy it, and save to your repository hosting account.
 
 ![Clipboard4.jpg]({{ base }}/assets/imgs/Clipboard4.jpg)
+
 ## Use Existing SSH Keys
 You can upload an existing public key instead of creating a new SSH key. When uploading a key add the hostname (using no www or http/https - as in the example below). Note that the `public key > view` button will not be available with this option as the public file should be generated already.
 ![Clipboard7.jpg]({{ base }}/assets/imgs/Clipboard7.jpg)
+
 ## Adding SSH Public Key to Repository Account
 Each repository provider has their own specific way to upload SSH public keys. This is required to use features such as `push` from the Git or Subversion menu in the workspace.
 
@@ -31,17 +34,19 @@ To add the associated public key to a repository/account  using **github.com** c
 
 ![Clipboard6.jpg]({{ base }}/assets/imgs/Clipboard6.jpg)
 ### GitLab Example
-To add the associated public key to a git repository/account  using **gitlab.com** click your user icon(top right) then `Profile Settings > SSH Keys`. Give a title to your liking and paste the public key copied from Che into form.
+To add the associated public key to a git repository/account  using **gitlab.com** click your user icon(top right) then `Profile Settings > SSH Keys`. Give a title to your liking and paste the public key copied from {{ site.product_mini_name_capitalized }} into form.
 ![GitLabSSH.jpg]({{ base }}/assets/imgs/GitLabSSH.jpg)
+
 ## Import Project from Repository Using SSH
 Import project from the IDE `Workspace > Import Project > GIT/SUBVERSION` menu.
 ![Clipboard12.jpg]({{ base }}/assets/imgs/Clipboard12.jpg)
 Importing a project can also be done from the dashboard menu.
 ![ImportProjectDashboard.jpg]({{ base }}/assets/imgs/ImportProjectDashboard.jpg)
-Be sure to use the ssh url like `git@<git url>:<account>/<project>.git` when importing a project from a git repository using ssh key authorization. **Note: HTTPS git url can only be used for oauth authentication described in [Git Using oAuth](https://eclipse-che.readme.io/docs/git#github-using-oauth)**.
+Be sure to use the ssh url like `git@<git url>:<account>/<project>.git` when importing a project from a git repository using ssh key authorization. **Note: HTTPS git url can only be used for oauth authentication described in [Git Using oAuth]({{base}}/docs/ide/git-svn/index.html#git-using-oauth)**.
+
 # Git Using oAuth  
 ## GitLab oAuth
-Currently it's not possible for Che to use oAuth integration with GitLab. Although GitLab supports oAuth for clone operations, pushes are not supported. You can track [this GitLab issue](https://gitlab.com/gitlab-org/gitlab-ce/issues/18106) in their issue management system.
+Currently it's not possible for {{ site.product_mini_name_capitalized }} to use oAuth integration with GitLab. Although GitLab supports oAuth for clone operations, pushes are not supported. You can track [this GitLab issue](https://gitlab.com/gitlab-org/gitlab-ce/issues/18106) in their issue management system.
 
 ## GitHub oAuth
 ### Setup oAuth at GitHub
@@ -50,7 +55,7 @@ To enable automatic key upload to GitHub, register an application in your GitHub
 
 ![Clipboard9.jpg]({{ base }}/assets/imgs/Clipboard9.jpg)
 ### Setup environment variables.
-Set the following to environment variables then start/restart the Eclipse Che server. Optionally you can use [CLI profiles](https://eclipse-che.readme.io/docs/che-cli#profiles) to save these environment variables.
+Set the following to environment variables then start/restart the {{ site.product_formal_name }} server. Optionally you can use [CLI profiles](https://eclipse-che.readme.io/docs/che-cli#profiles) to save these environment variables.
 ```shell  
 export CHE_PROPERTY_oauth_github_clientid=yourClientID
 export CHE_PROPERTY_oauth_github_clientsecret=yourClientSecret
@@ -60,15 +65,17 @@ export CHE_PROPERTY_oauth_github_redirecturis= http://${CHE_HOST_IP}:${SERVER_PO
 #Optionally save the enviroment variables above using the CLI.
 #che profile add <profile-name>
 #che profile set <profile-name>
-che start\
+che start
 ```
 ### Using OAuth in Workspace
 Once the oauth is setup, SSH keys are generated and uploaded automatically for GitHub at `Profile > Preferences > SSH > VCS` by clicking the 'Octocat' icon.
 ![Clipboard.jpg]({{ base }}/assets/imgs/Clipboard.jpg)
+
 ### Import Existing Project
 Import project from the IDE `Workspace > Import Project > GITHUB` menu. When importing a project from GitHub using oauth key authorization you can use the https url like `https://github.com/<account>/<project>.git`.
 ![Clipboard13.jpg]({{ base }}/assets/imgs/Clipboard13.jpg)
 Importing a project can also be done from the dashboard menu.
+
 # SVN Using Username/Password  
 Import project from the IDE `Workspace > Import Project > SUBVERSION` menu. When importing a project from you can use the https url like `https://<hostname>/<repo-name>`.
 ![che-svn-username-password.jpg]({{ base }}/assets/imgs/che-svn-username-password.jpg)
