@@ -18,10 +18,10 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
-import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandManager.CommandChangedListener;
 import org.eclipse.che.ide.api.command.CommandManager.CommandLoadedListener;
+import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.command.PredefinedCommandGoalRegistry;
 import org.eclipse.che.ide.api.component.Component;
 
@@ -71,8 +71,12 @@ public class ExecuteCommandActionManager implements Component,
 
         command2Action = new HashMap<>();
         commandGoalPopUpGroups = new HashMap<>();
+    }
 
-        // TODO: move it to #start method
+    @Override
+    public void start(Callback<Component, Exception> callback) {
+        callback.onSuccess(this);
+
         commandManager.addCommandLoadedListener(this);
         commandManager.addCommandChangedListener(this);
 
@@ -82,11 +86,6 @@ public class ExecuteCommandActionManager implements Component,
         ((DefaultActionGroup)actionManager.getAction(GROUP_MAIN_CONTEXT_MENU)).add(commandsActionGroup);
         ((DefaultActionGroup)actionManager.getAction(GROUP_EDITOR_TAB_CONTEXT_MENU)).add(commandsActionGroup);
         ((DefaultActionGroup)actionManager.getAction(GROUP_CONSOLES_TREE_CONTEXT_MENU)).add(commandsActionGroup);
-    }
-
-    @Override
-    public void start(Callback<Component, Exception> callback) {
-        callback.onSuccess(this);
     }
 
     @Override

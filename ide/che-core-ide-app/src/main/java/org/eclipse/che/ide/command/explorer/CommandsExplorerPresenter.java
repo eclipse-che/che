@@ -253,7 +253,6 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
             }
         }
 
-        // FIXME: when #delay() is invoking then command must be cleared
         void delayAndSelectCommand(@Nullable ContextualCommand command) {
             this.command = command;
 
