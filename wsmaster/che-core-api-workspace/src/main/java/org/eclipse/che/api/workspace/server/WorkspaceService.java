@@ -64,6 +64,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
@@ -572,9 +573,9 @@ public class WorkspaceService extends Service {
         if (previous == null) {
             throw new NotFoundException(format("Workspace '%s' doesn't contain environment '%s'", id, envName));
         }
-        if (newEnvName != null && !"".equals(newEnvName)) {
+        if (!isNullOrEmpty(newEnvName)) {
             if (workspace.getConfig().getEnvironments().containsKey(newEnvName)) {
-                throw new ConflictException(format("Environment '%s' already exists", newEnvName));
+                throw new ConflictException(format("Environment '%s' already exists in '%s' workspace", newEnvName, workspace.getId()));
             }
             envName = newEnvName;
         }
@@ -768,10 +769,7 @@ public class WorkspaceService extends Service {
         }
     }
 
-    /*
-     * Validate composite key.
-     *
-     */
+    /** Validate composite key. */
     private void validateKey(String key) throws BadRequestException {
         String[] parts = key.split(":", -1); // -1 is to prevent skipping trailing part
         switch (parts.length) {

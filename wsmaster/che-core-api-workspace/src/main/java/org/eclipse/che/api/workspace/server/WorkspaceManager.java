@@ -356,7 +356,7 @@ public class WorkspaceManager {
                                                                                     .filter(e -> e.getValue().equals(envValue))
                                                                                     .findAny()
                                                                                     .orElse(null) // should never happens
-                                                                                    .getKey());
+                                                                                    .getKey()); // gets new name of environment
                 } catch (ConflictException | SnapshotException | NotFoundException err) {
                     LOG.error("Failed to update snapshots of '%s' environment in '%s' workspace.", env.getKey(), workspaceId, err);
                     removeEnvironmentSnapshotsQuietly(workspaceId, env.getKey());
@@ -630,40 +630,29 @@ public class WorkspaceManager {
      *         workspace id to remove environment snapshots
      * @param envName
      *         environment name to remove snapshots from
-     * @throws NotFoundException
-     *           when workspace with given id doesn't exists
-     * @throws ServerException
-     *          when any other error occurs
      */
     @VisibleForTesting
-    void removeEnvironmentSnapshots(String workspaceId, String envName) throws NotFoundException, ServerException {
-        List<SnapshotImpl> removed = new ArrayList<>();
-        getSnapshot(workspaceId).stream()
-                                .filter(snapshot -> snapshot.getEnvName().equals(envName))
-                                .forEach(snapshot -> {
-                                    try {
-                                        snapshotDao.removeSnapshot(snapshot.getId());
-                                        removed.add(snapshot);
-                                    } catch (Exception e) {
-                                        LOG.error(format("Couldn't remove snapshot '%s' meta data, " +
-                                                         "binaries won't be removed either", snapshot.getId()), e);
-                                    }
-                                });
-        // binaries removal may take some time, do it asynchronously
-        sharedPool.execute(() -> runtimes.removeBinaries(removed));
-    }
-
-    /**
-     * The same as {@link #removeEnvironmentSnapshots(String, String)}, but log error instead of throwing any exception.
-     */
-    private void removeEnvironmentSnapshotsQuietly(String workspaceId, String envName) {
+    void removeEnvironmentSnapshotsQuietly(String workspaceId, String envName) {
         try {
-            removeEnvironmentSnapshots(workspaceId, envName);
+            List<SnapshotImpl> removed = new ArrayList<>();
+            getSnapshot(workspaceId).stream()
+                                    .filter(snapshot -> snapshot.getEnvName().equals(envName))
+                                    .forEach(snapshot -> {
+                                        try {
+                                            snapshotDao.removeSnapshot(snapshot.getId());
+                                            removed.add(snapshot);
+                                        } catch (Exception e) {
+                                            LOG.error(format("Couldn't remove snapshot '%s' meta data, " +
+                                                             "binaries won't be removed either", snapshot.getId()), e);
+                                        }
+                                    });
+            // binaries removal may take some time, do it asynchronously
+            sharedPool.execute(() -> runtimes.removeBinaries(removed));
         } catch (NotFoundException e) {
-            LOG.error("Failed to delete snapshots of '%s' environment because workspace with '%s' id doesn't exist",
+            LOG.error("Failed to delete snapshots of '{}' environment because workspace with '{}' id doesn't exist",
                       envName, workspaceId, e);
         } catch (ServerException e) {
-            LOG.error("Failed to delete snapshots of '%s' environment in '%s' workspace.", envName, workspaceId, e);
+            LOG.error("Failed to delete snapshots of '{}' environment in '{}' workspace.", envName, workspaceId, e);
         }
     }
 

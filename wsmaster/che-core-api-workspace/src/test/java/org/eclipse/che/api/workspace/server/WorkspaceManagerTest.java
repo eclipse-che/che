@@ -48,6 +48,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -853,7 +854,7 @@ public class WorkspaceManagerTest {
         assertEquals(updatedWorkspace.getConfig().getEnvironments().get(workspace.getConfig().getDefaultEnv()),
                      workspace.getConfig().getEnvironments().get(workspace.getConfig().getDefaultEnv()));
 
-        verify(workspaceManager).removeEnvironmentSnapshots(eq(workspace.getId()), eq(envName));
+        verify(workspaceManager).removeEnvironmentSnapshotsQuietly(eq(workspace.getId()), eq(envName));
     }
 
     @Test
@@ -879,7 +880,7 @@ public class WorkspaceManagerTest {
                      workspace.getConfig().getEnvironments().get(workspace.getConfig().getDefaultEnv()));
         assertEquals(updatedWorkspace.getConfig().getEnvironments().get(envName), updatedEnv);
 
-        verify(workspaceManager).removeEnvironmentSnapshots(eq(workspace.getId()), eq(envName));
+        verify(workspaceManager).removeEnvironmentSnapshotsQuietly(eq(workspace.getId()), eq(envName));
     }
 
     @Test
@@ -907,7 +908,7 @@ public class WorkspaceManagerTest {
         assertEquals(updatedWorkspace.getConfig().getEnvironments().get(newName), env);
 
         verify(workspaceManager).updateEnvironmentSnapshots(eq(workspace.getId()), eq(envName), eq(newName));
-        verify(workspaceManager, never()).removeEnvironmentSnapshots(any(), any());
+        verify(workspaceManager, never()).removeEnvironmentSnapshotsQuietly(any(), any());
     }
 
     @Test
@@ -951,12 +952,30 @@ public class WorkspaceManagerTest {
         assertFalse(updatedWorkspaceEnvironments.containsKey("env2"));
         assertFalse(updatedWorkspaceEnvironments.containsKey("env3"));
 
-        verify(workspaceManager, never()).removeEnvironmentSnapshots(eq(workspace.getId()), eq(workspace.getConfig().getDefaultEnv()));
+        verify(workspaceManager, never()).removeEnvironmentSnapshotsQuietly(eq(workspace.getId()), eq(workspace.getConfig().getDefaultEnv()));
         verify(workspaceManager, never()).updateEnvironmentSnapshots(eq(workspace.getId()), eq(workspace.getConfig().getDefaultEnv()), any());
-        verify(workspaceManager).removeEnvironmentSnapshots(eq(workspace.getId()), eq("env1"));
+        verify(workspaceManager).removeEnvironmentSnapshotsQuietly(eq(workspace.getId()), eq("env1"));
         verify(workspaceManager).updateEnvironmentSnapshots(eq(workspace.getId()), eq("env2"), eq("envX"));
-        verify(workspaceManager).removeEnvironmentSnapshots(eq(workspace.getId()), eq("env3"));
+        verify(workspaceManager).removeEnvironmentSnapshotsQuietly(eq(workspace.getId()), eq("env3"));
         verify(workspaceManager, never()).updateEnvironmentSnapshots(eq(workspace.getId()), any(), eq("envZ"));
+    }
+
+    @Test
+    public void shouldUpdateEnvironmentSnapshots() throws Exception {
+        // given
+        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), NAMESPACE);
+        final String newEnvName = "env2";
+        final SnapshotImpl snapshot = new SnapshotImpl();
+        snapshot.setEnvName(workspace.getConfig().getDefaultEnv());
+        when(snapshotDao.findSnapshots(workspace.getId())).thenReturn(Collections.singletonList(snapshot));
+
+        // when
+        workspaceManager.updateEnvironmentSnapshots(workspace.getId(), workspace.getConfig().getDefaultEnv(), newEnvName);
+
+        // then
+        final ArgumentCaptor<SnapshotImpl> snapshotCaptor = ArgumentCaptor.forClass(SnapshotImpl.class);
+        verify(snapshotDao).updateSnapshot(snapshotCaptor.capture());
+        assertEquals(snapshotCaptor.getValue().getEnvName(), newEnvName);
     }
 
     @Test
