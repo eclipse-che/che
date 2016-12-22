@@ -45,10 +45,10 @@ public class TestNGTestAction implements TestAction {
         actionManager.registerAction("TestNGActionRunXML", runTestXMLAction);
         actionManager.registerAction("TestNGActionRunClassContext", runClassContextTestAction);
 
-        keyBinding.getGlobal().addKey(new KeyBuilder().action().alt().charCode('n').build(),
+        keyBinding.getGlobal().addKey(new KeyBuilder().action().alt().charCode('g').build(),
                 "TestNGActionRunAll");
 
-        keyBinding.getGlobal().addKey(new KeyBuilder().action().shift().charCode('n').build(),
+        keyBinding.getGlobal().addKey(new KeyBuilder().action().shift().charCode('g').build(),
                 "TestNGActionRunClass");
 
         this.runAllTestAction = runAllTestAction;
