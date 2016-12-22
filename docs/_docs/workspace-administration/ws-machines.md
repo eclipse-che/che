@@ -33,7 +33,7 @@ Machines can have their internal state saved into a Docker image with a snapshot
 
 Snapshots are important to preserve the internal state of a machine that is not defined by the recipe. For example, you may define a recipe that includes maven, but your project may require numerous dependencies that are downloaded and locally installed into the internal maven repository of the machine. If you stop and restart the machine without a snapshot, that internal state will be lost.
 
-Note that once you've snapshotted a workspace, changing the workspace's name will result in the snapshot being lost.
+Note that once you've snapshotted a workspace, changing the environment name inside the workspace will result in the snapshot being lost.
 
 Snapshots image a machine and then it is committed, tagged, and optionally pushed into a Docker registry. You can use a local Docker registry or a remote one. See [Configuration](https://eclipse-che.readme.io/docs/configuration#section-workspace-snapshots) for information on how to setup a docker registry.
 
