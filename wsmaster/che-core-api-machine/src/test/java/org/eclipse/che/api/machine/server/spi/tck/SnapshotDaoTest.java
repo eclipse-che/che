@@ -210,6 +210,38 @@ public class SnapshotDaoTest {
         snapshotDao.removeSnapshot(null);
     }
 
+    @Test
+    public void shouldUpdateSnapshot() throws Exception {
+        final String snapshotId = snapshots[0].getId();
+        final String anotherEnvName = "new-env";
+        final String anotherMachineName = "some-machine-name";
+        final SnapshotImpl snapshot = createSnapshot(snapshotId,
+                                                     snapshots[0].getWorkspaceId(),
+                                                     anotherEnvName,
+                                                     anotherMachineName);
+
+        snapshotDao.updateSnapshot(snapshot);
+
+        SnapshotImpl updatedSnapshot = null;
+        try {
+            updatedSnapshot = snapshotDao.getSnapshot(snapshotId);
+        } catch (NotFoundException nfe) {
+            fail("Should update - not delete - snapshot");
+        }
+        assertEquals(updatedSnapshot.getEnvName(), anotherEnvName);
+        assertEquals(updatedSnapshot.getMachineName(), anotherMachineName);
+    }
+
+    @Test(expectedExceptions = NotFoundException.class)
+    public void shouldThrowNotFoundExceptionWhenTryToUpdateNonExistingSnapshot() throws Exception {
+        final SnapshotImpl snapshot = createSnapshot("not-saved-snapshot",
+                                                     snapshots[0].getWorkspaceId(),
+                                                     snapshots[0].getEnvName(),
+                                                     snapshots[0].getMachineName());
+
+        snapshotDao.updateSnapshot(snapshot);
+    }
+
     @Test(dependsOnMethods = "shouldFindSnapshotsByWorkspaceAndNamespace")
     public void replacesSnapshots() throws Exception {
         final SnapshotImpl newSnapshot = createSnapshot("new-snapshot",

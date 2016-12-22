@@ -164,9 +164,13 @@ public class JpaSnapshotDao implements SnapshotDao {
     }
 
     @Transactional
-    protected SnapshotImpl doUpdate(SnapshotImpl update) throws NotFoundException, SnapshotException {
-        if (managerProvider.get().find(SnapshotImpl.class, update.getId()) == null) {
+    protected SnapshotImpl doUpdate(SnapshotImpl update) throws NotFoundException, SnapshotException, ConflictException {
+        SnapshotImpl oldSnapshot = managerProvider.get().find(SnapshotImpl.class, update.getId());
+        if (oldSnapshot == null) {
             throw new NotFoundException(format("Snapshot with id '%s' doesn't exist", update.getId()));
+        }
+        if (!oldSnapshot.getWorkspaceId().equals(update.getWorkspaceId())) {
+            throw new ConflictException(format("Cannot move '%s' snapshot to another workspace", oldSnapshot));
         }
         return managerProvider.get().merge(update);
     }

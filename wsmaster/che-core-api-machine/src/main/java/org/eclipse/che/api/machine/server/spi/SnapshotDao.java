@@ -98,7 +98,8 @@ public interface SnapshotDao {
      * @throws NotFoundException
      *         if given snapshot doesn't exist
      * @throws ConflictException
-     *         if snapshot for the same machine in the same environment in the same workspace already exists
+     *         if snapshot for the same machine in the same environment in the same workspace already exists,
+     *         if try to move snapshot to another workspace
      * @throws SnapshotException
      *         if an error occur
      */
