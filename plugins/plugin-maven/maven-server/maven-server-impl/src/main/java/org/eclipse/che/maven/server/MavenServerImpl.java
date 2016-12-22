@@ -217,6 +217,9 @@ public class MavenServerImpl extends MavenRmiObject implements MavenServer {
         Model result = MavenModelUtil.convertToMavenModel(model);
         result = internalInterpolate(result, projectDir);
 
+//        PathTranslator pathTranslator = new DefaultPathTranslator();
+//        pathTranslator.alignToBaseDirectory(result, projectDir);
+
         return MavenModelUtil.convertModel(result);
     }
 

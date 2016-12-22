@@ -26,6 +26,10 @@ name: Eclipse Che Docs
 description: Cloud workspaces for development teams
 url: https://www.eclipse.org/che/
 
+product_name: "CHE"
+product_mini_name:  "Che"
+product_formal_name: "Eclipse Che"
+
 twitter:
   username: eclipse_che
 

@@ -121,7 +121,6 @@ public class MachineProviderImplTest {
     @BeforeMethod
     public void setUp() throws Exception {
         when(dockerConnectorConfiguration.getDockerHostIp()).thenReturn("123.123.123.123");
-        when(dockerNode.getProjectsFolder()).thenReturn("/tmp/projects");
 
         provider = spy(new MachineProviderBuilder().build());
 

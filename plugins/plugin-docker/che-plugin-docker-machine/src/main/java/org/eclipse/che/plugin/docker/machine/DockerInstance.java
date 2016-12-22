@@ -14,6 +14,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.MachineSource;
@@ -285,7 +286,8 @@ public class DockerInstance extends AbstractInstance {
             docker.removeContainer(RemoveContainerParams.create(container)
                                                         .withRemoveVolumes(true)
                                                         .withForce(true));
-        } catch (IOException e) {
+        } catch (IOException | ServerException e) {
+            LOG.error(e.getLocalizedMessage(), e);
             throw new MachineException(e.getLocalizedMessage());
         }
 

@@ -73,7 +73,7 @@ import static java.lang.String.format;
  * @author gazarenkov
  */
 @Singleton
-public final class ProjectManager {
+public class ProjectManager {
     private static final Logger LOG = LoggerFactory.getLogger(ProjectManager.class);
 
     private final VirtualFileSystem              vfs;
