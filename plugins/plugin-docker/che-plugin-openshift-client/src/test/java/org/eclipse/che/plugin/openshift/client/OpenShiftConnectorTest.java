@@ -1,18 +1,21 @@
-package org.eclipse.che.plugin.docker.client;
+/*******************************************************************************
+ * Copyright (c) 2012-2016 Codenvy, S.A.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc -  initial implementation
+ *******************************************************************************/
+package org.eclipse.che.plugin.openshift.client;
 
-import io.fabric8.kubernetes.api.model.ContainerPort;
-import io.fabric8.kubernetes.api.model.EnvVar;
-import io.fabric8.kubernetes.api.model.ServicePort;
-
-import org.eclipse.che.plugin.docker.client.connection.DockerConnectionFactory;
-import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
-import org.eclipse.che.plugin.docker.client.json.ExposedPort;
-import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
-import org.mockito.Mock;
-import org.mockito.testng.MockitoTestNGListener;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Listeners;
-import org.testng.annotations.Test;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -23,17 +26,27 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import org.eclipse.che.plugin.docker.client.DockerApiVersionPathPrefixProvider;
+import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
+import org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver;
+import org.eclipse.che.plugin.docker.client.connection.DockerConnectionFactory;
+import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
+import org.eclipse.che.plugin.docker.client.json.ExposedPort;
+import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
+import org.mockito.Mock;
+import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Listeners;
+import org.testng.annotations.Test;
+
+import io.fabric8.kubernetes.api.model.ContainerPort;
+import io.fabric8.kubernetes.api.model.EnvVar;
+import io.fabric8.kubernetes.api.model.ServicePort;
 
 @Listeners(MockitoTestNGListener.class)
 public class OpenShiftConnectorTest {
 
     private static final String[] CONTAINER_ENV_VARIABLES = {"CHE_WORKSPACE_ID=abcd1234"};
-    private static final String   CONTAINER_NAME          = "workspace33c89znmqidvzol8_machineyytelq6lni7mndlf_che_dev-machine";
     private static final String   CHE_DEFAULT_OPENSHIFT_PROJECT_NAME = "eclipse-che";
     private static final String   CHE_DEFAULT_OPENSHIFT_SERVICEACCOUNT = "cheserviceaccount";
     private static final String   OPENSHIFT_API_ENDPOINT_MINISHIFT = "https://192.168.64.2:8443/";

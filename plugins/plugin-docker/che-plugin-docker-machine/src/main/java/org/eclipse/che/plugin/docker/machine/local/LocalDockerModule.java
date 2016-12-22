@@ -25,6 +25,7 @@ import org.eclipse.che.plugin.docker.machine.DockerInstance;
 import org.eclipse.che.plugin.docker.machine.DockerInstanceRuntimeInfo;
 import org.eclipse.che.plugin.docker.machine.DockerProcess;
 import org.eclipse.che.plugin.docker.machine.node.DockerNode;
+import org.eclipse.che.plugin.openshift.client.OpenShiftConnector;
 
 import java.util.Set;
 
@@ -60,7 +61,7 @@ public class LocalDockerModule extends AbstractModule {
 
         MapBinder<String, DockerConnector> dockerConnectors = MapBinder.newMapBinder(binder(), String.class, DockerConnector.class);
         dockerConnectors.addBinding("default").to(DockerConnector.class);
-        dockerConnectors.addBinding("openshift").to(org.eclipse.che.plugin.docker.client.OpenShiftConnector.class);
+        dockerConnectors.addBinding("openshift").to(OpenShiftConnector.class);
 
         Multibinder<String> devMachineEnvVars = Multibinder.newSetBinder(binder(),
                                                                          String.class,

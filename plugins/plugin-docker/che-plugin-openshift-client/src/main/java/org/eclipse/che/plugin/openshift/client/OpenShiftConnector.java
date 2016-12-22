@@ -7,8 +7,9 @@
  *
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc -  initial implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.docker.client;
+package org.eclipse.che.plugin.openshift.client;
 
 import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.Container;
@@ -41,6 +42,10 @@ import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.che.plugin.docker.client.DockerApiVersionPathPrefixProvider;
+import org.eclipse.che.plugin.docker.client.DockerConnector;
+import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
+import org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver;
 import org.eclipse.che.plugin.docker.client.connection.DockerConnectionFactory;
 import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
