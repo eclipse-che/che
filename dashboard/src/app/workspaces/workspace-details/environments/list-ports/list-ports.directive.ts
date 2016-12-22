@@ -25,19 +25,22 @@
  * @author Oleksii Kurinnyi
  */
 export class ListPorts {
+  restrict: string = 'E';
+  templateUrl: string = 'app/workspaces/workspace-details/environments/list-ports/list-ports.html';
+
+  controller: string = 'ListPortsController';
+  controllerAs: string = 'listPortsController';
+  bindToController: boolean = true;
+
+  scope: {
+    [propName: string]: string
+  };
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
   constructor () {
-    this.restrict = 'E';
-    this.templateUrl = 'app/workspaces/workspace-details/environments/list-ports/list-ports.html';
-
-    this.controller = 'ListPortsController';
-    this.controllerAs = 'listPortsController';
-    this.bindToController = true;
-
     // scope values
     this.scope = {
       servers: '=',

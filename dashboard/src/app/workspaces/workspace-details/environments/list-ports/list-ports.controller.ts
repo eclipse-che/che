@@ -9,6 +9,11 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {IServer} from './server';
+
+interface IServerListItem extends IServer {
+  reference: string;
+}
 
 /**
  * @ngdoc controller
@@ -17,40 +22,54 @@
  * @author Oleksii Kurinnyi
  */
 export class ListPortsController {
+  $mdDialog: ng.material.IDialogService;
+  lodash: _.LoDashStatic;
+
+  isNoSelected: boolean = true;
+  isBulkChecked: boolean = false;
+  serversSelectedStatus: {
+    [serverName: string]: boolean
+  }  = {};
+  serversSelectedNumber: number = 0;
+  serversOrderBy: string = 'reference';
+  server: IServer;
+  servers: {
+    [reference: string]: IServer
+  };
+  serversList: IServerListItem[];
+
+  serversOnChange: Function;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($mdDialog, lodash) {
+  constructor($mdDialog: ng.material.IDialogService, lodash: _.LoDashStatic) {
     this.$mdDialog = $mdDialog;
     this.lodash = lodash;
-
-    this.isNoSelected = true;
-    this.isBulkChecked = false;
-    this.serversSelectedStatus = {};
-    this.serversSelectedNumber = 0;
-    this.serversOrderBy = 'name';
 
     this.buildServersList();
   }
 
-  buildServersList() {
-    this.serversList = this.lodash.map(this.servers, (server, name) => {
-      server.name = name;
-      server.protocol = server.protocol ? server.protocol : 'http';
-      return server;
+  /**
+   * Build list of servers
+   */
+  buildServersList(): void {
+    this.serversList = this.lodash.map(this.servers, (server: IServer, reference: string) => {
+      let serverItem: IServerListItem = angular.extend({}, {reference: reference}, server);
+      serverItem.protocol = serverItem.protocol ? serverItem.protocol : 'http';
+      return serverItem;
     });
   }
 
   /**
    * Update port selected status
    */
-  updateSelectedStatus() {
+  updateSelectedStatus(): void {
     this.serversSelectedNumber = 0;
     this.isBulkChecked = !!this.serversList.length;
-    this.serversList.forEach((server) => {
-      if (this.serversSelectedStatus[server.name]) {
+    this.serversList.forEach((serverListItem: IServerListItem) => {
+      if (this.serversSelectedStatus[serverListItem.reference]) {
         this.serversSelectedNumber++;
       } else {
         this.isBulkChecked = false;
@@ -58,7 +77,10 @@ export class ListPortsController {
     });
   }
 
-  changePortSelection(name) {
+  /**
+   * @param {string} name
+   */
+  changePortSelection(name: string): void {
     this.serversSelectedStatus[name] = !this.serversSelectedStatus[name];
     this.updateSelectedStatus();
   }
@@ -66,7 +88,7 @@ export class ListPortsController {
   /**
    * Change bulk selection value
    */
-  changeBulkSelection() {
+  changeBulkSelection(): void {
     if (this.isBulkChecked) {
       this.deselectAllPorts();
       this.isBulkChecked = false;
@@ -79,71 +101,57 @@ export class ListPortsController {
   /**
    * Check all ports in list
    */
-  selectAllPorts() {
+  selectAllPorts(): void {
     this.serversSelectedNumber = this.serversList.length;
-    this.serversList.forEach((server) => {
-      this.serversSelectedStatus[server.name] = true;
-    })
+    this.serversList.forEach((serverListItem: IServerListItem) => {
+      this.serversSelectedStatus[serverListItem.reference] = true;
+    });
   }
 
   /**
    * Uncheck all ports in list
    */
-  deselectAllPorts() {
+  deselectAllPorts(): void {
     this.serversSelectedStatus = {};
     this.serversSelectedNumber = 0;
   }
 
-  addPort(port, protocol) {
-    let name = this.buildServerName(port);
-    this.servers[name] = {'port': port, 'protocol': protocol};
+  /**
+   * Add new server.
+   *
+   * @param {string} reference
+   * @param {number} port
+   * @param {string} protocol
+   */
+  addServer(reference: string, port: number, protocol: string): void {
+    this.servers[reference] = {'port': port, 'protocol': protocol};
 
     this.updateSelectedStatus();
     this.serversOnChange();
     this.buildServersList();
   }
 
-  updatePort(serverName, port, protocol) {
-    delete this.servers[serverName];
-    delete this.serversSelectedStatus[serverName];
-    this.updateSelectedStatus();
+  /**
+   * Update server
+   *
+   * @param {string} oldReference
+   * @param {string} newReference
+   * @param {number} port
+   * @param {string} protocol
+   */
+  updateServer(oldReference: string, newReference: string, port: number, protocol: string): void {
+    delete this.servers[oldReference];
 
-    let newName = this.buildServerName(port);
-    this.servers[newName] = {'port': port, 'protocol': protocol};
-
-    this.serversOnChange();
-    this.buildServersList();
-  }
-
-  buildServerName(port) {
-    return port + '/tcp';
+    this.addServer(newReference, port, protocol);
   }
 
   /**
-   * Show dialog to add new port
-   * @param $event
+   * Show dialog to add new or edit existing port
+   *
+   * @param {MouseEvent} $event
+   * @param {string=} reference
    */
-  showAddDialog($event) {
-    this.$mdDialog.show({
-      targetEvent: $event,
-      controller: 'AddPortDialogController',
-      controllerAs: 'addPortDialogController',
-      bindToController: true,
-      clickOutsideToClose: true,
-      locals: {
-        servers: this.servers,
-        callbackController: this
-      },
-      templateUrl: 'app/workspaces/workspace-details/environments/list-ports/add-port-dialog/add-port-dialog.html'
-    });
-  }
-
-  /**
-   * Show dialog to edit existing port
-   * @param $event
-   * @param serverName {string}
-   */
-  showEditDialog($event, serverName) {
+  showEditDialog($event: MouseEvent, reference?: string): void {
     this.$mdDialog.show({
       targetEvent: $event,
       controller: 'EditPortDialogController',
@@ -151,7 +159,7 @@ export class ListPortsController {
       bindToController: true,
       clickOutsideToClose: true,
       locals: {
-        serverName: serverName,
+        toEdit: reference,
         servers: this.servers,
         callbackController: this
       },
@@ -162,29 +170,28 @@ export class ListPortsController {
   /**
    * Removes selected ports
    */
-  deleteSelectedPorts() {
+  deleteSelectedPorts(): void {
     this.showDeleteConfirmation(this.serversSelectedNumber).then(() => {
-      this.lodash.forEach(this.serversSelectedStatus, (server, name) => {
+      this.lodash.forEach(this.serversSelectedStatus, (server: IServer, name: string) => {
         delete this.servers[name];
       });
       this.deselectAllPorts();
       this.isBulkChecked = false;
       this.serversOnChange();
       this.buildServersList();
-    })
+    });
   }
 
   /**
    * Show confirmation popup before port to delete
-   * @param numberToDelete
-   * @returns {*}
+   * @param {number} numberToDelete
+   * @returns {angular.IPromise<any>}
    */
-  showDeleteConfirmation(numberToDelete) {
+  showDeleteConfirmation(numberToDelete: number): ng.IPromise<any> {
     let confirmTitle = 'Would you like to delete ';
     if (numberToDelete > 1) {
       confirmTitle += 'these ' + numberToDelete + ' ports?';
-    }
-    else {
+    } else {
       confirmTitle += 'this selected port?';
     }
     let confirm = this.$mdDialog.confirm()

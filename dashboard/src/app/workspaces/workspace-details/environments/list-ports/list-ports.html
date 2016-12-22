@@ -34,12 +34,18 @@
         <div flex hide-xs layout-gt-xs="row"
              layout-align="start center"
              class="che-list-item-details">
-          <che-list-header-column flex="25"
+          <che-list-header-column flex="15"
+                                  che-sort-value="listPortsController.serversOrderBy"
+                                  che-sort-item="reference"
+                                  che-column-title="Reference"></che-list-header-column>
+          <che-list-header-column flex="10"
                                   che-sort-value="listPortsController.serversOrderBy"
                                   che-sort-item="port"
                                   che-column-title="Port"></che-list-header-column>
-          <che-list-header-column flex="65"
-                                  che-column-title="Public"></che-list-header-column>
+          <che-list-header-column flex="15"
+                                  che-column-title="Protocol"></che-list-header-column>
+          <che-list-header-column flex="50"
+                                  che-column-title="Runtime URL"></che-list-header-column>
           <che-list-header-column flex="10"
                                   che-column-title="Action"></che-list-header-column>
         </div>
@@ -56,8 +62,8 @@
           <div layout="row"
                layout-align="start center"
                class="che-checkbox-area">
-            <che-list-item-checked ng-model="listPortsController.serversSelectedStatus[server.name]"
-                                   che-aria-label-checkbox="Port {{server.name}}"
+            <che-list-item-checked ng-model="listPortsController.serversSelectedStatus[server.reference]"
+                                   che-aria-label-checkbox="Port {{server.reference}}"
                                    ng-click="listPortsController.updateSelectedStatus()"></che-list-item-checked>
           </div>
           <div flex
@@ -65,16 +71,27 @@
                layout-align-gt-xs="start center"
                layout-align-xs="start start"
                class="che-list-item-details">
-            <div flex="25"
+            <div flex="15"
+                 class="che-list-item-name">
+              <span class="che-hover">{{server.reference}}</span>
+            </div>
+            <div flex="10"
                  class="che-list-item-name">
               <span class="che-hover">{{server.port}}</span>
             </div>
-            <div flex="65">
-              <span class="">YES</span>
+            <div flex="15"
+                 class="che-list-item-name">
+              <span class="che-hover">{{server.protocol}}</span>
+            </div>
+            <div flex="50"
+                 class="che-list-item-name">
+              <span class="che-hover">
+                <a href="{{server.runtimeUrl}}" target="_blank">{{server.runtimeUrl}}</a>
+              </span>
             </div>
             <div flex="10">
               <div class="che-list-actions"
-                   ng-click="listPortsController.showEditDialog($event,server.name)">
+                   ng-click="listPortsController.showEditDialog($event,server.reference)">
                 <i class="fa fa-pencil" tooltip="Edit"></i>
               </div>
             </div>
@@ -89,7 +106,7 @@
     <div flex>
       <che-button-default class="che-list-add-button"
                           che-button-title="Add" name="addButton"
-                          ng-click="listPortsController.showAddDialog($event)"></che-button-default>
+                          ng-click="listPortsController.showEditDialog($event)"></che-button-default>
     </div>
     <div flex-offset="5" ng-if="listPortsController.serversList.length > 0">
       <che-button-primary-flat ng-disabled="(listPortsController.serversSelectedNumber === 0)"

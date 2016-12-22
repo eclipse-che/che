@@ -1,16 +1,42 @@
 <md-dialog flex="50"
            class="edit-port-dialog-content">
-  <ng-form flex layout="column" name="editPortForm">
-    <che-label-container che-label-name="Name">
+  <ng-form flex layout="column"
+           name="editServerForm"
+           ng-submit="editPortDialogController.saveServer()">
+    <!-- Reference -->
+    <che-label-container che-label-name="Reference">
       <div class="edit-port-dialog-input">
-        <che-input che-form="editPortForm"
+        <che-input che-form="editServerForm"
+                   che-name="reference"
+                   che-place-holder="Server reference"
+                   ng-model="editPortDialogController.reference"
+                   type="type"
+                   aria-label="Server reference"
+                   required
+                   custom-validator="editPortDialogController.isUniqueReference($value)"
+                   ng-minlength="3"
+                   ng-maxlength="20"
+                   ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
+          <div ng-message="required">A reference is required.</div>
+          <div ng-message="pattern">The reference should not contain special characters like space, dollar, etc.
+          </div>
+          <div ng-message="minlength">The reference has to be more than 3 characters long.</div>
+          <div ng-message="maxlength">The reference has to be less than 20 characters long.</div>
+          <div ng-message="customValidator">This reference is already in use.</div>
+        </che-input>
+      </div>
+    </che-label-container>
+    <!-- Port -->
+    <che-label-container che-label-name="Port">
+      <div class="edit-port-dialog-input">
+        <che-input che-form="editServerForm"
                    che-name="port"
-                   che-place-holder="Server port number"
+                   che-place-holder="Port number"
                    ng-model="editPortDialogController.port"
                    type="number"
                    min="1024"
                    max="65535"
-                   custom-validator="editPortDialogController.isUnique($value)"
+                   custom-validator="editPortDialogController.isUniquePort($value)"
                    aria-label="Server port number"
                    required>
           <div ng-message="required">A number is required.</div>
@@ -20,12 +46,26 @@
         </che-input>
       </div>
     </che-label-container>
+    <!-- Protocol -->
+    <che-label-container che-label-name="Protocol">
+      <div class="edit-port-dialog-input">
+        <che-input che-form="editServerForm"
+                   che-name="protocol"
+                   che-place-holder="Protocol"
+                   ng-model="editPortDialogController.protocol"
+                   type="type"
+                   aria-label="Server protocol"
+                   ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
+          <div ng-message="pattern">The reference should not contain special characters like space, dollar, etc.</div>
+        </che-input>
+      </div>
+    </che-label-container>
 
     <che-label-container>
       <div layout="row">
-        <che-button-primary che-button-title="Update"
-                            ng-disabled="editPortForm.$invalid"
-                            ng-click="editPortDialogController.updatePort()"></che-button-primary>
+        <che-button-primary che-button-title="{{editPortDialogController.toEdit ? 'Update' : 'Add'}}"
+                            ng-disabled="editServerForm.$invalid"
+                            ng-click="editPortDialogController.saveServer()"></che-button-primary>
 
         <che-button-notice che-button-title="Cancel"
                            ng-click="editPortDialogController.hide()"

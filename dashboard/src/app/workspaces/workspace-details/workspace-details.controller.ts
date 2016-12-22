@@ -103,6 +103,20 @@ export class WorkspaceDetailsController {
     (this.$rootScope as any).showIDE = false;
 
     this.init();
+
+    $scope.$watch(() => { return this.getWorkspaceStatus(); }, (newStatus: string, oldStatus: string) => {
+      if (oldStatus === 'SNAPSHOTTING') {
+        // status was not changed
+        return;
+      }
+      if (newStatus === 'RUNNING' || newStatus === 'STOPPED') {
+        this.cheWorkspace.fetchWorkspaceDetails(this.workspaceId).then(() => {
+          this.workspaceDetails = this.cheWorkspace.getWorkspaceByName(this.namespace, this.workspaceName);
+          this.updateWorkspaceData();
+        });
+      }
+    });
+
   }
 
   init(): void {

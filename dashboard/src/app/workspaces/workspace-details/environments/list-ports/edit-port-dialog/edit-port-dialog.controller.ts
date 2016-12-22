@@ -9,56 +9,116 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {IServer} from '../server';
+import {ListPortsController} from '../list-ports.controller';
 
 /**
  * @ngdoc controller
  * @name list.environment.variables.controller:EditPortDialogController
- * @description This class is handling the controller for the dialog box about editing the server ports.
+ * @description This class is handling the controller for the dialog box about adding a new server or editing an existing one.
  * @author Oleksii Kurinnyi
  */
 export class EditPortDialogController {
+  $mdDialog: ng.material.IDialogService;
+  lodash: _.LoDashStatic;
+
+  toEdit: string;
+  servers: {
+    [reference: string]: IServer
+  };
+
+  usedPorts: number[];
+  usedReferences: string[];
+
+  port: number;
+  portMin: number = 1024;
+  portMax: number = 65535;
+  protocol: string;
+  reference: string;
+
+  callbackController: ListPortsController;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($mdDialog, lodash) {
+  constructor($mdDialog: ng.material.IDialogService, lodash: _.LoDashStatic) {
     this.$mdDialog = $mdDialog;
     this.lodash = lodash;
 
-    this.usedPorts = [];
-
-    this.port = parseInt(this.servers[this.serverName].port, 10);
-    this.protocol = this.servers[this.serverName].protocol;
-
-    this.fillInUsedPorts();
-  }
-
-  isUnique(port) {
-    return this.usedPorts.indexOf(port) < 0;
-  }
-
-  fillInUsedPorts() {
-    this.lodash.forEach(this.servers, (server) => {
-      let _port = parseInt(server.port, 10);
-      if (this.port !== _port) {
-        this.usedPorts.push(_port);
-      }
+    // get used ports and references
+    let serversCopy = angular.copy(this.servers);
+    if (this.toEdit && serversCopy[this.toEdit]) {
+      delete serversCopy[this.toEdit];
+    }
+    this.usedPorts = this.lodash.map(serversCopy, (server: IServer) => {
+      return  parseInt(<string>server.port, 10);
     });
+    this.usedReferences = Object.keys(serversCopy);
+
+    if (this.toEdit && this.servers[this.toEdit]) {
+      let server = this.servers[this.toEdit];
+      this.reference = this.toEdit;
+      this.protocol = server.protocol;
+      this.port = parseInt(<string>server.port, 10);
+    } else {
+      this.protocol = 'http';
+      this.port = this.getLowestFreePort();
+    }
+
   }
 
   /**
-   * It will hide the dialog box.
+   * Check if port is unique.
+   *
+   * @param {number} port port to test
+   * @returns {boolean}
    */
-  hide() {
+  isUniquePort(port: number): boolean {
+    return this.usedPorts.indexOf(port) < 0;
+  }
+
+  /**
+   * Check if reference is unique.
+   *
+   * @param {string} reference reference name to test
+   * @returns {boolean}
+   */
+  isUniqueReference(reference: string): boolean {
+    return this.usedReferences.indexOf(reference) < 0;
+  }
+
+  /**
+   * Returns the lowest free port.
+   *
+   * @returns {number}
+   */
+  getLowestFreePort(): number {
+    let port: number;
+    for (port = this.portMin; port <= this.portMax; port++) {
+      if (this.usedPorts.indexOf(port) < 0) {
+        break;
+      }
+    }
+    return port;
+  }
+
+  /**
+   * Hide the dialog box.
+   */
+  hide(): void {
     this.$mdDialog.hide();
   }
 
   /**
-   * Update port
+   * Add new server or update an existing one
    */
-  updatePort() {
-    this.callbackController.updatePort(this.serverName, this.port, this.protocol);
+  saveServer(): void {
+    if (this.toEdit) {
+      this.callbackController.updateServer(this.toEdit, this.reference, this.port, this.protocol);
+    } else {
+      this.callbackController.addServer(this.reference, this.port, this.protocol);
+    }
     this.hide();
   }
 }
