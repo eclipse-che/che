@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2012-2016 Codenvy, S.A.
+    Copyright (c) 2012-2016 Red Hat, Inc.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
     http://www.eclipse.org/legal/epl-v10.html
 
     Contributors:
-      Codenvy, S.A. - initial API and implementation
-      Red Hat, Inc -  initial implementation
+      Red Hat, Inc. - initial API and implementation
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
@@ -25,8 +24,9 @@
     <properties>
         <findbugs.failonerror>false</findbugs.failonerror>
         <io.fabric8.openshift-client.version>1.4.26</io.fabric8.openshift-client.version>
-        <license_contributor2>Red Hat, Inc -  initial implementation</license_contributor2>
-        <license_header>license-header2.txt</license_header>
+        <license_contributor>Red Hat, Inc. - initial API and implementation</license_contributor>
+        <license_copyrightOwner>Red Hat, Inc.</license_copyrightOwner>
+        <license_header>license-header.txt</license_header>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -49,10 +49,12 @@
         <dependency>
             <groupId>io.fabric8</groupId>
             <artifactId>kubernetes-client</artifactId>
+            <version>1.4.26</version>
         </dependency>
         <dependency>
             <groupId>io.fabric8</groupId>
             <artifactId>kubernetes-model</artifactId>
+            <version>1.0.63</version>
         </dependency>
         <dependency>
             <groupId>io.fabric8</groupId>
