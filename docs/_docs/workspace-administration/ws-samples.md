@@ -5,6 +5,7 @@ excerpt: "Sample code that can be used to bootstrap the content of a new project
 layout: docs
 permalink: /:categories/samples/
 ---
+{% include base.html %}
 A template is a packaged set of sample code that is launched in the workspace when a user creates a new project. Users can select from a template while using the user dashboard. Templates have both sample code and a default set of commands associated with them. Templates are filtered based upon the type of stack selected. You can add your own templates to Che.
 # Project Templates  
 Che provides stacks with project templates (code samples).  It is possible to have a single stack with a variety of different project templates, which provide sample code to get started with or wizard-driven templates.

@@ -5,6 +5,7 @@ excerpt: ""
 layout: docs
 permalink: /:categories/machines/
 ---
+{% include base.html %}
 A machine is part of an environment, which are in turn part of a Che workspace. The [workspace administration introduction](https://eclipse-che.readme.io/docs/workspace-admin-intro) explains the details of this relationship.
 
 A machine is created from a [runtime stack](doc:stacks). Che supports both single-machine environments and multi-machine environments. The Che server manages the lifecycle of environments and the machines inside, including creating snapshots of machines.  Additionally, the Che server can inject [workspace agents](doc:workspace-agents) into a machine to provide additional capabilities inside the machine.

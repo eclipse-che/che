@@ -5,6 +5,7 @@ excerpt: ""
 layout: docs
 permalink: /:categories/glossary/
 ---
+{% include base.html %}
 **Artifacts**: The packaged results of build processes executed by a command. Build artifacts are stored in your project tree, can be downloaded, or injected into other machines where they are used during process execution.
 
 **Command **: A configuration that defines a process that will execute within a machine. Commands can be used to launch builds, runs, unit tests or any process that is needed to execute against the files of a project. A command defines how a process will start and stop. Commands have scope and can be made reusable to different users depending upon where it is saved. Commands are injected into any machine controlled by Che, whether that machine is local or remote.

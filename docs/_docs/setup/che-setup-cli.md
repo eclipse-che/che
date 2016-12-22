@@ -1,9 +1,11 @@
 ---
+tags: [ "eclipse" , "che" ]
 title: CLI Reference
 excerpt: "Manage your Che installation on the command line."
 layout: docs
 permalink: /:categories/cli/
 ---
+{% include base.html %}
 The Docker image which runs Che is the Che CLI. It has various commands for running Che and also for allowing your end users to interact with their workspaces on the command line.
 
 ```

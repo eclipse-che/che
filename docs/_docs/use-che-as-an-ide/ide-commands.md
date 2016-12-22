@@ -5,6 +5,7 @@ excerpt: ""
 layout: docs
 permalink: /:categories/commands/
 ---
+{% include base.html %}
 Commands are script-like instructions that are injected into the workspace machine for execution. Commands are executed at by selecting a command from the IDE toolbar `CMD` drop down. You can add or edit commands at `Run > Edit Commands` or `CMD > Edit Commands` drop down.
 
 Commands are saved in the configuration storage of your workspace and will be part of any workspace export.

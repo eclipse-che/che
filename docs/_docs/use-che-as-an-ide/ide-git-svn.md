@@ -5,6 +5,7 @@ excerpt: ""
 layout: docs
 permalink: /:categories/git-svn/
 ---
+{% include base.html %}
 Che natively supports Git and SVN, which is installed in all pre-defined Che images. Versioning functionality is available in the IDE and in the terminal. When using the Git and SVN menu, commands are injected into the workspace runtime and all output is streamed into the consoles panels. The following sections are in reference to Che's IDE Git and SVN Menu.
 # Using Private Repositories  
 Private repositories will require a secure SSH connection, so an SSH key pair needs to be generated. SSH keys are saved in user preferences, so you need to generate the SSH key only once and it will be used in all workspaces.

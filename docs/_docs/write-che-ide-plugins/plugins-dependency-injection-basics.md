@@ -5,6 +5,7 @@ excerpt: ""
 layout: docs
 permalink: /:categories/dependency-injection-basics/
 ---
+{% include base.html %}
 In this section, we briefly introduce the usage of dependency injection in Che, on the client and on the server side. If you are already familiar with Guice and Gin, you might want to skip this part.
 
 Che uses dependency injection to wire the different components, in order to create objects as well as register and retrieve extensions. Therefore, dependency injection is technically the core mechanism of communicating with the framework and connecting custom extensions. This includes accessing framework services and objects (e.g. a file type or a [file type registry](code-editors)) and providing custom objects to the framework (e.g. a [custom wizard](project-types)).

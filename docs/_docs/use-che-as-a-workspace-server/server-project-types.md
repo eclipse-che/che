@@ -5,6 +5,7 @@ excerpt: ""
 layout: docs
 permalink: /:categories/project-types/
 ---
+{% include base.html %}
 A **Project Type** is a behavior that apples a named group of attribute definitions, pre-defined attributes, and an associated set of machine images.
 
 For example, within Che, maven is a Project Type. Each Project Type can have a different set of attributes associated with it as defined by the author of the Project Type. Project Types can have both mandatory and optional attributes. Some attributes are pre-defined and cannot be changed. Some attributes can be derived by the extension at runtime and others must be defined by the Developer User when constructing a new Project.

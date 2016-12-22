@@ -5,6 +5,7 @@ excerpt: "Building and compiling projects with commands"
 layout: docs
 permalink: /:categories/build/
 ---
+{% include base.html %}
 If your project has a built-in project type, Che will install a series of type-specific commands that provide utilities for building projects. For example, Che has a built-in `maven` project type that will install the Maven plug-in whenever one or more projects in your workspace are set with the `maven` project type.
 
 Plug-in developers can optionally provide typed commands, which will appear in the [Commands](doc:commands) editor to simplify the creation of commands to perform compiling tasks.  With Maven, this includes dependencies update, project tree view for external libraries, and maven flag interpolation.

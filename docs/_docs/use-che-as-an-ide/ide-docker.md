@@ -5,6 +5,7 @@ excerpt: "Best practices for using Docker with Che"
 layout: docs
 permalink: /:categories/docker/
 ---
+{% include base.html %}
 Eclipse Che is intimately tied to Docker. The Che server runs as a Docker container and each workspace has a set of environments which may be powered by containers.  Also, our utilities for launching Che, mounting local IDEs, running smoke tests, and compiling Che are also built in Docker.
 
 There are numerous best practices that you can follow to get the most out of Docker when using Che. Also, if your projects depend upon Docker themeslves, there are common questions about Docker in Docker or other similar tactics.

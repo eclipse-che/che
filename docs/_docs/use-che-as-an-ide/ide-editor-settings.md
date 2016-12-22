@@ -5,6 +5,7 @@ excerpt: ""
 layout: docs
 permalink: /:categories/editor-settings/
 ---
+{% include base.html %}
 Che uses [Orion](https://orionhub.org/) editor, which provides syntax coloring, code folding, typing help like braces auto pair.
 
 Editor settings can be configured at `Profile > Preferences > IDE > Editor`. Preferences include typing behaviors, key bindings, tabbing rules, language tools, whitespaces and ruler preferences.

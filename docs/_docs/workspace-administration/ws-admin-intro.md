@@ -5,6 +5,7 @@ excerpt: ""
 layout: docs
 permalink: /:categories/admin-intro/
 ---
+{% include base.html %}
 A Che workspace is composed of projects (source files) and environments (runtimes). A workspace can contain one or more environments (e.g. hack environment, populated database environment, etc...) but only one environment at a time can be running in the workspace. An environment is composed of one or more machines. The default machine in an environment is called the "dev-machine" and your projects are mounted or synchronized into that machine so that the software running in the machine can gain access to the source code.  
 ![WorksapceBasicArchitecture.png]({{ base }}/assets/imgs/WorksapceBasicArchitecture.png)
 

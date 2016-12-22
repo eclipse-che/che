@@ -5,6 +5,7 @@ excerpt: "Defines the runtimes for a workspace."
 layout: docs
 permalink: /:categories/data-model-stacks/
 ---
+{% include base.html %}
 Admins and users typically use our graphical dashboard for adding and configuring stacks within the product. However, you can also add these directly with REST or in the product using a JSON data model. 
 
 # Stack Object

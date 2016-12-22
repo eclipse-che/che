@@ -5,6 +5,7 @@ excerpt: "Part API"
 layout: docs
 permalink: /:categories/parts/
 ---
+{% include base.html %}
 Parts represent the content of the Che workbench, i.e. views and editors within the IDE. Che already provides various parts such as the project explorer, the output console, the build result view, file outline and the code editor. In this part of the tutorial, we describe how to implement a custom view and embed it into the Che IDE. Furthermore, we demonstrate how to open and hide views.
 
 ## Create a custom Part
