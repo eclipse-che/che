@@ -29,8 +29,8 @@ import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStdOutEvent
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandImpl;
-import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.machine.CommandOutputMessageUnmarshaller;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
@@ -52,7 +52,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static org.eclipse.che.ide.extension.machine.client.command.edit.EditCommandsPresenter.PREVIEW_URL_ATTR;
+import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_PREVIEW_URL_ATTRIBUTE_NAME;
 
 /**
  * Console for command output.
@@ -67,7 +67,7 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
     private final CommandImpl             command;
     private final EventBus                eventBus;
     private final Machine                 machine;
-    private final CommandManager          commandManager;
+    private final CommandExecutor         commandExecutor;
     private final AsyncRequestFactory     asyncRequestFactory;
     private final ExecAgentCommandManager execAgentCommandManager;
     private final MessageBus              messageBus;
@@ -90,7 +90,7 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
                                          DtoUnmarshallerFactory dtoUnmarshallerFactory,
                                          final MessageBusProvider messageBusProvider,
                                          MachineResources resources,
-                                         CommandManager commandManager,
+                                         CommandExecutor commandExecutor,
                                          MacroProcessor macroProcessor,
                                          EventBus eventBus,
                                          AsyncRequestFactory asyncRequestFactory,
@@ -106,11 +106,11 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
         this.command = command;
         this.machine = machine;
         this.eventBus = eventBus;
-        this.commandManager = commandManager;
+        this.commandExecutor = commandExecutor;
 
         view.setDelegate(this);
 
-        final String previewUrl = command.getAttributes().get(PREVIEW_URL_ATTR);
+        final String previewUrl = command.getAttributes().get(COMMAND_PREVIEW_URL_ATTRIBUTE_NAME);
         if (!isNullOrEmpty(previewUrl)) {
             macroProcessor.expandMacros(previewUrl).then(new Operation<String>() {
                 @Override
@@ -356,12 +356,12 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
     @Override
     public void reRunProcessButtonClicked() {
         if (isFinished()) {
-            commandManager.executeCommand(command, machine);
+            commandExecutor.executeCommand(command, machine);
         } else {
             execAgentCommandManager.killProcess(machine.getId(), pid).then(new Operation<ProcessKillResponseDto>() {
                 @Override
                 public void apply(ProcessKillResponseDto arg) throws OperationException {
-                    commandManager.executeCommand(command, machine);
+                    commandExecutor.executeCommand(command, machine);
                 }
             });
         }

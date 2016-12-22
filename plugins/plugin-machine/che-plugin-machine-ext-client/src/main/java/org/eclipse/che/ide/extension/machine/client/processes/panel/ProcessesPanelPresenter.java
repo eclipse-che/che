@@ -55,6 +55,7 @@ import org.eclipse.che.ide.api.parts.PartStackStateChangedEvent;
 import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
+import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.ssh.SshServiceClient;
 import org.eclipse.che.ide.api.workspace.event.EnvironmentOutputEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
@@ -489,8 +490,15 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
     @Override
     public void onTreeNodeSelected(final ProcessTreeNode node) {
+        setSelection(new Selection.NoSelectionProvided());
+
         if (node != null) {
             if (ProcessTreeNode.ProcessNodeType.MACHINE_NODE == node.getType()) {
+                final MachineEntity machine = getMachine(node.getId());
+                if (machine != null) {
+                    setSelection(new Selection<>(machine));
+                }
+
                 view.showProcessOutput(node.getName());
             } else {
                 view.showProcessOutput(node.getId());

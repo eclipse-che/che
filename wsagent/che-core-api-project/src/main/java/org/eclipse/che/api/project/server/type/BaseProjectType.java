@@ -12,6 +12,9 @@ package org.eclipse.che.api.project.server.type;
 
 import javax.inject.Singleton;
 
+import static org.eclipse.che.api.project.shared.Constants.COMMANDS_ATTRIBUTE_DESCRIPTION;
+import static org.eclipse.che.api.project.shared.Constants.COMMANDS_ATTRIBUTE_NAME;
+
 /**
  * @author gazarenkov
  */
@@ -22,5 +25,7 @@ public class BaseProjectType extends ProjectTypeDef {
 
     public BaseProjectType() {
         super(ID, "Blank", true, false);
+
+        addVariableDefinition(COMMANDS_ATTRIBUTE_NAME, COMMANDS_ATTRIBUTE_DESCRIPTION, false);
     }
 }

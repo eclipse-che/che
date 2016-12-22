@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2012-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:che='urn:import:org.eclipse.che.ide.ui.listbox'>
+    <ui:with field='messages' type='org.eclipse.che.ide.command.editor.EditorMessages'/>
+    <ui:style>
+        .section {
+            margin-left: 10px;
+            margin-top: 15px;
+        }
+
+        .checkbox-panel {
+            margin-left: 10px;
+        }
+
+        .table-header {
+            background-color: #2f353b;
+        }
+
+        .column-header {
+            display: inline-block;
+            width: 150px;
+            margin-left: 10px;
+        }
+    </ui:style>
+
+    <g:SimpleLayoutPanel width="500px">
+        <g:FlowPanel>
+            <g:FlowPanel addStyleNames="{style.section}">
+                <g:Label text="{messages.pageInfoNameLabel}"/>
+                <g:TextBox ui:field="commandName" width="97%"/>
+            </g:FlowPanel>
+            <g:FlowPanel addStyleNames="{style.section}">
+                <g:Label text="{messages.pageInfoGoalLabel}"/>
+                <che:CustomComboBox ui:field="goal" width="100%"/>
+            </g:FlowPanel>
+            <g:FlowPanel addStyleNames="{style.section}">
+                <g:Label text="{messages.pageInfoSectionContextLabel}"/>
+                <g:FlowPanel addStyleNames="{style.checkbox-panel}">
+                    <g:CheckBox ui:field="workspace" text="{messages.pageInfoWorkspaceLabel}"/>
+                </g:FlowPanel>
+            </g:FlowPanel>
+            <g:FlowPanel ui:field="projectsSection" addStyleNames="{style.section}">
+                <g:Label text="{messages.pageInfoSectionProjectsLabel}"/>
+                <g:FlowPanel addStyleNames="{style.table-header}">
+                    <g:Label text="{messages.pageInfoProjectsTableHeaderProjectLabel}" addStyleNames="{style.column-header}"/>
+                    <g:Label text="{messages.pageInfoProjectsTableHeaderApplicableLabel}" addStyleNames="{style.column-header}"/>
+                </g:FlowPanel>
+                <g:FlowPanel ui:field="projectsPanel"/>
+            </g:FlowPanel>
+        </g:FlowPanel>
+    </g:SimpleLayoutPanel>
+</ui:UiBinder>

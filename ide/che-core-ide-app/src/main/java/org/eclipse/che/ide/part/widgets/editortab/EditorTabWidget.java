@@ -32,8 +32,6 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.event.FileEvent.FileEventHandler;
-import org.eclipse.che.ide.api.filetypes.FileType;
-import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.parts.EditorPartStack;
 import org.eclipse.che.ide.api.parts.EditorTab;
 import org.eclipse.che.ide.api.parts.PartPresenter;
@@ -88,7 +86,6 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
 
     private final EventBus                    eventBus;
     private final EditorTabContextMenuFactory editorTabContextMenu;
-    private final FileTypeRegistry            fileTypeRegistry;
     private final String                      id;
     private final EditorPartPresenter         relatedEditorPart;
     private final EditorPartStack             relatedEditorPartStack;
@@ -103,11 +100,9 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
                            @Assisted EditorPartStack relatedEditorPartStack,
                            PartStackUIResources resources,
                            EditorTabContextMenuFactory editorTabContextMenu,
-                           final EventBus eventBus,
-                           FileTypeRegistry fileTypeRegistry) {
+                           final EventBus eventBus) {
         this.resources = resources;
         this.eventBus = eventBus;
-        this.fileTypeRegistry = fileTypeRegistry;
         this.relatedEditorPart = relatedEditorPart;
         this.relatedEditorPartStack = relatedEditorPartStack;
 
@@ -162,9 +157,9 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
         title.setText(part.getTitle());
 
         if (part instanceof EditorPartPresenter) {
-            file = ((EditorPartPresenter)part).getEditorInput().getFile();
-            FileType fileType = fileTypeRegistry.getFileTypeByFile(file);
-            icon = fileType.getImage();
+            final EditorPartPresenter editorPartPresenter = (EditorPartPresenter)part;
+            file = editorPartPresenter.getEditorInput().getFile();
+            icon = editorPartPresenter.getTitleImage();
             iconPanel.setWidget(getIcon());
         }
     }

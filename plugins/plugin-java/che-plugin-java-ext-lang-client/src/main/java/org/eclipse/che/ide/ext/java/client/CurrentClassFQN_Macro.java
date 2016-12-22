@@ -58,7 +58,7 @@ public class CurrentClassFQN_Macro implements Macro {
     public Promise<String> expand() {
         final Resource[] resources = appContext.getResources();
 
-        if (resources == null || resources.length > 1) {
+        if (resources == null || resources.length != 1) {
             return Promises.resolve("");
         }
 

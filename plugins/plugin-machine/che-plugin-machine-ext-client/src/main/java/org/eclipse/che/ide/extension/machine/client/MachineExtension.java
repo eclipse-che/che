@@ -35,11 +35,8 @@ import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.extension.machine.client.actions.CreateMachineAction;
 import org.eclipse.che.ide.extension.machine.client.actions.CreateSnapshotAction;
 import org.eclipse.che.ide.extension.machine.client.actions.DestroyMachineAction;
-import org.eclipse.che.ide.extension.machine.client.actions.EditCommandsAction;
-import org.eclipse.che.ide.extension.machine.client.actions.ExecuteSelectedCommandAction;
 import org.eclipse.che.ide.extension.machine.client.actions.RestartMachineAction;
 import org.eclipse.che.ide.extension.machine.client.actions.RunCommandAction;
-import org.eclipse.che.ide.extension.machine.client.actions.SelectCommandComboBox;
 import org.eclipse.che.ide.extension.machine.client.actions.SwitchPerspectiveAction;
 import org.eclipse.che.ide.extension.machine.client.command.macros.ServerPortProvider;
 import org.eclipse.che.ide.extension.machine.client.machine.MachineStatusHandler;
@@ -50,9 +47,6 @@ import org.eclipse.che.ide.extension.machine.client.processes.actions.StopProces
 import org.eclipse.che.ide.extension.machine.client.targets.EditTargetsAction;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
 
-import javax.inject.Named;
-
-import static org.eclipse.che.ide.api.action.IdeActions.GROUP_CENTER_TOOLBAR;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_CONSOLES_TREE_CONTEXT_MENU;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_MAIN_MENU;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RIGHT_TOOLBAR;
@@ -71,23 +65,7 @@ import static org.eclipse.che.ide.api.constraints.Constraints.FIRST;
 @Extension(title = "Machine", version = "1.0.0")
 public class MachineExtension {
 
-    public static final String GROUP_MACHINE_TOOLBAR   = "MachineGroupToolbar";
-    public static final String GROUP_COMMANDS_DROPDOWN = "CommandsSelector";
-    public static final String GROUP_COMMANDS_LIST     = "CommandsListGroup";
-    public static final String GROUP_MACHINES_DROPDOWN = "MachinesSelector";
-    public static final String GROUP_MACHINES_LIST     = "MachinesListGroup";
-
-    private final PerspectiveManager        perspectiveManager;
-
-    /**
-     * Controls central toolbar action group visibility. Use for example next snippet:
-     * <code>
-     *     bindConstant().annotatedWith(Names.named("machine.extension.central.toolbar.visibility")).to(false);
-     * </code>
-     * to define a constant. If no constant defined than default value is used - <code>true</code>.
-     */
-    @Inject(optional = true)
-    @Named("central.toolbar.visibility") boolean centralToolbarVisible = true;
+    private final PerspectiveManager perspectiveManager;
 
     @Inject
     public MachineExtension(final MachineResources machineResources,
@@ -162,9 +140,6 @@ public class MachineExtension {
     private void prepareActions(MachineLocalizationConstant localizationConstant,
                                 ActionManager actionManager,
                                 KeyBindingAgent keyBinding,
-                                ExecuteSelectedCommandAction executeSelectedCommandAction,
-                                SelectCommandComboBox selectCommandAction,
-                                EditCommandsAction editCommandsAction,
                                 CreateMachineAction createMachine,
                                 RestartMachineAction restartMachine,
                                 DestroyMachineAction destroyMachineAction,
@@ -184,11 +159,6 @@ public class MachineExtension {
         final DefaultActionGroup workspaceMenu = (DefaultActionGroup)actionManager.getAction(GROUP_WORKSPACE);
         final DefaultActionGroup runMenu = (DefaultActionGroup)actionManager.getAction(GROUP_RUN);
 
-        // register actions
-        actionManager.registerAction("editCommands", editCommandsAction);
-        actionManager.registerAction("selectCommandAction", selectCommandAction);
-        actionManager.registerAction("executeSelectedCommand", executeSelectedCommandAction);
-
         actionManager.registerAction("editTargets", editTargetsAction);
 
         //add actions in machine menu
@@ -206,7 +176,6 @@ public class MachineExtension {
         // add actions in main menu
         runMenu.add(newTerminalAction, FIRST);
         runMenu.addSeparator();
-        runMenu.add(editCommandsAction);
         runMenu.add(editTargetsAction);
 
         workspaceMenu.add(stopWorkspaceAction);
@@ -217,32 +186,9 @@ public class MachineExtension {
         machineMenu.add(destroyMachineAction);
         machineMenu.add(createSnapshotAction);
 
-        if (centralToolbarVisible) {
-            // add actions on center part of toolbar
-            final DefaultActionGroup centerToolbarGroup = (DefaultActionGroup)actionManager.getAction(GROUP_CENTER_TOOLBAR);
-            final DefaultActionGroup machineToolbarGroup = new DefaultActionGroup(GROUP_MACHINE_TOOLBAR, false, actionManager);
-            actionManager.registerAction(GROUP_MACHINE_TOOLBAR, machineToolbarGroup);
-            centerToolbarGroup.add(machineToolbarGroup, FIRST);
-            machineToolbarGroup.add(selectCommandAction);
-            final DefaultActionGroup executeToolbarGroup = new DefaultActionGroup(actionManager);
-            executeToolbarGroup.add(executeSelectedCommandAction);
-            machineToolbarGroup.add(executeToolbarGroup);
-        }
-
         // add actions on right part of toolbar
         final DefaultActionGroup rightToolbarGroup = (DefaultActionGroup)actionManager.getAction(GROUP_RIGHT_TOOLBAR);
         rightToolbarGroup.add(switchPerspectiveAction);
-
-        // add group for list of machines
-        final DefaultActionGroup machinesList = new DefaultActionGroup(GROUP_MACHINES_DROPDOWN, true, actionManager);
-        actionManager.registerAction(GROUP_MACHINES_LIST, machinesList);
-        machinesList.add(editTargetsAction, FIRST);
-
-        // add group for list of commands
-        final DefaultActionGroup commandList = new DefaultActionGroup(GROUP_COMMANDS_DROPDOWN, true, actionManager);
-        actionManager.registerAction(GROUP_COMMANDS_LIST, commandList);
-        commandList.add(editCommandsAction, FIRST);
-
 
         // Consoles tree context menu group
         DefaultActionGroup consolesTreeContextMenu = (DefaultActionGroup)actionManager.getAction(GROUP_CONSOLES_TREE_CONTEXT_MENU);
@@ -250,7 +196,6 @@ public class MachineExtension {
         consolesTreeContextMenu.add(reRunProcessAction);
         consolesTreeContextMenu.add(stopProcessAction);
         consolesTreeContextMenu.add(closeConsoleAction);
-
 
         // Define hot-keys
         keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode(KeyCodeMap.F12).build(), "newTerminal");

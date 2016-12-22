@@ -12,7 +12,7 @@ package org.eclipse.che.ide.api.command;
 
 import org.eclipse.che.api.core.model.machine.Command;
 
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -23,38 +23,30 @@ import java.util.Objects;
  */
 public class CommandImpl implements Command {
 
-    private final String              type;
+    private final String              typeId;
     private       String              name;
     private       String              commandLine;
     private       Map<String, String> attributes;
 
-    /**
-     * Creates new command of the specified type with the given name and command line.
-     *
-     * @param name
-     *         command name
-     * @param commandLine
-     *         command line
-     * @param type
-     *         type of the command
-     */
-    public CommandImpl(String name, String commandLine, String type) {
-        this(name, commandLine, type, Collections.<String, String>emptyMap());
+    /** Creates new {@link CommandImpl} based on the provided data. */
+    public CommandImpl(String name, String commandLine, String typeId) {
+        this(name, commandLine, typeId, new HashMap<String, String>());
     }
 
-    public CommandImpl(String name, String commandLine, String type, Map<String, String> attributes) {
-        this.name = name;
-        this.commandLine = commandLine;
-        this.type = type;
-        this.attributes = attributes;
-    }
-
-    /** Creates copy of the given {@link Command}. */
+    /** Creates copy of the given {@code command}. */
     public CommandImpl(Command command) {
         this(command.getName(),
              command.getCommandLine(),
              command.getType(),
-             command.getAttributes());
+             new HashMap<>(command.getAttributes()));
+    }
+
+    /** Creates new {@link CommandImpl} based on the provided data. */
+    public CommandImpl(String name, String commandLine, String typeId, Map<String, String> attributes) {
+        this.name = name;
+        this.commandLine = commandLine;
+        this.typeId = typeId;
+        this.attributes = attributes;
     }
 
     @Override
@@ -77,7 +69,7 @@ public class CommandImpl implements Command {
 
     @Override
     public String getType() {
-        return type;
+        return typeId;
     }
 
     @Override
@@ -102,13 +94,13 @@ public class CommandImpl implements Command {
         CommandImpl other = (CommandImpl)o;
 
         return Objects.equals(getName(), other.getName())
-               && Objects.equals(type, other.type)
+               && Objects.equals(typeId, other.typeId)
                && Objects.equals(commandLine, other.commandLine)
                && Objects.equals(getAttributes(), other.getAttributes());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, type, commandLine, getAttributes());
+        return Objects.hash(name, typeId, commandLine, getAttributes());
     }
 }

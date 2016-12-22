@@ -37,5 +37,8 @@ public class StyleInjector {
         resources.defaultCategoriesListCss().ensureInjected();
         resources.Css().ensureInjected();
         resources.menuCss().ensureInjected();
+
+        resources.commandsExplorerCss().ensureInjected();
+        resources.commandsPaletteCss().ensureInjected();
     }
 }

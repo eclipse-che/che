@@ -38,7 +38,6 @@ import org.eclipse.che.ide.api.icon.Icon;
 import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
-import org.eclipse.che.ide.extension.machine.client.command.edit.EditCommandResources;
 import org.eclipse.che.ide.ui.Tooltip;
 import org.eclipse.che.ide.ui.list.CategoriesList;
 import org.eclipse.che.ide.ui.list.Category;
@@ -69,9 +68,9 @@ public class TargetsViewImpl extends Window implements TargetsView {
     interface TargetsViewImplUiBinder extends UiBinder<Widget, TargetsViewImpl> {
     }
 
-    private EditCommandResources commandResources;
-    private MachineResources     machineResources;
-    private IconRegistry         iconRegistry;
+    private TargetsResources commandResources;
+    private MachineResources machineResources;
+    private IconRegistry     iconRegistry;
 
     private ActionDelegate delegate;
 
@@ -96,7 +95,7 @@ public class TargetsViewImpl extends Window implements TargetsView {
                            MachineLocalizationConstant machineLocale,
                            MachineResources machineResources,
                            CoreLocalizationConstant coreLocale,
-                           EditCommandResources commandResources,
+                           TargetsResources commandResources,
                            IconRegistry iconRegistry,
                            TargetsViewImplUiBinder uiBinder) {
         this.machineLocale = machineLocale;

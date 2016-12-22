@@ -63,6 +63,8 @@ import org.eclipse.che.ide.api.icon.Icon;
 import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.keybinding.KeyBuilder;
+import org.eclipse.che.ide.command.editor.CommandEditorProvider;
+import org.eclipse.che.ide.command.palette.ShowCommandPaletteAction;
 import org.eclipse.che.ide.connection.WsConnectionListener;
 import org.eclipse.che.ide.imageviewer.ImageViewerProvider;
 import org.eclipse.che.ide.macro.ServerHostNameMacro;
@@ -289,6 +291,9 @@ public class StandardComponentInitializer {
     private CloseActiveEditorAction closeActiveEditorAction;
 
     @Inject
+    private ShowCommandPaletteAction showCommandPaletteAction;
+
+    @Inject
     private MessageLoaderResources messageLoaderResources;
 
     @Inject
@@ -361,6 +366,13 @@ public class StandardComponentInitializer {
     private FileType jpgFile;
 
     @Inject
+    private CommandEditorProvider commandEditorProvider;
+
+    @Inject
+    @Named("CommandFileType")
+    private FileType commandFileType;
+
+    @Inject
     private WsConnectionListener wsConnectionListener;
 
     @Inject
@@ -423,6 +435,9 @@ public class StandardComponentInitializer {
 
         fileTypeRegistry.registerFileType(jpgFile);
         editorRegistry.registerDefaultEditor(jpgFile, imageViewerProvider);
+
+        fileTypeRegistry.registerFileType(commandFileType);
+        editorRegistry.registerDefaultEditor(commandFileType, commandEditorProvider);
 
         // Workspace (New Menu)
         DefaultActionGroup workspaceGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_WORKSPACE);
@@ -655,6 +670,10 @@ public class StandardComponentInitializer {
         actionManager.registerAction("noOpAction", new NoOpAction());
         actionManager.registerAction("signatureHelp", signatureHelpAction);
 
+        actionManager.registerAction("showCommandsPalette", showCommandPaletteAction);
+        DefaultActionGroup runGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_RUN);
+        runGroup.add(showCommandPaletteAction);
+
         DefaultActionGroup editorContextMenuGroup = new DefaultActionGroup(actionManager);
         actionManager.registerAction(IdeActions.GROUP_EDITOR_CONTEXT_MENU, editorContextMenuGroup);
 
@@ -681,6 +700,7 @@ public class StandardComponentInitializer {
         keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('e').build(), "openRecentFiles");
         keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('s').build(), "noOpAction");
         keyBinding.getGlobal().addKey(new KeyBuilder().charCode(KeyCodeMap.DELETE).build(), "deleteItem");
+        keyBinding.getGlobal().addKey(new KeyBuilder().shift().charCode(KeyCodeMap.F10).build(), "showCommandsPalette");
 
         keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode('N').build(), "newFile");
         keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode('x').build(), "createProject");
