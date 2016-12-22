@@ -86,6 +86,7 @@ func init() {
 		"/bin/bash",
 		"shell interpreter and command to execute on slave side of the pty",
 	)
+	process.ShellInterpreter = term.Cmd
 
 	// workspace master server configuration
 	flag.StringVar(

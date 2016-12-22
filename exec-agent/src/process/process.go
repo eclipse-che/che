@@ -22,7 +22,6 @@ import (
 	"time"
 
 	"github.com/eclipse/che/exec-agent/rpc"
-	"github.com/eclipse/che/exec-agent/term"
 )
 
 const (
@@ -35,13 +34,16 @@ const (
 
 	StdoutKind = "STDOUT"
 	StderrKind = "STDERR"
+
+	DefaultShellInterpreter = "/bin/bash"
 )
 
 var (
-	prevPid   uint64 = 0
-	processes        = &processesMap{items: make(map[uint64]*MachineProcess)}
-	logsDist         = NewLogsDistributor()
-	LogsDir   string
+	prevPid   		uint64 = 0
+	processes        	= &processesMap{items: make(map[uint64]*MachineProcess)}
+	logsDist         	= NewLogsDistributor()
+	LogsDir   		string
+	ShellInterpreter   	string = DefaultShellInterpreter
 )
 
 type Command struct {
@@ -139,7 +141,7 @@ type processesMap struct {
 
 func Start(process MachineProcess) (MachineProcess, error) {
 	// wrap command to be able to kill child processes see https://github.com/golang/go/issues/8854
-	cmd := exec.Command("setsid", term.Cmd, "-c", process.CommandLine)
+	cmd := exec.Command("setsid", ShellInterpreter, "-c", process.CommandLine)
 
 	// getting stdout pipe
 	stdout, err := cmd.StdoutPipe()

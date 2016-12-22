@@ -12,7 +12,6 @@
 package process_test
 
 import (
-	"github.com/eclipse/che/exec-agent/term"
 	"github.com/eclipse/che/exec-agent/process"
 	"github.com/eclipse/che/exec-agent/rpc"
 	"os"
@@ -23,7 +22,6 @@ import (
 
 const (
 	testCmd = "printf \"1\n2\n3\n4\n5\n6\n7\n8\n9\n10\""
-	termCmd = "/bin/bash"
 )
 
 func TestOneLineOutput(t *testing.T) {
@@ -199,7 +197,6 @@ func TestReadProcessLogs(t *testing.T) {
 }
 
 func startAndWaitTestProcess(cmd string, t *testing.T) process.MachineProcess {
-	term.Cmd = termCmd
 	process.LogsDir = TmpFile()
 	events := make(chan *rpc.Event)
 	done := make(chan bool)
