@@ -206,23 +206,38 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
 
         if (state == State.MINIMIZED) {
             state = State.NORMAL;
+
+            if (currentSize < MIN_PART_SIZE) {
+                currentSize = DEFAULT_PART_SIZE;
+            }
+
             workBenchPartController.setSize(currentSize);
+            workBenchPartController.setMinSize(MIN_PART_SIZE);
             workBenchPartController.setHidden(false);
 
-            // Notify the part stack state has been changed.
-            Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-                @Override
-                public void execute() {
-                    eventBus.fireEvent(new PartStackStateChangedEvent(PartStackPresenter.this));
-                }
-            });
         } else if (state == State.COLLAPSED) {
             // Collapsed state means the other part stack is maximized.
             // Ask the delegate to restore part stacks.
             if (delegate != null) {
                 delegate.onRestore(this);
             }
+
+        } else if (state == State.NORMAL) {
+            if (workBenchPartController.getSize() < MIN_PART_SIZE) {
+                workBenchPartController.setMinSize(MIN_PART_SIZE);
+                workBenchPartController.setSize(DEFAULT_PART_SIZE);
+            }
+
+            workBenchPartController.setHidden(false);
         }
+
+        // Notify the part stack state has been changed.
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                eventBus.fireEvent(new PartStackStateChangedEvent(PartStackPresenter.this));
+            }
+        });
 
         selectActiveTab(tab);
     }
@@ -403,8 +418,17 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
         // Restore and update the stack.
         State prevState = state;
         state = State.NORMAL;
-        workBenchPartController.setSize(currentSize);
-        workBenchPartController.setHidden(false);
+
+        if (!parts.isEmpty()) {
+
+            if (currentSize < MIN_PART_SIZE) {
+                currentSize = DEFAULT_PART_SIZE;
+            }
+
+            workBenchPartController.setSize(currentSize);
+            workBenchPartController.setMinSize(MIN_PART_SIZE);
+            workBenchPartController.setHidden(false);
+        }
 
         // Ask the delegate to restore part stacks if this part stack was maximized.
         if (prevState == State.MAXIMIZED) {
