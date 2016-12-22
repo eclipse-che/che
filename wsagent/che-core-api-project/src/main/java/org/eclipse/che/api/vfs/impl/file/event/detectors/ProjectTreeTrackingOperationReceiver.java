@@ -15,7 +15,7 @@ import org.eclipse.che.api.core.jsonrpc.RequestTransmitter;
 import org.eclipse.che.api.project.shared.dto.event.ProjectTreeStateUpdateDto;
 import org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto;
 import org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto.Type;
-import org.eclipse.che.api.vfs.ng.FileWatcherManager;
+import org.eclipse.che.api.vfs.watcher.FileWatcherManager;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -23,15 +23,13 @@ import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toSet;
 import static org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType.CREATED;
 import static org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType.DELETED;
-import static org.eclipse.che.api.vfs.ng.FileWatcherManager.EMPTY_CONSUMER;
+import static org.eclipse.che.api.vfs.watcher.FileWatcherManager.EMPTY_CONSUMER;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.slf4j.LoggerFactory.getLogger;
 

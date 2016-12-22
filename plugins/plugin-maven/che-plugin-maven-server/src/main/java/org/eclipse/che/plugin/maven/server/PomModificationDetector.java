@@ -14,13 +14,13 @@ import com.google.inject.Inject;
 
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.project.shared.dto.event.PomModifiedEventDto;
-import org.eclipse.che.api.vfs.ng.FileWatcherManager;
+import org.eclipse.che.api.vfs.watcher.FileWatcherManager;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import static java.nio.file.Files.isDirectory;
-import static org.eclipse.che.api.vfs.ng.FileWatcherManager.EMPTY_CONSUMER;
+import static org.eclipse.che.api.vfs.watcher.FileWatcherManager.EMPTY_CONSUMER;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 public class PomModificationDetector {

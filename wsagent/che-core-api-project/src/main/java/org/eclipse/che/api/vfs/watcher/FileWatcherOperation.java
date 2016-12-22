@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.vfs.ng;
+package org.eclipse.che.api.vfs.watcher;
 
 import java.nio.file.WatchEvent;
 import java.util.Optional;

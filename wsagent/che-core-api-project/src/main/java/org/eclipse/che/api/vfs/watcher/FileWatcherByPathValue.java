@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.vfs.ng;
+package org.eclipse.che.api.vfs.watcher;
 
 import com.google.inject.Inject;
 
@@ -34,7 +34,7 @@ public class FileWatcherByPathValue {
         this.service = service;
     }
 
-    public int watch(Path path, Consumer<String> create, Consumer<String> modify, Consumer<String> delete) {
+    int watch(Path path, Consumer<String> create, Consumer<String> modify, Consumer<String> delete) {
         LOG.debug("Watching path '{}'", path);
         service.register(isDirectory(path) ? path : path.getParent());
         int operationId = handler.register(path, create, modify, delete);
@@ -42,7 +42,7 @@ public class FileWatcherByPathValue {
         return operationId;
     }
 
-    public void unwatch(int operationId) {
+    void unwatch(int operationId) {
         LOG.debug("Unregisterng an operation set with id '{}'", operationId);
         Path dir = handler.unRegister(operationId);
         LOG.debug("Unwatching path '{}'");

@@ -17,7 +17,7 @@ import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto;
 import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto.Type;
 import org.eclipse.che.api.vfs.Path;
 import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
-import org.eclipse.che.api.vfs.ng.FileWatcherManager;
+import org.eclipse.che.api.vfs.watcher.FileWatcherManager;
 import org.slf4j.Logger;
 
 import javax.annotation.PostConstruct;
@@ -31,7 +31,7 @@ import static java.nio.file.Files.isDirectory;
 import static java.util.regex.Pattern.compile;
 import static org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto.Type.BRANCH;
 import static org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto.Type.REVISION;
-import static org.eclipse.che.api.vfs.ng.FileWatcherManager.EMPTY_CONSUMER;
+import static org.eclipse.che.api.vfs.watcher.FileWatcherManager.EMPTY_CONSUMER;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -59,10 +59,7 @@ public class GitCheckoutDetector {
 
     @PostConstruct
     public void startWatcher() {
-        id = manager.registerByMatcher(getMatcher(),
-                                       getModifyOperation(),
-                                       getModifyOperation(),
-                                       EMPTY_CONSUMER);
+        id = manager.registerByMatcher(getMatcher(), getOperation(), getOperation(), EMPTY_CONSUMER);
     }
 
     @PreDestroy
@@ -77,7 +74,7 @@ public class GitCheckoutDetector {
                      GIT_DIR.equals(it.getParent().getFileName().toString());
     }
 
-    private Consumer<String> getModifyOperation() {
+    private Consumer<String> getOperation() {
         return it -> {
             try {
                 String content = vfsProvider.getVirtualFileSystem()
