@@ -84,7 +84,7 @@ func init() {
 		&term.Cmd,
 		"cmd",
 		"/bin/bash",
-		"command to execute on slave side of the pty",
+		"shell interpreter and command to execute on slave side of the pty",
 	)
 
 	// workspace master server configuration
