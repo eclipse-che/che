@@ -5,6 +5,7 @@ excerpt: ""
 layout: tutorials
 permalink: /:categories/multi-machine/
 ---
+{% include base.html %}
 A multi-machine recipe allows multiple runtimes to communicate/share data. In this tutorial we will be looking at an existing Java and MySQL application called Pet Clinic. The tutorial will help show how to create a multi-machine from an existing [runtime stack](doc:stacks) called "Java-MySQL", execute commands on different target runtimes, startup the Pet Clinic Tomcat server, view/interact with the Pet Clinic web page, and take a closer look at the "Java-MySQL" [runtime stack](doc:stacks) /[runtime recipe](doc:recipes) to get a better understanding of how multi-machine runtimes are created.
 
 # 1. Start Che  

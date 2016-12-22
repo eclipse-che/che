@@ -5,6 +5,7 @@ excerpt: ""
 layout: tutorials
 permalink: /:categories/platformio/
 ---
+{% include base.html %}
 This example uses the EmonTX connected to a RaspberryPi3 with the PlatformIO remote agent and Eclipse Che's PlatformIO stack.
 ![d11893a8-a2e5-11e6-9252-830ab42c4f0e.jpg]({{ base }}/assets/imgs/d11893a8-a2e5-11e6-9252-830ab42c4f0e.jpg)
 1. Connect the EmonTX to USB to RS232 TTL Converter Adapter Module and then connect that to the RaspberryPi3

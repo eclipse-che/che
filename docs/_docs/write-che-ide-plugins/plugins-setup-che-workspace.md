@@ -5,6 +5,7 @@ excerpt: ""
 layout: docs
 permalink: /:categories/setup-che-workspace/
 ---
+{% include base.html %}
 This page explains how to setup a developer workspace for Che using various IDEs. This includes checking out the sources. If you want to build an extension for Che, you should also follow these instructions.
 
 Setting up your environment consist of three steps, (1) Getting the source code, (2), setting up your IDE for development, (3) and configuring the maven build.

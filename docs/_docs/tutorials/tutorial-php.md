@@ -5,6 +5,7 @@ excerpt: ""
 layout: tutorials
 permalink: /:categories/php/
 ---
+{% include base.html %}
 # 1. Create a PHP Project  
 Start Che, create a PHP project using a sample app:
 ![php.png]({{ base }}/assets/imgs/php.png)

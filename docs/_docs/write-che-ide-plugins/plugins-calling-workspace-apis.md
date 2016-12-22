@@ -5,6 +5,7 @@ excerpt: ""
 layout: docs
 permalink: /:categories/calling-workspace-apis/
 ---
+{% include base.html %}
 Many of the IDE components that you build into your extension will need to communicate directly with the Che server or to the workspace the IDE is currently bound to. Che provides helper utilities to make REST calls simpler. Che's REST library is built on top of Google's HTTP Java client libraries.
 
 In your extension code, you can create an AsyncRequestFactory object, which has helper methods for creating requests that will have responses.

@@ -5,6 +5,7 @@ excerpt: "How to install the OpenShift Plug-in."
 layout: openshift
 permalink: /:categories/config/
 ---
+{% include base.html %}
 # Download  
 ### Binaries
 [Get packaged zip file](http://maven.codenvycorp.com/content/repositories/codenvy-public-snapshots/org/eclipse/che/openshift-plugin-assembly-main/)

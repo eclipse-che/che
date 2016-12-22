@@ -5,6 +5,7 @@ excerpt: ""
 layout: artik
 permalink: /:categories/start-mac/
 ---
+{% include base.html %}
 The Samsung ARTIK IDE is based upon Eclipse Che and runs on Windows, Mac or Linux.
 
 Mac and Linux users follow the instructions below.

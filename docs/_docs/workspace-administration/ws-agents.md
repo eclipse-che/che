@@ -5,6 +5,7 @@ excerpt: ""
 layout: docs
 permalink: /:categories/agents/
 ---
+{% include base.html %}
 Agents are scripts that are executed after a [runtime machines](https://eclipse-che.readme.io/docs/machines) is created. They add additional capabilities to the machines they're injected in - for example to allow terminal access or enhanced language services. Agents allow these services to be injected into machines built from stock Dockerfiles or Compose files.
 # Adding Agents to a Machine  
 Agents are added to [machines](https://eclipse-che.readme.io/docs/machines) through [runtime stack](https://eclipse-che.readme.io/docs/stacks) configuration. Eclipse Che's included stacks have been pre-configured to use certain agents. The agents needed for each pre-defined stack is determined by common tasks or file types found in [projects](https://eclipse-che.readme.io/docs/projects).

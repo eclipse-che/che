@@ -5,3 +5,4 @@ excerpt: ""
 layout: artik
 permalink: /:categories/wireless-setup/
 ---
+{% include base.html %}

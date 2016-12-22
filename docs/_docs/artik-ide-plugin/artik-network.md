@@ -5,6 +5,7 @@ excerpt: "Setting up networking for the ARTIK IDE."
 layout: artik
 permalink: /:categories/network/
 ---
+{% include base.html %}
 The ARTIK IDE makes connections between three entities: the browser, the Che server (which runs the ARTIK IDE) running in a Docker container, and a workspace running in a Docker container.
 
 If you distribute these components onto different nodes, hosts or IP addresses, then you may need to add additional configuration parameters to bridge different networks.

@@ -5,6 +5,7 @@ excerpt: ""
 layout: docs
 permalink: /:categories/project-setup/
 ---
+{% include base.html %}
 The first step in configuring a Che workspace from your directory is to create a Chefile. The purpose of the Chefile is to:
 1. Mark the root directory that contains the source code to be mounted into your workspace. This directory will be used to create a single project in the workspace running in the Che server. The project will be mounted into `/projects` in the workspace. Many of the configuration options in Chedir are relative to this root directory.
 
