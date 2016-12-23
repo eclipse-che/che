@@ -54,10 +54,14 @@ public class CommandTypeChooser implements CommandTypeChooserView.ActionDelegate
     }
 
     /**
-     * Pops up a machine chooser dialog.
+     * Pops up a command type chooser dialog at the position relative to the browser's client area.
      *
+     * @param left
+     *         the left position, in pixels
+     * @param top
+     *         the top position, in pixels
      * @return promise that will be resolved with a chosen {@link CommandType}
-     * or rejected in case machine selection has been cancelled
+     * or rejected in case command type selection has been cancelled
      */
     public Promise<CommandType> show(int left, int top) {
         final List<CommandType> commandTypes = commandTypeRegistry.getCommandTypes();

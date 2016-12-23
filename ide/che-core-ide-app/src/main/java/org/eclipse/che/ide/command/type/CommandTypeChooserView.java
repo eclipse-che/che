@@ -23,7 +23,14 @@ import java.util.List;
  */
 public interface CommandTypeChooserView extends View<CommandTypeChooserView.ActionDelegate> {
 
-    /** Show the view. */
+    /**
+     * Show the view at the position relative to the browser's client area.
+     *
+     * @param left
+     *         the left position, in pixels
+     * @param top
+     *         the top position, in pixels
+     */
     void show(int left, int top);
 
     /** Close the view. */
