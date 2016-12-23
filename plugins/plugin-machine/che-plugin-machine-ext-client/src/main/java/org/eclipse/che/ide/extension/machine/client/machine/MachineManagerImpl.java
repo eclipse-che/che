@@ -23,13 +23,11 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.machine.MachineManager;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.machine.events.MachineStateEvent;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
-import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.dto.DtoFactory;
 
 import static org.eclipse.che.ide.api.machine.events.MachineStateEvent.MachineAction.DESTROYED;
@@ -152,11 +150,6 @@ public class MachineManagerImpl implements MachineManager {
             @Override
             public void apply(Void arg) throws OperationException {
                 eventBus.fireEvent(new MachineStateEvent(machineState, DESTROYED));
-
-                final DevMachine devMachine = appContext.getDevMachine();
-                if (devMachine != null && machineState.getId().equals(devMachine.getId()) && appContext instanceof AppContextImpl) {
-                    ((AppContextImpl)appContext).setDevMachine(null);
-                }
             }
         });
     }

@@ -34,7 +34,9 @@ import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.editor.JavaCodeAssistClient;
 import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
 import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
+import org.eclipse.che.ide.ext.java.shared.dto.Change;
 import org.eclipse.che.ide.ext.java.shared.dto.ConflictImportDTO;
+import org.eclipse.che.ide.ext.java.shared.dto.OrganizeImportResult;
 import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.ArrayList;
@@ -110,13 +112,13 @@ public class OrganizeImportsPresenter implements OrganizeImportsView.ActionDeleg
 
             eventBus.fireEvent(newFileTrackingSuspendEvent());
             javaCodeAssistClient.organizeImports(project.get().getLocation().toString(), fqn)
-                                .then(new Operation<List<ConflictImportDTO>>() {
+                                .then(new Operation<OrganizeImportResult>() {
                                     @Override
-                                    public void apply(List<ConflictImportDTO> choices) throws OperationException {
-                                        if (!choices.isEmpty()) {
-                                            show(choices);
+                                    public void apply(OrganizeImportResult result) throws OperationException {
+                                        if (result.getConflicts() != null && !result.getConflicts().isEmpty()) {
+                                            show(result.getConflicts());
                                         } else {
-                                            applyChanges(file);
+                                            applyChanges(document, result.getChanges());
                                         }
                                         eventBus.fireEvent(newFileTrackingResumeEvent());
                                     }
@@ -166,10 +168,10 @@ public class OrganizeImportsPresenter implements OrganizeImportsView.ActionDeleg
             final Optional<Project> project = ((Resource)file).getRelatedProject();
 
             javaCodeAssistClient.applyChosenImports(project.get().getLocation().toString(), JavaUtil.resolveFQN(file), result)
-                                .then(new Operation<Void>() {
+                                .then(new Operation<List<Change>>() {
                                     @Override
-                                    public void apply(Void arg) throws OperationException {
-                                        applyChanges(file);
+                                    public void apply(List<Change> result)  throws OperationException {
+                                        applyChanges(((TextEditor) editor).getDocument(), result);
                                         view.hide();
                                         ((TextEditor)editor).setFocus();
                                     }
@@ -214,10 +216,12 @@ public class OrganizeImportsPresenter implements OrganizeImportsView.ActionDeleg
     /**
      * Update content of the file.
      *
-     * @param file
-     *         current file
+     * @param document
+     *         current document
+     * @param changes
+     *
      */
-    private void applyChanges(VirtualFile file) {
+    private void applyChanges(Document document, List<Change> changes) {
         HandlesUndoRedo undoRedo = null;
         if (editor instanceof UndoableEditor) {
             undoRedo = ((UndoableEditor)editor).getUndoRedo();
@@ -226,24 +230,15 @@ public class OrganizeImportsPresenter implements OrganizeImportsView.ActionDeleg
             if (undoRedo != null) {
                 undoRedo.beginCompoundChange();
             }
-            replaceContent(file, document);
+            for (Change change : changes) {
+                document.replace(change.getOffset(), change.getLength(), change.getText());
+            }
         } catch (final Exception e) {
             Log.error(getClass(), e);
         } finally {
             if (undoRedo != null) {
                 undoRedo.endCompoundChange();
             }
-        }
-    }
-
-    private void replaceContent(VirtualFile file, final Document document) {
-        if (file instanceof File) {
-            file.getContent().then(new Operation<String>() {
-                @Override
-                public void apply(String content) throws OperationException {
-                    document.replace(0, document.getContents().length(), content);
-                }
-            });
         }
     }
 

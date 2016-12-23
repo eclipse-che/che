@@ -42,7 +42,7 @@ export class ArgumentProcessor {
                 asciiFormParameters.withEntry("    <" + metadataArgument.fieldName + ">", metadataArgument.description);
             });
         }
-        Log.getLogger().log("multiline:info", asciiFormParameters.toAscii());
+        Log.getLogger().log("multiline:direct", asciiFormParameters.toAscii());
     }
 
     static help(object : any) : void {

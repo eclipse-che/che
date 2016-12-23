@@ -20,7 +20,6 @@ import elemental.html.SpanElement;
 import com.google.inject.Inject;
 
 import org.eclipse.che.api.core.model.machine.MachineConfig;
-import org.eclipse.che.api.core.model.machine.MachineRuntimeInfo;
 import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
@@ -36,7 +35,6 @@ import org.vectomatic.dom.svg.ui.SVGResource;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter.SSH_PORT;
 import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
 import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
 
@@ -218,6 +216,10 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
 
         Element nameElement = Elements.createSpanElement(resources.getCss().nameLabel());
         nameElement.setTextContent(machineConfig.getName());
+        Tooltip.create(nameElement,
+                       BOTTOM,
+                       MIDDLE,
+                       machineConfig.getName());
         root.appendChild(nameElement);
 
         return root;
@@ -246,6 +248,10 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
 
         Element nameElement = Elements.createSpanElement();
         nameElement.setTextContent(node.getName());
+        Tooltip.create(nameElement,
+                       BOTTOM,
+                       MIDDLE,
+                       node.getName());
         root.appendChild(nameElement);
 
         Element spanElement = Elements.createSpanElement();
@@ -273,6 +279,10 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
 
         Element nameElement = Elements.createSpanElement();
         nameElement.setTextContent(node.getName());
+        Tooltip.create(nameElement,
+                       BOTTOM,
+                       MIDDLE,
+                       node.getName());
         root.appendChild(nameElement);
 
         Element spanElement = Elements.createSpanElement();

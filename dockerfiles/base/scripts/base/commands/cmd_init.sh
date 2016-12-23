@@ -56,11 +56,11 @@ cmd_init() {
       info ""
       info "init" "Do you accept the ${CHE_FORMAL_PRODUCT_NAME} license? (${CHE_LICENSE_URL})"
       text "\n"
-      read -p "      I accept the license: [Y/n] " -n 1 -r
-      text "\n"
+      read -p "      I accept the license: [Y/n] " -r || { error "Shell is not in interactive mode. Add -i flag to the docker run command"; return 2; }
       if [[ $REPLY =~ ^[Nn]$ ]]; then
         return 2;
       fi
+      text "\n"
     fi
   fi
 
@@ -115,6 +115,10 @@ cmd_init() {
 }
 
 cmd_init_reinit_pre_action() {
+  
+  # One time only, set the value of CHE_HOST within the environment file.
+  sed -i'.bak' "s|#${CHE_PRODUCT_NAME}_HOST=.*|${CHE_PRODUCT_NAME}_HOST=${CHE_HOST}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
+
   # For testing purposes only
   #HTTP_PROXY=8.8.8.8
   #HTTPS_PROXY=http://4.4.4.4:9090
@@ -130,8 +134,8 @@ cmd_init_reinit_pre_action() {
   fi
   if [[ ! ${HTTP_PROXY} = "" ]] ||
      [[ ! ${HTTPS_PROXY} = "" ]]; then
-    sed -i'.bak' "s|#${CHE_PRODUCT_NAME}_NO_PROXY=.*|${CHE_PRODUCT_NAME}_NO_PROXY=127.0.0.1,localhost,${NO_PROXY},${CHE_HOST}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
-    sed -i'.bak' "s|#${CHE_PRODUCT_NAME}_WORKSPACE_NO__PROXY=.*|${CHE_PRODUCT_NAME}_WORKSPACE_NO__PROXY=127.0.0.1,localhost,${NO_PROXY},${CHE_HOST}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
+    sed -i'.bak' "s|#${CHE_PRODUCT_NAME}_NO_PROXY=.*|${CHE_PRODUCT_NAME}_NO_PROXY=${NO_PROXY},${CHE_HOST}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
+    sed -i'.bak' "s|#${CHE_PRODUCT_NAME}_WORKSPACE_NO__PROXY=.*|${CHE_PRODUCT_NAME}_WORKSPACE_NO__PROXY=che-host,${NO_PROXY},${CHE_HOST}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
   fi
 }
 

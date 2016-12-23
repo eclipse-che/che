@@ -1,0 +1,16 @@
+<div class="docs-nav-mobile unit whole show-on-mobiles">
+  <select onchange="if (this.value) window.location.href=this.value">
+    <option value="">Navigate the docs…</option>
+    
+    {% if page.layout == 'tutorials' %} 
+    {% assign layout_docs = site.data.tutorials %}
+    {% else %}
+    {% assign layout_docs = site.data.docs %}
+    {% endif %}
+    {% for section in layout_docs %}
+    <optgroup label="{{ section.title }}">
+      {% include docs_option.html items=section.docs %}
+    </optgroup>
+    {% endfor %}
+  </select>
+</div>

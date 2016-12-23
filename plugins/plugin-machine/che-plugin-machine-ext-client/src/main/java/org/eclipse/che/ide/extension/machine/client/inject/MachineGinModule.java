@@ -38,7 +38,7 @@ import org.eclipse.che.ide.extension.machine.client.command.macros.DevMachineHos
 import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.TerminalFactory;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.WidgetsFactory;
-import org.eclipse.che.ide.extension.machine.client.machine.MachineEntityImpl;
+import org.eclipse.che.ide.extension.machine.client.machine.MachineItem;
 import org.eclipse.che.ide.extension.machine.client.machine.MachineManagerImpl;
 import org.eclipse.che.ide.extension.machine.client.machine.create.CreateMachineView;
 import org.eclipse.che.ide.extension.machine.client.machine.create.CreateMachineViewImpl;
@@ -116,7 +116,7 @@ public class MachineGinModule extends AbstractGinModule {
                                              .implement(EditorButtonWidget.class, EditorButtonWidgetImpl.class)
                                              .build(WidgetsFactory.class));
         install(new GinFactoryModuleBuilder().implement(Tab.class, TabImpl.class)
-                                             .implement(MachineEntity.class, MachineEntityImpl.class)
+                                             .implement(MachineEntity.class, MachineItem.class)
                                              .build(EntityFactory.class));
         install(new GinFactoryModuleBuilder().build(TerminalFactory.class));
 

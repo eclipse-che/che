@@ -9,7 +9,7 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
-import {ListCommandsController} from "../list-commands.controller";
+import {ListCommandsController} from '../list-commands.controller';
 
 /**
  * @ngdoc controller
@@ -44,7 +44,7 @@ export class EditCommandDialogController {
     }
 
     this.usedCommandsName = [];
-    this.commands.forEach((command) => {
+    this.commands.forEach((command: any) => {
       if (isAddMode || this.name !== command.name) {
         this.usedCommandsName.push(command.name);
       }

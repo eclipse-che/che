@@ -183,7 +183,7 @@ export class CheDir {
   }
 
   run() : Promise<string> {
-    Log.context = ProductName.getDisplayName() + '(dir)';
+    Log.context = '(' + ProductName.getMiniDisplayName() + ' dir)';
 
     // call the method analyzed from the argument
     return this.parseArgument().then((methodName) => {

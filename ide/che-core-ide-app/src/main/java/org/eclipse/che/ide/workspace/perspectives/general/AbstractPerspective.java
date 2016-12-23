@@ -37,7 +37,6 @@ import org.eclipse.che.ide.workspace.WorkBenchPartController;
 import org.eclipse.che.providers.DynaProvider;
 
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,6 +57,12 @@ import static org.eclipse.che.ide.api.parts.PartStackView.TabPosition.RIGHT;
 public abstract class AbstractPerspective implements Presenter, Perspective,
         ActivePartChangedHandler, MaximizePartEvent.Handler,
         PerspectiveView.ActionDelegate, PartStack.ActionDelegate {
+
+    /** The default size for the part. */
+    private static final double DEFAULT_PART_SIZE = 260;
+
+    /** The minimum allowable size for the part. */
+    private static final int MIN_PART_SIZE = 100;
 
     protected final Map<PartStackType, PartStack> partStacks;
     protected final PerspectiveViewImpl           view;
@@ -279,14 +284,9 @@ public abstract class AbstractPerspective implements Presenter, Perspective,
         PartStack destPartStack = partStacks.get(type);
 
         List<String> rules = part.getRules();
-
-        if (rules.isEmpty() && !destPartStack.containsPart(part)) {
+        if (rules.isEmpty() || rules.contains(perspectiveId)) {
             destPartStack.addPart(part, constraint);
             return;
-        }
-
-        if (rules.contains(perspectiveId)) {
-            destPartStack.addPart(part, constraint);
         }
     }
 
@@ -344,23 +344,19 @@ public abstract class AbstractPerspective implements Presenter, Perspective,
     public void loadState(@NotNull JsonObject state) {
         if (state.hasKey("PART_STACKS")) {
             JsonObject part_stacks = state.getObject("PART_STACKS");
-            List<PartPresenter> activeParts = new ArrayList<>();
             for (String partStackType : part_stacks.keys()) {
                 JsonObject partStack = part_stacks.getObject(partStackType);
                 switch (PartStackType.valueOf(partStackType)) {
                     case INFORMATION:
-                        restorePartController(partStacks.get(INFORMATION), belowPartController, partStack, activeParts);
+                        restorePartController(partStacks.get(INFORMATION), belowPartController, partStack);
                         break;
                     case NAVIGATION:
-                        restorePartController(partStacks.get(NAVIGATION), leftPartController, partStack, activeParts);
+                        restorePartController(partStacks.get(NAVIGATION), leftPartController, partStack);
                         break;
                     case TOOLING:
-                        restorePartController(partStacks.get(TOOLING), rightPartController, partStack, activeParts);
+                        restorePartController(partStacks.get(TOOLING), rightPartController, partStack);
                         break;
                 }
-            }
-            for (PartPresenter part : activeParts) {
-                setActivePart(part);
             }
         }
 
@@ -373,20 +369,9 @@ public abstract class AbstractPerspective implements Presenter, Perspective,
         }
     }
 
-    private void restorePartController(PartStack stack, WorkBenchPartController controller, JsonObject partStack,
-                                         List<PartPresenter> activeParts) {
-        double size = 0;
-        if (partStack.hasKey("SIZE")) {
-            size = partStack.getNumber("SIZE");
-            controller.setSize(size);
-        }
-
-        if (partStack.hasKey("HIDDEN")) {
-            controller.setHidden(partStack.getBoolean("HIDDEN"));
-        }
-
-        if (partStack.hasKey("PARTS")) {
-            JsonArray parts = partStack.get("PARTS");
+    private void restorePartController(PartStack partStack, WorkBenchPartController controller, JsonObject partStackJSON) {
+        if (partStackJSON.hasKey("PARTS")) {
+            JsonArray parts = partStackJSON.get("PARTS");
             for (int i = 0; i < parts.length(); i++) {
                 JsonObject value = parts.get(i);
                 if (value.hasKey("CLASS")) {
@@ -394,25 +379,34 @@ public abstract class AbstractPerspective implements Presenter, Perspective,
                     Provider<PartPresenter> provider = dynaProvider.getProvider(className);
                     if (provider != null) {
                         PartPresenter partPresenter = provider.get();
-                        if (!stack.containsPart(partPresenter)) {
-                            stack.addPart(partPresenter);
+                        if (!partStack.containsPart(partPresenter)) {
+                            partStack.addPart(partPresenter);
                         }
                     }
                 }
             }
         }
 
-        //hide part stack if we cannot restore opened parts
-        if (stack.getParts().isEmpty()) {
+        //hide part stack if it has no parts
+        if (partStack.getParts().isEmpty()) {
             controller.setHidden(true);
+            return;
         }
 
-        if (partStack.hasKey("ACTIVE_PART")) {
-            String className = partStack.getString("ACTIVE_PART");
-            Provider<PartPresenter> provider = dynaProvider.getProvider(className);
-            if (provider != null) {
-                activeParts.add(provider.get());
+        if (partStackJSON.hasKey("HIDDEN") && partStackJSON.getBoolean("HIDDEN")) {
+            partStack.minimize();
+            return;
+        }
+
+        if (partStackJSON.hasKey("SIZE")) {
+            double size = partStackJSON.getNumber("SIZE");
+
+            // Size of the part must not be less 100 pixels.
+            if (size < MIN_PART_SIZE) {
+                size = DEFAULT_PART_SIZE;
             }
+
+            controller.setSize(size);
         }
     }
 

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server.stack;
 
-import com.google.common.io.Resources;
 import com.jayway.restassured.response.Response;
 
 import org.eclipse.che.api.core.ConflictException;
@@ -29,6 +28,7 @@ import org.eclipse.che.api.workspace.server.stack.image.StackIcon;
 import org.eclipse.che.api.workspace.shared.dto.stack.StackComponentDto;
 import org.eclipse.che.api.workspace.shared.dto.stack.StackDto;
 import org.eclipse.che.api.workspace.shared.dto.stack.StackSourceDto;
+import org.eclipse.che.api.workspace.shared.stack.Stack;
 import org.eclipse.che.api.workspace.shared.stack.StackComponent;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.SubjectImpl;
@@ -46,7 +46,6 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import javax.ws.rs.core.UriInfo;
-import java.io.File;
 import java.lang.reflect.Field;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -105,6 +104,11 @@ public class StackServiceTest {
     private static final String ENVIRONMENT_NAME = "default";
 
     private static final String ICON_MEDIA_TYPE = "image/svg+xml";
+
+    private static final String SVG_ICON = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
+                                           "<svg viewBox=\"0 0 200 200\" xmlns=\"http://www.w3.org/2000/svg\">\n" +
+                                           "  <circle cx=\"100\" cy=\"100\" r=\"100\" fill=\"red\"/>\n" +
+                                           "</svg>";
 
     @SuppressWarnings("unused")
     static final EnvironmentFilter  FILTER = new EnvironmentFilter();
@@ -499,31 +503,23 @@ public class StackServiceTest {
 
     @Test
     public void stackIconShouldBeUploadedForUserOwner() throws NotFoundException, ConflictException, ServerException, URISyntaxException {
-        File file = new File(Resources.getResource("stack_img").getPath(), "type-java.svg");
-
         when(stackDao.getById(stackImpl.getId())).thenReturn(stackImpl);
 
-        Response response = given().auth()
-                                   .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                   .when()
-                                   .multiPart("type-java.svg", file, "image/svg+xml")
-                                   .contentType(MULTIPART_FORM_DATA)
-                                   .post(SECURE_PATH + "/stack/" + stackImpl.getId() + "/icon");
-
-        assertEquals(response.getStatusCode(), 200);
-        verify(stackDao).getById(stackImpl.getId());
-        verify(stackDao).update(any());
+        checkUploadIcon(stackImpl);
     }
 
     @Test
     public void foreignStackIconShouldBeUploadedForUser() throws NotFoundException, ConflictException, ServerException {
-        File file = new File(Resources.getResource("stack_img").getPath(), "type-java.svg");
         when(stackDao.getById(foreignStack.getId())).thenReturn(foreignStack);
 
+        checkUploadIcon(foreignStack);
+    }
+
+    private void checkUploadIcon(Stack stack) throws NotFoundException, ServerException, ConflictException {
         Response response = given().auth()
                                    .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
                                    .when()
-                                   .multiPart("type-java.svg", file, "image/svg+xml")
+                                   .multiPart("type-java.svg", SVG_ICON, "image/svg+xml")
                                    .contentType(MULTIPART_FORM_DATA)
                                    .post(SECURE_PATH + "/stack/" + stackImpl.getId() + "/icon");
 

@@ -17,6 +17,7 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.DevMachine;
+import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.jsonrpc.JsonRpcInitializer;
@@ -62,17 +63,30 @@ public class JsonRpcWebSocketAgentEventListener implements WsAgentStateHandler {
 
     private void internalInitialize() {
         DevMachine devMachine = appContext.getDevMachine();
+        String devMachineId = devMachine.getId();
         String wsAgentWebSocketUrl = devMachine.getWsAgentWebSocketUrl();
 
         String wsAgentUrl = wsAgentWebSocketUrl.replaceFirst("(api)(/)(ws)", "websocket" + "$2" + ENDPOINT_ID);
+        String execAgentUrl = devMachine.getExecAgentUrl();
 
         initializer.initialize("ws-agent", singletonMap("url", wsAgentUrl));
+        initializer.initialize(devMachineId, singletonMap("url", execAgentUrl));
+
+        for(MachineEntity machineEntity : appContext.getActiveRuntime().getMachines()) {
+            if (!machineEntity.isDev()) {
+                initializer.initialize(machineEntity.getId(), singletonMap("url", machineEntity.getExecAgentUrl()));
+            }
+        }
     }
 
     @Override
     public void onWsAgentStopped(WsAgentStateEvent event) {
+        DevMachine devMachine = appContext.getDevMachine();
+        String devMachineId = devMachine.getId();
+
         Log.debug(JsonRpcWebSocketAgentEventListener.class, "Web socket agent stopped event caught.");
 
         initializer.terminate("ws-agent");
+        initializer.terminate(devMachineId);
     }
 }

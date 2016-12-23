@@ -121,12 +121,31 @@ docker_run() {
       DOCKER_HOST="/var/run/docker.sock"
   fi
 
+  echo "" > /tmp/docker_run_vars
+  # Add environment variables for CHE
+  while IFS='=' read -r -d '' key value; do
+    if [[ ${key} == "CHE_"* ]]; then
+      echo ${key}=${value} >> /tmp/docker_run_vars
+    fi
+  done < <(env -0)
+
+  # Add scripts global variables for CHE
+  while read key; do
+    if [[ ${key} == "CHE_"* ]]; then
+      local ENV_VAL="${!key}"
+      echo ${key}=${ENV_VAL} >> /tmp/docker_run_vars
+    fi
+  done < <(compgen -v)
+
+
   if [ -S "$DOCKER_HOST" ]; then
-    docker run --rm -v $DOCKER_HOST:$DOCKER_HOST \
+    docker run --rm --env-file /tmp/docker_run_vars \
+                    -v $DOCKER_HOST:$DOCKER_HOST \
                     -v $HOME:$HOME \
                     -w "$(pwd)" "$@"
   else
-    docker run --rm -e DOCKER_HOST -e DOCKER_TLS_VERIFY -e DOCKER_CERT_PATH \
+    docker run --rm --env-file /tmp/docker_run_vars \
+                    -e DOCKER_HOST -e DOCKER_TLS_VERIFY -e DOCKER_CERT_PATH \
                     -v $HOME:$HOME \
                     -w "$(pwd)" "$@"
   fi
@@ -171,6 +190,12 @@ check_docker() {
     return 1;
   fi
 
+  CHECK_VERSION=$(docker ps 2>&1 || true)
+  if [[ "$CHECK_VERSION" = *"Error response from daemon: client is newer"* ]]; then
+    error "Error - Docker engine 1.11+ required."
+    return 2;
+  fi
+
   # If DOCKER_HOST is not set, then it should bind mounted
   if [ -z "${DOCKER_HOST+x}" ]; then
     if ! docker ps > /dev/null 2>&1; then
@@ -187,17 +212,6 @@ check_docker() {
       info "   Start with 'docker run -it --rm -e DOCKER_HOST=<daemon-location> ...'"
       return 2;
     fi
-  fi
-
-  DOCKER_VERSION=($(docker version |  grep  "Version:" | sed 's/Version://'))
-  MAJOR_VERSION_ID=$(echo ${DOCKER_VERSION[0]:0:1})
-  MINOR_VERSION_ID=$(echo ${DOCKER_VERSION[0]:2:2})
-
-  # Docker needs to be greater than or equal to 1.11
-  if [[ ${MAJOR_VERSION_ID} -lt 1 ]] ||
-     [[ ${MINOR_VERSION_ID} -lt 10 ]]; then
-       error "Error - Docker engine 1.10+ required."
-       return 2;
   fi
 
   # Detect version so that we can provide better error warnings
@@ -251,21 +265,14 @@ check_docker_networking() {
   export no_proxy=$NO_PROXY
 }
 
-check_tty() {
+check_interactive() {
   # Detect and verify that the CLI container was started with -it option.
-  if [[ ! -t 1 ]]; then
-    info "Welcome to ${CHE_FORMAL_PRODUCT_NAME}!"
-    info ""
-    info "We did not detect a valid TTY."
-    info ""
-    info "TTY Syntax:"
-    info "    Add '-it' to your 'docker run' command."
-    return 2
+  if [ ! -t 1 ]; then
+    warning "Did not detect TTY - interactive mode disabled"
   fi
 }
 
 check_mounts() {
-
   DATA_MOUNT=$(get_container_folder ":${CHE_CONTAINER_ROOT}")
   INSTANCE_MOUNT=$(get_container_folder ":${CHE_CONTAINER_ROOT}/instance")
   BACKUP_MOUNT=$(get_container_folder ":${CHE_CONTAINER_ROOT}/backup")

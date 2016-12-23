@@ -76,6 +76,8 @@ export class CreateProjectController {
   readyToGoStack: any;
   stackLibraryUser: any;
   isCustomStack: boolean;
+  isHandleClose: boolean;
+  connectionClosed: Function;
 
   workspaceResourceForm: ng.IFormController;
   workspaceInformationForm: ng.IFormController;
@@ -228,6 +230,21 @@ export class CreateProjectController {
     cheAPI.cheWorkspace.getWorkspaces();
 
     $rootScope.showIDE = false;
+
+    this.isHandleClose = true;
+    this.connectionClosed = () => {
+      if (!this.isHandleClose) {
+        return;
+      }
+
+      this.$mdDialog.show(
+        this.$mdDialog.alert()
+          .title('Connection error')
+          .content('Unable to track the workspace status due to connection closed error. Please, try again or restart the page.')
+          .ariaLabel('Workspace start')
+          .ok('OK')
+      );
+    }
   }
 
   /**
@@ -509,7 +526,10 @@ export class CreateProjectController {
       });
     }
 
+
+
     let startWorkspacePromise = this.cheAPI.getWorkspace().startWorkspace(workspace.id, workspace.config.defaultEnv);
+    bus.onClose(this.connectionClosed);
     startWorkspacePromise.then(() => {
       // update list of workspaces
       // for new workspace to show in recent workspaces
@@ -570,7 +590,7 @@ export class CreateProjectController {
       promise = deferred.promise;
       deferred.resolve(true);
 
-    } else if (projectData.source.location.length > 0) {
+    } else {
 
       // if it's a user-defined location we need to cleanup commands that may have been configured by templates
       if (this.selectSourceOption === 'select-source-existing') {
@@ -808,6 +828,7 @@ export class CreateProjectController {
    * Cleanup the websocket elements after actions are finished
    */
   cleanupChannels(websocketStream: any, workspaceBus: any, bus: any, channel: any): void {
+    this.isHandleClose = false;
     if (websocketStream != null) {
       websocketStream.close();
     }
@@ -879,6 +900,7 @@ export class CreateProjectController {
     websocketStream.onOpen(() => {
       let bus = this.cheAPI.getWebsocket().getExistingBus(websocketStream);
       this.createProjectInWorkspace(workspaceId, projectName, projectData, bus, websocketStream, workspaceBus);
+      bus.onClose(this.connectionClosed);
     });
 
     // on error, retry to connect or after a delay, abort
@@ -1495,4 +1517,5 @@ export class CreateProjectController {
     let environmentManager = this.cheEnvironmentRegistry.getEnvironmentManager(recipeType);
     workspace.environments[workspace.defaultEnv] = environmentManager.getEnvironment(environment, this.getStackMachines(environment));
   }
+
 }

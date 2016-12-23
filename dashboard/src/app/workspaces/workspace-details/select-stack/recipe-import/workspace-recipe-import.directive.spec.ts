@@ -36,7 +36,9 @@ describe('WorkspaceRecipeImport', () => {
     $compile = _$compile_;
 
     httpBackend = cheHttpBackend.getHttpBackend();
+    // avoid tracking requests from branding controller
     httpBackend.whenGET(/.*/).respond(200, '');
+    httpBackend.when('OPTIONS', '/api/').respond({});
 
     $rootScope.model = {
       recipeUrl: '',
