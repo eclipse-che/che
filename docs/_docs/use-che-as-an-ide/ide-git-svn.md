@@ -5,7 +5,7 @@ excerpt: ""
 layout: docs
 permalink: /:categories/git-svn/
 ---
-{{ site.product_formal_name }} natively supports Git and SVN, which is installed in all pre-defined stacks. Versioning functionality is available in the IDE and in the terminal. When using the Git and SVN menu, commands are injected into the workspace runtime and all output is streamed into the consoles panels. The following sections are in reference to {{site.product_mini_name_capitalized}}'s IDE Git and SVN Menu.
+{{ site.product_formal_name }} natively supports Git and SVN, which is installed in all pre-defined stacks. Versioning functionality is available in the IDE and in the terminal. When using the Git and SVN menu, commands are injected into the workspace runtime and all output is streamed into the consoles panels. The following sections are in reference to {{site.product_mini_name}}'s IDE Git and SVN Menu.
 
 # Using Private Repositories  
 Private repositories will require a secure SSH connection, so an SSH key pair needs to be generated. SSH keys are saved in user preferences, so you need to generate the SSH key only once and it will be used in all workspaces.
@@ -34,7 +34,7 @@ To add the associated public key to a repository/account  using **github.com** c
 
 ![Clipboard6.jpg]({{ base }}/assets/imgs/Clipboard6.jpg)
 ### GitLab Example
-To add the associated public key to a git repository/account  using **gitlab.com** click your user icon(top right) then `Profile Settings > SSH Keys`. Give a title to your liking and paste the public key copied from {{ site.product_mini_name_capitalized }} into form.
+To add the associated public key to a git repository/account  using **gitlab.com** click your user icon(top right) then `Profile Settings > SSH Keys`. Give a title to your liking and paste the public key copied from {{ site.product_mini_name }} into form.
 ![GitLabSSH.jpg]({{ base }}/assets/imgs/GitLabSSH.jpg)
 
 ## Import Project from Repository Using SSH
@@ -46,7 +46,7 @@ Be sure to use the ssh url like `git@<git url>:<account>/<project>.git` when imp
 
 # Git Using oAuth  
 ## GitLab oAuth
-Currently it's not possible for {{ site.product_mini_name_capitalized }} to use oAuth integration with GitLab. Although GitLab supports oAuth for clone operations, pushes are not supported. You can track [this GitLab issue](https://gitlab.com/gitlab-org/gitlab-ce/issues/18106) in their issue management system.
+Currently it's not possible for {{ site.product_mini_name }} to use oAuth integration with GitLab. Although GitLab supports oAuth for clone operations, pushes are not supported. You can track [this GitLab issue](https://gitlab.com/gitlab-org/gitlab-ce/issues/18106) in their issue management system.
 
 ## GitHub oAuth
 ### Setup oAuth at GitHub

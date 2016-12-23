@@ -37,7 +37,7 @@ fi
 ```
 
 # Macros  
-{{ site.product_mini_name_capitalized }} provides macros that can be used within a command or preview URL to reference workspace objects.
+{{ site.product_mini_name }} provides macros that can be used within a command or preview URL to reference workspace objects.
 
 | Macro   | Details   
 | --- | ---

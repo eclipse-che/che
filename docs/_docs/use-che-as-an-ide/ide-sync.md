@@ -33,7 +33,7 @@ To synchronize your IDE you'll use the [{{ site.product_formal_name }} CLI]({{ba
 ```shell  
 mkdir sync
 cd sync
-{{ site.product_mini_name }} mount <ws-name> (or {{ site.product_mini_name }} mount <ws-id>)
+{{ site.product_mini_cli }} mount <ws-name> (or {{ site.product_mini_cli }} mount <ws-id>)
 
 # Options
 --url <url>           # Che or Codenvy host where workspaces are running

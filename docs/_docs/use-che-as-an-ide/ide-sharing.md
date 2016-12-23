@@ -7,11 +7,11 @@ permalink: /:categories/sharing/
 ---
 {{ site.product_formal_name }} helps teams collaborate in reproducible workspace environments. Team members can contribute to a project using the same environment (on any OS), knowing that all behaviors will match on every developer's machine.
 # Sharing Workspaces  
-## Setting Up {{ site.product_mini_name_capitalized }} as a Shared Server
+## Setting Up {{ site.product_mini_name }} as a Shared Server
 An {{ site.product_formal_name }} server can be setup to run on an external port using the environment variable  `CHE_HOST_IP` when starting the Che server. Once the Che server is running, team members can use this remote IP to connect to the same Che server.
 
 ## Export Workspaces from Separate Servers
-If team members are all using their own {{ site.product_mini_name_capitalized }} servers, they can share their workspace environment with other team members manually. Exporting a workspace can be done after a workspace has been created from the Workspaces page in the dashboard:
+If team members are all using their own {{ site.product_mini_name }} servers, they can share their workspace environment with other team members manually. Exporting a workspace can be done after a workspace has been created from the Workspaces page in the dashboard:
 ![che-sharing2.jpg]({{ base }}/assets/imgs/che-sharing2.jpg)
 There are two exporting options available there, **Export to File** and **Export to Cloud** under Settings tab:
 ![che-sharing3.jpg]({{ base }}/assets/imgs/che-sharing3.jpg)
@@ -20,17 +20,17 @@ Finally, it's possible to take a snapshot of a running workspace, export it to a
 ### Export to File
 In the user dashboard's workspace detail view for a specific workspace:
 1. Click the "Export As A File" button to bring up the Export Workspace window. A custom recipe for the workspace will be shown. It includes environment and project information for the workspace.
-2. Click "Download" or "Copy to Clipboard" to get a copy of the workspace JSON which can be imported into another {{ site.product_mini_name_capitalized }} instance.
+2. Click "Download" or "Copy to Clipboard" to get a copy of the workspace JSON which can be imported into another {{ site.product_mini_name }} instance.
 
-To import the JSON in another {{ site.product_mini_name_capitalized }} instance:
-1. Ensure that the two instances are running the same {{ site.product_mini_name_capitalized }} version.
+To import the JSON in another {{ site.product_mini_name }} instance:
+1. Ensure that the two instances are running the same {{ site.product_mini_name }} version.
 2. In the user dashboard select "Workspaces" from the left navigation bar.
 3. Click "Add Workspace".
 4. Under "Select Source" choose "Import an existing workspace configuration".
 5. Paste the JSON in the text editing area.
 ![che-sharing4.jpg]({{ base }}/assets/imgs/che-sharing4.jpg)
 ### Export to Cloud
-Export to Cloud pushes the {{ site.product_mini_name_capitalized }} workspace to a network-reachable Che or Codenvy system. This is tested with the hosted Che system at https://codenvy.io/.
+Export to Cloud pushes the {{ site.product_mini_name }} workspace to a network-reachable Che or Codenvy system. This is tested with the hosted Che system at https://codenvy.io/.
 
 In the user dashboard's workspace detail view for a specific workspace:
 1. Click the "Export To Private Cloud" button to bring up the Export Workspace window.

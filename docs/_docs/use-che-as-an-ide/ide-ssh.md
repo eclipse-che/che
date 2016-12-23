@@ -41,16 +41,16 @@ If you have the {{ site.product_mini_name }} CLI installed, you can SSH into any
 ```shell  
 # Connect to the machine in a workspace that is designated as the dev machine.
 # Each workspace always has one machine that is a dev machine with a dev agent on it.
-{{ site.product_mini_name }} ssh <ws-name>
-{{ site.product_mini_name }} ssh <ws-id>
+{{ site.product_mini_cli }} ssh <ws-name>
+{{ site.product_mini_cli }} ssh <ws-id>
 
 # If in Codenvy, you can optionally append a user namespace to a workspace name.
 # For example, <namespace:ws-name> such as "florent:first-workspace".
 
 # Connect to a secondary machine in the workspace if you started multiple machines
 # using Docker compose.
-{{ site.product_mini_name }} ssh <ws-name> [machine-name]
-{{ site.product_mini_name }} ssh <ws-id> [machine-name]
+{{ site.product_mini_cli }} ssh <ws-name> [machine-name]
+{{ site.product_mini_cli }} ssh <ws-id> [machine-name]
 
 # Options
 --url <url>           # Che or Codenvy host where workspaces are running
@@ -64,8 +64,8 @@ The same is true for the machines - if there is a single machine, it will choose
 ### SSH With Containers
 We provide a utiltiy `eclipse/che-action` which performs various actions against a {{ site.product_mini_name }} server. One of the actions is to SSH. In Eclipse Che, this utility auto-discovers the right key to use by querying the Che server. In Codenvy, you will need to provide the key or authenticate in advance.
 ```shell  
-che action workspace-ssh <ws-name>
-che action workspace-ssh <ws-id>
+{{ site.product_mini_cli }} action workspace-ssh <ws-name>
+{{ site.product_mini_cli }} action workspace-ssh <ws-id>
 
 [-s,--url]=<value>      Defines the url of Che or Codenvy to connect to
 [-u,--user]=<value>     Defines the Codenvy user name to authenticate with
@@ -74,8 +74,8 @@ che action workspace-ssh <ws-id>
 ### SSH With Native Tools
 If you want to use your native SSH tools to connect to a workspace, you can get the connectivity information that you need to use with one of our utilities. You can then pass this information into `ssh` or `putty` to make a direct connection.
 ```text  
-$ {{ site.product_mini_name }} action get-ssh-data <ws-name>
-$ {{ site.product_mini_name }} action get-ssh-data <ws-id>
+$ {{ site.product_mini_cli }} action get-ssh-data <ws-name>
+$ {{ site.product_mini_cli }} action get-ssh-data <ws-id>
 SSH_IP=192.168.65.2
 SSH_PORT=32900
 SSH_USER=user

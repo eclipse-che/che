@@ -5,7 +5,7 @@ excerpt: "Building and compiling projects with commands"
 layout: docs
 permalink: /:categories/build/
 ---
-If your project has a built-in project type, {{ site.product_mini_name_capitalized }} will install a series of type-specific commands that provide utilities for building projects. For example, {{ site.product_mini_name_capitalized }} has a built-in `maven` project type that will install the Maven plug-in whenever one or more projects in your workspace are set with the `maven` project type.
+If your project has a built-in project type, {{ site.product_mini_name }} will install a series of type-specific commands that provide utilities for building projects. For example, {{ site.product_mini_name }} has a built-in `maven` project type that will install the Maven plug-in whenever one or more projects in your workspace are set with the `maven` project type.
 
 Plug-in developers can optionally provide typed commands, which will appear in the [Commands]({{base}}/docs/ide/commands/index.html) editor to simplify the creation of commands to perform compiling tasks.  With Maven, this includes dependencies update, project tree view for external libraries, and maven flag interpolation.
 
@@ -30,7 +30,7 @@ mvn -f ${current.project.path} clean install
 # execute Maven command with an argument as an absolute path
 mvn -f /projects/awesomeproject clean install\
 ```
-For Maven projects, { site.product_mini_name_capitalized }} automatically discovers and downloads dependencies into the local Maven repository stored within your workspace. This is triggered when the project is opened. You can update dependencies manually at `Code > Update Dependencies`.
+For Maven projects, { site.product_mini_name }} automatically discovers and downloads dependencies into the local Maven repository stored within your workspace. This is triggered when the project is opened. You can update dependencies manually at `Code > Update Dependencies`.
 
 # Build in Terminal  
 All projects are created and stored in `/projects` directory in a machine that runs a workspace. You can navigate to project directory through the Terminal and run Maven commands in a tried and true way:
