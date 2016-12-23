@@ -10,18 +10,16 @@
  *******************************************************************************/
 package org.eclipse.che.ide.editor;
 
-import elemental.json.Json;
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
-import elemental.util.ArrayOf;
-
 import com.google.common.base.Optional;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
-
+import elemental.json.Json;
+import elemental.json.JsonArray;
+import elemental.json.JsonObject;
+import elemental.util.ArrayOf;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -56,8 +54,6 @@ import org.eclipse.che.ide.api.event.WindowActionEvent;
 import org.eclipse.che.ide.api.event.WindowActionHandler;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.parts.EditorMultiPartStack;
 import org.eclipse.che.ide.api.parts.EditorMultiPartStackState;
 import org.eclipse.che.ide.api.parts.EditorPartStack;
@@ -99,7 +95,6 @@ public class EditorAgentImpl implements EditorAgent,
                                         ActivePartChangedHandler,
                                         SelectionChangedHandler,
                                         WindowActionHandler,
-                                        WsAgentStateHandler,
                                         StateComponent {
 
     private final EventBus                 eventBus;
@@ -147,7 +142,6 @@ public class EditorAgentImpl implements EditorAgent,
         eventBus.addHandler(SelectionChangedEvent.TYPE, this);
         eventBus.addHandler(FileEvent.TYPE, this);
         eventBus.addHandler(WindowActionEvent.TYPE, this);
-        eventBus.addHandler(WsAgentStateEvent.TYPE, this);
     }
 
     @Override
@@ -194,18 +188,6 @@ public class EditorAgentImpl implements EditorAgent,
     @Override
     public void onWindowClosed(WindowActionEvent event) {
         //do nothing
-    }
-
-    @Override
-    public void onWsAgentStarted(WsAgentStateEvent event) {
-        //do nothing
-    }
-
-    @Override
-    public void onWsAgentStopped(WsAgentStateEvent event) {
-        for (EditorPartPresenter editor : getOpenedEditors()) {
-            closeEditor(editor);
-        }
     }
 
     @Override
