@@ -65,6 +65,7 @@ Thumbs.db
 .che
 dockerfiles/che/eclipse-che.tar.gz
 .unison*
-docs/_site
-docs/.sass-cache
-docs/.jekyll-metadata
+docs/src/main/_site
+docs/src/main/.sass-cache
+docs/src/main/.jekyll-metadata
+docs/src/main/assets/imgs

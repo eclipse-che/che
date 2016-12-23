@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2012-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>maven-depmgt-pom</artifactId>
+        <groupId>org.eclipse.che.depmgt</groupId>
+        <version>5.0.0-M9-SNAPSHOT</version>
+    </parent>
+    <groupId>org.eclipse.che</groupId>
+    <artifactId>docs</artifactId>
+    <version>5.0.0-M9-SNAPSHOT</version>
+    <packaging>war</packaging>
+    <name>Che :: Docs :: War</name>
+    <build>
+        <sourceDirectory>${project.build.directory}/src/main/</sourceDirectory>
+        <plugins>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.6</version>
+                <executions>
+                    <execution>
+                        <id>copy-resources01</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/classes</outputDirectory>
+                            <encoding>UTF-8</encoding>
+                            <resources>
+                                <resource>
+                                    <directory>${basedir}/src</directory>
+                                    <includes>
+                                        <include>**/*.properties</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+              <plugin>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>attach-sources</id>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <mkdir dir="${project.build.directory}/_site"/>
+                                <exec dir="${project.build.directory}" executable="cp" failonerror="true">
+                                    <arg value="-rf" />
+                                    <arg value="${project.basedir}/src" />
+                                    <arg value="${project.build.directory}/" />
+                                </exec>
+                                <exec dir="${project.build.directory}" executable="git" failonerror="true">
+                                    <arg value="clone" />
+                                    <arg value="https://github.com/JamesDrummond/che-doc-images.git" />
+                                    <arg value="${project.build.directory}/che-doc-images" />
+                                </exec>
+                                <exec dir="${project.build.directory}" executable="cp" failonerror="true">
+                                    <arg value="-rf" />
+                                    <arg value="${project.build.directory}/che-doc-images/imgs" />
+                                    <arg value="${project.build.directory}/src/main/assets/" />
+                                </exec>
+                                <exec dir="${project.build.directory}/src/main/" executable="jekyll" failonerror="true">
+                                    <arg value="build" />
+                                    <arg value="--destination" />
+                                    <arg value="${project.build.directory}/_site" />
+                                </exec>
+                                <delete>
+                                    <fileset dir="${project.build.directory}/_site" includes="*.xml" />
+                                </delete>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <configuration>
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                    <webResources>
+                        <resource>
+                            <directory>${project.build.directory}/_site</directory>
+                        </resource>
+                    </webResources>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>format</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <header>NOTICE</header>
+                    <aggregate>true</aggregate>
+                    <includes>
+                        <include>**/*.html</include>
+                    </includes>
+                    <excludes>
+                        <exclude>**/*.sh</exclude>
+                        <exclude>**/_includes/*.html</exclude>
+                        <exclude>**/_layouts/*.html</exclude>
+                        <exclude>**/_docs/index.html</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
