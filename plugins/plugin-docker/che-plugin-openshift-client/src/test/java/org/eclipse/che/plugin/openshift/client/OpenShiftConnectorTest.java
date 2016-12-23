@@ -65,9 +65,12 @@ public class OpenShiftConnectorTest {
     private CreateContainerParams createContainerParams;
 
     private OpenShiftConnector openShiftConnector;
+    
+    private KubernetesLabelConverter kubernetesLabelConverter;
 
     @BeforeMethod
     public void setup() {
+        kubernetesLabelConverter = new KubernetesLabelConverter();
         openShiftConnector = spy(new OpenShiftConnector(dockerConnectorConfiguration,
                                                         dockerConnectionFactory,
                                                         authManager,
@@ -249,14 +252,15 @@ public class OpenShiftConnectorTest {
     @Test
     public void shouldConvertLabelsToValidKubernetesLabelNames() {
         String validLabelRegex   = "([A-Za-z0-9][-A-Za-z0-9_\\.]*)?[A-Za-z0-9]";
+        String prefix = kubernetesLabelConverter.getCheServerLabelPrefix();
 
         // Given
         Map<String, String> labels = new HashMap<>();
-        labels.put(OpenShiftConnector.CHE_SERVER_LABEL_PREFIX + "4401/tcp:path:", "/api");
-        labels.put(OpenShiftConnector.CHE_SERVER_LABEL_PREFIX + "8000/tcp:ref:", "tomcat-debug");
+        labels.put(prefix + "4401/tcp:path:", "/api");
+        labels.put(prefix + "8000/tcp:ref:", "tomcat-debug");
 
         // When
-        Map<String, String> converted = openShiftConnector.convertLabelsToKubernetesNames(labels);
+        Map<String, String> converted = kubernetesLabelConverter.labelsToNames(labels);
 
         // Then
         for (Map.Entry<String, String> entry : converted.entrySet()) {
@@ -270,13 +274,14 @@ public class OpenShiftConnectorTest {
     @Test
     public void shouldBeAbleToRecoverOriginalLabelsAfterConversion() {
         // Given
+        String prefix = kubernetesLabelConverter.getCheServerLabelPrefix();
         Map<String, String> originalLabels = new HashMap<>();
-        originalLabels.put(OpenShiftConnector.CHE_SERVER_LABEL_PREFIX + "4401/tcp:path:", "/api");
-        originalLabels.put(OpenShiftConnector.CHE_SERVER_LABEL_PREFIX + "8000/tcp:ref:", "tomcat-debug");
+        originalLabels.put(prefix + "4401/tcp:path:", "/api");
+        originalLabels.put(prefix + "8000/tcp:ref:", "tomcat-debug");
 
         // When
-        Map<String, String> converted   = openShiftConnector.convertLabelsToKubernetesNames(originalLabels);
-        Map<String, String> unconverted = openShiftConnector.convertKubernetesNamesToLabels(converted);
+        Map<String, String> converted   = kubernetesLabelConverter.labelsToNames(originalLabels);
+        Map<String, String> unconverted = kubernetesLabelConverter.namesToLabels(converted);
 
         // Then
         assertEquals(originalLabels, unconverted);

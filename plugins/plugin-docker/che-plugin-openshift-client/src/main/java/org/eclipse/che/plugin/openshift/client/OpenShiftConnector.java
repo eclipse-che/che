@@ -10,7 +10,44 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.openshift.client;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+
+import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang.StringUtils;
+import org.eclipse.che.plugin.docker.client.DockerApiVersionPathPrefixProvider;
+import org.eclipse.che.plugin.docker.client.DockerConnector;
+import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
+import org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver;
+import org.eclipse.che.plugin.docker.client.connection.DockerConnectionFactory;
+import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
+import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
+import org.eclipse.che.plugin.docker.client.json.ImageConfig;
+import org.eclipse.che.plugin.docker.client.json.PortBinding;
+import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
+import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
+import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
+import org.eclipse.che.plugin.docker.client.params.network.ConnectContainerToNetworkParams;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.collect.ImmutableMap;
+
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
 import io.fabric8.kubernetes.api.model.ContainerPort;
@@ -39,42 +76,6 @@ import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
-import org.apache.commons.lang.RandomStringUtils;
-import org.apache.commons.lang.StringUtils;
-import org.eclipse.che.plugin.docker.client.DockerApiVersionPathPrefixProvider;
-import org.eclipse.che.plugin.docker.client.DockerConnector;
-import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
-import org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver;
-import org.eclipse.che.plugin.docker.client.connection.DockerConnectionFactory;
-import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
-import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
-import org.eclipse.che.plugin.docker.client.json.ImageConfig;
-import org.eclipse.che.plugin.docker.client.json.PortBinding;
-import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
-import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
-import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
-import org.eclipse.che.plugin.docker.client.params.network.ConnectContainerToNetworkParams;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
  * Client for OpenShift API.
@@ -86,15 +87,6 @@ public class OpenShiftConnector extends DockerConnector {
     private static final Logger LOG = LoggerFactory.getLogger(OpenShiftConnector.class);
     private static final String CHE_WORKSPACE_ID_ENV_VAR = "CHE_WORKSPACE_ID";
     private static final String CHE_OPENSHIFT_RESOURCES_PREFIX = "che-ws-";
-    private static final String KUBERNETES_ANNOTATION_REGEX = "([A-Za-z0-9][-A-Za-z0-9_\\.]*)?[A-Za-z0-9]";
-
-    /** Prefix used for che server labels */
-    protected static final String CHE_SERVER_LABEL_PREFIX  = "che:server";
-    /** Padding to use when converting server label to DNS name */
-    protected static final String CHE_SERVER_LABEL_PADDING = "0%s0";
-    /** Regex to use when matching converted labels -- should match {@link CHE_SERVER_LABEL_PADDING} */
-    protected static final Pattern CHE_SERVER_LABEL_KEY    = Pattern.compile("^0(.*)0$");
-
     private static final String OPENSHIFT_SERVICE_TYPE_NODE_PORT = "NodePort";
     private static final int OPENSHIFT_LIVENESS_PROBE_DELAY = 120;
     private static final int OPENSHIFT_LIVENESS_PROBE_TIMEOUT = 1;
@@ -114,6 +106,7 @@ public class OpenShiftConnector extends DockerConnector {
     public static final int CHE_TERMINAL_AGENT_PORT = 4411;
 
     private final OpenShiftClient    openShiftClient;
+    private final KubernetesLabelConverter kubernetesLabelConverter;
     private final String             cheOpenShiftProjectName;
     private final String             cheOpenShiftServiceAccount;
 
@@ -144,6 +137,7 @@ public class OpenShiftConnector extends DockerConnector {
                 .withUsername(openShiftUserName)
                 .withPassword(openShiftUserPassword).build();
         this.openShiftClient = new DefaultOpenShiftClient(config);
+        this.kubernetesLabelConverter = new KubernetesLabelConverter();
     }
 
     /**
@@ -225,11 +219,11 @@ public class OpenShiftConnector extends DockerConnector {
             return null;
         }
 
-        Map<String, String> annotations = convertKubernetesNamesToLabels(svc.getMetadata().getAnnotations());
+        Map<String, String> annotations = kubernetesLabelConverter.namesToLabels(svc.getMetadata().getAnnotations());
         Map<String, String> containerLabels = info.getConfig().getLabels();
 
         Map<String, String> labels = Stream.concat(annotations.entrySet().stream(), containerLabels.entrySet().stream())
-                                           .filter(e -> e.getKey().startsWith(CHE_SERVER_LABEL_PREFIX))
+                                           .filter(e -> e.getKey().startsWith(kubernetesLabelConverter.getCheServerLabelPrefix()))
                                            .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
 
         info.getConfig().setLabels(labels);
@@ -387,7 +381,7 @@ public class OpenShiftConnector extends DockerConnector {
                 .createNew()
                 .withNewMetadata()
                     .withName(CHE_OPENSHIFT_RESOURCES_PREFIX + workspaceID)
-                    .withAnnotations(convertLabelsToKubernetesNames(additionalLabels))
+                    .withAnnotations(kubernetesLabelConverter.labelsToNames(additionalLabels))
                 .endMetadata()
                 .withNewSpec()
                     .withType(OPENSHIFT_SERVICE_TYPE_NODE_PORT)
@@ -750,95 +744,5 @@ public class OpenShiftConnector extends DockerConnector {
      */
     private String normalizeContainerID(final String containerID) {
         return StringUtils.replaceOnce(containerID, DOCKER_PREFIX, "").replace("\"", "");
-    }
-
-    /**
-     * Converts a map of labels to match Kubernetes annotation requirements. Annotations are limited
-     * to alphanumeric characters, {@code '.'}, {@code '_'} and {@code '-'}, and must start and end
-     * with an alphanumeric character, i.e. they must match the regex
-     * {@code ([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9]}
-     *
-     * <p>Note that entry keys should begin with {@link OpenShiftConnector#CHE_SERVER_LABEL_PREFIX} and
-     * entries should not contain {@code '.'} or {@code '_'} before conversion;
-     * otherwise label will not be converted and included in output.
-     *
-     * <p>This implementation is relatively fragile -- changes to how Che generates labels may cause
-     * this method to stop working. In general, it will only be possible to convert labels that are
-     * alphanumeric plus up to 3 special characters (by converting the special characters to {@code '_'},
-     * {@code '-'}, and {@code '.'} as necessary).
-     *
-     * @param labels Map of labels to convert
-     * @return Map of labels converted to DNS Names
-     * @see OpenShiftConnector#convertKubernetesNamesToLabels(Map)
-     */
-    protected Map<String, String> convertLabelsToKubernetesNames(Map<String, String> labels) {
-        Map<String, String> names = new HashMap<>();
-        for (Map.Entry<String, String> entry : labels.entrySet()) {
-            String key = entry.getKey();
-            String value = entry.getValue();
-
-            if (value == null) {
-                continue;
-            }
-            // Check for potential problems with conversion
-            if (!key.startsWith(CHE_SERVER_LABEL_PREFIX)) {
-                LOG.warn("Expected CreateContainerParams label key " + entry.getKey() +
-                         " to start with " + CHE_SERVER_LABEL_PREFIX);
-            } else if (key.contains(".") || key.contains("_") || value.contains("_")) {
-                LOG.error(String.format("Cannot convert label %s to DNS Name: "
-                          + "'-' and '.' are used as escape characters", entry.toString()));
-                continue;
-            }
-
-            // Convert keys: e.g. "che:server:4401/tcp:ref" -> "che.server.4401-tcp.ref"
-            key = key.replaceAll(":", ".").replaceAll("/", "_");
-            // Convert values: e.g. "/api" -> ".api" -- note values may include '-' e.g. "tomcat-debug"
-            value = value.replaceAll("/", "_");
-
-            // Add padding since DNS names must start and end with alphanumeric characters
-            key   = String.format(CHE_SERVER_LABEL_PADDING, key);
-            value = String.format(CHE_SERVER_LABEL_PADDING, value);
-
-            if (!key.matches(KUBERNETES_ANNOTATION_REGEX) || !value.matches(KUBERNETES_ANNOTATION_REGEX)) {
-                LOG.error(String.format("Could not convert label %s into Kubernetes annotation: "
-                                        + "labels must be alphanumeric with ':' and '/'", entry.toString()));
-                continue;
-            }
-
-            names.put(key, value);
-        }
-        return names;
-    }
-
-    /**
-     * Undoes the label conversion done by {@link OpenShiftConnector#convertLabelsToKubernetesNames(Map)}
-     *
-     * @param labels Map of DNS names
-     * @return Map of unconverted labels
-     * @see OpenShiftConnector#convertLabelsToKubernetesNames(Map)
-     */
-    protected Map<String, String> convertKubernetesNamesToLabels(Map<String, String> names) {
-        Map<String, String> labels = new HashMap<>();
-        for (Map.Entry<String, String> entry: names.entrySet()){
-            String key = entry.getKey();
-            String value = entry.getValue();
-
-            // Remove padding
-            Matcher keyMatcher   = CHE_SERVER_LABEL_KEY.matcher(key);
-            Matcher valueMatcher = CHE_SERVER_LABEL_KEY.matcher(value);
-            if (!keyMatcher.matches() || !valueMatcher.matches()) {
-                continue;
-            }
-            key = keyMatcher.group(1);
-            value = valueMatcher.group(1);
-
-            // Convert key: e.g. "che.server.4401_tcp.ref" -> "che:server:4401/tcp:ref"
-            key = key.replaceAll("\\.", ":").replaceAll("_", "/");
-            // Convert value: e.g. Convert values: e.g. "_api" -> "/api"
-            value = value.replaceAll("_", "/");
-
-            labels.put(key, value);
-        }
-        return labels;
     }
 }
