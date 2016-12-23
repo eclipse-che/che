@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2012-2016 Red Hat, Inc.
+    Copyright (c) 2012-2017 Red Hat, Inc.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
@@ -16,27 +16,16 @@
     <parent>
         <artifactId>che-plugin-docker-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>5.0.0-M8</version>
+        <version>5.2.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-openshift-client</artifactId>
     <packaging>jar</packaging>
     <name>Che Plugin :: Docker :: OpenShift Client</name>
     <properties>
-        <findbugs.failonerror>false</findbugs.failonerror>
-        <io.fabric8.openshift-client.version>1.4.31</io.fabric8.openshift-client.version>
         <license_contributor>Red Hat, Inc. - initial API and implementation</license_contributor>
         <license_copyrightOwner>Red Hat, Inc.</license_copyrightOwner>
         <license_header>license-header.txt</license_header>
     </properties>
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>io.fabric8</groupId>
-                <artifactId>openshift-client</artifactId>
-                <version>${io.fabric8.openshift-client.version}</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
     <dependencies>
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -49,12 +38,10 @@
         <dependency>
             <groupId>io.fabric8</groupId>
             <artifactId>kubernetes-client</artifactId>
-            <version>1.4.31</version>
         </dependency>
         <dependency>
             <groupId>io.fabric8</groupId>
             <artifactId>kubernetes-model</artifactId>
-            <version>1.0.65</version>
         </dependency>
         <dependency>
             <groupId>io.fabric8</groupId>
@@ -103,11 +90,4 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-    <build>
-        <resources>
-            <resource>
-                <directory>src/main/java</directory>
-            </resource>
-        </resources>
-    </build>
 </project>

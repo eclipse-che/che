@@ -213,7 +213,7 @@ public class DockerInstanceTest {
                                              boolean snapshotUseRegistry) throws MachineException {
         DockerMachineFactory machineFactory = mock(DockerMachineFactory.class);
         when(machineFactory.createMetadata(any(), any(), any())).thenReturn(mock(DockerInstanceRuntimeInfo.class));
-        return new DockerInstance(dockerConnectorMock,
+        return new DockerInstance(dockerConnectorProviderMock,
                                   registry,
                                   USERNAME,
                                   machineFactory,

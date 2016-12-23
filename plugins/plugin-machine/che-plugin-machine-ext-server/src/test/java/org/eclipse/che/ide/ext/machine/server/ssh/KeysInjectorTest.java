@@ -122,8 +122,7 @@ public class KeysInjectorTest {
         keysInjector = new KeysInjector(eventService,
                                         new MockConnectorProvider(),
                                         sshManager,
-                                        environmentEngine,
-                                        userManager);
+                                        environmentEngine);
 
         keysInjector.start();
         verify(eventService).subscribe(subscriberCaptor.capture());
