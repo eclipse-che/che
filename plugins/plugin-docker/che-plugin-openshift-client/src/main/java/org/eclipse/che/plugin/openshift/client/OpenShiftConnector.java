@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Red Hat, Inc.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,8 +9,6 @@
  *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.plugin.openshift.client;
-
-import static com.google.common.base.Strings.isNullOrEmpty;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -43,18 +41,15 @@ import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
 import org.eclipse.che.plugin.docker.client.params.network.ConnectContainerToNetworkParams;
+import org.eclipse.che.plugin.openshift.client.kubernetes.KubernetesContainer;
+import org.eclipse.che.plugin.openshift.client.kubernetes.KubernetesEnvVar;
+import org.eclipse.che.plugin.openshift.client.kubernetes.KubernetesLabelConverter;
+import org.eclipse.che.plugin.openshift.client.kubernetes.KubernetesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableMap;
-
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
-import io.fabric8.kubernetes.api.model.ContainerPort;
-import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
-import io.fabric8.kubernetes.api.model.EnvVar;
-import io.fabric8.kubernetes.api.model.EnvVarBuilder;
-import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodList;
 import io.fabric8.kubernetes.api.model.PodSpec;
@@ -85,8 +80,14 @@ import io.fabric8.openshift.client.OpenShiftClient;
 @Singleton
 public class OpenShiftConnector extends DockerConnector {
     private static final Logger LOG = LoggerFactory.getLogger(OpenShiftConnector.class);
-    private static final String CHE_WORKSPACE_ID_ENV_VAR = "CHE_WORKSPACE_ID";
+    private static final String CHE_CONTAINER_IDENTIFIER_LABEL_KEY = "cheContainerIdentifier";
+    private static final String CHE_DEFAULT_EXTERNAL_ADDRESS = "172.17.0.1";
     private static final String CHE_OPENSHIFT_RESOURCES_PREFIX = "che-ws-";
+    private static final String CHE_WORKSPACE_ID_ENV_VAR = "CHE_WORKSPACE_ID";
+    private static final int CHE_WORKSPACE_AGENT_PORT = 4401;
+    private static final int CHE_TERMINAL_AGENT_PORT = 4411;
+    private static final String DOCKER_PREFIX = "docker://";
+    private static final String DOCKER_PROTOCOL_PORT_DELIMITER = "/";
     private static final String OPENSHIFT_SERVICE_TYPE_NODE_PORT = "NodePort";
     private static final int OPENSHIFT_LIVENESS_PROBE_DELAY = 120;
     private static final int OPENSHIFT_LIVENESS_PROBE_TIMEOUT = 1;
@@ -94,30 +95,17 @@ public class OpenShiftConnector extends DockerConnector {
     private static final int OPENSHIFT_WAIT_POD_TIMEOUT = 120;
     private static final String OPENSHIFT_POD_STATUS_RUNNING = "Running";
     private static final String OPENSHIFT_DEPLOYMENT_LABEL = "deployment";
-    private static final String DOCKER_PREFIX = "docker://";
-    public static final String DOCKER_PROTOCOL_PORT_DELIMITER = "/";
-    public static final String IMAGE_PULL_POLICY_IFNOTPRESENT = "IfNotPresent";
-    public static final String CHE_DEFAULT_EXTERNAL_ADDRESS = "172.17.0.1";
-    public static final String CHE_SERVER_INTERNAL_IP_ADB = "172.17.0.5";
-    public static final String CHE_CONTAINER_IDENTIFIER_LABEL_KEY = "cheContainerIdentifier";
-    public static final Long UID_ROOT = Long.valueOf(0);
-    public static final Long UID_USER = Long.valueOf(1000);
-    public static final int CHE_WORKSPACE_AGENT_PORT = 4401;
-    public static final int CHE_TERMINAL_AGENT_PORT = 4411;
+    private static final String OPENSHIFT_IMAGE_PULL_POLICY_IFNOTPRESENT = "IfNotPresent";
+    private static final Long UID_ROOT = Long.valueOf(0);
+    private static final Long UID_USER = Long.valueOf(1000);
 
     private final OpenShiftClient    openShiftClient;
     private final KubernetesLabelConverter kubernetesLabelConverter;
+    private final KubernetesEnvVar kubernetesEnvVar;
+    private final KubernetesContainer kubernetesContainer;
+    private final KubernetesService kubernetesService;
     private final String             cheOpenShiftProjectName;
     private final String             cheOpenShiftServiceAccount;
-
-    public final Map<Integer, String> servicePortNames = ImmutableMap.<Integer, String>builder().
-            put(22, "sshd").
-            put(CHE_WORKSPACE_AGENT_PORT, "wsagent").
-            put(4403, "wsagent-jpda").
-            put(CHE_TERMINAL_AGENT_PORT, "terminal").
-            put(8080, "tomcat").
-            put(8000, "tomcat-jpda").
-            put(9876, "codeserver").build();
 
     @Inject
     public OpenShiftConnector(DockerConnectorConfiguration connectorConfiguration,
@@ -137,7 +125,11 @@ public class OpenShiftConnector extends DockerConnector {
                 .withUsername(openShiftUserName)
                 .withPassword(openShiftUserPassword).build();
         this.openShiftClient = new DefaultOpenShiftClient(config);
+
         this.kubernetesLabelConverter = new KubernetesLabelConverter();
+        this.kubernetesEnvVar = new KubernetesEnvVar();
+        this.kubernetesContainer = new KubernetesContainer();
+        this.kubernetesService = new KubernetesService();
     }
 
     /**
@@ -373,7 +365,7 @@ public class OpenShiftConnector extends DockerConnector {
         Map<String, String> selector = new HashMap<>();
         selector.put(OPENSHIFT_DEPLOYMENT_LABEL, CHE_OPENSHIFT_RESOURCES_PREFIX + workspaceID);
 
-        List<ServicePort> ports = getServicePortsFrom(exposedPorts);
+        List<ServicePort> ports = kubernetesService.getServicePortsFrom(exposedPorts);
 
         Service service = openShiftClient
                 .services()
@@ -412,9 +404,9 @@ public class OpenShiftConnector extends DockerConnector {
         Container container = new ContainerBuilder()
                                     .withName(sanitizedContainerName)
                                     .withImage(imageName)
-                                    .withEnv(getContainerEnvFrom(envVariables))
-                                    .withPorts(getContainerPortsFrom(exposedPorts))
-                                    .withImagePullPolicy(IMAGE_PULL_POLICY_IFNOTPRESENT)
+                                    .withEnv(kubernetesEnvVar.getEnvFrom(envVariables))
+                                    .withPorts(kubernetesContainer.getContainerPortsFrom(exposedPorts))
+                                    .withImagePullPolicy(OPENSHIFT_IMAGE_PULL_POLICY_IFNOTPRESENT)
                                     .withNewSecurityContext()
                                         .withRunAsUser(UID)
                                         .withPrivileged(true)
@@ -548,68 +540,6 @@ public class OpenShiftConnector extends DockerConnector {
         return null;
     }
 
-    public List<ServicePort> getServicePortsFrom(Set<String> exposedPorts) {
-        List<ServicePort> servicePorts = new ArrayList<>();
-        for (String exposedPort: exposedPorts){
-            String[] portAndProtocol = exposedPort.split(DOCKER_PROTOCOL_PORT_DELIMITER,2);
-
-            String port = portAndProtocol[0];
-            String protocol = portAndProtocol[1];
-
-            int portNumber = Integer.parseInt(port);
-            String portName = isNullOrEmpty(servicePortNames.get(portNumber)) ?
-                    exposedPort.replace("/","-") : servicePortNames.get(portNumber);
-            int targetPortNumber = portNumber;
-
-            ServicePort servicePort = new ServicePort();
-            servicePort.setName(portName);
-            servicePort.setProtocol(protocol);
-            servicePort.setPort(portNumber);
-            servicePort.setTargetPort(new IntOrString(targetPortNumber));
-            servicePorts.add(servicePort);
-        }
-        return servicePorts;
-    }
-
-    public List<ContainerPort> getContainerPortsFrom(Set<String> exposedPorts) {
-        List<ContainerPort> containerPorts = new ArrayList<>();
-        for (String exposedPort: exposedPorts){
-            String[] portAndProtocol = exposedPort.split(DOCKER_PROTOCOL_PORT_DELIMITER,2);
-
-            String port = portAndProtocol[0];
-            String protocol = portAndProtocol[1].toUpperCase();
-
-            int portNumber = Integer.parseInt(port);
-            String portName = isNullOrEmpty(servicePortNames.get(portNumber)) ?
-                    exposedPort.replace("/","-") : servicePortNames.get(portNumber);
-
-            ContainerPort containerPort = new ContainerPortBuilder()
-                                                .withName(portName)
-                                                .withProtocol(protocol)
-                                                .withContainerPort(portNumber)
-                                                .build();
-            containerPorts.add(containerPort);
-        }
-        return containerPorts;
-    }
-
-    public List<EnvVar> getContainerEnvFrom(String[] envVariables){
-        LOG.info("Container environment variables:");
-        List<EnvVar> env = new ArrayList<>();
-        for (String envVariable : envVariables) {
-            String[] nameAndValue = envVariable.split("=",2);
-            String varName = nameAndValue[0];
-            String varValue = nameAndValue[1];
-            EnvVar envVar = new EnvVarBuilder()
-                    .withName(varName)
-                    .withValue(varValue)
-                    .build();
-            env.add(envVar);
-            LOG.info("- " + varName + "=" + varValue);
-        }
-        return env;
-    }
-
     private void replaceNetworkSettings(ContainerInfo info) throws IOException {
 
         if (info.getNetworkSettings() == null) {
@@ -635,24 +565,6 @@ public class OpenShiftConnector extends DockerConnector {
         }
 
         return service;
-    }
-
-    private Map<String, List<PortBinding>> getCheServicePorts(Service service) {
-        Map<String, List<PortBinding>> networkSettingsPorts = new HashMap<>();
-        List<ServicePort> servicePorts = service.getSpec().getPorts();
-        LOG.info("Retrieving " + servicePorts.size() + " ports exposed by service " + service.getMetadata().getName());
-        for (ServicePort servicePort : servicePorts) {
-            String protocol = servicePort.getProtocol();
-            String targetPort = String.valueOf(servicePort.getTargetPort().getIntVal());
-            String nodePort = String.valueOf(servicePort.getNodePort());
-            String portName = servicePort.getName();
-
-            LOG.info("Port: " + targetPort + DOCKER_PROTOCOL_PORT_DELIMITER + protocol + " (" + portName + ")");
-
-            networkSettingsPorts.put(targetPort + DOCKER_PROTOCOL_PORT_DELIMITER + protocol.toLowerCase(),
-                    Collections.singletonList(new PortBinding().withHostIp(CHE_DEFAULT_EXTERNAL_ADDRESS).withHostPort(nodePort)));
-        }
-        return networkSettingsPorts;
     }
 
     /**
@@ -686,6 +598,26 @@ public class OpenShiftConnector extends DockerConnector {
         }
 
         return null;
+    }
+
+    private Map<String, List<PortBinding>> getCheServicePorts(Service service) {
+        Map<String, List<PortBinding>> networkSettingsPorts = new HashMap<>();
+        List<ServicePort> servicePorts = service.getSpec().getPorts();
+        LOG.info("Retrieving " + servicePorts.size() + " ports exposed by service " + service.getMetadata().getName());
+        for (ServicePort servicePort : servicePorts) {
+            String protocol = servicePort.getProtocol();
+            String targetPort = String.valueOf(servicePort.getTargetPort().getIntVal());
+            String nodePort = String.valueOf(servicePort.getNodePort());
+            String portName = servicePort.getName();
+
+            LOG.info("Port: " + targetPort + DOCKER_PROTOCOL_PORT_DELIMITER + protocol + " (" + portName
+                    + ")");
+
+            networkSettingsPorts.put(targetPort + DOCKER_PROTOCOL_PORT_DELIMITER + protocol.toLowerCase(),
+                    Collections.singletonList(
+                            new PortBinding().withHostIp(CHE_DEFAULT_EXTERNAL_ADDRESS).withHostPort(nodePort)));
+        }
+        return networkSettingsPorts;
     }
 
     /**
