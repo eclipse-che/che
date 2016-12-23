@@ -141,6 +141,8 @@ public class FileWatcherService {
         running.compareAndSet(true, false);
 
         try {
+            LOG.debug("Cancelling watch keys");
+            keys.keySet().forEach(WatchKey::cancel);
             LOG.debug("Closing java watch service");
             service.close();
         } catch (IOException e) {

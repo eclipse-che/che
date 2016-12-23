@@ -16,9 +16,11 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
@@ -33,7 +35,7 @@ import static java.util.Collections.emptySet;
 import static org.apache.commons.io.FileUtils.write;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
@@ -47,22 +49,29 @@ public class FileWatcherServiceTest {
     @Rule
     public TemporaryFolder rootFolder = new TemporaryFolder();
 
+    @Mock
     FileWatcherEventHandler handler;
+    Set<PathMatcher> excludes     = emptySet();
+    WatchService     watchService = FileSystems.getDefault().newWatchService();
 
     FileWatcherService service;
 
+    public FileWatcherServiceTest() throws IOException {
+    }
+
     @Before
     public void setUp() throws Exception {
-        Set<PathMatcher> excludes = emptySet();
-        WatchService service = FileSystems.getDefault().newWatchService();
-        handler = mock(FileWatcherEventHandler.class);
-        this.service = new FileWatcherService(excludes, handler, service);
-        this.service.start();
+
+        service = new FileWatcherService(excludes, handler, watchService);
+
+        service.start();
     }
 
     @After
     public void tearDown() throws Exception {
         service.stop();
+        reset(handler);
+
         for (int i = 0; i < 10; i++) {
             if (service.isStopped()) {
                 return;
