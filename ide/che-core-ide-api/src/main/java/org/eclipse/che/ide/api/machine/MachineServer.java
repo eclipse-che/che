@@ -12,7 +12,6 @@ package org.eclipse.che.ide.api.machine;
 
 import org.eclipse.che.api.core.model.machine.Server;
 import org.eclipse.che.api.core.model.machine.ServerProperties;
-import org.eclipse.che.api.machine.shared.dto.ServerDto;
 
 import java.util.Objects;
 
@@ -22,7 +21,7 @@ import java.util.Objects;
  * @link Server
  * @author Vitalii Parfonov
  */
-public class DevMachineServer implements Server {
+public class MachineServer implements Server {
 
 
     private final String address;
@@ -31,7 +30,7 @@ public class DevMachineServer implements Server {
     private final String url;
     private final ServerProperties properties;
 
-        public DevMachineServer(Server dto) {
+        public MachineServer(Server dto) {
             address = dto.getAddress();
             protocol = dto.getProtocol();
             ref = dto.getRef();
@@ -66,8 +65,8 @@ public class DevMachineServer implements Server {
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-            if (!(o instanceof DevMachineServer)) return false;
-            final DevMachineServer other = (DevMachineServer) o;
+            if (!(o instanceof MachineServer)) return false;
+            final MachineServer other = (MachineServer) o;
             return Objects.equals(ref, other.ref) &&
                            Objects.equals(protocol, other.protocol) &&
                            Objects.equals(address, other.address) &&
@@ -88,7 +87,7 @@ public class DevMachineServer implements Server {
 
         @Override
         public String toString() {
-            return "DevMachineServer{" +
+            return "MachineServer{" +
                            "ref='" + ref + '\'' +
                            ", protocol='" + protocol + '\'' +
                            ", address='" + address + '\'' +

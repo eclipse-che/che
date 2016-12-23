@@ -64,7 +64,7 @@ import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.TerminalFactory;
-import org.eclipse.che.ide.extension.machine.client.machine.MachineEntityImpl;
+import org.eclipse.che.ide.extension.machine.client.machine.MachineItem;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandConsoleFactory;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandOutputConsole;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandOutputConsolePresenter;
@@ -1141,7 +1141,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                                     .withDev("dev-machine".equals(machineName))
                                     .withName(machineName)
                     );
-            provideMachineNode(new MachineEntityImpl(machineDto), true);
+            provideMachineNode(new MachineItem(machineDto), true);
         }
 
         OutputConsole console = consoles.get(machineName);

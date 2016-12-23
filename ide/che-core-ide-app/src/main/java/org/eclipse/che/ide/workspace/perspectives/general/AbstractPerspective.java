@@ -37,7 +37,6 @@ import org.eclipse.che.ide.workspace.WorkBenchPartController;
 import org.eclipse.che.providers.DynaProvider;
 
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,6 +57,12 @@ import static org.eclipse.che.ide.api.parts.PartStackView.TabPosition.RIGHT;
 public abstract class AbstractPerspective implements Presenter, Perspective,
         ActivePartChangedHandler, MaximizePartEvent.Handler,
         PerspectiveView.ActionDelegate, PartStack.ActionDelegate {
+
+    /** The default size for the part. */
+    private static final double DEFAULT_PART_SIZE = 260;
+
+    /** The minimum allowable size for the part. */
+    private static final int MIN_PART_SIZE = 100;
 
     protected final Map<PartStackType, PartStack> partStacks;
     protected final PerspectiveViewImpl           view;
@@ -397,8 +402,8 @@ public abstract class AbstractPerspective implements Presenter, Perspective,
             double size = partStackJSON.getNumber("SIZE");
 
             // Size of the part must not be less 100 pixels.
-            if (size < 100) {
-                size = 100;
+            if (size < MIN_PART_SIZE) {
+                size = DEFAULT_PART_SIZE;
             }
 
             controller.setSize(size);

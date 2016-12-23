@@ -22,9 +22,7 @@ import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.workspace.WorkspaceRuntime;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.core.rest.shared.dto.LinkParameter;
-import org.eclipse.che.api.machine.shared.Constants;
 import org.eclipse.che.api.machine.shared.dto.MachineLogMessageDto;
-import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
 import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessLogsResponseDto;
 import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessesResponseDto;
@@ -41,7 +39,6 @@ import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.machine.MachineManager;
-import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.machine.OutputMessageUnmarshaller;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -53,7 +50,6 @@ import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.ide.rest.StringUnmarshaller;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.websocket.MessageBus;
@@ -416,8 +412,8 @@ public class WorkspaceEventsHandler {
                 case STOPPED:
                     loader.setSuccess(LoaderPresenter.Phase.STOPPING_WORKSPACE);
                     startWorkspaceNotification.show(statusEvent.getWorkspaceId());
-                    eventBus.fireEvent(new WorkspaceStoppedEvent(workspace));
                     eventBus.fireEvent(WsAgentStateEvent.createWsAgentStoppedEvent());
+                    eventBus.fireEvent(new WorkspaceStoppedEvent(workspace));
                     break;
 
                 case SNAPSHOT_CREATING:

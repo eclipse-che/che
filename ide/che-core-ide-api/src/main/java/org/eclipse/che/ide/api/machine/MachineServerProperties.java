@@ -20,13 +20,13 @@ import java.util.Objects;
  * @link ServerProperties
  * @author Mario Loriedo
  */
-public class DevMachineServerProperties implements ServerProperties {
+public class MachineServerProperties implements ServerProperties {
 
     private final String path;
     private final String internalAddress;
     private final String internalUrl;
 
-    public DevMachineServerProperties(ServerProperties properties) {
+    public MachineServerProperties(ServerProperties properties) {
         path = properties.getPath();
         internalAddress = properties.getInternalAddress();
         internalUrl = properties.getInternalUrl();
@@ -50,8 +50,8 @@ public class DevMachineServerProperties implements ServerProperties {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof DevMachineServerProperties)) return false;
-        final DevMachineServerProperties other = (DevMachineServerProperties)o;
+        if (!(o instanceof MachineServerProperties)) return false;
+        final MachineServerProperties other = (MachineServerProperties)o;
 
         return Objects.equals(path, other.path) &&
                        Objects.equals(internalAddress, other.internalAddress) &&
@@ -69,7 +69,7 @@ public class DevMachineServerProperties implements ServerProperties {
 
     @Override
     public String toString() {
-        return "DevMachineServerProperties{" +
+        return "MachineServerProperties{" +
                        "path='" + path + '\'' +
                        ", internalAddress='" + internalAddress + '\'' +
                        ", internalUrl='" + internalUrl + '\'' +

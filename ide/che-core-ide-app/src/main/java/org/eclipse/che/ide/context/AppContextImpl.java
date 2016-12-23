@@ -32,6 +32,7 @@ import org.eclipse.che.ide.api.event.SelectionChangedEvent;
 import org.eclipse.che.ide.api.event.SelectionChangedHandler;
 import org.eclipse.che.ide.api.event.WindowActionEvent;
 import org.eclipse.che.ide.api.event.WindowActionHandler;
+import org.eclipse.che.ide.api.machine.ActiveRuntime;
 import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Project;
@@ -85,14 +86,16 @@ public class AppContextImpl implements AppContext,
                                        WorkspaceStoppedEvent.Handler,
                                        ResourceManagerInitializer {
 
+    private static final Project[] NO_PROJECTS = {};
+
     private final BrowserQueryFieldRenderer browserQueryFieldRenderer;
     private final List<String>              projectsInImport;
 
     private Workspace           usersWorkspace;
     private CurrentUser         currentUser;
     private FactoryDto          factory;
-    private DevMachine          devMachine;
     private Path                projectsRoot;
+    private ActiveRuntime       runtime;
     /**
      * List of actions with parameters which comes from startup URL.
      * Can be processed after IDE initialization as usual after starting ws-agent.
@@ -130,6 +133,7 @@ public class AppContextImpl implements AppContext,
     @Override
     public void setWorkspace(Workspace workspace) {
         this.usersWorkspace = workspace;
+        runtime = new ActiveRuntime(workspace.getRuntime());
     }
 
     @Override
@@ -187,22 +191,13 @@ public class AppContextImpl implements AppContext,
 
     @Override
     public DevMachine getDevMachine() {
-        return devMachine;
+        return runtime.getDevMachine();
     }
 
-    public void setDevMachine(DevMachine devMachine) {
-        checkState(devMachine != null);
-
-        if (this.devMachine != null && this.devMachine.getId().equals(devMachine.getId())) {
-            return;
-        }
-
-        this.devMachine = devMachine;
-    }
 
     @Override
     public void initResourceManager(final Callback<ResourceManager, Exception> callback) {
-        if (devMachine == null) {
+        if (runtime.getDevMachine() == null) {
             //should never happened, but anyway
             callback.onFailure(new NullPointerException("Dev machine is not initialized"));
         }
@@ -216,7 +211,7 @@ public class AppContextImpl implements AppContext,
             projects = null;
         }
 
-        resourceManager = resourceManagerFactory.newResourceManager(devMachine);
+        resourceManager = resourceManagerFactory.newResourceManager(runtime.getDevMachine());
         resourceManager.getWorkspaceProjects().then(new Operation<Project[]>() {
             @Override
             public void apply(Project[] projects) throws OperationException {
@@ -466,11 +461,11 @@ public class AppContextImpl implements AppContext,
                     eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(project, REMOVED)));
                 }
 
-                projects = null;
+                projects = NO_PROJECTS; //avoid NPE
                 resourceManager = null;
             }
         });
-        devMachine = null;
+        runtime = null;
 
         //goto close all editors
         final EditorAgent editorAgent = editorAgentProvider.get();
@@ -483,4 +478,11 @@ public class AppContextImpl implements AppContext,
     @Override
     public void onWindowClosed(WindowActionEvent event) {
     }
+
+
+    @Override
+    public ActiveRuntime getActiveRuntime() {
+        return runtime;
+    }
+
 }

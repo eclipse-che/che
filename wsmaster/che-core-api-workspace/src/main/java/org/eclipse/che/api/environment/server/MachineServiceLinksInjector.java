@@ -35,6 +35,7 @@ import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static org.eclipse.che.api.core.util.LinksHelper.createLink;
 import static org.eclipse.che.api.machine.shared.Constants.ENVIRONMENT_OUTPUT_CHANNEL_TEMPLATE;
 import static org.eclipse.che.api.machine.shared.Constants.ENVIRONMENT_STATUS_CHANNEL_TEMPLATE;
+import static org.eclipse.che.api.machine.shared.Constants.EXEC_AGENT_REFERENCE;
 import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_ENVIRONMENT_OUTPUT_CHANNEL;
 import static org.eclipse.che.api.machine.shared.Constants.TERMINAL_REFERENCE;
 import static org.eclipse.che.dto.server.DtoFactory.cloneDto;
@@ -92,6 +93,7 @@ public class MachineServiceLinksInjector {
                              Constants.LINK_REL_GET_PROCESSES));
 
         injectTerminalLink(machine, serviceContext, links);
+        injectExecAgentLink(machine, serviceContext, links);
 
         // add workspace channel links
         final Link workspaceChannelLink = createLink("GET",
@@ -132,6 +134,24 @@ public class MachineServiceLinksInjector {
                                                                          .build()
                                                                          .toString(),
                                                            TERMINAL_REFERENCE)));
+        }
+    }
+
+    protected void injectExecAgentLink(MachineDto machine, ServiceContext serviceContext, List<Link> links) {
+        final String scheme = serviceContext.getBaseUriBuilder().build().getScheme();
+        if (machine.getRuntime() != null) {
+            final Collection<ServerDto> servers = machine.getRuntime().getServers().values();
+            servers.stream()
+                   .filter(server -> TERMINAL_REFERENCE.equals(server.getRef()))
+                   .findAny()
+                   .ifPresent(terminal ->
+                                  links.add(createLink("GET",
+                                                       UriBuilder.fromUri(terminal.getUrl())
+                                                                 .scheme("https".equals(scheme) ? "wss" : "ws")
+                                                                 .path("/connect")
+                                                                 .build()
+                                                                 .toString(),
+                                                       EXEC_AGENT_REFERENCE)));
         }
     }
 
