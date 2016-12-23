@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Red Hat, Inc.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.openshift.client;
+package org.eclipse.che.plugin.openshift.client.kubernetes;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,7 +41,7 @@ public class KubernetesLabelConverter {
      * with an alphanumeric character, i.e. they must match the regex
      * {@code ([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9]}
      *
-     * <p>Note that entry keys should begin with {@link OpenShiftConnector#CHE_SERVER_LABEL_PREFIX} and
+     * <p>Note that entry keys should begin with {@link KubernetesLabelConverter#CHE_SERVER_LABEL_PREFIX} and
      * entries should not contain {@code '.'} or {@code '_'} before conversion;
      * otherwise label will not be converted and included in output.
      *
@@ -52,7 +52,6 @@ public class KubernetesLabelConverter {
      *
      * @param labels Map of labels to convert
      * @return Map of labels converted to DNS Names
-     * @see OpenShiftConnector#convertKubernetesNamesToLabels(Map)
      */
     public Map<String, String> labelsToNames(Map<String, String> labels) {
         Map<String, String> names = new HashMap<>();
@@ -94,11 +93,10 @@ public class KubernetesLabelConverter {
     }
 
     /**
-     * Undoes the label conversion done by {@link OpenShiftConnector#convertLabelsToKubernetesNames(Map)}
+     * Undoes the label conversion done by {@link KubernetesLabelConverter#labelsToNames(Map)}
      *
      * @param labels Map of DNS names
      * @return Map of unconverted labels
-     * @see OpenShiftConnector#convertLabelsToKubernetesNames(Map)
      */
     public Map<String, String> namesToLabels(Map<String, String> names) {
         Map<String, String> labels = new HashMap<>();
