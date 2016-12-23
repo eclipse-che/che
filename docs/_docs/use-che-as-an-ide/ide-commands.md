@@ -10,6 +10,7 @@ Commands are script-like instructions that are injected into the workspace machi
 Commands are saved in the configuration storage of your workspace and will be part of any workspace export.
 
 Commands have type like projects. Plug-in authors can register different command types that will inject additional behaviors into the command when it is executed. For example, Che provides a Maven command type for any project that has the maven project type. Maven commands have knowledge of how maven works and will auto-set certain flags and simplify the configuration.
+
 # Authoring  
 You can create any number of commands. The name of a command is not restricted to camelCase. A command may contain a single instruction or a succession of commands. For example:
 ```shell  
@@ -36,34 +37,29 @@ fi
 ```
 
 # Macros  
-Che provides macros that can be used within a command or preview URL to reference workspace objects.
+{{ site.product_mini_name }} provides macros that can be used within a command or preview URL to reference workspace objects.
 
 | Macro   | Details   
 | --- | ---
-| Currently selected file in editor   | Absolute path to the selected file in editor   
-| Path relative to the `/projects` folder to the selected file in editor   | Project name of the file currently selected in editor   
-| Project type of the file currently selected in editor   | Currently selected file in project tree   
-| Absolute path to the selected file in project tree   | Path relative to the `/projects` folder in project tree   
-| Project name of the file currently selected in explorer   | Project type of the file currently selected in explorer   
-| Returns protocol, hostname and port of an internal server. `<name>` is defined by the same of the internal service that you have exposed in your workspace recipe.\n\nReturns the hostname and port of a service or application you launch inside of a machine. \n\nThe hostname resolves to the hostname or the IP address of the workspace machine. This name varies depending upon where Docker is running and whether it is embedded within a VM.  See [Networking](doc:networking).\n\nThe port returns the Docker ephemeral port that you can give to your external clients to connect to your internal service. Docker uses ephemeral port mapping to expose a range of ports that your clients may use to connect to your internal service. This port mapping is dynamic.   | Returns protocol of a server registered by name   
-| Returns hostname of a server registered by name   | Returns port of a server registered by name   
-| Returns the name of the workspace   | `info`   
-| `CHE_IP`   | IP address Che server will bind to. Used by browsers to contact workspaces. You must set this IP address if you want to bind the Che server to an external IP address that is not the same as Docker's.   
-| The IP address set to the Docker host. This does cover 99% of situations, but on rare occassions we are not able to discover this IP address and you must provide it.   | `CHE_DEBUG_SERVER`   
-| If `true`, then will launch the Che server with JPDA activated so that you a Java debugger can attach to the Che server for debugging plugins, extensions, and core libraries.   | `false`   
-| `CHE_DEBUG_SERVER_PORT`   | The port that the JPDA debugger will listen.   
-| `8000`   | `CHE_DEBUG_SERVER_SUSPEND`   
-| If `true`, then activates `JPDA_SUSPEND` flag for Tomcat running the Che server. Used for advanced internal debugging of extensions.   | `false`   
-| `CHE_PORT`   | The port the Che server will bind itself to within the Che container.   
-
-
-
-| Che 4.6 Macros   | Details   
-| --- | ---
-| Absolute path to the project or module currently selected in the project explorer tree.   | The fully qualified package.class name of the Java class currently active in the editor panel.   
-| The path to the currently selected project relative to `/projects`. Effectively removes the `/projects` path from any project reference.   | Project name of the file currently selected in editor   
-| Project type of the file currently selected in editor   | Currently selected file in project tree   
-| Absolute path to the selected file in project tree   | Path relative to the `/projects` folder in project tree   
+| `${current.project.path}` | Absolute path to the project or module currently selected in the project explorer tree.
+| `${current.class.fqn}` | The fully qualified package.class name of the Java class currently active in the editor panel.
+| `${current.project.relpath}` | The path to the currently selected project relative to `/projects`. Effectively removes the `/projects` path from any project reference.
+| `${editor.current.file.name}` | Currently selected file in editor   
+| `${editor.current.file.path}` | Absolute path to the selected file in editor   
+| `${editor.current.file.relpath}` | Path relative to the `/projects` folder to the selected file in editor   
+| `${editor.current.project.name}` | Project name of the file currently selected in editor   
+| `${editor.current.project.type}` | Project type of the file currently selected in editor   
+| `${explorer.current.file.name}` | Currently selected file in project tree   
+| `${explorer.current.file.path}` | Absolute path to the selected file in project tree   
+| `${explorer.current.file.relpath}` | Path relative to the `/projects` folder in project tree   
+| `${explorer.current.project.name}` | Project name of the file currently selected in explorer   
+| `${explorer.current.project.type}` | Project type of the file currently selected in explorer   
+| `${server.<name>}` | Returns protocol, hostname and port of an internal server. `<name>` is defined by the same of the internal service that you have exposed in your workspace recipe. <br><br> Returns the hostname and port of a service or application you launch inside of a machine. <br><br> The hostname resolves to the hostname or the IP address of the workspace machine. This name varies depending upon where Docker is running and whether it is embedded within a VM.  See [Networking]({{base}}/docs/setup/configuration/index.html#networking). <br><br> The port returns the Docker ephemeral port that you can give to your external clients to connect to your internal service. Docker uses ephemeral port mapping to expose a range of ports that your clients may use to connect to your internal service. This port mapping is dynamic.   
+| `${server.<name>.protocol}` | Returns protocol of a server registered by name   
+| `${server.<name>.hostname}` | Returns hostname of a server registered by name   
+| `${server.<name>.port}` | Returns port of a server registered by name
+| `${server.port.<port>}` | Returns the hostname and port of a service or application you launch inside of a machine. <br><br>The hostname resolves to the hostname or the IP address of the workspace machine. This name varies depending upon where Docker is running and whether it is embedded within a VM. See [Networking](({{base}}/docs/setup/configuration/index.html#networking)).<br><br>The port returns the Docker ephemeral port that you can give to your external clients to connect to your internal service. Docker uses ephemeral port mapping to expose a range of ports that your clients may use to connect to your internal service. This port mapping is dynamic.<br><br>Let's say you launched a process inside your machine and bound it to `<port>`. A remote client can connect to your workspace by taking the IP address of the machine and the port of your service. Docker provides a dynamic port number to external clients for each service running internally. This macro will return the value Docker assigned for external clients to use. <br><br>For example, in your workspace, you launch a service that binds to port 8080. Then `${server.port.8080}` macro may return 32769, which is the port to give to remote clients to connect to the internal service.   
+| `${workspace.name}` | Returns the name of the workspace   
 
 
 # Machine Environment Variables  

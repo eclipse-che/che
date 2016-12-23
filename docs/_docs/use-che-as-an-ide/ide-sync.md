@@ -28,12 +28,12 @@ We provide a Docker container that bridges your remote Che workspace with your l
 This particular approach is fast because your local IDE has local I/O performance for all file actions. The synchronizer runs in the background asynchronously, and synchronizes your local changes into the workspace. The reverse course is true as well. This asynchronous approach provides a non-blocking I/O performance that is essential.
 
 ## Use
-To synchronize your IDE you'll use the [Eclipse Che CLI](che-cli) installed. The synchronization will take place with the current directory. It is probably best to start in an empty directory, otherwise the utility will synchronize the contents of an existing directory onto the workspace.
+To synchronize your IDE you'll use the [{{ site.product_formal_name }} CLI]({{base}}/docs/setup/cli/index.html) installed. The synchronization will take place with the current directory. It is probably best to start in an empty directory, otherwise the utility will synchronize the contents of an existing directory onto the workspace.
 
 ```shell  
 mkdir sync
 cd sync
-che mount <ws-name> (or che mount <ws-id>)
+{{ site.product_mini_cli }} mount <ws-name> (or {{ site.product_mini_cli }} mount <ws-id>)
 
 # Options
 --url <url>           # Che or Codenvy host where workspaces are running

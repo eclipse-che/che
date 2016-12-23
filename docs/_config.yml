@@ -28,6 +28,7 @@ url: https://www.eclipse.org/che/
 
 product_name: "CHE"
 product_mini_name:  "Che"
+product_mini_cli: "che"
 product_formal_name: "Eclipse Che"
 
 twitter:
@@ -48,8 +49,8 @@ exclude:
   - assembly/*
   - _site/*
   - pom.xml
-  
- 
+
+
  # The following are used to define markdown permalinks
 defaults:
   -
