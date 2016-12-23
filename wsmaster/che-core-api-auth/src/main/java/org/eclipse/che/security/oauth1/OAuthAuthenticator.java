@@ -25,8 +25,6 @@ import com.google.api.client.util.Base64;
 import org.eclipse.che.api.auth.shared.dto.OAuthToken;
 import org.eclipse.che.commons.annotation.Nullable;
 
-import javax.validation.constraints.NotNull;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
@@ -69,13 +67,13 @@ public abstract class OAuthAuthenticator {
     private final ReentrantLock                         credentialsStoreLock;
     private final Map<String, String>                   sharedTokenSecrets;
 
-    protected OAuthAuthenticator(@NotNull final String clientId,
-                                 @Nullable final String clientSecret,
-                                 @Nullable final String privateKey,
-                                 @NotNull final String requestTokenUri,
-                                 @NotNull final String accessTokenUri,
-                                 @NotNull final String authorizeTokenUri,
-                                 @NotNull final String redirectUri) {
+    protected OAuthAuthenticator(String clientId,
+                                 String requestTokenUri,
+                                 String accessTokenUri,
+                                 String authorizeTokenUri,
+                                 String redirectUri,
+                                 @Nullable String clientSecret,
+                                 @Nullable String privateKey) {
         this.clientId = clientId;
         this.clientSecret = clientSecret;
         this.privateKey = privateKey;
@@ -104,7 +102,7 @@ public abstract class OAuthAuthenticator {
      * @throws OAuthAuthenticationException
      *         if authentication failed.
      */
-    String getAuthenticateUrl(@NotNull final URL requestUrl,
+    String getAuthenticateUrl(final URL requestUrl,
                               @Nullable final String requestMethod,
                               @Nullable final String signatureMethod) throws OAuthAuthenticationException {
         try {
@@ -146,7 +144,7 @@ public abstract class OAuthAuthenticator {
      * @throws OAuthAuthenticationException
      *         if authentication failed or {@code requestUrl} does not contain required parameters.
      */
-    String callback(@NotNull final URL requestUrl) throws OAuthAuthenticationException {
+    String callback(final URL requestUrl) throws OAuthAuthenticationException {
         try {
             final GenericUrl callbackUrl = new GenericUrl(requestUrl.toString());
 
@@ -160,13 +158,13 @@ public abstract class OAuthAuthenticator {
 
             final String state = (String)callbackUrl.getFirst(STATE_PARAM_KEY);
 
-            String requestType = getRequestTypeFromStateParameter(state);
-            String signatureMethod = getSignatureMethodFromStateParameter(state);
+            String requestMethod = getParameterFromState(state, REQUEST_METHOD_PARAM_KEY);
+            String signatureMethod = getParameterFromState(state, SIGNATURE_METHOD_PARAM_KEY);
 
             final String oauthTemporaryToken = (String)callbackUrl.getFirst(OAUTH_TOKEN_PARAM_KEY);
 
             OAuthGetAccessToken getAccessToken;
-            if (requestType != null && "post".equals(requestType.toLowerCase())) {
+            if (requestMethod != null && "post".equals(requestMethod.toLowerCase())) {
                 getAccessToken = new OAuthPostAccessToken(accessTokenUri);
             } else {
                 getAccessToken = new OAuthGetAccessToken(accessTokenUri);
@@ -183,7 +181,7 @@ public abstract class OAuthAuthenticator {
 
             final OAuthCredentialsResponse credentials = getAccessToken.execute();
 
-            String userId = getUserFromStateParameter(state);
+            String userId = getParameterFromState(state, USER_ID_PARAM_KEY);
 
             credentialsStoreLock.lock();
             try {
@@ -227,9 +225,9 @@ public abstract class OAuthAuthenticator {
      * @throws OAuthAuthenticationException
      *         if authentication failed.
      */
-    String computeAuthorizationHeader(@NotNull final String userId,
-                                      @NotNull final String requestMethod,
-                                      @NotNull final String requestUrl) throws OAuthAuthenticationException {
+    String computeAuthorizationHeader(final String userId,
+                                      final String requestMethod,
+                                      final String requestUrl) throws OAuthAuthenticationException {
         final OAuthCredentialsResponse credentials = new OAuthCredentialsResponse();
         OAuthToken oauthToken = getToken(userId);
         credentials.token = oauthToken != null ? oauthToken.getToken() : null;
@@ -266,10 +264,10 @@ public abstract class OAuthAuthenticator {
      *         the secret token.
      * @return the authorization header value, or {@code null}.
      */
-    private String computeAuthorizationHeader(@NotNull final String requestMethod,
-                                              @NotNull final String requestUrl,
-                                              @NotNull final String token,
-                                              @NotNull final String tokenSecret) throws OAuthAuthenticationException {
+    private String computeAuthorizationHeader(final String requestMethod,
+                                              final String requestUrl,
+                                              final String token,
+                                              final String tokenSecret) throws OAuthAuthenticationException {
         OAuthParameters oauthParameters;
         try {
             oauthParameters = new OAuthParameters();
@@ -289,37 +287,13 @@ public abstract class OAuthAuthenticator {
         return oauthParameters.getAuthorizationHeader();
     }
 
-    private String getUserFromStateParameter(final String state) {
-        if (!isNullOrEmpty(state)) {
-            final String[] params = extractStateParams(state);
-            for (final String param : params) {
-                if (param.startsWith(USER_ID_PARAM_KEY + "=")) {
-                    return param.substring(USER_ID_PARAM_KEY.length() + 1);
-                }
-            }
+    private String getParameterFromState(String state, String parameterName) {
+        if (isNullOrEmpty(state)) {
+            return null;
         }
-        return null;
-    }
-
-    private String getSignatureMethodFromStateParameter(final String state) {
-        if (!isNullOrEmpty(state)) {
-            final String[] params = extractStateParams(state);
-            for (final String param : params) {
-                if (param.startsWith(SIGNATURE_METHOD_PARAM_KEY + "=")) {
-                    return param.substring(SIGNATURE_METHOD_PARAM_KEY.length() + 1);
-                }
-            }
-        }
-        return null;
-    }
-
-    private String getRequestTypeFromStateParameter(final String state) {
-        if (!isNullOrEmpty(state)) {
-            final String[] params = extractStateParams(state);
-            for (final String param : params) {
-                if (param.startsWith(REQUEST_METHOD_PARAM_KEY + "=")) {
-                    return param.substring(REQUEST_METHOD_PARAM_KEY.length() + 1);
-                }
+        for (final String param : extractStateParams(state)) {
+            if (param.startsWith(parameterName + "=")) {
+                return param.substring(parameterName.length() + 1);
             }
         }
         return null;

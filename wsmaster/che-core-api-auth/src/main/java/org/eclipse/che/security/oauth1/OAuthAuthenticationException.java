@@ -10,12 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.security.oauth1;
 
+import org.eclipse.che.api.core.ServerException;
+
 /**
  * Exception raised when the OAuth authentication failed.
  *
  * @author Kevin Pollet
+ * @author Igor Vinokur
  */
-public final class OAuthAuthenticationException extends Exception {
+public final class OAuthAuthenticationException extends ServerException {
 
     /**
      * Constructs an instance of {@link OAuthAuthenticationException}.

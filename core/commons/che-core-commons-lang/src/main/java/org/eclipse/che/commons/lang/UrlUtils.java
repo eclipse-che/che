@@ -75,7 +75,7 @@ public class UrlUtils {
     }
 
     /**
-     * Retrieve parameters map from state parameter
+     * Retrieve parameters map from state parameter.
      *
      * @param state
      *         state parameter encoded in application/x-www-form-urlencoded MIME format
@@ -83,30 +83,26 @@ public class UrlUtils {
      */
     public static Map<String, List<String>> getQueryParametersFromState(String state) {
         Map<String, List<String>> params = new HashMap<>();
-
         if (isNullOrEmpty(state)) {
             return params;
         }
-
-        String decodedState;
         try {
-            decodedState = URLDecoder.decode(state, "UTF-8");
-            for (String pair : decodedState.split("&")) {
-                if (!pair.isEmpty()) {
-                    String name;
-                    String value;
-                    int eq = pair.indexOf('=');
-                    if (eq < 0) {
-                        name = pair;
-                        value = "";
-                    } else {
-                        name = pair.substring(0, eq);
-                        value = pair.substring(eq + 1);
-                    }
-
-                    List<String> paramValues = params.computeIfAbsent(name, values -> new ArrayList<>());
-                    paramValues.add(value);
+            for (String pair : URLDecoder.decode(state, "UTF-8").split("&")) {
+                if (pair.isEmpty()) {
+                    continue;
                 }
+                String name;
+                String value;
+                int eq = pair.indexOf('=');
+                if (eq < 0) {
+                    name = pair;
+                    value = "";
+                } else {
+                    name = pair.substring(0, eq);
+                    value = pair.substring(eq + 1);
+                }
+                List<String> paramValues = params.computeIfAbsent(name, values -> new ArrayList<>());
+                paramValues.add(value);
             }
         } catch (UnsupportedEncodingException ignored) {
             // should never happen, UTF-8 supported.

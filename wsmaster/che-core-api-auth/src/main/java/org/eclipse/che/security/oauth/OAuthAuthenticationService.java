@@ -49,7 +49,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.util.Collections.emptyList;
 import static org.eclipse.che.commons.lang.UrlUtils.getParameter;
 import static org.eclipse.che.commons.lang.UrlUtils.getQueryParametersFromState;
 import static org.eclipse.che.commons.lang.UrlUtils.getRequestUrl;
@@ -96,18 +96,11 @@ public class OAuthAuthenticationService {
     @GET
     @Path("authenticate")
     public Response authenticate(@Required @QueryParam("oauth_provider") String oauthProvider,
-                                 @QueryParam("userId") String userId,
-                                 @QueryParam("scope") List<String> scopes)
-            throws ForbiddenException, BadRequestException, OAuthAuthenticationException {
-
+                                 @QueryParam("scope") List<String> scopes)throws ForbiddenException,
+                                                                                 BadRequestException,
+                                                                                 OAuthAuthenticationException {
         OAuthAuthenticator oauth = getAuthenticator(oauthProvider);
-        if (!isNullOrEmpty(userId) && !userId.equals(EnvironmentContext.getCurrent().getSubject().getUserId())) {
-            throw new ForbiddenException("Provided userId " + userId + " is not related to current user " + EnvironmentContext.getCurrent()
-                                                                                                                              .getSubject()
-                                                                                                                              .getUserId());
-        }
-
-        final String authUrl = oauth.getAuthenticateUrl(getRequestUrl(uriInfo), scopes == null ? Collections.<String>emptyList() : scopes);
+        final String authUrl = oauth.getAuthenticateUrl(getRequestUrl(uriInfo), scopes == null ? emptyList() : scopes);
         return Response.temporaryRedirect(URI.create(authUrl)).build();
     }
 

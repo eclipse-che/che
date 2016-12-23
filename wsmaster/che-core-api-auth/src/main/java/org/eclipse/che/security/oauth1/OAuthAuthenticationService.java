@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -43,12 +44,6 @@ import static org.eclipse.che.commons.lang.UrlUtils.getState;
 public class OAuthAuthenticationService extends Service {
     private static final Logger LOG = LoggerFactory.getLogger(OAuthAuthenticationService.class);
 
-    private final static String USER_ID_PARAMETER                = "user_id";
-    private final static String REQUEST_URL_PARAMETER            = "request_url";
-    private final static String PROVIDER_NAME_PARAMETER          = "oauth_provider";
-    private final static String REQUEST_METHOD_PARAMETER         = "request_method";
-    private final static String SIGNATURE_METHOD_PARAMETER       = "signature_method";
-    private final static String REDIRECT_AFTER_LOGIN_PARAMETER   = "redirect_after_login";
     private final static String UNSUPPORTED_OAUTH_PROVIDER_ERROR = "Unsupported OAuth provider: %s";
 
     @Inject
@@ -56,16 +51,14 @@ public class OAuthAuthenticationService extends Service {
 
     @GET
     @Path("authenticate")
-    public Response authenticate(@Context UriInfo uriInfo) throws OAuthAuthenticationException, BadRequestException {
-        MultivaluedMap<String, String> parameters = uriInfo.getQueryParameters();
+    public Response authenticate(@QueryParam("oauth_provider") String providerName,
+                                 @QueryParam("request_method") String requestMethod,
+                                 @QueryParam("signature_method") String signatureMethod,
+                                 @QueryParam("redirect_after_login") String redirectAfterLogin) throws OAuthAuthenticationException,
+                                                                                                       BadRequestException {
 
-        final String providerName = parameters.getFirst(PROVIDER_NAME_PARAMETER);
-        final String requestMethod = parameters.getFirst(REQUEST_METHOD_PARAMETER);
-        final String signatureMethod = parameters.getFirst(SIGNATURE_METHOD_PARAMETER);
-        final String redirectAfterLogin = parameters.getFirst(REDIRECT_AFTER_LOGIN_PARAMETER);
-
-        requiredNotNull(providerName, PROVIDER_NAME_PARAMETER);
-        requiredNotNull(redirectAfterLogin, REDIRECT_AFTER_LOGIN_PARAMETER);
+        requiredNotNull(providerName, "Provider name");
+        requiredNotNull(redirectAfterLogin, "Redirect after login");
 
         final OAuthAuthenticator oauth = getAuthenticator(providerName);
         final String authUrl = oauth.getAuthenticateUrl(getRequestUrl(uriInfo), requestMethod, signatureMethod);
@@ -75,12 +68,12 @@ public class OAuthAuthenticationService extends Service {
 
     @GET
     @Path("callback")
-    public Response callback(@Context UriInfo uriInfo) throws OAuthAuthenticationException, BadRequestException {
+    public Response callback() throws OAuthAuthenticationException, BadRequestException {
         final URL requestUrl = getRequestUrl(uriInfo);
         final Map<String, List<String>> parameters = getQueryParametersFromState(getState(requestUrl));
 
-        final String providerName = getParameter(parameters, PROVIDER_NAME_PARAMETER);
-        final String redirectAfterLogin = getParameter(parameters, REDIRECT_AFTER_LOGIN_PARAMETER);
+        final String providerName = getParameter(parameters, "oauth_provider");
+        final String redirectAfterLogin = getParameter(parameters, "redirect_after_login");
 
         getAuthenticator(providerName).callback(requestUrl);
 
@@ -89,18 +82,15 @@ public class OAuthAuthenticationService extends Service {
 
     @GET
     @Path("signature")
-    public String signature(@Context UriInfo uriInfo) throws OAuthAuthenticationException, BadRequestException {
-        MultivaluedMap<String, String> parameters = uriInfo.getQueryParameters();
-
-        String providerName = parameters.getFirst(PROVIDER_NAME_PARAMETER);
-        String userId = parameters.getFirst(USER_ID_PARAMETER);
-        String requestUrl = parameters.getFirst(REQUEST_URL_PARAMETER);
-        String requestMethod = parameters.getFirst(REQUEST_METHOD_PARAMETER);
-
-        requiredNotNull(providerName, PROVIDER_NAME_PARAMETER);
-        requiredNotNull(userId, USER_ID_PARAMETER);
-        requiredNotNull(requestUrl, REQUEST_URL_PARAMETER);
-        requiredNotNull(requestMethod, REQUEST_METHOD_PARAMETER);
+    public String signature(@QueryParam("oauth_provider") String providerName,
+                            @QueryParam("user_id") String userId,
+                            @QueryParam("request_url") String requestUrl,
+                            @QueryParam("request_method") String requestMethod) throws OAuthAuthenticationException,
+                                                                                       BadRequestException {
+        requiredNotNull(providerName, "Provider name");
+        requiredNotNull(userId, "User Id");
+        requiredNotNull(requestUrl, "Request url");
+        requiredNotNull(requestMethod, "Request method");
 
         return getAuthenticator(providerName).computeAuthorizationHeader(userId, requestMethod, requestUrl);
     }

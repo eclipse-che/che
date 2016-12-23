@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.auth.oauth;
 
-import javax.validation.constraints.NotNull;
 import java.util.Map;
 
 /**
@@ -37,9 +36,9 @@ public interface OAuthAuthorizationHeaderProvider {
      *         parameters.
      * @return the Authorization header value or {@code null} if it cannot be computed.
      */
-    String getAuthorizationHeader(@NotNull String oauthProviderName,
-                                  @NotNull String userId,
-                                  @NotNull String requestMethod,
-                                  @NotNull String requestUrl,
-                                  @NotNull Map<String, String> requestParameters);
+    String getAuthorizationHeader(String oauthProviderName,
+                                  String userId,
+                                  String requestMethod,
+                                  String requestUrl,
+                                  Map<String, String> requestParameters);
 }
