@@ -16,7 +16,6 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
-
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.promises.client.Operation;
@@ -465,7 +464,6 @@ public class AppContextImpl implements AppContext,
                 resourceManager = null;
             }
         });
-        runtime = null;
 
         //goto close all editors
         final EditorAgent editorAgent = editorAgentProvider.get();
@@ -473,6 +471,7 @@ public class AppContextImpl implements AppContext,
         for (EditorPartPresenter editor : openedEditors) {
             editorAgent.closeEditor(editor);
         }
+        runtime = null;
     }
 
     @Override
