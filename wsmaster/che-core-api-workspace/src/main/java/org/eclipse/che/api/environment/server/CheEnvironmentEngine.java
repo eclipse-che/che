@@ -890,8 +890,9 @@ public class CheEnvironmentEngine {
                     // Snapshot image location has SHA-256 digest which needs to be removed,
                     // otherwise it will be pulled without tag and cause problems
                     String imageName = machineSource.getLocation();
-                    if (imageName.contains("@sha256:"))
-                    machineSource.setLocation(imageName.substring(0, imageName.indexOf('@')));
+                    if (imageName.contains("@sha256:")) {
+                        machineSource.setLocation(imageName.substring(0, imageName.indexOf('@')));
+                    }
                 }
 
                 instance = machineStarter.startMachine(machineLogger, machineSource);
