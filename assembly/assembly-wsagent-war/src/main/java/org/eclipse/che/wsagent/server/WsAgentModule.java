@@ -24,7 +24,6 @@ import org.eclipse.che.api.core.jsonrpc.RequestHandler;
 import org.eclipse.che.api.core.jsonrpc.RequestTransmitter;
 import org.eclipse.che.api.core.jsonrpc.impl.WebSocketToJsonRpcDispatcher;
 import org.eclipse.che.api.core.jsonrpc.impl.WebSocketTransmitter;
-import org.eclipse.che.api.core.notification.WSocketEventBusClient;
 import org.eclipse.che.api.core.rest.ApiInfoService;
 import org.eclipse.che.api.core.rest.CoreRestModule;
 import org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule;
@@ -77,7 +76,6 @@ public class WsAgentModule extends AbstractModule {
 
         bind(URI.class).annotatedWith(Names.named("che.api")).toProvider(UriApiEndpointProvider.class);
         bind(String.class).annotatedWith(Names.named("user.token")).toProvider(UserTokenProvider.class);
-        bind(WSocketEventBusClient.class).asEagerSingleton();
 
         bind(String.class).annotatedWith(Names.named("event.bus.url")).toProvider(EventBusURLProvider.class);
         bind(ApiEndpointAccessibilityChecker.class);
