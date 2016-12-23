@@ -138,6 +138,8 @@ public class FileWatcherService {
 
     @PreDestroy
     void stop() {
+        running.compareAndSet(true, false);
+
         try {
             LOG.debug("Closing java watch service");
             service.close();
@@ -160,6 +162,10 @@ public class FileWatcherService {
             LOG.debug("Executor tasks have been shutdown");
 
         }
+    }
+
+    boolean isStopped(){
+        return executor.isShutdown();
     }
 
     /**

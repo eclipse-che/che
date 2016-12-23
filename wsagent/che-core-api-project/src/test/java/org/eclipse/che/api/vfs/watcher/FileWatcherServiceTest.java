@@ -32,6 +32,7 @@ import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 import static java.util.Collections.emptySet;
 import static org.apache.commons.io.FileUtils.write;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -62,6 +63,13 @@ public class FileWatcherServiceTest {
     @After
     public void tearDown() throws Exception {
         service.stop();
+        for (int i = 0; i < 10; i++) {
+            if (service.isStopped()) {
+                return;
+            }
+            Thread.sleep(1_000);
+        }
+        fail();
     }
 
     @Test
