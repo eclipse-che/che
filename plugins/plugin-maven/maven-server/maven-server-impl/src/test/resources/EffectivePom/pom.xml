@@ -1214,6 +1214,23 @@
                                 </configuration>
                             </execution>
                             <execution>
+                                <id>distribution-management-used</id>
+                                <goals>
+                                    <goal>enforce</goal>
+                                </goals>
+                                <configuration>
+                                    <rules>
+                                        <requireDepMgt>
+                                            <message>You are trying to use artifacts that are not in the list of allowed artifacts included in dependencyManagement in maven-depmgt-pom or have different version.</message>
+                                            <checkVersion>true</checkVersion>
+                                            <ignoreScopes>
+                                                <ignoreScope>runtime</ignoreScope>
+                                            </ignoreScopes>
+                                        </requireDepMgt>
+                                    </rules>
+                                </configuration>
+                            </execution>
+                            <execution>
                                 <id>no-distribution-management-at-all</id>
                                 <goals>
                                     <goal>enforce</goal>

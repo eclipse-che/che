@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Red Hat, Inc.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,16 +8,22 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.openshift.client;
+package org.eclipse.che.plugin.openshift.client.kubernetes;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang.StringUtils;
+import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Converter of labels defined in {@link ContainerConfig} for matching to Kubernetes
+ * annotation requirements
+ */
 public class KubernetesLabelConverter {
     private static final Logger LOG = LoggerFactory.getLogger(KubernetesLabelConverter.class);
     /** Prefix used for che server labels */
@@ -41,7 +47,7 @@ public class KubernetesLabelConverter {
      * with an alphanumeric character, i.e. they must match the regex
      * {@code ([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9]}
      *
-     * <p>Note that entry keys should begin with {@link OpenShiftConnector#CHE_SERVER_LABEL_PREFIX} and
+     * <p>Note that entry keys should begin with {@link KubernetesLabelConverter#CHE_SERVER_LABEL_PREFIX} and
      * entries should not contain {@code '.'} or {@code '_'} before conversion;
      * otherwise label will not be converted and included in output.
      *
@@ -52,53 +58,45 @@ public class KubernetesLabelConverter {
      *
      * @param labels Map of labels to convert
      * @return Map of labels converted to DNS Names
-     * @see OpenShiftConnector#convertKubernetesNamesToLabels(Map)
      */
     public Map<String, String> labelsToNames(Map<String, String> labels) {
         Map<String, String> names = new HashMap<>();
-        for (Map.Entry<String, String> entry : labels.entrySet()) {
-            String key = entry.getKey();
-            String value = entry.getValue();
+        for (Map.Entry<String, String> label : labels.entrySet()) {
 
-            if (value == null) {
-                continue;
+            if (!hasConversionProblems(label)) {
+
+                String key = label.getKey();
+                String value = label.getValue();
+
+                // Convert keys: e.g. "che:server:4401/tcp:ref" ->
+                // "che.server.4401-tcp.ref"
+                key = convertLabelKey(key);
+                // Convert values: e.g. "/api" -> ".api" -- note values may
+                // include '-' e.g. "tomcat-debug"
+                value = convertLabelValue(value);
+
+                // Add padding since DNS names must start and end with
+                // alphanumeric characters
+                key = addPadding(key);
+                value = addPadding(value);
+
+                if (matchesKubernetesLabelRegex(key) && matchesKubernetesLabelRegex(value)) {
+                    names.put(key, value);
+                } else {
+                    LOG.error(
+                            "Could not convert label {} into Kubernetes annotation: labels must be alphanumeric with ':' and '/'",
+                            label.toString());
+                }
             }
-            // Check for potential problems with conversion
-            if (!key.startsWith(CHE_SERVER_LABEL_PREFIX)) {
-                LOG.warn("Expected CreateContainerParams label key " + entry.getKey() +
-                         " to start with " + CHE_SERVER_LABEL_PREFIX);
-            } else if (key.contains(".") || key.contains("_") || value.contains("_")) {
-                LOG.error(String.format("Cannot convert label %s to DNS Name: "
-                          + "'-' and '.' are used as escape characters", entry.toString()));
-                continue;
-            }
-
-            // Convert keys: e.g. "che:server:4401/tcp:ref" -> "che.server.4401-tcp.ref"
-            key = key.replaceAll(":", ".").replaceAll("/", "_");
-            // Convert values: e.g. "/api" -> ".api" -- note values may include '-' e.g. "tomcat-debug"
-            value = value.replaceAll("/", "_");
-
-            // Add padding since DNS names must start and end with alphanumeric characters
-            key   = String.format(CHE_SERVER_LABEL_PADDING, key);
-            value = String.format(CHE_SERVER_LABEL_PADDING, value);
-
-            if (!key.matches(KUBERNETES_ANNOTATION_REGEX) || !value.matches(KUBERNETES_ANNOTATION_REGEX)) {
-                LOG.error(String.format("Could not convert label %s into Kubernetes annotation: "
-                                        + "labels must be alphanumeric with ':' and '/'", entry.toString()));
-                continue;
-            }
-
-            names.put(key, value);
         }
         return names;
     }
 
     /**
-     * Undoes the label conversion done by {@link OpenShiftConnector#convertLabelsToKubernetesNames(Map)}
+     * Undoes the label conversion done by {@link KubernetesLabelConverter#labelsToNames(Map)}
      *
      * @param labels Map of DNS names
      * @return Map of unconverted labels
-     * @see OpenShiftConnector#convertLabelsToKubernetesNames(Map)
      */
     public Map<String, String> namesToLabels(Map<String, String> names) {
         Map<String, String> labels = new HashMap<>();
@@ -123,5 +121,55 @@ public class KubernetesLabelConverter {
             labels.put(key, value);
         }
         return labels;
+    }
+
+    /**
+     * Checks if there are any potential problems coupled with label conversion
+     * @param label
+     * @return true if label has no conversion issues, false otherwise 
+     */
+    private boolean hasConversionProblems(final Map.Entry<String, String> label) {
+        boolean hasProblems = false;
+        String key = label.getKey();
+        String value = label.getValue();
+
+        if (StringUtils.isBlank(value)) {
+            LOG.error("The label {} is blank", label.toString());
+            hasProblems = true;
+        } else if (key.contains(".") || key.contains("_") || value.contains("_")) {
+            LOG.error("Cannot convert label {} to DNS Name: '-' and '.' are used as escape characters",
+                    label.toString());
+            hasProblems = true;
+        } else if (!key.startsWith(CHE_SERVER_LABEL_PREFIX)) {
+            LOG.warn("Expected CreateContainerParams label key {} to start with {}", key, CHE_SERVER_LABEL_PREFIX);
+        }
+        return hasProblems;
+    }
+
+    /**
+     * Convert keys: e.g. "che:server:4401/tcp:ref" -> "che.server.4401-tcp.ref"
+     */
+    private String convertLabelKey(final String key) {
+        return key.replaceAll(":", ".").replaceAll("/", "_");
+    }
+
+    /**
+     * Convert values: e.g. "/api" -> ".api" Note: values may include '-' e.g.
+     * "tomcat-debug"
+     */
+    private String convertLabelValue(final String value) {
+        return value.replaceAll("/", "_");
+    }
+
+    /**
+     * Adds padding since DNS names must start and end with alphanumeric
+     * characters
+     */
+    private String addPadding(final String label) {
+        return String.format(CHE_SERVER_LABEL_PADDING, label);
+    }
+
+    private boolean matchesKubernetesLabelRegex(final String label) {
+        return label.matches(KUBERNETES_ANNOTATION_REGEX);
     }
 }
