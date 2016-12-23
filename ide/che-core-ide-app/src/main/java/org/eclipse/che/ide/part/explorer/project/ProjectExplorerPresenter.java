@@ -266,7 +266,9 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
         // process root projects, they have only one segment in path
         if (resource.getLocation().segmentCount() == 1) {
             if (delta.getKind() == ADDED) {
-                tree.getNodeStorage().add(nodeFactory.newContainerNode((Container)resource, nodeSettings));
+                if (getNode(resource.getLocation()) == null) {
+                    tree.getNodeStorage().add(nodeFactory.newContainerNode((Container)resource, nodeSettings));
+                }
             } else if (delta.getKind() == REMOVED) {
                 Node node = getNode(resource.getLocation());
 
