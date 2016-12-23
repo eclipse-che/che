@@ -6,7 +6,7 @@
 .che-input-desktop textarea
   color lighten($che-ide-background-color, 53%)
   border 1px solid $box-border-color
-  padding 5px 10px
+  padding 5px 15px 5px 10px
   border-radius 2px
   che-box-shadow()
 
@@ -31,6 +31,10 @@
 
   [ng-messages]
     padding 0 12px
+
+  // suppress 'required' message
+  [ng-message="required"]
+    display none
 
   // avoid validation messages filckering
   [ng-message]:not(:first-child)
@@ -58,6 +62,13 @@
       text-overflow ellipsis
       white-space nowrap
       background-color inherit
+
+    .che-input-asterisk
+      position absolute
+      right 4px
+      color $error-color
+      font-size 17px
+      line-height 36px
 
     .che-input-desktop-hidden-text
       min-width 170px

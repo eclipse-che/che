@@ -62,14 +62,20 @@ export class CheInput {
         placeHolder = attrs.chePlaceHolder,
         pattern = attrs.chePattern;
 
-    let template = '<div class="che-input">'
+    // check if field is mandatory
+    let isMandatory = angular.isDefined(attrs.required) ? true : false;
+
+    let template = '<div class="che-input" ng-class="{\'che-input-focused\': focused}">'
       + '<div class="che-input-desktop" layout="column">'
       + '<div layout="column" class="che-input-desktop-value-column">'
-      + '<input type="text" placeholder="' + placeHolder + '" ng-trim="false" name="' + inputName + '"';
+      + '<input type="text" placeholder="' + placeHolder + '" ng-trim="false" name="' + inputName + '" ng-focus="focused=true" ng-blur="focused=false"';
     if (attrs.chePattern) {
       template = template + ' pattern="' + pattern + '"';
     }
     template = template + ' data-ng-model="valueModel">';
+    if (isMandatory) {
+      template += '<span class="che-input-asterisk">*</span>';
+    }
 
     template = template +
       '<!-- display error messages for the form -->'
@@ -139,7 +145,7 @@ export class CheInput {
    * Keep reference to the model controller
    */
   link($scope: IInputScope, element: ng.IAugmentedJQuery, attr: any): void {
-    $scope.$watch('myForm.desk' + $scope.inputName + '.$pristine', (isPristine: boolean) => {
+    $scope.$watch('myForm.' + $scope.inputName + '.$pristine', (isPristine: boolean) => {
       if (isPristine) {
         element.addClass('desktop-pristine');
       } else {

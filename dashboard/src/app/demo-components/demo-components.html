@@ -247,9 +247,11 @@ Ultima Syriarum est Palaestina per intervalla magna protenta, cultis abundans te
                      ng-model="demoComponentsController.demoInput"
                      ng-minlength="3"
                      ng-maxlength="8"
-                     required>
+                     required
+                     ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
             <div ng-message="minlength">The value has to be more than 3 characters long.</div>
             <div ng-message="maxlength">The value has to be less than 8 characters long.</div>
+            <div ng-message="pattern">The name value not contain special characters like space, dollar, etc.
             <div ng-message="required">A value is required.</div>
           </che-input>
         </textarea>
@@ -300,7 +302,6 @@ Ultima Syriarum est Palaestina per intervalla magna protenta, cultis abundans te
         </textarea>
 
         <textarea demo-source-render>
-
           <!-- che-label-container -->
           <!-- changes layout on 'gt-sm' breakpoint -->
 
@@ -324,13 +325,15 @@ Ultima Syriarum est Palaestina per intervalla magna protenta, cultis abundans te
                                che-transclude-layout="true"
                                layout="column" layout-gt-sm="row">
             <div style="margin-top: -12px;">
+              <ng-form name="demoForm">
               <che-input che-form="demoForm"
-                         che-name="demoinput2"
+                         che-name="demoinput3"
                          che-place-holder="Name of this demo"
                          ng-model="demoComponentsController.demoInput"
                          required>
                 <div ng-message="required">A name is required.</div>
               </che-input>
+              </ng-form>
             </div>
             <p>
              Mel no ullum appareat, est ex virtute indoctum, duo fabulas epicuri principes at. Vis option recteque vulputate eu, harum voluptaria intellegebat pro in, vix cu graeci vivendum intellegebat. Ius docendi invidunt convenire ad. Nam nibh expetendis cu, congue molestiae dissentiunt pri eu, eu virtute alterum repudiandae nec. Te eam vitae libris, nec ut suas errem volumus, ei numquam phaedrum rationibus pri. Verear dissentiunt theophrastus eum ex, ex adhuc appareat moderatius est.
