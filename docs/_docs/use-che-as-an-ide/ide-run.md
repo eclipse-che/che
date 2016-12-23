@@ -5,6 +5,7 @@ excerpt: ""
 layout: docs
 permalink: /:categories/run/
 ---
+{% include base.html %}
 There are two ways to run your application in Che:
 
 * using [commands](/docs/commands)

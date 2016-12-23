@@ -5,6 +5,7 @@ excerpt: "Notes on features and bugs fixed in ARTIK IDE releases."
 layout: artik
 permalink: /:categories/release-notes/
 ---
+{% include base.html %}
 # ARTIK IDE 1.1.0  
 ## Bugs Fixed
 * Deleting a device from the list of Artik devices does not delete it from consoles panel

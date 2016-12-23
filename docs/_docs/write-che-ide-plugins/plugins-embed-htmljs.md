@@ -5,6 +5,7 @@ excerpt: ""
 layout: docs
 permalink: /:categories/embed-htmljs/
 ---
+{% include base.html %}
 The Che IDE is developed based on GWT. If you want to extend the Che UI with new UI components, the default is to develop those custom components using GWT, too. Please refer to [this tutorial](doc:parts) to learn how to extend Che with new parts (view or editors).
 
 However, as Che is a browser application based on HTML and JavaScript, it is also possible to embed native web components. Those do not have to be based on GWT. This also enables you to reuse any kind of existing UI component in Che. As an existing example, Che embeds the Orion code editor.

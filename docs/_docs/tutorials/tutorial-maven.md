@@ -5,6 +5,7 @@ excerpt: "Che was written in Java. Experience the rich Intellisense and Java too
 layout: tutorials
 permalink: /:categories/maven/
 ---
+{% include base.html %}
 # 1. Start Che  
 Use your SaaS account for the following, or if you have [installed Che](https://eclipse-che.readme.io/v5.0/docs/che-getting-started), open a terminal and use the Che startup script:
 ```shell  

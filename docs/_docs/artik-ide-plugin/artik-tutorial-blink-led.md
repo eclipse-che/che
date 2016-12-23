@@ -5,6 +5,7 @@ excerpt: ""
 layout: artik
 permalink: /:categories/tutorial-blink-led/
 ---
+{% include base.html %}
 The ARTIK device and many other other embedded device have their own equivalents to the standard printed "Hello World!" program. To show that a device can interact with digital devices in the physical world a device blinks an LED to say "Hello".
 
 This tutorial assumes that the user has already gone thru the ARTIK [Getting Started](../../docs/artik/) documentation.

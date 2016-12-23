@@ -5,6 +5,7 @@ excerpt: "Convert any repository into a developer workspace."
 layout: docs
 permalink: /:categories/getting-started/
 ---
+{% include base.html %}
 The Chedir getting started guide will walk you through your first Chedir project, and show the basic  features Chedir has to offer.
 
 If you are curious what benefits Chedir has to offer, you should also read the [Why Chedir?](https://eclipse-che.readme.io/docs/why-chedir) page.

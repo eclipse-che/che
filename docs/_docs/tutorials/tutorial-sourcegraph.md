@@ -5,6 +5,7 @@ excerpt: ""
 layout: tutorials
 permalink: /:categories/sourcegraph/
 ---
+{% include base.html %}
 Sourcegraph is a version-control platform built with Code Intelligence.
 ```shell  
 # In the dashboard, create a new project and import from source:

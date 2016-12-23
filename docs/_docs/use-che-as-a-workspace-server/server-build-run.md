@@ -5,6 +5,7 @@ excerpt: ""
 layout: docs
 permalink: /:categories/build-run/
 ---
+{% include base.html %}
 ```shell  
 curl -X POST -d 'var i = 1;' http://localhost:8080/api/ext/project/workspacesq6co30qcxi1kqsj/file/my-first-sample?name=newfile.js\
 ```

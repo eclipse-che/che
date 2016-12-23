@@ -5,6 +5,7 @@ excerpt: ""
 layout: docs
 permalink: /:categories/managing/
 ---
+{% include base.html %}
 # Scaling
 Eclipse Che is a workspace server. It supports the provisioning and management of numerous workspaces for users. The default configuration of Che has a single identity per server, where the identity manages IDE preferences and SSH keys for workspaces and GitHub.
 

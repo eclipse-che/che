@@ -5,6 +5,7 @@ excerpt: ""
 layout: docs
 permalink: /:categories/serverworkspace-access/
 ---
+{% include base.html %}
 Many simple extensions to Che are directly implemented in the IDE running in the browser. This has the advantage that the execution of simple actions do not require any server round-trips and are therefore typically very fast.
 However, more complex operations, especially when accessing resources from a project or the workspace require you to run on the server or within the workspace. Examples for such operations are validating files, compiling code, providing auto-completion or creating workspaces. All those operations are implemented as REST services and can be consumed by the client IDE.
 

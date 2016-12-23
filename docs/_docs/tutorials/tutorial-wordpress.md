@@ -5,6 +5,7 @@ excerpt: "Create a new Wordpress project with a dedicated database"
 layout: tutorials
 permalink: /:categories/wordpress/
 ---
+{% include base.html %}
 # 1. Start Che  
 
 ```smarty  

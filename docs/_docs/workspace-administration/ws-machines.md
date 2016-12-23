@@ -6,6 +6,7 @@ layout: docs
 permalink: /:categories/machines/
 ---
 {% include base.html %}
+=======
 
 
 A machine is part of an environment, which are in turn part of a Che workspace. The [workspace administration introduction](https://eclipse-che.readme.io/docs/workspace-admin-intro) explains the details of this relationship.

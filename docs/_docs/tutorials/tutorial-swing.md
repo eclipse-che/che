@@ -5,6 +5,7 @@ excerpt: ""
 layout: tutorials
 permalink: /:categories/swing/
 ---
+{% include base.html %}
 Swing is a GUI widget toolkit for Java. It is part of Oracle's Java Foundation Classes (JFC) – an API for providing a graphical user interface (GUI) for Java programs.
 ```text  
 #Import a project from source:

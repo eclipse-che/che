@@ -5,6 +5,7 @@ excerpt: "Customize how the Che server, workspace, and project are generated fro
 layout: docs
 permalink: /:categories/chefiles/
 ---
+{% include base.html %}
 You can create a Chefile and place it into the root of your repository. The Chefile contains the configuration that will be used to setup the Che server and Che workspace. You can run `che dir init` in a directory to provide a template Chefile.
 
 ```javascript  

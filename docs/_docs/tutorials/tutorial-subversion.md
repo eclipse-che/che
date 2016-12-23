@@ -5,6 +5,7 @@ excerpt: ""
 layout: tutorials
 permalink: /:categories/subversion/
 ---
+{% include base.html %}
 Apache Subversion (often abbreviated SVN, after the command name svn) is a software versioning and revision control system distributed as free software under the Apache License.
 
 Che supports SVN through the commands line.
