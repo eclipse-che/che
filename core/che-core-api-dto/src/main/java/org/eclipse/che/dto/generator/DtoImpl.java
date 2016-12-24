@@ -177,6 +177,9 @@ abstract class DtoImpl {
         return new ArrayList<>(getters.values());
     }
 
+    /**
+     * Get the names of all the getters in the super DTO interface and upper ancestors.
+     */
     protected Set<String> getSuperGetterNames(Class<?> dto) {
         final Map<String, Method> getters = new HashMap<>();
         Class<?> superDto = getSuperDtoInterface(dto);
