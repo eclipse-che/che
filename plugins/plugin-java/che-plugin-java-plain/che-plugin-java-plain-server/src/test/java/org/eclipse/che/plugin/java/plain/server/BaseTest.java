@@ -28,7 +28,7 @@ import org.eclipse.che.api.vfs.impl.file.DefaultFileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.FileTreeWatcher;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
-import org.eclipse.che.api.vfs.impl.file.event.detectors.ProjectTreeChangesDetector;
+import org.eclipse.che.api.vfs.watcher.FileWatcherManager;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.commons.lang.IoUtil;
@@ -115,7 +115,7 @@ public abstract class BaseTest {
                                             fileWatcherNotificationHandler,
                                             fileTreeWatcher,
                                             new TestWorkspaceHolder(new ArrayList<>()),
-                                            mock(ProjectTreeChangesDetector.class));
+                                            mock(FileWatcherManager.class));
 
         ResourcesPlugin plugin = new ResourcesPlugin("target/index", wsPath, () -> projectRegistry, () -> projectManager);
 

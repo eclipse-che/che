@@ -15,17 +15,22 @@ import com.google.gwt.user.client.Timer;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
+import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.jsonrpc.JsonRpcInitializer;
+import org.eclipse.che.ide.jsonrpc.RequestTransmitter;
 import org.eclipse.che.ide.util.loging.Log;
 
 import javax.inject.Singleton;
 
 import static java.util.Collections.singletonMap;
+import static org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto.Type.START;
+import static org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto.Type.STOP;
 
 /**
  * @author Dmitry Kuleshov
@@ -36,11 +41,16 @@ public class JsonRpcWebSocketAgentEventListener implements WsAgentStateHandler {
 
     private final JsonRpcInitializer initializer;
     private final AppContext         appContext;
+    private final RequestTransmitter requestTransmitter;
+    private final DtoFactory         dtoFactory;
 
     @Inject
-    public JsonRpcWebSocketAgentEventListener(JsonRpcInitializer initializer, AppContext appContext, EventBus eventBus) {
+    public JsonRpcWebSocketAgentEventListener(JsonRpcInitializer initializer, AppContext appContext, EventBus eventBus,
+                                              RequestTransmitter requestTransmitter, DtoFactory dtoFactory) {
         this.appContext = appContext;
         this.initializer = initializer;
+        this.requestTransmitter = requestTransmitter;
+        this.dtoFactory = dtoFactory;
 
         eventBus.addHandler(WsAgentStateEvent.TYPE, this);
     }
@@ -59,6 +69,8 @@ public class JsonRpcWebSocketAgentEventListener implements WsAgentStateHandler {
                 }
             }.schedule(1_000);
         }
+
+        initializeTreeExplorerFileWatcher();
     }
 
     private void internalInitialize() {
@@ -77,6 +89,14 @@ public class JsonRpcWebSocketAgentEventListener implements WsAgentStateHandler {
                 initializer.initialize(machineEntity.getId(), singletonMap("url", machineEntity.getExecAgentUrl()));
             }
         }
+    }
+
+    private void initializeTreeExplorerFileWatcher() {
+        ProjectTreeTrackingOperationDto params = dtoFactory.createDto(ProjectTreeTrackingOperationDto.class)
+                                                           .withPath("/")
+                                                           .withType(START);
+
+        requestTransmitter.transmitOneToNone("ws-agent", "track:project-tree", params);
     }
 
     @Override
