@@ -453,8 +453,6 @@ public class CheEnvironmentEngine {
     /**
      * Saves machine into snapshot.
      *
-     * @param namespace
-     *         namespace of the workspace
      * @param workspaceId
      *         ID of workspace that owns environment
      * @param machineId
@@ -891,10 +889,14 @@ public class CheEnvironmentEngine {
                 }
 
                 instance = machineStarter.startMachine(machineLogger, machineSource);
-            } catch (SourceNotFoundException e) {
+            } catch (SourceNotFoundException | NotFoundException e) {
                 if (recover) {
                     LOG.error("Image of snapshot for machine " + machine.getConfig().getName() +
-                              " not found. " + "Machine will be created from origin source");
+                              " not found. " + "Machine will be created from origin source.");
+                    try {
+                        machineLogger.writeLine("Failed to boot machine from snapshot: snapshot not found. " +
+                                                "Machine will be created from origin source.");
+                    } catch (IOException ignore) { }
                     machine = originMachine;
                     instance = machineStarter.startMachine(machineLogger, null);
                 } else {
