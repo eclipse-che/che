@@ -60,7 +60,6 @@ import {EditMachineNameDialogController} from  './workspace-details/environments
 
 import {ListEnvVariablesController} from './workspace-details/environments/list-env-variables/list-env-variables.controller';
 import {ListEnvVariables} from './workspace-details/environments/list-env-variables/list-env-variables.directive';
-import {AddVariableDialogController} from  './workspace-details/environments/list-env-variables/add-variable-dialog/add-variable-dialog.controller';
 import {EditVariableDialogController} from  './workspace-details/environments/list-env-variables/edit-variable-dialog/edit-variable-dialog.controller';
 
 import {ListPortsController} from './workspace-details/environments/list-ports/list-ports.controller';
@@ -151,7 +150,6 @@ export class WorkspacesConfig {
 
     register.controller('ListEnvVariablesController', ListEnvVariablesController);
     register.directive('listEnvVariables', ListEnvVariables);
-    register.controller('AddVariableDialogController', AddVariableDialogController);
     register.controller('EditVariableDialogController', EditVariableDialogController);
 
     register.controller('ListPortsController', ListPortsController);
