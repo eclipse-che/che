@@ -39,11 +39,11 @@ const (
 )
 
 var (
-	prevPid   		uint64 = 0
-	processes        	= &processesMap{items: make(map[uint64]*MachineProcess)}
-	logsDist         	= NewLogsDistributor()
-	LogsDir   		string
-	ShellInterpreter   	string = DefaultShellInterpreter
+	prevPid          uint64 = 0
+	processes               = &processesMap{items: make(map[uint64]*MachineProcess)}
+	logsDist                = NewLogsDistributor()
+	LogsDir          string
+	ShellInterpreter string = DefaultShellInterpreter
 )
 
 type Command struct {
