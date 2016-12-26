@@ -59,6 +59,8 @@ import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
 /**
  * Implementation of {@link ProjectServiceClient}.
  *
+ * TODO need to remove interface as this component is internal one and couldn't have more than one instance
+ *
  * @author Vitaly Parfonov
  * @author Artem Zatsarynnyi
  * @author Valeriy Svydenko
@@ -310,9 +312,11 @@ public class ProjectServiceClientImpl implements ProjectServiceClient {
     public Promise<TreeElement> getTree(Path path, int depth, boolean includeFiles) {
         final String url = getBaseUrl() + TREE + path(path.toString()) + "?depth=" + depth + "&includeFiles=" + includeFiles;
 
+        // temporary workaround for CHE-3467, remove loader for disable UI blocking
+        // later this loader should be added with the new mechanism of client-server synchronization
+
         return reqFactory.createGetRequest(url)
                          .header(ACCEPT, MimeType.APPLICATION_JSON)
-                         .loader(loaderFactory.newLoader("Reading project structure..."))
                          .send(unmarshaller.newUnmarshaller(TreeElement.class));
     }
 
