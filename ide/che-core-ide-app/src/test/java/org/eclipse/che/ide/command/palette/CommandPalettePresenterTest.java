@@ -24,7 +24,6 @@ import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.command.CommandUtils;
 import org.eclipse.che.ide.machine.chooser.MachineChooser;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -35,9 +34,11 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -81,12 +82,11 @@ public class CommandPalettePresenterTest {
     @Captor
     private ArgumentCaptor<Operation<Machine>> selectedMachineCaptor;
 
+    @Captor
+    private ArgumentCaptor<Map<CommandGoal, List<ContextualCommand>>> filteredCommandsCaptor;
+
     @InjectMocks
     private CommandPalettePresenter presenter;
-
-    @Before
-    public void setUp() throws Exception {
-    }
 
     @Test
     public void shouldSetViewDelegate() throws Exception {
@@ -98,7 +98,37 @@ public class CommandPalettePresenterTest {
         presenter.showDialog();
 
         verify(view).show();
+        verify(commandManager).getCommands();
         verify(view).setCommands(Matchers.<Map<CommandGoal, List<ContextualCommand>>>any());
+    }
+
+    @Test
+    public void shouldFilterCommands() throws Exception {
+        // given
+        ContextualCommand cmd1 = mock(ContextualCommand.class);
+        when(cmd1.getName()).thenReturn("test");
+
+        ContextualCommand cmd2 = mock(ContextualCommand.class);
+        when(cmd2.getName()).thenReturn("run");
+
+        List<ContextualCommand> commands = new ArrayList<>();
+        commands.add(cmd1);
+        commands.add(cmd2);
+
+        when(commandManager.getCommands()).thenReturn(commands);
+
+        Map<CommandGoal, List<ContextualCommand>> filteredCommandsMock = new HashMap<>();
+        filteredCommandsMock.put(mock(CommandGoal.class), commands);
+        when(commandUtils.groupCommandsByGoal(commands)).thenReturn(filteredCommandsMock);
+
+        // when
+        presenter.onFilterChanged("run");
+
+        // then
+        verify(commandUtils).groupCommandsByGoal(commands);
+        verify(view).setCommands(filteredCommandsCaptor.capture());
+        final Map<CommandGoal, List<ContextualCommand>> filteredCommandsValue = filteredCommandsCaptor.getValue();
+        assertEquals(filteredCommandsMock, filteredCommandsValue);
     }
 
     @Test
@@ -127,7 +157,6 @@ public class CommandPalettePresenterTest {
         verify(machineChooser).show();
 
         verify(machinePromise).then(selectedMachineCaptor.capture());
-        // simulate choosing machine
         selectedMachineCaptor.getValue().apply(chosenMachine);
 
         verify(commandExecutor).executeCommand(eq(commandToExecute), eq(chosenMachine));
