@@ -153,7 +153,9 @@ public class FileWatcherServiceTest {
 
     @Test
     public void shouldWatchForRegisteredFolderForFolderModification() throws Exception {
-        assumeTrue(osIsMacOsX());
+        if (!osIsMacOsX()){
+            return;
+        }
 
         service.register(rootFolder.getRoot().toPath());
 
