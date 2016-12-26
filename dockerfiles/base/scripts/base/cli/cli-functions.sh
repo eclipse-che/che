@@ -24,7 +24,7 @@ cli_parse () {
   COMMAND="cmd_$1"
 
   case $1 in
-      init|config|start|stop|restart|backup|restore|info|offline|destroy|download|rmi|upgrade|version|ssh|sync|action|test|compile|help)
+      init|config|start|stop|restart|backup|restore|info|offline|destroy|download|rmi|upgrade|version|ssh|sync|action|test|compile|dir|help)
       ;;
       *)
          error "You passed an unknown command."

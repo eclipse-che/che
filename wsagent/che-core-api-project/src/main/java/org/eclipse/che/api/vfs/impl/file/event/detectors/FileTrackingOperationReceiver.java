@@ -10,14 +10,33 @@
  *******************************************************************************/
 package org.eclipse.che.api.vfs.impl.file.event.detectors;
 
+import com.google.common.hash.Hashing;
+
+import org.eclipse.che.api.core.ForbiddenException;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jsonrpc.RequestHandler;
+import org.eclipse.che.api.core.jsonrpc.RequestTransmitter;
+import org.eclipse.che.api.project.shared.dto.event.FileStateUpdateDto;
 import org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto;
 import org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type;
+import org.eclipse.che.api.vfs.Path;
+import org.eclipse.che.api.vfs.VirtualFile;
+import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
+import org.eclipse.che.api.vfs.watcher.FileWatcherManager;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Consumer;
 
+import static java.nio.charset.Charset.defaultCharset;
+import static org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType.DELETED;
+import static org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType.MODIFIED;
+import static org.eclipse.che.api.vfs.watcher.FileWatcherManager.EMPTY_CONSUMER;
+import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -40,12 +59,23 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class FileTrackingOperationReceiver extends RequestHandler<FileTrackingOperationDto, Void> {
     private static final Logger LOG = getLogger(FileTrackingOperationReceiver.class);
 
-    private final FileTrackingRegistry registry;
+    private static final String OUTGOING_METHOD = "event:file-state-changed";
+
+    private final Map<String, String>  hashRegistry    = new HashMap<>();
+    private final Map<String, Integer> watchIdRegistry = new HashMap<>();
+
+    private final RequestTransmitter        transmitter;
+    private final FileWatcherManager        fileWatcherManager;
+    private final VirtualFileSystemProvider vfsProvider;
+
 
     @Inject
-    public FileTrackingOperationReceiver(FileTrackingRegistry registry) {
+    public FileTrackingOperationReceiver(FileWatcherManager fileWatcherManager, RequestTransmitter transmitter,
+                                         VirtualFileSystemProvider vfsProvider) {
         super(FileTrackingOperationDto.class, Void.class);
-        this.registry = registry;
+        this.fileWatcherManager = fileWatcherManager;
+        this.transmitter = transmitter;
+        this.vfsProvider = vfsProvider;
     }
 
     @Override
@@ -57,39 +87,47 @@ public class FileTrackingOperationReceiver extends RequestHandler<FileTrackingOp
         switch (type) {
             case START: {
                 LOG.debug("Received file tracking operation START trigger.");
-
-                registry.add(path, endpointId);
-
+                int id = fileWatcherManager.registerByPath(path,
+                                                           EMPTY_CONSUMER,
+                                                           getModifyConsumer(endpointId, path),
+                                                           getDeleteConsumer(endpointId, path));
+                watchIdRegistry.put(path + endpointId, id);
                 break;
             }
             case STOP: {
                 LOG.debug("Received file tracking operation STOP trigger.");
 
-                registry.remove(path, endpointId);
+                int id = watchIdRegistry.remove(path + endpointId);
+                fileWatcherManager.unRegisterByPath(id);
 
                 break;
             }
             case SUSPEND: {
                 LOG.debug("Received file tracking operation SUSPEND trigger.");
 
-                registry.suspend(endpointId);
+                fileWatcherManager.suspend();
 
                 break;
             }
             case RESUME: {
                 LOG.debug("Received file tracking operation RESUME trigger.");
 
-                registry.resume(endpointId);
+                fileWatcherManager.resume();
 
                 break;
             }
             case MOVE: {
                 LOG.debug("Received file tracking operation MOVE trigger.");
 
-                registry.copy(oldPath, path);
-                // TODO temporary workaround to support multi-client refactoring
-                // file remove notification
-//                registry.move(oldPath, path);
+                int oldId = watchIdRegistry.remove(oldPath + endpointId);
+                fileWatcherManager.unRegisterByPath(oldId);
+
+                int newId = fileWatcherManager.registerByPath(path,
+                                                              EMPTY_CONSUMER,
+                                                              getModifyConsumer(endpointId, path),
+                                                              getDeleteConsumer(endpointId, path));
+                watchIdRegistry.put(path + endpointId, newId);
+
 
                 break;
             }
@@ -99,5 +137,37 @@ public class FileTrackingOperationReceiver extends RequestHandler<FileTrackingOp
                 break;
             }
         }
+    }
+
+    private Consumer<String> getDeleteConsumer(String endpointId, String path) {
+        return it -> transmitter.transmitNotification(endpointId, OUTGOING_METHOD, newDto(FileStateUpdateDto.class).withPath(path)
+                                                                                                                   .withType(DELETED));
+    }
+
+    private Consumer<String> getModifyConsumer(String endpointId, String path) {
+        return it -> {
+            String newHash = hashFile(path);
+            String oldHash = hashRegistry.getOrDefault(path + endpointId, null);
+
+            if (Objects.equals(newHash, oldHash)) {
+                return;
+            }
+
+            hashRegistry.put(path + endpointId, newHash);
+
+            transmitter.transmitNotification(endpointId, OUTGOING_METHOD, newDto(FileStateUpdateDto.class).withPath(path)
+                                                                                                          .withType(MODIFIED)
+                                                                                                          .withHashCode(newHash));
+        };
+    }
+
+    private String hashFile(String path) {
+        try {
+            VirtualFile file = vfsProvider.getVirtualFileSystem().getRoot().getChild(Path.of(path));
+            return Hashing.md5().hashString(file == null ? "" : file.getContentAsString(), defaultCharset()).toString();
+        } catch (ServerException | ForbiddenException e) {
+            LOG.error("Error trying to read {} file and broadcast it", path, e);
+        }
+        return null;
     }
 }

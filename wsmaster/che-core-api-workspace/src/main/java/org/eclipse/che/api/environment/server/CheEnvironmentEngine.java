@@ -879,14 +879,19 @@ public class CheEnvironmentEngine {
 
             MachineImpl originMachine = new MachineImpl(machine);
             try {
-                MachineSource machineSource = null;
+                MachineSourceImpl machineSource = null;
                 if (recover) {
                     try {
                         SnapshotImpl snapshot = snapshotDao.getSnapshot(machine.getWorkspaceId(),
                                                                         machine.getEnvName(),
                                                                         machine.getConfig().getName());
-
                         machineSource = snapshot.getMachineSource();
+                        // Snapshot image location has SHA-256 digest which needs to be removed,
+                        // otherwise it will be pulled without tag and cause problems
+                        String imageName = machineSource.getLocation();
+                        if (imageName.contains("@sha256:")) {
+                            machineSource.setLocation(imageName.substring(0, imageName.indexOf('@')));
+                        }
                     } catch (NotFoundException e) {
                         try {
                             machineLogger.writeLine("Failed to boot machine from snapshot: snapshot not found. " +
