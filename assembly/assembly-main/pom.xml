@@ -65,6 +65,11 @@
             <type>war</type>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che.docs</groupId>
+            <artifactId>che-docs</artifactId>
+            <type>war</type>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.che.lib</groupId>
             <artifactId>che-swagger-war</artifactId>
             <type>war</type>
