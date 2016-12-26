@@ -881,22 +881,25 @@ public class CheEnvironmentEngine {
             try {
                 MachineSource machineSource = null;
                 if (recover) {
-                    SnapshotImpl snapshot = snapshotDao.getSnapshot(machine.getWorkspaceId(),
-                                                                    machine.getEnvName(),
-                                                                    machine.getConfig().getName());
+                    try {
+                        SnapshotImpl snapshot = snapshotDao.getSnapshot(machine.getWorkspaceId(),
+                                                                        machine.getEnvName(),
+                                                                        machine.getConfig().getName());
 
-                    machineSource = snapshot.getMachineSource();
+                        machineSource = snapshot.getMachineSource();
+                    } catch (NotFoundException e) {
+                        try {
+                            machineLogger.writeLine("Failed to boot machine from snapshot: snapshot not found. " +
+                                                    "Machine will be created from origin source.");
+                        } catch (IOException ignore) { }
+                    }
                 }
 
                 instance = machineStarter.startMachine(machineLogger, machineSource);
-            } catch (SourceNotFoundException | NotFoundException e) {
+            } catch (SourceNotFoundException e) {
                 if (recover) {
                     LOG.error("Image of snapshot for machine " + machine.getConfig().getName() +
                               " not found. " + "Machine will be created from origin source.");
-                    try {
-                        machineLogger.writeLine("Failed to boot machine from snapshot: snapshot not found. " +
-                                                "Machine will be created from origin source.");
-                    } catch (IOException ignore) { }
                     machine = originMachine;
                     instance = machineStarter.startMachine(machineLogger, null);
                 } else {
