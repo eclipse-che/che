@@ -11,6 +11,8 @@
 package org.eclipse.che.api.workspace.server.launcher;
 
 import org.eclipse.che.api.agent.server.launcher.AbstractAgentLauncher;
+import org.eclipse.che.api.agent.server.launcher.CompositeAgentLaunchingChecker;
+import org.eclipse.che.api.agent.server.launcher.MappedPortIsListeningAgentChecker;
 import org.eclipse.che.api.agent.server.launcher.ProcessIsLaunchedChecker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,9 +22,10 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 /**
- * Starts terminal agent.
+ * Starts SSH agent.
  *
  * @author Anatolii Bazko
+ * @author Alexander Garagatyi
  */
 @Singleton
 public class SshAgentLauncherImpl extends AbstractAgentLauncher {
@@ -31,7 +34,10 @@ public class SshAgentLauncherImpl extends AbstractAgentLauncher {
     @Inject
     public SshAgentLauncherImpl(@Named("che.agent.dev.max_start_time_ms") long agentMaxStartTimeMs,
                                 @Named("che.agent.dev.ping_delay_ms") long agentPingDelayMs) {
-        super(agentMaxStartTimeMs, agentPingDelayMs, new ProcessIsLaunchedChecker("sshd"));
+        super(agentMaxStartTimeMs,
+              agentPingDelayMs,
+              new CompositeAgentLaunchingChecker(new ProcessIsLaunchedChecker("sshd"),
+                                                 new MappedPortIsListeningAgentChecker("22/tcp")));
     }
 
     @Override
