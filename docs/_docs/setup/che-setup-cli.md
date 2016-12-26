@@ -29,6 +29,7 @@ COMMANDS:
   backup                               Backups che configuration and data to /data/backup volume mount
   config                               Generates a che config from vars; run on any start / restart
   destroy                              Stops services, and deletes che instance data
+  dir <path> <command>                 Use Chefile feature in the directory <path>
   download                             Pulls Docker images for the current che version
   help                                 This message
   info                                 Displays info about che and the CLI
@@ -138,7 +139,34 @@ Restores `/instance` to its previous state. You do not need to worry about havin
 
 This command will destroy your existing `/instance` folder, so use with caution, or set these values to different folders when performing a restore.
 
-TODO: NEED SYNTAX FOR SSH, TEST, SYNC, DIR COMMANDS
+## action
+Executes some actions on the Eclipse Che instance or on a workspace running inside Che.
+For example to list all workspaces on Che, the following command can be used
+`action list-workspaces`.
+To execute a command on a workspace `action execute-command <workspace-name> <action>` where action can be any bash command.
+
+## dir
+Boots a new Eclipse Che instance with a workspace for the folder specified in parameter.
+If for example `$HOME/my-project` is given as parameter in `dir $HOME/my-project up`, a new Che instance will be created, using `$HOME/my-project`as project in the IDE.
+So inside the IDE, `/projects` folder will contain a `my-project`folder with your host folder.
+Then, any changes inside the IDE will be reflected in your host folder. And the opposite is also true, updating a file on your local computer will update the content of the file inside the IDE.
+
+Other commands are `init`,`up`, `down`, `ssh` and `status`
+
+  - `init`  : Initialize the directory specified and add a default `Chefile` file if there is none
+  - `up`    : Boot Eclipse Che with workspace on folder
+  - `down`  : Stop Eclipse Che and any workspaces
+  - `ssh`   : Connect to the running workspace by using ssh
+  - `status`: Display if an instance of Eclipse Che is running or not for the specified folder.
+
+## ssh
+Connects the current terminal where the command is started to the terminal of a machine of the workspace. If no machine is specified in the command, it will connect to the default machine which is the dev machine.
+The syntax is `ssh <workspace-name> [machine-name]`
+The ssh connection will work only if there is a workspace ssh key setup. A default ssh key is automatically generated when a workspace is created.
+
+## test
+Performs some tests on your local instance of Che. It can for example check the ability to create a workspace, start the workspace by using a custom Workspace runtime and then use it.
+The list of all the tests available can be obtained by providing only `test` command.
 
 # CLI Development
 You can customize the CLI using a variety of techniques. This section discusses how engineers develop and test the CLI on their local machines.
