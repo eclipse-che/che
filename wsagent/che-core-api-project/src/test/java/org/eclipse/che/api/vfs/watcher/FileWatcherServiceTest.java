@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.vfs.watcher;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -35,7 +35,6 @@ import static java.util.Collections.emptySet;
 import static org.apache.commons.io.FileUtils.write;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.junit.Assume.assumeTrue;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -62,7 +61,7 @@ public class FileWatcherServiceTest {
     public FileWatcherServiceTest() throws IOException {
     }
 
-    @Before
+    @BeforeClass
     public void setUp() throws Exception {
         service = new FileWatcherService(excludes, handler, watchService);
 
@@ -82,7 +81,7 @@ public class FileWatcherServiceTest {
         verify(handler, timeout(TIMEOUT_VALUE)).handle(path, ENTRY_CREATE);
     }
 
-    @After
+    @AfterClass
     public void tearDown() throws Exception {
         service.stop();
 
