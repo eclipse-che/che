@@ -23,9 +23,13 @@ import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static java.util.stream.Collectors.toSet;
 import static org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType.CREATED;
 import static org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType.DELETED;
@@ -40,6 +44,8 @@ public class ProjectTreeTrackingOperationReceiver extends RequestHandler<Project
     private static final String OUTGOING_METHOD = "event:project-tree-state-changed";
 
     private final Map<String, Integer> watchIdRegistry = new HashMap<>();
+    private final Set<String>          timer           = newConcurrentHashSet();
+
 
     private final RequestTransmitter transmitter;
     private final FileWatcherManager fileWatcherManager;
@@ -107,15 +113,29 @@ public class ProjectTreeTrackingOperationReceiver extends RequestHandler<Project
 
     private Consumer<String> getDeleteOperation(String endpointId) {
         return it -> {
-            ProjectTreeStateUpdateDto params = newDto(ProjectTreeStateUpdateDto.class).withPath(it).withType(DELETED);
-            transmitter.transmitNotification(endpointId, OUTGOING_METHOD, params);
+            timer.add(it);
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    if (timer.contains(it)) {
+                        timer.remove(it);
+                        ProjectTreeStateUpdateDto params = newDto(ProjectTreeStateUpdateDto.class).withPath(it).withType(DELETED);
+                        transmitter.transmitNotification(endpointId, OUTGOING_METHOD, params);
+                    }
+
+                }
+            }, 1_000L);
         };
     }
 
     private Consumer<String> getCreateOperation(String endpointId) {
         return it -> {
-            ProjectTreeStateUpdateDto params = newDto(ProjectTreeStateUpdateDto.class).withPath(it).withType(CREATED);
-            transmitter.transmitNotification(endpointId, OUTGOING_METHOD, params);
+            if (timer.contains(it)) {
+                timer.remove(it);
+            } else {
+                ProjectTreeStateUpdateDto params = newDto(ProjectTreeStateUpdateDto.class).withPath(it).withType(CREATED);
+                transmitter.transmitNotification(endpointId, OUTGOING_METHOD, params);
+            }
         };
     }
 }
