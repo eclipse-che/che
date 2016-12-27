@@ -14,7 +14,7 @@ import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.util.Set;
 
-class FileWatcherUtils {
+public class FileWatcherUtils {
 
     /**
      * Transform internal path representation into normal path representation
@@ -23,10 +23,9 @@ class FileWatcherUtils {
      *         root of virtual file system
      * @param path
      *         internal path representation
-     *
      * @return normal path
      */
-    static Path toNormalPath(Path root, String path) {
+    public static Path toNormalPath(Path root, String path) {
         return root.resolve(path.startsWith("/") ? path.substring(1) : path).toAbsolutePath();
     }
 
@@ -37,10 +36,9 @@ class FileWatcherUtils {
      *         root of virtual file system
      * @param path
      *         normal path representation
-     *
      * @return internal path
      */
-    static String toInternalPath(Path root, Path path) {
+    public static String toInternalPath(Path root, Path path) {
         return "/" + root.toAbsolutePath().relativize(path);
     }
 
@@ -51,10 +49,9 @@ class FileWatcherUtils {
      *         set of exclude matchers
      * @param path
      *         path being examined
-     *
      * @return true if path is within excludes, false otherwise
      */
-    static boolean isExcluded(Set<PathMatcher> excludes, Path path) {
+    public static boolean isExcluded(Set<PathMatcher> excludes, Path path) {
         for (PathMatcher matcher : excludes) {
             if (matcher.matches(path)) {
                 return true;

@@ -23,13 +23,19 @@ import org.eclipse.che.api.vfs.Path;
 import org.eclipse.che.api.vfs.VirtualFile;
 import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
 import org.eclipse.che.api.vfs.watcher.FileWatcherManager;
+import org.eclipse.che.api.vfs.watcher.FileWatcherUtils;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
+import java.io.File;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.function.Consumer;
 
 import static java.nio.charset.Charset.defaultCharset;
@@ -65,14 +71,16 @@ public class FileTrackingOperationReceiver extends RequestHandler<FileTrackingOp
     private final Map<String, Integer> watchIdRegistry = new HashMap<>();
 
     private final RequestTransmitter        transmitter;
-    private final FileWatcherManager        fileWatcherManager;
+    private       File                      root;
+    private final FileWatcherManager fileWatcherManager;
     private final VirtualFileSystemProvider vfsProvider;
 
 
     @Inject
-    public FileTrackingOperationReceiver(FileWatcherManager fileWatcherManager, RequestTransmitter transmitter,
+    public FileTrackingOperationReceiver(@Named("che.user.workspaces.storage") File root, FileWatcherManager fileWatcherManager, RequestTransmitter transmitter,
                                          VirtualFileSystemProvider vfsProvider) {
         super(FileTrackingOperationDto.class, Void.class);
+        this.root = root;
         this.fileWatcherManager = fileWatcherManager;
         this.transmitter = transmitter;
         this.vfsProvider = vfsProvider;
@@ -140,8 +148,18 @@ public class FileTrackingOperationReceiver extends RequestHandler<FileTrackingOp
     }
 
     private Consumer<String> getDeleteConsumer(String endpointId, String path) {
-        return it -> transmitter.transmitNotification(endpointId, OUTGOING_METHOD, newDto(FileStateUpdateDto.class).withPath(path)
-                                                                                                                   .withType(DELETED));
+        return it -> {
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    if (!Files.exists(FileWatcherUtils.toNormalPath(root.toPath(), it))) {
+                        transmitter.transmitNotification(endpointId, OUTGOING_METHOD, newDto(FileStateUpdateDto.class).withPath(path)
+                                                                                                                      .withType(DELETED));
+                    }
+
+                }
+            }, 1_000L);
+        };
     }
 
     private Consumer<String> getModifyConsumer(String endpointId, String path) {
