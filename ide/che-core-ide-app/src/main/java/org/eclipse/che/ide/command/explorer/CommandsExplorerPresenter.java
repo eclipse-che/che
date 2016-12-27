@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.explorer;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
@@ -24,11 +25,11 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.DelayedTask;
 import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.command.CommandManager;
+import org.eclipse.che.ide.api.command.CommandManager.CommandChangedListener;
+import org.eclipse.che.ide.api.command.CommandManager.CommandLoadedListener;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.command.ContextualCommand.ApplicableContext;
-import org.eclipse.che.ide.api.command.CommandManager.CommandChangedListener;
-import org.eclipse.che.ide.api.command.CommandManager.CommandLoadedListener;
 import org.eclipse.che.ide.api.command.PredefinedCommandGoalRegistry;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.constraints.Constraints;
@@ -60,39 +61,32 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
                                                                         CommandChangedListener,
                                                                         CommandLoadedListener {
 
-    private final CommandsExplorerView          view;
-    private final CommandResources              resources;
-    private final WorkspaceAgent                workspaceAgent;
-    private final CommandManager                commandManager;
-    private final PredefinedCommandGoalRegistry goalRegistry;
-    private final NotificationManager           notificationManager;
-    private final CommandTypeChooser            commandTypeChooser;
-    private final CommandUtils                  commandUtils;
-    private final ExplorerMessages              messages;
-
-    private final RefreshViewTask refreshViewTask;
+    private final CommandsExplorerView view;
+    private final CommandResources     resources;
+    private final WorkspaceAgent       workspaceAgent;
+    private final CommandManager       commandManager;
+    private final NotificationManager  notificationManager;
+    private final CommandTypeChooser   commandTypeChooser;
+    private final ExplorerMessages     messages;
+    private final RefreshViewTask      refreshViewTask;
 
     @Inject
     public CommandsExplorerPresenter(CommandsExplorerView view,
                                      CommandResources commandResources,
                                      WorkspaceAgent workspaceAgent,
                                      CommandManager commandManager,
-                                     PredefinedCommandGoalRegistry predefinedCommandGoalRegistry,
                                      NotificationManager notificationManager,
                                      CommandTypeChooser commandTypeChooser,
-                                     CommandUtils commandUtils,
-                                     ExplorerMessages messages) {
+                                     ExplorerMessages messages,
+                                     RefreshViewTask refreshViewTask) {
         this.view = view;
         this.resources = commandResources;
         this.workspaceAgent = workspaceAgent;
         this.commandManager = commandManager;
-        this.goalRegistry = predefinedCommandGoalRegistry;
         this.notificationManager = notificationManager;
         this.commandTypeChooser = commandTypeChooser;
-        this.commandUtils = commandUtils;
         this.messages = messages;
-
-        refreshViewTask = new RefreshViewTask();
+        this.refreshViewTask = refreshViewTask;
 
         view.setDelegate(this);
     }
@@ -231,12 +225,31 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
      * and it needs some time to be fully rendered.
      * So successive refreshing view must be called with some delay.
      */
-    private class RefreshViewTask extends DelayedTask {
+    // since GIN can't instantiate inner classes
+    // made it nested in order to allow injection
+    @VisibleForTesting
+    static class RefreshViewTask extends DelayedTask {
 
         // delay determined experimentally
         private static final int DELAY_MILLIS = 300;
 
+        private final CommandsExplorerView          view;
+        private final PredefinedCommandGoalRegistry goalRegistry;
+        private final CommandManager                commandManager;
+        private final CommandUtils                  commandUtils;
+
         private ContextualCommand command;
+
+        @Inject
+        public RefreshViewTask(CommandsExplorerView view,
+                               PredefinedCommandGoalRegistry goalRegistry,
+                               CommandManager commandManager,
+                               CommandUtils commandUtils) {
+            this.view = view;
+            this.goalRegistry = goalRegistry;
+            this.commandManager = commandManager;
+            this.commandUtils = commandUtils;
+        }
 
         @Override
         public void onExecute() {
