@@ -97,7 +97,6 @@ public abstract class AbstractAgentLauncher implements AgentLauncher {
         throw new ServerException(errMsg);
     }
 
-
     protected InstanceProcess start(Instance machine, Agent agent) throws ServerException {
         Command command = new CommandImpl(agent.getId(), agent.getScript(), "agent");
         InstanceProcess process = machine.createProcess(command, null);
