@@ -112,7 +112,7 @@ export class AddMachineDialogController {
   /**
    * Update machine RAM.
    */
-  updateMachineRAM() {
+  updateMachineRAM(): void {
     this.machineRecipe[Object.keys(this.machineRecipe)[0]].mem_limit = this.machineRAM;
     this.machineRecipeScript = jsyaml.safeDump(this.machineRecipe, {'indent': 1});
   }
