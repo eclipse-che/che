@@ -94,7 +94,7 @@ public class CommandUtils {
         final CommandType commandType = commandTypeRegistry.getCommandTypeById(typeId);
 
         if (commandType != null) {
-            final Icon icon = iconRegistry.getIconIfExist(commandType.getId() + ".commands.category.icon");
+            final Icon icon = iconRegistry.getIconIfExist("command.type." + commandType.getId());
 
             if (icon != null) {
                 final SVGImage svgImage = icon.getSVGImage();
@@ -114,7 +114,7 @@ public class CommandUtils {
         final Optional<CommandGoal> goalOptional = goalRegistry.getGoalById(goalId);
 
         if (goalOptional.isPresent()) {
-            final Icon icon = iconRegistry.getIconIfExist(goalOptional.get().getId() + ".commands.goal.icon");
+            final Icon icon = iconRegistry.getIconIfExist("command.goal." + goalOptional.get().getId());
 
             if (icon != null) {
                 final SVGImage svgImage = icon.getSVGImage();

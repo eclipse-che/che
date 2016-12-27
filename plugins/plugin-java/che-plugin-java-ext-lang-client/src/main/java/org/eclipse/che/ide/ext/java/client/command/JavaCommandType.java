@@ -61,7 +61,7 @@ public class JavaCommandType implements CommandType {
         pages = new LinkedList<>();
         pages.add(page);
 
-        iconRegistry.registerIcon(new Icon(ID + ".commands.category.icon", resources.javaCategoryIcon()));
+        iconRegistry.registerIcon(new Icon("command.type." + ID, resources.javaCategoryIcon()));
     }
 
     @Override

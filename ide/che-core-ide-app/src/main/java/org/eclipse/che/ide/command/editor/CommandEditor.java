@@ -154,7 +154,7 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
 
         if (file instanceof CommandFileNode) {
             final ContextualCommand command = ((CommandFileNode)file).getData();
-            final Icon icon = iconRegistry.getIconIfExist(command.getType() + ".commands.category.icon");
+            final Icon icon = iconRegistry.getIconIfExist("command.type." + command.getType());
 
             if (icon != null) {
                 final SVGImage svgImage = icon.getSVGImage();

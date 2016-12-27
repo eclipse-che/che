@@ -62,7 +62,7 @@ class GoalPopUpGroup extends DefaultActionGroup {
     private SVGResource getCommandGoalIcon() {
         final String goalId = commandGoal.getId();
 
-        final Icon icon = iconRegistry.getIconIfExist(goalId + ".commands.goal.icon");
+        final Icon icon = iconRegistry.getIconIfExist("command.goal." + goalId);
 
         if (icon != null) {
             final SVGImage svgImage = icon.getSVGImage();
