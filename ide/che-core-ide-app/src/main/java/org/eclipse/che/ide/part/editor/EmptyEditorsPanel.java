@@ -99,6 +99,8 @@ public class EmptyEditorsPanel extends Composite implements ResourceChangedEvent
 
         eventBus.addHandler(ResourceChangedEvent.getType(), this);
         logo.appendChild(new SVGImage(productInfoDataProvider.getLogo()).getSvgElement().getElement());
+        //Sometimes initialization of Create/Import Project actions are completed after the Empty editor page is rendered.
+        //In this case we need to wait when actions will be initialized.
         Timer hoverToRenderTimer = new Timer() {
             @Override
             public void run() {
