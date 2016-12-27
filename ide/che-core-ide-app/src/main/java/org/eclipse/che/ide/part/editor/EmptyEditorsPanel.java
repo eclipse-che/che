@@ -23,6 +23,7 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Provider;
@@ -98,12 +99,13 @@ public class EmptyEditorsPanel extends Composite implements ResourceChangedEvent
 
         eventBus.addHandler(ResourceChangedEvent.getType(), this);
         logo.appendChild(new SVGImage(productInfoDataProvider.getLogo()).getSvgElement().getElement());
-        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+        Timer hoverToRenderTimer = new Timer() {
             @Override
-            public void execute() {
+            public void run() {
                 renderNoProjects();
             }
-        });
+        };
+        hoverToRenderTimer.schedule(500);
     }
 
     public EmptyEditorsPanel(ActionManager actionManager,
