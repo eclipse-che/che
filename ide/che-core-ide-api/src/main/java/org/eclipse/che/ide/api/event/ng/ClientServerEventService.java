@@ -29,8 +29,7 @@ public class ClientServerEventService {
     private final RequestTransmitter requestTransmitter;
 
     @Inject
-    public ClientServerEventService(EventBus eventBus, DtoFactory dtoFactory,
-                                    RequestTransmitter requestTransmitter) {
+    public ClientServerEventService(EventBus eventBus, DtoFactory dtoFactory, RequestTransmitter requestTransmitter) {
         this.dtoFactory = dtoFactory;
         this.requestTransmitter = requestTransmitter;
 

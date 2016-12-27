@@ -5,6 +5,7 @@ excerpt: ""
 layout: docs
 permalink: /:categories/intro/
 ---
+{% include base.html %}
 Eclipse Che provides:
 
 * Workspaces that include runtimes and IDEs

@@ -5,6 +5,7 @@ excerpt: ""
 layout: docs
 permalink: /:categories/create-and-build-extensions/
 ---
+{% include base.html %}
 This section describes, how to create, build and run a new extension to Che. It is focused on the infrastructural part only. To set-up a workspace, you should first refer to the [Contributor Setup: Che Workspace](doc:setup-che-workspace)
 
 # Build and Run Che  

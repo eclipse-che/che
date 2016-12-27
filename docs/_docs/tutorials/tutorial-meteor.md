@@ -5,6 +5,7 @@ excerpt: ""
 layout: tutorials
 permalink: /:categories/meteor/
 ---
+{% include base.html %}
 # 1. Start Che  
 Run `docker run --rm -t -v /var/run/docker.sock:/var/run/docker.sock eclipse/che start` and open your browser at `http://<your-che-host>:8080`
 

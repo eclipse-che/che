@@ -40,7 +40,7 @@
       {
         "name": "build and deploy",
         "type": "mvn",
-        "commandLine": "mvn -f ${current.project.path} clean install -DskipTests && cp ${current.project.path}/target/*.war $TOMCAT_HOME/webapps/ROOT.war && $TOMCAT_HOME/bin/catalina.sh run",
+        "commandLine": "mvn -f ${current.project.path} clean install -DskipTests && cp ${current.project.path}/target/*.war $TOMCAT_HOME/webapps/ROOT.war && $TOMCAT_HOME/bin/catalina.sh run 2>&1",
         "attributes": {
           "previewUrl": "http://${server.port.8080}"
         }
@@ -48,7 +48,7 @@
       {
         "name": "debug",
         "type": "mvn",
-        "commandLine": "mvn -f ${current.project.path} clean install -DskipTests && cp ${current.project.path}/target/*.war $TOMCAT_HOME/webapps/ROOT.war && $TOMCAT_HOME/bin/catalina.sh jpda run",
+        "commandLine": "mvn -f ${current.project.path} clean install -DskipTests && cp ${current.project.path}/target/*.war $TOMCAT_HOME/webapps/ROOT.war && $TOMCAT_HOME/bin/catalina.sh jpda run 2>&1",
         "attributes": {
           "previewUrl": "http://${server.port.8080}"
         }
@@ -620,7 +620,7 @@
       {
         "name": "run tomcat",
         "type": "custom",
-        "commandLine": "$TOMCAT_HOME/bin/catalina.sh run",
+        "commandLine": "$TOMCAT_HOME/bin/catalina.sh run 2>&1",
         "attributes": {
           "previewUrl": "http://${server.port.8080}"
         }
@@ -636,7 +636,7 @@
       {
         "name": "build and run",
         "type": "mvn",
-        "commandLine": "mvn -f ${current.project.path} clean install && cp ${current.project.path}/target/*.war $TOMCAT_HOME/webapps/ROOT.war && $TOMCAT_HOME/bin/catalina.sh run",
+        "commandLine": "mvn -f ${current.project.path} clean install && cp ${current.project.path}/target/*.war $TOMCAT_HOME/webapps/ROOT.war && $TOMCAT_HOME/bin/catalina.sh run 2>&1",
         "attributes": {
           "previewUrl": "http://${server.port.8080}"
         }
@@ -644,7 +644,7 @@
       {
         "name": "debug",
         "type": "mvn",
-        "commandLine": "mvn -f ${current.project.path} clean install && cp ${current.project.path}/target/*.war $TOMCAT_HOME/webapps/ROOT.war && $TOMCAT_HOME/bin/catalina.sh jpda run",
+        "commandLine": "mvn -f ${current.project.path} clean install && cp ${current.project.path}/target/*.war $TOMCAT_HOME/webapps/ROOT.war && $TOMCAT_HOME/bin/catalina.sh jpda run 2>&1",
         "attributes": {
           "previewUrl": "http://${server.port.8080}"
         }
@@ -942,7 +942,7 @@
       {
         "name": "run tomee",
         "type": "custom",
-        "commandLine": "$TOMEE_HOME/bin/catalina.sh run",
+        "commandLine": "$TOMEE_HOME/bin/catalina.sh run 2>&1",
         "attributes": {
           "previewUrl": "http://${server.port.8080}"
         }
@@ -958,7 +958,7 @@
       {
         "name": "build and run",
         "type": "mvn",
-        "commandLine": "mvn -f ${current.project.path} clean install && cp ${current.project.path}/target/*.war $TOMEE_HOME/webapps/ROOT.war && $TOMEE_HOME/bin/catalina.sh run",
+        "commandLine": "mvn -f ${current.project.path} clean install && cp ${current.project.path}/target/*.war $TOMEE_HOME/webapps/ROOT.war && $TOMEE_HOME/bin/catalina.sh run 2>&1",
         "attributes": {
           "previewUrl": "http://${server.port.8080}"
         }
@@ -966,7 +966,7 @@
       {
         "name": "debug",
         "type": "mvn",
-        "commandLine": "mvn -f ${current.project.path} clean install && cp ${current.project.path}/target/*.war $TOMEE_HOME/webapps/ROOT.war && $TOMEE_HOME/bin/catalina.sh jpda run",
+        "commandLine": "mvn -f ${current.project.path} clean install && cp ${current.project.path}/target/*.war $TOMEE_HOME/webapps/ROOT.war && $TOMEE_HOME/bin/catalina.sh jpda run 2>&1",
         "attributes": {
           "previewUrl": "http://${server.port.8080}"
         }

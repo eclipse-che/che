@@ -68,3 +68,4 @@ dockerfiles/che/eclipse-che.tar.gz
 docs/_site
 docs/.sass-cache
 docs/.jekyll-metadata
+docs/assets/imgs

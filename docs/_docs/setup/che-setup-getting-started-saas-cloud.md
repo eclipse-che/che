@@ -5,6 +5,7 @@ excerpt: ""
 layout: docs
 permalink: /:categories/getting-started-saas-cloud/
 ---
+{% include base.html %}
 You can use Eclipse Che workspaces hosted at http://codenvy.com by signing up for a free account and accepting Codenvy's terms of service.
 # How to Get Help  
 **Support:** If the unthinkable happens, or you have a question, you can post [issues on our GitHub page](https://github.com/eclipse/che/issues). Please follow the [guidelines on issue reporting](https://github.com/eclipse/che/blob/master/CONTRIBUTING.md).

@@ -433,6 +433,67 @@ public class CheEnvironmentEngineTest {
     }
 
     @Test
+    public void shouldBeAbleToStartEnvironmentWithRrcover() throws Exception {
+        // given
+        SnapshotImpl snapshot = mock(SnapshotImpl.class);
+        MachineSourceImpl machineSource = new MachineSourceImpl("image", "registry.com/snapshot123:latest@sha256:abc1234567890", null);
+        when(snapshotDao.getSnapshot(anyString(), anyString(), anyString())).thenReturn(snapshot);
+        when(snapshot.getMachineSource()).thenReturn(machineSource);
+
+        // given
+        EnvironmentImpl env = createEnv();
+        String envName = "env-1";
+        String workspaceId = "wsId";
+        List<Instance> expectedMachines = new ArrayList<>();
+        when(machineProvider.startService(anyString(),
+                                          eq(workspaceId),
+                                          eq(envName),
+                                          anyString(),
+                                          anyBoolean(),
+                                          anyString(),
+                                          any(CheServiceImpl.class),
+                                          any(LineConsumer.class)))
+                .thenAnswer(invocationOnMock -> {
+                    Object[] arguments = invocationOnMock.getArguments();
+                    String machineName = (String)arguments[3];
+                    boolean isDev = (boolean)arguments[4];
+                    CheServiceImpl service = (CheServiceImpl)arguments[6];
+                    Machine machine = createMachine(workspaceId,
+                                                    envName,
+                                                    service,
+                                                    machineName,
+                                                    isDev);
+                    NoOpMachineInstance instance = spy(new NoOpMachineInstance(machine));
+                    expectedMachines.add(instance);
+                    return instance;
+                });
+        when(environmentParser.parse(env)).thenReturn(createCheServicesEnv());
+
+        // when
+        List<Instance> machines = engine.start(workspaceId,
+                     envName,
+                     env,
+                     true,
+                     messageConsumer);
+
+        // then
+        assertEquals(machines, expectedMachines);
+
+        ArgumentCaptor<CheServiceImpl> captor = ArgumentCaptor.forClass(CheServiceImpl.class);
+        verify(machineProvider).startService(anyString(),
+                                             anyString(),
+                                             anyString(),
+                                             anyString(),
+                                             eq(false),
+                                             anyString(),
+                                             captor.capture(),
+                                             any(LineConsumer.class));
+        CheServiceImpl actualService = captor.getValue();
+
+        assertEquals(actualService.getImage(), "registry.com/snapshot123:latest");
+    }
+
+    @Test
     public void shouldUseConfiguredInMachineRamInsteadOfSetDefaultOnMachineStart() throws Exception {
         // given
         List<Instance> instances = startEnv();

@@ -5,6 +5,7 @@ excerpt: ""
 layout: tutorials
 permalink: /:categories/vaadin/
 ---
+{% include base.html %}
 Vaadin is a set of user interface components for Web applications. Vaadin projects work within Che. This page provides a quick configuration guide to get started.
 ```text  
 # In the dashboard, create a new project and import from source:

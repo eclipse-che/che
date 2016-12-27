@@ -5,6 +5,7 @@ excerpt: ""
 layout: tutorials
 permalink: /:categories/cuba/
 ---
+{% include base.html %}
 CUBA Platform is a high level Java framework for faster enterprise software development.
 ```text  
 #When on the User Dashboard, create a new project from existing sources:

@@ -5,6 +5,7 @@ excerpt: ""
 layout: tutorials
 permalink: /:categories/tomee/
 ---
+{% include base.html %}
 TomEE is a JavaEE application server. (Learn more about TomEE) This page provides a quick configuration guide to get started with TomEE within Che.  
 ```text  
 # In the dashboard, create a new project from samples

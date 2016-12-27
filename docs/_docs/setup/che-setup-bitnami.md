@@ -5,6 +5,7 @@ excerpt: "Using Che with your cloud hosting account."
 layout: docs
 permalink: /:categories/bitnami/
 ---
+{% include base.html %}
 Bitnami provides provides a [one-click install](https://bitnami.com/stack/eclipse-che) solution for deploying Eclipse Che to your own cloud account.
 # 1. Install Che  
 Bitnami will automatically install Che to your cloud account, just select your provider and then choose "Add Account" from the menu:

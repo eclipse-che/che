@@ -11,13 +11,11 @@
 package org.eclipse.che.api.git;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
 
 import org.eclipse.che.api.project.server.importer.ProjectImporter;
-import org.eclipse.che.api.project.server.type.ValueProviderFactory;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
-import org.eclipse.che.api.vfs.impl.file.event.HiEventDetector;
+import org.eclipse.che.api.project.server.type.ValueProviderFactory;
 import org.eclipse.che.inject.DynaModule;
 
 /**
@@ -51,7 +49,6 @@ public class GitModule extends AbstractModule {
 
         //bind(GitConnectionFactory.class).to(NativeGitConnectionFactory.class);
 
-        Multibinder.newSetBinder(binder(), new TypeLiteral<HiEventDetector<?>>() {
-        }).addBinding().to(GitCheckoutHiEventDetector.class);
+        bind(GitCheckoutDetector.class).asEagerSingleton();
     }
 }

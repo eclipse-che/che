@@ -5,6 +5,7 @@ excerpt: "Setting up the ARTIK IDE behind a proxy."
 layout: artik
 permalink: /:categories/proxies/
 ---
+{% include base.html %}
 Your users may need their workspaces to operate over a proxy to the Internet. The ARTIK IDE has three dependencies to the Internet:
 
 1. Docker, in order to download Docker images from DockerHub.

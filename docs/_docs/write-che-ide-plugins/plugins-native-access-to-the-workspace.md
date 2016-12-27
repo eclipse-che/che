@@ -5,6 +5,7 @@ excerpt: ""
 layout: docs
 permalink: /:categories/native-access-to-the-workspace/
 ---
+{% include base.html %}
 One of the core strengths of Che is the workspace concept. Additionally to project files, such as source code, Che also allows to share workspaces, which provide the necessary runtime to compile and run the system under development. Workspaces can also provide any other kind of tooling to work on a project, this tooling can then be triggered in the Che IDE.
 
 The concept of workspaces makes it very convenient to reuse any existing tool in Che, as those tools can be executed on the workspace runtime. Che already provides several of those tool integrations, such as Maven or Git.

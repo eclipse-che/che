@@ -21,13 +21,14 @@ OPTIONAL DOCKER PARAMETERS:
   -v <LOCAL_PATH>:${CHE_CONTAINER_ROOT}/backup         Where backup files will be saved
   -v <LOCAL_PATH>:/repo                ${CHE_MINI_PRODUCT_NAME} git repo to activate dev mode
   -v <LOCAL_PATH>:/sync                Where remote ws files will be copied with sync command
-  -v <LOCAL_PATH>:/unison              Where unison profile for optimzing sync command resides
+  -v <LOCAL_PATH>:/unison              Where unison profile for optimizing sync command resides
     
 COMMANDS:
   action <action-name>                 Start action on ${CHE_MINI_PRODUCT_NAME} instance
   backup                               Backups ${CHE_MINI_PRODUCT_NAME} configuration and data to ${CHE_CONTAINER_ROOT}/backup volume mount
   config                               Generates a ${CHE_MINI_PRODUCT_NAME} config from vars; run on any start / restart
   destroy                              Stops services, and deletes ${CHE_MINI_PRODUCT_NAME} instance data
+  dir <path> <command>                 Use Chefile feature in the directory <path>
   download                             Pulls Docker images for the current ${CHE_MINI_PRODUCT_NAME} version
   help                                 This message
   info                                 Displays info about ${CHE_MINI_PRODUCT_NAME} and the CLI

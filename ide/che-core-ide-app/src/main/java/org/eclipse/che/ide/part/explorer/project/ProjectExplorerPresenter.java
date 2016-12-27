@@ -16,6 +16,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.DelayedTask;
@@ -41,6 +42,8 @@ import org.eclipse.che.ide.api.resources.marker.MarkerChangedEvent;
 import org.eclipse.che.ide.api.resources.marker.MarkerChangedEvent.MarkerChangedHandler;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
+import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.jsonrpc.RequestTransmitter;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerView.ActionDelegate;
 import org.eclipse.che.ide.project.node.SyntheticNode;
 import org.eclipse.che.ide.project.node.SyntheticNodeUpdateEvent;
@@ -50,17 +53,24 @@ import org.eclipse.che.ide.resources.tree.ResourceNode;
 import org.eclipse.che.ide.ui.smartTree.NodeDescriptor;
 import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.ide.ui.smartTree.event.BeforeExpandNodeEvent;
+import org.eclipse.che.ide.ui.smartTree.event.CollapseNodeEvent;
+import org.eclipse.che.ide.ui.smartTree.event.ExpandNodeEvent;
 import org.eclipse.che.ide.ui.smartTree.event.PostLoadEvent;
 import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent;
 import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent.SelectionChangedHandler;
+import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.providers.DynaObject;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto.Type.START;
+import static org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto.Type.STOP;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_FROM;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_TO;
@@ -86,6 +96,8 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
     private final CoreLocalizationConstant locale;
     private final Resources                resources;
     private final TreeExpander             treeExpander;
+    private final RequestTransmitter       requestTransmitter;
+    private final DtoFactory               dtoFactory;
 
     private UpdateTask updateTask = new UpdateTask();
     private Set<Path> expandQueue = new HashSet<>();
@@ -102,13 +114,15 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
                                     final ResourceNode.NodeFactory nodeFactory,
                                     final SettingsProvider settingsProvider,
                                     final AppContext appContext,
-                                    final WorkspaceAgent workspaceAgent) {
+                                    final WorkspaceAgent workspaceAgent, RequestTransmitter requestTransmitter, DtoFactory dtoFactory) {
         this.view = view;
         this.eventBus = eventBus;
         this.nodeFactory = nodeFactory;
         this.settingsProvider = settingsProvider;
         this.locale = locale;
         this.resources = resources;
+        this.requestTransmitter = requestTransmitter;
+        this.dtoFactory = dtoFactory;
         this.view.setDelegate(this);
 
         eventBus.addHandler(ResourceChangedEvent.getType(), this);
@@ -170,6 +184,40 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
         });
     }
 
+    @Inject
+    public void initFileWatchers() {
+        final String endpointId = "ws-agent";
+        final String method = "track:project-tree";
+
+        getTree().addExpandHandler(new ExpandNodeEvent.ExpandNodeHandler() {
+            @Override
+            public void onExpand(ExpandNodeEvent event) {
+                Node node = event.getNode();
+
+                if (node instanceof ResourceNode) {
+                    Resource data = ((ResourceNode)node).getData();
+                    requestTransmitter.transmitOneToNone(endpointId, method, dtoFactory.createDto(ProjectTreeTrackingOperationDto.class)
+                                                                                       .withPath(data.getLocation().toString())
+                                                                                       .withType(START));
+                }
+            }
+        });
+
+        getTree().addCollapseHandler(new CollapseNodeEvent.CollapseNodeHandler() {
+            @Override
+            public void onCollapse(CollapseNodeEvent event) {
+                Node node = event.getNode();
+
+                if (node instanceof ResourceNode) {
+                    Resource data = ((ResourceNode)node).getData();
+                    requestTransmitter.transmitOneToNone(endpointId, method, dtoFactory.createDto(ProjectTreeTrackingOperationDto.class)
+                                                                                       .withPath(data.getLocation().toString())
+                                                                                       .withType(STOP));
+                }
+            }
+        });
+    }
+
     /* Expose Project Explorer's internal API to the world, to allow automated Selenium scripts expand all projects tree. */
     private native void registerNative() /*-{
         var that = this;
@@ -218,7 +266,9 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
         // process root projects, they have only one segment in path
         if (resource.getLocation().segmentCount() == 1) {
             if (delta.getKind() == ADDED) {
-                tree.getNodeStorage().add(nodeFactory.newContainerNode((Container)resource, nodeSettings));
+                if (getNode(resource.getLocation()) == null) {
+                    tree.getNodeStorage().add(nodeFactory.newContainerNode((Container)resource, nodeSettings));
+                }
             } else if (delta.getKind() == REMOVED) {
                 Node node = getNode(resource.getLocation());
 

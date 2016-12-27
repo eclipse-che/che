@@ -5,6 +5,7 @@ excerpt: ""
 layout: tutorials
 permalink: /:categories/gradle/
 ---
+{% include base.html %}
 Gradle is an open source build automation system that builds upon the concepts of Apache Ant and Apache Maven and introduces a Groovy-based domain-specific language (DSL) instead of the XML form used by Apache Maven of declaring the project configuration.
 ```text  
 #Import a project from source:

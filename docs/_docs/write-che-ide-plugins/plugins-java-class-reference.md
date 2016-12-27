@@ -5,6 +5,7 @@ excerpt: "JavaDoc for the Che & GWT classes available to developers"
 layout: docs
 permalink: /:categories/java-class-reference/
 ---
+{% include base.html %}
 You can generate the JavaDoc for your installation from source.
 ```shell  
 # You need the che-core library
