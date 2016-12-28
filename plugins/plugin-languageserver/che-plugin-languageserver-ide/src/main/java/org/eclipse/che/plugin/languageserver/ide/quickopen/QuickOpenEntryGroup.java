@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.quickopen;
 
-import org.eclipse.che.plugin.languageserver.ide.filters.Match;
+import org.eclipse.che.ide.filters.Match;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import java.util.List;

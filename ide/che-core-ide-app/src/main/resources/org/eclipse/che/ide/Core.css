@@ -780,3 +780,8 @@ a {
 ::-webkit-scrollbar-thumb:hover {
     background-color: scrollbarHoverBackgroundColor;
 }
+
+.codeassistant-highlight {
+    color: completionPopupItemHighlightTextColor;
+}
+

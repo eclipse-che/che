@@ -8,9 +8,11 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.languageserver.ide.filters;
+package org.eclipse.che.ide.filters;
 
 /**
+ * Result of {@link Matcher#match(String, String)}, contains start and end offset in matched string.
+ *
  * @author Evgen Vidolob
  */
 public class Match {

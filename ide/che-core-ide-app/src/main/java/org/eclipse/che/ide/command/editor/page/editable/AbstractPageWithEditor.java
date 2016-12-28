@@ -12,7 +12,6 @@
 package org.eclipse.che.ide.command.editor.page.editable;
 
 import com.google.gwt.user.client.ui.IsWidget;
-
 import org.eclipse.che.ide.api.editor.OpenEditorCallbackImpl;
 import org.eclipse.che.ide.api.editor.defaulteditor.EditorBuilder;
 import org.eclipse.che.ide.api.editor.document.Document;
@@ -24,6 +23,7 @@ import org.eclipse.che.ide.api.parts.PropertyListener;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.command.editor.page.AbstractCommandEditorPage;
 import org.eclipse.che.ide.command.editor.page.CommandEditorPage;
+import org.eclipse.che.ide.command.editor.page.editable.editor.MacroEditorConfiguration;
 import org.eclipse.che.ide.macro.chooser.MacroChooser;
 import org.eclipse.che.ide.macro.chooser.MacroChooser.MacroChosenCallback;
 
@@ -41,6 +41,7 @@ public abstract class AbstractPageWithEditor extends AbstractCommandEditorPage i
     private final PageWithEditorView view;
     private final FileTypeRegistry   fileTypeRegistry;
     private final MacroChooser       macroChooser;
+    private MacroEditorConfiguration editorConfiguration;
 
     private TextEditor editor;
 
@@ -52,12 +53,14 @@ public abstract class AbstractPageWithEditor extends AbstractCommandEditorPage i
                                      FileTypeRegistry fileTypeRegistry,
                                      MacroChooser macroChooser,
                                      String title,
-                                     String tooltip) {
+                                     String tooltip,
+                                     MacroEditorConfiguration editorConfiguration) {
         super(title, tooltip);
 
         this.view = view;
         this.fileTypeRegistry = fileTypeRegistry;
         this.macroChooser = macroChooser;
+        this.editorConfiguration = editorConfiguration;
 
         view.setDelegate(this);
 
@@ -66,7 +69,7 @@ public abstract class AbstractPageWithEditor extends AbstractCommandEditorPage i
 
     private void initializeEditor(EditorBuilder editorBuilder) {
         editor = editorBuilder.buildEditor();
-
+        editor.initialize(editorConfiguration);
         editor.activate();
 
         editor.addPropertyListener(new PropertyListener() {
