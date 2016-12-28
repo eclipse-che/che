@@ -9,3 +9,6 @@
 (Explain the PR as it should appear in the release notes)
 
 Please review [Che's Contributing Guide](https://github.com/eclipse/che/blob/master/CONTRIBUTING.md) for best practices.
+
+### Tests written?
+Yes/No
