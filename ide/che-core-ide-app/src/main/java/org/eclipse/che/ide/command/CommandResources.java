@@ -48,11 +48,11 @@ public interface CommandResources extends ClientBundle {
     PaletteCSS commandsPaletteCss();
 
     interface ExplorerCSS extends CssResource {
-        String categoryHeader();
+        String commandGoalNode();
 
-        String categorySubElementHeader();
+        String commandNode();
 
-        String buttonArea();
+        String commandNodeButtonsPanel();
     }
 
     interface PaletteCSS extends CssResource {

@@ -15,8 +15,8 @@
 @eval categorySelectElementBackgroundColor org.eclipse.che.ide.api.theme.Style.theme.categorySelectElementBackgroundColor();
 @eval categorySelectElementColor org.eclipse.che.ide.api.theme.Style.theme.categorySelectElementColor();
 
-.categoryHeader span:last-child,
-.categorySubElementHeader .buttonArea > span {
+.commandGoalNode span:last-child,
+.commandNode .commandNodeButtonsPanel > span {
     display: inline-block;
     height: 100%;
     width: 25px;
@@ -25,8 +25,8 @@
     text-align: center;
 }
 
-.categoryHeader span:last-child svg,
-.categorySubElementHeader .buttonArea svg {
+.commandGoalNode span:last-child svg,
+.commandNode .commandNodeButtonsPanel svg {
     width: 12px;
     height: 12px;
     vertical-align: middle;
@@ -34,38 +34,38 @@
     stroke: categoryHeaderButtonColor;
 }
 
-.categoryHeader span:last-child:hover svg,
-.categorySubElementHeader .buttonArea span:hover > svg {
+.commandGoalNode span:last-child:hover svg,
+.commandNode .commandNodeButtonsPanel span:hover > svg {
     fill: categoryHeaderButtonHoverColor;
     stroke: categoryHeaderButtonHoverColor;
 }
 
-.categorySubElementHeader {
+.commandNode {
     padding-right: 1px;
     line-height: 18px;
 }
 
-div.categorySubElementHeader[selected] {
+div.commandNode[selected] {
     background: categorySelectElementBackgroundColor;
     color: categorySelectElementColor;
 }
 
-div.categorySubElementHeader[selected] .buttonArea {
+div.commandNode[selected] .commandNodeButtonsPanel {
     display: inline;
 }
 
-div.categorySubElementHeader[selected] .buttonArea svg {
+div.commandNode[selected] .commandNodeButtonsPanel svg {
     opacity: 1;
     fill: categoryElementButtonColor;
     stroke: categoryElementButtonColor;
 }
 
-div.categorySubElementHeader[selected] .buttonArea span:hover > svg {
+div.commandNode[selected] .commandNodeButtonsPanel span:hover > svg {
     fill: categoryElementButtonHoverColor;
     stroke: categoryElementButtonHoverColor;
 }
 
-.buttonArea {
+.commandNodeButtonsPanel {
     display: none;
     float: right;
 }

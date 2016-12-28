@@ -53,8 +53,7 @@ class CommandsTreeRenderer extends DefaultPresentationRenderer<Node> {
         final Element nodeContainerElement = element.getFirstChildElement();
 
         if (node instanceof CommandFileNode) {
-
-            nodeContainerElement.addClassName(resources.commandsExplorerCss().categorySubElementHeader());
+            nodeContainerElement.addClassName(resources.commandsExplorerCss().commandNode());
 
             final SpanElement removeCommandButton = createButton(resources.removeCommand());
             Event.setEventListener(removeCommandButton, new EventListener() {
@@ -79,17 +78,15 @@ class CommandsTreeRenderer extends DefaultPresentationRenderer<Node> {
             });
 
             final SpanElement buttonsPanel = Document.get().createSpanElement();
-            buttonsPanel.setClassName(resources.commandsExplorerCss().buttonArea());
+            buttonsPanel.setClassName(resources.commandsExplorerCss().commandNodeButtonsPanel());
 
             buttonsPanel.appendChild(removeCommandButton);
             buttonsPanel.appendChild(duplicateCommandButton);
 
             // add additional buttons to node container
             nodeContainerElement.appendChild(buttonsPanel);
-
         } else if (node instanceof CommandGoalNode) {
-
-            nodeContainerElement.addClassName(resources.commandsExplorerCss().categoryHeader());
+            nodeContainerElement.addClassName(resources.commandsExplorerCss().commandGoalNode());
 
             final SpanElement addCommandButton = createButton(resources.addCommand());
             Event.setEventListener(addCommandButton, new EventListener() {
