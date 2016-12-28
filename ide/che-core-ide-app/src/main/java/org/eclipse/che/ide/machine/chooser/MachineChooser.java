@@ -52,10 +52,12 @@ public class MachineChooser implements MachineChooserView.ActionDelegate {
     }
 
     /**
-     * Pops up a machine chooser dialog.
+     * Pops up a dialog for choosing a machine.
+     * <p><b>Note:</b> if there is only one machine running in the workspace
+     * then returned promise will be resolved with that machine without asking user.
      *
      * @return promise that will be resolved with a chosen {@link Machine}
-     * or rejected in case machine selection has been cancelled
+     * or rejected in case machine selection has been cancelled.
      */
     public Promise<Machine> show() {
         final WorkspaceRuntime runtime = appContext.getWorkspace().getRuntime();

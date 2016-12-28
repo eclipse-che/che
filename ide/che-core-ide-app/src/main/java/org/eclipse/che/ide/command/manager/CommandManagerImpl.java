@@ -161,15 +161,23 @@ public class CommandManagerImpl implements CommandManager,
         return list;
     }
 
+    @Nullable
     @Override
-    public List<ContextualCommand> getApplicableCommands() {
-        if (isMachineSelected()) {
-            return getCommands();
+    public ContextualCommand getCommand(String name) {
+        for (ContextualCommand command : commands.values()) {
+            if (name.equals(command.getName())) {
+                return command;
+            }
         }
 
-        List<ContextualCommand> list = new ArrayList<>();
+        return null;
+    }
+
+    @Override
+    public List<ContextualCommand> getApplicableCommands() {
+        final List<ContextualCommand> list = new ArrayList<>();
         for (ContextualCommand command : commands.values()) {
-            if (isApplicableToTheCurrentProject(command)) {
+            if (isCommandApplicable(command)) {
                 list.add(new ContextualCommand(command));
             }
         }
@@ -177,28 +185,25 @@ public class CommandManagerImpl implements CommandManager,
         return list;
     }
 
-    /** Whether machine is currently selected? */
-    private boolean isMachineSelected() {
-        return getSelectedMachine() != null;
+    @Override
+    public boolean isCommandApplicable(ContextualCommand command) {
+        return isMachineSelected() || isCommandApplicableToCurrentProject(command);
+
     }
 
-    /** Returns the currently selected machine. */
-    @Nullable
-    private Machine getSelectedMachine() {
+    /** Checks whether the machine is currently selected. */
+    private boolean isMachineSelected() {
         final Selection<?> selection = selectionAgent.getSelection();
 
         if (selection != null && !selection.isEmpty() && selection.isSingleSelection()) {
-            final Object possibleNode = selection.getHeadElement();
-
-            if (possibleNode instanceof Machine) {
-                return (Machine)possibleNode;
-            }
+            return selection.getHeadElement() instanceof Machine;
         }
 
-        return null;
+        return false;
     }
 
-    private boolean isApplicableToTheCurrentProject(ContextualCommand command) {
+    /** Checks whether the given command is applicable to the current project. */
+    private boolean isCommandApplicableToCurrentProject(ContextualCommand command) {
         final List<String> applicableProjects = command.getApplicableContext().getApplicableProjects();
 
         if (applicableProjects.isEmpty()) {
@@ -220,18 +225,6 @@ public class CommandManagerImpl implements CommandManager,
         }
 
         return false;
-    }
-
-    @Nullable
-    @Override
-    public ContextualCommand getCommand(String name) {
-        for (ContextualCommand command : commands.values()) {
-            if (name.equals(command.getName())) {
-                return command;
-            }
-        }
-
-        return null;
     }
 
     @Override

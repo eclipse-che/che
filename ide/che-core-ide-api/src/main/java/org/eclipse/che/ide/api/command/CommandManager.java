@@ -28,15 +28,18 @@ import java.util.List;
  */
 public interface CommandManager {
 
-    /** Returns commands. */
+    /** Returns all commands. */
     List<ContextualCommand> getCommands();
-
-    /** Returns commands which are applicable to the current IDE context. */
-    List<ContextualCommand> getApplicableCommands();
 
     /** Returns command by the specified name or {@code null} if none. */
     @Nullable
     ContextualCommand getCommand(String name);
+
+    /** Returns commands which are applicable to the current IDE context. */
+    List<ContextualCommand> getApplicableCommands();
+
+    /** Checks whether the given {@code command} is applicable to the current IDE context or not. */
+    boolean isCommandApplicable(ContextualCommand command);
 
     /**
      * Creates new command of the specified type with the given {@link ApplicableContext}.

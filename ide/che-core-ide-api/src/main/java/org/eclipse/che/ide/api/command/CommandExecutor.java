@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.command;
 
+import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.ide.api.macro.Macro;
 
@@ -31,5 +32,18 @@ public interface CommandExecutor {
      *         machine to execute the command
      * @see Macro
      */
-    void executeCommand(CommandImpl command, Machine machine);
+    void executeCommand(Command command, Machine machine);
+
+    /**
+     * Sends the the given {@code command} for execution.
+     * <p>If any machine is currently selected it will be used as execution target.
+     * Otherwise user will be asked for choosing execution target.
+     * <p><b>Note</b> that all {@link Macro}s will be expanded into
+     * real values before sending the {@code command} for execution.
+     *
+     * @param command
+     *         command to execute
+     * @see Macro
+     */
+    void executeCommand(ContextualCommand command);
 }
