@@ -9,4 +9,4 @@ IMAGE_NAME="eclipse/che-mount"
 . $(cd "$(dirname "$0")"; pwd)/../build.include
 
 init "$@"
-build "$@"
+build
