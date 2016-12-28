@@ -40,39 +40,37 @@ export class CheFooter {
    *   <che-footer che-logo="src/logo.svg"></che-footer>
    *
    * @example
-   <example module="userDashboard">
-   <file name="index.html">
-   <che-footer
-   che-logo="src/logo.svg"
-   che-product-name="Eclipse Che"
-   che-support-email="support@codenvy.com"
-   che-support-help="http://www.eclipse.org/che">
-   </che-footer>
-   </file>
-   </example>
+   * <example module="userDashboard">
+   * <file name="index.html">
+   * <che-footer
+   * che-logo="src/logo.svg"
+   * che-product-name="Eclipse Che"
+   * che-support-email="support@codenvy.com"
+   * che-support-help="http://www.eclipse.org/che">
+   * </che-footer>
+   * </file>
+   * </example>
    * @author Ann Shumilova
    */
-  constructor () {
-    this.restrict='E';
-    this.replace = true;
-    this.transclude= true;
-  }
+  restrict: string = 'E';
+  replace: boolean = true;
+  transclude: boolean = true;
 
   /**
    * Template for the current footer
-   * @param element
-   * @param attrs
+   * @param {ng.IAugmentedJQuery} element
+   * @param {any} attrs
    * @returns {string} the template
    */
-  template(element, attrs) {
-    var logo = attrs.cheLogo;
-    var version = attrs.cheVersion;
-    var productName  = attrs.cheProductName;
-    var supportEmail = attrs.cheSupportEmail;
-    var supportHelpPath = attrs.cheSupportHelpPath;
-    var supportHelpTitle = attrs.cheSupportHelpTitle;
+  template(element: ng.IAugmentedJQuery, attrs: any) {
+    let logo = attrs.cheLogo;
+    let version = attrs.cheVersion;
+    let productName  = attrs.cheProductName;
+    let supportEmail = attrs.cheSupportEmail;
+    let supportHelpPath = attrs.cheSupportHelpPath;
+    let supportHelpTitle = attrs.cheSupportHelpTitle;
 
-    var template = '<div class=\"che-footer\" layout=\"row\" layout-align=\"start center\">';
+    let template = '<div class=\"che-footer\" layout=\"row\" layout-align=\"start center\">';
     if (logo) {
       template += '<img class=\"che-footer-logo\" ng-src=\"' + logo + '\" alt=\"logo\">';
     }
@@ -82,14 +80,18 @@ export class CheFooter {
     template += '<div flex />';
     template += '<ng-transclude></ng-transclude>';
 
+    // email
     if (supportEmail) {
       let subject = '?subject=' + encodeURIComponent('Wishes for ' + productName);
-      template += '<input class=\"che-footer-input\" ng-model=\"productWish\" placeholder=\"I wish this product...\" />';
-      template += '<a class=\"che-footer-button-mail che-footer-button\" ng-href=\"mailto:' + supportEmail + subject + '&body={{productWish}}\">Make a wish<a/>';
+      template += '<a class=\"che-footer-button-blue che-footer-button\" ng-href=\"mailto:' + supportEmail + subject + '\">Make a wish<a/>';
     }
 
+    // docs
+    template += '<a class=\"che-footer-button-blue che-footer-button\" href=\"/#/docs\">Docs<a/>';
+
+    // help
     if (supportHelpPath && supportHelpTitle) {
-      template += '<a class=\"che-footer-button-community che-footer-button\" ng-href=\"' + supportHelpPath + '\" target=\"_blank\">' + supportHelpTitle + '<a/>';
+      template += '<a class=\"che-footer-button-blue che-footer-button\" ng-href=\"' + supportHelpPath + '\" target=\"_blank\">' + supportHelpTitle + '<a/>';
     }
     template += '</div>';
     return template;

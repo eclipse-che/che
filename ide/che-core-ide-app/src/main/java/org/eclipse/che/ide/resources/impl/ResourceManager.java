@@ -71,6 +71,8 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOf;
+import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingResumeEvent;
+import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingSuspendEvent;
 import static org.eclipse.che.ide.api.resources.Resource.FILE;
 import static org.eclipse.che.ide.api.resources.Resource.PROJECT;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
@@ -555,6 +557,8 @@ public final class ResourceManager {
                     deletedFilesController.add(source.getLocation().toString());
                 }
 
+                eventBus.fireEvent(newFileTrackingSuspendEvent());
+
                 return ps.move(source.getLocation(), destination.parent(), destination.lastSegment(), force)
                          .thenPromise(new Function<Void, Promise<Resource>>() {
                              @Override
@@ -571,8 +575,10 @@ public final class ResourceManager {
                                              eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(movedResource.get(), source,
                                                                                                                ADDED | MOVED_FROM |
                                                                                                                MOVED_TO | DERIVED)));
+                                             eventBus.fireEvent(newFileTrackingResumeEvent());
                                              return movedResource.get();
                                          }
+                                         eventBus.fireEvent(newFileTrackingResumeEvent());
 
                                          throw new IllegalStateException("Resource not found");
                                      }
