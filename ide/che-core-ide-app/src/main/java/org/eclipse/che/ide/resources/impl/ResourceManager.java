@@ -550,7 +550,7 @@ public final class ResourceManager {
 
         return findResource(destination, true).thenPromise(new Function<Optional<Resource>, Promise<Resource>>() {
             @Override
-            public Promise<Resource> apply(Optional<Resource> resource) throws FunctionException {
+            public Promise<Resource> apply(final Optional<Resource> resource) throws FunctionException {
                 checkState(!resource.isPresent() || force, "Cannot create '" + destination.toString() + "'. Resource already exists.");
 
                 if (isResourceOpened(source)) {
@@ -564,8 +564,31 @@ public final class ResourceManager {
                              @Override
                              public Promise<Resource> apply(Void ignored) throws FunctionException {
 
-                                 if (source.isProject()) {
-                                     return Promises.resolve(source);
+                                 if (source.isProject() && source.getLocation().segmentCount() == 1) {
+                                     return ps.getProjects().then(new Function<List<ProjectConfigDto>, Resource>() {
+                                         @Override
+                                         public Resource apply(List<ProjectConfigDto> updatedConfigs) throws FunctionException {
+                                             eventBus.fireEvent(newFileTrackingResumeEvent());
+
+                                             //cache new configs
+                                             cachedConfigs = updatedConfigs.toArray(new ProjectConfigDto[updatedConfigs.size()]);
+                                             store.dispose(source.getLocation(), true);
+
+                                             for (ProjectConfigDto projectConfigDto : cachedConfigs) {
+                                                 if (projectConfigDto.getPath().equals(destination.toString())) {
+                                                     final Project newResource = resourceFactory.newProjectImpl(projectConfigDto, ResourceManager.this);
+                                                     store.register(newResource);
+                                                     eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(newResource, source,
+                                                                                                                       ADDED | MOVED_FROM |
+                                                                                                                       MOVED_TO | DERIVED)));
+
+                                                     return newResource;
+                                                 }
+                                             }
+
+                                             throw new IllegalStateException("Resource not found");
+                                         }
+                                     });
                                  }
 
                                  return findResource(destination, false).then(new Function<Optional<Resource>, Resource>() {
