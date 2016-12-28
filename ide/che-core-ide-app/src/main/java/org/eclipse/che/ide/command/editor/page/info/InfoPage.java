@@ -10,8 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.editor.page.info;
 
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
+import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.BaseCommandGoal;
@@ -21,6 +24,10 @@ import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.command.ContextualCommand.ApplicableContext;
 import org.eclipse.che.ide.api.command.PredefinedCommandGoalRegistry;
 import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
+import org.eclipse.che.ide.api.resources.ResourceChangedEvent.ResourceChangedHandler;
+import org.eclipse.che.ide.api.resources.ResourceDelta;
 import org.eclipse.che.ide.command.editor.EditorMessages;
 import org.eclipse.che.ide.command.editor.page.AbstractCommandEditorPage;
 import org.eclipse.che.ide.command.editor.page.CommandEditorPage;
@@ -45,7 +52,8 @@ import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_GOAL_ATTRIB
  *
  * @author Artem Zatsarynnyi
  */
-public class InfoPage extends AbstractCommandEditorPage implements InfoPageView.ActionDelegate {
+public class InfoPage extends AbstractCommandEditorPage implements InfoPageView.ActionDelegate,
+                                                                   ResourceChangedHandler {
 
     private final InfoPageView                  view;
     private final AppContext                    appContext;
@@ -67,13 +75,16 @@ public class InfoPage extends AbstractCommandEditorPage implements InfoPageView.
                     AppContext appContext,
                     PredefinedCommandGoalRegistry predefinedCommandGoalRegistry,
                     CommandManager commandManager,
-                    EditorMessages messages) {
+                    EditorMessages messages,
+                    EventBus eventBus) {
         super(messages.pageInfoTitle(), messages.pageInfoTooltip());
 
         this.view = view;
         this.appContext = appContext;
         this.goalRegistry = predefinedCommandGoalRegistry;
         this.commandManager = commandManager;
+
+        eventBus.addHandler(ResourceChangedEvent.getType(), this);
 
         projectsState = new HashMap<>();
 
@@ -111,7 +122,7 @@ public class InfoPage extends AbstractCommandEditorPage implements InfoPageView.
         refreshProjects();
     }
 
-    /** Refresh projects in the view. */
+    /** Refresh 'Projects' section in the view. */
     private void refreshProjects() {
         projectsState.clear();
 
@@ -194,5 +205,21 @@ public class InfoPage extends AbstractCommandEditorPage implements InfoPageView.
         }
 
         return list;
+    }
+
+    @Override
+    public void onResourceChanged(ResourceChangedEvent event) {
+        final ResourceDelta delta = event.getDelta();
+        final Resource resource = delta.getResource();
+
+        if (resource.isProject()) {
+            // defer refreshing the projects section since appContext#getProjects may return old data
+            Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+                @Override
+                public void execute() {
+                    refreshProjects();
+                }
+            });
+        }
     }
 }

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.editor.page.info;
 
+import com.google.web.bindery.event.shared.EventBus;
+
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.command.CommandManager;
@@ -59,6 +61,8 @@ public class InfoPageTest {
     private CommandManager                commandManager;
     @Mock
     private EditorMessages                messages;
+    @Mock
+    private EventBus                      eventBus;
 
     @InjectMocks
     private InfoPage page;
