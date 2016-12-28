@@ -104,8 +104,6 @@ public class InfoPage extends AbstractCommandEditorPage implements InfoPageView.
         goals.addAll(getCustomGoals());
 
         view.setAvailableGoals(goals);
-
-
         view.setGoal(goalId);
         view.setCommandName(editedCommand.getName());
         view.setWorkspace(editedCommand.getApplicableContext().isWorkspaceApplicable());
