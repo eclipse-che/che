@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.languageserver.ide.filters;
+package org.eclipse.che.ide.filters;
 
 import org.eclipse.che.commons.annotation.Nullable;
 
@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Matcher the wey to match some string.
+ * S
  * @author Evgen Vidolob
  */
 public interface Matcher {

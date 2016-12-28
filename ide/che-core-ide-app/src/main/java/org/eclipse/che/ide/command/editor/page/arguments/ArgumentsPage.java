@@ -11,13 +11,13 @@
 package org.eclipse.che.ide.command.editor.page.arguments;
 
 import com.google.inject.Inject;
-
 import org.eclipse.che.ide.api.editor.defaulteditor.EditorBuilder;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.command.editor.EditorMessages;
 import org.eclipse.che.ide.command.editor.page.CommandEditorPage;
 import org.eclipse.che.ide.command.editor.page.editable.AbstractPageWithEditor;
 import org.eclipse.che.ide.command.editor.page.editable.PageWithEditorView;
+import org.eclipse.che.ide.command.editor.page.editable.editor.MacroEditorConfiguration;
 import org.eclipse.che.ide.macro.chooser.MacroChooser;
 
 /**
@@ -32,13 +32,15 @@ public class ArgumentsPage extends AbstractPageWithEditor {
                          EditorBuilder editorBuilder,
                          FileTypeRegistry fileTypeRegistry,
                          MacroChooser macroChooser,
-                         EditorMessages messages) {
+                         EditorMessages messages,
+                         MacroEditorConfiguration editorConfiguration) {
         super(view,
               editorBuilder,
               fileTypeRegistry,
               macroChooser,
               messages.pageArgumentsTitle(),
-              messages.pageArgumentsTooltip());
+                messages.pageArgumentsTooltip(),
+                editorConfiguration);
     }
 
     @Override

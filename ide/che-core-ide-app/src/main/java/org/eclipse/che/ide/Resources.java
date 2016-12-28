@@ -13,7 +13,6 @@ package org.eclipse.che.ide;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.CssResource.NotStrict;
 import com.google.gwt.resources.client.TextResource;
-
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.command.CommandResources;
 import org.eclipse.che.ide.menu.MenuResources;
@@ -213,5 +212,8 @@ public interface Resources extends Tree.Resources,
         String createWsTagsPopup();
 
         String tagsPanel();
+
+        @ClassName("codeassistant-highlight")
+        String codeassistantHighlight();
     }
 }
