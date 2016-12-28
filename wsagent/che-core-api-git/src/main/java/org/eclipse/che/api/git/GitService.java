@@ -36,6 +36,7 @@ import org.eclipse.che.api.git.shared.CloneRequest;
 import org.eclipse.che.api.git.shared.CommitRequest;
 import org.eclipse.che.api.git.shared.Commiters;
 import org.eclipse.che.api.git.shared.ConfigRequest;
+import org.eclipse.che.api.git.shared.Constants;
 import org.eclipse.che.api.git.shared.DiffType;
 import org.eclipse.che.api.git.shared.FetchRequest;
 import org.eclipse.che.api.git.shared.MergeRequest;
@@ -67,6 +68,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -275,12 +277,16 @@ public class GitService {
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     public LogPage log(@QueryParam("fileFilter") List<String> fileFilter,
                        @QueryParam("since") String revisionRangeSince,
-                       @QueryParam("until") String revisionRangeUntil) throws ApiException {
+                       @QueryParam("until") String revisionRangeUntil,
+                       @QueryParam("skip") @DefaultValue("0") int skip,
+                       @QueryParam("maxCount") @DefaultValue(Constants.DEFAULT_PAGE_SIZE_QUERY_PARAM) int maxCount) throws ApiException {
         try (GitConnection gitConnection = getGitConnection()) {
             return gitConnection.log(LogParams.create()
                                               .withFileFilter(fileFilter)
                                               .withRevisionRangeSince(revisionRangeSince)
-                                              .withRevisionRangeUntil(revisionRangeUntil));
+                                              .withRevisionRangeUntil(revisionRangeUntil)
+                                              .withMaxCount(maxCount)
+                                              .withSkip(skip));
         }
     }
 

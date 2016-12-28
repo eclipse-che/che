@@ -652,19 +652,25 @@ public class GitServiceClientImpl implements GitServiceClient {
 
     @Override
     public Promise<LogResponse> log(DevMachine devMachine, Path project, Path[] fileFilter, boolean plainText) {
+        return log(devMachine, project, fileFilter, -1, -1, plainText);
+    }
+
+    @Override
+    public Promise<LogResponse> log(DevMachine devMachine, Path project, Path[] fileFilter, int skip, int maxCount, boolean plainText) {
         StringBuilder params = new StringBuilder().append("?projectPath=").append(project.toString());
         if (fileFilter != null) {
             for (Path file : fileFilter) {
                 params.append("&fileFilter=").append(file.toString());
             }
         }
+        params.append("&skip=").append(skip);
+        params.append("&maxCount=").append(maxCount);
         String url = appContext.getDevMachine().getWsAgentBaseUrl() + LOG + params;
         if (plainText) {
             return asyncRequestFactory.createGetRequest(url)
                                       .send(dtoUnmarshallerFactory.newUnmarshaller(LogResponse.class));
         } else {
             return asyncRequestFactory.createGetRequest(url)
-                                      .loader(loader)
                                       .header(ACCEPT, APPLICATION_JSON)
                                       .send(dtoUnmarshallerFactory.newUnmarshaller(LogResponse.class));
         }
