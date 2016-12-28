@@ -333,7 +333,7 @@ check_mounts() {
     CHE_HOST_DEVELOPMENT_REPO="${REPO_MOUNT}"
     CHE_CONTAINER_DEVELOPMENT_REPO="/repo"
 
-    CHE_ASSEMBLY="${CHE_HOST_INSTANCE}/dev"
+    CHE_ASSEMBLY="${CHE_HOST_INSTANCE}/dev/${CHE_MINI_PRODUCT_NAME}-tomcat"
 
     if [[ ! -d "${CHE_CONTAINER_DEVELOPMENT_REPO}"  ]] || [[ ! -d "${CHE_CONTAINER_DEVELOPMENT_REPO}/assembly" ]]; then
       info "Welcome to $CHE_FORMAL_PRODUCT_NAME!"
