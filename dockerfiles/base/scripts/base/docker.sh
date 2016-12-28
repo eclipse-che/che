@@ -360,13 +360,6 @@ check_mounts() {
       info "                         ${CHE_IMAGE_FULLNAME} $*"
       return 2
     fi
-    if [[ ! -d $(echo ${CHE_CONTAINER_DEVELOPMENT_REPO}/${CHE_ASSEMBLY_IN_REPO}) ]]; then
-      info "Welcome to $CHE_FORMAL_PRODUCT_NAME!"
-      info ""
-      info "You volume mounted a valid $CHE_FORMAL_PRODUCT_NAME repo to ':/repo', but we could not find a ${CHE_FORMAL_PRODUCT_NAME} assembly."
-      info "Have you built ${CHE_ASSEMBLY_IN_REPO_MODULE_NAME} with 'mvn clean install'?"
-      return 2
-    fi
   fi
 }
 
