@@ -224,7 +224,7 @@ The Che container uses host mounted volumes to store persistent data:
 | `/var/run/docker.sock`   | `/var/run/docker.sock`   | This is how Che gets access to Docker daemon. This instructs the container to use your local Docker daemon when Che wants to create its own containers.   
 | `/<your-path>/lib`   | `/data/lib`   | Inside the container, we make a copy of important libraries that your workspaces will need and place them into `/lib`. When Che creates a workspace container, that container will be using your local Docker daemon and the Che workspace will look for these libraries in your local `/lib`. This is a tactic we use to get files from inside the container out onto your local host.   
 | `/<your-path>/workspaces`   | `/data/workspaces`   | The location of your workspace and project files.   
-| `/<your-path>/storage`   | /data/storage`   | The location where Che stores the meta information that describes the various workspaces, projects and user preferences.   
+| `/<your-path>/storage`   | `/data/storage`   | The location where Che stores the meta information that describes the various workspaces, projects and user preferences.   
 
 
 # Debugging  
