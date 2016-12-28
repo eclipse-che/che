@@ -31,7 +31,6 @@ import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.Exec;
 import org.eclipse.che.plugin.docker.client.LogMessage;
 import org.eclipse.che.plugin.docker.client.ProgressLineFormatterImpl;
-import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.params.CommitParams;
 import org.eclipse.che.plugin.docker.client.params.CreateExecParams;
 import org.eclipse.che.plugin.docker.client.params.GetResourceParams;
@@ -102,8 +101,7 @@ public class DockerInstance extends AbstractInstance {
     private final DockerInstanceProcessesCleaner              processesCleaner;
     private final ConcurrentHashMap<Integer, InstanceProcess> machineProcesses;
     private final boolean                                     snapshotUseRegistry;
-
-    private MachineRuntimeInfoImpl machineRuntime;
+    private final MachineRuntimeInfoImpl                      machineRuntime;
 
     @Inject
     public DockerInstance(DockerConnector docker,
@@ -117,7 +115,7 @@ public class DockerInstance extends AbstractInstance {
                           @Assisted LineConsumer outputConsumer,
                           DockerInstanceStopDetector dockerInstanceStopDetector,
                           DockerInstanceProcessesCleaner processesCleaner,
-                          @Named("che.docker.registry_for_snapshots") boolean snapshotUseRegistry) {
+                          @Named("che.docker.registry_for_snapshots") boolean snapshotUseRegistry) throws MachineException {
         super(machine);
         this.dockerMachineFactory = dockerMachineFactory;
         this.container = container;
@@ -132,6 +130,7 @@ public class DockerInstance extends AbstractInstance {
         this.machineProcesses = new ConcurrentHashMap<>();
         processesCleaner.trackProcesses(this);
         this.snapshotUseRegistry = snapshotUseRegistry;
+        this.machineRuntime = doGetRuntime();
     }
 
     @Override
@@ -141,18 +140,6 @@ public class DockerInstance extends AbstractInstance {
 
     @Override
     public MachineRuntimeInfoImpl getRuntime() {
-        // if runtime info is not evaluated yet
-        if (machineRuntime == null) {
-            try {
-                final ContainerInfo containerInfo = docker.inspectContainer(container);
-                machineRuntime = new MachineRuntimeInfoImpl(dockerMachineFactory.createMetadata(containerInfo,
-                                                                                                getConfig(),
-                                                                                                node.getHost()));
-            } catch (IOException e) {
-                LOG.error(e.getLocalizedMessage(), e);
-                return null;
-            }
-        }
         return machineRuntime;
     }
 
@@ -390,5 +377,15 @@ public class DockerInstance extends AbstractInstance {
      */
     public String getContainer() {
         return container;
+    }
+
+    private MachineRuntimeInfoImpl doGetRuntime() throws MachineException {
+        try {
+            return new MachineRuntimeInfoImpl(dockerMachineFactory.createMetadata(docker.inspectContainer(container),
+                                                                                  null,
+                                                                                  node.getHost()));
+        } catch (IOException x) {
+            throw new MachineException(x.getMessage(), x);
+        }
     }
 }

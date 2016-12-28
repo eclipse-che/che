@@ -68,6 +68,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -107,15 +109,15 @@ public class WorkspaceRuntimes {
 
     private static final Logger LOG = getLogger(WorkspaceRuntimes.class);
 
-    private final Map<String, WorkspaceState> workspaces;
-    private final EventService                eventsService;
-    private final StripedLocks                locks;
-    private final CheEnvironmentEngine        envEngine;
-    private final AgentSorter                 agentSorter;
-    private final AgentLauncherFactory        launcherFactory;
-    private final AgentRegistry               agentRegistry;
-    private final SnapshotDao                 snapshotDao;
-    private final WorkspaceSharedPool         sharedPool;
+    private final ConcurrentMap<String, WorkspaceState> workspaces;
+    private final EventService                          eventsService;
+    private final StripedLocks                          locks;
+    private final CheEnvironmentEngine                  envEngine;
+    private final AgentSorter                           agentSorter;
+    private final AgentLauncherFactory                  launcherFactory;
+    private final AgentRegistry                         agentRegistry;
+    private final SnapshotDao                           snapshotDao;
+    private final WorkspaceSharedPool                   sharedPool;
 
     private volatile boolean isPreDestroyInvoked;
 
@@ -133,7 +135,7 @@ public class WorkspaceRuntimes {
         this.launcherFactory = launcherFactory;
         this.agentRegistry = agentRegistry;
         this.snapshotDao = snapshotDao;
-        this.workspaces = new HashMap<>();
+        this.workspaces = new ConcurrentHashMap<>();
         // 16 - experimental value for stripes count, it comes from default hash map size
         this.locks = new StripedLocks(16);
         this.sharedPool = sharedPool;
