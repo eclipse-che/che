@@ -145,7 +145,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                @Named("machine.docker.machine_volumes") Set<String> allMachinesSystemVolumes,
                                @Nullable @Named("che.workspace.hosts") String allMachinesExtraHosts,
                                @Named("che.docker.always_pull_image") boolean doForcePullOnBuild,
-                               @Named("che.docker.privilege") boolean privilegeMode,
+                               @Named("che.docker.privileged") boolean privilegeMode,
                                @Named("che.docker.pids_limit") int pidsLimit,
                                @Named("machine.docker.dev_machine.machine_env") Set<String> devMachineEnvVariables,
                                @Named("machine.docker.machine_env") Set<String> allMachinesEnvVariables,
