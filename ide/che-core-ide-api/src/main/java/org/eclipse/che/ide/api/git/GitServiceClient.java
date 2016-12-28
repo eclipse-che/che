@@ -965,8 +965,7 @@ public interface GitServiceClient {
              AsyncRequestCallback<LogResponse> callback);
 
     /**
-     * Get log of commits. The result is the list of {@link Revision}, which is returned by callback in
-     * <code>onSuccess(Revision result)</code>.
+     * Get log of commits.
      *
      * Method is deprecated. Use {@link #log(DevMachine, Path, Path[], int, int, boolean)} to pass
      * {@code skip} and {@code maxCount} parameters to limit the number of returning entries.
@@ -981,11 +980,10 @@ public interface GitServiceClient {
      *         if <code>true</code> the loq response will be in text format
      */
     @Deprecated
-    Promise<LogResponse> log(DevMachine devMachine, Path project, Path[] fileFilter, boolean plainText);
+    Promise<LogResponse> log(DevMachine devMachine, Path project, @Nullable Path[] fileFilter, boolean plainText);
 
     /**
-     * Get log of commits. The result is the list of {@link Revision}, which is returned by callback in
-     * <code>onSuccess(Revision result)</code>.
+     * Get log of commits.
      *
      * @param devMachine
      *         current machine
@@ -1000,7 +998,7 @@ public interface GitServiceClient {
      * @param plainText
      *         if <code>true</code> the loq response will be in text format
      */
-    Promise<LogResponse> log(DevMachine devMachine, Path project, Path[] fileFilter, int skip, int maxCount, boolean plainText);
+    Promise<LogResponse> log(DevMachine devMachine, Path project, @Nullable Path[] fileFilter, int skip, int maxCount, boolean plainText);
 
     /**
      * Merge the pointed commit with current HEAD.

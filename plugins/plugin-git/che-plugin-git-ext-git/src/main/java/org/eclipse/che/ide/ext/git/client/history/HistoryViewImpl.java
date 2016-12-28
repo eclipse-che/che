@@ -92,7 +92,7 @@ public class HistoryViewImpl extends BaseView<HistoryView.ActionDelegate> implem
     @UiField
     Button              btnDiffWithPrevCommit;
     @UiField
-    ScrollPanel scrollPanel;
+    ScrollPanel         scrollPanel;
     @UiField(provided = true)
     final GitResources            res;
     @UiField(provided = true)

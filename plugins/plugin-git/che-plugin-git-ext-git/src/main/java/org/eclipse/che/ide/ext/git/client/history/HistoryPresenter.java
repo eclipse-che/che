@@ -148,8 +148,11 @@ public class HistoryPresenter extends BasePresenter implements HistoryView.Actio
             @Override
             public void apply(LogResponse log) throws OperationException {
                 List<Revision> commits = log.getCommits();
-                skip += commits.size();
+                if (commits.isEmpty()) {
+                    return;
+                }
 
+                skip += commits.size();
                 if (append) {
                     revisions.addAll(commits);
                 } else {
