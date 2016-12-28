@@ -36,7 +36,7 @@ public class MappedPortIsListeningAgentChecker implements AgentLaunchingChecker 
         Server server = machine.getRuntime().getServers().get(exposedPort);
         if (server != null) {
             try {
-                String[] hostPort = server.getAddress().split(":");
+                String[] hostPort = server.getProperties().getInternalAddress().split(":");
                 try (@SuppressWarnings("unused") Socket socket = new Socket(hostPort[0],
                                                                             Integer.parseInt(hostPort[1]))) {
                     return true;
