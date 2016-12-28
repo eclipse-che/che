@@ -31,6 +31,9 @@ public interface CommandManager {
     /** Returns commands. */
     List<ContextualCommand> getCommands();
 
+    /** Returns commands which are applicable to the current IDE context. */
+    List<ContextualCommand> getApplicableCommands();
+
     /** Returns command by the specified name or {@code null} if none. */
     @Nullable
     ContextualCommand getCommand(String name);

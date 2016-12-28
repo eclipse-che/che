@@ -13,11 +13,13 @@ package org.eclipse.che.ide.command.manager;
 import elemental.util.ArrayOf;
 import elemental.util.Collections;
 
+import com.google.common.base.Optional;
 import com.google.gwt.core.client.Callback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Operation;
@@ -34,6 +36,9 @@ import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.command.ContextualCommand.ApplicableContext;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.selection.Selection;
+import org.eclipse.che.ide.api.selection.SelectionAgent;
 import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
 import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent.WorkspaceReadyHandler;
 
@@ -64,6 +69,7 @@ public class CommandManagerImpl implements CommandManager,
     private final ProjectCommandManagerDelegate   projectCommandManagerDelegate;
     private final WorkspaceCommandManagerDelegate workspaceCommandManagerDelegate;
     private final EventBus                        eventBus;
+    private final SelectionAgent                  selectionAgent;
 
     private final Map<String, ContextualCommand> commands;
     private final Set<CommandLoadedListener>     commandLoadedListeners;
@@ -75,13 +81,15 @@ public class CommandManagerImpl implements CommandManager,
                               CommandTypeRegistry commandTypeRegistry,
                               ProjectCommandManagerDelegate projectCommandManagerDelegate,
                               WorkspaceCommandManagerDelegate workspaceCommandManagerDelegate,
-                              EventBus eventBus) {
+                              EventBus eventBus,
+                              SelectionAgent selectionAgent) {
         this.appContext = appContext;
         this.promiseProvider = promiseProvider;
         this.commandTypeRegistry = commandTypeRegistry;
         this.projectCommandManagerDelegate = projectCommandManagerDelegate;
         this.workspaceCommandManagerDelegate = workspaceCommandManagerDelegate;
         this.eventBus = eventBus;
+        this.selectionAgent = selectionAgent;
 
         commands = new HashMap<>();
         commandLoadedListeners = new HashSet<>();
@@ -151,6 +159,67 @@ public class CommandManagerImpl implements CommandManager,
         }
 
         return list;
+    }
+
+    @Override
+    public List<ContextualCommand> getApplicableCommands() {
+        if (isMachineSelected()) {
+            return getCommands();
+        }
+
+        List<ContextualCommand> list = new ArrayList<>();
+        for (ContextualCommand command : commands.values()) {
+            if (isApplicableToTheCurrentProject(command)) {
+                list.add(new ContextualCommand(command));
+            }
+        }
+
+        return list;
+    }
+
+    /** Whether machine is currently selected? */
+    private boolean isMachineSelected() {
+        return getSelectedMachine() != null;
+    }
+
+    /** Returns the currently selected machine. */
+    @Nullable
+    private Machine getSelectedMachine() {
+        final Selection<?> selection = selectionAgent.getSelection();
+
+        if (selection != null && !selection.isEmpty() && selection.isSingleSelection()) {
+            final Object possibleNode = selection.getHeadElement();
+
+            if (possibleNode instanceof Machine) {
+                return (Machine)possibleNode;
+            }
+        }
+
+        return null;
+    }
+
+    private boolean isApplicableToTheCurrentProject(ContextualCommand command) {
+        final List<String> applicableProjects = command.getApplicableContext().getApplicableProjects();
+
+        if (applicableProjects.isEmpty()) {
+            return true;
+        }
+
+        final Resource currentResource = appContext.getResource();
+
+        if (currentResource != null) {
+            final Optional<Project> currentProjectOptional = currentResource.getRelatedProject();
+
+            if (currentProjectOptional.isPresent()) {
+                final Project currentProject = currentProjectOptional.get();
+
+                if (applicableProjects.contains(currentProject.getPath())) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     @Nullable
