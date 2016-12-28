@@ -11,11 +11,16 @@
 package org.eclipse.che.ide.api.event.ng;
 
 
+import com.google.common.base.Optional;
+
 import org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType;
 import org.eclipse.che.api.project.shared.dto.event.ProjectTreeStateUpdateDto;
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.ExternalResourceDelta;
+import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.jsonrpc.JsonRpcException;
 import org.eclipse.che.ide.jsonrpc.JsonRpcRequestBiOperation;
 import org.eclipse.che.ide.jsonrpc.RequestHandlerConfigurator;
@@ -90,6 +95,18 @@ public class ProjectTreeStateNotificationOperation implements JsonRpcRequestBiOp
             appContext.getWorkspaceRoot().synchronize();
         } else {
             appContext.getWorkspaceRoot().synchronize(new ExternalResourceDelta(Path.valueOf(path), Path.valueOf(path), status));
+        }
+
+        if (status == ADDED) {
+            appContext.getWorkspaceRoot().getFile(Path.valueOf(path)).then(new Operation<Optional<File>>() {
+                @Override
+                public void apply(Optional<File> arg) throws OperationException {
+                    if (arg.isPresent()) {
+                        appContext.getWorkspaceRoot()
+                                  .synchronize(new ExternalResourceDelta(Path.valueOf(path), Path.valueOf(path), UPDATED));
+                    }
+                }
+            });
         }
     }
 }
