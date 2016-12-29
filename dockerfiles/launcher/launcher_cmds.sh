@@ -28,7 +28,7 @@ start_che_server() {
   fi
 
   info "${CHE_PRODUCT_NAME}: Starting container..."
-  docker_run_with_debug "${CHE_SERVER_IMAGE_NAME}":"${CHE_VERSION}" > /dev/null
+  docker_run_with_volumes_lib "${CHE_SERVER_IMAGE_NAME}":"${CHE_VERSION}" > /dev/null
   CURRENT_CHE_SERVER_CONTAINER_ID=$(get_che_server_container_id ${CHE_SERVER_CONTAINER_NAME})
   wait_until_container_is_running 10 ${CURRENT_CHE_SERVER_CONTAINER_ID}
   if ! che_container_is_running ${CURRENT_CHE_SERVER_CONTAINER_ID}; then
@@ -160,4 +160,5 @@ print_debug_info() {
   info "CHE_HOSTNAME              = ${CHE_HOSTNAME}"
   info "CHE_SERVER_CONTAINER_NAME = ${CHE_SERVER_CONTAINER_NAME}"
   info "CHE_SERVER_IMAGE_NAME     = ${CHE_SERVER_IMAGE_NAME}"
+  info "CHE_LIB_VOLUME            = ${CHE_LIB_VOLUME:-not set}"
 }

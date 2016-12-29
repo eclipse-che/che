@@ -132,6 +132,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
     private final long                                          cpuPeriod;
     private final long                                          cpuQuota;
     private final WindowsPathEscaper                            windowsPathEscaper;
+    private final String                                        volumesFrom;
 
     @Inject
     public MachineProviderImpl(DockerConnector docker,
@@ -143,6 +144,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                @Named("machine.docker.machine_servers") Set<ServerConf> allMachinesServers,
                                @Named("machine.docker.dev_machine.machine_volumes") Set<String> devMachineSystemVolumes,
                                @Named("machine.docker.machine_volumes") Set<String> allMachinesSystemVolumes,
+                               @Nullable @Named("che.workspace.volumes_from") String volumesFrom,
                                @Nullable @Named("che.workspace.hosts") String allMachinesExtraHosts,
                                @Named("che.docker.always_pull_image") boolean doForcePullOnBuild,
                                @Named("che.docker.privilege") boolean privilegeMode,
@@ -163,6 +165,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
         this.dockerCredentials = dockerCredentials;
         this.dockerMachineFactory = dockerMachineFactory;
         this.dockerInstanceStopDetector = dockerInstanceStopDetector;
+        this.volumesFrom = volumesFrom;
         this.doForcePullOnBuild = doForcePullOnBuild;
         this.privilegeMode = privilegeMode;
         this.snapshotUseRegistry = snapshotUseRegistry;
@@ -516,6 +519,17 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                            .collect(toMap(Function.identity(),
                                                           value -> new PortBinding[0])))
                   .withVolumesFrom(toArrayIfNotNull(service.getVolumesFrom()));
+        
+        if (volumesFrom != null) {
+        	List<String> values = new ArrayList<String>();
+        	values.add(volumesFrom);
+        	
+        	if (hostConfig.getVolumesFrom() != null && hostConfig.getVolumesFrom().length > 0) {
+        	    values.addAll(Arrays.asList(hostConfig.getVolumesFrom()));
+        	}
+        	hostConfig.withVolumesFrom(values.toArray(new String[values.size()]));
+        }
+                  
 
         ContainerConfig config = new ContainerConfig();
         config.withImage(image)
