@@ -650,6 +650,33 @@ public class WorkspaceServiceTest {
     }
 
     @Test
+    public void shouldRenameEnvironment() throws Exception {
+        final WorkspaceImpl workspace = createWorkspace(createConfigDto());
+        when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
+        when(wsManager.updateWorkspace(any(), any())).thenReturn(workspace);
+        final String additionalEnvName = "some-env";
+        final String renamedAdditionalEnvName = "some-renamed-env";
+        workspace.getConfig().getEnvironments().put(additionalEnvName, new EnvironmentImpl());
+        final EnvironmentDto envDto = createEnvDto();
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .contentType("application/json")
+                                         .body(envDto)
+                                         .queryParam("new-name", renamedAdditionalEnvName)
+                                         .when()
+                                         .put(SECURE_PATH + "/workspace/" + workspace.getId()
+                                              + "/environment/" + additionalEnvName);
+
+        assertEquals(response.getStatusCode(), 200);
+        assertEquals(workspace.getConfig().getEnvironments().size(), 2);
+        assertEquals(workspace.getConfig().getEnvironments().get(additionalEnvName), null);
+        assertTrue(workspace.getConfig().getEnvironments().containsKey(renamedAdditionalEnvName));
+        verify(validator).validateConfig(workspace.getConfig());
+        verify(wsManager).updateWorkspace(any(), any());
+    }
+
+    @Test
     public void shouldRespond404WhenUpdatingEnvironmentWhichDoesNotExist() throws Exception {
         final WorkspaceImpl workspace = createWorkspace(createConfigDto());
         when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
@@ -663,6 +690,27 @@ public class WorkspaceServiceTest {
 
         assertEquals(response.getStatusCode(), 404);
         assertEquals(unwrapError(response), "Workspace '" + workspace.getId() + "' doesn't contain environment 'fake'");
+        verify(wsManager, never()).updateWorkspace(any(), any());
+    }
+
+    @Test
+    public void shouldRespond409WhenRenameEnvironmentIntoAlreadyExistingOne() throws Exception {
+        final WorkspaceImpl workspace = createWorkspace(createConfigDto());
+        final String additionalEnvName = "some-env";
+        workspace.getConfig().getEnvironments().put(additionalEnvName, new EnvironmentImpl());
+        when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .contentType("application/json")
+                                         .body(createEnvDto())
+                                         .queryParam("new-name", workspace.getConfig().getDefaultEnv())
+                                         .when()
+                                         .put(SECURE_PATH + "/workspace/" + workspace.getId() + "/environment/" + additionalEnvName);
+
+        assertEquals(response.getStatusCode(), 409);
+        assertEquals(unwrapError(response), "Environment '" + workspace.getConfig().getDefaultEnv() + "' already exists in '" +
+                                            workspace.getId() + "' workspace");
         verify(wsManager, never()).updateWorkspace(any(), any());
     }
 
@@ -683,6 +731,22 @@ public class WorkspaceServiceTest {
         verify(wsManager).updateWorkspace(any(), any());
     }
 
+    @Test
+    public void shouldRespond404WhenDeleteNonExistingEnvironment() throws Exception {
+        final WorkspaceImpl workspace = createWorkspace(createConfigDto());
+        final String nonExistingEnv = "some-env";
+        when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .when()
+                                         .delete(SECURE_PATH + "/workspace/" + workspace.getId()
+                                                 + "/environment/" + nonExistingEnv);
+
+        assertEquals(response.getStatusCode(), 404);
+        assertEquals(unwrapError(response), "Workspace '" + workspace.getId() + "' doesn't contain environment '" + nonExistingEnv + "'");
+        verify(wsManager, never()).updateWorkspace(any(), any());
+    }
 
     @Test
     public void shouldRelativizeLinksOnAddEnvironment() throws Exception {

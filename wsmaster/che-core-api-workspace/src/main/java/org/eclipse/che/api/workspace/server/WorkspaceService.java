@@ -64,6 +64,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
@@ -532,7 +533,9 @@ public class WorkspaceService extends Service {
         requiredNotNull(envName, "New environment name");
         relativizeRecipeLinks(newEnvironment);
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
-        workspace.getConfig().getEnvironments().put(envName, new EnvironmentImpl(newEnvironment));
+        if (workspace.getConfig().getEnvironments().put(envName, new EnvironmentImpl(newEnvironment)) != null) {
+            throw new ConflictException(format("Environment '%s' already exists", envName));
+        }
         validator.validateConfig(workspace.getConfig());
         return linksInjector.injectLinks(asDto(workspaceManager.updateWorkspace(id, workspace)), getServiceContext());
     }
@@ -555,18 +558,28 @@ public class WorkspaceService extends Service {
                                           @PathParam("name")
                                           String envName,
                                           @ApiParam(value = "The environment update", required = true)
-                                          EnvironmentDto update) throws ServerException,
-                                                                        BadRequestException,
-                                                                        NotFoundException,
-                                                                        ConflictException,
-                                                                        ForbiddenException {
+                                          EnvironmentDto update,
+                                          @ApiParam("New name of the environment")
+                                          @QueryParam("new-name")
+                                          String newEnvName) throws ServerException,
+                                                                    BadRequestException,
+                                                                    NotFoundException,
+                                                                    ConflictException,
+                                                                    ForbiddenException {
         requiredNotNull(update, "Environment description");
         relativizeRecipeLinks(update);
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
-        EnvironmentImpl previous = workspace.getConfig().getEnvironments().put(envName, new EnvironmentImpl(update));
+        EnvironmentImpl previous = workspace.getConfig().getEnvironments().remove(envName);
         if (previous == null) {
             throw new NotFoundException(format("Workspace '%s' doesn't contain environment '%s'", id, envName));
         }
+        if (!isNullOrEmpty(newEnvName)) {
+            if (workspace.getConfig().getEnvironments().containsKey(newEnvName)) {
+                throw new ConflictException(format("Environment '%s' already exists in '%s' workspace", newEnvName, workspace.getId()));
+            }
+            envName = newEnvName;
+        }
+        workspace.getConfig().getEnvironments().put(envName, new EnvironmentImpl(update));
         validator.validateConfig(workspace.getConfig());
         return linksInjector.injectLinks(asDto(workspaceManager.updateWorkspace(id, workspace)), getServiceContext());
     }
@@ -590,9 +603,10 @@ public class WorkspaceService extends Service {
                                                          ConflictException,
                                                          ForbiddenException {
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
-        if (workspace.getConfig().getEnvironments().remove(envName) != null) {
-            workspaceManager.updateWorkspace(id, workspace);
+        if (workspace.getConfig().getEnvironments().remove(envName) == null) {
+            throw new NotFoundException(format("Workspace '%s' doesn't contain environment '%s'", id, envName));
         }
+        workspaceManager.updateWorkspace(id, workspace);
     }
 
     @POST
@@ -755,10 +769,7 @@ public class WorkspaceService extends Service {
         }
     }
 
-    /*
-     * Validate composite key.
-     *
-     */
+    /** Validate composite key. */
     private void validateKey(String key) throws BadRequestException {
         String[] parts = key.split(":", -1); // -1 is to prevent skipping trailing part
         switch (parts.length) {

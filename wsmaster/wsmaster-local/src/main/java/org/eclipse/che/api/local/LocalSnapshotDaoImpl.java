@@ -13,6 +13,7 @@ package org.eclipse.che.api.local;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.reflect.TypeToken;
 
+import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.local.storage.LocalStorage;
@@ -118,6 +119,11 @@ public class LocalSnapshotDaoImpl implements SnapshotDao {
             throw new NotFoundException(format("Snapshot with id '%s' doesn't exist", snapshotId));
         }
         snapshots.remove(snapshotId);
+    }
+
+    @Override
+    public SnapshotImpl updateSnapshot(SnapshotImpl update) throws NotFoundException, ConflictException, SnapshotException {
+        throw new RuntimeException("Not implemented");
     }
 
     @Override

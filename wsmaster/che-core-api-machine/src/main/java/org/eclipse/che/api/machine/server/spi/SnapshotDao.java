@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.server.spi;
 
+import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.machine.server.exception.SnapshotException;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
@@ -87,6 +88,22 @@ public interface SnapshotDao {
      *         if other error occur
      */
     void removeSnapshot(String snapshotId) throws NotFoundException, SnapshotException;
+
+    /**
+     * Update snapshot info.
+     *
+     * @param update
+     *         updated snapshot info
+     * @return snapshot info before update
+     * @throws NotFoundException
+     *         if given snapshot doesn't exist
+     * @throws ConflictException
+     *         if snapshot for the same machine in the same environment in the same workspace already exists,
+     *         if try to move snapshot to another workspace
+     * @throws SnapshotException
+     *         if an error occur
+     */
+    SnapshotImpl updateSnapshot(SnapshotImpl update) throws NotFoundException, ConflictException, SnapshotException;
 
     /**
      * Replaces all the existing snapshots related to the given workspace

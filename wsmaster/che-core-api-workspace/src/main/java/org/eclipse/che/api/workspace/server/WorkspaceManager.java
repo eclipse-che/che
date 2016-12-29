@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
 import org.eclipse.che.account.api.AccountManager;
@@ -20,10 +22,13 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
+import org.eclipse.che.api.core.model.workspace.Environment;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.machine.server.exception.SnapshotException;
+import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.environment.server.exception.EnvironmentException;
 import org.eclipse.che.api.machine.server.exception.SourceNotFoundException;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
@@ -44,9 +49,11 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Throwables.getCausalChain;
@@ -287,11 +294,77 @@ public class WorkspaceManager {
         requireNonNull(id, "Required non-null workspace id");
         requireNonNull(update, "Required non-null workspace update");
         final WorkspaceImpl workspace = workspaceDao.get(id);
+        updateWorkspaceSnapshots(id, workspace, update);
         workspace.setConfig(new WorkspaceConfigImpl(update.getConfig()));
         update.getAttributes().put(UPDATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
         workspace.setAttributes(update.getAttributes());
         workspace.setTemporary(update.isTemporary());
         return normalizeState(workspaceDao.update(workspace));
+    }
+
+    /**
+     * Updates workspace snapshots corresponding to update environments.
+     * Snapshots are deleted on any environment update except rename.
+     * Also they will be deleted if it is impossible to find one correspondence between old and new environment,
+     * but if in current and in update configuration the same environment is present, it supposed as untouched.
+     *
+     * @param workspaceId
+     *         id of workspace under update
+     * @param current
+     *         current workspace configuration
+     * @param update
+     *         new workspace configuration
+     */
+    private void updateWorkspaceSnapshots(String workspaceId, Workspace current, Workspace update) {
+        // this is needed to convert DTO into EnvironmentImpl object, otherwise equals will fail
+        final Map<String, Environment> updateEnvironments = update.getConfig()
+                                                                  .getEnvironments()
+                                                                  .entrySet()
+                                                                  .stream()
+                                                                  .collect(Collectors.toMap(Map.Entry::getKey,
+                                                                                            env -> new EnvironmentImpl(env.getValue())));
+        // gets current environments which were changed or removed
+        final Map <String, Environment> currentDiff = Sets.difference(current.getConfig().getEnvironments().entrySet(),
+                                                                      updateEnvironments.entrySet())
+                                                          .stream()
+                                                          .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        // gets environments which were updated or added
+        final Map <String, Environment> updateDiff = Sets.difference(updateEnvironments.entrySet(),
+                                                                     current.getConfig().getEnvironments().entrySet())
+                                                         .stream()
+                                                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        // Here we should update or delete current environments snapshots.
+        // Assumed, that the same environments in current and new configuration is untouched (and don't affect on an environment
+        // configuration unicity in the diff, that is why they were deleted before).
+        // Snapshots should be deleted when:
+        //  - environment deleted
+        //  - environment configuration updated (TODO try to keep snapshots when it possible)
+        //  - impossible to establish one correspondence between current and new/updated environments
+        // Snapshots should be updated when:
+        //  - environment is only renamed and we can find one correspondence between current and renamed environments
+        // In other words, we should update snapshots only if environment was renamed i.e. environment configuration present and unique in
+        // both (current and new) configs but under different names. Also must be no environment in new config with old environment name
+        // (otherwise we don't know who is who and should delete snapshots).
+        for (Map.Entry<String, Environment> env : currentDiff.entrySet()) {
+            Environment envValue = env.getValue();
+            if (Collections.frequency(currentDiff.values(), envValue) == 1 &&
+                Collections.frequency(updateDiff.values(), envValue) == 1 &&
+                !updateDiff.containsKey(env.getKey())) {
+                try {
+                    updateEnvironmentSnapshots(workspaceId, env.getKey(), updateDiff.entrySet()
+                                                                                    .stream()
+                                                                                    .filter(e -> e.getValue().equals(envValue))
+                                                                                    .findAny()
+                                                                                    .orElse(null) // should never happens
+                                                                                    .getKey()); // gets new name of environment
+                } catch (ConflictException | SnapshotException | NotFoundException err) {
+                    LOG.error("Failed to update snapshots of '%s' environment in '%s' workspace.", env.getKey(), workspaceId, err);
+                    removeEnvironmentSnapshotsQuietly(workspaceId, env.getKey());
+                }
+            } else {
+                removeEnvironmentSnapshotsQuietly(workspaceId, env.getKey());
+            }
+        }
     }
 
     /**
@@ -551,6 +624,39 @@ public class WorkspaceManager {
     }
 
     /**
+     * Removes all snapshots of all machines of specified environment of workspace.
+     *
+     * @param workspaceId
+     *         workspace id to remove environment snapshots
+     * @param envName
+     *         environment name to remove snapshots from
+     */
+    @VisibleForTesting
+    void removeEnvironmentSnapshotsQuietly(String workspaceId, String envName) {
+        try {
+            List<SnapshotImpl> removed = new ArrayList<>();
+            getSnapshot(workspaceId).stream()
+                                    .filter(snapshot -> snapshot.getEnvName().equals(envName))
+                                    .forEach(snapshot -> {
+                                        try {
+                                            snapshotDao.removeSnapshot(snapshot.getId());
+                                            removed.add(snapshot);
+                                        } catch (Exception e) {
+                                            LOG.error(format("Couldn't remove snapshot '%s' meta data, " +
+                                                             "binaries won't be removed either", snapshot.getId()), e);
+                                        }
+                                    });
+            // binaries removal may take some time, do it asynchronously
+            sharedPool.execute(() -> runtimes.removeBinaries(removed));
+        } catch (NotFoundException e) {
+            LOG.error("Failed to delete snapshots of '{}' environment because workspace with '{}' id doesn't exist",
+                      envName, workspaceId, e);
+        } catch (ServerException e) {
+            LOG.error("Failed to delete snapshots of '{}' environment in '{}' workspace.", envName, workspaceId, e);
+        }
+    }
+
+    /**
      * Stops machine in running workspace.
      *
      * @param workspaceId
@@ -705,6 +811,18 @@ public class WorkspaceManager {
         });
     }
 
+    /** Updates environment snapshots in database */
+    void updateEnvironmentSnapshots(String workspaceId, String oldEnvName, String newEnvName) throws NotFoundException,
+                                                                                                     ConflictException,
+                                                                                                     SnapshotException {
+        for (SnapshotImpl snapshot : snapshotDao.findSnapshots(workspaceId)) {
+            if (snapshot.getEnvName().equals(oldEnvName)) {
+                snapshot.setEnvName(newEnvName);
+                snapshotDao.updateSnapshot(snapshot);
+            }
+        }
+    }
+
     private void checkWorkspaceIsRunning(WorkspaceImpl workspace, String operation) throws ConflictException {
         if (workspace.getStatus() != RUNNING) {
             throw new ConflictException(format("Could not %s the workspace '%s:%s' because its status is '%s'.",
@@ -777,10 +895,7 @@ public class WorkspaceManager {
         return workspace;
     }
 
-    /*
-    * Get workspace using composite key.
-    *
-    */
+    /** Get workspace using composite key */
     private WorkspaceImpl getByKey(String key) throws NotFoundException, ServerException {
         String[] parts = key.split(":", -1); // -1 is to prevent skipping trailing part
         if (parts.length == 1) {
