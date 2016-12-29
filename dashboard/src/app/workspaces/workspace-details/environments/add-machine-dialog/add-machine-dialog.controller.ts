@@ -34,7 +34,9 @@ export class AddMachineDialogController {
     matchBrackets: boolean,
     mode: string,
     onLoad: Function };
-  environments: che.IWorkspaceEnvironments;
+  environments: {
+    [envName: string]: che.IWorkspaceEnvironment
+  };
 
   /**
    * Default constructor that is using resource

@@ -98,7 +98,7 @@ export class CheWorkspace {
 
     cheEnvironmentRegistry.addEnvironmentManager('compose', new ComposeEnvironmentManager($log));
     cheEnvironmentRegistry.addEnvironmentManager('dockerfile', new DockerFileEnvironmentManager($log));
-    cheEnvironmentRegistry.addEnvironmentManager('dockerimage', new DockerImageEnvironmentManager());
+    cheEnvironmentRegistry.addEnvironmentManager('dockerimage', new DockerImageEnvironmentManager($log));
   }
 
   /**
@@ -188,7 +188,7 @@ export class CheWorkspace {
     let updatedPromise = promise.then((data: Array<che.IWorkspace>) => {
       let remoteWorkspaces = [];
       this.workspaces.length = 0;
-      //TODO It's a fix used not to loose account ID of the workspace.
+      // todo It's a fix used not to loose account ID of the workspace.
       // can be removed, when API will return accountId in the list of user workspaces response:
       let copyWorkspaceById = new Map();
       angular.copy(this.workspacesById, copyWorkspaceById);
@@ -536,7 +536,7 @@ export class CheWorkspace {
    * Add subscribe to websocket channel for specified workspaceId
    * to handle workspace's status changes.
    * @param workspaceId {string}
-     */
+   */
   startUpdateWorkspaceStatus(workspaceId: string): void {
     if (this.subscribedWorkspacesIds.indexOf(workspaceId) < 0) {
       let bus = this.cheWebsocket.getBus();

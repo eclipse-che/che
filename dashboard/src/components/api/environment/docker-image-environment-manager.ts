@@ -11,6 +11,7 @@
 'use strict';
 
 import {EnvironmentManager} from './environment-manager';
+import {IEnvironmentManagerMachine} from './environment-manager-machine';
 
 /**
  * This is the implementation of environment manager that handles the docker image format of environment.
@@ -29,25 +30,32 @@ import {EnvironmentManager} from './environment-manager';
  */
 export class DockerImageEnvironmentManager extends EnvironmentManager {
 
-  constructor() {
-    super();
+  constructor($log: ng.ILogService) {
+    super($log);
   }
 
   /**
    * Retrieves the list of machines.
    *
-   * @param environment environment's configuration
-   * @returns {Array} list of machines defined in environment
+   * @param {che.IWorkspaceEnvironment} environment environment's configuration
+   * @param {any=} runtime runtime of an active environment
+   * @returns {IEnvironmentManagerMachine[]} list of machines defined in environment
    */
-  getMachines(environment: any): any {
-    let machines = [];
+  getMachines(environment: che.IWorkspaceEnvironment, runtime?: any): IEnvironmentManagerMachine[] {
+    let machines: IEnvironmentManagerMachine[] = super.getMachines(environment, runtime);
 
     Object.keys(environment.machines).forEach((machineName: string) => {
-      let machine = angular.copy(environment.machines[machineName]);
-      machine.name = machineName;
-      machine.recipe = environment.recipe;
+      let machine: IEnvironmentManagerMachine = machines.find((_machine: IEnvironmentManagerMachine) => {
+        return _machine.name === machineName;
+      });
 
-      machines.push(machine);
+      if (!machine) {
+        machine = {name: machineName};
+        machines.push(machine);
+      }
+
+      angular.merge(machine, environment.machines[machineName]);
+      machine.recipe = environment.recipe;
     });
 
     return machines;
@@ -56,20 +64,20 @@ export class DockerImageEnvironmentManager extends EnvironmentManager {
   /**
    * Provides the environment configuration based on machines format.
    *
-   * @param environment origin of the environment to be edited
-   * @param machines the list of machines
-   * @returns environment's configuration
+   * @param {che.IWorkspaceEnvironment} environment origin of the environment to be edited
+   * @param {IEnvironmentManagerMachine[]} machines the list of machines
+   * @returns {che.IWorkspaceEnvironment} environment's configuration
    */
-  getEnvironment(environment: any, machines: any): any {
+  getEnvironment(environment: che.IWorkspaceEnvironment, machines: IEnvironmentManagerMachine[]): che.IWorkspaceEnvironment {
     return super.getEnvironment(environment, machines);
   }
 
   /**
    * Returns a dockerimage.
    *
-   * @param machine {object}
+   * @param {IEnvironmentManagerMachine} machine
    * @returns {{image: string}}
    */
-  getSource(machine: any): any {
+  getSource(machine: IEnvironmentManagerMachine): any {
     return {image: machine.recipe.location};
   }}

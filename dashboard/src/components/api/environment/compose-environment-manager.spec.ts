@@ -11,6 +11,7 @@
 'use strict';
 
 import {ComposeEnvironmentManager} from './compose-environment-manager';
+import {IEnvironmentManagerMachine} from './environment-manager-machine';
 
 /**
  * Test the environment manager for compose based recipes
@@ -18,22 +19,44 @@ import {ComposeEnvironmentManager} from './compose-environment-manager';
  */
 
 describe('ComposeEnvironmentManager', () => {
-  let envManager;
+  let envManager: ComposeEnvironmentManager;
 
   describe('regardless of recipe location or content', () => {
-    let environment, machines;
+    let environment: che.IWorkspaceEnvironment, machines: IEnvironmentManagerMachine[];
 
-    beforeEach(inject(function() {
-      envManager = new ComposeEnvironmentManager();
+    beforeEach(inject(($log: ng.ILogService) => {
+      envManager = new ComposeEnvironmentManager($log);
 
-      environment = {"machines":{"another-machine":{"attributes":{"memoryLimitBytes":"2147483648"},"servers":{},"agents":[]},"db":{"attributes":{},"servers":{},"agents":[]},"dev-machine":{"attributes":{"memoryLimitBytes":"5368709120"},"servers":{"1024/tcp":{"port":"1024","properties":{},"protocol":"http"},"1025/tcp":{"port":"1025","properties":{},"protocol":"http"}},"agents":["org.eclipse.che.ws-agent","org.eclipse.che.terminal","org.eclipse.che.ssh"]}},"recipe":{"type":"compose","content":"services:\n  dev-machine:\n    image: codenvy/ubuntu_jdk8\n    mem_limit: 2147483648\n    depends_on:\n      - another-machine\n    environment:\n      myName: John Doe\n      myDog: Rex The Dog\n      myCat: fluffy\n  another-machine:\n    build:\n      context: 'https://github.com/eclipse/che'\n      dockerfile: dockerfiles/che-dev/Dockerfile\n    command:\n      - tail\n      - '-f'\n      - /dev/null\n    entrypoint:\n      - /bin/bash\n      - '-c'\n    environment:\n      SOME_ENV: development\n      SHOW: 'true'\n      SESSION_SECRET: null\n    expose:\n      - '3000'\n      - '8000'\n    labels:\n      com.example.description: Accounting webapp\n      com.example.department: Finance\n      com.example.label-with-empty-value: ''\n    links:\n      - 'db:database'\n    mem_limit: 2147483648\n  db:\n    image: redis\n","contentType":"application/x-yaml"}};
+      environment = {
+        'machines': {
+          'another-machine': {
+            'attributes': {'memoryLimitBytes': '2147483648'},
+            'servers': {},
+            'agents': []
+          },
+          'db': {'attributes': {}, 'servers': {}, 'agents': []},
+          'dev-machine': {
+            'attributes': {'memoryLimitBytes': '5368709120'},
+            'servers': {
+              '1024/tcp': {'port': '1024', 'properties': {}, 'protocol': 'http'},
+              '1025/tcp': {'port': '1025', 'properties': {}, 'protocol': 'http'}
+            },
+            'agents': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
+          }
+        },
+        'recipe': {
+          'type': 'compose',
+          'content': 'services:\n  dev-machine:\n    image: codenvy/ubuntu_jdk8\n    mem_limit: 2147483648\n    depends_on:\n      - another-machine\n    environment:\n      myName: John Doe\n      myDog: Rex The Dog\n      myCat: fluffy\n  another-machine:\n    build:\n      context: \'https://github.com/eclipse/che\'\n      dockerfile: dockerfiles/che-dev/Dockerfile\n    command:\n      - tail\n      - \'-f\'\n      - /dev/null\n    entrypoint:\n      - /bin/bash\n      - \'-c\'\n    environment:\n      SOME_ENV: development\n      SHOW: \'true\'\n      SESSION_SECRET: null\n    expose:\n      - \'3000\'\n      - \'8000\'\n    labels:\n      com.example.description: Accounting webapp\n      com.example.department: Finance\n      com.example.label-with-empty-value: \'\'\n    links:\n      - \'db:database\'\n    mem_limit: 2147483648\n  db:\n    image: redis\n',
+          'contentType': 'application/x-yaml'
+        }
+      };
 
       machines = envManager.getMachines(environment);
     }));
 
     it('should return servers', () => {
       let machineName = 'dev-machine',
-          machine = machines.find((machine) => {
+          machine     = machines.find((machine: IEnvironmentManagerMachine) => {
             return machine.name === machineName;
           });
       let servers = envManager.getServers(machine);
@@ -43,7 +66,7 @@ describe('ComposeEnvironmentManager', () => {
     });
 
     it('at least one machine should contain \'ws-agent\'', () => {
-      let devMachinesList = machines.filter((machine) => {
+      let devMachinesList = machines.filter((machine: IEnvironmentManagerMachine) => {
         return envManager.isDev(machine);
       });
 
@@ -53,17 +76,39 @@ describe('ComposeEnvironmentManager', () => {
   });
 
   describe('for recipe from content', () => {
-    let environment, machines, testMachine;
+    let environment: che.IWorkspaceEnvironment, machines: IEnvironmentManagerMachine[], testMachine: IEnvironmentManagerMachine;
 
-    beforeEach(inject(function() {
-      envManager = new ComposeEnvironmentManager();
+    beforeEach(inject(($log: ng.ILogService) => {
+      envManager = new ComposeEnvironmentManager($log);
 
-      environment = {"machines":{"another-machine":{"attributes":{"memoryLimitBytes":"2147483648"},"servers":{},"agents":[]},"db":{"attributes":{},"servers":{},"agents":[]},"dev-machine":{"attributes":{"memoryLimitBytes":"5368709120"},"servers":{"1024/tcp":{"port":"1024","properties":{},"protocol":"http"},"1025/tcp":{"port":"1025","properties":{},"protocol":"http"}},"agents":["org.eclipse.che.ws-agent","org.eclipse.che.terminal","org.eclipse.che.ssh"]}},"recipe":{"type":"compose","content":"services:\n  dev-machine:\n    image: codenvy/ubuntu_jdk8\n    mem_limit: 2147483648\n    depends_on:\n      - another-machine\n    environment:\n      myName: John Doe\n      myDog: Rex The Dog\n      myCat: fluffy\n  another-machine:\n    build:\n      context: 'https://github.com/eclipse/che'\n      dockerfile: dockerfiles/che-dev/Dockerfile\n    command:\n      - tail\n      - '-f'\n      - /dev/null\n    entrypoint:\n      - /bin/bash\n      - '-c'\n    environment:\n      SOME_ENV: development\n      SHOW: 'true'\n      SESSION_SECRET: null\n    expose:\n      - '3000'\n      - '8000'\n    labels:\n      com.example.description: Accounting webapp\n      com.example.department: Finance\n      com.example.label-with-empty-value: ''\n    links:\n      - 'db:database'\n    mem_limit: 2147483648\n  db:\n    image: redis\n","contentType":"application/x-yaml"}};
+      environment = {
+        'machines': {
+          'another-machine': {
+            'attributes': {'memoryLimitBytes': '2147483648'},
+            'servers': {},
+            'agents': []
+          },
+          'db': {'attributes': {}, 'servers': {}, 'agents': []},
+          'dev-machine': {
+            'attributes': {'memoryLimitBytes': '5368709120'},
+            'servers': {
+              '1024/tcp': {'port': '1024', 'properties': {}, 'protocol': 'http'},
+              '1025/tcp': {'port': '1025', 'properties': {}, 'protocol': 'http'}
+            },
+            'agents': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
+          }
+        },
+        'recipe': {
+          'type': 'compose',
+          'content': 'services:\n  dev-machine:\n    image: codenvy/ubuntu_jdk8\n    mem_limit: 2147483648\n    depends_on:\n      - another-machine\n    environment:\n      myName: John Doe\n      myDog: Rex The Dog\n      myCat: fluffy\n  another-machine:\n    build:\n      context: \'https://github.com/eclipse/che\'\n      dockerfile: dockerfiles/che-dev/Dockerfile\n    command:\n      - tail\n      - \'-f\'\n      - /dev/null\n    entrypoint:\n      - /bin/bash\n      - \'-c\'\n    environment:\n      SOME_ENV: development\n      SHOW: \'true\'\n      SESSION_SECRET: null\n    expose:\n      - \'3000\'\n      - \'8000\'\n    labels:\n      com.example.description: Accounting webapp\n      com.example.department: Finance\n      com.example.label-with-empty-value: \'\'\n    links:\n      - \'db:database\'\n    mem_limit: 2147483648\n  db:\n    image: redis\n',
+          'contentType': 'application/x-yaml'
+        }
+      };
 
       machines = envManager.getMachines(environment);
 
       let testMachineName = 'dev-machine';
-      testMachine = machines.find((machine) => {
+      testMachine = machines.find((machine: IEnvironmentManagerMachine) => {
         return machine.name === testMachineName;
       });
     }));
@@ -105,9 +150,9 @@ describe('ComposeEnvironmentManager', () => {
       let someMachineName = 'dev-machine';
       delete environment.machines[someMachineName].attributes.memoryLimitBytes;
 
-      let machines = envManager.getMachines(environment),
-          someMachine = machines.find((machine) => {
-            return machine.name = someMachineName;
+      let machines    = envManager.getMachines(environment),
+          someMachine = machines.find((machine: IEnvironmentManagerMachine) => {
+            return machine.name === someMachineName;
           });
 
       let memoryLimit = envManager.getMemoryLimit(someMachine);
@@ -120,12 +165,25 @@ describe('ComposeEnvironmentManager', () => {
   });
 
   describe('for recipe from location', () => {
-    let environment, machines;
+    let environment: che.IWorkspaceEnvironment, machines: IEnvironmentManagerMachine[];
 
-    beforeEach(inject(function() {
-      envManager = new ComposeEnvironmentManager();
+    beforeEach(inject(($log: ng.ILogService) => {
+      envManager = new ComposeEnvironmentManager($log);
 
-      environment = {"machines":{"dev-machine":{"servers":{},"agents":["org.eclipse.che.ws-agent","org.eclipse.che.terminal","org.eclipse.che.ssh"],"attributes":{"memoryLimitBytes":"2147483648"}}},"recipe":{"contentType":"text/x-dockerfile","location":"https://gist.githubusercontent.com/garagatyi/14c3d1587a4c5b630d789f85340426c7/raw/8db09677766b82ec8b034698a046f8fdf53ebcb1/script","type":"dockerfile"}};
+      environment = {
+        'machines': {
+          'dev-machine': {
+            'servers': {},
+            'agents': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh'],
+            'attributes': {'memoryLimitBytes': '2147483648'}
+          }
+        },
+        'recipe': {
+          'contentType': 'text/x-dockerfile',
+          'location': 'https://gist.githubusercontent.com/garagatyi/14c3d1587a4c5b630d789f85340426c7/raw/8db09677766b82ec8b034698a046f8fdf53ebcb1/script',
+          'type': 'dockerfile'
+        }
+      };
 
       machines = envManager.getMachines(environment);
     }));
