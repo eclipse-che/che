@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.ext.java.testing.testng.client;
 
 import com.google.inject.Inject;
+
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
@@ -21,8 +22,11 @@ import org.eclipse.che.ide.ext.java.testing.testng.client.action.RunAllTestActio
 import org.eclipse.che.ide.ext.java.testing.testng.client.action.RunClassContextTestAction;
 import org.eclipse.che.ide.ext.java.testing.testng.client.action.RunClassTestAction;
 import org.eclipse.che.ide.ext.java.testing.testng.client.action.RunTestXMLAction;
+import org.eclipse.che.ide.util.browser.UserAgent;
+
 /**
  * TestNG ide implementation.
+ *
  * @author Mirage Abeysekara
  */
 public class TestNGTestAction implements TestAction {
@@ -45,11 +49,13 @@ public class TestNGTestAction implements TestAction {
         actionManager.registerAction("TestNGActionRunXML", runTestXMLAction);
         actionManager.registerAction("TestNGActionRunClassContext", runClassContextTestAction);
 
-        keyBinding.getGlobal().addKey(new KeyBuilder().action().alt().charCode('n').build(),
-                "TestNGActionRunAll");
-
-        keyBinding.getGlobal().addKey(new KeyBuilder().action().shift().charCode('n').build(),
-                "TestNGActionRunClass");
+        if (UserAgent.isMac()) {
+            keyBinding.getGlobal().addKey(new KeyBuilder().control().alt().charCode('g').build(), "TestNGActionRunAll");
+            keyBinding.getGlobal().addKey(new KeyBuilder().control().shift().charCode('g').build(), "TestNGActionRunClass");
+        } else {
+            keyBinding.getGlobal().addKey(new KeyBuilder().action().alt().charCode('g').build(), "TestNGActionRunAll");
+            keyBinding.getGlobal().addKey(new KeyBuilder().action().shift().charCode('g').build(), "TestNGActionRunClass");
+        }
 
         this.runAllTestAction = runAllTestAction;
         this.runClassContextTestAction = runClassContextTestAction;

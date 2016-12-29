@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.ext.java.testing.junit.client;
 
 import com.google.inject.Inject;
+
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
@@ -20,8 +21,11 @@ import org.eclipse.che.ide.ext.java.testing.core.client.TestAction;
 import org.eclipse.che.ide.ext.java.testing.junit.client.action.RunAllTestAction;
 import org.eclipse.che.ide.ext.java.testing.junit.client.action.RunClassContextTestAction;
 import org.eclipse.che.ide.ext.java.testing.junit.client.action.RunClassTestAction;
+import org.eclipse.che.ide.util.browser.UserAgent;
+
 /**
  * JUnit 3.x and 4.x ide implementation.
+ *
  * @author Mirage Abeysekara
  */
 public class JUnitTestAction implements TestAction {
@@ -39,11 +43,13 @@ public class JUnitTestAction implements TestAction {
         actionManager.registerAction("TestActionRunAll", runAllTestAction);
         actionManager.registerAction("TestActionRunClassContext", runClassContextTestAction);
 
-        keyBinding.getGlobal().addKey(new KeyBuilder().action().alt().charCode('z').build(),
-                "TestActionRunAll");
-
-        keyBinding.getGlobal().addKey(new KeyBuilder().action().shift().charCode('z').build(),
-                "TestActionRunClass");
+        if (UserAgent.isMac()) {
+            keyBinding.getGlobal().addKey(new KeyBuilder().control().alt().charCode('z').build(), "TestActionRunAll");
+            keyBinding.getGlobal().addKey(new KeyBuilder().control().shift().charCode('z').build(), "TestActionRunClass");
+        } else {
+            keyBinding.getGlobal().addKey(new KeyBuilder().action().alt().charCode('z').build(), "TestActionRunAll");
+            keyBinding.getGlobal().addKey(new KeyBuilder().action().shift().charCode('z').build(), "TestActionRunClass");
+        }
 
         this.runAllTestAction = runAllTestAction;
         this.runClassContextTestAction = runClassContextTestAction;
