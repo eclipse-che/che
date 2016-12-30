@@ -21,18 +21,7 @@
                    che-place-holder="Name of the environment"
                    aria-label="Name of the environment"
                    ng-model="workspaceEnvironmentsController.newEnvironmentName"
-                   ng-change="workspaceEnvironmentsController.updateEnvironmentName(workspaceEnvironmentsForm.$valid)"
-                   ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 2000, 'blur': 0 } }"
-                   custom-validator="workspaceEnvironmentsController.isUnique($value)"
-                   required
-                   ng-maxlength="128"
-                   ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
-          <div ng-message="required">A name is required.</div>
-          <div ng-message="pattern">The name should not contain special characters like space, dollar, etc.
-          </div>
-          <div ng-message="maxlength">The name has to be less than 128 characters long.</div>
-          <div ng-message="md-maxlength">The name has to be less than 128 characters long.</div>
-          <div ng-message="customValidator">This environment name is already used.</div>
+                   readonly>
         </che-input>
       </div>
     </ng-form>

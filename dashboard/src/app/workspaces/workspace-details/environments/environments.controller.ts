@@ -109,39 +109,6 @@ export class WorkspaceEnvironmentsController {
   }
 
   /**
-   * Returns true if environment name is unique
-   *
-   * @param name {string} environment name to validate
-   * @returns {boolean}
-   */
-  isUnique(name: string): boolean {
-    return name === this.environmentName || !this.workspaceConfig.environments || !this.workspaceConfig.environments[name];
-  }
-
-  /**
-   * Updates name of environment
-   * @param isFormValid {boolean}
-   */
-  updateEnvironmentName(isFormValid: boolean): void {
-    if (!isFormValid || this.newEnvironmentName === this.environmentName) {
-      return;
-    }
-
-    this.workspaceConfig.environments[this.newEnvironmentName] = this.environment;
-    delete this.workspaceConfig.environments[this.environmentName];
-
-    if (this.workspaceConfig.defaultEnv === this.environmentName) {
-      this.workspaceConfig.defaultEnv = this.newEnvironmentName;
-    }
-
-    this.machinesViewStatus[this.newEnvironmentName] = this.machinesViewStatus[this.environmentName];
-
-    this.environmentName = this.newEnvironmentName;
-
-    this.doUpdateEnvironments();
-  }
-
-  /**
    * Returns name of machine which includes 'ws-agent'
    *
    * @returns {string} name of dev machine
@@ -203,8 +170,6 @@ export class WorkspaceEnvironmentsController {
    * Callback which is called in order to rename specified machine
    * @param oldName
    * @param newName
-   *
-   * @returns {ng.IPromise<any>}
    */
   updateMachineName(oldName: string, newName: string): void {
     let newEnvironment = this.environmentManager.renameMachine(this.environment, oldName, newName);
