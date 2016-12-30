@@ -537,7 +537,7 @@ public class WorkspaceRuntimes {
     }
 
     /**
-     * Return status of the workspace
+     * Return status of the workspace.
      *
      * @param workspaceId
      *         ID of requested workspace
