@@ -235,7 +235,7 @@ public class WorkspaceManager {
         requireNonNull(user, "Required non-null user id");
         final List<WorkspaceImpl> workspaces = workspaceDao.getWorkspaces(user);
         for (WorkspaceImpl workspace : workspaces) {
-            normalizeState(workspace);
+            workspace.setStatus(runtimes.getStatus(workspace.getId()));
         }
         return workspaces;
     }
