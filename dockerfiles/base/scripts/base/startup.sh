@@ -17,6 +17,7 @@ init_constants() {
   NC='\033[0m'
   LOG_INITIALIZED=false
   FAST_BOOT=false
+  CHE_DEVELOPMENT_MODE="production"
 
   DEFAULT_CHE_PRODUCT_NAME="CHE"
   CHE_PRODUCT_NAME=${CHE_PRODUCT_NAME:-${DEFAULT_CHE_PRODUCT_NAME}}
@@ -241,6 +242,10 @@ init() {
   	FAST_BOOT=true
   fi
 
+  if [[ "$@" == *"--debug"* ]]; then
+  	CHE_DEVELOPMENT_MODE="development"
+  fi
+
   SCRIPTS_BASE_CONTAINER_SOURCE_DIR="/scripts/base"
   # add helper scripts
   for HELPER_FILE in "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/*.sh
@@ -264,7 +269,7 @@ init() {
   init_logging "$@"
 
   SCRIPTS_CONTAINER_SOURCE_DIR=""
-  if [[ "${CHE_DEVELOPMENT_MODE}" = "on" ]]; then
+  if [[ "${CHE_DEVELOPMENT_MODE_WITH_REPO}" = "on" ]]; then
      # Use the CLI that is inside the repository.
      SCRIPTS_CONTAINER_SOURCE_DIR=${CHE_SCRIPTS_CONTAINER_SOURCE_DIR}
   else
@@ -366,11 +371,12 @@ cleanup() {
 }
 
 start() {
-  # Bootstrap enough stuff to load /cli/cli.sh
+  # Bootstrap networking, docker, logging, and ability to load cli.sh and cli-functions.sh
   init "$@"
 
-  # Removes "--fast" from the positional arguments if it is set.
+  # Removes "--fast" and "--debug" from the positional arguments if it is set.
   set -- "${@/\-\-fast/}"
+  set -- "${@/\-\-debug/}"
   
   # Begin product-specific CLI calls
   info "cli" "Loading cli..."

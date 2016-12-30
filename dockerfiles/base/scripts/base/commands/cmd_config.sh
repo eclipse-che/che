@@ -30,7 +30,7 @@ cmd_config() {
   fi
 
   # Development mode
-  if [ "${CHE_DEVELOPMENT_MODE}" = "on" ]; then
+  if [ "${CHE_DEVELOPMENT_MODE_WITH_REPO}" = "on" ]; then
     # if dev mode is on, pick configuration sources from repo.
     # please note that in production mode update of configuration sources must be only on update.
     docker_run -v "${CHE_HOST_CONFIG}":/copy \
@@ -76,7 +76,7 @@ generate_configuration_with_puppet() {
     CHE_ENV_FILE="${CHE_HOST_INSTANCE}/config/$CHE_MINI_PRODUCT_NAME.env"
   fi
 
-  if [ "${CHE_DEVELOPMENT_MODE}" = "on" ]; then
+  if [ "${CHE_DEVELOPMENT_MODE_WITH_REPO}" = "on" ]; then
     # Note - bug in docker requires relative path for env, not absolute
     GENERATE_CONFIG_COMMAND="docker_run \
                   --env-file=\"${REFERENCE_CONTAINER_ENVIRONMENT_FILE}\" \
@@ -86,10 +86,10 @@ generate_configuration_with_puppet() {
                   -v \"${CHE_HOST_DEVELOPMENT_REPO}/dockerfiles/init/modules\":/etc/puppet/modules:ro \
                   -e \"CHE_ENV_FILE=${CHE_ENV_FILE}\" \
                   -e \"CHE_CONTAINER_ROOT=${CHE_CONTAINER_ROOT}\" \
-                  -e \"CHE_ENVIRONMENT=development\" \
+                  -e \"CHE_ENVIRONMENT=${CHE_DEVELOPMENT_MODE}\" \
+                  -e \"CHE_DEV_ENVIRONMENT_WITH_REPO=${CHE_DEVELOPMENT_MODE_WITH_REPO}\" \
                   -e \"CHE_CONFIG=${CHE_HOST_INSTANCE}\" \
                   -e \"CHE_INSTANCE=${CHE_HOST_INSTANCE}\" \
-                  -e \"CHE_DEVELOPMENT_REPO=${CHE_HOST_DEVELOPMENT_REPO}\" \
                   -e \"CHE_ASSEMBLY=${CHE_ASSEMBLY}\" \
                   --entrypoint=/usr/bin/puppet \
                       $IMAGE_INIT \
@@ -103,7 +103,8 @@ generate_configuration_with_puppet() {
                   -v \"${CHE_HOST_INSTANCE}\":/opt/${CHE_MINI_PRODUCT_NAME}:rw \
                   -e \"CHE_ENV_FILE=${CHE_ENV_FILE}\" \
                   -e \"CHE_CONTAINER_ROOT=${CHE_CONTAINER_ROOT}\" \
-                  -e \"CHE_ENVIRONMENT=production\" \
+                  -e \"CHE_ENVIRONMENT=${CHE_DEVELOPMENT_MODE}\" \
+                  -e \"CHE_DEV_ENVIRONMENT_WITH_REPO=${CHE_DEVELOPMENT_MODE_WITH_REPO}\" \
                   -e \"CHE_CONFIG=${CHE_HOST_INSTANCE}\" \
                   -e \"CHE_INSTANCE=${CHE_HOST_INSTANCE}\" \
                   --entrypoint=/usr/bin/puppet \

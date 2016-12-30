@@ -54,7 +54,7 @@ cmd_destroy() {
   # Super weird bug.  For some reason on windows, this command has to be run 3x for everything
   # to be destroyed properly if you are in dev mode.
   if has_docker_for_windows_client; then
-    if [[ "${CHE_DEVELOPMENT_MODE}" = "on" ]]; then
+    if [[ "${CHE_DEVELOPMENT_MODE_WITH_REPO}" = "on" ]]; then
       docker_run -v "${CHE_HOST_CONFIG}":/root${CHE_CONTAINER_ROOT} \
                     alpine:3.4 sh -c "rm -rf /root${CHE_CONTAINER_ROOT}/docs \
                                    && rm -rf /root${CHE_CONTAINER_ROOT}/instance \

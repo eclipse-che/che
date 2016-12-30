@@ -327,9 +327,15 @@ check_mounts() {
   CHE_CONTAINER_BACKUP="${CHE_CONTAINER_ROOT}/backup"
 
   ### DEV MODE VARIABLES
-  CHE_DEVELOPMENT_MODE="off"
+  CHE_DEVELOPMENT_MODE_WITH_REPO="off"
   if [[ "${REPO_MOUNT}" != "not set" ]]; then
-    CHE_DEVELOPMENT_MODE="on"
+
+    if [[ "${CHE_DEVELOPMENT_MODE}" = "production" ]]; then
+      warning "You volume mounted :/repo, but dev mode is off (hint: pass --debug to activate)"
+      return
+    fi
+
+    CHE_DEVELOPMENT_MODE_WITH_REPO="on"
     CHE_HOST_DEVELOPMENT_REPO="${REPO_MOUNT}"
     CHE_CONTAINER_DEVELOPMENT_REPO="/repo"
 
@@ -367,6 +373,8 @@ check_mounts() {
       info "Have you built ${CHE_ASSEMBLY_IN_REPO_MODULE_NAME} with 'mvn clean install'?"
       return 2
     fi
+  elif [[ "${CHE_DEVELOPMENT_MODE}" = "development" ]]; then
+    warning "Dev mode activated without :/repo mount - debugging binaries within image"
   fi
 }
 
