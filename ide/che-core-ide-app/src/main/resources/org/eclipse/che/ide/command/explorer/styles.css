@@ -25,6 +25,10 @@
     text-align: center;
 }
 
+.commandNodeText {
+    max-width: 65%;
+}
+
 .commandGoalNode span:last-child svg,
 .commandNode .commandNodeButtonsPanel svg {
     width: 12px;
@@ -43,6 +47,7 @@
 .commandNode {
     padding-right: 1px;
     line-height: 18px;
+    overflow: hidden;
 }
 
 div.commandNode[selected] {

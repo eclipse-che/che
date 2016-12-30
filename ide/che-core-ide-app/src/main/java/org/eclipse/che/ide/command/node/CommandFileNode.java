@@ -48,6 +48,7 @@ public class CommandFileNode extends AbstractCommandNode implements HasAction, V
         super.updatePresentation(presentation);
 
         presentation.setPresentableText(getDisplayName());
+        presentation.setPresentableTextCss("overflow: hidden; text-overflow: ellipsis;");
     }
 
     @Override

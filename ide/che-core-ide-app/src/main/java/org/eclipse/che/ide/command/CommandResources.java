@@ -52,6 +52,8 @@ public interface CommandResources extends ClientBundle {
 
         String commandNode();
 
+        String commandNodeText();
+
         String commandNodeButtonsPanel();
     }
 

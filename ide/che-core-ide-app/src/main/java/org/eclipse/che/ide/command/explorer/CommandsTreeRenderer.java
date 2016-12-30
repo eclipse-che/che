@@ -12,7 +12,6 @@ package org.eclipse.che.ide.command.explorer;
 
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 
@@ -47,6 +46,18 @@ class CommandsTreeRenderer extends DefaultPresentationRenderer<Node> {
         this.delegate = delegate;
     }
 
+    void setDelegate(CommandsExplorerView.ActionDelegate delegate) {
+        this.delegate = delegate;
+    }
+
+    @Override
+    public Element getPresentableTextContainer(Element content) {
+        final Element presentableTextContainer = super.getPresentableTextContainer(content);
+        presentableTextContainer.addClassName(resources.commandsExplorerCss().commandNodeText());
+
+        return presentableTextContainer;
+    }
+
     @Override
     public Element render(final Node node, String domID, Tree.Joint joint, int depth) {
         final Element element = super.render(node, domID, joint, depth);
@@ -55,7 +66,7 @@ class CommandsTreeRenderer extends DefaultPresentationRenderer<Node> {
         if (node instanceof CommandFileNode) {
             nodeContainerElement.addClassName(resources.commandsExplorerCss().commandNode());
 
-            final SpanElement removeCommandButton = createButton(resources.removeCommand());
+            final Element removeCommandButton = createButton(resources.removeCommand());
             Event.setEventListener(removeCommandButton, new EventListener() {
                 @Override
                 public void onBrowserEvent(Event event) {
@@ -66,7 +77,7 @@ class CommandsTreeRenderer extends DefaultPresentationRenderer<Node> {
                 }
             });
 
-            final SpanElement duplicateCommandButton = createButton(resources.duplicateCommand());
+            final Element duplicateCommandButton = createButton(resources.duplicateCommand());
             Event.setEventListener(duplicateCommandButton, new EventListener() {
                 @Override
                 public void onBrowserEvent(Event event) {
@@ -77,7 +88,7 @@ class CommandsTreeRenderer extends DefaultPresentationRenderer<Node> {
                 }
             });
 
-            final SpanElement buttonsPanel = Document.get().createSpanElement();
+            final Element buttonsPanel = Document.get().createSpanElement();
             buttonsPanel.setClassName(resources.commandsExplorerCss().commandNodeButtonsPanel());
 
             buttonsPanel.appendChild(removeCommandButton);
@@ -88,7 +99,7 @@ class CommandsTreeRenderer extends DefaultPresentationRenderer<Node> {
         } else if (node instanceof CommandGoalNode) {
             nodeContainerElement.addClassName(resources.commandsExplorerCss().commandGoalNode());
 
-            final SpanElement addCommandButton = createButton(resources.addCommand());
+            final Element addCommandButton = createButton(resources.addCommand());
             Event.setEventListener(addCommandButton, new EventListener() {
                 @Override
                 public void onBrowserEvent(Event event) {
@@ -105,16 +116,12 @@ class CommandsTreeRenderer extends DefaultPresentationRenderer<Node> {
         return element;
     }
 
-    private SpanElement createButton(SVGResource icon) {
-        final SpanElement button = Document.get().createSpanElement();
+    private Element createButton(SVGResource icon) {
+        final Element button = Document.get().createSpanElement();
         button.appendChild(icon.getSvg().getElement());
 
         Event.sinkEvents(button, ONCLICK);
 
         return button;
-    }
-
-    void setDelegate(CommandsExplorerView.ActionDelegate delegate) {
-        this.delegate = delegate;
     }
 }
