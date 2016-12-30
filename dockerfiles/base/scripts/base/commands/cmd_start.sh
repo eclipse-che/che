@@ -143,7 +143,7 @@ check_if_booted() {
 
   if server_is_booted ${CURRENT_CHE_SERVER_CONTAINER_ID}; then
     if [[ "${CHE_DEVELOPMENT_MODE}" = "development" ]]; then
-      kill -9 $LOG_PID > /dev/null 2>&1
+      kill $LOG_PID > /dev/null 2>&1
       info ""
     fi
     info "start" "Booted and reachable"
