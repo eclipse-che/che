@@ -382,7 +382,7 @@ public abstract class LuceneSearcher implements Searcher {
     protected Document createDocument(VirtualFile virtualFile, Reader reader) throws ServerException {
         final Document doc = new Document();
         doc.add(new StringField("path", virtualFile.getPath().toString(), Field.Store.YES));
-        doc.add(new StringField("name", virtualFile.getName(), Field.Store.YES));
+        doc.add(new StringField("name", virtualFile.getName().toLowerCase(), Field.Store.YES));
         if (reader != null) {
             doc.add(new TextField("text", reader));
         }

@@ -191,6 +191,17 @@ public class FSLuceneSearcherTest {
     }
 
     @Test
+    public void searchesByFileName() throws Exception {
+        VirtualFileSystem virtualFileSystem = virtualFileSystem();
+        VirtualFile folder = virtualFileSystem.getRoot().createFolder("folder");
+        folder.createFile("Xxx.txt", TEST_CONTENT[2]);
+        searcher.init(virtualFileSystem);
+
+        List<String> paths = searcher.search(new QueryExpression().setName("xxx.txt")).getFilePaths();
+        assertEquals(newArrayList("/folder/Xxx.txt"), paths);
+    }
+
+    @Test
     public void searchesByTextAndPath() throws Exception {
         VirtualFileSystem virtualFileSystem = virtualFileSystem();
         VirtualFile folder1 = virtualFileSystem.getRoot().createFolder("folder1/a/b");
