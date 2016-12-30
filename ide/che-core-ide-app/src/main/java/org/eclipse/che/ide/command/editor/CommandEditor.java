@@ -20,9 +20,9 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandManager.CommandChangedListener;
+import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.dialogs.CancelCallback;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
@@ -39,6 +39,7 @@ import org.eclipse.che.ide.command.editor.page.arguments.ArgumentsPage;
 import org.eclipse.che.ide.command.editor.page.info.InfoPage;
 import org.eclipse.che.ide.command.editor.page.previewurl.PreviewUrlPage;
 import org.eclipse.che.ide.command.node.CommandFileNode;
+import org.eclipse.che.ide.command.node.NodeFactory;
 import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -65,6 +66,7 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
     private final EditorAgent              editorAgent;
     private final CoreLocalizationConstant localizationConstants;
     private final EditorMessages           messages;
+    private final NodeFactory              nodeFactory;
 
     private final List<CommandEditorPage> pages;
 
@@ -85,7 +87,8 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
                          DialogFactory dialogFactory,
                          EditorAgent editorAgent,
                          CoreLocalizationConstant localizationConstants,
-                         EditorMessages messages) {
+                         EditorMessages messages,
+                         NodeFactory nodeFactory) {
         this.view = view;
         this.workspaceAgent = workspaceAgent;
         this.iconRegistry = iconRegistry;
@@ -95,6 +98,7 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
         this.editorAgent = editorAgent;
         this.localizationConstants = localizationConstants;
         this.messages = messages;
+        this.nodeFactory = nodeFactory;
 
         view.setDelegate(this);
 
@@ -203,6 +207,11 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
             @Override
             public void apply(ContextualCommand arg) throws OperationException {
                 updateDirtyState(false);
+
+                if (!commandNameInitial.equals(editedCommand.getName())) {
+                    input.setFile(nodeFactory.newCommandFileNode(editedCommand));
+                }
+
                 initializePages();
 
                 callback.onSuccess(getEditorInput());

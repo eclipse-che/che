@@ -31,6 +31,7 @@ import org.eclipse.che.ide.command.editor.page.arguments.ArgumentsPage;
 import org.eclipse.che.ide.command.editor.page.info.InfoPage;
 import org.eclipse.che.ide.command.editor.page.previewurl.PreviewUrlPage;
 import org.eclipse.che.ide.command.node.CommandFileNode;
+import org.eclipse.che.ide.command.node.NodeFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -83,6 +84,8 @@ public class CommandEditorTest {
     private CoreLocalizationConstant localizationConstants;
     @Mock
     private EditorMessages           editorMessages;
+    @Mock
+    private NodeFactory              nodeFactory;
 
     @InjectMocks
     private CommandEditor editor;
