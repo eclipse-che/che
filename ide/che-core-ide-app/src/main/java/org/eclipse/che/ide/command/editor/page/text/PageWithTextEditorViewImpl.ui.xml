@@ -24,7 +24,7 @@
     <g:DockLayoutPanel>
         <g:north size="20">
             <g:Hyperlink ui:field="exploreMacrosLink"
-                         text="{messages.pageWithEditorExploreMacros}"
+                         text="{messages.pageWithTextEditorExploreMacros}"
                          addStyleNames="{style.link}"/>
         </g:north>
         <g:center>

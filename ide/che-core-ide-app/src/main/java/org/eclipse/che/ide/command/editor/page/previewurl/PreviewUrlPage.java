@@ -11,13 +11,14 @@
 package org.eclipse.che.ide.command.editor.page.previewurl;
 
 import com.google.inject.Inject;
+
 import org.eclipse.che.ide.api.editor.defaulteditor.EditorBuilder;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.command.editor.EditorMessages;
 import org.eclipse.che.ide.command.editor.page.CommandEditorPage;
-import org.eclipse.che.ide.command.editor.page.editable.AbstractPageWithEditor;
-import org.eclipse.che.ide.command.editor.page.editable.PageWithEditorView;
-import org.eclipse.che.ide.command.editor.page.editable.editor.MacroEditorConfiguration;
+import org.eclipse.che.ide.command.editor.page.text.AbstractPageWithTextEditor;
+import org.eclipse.che.ide.command.editor.page.text.PageWithTextEditorView;
+import org.eclipse.che.ide.command.editor.page.text.MacroEditorConfiguration;
 import org.eclipse.che.ide.macro.chooser.MacroChooser;
 
 import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_PREVIEW_URL_ATTRIBUTE_NAME;
@@ -27,10 +28,10 @@ import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_PREVIEW_URL
  *
  * @author Artem Zatsarynnyi
  */
-public class PreviewUrlPage extends AbstractPageWithEditor {
+public class PreviewUrlPage extends AbstractPageWithTextEditor {
 
     @Inject
-    public PreviewUrlPage(PageWithEditorView view,
+    public PreviewUrlPage(PageWithTextEditorView view,
                           EditorBuilder editorBuilder,
                           FileTypeRegistry fileTypeRegistry,
                           MacroChooser macroChooser,
@@ -41,8 +42,8 @@ public class PreviewUrlPage extends AbstractPageWithEditor {
               fileTypeRegistry,
               macroChooser,
               messages.pagePreviewUrlTitle(),
-                messages.pagePreviewUrlTooltip(),
-                editorConfiguration);
+              messages.pagePreviewUrlTooltip(),
+              editorConfiguration);
     }
 
     @Override

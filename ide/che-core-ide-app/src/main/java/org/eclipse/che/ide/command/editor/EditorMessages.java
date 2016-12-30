@@ -55,8 +55,8 @@ public interface EditorMessages extends Messages {
     @Key("page.info.projects_table.header.applicable.label")
     String pageInfoProjectsTableHeaderApplicableLabel();
 
-    @Key("page.with_editor.explore_macros")
-    String pageWithEditorExploreMacros();
+    @Key("page.with_text_editor.explore_macros")
+    String pageWithTextEditorExploreMacros();
 
     @Key("page.arguments.title")
     String pageArgumentsTitle();

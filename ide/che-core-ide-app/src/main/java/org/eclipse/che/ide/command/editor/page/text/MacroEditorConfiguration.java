@@ -8,10 +8,11 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.editor.page.editable.editor;
+package org.eclipse.che.ide.command.editor.page.text;
 
 import org.eclipse.che.ide.api.editor.codeassist.CodeAssistProcessor;
 import org.eclipse.che.ide.api.editor.editorconfig.DefaultTextEditorConfiguration;
+import org.eclipse.che.ide.api.editor.editorconfig.TextEditorConfiguration;
 import org.eclipse.che.ide.api.editor.partition.DocumentPartitioner;
 
 import javax.inject.Inject;
@@ -19,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Editor configuration for macro editor
+ * {@link TextEditorConfiguration} which provides {@link CodeAssistProcessor} for macros names.
  */
 public class MacroEditorConfiguration extends DefaultTextEditorConfiguration {
 

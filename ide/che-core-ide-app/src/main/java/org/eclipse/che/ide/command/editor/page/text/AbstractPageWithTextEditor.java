@@ -9,12 +9,14 @@
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.che.ide.command.editor.page.editable;
+package org.eclipse.che.ide.command.editor.page.text;
 
 import com.google.gwt.user.client.ui.IsWidget;
+
 import org.eclipse.che.ide.api.editor.OpenEditorCallbackImpl;
 import org.eclipse.che.ide.api.editor.defaulteditor.EditorBuilder;
 import org.eclipse.che.ide.api.editor.document.Document;
+import org.eclipse.che.ide.api.editor.editorconfig.TextEditorConfiguration;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.macro.Macro;
@@ -23,7 +25,6 @@ import org.eclipse.che.ide.api.parts.PropertyListener;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.command.editor.page.AbstractCommandEditorPage;
 import org.eclipse.che.ide.command.editor.page.CommandEditorPage;
-import org.eclipse.che.ide.command.editor.page.editable.editor.MacroEditorConfiguration;
 import org.eclipse.che.ide.macro.chooser.MacroChooser;
 import org.eclipse.che.ide.macro.chooser.MacroChooser.MacroChosenCallback;
 
@@ -31,30 +32,30 @@ import static org.eclipse.che.ide.api.editor.EditorPartPresenter.PROP_DIRTY;
 import static org.eclipse.che.ide.api.editor.EditorPartPresenter.PROP_INPUT;
 
 /**
- * Abstract {@link CommandEditorPage} that allows to edit a command's property
- * with Orion editor with ability to explore and insert macros.
+ * Abstract {@link CommandEditorPage} which allows to edit a command's property
+ * with text editor which provides autocompletion for macros names.
  *
  * @author Artem Zatsarynnyi
  */
-public abstract class AbstractPageWithEditor extends AbstractCommandEditorPage implements PageWithEditorView.ActionDelegate {
+public abstract class AbstractPageWithTextEditor extends AbstractCommandEditorPage implements PageWithTextEditorView.ActionDelegate {
 
-    private final PageWithEditorView view;
-    private final FileTypeRegistry   fileTypeRegistry;
-    private final MacroChooser       macroChooser;
-    private MacroEditorConfiguration editorConfiguration;
+    private final PageWithTextEditorView  view;
+    private final FileTypeRegistry        fileTypeRegistry;
+    private final MacroChooser            macroChooser;
+    private final TextEditorConfiguration editorConfiguration;
 
     private TextEditor editor;
 
     /** Initial value of the edited command's property. */
     private String initialValue;
 
-    protected AbstractPageWithEditor(PageWithEditorView view,
-                                     EditorBuilder editorBuilder,
-                                     FileTypeRegistry fileTypeRegistry,
-                                     MacroChooser macroChooser,
-                                     String title,
-                                     String tooltip,
-                                     MacroEditorConfiguration editorConfiguration) {
+    protected AbstractPageWithTextEditor(PageWithTextEditorView view,
+                                         EditorBuilder editorBuilder,
+                                         FileTypeRegistry fileTypeRegistry,
+                                         MacroChooser macroChooser,
+                                         String title,
+                                         String tooltip,
+                                         TextEditorConfiguration editorConfiguration) {
         super(title, tooltip);
 
         this.view = view;
@@ -125,10 +126,10 @@ public abstract class AbstractPageWithEditor extends AbstractCommandEditorPage i
     /**
      * Updates the value of the edited command's property.
      *
-     * @param content
-     *         new value modified by user
+     * @param newValue
+     *         new value of the edited command's property
      */
-    protected abstract void updateCommandPropertyValue(String content);
+    protected abstract void updateCommandPropertyValue(String newValue);
 
     @Override
     public void onExploreMacros() {

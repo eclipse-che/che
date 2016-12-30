@@ -9,7 +9,7 @@
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.che.ide.command.editor.page.editable;
+package org.eclipse.che.ide.command.editor.page.text;
 
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.filetypes.FileType;

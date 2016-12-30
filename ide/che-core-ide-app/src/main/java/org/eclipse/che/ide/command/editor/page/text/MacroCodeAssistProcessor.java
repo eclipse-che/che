@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.editor.page.editable.editor;
+package org.eclipse.che.ide.command.editor.page.text;
 
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.editor.codeassist.CodeAssistCallback;

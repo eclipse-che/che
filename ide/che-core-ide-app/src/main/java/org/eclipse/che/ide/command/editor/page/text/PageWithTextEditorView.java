@@ -9,18 +9,18 @@
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.che.ide.command.editor.page.editable;
+package org.eclipse.che.ide.command.editor.page.text;
 
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 
 import org.eclipse.che.ide.api.mvp.View;
 
 /**
- * Contract of the view for {@link AbstractPageWithEditor}.
+ * Contract of the view for {@link AbstractPageWithTextEditor}.
  *
  * @author Artem Zatsarynnyi
  */
-public interface PageWithEditorView extends View<PageWithEditorView.ActionDelegate> {
+public interface PageWithTextEditorView extends View<PageWithTextEditorView.ActionDelegate> {
 
     /** Returns the container where the editor should be placed. */
     SimpleLayoutPanel getEditorContainer();

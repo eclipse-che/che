@@ -9,7 +9,7 @@
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.che.ide.command.editor.page.editable;
+package org.eclipse.che.ide.command.editor.page.text;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -23,13 +23,13 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
 /**
- * Implementation of {@link PageWithEditorView}.
+ * Implementation of {@link PageWithTextEditorView}.
  *
  * @author Artem Zatsarynnyi
  */
-public class PageWithEditorViewImpl extends Composite implements PageWithEditorView {
+public class PageWithTextEditorViewImpl extends Composite implements PageWithTextEditorView {
 
-    private static final PageWithEditorViewImplUiBinder UI_BINDER = GWT.create(PageWithEditorViewImplUiBinder.class);
+    private static final PageWithTextEditorViewImplUiBinder UI_BINDER = GWT.create(PageWithTextEditorViewImplUiBinder.class);
 
     @UiField
     Hyperlink exploreMacrosLink;
@@ -41,7 +41,7 @@ public class PageWithEditorViewImpl extends Composite implements PageWithEditorV
     private ActionDelegate delegate;
 
     @Inject
-    public PageWithEditorViewImpl() {
+    public PageWithTextEditorViewImpl() {
         initWidget(UI_BINDER.createAndBindUi(this));
     }
 
@@ -60,6 +60,6 @@ public class PageWithEditorViewImpl extends Composite implements PageWithEditorV
         delegate.onExploreMacros();
     }
 
-    interface PageWithEditorViewImplUiBinder extends UiBinder<Widget, PageWithEditorViewImpl> {
+    interface PageWithTextEditorViewImplUiBinder extends UiBinder<Widget, PageWithTextEditorViewImpl> {
     }
 }

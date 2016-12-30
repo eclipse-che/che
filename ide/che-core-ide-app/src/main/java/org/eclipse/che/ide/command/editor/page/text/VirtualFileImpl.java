@@ -9,7 +9,7 @@
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.che.ide.command.editor.page.editable;
+package org.eclipse.che.ide.command.editor.page.text;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
@@ -24,7 +24,6 @@ import org.eclipse.che.ide.resource.Path;
  * Copy of the {@link SyntheticFile} with ability to update it's content
  * since {@link SyntheticFile} is read only.
  *
- * @author Artem Zatsarynnyi
  * @see SyntheticFile
  */
 class VirtualFileImpl implements VirtualFile {
