@@ -17,7 +17,7 @@ init_constants() {
   NC='\033[0m'
   LOG_INITIALIZED=false
   FAST_BOOT=false
-  CHE_DEVELOPMENT_MODE="production"
+  CHE_DEBUG=false
 
   DEFAULT_CHE_PRODUCT_NAME="CHE"
   CHE_PRODUCT_NAME=${CHE_PRODUCT_NAME:-${DEFAULT_CHE_PRODUCT_NAME}}
@@ -214,6 +214,13 @@ is_debug() {
   fi
 }
 
+debug_server() {
+  if [ "${CHE_DEBUG}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
 
 init_logging() {
   # Initialize CLI folder
@@ -228,8 +235,6 @@ init_logging() {
   log "$(date)"
 }
 
-
-
 init() {
   init_constants
 
@@ -243,7 +248,7 @@ init() {
   fi
 
   if [[ "$@" == *"--debug"* ]]; then
-  	CHE_DEVELOPMENT_MODE="development"
+  	CHE_DEBUG=true
   fi
 
   SCRIPTS_BASE_CONTAINER_SOURCE_DIR="/scripts/base"
@@ -269,7 +274,7 @@ init() {
   init_logging "$@"
 
   SCRIPTS_CONTAINER_SOURCE_DIR=""
-  if [[ "${CHE_DEVELOPMENT_MODE_WITH_REPO}" = "on" ]]; then
+  if $CHE_LOCAL_REPO; then
      # Use the CLI that is inside the repository.
      SCRIPTS_CONTAINER_SOURCE_DIR=${CHE_SCRIPTS_CONTAINER_SOURCE_DIR}
   else

@@ -81,7 +81,7 @@ cmd_init() {
   fi
 
   # in development mode we use init files from repo otherwise we use it from docker image
-  if [ "${CHE_DEVELOPMENT_MODE_WITH_REPO}" = "on" ]; then
+  if local_repo; then
     docker_run -v "${CHE_HOST_CONFIG}":/copy \
                -v "${CHE_HOST_DEVELOPMENT_REPO}"/dockerfiles/init:/files \
                -v "${CHE_HOST_DEVELOPMENT_REPO}"/dockerfiles/init/manifests/${CHE_MINI_PRODUCT_NAME}.env:/etc/puppet/manifests/${CHE_MINI_PRODUCT_NAME}.env \
@@ -101,8 +101,7 @@ cmd_init() {
     info "init" "  ${CHE_PRODUCT_NAME}_VERSION=${CHE_VERSION}"
     info "init" "  ${CHE_PRODUCT_NAME}_CONFIG=${CHE_HOST_CONFIG}"
     info "init" "  ${CHE_PRODUCT_NAME}_INSTANCE=${CHE_HOST_INSTANCE}"
-    info "init" "  ${CHE_PRODUCT_NAME}_ENVIRONMENT=${CHE_DEVELOPMENT_MODE}"
-    if [ "${CHE_DEVELOPMENT_MODE_WITH_REPO}" == "on" ]; then
+    if local_repo; then
       info "init" "  ${CHE_PRODUCT_NAME}_DEVELOPMENT_REPO=${CHE_HOST_DEVELOPMENT_REPO}"
       info "init" "  ${CHE_PRODUCT_NAME}_ASSEMBLY=${CHE_ASSEMBLY}"
     fi
