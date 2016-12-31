@@ -112,9 +112,9 @@ cmd_restart() {
   debug $FUNCNAME
 
   FORCE_UPDATE=${1:-"--no-force"}
-    info "restart" "Restarting..."
-    cmd_stop
-    cmd_start ${FORCE_UPDATE}
+  info "restart" "Restarting..."
+  cmd_stop
+  cmd_start ${FORCE_UPDATE}
 }
 
 check_if_booted() {
@@ -137,20 +137,20 @@ check_if_booted() {
   fi
 
   wait_until_server_is_booted 60 ${CURRENT_CHE_SERVER_CONTAINER_ID}
-
-  DISPLAY_URL=$(get_display_url)
-  DISPLAY_DEBUG_URL=$(get_debug_display_url)
-
+ 
   if server_is_booted ${CURRENT_CHE_SERVER_CONTAINER_ID}; then
     if [[ "${CHE_DEVELOPMENT_MODE}" = "development" ]]; then
       kill $LOG_PID > /dev/null 2>&1
       info ""
     fi
+
+    DISPLAY_URL=$(get_display_url)
     info "start" "Booted and reachable"
     info "start" "Ver: $(get_installed_version)"
     info "start" "Use: ${DISPLAY_URL}"
     info "start" "API: ${DISPLAY_URL}/swagger"
     if [[ "${CHE_DEVELOPMENT_MODE}" = "development" ]]; then
+      DISPLAY_DEBUG_URL=$(get_debug_display_url)
       info "start" "Debug: ${DISPLAY_DEBUG_URL}"
     fi
   else
