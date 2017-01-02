@@ -14,7 +14,7 @@ The `che` repository is where we do development and there are many ways you can 
 
 - [Submit bugs and feature requests](http://github.com/eclipse/che/issues) and help us verify them
 - Review [source code changes](http://github.com/eclipse/che/pulls)
-- [Review the docs](https://www.eclipse.org/che/docs/) and make improvements for anything from typos to new content at [che-docs repository](https://github.com/codenvy/che-docs)
+- [Review the docs](https://www.eclipse.org/che/docs/) and make improvements for anything from typos to new content at [che-docs repository](https://github.com/codenvy/che-docs) 
 
 ### Customizing
 There are many ways to customize Che out-of-the-box including [stacks, templates, commands, IDE extensions, server-side extensions plugins, assemblies, RESTful APIs, and editors](https://github.com/eclipse/che/blob/master/CUSTOMIZING.md). 
