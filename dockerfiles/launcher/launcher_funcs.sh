@@ -64,11 +64,7 @@ get_che_launcher_container_id() {
 }
 
 get_che_launcher_version() {
-  if [ -n "${LAUNCHER_IMAGE_VERSION}" ]; then
-    echo "${LAUNCHER_IMAGE_VERSION}"
-  else
-    echo "latest"
-  fi
+  get_che_image_version ${LAUNCHER_IMAGE_VERSION}
 }
 
 is_boot2docker() {
@@ -289,7 +285,7 @@ get_docker_host_os() {
 }
 
 get_docker_daemon_version() {
-  docker version | grep -i "server version:" | sed "s/^server version: //I"
+  docker version --format '{{.Server.Version}}' | grep "1\.[0-9]*\.[0-9]*"
 }
 
 get_che_hostname() {
@@ -396,7 +392,6 @@ get_che_container_host_ip_from_container() {
 
 get_che_container_host_bind_folder() {
   BINDS=$(docker inspect --format="{{.HostConfig.Binds}}" "${2}" | cut -d '[' -f 2 | cut -d ']' -f 1)
-
   IFS=$' '
   for SINGLE_BIND in $BINDS; do
     case $SINGLE_BIND in
@@ -421,6 +416,15 @@ get_che_container_data_folder() {
 
 get_che_container_image_name() {
   docker inspect --format="{{.Config.Image}}" "${1}"
+}
+
+get_che_image_version() {
+  image_version=$(echo ${1} | cut -d : -f2 -s)
+  if [ -n "${image_version}" ]; then
+    echo "${image_version}"
+  else
+    echo "latest"
+  fi
 }
 
 get_che_server_container_id() {
