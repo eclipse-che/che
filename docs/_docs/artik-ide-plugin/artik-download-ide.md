@@ -5,6 +5,7 @@ excerpt: "Downloading"
 layout: artik
 permalink: /:categories/download-ide/
 ---
+{% include base.html %}
 The easiest way to get started with ARTIK is by following the instructions in our [Getting Started](../../docs/artik/) page.
 
 

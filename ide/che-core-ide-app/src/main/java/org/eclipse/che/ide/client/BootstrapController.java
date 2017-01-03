@@ -112,7 +112,6 @@ public class BootstrapController {
                         DevMachine devMachine = new DevMachine(devMachineDto);
 
                         if (appContext instanceof AppContextImpl) {
-                            ((AppContextImpl)appContext).setDevMachine(devMachine);
                             ((AppContextImpl)appContext).setProjectsRoot(Path.valueOf(devMachineDto.getRuntime().projectsRoot()));
                         }
 

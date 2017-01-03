@@ -49,7 +49,7 @@ import org.eclipse.che.api.vfs.impl.file.DefaultFileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.FileTreeWatcher;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
-import org.eclipse.che.api.vfs.impl.file.event.detectors.ProjectTreeChangesDetector;
+import org.eclipse.che.api.vfs.watcher.FileWatcherManager;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
@@ -75,6 +75,7 @@ import org.everrest.core.tools.ResourceLauncher;
 import org.junit.Assert;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -162,17 +163,17 @@ public class ProjectServiceTest {
     private List<ProjectConfigDto> projects;
 
     @Mock
-    private UserDao                    userDao;
+    private UserDao                userDao;
     @Mock
-    private WorkspaceDto               usersWorkspaceMock;
+    private WorkspaceDto           usersWorkspaceMock;
     @Mock
-    private WorkspaceConfigDto         workspaceConfigMock;
+    private WorkspaceConfigDto     workspaceConfigMock;
     @Mock
-    private HttpJsonRequestFactory     httpJsonRequestFactory;
+    private HttpJsonRequestFactory httpJsonRequestFactory;
     @Mock
-    private HttpJsonResponse           httpJsonResponse;
+    private HttpJsonResponse       httpJsonResponse;
     @Mock
-    private ProjectTreeChangesDetector projectTreeChangesDetector;
+    private FileWatcherManager     fileWatcherManager;
 
     protected LocalVirtualFileSystemProvider vfsProvider;
 
@@ -245,7 +246,7 @@ public class ProjectServiceTest {
 
         pm = new ProjectManager(vfsProvider, new EventService(), ptRegistry, projectRegistry, phRegistry,
                                 importerRegistry, fileWatcherNotificationHandler, fileTreeWatcher, workspaceHolder,
-                                projectTreeChangesDetector);
+                                fileWatcherManager);
         pm.initWatcher();
 
         HttpJsonRequest httpJsonRequest = mock(HttpJsonRequest.class, new SelfReturningAnswer());
@@ -298,6 +299,12 @@ public class ProjectServiceTest {
         ApplicationContext.setCurrent(anApplicationContext().withProviders(providers).build());
 
         env = org.eclipse.che.commons.env.EnvironmentContext.getCurrent();
+
+    }
+
+    @AfterMethod
+    public void tearDown() throws Exception {
+        pm.stop();
     }
 
     private void addMockedProjectConfigDto(org.eclipse.che.api.project.server.type.ProjectTypeDef myProjectType, String projectName)

@@ -5,6 +5,7 @@ excerpt: "How to use the OpenShift plug-in."
 layout: openshift
 permalink: /:categories/user-guide/
 ---
+{% include base.html %}
 # Run Che  
 
 ```shell  

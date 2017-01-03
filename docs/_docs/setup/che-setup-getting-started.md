@@ -5,6 +5,7 @@ excerpt: ""
 layout: docs
 permalink: /:categories/getting-started/
 ---
+{% include base.html %}
 Eclipse Che is a developer workspace server and cloud IDE. You install, run, and manage Eclipse Che with Docker.
 
 ### Download

@@ -5,6 +5,7 @@ excerpt: ""
 layout: docs
 permalink: /:categories/api-projects/
 ---
+{% include base.html %}
 Che provides developer services within a workspace server whose project type and edit-build-run cycle can be customized. Product teams can deliver on-demand workspaces for their user-developers through the Che IDE or another. In this section we describe API and services that make Che act as a workspace server.
 
 # Definition

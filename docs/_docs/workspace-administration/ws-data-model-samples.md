@@ -5,6 +5,7 @@ excerpt: "Defines code sample and commands used to bootstrap a new project in a 
 layout: docs
 permalink: /:categories/data-model-samples/
 ---
+{% include base.html %}
 Users can add additional code-based project samples that are cloned into a workspace during workspace activation or by a project wizard. The `samples` JSON object defines a code sample and commands that can be used to bootstrap the content of a new project.
 
 # Samples Object

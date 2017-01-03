@@ -24,7 +24,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/ubuntu_jdk8"
+      "origin": "eclipse/ubuntu_jdk8"
     },
     "workspaceConfig": {
       "environments": {
@@ -46,7 +46,7 @@
             }
           },
           "recipe": {
-            "content": "services:\n db:\n  image: mysql\n  environment:\n   MYSQL_ROOT_PASSWORD: password\n   MYSQL_DATABASE: petclinic\n   MYSQL_USER: petclinic\n   MYSQL_PASSWORD: password\n  mem_limit: 1073741824\n dev-machine:\n  image: codenvy/ubuntu_jdk8\n  mem_limit: 2147483648\n  depends_on:\n    - db",
+            "content": "services:\n db:\n  image: mysql\n  environment:\n   MYSQL_ROOT_PASSWORD: password\n   MYSQL_DATABASE: petclinic\n   MYSQL_USER: petclinic\n   MYSQL_PASSWORD: password\n  mem_limit: 1073741824\n dev-machine:\n  image: eclipse/ubuntu_jdk8\n  mem_limit: 2147483648\n  depends_on:\n    - db",
             "contentType": "application/x-yaml",
             "type": "compose"
           }
@@ -99,7 +99,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/ubuntu_jdk8"
+      "origin": "eclipse/ubuntu_jdk8"
     },
     "workspaceConfig": {
       "environments": {
@@ -116,7 +116,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/ubuntu_jdk8",
+            "location": "eclipse/ubuntu_jdk8",
             "type": "dockerimage"
           }
         }
@@ -152,7 +152,7 @@
     "components": [],
     "source": {
       "type": "image",
-      "origin": "codenvy/ubuntu_jdk8"
+      "origin": "eclipse/ubuntu_jdk8"
     },
     "workspaceConfig": {
       "environments": {
@@ -169,7 +169,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/ubuntu_jdk8",
+            "location": "eclipse/ubuntu_jdk8",
             "type": "dockerimage"
           }
         }
@@ -210,7 +210,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/ubuntu_android"
+      "origin": "eclipse/ubuntu_android"
     },
     "workspaceConfig": {
       "environments": {
@@ -227,7 +227,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/ubuntu_android",
+            "location": "eclipse/ubuntu_android",
             "type": "dockerimage"
           }
         }
@@ -277,7 +277,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/cpp_gcc"
+      "origin": "eclipse/cpp_gcc"
     },
     "workspaceConfig": {
       "environments": {
@@ -294,7 +294,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/cpp_gcc",
+            "location": "eclipse/cpp_gcc",
             "type": "dockerimage"
           }
         }
@@ -338,7 +338,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/dotnet_core"
+      "origin": "eclipse/dotnet_core"
     },
     "workspaceConfig": {
       "environments": {
@@ -355,7 +355,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/dotnet_core",
+            "location": "eclipse/dotnet_core",
             "type": "dockerimage"
           }
         }
@@ -409,7 +409,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/ubuntu_go"
+      "origin": "eclipse/ubuntu_go"
     },
     "workspaceConfig": {
       "environments": {
@@ -426,7 +426,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/ubuntu_go",
+            "location": "eclipse/ubuntu_go",
             "type": "dockerimage"
           }
         }
@@ -478,7 +478,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/hadoop-dev"
+      "origin": "eclipse/hadoop-dev"
     },
     "workspaceConfig": {
       "environments": {
@@ -495,7 +495,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/hadoop-dev",
+            "location": "eclipse/hadoop-dev",
             "type": "dockerimage"
           }
         }
@@ -555,7 +555,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/node"
+      "origin": "eclipse/node"
     },
     "workspaceConfig": {
       "environments": {
@@ -572,7 +572,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/node",
+            "location": "eclipse/node",
             "type": "dockerimage"
           }
         }
@@ -625,7 +625,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/php"
+      "origin": "eclipse/php"
     },
     "workspaceConfig": {
       "environments": {
@@ -642,7 +642,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/php",
+            "location": "eclipse/php",
             "type": "dockerimage"
           }
         }
@@ -722,7 +722,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/ubuntu_python:latest"
+      "origin": "eclipse/ubuntu_python:latest"
     },
     "workspaceConfig": {
       "environments": {
@@ -739,7 +739,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/ubuntu_python:latest",
+            "location": "eclipse/ubuntu_python:latest",
             "type": "dockerimage"
           }
         }
@@ -792,7 +792,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/ubuntu_rails"
+      "origin": "eclipse/ubuntu_rails"
     },
     "workspaceConfig": {
       "environments": {
@@ -809,7 +809,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/ubuntu_rails",
+            "location": "eclipse/ubuntu_rails",
             "type": "dockerimage"
           }
         }
@@ -858,7 +858,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/debian_jre"
+      "origin": "eclipse/debian_jre"
     },
     "workspaceConfig": {
       "environments": {
@@ -875,7 +875,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/debian_jre",
+            "location": "eclipse/debian_jre",
             "type": "dockerimage"
           }
         }
@@ -903,7 +903,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/debian_jre"
+      "origin": "eclipse/debian_jre"
     },
     "workspaceConfig": {
       "environments": {
@@ -925,7 +925,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/debian_jre",
+            "location": "eclipse/debian_jre",
             "type": "dockerimage"
           }
         }
@@ -969,7 +969,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/centos_jdk8"
+      "origin": "eclipse/centos_jdk8"
     },
     "workspaceConfig": {
       "environments": {
@@ -986,7 +986,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/centos_jdk8",
+            "location": "eclipse/centos_jdk8",
             "type": "dockerimage"
           }
         }
@@ -1041,7 +1041,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/debian_jdk8"
+      "origin": "eclipse/debian_jdk8"
     },
     "workspaceConfig": {
       "environments": {
@@ -1058,7 +1058,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/debian_jdk8",
+            "location": "eclipse/debian_jdk8",
             "type": "dockerimage"
           }
         }
@@ -1116,7 +1116,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/php:gae"
+      "origin": "eclipse/php:gae"
     },
     "workspaceConfig": {
       "environments": {
@@ -1133,7 +1133,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/php:gae",
+            "location": "eclipse/php:gae",
             "type": "dockerimage"
           }
         }
@@ -1181,7 +1181,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/ubuntu_python:2.7"
+      "origin": "eclipse/ubuntu_python:2.7"
     },
     "workspaceConfig": {
       "environments": {
@@ -1198,7 +1198,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/ubuntu_python:2.7",
+            "location": "eclipse/ubuntu_python:2.7",
             "type": "dockerimage"
           }
         }
@@ -1243,7 +1243,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/ubuntu_python:gae_python2.7"
+      "origin": "eclipse/ubuntu_python:gae_python2.7"
     },
     "workspaceConfig": {
       "environments": {
@@ -1260,7 +1260,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/ubuntu_python:gae_python2.7",
+            "location": "eclipse/ubuntu_python:gae_python2.7",
             "type": "dockerimage"
           }
         }
@@ -1324,7 +1324,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/selenium"
+      "origin": "eclipse/selenium"
     },
     "workspaceConfig": {
       "environments": {
@@ -1341,7 +1341,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/selenium",
+            "location": "eclipse/selenium",
             "type": "dockerimage"
           }
         }
@@ -1444,7 +1444,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/ubuntu_jre",
+            "location": "eclipse/ubuntu_jre",
             "type": "dockerimage"
           }
         }
@@ -1455,7 +1455,7 @@
     },
     "source": {
       "type": "image",
-      "origin": "codenvy/ubuntu_jre"
+      "origin": "eclipse/ubuntu_jre"
     }
   },
   {

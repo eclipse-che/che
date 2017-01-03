@@ -5,6 +5,7 @@ excerpt: "Theme API"
 layout: docs
 permalink: /:categories/themes/
 ---
+{% include base.html %}
 Themes API is required to be able to quickly change look and feel of the IDE, and have an easy way to change fonts, their color and the entire color scheme of IDE in a centralized way. As a result, with Themes API it has become possible to choose different color schemes and add new ones.
 
 # Scope

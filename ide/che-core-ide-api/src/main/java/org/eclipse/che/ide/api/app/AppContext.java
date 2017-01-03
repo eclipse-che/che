@@ -16,6 +16,7 @@ import org.eclipse.che.api.core.model.factory.Factory;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
+import org.eclipse.che.ide.api.machine.ActiveRuntime;
 import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Project;
@@ -201,4 +202,8 @@ public interface AppContext {
      *         current workspace or {@code null}
      */
     void setWorkspace(Workspace workspace);
+
+
+    ActiveRuntime getActiveRuntime();
+
 }

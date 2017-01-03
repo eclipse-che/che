@@ -5,6 +5,7 @@ excerpt: ""
 layout: docs
 permalink: /:categories/events/
 ---
+{% include base.html %}
 Events are defined in Che in order to circulate information between processes in a publish/subscribe model. Event notifications are provided on Websocket channels. Clients can subscribe to these channels.
 ```shell  
 # Get the workspace Id

@@ -5,6 +5,7 @@ excerpt: ""
 layout: docs
 permalink: /:categories/che-properties/
 ---
+{% include base.html %}
 # Referencing Properties in Extensions  
 You can reference properties in Che extensions that you author. Configuration parameters may be injected with a constructor or directly in the fields. The parameter of the field must be annotated with `@javax.inject.Named`. The value of the annotation is the name of the property. For example, if the configuration property is: `data_file:/home/user/storage` then in your extension code:
 ```java  

@@ -15,6 +15,7 @@ import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.keybinding.KeyBuilder;
+import org.eclipse.che.ide.util.browser.UserAgent;
 import org.eclipse.che.plugin.testing.ide.TestAction;
 import org.eclipse.che.plugin.testing.testng.ide.action.RunAllTestAction;
 import org.eclipse.che.plugin.testing.testng.ide.action.RunClassContextTestAction;
@@ -25,7 +26,7 @@ import com.google.inject.Inject;
 
 /**
  * TestNG ide implementation.
- * 
+ *
  * @author Mirage Abeysekara
  */
 public class TestNGTestAction implements TestAction {
@@ -46,13 +47,19 @@ public class TestNGTestAction implements TestAction {
         actionManager.registerAction("TestNGActionRunAll", runAllTestAction);
         actionManager.registerAction("TestNGActionRunXML", runTestXMLAction);
         actionManager.registerAction("TestNGActionRunClassContext", runClassContextTestAction);
-        keyBinding.getGlobal().addKey(new KeyBuilder().action().alt().charCode('n').build(), "TestNGActionRunAll");
-        keyBinding.getGlobal().addKey(new KeyBuilder().action().shift().charCode('n').build(), "TestNGActionRunClass");
+        if (UserAgent.isMac()) {
+            keyBinding.getGlobal().addKey(new KeyBuilder().control().alt().charCode('g').build(), "TestNGActionRunAll");
+            keyBinding.getGlobal().addKey(new KeyBuilder().control().shift().charCode('g').build(), "TestNGActionRunClass");
+        } else {
+            keyBinding.getGlobal().addKey(new KeyBuilder().action().alt().charCode('g').build(), "TestNGActionRunAll");
+            keyBinding.getGlobal().addKey(new KeyBuilder().action().shift().charCode('g').build(), "TestNGActionRunClass");
+        }
         this.runAllTestAction = runAllTestAction;
         this.runClassContextTestAction = runClassContextTestAction;
         this.runClassTestAction = runClassTestAction;
         this.runTestXMLAction = runTestXMLAction;
     }
+
 
     @Override
     public void addMainMenuItems(DefaultActionGroup testMainMenu) {

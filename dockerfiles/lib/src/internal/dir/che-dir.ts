@@ -93,6 +93,10 @@ export class CheDir {
     this.args = ArgumentProcessor.inject(this, args);
 
 
+    if (this.args.length == 0) {
+      throw new Error("Missing folder for synchronization.");
+    }
+
     this.currentFolder = this.path.resolve(args[0]);
     this.folderName = this.path.basename(this.currentFolder);
     this.cheFile = this.path.resolve(this.currentFolder, 'Chefile');
@@ -163,9 +167,10 @@ export class CheDir {
 
   parseArgument() : Promise<string> {
     return new Promise<string>( (resolve, reject) => {
-      let invalidCommand : string = 'only init, up, down, ssh and status commands are supported.';
-      if (this.args.length == 0) {
-        reject(invalidCommand);
+      let emptyCommand : string = 'You need to provide an argument to the command : init, up, down, ssh or status';
+      let invalidCommand : string = 'Invalid command given: only init, up, down, ssh and status commands are supported.';
+      if (this.args.length == 1) {
+        reject(emptyCommand);
       } else if ('init' === this.args[1]
                  || 'up' === this.args[1]
                  || 'destroy' === this.args[1]

@@ -24,7 +24,7 @@ public class LogMessage {
     private final Type   type;
     private final String content;
 
-    LogMessage(Type type, String content) {
+    public LogMessage(Type type, String content) {
         this.type = type;
         this.content = content;
     }

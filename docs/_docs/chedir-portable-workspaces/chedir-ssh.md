@@ -5,6 +5,7 @@ excerpt: "SSH into your workspace"
 layout: docs
 permalink: /:categories/ssh/
 ---
+{% include base.html %}
 You can use Chedir to SSH into the newly created workspace, whether it is local or remote. It does not matter what operating system that you are using, this technique also supports Microsoft Windows without having to install putty!
 ```shell  
 che dir ssh\

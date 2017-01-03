@@ -5,6 +5,7 @@ excerpt: ""
 layout: docs
 permalink: /:categories/debug/
 ---
+{% include base.html %}
 # Java  
 Java debugger is deployed with the workspace agent, i.e. runs in the workspace. It can connect to local processes (those running in a workspace) or remote ones.
 

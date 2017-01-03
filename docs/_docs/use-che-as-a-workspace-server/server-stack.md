@@ -5,6 +5,7 @@ excerpt: "Manage stacks using Che REST API"
 layout: docs
 permalink: /:categories/stack/
 ---
+{% include base.html %}
 ## List All Stacks
 ```curl  
 curl --header 'Accept: application/json' http://localhost:8080/api/stack?tags=Node.JS\

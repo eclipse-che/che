@@ -5,6 +5,7 @@ excerpt: ""
 layout: docs
 permalink: /:categories/intellisense/
 ---
+{% include base.html %}
 Eclipse Che uses a language server protocol to provide intellisense for various languages. Each language server protocol is an [agent](https://eclipse-che.readme.io/docs/workspace-agents) that is injected into the [runtime machine dev-machine](https://eclipse-che.readme.io/docs/machines) by adding it to a [runtime stack](https://eclipse-che.readme.io/docs/stacks) configuration or an existing [workspace](https://eclipse-che.readme.io/docs/machines#section-dashboard-machine-information) in the dashboard.
 # Language Intellisense  
 We currently support the following intellisense languages.
