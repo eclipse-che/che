@@ -40,6 +40,7 @@ if test -z ${NETWORK_IF}; then
 fi
 
 ip a show "${NETWORK_IF}" | \
-            grep 'inet ' | \
+            grep "scope global ${NETWORK_IF}" | \
+            grep -v ':' | \
             cut -d/ -f1 | \
             awk '{print $2}'
