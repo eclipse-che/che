@@ -20,6 +20,7 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.CoreLocalizationConstant;
+import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandManager.CommandChangedListener;
 import org.eclipse.che.ide.api.command.ContextualCommand;
@@ -67,6 +68,7 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
     private final CoreLocalizationConstant localizationConstants;
     private final EditorMessages           messages;
     private final NodeFactory              nodeFactory;
+    private final CommandExecutor          commandExecutor;
 
     private final List<CommandEditorPage> pages;
 
@@ -88,7 +90,8 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
                          EditorAgent editorAgent,
                          CoreLocalizationConstant localizationConstants,
                          EditorMessages messages,
-                         NodeFactory nodeFactory) {
+                         NodeFactory nodeFactory,
+                         CommandExecutor commandExecutor) {
         this.view = view;
         this.workspaceAgent = workspaceAgent;
         this.iconRegistry = iconRegistry;
@@ -99,6 +102,7 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
         this.localizationConstants = localizationConstants;
         this.messages = messages;
         this.nodeFactory = nodeFactory;
+        this.commandExecutor = commandExecutor;
 
         view.setDelegate(this);
 
@@ -275,6 +279,11 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
     @Override
     public void onCommandSave() {
         doSave();
+    }
+
+    @Override
+    public void onCommandTest() {
+        commandExecutor.executeCommand(editedCommand);
     }
 
     @Override

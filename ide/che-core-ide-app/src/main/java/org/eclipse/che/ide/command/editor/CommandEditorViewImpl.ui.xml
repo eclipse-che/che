@@ -16,6 +16,7 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:che='urn:import:org.eclipse.che.ide.ui'>
     <ui:with field='messages' type='org.eclipse.che.ide.command.editor.EditorMessages'/>
+    <ui:with field='resources' type='org.eclipse.che.ide.command.CommandResources'/>
     <ui:style>
         @eval partBackground org.eclipse.che.ide.api.theme.Style.theme.partBackground();
         @eval tabsPanelBackground org.eclipse.che.ide.api.theme.Style.theme.tabsPanelBackground();
@@ -42,7 +43,8 @@
             box-shadow: 0 1px 0 0 getToolbarActionGroupShadowColor;
             border: 1px solid getToolbarActionGroupBorderColor;
             border-radius: 3px;
-            margin-left: 100px;
+            margin-left: 50px;
+            margin-right: 20px;
         }
 
         .switcher {
@@ -51,7 +53,13 @@
 
         .button {
             float: left;
-            margin: 5px 0 0 60px;
+            margin: 5px 0 0 10px;
+        }
+
+        .button > svg {
+            width: 16px;
+            height: 16px;
+            margin: 1px;
         }
     </ui:style>
 
@@ -67,6 +75,10 @@
                           text="{messages.buttonSaveText}"
                           addStyleNames="{style.button}"
                           debugId="command-editor-button-save"/>
+                <g:Button ui:field="testButton"
+                          addStyleNames="{style.button}"
+                          debugId="command-editor-button-test">
+                </g:Button>
             </g:FlowPanel>
         </g:north>
         <g:center>
