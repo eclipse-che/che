@@ -19,6 +19,10 @@
     <ui:style>
         @eval partBackground org.eclipse.che.ide.api.theme.Style.theme.partBackground();
         @eval tabsPanelBackground org.eclipse.che.ide.api.theme.Style.theme.tabsPanelBackground();
+        @eval toolbarActionGroupShadowColor org.eclipse.che.ide.api.theme.Style.getToolbarActionGroupShadowColor();
+        @eval getToolbarActionGroupBackgroundColor org.eclipse.che.ide.api.theme.Style.getToolbarActionGroupBackgroundColor();
+        @eval getToolbarActionGroupBorderColor org.eclipse.che.ide.api.theme.Style.getToolbarActionGroupBorderColor();
+        @eval getToolbarActionGroupShadowColor org.eclipse.che.ide.api.theme.Style.getToolbarActionGroupShadowColor();
 
         .mainPanel {
             background-color: partBackground;
@@ -33,10 +37,10 @@
         .tabsPanel {
             width: 285px;
             height: 30px;
-            background-color: #303336;
+            background-color: getToolbarActionGroupBackgroundColor;
             float: left;
-            box-shadow: 0 1px 0 0 #3c3c3c;
-            border: 1px solid #24272c;
+            box-shadow: 0 1px 0 0 getToolbarActionGroupShadowColor;
+            border: 1px solid getToolbarActionGroupBorderColor;
             border-radius: 3px;
             margin-left: 100px;
         }

@@ -17,6 +17,8 @@
              xmlns:che='urn:import:org.eclipse.che.ide.ui.listbox'>
     <ui:with field='messages' type='org.eclipse.che.ide.command.editor.EditorMessages'/>
     <ui:style>
+        @eval projectExplorerSelectedRowBackground org.eclipse.che.ide.api.theme.Style.theme.projectExplorerSelectedRowBackground();
+
         .section {
             margin-left: 10px;
             margin-top: 15px;
@@ -27,7 +29,7 @@
         }
 
         .table-header {
-            background-color: #2f353b;
+            background-color: projectExplorerSelectedRowBackground;
         }
 
         .column-header {
