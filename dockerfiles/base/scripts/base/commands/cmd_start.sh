@@ -138,12 +138,12 @@ check_if_booted() {
 
   wait_until_server_is_booted 60 ${CURRENT_CHE_SERVER_CONTAINER_ID}
  
-  if server_is_booted ${CURRENT_CHE_SERVER_CONTAINER_ID}; then
-    if debug_server; then
-      kill $LOG_PID > /dev/null 2>&1
-      info ""
-    fi
+  if debug_server; then
+    kill $LOG_PID > /dev/null 2>&1
+    info ""
+  fi
 
+  if server_is_booted ${CURRENT_CHE_SERVER_CONTAINER_ID}; then
     DISPLAY_URL=$(get_display_url)
     info "start" "Booted and reachable"
     info "start" "Ver: $(get_installed_version)"

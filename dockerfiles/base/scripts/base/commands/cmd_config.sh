@@ -29,7 +29,7 @@ cmd_config() {
     get_image_manifest $CHE_VERSION
   fi
 
-  # Development mode
+  # If using a local repository, then we need to always perform an updated init with those files
   if local_repo; then
     # if user has mounted local repo, use configuration files from the repo.
     # please note that in production mode update of configuration sources must be only on update.
@@ -43,7 +43,7 @@ cmd_config() {
         log "docker_run -v \"${CHE_HOST_INSTANCE}/dev\":/root/dev alpine:3.4 sh -c \"rm -rf /root/dev/*\""
 
         # Super weird bug - sometimes, the RM command doesn't wipe everything, so we have to repeat it a couple times
-        until directory_is_clean; do
+        until config_directory_is_empty; do
           docker_run -v "${CHE_HOST_INSTANCE}/dev":/root/dev alpine:3.4 sh -c "rm -rf /root/dev/${CHE_MINI_PRODUCT_NAME}-tomcat" > /dev/null 2>&1  || true
         done
 
@@ -83,47 +83,31 @@ generate_configuration_with_puppet() {
   fi
 
   if debug_server; then
-    DEV_MODE="development"
+    CHE_ENVIRONMENT="development"
     WRITE_LOGS=""
   else
-    DEV_MODE="production"
+    CHE_ENVIRONMENT="production"
     WRITE_LOGS=">> \"${LOGS}\""
   fi
 
   if local_repo; then
     CHE_REPO="on"
+    WRITE_PARAMETERS="-v \"${CHE_HOST_DEVELOPMENT_REPO}/dockerfiles/init/manifests\":/etc/puppet/manifests:ro \
+                      -v \"${CHE_HOST_DEVELOPMENT_REPO}/dockerfiles/init/modules\":/etc/puppet/modules:ro \
+                      -e \"CHE_ASSEMBLY=${CHE_ASSEMBLY}\""
   else
     CHE_REPO="off"
+    WRITE_PARAMETERS=""
   fi
 
-  if local_repo; then
-    # Note - bug in docker requires relative path for env, not absolute
-    GENERATE_CONFIG_COMMAND="docker_run \
-                  --env-file=\"${REFERENCE_CONTAINER_ENVIRONMENT_FILE}\" \
+  GENERATE_CONFIG_COMMAND="docker_run \
+                 --env-file=\"${REFERENCE_CONTAINER_ENVIRONMENT_FILE}\" \
                   --env-file=/version/$CHE_VERSION/images \
                   -v \"${CHE_HOST_INSTANCE}\":/opt/${CHE_MINI_PRODUCT_NAME}:rw \
-                  -v \"${CHE_HOST_DEVELOPMENT_REPO}/dockerfiles/init/manifests\":/etc/puppet/manifests:ro \
-                  -v \"${CHE_HOST_DEVELOPMENT_REPO}/dockerfiles/init/modules\":/etc/puppet/modules:ro \
+                  ${WRITE_PARAMETERS} \
                   -e \"CHE_ENV_FILE=${CHE_ENV_FILE}\" \
                   -e \"CHE_CONTAINER_ROOT=${CHE_CONTAINER_ROOT}\" \
-                  -e \"CHE_ENVIRONMENT=${DEV_MODE}\" \
-                  -e \"CHE_CONFIG=${CHE_HOST_INSTANCE}\" \
-                  -e \"CHE_INSTANCE=${CHE_HOST_INSTANCE}\" \
-                  -e \"CHE_REPO=${CHE_REPO}\" \
-                  -e \"CHE_ASSEMBLY=${CHE_ASSEMBLY}\" \
-                  --entrypoint=/usr/bin/puppet \
-                      $IMAGE_INIT \
-                          apply --modulepath \
-                                /etc/puppet/modules/ \
-                                /etc/puppet/manifests/${CHE_MINI_PRODUCT_NAME}.pp --show_diff ${WRITE_LOGS}"
-  else
-    GENERATE_CONFIG_COMMAND="docker_run \
-                  --env-file=\"${REFERENCE_CONTAINER_ENVIRONMENT_FILE}\" \
-                  --env-file=/version/$CHE_VERSION/images \
-                  -v \"${CHE_HOST_INSTANCE}\":/opt/${CHE_MINI_PRODUCT_NAME}:rw \
-                  -e \"CHE_ENV_FILE=${CHE_ENV_FILE}\" \
-                  -e \"CHE_CONTAINER_ROOT=${CHE_CONTAINER_ROOT}\" \
-                  -e \"CHE_ENVIRONMENT=${DEV_MODE}\" \
+                  -e \"CHE_ENVIRONMENT=${CHE_ENVIRONMENT}\" \
                   -e \"CHE_CONFIG=${CHE_HOST_INSTANCE}\" \
                   -e \"CHE_INSTANCE=${CHE_HOST_INSTANCE}\" \
                   -e \"CHE_REPO=${CHE_REPO}\" \
@@ -132,13 +116,12 @@ generate_configuration_with_puppet() {
                           apply --modulepath \
                                 /etc/puppet/modules/ \
                                 /etc/puppet/manifests/${CHE_MINI_PRODUCT_NAME}.pp --show_diff ${WRITE_LOGS}"
-  fi
 
   log ${GENERATE_CONFIG_COMMAND}
   eval ${GENERATE_CONFIG_COMMAND}
 }
 
-directory_is_clean() {
+config_directory_is_empty() {
   if [[ -d "${CHE_CONTAINER_INSTANCE}/dev/${CHE_MINI_PRODUCT_NAME}-tomcat" ]]; then
     return 1
   else
