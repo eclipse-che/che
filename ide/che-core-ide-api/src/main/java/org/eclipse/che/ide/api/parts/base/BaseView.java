@@ -125,6 +125,9 @@ public abstract class BaseView<T extends BaseActionDelegate> extends Composite i
         }, DoubleClickEvent.getType());
     }
 
+    /**
+     * Adds minimize part button.
+     */
     private void addMinimizeButton() {
         SVGImage minimize = new SVGImage(resources.collapseExpandIcon());
         minimize.getElement().setAttribute("name", "workBenchIconMinimize");
@@ -145,6 +148,9 @@ public abstract class BaseView<T extends BaseActionDelegate> extends Composite i
         }
     }
 
+    /**
+     * Adds maximize part button.
+     */
     private void addMaximizeButton() {
         SVGImage maximize = new SVGImage(resources.maximizePart());
         maximize.getElement().setAttribute("name", "workBenchIconMaximize");
@@ -164,6 +170,9 @@ public abstract class BaseView<T extends BaseActionDelegate> extends Composite i
         }
     }
 
+    /**
+     * Adds part menu button.
+     */
     private void addMenuButton() {
         final ToolButton menuButton = new ToolButton(FontAwesome.COG + "&nbsp;" + FontAwesome.CARET_DOWN);
         menuButton.getElement().setAttribute("name", "workBenchIconMenu");
