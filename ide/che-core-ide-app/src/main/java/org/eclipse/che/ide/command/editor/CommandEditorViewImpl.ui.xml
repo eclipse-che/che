@@ -21,9 +21,11 @@
         @eval partBackground org.eclipse.che.ide.api.theme.Style.theme.partBackground();
         @eval tabsPanelBackground org.eclipse.che.ide.api.theme.Style.theme.tabsPanelBackground();
         @eval toolbarActionGroupShadowColor org.eclipse.che.ide.api.theme.Style.getToolbarActionGroupShadowColor();
-        @eval getToolbarActionGroupBackgroundColor org.eclipse.che.ide.api.theme.Style.getToolbarActionGroupBackgroundColor();
-        @eval getToolbarActionGroupBorderColor org.eclipse.che.ide.api.theme.Style.getToolbarActionGroupBorderColor();
-        @eval getToolbarActionGroupShadowColor org.eclipse.che.ide.api.theme.Style.getToolbarActionGroupShadowColor();
+        @eval toolbarActionGroupBackgroundColor org.eclipse.che.ide.api.theme.Style.getToolbarActionGroupBackgroundColor();
+        @eval toolbarActionGroupBorderColor org.eclipse.che.ide.api.theme.Style.getToolbarActionGroupBorderColor();
+        @eval toolbarActionGroupShadowColor org.eclipse.che.ide.api.theme.Style.getToolbarActionGroupShadowColor();
+        @eval blueIconColor org.eclipse.che.ide.api.theme.Style.theme.getBlueIconColor();
+        @eval greenIconColor org.eclipse.che.ide.api.theme.Style.theme.getSuccessEventColor();
 
         .mainPanel {
             background-color: partBackground;
@@ -38,10 +40,10 @@
         .tabsPanel {
             width: 285px;
             height: 30px;
-            background-color: getToolbarActionGroupBackgroundColor;
+            background-color: toolbarActionGroupBackgroundColor;
             float: left;
-            box-shadow: 0 1px 0 0 getToolbarActionGroupShadowColor;
-            border: 1px solid getToolbarActionGroupBorderColor;
+            box-shadow: 0 1px 0 0 toolbarActionGroupShadowColor;
+            border: 1px solid toolbarActionGroupBorderColor;
             border-radius: 3px;
             margin-left: 50px;
             margin-right: 20px;
@@ -60,6 +62,16 @@
             width: 16px;
             height: 16px;
             margin: 1px;
+        }
+
+        .button > svg g,
+        .button > svg g g path {
+            fill: blueIconColor;
+        }
+
+        .button:hover > svg g,
+        .button:hover > svg g g path {
+            fill: greenIconColor;
         }
     </ui:style>
 
