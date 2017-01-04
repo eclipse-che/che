@@ -16,6 +16,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.ErrorCodes;
+import org.eclipse.che.api.git.shared.Constants;
 import org.eclipse.che.api.git.shared.LogResponse;
 import org.eclipse.che.api.git.shared.Revision;
 import org.eclipse.che.api.promises.client.Operation;
@@ -26,7 +27,6 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
@@ -85,6 +85,7 @@ public class HistoryPresenter extends BasePresenter implements HistoryView.Actio
     private NotificationManager notificationManager;
 
     private Project project;
+    private int     skip;
 
     @Inject
     public HistoryPresenter(HistoryView view,
@@ -115,9 +116,8 @@ public class HistoryPresenter extends BasePresenter implements HistoryView.Actio
 
     public void showDialog(Project project) {
         this.project = project;
-        getCommitsLog();
+        initializeHistory();
         selectedRevision = null;
-
         view.selectProjectChangesButton(true);
         view.selectResourceChangesButton(false);
         showChangesInProject = true;
@@ -138,11 +138,27 @@ public class HistoryPresenter extends BasePresenter implements HistoryView.Actio
     }
 
     /** Get the log of the commits. If successfully received, then display in revision grid, otherwise - show error in output panel. */
-    private void getCommitsLog() {
-        service.log(appContext.getDevMachine(), project.getLocation(), null, false).then(new Operation<LogResponse>() {
+    private void fetchHistoryPage(final boolean append) {
+        service.log(appContext.getDevMachine(),
+                    project.getLocation(),
+                    null,
+                    skip,
+                    Constants.DEFAULT_PAGE_SIZE,
+                    false).then(new Operation<LogResponse>() {
             @Override
             public void apply(LogResponse log) throws OperationException {
-                revisions = log.getCommits();
+                List<Revision> commits = log.getCommits();
+                if (commits.isEmpty()) {
+                    return;
+                }
+
+                skip += commits.size();
+                if (append) {
+                    revisions.addAll(commits);
+                } else {
+                    revisions = commits;
+                }
+
                 view.setRevisions(revisions);
             }
         }).catchError(new Operation<PromiseError>() {
@@ -214,7 +230,12 @@ public class HistoryPresenter extends BasePresenter implements HistoryView.Actio
     /** {@inheritDoc} */
     @Override
     public void onRefreshClicked() {
-        getCommitsLog();
+        initializeHistory();
+    }
+
+    private void initializeHistory() {
+        skip = 0;
+        fetchHistoryPage(false);
     }
 
     /** {@inheritDoc} */
@@ -226,7 +247,7 @@ public class HistoryPresenter extends BasePresenter implements HistoryView.Actio
         showChangesInProject = true;
         view.selectProjectChangesButton(true);
         view.selectResourceChangesButton(false);
-        update();
+        updateDiff();
     }
 
     /** {@inheritDoc} */
@@ -238,7 +259,7 @@ public class HistoryPresenter extends BasePresenter implements HistoryView.Actio
         showChangesInProject = false;
         view.selectProjectChangesButton(false);
         view.selectResourceChangesButton(true);
-        update();
+        updateDiff();
     }
 
     /** {@inheritDoc} */
@@ -251,7 +272,7 @@ public class HistoryPresenter extends BasePresenter implements HistoryView.Actio
         view.selectDiffWithIndexButton(true);
         view.selectDiffWithPrevVersionButton(false);
         view.selectDiffWithWorkingTreeButton(false);
-        update();
+        updateDiff();
     }
 
     /** {@inheritDoc} */
@@ -264,7 +285,7 @@ public class HistoryPresenter extends BasePresenter implements HistoryView.Actio
         view.selectDiffWithIndexButton(false);
         view.selectDiffWithPrevVersionButton(false);
         view.selectDiffWithWorkingTreeButton(true);
-        update();
+        updateDiff();
     }
 
     /** {@inheritDoc} */
@@ -277,24 +298,23 @@ public class HistoryPresenter extends BasePresenter implements HistoryView.Actio
         view.selectDiffWithIndexButton(false);
         view.selectDiffWithPrevVersionButton(true);
         view.selectDiffWithWorkingTreeButton(false);
-        update();
+        updateDiff();
     }
 
     /** {@inheritDoc} */
     @Override
     public void onRevisionSelected(@NotNull Revision revision) {
         selectedRevision = revision;
-        update();
+        updateDiff();
     }
 
-    /** Update content. */
-    private void update() {
-        getDiff();
-        getCommitsLog();
+    @Override
+    public void onScrolledToButton() {
+        fetchHistoryPage(true);
     }
 
     /** Get the changes between revisions. On success - display diff in text format, otherwise - show the error message in output panel. */
-    private void getDiff() {
+    private void updateDiff() {
         Path path = Path.EMPTY;
 
         if (!showChangesInProject) {

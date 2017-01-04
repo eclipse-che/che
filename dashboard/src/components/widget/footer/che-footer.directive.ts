@@ -87,7 +87,7 @@ export class CheFooter {
     }
 
     // docs
-    template += '<a class=\"che-footer-button-blue che-footer-button\" href=\"/#/docs\">Docs<a/>';
+    template += '<a class=\"che-footer-button-blue che-footer-button\" href=\"/docs\" target=\"_blank\">Docs<a/>';
 
     // help
     if (supportHelpPath && supportHelpTitle) {

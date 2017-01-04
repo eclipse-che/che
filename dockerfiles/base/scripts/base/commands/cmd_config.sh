@@ -46,8 +46,9 @@ cmd_config() {
         rm -rf "${CHE_CONTAINER_INSTANCE}/dev"
     fi
     # copy ${CHE_FORMAL_PRODUCT_NAME} development tomcat to ${CHE_INSTANCE} folder
-    cp -r "$(echo $CHE_CONTAINER_DEVELOPMENT_REPO/$CHE_ASSEMBLY_IN_REPO)" \
-        "${CHE_CONTAINER_INSTANCE}/dev"
+    mkdir -p "${CHE_CONTAINER_INSTANCE}/dev/${CHE_MINI_PRODUCT_NAME}-tomcat"
+    cp -r "$(echo $CHE_CONTAINER_DEVELOPMENT_REPO/$CHE_ASSEMBLY_IN_REPO)/." \
+        "${CHE_CONTAINER_INSTANCE}/dev/${CHE_MINI_PRODUCT_NAME}-tomcat/"
   fi
 
   info "config" "Generating $CHE_MINI_PRODUCT_NAME configuration..."
