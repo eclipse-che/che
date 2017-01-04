@@ -363,6 +363,24 @@ public interface CoreLocalizationConstant extends Messages {
     @Key("action.showHiddenFiles.description")
     String actionShowHiddenFilesDescription();
 
+    @Key("action.maximizePart.title")
+    String actionMaximizePartTitle();
+
+    @Key("action.maximizePart.description")
+    String actionMaximizePartDescription();
+
+    @Key("action.restorePart.title")
+    String actionRestorePartTitle();
+
+    @Key("action.restorePart.description")
+    String actionRestorePartDescription();
+
+    @Key("action.minimizePart.title")
+    String actionMinimizePartTitle();
+
+    @Key("action.minimizePart.description")
+    String actionMinimizePartDescription();
+
     /* NewResource */
     @Key("newResource.title")
     String newResourceTitle(String title);

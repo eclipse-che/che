@@ -21,6 +21,7 @@ import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStackView;
 import org.eclipse.che.ide.api.parts.PropertyListener;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
+import org.eclipse.che.ide.menu.PartMenu;
 import org.eclipse.che.ide.part.widgets.TabItemFactory;
 import org.eclipse.che.ide.part.PartStackPresenter.PartStackEventHandler;
 import org.eclipse.che.ide.part.widgets.partbutton.PartButton;
@@ -58,6 +59,8 @@ public class PartStackPresenterTest {
     //constructor mocks
     @Mock
     private EventBus                eventBus;
+    @Mock
+    private PartMenu                partMenu;
     @Mock
     private WorkBenchPartController workBenchPartController;
     @Mock
@@ -106,7 +109,7 @@ public class PartStackPresenterTest {
         when(partButton.setTooltip(SOME_TEXT)).thenReturn(partButton);
         when(partButton.setIcon(resource)).thenReturn(partButton);
 
-        presenter = new PartStackPresenter(eventBus, partStackHandler, tabItemFactory, partsComparator, view, workBenchPartController);
+        presenter = new PartStackPresenter(eventBus, partMenu, partStackHandler, tabItemFactory, partsComparator, view, workBenchPartController);
     }
 
     @Test
@@ -278,4 +281,5 @@ public class PartStackPresenterTest {
 
         verify(view).selectTab(partPresenter);
     }
+
 }

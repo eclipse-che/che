@@ -48,6 +48,9 @@ import org.eclipse.che.ide.actions.SignatureHelpAction;
 import org.eclipse.che.ide.actions.UndoAction;
 import org.eclipse.che.ide.actions.UploadFileAction;
 import org.eclipse.che.ide.actions.UploadFolderAction;
+import org.eclipse.che.ide.actions.common.MaximizePartAction;
+import org.eclipse.che.ide.actions.common.MinimizePartAction;
+import org.eclipse.che.ide.actions.common.RestorePartAction;
 import org.eclipse.che.ide.actions.find.FindActionAction;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
@@ -311,6 +314,15 @@ public class StandardComponentInitializer {
 
     @Inject
     private SignatureHelpAction signatureHelpAction;
+
+    @Inject
+    private MaximizePartAction maximizePartAction;
+
+    @Inject
+    private MinimizePartAction minimizePartAction;
+
+    @Inject
+    private RestorePartAction restorePartAction;
 
     @Inject
     @Named("XMLFileType")
@@ -596,6 +608,11 @@ public class StandardComponentInitializer {
         mainContextMenuGroup.addSeparator();
         mainContextMenuGroup.add(resourceOperation);
 
+        DefaultActionGroup partMenuGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_PART_MENU);
+        partMenuGroup.add(maximizePartAction);
+        partMenuGroup.add(minimizePartAction);
+        partMenuGroup.add(restorePartAction);
+
         actionManager.registerAction("expandEditor", expandEditorAction);
         DefaultActionGroup rightMenuGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_RIGHT_MAIN_MENU);
         rightMenuGroup.add(expandEditorAction, FIRST);
@@ -666,7 +683,6 @@ public class StandardComponentInitializer {
         editorContextMenuGroup.addSeparator();
         editorContextMenuGroup.add(fullTextSearchAction);
         editorContextMenuGroup.add(closeActiveEditorAction);
-
 
         // Define hot-keys
         keyBinding.getGlobal().addKey(new KeyBuilder().action().alt().charCode('n').build(), "navigateToFile");

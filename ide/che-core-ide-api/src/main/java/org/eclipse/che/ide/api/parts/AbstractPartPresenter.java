@@ -22,7 +22,6 @@ import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-
 /**
  * Abstract base implementation of all PartPresenter
  *
@@ -31,10 +30,13 @@ import java.util.List;
  * @author Valeriy Svydenko
  */
 public abstract class AbstractPartPresenter implements PartPresenter {
+
     private final ListenerManager<PropertyListener> manager;
     private final List<String>                      rules;
 
     private Selection<?> selection;
+
+    protected PartStack partStack;
 
     public AbstractPartPresenter() {
         manager = ListenerManager.create();
@@ -52,6 +54,20 @@ public abstract class AbstractPartPresenter implements PartPresenter {
     @Override
     public void restoreState() {
         //default implementation is empty. Add some logic for particular part to restore it's state
+    }
+
+    /**
+     * Set PartStack where this part added.
+     *
+     * @param partStack
+     */
+    public void setPartStack(@NotNull PartStack partStack) {
+        this.partStack = partStack;
+    }
+
+    @Override
+    public PartStack getPartStack() {
+        return partStack;
     }
 
     /** {@inheritDoc} */
