@@ -167,4 +167,12 @@ declare namespace _che {
     isValid: boolean;
     errors: Array<string>;
   }
+
+  export interface IProfile {
+    attributes?: Object;
+    email: string;
+    links?: Array<any>;
+    userId: string;
+    $promise?: any;
+  }
 }
