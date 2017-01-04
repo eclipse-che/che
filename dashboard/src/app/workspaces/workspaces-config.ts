@@ -62,9 +62,9 @@ import {ListEnvVariablesController} from './workspace-details/environments/list-
 import {ListEnvVariables} from './workspace-details/environments/list-env-variables/list-env-variables.directive';
 import {EditVariableDialogController} from  './workspace-details/environments/list-env-variables/edit-variable-dialog/edit-variable-dialog.controller';
 
-import {ListPortsController} from './workspace-details/environments/list-ports/list-ports.controller';
-import {ListPorts} from './workspace-details/environments/list-ports/list-ports.directive';
-import {EditPortDialogController} from  './workspace-details/environments/list-ports/edit-port-dialog/edit-port-dialog.controller';
+import {ListServersController} from './workspace-details/environments/list-servers/list-servers.controller';
+import {ListServers} from './workspace-details/environments/list-servers/list-servers.directive';
+import {EditServerDialogController} from  './workspace-details/environments/list-servers/edit-server-dialog/edit-server-dialog.controller';
 
 import {ListCommandsController} from './workspace-details/list-commands/list-commands.controller';
 import {ListCommands} from './workspace-details/list-commands/list-commands.directive';
@@ -152,9 +152,9 @@ export class WorkspacesConfig {
     register.directive('listEnvVariables', ListEnvVariables);
     register.controller('EditVariableDialogController', EditVariableDialogController);
 
-    register.controller('ListPortsController', ListPortsController);
-    register.directive('listPorts', ListPorts);
-    register.controller('EditPortDialogController', EditPortDialogController);
+    register.controller('ListServersController', ListServersController);
+    register.directive('listServers', ListServers);
+    register.controller('EditServerDialogController', EditServerDialogController);
 
     register.controller('ListCommandsController', ListCommandsController);
     register.directive('listCommands', ListCommands);

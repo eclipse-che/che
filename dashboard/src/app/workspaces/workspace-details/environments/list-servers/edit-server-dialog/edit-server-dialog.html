@@ -2,18 +2,18 @@
            class="edit-port-dialog-content">
   <ng-form flex layout="column"
            name="editServerForm"
-           ng-submit="editPortDialogController.saveServer()">
+           ng-submit="editServerDialogController.saveServer()">
     <!-- Reference -->
     <che-label-container che-label-name="Reference">
       <div class="edit-port-dialog-input">
         <che-input che-form="editServerForm"
                    che-name="reference"
                    che-place-holder="Server reference"
-                   ng-model="editPortDialogController.reference"
+                   ng-model="editServerDialogController.reference"
                    type="type"
                    aria-label="Server reference"
                    required
-                   custom-validator="editPortDialogController.isUniqueReference($value)"
+                   custom-validator="editServerDialogController.isUniqueReference($value)"
                    ng-minlength="3"
                    ng-maxlength="20"
                    ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
@@ -32,11 +32,11 @@
         <che-input che-form="editServerForm"
                    che-name="port"
                    che-place-holder="Port number"
-                   ng-model="editPortDialogController.port"
+                   ng-model="editServerDialogController.port"
                    type="number"
                    min="1024"
                    max="65535"
-                   custom-validator="editPortDialogController.isUniquePort($value)"
+                   custom-validator="editServerDialogController.isUniquePort($value)"
                    aria-label="Server port number"
                    required>
           <div ng-message="required">A number is required.</div>
@@ -52,7 +52,7 @@
         <che-input che-form="editServerForm"
                    che-name="protocol"
                    che-place-holder="Protocol"
-                   ng-model="editPortDialogController.protocol"
+                   ng-model="editServerDialogController.protocol"
                    type="type"
                    aria-label="Server protocol"
                    ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
@@ -63,12 +63,12 @@
 
     <che-label-container>
       <div layout="row">
-        <che-button-primary che-button-title="{{editPortDialogController.toEdit ? 'Update' : 'Add'}}"
+        <che-button-primary che-button-title="{{editServerDialogController.toEdit ? 'Update' : 'Add'}}"
                             ng-disabled="editServerForm.$invalid"
-                            ng-click="editPortDialogController.saveServer()"></che-button-primary>
+                            ng-click="editServerDialogController.saveServer()"></che-button-primary>
 
         <che-button-notice che-button-title="Cancel"
-                           ng-click="editPortDialogController.hide()"
+                           ng-click="editServerDialogController.hide()"
                            tabindex="0"></che-button-notice>
       </div>
     </che-label-container>

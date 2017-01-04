@@ -17,11 +17,11 @@ interface IServerListItem extends IServer {
 
 /**
  * @ngdoc controller
- * @name workspace.details.controller:ListPortsController
- * @description This class is handling the controller for list of ports
+ * @name workspace.details.controller:ListServersController
+ * @description This class is handling the controller for list of servers
  * @author Oleksii Kurinnyi
  */
-export class ListPortsController {
+export class ListServersController {
   $mdDialog: ng.material.IDialogService;
   lodash: _.LoDashStatic;
 
@@ -154,8 +154,8 @@ export class ListPortsController {
   showEditDialog($event: MouseEvent, reference?: string): void {
     this.$mdDialog.show({
       targetEvent: $event,
-      controller: 'EditPortDialogController',
-      controllerAs: 'editPortDialogController',
+      controller: 'EditServerDialogController',
+      controllerAs: 'editServerDialogController',
       bindToController: true,
       clickOutsideToClose: true,
       locals: {
@@ -163,7 +163,7 @@ export class ListPortsController {
         servers: this.servers,
         callbackController: this
       },
-      templateUrl: 'app/workspaces/workspace-details/environments/list-ports/edit-port-dialog/edit-port-dialog.html'
+      templateUrl: 'app/workspaces/workspace-details/environments/list-servers/edit-server-dialog/edit-server-dialog.html'
     });
   }
 

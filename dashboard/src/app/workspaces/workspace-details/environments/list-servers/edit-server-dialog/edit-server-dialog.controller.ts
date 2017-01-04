@@ -10,15 +10,15 @@
  */
 'use strict';
 import {IServer} from '../server';
-import {ListPortsController} from '../list-ports.controller';
+import {ListServersController} from '../list-servers.controller';
 
 /**
  * @ngdoc controller
- * @name list.environment.variables.controller:EditPortDialogController
+ * @name list.environment.variables.controller:EditServerDialogController
  * @description This class is handling the controller for the dialog box about adding a new server or editing an existing one.
  * @author Oleksii Kurinnyi
  */
-export class EditPortDialogController {
+export class EditServerDialogController {
   $mdDialog: ng.material.IDialogService;
   lodash: _.LoDashStatic;
 
@@ -36,7 +36,7 @@ export class EditPortDialogController {
   protocol: string;
   reference: string;
 
-  callbackController: ListPortsController;
+  callbackController: ListServersController;
 
   /**
    * Default constructor that is using resource
