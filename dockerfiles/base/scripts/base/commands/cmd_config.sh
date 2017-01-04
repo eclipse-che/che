@@ -37,6 +37,18 @@ cmd_config() {
                -v "${CHE_HOST_DEVELOPMENT_REPO}"/dockerfiles/init:/files \
                   $IMAGE_INIT
 
+  fi
+
+  info "config" "Generating $CHE_MINI_PRODUCT_NAME configuration..."
+
+  # Run the docker configurator
+  generate_configuration_with_puppet
+
+  # Replace certain environment file lines with their container counterparts
+  info "config" "Customizing docker-compose for running in a container"
+
+ 
+  if local_repo; then
     # in development mode to avoid permissions issues we copy tomcat assembly to ${CHE_INSTANCE}
     # if ${CHE_FORMAL_PRODUCT_NAME} development tomcat exist we remove it
     if [[ -d "${CHE_CONTAINER_INSTANCE}/dev" ]]; then
@@ -50,6 +62,13 @@ cmd_config() {
         log "rm -rf \"${CHE_HOST_INSTANCE}/dev\" >> \"${LOGS}\""
         rm -rf "${CHE_CONTAINER_INSTANCE}/dev"
     fi
+
+    if [[ ! -d $(echo ${CHE_CONTAINER_DEVELOPMENT_REPO}/${CHE_ASSEMBLY_IN_REPO}) ]]; then
+      warning "You volume mounted a valid $CHE_FORMAL_PRODUCT_NAME repo to ':/repo', but we could not find a ${CHE_FORMAL_PRODUCT_NAME} assembly."
+      warning "Have you built ${CHE_ASSEMBLY_IN_REPO_MODULE_NAME} with 'mvn clean install'?"
+      return 2
+    fi
+
     # copy ${CHE_FORMAL_PRODUCT_NAME} development tomcat to ${CHE_INSTANCE} folder
     info "config" "Copying local binaries to ${CHE_HOST_INSTANCE}/dev..."
     mkdir -p "${CHE_CONTAINER_INSTANCE}/dev/${CHE_MINI_PRODUCT_NAME}-tomcat"
@@ -57,18 +76,7 @@ cmd_config() {
         "${CHE_CONTAINER_INSTANCE}/dev/${CHE_MINI_PRODUCT_NAME}-tomcat/"
   fi
 
-  info "config" "Generating $CHE_MINI_PRODUCT_NAME configuration..."
-  # Run the docker configurator
-  generate_configuration_with_puppet
-
-  # Replace certain environment file lines with their container counterparts
-  info "config" "Customizing docker-compose for running in a container"
-
-  # Write the installed version to the *.ver file into the instance folder
-  echo "$CHE_VERSION" > "${CHE_CONTAINER_INSTANCE}/${CHE_VERSION_FILE}"
-
   cmd_config_post_action
-
 }
 
 
