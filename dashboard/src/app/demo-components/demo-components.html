@@ -215,12 +215,19 @@ Ultima Syriarum est Palaestina per intervalla magna protenta, cultis abundans te
         </textarea>
 
         <textarea demo-source-render>
+          <div layout="column">
+            <label>Readonly: <input type="checkbox" ng-model="readonly"></label>
+            <label>Disabled: <input type="checkbox" ng-model="disabled"></label>
+          </div>
+
           <!-- che-input -->
 
           <che-input che-form="demoForm"
                      che-name="demoinput"
                      che-place-holder="Name of this demo"
-                     ng-model="demoComponentsController.demoInput">
+                     ng-model="demoComponentsController.demoInput"
+                     che-readonly="readonly"
+                     che-disabled="disabled">
           </che-input>
 
         </textarea>
@@ -251,9 +258,19 @@ Ultima Syriarum est Palaestina per intervalla magna protenta, cultis abundans te
                      ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
             <div ng-message="minlength">The value has to be more than 3 characters long.</div>
             <div ng-message="maxlength">The value has to be less than 8 characters long.</div>
-            <div ng-message="pattern">The name value not contain special characters like space, dollar, etc.
+            <div ng-message="pattern">The name value not contain special characters like space, dollar, etc.</div>
             <div ng-message="required">A value is required.</div>
           </che-input>
+        </textarea>
+
+        <textarea demo-source-render>
+          <!-- che-textarea -->
+
+          <che-textarea che-form="demoForm"
+                     che-name="demotextarea"
+                     che-place-holder="Text"
+                     ng-model="demoComponentsController.demoTextarea">
+          </che-textarea>
         </textarea>
       </ng-form>
     </md-tab>

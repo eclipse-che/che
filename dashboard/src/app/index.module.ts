@@ -92,8 +92,8 @@ initModule.config(['$routeProvider', 'ngClipProvider', ($routeProvider, ngClipPr
     $routeProvider.accessWhen('/demo-components', {
       title: 'Demo Components',
       templateUrl: 'app/demo-components/demo-components.html',
-      controller: 'DemoComponentsCtrl',
-      controllerAs: 'demoComponentsCtrl'
+      controller: 'DemoComponentsController',
+      controllerAs: 'demoComponentsController'
     });
   }
 
@@ -362,7 +362,7 @@ initModule.config(['$routeProvider', '$locationProvider', '$httpProvider', ($rou
 var instanceRegister = new Register(initModule);
 
 if (DEV) {
-  instanceRegister.controller('DemoComponentsCtrl', DemoComponentsCtrl);
+  instanceRegister.controller('DemoComponentsController', DemoComponentsController);
 }
 
 new ProxySettingsConfig(instanceRegister);

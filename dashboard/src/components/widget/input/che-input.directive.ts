@@ -45,7 +45,9 @@ export class CheInput {
       placeHolder: '@chePlaceHolder',
       pattern: '@chePattern',
       myForm: '=cheForm',
-      isChanged: '&ngChange'
+      isChanged: '&ngChange',
+      readonly: '=cheReadonly',
+      disabled: '=cheDisabled'
     };
   }
 
@@ -71,6 +73,12 @@ export class CheInput {
       + '<input type="text" placeholder="' + placeHolder + '" ng-trim="false" name="' + inputName + '" ng-focus="focused=true" ng-blur="focused=false"';
     if (attrs.chePattern) {
       template = template + ' pattern="' + pattern + '"';
+    }
+    if (attrs.cheReadonly) {
+      template = template + ' ng-readonly="readonly"';
+    }
+    if (attrs.cheDisabled) {
+      template = template + ' ng-disabled="disabled"';
     }
     template = template + ' data-ng-model="valueModel">';
     if (isMandatory) {

@@ -41,7 +41,14 @@ export class CheTextarea extends CheInput {
     let template = '<div class="che-input">'
       + '<div class="che-input-desktop" layout="column">'
       + '<div layout="column" class="che-input-desktop-value-column">'
-      + '<textarea type="text" placeholder="' + placeHolder + '" ng-trim="false" name="' + textareaName + '" data-ng-model="valueModel"></textarea>'
+      + '<textarea type="text" placeholder="' + placeHolder + '" ng-trim="false" name="' + textareaName + '" data-ng-model="valueModel"';
+    if (attrs.cheReadonly) {
+      template = template + ' ng-readonly="readonly"';
+    }
+    if (attrs.cheDisabled) {
+      template = template + ' ng-disabled="disabled"';
+    }
+    template = template + '></textarea>'
       + '<!-- display error messages for the form -->'
       + '<div ng-messages="myForm.' + textareaName + '.$error" ng-transclude></div>'
       + '</div>'
