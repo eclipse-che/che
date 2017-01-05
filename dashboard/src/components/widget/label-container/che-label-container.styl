@@ -1,28 +1,26 @@
 .che-label-container
-  padding 25px 0
-  border-bottom 1px solid $list-separator-color
-
-  &:not(.che-label-container-not-last):last-child, &.che-label-container-last
-    border-bottom none
+  padding 12px 0
 
   .che-label-container-label
-    min-width 280px
-    width 280px
+    margin 12px 0
+    min-width 180px
+    width 180px
 
   .che-label-container-label-name
-    color $primary-color
+    color lighten($che-ide-background-color, 53%)
+    text-transform uppercase
+    letter-spacing 1.3px
+    font-size 12px
+    font-weight 600 !important
     margin-right 10px
 
   .che-label-container-description
-    color $disabled-color
-    font-size 10px
+    color lighten($stroke-color, 16%)
+    font-size 11px
     margin-top 5px
 
-  .che-label-container-divider
-    border-bottom 1px solid $list-separator-color
-    margin-top 26px
-
   .che-label-container-content
+    margin 12px 0
 
     /* inner container */
     .che-label-container-label

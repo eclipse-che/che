@@ -33,6 +33,7 @@ import {CheHtmlSource} from './html-source/che-html-source.directive';
 import {CheInput} from './input/che-input.directive';
 import {CheInputBox} from './input/che-input-box.directive';
 import {CheTextarea} from './input/che-textarea.directive';
+import {CheNumberSpinner} from './input/che-number-spinner.directive';
 import {CheLabel} from './label/che-label.directive';
 import {CheLabelContainer} from './label-container/che-label-container.directive';
 import {CheLearnMoreCtrl} from './learn-more/che-learn-more.controller';
@@ -103,6 +104,7 @@ export class WidgetConfig {
       .directive('cheInput', CheInput)
       .directive('cheInputBox', CheInputBox)
       .directive('cheTextarea', CheTextarea)
+      .directive('cheNumberSpinner', CheNumberSpinner)
       .directive('cheLabel', CheLabel)
       .directive('cheLabelContainer', CheLabelContainer)
 
