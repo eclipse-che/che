@@ -20,4 +20,15 @@
     </parent>
     <artifactId>che-core-sql-schema</artifactId>
     <name>Che Core :: SQL :: Schema</name>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>**/*.sql</excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
