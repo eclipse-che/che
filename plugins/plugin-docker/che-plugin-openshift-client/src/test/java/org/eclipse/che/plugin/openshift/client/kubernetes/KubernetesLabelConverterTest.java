@@ -16,12 +16,10 @@ import static org.testng.Assert.assertTrue;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.che.plugin.openshift.client.kubernetes.KubernetesLabelConverter;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class KubernetesLabelConverterTest {
-
     private KubernetesLabelConverter kubernetesLabelConverter;
 
     @BeforeClass

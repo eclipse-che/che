@@ -20,21 +20,19 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.che.plugin.docker.client.json.ExposedPort;
-import org.eclipse.che.plugin.openshift.client.kubernetes.KubernetesService;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import io.fabric8.kubernetes.api.model.ServicePort;
 
 public class KubernetesServiceTest {
-    
     private KubernetesService kubernetesService;
-    
+
     @BeforeClass
     private void setup() {
         this.kubernetesService = new KubernetesService();
     }
-    
+
     @Test
     public void shouldReturnServicePortListFromImageExposedPortList() {
         // Given

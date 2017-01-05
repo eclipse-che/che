@@ -31,7 +31,6 @@ import org.testng.annotations.Test;
 
 @Listeners(MockitoTestNGListener.class)
 public class OpenShiftConnectorTest {
-    
     private static final String[] CONTAINER_ENV_VARIABLES = {"CHE_WORKSPACE_ID=abcd1234"};
     private static final String   CHE_DEFAULT_OPENSHIFT_PROJECT_NAME = "eclipse-che";
     private static final String   CHE_DEFAULT_OPENSHIFT_SERVICEACCOUNT = "cheserviceaccount";

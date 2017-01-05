@@ -20,21 +20,19 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.che.plugin.docker.client.json.ExposedPort;
-import org.eclipse.che.plugin.openshift.client.kubernetes.KubernetesContainer;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import io.fabric8.kubernetes.api.model.ContainerPort;
 
 public class KubernetesContainerTest {
-    
-    public KubernetesContainer kubernetesContainer;
-    
+    private KubernetesContainer kubernetesContainer;
+
     @BeforeClass
     private void setup() {
         this.kubernetesContainer = new KubernetesContainer();
     }
-    
+
     @Test
     public void shouldReturnContainerPortFromExposedPortList() {
         // Given

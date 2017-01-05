@@ -139,7 +139,6 @@ public class OpenShiftConnector extends DockerConnector {
      */
     @Override
     public ContainerCreated createContainer(CreateContainerParams createContainerParams) throws IOException {
-
         String containerName = getNormalizedContainerName(createContainerParams);
         String workspaceID = getCheWorkspaceId(createContainerParams);
         // Generate workspaceID if CHE_WORKSPACE_ID env var does not exist
@@ -234,9 +233,6 @@ public class OpenShiftConnector extends DockerConnector {
     @Override
     public void removeContainer(final RemoveContainerParams params) throws IOException {
         String containerId = params.getContainer();
-        boolean useForce = params.isForce();
-        boolean removeVolumes = params.isRemoveVolumes();
-
         Pod pod = getChePodByContainerId(containerId);
 
         String deploymentName = pod.getMetadata().getLabels().get(OPENSHIFT_DEPLOYMENT_LABEL);
@@ -360,7 +356,7 @@ public class OpenShiftConnector extends DockerConnector {
 
     private void createOpenShiftService(String workspaceID,
                                         Set<String> exposedPorts,
-										Map<String, String> additionalLabels) {
+                                        Map<String, String> additionalLabels) {
 
         Map<String, String> selector = new HashMap<>();
         selector.put(OPENSHIFT_DEPLOYMENT_LABEL, CHE_OPENSHIFT_RESOURCES_PREFIX + workspaceID);
@@ -415,13 +411,11 @@ public class OpenShiftConnector extends DockerConnector {
                                     .withVolumeMounts(getVolumeMountsFrom(volumes,workspaceID))
                                     .build();
 
-
         PodSpec podSpec = new PodSpecBuilder()
                                  .withContainers(container)
                                  .withVolumes(getVolumesFrom(volumes, workspaceID))
                                  .withServiceAccountName(this.cheOpenShiftServiceAccount)
                                  .build();
-
 
         Deployment deployment = new DeploymentBuilder()
                 .withNewMetadata()
@@ -453,9 +447,7 @@ public class OpenShiftConnector extends DockerConnector {
     }
 
     private List<VolumeMount> getVolumeMountsFrom(String[] volumes, String workspaceID) {
-
         List<VolumeMount> vms = new ArrayList<>();
-
         for (String volume : volumes) {
             String mountPath = volume.split(":",3)[1];
             String volumeName = getVolumeName(volume);
@@ -466,15 +458,11 @@ public class OpenShiftConnector extends DockerConnector {
                     .build();
             vms.add(vm);
         }
-
         return vms;
     }
 
-
     private List<Volume> getVolumesFrom(String[] volumes, String workspaceID) {
-
         List<Volume> vs = new ArrayList<>();
-
         for (String volume : volumes) {
             String hostPath = volume.split(":",3)[0];
             String volumeName = getVolumeName(volume);
@@ -485,10 +473,8 @@ public class OpenShiftConnector extends DockerConnector {
                     .build();
             vs.add(v);
         }
-
         return vs;
     }
-
 
     private String getVolumeName(String volume) {
         if (volume.contains("ws-agent")) {
@@ -505,7 +491,6 @@ public class OpenShiftConnector extends DockerConnector {
 
         return "unknown-volume";
     }
-
 
     private String waitAndRetrieveContainerID(String deploymentName) {
         for (int i = 0; i < OPENSHIFT_WAIT_POD_TIMEOUT; i++) {
@@ -541,14 +526,12 @@ public class OpenShiftConnector extends DockerConnector {
     }
 
     private void replaceNetworkSettings(ContainerInfo info) throws IOException {
-
         if (info.getNetworkSettings() == null) {
             return;
         }
 
         Service service = getCheWorkspaceService();
         Map<String, List<PortBinding>> networkSettingsPorts = getCheServicePorts(service);
-
         info.getNetworkSettings().setPorts(networkSettingsPorts);
     }
 

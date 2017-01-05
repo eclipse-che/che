@@ -16,21 +16,19 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.eclipse.che.plugin.openshift.client.kubernetes.KubernetesEnvVar;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import io.fabric8.kubernetes.api.model.EnvVar;
 
 public class KubernetesEnvVarTest {
-    
     private KubernetesEnvVar kubernetesEnvVar;
-    
+
     @BeforeClass
     private void setup() {
         this.kubernetesEnvVar = new KubernetesEnvVar();
     }
-    
+
     @Test
     public void shouldReturnContainerEnvFromEnvVariableArray() {
         // Given

@@ -27,7 +27,6 @@ public class KubernetesService {
         List<ServicePort> servicePorts = new ArrayList<>();
         for (String exposedPort : exposedPorts) {
             String[] portAndProtocol = exposedPort.split("/", 2);
-
             String port = portAndProtocol[0];
             String protocol = portAndProtocol[1];
 
