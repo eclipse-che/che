@@ -63,7 +63,7 @@ public interface CommitView extends View<CommitView.ActionDelegate> {
      */
     void setAddAllExceptNew(boolean addAllExceptNew);
 
-    /** Returns true if the project explorer selection must be added to index before commit, and <code>false</code> otherwise. */
+    /** Returns true if the selection must be added to index before commit, and <code>false</code> otherwise. */
     boolean isAddSelectedFiles();
 
     /**

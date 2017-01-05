@@ -770,7 +770,7 @@ public interface GitServiceClient {
      * @param all
      *         automatically stage files that have been modified and deleted
      * @param files
-     *         the list of iles that are commited, ignoring the index
+     *         the list of files that are committed, ignoring the index
      * @param amend
      *         indicates that previous commit must be overwritten
      */

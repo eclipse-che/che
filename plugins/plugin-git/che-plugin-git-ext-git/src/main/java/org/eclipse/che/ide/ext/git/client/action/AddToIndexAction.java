@@ -43,7 +43,6 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
  **/
 @Singleton
 public class AddToIndexAction extends GitAction {
-    private static final String ADD_TO_INDEX_COMMAND_NAME = "Git add to index";
 
     private final AddToIndexPresenter     presenter;
     private final GitLocalizationConstant constant;
@@ -74,7 +73,7 @@ public class AddToIndexAction extends GitAction {
     public void actionPerformed(ActionEvent e) {
         final Resource[] resources = appContext.getResources();
         final DevMachine devMachine = appContext.getDevMachine();
-        final GitOutputConsole console = gitOutputConsoleFactory.create(ADD_TO_INDEX_COMMAND_NAME);
+        final GitOutputConsole console = gitOutputConsoleFactory.create(constant.addToIndexCommandName());
         consolesPanelPresenter.addCommandOutput(devMachine.getId(), console);
         service.getStatus(devMachine, appContext.getRootProject().getLocation())
                .then(new Operation<Status>() {
@@ -104,7 +103,7 @@ public class AddToIndexAction extends GitAction {
         Resource[] resources = appContext.getResources();
         Path[] paths = new Path[resources.length];
         for (int i = 0; i < resources.length; i++) {
-            Path path = resources[i].getLocation().removeFirstSegments(appContext.getRootProject().getLocation().segmentCount());
+            Path path = resources[i].getLocation().removeFirstSegments(1);
             paths[i] = path.segmentCount() == 0 ? Path.EMPTY : path;
         }
         service.add(appContext.getDevMachine(), appContext.getRootProject().getLocation(), false, paths)

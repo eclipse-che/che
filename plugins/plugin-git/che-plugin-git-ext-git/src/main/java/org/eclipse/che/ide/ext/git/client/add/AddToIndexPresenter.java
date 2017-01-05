@@ -28,6 +28,7 @@ import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
 
+import static com.google.common.base.Preconditions.checkState;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
@@ -40,7 +41,6 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
  */
 @Singleton
 public class AddToIndexPresenter implements AddToIndexView.ActionDelegate {
-    private static final String ADD_TO_INDEX_COMMAND_NAME = "Git add to index";
 
     private final AddToIndexView          view;
     private final GitServiceClient        service;
@@ -69,7 +69,9 @@ public class AddToIndexPresenter implements AddToIndexView.ActionDelegate {
     }
 
     public void showDialog() {
-        if (appContext.getResources().length == 1) {
+        Resource[] resources = appContext.getResources();
+        checkState(resources != null && resources.length > 0);
+        if (resources.length == 1) {
             Resource resource = appContext.getResource();
             if (resource instanceof Container) {
                 view.setMessage(constant.addToIndexFolder(resource.getName()));
@@ -94,7 +96,7 @@ public class AddToIndexPresenter implements AddToIndexView.ActionDelegate {
             Path path = resources[i].getLocation().removeFirstSegments(projectLocation.segmentCount());
             paths[i] = path.segmentCount() == 0 ? Path.EMPTY : path;
         }
-        final GitOutputConsole console = gitOutputConsoleFactory.create(ADD_TO_INDEX_COMMAND_NAME);
+        final GitOutputConsole console = gitOutputConsoleFactory.create(constant.addToIndexCommandName());
         consolesPanelPresenter.addCommandOutput(devMachine.getId(), console);
         service.add(devMachine, projectLocation, view.isUpdated(), paths)
                .then(new Operation<Void>() {

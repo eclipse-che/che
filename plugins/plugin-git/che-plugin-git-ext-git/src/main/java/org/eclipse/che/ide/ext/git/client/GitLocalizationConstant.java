@@ -311,6 +311,9 @@ public interface GitLocalizationConstant extends Messages {
     @Key("view.add_to_index.title")
     String addToIndexTitle();
 
+    @Key("view.add_to_index.command_name")
+    String addToIndexCommandName();
+
     // Branch
     @Key("view.branch.create_new")
     String branchCreateNew();

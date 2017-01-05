@@ -13,6 +13,7 @@ package org.eclipse.che.ide.ext.git.client.add;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitResources;
 import org.eclipse.che.ide.ui.window.Window;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -38,7 +39,7 @@ public class AddToIndexViewImpl extends Window implements AddToIndexView {
     private static AddToIndexViewImplUiBinder ourUiBinder = GWT.create(AddToIndexViewImplUiBinder.class);
 
     @UiField
-    Label     message;
+    Label    message;
     @UiField
     CheckBox update;
     Button btnAdd;
