@@ -36,19 +36,6 @@ cmd_config() {
     docker_run -v "${CHE_HOST_CONFIG}":/copy \
                -v "${CHE_HOST_DEVELOPMENT_REPO}"/dockerfiles/init:/files \
                   $IMAGE_INIT
-
-    # in development mode to avoid permissions issues we copy tomcat assembly to ${CHE_INSTANCE}
-    # if ${CHE_FORMAL_PRODUCT_NAME} development tomcat exist we remove it
-    if [[ -d "${CHE_CONTAINER_INSTANCE}/dev" ]]; then
-        log "docker_run -v \"${CHE_HOST_INSTANCE}/dev\":/root/dev alpine:3.4 sh -c \"rm -rf /root/dev/*\""
-        docker_run -v "${CHE_HOST_INSTANCE}/dev":/root/dev alpine:3.4 sh -c "rm -rf /root/dev/*"
-        log "rm -rf \"${CHE_HOST_INSTANCE}/dev\" >> \"${LOGS}\""
-        rm -rf "${CHE_CONTAINER_INSTANCE}/dev"
-    fi
-    # copy ${CHE_FORMAL_PRODUCT_NAME} development tomcat to ${CHE_INSTANCE} folder
-    mkdir -p "${CHE_CONTAINER_INSTANCE}/dev/${CHE_MINI_PRODUCT_NAME}-tomcat"
-    cp -r "$(echo $CHE_CONTAINER_DEVELOPMENT_REPO/$CHE_ASSEMBLY_IN_REPO)/." \
-        "${CHE_CONTAINER_INSTANCE}/dev/${CHE_MINI_PRODUCT_NAME}-tomcat/"
   fi
 
   info "config" "Generating $CHE_MINI_PRODUCT_NAME configuration..."
@@ -60,6 +47,27 @@ cmd_config() {
 
   # Write the installed version to the *.ver file into the instance folder
   echo "$CHE_VERSION" > "${CHE_CONTAINER_INSTANCE}/${CHE_VERSION_FILE}"
+
+  if [ "${CHE_DEVELOPMENT_MODE}" = "on" ]; then
+    # in development mode to avoid permissions issues we copy tomcat assembly to ${CHE_INSTANCE}
+    # if ${CHE_FORMAL_PRODUCT_NAME} development tomcat exist we remove it
+    if [[ -d "${CHE_CONTAINER_INSTANCE}/dev" ]]; then
+        log "docker_run -v \"${CHE_HOST_INSTANCE}/dev\":/root/dev alpine:3.4 sh -c \"rm -rf /root/dev/*\""
+        docker_run -v "${CHE_HOST_INSTANCE}/dev":/root/dev alpine:3.4 sh -c "rm -rf /root/dev/*"
+        log "rm -rf \"${CHE_HOST_INSTANCE}/dev\" >> \"${LOGS}\""
+        rm -rf "${CHE_CONTAINER_INSTANCE}/dev"
+    fi
+
+    if [[ ! -d $(echo ${CHE_CONTAINER_DEVELOPMENT_REPO}/${CHE_ASSEMBLY_IN_REPO}) ]]; then
+      warning "You volume mounted a valid $CHE_FORMAL_PRODUCT_NAME repo to ':/repo', but we could not find a ${CHE_FORMAL_PRODUCT_NAME} assembly."
+      warning "Have you built ${CHE_ASSEMBLY_IN_REPO_MODULE_NAME} with 'mvn clean install'?"
+      return 2
+    fi
+    # copy ${CHE_FORMAL_PRODUCT_NAME} development tomcat to ${CHE_INSTANCE} folder
+    mkdir -p "${CHE_CONTAINER_INSTANCE}/dev/${CHE_MINI_PRODUCT_NAME}-tomcat"
+    cp -r "$(echo $CHE_CONTAINER_DEVELOPMENT_REPO/$CHE_ASSEMBLY_IN_REPO)/." \
+        "${CHE_CONTAINER_INSTANCE}/dev/${CHE_MINI_PRODUCT_NAME}-tomcat/"
+  fi
 
   cmd_config_post_action
 
