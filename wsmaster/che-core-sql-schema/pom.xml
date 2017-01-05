@@ -26,7 +26,7 @@
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
                 <configuration>
-                    <excludes>src/**</excludes>
+                    <excludes>**/*.sql</excludes>
                 </configuration>
             </plugin>
         </plugins>
