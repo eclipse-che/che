@@ -182,12 +182,14 @@ public class BootstrapController {
 
         appStateManagerProvider.get();
 
+        displayIDE();
+
         extensionInitializer.startExtensions();
 
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
             @Override
             public void execute() {
-                displayIDE();
+                notifyShowIDE();
             }
         });
     }
@@ -195,7 +197,6 @@ public class BootstrapController {
     private void displayIDE() {
         // Start UI
         SimpleLayoutPanel mainPanel = new SimpleLayoutPanel();
-
         RootLayoutPanel.get().add(mainPanel);
 
         // Make sure the root panel creates its own stacking context
@@ -218,13 +219,6 @@ public class BootstrapController {
             @Override
             public void onClose(CloseEvent<Window> event) {
                 eventBus.fireEvent(WindowActionEvent.createWindowClosedEvent());
-            }
-        });
-
-        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-            @Override
-            public void execute() {
-                notifyShowIDE();
             }
         });
     }
@@ -266,4 +260,5 @@ public class BootstrapController {
 
         var interval = setInterval(setInterval, customInterval);
     }-*/;
+
 }

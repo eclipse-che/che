@@ -1158,6 +1158,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                     .withConfig(dtoFactory.createDto(MachineConfigDto.class)
                                     .withDev("dev-machine".equals(machineName))
                                     .withName(machineName)
+                                    .withType("docker")
                     );
             provideMachineNode(new MachineItem(machineDto), true);
         }
