@@ -23,7 +23,7 @@
     <name>Che Plugin :: Docker :: OpenShift Client</name>
     <properties>
         <findbugs.failonerror>false</findbugs.failonerror>
-        <io.fabric8.openshift-client.version>1.4.26</io.fabric8.openshift-client.version>
+        <io.fabric8.openshift-client.version>1.4.31</io.fabric8.openshift-client.version>
         <license_contributor>Red Hat, Inc. - initial API and implementation</license_contributor>
         <license_copyrightOwner>Red Hat, Inc.</license_copyrightOwner>
         <license_header>license-header.txt</license_header>
@@ -49,12 +49,12 @@
         <dependency>
             <groupId>io.fabric8</groupId>
             <artifactId>kubernetes-client</artifactId>
-            <version>1.4.26</version>
+            <version>1.4.31</version>
         </dependency>
         <dependency>
             <groupId>io.fabric8</groupId>
             <artifactId>kubernetes-model</artifactId>
-            <version>1.0.63</version>
+            <version>1.0.65</version>
         </dependency>
         <dependency>
             <groupId>io.fabric8</groupId>
