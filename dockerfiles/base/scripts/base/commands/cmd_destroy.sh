@@ -57,11 +57,12 @@ cmd_destroy() {
 
   cmd_destroy_post_action
 
-  # Sometimes users want the CLI after they have destroyed their instance
-  # If they pass destroy --cli then we will also destroy the CLI
+  # Sometimes users want the CLI log after they have destroyed their instance
+  # If they pass destroy --cli then we will also destroy the CLI log
   if [[ "${DESTROY_CLI}" = "true" ]]; then
     info "destroy" "Deleting cli.log..."
-    docker_run -v "${CLI_DIR}":/root/cli ${UTILITY_IMAGE_ALPINE} sh -c "rm -rf /root/cli/cli.log"
+     docker_run -v "${CHE_HOST_CONFIG}":/root${CHE_CONTAINER_ROOT} \
+     		   ${UTILITY_IMAGE_ALPINE} sh -c "rm -rf /root${CHE_CONTAINER_ROOT}/cli.log" > /dev/null 2>&1 || true
   fi
 }
 
