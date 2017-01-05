@@ -103,19 +103,19 @@ public class JsonRpcList {
     private String getString(int i) {
         checkArgument(i >= 0, "Index must not be negative");
 
-        return ((JsonString)jsonObjectList.get(0)).getString();
+        return ((JsonString)jsonObjectList.get(i)).getString();
     }
 
     private Double getNumber(int i) {
         checkArgument(i >= 0, "Index must not be negative");
 
-        return ((JsonNumber)jsonObjectList.get(0)).getNumber();
+        return ((JsonNumber)jsonObjectList.get(i)).getNumber();
     }
 
     private Boolean getBoolean(int i) {
         checkArgument(i >= 0, "Index must not be negative");
 
-        return ((JsonBoolean)jsonObjectList.get(0)).getBoolean();
+        return ((JsonBoolean)jsonObjectList.get(i)).getBoolean();
     }
 
     private int size() {

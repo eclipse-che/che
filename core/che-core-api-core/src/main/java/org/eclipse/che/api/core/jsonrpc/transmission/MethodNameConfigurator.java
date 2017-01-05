@@ -8,12 +8,13 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.jsonrpc.transmission;
+package org.eclipse.che.api.core.jsonrpc.transmission;
 
-import org.eclipse.che.ide.jsonrpc.JsonRpcFactory;
-import org.eclipse.che.ide.jsonrpc.ResponseDispatcher;
-import org.eclipse.che.ide.util.loging.Log;
-import org.eclipse.che.ide.websocket.ng.WebSocketMessageTransmitter;
+import org.eclipse.che.api.core.jsonrpc.JsonRpcFactory;
+import org.eclipse.che.api.core.jsonrpc.ResponseDispatcher;
+import org.eclipse.che.api.core.websocket.WebSocketMessageTransmitter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -26,19 +27,21 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * will have.
  */
 public class MethodNameConfigurator {
+    private static final Logger LOG = LoggerFactory.getLogger(MethodNameConfigurator.class);
+
     public static AtomicInteger id = new AtomicInteger(0);
 
-    private final ResponseDispatcher          responseDispatcher;
+    private final ResponseDispatcher          dispatcher;
     private final WebSocketMessageTransmitter transmitter;
-    private final JsonRpcFactory              jsonRpcFactory;
+    private final JsonRpcFactory              factory;
     private final String                      endpointId;
 
     @Inject
-    public MethodNameConfigurator(ResponseDispatcher responseDispatcher, WebSocketMessageTransmitter transmitter,
-                                  JsonRpcFactory jsonRpcFactory, String endpointId) {
-        this.responseDispatcher = responseDispatcher;
+    public MethodNameConfigurator(ResponseDispatcher dispatcher, WebSocketMessageTransmitter transmitter, JsonRpcFactory factory,
+                                  String endpointId) {
+        this.dispatcher = dispatcher;
         this.transmitter = transmitter;
-        this.jsonRpcFactory = jsonRpcFactory;
+        this.factory = factory;
         this.endpointId = endpointId;
     }
 
@@ -46,8 +49,12 @@ public class MethodNameConfigurator {
         checkNotNull(name, "Method name must not be null");
         checkArgument(!name.isEmpty(), "Method name must not be empty");
 
-        Log.debug(getClass(), "Configuring outgoing request method name name: " + name);
+        LOG.debug("Configuring outgoing request method name name: {}", name);
 
-        return new ParamsConfigurator(responseDispatcher, transmitter, jsonRpcFactory, name, endpointId);
+        return new ParamsConfigurator(dispatcher, transmitter, factory, name, endpointId);
+    }
+
+    public static int getIdAndIncrement() {
+        return id.getAndIncrement();
     }
 }

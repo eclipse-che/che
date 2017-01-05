@@ -10,9 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.jsonrpc;
 
+
+import org.eclipse.che.api.core.jsonrpc.transmission.EndpointIdConfigurator;
+
 /**
- * Handler corresponding to processing JSON RPC requests.
+ * Simple factory that provides facilities to manually build JSON RPC requests
  */
-public interface RequestHandler {
-    JsonRpcResult handle(String endpointId, JsonRpcParams params) throws JsonRpcException;
+public interface BuildingRequestTransmitter {
+    EndpointIdConfigurator newRequest();
 }
