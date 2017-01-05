@@ -20,6 +20,8 @@ import {ListEnvVariablesController} from '../list-env-variables.controller';
 export class EditVariableDialogController {
   $mdDialog: ng.material.IDialogService;
 
+  popupTitle: string;
+
   toEdit: string;
   envVariables: {
     [envVarName: string]: string
@@ -47,6 +49,9 @@ export class EditVariableDialogController {
     if (this.toEdit && this.envVariables[this.toEdit]) {
       this.name = this.toEdit;
       this.value = this.envVariables[this.name];
+      this.popupTitle = 'Edit the environment variable';
+    } else {
+      this.popupTitle = 'Add a new environment variable';
     }
   }
 

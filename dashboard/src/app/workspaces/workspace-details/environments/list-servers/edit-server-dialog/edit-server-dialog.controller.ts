@@ -22,6 +22,8 @@ export class EditServerDialogController {
   $mdDialog: ng.material.IDialogService;
   lodash: _.LoDashStatic;
 
+  popupTitle: string;
+
   toEdit: string;
   servers: {
     [reference: string]: IServer
@@ -61,9 +63,11 @@ export class EditServerDialogController {
       this.reference = this.toEdit;
       this.protocol = server.protocol;
       this.port = parseInt(<string>server.port, 10);
+      this.popupTitle = 'Edit the server';
     } else {
       this.protocol = 'http';
       this.port = this.getLowestFreePort();
+      this.popupTitle = 'Add a new server';
     }
 
   }

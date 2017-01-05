@@ -1,4 +1,5 @@
-<md-dialog flex="50"
+<che-popup title="{{editServerDialogController.popupTitle}}"
+           on-close="editServerDialogController.hide()"
            class="edit-port-dialog-content">
   <ng-form flex layout="column"
            name="editServerForm"
@@ -73,4 +74,4 @@
       </div>
     </che-label-container>
   </ng-form>
-</md-dialog>
+</che-popup>
