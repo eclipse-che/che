@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -103,6 +103,20 @@ export class WorkspaceDetailsController {
     (this.$rootScope as any).showIDE = false;
 
     this.init();
+
+    $scope.$watch(() => { return this.getWorkspaceStatus(); }, (newStatus: string, oldStatus: string) => {
+      if (oldStatus === 'SNAPSHOTTING') {
+        // status was not changed
+        return;
+      }
+      if (newStatus === 'RUNNING' || newStatus === 'STOPPED') {
+        this.cheWorkspace.fetchWorkspaceDetails(this.workspaceId).then(() => {
+          this.workspaceDetails = this.cheWorkspace.getWorkspaceByName(this.namespace, this.workspaceName);
+          this.updateWorkspaceData();
+        });
+      }
+    });
+
   }
 
   init(): void {
@@ -402,7 +416,7 @@ export class WorkspaceDetailsController {
         iterations = 100;
     while (iterations--) {
       name = 'wksp-' + (('0000' + (Math.random() * Math.pow(36, 4) << 0).toString(36)).slice(-4)); // jshint ignore:line
-      if (!this.usedNamesList.indexOf(name) >= 0) {
+      if (this.usedNamesList.indexOf(name) >= 0) {
         break;
       }
     }
