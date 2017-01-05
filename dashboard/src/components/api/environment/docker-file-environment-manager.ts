@@ -12,6 +12,7 @@
 
 import {EnvironmentManager} from './environment-manager';
 import {DockerfileParser} from './docker-file-parser';
+import {IEnvironmentManagerMachine} from './environment-manager-machine';
 
 /**
  * This is the implementation of environment manager that handles the docker file format of environment.
@@ -35,13 +36,10 @@ import {DockerfileParser} from './docker-file-parser';
 const ENV_INSTRUCTION: string = 'ENV';
 
 export class DockerFileEnvironmentManager extends EnvironmentManager {
-  $log: ng.ILogService;
   parser: DockerfileParser;
 
   constructor($log: ng.ILogService) {
-    super();
-
-    this.$log = $log;
+    super($log);
 
     this.parser = new DockerfileParser();
   }
@@ -89,11 +87,11 @@ export class DockerFileEnvironmentManager extends EnvironmentManager {
   /**
    * Provides the environment configuration based on machines format.
    *
-   * @param environment origin of the environment to be edited
-   * @param machines the list of machines
-   * @returns environment's configuration
+   * @param {che.IWorkspaceEnvironment} environment origin of the environment to be edited
+   * @param {IEnvironmentManagerMachine[]} machines the list of machines
+   * @returns {che.IWorkspaceEnvironment} environment's configuration
    */
-  getEnvironment(environment: any, machines: any): any {
+  getEnvironment(environment: che.IWorkspaceEnvironment, machines: IEnvironmentManagerMachine[]): che.IWorkspaceEnvironment {
     let newEnvironment = super.getEnvironment(environment, machines);
 
     // machines should contain one machine only
@@ -111,23 +109,30 @@ export class DockerFileEnvironmentManager extends EnvironmentManager {
   /**
    * Retrieves the list of machines.
    *
-   * @param environment environment's configuration
-   * @returns {Array} list of machines defined in environment
+   * @param {che.IWorkspaceEnvironment} environment environment's configuration
+   * @param {any=} runtime runtime of active environment
+   * @returns {IEnvironmentManagerMachine[]} list of machines defined in environment
    */
-  getMachines(environment: any): any[] {
+  getMachines(environment: che.IWorkspaceEnvironment, runtime?: any): IEnvironmentManagerMachine[] {
     let recipe = null,
-        machines = [];
+        machines: IEnvironmentManagerMachine[] = super.getMachines(environment, runtime);
 
     if (environment.recipe.content) {
       recipe = this._parseRecipe(environment.recipe.content);
     }
 
     Object.keys(environment.machines).forEach((machineName: string) => {
-      let machine = angular.copy(environment.machines[machineName]);
-      machine.name = machineName;
-      machine.recipe = recipe;
+      let machine: IEnvironmentManagerMachine = machines.find((_machine: IEnvironmentManagerMachine) => {
+        return _machine.name === machineName;
+      });
 
-      machines.push(machine);
+      if (!machine) {
+        machine = {name: machineName};
+        machines.push(machine);
+      }
+
+      angular.merge(machine, environment.machines[machineName]);
+      machine.recipe = recipe;
     });
 
     return machines;
@@ -136,10 +141,10 @@ export class DockerFileEnvironmentManager extends EnvironmentManager {
   /**
    * Returns a docker image from the recipe.
    *
-   * @param machine
+   * @param {IEnvironmentManagerMachine} machine
    * @returns {*}
    */
-  getSource(machine: any): any {
+  getSource(machine: IEnvironmentManagerMachine): any {
     if (!machine.recipe) {
       return null;
     }
@@ -154,20 +159,20 @@ export class DockerFileEnvironmentManager extends EnvironmentManager {
   /**
    * Returns true if environment recipe content is present.
    *
-   * @param machine {object}
+   * @param {IEnvironmentManagerMachine} machine
    * @returns {boolean}
    */
-  canEditEnvVariables(machine: any): boolean {
+  canEditEnvVariables(machine: IEnvironmentManagerMachine): boolean {
     return !!machine.recipe;
   }
 
   /**
    * Returns environment variables from recipe
    *
-   * @param machine {object}
+   * @param {IEnvironmentManagerMachine} machine
    * @returns {*}
    */
-  getEnvVariables(machine: any): any {
+  getEnvVariables(machine: IEnvironmentManagerMachine): any {
     if (!machine.recipe) {
       return null;
     }
@@ -188,10 +193,10 @@ export class DockerFileEnvironmentManager extends EnvironmentManager {
   /**
    * Updates machine with new environment variables.
    *
-   * @param machine {object}
-   * @param envVariables {object}
+   * @param {IEnvironmentManagerMachine} machine
+   * @param {any} envVariables
    */
-  setEnvVariables(machine: any, envVariables: any): void {
+  setEnvVariables(machine: IEnvironmentManagerMachine, envVariables: any): void {
     if (!machine.recipe) {
       return;
     }

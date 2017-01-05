@@ -9,6 +9,7 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {IEnvironmentManagerMachine} from './environment-manager-machine';
 
 /**
  * This is base class, which describes the environment manager.
@@ -20,74 +21,100 @@ const TERMINAL_AGENT_NAME: string = 'org.eclipse.che.terminal';
 const SSH_AGENT_NAME: string = 'org.eclipse.che.ssh';
 
 export class EnvironmentManager {
+  $log: ng.ILogService;
 
-  constructor() { }
+  constructor($log: ng.ILogService) {
+    this.$log = $log;
+  }
 
   get editorMode(): string {
     return '';
   }
 
-  canRenameMachine(machine: any): boolean {
+  canRenameMachine(machine: IEnvironmentManagerMachine): boolean {
     return false;
   }
 
-  canDeleteMachine(machine: any): boolean {
+  canDeleteMachine(machine: IEnvironmentManagerMachine): boolean {
     return false;
   }
 
-  canEditEnvVariables(machine: any): boolean {
+  canEditEnvVariables(machine: IEnvironmentManagerMachine): boolean {
     return false;
   }
 
   /**
    * Retrieves the list of machines.
    *
-   * @param {*} environment
-   * @returns {Array} list of machines defined in environment
+   * @param {che.IWorkspaceEnvironment} environment
+   * @param {any=} runtime runtime of active environment
+   * @returns {IEnvironmentManagerMachine} list of machines defined in environment
    */
-  getMachines(environment: any): any[] {
-    return [];
+  getMachines(environment: che.IWorkspaceEnvironment, runtime?: any): IEnvironmentManagerMachine[] {
+    if (!runtime) {
+      return [];
+    }
+
+    let machines: IEnvironmentManagerMachine[] = [];
+    runtime.machines.forEach((runtimeMachine: any) => {
+      let name = runtimeMachine.config.name,
+          machine: any = {
+            name: name,
+            runtime: {
+              servers: runtimeMachine.runtime.servers
+            }
+          };
+      machines.push(machine);
+    });
+
+    return machines;
   }
 
   /**
    * Renames machine.
    *
-   * @param environment {object}
-   * @param oldName {string}
-   * @param newName {string}
+   * @param {che.IWorkspaceEnvironment} environment
+   * @param {string} oldName
+   * @param {string} newName
+   *
+   * @return {che.IWorkspaceEnvironment}
    */
-  renameMachine(environment: any, oldName: string, newName: string): void {
-    throw new TypeError('EnvironmentManager: cannot rename machine.');
+  renameMachine(environment: che.IWorkspaceEnvironment, oldName: string, newName: string): che.IWorkspaceEnvironment {
+    this.$log.error('EnvironmentManager: cannot rename machine.');
+    return environment;
   }
 
   /**
    * Removes machine.
    *
-   * @param environment {object}
-   * @param name {string} name of machine
+   * @param {che.IWorkspaceEnvironment} environment
+   * @param {string} name name of machine
+   *
+   * @return {che.IWorkspaceEnvironment}
    */
-  deleteMachine(environment: any, name: string): void {
-    throw new TypeError('EnvironmentManager: cannot delete machine.');
+  deleteMachine(environment: che.IWorkspaceEnvironment, name: string): che.IWorkspaceEnvironment {
+    this.$log.error('EnvironmentManager: cannot delete machine.');
+    return environment;
   }
 
   /**
    * Provides the environment configuration based on machines format.
    *
-   * @param environment origin of the environment to be edited
-   * @param machines the list of machines
-   * @returns environment's configuration
+   * @param {che.IWorkspaceEnvironment} environment origin of the environment to be edited
+   * @param {IEnvironmentManagerMachine} machines the list of machines
+   * @returns {che.IWorkspaceEnvironment} environment's configuration
    */
-  getEnvironment(environment: any, machines: any): any {
-    let newEnvironment = angular.copy(environment);
+  getEnvironment(environment: che.IWorkspaceEnvironment, machines: IEnvironmentManagerMachine[]): che.IWorkspaceEnvironment {
+    let newEnvironment: che.IWorkspaceEnvironment = angular.copy(environment);
 
-    machines.forEach((machine) => {
+    machines.forEach((machine: IEnvironmentManagerMachine) => {
       let machineName = machine.name;
 
       if (angular.isUndefined(newEnvironment.machines)) {
         newEnvironment.machines = {};
       }
       if (angular.isUndefined(newEnvironment.machines[machineName])) {
-        newEnvironment.machines[machineName] = {'attributes': {}};
+        newEnvironment.machines[machineName] = {attributes: {}};
       }
       newEnvironment.machines[machineName].attributes.memoryLimitBytes = machine.attributes.memoryLimitBytes;
       newEnvironment.machines[machineName].agents = angular.copy(machine.agents);
@@ -100,20 +127,20 @@ export class EnvironmentManager {
   /**
    * Returns whether machine is developer or not.
    *
-   * @param machine
+   * @param {IEnvironmentManagerMachine} machine
    * @returns {boolean}
    */
-  isDev(machine: any): boolean {
+  isDev(machine: IEnvironmentManagerMachine): boolean {
     return machine.agents && machine.agents.indexOf(WS_AGENT_NAME) >= 0;
   }
 
   /**
    * Set machine as developer one - contains 'ws-agent' agent.
    *
-   * @param machine machine to edit
-   * @param isDev defined whether machine is developer or not
+   * @param {IEnvironmentManagerMachine} machine machine to edit
+   * @param {boolean} isDev defined whether machine is developer or not
    */
-  setDev(machine: any, isDev: boolean): void {
+  setDev(machine: IEnvironmentManagerMachine, isDev: boolean): void {
     let hasWsAgent = this.isDev(machine);
     if (isDev) {
       machine.agents = machine.agents ? machine.agents : [];
@@ -134,29 +161,44 @@ export class EnvironmentManager {
     }
   }
 
-  getServers(machine: any): any {
-    return machine.servers || {};
+  getServers(machine: IEnvironmentManagerMachine): {[serverName: string]: che.IEnvironmentMachineServer} {
+    if (!machine.servers) {
+      return {};
+    }
+
+    if (!machine.runtime) {
+      return machine.servers;
+    }
+
+    Object.keys(machine.runtime.servers).forEach((serverName: string) => {
+      let runtimeServer = machine.runtime.servers[serverName];
+      if (machine.servers[runtimeServer.ref]) {
+        machine.servers[runtimeServer.ref].runtimeUrl = runtimeServer.url;
+      }
+    });
+
+    return machine.servers;
   }
 
-  setServers(machine: any, servers: any): void {
+  setServers(machine: IEnvironmentManagerMachine, servers: {[serverRef: string]: che.IEnvironmentMachineServer}): void {
     machine.servers = angular.copy(servers);
   }
 
-  getAgents(machine: any): any[] {
+  getAgents(machine: IEnvironmentManagerMachine): string[] {
     return machine.agents || [];
   }
 
-  setAgents(machine: any, agents: any[]): void {
+  setAgents(machine: IEnvironmentManagerMachine, agents: string[]): void {
     machine.agents = angular.copy(agents);
   }
 
   /**
    * Returns memory limit from machine's attributes
    *
-   * @param machine
+   * @param {IEnvironmentManagerMachine} machine
    * @returns {number|string} memory limit in bytes
    */
-  getMemoryLimit(machine: any): number|string {
+  getMemoryLimit(machine: IEnvironmentManagerMachine): number|string {
     if (machine && machine.attributes && machine.attributes.memoryLimitBytes) {
       return machine.attributes.memoryLimitBytes;
     }
@@ -168,15 +210,15 @@ export class EnvironmentManager {
    * Sets the memory limit of the pointed machine.
    * Value in attributes has the highest priority,
    *
-   * @param machine machine to change memory limit
-   * @param limit memory limit
+   * @param {IEnvironmentManagerMachine} machine machine to change memory limit
+   * @param {number} limit memory limit
    */
-  setMemoryLimit(machine: any, limit: number): void {
+  setMemoryLimit(machine: IEnvironmentManagerMachine, limit: number): void {
     machine.attributes = machine.attributes ? machine.attributes : {};
     machine.attributes.memoryLimitBytes = limit;
   }
 
-  getEnvVariables(machine: any): any {
+  getEnvVariables(machine: IEnvironmentManagerMachine): any {
     return null;
   }
 }

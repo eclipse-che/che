@@ -10,6 +10,11 @@
  */
 'use strict';
 
+interface IEnvironmentVariable {
+  name: string;
+  value: string;
+}
+
 /**
  * @ngdoc controller
  * @name workspace.details.controller:ListEnvVariablesController
@@ -17,26 +22,36 @@
  * @author Oleksii Kurinnyi
  */
 export class ListEnvVariablesController {
+  $mdDialog: ng.material.IDialogService;
+  lodash: _.LoDashStatic;
+
+  isNoSelected: boolean = true;
+  isBulkChecked: boolean = false;
+  envVariables: {
+    [envVarName: string]: string
+  };
+  envVariablesList: IEnvironmentVariable[] = [];
+  envVariablesSelectedStatus: {
+    [envVarName: string]: boolean
+  } = {};
+  envVariablesSelectedNumber: number = 0;
+  envVariableOrderBy: string = 'name';
+
+  envVariablesOnChange: Function;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($mdDialog, lodash) {
+  constructor($mdDialog: ng.material.IDialogService, lodash: _.LoDashStatic) {
     this.$mdDialog = $mdDialog;
     this.lodash = lodash;
-
-    this.isNoSelected = true;
-    this.isBulkChecked = false;
-    this.envVariablesSelectedStatus = {};
-    this.envVariablesSelectedNumber = 0;
-    this.envVariableOrderBy = 'name';
 
     this.buildVariablesList();
   }
 
-  buildVariablesList() {
-    this.envVariablesList = this.lodash.map(this.envVariables, (value, name) => {
+  buildVariablesList(): void {
+    this.envVariablesList = this.lodash.map(this.envVariables, (value: string, name: string) => {
       return {name: name, value: value};
     });
   }
@@ -44,10 +59,10 @@ export class ListEnvVariablesController {
   /**
    * Update environment variable selected status
    */
-  updateSelectedStatus() {
+  updateSelectedStatus(): void {
     this.envVariablesSelectedNumber = 0;
     this.isBulkChecked = true;
-    this.envVariablesList.forEach((envVariable) => {
+    this.envVariablesList.forEach((envVariable: IEnvironmentVariable) => {
       if (this.envVariablesSelectedStatus[envVariable.name]) {
         this.envVariablesSelectedNumber++;
       } else {
@@ -56,7 +71,7 @@ export class ListEnvVariablesController {
     });
   }
 
-  changeEnvVariableSelection(name) {
+  changeEnvVariableSelection(name: string): void {
     this.envVariablesSelectedStatus[name] = !this.envVariablesSelectedStatus[name];
     this.updateSelectedStatus();
   }
@@ -64,7 +79,7 @@ export class ListEnvVariablesController {
   /**
    * Change bulk selection value
    */
-  changeBulkSelection() {
+  changeBulkSelection(): void {
     if (this.isBulkChecked) {
       this.deselectAllVariables();
       this.isBulkChecked = false;
@@ -77,53 +92,52 @@ export class ListEnvVariablesController {
   /**
    * Check all environment variables in list
    */
-  selectAllVariables() {
+  selectAllVariables(): void {
     this.envVariablesSelectedNumber = this.envVariablesList.length;
-    this.envVariablesList.forEach((envVariable) => {
+    this.envVariablesList.forEach((envVariable: IEnvironmentVariable) => {
       this.envVariablesSelectedStatus[envVariable.name] = true;
-    })
+    });
   }
 
   /**
    * Uncheck all environment variables in list
    */
-  deselectAllVariables() {
+  deselectAllVariables(): void {
     this.envVariablesSelectedStatus = {};
     this.envVariablesSelectedNumber = 0;
   }
 
-  updateEnvVariable(name, value) {
+  /**
+   * Add new environment variable
+   *
+   * @param {string} name environment's variable name
+   * @param {string} value environment's variable value
+   */
+  addEnvVariable(name: string, value: string): void {
     this.envVariables[name] = value;
     this.envVariablesOnChange();
     this.buildVariablesList();
   }
 
   /**
-   * Show dialog to add new environment variable
-   * @param $event
+   * Updates an existing environment variable
+   *
+   * @param {string} oldName old name of environment variable
+   * @param {string} newName new name of environment variable
+   * @param {string} newValue new value of environment variable
    */
-  showAddDialog($event) {
-    this.$mdDialog.show({
-      targetEvent: $event,
-      controller: 'AddVariableDialogController',
-      controllerAs: 'addVariableDialogController',
-      bindToController: true,
-      clickOutsideToClose: true,
-      locals: {
-        callbackController: this,
-        variables: this.envVariables
-      },
-      templateUrl: 'app/workspaces/workspace-details/environments/list-env-variables/add-variable-dialog/add-variable-dialog.html'
-    });
+  updateEnvVariable(oldName: string, newName: string, newValue: string): void {
+    delete this.envVariables[oldName];
+
+    this.addEnvVariable(newName, newValue);
   }
 
   /**
    * Show dialog to edit existing environment variable
-   * @param $event
-   * @param name environment variable's name
-   * @param value environment variable's value
+   * @param {MouseEvent} $event
+   * @param {string=} name environment variable's name
    */
-  showEditDialog($event, name, value) {
+  showEditDialog($event: MouseEvent, name?: string): void {
     this.$mdDialog.show({
       targetEvent: $event,
       controller: 'EditVariableDialogController',
@@ -131,8 +145,8 @@ export class ListEnvVariablesController {
       bindToController: true,
       clickOutsideToClose: true,
       locals: {
-        name: name,
-        value: value,
+        toEdit: name,
+        envVariables: this.envVariables,
         callbackController: this
       },
       templateUrl: 'app/workspaces/workspace-details/environments/list-env-variables/edit-variable-dialog/edit-variable-dialog.html'
@@ -142,29 +156,28 @@ export class ListEnvVariablesController {
   /**
    * Removes selected environment variables
    */
-  deleteSelectedEnvVariables() {
+  deleteSelectedEnvVariables(): void {
     this.showDeleteConfirmation(this.envVariablesSelectedNumber).then(() => {
-      this.lodash.forEach(this.envVariablesSelectedStatus, (value, name) => {
+      this.lodash.forEach(this.envVariablesSelectedStatus, (value: string, name: string) => {
         delete this.envVariables[name];
       });
       this.deselectAllVariables();
       this.isBulkChecked = false;
       this.envVariablesOnChange();
       this.buildVariablesList();
-    })
+    });
   }
 
   /**
    * Show confirmation popup before environment variable to delete
-   * @param numberToDelete
-   * @returns {*}
+   * @param {number} numberToDelete number of environment variables to delete
+   * @returns {ng.IPromise<any>}
    */
-  showDeleteConfirmation(numberToDelete) {
+  showDeleteConfirmation(numberToDelete: number): ng.IPromise<any> {
     let confirmTitle = 'Would you like to delete ';
     if (numberToDelete > 1) {
       confirmTitle += 'these ' + numberToDelete + ' variables?';
-    }
-    else {
+    } else {
       confirmTitle += 'this selected variable?';
     }
     let confirm = this.$mdDialog.confirm()

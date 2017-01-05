@@ -34,7 +34,9 @@ export class AddMachineDialogController {
     matchBrackets: boolean,
     mode: string,
     onLoad: Function };
-  environments: che.IWorkspaceEnvironments;
+  environments: {
+    [envName: string]: che.IWorkspaceEnvironment
+  };
 
   /**
    * Default constructor that is using resource
@@ -110,7 +112,7 @@ export class AddMachineDialogController {
   /**
    * Update machine RAM.
    */
-  updateMachineRAM() {
+  updateMachineRAM(): void {
     this.machineRecipe[Object.keys(this.machineRecipe)[0]].mem_limit = this.machineRAM;
     this.machineRecipeScript = jsyaml.safeDump(this.machineRecipe, {'indent': 1});
   }

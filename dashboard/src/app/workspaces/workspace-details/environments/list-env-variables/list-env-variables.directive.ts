@@ -25,19 +25,22 @@
  * @author Oleksii Kurinnyi
  */
 export class ListEnvVariables {
+  restrict: string = 'E';
+  templateUrl: string = 'app/workspaces/workspace-details/environments/list-env-variables/list-env-variables.html';
+
+  controller: string = 'ListEnvVariablesController';
+  controllerAs: string = 'listEnvVariablesController';
+  bindToController: boolean = true;
+
+  scope: {
+    [propName: string]: string
+  };
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
   constructor () {
-    this.restrict = 'E';
-    this.templateUrl = 'app/workspaces/workspace-details/environments/list-env-variables/list-env-variables.html';
-
-    this.controller = 'ListEnvVariablesController';
-    this.controllerAs = 'listEnvVariablesController';
-    this.bindToController = true;
-
     // scope values
     this.scope = {
       envVariables: '=',

@@ -103,6 +103,20 @@ export class WorkspaceDetailsController {
     (this.$rootScope as any).showIDE = false;
 
     this.init();
+
+    $scope.$watch(() => { return this.getWorkspaceStatus(); }, (newStatus: string, oldStatus: string) => {
+      if (oldStatus === 'SNAPSHOTTING') {
+        // status was not changed
+        return;
+      }
+      if (newStatus === 'RUNNING' || newStatus === 'STOPPED') {
+        this.cheWorkspace.fetchWorkspaceDetails(this.workspaceId).then(() => {
+          this.workspaceDetails = this.cheWorkspace.getWorkspaceByName(this.namespace, this.workspaceName);
+          this.updateWorkspaceData();
+        });
+      }
+    });
+
   }
 
   init(): void {
@@ -402,7 +416,7 @@ export class WorkspaceDetailsController {
         iterations = 100;
     while (iterations--) {
       name = 'wksp-' + (('0000' + (Math.random() * Math.pow(36, 4) << 0).toString(36)).slice(-4)); // jshint ignore:line
-      if (!this.usedNamesList.indexOf(name) >= 0) {
+      if (this.usedNamesList.indexOf(name) >= 0) {
         break;
       }
     }

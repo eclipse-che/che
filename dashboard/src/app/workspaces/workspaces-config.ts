@@ -60,13 +60,11 @@ import {EditMachineNameDialogController} from  './workspace-details/environments
 
 import {ListEnvVariablesController} from './workspace-details/environments/list-env-variables/list-env-variables.controller';
 import {ListEnvVariables} from './workspace-details/environments/list-env-variables/list-env-variables.directive';
-import {AddVariableDialogController} from  './workspace-details/environments/list-env-variables/add-variable-dialog/add-variable-dialog.controller';
 import {EditVariableDialogController} from  './workspace-details/environments/list-env-variables/edit-variable-dialog/edit-variable-dialog.controller';
 
-import {ListPortsController} from './workspace-details/environments/list-ports/list-ports.controller';
-import {ListPorts} from './workspace-details/environments/list-ports/list-ports.directive';
-import {AddPortDialogController} from  './workspace-details/environments/list-ports/add-port-dialog/add-port-dialog.controller';
-import {EditPortDialogController} from  './workspace-details/environments/list-ports/edit-port-dialog/edit-port-dialog.controller';
+import {ListServersController} from './workspace-details/environments/list-servers/list-servers.controller';
+import {ListServers} from './workspace-details/environments/list-servers/list-servers.directive';
+import {EditServerDialogController} from  './workspace-details/environments/list-servers/edit-server-dialog/edit-server-dialog.controller';
 
 import {ListCommandsController} from './workspace-details/list-commands/list-commands.controller';
 import {ListCommands} from './workspace-details/list-commands/list-commands.directive';
@@ -152,13 +150,11 @@ export class WorkspacesConfig {
 
     register.controller('ListEnvVariablesController', ListEnvVariablesController);
     register.directive('listEnvVariables', ListEnvVariables);
-    register.controller('AddVariableDialogController', AddVariableDialogController);
     register.controller('EditVariableDialogController', EditVariableDialogController);
 
-    register.controller('ListPortsController', ListPortsController);
-    register.directive('listPorts', ListPorts);
-    register.controller('AddPortDialogController', AddPortDialogController);
-    register.controller('EditPortDialogController', EditPortDialogController);
+    register.controller('ListServersController', ListServersController);
+    register.directive('listServers', ListServers);
+    register.controller('EditServerDialogController', EditServerDialogController);
 
     register.controller('ListCommandsController', ListCommandsController);
     register.directive('listCommands', ListCommands);

@@ -9,6 +9,7 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {EnvironmentManager} from './environment-manager';
 
 /**
  * Registry for maintaining environment managers.
@@ -16,6 +17,7 @@
  * @author Ann Shumilova
  */
 export class CheEnvironmentRegistry {
+  managers: Map<string, EnvironmentManager>;
 
   constructor() {
     this.managers = new Map();
@@ -24,29 +26,29 @@ export class CheEnvironmentRegistry {
   /**
    * Adds new environment manager to handle environments with specified type.
    *
-   * @param type environment's type
-   * @param manager environment's manager
+   * @param {string} type environment's type
+   * @param {EnvironmentManager} manager environment's manager
    */
-  addEnvironmentManager(type, manager) {
+  addEnvironmentManager(type: string, manager: EnvironmentManager): void {
     this.managers.set(type, manager);
   }
 
   /**
    * Returns the registered environment manager by type.
    *
-   * @param type environment's type
-   * @returns {*}
+   * @param {string} type environment's type
+   * @returns {EnvironmentManager}
    */
-  getEnvironmentManager(type) {
+  getEnvironmentManager(type: string): EnvironmentManager {
     return this.managers.get(type);
   }
 
   /**
    * Returns the list of registered environments managers.
    *
-   * @returns {lookup.managers|*|managers}
+   * @returns {Map<string, EnvironmentManager>}
    */
-  getEnvironmentManagers() {
+  getEnvironmentManagers(): Map<string, EnvironmentManager> {
     return this.managers;
   }
 }

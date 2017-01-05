@@ -12,32 +12,35 @@
 
 /**
  * @ngdoc directive
- * @name workspaces.details.directive:listPorts
+ * @name workspaces.details.directive:listServers
  * @restrict E
  * @element
  *
  * @description
- * `<list-ports ports="ctrl.ports" ports-on-change="ctrl.onChangeCallback()"></list-ports>` for displaying list of ports
+ * `<list-servers ports="ctrl.ports" ports-on-change="ctrl.onChangeCallback()"></list-servers>` for displaying list of ports
  *
  * @usage
- *   <list-ports ports="ctrl.ports" ports-on-change="ctrl.onChangeCallback()"></list-ports>
+ *   <list-servers ports="ctrl.ports" ports-on-change="ctrl.onChangeCallback()"></list-servers>
  *
  * @author Oleksii Kurinnyi
  */
-export class ListPorts {
+export class ListServers {
+  restrict: string = 'E';
+  templateUrl: string = 'app/workspaces/workspace-details/environments/list-servers/list-servers.html';
+
+  controller: string = 'ListServersController';
+  controllerAs: string = 'listServersController';
+  bindToController: boolean = true;
+
+  scope: {
+    [propName: string]: string
+  };
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
   constructor () {
-    this.restrict = 'E';
-    this.templateUrl = 'app/workspaces/workspace-details/environments/list-ports/list-ports.html';
-
-    this.controller = 'ListPortsController';
-    this.controllerAs = 'listPortsController';
-    this.bindToController = true;
-
     // scope values
     this.scope = {
       servers: '=',

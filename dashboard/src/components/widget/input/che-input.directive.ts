@@ -37,7 +37,9 @@ export class CheInput {
       placeHolder: '@chePlaceHolder',
       pattern: '@chePattern',
       myForm: '=cheForm',
-      isChanged: '&ngChange'
+      isChanged: '&ngChange',
+      readonly: '=cheReadonly',
+      disabled: '=cheDisabled'
     };
 
   }
@@ -63,6 +65,12 @@ export class CheInput {
     if (attrs.chePattern) {
       template = template + ' pattern="' + pattern + '"';
     }
+    if (attrs.cheReadonly) {
+      template = template + ' ng-readonly="readonly"';
+    }
+    if (attrs.cheDisabled) {
+      template = template + ' ng-disabled="disabled"';
+    }
 
     template = template + ' ng-trim="false" data-ng-model="valueModel" >'
       + '<md-icon class="fa fa-pencil che-input-icon che-input-icon-xs"></md-icon>'
@@ -78,6 +86,12 @@ export class CheInput {
       + '<input type="text" placeholder="' + placeHolder + '" ng-trim="false" name="desk' + inputName + '" style="{{labelName ? \'width: 100%\' : \'\'}}"';
     if (attrs.chePattern) {
       template = template + ' pattern="' + pattern + '"';
+    }
+    if (attrs.cheReadonly) {
+      template = template + ' ng-readonly="readonly"';
+    }
+    if (attrs.cheDisabled) {
+      template = template + ' ng-disabled="disabled"';
     }
     template = template + ' data-ng-model="valueModel">'
       + '<md-icon class="fa fa-pencil che-input-icon"></md-icon>';

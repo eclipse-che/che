@@ -20,13 +20,25 @@ import {DockerImageEnvironmentManager} from './docker-image-environment-manager'
 describe('DockerImageEnvironmentManager', () => {
   let envManager, environment, machines;
 
-  beforeEach(() => {
-    envManager = new DockerImageEnvironmentManager();
+  beforeEach(inject(($log: ng.ILogService) => {
+    envManager = new DockerImageEnvironmentManager($log);
 
-    environment = {'machines':{'dev-machine':{'servers':{'10240/tcp':{'properties':{},'protocol':'http','port':'10240'}},'agents':['ws-agent','org.eclipse.che.ws-agent'],'attributes':{'memoryLimitBytes':'16642998272'}}},'recipe':{'location':'codenvy/ubuntu_jdk8','type':'dockerimage'}};
+    environment = {
+      'machines': {
+        'dev-machine': {
+          'servers': {
+            '10240/tcp': {
+              'properties': {},
+              'protocol': 'http',
+              'port': '10240'
+            }
+          }, 'agents': ['ws-agent', 'org.eclipse.che.ws-agent'], 'attributes': {'memoryLimitBytes': '16642998272'}
+        }
+      }, 'recipe': {'location': 'codenvy/ubuntu_jdk8', 'type': 'dockerimage'}
+    };
 
     machines = envManager.getMachines(environment);
-  });
+  }));
 
   it('cannot rename machine', () => {
     let canRenameMachine = envManager.canRenameMachine(machines[0]);
@@ -71,6 +83,6 @@ describe('DockerImageEnvironmentManager', () => {
     let isDev = envManager.isDev(machines[0]);
 
     expect(isDev).toBe(true);
-  })
+  });
 });
 
