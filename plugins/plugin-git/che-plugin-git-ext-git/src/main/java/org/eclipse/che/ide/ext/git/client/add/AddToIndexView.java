@@ -11,7 +11,6 @@
 package org.eclipse.che.ide.ext.git.client.add;
 
 import org.eclipse.che.ide.api.mvp.View;
-import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
@@ -23,7 +22,7 @@ import javax.validation.constraints.NotNull;
  */
 public interface AddToIndexView extends View<AddToIndexView.ActionDelegate> {
     /** Needs for delegate some function into CloneRepository view. */
-    public interface ActionDelegate {
+    interface ActionDelegate {
         /** Performs any actions appropriate in response to the user having pressed the Add button. */
         void onAddClicked();
 
@@ -37,7 +36,7 @@ public interface AddToIndexView extends View<AddToIndexView.ActionDelegate> {
      * @param message
      *         content of message
      */
-    void setMessage(@NotNull String message, @NotNull List<String> items);
+    void setMessage(@NotNull String message);
 
     /** @return <code>true</code> if new file must be added to index, and <code>false</code> otherwise */
     boolean isUpdated();

@@ -20,14 +20,11 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.TextArea;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import java.util.List;
-import javax.validation.constraints.NotNull;
 /**
  * The implementation of {@link AddToIndexView}.
  *
@@ -41,9 +38,7 @@ public class AddToIndexViewImpl extends Window implements AddToIndexView {
     private static AddToIndexViewImplUiBinder ourUiBinder = GWT.create(AddToIndexViewImplUiBinder.class);
 
     @UiField
-    HTML     message;
-    @UiField
-    TextArea items;
+    Label     message;
     @UiField
     CheckBox update;
     Button btnAdd;
@@ -101,22 +96,8 @@ public class AddToIndexViewImpl extends Window implements AddToIndexView {
 
     /** {@inheritDoc} */
     @Override
-    public void setMessage(@NotNull String message, @NotNull List<String> items) {
-        this.message.setHTML(message);
-        if (items == null || items.isEmpty()) {
-            this.items.setVisible(false);
-            this.items.setText("");
-        } else {
-            this.items.setVisible(true);
-            final StringBuilder sb = new StringBuilder();
-            String toAppend = "";
-            for (String item : items) {
-                sb.append(toAppend);
-                toAppend = "\n";
-                sb.append(item);
-            }
-            this.items.setText(sb.toString());
-        }
+    public void setMessage(String message) {
+        this.message.getElement().setInnerHTML(message);
     }
 
     /** {@inheritDoc} */
