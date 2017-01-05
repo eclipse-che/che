@@ -24,10 +24,11 @@ import {ValidatorConfig} from './validator/validator-config';
 import {WidgetConfig} from './widget/widget-config';
 
 import {CheStepsContainer} from './steps-container/steps-container.directive';
+import {FilterConfig} from './filter/che-filter-config';
 
 export class ComponentsConfig {
 
-  constructor(register) {
+  constructor(register: che.IRegisterService) {
     new ApiConfig(register);
     new AttributeConfig(register);
     new CheBrandingConfig(register);
@@ -39,6 +40,7 @@ export class ComponentsConfig {
     new RoutingConfig(register);
     new ValidatorConfig(register);
     new WidgetConfig(register);
+    new FilterConfig(register);
 
     register.directive('cheStepsContainer', CheStepsContainer);
   }

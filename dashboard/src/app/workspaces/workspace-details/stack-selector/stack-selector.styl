@@ -1,0 +1,44 @@
+.stack-selector
+  $stack-selector-list-header-border = lighten($very-light-grey-color, 4%)
+  $stack-selector-list-header-background = lighten($very-light-grey-color, 28%)
+
+  .stack-selector-buttons-right
+    & > *
+      margin 0
+
+    & > *:not(:first-child)
+      margin-left 32px
+
+    che-button-default
+
+      .che-button.md-button
+        padding-left 9px !important
+        margin 0
+        vertical-align middle
+        che-box-shadow()
+
+        md-icon
+          font-size 28px
+
+  .stack-selector-list
+    margin-top 20px
+
+    md-content
+      che-box-shadow()
+
+    .stack-selector-icon-column
+      width 100px !important
+
+    .stack-selector-list-header
+      border 1px solid $stack-selector-list-header-border
+      border-bottom none
+      border-radius 2px 2px 0 0
+      background-color $stack-selector-list-header-background
+
+    .stack-selector-stack-list
+      max-height 500px
+      margin 0
+
+      .che-list
+        margin 0
+

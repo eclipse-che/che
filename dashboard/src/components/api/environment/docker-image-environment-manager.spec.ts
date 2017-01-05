@@ -23,7 +23,19 @@ describe('DockerImageEnvironmentManager', () => {
   beforeEach(() => {
     envManager = new DockerImageEnvironmentManager();
 
-    environment = {'machines':{'dev-machine':{'servers':{'10240/tcp':{'properties':{},'protocol':'http','port':'10240'}},'agents':['ws-agent','org.eclipse.che.ws-agent'],'attributes':{'memoryLimitBytes':'16642998272'}}},'recipe':{'location':'codenvy/ubuntu_jdk8','type':'dockerimage'}};
+    environment = {
+      'machines': {
+        'dev-machine': {
+          'servers': {
+            '10240/tcp': {
+              'properties': {},
+              'protocol': 'http',
+              'port': '10240'
+            }
+          }, 'agents': ['ws-agent', 'org.eclipse.che.ws-agent'], 'attributes': {'memoryLimitBytes': '16642998272'}
+        }
+      }, 'recipe': {'location': 'codenvy/ubuntu_jdk8', 'type': 'dockerimage'}
+    };
 
     machines = envManager.getMachines(environment);
   });
@@ -63,7 +75,7 @@ describe('DockerImageEnvironmentManager', () => {
   it('should return memory limit', () => {
     let memoryLimit = envManager.getMemoryLimit(machines[0]);
 
-    let expectedMemoryLimit = environment.machines['dev-machine'].attributes.memoryLimitBytes;
+    let expectedMemoryLimit = parseInt(environment.machines['dev-machine'].attributes.memoryLimitBytes, 10);
     expect(memoryLimit).toEqual(expectedMemoryLimit);
   });
 
@@ -71,6 +83,7 @@ describe('DockerImageEnvironmentManager', () => {
     let isDev = envManager.isDev(machines[0]);
 
     expect(isDev).toBe(true);
-  })
+  });
+
 });
 

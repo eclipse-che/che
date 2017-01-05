@@ -11,12 +11,16 @@
 'use strict';
 
 /**
- * Defines a directive for a toggle button.
- * @author Florent Benoit
+ * Defines a directive for displaying stack selector's item.
+ *
+ * @author Oleksii Kurinnyi
  */
-export class CheToggleButton {
-  restrict: string;
-  templateUrl: string;
+
+export class StackSelectorItem {
+  restrict: string = 'E';
+  templateUrl: string = 'app/workspaces/workspace-details/stack-selector/stack-selector-item.html';
+  replace: boolean = true;
+
   scope: {
     [propName: string]: string
   };
@@ -26,19 +30,13 @@ export class CheToggleButton {
    * @ngInject for Dependency injection
    */
   constructor() {
-    this.restrict = 'E';
-    this.templateUrl = 'components/widget/toggle-button/che-toggle-button.html';
-
-    // scope values
     this.scope = {
-      title: '@cheTitle',
-      value: '=?cheValue',
-      fontIcon: '@cheFontIcon',
-      ngDisabled: '@ngDisabled'
+      stack: '=',
+      stackIconLink: '=',
+      stackMachines: '=',
+      stackIdSelected: '=',
+      stackOnClick: '&'
     };
   }
-
-  link($scope: ng.IScope): void {
-    ($scope as any).controller = ($scope.$parent.$parent as any).cheToggleController || ($scope.$parent.$parent.$parent as any).cheToggleController;
-  }
 }
+

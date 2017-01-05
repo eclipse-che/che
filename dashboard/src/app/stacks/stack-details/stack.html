@@ -69,8 +69,8 @@
       <div layout="column">
         <che-toggle ng-model="stackController.stack.scope" ng-change="stackController.updateJsonFromStack()"
                     md-theme="default">
-          <che-toggle-button che-title="Ready-to-go" che-value="{{stackController.GENERAL_SCOPE}}"></che-toggle-button>
-          <che-toggle-button che-title="Advanced" che-value="{{stackController.ADVANCED_SCOPE}}"></che-toggle-button>
+          <che-toggle-button che-title="Ready-to-go" che-value="stackController.GENERAL_SCOPE"></che-toggle-button>
+          <che-toggle-button che-title="Advanced" che-value="stackController.ADVANCED_SCOPE"></che-toggle-button>
         </che-toggle>
       </div>
     </che-label-container>

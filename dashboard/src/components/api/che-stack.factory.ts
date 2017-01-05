@@ -18,7 +18,7 @@
  */
 export class CheStack {
   $resource: ng.resource.IResourceService;
-  stacksById: {[stackId: string]: {stack: any}};
+  stacksById: {[stackId: string]: che.IStack};
   stacks: Array<any>;
   usedStackNames: Array<string>;
   remoteStackAPI: ng.resource.IResourceClass<ng.resource.IResource<any>>;
@@ -128,13 +128,14 @@ export class CheStack {
    * Fetch the stacks
    * @returns {$promise: ng.IPromise}
    */
-  fetchStacks(): ng.IPromise {
-    let promise: ng.IPromise = this.remoteStackAPI.getStacks().$promise;
-    let updatedPromise = promise.then((stacks) => {
+  fetchStacks(): ng.IPromise<any> {
+    let promise: ng.IPromise<any> = this.remoteStackAPI.getStacks().$promise;
+    let updatedPromise = promise.then((stacks: che.IStack) => {
       // reset global stacks list
       this.stacks.length = 0;
-      for (let member: any in this.stacksById) {
-        delete this.stacksById[member];
+      for (let stackId in this.stacksById) {
+        if (this.stacksById.hasOwnProperty(stackId))
+        delete this.stacksById[stackId];
       }
       // reset global stack names list
       this.usedStackNames.length = 0;
@@ -153,7 +154,7 @@ export class CheStack {
    * Gets all stacks
    * @returns {Array}
    */
-  getStacks(): Array {
+  getStacks(): che.IStack[] {
     return this.stacks;
   }
 
@@ -162,7 +163,7 @@ export class CheStack {
    * @param id: string
    * @returns {any}
    */
-  getStackById(id: string): any {
+  getStackById(id: string): che.IStack {
     return this.stacksById[id];
   }
 
@@ -171,7 +172,7 @@ export class CheStack {
    * @param stack: any - data for new stack
    * @returns {$promise: ng.IPromise}
    */
-  createStack(stack: any): ng.IPromise {
+  createStack(stack: che.IStack): ng.IPromise<any> {
     return this.remoteStackAPI.createStack({}, stack).$promise;
   }
 
@@ -180,7 +181,7 @@ export class CheStack {
    * @param stackId: string - stack's id
    * @returns {$promise: ng.IPromise}
    */
-  fetchStack(stackId: string): ng.IPromise {
+  fetchStack(stackId: string): ng.IPromise<any> {
     return this.remoteStackAPI.getStack({stackId: stackId}).$promise;
   }
 
@@ -190,7 +191,7 @@ export class CheStack {
    * @param stack: any - data for new stack
    * @returns {$promise: ng.IPromise}
    */
-  updateStack(stackId: string, stack: any): ng.IPromise {
+  updateStack(stackId: string, stack: che.IStack): ng.IPromise<any> {
     return this.remoteStackAPI.updateStack({stackId: stackId}, stack).$promise;
   }
 
@@ -199,7 +200,7 @@ export class CheStack {
    * @param stackId: string - stack's id
    * @returns {$promise: ng.IPromise}
    */
-  deleteStack(stackId: string): ng.IPromise {
+  deleteStack(stackId: string): ng.IPromise<any> {
     return this.remoteStackAPI.deleteStack({stackId: stackId}).$promise;
   }
 }

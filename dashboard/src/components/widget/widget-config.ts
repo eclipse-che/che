@@ -51,6 +51,7 @@ import {CheLoaderCrane} from './loader/che-loader-crane.directive';
 import {ChePanelCtrl} from './panel/che-panel.controller';
 import {ChePanel} from './panel/che-panel.directive';
 import {CheSearch} from './search/che-search.directive';
+import {SearchInput} from './search/search-input.directive';
 import {CheSelect} from './select/che-select.directive';
 import {CheSelecterCtrl} from './selecter/che-selecter.controller';
 import {CheSelecter} from './selecter/che-selecter.directive';
@@ -67,11 +68,15 @@ import {ChePopup} from './popup/che-popup.directive';
 import {CheModalPopup} from './popup/che-modal-popup.directive';
 import {CheShowArea} from './show-area/che-show-area.directive';
 import {DemoSourceRender} from './html-source/demo-source-render.directive';
+import {ToggleSingleButton} from './toggle-button/toggle-single-button.directive';
+import {CheToggleJoinedButton} from './toggle-button/che-toggle-joined-button.directive';
+import {CheToggleJoined} from './toggle-button/che-toggle-joined.directive';
+import {CheChipsList} from './chips-list/chips-list.directive';
 
 
 export class WidgetConfig {
 
-  constructor(register) {
+  constructor(register: che.IRegisterService) {
 
     // accordion
     register.directive('cheAccordion', CheAccordion)
@@ -127,6 +132,7 @@ export class WidgetConfig {
       .directive('chePanel', ChePanel)
 
       .directive('cheSearch', CheSearch)
+      .directive('searchInput', SearchInput)
 
       .directive('cheSelect', CheSelect)
 
@@ -142,6 +148,9 @@ export class WidgetConfig {
       .controller('CheToggleController', CheToggleController)
       .directive('cheToggleButton', CheToggleButton)
       .directive('cheToggle', CheToggle)
+      .directive('cheToggleJoined', CheToggleJoined)
+      .directive('cheToggleJoinedButton', CheToggleJoinedButton)
+      .directive('toggleSingleButton', ToggleSingleButton)
 
       .directive('cheToolbar', CheToolbar)
       // notifications
@@ -152,5 +161,7 @@ export class WidgetConfig {
       .directive('cheModalPopup', CheModalPopup)
       // show area
       .directive('cheShowArea', CheShowArea)
+      // tags
+      .directive('cheChipsList', CheChipsList);
   }
 }

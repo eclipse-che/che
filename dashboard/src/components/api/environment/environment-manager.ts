@@ -156,9 +156,9 @@ export class EnvironmentManager {
    * @param machine
    * @returns {number|string} memory limit in bytes
    */
-  getMemoryLimit(machine: any): number|string {
+  getMemoryLimit(machine: any): number {
     if (machine && machine.attributes && machine.attributes.memoryLimitBytes) {
-      return machine.attributes.memoryLimitBytes;
+      return parseInt(machine.attributes.memoryLimitBytes, 10);
     }
 
     return -1;
