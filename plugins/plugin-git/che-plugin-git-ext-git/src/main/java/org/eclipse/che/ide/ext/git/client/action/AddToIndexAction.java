@@ -33,6 +33,7 @@ import org.eclipse.che.ide.resource.Path;
 
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkState;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
@@ -72,6 +73,7 @@ public class AddToIndexAction extends GitAction {
     @Override
     public void actionPerformed(ActionEvent e) {
         final Resource[] resources = appContext.getResources();
+        checkState(resources != null);
         final DevMachine devMachine = appContext.getDevMachine();
         final GitOutputConsole console = gitOutputConsoleFactory.create(constant.addToIndexCommandName());
         consolesPanelPresenter.addCommandOutput(devMachine.getId(), console);

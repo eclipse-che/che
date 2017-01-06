@@ -118,12 +118,15 @@ public class ResetFilesPresenter implements ResetFilesView.ActionDelegate {
                 }
 
                 //Mark selected items to reset from index
-                for (Resource selectedItem : appContext.getResources()) {
-                    String selectedItemPath = selectedItem.getLocation().removeFirstSegments(1).toString();
-                    for (IndexFile file : indexedFiles)
-                        if (file.getPath().startsWith(selectedItemPath)) {
-                            file.setIndexed(false);
-                        }
+                Resource[] resources = appContext.getResources();
+                if (resources != null) {
+                    for (Resource selectedItem : resources) {
+                        String selectedItemPath = selectedItem.getLocation().removeFirstSegments(1).toString();
+                        for (IndexFile file : indexedFiles)
+                            if (file.getPath().startsWith(selectedItemPath)) {
+                                file.setIndexed(false);
+                            }
+                    }
                 }
 
                 view.setIndexedFiles(indexedFiles);

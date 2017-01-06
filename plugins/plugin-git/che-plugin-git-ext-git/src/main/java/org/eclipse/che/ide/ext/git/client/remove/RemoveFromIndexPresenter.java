@@ -73,6 +73,7 @@ public class RemoveFromIndexPresenter implements RemoveFromIndexView.ActionDeleg
 
     public void showDialog(Project project) {
         Resource[] resources = appContext.getResources();
+        checkState(resources != null && resources.length > 0);
         this.project = project;
         if (resources.length == 1) {
             Resource resource = appContext.getResource();

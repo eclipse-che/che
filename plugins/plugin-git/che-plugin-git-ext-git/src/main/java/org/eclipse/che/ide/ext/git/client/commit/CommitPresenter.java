@@ -143,6 +143,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
     @VisibleForTesting
     void doCommit(final String message, final boolean addAll, final boolean commitAll, final boolean amend) {
         final Resource[] resources = appContext.getResources();
+        checkState(resources != null);
         service.commit(appContext.getDevMachine(),
                        project.getLocation(),
                        message,
