@@ -17,6 +17,7 @@ export interface IEnvironmentManagerMachine extends che.IEnvironmentMachine {
   };
 }
 
-interface IEnvironmentManagerMachineServer extends che.IEnvironmentMachineServer {
-  runtimeUrl?: string;
+export interface IEnvironmentManagerMachineServer extends che.IEnvironmentMachineServer {
+  userScope?: boolean; // indicates a server added by user
+  runtime?: che.IWorkspaceRuntimeMachineServer;
 }

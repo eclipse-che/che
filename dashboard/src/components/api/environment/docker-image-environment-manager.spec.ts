@@ -69,6 +69,10 @@ describe('DockerImageEnvironmentManager', () => {
     let servers = envManager.getServers(machines[0]);
 
     let expectedServers = environment.machines['dev-machine'].servers;
+    Object.keys(expectedServers).forEach((serverRef: string) => {
+      expectedServers[serverRef].userScope = true;
+    });
+
     expect(servers).toEqual(expectedServers);
   });
 
