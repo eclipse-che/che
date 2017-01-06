@@ -125,6 +125,8 @@
                         <exclude>**/*.eot</exclude>
                         <exclude>**/*.css</exclude>
                         <exclude>**/*.woff</exclude>
+                        <exclude>src/app/colors/che-output-colors.constant.ts</exclude>
+                        <exclude>src/app/proxy/proxy-settings.constant.ts</exclude>
                     </excludes>
                 </configuration>
             </plugin>
