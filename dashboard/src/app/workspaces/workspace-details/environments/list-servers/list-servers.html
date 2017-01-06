@@ -54,7 +54,7 @@
 
     <che-list flex>
       <che-list-item ng-mouseover="hover=true" ng-mouseout="hover=false"
-                     ng-repeat="server in listServersController.serversList | orderBy:listServersController.serversOrderBy">
+                     ng-repeat="server in listServersController.serversList | orderBy:['-userScope', listServersController.serversOrderBy]">
         <div flex="100"
              layout="row"
              layout-align="start stretch"
@@ -64,6 +64,7 @@
                class="che-checkbox-area">
             <che-list-item-checked ng-model="listServersController.serversSelectedStatus[server.reference]"
                                    che-aria-label-checkbox="Port {{server.reference}}"
+                                   ng-if="server.userScope"
                                    ng-click="listServersController.updateSelectedStatus()"></che-list-item-checked>
           </div>
           <div flex
@@ -85,12 +86,13 @@
             </div>
             <div flex="50"
                  class="che-list-item-name">
-              <span class="che-hover">
-                <a href="{{server.runtimeUrl}}" target="_blank">{{server.runtimeUrl}}</a>
+              <span class="che-hover" ng-if="server.runtime">
+                <a href="{{server.runtime.url}}" target="_blank">{{server.runtime.url}}</a>
               </span>
             </div>
             <div flex="10">
               <div class="che-list-actions"
+                   ng-if="server.userScope"
                    ng-click="listServersController.showEditDialog($event,server.reference)">
                 <i class="fa fa-pencil" tooltip="Edit"></i>
               </div>
@@ -111,7 +113,7 @@
     <div flex-offset="5" ng-if="listServersController.serversList.length > 0">
       <che-button-primary-flat ng-disabled="(listServersController.serversSelectedNumber === 0)"
                                che-button-title="Delete" name="deleteButton"
-                               ng-click="listServersController.deleteSelectedPorts()"></che-button-primary-flat>
+                               ng-click="listServersController.deleteSelectedServers()"></che-button-primary-flat>
     </div>
   </div>
 </div>
