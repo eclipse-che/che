@@ -57,14 +57,14 @@ public class RequestHandlerRegistry {
         notificationHandlers.remove(method);
     }
 
-    public RequestHandler getRequestHandler(String method) {
+    RequestHandler getRequestHandler(String method) {
         checkNotNull(method, "Method name must not be null");
         checkArgument(!method.isEmpty(), "Method name must not be empty");
 
         return requestHandlers.get(method);
     }
 
-    public NotificationHandler getNotificationHandler(String method) {
+    NotificationHandler getNotificationHandler(String method) {
         checkNotNull(method, "Method name must not be null");
         checkArgument(!method.isEmpty(), "Method name must not be empty");
 

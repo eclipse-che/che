@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.jsonrpc.reception;
 
-
 import org.eclipse.che.api.core.jsonrpc.NotificationHandler;
 import org.eclipse.che.api.core.jsonrpc.NotificationHandlerManyToNone;
 import org.eclipse.che.api.core.jsonrpc.RequestHandlerRegistry;
@@ -36,7 +35,6 @@ public class OperationConfiguratorManyToNone<P> {
     private final RequestHandlerRegistry registry;
     private final String                 method;
     private final Class<P>               pClass;
-
 
     OperationConfiguratorManyToNone(RequestHandlerRegistry registry, String method, Class<P> pClass) {
         this.registry = registry;

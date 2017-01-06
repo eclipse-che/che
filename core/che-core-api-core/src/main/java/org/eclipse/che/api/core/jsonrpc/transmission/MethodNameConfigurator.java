@@ -37,7 +37,7 @@ public class MethodNameConfigurator {
     private final String                      endpointId;
 
     @Inject
-    public MethodNameConfigurator(ResponseDispatcher dispatcher, WebSocketMessageTransmitter transmitter, JsonRpcFactory factory,
+    MethodNameConfigurator(ResponseDispatcher dispatcher, WebSocketMessageTransmitter transmitter, JsonRpcFactory factory,
                                   String endpointId) {
         this.dispatcher = dispatcher;
         this.transmitter = transmitter;

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.jsonrpc.reception;
 
-
 import org.eclipse.che.api.core.jsonrpc.JsonRpcFactory;
 import org.eclipse.che.api.core.jsonrpc.RequestHandlerRegistry;
 import org.slf4j.Logger;

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.jsonrpc;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -42,7 +41,7 @@ public class JsonRpcResult {
     private final DtoFactory dtoFactory;
 
     private List<JsonElement> resultList;
-    private JsonElement        result;
+    private JsonElement       result;
 
     @AssistedInject
     public JsonRpcResult(@Assisted("message") String message, JsonParser jsonParser, DtoFactory dtoFactory) {
@@ -72,7 +71,7 @@ public class JsonRpcResult {
     public JsonRpcResult(@Assisted("result") List<?> result, JsonParser jsonParser, DtoFactory dtoFactory) {
         this.dtoFactory = dtoFactory;
 
-        if (result == null || result.isEmpty()){
+        if (result == null || result.isEmpty()) {
             this.resultList = Collections.emptyList();
         } else {
             this.resultList = result.stream().map(Object::toString).map(jsonParser::parse).collect(Collectors.toList());

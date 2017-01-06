@@ -35,15 +35,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class JsonRpcList {
     private final DtoFactory        dtoFactory;
     private final List<JsonElement> jsonElementList;
-    private final JsonParser        jsonParser;
 
     @AssistedInject
     public JsonRpcList(@Assisted("message") String message, JsonParser jsonParser, DtoFactory dtoFactory) {
+        this.dtoFactory = dtoFactory;
+
         checkNotNull(message, "Message must not be null");
         checkArgument(!message.isEmpty(), "Message must not be empty");
-
-        this.dtoFactory = dtoFactory;
-        this.jsonParser = jsonParser;
 
         JsonArray jsonArray = jsonParser.parse(message).getAsJsonArray();
         this.jsonElementList = new ArrayList<>(jsonArray.size());
@@ -52,18 +50,12 @@ public class JsonRpcList {
 
     @AssistedInject
     public JsonRpcList(@Assisted("dtoObjectList") List<?> dtoObjectList, JsonParser jsonParser, DtoFactory dtoFactory) {
+        this.dtoFactory = dtoFactory;
+
         checkNotNull(dtoObjectList, "List must not be null");
         checkArgument(!dtoObjectList.isEmpty(), "List must not be empty");
 
-        this.dtoFactory = dtoFactory;
-        this.jsonParser = jsonParser;
-
         this.jsonElementList = dtoObjectList.stream().map(Object::toString).map(jsonParser::parse).collect(Collectors.toList());
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T> T cast(Object object) {
-        return (T)object;
     }
 
     public static boolean isArray(String message) {

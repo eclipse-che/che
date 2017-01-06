@@ -32,7 +32,7 @@ public class ResultConfiguratorFromOne<P> {
     private final String                 method;
     private final Class<P>               pClass;
 
-    public ResultConfiguratorFromOne(RequestHandlerRegistry registry, JsonRpcFactory factory, String method, Class<P> pClass) {
+    ResultConfiguratorFromOne(RequestHandlerRegistry registry, JsonRpcFactory factory, String method, Class<P> pClass) {
         this.registry = registry;
         this.factory = factory;
         this.method = method;

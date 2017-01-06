@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.jsonrpc.transmission;
 
-
 import org.eclipse.che.api.core.jsonrpc.JsonRpcFactory;
 import org.eclipse.che.api.core.jsonrpc.ResponseDispatcher;
 import org.eclipse.che.api.core.websocket.WebSocketMessageTransmitter;
@@ -38,8 +37,8 @@ public class ParamsConfigurator {
     private final String method;
     private final String endpointId;
 
-    public ParamsConfigurator(ResponseDispatcher dispatcher, WebSocketMessageTransmitter transmitter,
-                              JsonRpcFactory factory, String method, String endpointId) {
+    ParamsConfigurator(ResponseDispatcher dispatcher, WebSocketMessageTransmitter transmitter, JsonRpcFactory factory, String method,
+                       String endpointId) {
         this.dispatcher = dispatcher;
         this.transmitter = transmitter;
         this.factory = factory;

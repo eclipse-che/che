@@ -10,10 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.jsonrpc.reception;
 
-
 import org.eclipse.che.api.core.jsonrpc.JsonRpcFactory;
 import org.eclipse.che.api.core.jsonrpc.RequestHandlerRegistry;
-import org.eclipse.che.api.core.jsonrpc.transmission.EndpointIdConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +30,7 @@ public class ParamsConfigurator {
     private final JsonRpcFactory         factory;
     private final String                 method;
 
-    public ParamsConfigurator(RequestHandlerRegistry registry, JsonRpcFactory factory, String method) {
+    ParamsConfigurator(RequestHandlerRegistry registry, JsonRpcFactory factory, String method) {
         this.registry = registry;
         this.factory = factory;
         this.method = method;

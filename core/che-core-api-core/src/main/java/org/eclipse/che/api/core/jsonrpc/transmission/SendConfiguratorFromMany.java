@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.jsonrpc.transmission;
 
-
 import org.eclipse.che.api.core.jsonrpc.JsonRpcFactory;
 import org.eclipse.che.api.core.jsonrpc.JsonRpcParams;
 import org.eclipse.che.api.core.jsonrpc.JsonRpcPromise;
@@ -21,6 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Configurator defines the type of a result (if present) and send a request.
@@ -42,8 +43,8 @@ public class SendConfiguratorFromMany<P> {
     private final List<P> pListValue;
     private final String  endpointId;
 
-    public SendConfiguratorFromMany(ResponseDispatcher dispatcher, WebSocketMessageTransmitter transmitter,
-                                    JsonRpcFactory factory, String method, List<P> pListValue, String endpointId) {
+    SendConfiguratorFromMany(ResponseDispatcher dispatcher, WebSocketMessageTransmitter transmitter, JsonRpcFactory factory, String method,
+                             List<P> pListValue, String endpointId) {
         this.dispatcher = dispatcher;
         this.transmitter = transmitter;
         this.factory = factory;
@@ -76,9 +77,6 @@ public class SendConfiguratorFromMany<P> {
                   "result object class: " + rClass);
 
         return dispatcher.registerPromiseOfOne(endpointId, requestId, rClass, new JsonRpcPromise<>());
-    }
-
-    private <R> void checkNotNull(Class<R> rClass, String s) {
     }
 
     public JsonRpcPromise<String> sendAndReceiveResultAsString() {

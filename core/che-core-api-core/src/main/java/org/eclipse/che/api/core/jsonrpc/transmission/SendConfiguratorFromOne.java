@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.jsonrpc.transmission;
 
-
 import org.eclipse.che.api.core.jsonrpc.JsonRpcFactory;
 import org.eclipse.che.api.core.jsonrpc.JsonRpcParams;
 import org.eclipse.che.api.core.jsonrpc.JsonRpcPromise;
@@ -43,8 +42,8 @@ public class SendConfiguratorFromOne<P> {
     private final P                           pValue;
     private final String                      endpointId;
 
-    public SendConfiguratorFromOne(ResponseDispatcher dispatcher, WebSocketMessageTransmitter transmitter,
-                                   JsonRpcFactory factory, String method, P pValue, String endpointId) {
+    SendConfiguratorFromOne(ResponseDispatcher dispatcher, WebSocketMessageTransmitter transmitter,
+                            JsonRpcFactory factory, String method, P pValue, String endpointId) {
         this.dispatcher = dispatcher;
         this.transmitter = transmitter;
         this.factory = factory;
@@ -57,7 +56,7 @@ public class SendConfiguratorFromOne<P> {
         LOG.debug("Transmitting request: " +
                   "endpoint ID: " + endpointId + ", " +
                   "method: " + method + ", " +
-                  "params object class: " + pValue.getClass() + ", " +
+                  (pValue != null ? "params object class: " + pValue.getClass() + ", " : "") +
                   "params list value" + pValue);
 
         transmitNotification();
@@ -72,7 +71,7 @@ public class SendConfiguratorFromOne<P> {
                   "endpoint ID: " + endpointId + ", " +
                   "request ID: " + requestId + ", " +
                   "method: " + method + ", " +
-                  "params object class: " + pValue.getClass() + ", " +
+                  (pValue != null ? "params object class: " + pValue.getClass() + ", " : "") +
                   "params list value" + pValue + ", " +
                   "result object class: " + rClass);
 
@@ -87,7 +86,7 @@ public class SendConfiguratorFromOne<P> {
                   "endpoint ID: " + endpointId + ", " +
                   "request ID: " + requestId + ", " +
                   "method: " + method + ", " +
-                  "params object class: " + pValue.getClass() + ", " +
+                  (pValue != null ? "params object class: " + pValue.getClass() + ", " : "") +
                   "params list value" + pValue + ", " +
                   "result object class: " + String.class);
 
@@ -102,7 +101,7 @@ public class SendConfiguratorFromOne<P> {
                   "endpoint ID: " + endpointId + ", " +
                   "request ID: " + requestId + ", " +
                   "method: " + method + ", " +
-                  "params object class: " + pValue.getClass() + ", " +
+                  (pValue != null ? "params object class: " + pValue.getClass() + ", " : "") +
                   "params list value" + pValue + ", " +
                   "result object class: " + Double.class);
 
@@ -117,7 +116,7 @@ public class SendConfiguratorFromOne<P> {
                   "endpoint ID: " + endpointId + ", " +
                   "request ID: " + requestId + ", " +
                   "method: " + method + ", " +
-                  "params object class: " + pValue.getClass() + ", " +
+                  (pValue != null ? "params object class: " + pValue.getClass() + ", " : "") +
                   "params list value" + pValue + ", " +
                   "result object class: " + Boolean.class);
 
@@ -133,7 +132,7 @@ public class SendConfiguratorFromOne<P> {
                   "endpoint ID: " + endpointId + ", " +
                   "request ID: " + requestId + ", " +
                   "method: " + method + ", " +
-                  "params object class: " + pValue.getClass() + ", " +
+                  (pValue != null ? "params object class: " + pValue.getClass() + ", " : "") +
                   "params list value" + pValue + ", " +
                   "result list items class: " + rClass);
 
@@ -148,7 +147,7 @@ public class SendConfiguratorFromOne<P> {
                   "endpoint ID: " + endpointId + ", " +
                   "request ID: " + requestId + ", " +
                   "method: " + method + ", " +
-                  "params object class: " + pValue.getClass() + ", " +
+                  (pValue != null ? "params object class: " + pValue.getClass() + ", " : "") +
                   "params list value" + pValue + ", " +
                   "result list items class: " + String.class);
 
@@ -162,7 +161,7 @@ public class SendConfiguratorFromOne<P> {
                   "endpoint ID: " + endpointId + ", " +
                   "request ID: " + requestId + ", " +
                   "method: " + method + ", " +
-                  "params object class: " + pValue.getClass() + ", " +
+                  (pValue != null ? "params object class: " + pValue.getClass() + ", " : "") +
                   "params list value" + pValue + ", " +
                   "result list items class: " + Boolean.class);
 
@@ -176,7 +175,7 @@ public class SendConfiguratorFromOne<P> {
                   "endpoint ID: " + endpointId + ", " +
                   "request ID: " + requestId + ", " +
                   "method: " + method + ", " +
-                  "params object class: " + pValue.getClass() + ", " +
+                  (pValue != null ? "params object class: " + pValue.getClass() + ", " : "") +
                   "params list value" + pValue + ", " +
                   "result list items class: " + Void.class);
 

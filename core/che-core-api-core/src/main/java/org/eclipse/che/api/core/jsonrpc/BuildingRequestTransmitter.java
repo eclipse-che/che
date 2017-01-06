@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.jsonrpc;
 
-
 import org.eclipse.che.api.core.jsonrpc.transmission.EndpointIdConfigurator;
 
 /**

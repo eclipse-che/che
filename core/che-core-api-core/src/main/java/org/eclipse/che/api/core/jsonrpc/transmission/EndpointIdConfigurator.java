@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.jsonrpc.transmission;
 
-
 import org.eclipse.che.api.core.jsonrpc.JsonRpcFactory;
 import org.eclipse.che.api.core.jsonrpc.ResponseDispatcher;
 import org.eclipse.che.api.core.websocket.WebSocketMessageTransmitter;
@@ -48,6 +47,4 @@ public class EndpointIdConfigurator {
 
         return new MethodNameConfigurator(dispatcher, transmitter, factory, id);
     }
-
-
 }

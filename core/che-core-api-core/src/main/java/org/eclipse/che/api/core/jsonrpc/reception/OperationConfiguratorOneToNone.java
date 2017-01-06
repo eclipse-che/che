@@ -35,7 +35,6 @@ public class OperationConfiguratorOneToNone<P> {
     private final String                 method;
     private final Class<P>               pClass;
 
-
     OperationConfiguratorOneToNone(RequestHandlerRegistry registry, String method, Class<P> pClass) {
         this.registry = registry;
         this.method = method;

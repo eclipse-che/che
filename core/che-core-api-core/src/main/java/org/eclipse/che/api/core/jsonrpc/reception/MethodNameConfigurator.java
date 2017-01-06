@@ -12,7 +12,6 @@ package org.eclipse.che.api.core.jsonrpc.reception;
 
 import org.eclipse.che.api.core.jsonrpc.JsonRpcFactory;
 import org.eclipse.che.api.core.jsonrpc.RequestHandlerRegistry;
-import org.eclipse.che.api.core.jsonrpc.transmission.EndpointIdConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
