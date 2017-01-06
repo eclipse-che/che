@@ -8,12 +8,22 @@
 # Contributors:
 #   Mario Loriedo - Initial implementation
 #   Tyler Jewell - Improvements
+#   Marian Labuda - Improvements
 #
 # To run the tests:
 #   docker run -w /tests/ -v $PWD:/tests dduportal/bats:0.4.0 /tests/launcher_test.bats
 #
 
 source ./launcher_funcs.sh
+
+#source ./launcher.sh
+
+# Set up clean environment 
+setup() {
+  if [ "$(docker ps -qa -f status=exited | wc -l)" -gt 0 ]; then
+    docker rm $(docker ps -qa -f status=exited)
+  fi
+}
 
 @test "clean folder path that is already clean" {
   result="$(get_clean_path /somefolder)"
@@ -62,11 +72,11 @@ source ./launcher_funcs.sh
   # Given
   export CHE_SERVER_CONTAINER_NAME="che-test-get-container-conf-folder"
   CONF_FOLDER=$(pwd)/che-test-conf
-  mkdir ${CONF_FOLDER}
-  docker run --name ${CHE_SERVER_CONTAINER_NAME} -v ${CONF_FOLDER}:/conf alpine:3.4 true
+  mkdir ${CONF_FOLDER} -p
+  docker run --name ${CHE_SERVER_CONTAINER_NAME} -v ${CONF_FOLDER}:/conf:Z alpine:3.4 true
 
   # When
-  result="$(get_che_container_conf_folder)"
+  result=$(get_che_container_conf_folder $CHE_SERVER_CONTAINER_NAME)
   docker rm -f ${CHE_SERVER_CONTAINER_NAME}
   rmdir ${CONF_FOLDER}
 
@@ -80,7 +90,7 @@ source ./launcher_funcs.sh
   docker run --name ${CHE_SERVER_CONTAINER_NAME} alpine:3.4 true
 
   # When
-  result="$(get_che_container_conf_folder)"
+  result=$(get_che_container_conf_folder $CHE_SERVER_CONTAINER_NAME)
   docker rm -f ${CHE_SERVER_CONTAINER_NAME}
 
   # Then
@@ -91,11 +101,11 @@ source ./launcher_funcs.sh
   # Given
   export CHE_SERVER_CONTAINER_NAME="che-test-get-container-data-folder"
   DATA_FOLDER=$(pwd)/che-test-data
-  mkdir ${DATA_FOLDER}
-  docker run --name ${CHE_SERVER_CONTAINER_NAME} -v ${DATA_FOLDER}:/home/user/che/workspaces/ alpine:3.4 true
+  mkdir ${DATA_FOLDER} -p
+  docker run --name ${CHE_SERVER_CONTAINER_NAME} -v ${DATA_FOLDER}:/home/user/che/workspaces:Z alpine:3.4 true
 
   # When
-  result="$(get_che_container_data_folder)"
+  result=$(get_che_container_data_folder $CHE_SERVER_CONTAINER_NAME)
   docker rm -f ${CHE_SERVER_CONTAINER_NAME}
   rmdir ${DATA_FOLDER}
 
@@ -109,7 +119,7 @@ source ./launcher_funcs.sh
   docker run --name ${CHE_SERVER_CONTAINER_NAME} alpine:3.4 true
 
   # When
-  result="$(get_che_container_image_name)"
+  result=$(get_che_container_image_name $CHE_SERVER_CONTAINER_NAME) 
   docker rm -f ${CHE_SERVER_CONTAINER_NAME}
 
   # Then
@@ -120,64 +130,59 @@ source ./launcher_funcs.sh
   # Given
   export CHE_SERVER_CONTAINER_NAME="che-test-get-container-id"
   long_id=$(docker run -d --name ${CHE_SERVER_CONTAINER_NAME} alpine:3.4 true)
-  short_id=${long_id:0:12}
 
   # When
-  result="$(get_che_server_container_id)"
+  result=$(get_che_server_container_id ${CHE_SERVER_CONTAINER_NAME})
   docker rm -f ${CHE_SERVER_CONTAINER_NAME}
 
   # Then
-  [ "$result" = "$short_id" ]
+  [ "$result" = "$long_id" ]
 }
 
 @test "get docker daemon version" {
   # When
-  result="$(get_docker_daemon_version)"
+  result=$(get_docker_daemon_version)
 
   # Then
   [ "$result" ]
 }
 
+# could be added check on host OS
 @test "get docker host os" {
   # When
-  result="$(get_docker_host_os)"
+  result=$(get_docker_host_os)
 
   # Then
   [ "$result" ]
 }
 
-@test "get che get che launcher version with nightly" {
+# get_che_launcher_container_id should be called in container
+@test "get che launcher version with nightly" {
   # Given
-  export CHE_SERVER_CONTAINER_NAME="che-test-get-che-launcher-version"
-  long_id=$(docker run -d --name ${CHE_SERVER_CONTAINER_NAME} --entrypoint=true eclipse/che-launcher:nightly)
-
-  get_che_launcher_container_id() {
-    echo ${long_id:0:12}
-  }
+  export CHE_LAUNCHER_CONTAINER_NAME="che-test-get-che-launcher-version"
+  long_id=$(docker run -d --name ${CHE_LAUNCHER_CONTAINER_NAME} --entrypoint=true eclipse/che-launcher:nightly)
+  image_name=$(get_che_container_image_name ${long_id})
 
   # When
-  result="$(get_che_launcher_version)"
-  docker rm $CHE_SERVER_CONTAINER_NAME
+  wait_until_container_is_stopped 5 ${long_id}
+  result=$(get_che_image_version ${image_name})
+  docker rm $CHE_LAUNCHER_CONTAINER_NAME
 
   # Then
   [ "$result" = "nightly" ]
 }
 
+#get_che_launcher_container_id should run in container
 @test "get che get che launcher version with no specific version" {
   # Given
   export CHE_SERVER_CONTAINER_NAME="che-test-get-che-launcher-version"
   long_id=$(docker run -d --name ${CHE_SERVER_CONTAINER_NAME} --entrypoint=true eclipse/che-launcher)
-
-  get_che_launcher_container_id() {
-    echo ${long_id:0:12}
-  }
+  image_name=$(get_che_container_image_name ${long_id})
 
   # When
-  result="$(get_che_launcher_version)"
+  wait_until_container_is_stopped 5 ${long_id}
+  result=$(get_che_image_version ${image_name})
   docker rm $CHE_SERVER_CONTAINER_NAME
-
-  echo "expected: latest"
-  echo "actual: $result"
 
   # Then
   [ "$result" = "latest" ]

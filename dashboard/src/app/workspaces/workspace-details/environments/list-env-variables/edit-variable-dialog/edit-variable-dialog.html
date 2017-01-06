@@ -1,14 +1,17 @@
-<md-dialog flex="50"
+<che-popup title="{{editVariableDialogController.popupTitle}}"
+           on-close="editVariableDialogController.hide()"
            class="edit-variable-dialog-content">
   <ng-form flex layout="column" name="envVariableForm">
     <che-label-container che-label-name="Name">
       <div class="edit-variable-dialog-input">
-        <che-input ng-disabled="true"
-                   che-form="envVariableForm"
+        <che-input che-form="envVariableForm"
                    che-name="name"
                    che-place-holder="Environment variable name"
-                   ng-model="editVariableDialogController.name">
+                   ng-model="editVariableDialogController.name"
+                   custom-validator="editVariableDialogController.isUniqueName($value)"
+                   required>
           <div ng-message="required">A name is required.</div>
+          <div ng-message="customValidator">This name is already in use.</div>
         </che-input>
       </div>
     </che-label-container>
@@ -26,9 +29,9 @@
 
     <che-label-container>
       <div layout="row">
-        <che-button-primary che-button-title="Update"
+        <che-button-primary che-button-title="{{editVariableDialogController.toEdit ? 'Update' : 'Add'}}"
                             ng-disabled="envVariableForm.$invalid"
-                            ng-click="editVariableDialogController.updateVariable()"></che-button-primary>
+                            ng-click="editVariableDialogController.saveVariable()"></che-button-primary>
 
         <che-button-notice che-button-title="Cancel"
                            ng-click="editVariableDialogController.hide()"
@@ -36,4 +39,4 @@
       </div>
     </che-label-container>
   </ng-form>
-</md-dialog>
+</che-popup>

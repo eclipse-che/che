@@ -40,8 +40,8 @@ init_global_variables() {
 
   # Used to self-determine container version
   LAUNCHER_CONTAINER_ID=$(get_che_launcher_container_id)
-  LAUNCHER_IMAGE_NAME=$(docker inspect --format='{{.Config.Image}}' "${LAUNCHER_CONTAINER_ID}")
-  LAUNCHER_IMAGE_VERSION=$(echo "${LAUNCHER_IMAGE_NAME}" | cut -d : -f2 -s)
+  LAUNCHER_IMAGE_NAME=$(get_che_container_image_name ${LAUNCHER_CONTAINER_ID})
+  LAUNCHER_IMAGE_VERSION=$(get_che_image_version ${LAUNCHER_IMAGE_NAME})
 
   # Possible Docker install types are:
   #     native, boot2docker or moby
