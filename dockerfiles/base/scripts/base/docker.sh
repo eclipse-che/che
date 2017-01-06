@@ -184,6 +184,14 @@ wait_until_container_is_running() {
   done
 }
 
+local_repo() {
+  if [ "${CHE_LOCAL_REPO}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
 check_docker() {
   if ! has_docker; then
     error "Docker not found. Get it at https://docs.docker.com/engine/installation/."
@@ -327,9 +335,11 @@ check_mounts() {
   CHE_CONTAINER_BACKUP="${CHE_CONTAINER_ROOT}/backup"
 
   ### DEV MODE VARIABLES
-  CHE_DEVELOPMENT_MODE="off"
+  CHE_LOCAL_REPO=false
   if [[ "${REPO_MOUNT}" != "not set" ]]; then
-    CHE_DEVELOPMENT_MODE="on"
+    info "cli" ":/repo mounted - using binaries from your local repository"
+
+    CHE_LOCAL_REPO=true
     CHE_HOST_DEVELOPMENT_REPO="${REPO_MOUNT}"
     CHE_CONTAINER_DEVELOPMENT_REPO="/repo"
 
@@ -360,13 +370,8 @@ check_mounts() {
       info "                         ${CHE_IMAGE_FULLNAME} $*"
       return 2
     fi
-    if [[ ! -d $(echo ${CHE_CONTAINER_DEVELOPMENT_REPO}/${CHE_ASSEMBLY_IN_REPO}) ]]; then
-      info "Welcome to $CHE_FORMAL_PRODUCT_NAME!"
-      info ""
-      info "You volume mounted a valid $CHE_FORMAL_PRODUCT_NAME repo to ':/repo', but we could not find a ${CHE_FORMAL_PRODUCT_NAME} assembly."
-      info "Have you built ${CHE_ASSEMBLY_IN_REPO_MODULE_NAME} with 'mvn clean install'?"
-      return 2
-    fi
+  elif debug_server; then
+    warning "Debugging activated without ':/repo' mount - using binaries inside Docker image"
   fi
 }
 

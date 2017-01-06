@@ -21,11 +21,11 @@ cmd_debug() {
   info "${CHE_PRODUCT_NAME}_CONFIG            = ${CHE_HOST_CONFIG}"
   info "${CHE_PRODUCT_NAME}_HOST              = ${CHE_HOST}"
   info "${CHE_PRODUCT_NAME}_REGISTRY          = ${CHE_MANIFEST_DIR}"
-  info "${CHE_PRODUCT_NAME}_DEVELOPMENT_MODE  = ${CHE_DEVELOPMENT_MODE}"
-  if [ "${CHE_DEVELOPMENT_MODE}" = "on" ]; then
+  info "${CHE_PRODUCT_NAME}_DEBUG             = ${CHE_DEBUG}"
+  info "${CHE_PRODUCT_NAME}_BACKUP            = ${CHE_HOST_BACKUP}"
+  if local_repo; then
     info "${CHE_PRODUCT_NAME}_DEVELOPMENT_REPO  = ${CHE_HOST_DEVELOPMENT_REPO}"
   fi
-  info "${CHE_PRODUCT_NAME}_BACKUP            = ${CHE_HOST_BACKUP}"
   info ""
   info "-----------  PLATFORM INFO  -----------"
   info "DOCKER_INSTALL_TYPE       = $(get_docker_install_type)"
