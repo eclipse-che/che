@@ -47,28 +47,11 @@ get_display_url() {
   fi
 }
 
-check_if_booted() {
-  CURRENT_CHE_SERVER_CONTAINER_ID=$(get_server_container_id $CHE_SERVER_CONTAINER_NAME)
-  wait_until_container_is_running 20 ${CURRENT_CHE_SERVER_CONTAINER_ID}
-  if ! container_is_running ${CURRENT_CHE_SERVER_CONTAINER_ID}; then
-    error "(${CHE_MINI_PRODUCT_NAME} start): Timeout waiting for ${CHE_MINI_PRODUCT_NAME} container to start."
-    return 2
-  fi
-
-  info "start" "Services booting..."
-  info "start" "Server logs at \"docker logs -f ${CHE_SERVER_CONTAINER_NAME}\""
-  wait_until_server_is_booted 60 ${CURRENT_CHE_SERVER_CONTAINER_ID}
-
-  DISPLAY_URL=$(get_display_url)
-
-  if server_is_booted ${CURRENT_CHE_SERVER_CONTAINER_ID}; then
-    info "start" "Booted and reachable"
-    info "start" "Ver: $(get_installed_version)"
-    info "start" "Use: ${DISPLAY_URL}"
-    info "start" "API: ${DISPLAY_URL}/swagger"
+get_debug_display_url() {
+  if ! is_docker_for_mac; then
+    echo "http://${CHE_HOST}:${CHE_DEBUG_PORT}"
   else
-    error "(${CHE_MINI_PRODUCT_NAME} start): Timeout waiting for server. Run \"docker logs ${CHE_SERVER_CONTAINER_NAME}\" to inspect the issue."
-    return 2
+    echo "http://localhost:${CHE_DEBUG_PORT}"
   fi
 }
 

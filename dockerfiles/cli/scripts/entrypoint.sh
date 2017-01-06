@@ -19,7 +19,7 @@ OPTIONAL DOCKER PARAMETERS:
   -e CHE_PORT=<YOUR_PORT>              Port where ${CHE_MINI_PRODUCT_NAME} will bind itself to
   -v <LOCAL_PATH>:${CHE_CONTAINER_ROOT}/instance       Where instance, user, log data will be saved
   -v <LOCAL_PATH>:${CHE_CONTAINER_ROOT}/backup         Where backup files will be saved
-  -v <LOCAL_PATH>:/repo                ${CHE_MINI_PRODUCT_NAME} git repo to activate dev mode
+  -v <LOCAL_PATH>:/repo                ${CHE_MINI_PRODUCT_NAME} git repo - uses local binaries
   -v <LOCAL_PATH>:/sync                Where remote ws files will be copied with sync command
   -v <LOCAL_PATH>:/unison              Where unison profile for optimizing sync command resides
     
@@ -44,6 +44,10 @@ COMMANDS:
   test <test-name>                     Start test on ${CHE_MINI_PRODUCT_NAME} instance
   upgrade                              Upgrades ${CHE_MINI_PRODUCT_NAME} from one version to another with migrations and backups
   version                              Installed version and upgrade paths
+
+GLOBAL COMMAND OPTIONS:
+  --fast                               Skips networking and version checks (saves 5 secs during bootstrap)
+  --debug                              Enable debugging of ${CHE_MINI_PRODUCT_NAME} server
 "
 }
 

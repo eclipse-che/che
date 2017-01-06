@@ -27,7 +27,8 @@ ENV LANG=C.UTF-8 \
     PATH=${PATH}:${JAVA_HOME}/bin \
     CHE_HOME=/home/user/che \
     DOCKER_VERSION=1.6.0 \
-    DOCKER_BUCKET=get.docker.com
+    DOCKER_BUCKET=get.docker.com \
+    CHE_IN_CONTAINER=true
 
 RUN yum -y update && \
     yum -y install openssl java sudo && \

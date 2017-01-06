@@ -140,6 +140,7 @@
         <ng-form name="workspaceRuntimeForm">
           <workspace-environments
             ng-init="workspaceDetailsController.setForm(workspaceDetailsController.tab.Runtime, workspaceRuntimeForm)"
+            workspace-runtime="workspaceDetailsController.copyWorkspaceDetails.runtime"
             workspace-creation-flow="workspaceDetailsController.isCreationFlow"
             workspace-name="workspaceDetailsController.newName"
             stack-id="workspaceDetailsController.stackId"

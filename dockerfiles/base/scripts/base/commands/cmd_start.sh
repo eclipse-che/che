@@ -45,7 +45,7 @@ cmd_start() {
   info "start" "Starting containers..."
   COMPOSE_UP_COMMAND="docker_compose --file=\"${REFERENCE_CONTAINER_COMPOSE_FILE}\" -p=\"${CHE_MINI_PRODUCT_NAME}\" up -d"
 
-  if [ "${CHE_DEVELOPMENT_MODE}" != "on" ]; then
+  if ! debug_server; then
     COMPOSE_UP_COMMAND+=" >> \"${LOGS}\" 2>&1"
   fi
 
@@ -58,7 +58,7 @@ cmd_start() {
 cmd_start_check_ports() {
 
   # If dev mode is on, then we also need to check the debug port set by the user for availability
-  if [ "${CHE_DEVELOPMENT_MODE}" = "on" ]; then
+  if debug_server; then
     USER_DEBUG_PORT=$(docker_run --env-file="${REFERENCE_CONTAINER_ENVIRONMENT_FILE}" alpine sh -c 'echo $CHE_DEBUG_PORT')
 
     if [[ "$USER_DEBUG_PORT" = "" ]]; then
@@ -71,15 +71,15 @@ cmd_start_check_ports() {
   fi
 
   text   "         port ${CHE_PORT} (http):       $(port_open ${CHE_PORT} && echo "${GREEN}[AVAILABLE]${NC}" || echo "${RED}[ALREADY IN USE]${NC}") \n"
-  if [ "${CHE_DEVELOPMENT_MODE}" = "on" ]; then
-    text   "         port ${CHE_DEBUG_PORT} (debug):       $(port_open ${CHE_DEBUG_PORT} && echo "${GREEN}[AVAILABLE]${NC}" || echo "${RED}[ALREADY IN USE]${NC}") \n"
+  if debug_server; then
+    text   "         port ${CHE_DEBUG_PORT} (debug):      $(port_open ${CHE_DEBUG_PORT} && echo "${GREEN}[AVAILABLE]${NC}" || echo "${RED}[ALREADY IN USE]${NC}") \n"
   fi
   if ! $(port_open ${CHE_PORT}); then
     echo ""
     error "Ports required to run $CHE_MINI_PRODUCT_NAME are used by another program."
     return 1;
   fi
-  if [ "${CHE_DEVELOPMENT_MODE}" = "on" ]; then
+  if debug_server; then
     if ! $(port_open ${CHE_DEBUG_PORT}); then
       echo ""
       error "Ports required to run $CHE_MINI_PRODUCT_NAME are used by another program."
@@ -112,7 +112,50 @@ cmd_restart() {
   debug $FUNCNAME
 
   FORCE_UPDATE=${1:-"--no-force"}
-    info "restart" "Restarting..."
-    cmd_stop
-    cmd_start ${FORCE_UPDATE}
+  info "restart" "Restarting..."
+  cmd_stop
+  cmd_start ${FORCE_UPDATE}
 }
+
+check_if_booted() {
+  CURRENT_CHE_SERVER_CONTAINER_ID=$(get_server_container_id $CHE_SERVER_CONTAINER_NAME)
+  wait_until_container_is_running 20 ${CURRENT_CHE_SERVER_CONTAINER_ID}
+  if ! container_is_running ${CURRENT_CHE_SERVER_CONTAINER_ID}; then
+    error "(${CHE_MINI_PRODUCT_NAME} start): Timeout waiting for ${CHE_MINI_PRODUCT_NAME} container to start."
+    return 2
+  fi
+
+  info "start" "Services booting..."
+
+  # CHE-3546 - if in development mode, then display the che server logs to STDOUT
+  #            automatically kill the streaming of the log output when the server is booted
+  if debug_server; then
+    docker logs -f ${CHE_SERVER_CONTAINER_NAME} &
+    LOG_PID=$!
+  else
+    info "start" "Server logs at \"docker logs -f ${CHE_SERVER_CONTAINER_NAME}\""
+  fi
+
+  wait_until_server_is_booted 60 ${CURRENT_CHE_SERVER_CONTAINER_ID}
+ 
+  if debug_server; then
+    kill $LOG_PID > /dev/null 2>&1
+    info ""
+  fi
+
+  if server_is_booted ${CURRENT_CHE_SERVER_CONTAINER_ID}; then
+    DISPLAY_URL=$(get_display_url)
+    info "start" "Booted and reachable"
+    info "start" "Ver: $(get_installed_version)"
+    info "start" "Use: ${DISPLAY_URL}"
+    info "start" "API: ${DISPLAY_URL}/swagger"
+    if debug_server; then
+      DISPLAY_DEBUG_URL=$(get_debug_display_url)
+      info "start" "Debug: ${DISPLAY_DEBUG_URL}"
+    fi
+  else
+    error "(${CHE_MINI_PRODUCT_NAME} start): Timeout waiting for server. Run \"docker logs ${CHE_SERVER_CONTAINER_NAME}\" to inspect the issue."
+    return 2
+  fi
+}
+
