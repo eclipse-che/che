@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.jsonrpc;
 
-
 import java.util.function.BiConsumer;
 
 /**

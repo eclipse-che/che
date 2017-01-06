@@ -47,9 +47,7 @@ public class JsonRpcList {
 
         JsonArray jsonArray = jsonParser.parse(message).getAsJsonArray();
         this.jsonElementList = new ArrayList<>(jsonArray.size());
-        for (int i = 0; i < jsonArray.size(); i++) {
-            jsonElementList.add(i, jsonArray.get(i));
-        }
+        jsonArray.forEach(jsonElementList::add);
     }
 
     @AssistedInject
@@ -61,7 +59,6 @@ public class JsonRpcList {
         this.jsonParser = jsonParser;
 
         this.jsonElementList = dtoObjectList.stream().map(Object::toString).map(jsonParser::parse).collect(Collectors.toList());
-        ;
     }
 
     @SuppressWarnings("unchecked")

@@ -39,7 +39,6 @@ public class JsonRpcRequest {
         checkNotNull(message, "Message must not be null");
         checkArgument(!message.isEmpty(), "Message must not be empty");
 
-
         JsonObject jsonObject = jsonParser.parse(message).getAsJsonObject();
 
         method = jsonObject.get("method").getAsString();
@@ -64,7 +63,6 @@ public class JsonRpcRequest {
 
         checkNotNull(method, "Method name must not be null");
         checkArgument(!method.isEmpty(), "Method name must not be empty");
-
 
         this.id = id;
         this.method = method;

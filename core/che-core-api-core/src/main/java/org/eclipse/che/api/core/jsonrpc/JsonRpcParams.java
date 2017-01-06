@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.jsonrpc;
 
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -49,7 +48,6 @@ public class JsonRpcParams {
 
         checkNotNull(message, "Message must not be null");
         checkArgument(!message.isEmpty(), "Message must not be empty");
-
 
         JsonElement jsonElement = jsonParser.parse(message);
         if (jsonElement.isJsonArray()) {

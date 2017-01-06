@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.jsonrpc.reception;
 
-
 import org.eclipse.che.api.core.jsonrpc.NotificationHandler;
 import org.eclipse.che.api.core.jsonrpc.NotificationHandlerOneToNone;
 import org.eclipse.che.api.core.jsonrpc.RequestHandlerRegistry;

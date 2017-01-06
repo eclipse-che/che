@@ -94,8 +94,7 @@ public class JsonRpcResponse {
         }
 
         if (id != null) {
-            response.addProperty(
-                    "id", id);
+            response.addProperty("id", id);
         }
         return response;
     }

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.jsonrpc;
 
-
 import org.eclipse.che.api.core.jsonrpc.JsonRpcEntityQualifier.JsonRpcEntityType;
 import org.eclipse.che.api.core.websocket.WebSocketMessageReceiver;
 import org.slf4j.Logger;
@@ -63,7 +62,6 @@ public class JsonRpcMessageReceiver implements WebSocketMessageReceiver {
         checkArgument(!endpointId.isEmpty(), "Endpoint ID name must not be empty");
         checkNotNull(message, "Message must not be null");
         checkArgument(!message.isEmpty(), "Message must not be empty");
-
 
         LOG.debug("Receiving message: " + message + ", from endpoint: " + endpointId);
         try {

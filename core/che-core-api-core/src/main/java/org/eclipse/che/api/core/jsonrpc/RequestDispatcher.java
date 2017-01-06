@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.jsonrpc;
 
-
 import org.eclipse.che.api.core.websocket.WebSocketMessageTransmitter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
