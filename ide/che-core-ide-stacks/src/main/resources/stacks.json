@@ -1491,7 +1491,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "bitnami/che-express:che-4.14.0-r11"
+      "origin": "bitnami/che-express:4.14.0-r13"
     },
     "workspaceConfig": {
       "environments": {
@@ -1508,7 +1508,7 @@
             }
           },
           "recipe": {
-            "location": "bitnami/che-express:che-4.14.0-r11",
+            "location": "bitnami/che-express:4.14.0-r13",
             "type": "dockerimage"
           }
         }
@@ -1540,7 +1540,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "bitnami/che-swift:che-3.0.1-RELEASE-r0"
+      "origin": "bitnami/che-swift:3.0.1-RELEASE-r2"
     },
     "workspaceConfig": {
       "environments": {
@@ -1557,7 +1557,7 @@
             }
           },
           "recipe": {
-            "location": "bitnami/che-swift:che-3.0.1-RELEASE-r0",
+            "location": "bitnami/che-swift:3.0.1-RELEASE-r2",
             "type": "dockerimage"
           }
         }
@@ -1597,7 +1597,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "bitnami/che-laravel:che-5.2.31-r9"
+      "origin": "bitnami/che-laravel:5.2.31-r11"
     },
     "workspaceConfig": {
       "environments": {
@@ -1614,7 +1614,7 @@
             }
           },
           "recipe": {
-            "location": "bitnami/che-laravel:che-5.2.31-r8",
+            "location": "bitnami/che-laravel:5.2.31-r11",
             "type": "dockerimage"
           }
         }
@@ -1654,7 +1654,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "bitnami/che-rails:che-5.0.0.1-r3"
+      "origin": "bitnami/che-rails:5.0.0.1-r5"
     },
     "workspaceConfig": {
       "environments": {
@@ -1671,7 +1671,7 @@
             }
           },
           "recipe": {
-            "location": "bitnami/che-rails:che-5.0.0.1-r3",
+            "location": "bitnami/che-rails:5.0.0.1-r5",
             "type": "dockerimage"
           }
         }
@@ -1711,7 +1711,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "bitnami/che-codeigniter:che-3.1.0-r9"
+      "origin": "bitnami/che-codeigniter:3.1.0-r11"
     },
     "workspaceConfig": {
       "environments": {
@@ -1728,7 +1728,7 @@
             }
           },
           "recipe": {
-            "location": "bitnami/che-codeigniter:che-3.1.0-r9",
+            "location": "bitnami/che-codeigniter:3.1.0-r11",
             "type": "dockerimage"
           }
         }
@@ -1768,7 +1768,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "bitnami/che-symfony:che-3.1.3-r6"
+      "origin": "bitnami/che-symfony:3.1.3-r8"
     },
     "workspaceConfig": {
       "environments": {
@@ -1785,7 +1785,7 @@
             }
           },
           "recipe": {
-            "location": "bitnami/che-symfony:che-3.1.3-r6",
+            "location": "bitnami/che-symfony:3.1.3-r8",
             "type": "dockerimage"
           }
         }
@@ -1825,7 +1825,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "bitnami/che-java-play:che-1.3.10-r4"
+      "origin": "bitnami/che-java-play:1.3.10-r6"
     },
     "workspaceConfig": {
       "environments": {
@@ -1842,7 +1842,7 @@
             }
           },
           "recipe": {
-            "location": "bitnami/che-java-play:che-1.3.10-r4",
+            "location": "bitnami/che-java-play:1.3.10-r6",
             "type": "dockerimage"
           }
         }
