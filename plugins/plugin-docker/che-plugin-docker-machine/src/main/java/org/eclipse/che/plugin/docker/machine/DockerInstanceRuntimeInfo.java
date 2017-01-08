@@ -88,6 +88,7 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
     private final String                      containerExternalHostname;
     private final String                      containerInternalHostname;
     private final Map<String, ServerConfImpl> serversConf;
+    private final boolean                     useInternalAddress;
 
     @Inject
     public DockerInstanceRuntimeInfo(@Assisted ContainerInfo containerInfo,
@@ -95,7 +96,8 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
                                      @Assisted("internalhost") String containerInternalHostname,
                                      @Assisted MachineConfig machineConfig,
                                      @Named("machine.docker.dev_machine.machine_servers") Set<ServerConf> devMachineSystemServers,
-                                     @Named("machine.docker.machine_servers") Set<ServerConf> allMachinesSystemServers) {
+                                     @Named("machine.docker.machine_servers") Set<ServerConf> allMachinesSystemServers,
+                                     @Named("che.docker.ip.use_internal_address") boolean useInternalAddress) {
         this.info = containerInfo;
         this.containerExternalHostname = containerExternalHostname == null ? containerInternalHostname : containerExternalHostname;
         this.containerInternalHostname = containerInternalHostname;
@@ -108,6 +110,7 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
                                                                srvConf.getPort() :
                                                                srvConf.getPort() + "/tcp",
                                                     ServerConfImpl::new));
+        this.useInternalAddress = useInternalAddress;
     }
 
     @Override
@@ -304,7 +307,7 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
         return servers;
     }
 
-    protected Map<String, ServerImpl> getServersWithFilledPorts(final String externalHostame, final String internalHostname, final Map<String, List<PortBinding>> exposedPorts) {
+    protected Map<String, ServerImpl> getServersWithFilledPorts(final String externalHostname, final String internalHostname, final Map<String, List<PortBinding>> exposedPorts) {
         final HashMap<String, ServerImpl> servers = new LinkedHashMap<>();
 
         for (Map.Entry<String, List<PortBinding>> portEntry : exposedPorts.entrySet()) {
@@ -312,11 +315,21 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
             String portProtocol = portEntry.getKey();
             // we are assigning ports automatically, so have 1 to 1 binding (at least per protocol)
             String externalPort = portEntry.getValue().get(0).getHostPort();
+
+            // If we are sending messages to the container directly, we don't want to use the mapped ports.
+            String internalHostnameAndPort;
+            if (useInternalAddress) {
+                String internalPort = portProtocol.split("/")[0];
+                internalHostnameAndPort = internalHostname + ":" + internalPort;
+            } else {
+                internalHostnameAndPort = internalHostname + ":" + externalPort;
+            }
+
             servers.put(portProtocol, new ServerImpl(null,
                                                      null,
-                                                     externalHostame + ":" + externalPort,
+                                                     externalHostname + ":" + externalPort,
                                                      null,
-                                                     new ServerPropertiesImpl(null, internalHostname + ":" + externalPort, null)));
+                                                     new ServerPropertiesImpl(null, internalHostnameAndPort, null)));
         }
 
         return servers;
@@ -352,4 +365,5 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
 
         return serversConf;
     }
+
 }
