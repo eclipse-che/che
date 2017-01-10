@@ -18,6 +18,7 @@ import com.google.inject.Provider;
  *
  * @author Vitaly Parfonov
  */
+@Deprecated
 public class RestContextProvider implements Provider<String> {
 
 

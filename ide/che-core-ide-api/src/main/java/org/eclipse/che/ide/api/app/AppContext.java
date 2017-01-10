@@ -201,4 +201,10 @@ public interface AppContext {
      *         current workspace or {@code null}
      */
     void setWorkspace(Workspace workspace);
+
+
+    String getMasterEndpoint();
+
+
+    String getDevAgentEndpoint();
 }

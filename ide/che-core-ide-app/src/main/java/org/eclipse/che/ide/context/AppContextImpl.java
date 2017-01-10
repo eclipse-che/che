@@ -483,4 +483,31 @@ public class AppContextImpl implements AppContext,
     @Override
     public void onWindowClosed(WindowActionEvent event) {
     }
+
+    @Override
+    public String getMasterEndpoint() {
+        String fromUrl = this.browserQueryFieldRenderer.getParameterFromURLByName("master");
+        if(fromUrl == null || fromUrl.isEmpty())
+            return masterFromIDEConfig();
+        else
+            return fromUrl;
+    }
+
+    @Override
+    public String getDevAgentEndpoint() {
+        String fromUrl = this.browserQueryFieldRenderer.getParameterFromURLByName("agent");
+        if(fromUrl == null || fromUrl.isEmpty())
+            return devMachine.getWsAgentBaseUrl();
+        else
+            return fromUrl;
+    }
+
+
+    private static native String masterFromIDEConfig() /*-{
+        if ($wnd.IDE && $wnd.IDE.config) {
+            return $wnd.IDE.config.restContext;
+        } else {
+            return null;
+        }
+    }-*/;
 }

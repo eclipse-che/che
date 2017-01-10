@@ -15,9 +15,9 @@ import com.google.gwt.user.client.ui.FormPanel;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.plugin.ssh.key.client.SshKeyLocalizationConstant;
-import org.eclipse.che.ide.rest.RestContext;
 
 import javax.validation.constraints.NotNull;
 
@@ -40,12 +40,12 @@ public class UploadSshKeyPresenter implements UploadSshKeyView.ActionDelegate {
     @Inject
     public UploadSshKeyPresenter(UploadSshKeyView view,
                                  SshKeyLocalizationConstant constant,
-                                 @RestContext String restContext,
+                                 AppContext appContext,
                                  NotificationManager notificationManager) {
         this.view = view;
         this.view.setDelegate(this);
         this.constant = constant;
-        this.restContext = restContext;
+        this.restContext = appContext.getMasterEndpoint();
         this.notificationManager = notificationManager;
     }
 

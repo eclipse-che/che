@@ -13,11 +13,10 @@ package org.eclipse.che.ide.api.project;
 import com.google.inject.Inject;
 
 import org.eclipse.che.api.project.templates.shared.dto.ProjectTemplateDescriptor;
-import org.eclipse.che.ide.api.project.ProjectTemplateServiceClient;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.AsyncRequestLoader;
-import org.eclipse.che.ide.rest.RestContext;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 
 import javax.validation.constraints.NotNull;
@@ -39,13 +38,13 @@ public class ProjectTemplateServiceClientImpl implements ProjectTemplateServiceC
     private String baseUrl;
 
     @Inject
-    protected ProjectTemplateServiceClientImpl(@RestContext String restContext,
+    protected ProjectTemplateServiceClientImpl(AppContext appContext,
                                                AsyncRequestFactory asyncRequestFactory,
                                                LoaderFactory loaderFactory) {
         this.asyncRequestFactory = asyncRequestFactory;
         this.loader = loaderFactory.newLoader();
 
-        baseUrl = restContext + "/project-template/";
+        baseUrl = appContext.getMasterEndpoint() + "/project-template/";
     }
 
     @Override

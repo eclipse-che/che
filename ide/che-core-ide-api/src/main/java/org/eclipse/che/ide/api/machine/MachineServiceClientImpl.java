@@ -18,10 +18,10 @@ import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.ide.rest.RestContext;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 
 import javax.validation.constraints.NotNull;
@@ -45,7 +45,7 @@ public class MachineServiceClientImpl implements MachineServiceClient {
     private final DtoFactory             dtoFactory;
 
     @Inject
-    protected MachineServiceClientImpl(@RestContext String restContext,
+    protected MachineServiceClientImpl(AppContext appContext,
                                        DtoUnmarshallerFactory dtoUnmarshallerFactory,
                                        AsyncRequestFactory asyncRequestFactory,
                                        LoaderFactory loaderFactory,
@@ -53,7 +53,7 @@ public class MachineServiceClientImpl implements MachineServiceClient {
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.asyncRequestFactory = asyncRequestFactory;
         this.loaderFactory = loaderFactory;
-        this.baseHttpUrl = restContext + "/workspace/";
+        this.baseHttpUrl = appContext.getMasterEndpoint() + "/workspace/";
         this.dtoFactory = dtoFactory;
     }
 

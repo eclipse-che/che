@@ -29,15 +29,14 @@ import org.eclipse.che.ide.api.importer.AbstractImporter;
 import org.eclipse.che.ide.api.oauth.OAuth2Authenticator;
 import org.eclipse.che.ide.api.oauth.OAuth2AuthenticatorRegistry;
 import org.eclipse.che.ide.api.oauth.OAuth2AuthenticatorUrlProvider;
-import org.eclipse.che.ide.api.subversion.Credentials;
-import org.eclipse.che.ide.api.subversion.SubversionCredentialsDialog;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.wizard.ImportProjectNotificationSubscriberFactory;
 import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
 import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.subversion.Credentials;
+import org.eclipse.che.ide.api.subversion.SubversionCredentialsDialog;
 import org.eclipse.che.ide.api.wizard.Wizard.CompleteCallback;
 import org.eclipse.che.ide.resource.Path;
-import org.eclipse.che.ide.rest.RestContext;
 import org.eclipse.che.ide.util.ExceptionUtils;
 import org.eclipse.che.security.oauth.OAuthStatus;
 
@@ -62,7 +61,6 @@ public class ProjectImporter extends AbstractImporter {
 
     private final CoreLocalizationConstant    localizationConstant;
     private final ProjectResolver             projectResolver;
-    private final String                      restContext;
     private final SubversionCredentialsDialog credentialsDialog;
     private final OAuth2AuthenticatorRegistry oAuth2AuthenticatorRegistry;
 
@@ -72,13 +70,11 @@ public class ProjectImporter extends AbstractImporter {
                            ImportProjectNotificationSubscriberFactory subscriberFactory,
                            AppContext appContext,
                            ProjectResolver projectResolver,
-                           @RestContext String restContext,
                            SubversionCredentialsDialog credentialsDialog,
                            OAuth2AuthenticatorRegistry oAuth2AuthenticatorRegistry) {
         super(appContext, subscriberFactory);
         this.localizationConstant = localizationConstant;
         this.projectResolver = projectResolver;
-        this.restContext = restContext;
         this.credentialsDialog = credentialsDialog;
         this.oAuth2AuthenticatorRegistry = oAuth2AuthenticatorRegistry;
     }
@@ -204,7 +200,7 @@ public class ProjectImporter extends AbstractImporter {
                     authenticator = oAuth2AuthenticatorRegistry.getAuthenticator("default");
                 }
 
-                authenticator.authenticate(OAuth2AuthenticatorUrlProvider.get(restContext, authenticateUrl),
+                authenticator.authenticate(OAuth2AuthenticatorUrlProvider.get(appContext.getMasterEndpoint(), authenticateUrl),
                                            new AsyncCallback<OAuthStatus>() {
                                                @Override
                                                public void onFailure(Throwable caught) {

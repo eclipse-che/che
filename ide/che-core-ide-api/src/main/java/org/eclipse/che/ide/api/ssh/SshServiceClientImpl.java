@@ -16,11 +16,11 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.ssh.shared.dto.GenerateSshPairRequest;
 import org.eclipse.che.api.ssh.shared.dto.SshPairDto;
 import org.eclipse.che.ide.MimeType;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.HTTPHeader;
-import org.eclipse.che.ide.rest.RestContext;
 
 import java.util.List;
 
@@ -36,14 +36,14 @@ public class SshServiceClientImpl implements SshServiceClient {
     private final String                 sshApi;
 
     @Inject
-    protected SshServiceClientImpl(@RestContext String baseUrl,
+    protected SshServiceClientImpl(AppContext appContext,
                                    DtoFactory dtoFactory,
                                    AsyncRequestFactory asyncRequestFactory,
                                    DtoUnmarshallerFactory unmarshallerFactory) {
         this.dtoFactory = dtoFactory;
         this.asyncRequestFactory = asyncRequestFactory;
         this.unmarshallerFactory = unmarshallerFactory;
-        this.sshApi = baseUrl + "/ssh";
+        this.sshApi = appContext.getMasterEndpoint() + "/ssh";
     }
 
     /**

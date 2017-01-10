@@ -13,10 +13,10 @@ package org.eclipse.che.ide.preferences;
 import com.google.inject.Inject;
 
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.user.PreferencesServiceClient;
 import org.eclipse.che.ide.json.JsonHelper;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
-import org.eclipse.che.ide.rest.RestContext;
 import org.eclipse.che.ide.rest.StringMapUnmarshaller;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 
@@ -38,16 +38,18 @@ public class PreferencesServiceClientImpl implements PreferencesServiceClient {
     private final AsyncRequestFactory asyncRequestFactory;
 
     @Inject
-    protected PreferencesServiceClientImpl(@RestContext String restContext,
+    protected PreferencesServiceClientImpl(AppContext appContext,
                                            LoaderFactory loaderFactory,
                                            AsyncRequestFactory asyncRequestFactory) {
         this.loaderFactory = loaderFactory;
         this.asyncRequestFactory = asyncRequestFactory;
-        PREFERENCES_PATH = restContext + "/preferences";
+        PREFERENCES_PATH = appContext.getMasterEndpoint() + "/preferences";
     }
 
     @Override
     public Promise<Map<String, String>> getPreferences() {
+
+
         return asyncRequestFactory.createGetRequest(PREFERENCES_PATH)
                                   .header(ACCEPT, APPLICATION_JSON)
                                   .header(CONTENT_TYPE, APPLICATION_JSON)
