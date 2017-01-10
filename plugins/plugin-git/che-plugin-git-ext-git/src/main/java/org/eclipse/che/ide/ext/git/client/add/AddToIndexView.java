@@ -12,8 +12,6 @@ package org.eclipse.che.ide.ext.git.client.add;
 
 import org.eclipse.che.ide.api.mvp.View;
 
-import javax.validation.constraints.NotNull;
-
 
 /**
  * The view of {@link AddToIndexPresenter}.
@@ -33,10 +31,10 @@ public interface AddToIndexView extends View<AddToIndexView.ActionDelegate> {
     /**
      * Set content into message field.
      *
-     * @param message
-     *         content of message
+     * @param htmlMessage
+     *         content of the message in html format
      */
-    void setMessage(@NotNull String message);
+    void setMessage(String htmlMessage);
 
     /** @return <code>true</code> if new file must be added to index, and <code>false</code> otherwise */
     boolean isUpdated();
