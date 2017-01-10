@@ -39,7 +39,7 @@ export class CheTest {
     mapOfTests : Map<string, any> = CheTest.init();
 
     static init() : Map<string,any> {
-        Log.context = ProductName.getDisplayName() + '(test)';
+        Log.context = '(' + ProductName.getMiniDisplayName() + ' test)';
         let testMap : Map<string, any> = new Map<string, any>();
         testMap.set('post-flight-check', PostFlightCheckTest);
         return testMap;
@@ -61,7 +61,7 @@ export class CheTest {
        let classOfTest: any = this.mapOfTests.get(this.testName);
        if (classOfTest) {
            // update logger
-           Log.context = ProductName.getDisplayName() + '(test/' + this.testName + ')';
+           Log.context = '(' + ProductName.getMiniDisplayName() + ' test/' + this.testName + ')';
            var instance = new classOfTest(this.args);
            return instance.run();
        } else {

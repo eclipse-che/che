@@ -1,0 +1,110 @@
+markdown: kramdown
+highlighter: rouge
+
+
+kramdown:
+  toc_levels:     1..6
+  smart_quotes:   lsquo,rsquo,ldquo,rdquo
+  input:          GFM
+
+repository: https://github.com/codenvy/codenvy
+#help_url: https://github.com/jekyll/jekyll-help
+
+timezone: America/Los_Angeles
+
+collections:
+  docs:
+    output: true
+  tutorials:
+    output: true
+  openshift:
+    output: true
+  artik:
+    output: true
+
+name: Eclipse Che Docs
+description: Cloud workspaces for development teams
+url: https://www.eclipse.org/che/
+
+product_name: "CHE"
+product_mini_name:  "Che"
+product_formal_name: "Eclipse Che"
+
+twitter:
+  username: eclipse_che
+
+logo: /img/logo-2x.png
+
+gems:
+  - jekyll-feed
+  - jekyll-redirect-from
+  - jekyll-sitemap
+
+exclude:
+  - /dev/
+  - README.md
+  - .gitignore
+  - docs.sh
+  - assembly/*
+  - _site/*
+  - pom.xml
+  
+ 
+ # The following are used to define markdown permalinks
+defaults:
+  -
+    scope:
+      path: "_docs/write-che-ide-plugins"
+    values:
+      categories: [ "docs" , "plugins" ]
+  -
+    scope:
+      path: "_docs/workspace-administration"
+    values:
+      categories: [ "docs" , "workspace" ]
+
+  -
+    scope:
+      path: "_docs/use-che-as-an-ide"
+    values:
+      categories: [ "docs" , "ide" ]
+  -
+    scope:
+      path: "_docs/use-che-as-a-workspace-server"
+    values:
+      categories: [ "docs" , "server" ]
+  -
+    scope:
+      path: "_docs/tutorials"
+    values:
+      categories: [ "tutorials" ]
+  -
+    scope:
+      path: "_docs/setup-alternatives"
+    values:
+      categories: [ "docs" , "setup-alternatives" ]
+  -
+    scope:
+      path: "_docs/setup"
+    values:
+      categories: [ "docs" , "setup" ]
+  -
+    scope:
+      path: "_docs/openshift-plugin"
+    values:
+      category: [ "openshift" ]
+  -
+    scope:
+      path: "_docs/chedir-portable-workspaces"
+    values:
+      categories: [ "docs" , "chedir" ]
+  -
+    scope:
+      path: "_docs/che-data-model"
+    values:
+      categories: [ "docs" , "data-model" ]
+  -
+    scope:
+      path: "_docs/artik-ide-plugin"
+    values:
+      categories: [ "artik" ]

@@ -9,12 +9,12 @@
 set -e
 set -u
 
-. build.include
-init
+. ./build.include
+init "$@"
 
 # loop on all libraries first
 for directory in lib*/ ; do
-  if [[ -e ${directory}/build.sh ]] ; then
+  if [ -e ${directory}/build.sh ] ; then
    echo "Call buid.sh from ${directory}"
    ${directory}build.sh "$@"
  else
@@ -24,12 +24,15 @@ done
 
 # loop on all directories and call build.sh script if present
 for directory in */ ; do
-  if [[ -e ${directory}/build.sh ]] ; then
-   echo "Call buid.sh from ${directory}"
-   ${directory}build.sh "$@"
- else
-   echo "skipping ${directory}"
- fi
+  if [[ ${directory} == lib*/ ]] ; then
+    # skipping lib directory
+    :
+  elif [ -e ${directory}/build.sh ] ; then
+    echo "Call buid.sh from ${directory}"
+    ${directory}build.sh "$@"
+  else
+    echo "skipping ${directory}"
+  fi
 done
 
 

@@ -17,7 +17,7 @@ generate_dto() {
   POM_VERSION=$(cat ${DIR}/dto-pom.xml | grep "^        <version>.*</version>$" | awk -F'[><]' '{print $3}')
   if [ -e "${DIR}/src/api/dto/che-dto.ts" ]; then
     # DTO file exists, Do we have snapshot ?
-    if [[ ${POM_VERSION} != *"SNAPSHOT" ]]
+    if [ ${POM_VERSION} != *"SNAPSHOT" ]
     then
       if [ ${DIR}/src/api/dto/che-dto.ts -nt ${DIR}/dto-pom.xml ]; then
         echo "Using tagged version and dto file is up-to-date. Not generating it."
@@ -51,7 +51,7 @@ native_build() {
   ./node_modules/typescript/bin/tsc --project .
 }
 
-init
+init "$@"
 generate_dto
 
 DIR=$(cd "$(dirname "$0")"; pwd)

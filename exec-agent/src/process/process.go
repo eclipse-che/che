@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012-2016 Codenvy, S.A.
+// Copyright (c) 2012-2017 Codenvy, S.A.
 // All rights reserved. This program and the accompanying materials
 // are made available under the terms of the Eclipse Public License v1.0
 // which accompanies this distribution, and is available at
@@ -34,13 +34,16 @@ const (
 
 	StdoutKind = "STDOUT"
 	StderrKind = "STDERR"
+
+	DefaultShellInterpreter = "/bin/bash"
 )
 
 var (
-	prevPid   uint64 = 0
-	processes        = &processesMap{items: make(map[uint64]*MachineProcess)}
-	logsDist         = NewLogsDistributor()
-	LogsDir   string
+	prevPid          uint64 = 0
+	processes               = &processesMap{items: make(map[uint64]*MachineProcess)}
+	logsDist                = NewLogsDistributor()
+	LogsDir          string
+	ShellInterpreter string = DefaultShellInterpreter
 )
 
 type Command struct {
@@ -138,7 +141,7 @@ type processesMap struct {
 
 func Start(process MachineProcess) (MachineProcess, error) {
 	// wrap command to be able to kill child processes see https://github.com/golang/go/issues/8854
-	cmd := exec.Command("setsid", "sh", "-c", process.CommandLine)
+	cmd := exec.Command("setsid", ShellInterpreter, "-c", process.CommandLine)
 
 	// getting stdout pipe
 	stdout, err := cmd.StdoutPipe()

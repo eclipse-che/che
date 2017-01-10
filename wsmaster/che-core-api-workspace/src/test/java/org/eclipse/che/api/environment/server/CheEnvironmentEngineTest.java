@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -430,6 +430,129 @@ public class CheEnvironmentEngineTest {
                                              any(LineConsumer.class));
         CheServiceImpl actualService = captor.getValue();
         assertEquals((long)actualService.getMemLimit(), DEFAULT_MACHINE_MEM_LIMIT_MB * 1024L * 1024L);
+    }
+
+    @Test
+    public void shouldBeAbleToStartEnvironmentWithRecover() throws Exception {
+        // given
+        SnapshotImpl snapshot = mock(SnapshotImpl.class);
+        MachineSourceImpl machineSource = new MachineSourceImpl("image", "registry.com/snapshot123:latest@sha256:abc1234567890", null);
+        when(snapshotDao.getSnapshot(anyString(), anyString(), anyString())).thenReturn(snapshot);
+        when(snapshot.getMachineSource()).thenReturn(machineSource);
+
+        // given
+        EnvironmentImpl env = createEnv();
+        String envName = "env-1";
+        String workspaceId = "wsId";
+        List<Instance> expectedMachines = new ArrayList<>();
+        when(machineProvider.startService(anyString(),
+                                          eq(workspaceId),
+                                          eq(envName),
+                                          anyString(),
+                                          anyBoolean(),
+                                          anyString(),
+                                          any(CheServiceImpl.class),
+                                          any(LineConsumer.class)))
+                .thenAnswer(invocationOnMock -> {
+                    Object[] arguments = invocationOnMock.getArguments();
+                    String machineName = (String)arguments[3];
+                    boolean isDev = (boolean)arguments[4];
+                    CheServiceImpl service = (CheServiceImpl)arguments[6];
+                    Machine machine = createMachine(workspaceId,
+                                                    envName,
+                                                    service,
+                                                    machineName,
+                                                    isDev);
+                    NoOpMachineInstance instance = spy(new NoOpMachineInstance(machine));
+                    expectedMachines.add(instance);
+                    return instance;
+                });
+        when(environmentParser.parse(env)).thenReturn(createCheServicesEnv());
+
+        // when
+        List<Instance> machines = engine.start(workspaceId,
+                     envName,
+                     env,
+                     true,
+                     messageConsumer);
+
+        // then
+        assertEquals(machines, expectedMachines);
+
+        ArgumentCaptor<CheServiceImpl> captor = ArgumentCaptor.forClass(CheServiceImpl.class);
+        verify(machineProvider).startService(anyString(),
+                                             anyString(),
+                                             anyString(),
+                                             anyString(),
+                                             eq(false),
+                                             anyString(),
+                                             captor.capture(),
+                                             any(LineConsumer.class));
+        CheServiceImpl actualService = captor.getValue();
+
+        assertEquals(actualService.getImage(), "registry.com/snapshot123:latest");
+    }
+
+    @Test
+    public void shouldBeAbleToStartEnvironmentWhenRecoverFailed() throws Exception {
+        // given
+        String machineImage = "che/ubuntu_jdk";
+        when(snapshotDao.getSnapshot(anyString(), anyString(), anyString())).thenThrow(new NotFoundException("Snapshot not found"));
+
+        EnvironmentImpl env = createEnv();
+        String envName = "env-1";
+        String workspaceId = "wsId";
+        List<Instance> expectedMachines = new ArrayList<>();
+        when(machineProvider.startService(anyString(),
+                                          eq(workspaceId),
+                                          eq(envName),
+                                          anyString(),
+                                          anyBoolean(),
+                                          anyString(),
+                                          any(CheServiceImpl.class),
+                                          any(LineConsumer.class)))
+                .thenAnswer(invocationOnMock -> {
+                    Object[] arguments = invocationOnMock.getArguments();
+                    String machineName = (String)arguments[3];
+                    boolean isDev = (boolean)arguments[4];
+                    CheServiceImpl service = (CheServiceImpl)arguments[6];
+                    Machine machine = createMachine(workspaceId,
+                                                    envName,
+                                                    service,
+                                                    machineName,
+                                                    isDev);
+                    NoOpMachineInstance instance = spy(new NoOpMachineInstance(machine));
+                    expectedMachines.add(instance);
+                    return instance;
+                });
+        CheServicesEnvironmentImpl servicesEnvironment = createCheServicesEnv();
+        for (CheServiceImpl service : servicesEnvironment.getServices().values()) {
+            service.setImage(machineImage);
+        }
+        when(environmentParser.parse(env)).thenReturn(servicesEnvironment);
+
+        // when
+        List<Instance> machines = engine.start(workspaceId,
+                                               envName,
+                                               env,
+                                               true,
+                                               messageConsumer);
+
+        // then
+        assertEquals(machines, expectedMachines);
+
+        ArgumentCaptor<CheServiceImpl> captor = ArgumentCaptor.forClass(CheServiceImpl.class);
+        verify(machineProvider).startService(anyString(),
+                                             anyString(),
+                                             anyString(),
+                                             anyString(),
+                                             eq(false),
+                                             anyString(),
+                                             captor.capture(),
+                                             any(LineConsumer.class));
+        CheServiceImpl actualService = captor.getValue();
+
+        assertEquals(actualService.getImage(), machineImage);
     }
 
     @Test
@@ -892,7 +1015,7 @@ public class CheEnvironmentEngineTest {
         doReturn(new MachineSourceImpl("someType").setContent("some content")).when(instance).saveToSnapshot();
 
         // when
-        engine.saveSnapshot("someNamespace", instance.getWorkspaceId(), instance.getId());
+        engine.saveSnapshot(instance.getWorkspaceId(), instance.getId());
 
         // then
         verify(instance).saveToSnapshot();
@@ -901,7 +1024,7 @@ public class CheEnvironmentEngineTest {
     @Test(expectedExceptions = EnvironmentNotRunningException.class,
           expectedExceptionsMessageRegExp = "Environment .*' is not running")
     public void shouldThrowExceptionOnSaveSnapshotIfEnvIsNotRunning() throws Exception {
-        engine.saveSnapshot("someNamespace", "wsIdOfNotRunningEnv", "someId");
+        engine.saveSnapshot("wsIdOfNotRunningEnv", "someId");
     }
 
     @Test(expectedExceptions = NotFoundException.class,
@@ -912,7 +1035,7 @@ public class CheEnvironmentEngineTest {
         Instance instance = instances.get(0);
 
         // when
-        engine.saveSnapshot("someNamespace", instance.getWorkspaceId(), "idOfNonExistingMachine");
+        engine.saveSnapshot(instance.getWorkspaceId(), "idOfNonExistingMachine");
     }
 
     @Test

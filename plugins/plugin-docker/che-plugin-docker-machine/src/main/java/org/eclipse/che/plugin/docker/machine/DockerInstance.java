@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.MachineSource;
@@ -145,9 +146,8 @@ public class DockerInstance extends AbstractInstance {
             try {
                 final ContainerInfo containerInfo = docker.inspectContainer(container);
                 machineRuntime = new MachineRuntimeInfoImpl(dockerMachineFactory.createMetadata(containerInfo,
-                                                                                                null,
-                                                                                                node.getHost(),
-                                                                                                getConfig()));
+                                                                                                getConfig(),
+                                                                                                node.getHost()));
             } catch (IOException e) {
                 LOG.error(e.getLocalizedMessage(), e);
                 return null;
@@ -285,7 +285,8 @@ public class DockerInstance extends AbstractInstance {
             docker.removeContainer(RemoveContainerParams.create(container)
                                                         .withRemoveVolumes(true)
                                                         .withForce(true));
-        } catch (IOException e) {
+        } catch (IOException | ServerException e) {
+            LOG.error(e.getLocalizedMessage(), e);
             throw new MachineException(e.getLocalizedMessage());
         }
 

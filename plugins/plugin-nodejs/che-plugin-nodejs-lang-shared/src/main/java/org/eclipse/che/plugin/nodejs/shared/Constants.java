@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,13 +15,17 @@ package org.eclipse.che.plugin.nodejs.shared;
  */
 public final class Constants {
     /**
+     * Options for run command
+     */
+    public static final String RUN_PARAMETERS_ATTRIBUTE = "run.parameters";
+    /**
      * Language attribute name
      */
-    public static String LANGUAGE                = "language";
+    public static       String LANGUAGE                 = "language";
     /**
      * Node JS Project Type ID
      */
-    public static String NODE_JS_PROJECT_TYPE_ID = "node-js";
+    public static       String NODE_JS_PROJECT_TYPE_ID  = "node-js";
 
     /**
      * Default extension for C files

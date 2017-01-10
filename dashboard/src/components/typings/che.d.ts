@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -66,19 +66,55 @@ declare namespace _che {
     id?: string;
     runtime?: any;
     temporary?: boolean;
+    status?: string;
+    namespace?: string;
+    attributes?: {
+      updated?: number;
+      created?: number;
+      [propName: string]: string;
+    };
     config: IWorkspaceConfig;
   }
 
   export interface IWorkspaceConfig {
     name?: string;
     defaultEnv?: string;
-    environments?: IWorkspaceEnvironments;
+    environments: {
+      [envName: string]: IWorkspaceEnvironment
+    };
     projects: Array <any>;
     commands?: Array <any>;
   }
 
-  export interface IWorkspaceEnvironments {
-      [envName: string]: any;
+  export interface IWorkspaceEnvironment {
+    machines: {
+      [machineName: string]: IEnvironmentMachine
+    };
+    recipe: {
+      content?: string;
+      location?: string;
+      contentType: string;
+      type: string;
+    };
+  }
+
+  export interface IEnvironmentMachine {
+    agents?: string[];
+    attributes?: {
+      memoryLimitBytes?: string|number;
+      [attrName: string]: string|number;
+    };
+    servers?: {
+      [serverRef: string]: IEnvironmentMachineServer
+    };
+  }
+
+  export interface IEnvironmentMachineServer {
+    port: string|number;
+    protocol: string;
+    properties?: {
+      [propName: string]: string
+    };
   }
 
   export interface IProject {
@@ -93,6 +129,14 @@ declare namespace _che {
     commands: Array<any>;
     projectType: string;
     tags: Array<string>;
+    attributes: Array<any>;
+    options: Array<any>;
+    workspaceId?: string;
+    workspaceName?: string;
+  }
+
+  export interface IWorkspaceProjects {
+    [workspaceId: string]: Array<IProject>;
   }
 
   export interface IImportProject {
@@ -106,6 +150,8 @@ declare namespace _che {
       type: string;
       description: string;
       commands: Array<any>;
+      attributes: Array<any>;
+      options: Array<any>;
     };
   }
 

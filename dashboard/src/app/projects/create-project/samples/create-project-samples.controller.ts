@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -50,6 +50,8 @@ export class CreateProjectSamplesController {
     createProjectCtrl.setProjectDescription(template.description);
     createProjectCtrl.importProjectData.project.type = template.projectType;
     createProjectCtrl.importProjectData.project.commands = template.commands;
+    createProjectCtrl.importProjectData.project.attributes = template.attributes;
+    createProjectCtrl.importProjectData.project.options = template.options;
     createProjectCtrl.importProjectData.projects = template.projects;
 
     let name: string = template.displayName;

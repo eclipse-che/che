@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,7 +13,6 @@ package org.eclipse.che.plugin.maven.server;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-
 import org.eclipse.che.maven.data.MavenModel;
 import org.eclipse.che.maven.server.MavenRemoteServer;
 import org.eclipse.che.maven.server.MavenServer;
@@ -97,7 +96,10 @@ public class MavenServerManager extends RmiObjectWrapper<MavenRemoteServer> {
                 MavenSettings mavenSettings = new MavenSettings();
                 //TODO add more user settings
                 mavenSettings.setMavenHome(new File(System.getenv("M2_HOME")));
-                mavenSettings.setGlobalSettings(new File(System.getProperty("user.home"), ".m2/settings.xml"));
+                mavenSettings.setUserSettings(new File(System.getProperty("user.home"), ".m2/settings.xml"));
+                // Setting Global maven setting
+                // for more maven info settings visit https://maven.apache.org/settings.html
+                mavenSettings.setGlobalSettings(new File(System.getenv("M2_HOME"), "conf/settings.xml"));
                 mavenSettings.setLoggingLevel(MavenTerminal.LEVEL_INFO);
                 if (localRepository != null) {
                     mavenSettings.setLocalRepository(localRepository);

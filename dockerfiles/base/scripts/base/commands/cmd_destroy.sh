@@ -45,27 +45,14 @@ cmd_destroy() {
                     alpine:3.4 sh -c \"rm -rf /root${CHE_CONTAINER_ROOT}/docs \
                                    && rm -rf /root${CHE_CONTAINER_ROOT}/instance \
                                    && rm -rf /root${CHE_CONTAINER_ROOT}/${CHE_MINI_PRODUCT_NAME}.env\""
-
-  docker_run -v "${CHE_HOST_CONFIG}":/root${CHE_CONTAINER_ROOT} \
-                alpine:3.4 sh -c "rm -rf /root${CHE_CONTAINER_ROOT}/docs \
-                               && rm -rf /root${CHE_CONTAINER_ROOT}/instance \
-                               && rm -rf /root${CHE_CONTAINER_ROOT}/${CHE_MINI_PRODUCT_NAME}.env" > /dev/null 2>&1  || true
-
   # Super weird bug.  For some reason on windows, this command has to be run 3x for everything
   # to be destroyed properly if you are in dev mode.
-  if has_docker_for_windows_client; then
-    if [[ "${CHE_DEVELOPMENT_MODE}" = "on" ]]; then
-      docker_run -v "${CHE_HOST_CONFIG}":/root${CHE_CONTAINER_ROOT} \
-                    alpine:3.4 sh -c "rm -rf /root${CHE_CONTAINER_ROOT}/docs \
-                                   && rm -rf /root${CHE_CONTAINER_ROOT}/instance \
-                                   && rm -rf /root${CHE_CONTAINER_ROOT}/${CHE_MINI_PRODUCT_NAME}.env" > /dev/null 2>&1  || true
-      docker_run -v "${CHE_HOST_CONFIG}":/root${CHE_CONTAINER_ROOT} \
-                    alpine:3.4 sh -c "rm -rf /root${CHE_CONTAINER_ROOT}/docs \
-                                   && rm -rf /root${CHE_CONTAINER_ROOT}/instance \
-                                   && rm -rf /root${CHE_CONTAINER_ROOT}/${CHE_MINI_PRODUCT_NAME}.env" > /dev/null 2>&1  || true
-    fi
-  fi
-
+  until directory_is_empty; do
+    docker_run -v "${CHE_HOST_CONFIG}":/root${CHE_CONTAINER_ROOT} \
+                  alpine:3.4 sh -c "rm -rf /root${CHE_CONTAINER_ROOT}/docs \
+                                 ; rm -rf /root${CHE_CONTAINER_ROOT}/instance \
+                                 ; rm -rf /root${CHE_CONTAINER_ROOT}/${CHE_MINI_PRODUCT_NAME}.env" > /dev/null 2>&1  || true
+  done
   rm -rf "${CHE_CONTAINER_INSTANCE}"
 
   cmd_destroy_post_action
@@ -78,3 +65,12 @@ cmd_destroy() {
   fi
 }
 
+directory_is_empty() {
+  if [[ -d "${CHE_CONTAINER_CONFIG}/docs" ]] ||
+     [[ -d "${CHE_CONTAINER_CONFIG}/instance" ]] ||
+     [[ -f "${CHE_CONTAINER_CONFIG}/${CHE_MINI_PRODUCT_NAME}.env" ]]; then
+    return 1
+  else
+    return 0
+  fi
+}

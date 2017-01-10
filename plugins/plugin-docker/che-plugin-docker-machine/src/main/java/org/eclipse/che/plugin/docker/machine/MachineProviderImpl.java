@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -113,7 +113,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
     private final ExecutorService                               executor;
     private final DockerInstanceStopDetector                    dockerInstanceStopDetector;
     private final boolean                                       doForcePullOnBuild;
-    private final boolean                                       privilegeMode;
+    private final boolean                                       privilegedMode;
     private final int                                           pidsLimit;
     private final DockerMachineFactory                          dockerMachineFactory;
     private final List<String>                                  devMachinePortsToExpose;
@@ -145,7 +145,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                @Named("machine.docker.machine_volumes") Set<String> allMachinesSystemVolumes,
                                @Nullable @Named("che.workspace.hosts") String allMachinesExtraHosts,
                                @Named("che.docker.always_pull_image") boolean doForcePullOnBuild,
-                               @Named("che.docker.privilege") boolean privilegeMode,
+                               @Named("che.docker.privileged") boolean privilegedMode,
                                @Named("che.docker.pids_limit") int pidsLimit,
                                @Named("machine.docker.dev_machine.machine_env") Set<String> devMachineEnvVariables,
                                @Named("machine.docker.machine_env") Set<String> allMachinesEnvVariables,
@@ -164,7 +164,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
         this.dockerMachineFactory = dockerMachineFactory;
         this.dockerInstanceStopDetector = dockerInstanceStopDetector;
         this.doForcePullOnBuild = doForcePullOnBuild;
-        this.privilegeMode = privilegeMode;
+        this.privilegedMode = privilegedMode;
         this.snapshotUseRegistry = snapshotUseRegistry;
         // use-cases:
         //  -1  enable unlimited swap
@@ -305,6 +305,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                                       service.getId(),
                                                       workspaceId);
 
+            final String userId = EnvironmentContext.getCurrent().getSubject().getUserId();
             MachineImpl machine = new MachineImpl(MachineConfigImpl.builder()
                                                                    .setDev(isDev)
                                                                    .setName(machineName)
@@ -323,7 +324,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                                   service.getId(),
                                                   workspaceId,
                                                   envName,
-                                                  namespace,
+                                                  userId,
                                                   MachineStatus.RUNNING,
                                                   null);
 
@@ -544,7 +545,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
         config.getHostConfig()
               .withPidsLimit(pidsLimit)
               .withExtraHosts(allMachinesExtraHosts)
-              .withPrivileged(privilegeMode)
+              .withPrivileged(privilegedMode)
               .withPublishAllPorts(true);
         // CPU limits
         config.getHostConfig()

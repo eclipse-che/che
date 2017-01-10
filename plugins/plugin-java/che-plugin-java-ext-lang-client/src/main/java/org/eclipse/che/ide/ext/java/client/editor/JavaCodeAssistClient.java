@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,6 +23,7 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
 import org.eclipse.che.ide.ext.java.shared.dto.Change;
 import org.eclipse.che.ide.ext.java.shared.dto.ConflictImportDTO;
+import org.eclipse.che.ide.ext.java.shared.dto.OrganizeImportResult;
 import org.eclipse.che.ide.ext.java.shared.dto.Problem;
 import org.eclipse.che.ide.ext.java.shared.dto.ProposalApplyResult;
 import org.eclipse.che.ide.ext.java.shared.dto.Proposals;
@@ -151,13 +152,13 @@ public class JavaCodeAssistClient {
      *         fully qualified name of the java file
      * @return list of imports which have conflicts
      */
-    public Promise<List<ConflictImportDTO>> organizeImports(String projectPath, String fqn) {
+    public Promise<OrganizeImportResult> organizeImports(String projectPath, String fqn) {
         String url =
                 appContext.getDevMachine().getWsAgentBaseUrl() + CODE_ASSIST_URL_PREFIX + "/organize-imports?projectpath=" + projectPath +
                 "&fqn=" + fqn;
         return asyncRequestFactory.createPostRequest(url, null)
                                   .loader(loader)
-                                  .send(unmarshallerFactory.newListUnmarshaller(ConflictImportDTO.class));
+                                  .send(unmarshallerFactory.newUnmarshaller(OrganizeImportResult.class));
     }
 
     /**
@@ -168,12 +169,12 @@ public class JavaCodeAssistClient {
      * @param fqn
      *         fully qualified name of the java file
      */
-    public Promise<Void> applyChosenImports(String projectPath, String fqn, ConflictImportDTO chosen) {
+    public Promise<List<Change>> applyChosenImports(String projectPath, String fqn, ConflictImportDTO chosen) {
         String url = appContext.getDevMachine().getWsAgentBaseUrl() + CODE_ASSIST_URL_PREFIX + "/apply-imports?projectpath=" + projectPath +
                      "&fqn=" + fqn;
         return asyncRequestFactory.createPostRequest(url, chosen)
                                   .loader(loader)
                                   .header(CONTENT_TYPE, MimeType.APPLICATION_JSON)
-                                  .send();
+                                  .send(unmarshallerFactory.newListUnmarshaller(Change.class));
     }
 }

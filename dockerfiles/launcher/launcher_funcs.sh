@@ -64,11 +64,7 @@ get_che_launcher_container_id() {
 }
 
 get_che_launcher_version() {
-  if [ -n "${LAUNCHER_IMAGE_VERSION}" ]; then
-    echo "${LAUNCHER_IMAGE_VERSION}"
-  else
-    echo "latest"
-  fi
+  get_che_image_version ${LAUNCHER_IMAGE_VERSION}
 }
 
 is_boot2docker() {
@@ -110,22 +106,44 @@ docker_run() {
     -v "$CHE_DATA_LOCATION" \
     -p "${CHE_PORT}":"${CHE_PORT}" \
     --restart="${CHE_RESTART_POLICY}" \
-    --user="${CHE_USER}" \
     -e "CHE_LOG_LEVEL=${CHE_LOG_LEVEL}" \
     -e "CHE_IP=$CHE_HOST_IP" \
     --env-file=$ENV_FILE \
     "$@"
- 
    rm -rf $ENV_FILE > /dev/null
+}
+
+get_user_id() {
+   CHE_USER_UID=$(docker run -t \
+     -v /etc/passwd:/etc/passwd:ro,Z \
+     -v /etc/group:/etc/group:ro,Z \
+     alpine id -u ${CHE_USER})
+   CHE_USER_GID=$(docker run -t \
+     -v /etc/passwd:/etc/passwd:ro,Z \
+     -v /etc/group:/etc/group:ro,Z \
+      alpine getent group docker | cut -d: -f3)
+   echo -n "${CHE_USER_UID}" | tr '\r' ':'; echo -n ${CHE_USER_GID}
+}
+
+docker_run_with_che_user() {
+   if [ "${CHE_USER}" != "root" ]; then
+     docker_run -e CHE_USER=${CHE_USER} \
+      -v /etc/group:/etc/group:ro,Z \
+      -v /etc/passwd:/etc/passwd:ro,Z \
+      --user=$(get_user_id) \
+      "$@"
+   else
+     docker_run --user="${CHE_USER}" "$@"
+   fi
 }
 
 docker_run_if_in_vm() {
   # If the container will run inside of a VM, additional parameters must be set.
   # Setting CHE_IN_VM=true will have the che-server container set the values.
   if is_docker_for_mac || is_docker_for_windows || is_boot2docker; then
-    docker_run -e "CHE_IN_VM=true" "$@"
+    docker_run_with_che_user -e "CHE_IN_VM=true" "$@"
   else
-    docker_run "$@"
+    docker_run_with_che_user "$@"
   fi
 }
 
@@ -267,7 +285,7 @@ get_docker_host_os() {
 }
 
 get_docker_daemon_version() {
-  docker version | grep -i "server version:" | sed "s/^server version: //I"
+  docker version --format '{{.Server.Version}}' | grep "1\.[0-9]*\.[0-9]*"
 }
 
 get_che_hostname() {
@@ -374,7 +392,6 @@ get_che_container_host_ip_from_container() {
 
 get_che_container_host_bind_folder() {
   BINDS=$(docker inspect --format="{{.HostConfig.Binds}}" "${2}" | cut -d '[' -f 2 | cut -d ']' -f 1)
-
   IFS=$' '
   for SINGLE_BIND in $BINDS; do
     case $SINGLE_BIND in
@@ -399,6 +416,15 @@ get_che_container_data_folder() {
 
 get_che_container_image_name() {
   docker inspect --format="{{.Config.Image}}" "${1}"
+}
+
+get_che_image_version() {
+  image_version=$(echo ${1} | cut -d : -f2 -s)
+  if [ -n "${image_version}" ]; then
+    echo "${image_version}"
+  else
+    echo "latest"
+  fi
 }
 
 get_che_server_container_id() {

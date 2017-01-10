@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,6 +52,7 @@ export class CheHttpBackend {
       this.addWorkspaceAgent(key, tmpWorkspace.runtime);
       this.httpBackend.when('GET', '/api/workspace/' + key).respond(tmpWorkspace);
     }
+    this.httpBackend.when('OPTIONS', '/api/').respond({});
 
     this.httpBackend.when('GET', '/api/workspace').respond(workspaceReturn);
 

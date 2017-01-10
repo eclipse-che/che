@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,7 +13,7 @@ package org.eclipse.che.ide.core;
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 
-import org.eclipse.che.ide.jsonrpc.impl.WebSocketToJsonRpcDispatcher;
+import org.eclipse.che.ide.jsonrpc.JsonRpcMessageReceiver;
 import org.eclipse.che.ide.websocket.ng.WebSocketMessageReceiver;
 import org.eclipse.che.ide.websocket.ng.WebSocketMessageTransmitter;
 import org.eclipse.che.ide.websocket.ng.impl.BasicWebSocketEndpoint;
@@ -34,7 +34,7 @@ public class WebSocketModule extends AbstractGinModule {
     protected void configure() {
         bind(WebSocketEndpoint.class).to(BasicWebSocketEndpoint.class);
         bind(WebSocketMessageTransmitter.class).to(BasicWebSocketMessageTransmitter.class);
-        bind(WebSocketMessageReceiver.class).to(WebSocketToJsonRpcDispatcher.class);
+        bind(WebSocketMessageReceiver.class).to(JsonRpcMessageReceiver.class);
 
         install(new GinFactoryModuleBuilder().implement(WebSocketConnection.class, DelayableWebSocketConnection.class)
                                              .build(WebSocketFactory.class));
