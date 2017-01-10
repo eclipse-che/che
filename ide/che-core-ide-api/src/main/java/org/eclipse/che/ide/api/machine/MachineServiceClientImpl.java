@@ -12,14 +12,9 @@ package org.eclipse.che.ide.api.machine;
 
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.core.model.machine.Command;
-import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
-import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
@@ -52,7 +47,6 @@ public class MachineServiceClientImpl implements MachineServiceClient {
         this.asyncRequestFactory = asyncRequestFactory;
         this.loaderFactory = loaderFactory;
         this.baseHttpUrl = appContext.getMasterEndpoint() + "/workspace/";
-        this.dtoFactory = dtoFactory;
     }
 
     @Override

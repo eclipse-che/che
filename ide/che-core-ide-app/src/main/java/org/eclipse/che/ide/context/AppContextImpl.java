@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,6 +32,7 @@ import org.eclipse.che.ide.api.event.SelectionChangedEvent;
 import org.eclipse.che.ide.api.event.SelectionChangedHandler;
 import org.eclipse.che.ide.api.event.WindowActionEvent;
 import org.eclipse.che.ide.api.event.WindowActionHandler;
+import org.eclipse.che.ide.api.machine.ActiveRuntime;
 import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Project;
@@ -57,7 +58,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Arrays.binarySearch;
 import static java.util.Arrays.copyOf;
@@ -85,14 +85,16 @@ public class AppContextImpl implements AppContext,
                                        WorkspaceStoppedEvent.Handler,
                                        ResourceManagerInitializer {
 
+    private static final Project[] NO_PROJECTS = {};
+
     private final BrowserQueryFieldRenderer browserQueryFieldRenderer;
     private final List<String>              projectsInImport;
 
     private Workspace           usersWorkspace;
     private CurrentUser         currentUser;
     private FactoryDto          factory;
-    private DevMachine          devMachine;
     private Path                projectsRoot;
+    private ActiveRuntime       runtime;
     /**
      * List of actions with parameters which comes from startup URL.
      * Can be processed after IDE initialization as usual after starting ws-agent.
@@ -129,7 +131,13 @@ public class AppContextImpl implements AppContext,
 
     @Override
     public void setWorkspace(Workspace workspace) {
-        this.usersWorkspace = workspace;
+        if (workspace != null) {
+            usersWorkspace = workspace;
+            runtime = new ActiveRuntime(workspace.getRuntime());
+        } else {
+            usersWorkspace = null;
+            runtime = null;
+        }
     }
 
     @Override
@@ -187,22 +195,13 @@ public class AppContextImpl implements AppContext,
 
     @Override
     public DevMachine getDevMachine() {
-        return devMachine;
+        return runtime.getDevMachine();
     }
 
-    public void setDevMachine(DevMachine devMachine) {
-        checkState(devMachine != null);
-
-        if (this.devMachine != null && this.devMachine.getId().equals(devMachine.getId())) {
-            return;
-        }
-
-        this.devMachine = devMachine;
-    }
 
     @Override
     public void initResourceManager(final Callback<ResourceManager, Exception> callback) {
-        if (devMachine == null) {
+        if (runtime.getDevMachine() == null) {
             //should never happened, but anyway
             callback.onFailure(new NullPointerException("Dev machine is not initialized"));
         }
@@ -216,7 +215,7 @@ public class AppContextImpl implements AppContext,
             projects = null;
         }
 
-        resourceManager = resourceManagerFactory.newResourceManager(devMachine);
+        resourceManager = resourceManagerFactory.newResourceManager(runtime.getDevMachine());
         resourceManager.getWorkspaceProjects().then(new Operation<Project[]>() {
             @Override
             public void apply(Project[] projects) throws OperationException {
@@ -375,7 +374,7 @@ public class AppContextImpl implements AppContext,
 
     @Override
     public Project[] getProjects() {
-        return checkNotNull(projects, "Projects is not initialized");
+        return projects == null ? new Project[0] : projects;
     }
 
     @Override
@@ -397,6 +396,10 @@ public class AppContextImpl implements AppContext,
 
     @Override
     public Project getRootProject() {
+        if (projects == null) {
+            return null;
+        }
+
         if (currentResource == null || currentResources == null) {
 
             EditorAgent editorAgent = editorAgentProvider.get();
@@ -466,11 +469,10 @@ public class AppContextImpl implements AppContext,
                     eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(project, REMOVED)));
                 }
 
-                projects = null;
+                projects = NO_PROJECTS; //avoid NPE
                 resourceManager = null;
             }
         });
-        devMachine = null;
 
         //goto close all editors
         final EditorAgent editorAgent = editorAgentProvider.get();
@@ -478,6 +480,7 @@ public class AppContextImpl implements AppContext,
         for (EditorPartPresenter editor : openedEditors) {
             editorAgent.closeEditor(editor);
         }
+        runtime = null;
     }
 
     @Override
@@ -497,9 +500,14 @@ public class AppContextImpl implements AppContext,
     public String getDevAgentEndpoint() {
         String fromUrl = this.browserQueryFieldRenderer.getParameterFromURLByName("agent");
         if(fromUrl == null || fromUrl.isEmpty())
-            return devMachine.getWsAgentBaseUrl();
+            return runtime.getDevMachine().getWsAgentBaseUrl();
         else
             return fromUrl;
+    }
+
+    @Override
+    public ActiveRuntime getActiveRuntime() {
+        return runtime;
     }
 
 
