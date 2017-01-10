@@ -536,6 +536,23 @@ public class WorkspaceRuntimes {
         return new HashMap<>(workspaces);
     }
 
+    /**
+     * Return status of the workspace.
+     *
+     * @param workspaceId
+     *         ID of requested workspace
+     * @return workspace status
+     */
+    public WorkspaceStatus getStatus(String workspaceId) {
+        try (@SuppressWarnings("unused") CloseableLock l = locks.acquireReadLock(workspaceId)) {
+            final WorkspaceState state = workspaces.get(workspaceId);
+            if (state == null) {
+                return WorkspaceStatus.STOPPED;
+            }
+            return state.status;
+        }
+    }
+
     private MessageConsumer<MachineLogMessage> getEnvironmentLogger(String workspaceId) throws ServerException {
         WebsocketMessageConsumer<MachineLogMessage> envMessageConsumer =
                 new WebsocketMessageConsumer<>(format(ENVIRONMENT_OUTPUT_CHANNEL_TEMPLATE, workspaceId));

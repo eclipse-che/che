@@ -214,8 +214,8 @@ public class WorkspaceManagerTest {
 
         when(workspaceDao.getWorkspaces(NAMESPACE)).thenReturn(asList(workspace1, workspace2));
         final RuntimeDescriptor descriptor = createDescriptor(workspace2, RUNNING);
-        when(runtimes.get(workspace2.getId())).thenReturn(descriptor);
-        when(runtimes.get(workspace1.getId())).thenThrow(new NotFoundException("no runtime"));
+        when(runtimes.getStatus(workspace2.getId())).thenReturn(RUNNING);
+        when(runtimes.getStatus(workspace1.getId())).thenReturn(STOPPED);
 
         // when
         final List<WorkspaceImpl> result = workspaceManager.getWorkspaces(NAMESPACE);
@@ -856,6 +856,7 @@ public class WorkspaceManagerTest {
             throws ServerException, NotFoundException, ConflictException {
         RuntimeDescriptor descriptor = createDescriptor(workspace, status);
         when(runtimes.get(workspace.getId())).thenReturn(descriptor);
+        when(runtimes.getStatus(workspace.getId())).thenReturn(status);
         return descriptor;
     }
 
