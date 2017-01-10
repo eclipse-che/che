@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.parts.base;
 
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.BlurEvent;
@@ -111,6 +112,7 @@ public abstract class BaseView<T extends BaseActionDelegate> extends Composite i
 
         addMaximizeButton();
         addMinimizeButton();
+        addMenuButton();
 
         /**
          * Handle double clicking on the toolbar header
@@ -121,9 +123,11 @@ public abstract class BaseView<T extends BaseActionDelegate> extends Composite i
                 onToggleMaximize();
             }
         }, DoubleClickEvent.getType());
-
     }
 
+    /**
+     * Adds minimize part button.
+     */
     private void addMinimizeButton() {
         SVGImage minimize = new SVGImage(resources.collapseExpandIcon());
         minimize.getElement().setAttribute("name", "workBenchIconMinimize");
@@ -144,6 +148,9 @@ public abstract class BaseView<T extends BaseActionDelegate> extends Composite i
         }
     }
 
+    /**
+     * Adds maximize part button.
+     */
     private void addMaximizeButton() {
         SVGImage maximize = new SVGImage(resources.maximizePart());
         maximize.getElement().setAttribute("name", "workBenchIconMaximize");
@@ -163,21 +170,52 @@ public abstract class BaseView<T extends BaseActionDelegate> extends Composite i
         }
     }
 
+    /**
+     * Adds part menu button.
+     */
     private void addMenuButton() {
-        ToolButton menuButton = new ToolButton(FontAwesome.ELLIPSIS_V);
+        final ToolButton menuButton = new ToolButton(FontAwesome.COG + "&nbsp;" + FontAwesome.CARET_DOWN);
+        menuButton.getElement().setAttribute("name", "workBenchIconMenu");
         menuButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
+                int left = getAbsoluteLeft(menuButton.getElement());
+                int top = getAbsoluteTop(menuButton.getElement());
+                delegate.onPartMenu(left, top + 21);
             }
         });
 
-        addToolButton(menuButton);
+        toolbarHeader.addEast(menuButton, 25);
 
         if (menuButton.getElement() instanceof elemental.dom.Element) {
             Tooltip.create((elemental.dom.Element) menuButton.getElement(),
                     PositionController.VerticalAlign.BOTTOM, PositionController.HorizontalAlign.MIDDLE, "Panel options");
         }
     }
+
+    /**
+     * Returns absolute left position of the element.
+     *
+     * @param element
+     *          element
+     * @return
+     *          element left position
+     */
+    private native int getAbsoluteLeft(JavaScriptObject element) /*-{
+        return element.getBoundingClientRect().left;
+    }-*/;
+
+    /**
+     * Returns absolute top position of the element.
+     *
+     * @param element
+     *          element
+     * @return
+     *          element top position
+     */
+    private native int getAbsoluteTop(JavaScriptObject element) /*-{
+        return element.getBoundingClientRect().top;
+    }-*/;
 
     /**
      * Add a button on part toolbar,

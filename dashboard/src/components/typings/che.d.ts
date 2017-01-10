@@ -52,14 +52,15 @@ declare namespace _che {
   }
 
   export interface IStack {
+    id?: string;
     name: string;
-    description: string;
-    projects: Array<any>;
-    tags: Array<string>;
-    scope: string;
-    components: Array<any>;
+    description?: string;
+    tags?: Array<string>;
+    creator?: string;
+    scope?: string;
+    components?: Array<any>;
     source: any;
-    workspaceConfig: IWorkspace;
+    workspaceConfig: IWorkspaceConfig;
   }
 
   export interface IWorkspace {
@@ -155,4 +156,23 @@ declare namespace _che {
     };
   }
 
+  export interface IEditorOptions {
+    mode: string;
+    lineNumbers: boolean;
+    lineWrapping: boolean;
+    matchBrackets: boolean;
+  }
+
+  export interface IValidation {
+    isValid: boolean;
+    errors: Array<string>;
+  }
+
+  export interface IProfile {
+    attributes?: Object;
+    email: string;
+    links?: Array<any>;
+    userId: string;
+    $promise?: any;
+  }
 }

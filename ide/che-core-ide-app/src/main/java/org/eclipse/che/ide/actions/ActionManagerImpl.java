@@ -113,6 +113,10 @@ public class ActionManagerImpl implements ActionManager {
         registerAction(IdeActions.GROUP_DEBUG_CONTEXT_MENU, debugContextMenuGroup);
         mainContextMenuGroup.add(debugContextMenuGroup);
 
+        // register default action groups for part menu
+        DefaultActionGroup partMenuGroup = new DefaultActionGroup(IdeActions.GROUP_PART_MENU, false, this);
+        registerAction(IdeActions.GROUP_PART_MENU, partMenuGroup);
+
         DefaultActionGroup leftMainMenu = new DefaultActionGroup(this);
         registerAction(IdeActions.GROUP_LEFT_MAIN_MENU, leftMainMenu);
 

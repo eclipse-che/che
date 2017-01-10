@@ -13,6 +13,7 @@ import {CheStack} from '../../../components/api/che-stack.factory';
 import {CheNotification} from '../../../components/notification/che-notification.factory';
 import {CheUIElementsInjectorService} from '../../../components/injector/che-ui-elements-injector.service';
 import {CheWorkspace} from '../../../components/api/che-workspace.factory';
+import {ImportStackService} from './import-stack.service';
 
 const STACK_TEST_POPUP_ID: string = 'stackTestPopup';
 
@@ -34,12 +35,14 @@ export class StackController {
   $location: ng.ILocationService;
   $mdDialog: ng.material.IDialogService;
   cheUIElementsInjectorService: CheUIElementsInjectorService;
+  importStackService: ImportStackService;
   cheStack: CheStack;
   cheWorkspace: CheWorkspace;
   cheNotification: CheNotification;
   showIDE: boolean;
   loading: boolean;
   isLoading: boolean;
+  isImport: boolean;
   isCreation: boolean;
   isStackChange: boolean;
   stackId: string;
@@ -57,7 +60,7 @@ export class StackController {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($route: ng.route.IRoute, $location: ng.ILocationService, $log: ng.ILogService, $filter: ng.IFilterService, cheStack: CheStack, cheWorkspace: CheWorkspace, $mdDialog: ng.material.IDialogService, cheNotification: CheNotification, $timeout: ng.ITimeoutService, $document: ng.IDocumentService, cheUIElementsInjectorService: CheUIElementsInjectorService, $scope: ng.IScope, $window: ng.IWindowService) {
+  constructor($route: ng.route.IRoute, $location: ng.ILocationService, $log: ng.ILogService, $filter: ng.IFilterService, cheStack: CheStack, cheWorkspace: CheWorkspace, $mdDialog: ng.material.IDialogService, cheNotification: CheNotification, $timeout: ng.ITimeoutService, $document: ng.IDocumentService, cheUIElementsInjectorService: CheUIElementsInjectorService, $scope: ng.IScope, $window: ng.IWindowService, importStackService: ImportStackService) {
     this.$location = $location;
     this.$log = $log;
     this.$route = $route;
@@ -70,6 +73,7 @@ export class StackController {
     this.cheNotification = cheNotification;
     this.$document = $document;
     this.cheUIElementsInjectorService = cheUIElementsInjectorService;
+    this.importStackService = importStackService;
 
     this.editorOptions = {
       lineWrapping: true,
@@ -84,8 +88,22 @@ export class StackController {
     };
 
     this.machinesViewStatus = {};
-    // checking creation mode:
-    this.isCreation = ($route as any).current.params.stackId === 'create';
+    let routeParam: string = ($route as any).current.params.stackId;
+
+    switch (routeParam) {
+      case 'import' :
+        this.isCreation = true;
+        this.isImport = true;
+        break;
+      case 'create':
+        this.isCreation = true;
+        this.isImport = false;
+        break;
+      default:
+        this.isCreation = false;
+        this.isImport = false;
+    }
+
     this.copyStack = {};
     this.stackTags = [];
 
@@ -111,6 +129,8 @@ export class StackController {
    */
   updateData(): void {
     if (this.isCreation) {
+      this.copyStack = {};
+      this.isStackChange = true;
       this.stack = this.getNewStackTemplate();
       this.stackTags = angular.copy(this.stack.tags);
       this.stackName = angular.copy(this.stack.name);
@@ -161,7 +181,7 @@ export class StackController {
    * @returns {che.IStack} new stack template
    */
   getNewStackTemplate(): che.IStack {
-    let stack: che.IStack = this.cheStack.getStackTemplate();
+    let stack: che.IStack = this.isImport ? this.importStackService.getStack() : this.cheStack.getStackTemplate();
     this.stackName = stack.name;
     return stack;
   }
@@ -249,7 +269,7 @@ export class StackController {
    * Update stack's editor json from stack.
    */
   updateJsonFromStack(): void {
-    this.isStackChange = !angular.equals(this.stack, this.copyStack);
+    this.isStackChange = this.isCreation || !angular.equals(this.stack, this.copyStack);
     this.stackJson = angular.toJson(this.stack, true);
   }
 
@@ -318,8 +338,9 @@ export class StackController {
       this.stack = stack;
       this.isLoading = false;
       this.cheStack.fetchStacks();
-      this.prepareStackData();
+      this.isStackChange = false;
       this.isCreation = false;
+      this.prepareStackData();
     }, (error: any) => {
       this.isLoading = false;
       this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Creation stack failed.');

@@ -127,7 +127,6 @@ public class PopupMenu extends Composite {
         }
     };
 
-
     /**
      * Creates new popup.
      *
@@ -310,19 +309,24 @@ public class PopupMenu extends Composite {
                                                                                : POPUP_RESOURCES.popup().popupMenuIconFieldDisabled());
 
                 int work = 1;
-                if (hasCheckedItems && menuItem instanceof ToggleAction) {
-                    ToggleAction toggleAction = (ToggleAction)menuItem;
-                    ActionEvent e = new ActionEvent(presentationFactory.getPresentation(toggleAction),
-                                                    actionManager,
-                                                    managerProvider.get());
+                if (hasCheckedItems) {
+                    if (menuItem instanceof ToggleAction) {
+                        ToggleAction toggleAction = (ToggleAction)menuItem;
+                        ActionEvent e = new ActionEvent(presentationFactory.getPresentation(toggleAction),
+                                actionManager,
+                                managerProvider.get());
 
-                    if (toggleAction.isSelected(e)) {
-                        // Temporary solution
-                        table.setHTML(i, work, "<i class=\"fa fa-check\"></i>");
+                        if (toggleAction.isSelected(e)) {
+                            // Temporary solution
+                            table.setHTML(i, work, "<i class=\"fa fa-check\"></i>");
+                        }
+
+                        table.getCellFormatter().setStyleName(i, work, presentation.isEnabled() ? POPUP_RESOURCES.popup().popupMenuCheckField()
+                                : POPUP_RESOURCES.popup().popupMenuCheckFieldDisabled());
+                    } else {
+                        table.setHTML(i, work, "");
                     }
 
-                    table.getCellFormatter().setStyleName(i, work, presentation.isEnabled() ? POPUP_RESOURCES.popup().popupMenuCheckField()
-                                                                                   : POPUP_RESOURCES.popup().popupMenuCheckFieldDisabled());
                     work++;
                 }
 

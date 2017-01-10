@@ -48,11 +48,8 @@
  */
 export class CheToolbar {
   restrict: string;
-  controller: string;
-  controllerAs: string;
   replace: boolean;
   transclude: boolean;
-  bindToController: boolean;
 
   /**
    * Default constructor that is using resource
@@ -61,11 +58,7 @@ export class CheToolbar {
   constructor() {
     this.restrict = 'E';
     this.replace = true;
-    this.controller = 'CheNavBarCtrl';
-    this.controllerAs = 'controller';
-    this.bindToController = true;
     this.transclude = true;
-
   }
 
   /**

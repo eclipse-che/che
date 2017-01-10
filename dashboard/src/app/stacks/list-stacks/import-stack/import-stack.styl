@@ -1,0 +1,71 @@
+.import-stack
+  min-width 800px
+  user-select none
+
+  ui-codemirror
+    display block
+    float none
+    width 800px
+    max-width 800px
+    margin-top 15px
+    margin-bottom 2px
+
+    .CodeMirror
+      max-height 200px
+      width inherit
+
+      .CodeMirror-sizer
+        margin-left 26px
+
+      .CodeMirror-gutter-wrapper
+        left 0 !important
+
+      .CodeMirror-gutter-elt,
+      .CodeMirror-linenumber
+        margin-left -55px
+
+      .CodeMirror-scroll
+        margin-left -20px
+
+    div.CodeMirror
+      border 1px solid $list-separator-color
+      height 250px !important
+      min-height 250px !important
+
+  .errors-container
+    color $error-color
+    min-height 20px
+    margin-right 2px
+
+    span
+     margin-right 2px
+
+  .header-label
+    line-height 30px
+
+  .toggle-button-area
+    position relative
+    margin-left 0
+
+    button
+     margin-left 0
+     margin-bottom 0
+
+    md-switch
+     height 100%
+     margin auto
+     overflow visible
+
+  .footer-label
+    display inline-block
+    line-height 30px
+    margin-top 10px
+    float right
+
+.import-stack  che-button-primary,
+.import-stack  che-button-notice
+  float right
+
+  button
+    margin-right 0
+    margin-bottom 0
