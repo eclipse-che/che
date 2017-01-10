@@ -118,24 +118,24 @@ initiate_offline_or_network_mode(){
 
 grab_initial_images() {
   # Prep script by getting default image
-  if [ "$(docker images -q alpine:3.4 2> /dev/null)" = "" ]; then
-    info "cli" "Pulling image alpine:3.4"
-    log "docker pull alpine:3.4 >> \"${LOGS}\" 2>&1"
+  if [ "$(docker images -q ${UTILITY_IMAGE_ALPINE} 2> /dev/null)" = "" ]; then
+    info "cli" "Pulling image ${UTILITY_IMAGE_ALPINE}"
+    log "docker pull ${UTILITY_IMAGE_ALPINE} >> \"${LOGS}\" 2>&1"
     TEST=""
-    docker pull alpine:3.4 >> "${LOGS}" > /dev/null 2>&1 || TEST=$?
+    docker pull ${UTILITY_IMAGE_ALPINE} >> "${LOGS}" > /dev/null 2>&1 || TEST=$?
     if [ "$TEST" = "1" ]; then
-      error "Image alpine:3.4 unavailable. Not on dockerhub or built locally."
+      error "Image ${UTILITY_IMAGE_ALPINE} unavailable. Not on dockerhub or built locally."
       return 2;
     fi
   fi
 
-  if [ "$(docker images -q eclipse/che-ip:nightly 2> /dev/null)" = "" ]; then
-    info "cli" "Pulling image eclipse/che-ip:nightly"
-    log "docker pull eclipse/che-ip:nightly >> \"${LOGS}\" 2>&1"
+  if [ "$(docker images -q ${UTILITY_IMAGE_CHEIP} 2> /dev/null)" = "" ]; then
+    info "cli" "Pulling image ${UTILITY_IMAGE_CHEIP}"
+    log "docker pull ${UTILITY_IMAGE_CHEIP} >> \"${LOGS}\" 2>&1"
     TEST=""
-    docker pull eclipse/che-ip:nightly >> "${LOGS}" > /dev/null 2>&1 || TEST=$?
+    docker pull ${UTILITY_IMAGE_CHEIP} >> "${LOGS}" > /dev/null 2>&1 || TEST=$?
     if [ "$TEST" = "1" ]; then
-      error "Image eclipse/che-ip:nightly unavailable. Not on dockerhub or built locally."
+      error "Image ${UTILITY_IMAGE_CHEIP} unavailable. Not on dockerhub or built locally."
       return 2;
     fi
   fi
@@ -460,7 +460,7 @@ confirm_operation() {
 port_open() {
   debug $FUNCNAME
 
-  docker run -d -p $1:$1 --name fake alpine:3.4 httpd -f -p $1 -h /etc/ > /dev/null 2>&1
+  docker run -d -p $1:$1 --name fake ${UTILITY_IMAGE_ALPINE} httpd -f -p $1 -h /etc/ > /dev/null 2>&1
   NETSTAT_EXIT=$?
   docker rm -f fake > /dev/null 2>&1
 

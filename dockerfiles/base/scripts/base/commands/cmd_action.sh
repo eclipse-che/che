@@ -18,8 +18,8 @@ cmd_action() {
        server_is_booted ${CURRENT_CHE_SERVER_CONTAINER_ID}; then
 
         # Not loaded as part of the init process to save on download time
-        update_image_if_not_found eclipse/che-action:nightly
-        docker_run -it eclipse/che-action:nightly "$@"
+        update_image_if_not_found ${UTILITY_IMAGE_CHEACTION}
+        docker_run -it ${UTILITY_IMAGE_CHEACTION} "$@"
 
        return
     fi

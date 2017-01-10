@@ -24,6 +24,8 @@
                      che-hide-search="listStacksController.stacks.length === 0"
                      che-add-button-title="Add Stack"
                      che-add-button-href="#stack/create"
+                     che-import-button-title="Import"
+                     che-on-import="listStacksController.showSelectStackRecipeDialog($event)"
                      che-delete-button-title="Delete"
                      che-on-delete="listStacksController.deleteSelectedStacks()"
                      che-hide-delete="listStacksController.isNoSelected"
