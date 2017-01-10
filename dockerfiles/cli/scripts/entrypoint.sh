@@ -41,7 +41,7 @@ COMMANDS:
   ssh <wksp-name> [machine-name]       SSH to a workspace if SSH agent enabled
   start                                Starts ${CHE_MINI_PRODUCT_NAME} services
   stop                                 Stops ${CHE_MINI_PRODUCT_NAME} services
-  sync <wksp-name>                     Synchronize workspace with current working directory
+  sync <wksp-name>                     Synchronize workspace with local directory mounted to :/sync
   test <test-name>                     Start test on ${CHE_MINI_PRODUCT_NAME} instance
   upgrade                              Upgrades ${CHE_MINI_PRODUCT_NAME} from one version to another with migrations and backups
   version                              Installed version and upgrade paths
