@@ -453,8 +453,6 @@ public class CheEnvironmentEngine {
     /**
      * Saves machine into snapshot.
      *
-     * @param namespace
-     *         namespace of the workspace
      * @param workspaceId
      *         ID of workspace that owns environment
      * @param machineId
@@ -883,15 +881,22 @@ public class CheEnvironmentEngine {
             try {
                 MachineSourceImpl machineSource = null;
                 if (recover) {
-                    SnapshotImpl snapshot = snapshotDao.getSnapshot(machine.getWorkspaceId(),
-                                                                    machine.getEnvName(),
-                                                                    machine.getConfig().getName());
-                    machineSource = snapshot.getMachineSource();
-                    // Snapshot image location has SHA-256 digest which needs to be removed,
-                    // otherwise it will be pulled without tag and cause problems
-                    String imageName = machineSource.getLocation();
-                    if (imageName.contains("@sha256:")) {
-                        machineSource.setLocation(imageName.substring(0, imageName.indexOf('@')));
+                    try {
+                        SnapshotImpl snapshot = snapshotDao.getSnapshot(machine.getWorkspaceId(),
+                                                                        machine.getEnvName(),
+                                                                        machine.getConfig().getName());
+                        machineSource = snapshot.getMachineSource();
+                        // Snapshot image location has SHA-256 digest which needs to be removed,
+                        // otherwise it will be pulled without tag and cause problems
+                        String imageName = machineSource.getLocation();
+                        if (imageName.contains("@sha256:")) {
+                            machineSource.setLocation(imageName.substring(0, imageName.indexOf('@')));
+                        }
+                    } catch (NotFoundException e) {
+                        try {
+                            machineLogger.writeLine("Failed to boot machine from snapshot: snapshot not found. " +
+                                                    "Machine will be created from origin source.");
+                        } catch (IOException ignore) { }
                     }
                 }
 
@@ -899,7 +904,7 @@ public class CheEnvironmentEngine {
             } catch (SourceNotFoundException e) {
                 if (recover) {
                     LOG.error("Image of snapshot for machine " + machine.getConfig().getName() +
-                              " not found. " + "Machine will be created from origin source");
+                              " not found. " + "Machine will be created from origin source.");
                     machine = originMachine;
                     instance = machineStarter.startMachine(machineLogger, null);
                 } else {
