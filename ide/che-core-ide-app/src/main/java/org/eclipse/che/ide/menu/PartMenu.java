@@ -10,36 +10,30 @@
  *******************************************************************************/
 package org.eclipse.che.ide.menu;
 
-import org.eclipse.che.ide.api.mvp.Presenter;
-import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import org.eclipse.che.ide.api.action.ActionManager;
+import org.eclipse.che.ide.api.action.IdeActions;
+import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
+import org.eclipse.che.ide.api.parts.PerspectiveManager;
 
 /**
- * Manages Main Menu Items, their runtime visibility and enabled state.
+ * Manages part menu based on context menu.
  *
- * @author Nikolay Zamosenchuk
+ * @author Vitaliy Guliy
  */
 @Singleton
-public class MainMenuPresenter implements Presenter, MainMenuView.ActionDelegate {
+public class PartMenu extends ContextMenu {
 
-    private final MainMenuView view;
-
-    /**
-     * Main Menu Presenter requires View implementation
-     *
-     * @param view
-     */
     @Inject
-    public MainMenuPresenter(MainMenuView view) {
-        this.view = view;
-        this.view.setDelegate(this);
+    public PartMenu(ActionManager actionManager, KeyBindingAgent keyBindingAgent, Provider<PerspectiveManager> managerProvider) {
+        super(actionManager, keyBindingAgent, managerProvider);
     }
 
-    /** {@inheritDoc} */
     @Override
-    public void go(AcceptsOneWidget container) {
-        container.setWidget(view);
+    protected String getGroupMenu() {
+        return IdeActions.GROUP_PART_MENU;
     }
 
 }

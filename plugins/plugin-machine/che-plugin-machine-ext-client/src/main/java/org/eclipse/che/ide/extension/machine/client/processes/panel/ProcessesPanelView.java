@@ -93,6 +93,9 @@ public interface ProcessesPanelView extends View<ProcessesPanelView.ActionDelega
     /** Sets visibility for processes tree */
     void setProcessesTreeVisible(boolean visible);
 
+    /** Determines whether process tree is visible */
+    boolean isProcessesTreeVisible();
+
     interface ActionDelegate extends BaseActionDelegate {
 
         /**

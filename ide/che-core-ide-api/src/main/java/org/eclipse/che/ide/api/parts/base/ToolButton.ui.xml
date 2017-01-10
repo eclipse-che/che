@@ -54,6 +54,13 @@
             line-height: 8px;
             text-align: center;
             color: toolButtonColor;
+            white-space: nowrap;
+            cursor: default;
+        }
+
+        .button[name="workBenchIconMenu"] > div {
+            width: 16px;
+            font-size: 10px;
         }
 
         .button:hover > svg,

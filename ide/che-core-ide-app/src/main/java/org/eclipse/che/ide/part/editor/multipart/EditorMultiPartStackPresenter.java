@@ -167,6 +167,10 @@ public class EditorMultiPartStackPresenter implements EditorMultiPartStack,
         return state;
     }
 
+    @Override
+    public void showPartMenu(int mouseX, int mouseY) {
+    }
+
     /** {@inheritDoc} */
     @Override
     public void removePart(PartPresenter part) {
