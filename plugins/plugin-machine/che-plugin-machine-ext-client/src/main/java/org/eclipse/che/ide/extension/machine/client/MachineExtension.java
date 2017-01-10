@@ -40,6 +40,7 @@ import org.eclipse.che.ide.extension.machine.client.actions.ExecuteSelectedComma
 import org.eclipse.che.ide.extension.machine.client.actions.RestartMachineAction;
 import org.eclipse.che.ide.extension.machine.client.actions.RunCommandAction;
 import org.eclipse.che.ide.extension.machine.client.actions.SelectCommandComboBox;
+import org.eclipse.che.ide.extension.machine.client.actions.ShowConsoleTreeAction;
 import org.eclipse.che.ide.extension.machine.client.actions.SwitchPerspectiveAction;
 import org.eclipse.che.ide.extension.machine.client.command.macros.ServerPortProvider;
 import org.eclipse.che.ide.extension.machine.client.machine.MachineStatusHandler;
@@ -178,7 +179,8 @@ public class MachineExtension {
                                 MachineResources machineResources,
                                 ReRunProcessAction reRunProcessAction,
                                 StopProcessAction stopProcessAction,
-                                CloseConsoleAction closeConsoleAction) {
+                                CloseConsoleAction closeConsoleAction,
+                                ShowConsoleTreeAction showConsoleTreeAction) {
         final DefaultActionGroup mainMenu = (DefaultActionGroup)actionManager.getAction(GROUP_MAIN_MENU);
 
         final DefaultActionGroup workspaceMenu = (DefaultActionGroup)actionManager.getAction(GROUP_WORKSPACE);
@@ -243,18 +245,19 @@ public class MachineExtension {
         actionManager.registerAction(GROUP_COMMANDS_LIST, commandList);
         commandList.add(editCommandsAction, FIRST);
 
-
         // Consoles tree context menu group
         DefaultActionGroup consolesTreeContextMenu = (DefaultActionGroup)actionManager.getAction(GROUP_CONSOLES_TREE_CONTEXT_MENU);
-
         consolesTreeContextMenu.add(reRunProcessAction);
         consolesTreeContextMenu.add(stopProcessAction);
         consolesTreeContextMenu.add(closeConsoleAction);
 
+        DefaultActionGroup partMenuGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_PART_MENU);
+        partMenuGroup.add(showConsoleTreeAction);
 
         // Define hot-keys
         keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode(KeyCodeMap.F12).build(), "newTerminal");
 
         iconRegistry.registerIcon(new Icon("che.machine.icon", machineResources.devMachine()));
     }
+
 }

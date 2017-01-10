@@ -131,6 +131,11 @@ public interface PartStack extends Presenter {
     void restore();
 
     /**
+     * Displays part menu.
+     */
+    void showPartMenu(int mouseX, int mouseY);
+
+    /**
      * Remove given part from PartStack.
      *
      * @param part

@@ -256,6 +256,24 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         notifyTreeNodeSelected(machineToSelect);
     }
 
+    /**
+     * Sets visibility for processes tree
+     *
+     * @param visible
+     */
+    public void setProcessesTreeVisible(boolean visible) {
+        view.setProcessesTreeVisible(visible);
+    }
+
+    /**
+     * determines whether process tree is visible.
+     *
+     * @return
+     */
+    public boolean isProcessesTreeVisible() {
+        return view.isProcessesTreeVisible();
+    }
+
     @Override
     public void go(AcceptsOneWidget container) {
         container.setWidget(view);

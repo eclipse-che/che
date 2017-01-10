@@ -17,6 +17,7 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
 import org.eclipse.che.ide.api.machine.MachineEntity;
+import org.eclipse.che.ide.menu.PartMenu;
 import org.eclipse.che.ide.part.widgets.TabItemFactory;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
@@ -65,6 +66,8 @@ public class MachineAppliancePresenterTest {
     //constructor mocks
     @Mock
     private EventBus                    eventBus;
+    @Mock
+    private PartMenu                    partMenu;
     @Mock
     private PartStackEventHandler       partStackEventHandler;
     @Mock
@@ -159,6 +162,7 @@ public class MachineAppliancePresenterTest {
                                      Matchers.<TabSelectHandler>anyObject())).thenReturn(recipeTab);
 
         presenter = new MachineAppliancePresenter(eventBus,
+                                                  partMenu,
                                                   comparator,
                                                   partStackEventHandler,
                                                   view,
@@ -180,7 +184,6 @@ public class MachineAppliancePresenterTest {
         verify(entityFactory).createTab(eq(tabHeader), eq(infoPresenter), Matchers.<TabSelectHandler>anyObject());
         verify(entityFactory).createTab(eq(tabHeader), eq(serverPresenter), Matchers.<TabSelectHandler>anyObject());
 
-        verify(locale).tabTerminal();
         verify(locale).tabInfo();
         verify(locale).tabServer();
 
@@ -228,7 +231,6 @@ public class MachineAppliancePresenterTest {
         verify(view).showContainer(tabContainerView);
 
         verify(tabContainer).showTab(SOME_TEXT);
-//        verify(terminalContainer).addOrShowTerminal(machine);
         verify(infoPresenter).update(machine);
         verify(serverPresenter).updateInfo(machine);
     }
@@ -271,4 +273,5 @@ public class MachineAppliancePresenterTest {
         verify(view, never()).showContainer(tabContainerView);
         verify(view).showStub(anyString());
     }
+
 }

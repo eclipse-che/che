@@ -52,6 +52,13 @@ public interface PartPresenter extends Presenter {
     IsWidget getView();
 
     /**
+     * Returns corresponding part stack.
+     *
+     * @return
+     */
+    PartStack getPartStack();
+
+    /**
      * Returns the title SVG image resource of this part. If this value changes the part must fire a property listener event with
      * <code>PROP_TITLE</code>.
      * <p>
