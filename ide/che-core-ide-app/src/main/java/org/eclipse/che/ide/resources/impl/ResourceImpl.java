@@ -17,6 +17,8 @@ import com.google.common.base.Optional;
 
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.resources.Container;
+import org.eclipse.che.ide.api.resources.File;
+import org.eclipse.che.ide.api.resources.Folder;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.marker.Marker;
@@ -27,6 +29,7 @@ import static com.google.common.base.Optional.absent;
 import static com.google.common.base.Optional.of;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOf;
@@ -60,16 +63,37 @@ abstract class ResourceImpl implements Resource {
         return getResourceType() == FILE;
     }
 
+    @Override
+    public File asFile() {
+        checkState(isFile(), "Current resource is not a file");
+
+        return (File)this;
+    }
+
     /** {@inheritDoc} */
     @Override
     public boolean isFolder() {
         return getResourceType() == FOLDER;
     }
 
+    @Override
+    public Folder asFolder() {
+        checkState(isFolder(), "Current resource is not a folder");
+
+        return (Folder)this;
+    }
+
     /** {@inheritDoc} */
     @Override
     public boolean isProject() {
         return getResourceType() == PROJECT;
+    }
+
+    @Override
+    public Project asProject() {
+        checkState(isProject(), "Current resource is not a project");
+
+        return (Project)this;
     }
 
     /** {@inheritDoc} */
