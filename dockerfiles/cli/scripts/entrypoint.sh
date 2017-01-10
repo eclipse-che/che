@@ -22,13 +22,14 @@ OPTIONAL DOCKER PARAMETERS:
   -v <LOCAL_PATH>:/repo                ${CHE_MINI_PRODUCT_NAME} git repo - uses local binaries
   -v <LOCAL_PATH>:/sync                Where remote ws files will be copied with sync command
   -v <LOCAL_PATH>:/unison              Where unison profile for optimizing sync command resides
+  -v <LOCAL_PATH>:/chedir              Soure repository to convert into workspace with Chedir utility
     
 COMMANDS:
   action <action-name>                 Start action on ${CHE_MINI_PRODUCT_NAME} instance
   backup                               Backups ${CHE_MINI_PRODUCT_NAME} configuration and data to ${CHE_CONTAINER_ROOT}/backup volume mount
   config                               Generates a ${CHE_MINI_PRODUCT_NAME} config from vars; run on any start / restart
   destroy                              Stops services, and deletes ${CHE_MINI_PRODUCT_NAME} instance data
-  dir <path> <command>                 Use Chefile feature in the directory <path>
+  dir <command>                        Use Chedir and Chefile in the directory mounted to :/chedir
   download                             Pulls Docker images for the current ${CHE_MINI_PRODUCT_NAME} version
   help                                 This message
   info                                 Displays info about ${CHE_MINI_PRODUCT_NAME} and the CLI
