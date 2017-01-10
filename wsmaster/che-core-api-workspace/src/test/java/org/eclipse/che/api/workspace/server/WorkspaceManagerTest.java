@@ -856,6 +856,7 @@ public class WorkspaceManagerTest {
             throws ServerException, NotFoundException, ConflictException {
         RuntimeDescriptor descriptor = createDescriptor(workspace, status);
         when(runtimes.get(workspace.getId())).thenReturn(descriptor);
+        when(runtimes.getStatus(workspace.getId())).thenReturn(status);
         return descriptor;
     }
 
