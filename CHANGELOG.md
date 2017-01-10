@@ -8,6 +8,7 @@
 
 - Add restart button the the Workspace Agent Not Responding popup [\#3155](https://github.com/eclipse/che/issues/3155)
 - Improve buttons on the part toolbar [\#3152](https://github.com/eclipse/che/issues/3152)
+- Processes panel should be opened maximized [\#2894](https://github.com/eclipse/che/issues/2894)
 - Rename Che Docker Images [\#2737](https://github.com/eclipse/che/issues/2737)
 - Che server should connect to ws-agent on internal URL [\#2030](https://github.com/eclipse/che/issues/2030)
 - I can not open eclipse-che [\#3643](https://github.com/eclipse/che/issues/3643)
@@ -18,6 +19,7 @@
 
 - Add ability to reload page after lose connection with ws agent [\#3651](https://github.com/eclipse/che/pull/3651) ([vzhukovskii](https://github.com/vzhukovskii))
 - CHE-3152 Improve buttons on the part toolbar [\#3590](https://github.com/eclipse/che/pull/3590) ([vitaliy-guliy](https://github.com/vitaliy-guliy))
+- CHE-2894 Processes panel should be opened maximized [\#3631](https://github.com/eclipse/che/pull/3631) ([vitaliy-guliy](https://github.com/vitaliy-guliy))
 - CHE-2528: Start workspace after renaming of environment [\#3521](https://github.com/eclipse/che/pull/3521) ([mmorhun](https://github.com/mmorhun))
 
 ## [5.0.0](https://github.com/eclipse/che/tree/5.0.0) (2017-01-06)
@@ -117,12 +119,9 @@
 ## [5.0.0-M9](https://github.com/eclipse/che/tree/5.0.0-M9) (2016-12-22)
 [Full Changelog](https://github.com/eclipse/che/compare/5.0.0-M8...5.0.0-M9)
 
-**Issues fixed with 'bugs' label:**
-
-- "group id ... is too big" on exec-agent module on Mac [\#3378](https://github.com/eclipse/che/issues/3378)
-
 **Closed issues:**
 
+- "group id ... is too big" on exec-agent module on Mac [\#3378](https://github.com/eclipse/che/issues/3378)
 - Properly maximize console and terminal tabs [\#3177](https://github.com/eclipse/che/issues/3177)
 - Wrong message when connection with workspace agent is broken [\#2860](https://github.com/eclipse/che/issues/2860)
 - Openshift Plugin Update [\#2834](https://github.com/eclipse/che/issues/2834)
