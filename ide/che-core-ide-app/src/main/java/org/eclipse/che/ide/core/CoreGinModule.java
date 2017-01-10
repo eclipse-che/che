@@ -120,8 +120,6 @@ public class CoreGinModule extends AbstractGinModule {
 
         bind(EventBus.class).to(SimpleEventBus.class).in(Singleton.class);
 
-        //bind(String.class).annotatedWith(RestContext.class).toProvider(RestContextProvider.class).in(Singleton.class);
-
         install(new GinFactoryModuleBuilder().build(LoaderFactory.class));
         install(new GinFactoryModuleBuilder().build(PopupLoaderFactory.class));
 

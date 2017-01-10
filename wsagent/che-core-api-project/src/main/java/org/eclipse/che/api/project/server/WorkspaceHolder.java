@@ -44,13 +44,10 @@ public class WorkspaceHolder extends WorkspaceProjectsSyncer {
 
     private final String userToken;
 
-    private WorkspaceDto workspace;
-
     private HttpJsonRequestFactory httpJsonRequestFactory;
 
     @Inject
     public WorkspaceHolder(@Named("che.api") String apiEndpoint,
-    //                       @Named("workspace.id") String workspaceId,
                            HttpJsonRequestFactory httpJsonRequestFactory) throws ServerException {
 
         this.apiEndpoint = apiEndpoint;
@@ -65,21 +62,11 @@ public class WorkspaceHolder extends WorkspaceProjectsSyncer {
 
         // check connection
         try {
-            this.workspace = workspaceDto();
+            workspaceDto();
         } catch (ServerException e) {
             LOG.error(e.getLocalizedMessage());
             System.exit(1);
         }
-
-
-        // TODO - invent mechanism to recognize workspace ID
-        // for Docker container name of this property is defined in
-        // org.eclipse.che.plugin.docker.machine.DockerInstanceMetadata.CHE_WORKSPACE_ID
-        // it resides on Workspace Master side so not accessible from agent code
-        //if (workspaceId == null) {
-        //    throw new ServerException("Workspace ID is not defined for Workspace Agent");
-        //}
-
     }
 
 
@@ -109,12 +96,6 @@ public class WorkspaceHolder extends WorkspaceProjectsSyncer {
         if(userToken != null)
             builder.queryParam("token", userToken);
         final String href = builder.build(workspaceId).toString();
-
-
-//        final String href = UriBuilder.fromUri(apiEndpoint)
-//                                      .path(WorkspaceService.class)
-//                                      .path(WorkspaceService.class, "addProject")
-//                                      .build(workspaceId).toString();
         try {
             httpJsonRequestFactory.fromUrl(href).usePostMethod().setBody(asDto(project)).request();
         } catch (IOException | ApiException e) {
@@ -138,12 +119,6 @@ public class WorkspaceHolder extends WorkspaceProjectsSyncer {
         if(userToken != null)
             builder.queryParam("token", userToken);
         final String href = builder.build(new String[]{workspaceId, project.getPath()}, false).toString();
-
-
-//        final String href = UriBuilder.fromUri(apiEndpoint)
-//                                      .path(WorkspaceService.class)
-//                                      .path(WorkspaceService.class, "updateProject")
-//                                      .build(new String[]{workspaceId, project.getPath()}, false).toString();
         try {
             httpJsonRequestFactory.fromUrl(href).usePutMethod().setBody(asDto(project)).request();
         } catch (IOException | ApiException e) {
@@ -160,11 +135,6 @@ public class WorkspaceHolder extends WorkspaceProjectsSyncer {
         if(userToken != null)
             builder.queryParam("token", userToken);
         final String href = builder.build(new String[]{workspaceId, project.getPath()}, false).toString();
-
-//        final String href = UriBuilder.fromUri(apiEndpoint)
-//                                      .path(WorkspaceService.class)
-//                                      .path(WorkspaceService.class, "deleteProject")
-//                                      .build(new String[]{workspaceId, project.getPath()}, false).toString();
         try {
             httpJsonRequestFactory.fromUrl(href).useDeleteMethod().request();
         } catch (IOException | ApiException e) {
@@ -183,10 +153,6 @@ public class WorkspaceHolder extends WorkspaceProjectsSyncer {
         if(userToken != null)
             builder.queryParam("token", userToken);
         final String href = builder.build(workspaceId).toString();
-
-//        final String href = UriBuilder.fromUri(apiEndpoint).queryParam("token", userToken)
-//                                      .path(WorkspaceService.class).path(WorkspaceService.class, "getByKey")
-//                                      .build(workspaceId).toString();
         try {
             return httpJsonRequestFactory.fromUrl(href).useGetMethod().request().asDto(WorkspaceDto.class);
         } catch (IOException | ApiException e) {
