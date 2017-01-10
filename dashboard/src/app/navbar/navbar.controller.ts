@@ -9,21 +9,43 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {CheAPI} from '../../components/api/che-api.factory';
 
-export class CheNavBarCtrl {
+export class CheNavBarController {
+  links = [{
+    href: '#/create-workspace',
+    name: 'New Workspace'
+  }];
+  menuItemUrl = {
+    dashboard: '#/',
+    workspaces: '#/workspaces',
+    administration: '#/administration',
+    // subsections
+    plugins: '#/admin/plugins',
+    account: '#/account',
+    stacks: '#/stacks'
+  };
+
+  private $mdSidenav: ng.material.ISidenavService;
+  private $scope: ng.IScope;
+  private $window: ng.IWindowService;
+  private $location: ng.ILocationService;
+  private $route: ng.route.IRouteService;
+  private cheAPI: CheAPI;
+  private profile: che.IProfile;
+  private email: string;
 
   /**
    * Default constructor
    * @ngInject for Dependency injection
    */
-  constructor($mdSidenav, $scope, $location, $route, cheAPI, $window) {
-    this.mdSidenav = $mdSidenav;
+  constructor($mdSidenav: ng.material.ISidenavService, $scope: ng.IScope, $location: ng.ILocationService, $route: ng.route.IRouteService, cheAPI: CheAPI, $window: ng.IWindowService) {
+    this.$mdSidenav = $mdSidenav;
     this.$scope = $scope;
     this.$location = $location;
     this.$route = $route;
     this.cheAPI = cheAPI;
     this.$window = $window;
-    this.links = [{href: '#/create-workspace', name: 'New Workspace'}];
 
     this.profile = cheAPI.getProfile().getProfile();
     if (this.profile.email) {
@@ -36,45 +58,31 @@ export class CheNavBarCtrl {
       });
     }
 
-    this.menuItemUrl = {
-      dashboard: '#/',
-      workspaces: '#/workspaces',
-      administration: '#/administration',
-      // subsections
-      plugins: '#/admin/plugins',
-      account: '#/account',
-      stacks: '#/stacks'
-    };
-
     // highlight navbar menu item
     $scope.$on('$locationChangeStart', () => {
       let path = '#' + $location.path();
       $scope.$broadcast('navbar-selected:set', path);
     });
 
-    cheAPI.cheWorkspace.fetchWorkspaces();
+    cheAPI.getWorkspace().fetchWorkspaces();
   }
 
-  isImsAvailable() {
-    return this.imsArtifactApi.isImsAvailable();
-  }
-
-  reload() {
+  reload(): void {
     this.$route.reload();
   }
 
   /**
    * Toggle the left menu
    */
-  toggleLeftMenu() {
-    this.mdSidenav('left').toggle();
+  toggleLeftMenu(): void {
+    this.$mdSidenav('left').toggle();
   }
 
-  getWorkspacesNumber() {
-    return this.cheAPI.cheWorkspace.getWorkspaces().length;
+  getWorkspacesNumber(): number {
+    return this.cheAPI.getWorkspace().getWorkspaces().length;
   }
 
-  openLinkInNewTab(url) {
+  openLinkInNewTab(url: string): void {
     this.$window.open(url, '_blank');
   }
 }
