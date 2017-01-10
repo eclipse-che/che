@@ -24,8 +24,6 @@ import javax.inject.Singleton;
 import java.util.List;
 import java.util.Objects;
 
-import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.START;
-import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.STOP;
 import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingStartEvent;
 import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingStopEvent;
 
@@ -79,7 +77,6 @@ public class FileOpenCloseEventListener {
                     }
                 }
 
-                deletedFilesController.remove(closingEditor.getEditorInput().getFile().getLocation().toString());
                 eventBus.fireEvent(newFileTrackingStopEvent(path.toString()));
 
             }
