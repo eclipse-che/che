@@ -352,24 +352,24 @@ function verify_nightly_accuracy() {
   # Per request of the engineers, check to see if the locally cached nightly version is older
   # than the one stored on DockerHub.
   if is_nightly; then
-    REMOTE_NIGHTLY_JSON=$(curl -s https://hub.docker.com/v2/repositories/${CHE_IMAGE_NAME}/tags/nightly/)
 
-    # Retrieve info on current nightly
-    LOCAL_CREATION_DATE=$(docker inspect --format="{{.Created }}" ${CHE_IMAGE_FULLNAME})
-    REMOTE_CREATION_DATE=$(echo $REMOTE_NIGHTLY_JSON | jq ".last_updated")
-    REMOTE_CREATION_DATE="${REMOTE_CREATION_DATE//\"}"
+    NIGHTLY_IMAGE=$(docker images -q --no-trunc $CHE_IMAGE_FULLNAME)
+    NIGHTLY_IMAGE=${NIGHTLY_IMAGE#sha256:}
 
-    # Unfortunatley, the "last_updated" date on DockerHub is the date it was uploaded, not created.
-    # So after you download the image locally, then the local image "created" value reflects when it
-    # was originally built, creating a istuation where the local cached version is always older than
-    # what is on DockerHub, even if you just pulled it.
-    # Solution is to compare the dates, and only print warning message if the locally created ate
-    # is less than the updated date on dockerhub.
+    NIGHTLY_IMAGE_DATE_WRITTEN=$(docker run -it -v /var/lib/docker:/var/lib/docker \
+                  alpine date -r /var/lib/docker/image/aufs/imagedb/content/sha256/$NIGHTLY_IMAGE)
+    CURRENT_DATE=$(date)
 
-    if [[ -z ${REMOTE_CREATION_DATE} ]]; then
-      warning "Unable to get published date on hub.docker.com for ${CHE_IMAGE_FULLNAME}"
-    elif $(newer_date_period ${LOCAL_CREATION_DATE} ${REMOTE_CREATION_DATE}); then
-      warning "There is a newer ${CHE_IMAGE_FULLNAME} image on DockerHub."
+    if newer_date_period \
+          $(timestamp_date_iso8601 "${NIGHTLY_IMAGE_DATE_WRITTEN}") \
+          $(timestamp_date_iso8601 "${CURRENT_DATE}"); then
+      # This means that nightly image written to disk >24 hours ago.
+      # If nightly disk writing is > 24 hours then it is too old
+      warning "Your 'nightly' image is over 24 hours old - checking for newer image..."
+      update_image $CHE_IMAGE_FULLNAME
+      warning "Pulled newer 'nightly' image - please rerun CLI"
+      return 2
+
     fi
   fi
 }
@@ -385,10 +385,7 @@ timestamp_date_iso8601() {
 # true if the first date is less than the second date (with a 1hour period)
 # else false
 newer_date_period() {
-  local FIRST_DATE=$(timestamp_date_iso8601 $1)
-  local SECOND_DATE=$(timestamp_date_iso8601 $2)
-
-  if [[ $(expr ${FIRST_DATE} + 3600) -lt ${SECOND_DATE} ]]; then
+  if [[ $(expr ${1} + 86400) -lt ${2} ]]; then
     return 0
   else
     return 1
