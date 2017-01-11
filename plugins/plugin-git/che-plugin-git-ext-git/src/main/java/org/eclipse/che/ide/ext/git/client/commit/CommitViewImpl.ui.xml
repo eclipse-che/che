@@ -1,6 +1,6 @@
 <!--
 
-    Copyright (c) 2012-2016 Codenvy, S.A.
+    Copyright (c) 2012-2017 Codenvy, S.A.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
@@ -41,13 +41,13 @@
 
     <g:HTMLPanel addStyleNames="{style.emptyBorder} {style.mainPanel}" debugId="git-commit-mainForm">
         <div class="{style.checkBoxesSection} {style.spacing}"><!-- Late 'git add' section -->
-            <g:CheckBox ui:field="addAll" HTML="{locale.commitAllFieldTitle}"
+            <g:CheckBox ui:field="addAll" HTML="{locale.commitAddAllFieldTitle}"
                         addStyleNames="{res.gitCSS.textFont} {style.emptyBorder}"
                         debugId="git-commit-addAll"/>
             <g:CheckBox ui:field="addSelection" HTML="{locale.commitSelectionFieldTitle}"
                         addStyleNames="{res.gitCSS.textFont} {style.emptyBorder}"
                         debugId="git-commit-addSelection"/>
-            <g:CheckBox ui:field="onlySelection" HTML="{locale.commitOnlySelectionFieldTitle}"
+            <g:CheckBox ui:field="commitAllSelection" HTML="{locale.commitAllFieldTitle}"
                         addStyleNames="{res.gitCSS.textFont} {style.emptyBorder}"
                         debugId="git-commit-onlySelection"/>
             <g:CheckBox ui:field="amend" HTML="{locale.commitAmendFieldTitle}"

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,7 +11,6 @@
 package org.eclipse.che.ide.ext.git.client;
 
 import com.google.gwt.i18n.client.Messages;
-import com.google.gwt.safehtml.shared.SafeHtml;
 
 /** @author Evgen Vidolob */
 public interface GitLocalizationConstant extends Messages {
@@ -94,6 +93,9 @@ public interface GitLocalizationConstant extends Messages {
 
     @Key("messages.nothingAddToIndex")
     String nothingAddToIndex();
+
+    @Key("messages.nothingAddToIndexMultiSelect")
+    String nothingAddToIndexMultiSelect();
 
     @Key("messages.add_failed")
     String addFailed();
@@ -294,20 +296,23 @@ public interface GitLocalizationConstant extends Messages {
     @Key("view.add_to_index.all_changes")
     String addToIndexAllChanges();
 
-    @Key("view.add_to_index.multiple")
-    String addToIndexMultiple();
+    @Key("view.add_to_index.multiselect")
+    String addToIndexMultiSelect();
 
     @Key("view.add_to_index.folder")
-    SafeHtml addToIndexFolder(String folder);
+    String addToIndexFolder(String folder);
 
     @Key("view.add_to_index.file")
-    SafeHtml addToIndexFile(String file);
+    String addToIndexFile(String file);
 
     @Key("view.add_to_index.update_field_title")
     String addToIndexUpdateFieldTitle();
 
     @Key("view.add_to_index.title")
     String addToIndexTitle();
+
+    @Key("view.add_to_index.command_name")
+    String addToIndexCommandName();
 
     // Branch
     @Key("view.branch.create_new")
@@ -348,13 +353,13 @@ public interface GitLocalizationConstant extends Messages {
     String commitTitle();
 
     @Key("view.commit.all_field_title")
-    String commitAllFieldTitle();
+    String commitAddAllFieldTitle();
 
     @Key("view.commit.selection_field_title")
     String commitSelectionFieldTitle();
 
-    @Key("view.commit.onlyselection_field_title")
-    String commitOnlySelectionFieldTitle();
+    @Key("view.commit.all_project_field_title")
+    String commitAllFieldTitle();
 
     @Key("view.commit.amend_field_title")
     String commitAmendFieldTitle();
@@ -413,10 +418,10 @@ public interface GitLocalizationConstant extends Messages {
     String removeFromIndexOnly();
 
     @Key("view.remove_from_index.folder")
-    SafeHtml removeFromIndexFolder(String folder);
+    String removeFromIndexFolder(String folder);
 
     @Key("view.remove_from_index.file")
-    SafeHtml removeFromIndexFile(String file);
+    String removeFromIndexFile(String file);
 
     @Key("view.remove_from_index.title")
     String removeFromIndexTitle();

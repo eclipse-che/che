@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,12 +14,14 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.core.model.project.NewProjectConfig;
 import org.eclipse.che.api.project.shared.dto.AttributeDto;
 import org.eclipse.che.api.project.shared.dto.ProjectTypeDto;
 import org.eclipse.che.api.project.templates.shared.dto.ProjectTemplateDescriptor;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
+import org.eclipse.che.ide.api.project.NewProjectConfigImpl;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistry;
@@ -181,7 +183,15 @@ public class ProjectWizardPresenter implements Wizard.UpdateDelegate,
         if (wizardMode == UPDATE) {
             newProject.setAttributes(prevData.getAttributes());
         } else {
-            List<AttributeDto> attributes = projectType.getAttributes();
+            final MutableProjectConfig.MutableSourceStorage sourceStorage = prevData.getSource();
+            if (sourceStorage != null) { // some values should be cleared when user switch between categories
+                sourceStorage.setLocation("");
+                sourceStorage.setType("");
+                sourceStorage.getParameters().clear();
+            }
+            prevData.getProjects().clear();
+
+            final List<AttributeDto> attributes = projectType.getAttributes();
             Map<String, List<String>> prevDataAttributes = prevData.getAttributes();
             Map<String, List<String>> newAttributes = new HashMap<>();
             for (AttributeDto attribute : attributes) {
@@ -203,8 +213,11 @@ public class ProjectWizardPresenter implements Wizard.UpdateDelegate,
         wizard.navigateToFirst();
 
         // set dataObject's values from projectTemplate
-        dataObject.setType(projectTemplate.getProjectType());
-        dataObject.setSource(projectTemplate.getSource());
+        final NewProjectConfig newProjectConfig = new NewProjectConfigImpl(projectTemplate);
+        dataObject.setType(newProjectConfig.getType());
+        dataObject.setSource(newProjectConfig.getSource());
+        dataObject.setAttributes(newProjectConfig.getAttributes());
+        dataObject.setOptions(newProjectConfig.getOptions());
     }
 
     /** Creates or returns project wizard for the specified projectType with the given dataObject. */

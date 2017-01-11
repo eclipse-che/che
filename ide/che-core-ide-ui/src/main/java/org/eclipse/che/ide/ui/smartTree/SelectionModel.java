@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -782,7 +782,9 @@ public class SelectionModel implements HasSelectionHandlers<Node>, HasBeforeSele
     }
 
     protected void onRemove(Node model) {
-        selectionStorage.remove(model);
+        if(selectionStorage.remove(model)) {
+            fireSelectionChange();
+        }
     }
 
     public List<Node> getSelectedNodes() {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.wsagent.server;
 
+import org.eclipse.che.api.core.websocket.WebSocketMessageReceiver;
 import org.eclipse.che.api.core.websocket.impl.BasicWebSocketEndpoint;
 import org.eclipse.che.api.core.websocket.impl.GuiceInjectorEndpointConfigurator;
-import org.eclipse.che.api.core.websocket.impl.PendingMessagesReSender;
+import org.eclipse.che.api.core.websocket.impl.MessagesReSender;
 import org.eclipse.che.api.core.websocket.impl.WebSocketSessionRegistry;
-import org.eclipse.che.api.core.websocket.impl.WebSocketTransmissionDispatcher;
 
 import javax.inject.Inject;
 import javax.websocket.server.ServerEndpoint;
@@ -31,8 +31,8 @@ public class CheWebSocketEndpoint extends BasicWebSocketEndpoint {
 
     @Inject
     public CheWebSocketEndpoint(WebSocketSessionRegistry registry,
-                                PendingMessagesReSender reSender,
-                                WebSocketTransmissionDispatcher dispatcher) {
-        super(registry, reSender, dispatcher);
+                                MessagesReSender reSender,
+                                WebSocketMessageReceiver receiver) {
+        super(registry, reSender, receiver);
     }
 }

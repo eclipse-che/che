@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,7 +25,7 @@ import java.util.Set;
  */
 public interface PreferencesView extends View<PreferencesView.ActionDelegate> {
     /** Needs for delegate some function into preferences view. */
-    public interface ActionDelegate {
+    interface ActionDelegate {
         /**
          * Performs actions when user click Save button.
          * Actually when button is pressed, preferences must be stored on the server.
@@ -50,6 +50,11 @@ public interface PreferencesView extends View<PreferencesView.ActionDelegate> {
          *         selected preference
          */
         void onPreferenceSelected(PreferencePagePresenter preference);
+
+        /**
+         * Performs any actions on the preferences window closing.
+         */
+        void onCloseWindow();
 
     }
 

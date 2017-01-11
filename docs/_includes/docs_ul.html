@@ -1,0 +1,20 @@
+{% include base.html %}
+<ul>
+{% for item in include.items %}
+  {% assign layout_type = page.layout | prepend:"/" | append:"/" %}
+  {% assign item_url = item | prepend:layout_type | append:"/" %}
+  {% assign item_url = item_url | replace_first:'/tutorial-','/' | replace_first:'/openshift-','/' %}
+  {% assign item_url = item_url | replace_first:'/artik-','/' | replace_first:'/che-data-model-','/data-model/' %}
+  {% assign item_url = item_url | replace_first:'/ws-','/workspace/' | replace_first:'/ide-','/ide/' %}
+  {% assign item_url = item_url | replace_first:'/server-','/server/' | replace_first:'/che-setup-','/setup/' %}
+  {% assign item_url = item_url | replace_first:'/che-setupalt-','/setup-alternatives/' | replace_first:'/chedir-','/chedir/' %}
+  {% assign item_url = item_url | replace_first:'/plugins-','/plugins/' %}
+  {% assign p = site.documents | where:"url", item_url | first %}
+  {% if page.url != null %} 
+    <li class="{% if item_url == page.url %}current{% endif %}"><a href="{{ base }}{{ p.url }}index.html">{{ p.title }}</a></li>
+  {% else %} 
+    <li class=""><a href="">Error Generating Page Link. Contact Maintainer.</a></li>
+  {% endif %}
+  
+{% endfor %}
+</ul>

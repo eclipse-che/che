@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -85,8 +85,6 @@ public class RecipePartPresenterTest {
     private RecipeDescriptor  recipeDescriptor1;
     @Mock
     private RecipeDescriptor  recipeDescriptor2;
-    @Mock
-    private RecipeWidget      recipeWidget;
     @Mock
     private RecipeEditorPanel recipeEditorPanel;
     @Mock
@@ -332,13 +330,6 @@ public class RecipePartPresenterTest {
         recipePartPresenter.getTitle();
 
         verify(locale).viewRecipePanelTitle();
-    }
-
-    @Test
-    public void panelShouldBeHidden() throws Exception {
-        recipePartPresenter.setVisible(false);
-
-        verify(recipePartView).setVisible(false);
     }
 
     @Test

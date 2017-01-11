@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+
+    Copyright (c) 2012-2017 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240" style="width: 10px; height: 10px; padding: 2px;">
+<g transform="translate(0.000000,240.000000) scale(0.100000,-0.100000)" stroke="none">
+  <path d="M0 1200 l0 -900 1200 0 1200 0 0 900 0 900 -1200 0 -1200 0 0 -900z m2200 0 l0 -700 -200 0 -200 0 0 500 0 500 -800 0 -800 0 0 200 0 200 1000 0 1000 0 0 -700z"></path>
+</g>
+</svg>

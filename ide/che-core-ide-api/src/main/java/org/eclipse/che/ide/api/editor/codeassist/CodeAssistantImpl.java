@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,12 +52,12 @@ public class CodeAssistantImpl implements CodeAssistant {
     }
 
     @Override
-    public void computeCompletionProposals(final int offset, final CodeAssistCallback callback) {
+    public void computeCompletionProposals(final int offset, final boolean triggered, final CodeAssistCallback callback) {
         this.lastErrorMessage = "processing";
 
         final CodeAssistProcessor processor = getProcessor(offset);
         if (processor != null) {
-            processor.computeCompletionProposals(textEditor, offset, callback);
+            processor.computeCompletionProposals(textEditor, offset, triggered, callback);
             this.lastErrorMessage = processor.getErrorMessage();
             if (this.lastErrorMessage != null) {
                 notificationManager.notify("", lastErrorMessage, FAIL, EMERGE_MODE);
@@ -66,7 +66,7 @@ public class CodeAssistantImpl implements CodeAssistant {
         } else {
             final CodeAssistProcessor fallbackProcessor = getFallbackProcessor();
             if (fallbackProcessor != null) {
-                fallbackProcessor.computeCompletionProposals(textEditor, offset, callback);
+                fallbackProcessor.computeCompletionProposals(textEditor, offset, triggered, callback);
                 this.lastErrorMessage = fallbackProcessor.getErrorMessage();
                 if (this.lastErrorMessage != null) {
                     this.textEditor.showMessage(this.lastErrorMessage);

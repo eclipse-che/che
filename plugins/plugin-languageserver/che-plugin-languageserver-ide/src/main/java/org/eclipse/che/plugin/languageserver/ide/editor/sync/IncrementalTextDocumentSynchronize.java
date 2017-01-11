@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,7 +12,6 @@ package org.eclipse.che.plugin.languageserver.ide.editor.sync;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.api.languageserver.shared.lsapi.DidChangeTextDocumentParamsDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.PositionDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.RangeDTO;
@@ -51,7 +50,7 @@ class IncrementalTextDocumentSynchronize implements TextDocumentSynchronize {
         if (event.getRemoveCharCount() != 0) {
             endPosition = new TextPosition(startPosition.getLine(), startPosition.getCharacter() + event.getRemoveCharCount());
         } else {
-            endPosition = new TextPosition(startPosition.getLine(), startPosition.getCharacter() + event.getLength());
+            endPosition = new TextPosition(startPosition.getLine(), startPosition.getCharacter());
         }
 
         DidChangeTextDocumentParamsDTO changeDTO = dtoFactory.createDto(DidChangeTextDocumentParamsDTO.class);

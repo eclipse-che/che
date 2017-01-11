@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.api.parts;
 
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.DoubleClickHandler;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -27,7 +28,7 @@ public interface PartStackView extends View<PartStackView.ActionDelegate> {
     }
 
     /** Tab which can be clicked and closed */
-    interface TabItem extends ClickHandler {
+    interface TabItem extends ClickHandler, DoubleClickHandler {
 
         @NotNull
         IsWidget getView();
@@ -66,6 +67,7 @@ public interface PartStackView extends View<PartStackView.ActionDelegate> {
          *         orientation of the Tab (e.g. LEFT or RIGHT)
          */
         void setTabPosition(@NotNull TabPosition tabPosition);
+
     }
 
     /** Add Tab */
@@ -82,6 +84,8 @@ public interface PartStackView extends View<PartStackView.ActionDelegate> {
     /** Set PartStack focused */
     void setFocus(boolean focused);
 
+    void setMaximized(boolean maximized);
+
     /** Update Tab */
     void updateTabItem(@NotNull PartPresenter partPresenter);
 
@@ -90,4 +94,5 @@ public interface PartStackView extends View<PartStackView.ActionDelegate> {
         /** PartStack is being clicked and requests Focus */
         void onRequestFocus();
     }
+
 }

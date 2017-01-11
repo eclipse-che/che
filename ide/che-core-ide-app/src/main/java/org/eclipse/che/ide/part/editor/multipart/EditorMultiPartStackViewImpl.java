@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,7 +32,7 @@ import static com.google.gwt.dom.client.Style.Unit.PCT;
 /**
  * @author Roman Nikitenko
  */
-public class EditorMultiPartStackViewImpl extends ResizeComposite implements EditorMultiPartStackView{
+public class EditorMultiPartStackViewImpl extends ResizeComposite implements EditorMultiPartStackView {
 
     private LayoutPanel contentPanel;
 
@@ -74,7 +74,6 @@ public class EditorMultiPartStackViewImpl extends ResizeComposite implements Edi
                     Log.error(getClass(), "Can not find container for specified editor");
                     return;
                 }
-
 
                 relativePartStackView.split(widget, constraints.direction, size);
                 splitEditorParts.put(partStack, relativePartStackView.getReplica());

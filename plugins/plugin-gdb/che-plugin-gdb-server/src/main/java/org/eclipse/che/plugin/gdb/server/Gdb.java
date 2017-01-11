@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,10 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.gdb.server;
 
+import org.eclipse.che.api.core.util.AbstractLineConsumer;
+import org.eclipse.che.api.core.util.LineConsumer;
+import org.eclipse.che.api.core.util.ProcessUtil;
+import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.gdb.server.exception.GdbException;
 import org.eclipse.che.plugin.gdb.server.exception.GdbTerminatedException;
+import org.eclipse.che.plugin.gdb.server.parser.GdbBacktrace;
 import org.eclipse.che.plugin.gdb.server.parser.GdbBreak;
 import org.eclipse.che.plugin.gdb.server.parser.GdbClear;
 import org.eclipse.che.plugin.gdb.server.parser.GdbContinue;
@@ -31,6 +36,7 @@ import org.eclipse.che.plugin.gdb.server.parser.GdbPrint;
 import org.eclipse.che.plugin.gdb.server.parser.GdbRun;
 import org.eclipse.che.plugin.gdb.server.parser.GdbTargetRemote;
 import org.eclipse.che.plugin.gdb.server.parser.GdbVersion;
+import org.eclipse.che.plugin.gdb.server.parser.ProcessInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +44,11 @@ import javax.validation.constraints.NotNull;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import static java.lang.String.format;
 
 /**
  * GDB.
@@ -79,6 +90,56 @@ public class Gdb extends GdbProcess {
     public GdbRun run() throws IOException, InterruptedException, DebuggerException {
         GdbOutput gdbOutput = sendCommand("run");
         return GdbRun.parse(gdbOutput);
+    }
+
+    public Location suspend(final String file, boolean isRemoteConnection) throws IOException, InterruptedException, DebuggerException {
+        if (pid < 0) {
+            throw new DebuggerException("Gdb process not found.");
+        }
+
+        if (isRemoteConnection) {
+            Runtime.getRuntime().exec("kill -SIGINT " + pid).waitFor();
+            sendCommand("signal SIGSTOP ");
+        } else {
+            final List<String> outputs = new ArrayList<>();
+            final ProcessBuilder processBuilder = new ProcessBuilder().command("ps", "-o", "pid,cmd", "--ppid", String.valueOf(pid));
+            final Process process = processBuilder.start();
+
+            LineConsumer stdout = new AbstractLineConsumer() {
+                @Override
+                public void writeLine(String line) throws IOException {
+                    outputs.add(line);
+                }
+            };
+
+            ProcessUtil.process(process, stdout);
+
+            int processId = -1;
+            for (String output : outputs) {
+                try {
+                    final ProcessInfo processInfo = ProcessInfo.parse(output);
+                    if (file.equals(processInfo.getProcessName())) {
+                        processId = processInfo.getProcessId();
+                    }
+                } catch (Exception e) {
+                    //we can't get info about current process, but we are trying to get info about another processes
+                }
+            }
+
+            if (processId == -1) {
+                throw new DebuggerException(format("Process %s not found.", file));
+            }
+            Runtime.getRuntime().exec("kill -SIGINT " + processId).waitFor();
+        }
+
+        final GdbOutput gdbOutput = sendCommand("backtrace");
+        final GdbBacktrace backtrace = GdbBacktrace.parse(gdbOutput);
+        final Map<Integer, Location> frames = backtrace.getFrames();
+
+        if (frames.containsKey(0)) {
+            return frames.get(0);
+        }
+        throw new DebuggerException("Unable recognize current location for debugger session. ");
     }
 
     /**

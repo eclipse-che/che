@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,7 @@ import org.eclipse.che.ide.api.component.StateComponent;
 import org.eclipse.che.ide.api.component.WsAgentComponent;
 import org.eclipse.che.ide.client.WorkspaceStateRestorer;
 import org.eclipse.che.ide.editor.EditorAgentImpl;
+import org.eclipse.che.ide.part.explorer.project.ProjectExplorerStateComponent;
 import org.eclipse.che.ide.workspace.WorkspacePresenter;
 
 /**
@@ -35,5 +36,6 @@ public class PersistenceApiModule extends AbstractGinModule {
         GinMapBinder<String, StateComponent> stateComponents = GinMapBinder.newMapBinder(binder(), String.class, StateComponent.class);
         stateComponents.addBinding("workspace").to(WorkspacePresenter.class);
         stateComponents.addBinding("editor").to(EditorAgentImpl.class);
+        stateComponents.addBinding("projectExplorer").to(ProjectExplorerStateComponent.class);
     }
 }

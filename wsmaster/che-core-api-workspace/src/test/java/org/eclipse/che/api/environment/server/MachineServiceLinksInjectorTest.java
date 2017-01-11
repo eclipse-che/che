@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 import static org.eclipse.che.api.machine.shared.Constants.ENVIRONMENT_STATUS_CHANNEL_TEMPLATE;
+import static org.eclipse.che.api.machine.shared.Constants.EXEC_AGENT_REFERENCE;
 import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_DESTROY_MACHINE;
 import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_ENVIRONMENT_OUTPUT_CHANNEL;
 import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_EXECUTE_COMMAND;
@@ -64,7 +65,11 @@ public class MachineServiceLinksInjectorTest {
     @Mock
     private MachineConfigDto      machineConfigDtoMock;
     @Mock
-    private ServerDto             serverDtoMock;
+    private ServerDto             terminalServerMock;
+
+    @Mock
+    private ServerDto             execAgentServerMock;
+
 
     private MachineServiceLinksInjector machineLinksInjector;
 
@@ -79,9 +84,12 @@ public class MachineServiceLinksInjectorTest {
 
     @Test
     public void shouldInjectLinksIntoMachineDto() {
-        when(serverDtoMock.getRef()).thenReturn(TERMINAL_REFERENCE);
-        when(serverDtoMock.getUrl()).thenReturn(URI_BASE + "/pty");
-        when(machineRuntimeInfoDtoMock.getServers()).thenReturn(ImmutableMap.of("", serverDtoMock));
+        when(terminalServerMock.getRef()).thenReturn(TERMINAL_REFERENCE);
+        when(terminalServerMock.getUrl()).thenReturn(URI_BASE + "/pty");
+        when(execAgentServerMock.getRef()).thenReturn(EXEC_AGENT_REFERENCE);
+        when(execAgentServerMock.getUrl()).thenReturn(URI_BASE + "/connect");
+        when(machineRuntimeInfoDtoMock.getServers()).thenReturn(ImmutableMap.of(TERMINAL_REFERENCE, terminalServerMock,
+                                                                                EXEC_AGENT_REFERENCE, execAgentServerMock));
         final MachineDto machineDto = DtoFactory.newDto(MachineDto.class)
                                                 .withId("id")
                                                 .withWorkspaceId("wsId")
@@ -93,6 +101,7 @@ public class MachineServiceLinksInjectorTest {
                                                           .map(link -> Pair.of(link.getMethod(), link.getRel()))
                                                           .collect(Collectors.toSet());
         final Set<Pair<String, String>> expectedLinks = new HashSet<>(asList(Pair.of("GET", TERMINAL_REFERENCE),
+                                                                             Pair.of("GET", EXEC_AGENT_REFERENCE),
                                                                              Pair.of("GET", LINK_REL_SELF),
                                                                              Pair.of("GET", LINK_REL_GET_MACHINES),
                                                                              Pair.of("POST", LINK_REL_EXECUTE_COMMAND),

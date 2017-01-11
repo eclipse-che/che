@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -193,7 +193,7 @@ public class OrionEditorInit {
             final KeyBindingAction action = new KeyBindingAction() {
                 @Override
                 public boolean action() {
-                    showCompletion(codeAssistant);
+                    showCompletion(codeAssistant, true);
                     return true;
                 }
             };
@@ -204,7 +204,7 @@ public class OrionEditorInit {
             documentHandle.getDocEventBus().addHandler(CompletionRequestEvent.TYPE, new CompletionRequestHandler() {
                 @Override
                 public void onCompletionRequest(final CompletionRequestEvent event) {
-                    showCompletion(codeAssistant);
+                    showCompletion(codeAssistant, false);
                 }
             });
         } else {
@@ -236,8 +236,9 @@ public class OrionEditorInit {
      * Show the available completions.
      *
      * @param codeAssistant the code assistant
+     * @param triggered if triggered by the content assist key binding
      */
-    private void showCompletion(final CodeAssistant codeAssistant) {
+    private void showCompletion(final CodeAssistant codeAssistant, final boolean triggered) {
         final int cursor = textEditor.getCursorOffset();
         if (cursor < 0) {
             return;
@@ -250,7 +251,7 @@ public class OrionEditorInit {
                     // cursor must be computed here again so it's original value is not baked in
                     // the SMI instance closure - important for completion update when typing
                     final int cursor = textEditor.getCursorOffset();
-                    codeAssistant.computeCompletionProposals(cursor, new CodeAssistCallback() {
+                    codeAssistant.computeCompletionProposals(cursor, triggered, new CodeAssistCallback() {
                         @Override
                         public void proposalComputed(final List<CompletionProposal> proposals) {
                             callback.onCompletionReady(proposals);

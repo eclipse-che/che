@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -76,25 +76,32 @@ public class ButtonImpl implements Button {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof ButtonImpl)) return false;
-        final ButtonImpl other = (ButtonImpl)obj;
-        return Objects.equals(attributes, other.attributes)
-               && Objects.equals(type, other.type);
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof ButtonImpl)) {
+            return false;
+        }
+        final ButtonImpl that = (ButtonImpl)obj;
+        return Objects.equals(id, that.id)
+               && Objects.equals(attributes, that.attributes)
+               && Objects.equals(type, that.type);
     }
 
     @Override
     public int hashCode() {
-        int result = 7;
-        result = 31 * result + Objects.hashCode(attributes);
-        result = 31 * result + Objects.hashCode(type);
-        return result;
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(id);
+        hash = 31 * hash + Objects.hashCode(attributes);
+        hash = 31 * hash + Objects.hashCode(type);
+        return hash;
     }
 
     @Override
     public String toString() {
         return "ButtonImpl{" +
-               "attributes=" + attributes +
+               "id=" + id +
+               ", attributes=" + attributes +
                ", type=" + type +
                '}';
     }

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2012-2016 Codenvy, S.A.
+# Copyright (c) 2012-2017 Codenvy, S.A.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
@@ -67,7 +67,7 @@ elif echo ${LINUX_TYPE} | grep -qi "debian"; then
 # Fedora 23 
 ###########
 elif echo ${LINUX_TYPE} | grep -qi "fedora"; then
-    PACKAGES=${PACKAGES}" procps-ng"
+    command -v ps >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" procps-ng"; }
     test "${PACKAGES}" = "" || {
         ${SUDO} dnf -y install ${PACKAGES};
     }
@@ -133,6 +133,8 @@ elif echo ${MACHINE_TYPE} | grep -qi "arm6"; then
     PREFIX=linux_arm7
 elif echo ${MACHINE_TYPE} | grep -qi "arm7"; then
     PREFIX=linux_arm7
+elif echo ${MACHINE_TYPE} | grep -qi "armv7l"; then
+    PREFIX=linux_arm7
 else
     >&2 echo "Unrecognized Machine Type"
     >&2 uname -a
@@ -169,4 +171,6 @@ if [ -f /bin/bash ]; then
     SHELL_INTERPRETER="/bin/bash"
 fi
 
-$HOME/che/terminal/che-websocket-terminal -addr :4411 -cmd ${SHELL_INTERPRETER} -static $HOME/che/terminal/
+#####################################################
+### terminal-agent run command will be added here ###
+#####################################################

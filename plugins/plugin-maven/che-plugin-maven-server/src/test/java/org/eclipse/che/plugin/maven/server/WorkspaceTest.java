@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,7 +12,6 @@ package org.eclipse.che.plugin.maven.server;
 
 import com.google.gson.JsonObject;
 import com.google.inject.Provider;
-
 import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.api.project.server.RegisteredProject;
@@ -781,4 +780,69 @@ public class WorkspaceTest extends BaseTest {
     }
 
 
+    @Test
+    public void testImportParentInSiblingFolder() throws Exception {
+        String parentPom = "" +
+                "  <groupId>com.mycompany.app</groupId>\n" +
+                "  <artifactId>my-app</artifactId>\n" +
+                "  <version>1</version>\n" +
+                "  <packaging>pom</packaging>\n" +
+                " \n" +
+                "  <modules>\n" +
+                "    <module>../my-module</module>\n" +
+                "  </modules>";
+
+        createTestProject("parent", parentPom);
+
+        String relativePom = "<parent>\n" +
+                "    <groupId>com.mycompany.app</groupId>\n" +
+                "    <artifactId>my-app</artifactId>\n" +
+                "    <version>1</version>\n" +
+                "    <relativePath>../parent/pom.xml</relativePath>\n" +
+                "  </parent>\n" +
+                "  <artifactId>my-module</artifactId>\n";
+
+        createTestProject("my-module", relativePom);
+
+        IProject test = ResourcesPlugin.getWorkspace().getRoot().getProject("my-module");
+        mavenWorkspace.update(Collections.singletonList(test));
+        mavenWorkspace.waitForUpdate();
+        MavenProject mavenProject = mavenProjectManager.findMavenProject(test);
+        assertThat(mavenProject).isNotNull();
+
+    }
+
+    @Test
+    public void testImportRelativeChildPom() throws Exception {
+        String parentPom = "" +
+                "  <groupId>com.mycompany.app</groupId>\n" +
+                "  <artifactId>my-app</artifactId>\n" +
+                "  <version>1</version>\n" +
+                "  <packaging>pom</packaging>\n" +
+                " \n" +
+                "  <modules>\n" +
+                "    <module>../my-module/pom.xml</module>\n" +
+                "  </modules>";
+
+        createTestProject("parent", parentPom);
+
+        String relativePom = "<parent>\n" +
+                "    <groupId>com.mycompany.app</groupId>\n" +
+                "    <artifactId>my-app</artifactId>\n" +
+                "    <version>1</version>\n" +
+                "    <relativePath>../parent/pom.xml</relativePath>\n" +
+                "  </parent>\n" +
+                "  <artifactId>my-module</artifactId>\n";
+
+        createTestProject("my-module", relativePom);
+
+        IProject test = ResourcesPlugin.getWorkspace().getRoot().getProject("parent");
+        mavenWorkspace.update(Collections.singletonList(test));
+        mavenWorkspace.waitForUpdate();
+        IProject myModule = ResourcesPlugin.getWorkspace().getRoot().getProject("my-module");
+        MavenProject mavenProject = mavenProjectManager.findMavenProject(myModule);
+        assertThat(mavenProject).isNotNull();
+        assertThat(mavenProject.getDependencies()).isNotNull();
+
+    }
 }

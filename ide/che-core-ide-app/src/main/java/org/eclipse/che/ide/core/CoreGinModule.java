@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,31 +29,35 @@ import org.eclipse.che.ide.api.extension.ExtensionRegistry;
 import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.git.GitServiceClientImpl;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
+import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
+import org.eclipse.che.ide.api.machine.ExecAgentEventManager;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.machine.MachineServiceClientImpl;
 import org.eclipse.che.ide.api.machine.RecipeServiceClient;
 import org.eclipse.che.ide.api.machine.RecipeServiceClientImpl;
+import org.eclipse.che.ide.api.machine.execagent.ConnectedEventHandler;
+import org.eclipse.che.ide.api.machine.execagent.JsonRpcExecAgentCommandManager;
+import org.eclipse.che.ide.api.machine.execagent.JsonRpcExecAgentEventManager;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.reference.FqnProvider;
 import org.eclipse.che.ide.api.selection.SelectionAgent;
 import org.eclipse.che.ide.api.ssh.SshServiceClient;
 import org.eclipse.che.ide.api.ssh.SshServiceClientImpl;
 import org.eclipse.che.ide.clipboard.ClipboardModule;
-import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.command.CommandApiModule;
-import org.eclipse.che.ide.macro.MacroApiModule;
-import org.eclipse.che.ide.project.ProjectApiModule;
-import org.eclipse.che.ide.workspace.WorkspaceApiModule;
+import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.debug.DebugApiModule;
 import org.eclipse.che.ide.editor.EditorApiModule;
 import org.eclipse.che.ide.editor.preferences.EditorPreferencesModule;
 import org.eclipse.che.ide.factory.FactoryApiModule;
 import org.eclipse.che.ide.filetypes.FileTypeApiModule;
 import org.eclipse.che.ide.keybinding.KeyBindingManager;
+import org.eclipse.che.ide.macro.MacroApiModule;
 import org.eclipse.che.ide.notification.NotificationApiModule;
 import org.eclipse.che.ide.oauth.OAuthApiModule;
 import org.eclipse.che.ide.part.PartApiModule;
 import org.eclipse.che.ide.preferences.PreferencesApiModule;
+import org.eclipse.che.ide.project.ProjectApiModule;
 import org.eclipse.che.ide.projectimport.ProjectImportModule;
 import org.eclipse.che.ide.resources.ResourceApiModule;
 import org.eclipse.che.ide.rest.RestContext;
@@ -65,6 +69,7 @@ import org.eclipse.che.ide.theme.ThemeApiModule;
 import org.eclipse.che.ide.ui.loaders.PopupLoaderFactory;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.user.UserApiModule;
+import org.eclipse.che.ide.workspace.WorkspaceApiModule;
 import org.eclipse.che.ide.workspace.WorkspacePresenter;
 import org.eclipse.che.providers.DynaProvider;
 import org.eclipse.che.providers.DynaProviderImpl;
@@ -138,6 +143,11 @@ public class CoreGinModule extends AbstractGinModule {
         bind(SelectionAgent.class).to(SelectionAgentImpl.class).asEagerSingleton();
         bind(KeyBindingAgent.class).to(KeyBindingManager.class).in(Singleton.class);
         bind(WorkspaceAgent.class).to(WorkspacePresenter.class).in(Singleton.class);
+
+        // Exec agent
+        bind(ExecAgentCommandManager.class).to(JsonRpcExecAgentCommandManager.class);
+        bind(ExecAgentEventManager.class).to(JsonRpcExecAgentEventManager.class);
+        bind(ConnectedEventHandler.class).asEagerSingleton();
     }
 
     @Provides

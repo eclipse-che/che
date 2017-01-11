@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,7 +39,7 @@ import org.eclipse.che.ide.menu.ContextMenu;
 import org.eclipse.che.ide.project.node.SyntheticNode;
 import org.eclipse.che.ide.resources.tree.ResourceNode;
 import org.eclipse.che.ide.resources.tree.SkipHiddenNodesInterceptor;
-import org.eclipse.che.ide.ui.FontAwesome;
+import org.eclipse.che.ide.FontAwesome;
 import org.eclipse.che.ide.ui.Tooltip;
 import org.eclipse.che.ide.ui.smartTree.NodeDescriptor;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
@@ -182,7 +182,7 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
             }
         });
 
-        Tooltip.create((elemental.dom.Element)collapseAllButton.getElement(), BOTTOM, MIDDLE, "Refresh selected path");
+        Tooltip.create((elemental.dom.Element)refreshPathButton.getElement(), BOTTOM, MIDDLE, "Refresh selected path");
         refreshPathButton.ensureDebugId(REFRESH_BUTTON_ID);
         refreshPathButton.setVisible(true);
         addToolButton(refreshPathButton);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,6 +18,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.api.workspace.server.WorkspaceFilesCleaner;
 import org.eclipse.che.api.workspace.server.event.WorkspaceRemovedEvent;
 import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
@@ -49,6 +50,8 @@ public class RemoveWorkspaceFilesAfterRemoveWorkspaceEventSubscriber implements 
         this.workspaceFilesCleaner = workspaceFilesCleaner;
         this.eventService = eventService;
         executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("RemoveWorkspaceFilesAfterRemoveWorkspaceEventSubscriber-%d")
+                                                                           .setUncaughtExceptionHandler(
+                                                                                   LoggingUncaughtExceptionHandler.getInstance())
                                                                            .setDaemon(true)
                                                                            .build());
     }

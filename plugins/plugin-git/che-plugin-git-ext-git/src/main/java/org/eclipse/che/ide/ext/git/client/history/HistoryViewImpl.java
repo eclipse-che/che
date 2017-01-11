@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.eclipse.che.ide.ext.git.client.history;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ScrollEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -23,6 +24,7 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.UIObject;
@@ -32,6 +34,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.git.shared.Constants;
 import org.eclipse.che.api.git.shared.Revision;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
@@ -42,6 +45,7 @@ import org.vectomatic.dom.svg.ui.SVGImage;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -87,6 +91,8 @@ public class HistoryViewImpl extends BaseView<HistoryView.ActionDelegate> implem
     Button              btnDiffWithWorkTree;
     @UiField
     Button              btnDiffWithPrevCommit;
+    @UiField
+    ScrollPanel         scrollPanel;
     @UiField(provided = true)
     final GitResources            res;
     @UiField(provided = true)
@@ -94,10 +100,6 @@ public class HistoryViewImpl extends BaseView<HistoryView.ActionDelegate> implem
 
     /**
      * Create view.
-     *
-     * @param resources
-     * @param locale
-     * @param partStackUIResources
      */
     @Inject
     protected HistoryViewImpl(final GitResources resources,
@@ -113,6 +115,7 @@ public class HistoryViewImpl extends BaseView<HistoryView.ActionDelegate> implem
         createCommitsTable(res);
         setContentWidget(uiBinder.createAndBindUi(this));
         minimizeButton.ensureDebugId("git-showHistory-minimizeBut");
+        this.scrollPanel.getElement().setTabIndex(-1);
 
         btnProjectChanges.getElement().appendChild(new SVGImage(resources.projectLevel()).getElement());
         btnResourceChanges.getElement().appendChild(new SVGImage(resources.resourceLevel()).getElement());
@@ -122,10 +125,10 @@ public class HistoryViewImpl extends BaseView<HistoryView.ActionDelegate> implem
         btnRefresh.getElement().appendChild(new SVGImage(resources.refresh()).getElement());
     }
 
-    /** Creates table what contains list of available commits.
-     * @param res*/
+    /** Creates table what contains list of available commits. */
     private void createCommitsTable(Resources res) {
-        commits = new CellTable<Revision>(15, res);
+        commits = new CellTable<Revision>(Constants.DEFAULT_PAGE_SIZE, res);
+        commits.setRowData(Collections.<Revision>emptyList());
 
         Column<Revision, String> dateColumn = new Column<Revision, String>(new TextCell()) {
             @Override
@@ -178,12 +181,10 @@ public class HistoryViewImpl extends BaseView<HistoryView.ActionDelegate> implem
     /** {@inheritDoc} */
     @Override
     public void setRevisions(@NotNull List<Revision> revisions) {
-        // Wraps Array in java.util.List
-        List<Revision> list = new ArrayList<>();
-        for (Revision revision : revisions) {
-            list.add(revision);
-        }
-        this.commits.setRowData(list);
+        commits.setRowData(revisions);
+
+        // if the size of the panel is greater then the size of the loaded list of the history then no scroller has been appeared yet
+        onPanelScrolled(null);
     }
 
     /** {@inheritDoc} */
@@ -304,5 +305,15 @@ public class HistoryViewImpl extends BaseView<HistoryView.ActionDelegate> implem
     @UiHandler("btnDiffWithPrevCommit")
     public void onDiffWithPrevCommitClicked(ClickEvent event) {
         delegate.onDiffWithPrevCommitClicked();
+    }
+
+    @UiHandler("scrollPanel")
+    public void onPanelScrolled(ScrollEvent event) {
+        if (scrollPanel.getVerticalScrollPosition() == scrollPanel.getMaximumVerticalScrollPosition()) {
+            // to avoid autoscrolling to selected item
+            scrollPanel.getElement().focus();
+
+            delegate.onScrolledToButton();
+        }
     }
 }

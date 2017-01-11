@@ -8,13 +8,13 @@ https://www.eclipse.org/che/. Next-generation Eclipse platform, developer worksp
 ![Eclipse Che](https://www.eclipse.org/che/images/banner@2x.png "Eclipse Che")
 
 ### Getting Started
-You can run Che in the public cloud, a private cloud, or install it on any OS. Che has been tested on Ubuntu, Linux, MacOS and Windows. The [step by step guide](http://eclipse.org/che/getting-started/) will get you going.
+You can run Che in the public cloud, a private cloud, or install it on any OS. Che has been tested on Ubuntu, Linux, MacOS and Windows. The [step by step guide](http://eclipse.org/che/getting-started/) will get you going along with [our docs](https://www.eclipse.org/che/docs/).
 
 The `che` repository is where we do development and there are many ways you can participate, for example:
 
 - [Submit bugs and feature requests](http://github.com/eclipse/che/issues) and help us verify them
 - Review [source code changes](http://github.com/eclipse/che/pulls)
-- [Review the docs](https://eclipse-che.readme.io/docs/) and make improvements for anything from typos to new content
+- [Improve docs](https://github.com/codenvy/che-docs)
 
 ### Customizing
 There are many ways to customize Che out-of-the-box including [stacks, templates, commands, IDE extensions, server-side extensions plugins, assemblies, RESTful APIs, and editors](https://github.com/eclipse/che/blob/master/CUSTOMIZING.md). 

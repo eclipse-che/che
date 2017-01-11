@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -118,11 +118,6 @@ public class TestSelectionAgent {
             }
 
             @Override
-            public void setVisible(boolean visible) {
-                //to do nothing
-            }
-
-            @Override
             public IsWidget getView() {
                 return null;
             }
@@ -163,11 +158,6 @@ public class TestSelectionAgent {
             @Override
             public String getTitle() {
                 return null;
-            }
-
-            @Override
-            public void setVisible(boolean visible) {
-                //to do nothing
             }
 
             @Override

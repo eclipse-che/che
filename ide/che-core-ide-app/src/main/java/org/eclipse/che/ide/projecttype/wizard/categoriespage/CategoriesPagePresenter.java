@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,13 @@ package org.eclipse.che.ide.projecttype.wizard.categoriespage;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 
+import org.eclipse.che.api.core.model.project.NewProjectConfig;
 import org.eclipse.che.api.project.shared.dto.ProjectTypeDto;
 import org.eclipse.che.api.project.templates.shared.dto.ProjectTemplateDescriptor;
+import org.eclipse.che.api.workspace.shared.dto.NewProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.project.MutableProjectConfig;
+import org.eclipse.che.ide.api.project.NewProjectConfigImpl;
 import org.eclipse.che.ide.api.project.type.ProjectTemplateRegistry;
 import org.eclipse.che.ide.api.project.type.ProjectTypeRegistry;
 import org.eclipse.che.ide.api.project.type.wizard.PreSelectedProjectTypeManager;
@@ -23,12 +27,12 @@ import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistry;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.wizard.AbstractWizardPage;
-import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.resources.selector.SelectPathPresenter;
 import org.eclipse.che.ide.resources.selector.SelectionPathHandler;
 import org.eclipse.che.ide.util.NameUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -162,13 +166,20 @@ public class CategoriesPagePresenter extends AbstractWizardPage<MutableProjectCo
         if (projectTemplateSelectionListener != null) {
             projectTemplateSelectionListener.onProjectTemplateSelected(templateDescriptor);
         }
+
+        updateProjectConfigs(dataObject.getPath(), selectedProjectTemplate);
         updateDelegate.updateControls();
     }
 
     @Override
     public void projectNameChanged(String name) {
+        final String newProjectPath = originParent.append(name).toString();
+        if (selectedProjectTemplate != null) {
+            updateProjectConfigs(newProjectPath, selectedProjectTemplate);
+        }
+
         dataObject.setName(name);
-        dataObject.setPath(originParent.append(name).toString());
+        dataObject.setPath(newProjectPath);
         updateDelegate.updateControls();
 
         if (NameUtils.checkProjectName(name)) {
@@ -209,6 +220,26 @@ public class CategoriesPagePresenter extends AbstractWizardPage<MutableProjectCo
 
     public void setProjectTemplateSelectionListener(ProjectTemplateSelectionListener listener) {
         projectTemplateSelectionListener = listener;
+    }
+
+    private void updateProjectConfigs(String newProjectPath, ProjectTemplateDescriptor projectTemplate) {
+        final List<NewProjectConfigDto> configDtoList = projectTemplate.getProjects();
+        if (newProjectPath.equals("/")) {
+            return;
+        }
+
+        final String templatePath = projectTemplate.getPath();
+        final List<NewProjectConfig> updatedConfigs = new ArrayList<>(configDtoList.size());
+        for (NewProjectConfigDto configDto : configDtoList) {
+            final NewProjectConfig newConfig = new NewProjectConfigImpl(configDto);
+            final String projectPath = configDto.getPath();
+            if (projectPath.startsWith(templatePath)) {
+                final String path = projectPath.replaceFirst(templatePath, newProjectPath);
+                newConfig.setPath(path);
+            }
+            updatedConfigs.add(newConfig);
+        }
+        dataObject.setProjects(updatedConfigs);
     }
 
     private void loadProjectTypesAndTemplates() {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,33 +52,73 @@ declare namespace _che {
   }
 
   export interface IStack {
+    id?: string;
     name: string;
-    description: string;
-    projects: Array<any>;
-    tags: Array<string>;
-    scope: string;
-    components: Array<any>;
+    description?: string;
+    tags?: Array<string>;
+    creator?: string;
+    scope?: string;
+    components?: Array<any>;
     source: any;
-    workspaceConfig: IWorkspace;
+    workspaceConfig: IWorkspaceConfig;
   }
 
   export interface IWorkspace {
     id?: string;
+    name: string;
+    projects?: any;
+    links?: Array<any>;
     runtime?: any;
     temporary?: boolean;
+    status?: string;
+    namespace?: string;
+    attributes?: {
+      updated?: number;
+      created?: number;
+      [propName: string]: string | number;
+    };
     config: IWorkspaceConfig;
   }
 
   export interface IWorkspaceConfig {
     name?: string;
     defaultEnv?: string;
-    environments?: IWorkspaceEnvironments;
+    environments: {
+      [envName: string]: IWorkspaceEnvironment
+    };
     projects: Array <any>;
     commands?: Array <any>;
   }
 
-  export interface IWorkspaceEnvironments {
-      [envName: string]: any;
+  export interface IWorkspaceEnvironment {
+    machines: {
+      [machineName: string]: IEnvironmentMachine
+    };
+    recipe: {
+      content?: string;
+      location?: string;
+      contentType: string;
+      type: string;
+    };
+  }
+
+  export interface IEnvironmentMachine {
+    agents?: string[];
+    attributes?: {
+      memoryLimitBytes?: string|number;
+      [attrName: string]: string|number;
+    };
+    servers?: {
+      [serverRef: string]: IEnvironmentMachineServer
+    };
+  }
+
+  export interface IEnvironmentMachineServer {
+    port: string|number;
+    protocol: string;
+    properties?: {
+      [propName: string]: string
+    };
   }
 
   export interface IProject {
@@ -93,20 +133,49 @@ declare namespace _che {
     commands: Array<any>;
     projectType: string;
     tags: Array<string>;
+    attributes: Array<any>;
+    options: Array<any>;
+    workspaceId?: string;
+    workspaceName?: string;
+  }
+
+  export interface IWorkspaceProjects {
+    [workspaceId: string]: Array<IProject>;
   }
 
   export interface IImportProject {
     source: {
-      type: string;
+      type?: string;
       location: string;
       parameters: Object;
     };
     project: {
       name: string;
-      type: string;
+      type?: string;
       description: string;
-      commands: Array<any>;
+      commands?: Array<any>;
+      attributes?: Array<any>;
+      options?: Array<any>;
     };
   }
 
+  export interface IEditorOptions {
+    mode: string;
+    lineNumbers: boolean;
+    lineWrapping: boolean;
+    matchBrackets: boolean;
+  }
+
+  export interface IValidation {
+    isValid: boolean;
+    errors: Array<string>;
+  }
+
+  export interface IProfile {
+    attributes?: Object;
+    email: string;
+    links?: Array<any>;
+    userId: string;
+    $promise?: any;
+  }
 }

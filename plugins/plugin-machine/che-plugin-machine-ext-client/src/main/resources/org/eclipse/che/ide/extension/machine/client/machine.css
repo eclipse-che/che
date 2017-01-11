@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,6 +35,7 @@
     color: outputFontColor;
     line-height: 13px;
     padding: 3px;
+    white-space: nowrap;
 }
 
 .terminal-cursor {
@@ -246,7 +247,7 @@
     font-size: 9px;
     padding: 0;
     border-radius: 2px;
-    margin: 0 5px 0 3px;
+    margin: 3px 5px 0 3px;
     box-shadow: 1px 1px 2px treeTextShadow;
 }
 
@@ -259,25 +260,21 @@
 }
 
 .processTree .machineStatus {
-    width: 10px;
-    height: 10px;
-    margin: 4px 5px;
     position: relative;
+    float: left;
+    margin: 0 4px;
     overflow: hidden;
-    margin-left: 0px;
-    margin-right: 4px;
 }
 
 .processTree .machineStatus .machineStatusRunning {
-    display: inline-block;
     width: 10px;
     height: 10px;
+    margin-top: 4px;
     background-color: #46af00;
     border: 1px solid #7ed321;
     border-radius: 5px;
     box-sizing: border-box;
     position: relative;
-    top: 1px;
 }
 
 .processTree .machineStatus .machineStatusPausedLeft {
@@ -299,14 +296,14 @@
 }
 
 .sshButton {
+    position: relative;
     font-size: 10px;
     float: right;
     margin-right: 2px;
     color: categoryHeaderButtonColor;
     cursor: pointer;
-    position: absolute;
-    right: 24px;
-    top: 0px;
+    right: 0;
+    top: 0;
 }
 
 .processTree .newTerminalButton {
@@ -320,9 +317,9 @@
     box-sizing: border-box;
     text-align: center;
     cursor: pointer;
-    position: absolute;
-    right: 0px;
-    top: 0px;
+    position: relative;
+    right: 0;
+    top: 0;
 }
 
 .processTree .newTerminalButton > svg {
@@ -345,12 +342,10 @@
     cursor: default;
     position: absolute;
     right: 24px;
-    top: 0px;
+    top: 0;
 }
 
 .processTree .processIcon {
-    height: 16px;
-    margin-top: 1px;
     margin-left: 5px;
     margin-right: 5px;
     position: relative;
@@ -359,11 +354,11 @@
 
 .processTree .processIconPanel {
     display: inline-block;
+    position: relative;
+    left: 0;
+    top: 2px;
     width: 16px;
     height: 14px;
-    position: relative;
-    left: 0px;
-    top: 2px;
 }
 
 .processTree .processBadge {
@@ -413,6 +408,7 @@
 }
 
 .processesPanelStopButtonForProcess {
+    position: relative;
     float: right;
     background-color: editorTabIconColor;
     opacity: 0.3;
@@ -422,8 +418,6 @@
     border-radius: 2px;
     box-sizing: border-box;
     cursor: pointer;
-    position: absolute;
-    right: 24px;
     top: 0px;
 }
 
@@ -436,6 +430,7 @@
 }
 
 .processesPanelCloseButtonForProcess svg {
+    position: relative;
     cursor: pointer;
     opacity: 0.5;
     padding-top: 6px;
@@ -444,9 +439,6 @@
     padding-right: 9px;
     float: right;
     fill: editorTabIconColor;
-    position: absolute;
-    right: 0px;
-    top: 0px;
 }
 
 .processesPanelCloseButtonForProcess svg g,

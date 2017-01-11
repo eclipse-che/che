@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ import com.google.inject.AbstractModule;
 
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.lang.Pair;
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,6 +44,9 @@ public class FileCleaner {
 
     private static ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder()
                                                                                                       .setNameFormat("FileCleaner")
+                                                                                                      .setUncaughtExceptionHandler(
+                                                                                                              LoggingUncaughtExceptionHandler
+                                                                                                                      .getInstance())
                                                                                                       .setDaemon(true).build());
 
     static {

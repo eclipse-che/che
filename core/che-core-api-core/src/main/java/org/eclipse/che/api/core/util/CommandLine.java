@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -127,14 +127,12 @@ public class CommandLine {
     public String toString() {
         final String[] str = asArray();
         final StringBuilder sb = new StringBuilder();
-//        sb.append('\'');
         for (String s : str) {
             if (sb.length() > 1) {
                 sb.append(' ');
             }
             sb.append(s);
         }
-//        sb.append('\'');
         return sb.toString();
     }
 }

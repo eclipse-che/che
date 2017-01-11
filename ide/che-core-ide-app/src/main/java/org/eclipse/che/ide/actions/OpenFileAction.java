@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,6 +34,7 @@ import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.File;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.loging.Log;
 
 import static org.eclipse.che.api.promises.client.callback.CallbackPromiseHelper.createFromCallback;
@@ -125,7 +126,7 @@ public class OpenFileAction extends Action implements PromisableAction {
                         if (event.getActivePart() instanceof EditorPartPresenter) {
                             EditorPartPresenter editor = (EditorPartPresenter)event.getActivePart();
                             handlerRegistration.removeHandler();
-                            if ((pathToOpen).equals(editor.getEditorInput().getFile().getPath())) {
+                            if (Path.valueOf(pathToOpen).equals(editor.getEditorInput().getFile().getLocation())) {
                                 callback.onSuccess(null);
                             }
                         }

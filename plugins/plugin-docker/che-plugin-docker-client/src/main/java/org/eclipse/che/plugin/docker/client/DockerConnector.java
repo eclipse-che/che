@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 
 import org.eclipse.che.api.core.util.FileCleaner;
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.TarUtils;
 import org.eclipse.che.commons.lang.ws.rs.ExtMediaType;
@@ -147,6 +148,8 @@ public class DockerConnector {
         this.authResolver = authResolver;
         this.apiVersionPathPrefix = dockerApiVersionPathPrefixProvider.get();
         executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder()
+                                                         .setUncaughtExceptionHandler(
+                                                                 LoggingUncaughtExceptionHandler.getInstance())
                                                          .setNameFormat("DockerApiConnector-%d")
                                                          .setDaemon(true)
                                                          .build());

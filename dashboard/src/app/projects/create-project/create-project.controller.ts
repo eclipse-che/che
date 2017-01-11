@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -76,6 +76,8 @@ export class CreateProjectController {
   readyToGoStack: any;
   stackLibraryUser: any;
   isCustomStack: boolean;
+  isHandleClose: boolean;
+  connectionClosed: Function;
 
   workspaceResourceForm: ng.IFormController;
   workspaceInformationForm: ng.IFormController;
@@ -228,6 +230,21 @@ export class CreateProjectController {
     cheAPI.cheWorkspace.getWorkspaces();
 
     $rootScope.showIDE = false;
+
+    this.isHandleClose = true;
+    this.connectionClosed = () => {
+      if (!this.isHandleClose) {
+        return;
+      }
+
+      this.$mdDialog.show(
+        this.$mdDialog.alert()
+          .title('Connection error')
+          .content('Unable to track the workspace status due to connection closed error. Please, try again or restart the page.')
+          .ariaLabel('Workspace start')
+          .ok('OK')
+      );
+    }
   }
 
   /**
@@ -509,7 +526,10 @@ export class CreateProjectController {
       });
     }
 
+
+
     let startWorkspacePromise = this.cheAPI.getWorkspace().startWorkspace(workspace.id, workspace.config.defaultEnv);
+    bus.onClose(this.connectionClosed);
     startWorkspacePromise.then(() => {
       // update list of workspaces
       // for new workspace to show in recent workspaces
@@ -561,7 +581,7 @@ export class CreateProjectController {
     this.createProjectSvc.setCurrentProgressStep(3);
 
     var promise;
-    var channel = null;
+    let channel: string = null;
     // select mode (create or import)
     if (this.selectSourceOption === 'select-source-new' && this.templatesChoice === 'templates-wizard') {
 
@@ -570,7 +590,7 @@ export class CreateProjectController {
       promise = deferred.promise;
       deferred.resolve(true);
 
-    } else if (projectData.source.location.length > 0) {
+    } else {
 
       // if it's a user-defined location we need to cleanup commands that may have been configured by templates
       if (this.selectSourceOption === 'select-source-existing') {
@@ -578,7 +598,7 @@ export class CreateProjectController {
       }
 
       // websocket channel
-      channel = 'importProject:output:' + workspaceId + ':' + projectName;
+      channel = 'importProject:output';
 
       // on import
       bus.subscribe(channel, (message: any) => {
@@ -592,7 +612,8 @@ export class CreateProjectController {
       let deferredResolve = this.$q.defer();
       let deferredResolvePromise = deferredResolve.promise;
 
-      let importPromise = this.cheAPI.getWorkspace().getWorkspaceAgent(workspaceId).getProject().importProject(projectName, projectData.source);
+      let projects = this.processMultiproject(projectData);
+      let importPromise = this.cheAPI.getWorkspace().getWorkspaceAgent(workspaceId).getProject().createProjects(projects);
 
       importPromise.then(() => {
         // add commands if there are some that have been defined
@@ -643,7 +664,31 @@ export class CreateProjectController {
 
   }
 
-  resolveProjectType(workspaceId: string, projectName: string, projectData: any, deferredResolve: ng.IDeferred<any>) {
+  /**
+   * Process multi-project and prepare batch of projects to be created.
+   *
+   * @param projectData project data to process
+   * @returns {Array|any} array of projects
+   */
+  processMultiproject(projectData) {
+    let currentPath = '/' + projectData.project.name;
+
+    let projects = projectData.projects || [];
+    let project = angular.copy(projectData.project);
+    project.path = currentPath;
+    project.source = projectData.source;
+
+    //Update path of sub-projects:
+    projects.forEach((project : any) => {
+      let index = project.path.indexOf('/' + project.name);
+      project.path = currentPath + project.path.substr(index);
+    });
+
+    projects.push(project);
+    return projects;
+  }
+
+  resolveProjectType(workspaceId, projectName, projectData, deferredResolve) {
     let projectDetails = projectData.project;
     if (!projectDetails.attributes) {
       projectDetails.source = projectData.source;
@@ -783,6 +828,7 @@ export class CreateProjectController {
    * Cleanup the websocket elements after actions are finished
    */
   cleanupChannels(websocketStream: any, workspaceBus: any, bus: any, channel: any): void {
+    this.isHandleClose = false;
     if (websocketStream != null) {
       websocketStream.close();
     }
@@ -854,6 +900,7 @@ export class CreateProjectController {
     websocketStream.onOpen(() => {
       let bus = this.cheAPI.getWebsocket().getExistingBus(websocketStream);
       this.createProjectInWorkspace(workspaceId, projectName, projectData, bus, websocketStream, workspaceBus);
+      bus.onClose(this.connectionClosed);
     });
 
     // on error, retry to connect or after a delay, abort
@@ -999,7 +1046,7 @@ export class CreateProjectController {
    * @param workspace existing workspace
    */
   checkExistingWorkspaceState(workspace: any): void {
-    if (workspace.runtime) {
+    if (workspace.status === 'RUNNING') {
       let websocketUrl = this.cheAPI.getWorkspace().getWebsocketUrl(workspace.id);
       // get bus
       let websocketStream = this.$websocket(websocketUrl);
@@ -1198,7 +1245,7 @@ export class CreateProjectController {
 
   isResourceProblem(): boolean {
     let currentCreationStep = this.getCreationSteps()[this.getCurrentProgressStep()];
-    return currentCreationStep.hasError && currentCreationStep.logs.includes('You can stop other workspaces');
+    return currentCreationStep.hasError && currentCreationStep.logs.indexOf('You can stop other workspaces') >= 0;
   }
 
   setStackTab(stackTab: string): void {
@@ -1470,4 +1517,5 @@ export class CreateProjectController {
     let environmentManager = this.cheEnvironmentRegistry.getEnvironmentManager(recipeType);
     workspace.environments[workspace.defaultEnv] = environmentManager.getEnvironment(environment, this.getStackMachines(environment));
   }
+
 }

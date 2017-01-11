@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -87,21 +87,21 @@ public abstract class AbstractNewResourceAction extends AbstractPerspectiveActio
                 new InputCallback() {
                     @Override
                     public void accepted(String value) {
-                        onAccepted(value);
+                        createFile(value);
                     }
                 }, null).withValidator(fileNameValidator);
         inputDialog.show();
     }
 
-    private void onAccepted(String value) {
-        final String name = getExtension().isEmpty() ? value : value + '.' + getExtension();
+    final void createFile(String nameWithoutExtension) {
+        final String name = getExtension().isEmpty() ? nameWithoutExtension : nameWithoutExtension + '.' + getExtension();
 
         Resource resource = appContext.getResource();
 
         if (!(resource instanceof Container)) {
             final Optional<Container> parent = resource.getParent();
 
-            checkState(!parent.isPresent(), "Parent should be a container");
+            checkState(parent.isPresent(), "Parent should be a container");
 
             resource = parent.get();
         }

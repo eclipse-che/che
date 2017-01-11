@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2012-2016 Codenvy, S.A.
+# Copyright (c) 2012-2017 Codenvy, S.A.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
@@ -70,7 +70,7 @@ elif echo ${LINUX_TYPE} | grep -qi "debian"; then
 # Fedora 23
 ###########
 elif echo ${LINUX_TYPE} | grep -qi "fedora"; then
-    PACKAGES=${PACKAGES}" procps-ng"
+    command -v ps >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" procps-ng"; }
     command -v sshd >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" openssh-server"; }
     test "${PACKAGES}" = "" || {
        ${SUDO} dnf -y install ${PACKAGES};

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2012-2016 Codenvy, S.A.
+# Copyright (c) 2012-2017 Codenvy, S.A.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
@@ -67,7 +67,7 @@ elif echo ${LINUX_TYPE} | grep -qi "debian"; then
 # Fedora 23
 ###########
 elif echo ${LINUX_TYPE} | grep -qi "fedora"; then
-    PACKAGES=${PACKAGES}" procps-ng"
+    command -v ps >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" procps-ng"; }
     test "${PACKAGES}" = "" || {
         ${SUDO} dnf -y install ${PACKAGES};
     }
@@ -128,13 +128,22 @@ fi
 ####################
 ### Install java ###
 ####################
-command -v ${JAVA_HOME}/bin/java >/dev/null 2>&1 || {
+downloadJava() {
+    echo "Downloading JDK 1.8.0_111"
+    JDK_URL=http://download.oracle.com/otn-pub/java/jdk/8u111-b14/jdk-8u111-linux-x64.tar.gz
+    curl -s -j -k -L -H "Cookie: oraclelicense=accept-securebackup-cookie" "${JDK_URL}" | tar -C ${CHE_DIR} -xzf -
+    mv ${CHE_DIR}/jdk1.8.0_111 ${CHE_DIR}/jdk1.8
+
     export JAVA_HOME=${CHE_DIR}/jdk1.8
-    command -v ${JAVA_HOME}/bin/java >/dev/null 2>&1 || {
-        JDK_URL=http://download.oracle.com/otn-pub/java/jdk/8u45-b14/jdk-8u45-linux-x64.tar.gz
-        curl -s -j -k -L -H "Cookie: oraclelicense=accept-securebackup-cookie" "${JDK_URL}" | tar -C ${CHE_DIR} -xzf -
-        mv ${CHE_DIR}/jdk1.8.0_45 ${CHE_DIR}/jdk1.8
-    }
+}
+
+command -v ${JAVA_HOME}/bin/java >/dev/null 2>&1 || {
+    downloadJava;
+} && {
+    java_version=$(${JAVA_HOME}/bin/java -version 2>&1 | sed 's/.* version "\\(.*\\)\\.\\(.*\\)\\..*"/\\1\\2/; 1q')
+    if [ "${java_version}" -lt "18" ]; then
+        downloadJava;
+    fi
 }
 
 ########################

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,6 +18,7 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
@@ -71,9 +72,20 @@ public class RemoveFromIndexPresenter implements RemoveFromIndexView.ActionDeleg
     }
 
     public void showDialog(Project project) {
+        Resource[] resources = appContext.getResources();
+        checkState(resources != null && resources.length > 0);
         this.project = project;
-
-        view.setMessage(constant.removeFromIndexAll());
+        if (resources.length == 1) {
+            Resource resource = appContext.getResource();
+            String selectedItemName = resource.getName();
+            if (resource instanceof Container) {
+                view.setMessage(constant.removeFromIndexFolder(selectedItemName));
+            } else {
+                view.setMessage(constant.removeFromIndexFile(selectedItemName));
+            }
+        } else {
+            view.setMessage(constant.removeFromIndexAll());
+        }
         view.setRemoved(false);
         view.showDialog();
     }
