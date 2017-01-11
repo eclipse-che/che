@@ -888,7 +888,7 @@ public class ProjectService extends Service {
 
         final QueryExpression expr = new QueryExpression()
                 .setPath(path.startsWith("/") ? path : ('/' + path))
-                .setName(name == null ? null : name.toLowerCase())
+                .setName(name == null ? null : name)
                 .setText(text)
                 .setMaxItems(maxItems)
                 .setSkipCount(skipCount);

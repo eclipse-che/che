@@ -33,7 +33,6 @@ import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.SearcherFactory;
 import org.apache.lucene.search.SearcherManager;
 import org.apache.lucene.search.TopDocs;
-import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.util.IOUtils;
 import org.eclipse.che.api.core.ForbiddenException;
@@ -245,7 +244,13 @@ public abstract class LuceneSearcher implements Searcher {
             luceneQuery.add(new PrefixQuery(new Term("path", path)), BooleanClause.Occur.MUST);
         }
         if (name != null) {
-            luceneQuery.add(new WildcardQuery(new Term("name", name)), BooleanClause.Occur.MUST);
+            QueryParser qParser = new QueryParser("name", makeAnalyzer());
+            qParser.setAllowLeadingWildcard(true);
+            try {
+                luceneQuery.add(qParser.parse(name), BooleanClause.Occur.MUST);
+            } catch (ParseException e) {
+                throw new ServerException(e.getMessage());
+            }
         }
         if (text != null) {
             QueryParser qParser = new QueryParser("text", makeAnalyzer());
@@ -382,7 +387,7 @@ public abstract class LuceneSearcher implements Searcher {
     protected Document createDocument(VirtualFile virtualFile, Reader reader) throws ServerException {
         final Document doc = new Document();
         doc.add(new StringField("path", virtualFile.getPath().toString(), Field.Store.YES));
-        doc.add(new StringField("name", virtualFile.getName().toLowerCase(), Field.Store.YES));
+        doc.add(new TextField("name", virtualFile.getName(), Field.Store.YES));
         if (reader != null) {
             doc.add(new TextField("text", reader));
         }
