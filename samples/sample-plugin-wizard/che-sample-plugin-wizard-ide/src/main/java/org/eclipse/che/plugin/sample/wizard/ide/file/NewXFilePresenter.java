@@ -18,10 +18,7 @@ import org.eclipse.che.ide.api.project.ProjectServiceClient;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Resource;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.resource.Path;
-import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.plugin.sample.wizard.shared.Constants;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -36,27 +33,17 @@ import static com.google.common.base.Preconditions.checkState;
 public class NewXFilePresenter implements NewXFileView.ActionDelegate {
     private static final String DEFAULT_CONTENT = " #include <${header}>";
 
-//    private final ProjectExplorerPresenter projectExplorer;
     private final NewXFileView view;
     private final ProjectServiceClient projectServiceClient;
-//    private final DtoUnmarshallerFactory dtoUnmarshaller;
     private final AppContext appContext;
-//    private final DialogFactory dialogFactory;
 
     @Inject
     public NewXFilePresenter(NewXFileView view,
-//                             ProjectExplorerPresenter projectExplorer,
                              AppContext appContext,
-                             ProjectServiceClient projectServiceClient
-//                             DtoUnmarshallerFactory dtoUnmarshaller,
-//                             DialogFactory dialogFactory
-                            ) {
+                             ProjectServiceClient projectServiceClient) {
         this.appContext = appContext;
-//        this.dialogFactory = dialogFactory;
         this.view = view;
-//        this.projectExplorer = projectExplorer;
         this.projectServiceClient = projectServiceClient;
-//        this.dtoUnmarshaller = dtoUnmarshaller;
         this.view.setDelegate(this);
     }
 
@@ -91,13 +78,7 @@ public class NewXFilePresenter implements NewXFileView.ActionDelegate {
         createFile(resource.getLocation().toString(), nameWithoutExtension, content);
     }
 
-
     private void createFile(final String path, final String nameWithoutExtension, final String content) {
         projectServiceClient.createFile(Path.valueOf(path + nameWithoutExtension + Constants.C_EXT), content);
     }
-
-
-
-
-
 }
