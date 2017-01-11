@@ -204,8 +204,8 @@ is_initialized() {
 
 is_configured() {
   debug $FUNCNAME
-  if [[ -d "${CHE_CONTAINER_CONFIG_MANIFESTS_FOLDER}" ]] && \
-     [[ -d "${CHE_CONTAINER_CONFIG_MODULES_FOLDER}" ]]; then
+  if [[ -d "${CHE_CONTAINER_INSTANCE}/config" ]] && \
+     [[ -f "${CHE_CONTAINER_INSTANCE}/${CHE_VERSION_FILE}" ]]; then
     return 0
   else
     return 1
@@ -275,16 +275,44 @@ less_than() {
   return 1
 }
 
+# Check if a version is < than another version (provide like for example : version_lt 5.0 5.1)
+version_lt() {
+ test "$(printf '%s\n' "$@" | sort -V | head -n 1)" == "$1";
+ return $?;
+}
+
+# return true if the provided version is an intermediate version (like a Milestone or a Release Candidate)
+is_intermediate_version() {
+  if [[ "$1" =~ .*-M.* ]]; then
+     return 0
+  fi
+  if [[ "$1" =~ .*-RC.* ]]; then
+     return 0
+  fi
+  return 1
+}
+
 compare_cli_version_to_installed_version() {
   IMAGE_VERSION=$(get_image_version)
   INSTALLED_VERSION=$(get_installed_version)
+
+  # add -ZZ suffix if not intermediate version
+  # So for example 5.0.0 is transformed into 5.0.0-ZZ and is greater than 5.0.0-M8
+  IMAGE_VERSION_SUFFIXED=${IMAGE_VERSION}
+  INSTALLED_VERSION_SUFFIXED=${INSTALLED_VERSION}
+  if ! is_intermediate_version  ${IMAGE_VERSION}; then
+    IMAGE_VERSION_SUFFIXED="${IMAGE_VERSION}-ZZ"
+  fi
+  if ! is_intermediate_version ${INSTALLED_VERSION}; then
+    INSTALLED_VERSION_SUFFIXED="${INSTALLED_VERSION}-ZZ"
+  fi
 
   if [[ "$INSTALLED_VERSION" = "$IMAGE_VERSION" ]]; then
     echo "match"
   elif [ "$INSTALLED_VERSION" = "nightly" ] ||
        [ "$IMAGE_VERSION" = "nightly" ]; then
     echo "nightly"
-  elif less_than $INSTALLED_VERSION $IMAGE_VERSION; then
+  elif version_lt $INSTALLED_VERSION_SUFFIXED $IMAGE_VERSION_SUFFIXED; then
     echo "install-less-cli"
   else
     echo "cli-less-install"
@@ -413,7 +441,7 @@ verify_version_upgrade_compatibility() {
     case "${COMPARE_CLI_ENV}" in
       "match")
         error ""
-        error "Your CLI version '${CHE_IMAGE_FULLNAME}' is identical to your installed version '$INSTALLED_VERSION'."
+        error "Your CLI version '${CHE_IMAGE_FULLNAME}' is identical to your installed version '$CONFIGURED_VERSION'."
         error ""
         error "Run '${CHE_IMAGE_NAME}:<version> upgrade' with a newer version to upgrade."
         error "View available versions with '$CHE_FORMAL_PRODUCT_NAME version'."
@@ -421,7 +449,7 @@ verify_version_upgrade_compatibility() {
       ;;
       "nightly")
         error ""
-        error "Your CLI version '${CHE_IMAGE_FULLNAME}' or installed version '$INSTALLED_VERSION' is nightly."
+        error "Your CLI version '${CHE_IMAGE_FULLNAME}' or installed version '$CONFIGURED_VERSION' is nightly."
         error ""
         error "You may not '${CHE_IMAGE_NAME} upgrade' from 'nightly' to a numbered (tagged) version."
         error "You can 'docker pull ${CHE_IMAGE_FULLNAME}' to get a newer nightly version."
@@ -431,7 +459,7 @@ verify_version_upgrade_compatibility() {
       ;;
       "cli-less-install")
         error ""
-        error "Your CLI version '${CHE_IMAGE_FULLNAME}' is older than your installed version '$INSTALLED_VERSION'."
+        error "Your CLI version '${CHE_IMAGE_FULLNAME}' is older than your installed version '$CONFIGURED_VERSION'."
         error ""
         error "You cannot use '${CHE_IMAGE_NAME} upgrade' to downgrade versions."
         error ""
