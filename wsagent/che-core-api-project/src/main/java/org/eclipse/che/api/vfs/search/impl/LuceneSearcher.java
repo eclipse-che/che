@@ -237,31 +237,30 @@ public abstract class LuceneSearcher implements Searcher {
 
     private Query createLuceneQuery(QueryExpression query) throws ServerException {
         final BooleanQuery luceneQuery = new BooleanQuery();
-        final String name = query.getName();
-        final String path = query.getPath();
-        final String text = query.getText();
-        if (path != null) {
-            luceneQuery.add(new PrefixQuery(new Term("path", path)), BooleanClause.Occur.MUST);
+        final String nameQuery = query.getName();
+        final String pathQuery = query.getPath();
+        final String textQuery = query.getText();
+        final String nameField = "name";
+        final String pathField = "path";
+        final String textField = "text";
+        if (pathQuery != null) {
+            luceneQuery.add(new PrefixQuery(new Term(pathField, pathQuery)), BooleanClause.Occur.MUST);
         }
-        if (name != null) {
-            QueryParser qParser = new QueryParser("name", makeAnalyzer());
-            qParser.setAllowLeadingWildcard(true);
-            try {
-                luceneQuery.add(qParser.parse(name), BooleanClause.Occur.MUST);
-            } catch (ParseException e) {
-                throw new ServerException(e.getMessage());
-            }
-        }
-        if (text != null) {
-            QueryParser qParser = new QueryParser("text", makeAnalyzer());
-            qParser.setAllowLeadingWildcard(true);
-            try {
-                luceneQuery.add(qParser.parse(text), BooleanClause.Occur.MUST);
-            } catch (ParseException e) {
-                throw new ServerException(e.getMessage());
-            }
-        }
+        createAndAddQueryParser(luceneQuery, nameField, nameQuery);
+        createAndAddQueryParser(luceneQuery, textField, textQuery);
         return luceneQuery;
+    }
+
+    private void createAndAddQueryParser(BooleanQuery luceneQuery, String name, String query) throws ServerException {
+        if (query != null) {
+            QueryParser qParser = new QueryParser(name, makeAnalyzer());
+            qParser.setAllowLeadingWildcard(true);
+            try {
+                luceneQuery.add(qParser.parse(query), BooleanClause.Occur.MUST);
+            } catch (ParseException e) {
+                throw new ServerException(e.getMessage());
+            }
+        }
     }
 
     private ScoreDoc skipScoreDocs(IndexSearcher luceneSearcher, Query luceneQuery, int numSkipDocs) throws IOException {
