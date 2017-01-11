@@ -255,6 +255,9 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
 
         if (width == x && height == y) {
             return;
+        } else if (width > 0 && height > 0) {
+            //if it's not first initialization
+            setFocus(true);
         }
 
         terminal.resize(x, y);
