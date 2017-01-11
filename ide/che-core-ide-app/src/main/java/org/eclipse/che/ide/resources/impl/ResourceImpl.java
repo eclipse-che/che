@@ -142,6 +142,13 @@ abstract class ResourceImpl implements Resource {
         return of((Project)parent);
     }
 
+    @Override
+    public Project getProject() {
+        final Optional<Project> project = getRelatedProject();
+
+        return project.isPresent() ? project.get() : null;
+    }
+
     /** {@inheritDoc} */
     @Override
     public abstract int getResourceType();
