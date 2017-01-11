@@ -34,12 +34,8 @@ import org.eclipse.che.ide.api.parts.Perspective;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
-import org.eclipse.che.ide.extension.machine.client.actions.CreateMachineAction;
-import org.eclipse.che.ide.extension.machine.client.actions.CreateSnapshotAction;
-import org.eclipse.che.ide.extension.machine.client.actions.DestroyMachineAction;
 import org.eclipse.che.ide.extension.machine.client.actions.EditCommandsAction;
 import org.eclipse.che.ide.extension.machine.client.actions.ExecuteSelectedCommandAction;
-import org.eclipse.che.ide.extension.machine.client.actions.RestartMachineAction;
 import org.eclipse.che.ide.extension.machine.client.actions.RunCommandAction;
 import org.eclipse.che.ide.extension.machine.client.actions.SelectCommandComboBox;
 import org.eclipse.che.ide.extension.machine.client.actions.ShowConsoleTreeAction;
@@ -168,12 +164,8 @@ public class MachineExtension {
                                 ExecuteSelectedCommandAction executeSelectedCommandAction,
                                 SelectCommandComboBox selectCommandAction,
                                 EditCommandsAction editCommandsAction,
-                                CreateMachineAction createMachine,
-                                RestartMachineAction restartMachine,
-                                DestroyMachineAction destroyMachineAction,
                                 StopWorkspaceAction stopWorkspaceAction,
                                 SwitchPerspectiveAction switchPerspectiveAction,
-                                CreateSnapshotAction createSnapshotAction,
                                 RunCommandAction runCommandAction,
                                 NewTerminalAction newTerminalAction,
                                 EditTargetsAction editTargetsAction,
@@ -199,11 +191,7 @@ public class MachineExtension {
         final DefaultActionGroup machineMenu = new DefaultActionGroup(localizationConstant.mainMenuMachine(), true, actionManager);
 
         actionManager.registerAction("machine", machineMenu);
-        actionManager.registerAction("createMachine", createMachine);
-        actionManager.registerAction("destroyMachine", destroyMachineAction);
-        actionManager.registerAction("restartMachine", restartMachine);
         actionManager.registerAction("stopWorkspace", stopWorkspaceAction);
-        actionManager.registerAction("createSnapshot", createSnapshotAction);
         actionManager.registerAction("runCommand", runCommandAction);
         actionManager.registerAction("newTerminal", newTerminalAction);
 
@@ -216,10 +204,6 @@ public class MachineExtension {
         workspaceMenu.add(stopWorkspaceAction);
 
         mainMenu.add(machineMenu, new Constraints(AFTER, IdeActions.GROUP_PROJECT));
-        machineMenu.add(createMachine);
-        machineMenu.add(restartMachine);
-        machineMenu.add(destroyMachineAction);
-        machineMenu.add(createSnapshotAction);
 
         if (centralToolbarVisible) {
             // add actions on center part of toolbar
@@ -233,9 +217,7 @@ public class MachineExtension {
             machineToolbarGroup.add(executeToolbarGroup);
         }
 
-        // add actions on right part of toolbar
-        final DefaultActionGroup rightToolbarGroup = (DefaultActionGroup)actionManager.getAction(GROUP_RIGHT_TOOLBAR);
-        rightToolbarGroup.add(switchPerspectiveAction);
+        // addActionsOnRightPartOfToolbar(actionManager, switchPerspectiveAction);
 
         // add group for list of machines
         final DefaultActionGroup machinesList = new DefaultActionGroup(GROUP_MACHINES_DROPDOWN, true, actionManager);
@@ -260,6 +242,11 @@ public class MachineExtension {
         keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode(KeyCodeMap.F12).build(), "newTerminal");
 
         iconRegistry.registerIcon(new Icon("che.machine.icon", machineResources.devMachine()));
+    }
+
+    private void addActionsOnRightPartOfToolbar(ActionManager actionManager, SwitchPerspectiveAction switchPerspectiveAction) {
+        final DefaultActionGroup rightToolbarGroup = (DefaultActionGroup)actionManager.getAction(GROUP_RIGHT_TOOLBAR);
+        rightToolbarGroup.add(switchPerspectiveAction);
     }
 
 }
