@@ -217,13 +217,12 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
     }
 
     /**
-     * Sends 'exit' command on server side to stop terminal.
+     * Sends 'close' message on server side to stop terminal.
      */
     public void stopTerminal() {
         if (connected) {
             Jso jso = Jso.create();
-            jso.addField("type", "data");
-            jso.addField("data", "exit\n");
+            jso.addField("type", "close");
             socket.send(jso.serialize());
         }
     }
