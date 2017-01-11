@@ -92,7 +92,7 @@ initiate_offline_or_network_mode(){
     # If we are in networking mode, we have had some issues where users have failed DNS networking.
     # See: https://github.com/eclipse/che/issues/3266#issuecomment-265464165
     if [[ "${FAST_BOOT}" = "false" ]]; then
-      info "cli" "Checking network... (hint: '--fast' skips version and network checks)"
+      info "cli" "Checking network... (hint: '--fast' skips version, network, and nightly checks)"
       local HTTP_STATUS_CODE=$(curl -I -k dockerhub.com -s -o /dev/null --write-out '%{http_code}')
       if [[ ! $HTTP_STATUS_CODE -eq "301" ]]; then
         info "Welcome to $CHE_FORMAL_PRODUCT_NAME!"
@@ -310,9 +310,10 @@ verify_version_compatibility() {
       ;;
       "nightly")
         error ""
-        error "Your CLI version '${CHE_IMAGE_FULLNAME}' does not match your installed version '$INSTALLED_VERSION'."
+        error "Your CLI version '${CHE_IMAGE_FULLNAME}' does not match your installed version '$INSTALLED_VERSION' in ${DATA_MOUNT}."
         error ""
         error "The 'nightly' CLI is only compatible with 'nightly' installed versions."
+        error "You may use 'nightly' with a separate ${CHE_FORMAL_PRODUCT_NAME} installation by providing a different ':/data' volume mount."
         error "You may not '${CHE_MINI_PRODUCT_NAME} upgrade' from 'nightly' to a numbered (tagged) version."
         error ""
         error "Run the CLI as '${CHE_IMAGE_NAME}:<version>' to install a tagged version."
@@ -337,32 +338,42 @@ verify_version_compatibility() {
       ;;
     esac
   fi
+}
 
+is_nightly() {
+  if [[ $(get_image_version) = "nightly" ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+function verify_nightly_accuracy() {
   # Per request of the engineers, check to see if the locally cached nightly version is older
   # than the one stored on DockerHub.
-  if [[ "${CHE_IMAGE_VERSION}" = "nightly" ]]; then
+  if is_nightly; then
 
-    REMOTE_NIGHTLY_JSON=$(curl -s https://hub.docker.com/v2/repositories/${CHE_IMAGE_NAME}/tags/nightly/)
+    NIGHTLY_IMAGE=$(docker images -q --no-trunc $CHE_IMAGE_FULLNAME)
+    NIGHTLY_IMAGE=${NIGHTLY_IMAGE#sha256:}
 
-    # Retrieve info on current nightly
-    LOCAL_CREATION_DATE=$(docker inspect --format="{{.Created }}" ${CHE_IMAGE_FULLNAME})
-    REMOTE_CREATION_DATE=$(echo $REMOTE_NIGHTLY_JSON | jq ".last_updated")
-    REMOTE_CREATION_DATE="${REMOTE_CREATION_DATE//\"}"
+    NIGHTLY_IMAGE_DATE_WRITTEN=$(docker run -it -v /var/lib/docker:/var/lib/docker \
+                  $UTILITY_IMAGE_ALPINE date -r /var/lib/docker/image/aufs/imagedb/content/sha256/$NIGHTLY_IMAGE)
+    CURRENT_DATE=$(date)
 
-    # Unfortunatley, the "last_updated" date on DockerHub is the date it was uploaded, not created.
-    # So after you download the image locally, then the local image "created" value reflects when it
-    # was originally built, creating a istuation where the local cached version is always older than
-    # what is on DockerHub, even if you just pulled it.
-    # Solution is to compare the dates, and only print warning message if the locally created ate
-    # is less than the updated date on dockerhub.
+    if newer_date_period \
+          $(timestamp_date_iso8601 "${NIGHTLY_IMAGE_DATE_WRITTEN}") \
+          $(timestamp_date_iso8601 "${CURRENT_DATE}"); then
+      # This means that nightly image written to disk >24 hours ago.
+      # If nightly disk writing is > 24 hours then it is too old
+      warning "Your 'nightly' image is over 24 hours old - checking for newer image..."
+      update_image $CHE_IMAGE_FULLNAME
+      warning "Pulled newer 'nightly' image - please rerun CLI"
+      return 2
 
-    if [[ -z ${REMOTE_CREATION_DATE} ]]; then
-      warning "Unable to get published date on hub.docker.com for ${CHE_IMAGE_FULLNAME}"
-    elif $(newer_date_period ${LOCAL_CREATION_DATE} ${REMOTE_CREATION_DATE}); then
-      warning "There is a newer ${CHE_IMAGE_FULLNAME} image on DockerHub."
     fi
   fi
 }
+
 
 # Convert a ISO 8601 date to timestamp
 timestamp_date_iso8601() {
@@ -371,13 +382,9 @@ timestamp_date_iso8601() {
 }
 
 # Compare two dates with ISO 8601 format and return
-# true if the first date is less than the second date (with a 1hour period)
-# else false
+# true if the first date is 24 hours less than the second date
 newer_date_period() {
-  local FIRST_DATE=$(timestamp_date_iso8601 $1)
-  local SECOND_DATE=$(timestamp_date_iso8601 $2)
-
-  if [[ $(expr ${FIRST_DATE} + 3600) -lt ${SECOND_DATE} ]]; then
+  if [[ $(expr ${1} + 86400) -lt ${2} ]]; then
     return 0
   else
     return 1
