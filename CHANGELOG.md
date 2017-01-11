@@ -1,44 +1,5 @@
 # Change Log
 
-## [Unreleased](https://github.com/eclipse/che/tree/HEAD)
-
-[Full Changelog](https://github.com/eclipse/che/compare/5.0.0...HEAD)
-
-**Issues with 'enhancement' label:**
-
-- Add restart button the the Workspace Agent Not Responding popup [\#3155](https://github.com/eclipse/che/issues/3155)
-- Improve buttons on the part toolbar [\#3152](https://github.com/eclipse/che/issues/3152)
-- Processes panel should be opened maximized [\#2894](https://github.com/eclipse/che/issues/2894)
-- Rename Che Docker Images [\#2737](https://github.com/eclipse/che/issues/2737)
-- Che server should connect to ws-agent on internal URL [\#2030](https://github.com/eclipse/che/issues/2030)
-- Add ability to reload page after lose connection with ws agent [\#3651](https://github.com/eclipse/che/pull/3651) ([vzhukovskii](https://github.com/vzhukovskii))
-- CHE-3152 Improve buttons on the part toolbar [\#3590](https://github.com/eclipse/che/pull/3590) ([vitaliy-guliy](https://github.com/vitaliy-guliy))
-
-**Issues fixed with 'bugs' label:**
-
-- File watcher works incorrectly \(regression\) [\#3537](https://github.com/eclipse/che/issues/3537)
-- Failed to restart workspace with renamed environment [\#2528](https://github.com/eclipse/che/issues/2528)
-
-**Closed issues:**
-
-- Problem in folder \(Package\) with name "api"  [\#3644](https://github.com/eclipse/che/issues/3644)
-- I can not open eclipse-che [\#3643](https://github.com/eclipse/che/issues/3643)
-- \[Docs\] Intelij development setup section missing in help [\#3642](https://github.com/eclipse/che/issues/3642)
-- license headers are missing [\#3608](https://github.com/eclipse/che/issues/3608)
-- CLI does not use a local che assembly [\#3599](https://github.com/eclipse/che/issues/3599)
-- CLI download error. [\#3596](https://github.com/eclipse/che/issues/3596)
-- Workspace Agent Not responding [\#3595](https://github.com/eclipse/che/issues/3595)
-- Can we deploy a custom war file into tomcat which is in che container [\#3588](https://github.com/eclipse/che/issues/3588)
-- Eclipse-che docs typo on Logical Architecture Section [\#3440](https://github.com/eclipse/che/issues/3440)
-- wsmaster/che-core-api-workspace sometimes fails to compile [\#3337](https://github.com/eclipse/che/issues/3337)
-
-**Pull requests merged:**
-
-- CHE-3537: don't show notification after deleting files internally [\#3652](https://github.com/eclipse/che/pull/3652) ([dkuleshov](https://github.com/dkuleshov))
-- CHE-2894 Processes panel should be opened maximized [\#3631](https://github.com/eclipse/che/pull/3631) ([vitaliy-guliy](https://github.com/vitaliy-guliy))
-- CHE-2528: Start workspace after renaming of environment [\#3521](https://github.com/eclipse/che/pull/3521) ([mmorhun](https://github.com/mmorhun))
-- Refactor DockerInstanceRuntimeInfo\#getServers\(\) \(\#2030\) [\#3282](https://github.com/eclipse/che/pull/3282) ([amisevsk](https://github.com/amisevsk))
-
 ## [5.0.0](https://github.com/eclipse/che/tree/5.0.0) (2017-01-06)
 [Full Changelog](https://github.com/eclipse/che/compare/5.0.0-M9...5.0.0)
 
@@ -73,7 +34,6 @@
 
 **Issues fixed with 'bugs' label:**
 
-- Error: Fail launching agent SSH [\#3603](https://github.com/eclipse/che/issues/3603)
 - eclipse/che-ip returns 2 IP addresses as CHE\_HOST [\#3564](https://github.com/eclipse/che/issues/3564)
 - Wiped issue [\#3550](https://github.com/eclipse/che/issues/3550)
 - Investigate correct working xtermjs with requirejs [\#3517](https://github.com/eclipse/che/issues/3517)
@@ -112,7 +72,6 @@
 - HotKeys hints for import/create projects does not appear in browser under anonim mode [\#3167](https://github.com/eclipse/che/issues/3167)
 - Cannot select an item in the terminal [\#3140](https://github.com/eclipse/che/issues/3140)
 - After reset or shut down computer CHE networks still exist. [\#3135](https://github.com/eclipse/che/issues/3135)
-- Project can't be created without Z option [\#3129](https://github.com/eclipse/che/issues/3129)
 - Issues with Language Servers [\#3127](https://github.com/eclipse/che/issues/3127)
 - Maven dependency resolver continues to run after workspace is stopped [\#3121](https://github.com/eclipse/che/issues/3121)
 - Access to workspace freezes when loading moderately big maven project [\#3115](https://github.com/eclipse/che/issues/3115)
@@ -138,18 +97,10 @@
 
 **Closed issues:**
 
-- Che issue starting debugger. [\#3604](https://github.com/eclipse/che/issues/3604)
-- docker fails when starting a workspace [\#3552](https://github.com/eclipse/che/issues/3552)
 - Add tests written section in PR template [\#3547](https://github.com/eclipse/che/issues/3547)
-- Unsupported OAuth provider github for Ready-To-Run project [\#3523](https://github.com/eclipse/che/issues/3523)
-- Dashboard "Create Workspace" button creates new project, not workspace [\#3515](https://github.com/eclipse/che/issues/3515)
-- Workspace storage location not inherited from server container [\#3514](https://github.com/eclipse/che/issues/3514)
 - Build che docs. [\#3487](https://github.com/eclipse/che/issues/3487)
 - Create repo to store large files such doc images. [\#3483](https://github.com/eclipse/che/issues/3483)
 - Duplicate entry in project explorer after import [\#3463](https://github.com/eclipse/che/issues/3463)
-- changing recipe location causes an error [\#3447](https://github.com/eclipse/che/issues/3447)
-- Unable to create workspace on start [\#3417](https://github.com/eclipse/che/issues/3417)
-- How to configure SSL che terminal ? [\#3132](https://github.com/eclipse/che/issues/3132)
 - Documentation for PHP Debugging [\#3594](https://github.com/eclipse/che/issues/3594)
 - Fix package/deploy issue of docs. [\#3563](https://github.com/eclipse/che/issues/3563)
 - Change access to docs from dashboard [\#3524](https://github.com/eclipse/che/issues/3524)
@@ -178,6 +129,7 @@
 - CHE-58: Refactoring introducing 'KubernetesResourceHelper' class [\#3600](https://github.com/eclipse/che/pull/3600) ([ibuziuk](https://github.com/ibuziuk))
 - Set new license year [\#3597](https://github.com/eclipse/che/pull/3597) ([mkuznyetsov](https://github.com/mkuznyetsov))
 - Update README.md [\#3584](https://github.com/eclipse/che/pull/3584) ([JamesDrummond](https://github.com/JamesDrummond))
+- Refactor workspace infrastructure provisioning [\#3577](https://github.com/eclipse/che/pull/3577) ([garagatyi](https://github.com/garagatyi))
 - CHE-3549 Fix docker privileged mode [\#3562](https://github.com/eclipse/che/pull/3562) ([mmorhun](https://github.com/mmorhun))
 - Additonal sync on file ADDED event.Should helps with few git operations [\#3556](https://github.com/eclipse/che/pull/3556) ([vparfonov](https://github.com/vparfonov))
 - Minor dockerfiles fixes [\#3555](https://github.com/eclipse/che/pull/3555) ([l0rd](https://github.com/l0rd))
@@ -264,21 +216,11 @@
 **Closed issues:**
 
 - What's the proper way for a workspace `dev-machine` to connect to the docker daemon? [\#3462](https://github.com/eclipse/che/issues/3462)
-- Configuration reset always [\#3422](https://github.com/eclipse/che/issues/3422)
-- Permission denied for che-websocket-terminal after building Che on Windows [\#3374](https://github.com/eclipse/che/issues/3374)
-- Workspace doesn't start on Che running on Amazon EC2 instance using remote browser [\#3361](https://github.com/eclipse/che/issues/3361)
-- Workspaces disappear from interface after a stop/crash  [\#3352](https://github.com/eclipse/che/issues/3352)
 - server and clent interaction [\#3346](https://github.com/eclipse/che/issues/3346)
-- sample-json-plugin doesn't appear in IDE [\#3338](https://github.com/eclipse/che/issues/3338)
 - Unable to Build Che [\#3333](https://github.com/eclipse/che/issues/3333)
-- Not able to create project [\#3332](https://github.com/eclipse/che/issues/3332)
 - artik-ide start and ERROR !!! Error - Docker not installed properly issue [\#3328](https://github.com/eclipse/che/issues/3328)
-- how to resume installation after crash [\#3326](https://github.com/eclipse/che/issues/3326)
 - Docker CLI Usage Message [\#3316](https://github.com/eclipse/che/issues/3316)
-- dashboard fails to compile [\#3312](https://github.com/eclipse/che/issues/3312)
-- Eclipse Che extension doesn't get loaded using Docker for Mac [\#3302](https://github.com/eclipse/che/issues/3302)
 - Sorry to bother, but I really need help to solve the network problem. [\#3299](https://github.com/eclipse/che/issues/3299)
-- Getting Started CHE CLI: che.sh fails to download cli.sh [\#3266](https://github.com/eclipse/che/issues/3266)
 - Extend the Che CLI with http proxy parameters [\#3259](https://github.com/eclipse/che/issues/3259)
 - Investigate usage  xterm.js instead of  old and unsupported  term.js [\#3210](https://github.com/eclipse/che/issues/3210)
 - Add configuration of CPU limits in docker machines [\#3199](https://github.com/eclipse/che/issues/3199)
@@ -345,13 +287,11 @@
 
 **Issues with 'enhancement' label:**
 
-- Invalid docker ip address when running by cli [\#3060](https://github.com/eclipse/che/issues/3060)
 - Estimate effort to support pull request panel operations with BitBucket \(public and private\) [\#3052](https://github.com/eclipse/che/issues/3052)
 - Add contextual menu associated to right-click action in the editor [\#3030](https://github.com/eclipse/che/issues/3030)
 - Manage empty states in IDE [\#2972](https://github.com/eclipse/che/issues/2972)
 - Let users configure the "Z" flag when mouting a volume [\#2874](https://github.com/eclipse/che/issues/2874)
 - Handle DOCKER\_HOST better [\#2754](https://github.com/eclipse/che/issues/2754)
-- Local IDE Mount with docker hangs [\#2742](https://github.com/eclipse/che/issues/2742)
 - yellow on white hard to read [\#2676](https://github.com/eclipse/che/issues/2676)
 - Investigate how to add possibility to limit CPU consumption by containers. [\#2630](https://github.com/eclipse/che/issues/2630)
 - Improve configurability for third party tools [\#1894](https://github.com/eclipse/che/issues/1894)
@@ -415,71 +355,20 @@
 
 **Closed issues:**
 
-- maven-server-impl test fails [\#3295](https://github.com/eclipse/che/issues/3295)
-- Fail launching agent Terminal [\#3275](https://github.com/eclipse/che/issues/3275)
-- Docs reference image eclipse/che-file which doesn't exist [\#3269](https://github.com/eclipse/che/issues/3269)
 - Upload a new version of the PHP Language Server [\#3227](https://github.com/eclipse/che/issues/3227)
 - che-sample-plugin-json-ide fails to compile [\#3222](https://github.com/eclipse/che/issues/3222)
-- Add Clojure Support [\#3217](https://github.com/eclipse/che/issues/3217)
-- Is there any possibility from which we can by pass username and password in eclipse che url? [\#3215](https://github.com/eclipse/che/issues/3215)
-- Why is there connections between port 4411 and the host where the web browser is opened?  [\#3211](https://github.com/eclipse/che/issues/3211)
 - Test CPU limits with docker and swarm [\#3198](https://github.com/eclipse/che/issues/3198)
 - No refresh in project explorer [\#3195](https://github.com/eclipse/che/issues/3195)
-- Upload files into workspace? [\#3194](https://github.com/eclipse/che/issues/3194)
 - \[Q\] Issue w/ ws-agent creation when creating project. [\#3190](https://github.com/eclipse/che/issues/3190)
 - wsagent 4818 Exception sending context initialized event [\#3184](https://github.com/eclipse/che/issues/3184)
 - bazel causes workspace agent to stop responding [\#3178](https://github.com/eclipse/che/issues/3178)
-- Is there any way in ehich we can install eclipse che on any virtual machine [\#3172](https://github.com/eclipse/che/issues/3172)
-- Can CheConf16 recording play? [\#3148](https://github.com/eclipse/che/issues/3148)
-- Moderator as a Contributor [\#3147](https://github.com/eclipse/che/issues/3147)
-- Need end point to load project from github branch [\#3134](https://github.com/eclipse/che/issues/3134)
-- Fail to start workspace agent  [\#3128](https://github.com/eclipse/che/issues/3128)
-- Endpoint for create and delete branch in eclipseche--\>git--\>branches [\#3126](https://github.com/eclipse/che/issues/3126)
-- Need to push changes to github branch [\#3122](https://github.com/eclipse/che/issues/3122)
-- Failed to inject orion editor [\#3118](https://github.com/eclipse/che/issues/3118)
-- Does Iresource Model supported in Che? How to achieve Iresource features ? [\#3099](https://github.com/eclipse/che/issues/3099)
-- Not able to load eclipse che workspace url in iframe [\#3072](https://github.com/eclipse/che/issues/3072)
-- File Sync agent is disabled by default [\#3071](https://github.com/eclipse/che/issues/3071)
-- How to run java project in eclipse che [\#3067](https://github.com/eclipse/che/issues/3067)
 - Set uncaught exception handler for executors [\#3065](https://github.com/eclipse/che/issues/3065)
 - Cannot start Eclipse Che using command line tool [\#3058](https://github.com/eclipse/che/issues/3058)
 - Are workspaces persistent? [\#3057](https://github.com/eclipse/che/issues/3057)
-- proxying and port exposure.. [\#3037](https://github.com/eclipse/che/issues/3037)
-- Wordpress issue www-data:www-data [\#3018](https://github.com/eclipse/che/issues/3018)
-- Possibility to develop android with gradle [\#3008](https://github.com/eclipse/che/issues/3008)
-- Need to update github url in remotes using swagger [\#2973](https://github.com/eclipse/che/issues/2973)
-- Fail to build che dashboard module using Docker [\#2963](https://github.com/eclipse/che/issues/2963)
-- How to change location in origin\(Git--\>Remotes--\>origin\) using curl [\#2951](https://github.com/eclipse/che/issues/2951)
-- Adding a new project template to custom stack [\#2879](https://github.com/eclipse/che/issues/2879)
-- Cannot build on windows "npm" command not found [\#2858](https://github.com/eclipse/che/issues/2858)
-- Cordova/Phonegap stacks, templates, and commands [\#2845](https://github.com/eclipse/che/issues/2845)
-- maven command does not work [\#2841](https://github.com/eclipse/che/issues/2841)
-- Wizard plugin not working [\#2810](https://github.com/eclipse/che/issues/2810)
-- Specifying local docker image in stacks.json [\#2806](https://github.com/eclipse/che/issues/2806)
-- Compile error  [\#2797](https://github.com/eclipse/che/issues/2797)
-- CHE using Docker on Mac with Chrome: Can't load project types: Error at Object.window.IDE.eventHandlers.initializationFailed  [\#2782](https://github.com/eclipse/che/issues/2782)
 - Documentation for Using Che as an IDE - Intellisense [\#2720](https://github.com/eclipse/che/issues/2720)
 - Documentation for Workspace Administration - Workspace Agents [\#2718](https://github.com/eclipse/che/issues/2718)
 - Documentation for Workspace Administration - Runtime Machines [\#2716](https://github.com/eclipse/che/issues/2716)
 - Documentation for Workspace Administration - Runtime Recipes [\#2688](https://github.com/eclipse/che/issues/2688)
-- Consider Adding Default Profiles for Maven Build [\#2594](https://github.com/eclipse/che/issues/2594)
-- How to authenticate against bitbucket? [\#2581](https://github.com/eclipse/che/issues/2581)
-- Cannot Paste commands in Command Definition Window [\#2579](https://github.com/eclipse/che/issues/2579)
-- Problems with Eclipse Che build. [\#2576](https://github.com/eclipse/che/issues/2576)
-- Port Eclipse Che for POWER \(ppc64le\) [\#2510](https://github.com/eclipse/che/issues/2510)
-- How would I preview a typical LAMP project? [\#2497](https://github.com/eclipse/che/issues/2497)
-- Highlight issue with custom editor and multiple extension file [\#2488](https://github.com/eclipse/che/issues/2488)
-- Problem using Bridge Mode for Server and Workspace Containers \(can't use --net=host\) [\#2450](https://github.com/eclipse/che/issues/2450)
-- CLI - che mount Fails [\#2442](https://github.com/eclipse/che/issues/2442)
-- dotnet workspace can't create donet/c\# project [\#2374](https://github.com/eclipse/che/issues/2374)
-- Cannot paste \(Ctrl+V\) into Text Area widget [\#2329](https://github.com/eclipse/che/issues/2329)
-- Request: for better UI on IDE especially for terminal  [\#2231](https://github.com/eclipse/che/issues/2231)
-- How to integrate Eclipse Che with Perforce or GitSwarm. [\#2201](https://github.com/eclipse/che/issues/2201)
-- Preparing a Workspace with a Maven Project [\#2191](https://github.com/eclipse/che/issues/2191)
-- Malformed Host Header error on Che startup [\#2124](https://github.com/eclipse/che/issues/2124)
-- Orion editor - Highlight issue [\#2078](https://github.com/eclipse/che/issues/2078)
-- Add third dependency SmartGWT to the che [\#1886](https://github.com/eclipse/che/issues/1886)
-- Running workspace results in IOException: Docker image build failed [\#1766](https://github.com/eclipse/che/issues/1766)
 - Release and ship CHE 5.0.0-M8 [\#3307](https://github.com/eclipse/che/issues/3307)
 - Create GET method to return snapshot configuration [\#3287](https://github.com/eclipse/che/issues/3287)
 - Eclipse Che CLI Refactoring + Improvements : phase 1 [\#3229](https://github.com/eclipse/che/issues/3229)
@@ -577,11 +466,6 @@
 ## [5.0.0-M7-artik](https://github.com/eclipse/che/tree/5.0.0-M7-artik) (2016-11-11)
 [Full Changelog](https://github.com/eclipse/che/compare/5.0.0-M7...5.0.0-M7-artik)
 
-**Closed issues:**
-
-- Endpoint for removing origin in eclipse che [\#3047](https://github.com/eclipse/che/issues/3047)
-- Dockerfile for the codenvy/mysql image? [\#2991](https://github.com/eclipse/che/issues/2991)
-
 ## [5.0.0-M7](https://github.com/eclipse/che/tree/5.0.0-M7) (2016-11-10)
 [Full Changelog](https://github.com/eclipse/che/compare/5.0.0-M6...5.0.0-M7)
 
@@ -658,20 +542,12 @@
 
 **Closed issues:**
 
-- Customizing dashboard [\#3016](https://github.com/eclipse/che/issues/3016)
 - Command Editor - Ability to get list of macros [\#2998](https://github.com/eclipse/che/issues/2998)
-- Eclipse Che install is a disaster [\#2965](https://github.com/eclipse/che/issues/2965)
 - Feature Request : Environmental Variables in main project / app container. [\#2954](https://github.com/eclipse/che/issues/2954)
-- This Linux user is not in 'docker' group [\#2922](https://github.com/eclipse/che/issues/2922)
-- Small question: what is inside eclipse/che:latest - where to find the dockerfile? [\#2917](https://github.com/eclipse/che/issues/2917)
-- On Mac, Running che command throws error `/usr/local/bin/che: line 165: init\_global\_variables: command not found` [\#2890](https://github.com/eclipse/che/issues/2890)
 - SVN UI - Commands Run via Java Implementation [\#2863](https://github.com/eclipse/che/issues/2863)
-- Could not load \[org.h2.mvstore.MV Store$2\] [\#2663](https://github.com/eclipse/che/issues/2663)
-- json structure to create dot net project in eclipse che workspace [\#2493](https://github.com/eclipse/che/issues/2493)
 - Provide automation for Json Rpc request/response processing [\#2147](https://github.com/eclipse/che/issues/2147)
 - Simplify usage of Json Rpc related components [\#2145](https://github.com/eclipse/che/issues/2145)
 - Workspace creation/edit view recasting and extending with new item [\#1767](https://github.com/eclipse/che/issues/1767)
-- Workspace Connection Error eclipse-che-4.2.0 [\#1149](https://github.com/eclipse/che/issues/1149)
 - Release and ship Che 5.0.0-M7 [\#3043](https://github.com/eclipse/che/issues/3043)
 - 5.0.0-M7 Milestone Plan [\#2935](https://github.com/eclipse/che/issues/2935)
 - Add servers to Agent description and propagate them to Workspace Runtime [\#2832](https://github.com/eclipse/che/issues/2832)
@@ -781,29 +657,15 @@
 
 **Closed issues:**
 
-- che.sh + docker: IPs and ws-agent timeouts [\#2864](https://github.com/eclipse/che/issues/2864)
 - Where to specify credentials for subversion [\#2852](https://github.com/eclipse/che/issues/2852)
-- The eclipse che can't start a workspace [\#2851](https://github.com/eclipse/che/issues/2851)
 - The eclipse che can't start a workspace [\#2849](https://github.com/eclipse/che/issues/2849)
 - There is no modelling tool on Eclipse Che [\#2844](https://github.com/eclipse/che/issues/2844)
-- Error while creating java project [\#2839](https://github.com/eclipse/che/issues/2839)
 - Documentation Feedback [\#2828](https://github.com/eclipse/che/issues/2828)
-- How To Start many che instances on same machine [\#2821](https://github.com/eclipse/che/issues/2821)
-- Service owned by current user [\#2818](https://github.com/eclipse/che/issues/2818)
-- Maven modules not recognized [\#2805](https://github.com/eclipse/che/issues/2805)
 - Che Mount - Accept Unison Profiles [\#2791](https://github.com/eclipse/che/issues/2791)
 - Github oauth uploaded ssh key worked, terminal not using it [\#2789](https://github.com/eclipse/che/issues/2789)
 - Hello World Extension Not Working [\#2784](https://github.com/eclipse/che/issues/2784)
-- Error "Certificates are required for https connection" in Eclipse Che  [\#2774](https://github.com/eclipse/che/issues/2774)
 - Documentation - Adding Terms to Glossary [\#2762](https://github.com/eclipse/che/issues/2762)
-- Special characters not working in workspace terminal [\#2752](https://github.com/eclipse/che/issues/2752)
-- Persisting workspaces on Dockerized Che [\#2741](https://github.com/eclipse/che/issues/2741)
-- Build assembly-ide-war failed on Window7 [\#2739](https://github.com/eclipse/che/issues/2739)
 - Documentation - Che Compose build.context for Private Repo [\#2738](https://github.com/eclipse/che/issues/2738)
-- How to configure Che when workspaces + browser are on different networks [\#2736](https://github.com/eclipse/che/issues/2736)
-- Ubuntu 16.04 unable to install Eclipse [\#2621](https://github.com/eclipse/che/issues/2621)
-- Eclipse Che Extension : Sample hello-world extension project Run issue  [\#2583](https://github.com/eclipse/che/issues/2583)
-- Question: Running Che on Mesos [\#2536](https://github.com/eclipse/che/issues/2536)
 - Data type mismatch in JpaUserDao\#getAll\(\) method [\#2524](https://github.com/eclipse/che/issues/2524)
 - Iterative improvements to simplify usage of che in che scenarios [\#2116](https://github.com/eclipse/che/issues/2116)
 - Study Initial schema generation and how to make changes in model after migration to single database [\#2110](https://github.com/eclipse/che/issues/2110)
@@ -912,14 +774,10 @@
 
 - can not find or open /mnt/che/lib/ws-agent.zip [\#2701](https://github.com/eclipse/che/issues/2701)
 - Support remote Docker by IP [\#2693](https://github.com/eclipse/che/issues/2693)
-- \[Q\] Why two versions of che.sh available? [\#2675](https://github.com/eclipse/che/issues/2675)
 - Default Stacks Do Not Reference Minimal Base Images. [\#2671](https://github.com/eclipse/che/issues/2671)
-- Code completion for PHP [\#2666](https://github.com/eclipse/che/issues/2666)
-- Recently created workspaces are lost when machine is drastically closed [\#2655](https://github.com/eclipse/che/issues/2655)
 - Cover by selenium test GWT SDM for Che [\#2635](https://github.com/eclipse/che/issues/2635)
 - Eclipse Che on Windows 8.1 [\#2620](https://github.com/eclipse/che/issues/2620)
 - Editor does not filter code completion proposals from language server [\#2592](https://github.com/eclipse/che/issues/2592)
-- Workspace creation error: 404 No such file or directory [\#2565](https://github.com/eclipse/che/issues/2565)
 - Language server module refactoring [\#2552](https://github.com/eclipse/che/issues/2552)
 - Remove WorkspaceHooks interface [\#1939](https://github.com/eclipse/che/issues/1939)
 - Simplify transition between dashboard and IDE [\#1743](https://github.com/eclipse/che/issues/1743)
@@ -991,7 +849,6 @@
 - Cover by selenium tests the Bitnamy stacks from dashboars [\#2636](https://github.com/eclipse/che/issues/2636)
 - Editor right click context menu. [\#2634](https://github.com/eclipse/che/issues/2634)
 - TODO [\#2586](https://github.com/eclipse/che/issues/2586)
-- Java errors - RHEL 7.2 Maipo  [\#2486](https://github.com/eclipse/che/issues/2486)
 - Simplify Stack management and authoring [\#2205](https://github.com/eclipse/che/issues/2205)
 - 5.0.0-M4 Milestone Plan [\#2615](https://github.com/eclipse/che/issues/2615)
 - Release and ship Che 5.0.0-M4 [\#2588](https://github.com/eclipse/che/issues/2588)
@@ -1074,15 +931,9 @@
 
 **Closed issues:**
 
-- Running the docker launcher with MACHINE\_WS\_AGENT\_MAX\_START\_TIME\_MS has no effect [\#2584](https://github.com/eclipse/che/issues/2584)
-- How to specify port for previewing Meteor projects [\#2580](https://github.com/eclipse/che/issues/2580)
-- Question: Using a Docker insecure registry [\#2563](https://github.com/eclipse/che/issues/2563)
 - Create Docker Image to Get CLI [\#2559](https://github.com/eclipse/che/issues/2559)
 - Remove Docker Server Mac and Windows Docs [\#2556](https://github.com/eclipse/che/issues/2556)
 - Link to 4.7 Release Notes on homepage broken [\#2513](https://github.com/eclipse/che/issues/2513)
-- Select and Copy output of Terminal panel [\#2512](https://github.com/eclipse/che/issues/2512)
-- Values from che.properties are not injected to Workspace, using Eclipse Che 4.7.2  [\#2511](https://github.com/eclipse/che/issues/2511)
-- Incorrect url is being used when pulling from private registry \(v5 M1\) [\#2495](https://github.com/eclipse/che/issues/2495)
 - 5.0.0-M3 Milestone Overview [\#2641](https://github.com/eclipse/che/issues/2641)
 - Documentation for preview HTML. [\#2597](https://github.com/eclipse/che/issues/2597)
 - Documentation for Mounting [\#2596](https://github.com/eclipse/che/issues/2596)
@@ -1151,7 +1002,6 @@
 - \[languageserver\] Ensure order of events [\#1426](https://github.com/eclipse/che/issues/1426)
 - \[languageserver\] Support incremental updates [\#1425](https://github.com/eclipse/che/issues/1425)
 - \[languageserver\] Find Reference [\#1421](https://github.com/eclipse/che/issues/1421)
-- creating containers from local dockerfiles [\#1379](https://github.com/eclipse/che/issues/1379)
 - Docker Volumes. [\#1338](https://github.com/eclipse/che/issues/1338)
 - GitHub plugin [\#738](https://github.com/eclipse/che/issues/738)
 - how to use content assist automatically [\#725](https://github.com/eclipse/che/issues/725)
@@ -1168,24 +1018,11 @@
 **Closed issues:**
 
 - CLI: Run Che specify CHE\_HOST\_IP [\#2476](https://github.com/eclipse/che/issues/2476)
-- consume eclipse che api from jquery/c\# [\#2475](https://github.com/eclipse/che/issues/2475)
 - Having to go through a series of steps before Eclipse Che starts. [\#2449](https://github.com/eclipse/che/issues/2449)
-- How to run a Che farm behind an nginx router [\#2383](https://github.com/eclipse/che/issues/2383)
-- Stop VM running che after idle/inactivity for long time [\#2362](https://github.com/eclipse/che/issues/2362)
-- Init git repository at workspace level [\#2357](https://github.com/eclipse/che/issues/2357)
-- Unable to select text on terminal window [\#2320](https://github.com/eclipse/che/issues/2320)
 - Adapt JPA branch with changes in Workspace model [\#2215](https://github.com/eclipse/che/issues/2215)
 - Implement post-flight check requirements into the codenvy/che-test image [\#2127](https://github.com/eclipse/che/issues/2127)
-- Eclipse che not working in clients machine [\#2062](https://github.com/eclipse/che/issues/2062)
-- Che build in the root directory fails on a clean check-out [\#1858](https://github.com/eclipse/che/issues/1858)
 - JPA Dao implementation [\#1790](https://github.com/eclipse/che/issues/1790)
 - Support for WTP server launching [\#1676](https://github.com/eclipse/che/issues/1676)
-- Question about google super dev. [\#1640](https://github.com/eclipse/che/issues/1640)
-- Timeline for multi-cursor visuals? [\#1618](https://github.com/eclipse/che/issues/1618)
-- How can I make my project type  extension  to extends MAVEN project type ?? [\#1535](https://github.com/eclipse/che/issues/1535)
-- How about supporting Mercurial as a version control tool ? [\#1436](https://github.com/eclipse/che/issues/1436)
-- How to extend a new project type that contains a new perspective [\#1404](https://github.com/eclipse/che/issues/1404)
-- Is it possible to use Sonarqube with Eclipse Che? [\#673](https://github.com/eclipse/che/issues/673)
 - 5.0.0-M2 Milestone Overview [\#2640](https://github.com/eclipse/che/issues/2640)
 
 **Pull requests merged:**
@@ -1252,16 +1089,9 @@
 
 **Closed issues:**
 
-- Command for opening a file [\#2412](https://github.com/eclipse/che/issues/2412)
-- Custom extension not visible on IDE 4.7.2 [\#2411](https://github.com/eclipse/che/issues/2411)
 - GitLab docs update [\#2405](https://github.com/eclipse/che/issues/2405)
 - Added documentation for GitLab oAuth [\#2404](https://github.com/eclipse/che/issues/2404)
 - Add authentication for accessing workspace in private cloud [\#2390](https://github.com/eclipse/che/issues/2390)
-- Help needed to make custom che.properties work on boot2docker-hyperV in windows 10 [\#2384](https://github.com/eclipse/che/issues/2384)
-- Not able to import projects from my Github account though can see the projects listed.  [\#2360](https://github.com/eclipse/che/issues/2360)
-- Close editor when file is deleted [\#2328](https://github.com/eclipse/che/issues/2328)
-- How integrate eclipse Che with AD and LDAP [\#2302](https://github.com/eclipse/che/issues/2302)
-- Can't load project types outside localhost [\#2058](https://github.com/eclipse/che/issues/2058)
 - Environment Provider and Agent SPI [\#1829](https://github.com/eclipse/che/issues/1829)
 - Release and ship Che 5.0.0-M1 [\#2433](https://github.com/eclipse/che/issues/2433)
 - Ways to mount folder inside host machine to auxiliary machine [\#2425](https://github.com/eclipse/che/issues/2425)
@@ -1325,7 +1155,6 @@
 **Closed issues:**
 
 - Building of 4.7.1 tag fails on IDE Stack: "Missing header in: che-core-ide-stacks/src/main/resources/images/type-bitnami.svg" [\#2389](https://github.com/eclipse/che/issues/2389)
-- Am I using che-install-plugin correctly? I can't make the JSON plugin works [\#2330](https://github.com/eclipse/che/issues/2330)
 - 4.7.2 Milestone Plan [\#2401](https://github.com/eclipse/che/issues/2401)
 
 ## [4.7.1](https://github.com/eclipse/che/tree/4.7.1) (2016-09-08)
@@ -1353,23 +1182,11 @@
 
 **Closed issues:**
 
-- Can't load project [\#2361](https://github.com/eclipse/che/issues/2361)
-- mvn clean install build is failure  [\#2335](https://github.com/eclipse/che/issues/2335)
 - Che server and workspace machines on separate nodes [\#2327](https://github.com/eclipse/che/issues/2327)
-- from 4.7.0 become 4.6.2  [\#2326](https://github.com/eclipse/che/issues/2326)
 - Trying to build Eclipse Che 4.8.x on Ubuntu, I got exception "java.net.SocketException: Broken pipe" [\#2323](https://github.com/eclipse/che/issues/2323)
 - "cannot enable tty mode on non tty input" on Eclipse Che version 4.7.0 [\#2321](https://github.com/eclipse/che/issues/2321)
-- Running che as a server on Mac with odd behavior [\#2313](https://github.com/eclipse/che/issues/2313)
-- How to config mirror for maven? cant run vi in che container [\#2309](https://github.com/eclipse/che/issues/2309)
-- What should I do to support hundreds of workspace working properly at the same time. [\#2297](https://github.com/eclipse/che/issues/2297)
-- Grammar for PHP tag doesn't support all cases [\#2283](https://github.com/eclipse/che/issues/2283)
-- I built Eclipse Che 4.8.0, but I get "LOADING: Error while Booting developer machine" when I try to run a Workspace [\#2271](https://github.com/eclipse/che/issues/2271)
-- chrome developer tools network show ”Provisional headers are shown“ [\#2270](https://github.com/eclipse/che/issues/2270)
 - somtimes pop dialog cant copy and paste [\#2258](https://github.com/eclipse/che/issues/2258)
-- Issue with Git Committing in 4.5.1 [\#2101](https://github.com/eclipse/che/issues/2101)
-- No index.html when creating a java-swing workspace with mentioned stack [\#2021](https://github.com/eclipse/che/issues/2021)
 - Make Che with multi-machine environments backward compatible [\#1820](https://github.com/eclipse/che/issues/1820)
-- Add enhancements for working with files not added as projects [\#1580](https://github.com/eclipse/che/issues/1580)
 - 4.7.1 Milestone Plan [\#2354](https://github.com/eclipse/che/issues/2354)
 - Release and ship Che 4.7.1 [\#2337](https://github.com/eclipse/che/issues/2337)
 
@@ -1408,10 +1225,6 @@
 **Closed issues:**
 
 - After stopping workspace the restart widget does not appear [\#2268](https://github.com/eclipse/che/issues/2268)
-- Trying to build and run Eclipse Che 4.6.x, I get java.lang.NoClassDefFoundError: org/objectweb/asm/MethodVisitor [\#2259](https://github.com/eclipse/che/issues/2259)
-- Cannot use github without oauth [\#2253](https://github.com/eclipse/che/issues/2253)
-- Build Che Using Docker - npm error [\#2247](https://github.com/eclipse/che/issues/2247)
-- Unable to import GitSwarm Projects [\#2244](https://github.com/eclipse/che/issues/2244)
 
 **Pull requests merged:**
 
@@ -1433,7 +1246,6 @@
 - Please add Clojure support to Eclipse Che [\#1484](https://github.com/eclipse/che/issues/1484)
 - Feature: Multiple Panes [\#1202](https://github.com/eclipse/che/issues/1202)
 - Eclipse Xtend [\#785](https://github.com/eclipse/che/issues/785)
-- Using authentication to access dashboard / IDE [\#690](https://github.com/eclipse/che/issues/690)
 - Modify Error Message When Trying to Run Che Server Twice [\#2233](https://github.com/eclipse/che/issues/2233)
 - Revamp list's header [\#2179](https://github.com/eclipse/che/issues/2179)
 - Simplify boxes' design for Dashboard page [\#2158](https://github.com/eclipse/che/issues/2158)
@@ -1464,7 +1276,6 @@
 - Folder/File disappeared after rename [\#2227](https://github.com/eclipse/che/issues/2227)
 - The just created new splitted pane for a terminal is empty [\#2222](https://github.com/eclipse/che/issues/2222)
 - Eclipse che up freezing [\#2189](https://github.com/eclipse/che/issues/2189)
-- Can not do CLI mount  [\#2123](https://github.com/eclipse/che/issues/2123)
 - Docker Launcher - wrong hostname output when running in a VM [\#1925](https://github.com/eclipse/che/issues/1925)
 - Wrong symbols in the message console after git merge [\#1859](https://github.com/eclipse/che/issues/1859)
 - workspace not restored from snapshot when che server is restarted [\#691](https://github.com/eclipse/che/issues/691)
@@ -1494,33 +1305,19 @@
 
 **Closed issues:**
 
-- IDE can't build and run project [\#2238](https://github.com/eclipse/che/issues/2238)
-- In company's network,workspace open error,and can't create project [\#2226](https://github.com/eclipse/che/issues/2226)
 - Ability to create a workspace from any repository hosting provider [\#2202](https://github.com/eclipse/che/issues/2202)
 - Is there a way to run 4.7 until it officially comes out? [\#2199](https://github.com/eclipse/che/issues/2199)
 - Error of automatic update of IM CLI: 'Could not generate DH keypair' [\#2195](https://github.com/eclipse/che/issues/2195)
-- Unable to start my workspace "You can configure machine.ws\_agent.max\_start\_time\_ms in Che properties to increase the timeout" [\#2192](https://github.com/eclipse/che/issues/2192)
 - CHE\_SERVER\_CONTAINER\_NAME doesn't have any effect. [\#2187](https://github.com/eclipse/che/issues/2187)
 - Where can I find che.properties file and export workspace snapshot? [\#2186](https://github.com/eclipse/che/issues/2186)
 - Links on hwo to extend Che on website are outdated [\#2184](https://github.com/eclipse/che/issues/2184)
-- Jade/Coffeescript/SASS support? [\#2180](https://github.com/eclipse/che/issues/2180)
-- HTTPS Support? [\#2174](https://github.com/eclipse/che/issues/2174)
 - Unable to create project eventhough workspace created.  [\#2173](https://github.com/eclipse/che/issues/2173)
 - Workspaces don't persist between docker service restarts [\#2172](https://github.com/eclipse/che/issues/2172)
-- I don't think APIs in swagger related to projects are working correctly. [\#2166](https://github.com/eclipse/che/issues/2166)
 - What's the differnce between eclipse/che and codenvy/che dockerhub repos? [\#2164](https://github.com/eclipse/che/issues/2164)
 - setup nightly QA for new dockerized CHE [\#2161](https://github.com/eclipse/che/issues/2161)
-- Blank Workspace Won't Start with Obscure Error [\#2149](https://github.com/eclipse/che/issues/2149)
 - Refresh in Project Explorer does not work [\#2141](https://github.com/eclipse/che/issues/2141)
-- Wokspaces are not loaded when che starts as a container [\#2122](https://github.com/eclipse/che/issues/2122)
-- Docker out of docker [\#2086](https://github.com/eclipse/che/issues/2086)
-- Issue building Che with custom plugin - Project extension doesn t appear [\#2077](https://github.com/eclipse/che/issues/2077)
 - Move "Subversion" menu after to "Git" in project's explorer right-click menu [\#1884](https://github.com/eclipse/che/issues/1884)
 - Rework the grids and lists views in the user dashboard [\#1762](https://github.com/eclipse/che/issues/1762)
-- Will the plugin-datasource coming back to the Che future version? [\#1724](https://github.com/eclipse/che/issues/1724)
-- Re-creating a project with the same name as a deleted one in same workspace fails on Codenvy [\#1637](https://github.com/eclipse/che/issues/1637)
-- Che image for armhf [\#531](https://github.com/eclipse/che/issues/531)
-- using che with nginx-proxy  [\#238](https://github.com/eclipse/che/issues/238)
 - Release and ship Che 4.7.0 [\#2265](https://github.com/eclipse/che/issues/2265)
 - How do I make eclipse che instance persist across host reboots [\#2170](https://github.com/eclipse/che/issues/2170)
 - Remove native git implementation [\#2033](https://github.com/eclipse/che/issues/2033)
@@ -1603,7 +1400,6 @@
 
 - Eclipse che doesn't read the workspaces created when executed as a container [\#2120](https://github.com/eclipse/che/issues/2120)
 - Signer information does not match \(version 4.6.2\) [\#2113](https://github.com/eclipse/che/issues/2113)
-- Problem authenticating on github [\#2104](https://github.com/eclipse/che/issues/2104)
 - Compiling Che fails [\#2093](https://github.com/eclipse/che/issues/2093)
 - Remove some editor api interfaces and clases and simplify editor initialization process [\#1913](https://github.com/eclipse/che/issues/1913)
 - Can't find REST API about auth. [\#1592](https://github.com/eclipse/che/issues/1592)
@@ -1628,13 +1424,7 @@
 
 **Closed issues:**
 
-- How do I write a custom recipe that uses scripts? [\#2084](https://github.com/eclipse/che/issues/2084)
-- unzip:  cannot find or open /mnt/che/ws-agent.zip, /mnt/che/ws-agent.zip.zip or /mnt/che/ws-agent.zip.ZIP. [\#2081](https://github.com/eclipse/che/issues/2081)
-- How to debug che source code in windows? [\#2070](https://github.com/eclipse/che/issues/2070)
-- Question: WEB UI Authentication [\#2028](https://github.com/eclipse/che/issues/2028)
 - Sparse checkout broken [\#2019](https://github.com/eclipse/che/issues/2019)
-- Cannot wget/curl/git/apt-get to internet from within docker container [\#2001](https://github.com/eclipse/che/issues/2001)
-- Issue on Eclipse Che using vagrant behind firewall [\#1897](https://github.com/eclipse/che/issues/1897)
 
 **Pull requests merged:**
 
@@ -1655,11 +1445,6 @@
 **Issues fixed with 'bugs' label:**
 
 - Could not start workspace \<wokespace-id\> Reason: Timeout reached [\#2039](https://github.com/eclipse/che/issues/2039)
-
-**Closed issues:**
-
-- Javascript errors while building from source [\#1984](https://github.com/eclipse/che/issues/1984)
-- Preview URL for android workspaces not include for Eclipse Che version 4.5.1 [\#1908](https://github.com/eclipse/che/issues/1908)
 
 **Pull requests merged:**
 
@@ -1727,30 +1512,16 @@
 
 **Closed issues:**
 
-- "Edit Commands..." for java seems don't work [\#1996](https://github.com/eclipse/che/issues/1996)
 - Check if workspace backup performed on docker service restart or stop [\#1972](https://github.com/eclipse/che/issues/1972)
 - Deprecate CurrentProjectChangedEvent and his handler [\#1961](https://github.com/eclipse/che/issues/1961)
 - Add custom user agent header into JGit  [\#1935](https://github.com/eclipse/che/issues/1935)
 - Make ability to show notifications from dashboard when IDE iframe is showed [\#1915](https://github.com/eclipse/che/issues/1915)
-- Is it possible way to debug Che Server? [\#1880](https://github.com/eclipse/che/issues/1880)
 - How should I debug the Eclipse Che core? [\#1876](https://github.com/eclipse/che/issues/1876)
-- Use local image before registry [\#1845](https://github.com/eclipse/che/issues/1845)
-- Certificates are required for https connection [\#1792](https://github.com/eclipse/che/issues/1792)
-- How to solve cross domain problem when deploy docker on seperate node [\#1781](https://github.com/eclipse/che/issues/1781)
-- CORS restrictions in Workspace Agent [\#1735](https://github.com/eclipse/che/issues/1735)
-- Cannot start a new workspace [\#1686](https://github.com/eclipse/che/issues/1686)
-- Che doesn't use the configured DNS server [\#1684](https://github.com/eclipse/che/issues/1684)
-- Error response from daemon: client is newer than server \(client API version: 1.23, server API version: 1.22\) [\#1636](https://github.com/eclipse/che/issues/1636)
 - insufficient memory [\#1631](https://github.com/eclipse/che/issues/1631)
-- Bluetooth over USB on OSX 10.11.4 - VirtualBox Settings [\#1611](https://github.com/eclipse/che/issues/1611)
-- Intellisense not work [\#1610](https://github.com/eclipse/che/issues/1610)
-- org.eclipse.che.ide.websocket.WebSocketException: WebSocket is not opened. [\#1604](https://github.com/eclipse/che/issues/1604)
-- How to restore workspaces when restarting Che? [\#1561](https://github.com/eclipse/che/issues/1561)
 - \[languageserver\] Rename Refactoring [\#1424](https://github.com/eclipse/che/issues/1424)
 - \[languageserver\] Goto Definition [\#1423](https://github.com/eclipse/che/issues/1423)
 - \[languageserver\] hover provider [\#1422](https://github.com/eclipse/che/issues/1422)
 - Callbacks send to WsAgentStateController\#getMessageBus ignored [\#1413](https://github.com/eclipse/che/issues/1413)
-- Poor performance running JGit Maven build in Che workspace [\#694](https://github.com/eclipse/che/issues/694)
 - Release and ship Che 4.6.0 [\#2012](https://github.com/eclipse/che/issues/2012)
 - Move che-plugin-java-jdt-core-repack module to che-lib [\#1887](https://github.com/eclipse/che/issues/1887)
 - Milestone Summary 4.6.0 [\#1870](https://github.com/eclipse/che/issues/1870)
@@ -1892,11 +1663,9 @@
 - Avoid "Contact support" wording in error messages [\#945](https://github.com/eclipse/che/issues/945)
 - Gradle support [\#802](https://github.com/eclipse/che/issues/802)
 - How to get the workspace port in previewUrl? [\#747](https://github.com/eclipse/che/issues/747)
-- Is it possible to manual save? [\#737](https://github.com/eclipse/che/issues/737)
 - Feature Request: Creating Snapshots of a Workspace from the UI. [\#698](https://github.com/eclipse/che/issues/698)
 - Add more support for docker-machine drivers [\#655](https://github.com/eclipse/che/issues/655)
 - Is there an easy way to change the log level of the tomcat in the che docker container? [\#613](https://github.com/eclipse/che/issues/613)
-- how sould I do to build a che-samples/che-ide-extension plugin [\#610](https://github.com/eclipse/che/issues/610)
 - Rearrange Assembly Module [\#425](https://github.com/eclipse/che/issues/425)
 - Java open type action \(like Eclipse Ctrl Shift T\) [\#332](https://github.com/eclipse/che/issues/332)
 
@@ -1914,19 +1683,9 @@
 - oAuth settings in che.properties not getting picked up [\#1696](https://github.com/eclipse/che/issues/1696)
 - Run on docker for windows [\#1695](https://github.com/eclipse/che/issues/1695)
 - Error when starting workspace [\#1681](https://github.com/eclipse/che/issues/1681)
-- Unable to open newly created workspaces [\#1666](https://github.com/eclipse/che/issues/1666)
 - Unable to run the latest version assembly successfully [\#1665](https://github.com/eclipse/che/issues/1665)
-- 404 error on creating workspace container. [\#1635](https://github.com/eclipse/che/issues/1635)
-- Google Eclipse Plugin - is or will there be a GWT plugin for Che ? [\#1617](https://github.com/eclipse/che/issues/1617)
-- Example showing syntax highlighting [\#1608](https://github.com/eclipse/che/issues/1608)
-- Cant run "Che run" on hyper-V \(not using docker for windows, due windows 10 build\) [\#1593](https://github.com/eclipse/che/issues/1593)
 - \[Codeenvy\] CORs issue [\#1481](https://github.com/eclipse/che/issues/1481)
-- \[Codenvy\] New Project stuck at "Starting workspace runtime" [\#1480](https://github.com/eclipse/che/issues/1480)
-- Workspace import/export [\#1468](https://github.com/eclipse/che/issues/1468)
 - How to create and register a custom viewpart in Che workspace? [\#1446](https://github.com/eclipse/che/issues/1446)
-- How to add a new view? [\#1433](https://github.com/eclipse/che/issues/1433)
-- Groovy editor: How to do it. github che-tutorials/che-tutorial-editor-api or che website? [\#1227](https://github.com/eclipse/che/issues/1227)
-- Cannot start workspace [\#1226](https://github.com/eclipse/che/issues/1226)
 - Quick Tips for Creating a Wizard [\#1186](https://github.com/eclipse/che/issues/1186)
 - Some issues with keyboard bindings [\#277](https://github.com/eclipse/che/issues/277)
 
@@ -2002,8 +1761,6 @@
 - I want set a login [\#1601](https://github.com/eclipse/che/issues/1601)
 - Failed build from source \(mvn clean install\) with devnation branch  [\#1598](https://github.com/eclipse/che/issues/1598)
 - Not able to open Workspace in Chrome. Stuck in Loading.  [\#1596](https://github.com/eclipse/che/issues/1596)
-- unzip:  cannot find or open /mnt/che/ws-agent.zip, /mnt/che/ws-agent.zip.zip or /mnt/che/ws-agent.zip.ZIP. [\#1595](https://github.com/eclipse/che/issues/1595)
-- Create Workspace Dialog [\#1517](https://github.com/eclipse/che/issues/1517)
 - I cannot create a fully functional CHE workspace using Docker beta for mac [\#1482](https://github.com/eclipse/che/issues/1482)
 
 **Pull requests merged:**
@@ -2173,13 +1930,8 @@
 
 - The latest code Compiling GWT Application failed [\#1485](https://github.com/eclipse/che/issues/1485)
 - Is there any tutorial to introduce how to deploy Che in a farm to keep every user has their own Che instance [\#1475](https://github.com/eclipse/che/issues/1475)
-- Github [\#1470](https://github.com/eclipse/che/issues/1470)
 - Workspace ram [\#1469](https://github.com/eclipse/che/issues/1469)
 - Browser JS error when starting agent [\#1462](https://github.com/eclipse/che/issues/1462)
-- Question: port range to open in amazon instance [\#1457](https://github.com/eclipse/che/issues/1457)
-- Terminal error on workspace creation [\#1445](https://github.com/eclipse/che/issues/1445)
-- unable to create a workspace [\#1332](https://github.com/eclipse/che/issues/1332)
-- Question - Remote HTTP Git with user/pass options [\#1289](https://github.com/eclipse/che/issues/1289)
 
 **Pull requests merged:**
 
@@ -2233,7 +1985,6 @@
 **Issues with 'enhancement' label:**
 
 - AMI for che? [\#1416](https://github.com/eclipse/che/issues/1416)
-- Allow configuration of syntax highlighting [\#1178](https://github.com/eclipse/che/issues/1178)
 
 **Issues fixed with 'bugs' label:**
 
@@ -2244,29 +1995,15 @@
 **Closed issues:**
 
 - Stuck at 'Starting workspace agent' when Che server, Docker and browser are on the same machine [\#1412](https://github.com/eclipse/che/issues/1412)
-- Workspace Not Loaded On Che Start [\#1410](https://github.com/eclipse/che/issues/1410)
 - VPN + eclipse che :  workspace agent unable to ping the Che server [\#1408](https://github.com/eclipse/che/issues/1408)
 - Can't install eclipse on Mac OS X "El Capitan" [\#1378](https://github.com/eclipse/che/issues/1378)
 - How to share a folder to docker build context [\#1374](https://github.com/eclipse/che/issues/1374)
 - feature request:  support of .net core enviroment. \(dnx is deprecated\) [\#1373](https://github.com/eclipse/che/issues/1373)
 - Compatibility matrix [\#1360](https://github.com/eclipse/che/issues/1360)
-- Unable to create workspace in che Artik Ide [\#1354](https://github.com/eclipse/che/issues/1354)
-- Error when starting workspace \[Question\] [\#1302](https://github.com/eclipse/che/issues/1302)
-- How to custom a project template from a hosted ZIP archive [\#1294](https://github.com/eclipse/che/issues/1294)
-- Che Authentification/Authorization [\#1250](https://github.com/eclipse/che/issues/1250)
-- Is it possible to fold code or show code outline [\#1210](https://github.com/eclipse/che/issues/1210)
 - Can't reuse Che Artik IDE [\#1207](https://github.com/eclipse/che/issues/1207)
-- How to deploy Che to google cloud? [\#1187](https://github.com/eclipse/che/issues/1187)
-- Build failure [\#1171](https://github.com/eclipse/che/issues/1171)
 - JREContainer hashcode implementation [\#1167](https://github.com/eclipse/che/issues/1167)
-- When create workspace,I got error about tty. [\#1155](https://github.com/eclipse/che/issues/1155)
-- CPP Workspace [\#1120](https://github.com/eclipse/che/issues/1120)
 - Incorporate Eclipse Collections into Che [\#1078](https://github.com/eclipse/che/issues/1078)
-- Can't start a project of a fresh install Eclipse Che [\#965](https://github.com/eclipse/che/issues/965)
-- .Generated Files [\#812](https://github.com/eclipse/che/issues/812)
-- .SymbolMap Files [\#811](https://github.com/eclipse/che/issues/811)
 - Authenticating my GitHub Account with Eclipse Che Won't Work [\#700](https://github.com/eclipse/che/issues/700)
-- Error creating a project in eclipse che on desktop [\#261](https://github.com/eclipse/che/issues/261)
 
 **Pull requests merged:**
 
@@ -2318,16 +2055,13 @@
 
 **Closed issues:**
 
-- `sudo: unable to send audit message: Operation not permitted` \(Ubuntu 14.04\) [\#1318](https://github.com/eclipse/che/issues/1318)
 - sudo: unable to send audit message: Operation not permitted 9 [\#1317](https://github.com/eclipse/che/issues/1317)
 - sudo: unable to send audit message: Operation not permitted  [\#1316](https://github.com/eclipse/che/issues/1316)
 - Confused with IP mappings. [\#1303](https://github.com/eclipse/che/issues/1303)
 - WebSocket che-host failed [\#1293](https://github.com/eclipse/che/issues/1293)
 - JAVA\_HOME not found [\#1292](https://github.com/eclipse/che/issues/1292)
 - A TLS packet with unexpected length was received. [\#1290](https://github.com/eclipse/che/issues/1290)
-- Custom Stack Not Being Used. [\#1280](https://github.com/eclipse/che/issues/1280)
 - Cant Start Wokspace on EC2 [\#1272](https://github.com/eclipse/che/issues/1272)
-- Upgraded to from 4.0.1 to 4.2.0: internal server error 500 when trying to access to workspaces [\#1263](https://github.com/eclipse/che/issues/1263)
 - Blank page when clicked "Open in IDE" [\#1262](https://github.com/eclipse/che/issues/1262)
 - Not able to import new project from github by organization application OAuth and get empty log [\#1260](https://github.com/eclipse/che/issues/1260)
 - GWT super dev mode not working [\#1256](https://github.com/eclipse/che/issues/1256)
@@ -2338,7 +2072,6 @@
 - Arm7 Git [\#1219](https://github.com/eclipse/che/issues/1219)
 - Change the state of che editor programmatically  [\#1209](https://github.com/eclipse/che/issues/1209)
 - Arm7 terminal websocket error. [\#1205](https://github.com/eclipse/che/issues/1205)
-- Beaglebone Che - Stuck on Finishing Editor Initialization [\#1100](https://github.com/eclipse/che/issues/1100)
 
 **Pull requests merged:**
 
@@ -2430,14 +2163,7 @@
 - Errors during build [\#1220](https://github.com/eclipse/che/issues/1220)
 - Uncaught exception when start eclipse-che.exe in win7  [\#1212](https://github.com/eclipse/che/issues/1212)
 - Getting Started - ARTIK IDE, not making sense [\#1196](https://github.com/eclipse/che/issues/1196)
-- Custom Stack not Working [\#1188](https://github.com/eclipse/che/issues/1188)
-- Not able to create new project using any stack [\#1138](https://github.com/eclipse/che/issues/1138)
-- cant access WSagent [\#1087](https://github.com/eclipse/che/issues/1087)
-- Impossible the update the copyright header [\#1059](https://github.com/eclipse/che/issues/1059)
-- Creating workspace with che running inside a docker container fails with certificates https error [\#300](https://github.com/eclipse/che/issues/300)
-- Exception during deployment when RVM is in the PATH [\#271](https://github.com/eclipse/che/issues/271)
 - Execute commands on auxiliary machines [\#250](https://github.com/eclipse/che/issues/250)
-- Linux: environment variables cause startup to fail [\#229](https://github.com/eclipse/che/issues/229)
 
 **Pull requests merged:**
 
@@ -2505,7 +2231,6 @@
 - Cannot find ws-agent.zip with Docker [\#1133](https://github.com/eclipse/che/issues/1133)
 - docker-compose Che don't run [\#1131](https://github.com/eclipse/che/issues/1131)
 - How to add python stacks to the predefined-stack.json [\#1129](https://github.com/eclipse/che/issues/1129)
-- Watching for project files external changes [\#803](https://github.com/eclipse/che/issues/803)
 
 **Pull requests merged:**
 
@@ -2554,20 +2279,13 @@
 
 - Worspace creation issue [\#1118](https://github.com/eclipse/che/issues/1118)
 - eclipse che problem "start injecting workspace agent [\#1069](https://github.com/eclipse/che/issues/1069)
-- Does Eclipse Che support importing projects from gitHub Enterprise? [\#1063](https://github.com/eclipse/che/issues/1063)
-- Eclipse Che with Docker Swarm doesn't work [\#1058](https://github.com/eclipse/che/issues/1058)
 - Fail "create project" after "inject and start workspace agent" on create workspace sequence [\#1050](https://github.com/eclipse/che/issues/1050)
 - can't connect to bitbucket with OAuth [\#1049](https://github.com/eclipse/che/issues/1049)
-- Question: chown: changing ownership of ‘/projects’: Read-only file system while creating a new project [\#1040](https://github.com/eclipse/che/issues/1040)
-- Question: How is a dockerfile used with a stack? Can we use the --privileged notion or the --device? [\#1031](https://github.com/eclipse/che/issues/1031)
 - stack.predefined.list.json property points to the file, not to the directory as written in the documentation [\#1025](https://github.com/eclipse/che/issues/1025)
-- cannot create WS from a docker file [\#1006](https://github.com/eclipse/che/issues/1006)
-- Error while creating the project  Internal Server Error [\#979](https://github.com/eclipse/che/issues/979)
 - Cannot find firefox binary in PATH. Make sure firefox is installed. OS appears to be: LINUX [\#926](https://github.com/eclipse/che/issues/926)
 - Che Server not starting via docker machine [\#879](https://github.com/eclipse/che/issues/879)
 - Plugin Repository/Plugin Manager for 3rd Party Enchancements [\#846](https://github.com/eclipse/che/issues/846)
 - Running 'docker' succeeded, but 'docker ps' failed. This usually means that docker cannot reach its daemon. [\#795](https://github.com/eclipse/che/issues/795)
-- Save Option [\#789](https://github.com/eclipse/che/issues/789)
 
 **Pull requests merged:**
 
@@ -2780,12 +2498,8 @@
 - Split build IDE war to two modules: GWT compilation \(client side\) and API war \(deploy server component\) [\#832](https://github.com/eclipse/che/issues/832)
 - Refactor SVN plugin console to be displayed in 'Consoles' tab [\#830](https://github.com/eclipse/che/issues/830)
 - Make plugin-svn build & run as part of Codenvy onprem 4.x [\#828](https://github.com/eclipse/che/issues/828)
-- Unable to use Git menu in IDE [\#796](https://github.com/eclipse/che/issues/796)
 - Can't install on Fedora 23 [\#792](https://github.com/eclipse/che/issues/792)
-- Error when trying to create a workspace [\#760](https://github.com/eclipse/che/issues/760)
 - Che Server |  Ping Ws Agent IllegalArgumentException [\#736](https://github.com/eclipse/che/issues/736)
-- Running che and docker daemon in 2 separate VMs [\#664](https://github.com/eclipse/che/issues/664)
-- Create project error: Client has aborted connection [\#643](https://github.com/eclipse/che/issues/643)
 - CHE-670 Make IDE startup components pluggable  [\#598](https://github.com/eclipse/che/issues/598)
 - CHE-667 Make ability to group by directory list of files when performing git diff [\#594](https://github.com/eclipse/che/issues/594)
 - CHE-664 che.sh script with root access [\#591](https://github.com/eclipse/che/issues/591)
@@ -2804,7 +2518,6 @@
 - CHE-586 Provide horizontal navigation for 'Go to line' feature [\#487](https://github.com/eclipse/che/issues/487)
 - CHE-582 Logs of machine start are unreachable for user if workspace start failed [\#479](https://github.com/eclipse/che/issues/479)
 - CHE-578 Old value in refactor dialog [\#474](https://github.com/eclipse/che/issues/474)
-- Cannot crate workspace [\#471](https://github.com/eclipse/che/issues/471)
 - CHE-556 Support packages for Che [\#440](https://github.com/eclipse/che/issues/440)
 - CHE-553 Add ability to view logs on start workspace [\#435](https://github.com/eclipse/che/issues/435)
 - CHE-552 Adopt OpenShift Plugin to RC5 [\#432](https://github.com/eclipse/che/issues/432)
@@ -2819,11 +2532,7 @@
 - CHE-515 Chrome displays wrong icon for requests to workspace master and workspace agent [\#378](https://github.com/eclipse/che/issues/378)
 - CHE-509 Refactoring for methods feature does not work properly in some cases [\#371](https://github.com/eclipse/che/issues/371)
 - CHE-504 Project configuration should be updated during move project folder via project api [\#367](https://github.com/eclipse/che/issues/367)
-- Exceptions creating a Java Project or Workspace [\#319](https://github.com/eclipse/che/issues/319)
 - Can't restart workspace after stopping it [\#286](https://github.com/eclipse/che/issues/286)
-- In Windows 10, sometimes workspaces hang when being stopped, and then when you start them again, they malfunction [\#264](https://github.com/eclipse/che/issues/264)
-- MVN Clean Install Fails on windows 8.1 [\#245](https://github.com/eclipse/che/issues/245)
-- Custom image fails on workspace build, stuck in "Starting" [\#202](https://github.com/eclipse/che/issues/202)
 
 **Pull requests merged:**
 
@@ -2962,7 +2671,6 @@
 
 **Issues with 'enhancement' label:**
 
-- Client hangs after changing theme [\#730](https://github.com/eclipse/che/issues/730)
 - Very long startup due to entropy gathering [\#498](https://github.com/eclipse/che/issues/498)
 
 **Issues fixed with 'bugs' label:**
@@ -2974,16 +2682,12 @@
 - Import project from hosted GIT repository URL: the host name must start with www [\#761](https://github.com/eclipse/che/issues/761)
 - Test for tasktop [\#750](https://github.com/eclipse/che/issues/750)
 - Test Tasktop Sync [\#749](https://github.com/eclipse/che/issues/749)
-- IDE trying to load localhost address when accessing from in network laptop [\#732](https://github.com/eclipse/che/issues/732)
 - Unable to start a workspace after compiling Che [\#726](https://github.com/eclipse/che/issues/726)
 - Can't find any GWT Modules on this page. [\#719](https://github.com/eclipse/che/issues/719)
-- Error creating simple java project in che [\#715](https://github.com/eclipse/che/issues/715)
 - I cannot run CHE from Linux Server using Docker Containers [\#697](https://github.com/eclipse/che/issues/697)
 - Unfinished loading while open http://localhost:8080 [\#696](https://github.com/eclipse/che/issues/696)
 - Unable to create workspace on Windows 7  eclipse che rc11, "cannot find or open /mnt/che/ws-agent.zip" [\#695](https://github.com/eclipse/che/issues/695)
-- Item ${projectName} already exists [\#693](https://github.com/eclipse/che/issues/693)
 - Cant change running port [\#686](https://github.com/eclipse/che/issues/686)
-- The workspace agent has attempted to start, but it is unable to ping the Che server at http://che-host:8080/ide/api/ [\#684](https://github.com/eclipse/che/issues/684)
 - How to configure docker image to use unicode ? [\#683](https://github.com/eclipse/che/issues/683)
 - Cannot compile "group id ... is too big" [\#680](https://github.com/eclipse/che/issues/680)
 - Unable to create project \(project already exists\) [\#678](https://github.com/eclipse/che/issues/678)
@@ -3000,7 +2704,6 @@
 - CHE-647 Fix integration tests of IM CLI to use Codenvy 4 of hosted version instead of nightly.codenvy-stg.com [\#567](https://github.com/eclipse/che/issues/567)
 - CHE-642 Incorrect behavior dialogs when user uses "Enter" button to confirm his choice  [\#562](https://github.com/eclipse/che/issues/562)
 - CHE-639 Investigate how to add new file formats in editor [\#558](https://github.com/eclipse/che/issues/558)
-- Does CHE Keep the editing histories of a file? [\#552](https://github.com/eclipse/che/issues/552)
 - CHE-629 Remove Help menu from left sidebar [\#547](https://github.com/eclipse/che/issues/547)
 - CHE-560 Swagger page is broken if no trailing slash in url [\#448](https://github.com/eclipse/che/issues/448)
 - CHE-557 Maven command doesn't work [\#441](https://github.com/eclipse/che/issues/441)
@@ -3099,7 +2802,6 @@
 
 - Features Page Content Typo [\#656](https://github.com/eclipse/che/issues/656)
 - Question about templates folder [\#649](https://github.com/eclipse/che/issues/649)
-- Can't create project [\#631](https://github.com/eclipse/che/issues/631)
 - CHE-669 Make terminal easier to find [\#597](https://github.com/eclipse/che/issues/597)
 - CHE-640 Password strength meter is broken on account view [\#559](https://github.com/eclipse/che/issues/559)
 
@@ -3122,8 +2824,6 @@
 
 **Closed issues:**
 
-- Eclispse CHE doesn't load in browser\(Chrome/Firefox\) [\#641](https://github.com/eclipse/che/issues/641)
-- How to define another environment and switch between environments? [\#634](https://github.com/eclipse/che/issues/634)
 - What's the difference between the two concepts "recipe" and "stack" [\#633](https://github.com/eclipse/che/issues/633)
 - CHE-653 Change value fails with NullPointerException [\#576](https://github.com/eclipse/che/issues/576)
 - CHE-651 Notification loose their shadow [\#573](https://github.com/eclipse/che/issues/573)
@@ -3145,14 +2845,8 @@
 
 **Closed issues:**
 
-- What does the asterisk on the left of the editor panel mean? [\#625](https://github.com/eclipse/che/issues/625)
 - Nightly docker image issue: can't open the created project [\#624](https://github.com/eclipse/che/issues/624)
-- Errors in nightly che [\#609](https://github.com/eclipse/che/issues/609)
 - CHE-614 Max size of message queue exceeded during starting workspace in Che [\#522](https://github.com/eclipse/che/issues/522)
-- Can't create a new workspace  [\#431](https://github.com/eclipse/che/issues/431)
-- how to configure che to pull private images from docker hub [\#237](https://github.com/eclipse/che/issues/237)
-- 连接过多 [\#140](https://github.com/eclipse/che/issues/140)
-- How to pass config when starting a machine? [\#130](https://github.com/eclipse/che/issues/130)
 
 **Pull requests merged:**
 
@@ -3172,7 +2866,6 @@
 
 **Closed issues:**
 
-- How to use che.sh to run a custom docker image? [\#608](https://github.com/eclipse/che/issues/608)
 - CHE-671 Investigate the reason of failing parser [\#599](https://github.com/eclipse/che/issues/599)
 - CHE-661 unzip ws-agent in quiet mode [\#588](https://github.com/eclipse/che/issues/588)
 - CHE-660 Connection timeout when updating a sizable project [\#586](https://github.com/eclipse/che/issues/586)
@@ -3286,14 +2979,9 @@
 ## [4.0.0-RC7](https://github.com/eclipse/che/tree/4.0.0-RC7) (2016-02-25)
 [Full Changelog](https://github.com/eclipse/che/compare/4.0.0-RC6...4.0.0-RC7)
 
-**Issues with 'enhancement' label:**
-
-- Autocomplete not working no idea why, not sure how to debug [\#283](https://github.com/eclipse/che/issues/283)
-
 **Issues fixed with 'bugs' label:**
 
 - Bug: equals called on same variable [\#462](https://github.com/eclipse/che/issues/462)
-- Che will not start when JAVA\_HOME does not match "java -version" on Windows [\#295](https://github.com/eclipse/che/issues/295)
 - How to finish an inline-rename of a field with vi-mode enabled? [\#288](https://github.com/eclipse/che/issues/288)
 - Exclude non-source directories from java project [\#523](https://github.com/eclipse/che/pull/523) ([vzhukovskii](https://github.com/vzhukovskii))
 
@@ -3302,16 +2990,8 @@
 - Workspaces can't be created \<1gb [\#503](https://github.com/eclipse/che/issues/503)
 - No feedback from ui when starting workspace [\#496](https://github.com/eclipse/che/issues/496)
 - Che does not respond [\#484](https://github.com/eclipse/che/issues/484)
-- What's the "temporary workspace"? [\#475](https://github.com/eclipse/che/issues/475)
 - GitHub oAuth callback "http://${che\_localhost}:8080/che/api/oauth/callback" not working [\#472](https://github.com/eclipse/che/issues/472)
 - Che upgrade from beta to RC3 release fails to detect my existing workspace [\#400](https://github.com/eclipse/che/issues/400)
-- How to work with meteor projects? [\#392](https://github.com/eclipse/che/issues/392)
-- How to customise project properties and preferences in Che? [\#303](https://github.com/eclipse/che/issues/303)
-- How can we setup environments with multiple machines? [\#281](https://github.com/eclipse/che/issues/281)
-- Don't use Docker-in-Docker when running as a Docker Container [\#244](https://github.com/eclipse/che/issues/244)
-- Unable to create workspaces [\#240](https://github.com/eclipse/che/issues/240)
-- Passing argument to docker image [\#170](https://github.com/eclipse/che/issues/170)
-- Too many open files with `codenvy/che:nightly` [\#143](https://github.com/eclipse/che/issues/143)
 
 **Pull requests merged:**
 
@@ -3357,8 +3037,6 @@
 
 - CHE-562 Test dev label on github issues [\#451](https://github.com/eclipse/che/issues/451)
 - Cannot Create Node Project: Endless exceptions in 'Injecting and starting workspace agent' [\#450](https://github.com/eclipse/che/issues/450)
-- Workspace startup freezes on Catalina startup [\#411](https://github.com/eclipse/che/issues/411)
-- How to deploy on PaaS [\#372](https://github.com/eclipse/che/issues/372)
 
 **Pull requests merged:**
 
@@ -3405,7 +3083,6 @@
 - Autocomplete not working on nodejs [\#348](https://github.com/eclipse/che/issues/348)
 - Question about the "Using che.sh Script" way to start che [\#336](https://github.com/eclipse/che/issues/336)
 - Error pulling docker image of my workspace [\#325](https://github.com/eclipse/che/issues/325)
-- Launching Che with docker as explained in documentation doesn't work [\#297](https://github.com/eclipse/che/issues/297)
 - Can't connect to ws://che-host:8080 when creating new project [\#148](https://github.com/eclipse/che/issues/148)
 
 **Pull requests merged:**
@@ -3439,56 +3116,35 @@
 
 - Che With Windows 64-bit? Not finding Java [\#290](https://github.com/eclipse/che/issues/290)
 - che.sh -p doesn't publish port 8080 to the specified port [\#243](https://github.com/eclipse/che/issues/243)
-- How to enable User Account Control [\#235](https://github.com/eclipse/che/issues/235)
 - 'conditional binary operator expected' error [\#227](https://github.com/eclipse/che/issues/227)
 
 **Closed issues:**
 
-- Where is "che-tomcat8-slf4j-logback"? [\#337](https://github.com/eclipse/che/issues/337)
 - "Could not find Che's application server." when trying to start it [\#335](https://github.com/eclipse/che/issues/335)
 - readme "Run Che as a Server" section links to non-existent documentation [\#331](https://github.com/eclipse/che/issues/331)
 - Scala support [\#301](https://github.com/eclipse/che/issues/301)
-- Windows 10 - Eclipse che fails to create 'projects' folder [\#296](https://github.com/eclipse/che/issues/296)
 - Error in importing existing workspace [\#289](https://github.com/eclipse/che/issues/289)
 - Node project only shows Blank and Maven project as configuration options [\#285](https://github.com/eclipse/che/issues/285)
-- Create new workspace then you can create projects from the IDE [\#284](https://github.com/eclipse/che/issues/284)
-- Update dependencies not using ~/.m2/repository in by custom stack [\#282](https://github.com/eclipse/che/issues/282)
 - Consider combining preferences and settings and moving to Workspace menu [\#276](https://github.com/eclipse/che/issues/276)
 - Document that custom stacks need to have a CMD that does not terminate [\#273](https://github.com/eclipse/che/issues/273)
-- Unable to access eclipseche from host system [\#272](https://github.com/eclipse/che/issues/272)
-- Documentation for running Che using docker-compose + potentially nginx-proxy & on carina [\#269](https://github.com/eclipse/che/issues/269)
 - Cannot checkout private GitHub repository [\#266](https://github.com/eclipse/che/issues/266)
 - Update dependency failed [\#263](https://github.com/eclipse/che/issues/263)
 - Documentation not clear enough [\#260](https://github.com/eclipse/che/issues/260)
-- Cannot uninstall che in mac? [\#259](https://github.com/eclipse/che/issues/259)
-- Che wont start because of Java but i have the right version. [\#258](https://github.com/eclipse/che/issues/258)
-- Can not open project in IDE [\#256](https://github.com/eclipse/che/issues/256)
-- Unable to Create Workspace [\#253](https://github.com/eclipse/che/issues/253)
 - Eclipse Che Space in filepath error [\#252](https://github.com/eclipse/che/issues/252)
 - Is there a demo server available? [\#251](https://github.com/eclipse/che/issues/251)
 - Cannot create additional machine [\#248](https://github.com/eclipse/che/issues/248)
 - Compiling GWT Application FAILURE [\#247](https://github.com/eclipse/che/issues/247)
-- import project from local file system [\#246](https://github.com/eclipse/che/issues/246)
-- Che force closes [\#239](https://github.com/eclipse/che/issues/239)
-- Need guide for Maven Usage [\#236](https://github.com/eclipse/che/issues/236)
-- Che won't start on Windows7 [\#231](https://github.com/eclipse/che/issues/231)
 - any documentation for backup workspaces before upgrade/rebuild new github updates? [\#230](https://github.com/eclipse/che/issues/230)
 - "Error while creating the project - Internal Server Error: Unable get private ssh key" [\#225](https://github.com/eclipse/che/issues/225)
-- Unable to create project [\#224](https://github.com/eclipse/che/issues/224)
-- failing to create new project [\#222](https://github.com/eclipse/che/issues/222)
 - debian jessie JAVA\_HOME issue [\#221](https://github.com/eclipse/che/issues/221)
 - Che can't make workspace or project [\#220](https://github.com/eclipse/che/issues/220)
-- Cannot create new workspace [\#219](https://github.com/eclipse/che/issues/219)
-- Che server does not start [\#217](https://github.com/eclipse/che/issues/217)
 - Folders that only contain one subfolder break the UI [\#214](https://github.com/eclipse/che/issues/214)
-- Require password [\#213](https://github.com/eclipse/che/issues/213)
 - 127.0.0.1:8080 always redirects to /che/default for Chrome [\#196](https://github.com/eclipse/che/issues/196)
 - About the feature of "remote machine" [\#188](https://github.com/eclipse/che/issues/188)
 - Docs may out of date [\#185](https://github.com/eclipse/che/issues/185)
 - Start Che Error [\#182](https://github.com/eclipse/che/issues/182)
 - Eclipse Che start error [\#180](https://github.com/eclipse/che/issues/180)
 - Build error  [\#177](https://github.com/eclipse/che/issues/177)
-- My che container starts very slow [\#176](https://github.com/eclipse/che/issues/176)
 - What does "Project git url" be used? [\#174](https://github.com/eclipse/che/issues/174)
 - Can't create maven command with the name "newMaven" [\#172](https://github.com/eclipse/che/issues/172)
 - `docker ps` checking fails randomly [\#171](https://github.com/eclipse/che/issues/171)
@@ -3500,7 +3156,6 @@
 - Where can I find the git hash from a che docker image? [\#161](https://github.com/eclipse/che/issues/161)
 - How to use the provided tomcat8 in workspace image "codenvy/ubuntu\_jdk8"? [\#156](https://github.com/eclipse/che/issues/156)
 - Incorrect error message che.sh [\#153](https://github.com/eclipse/che/issues/153)
-- compile error [\#142](https://github.com/eclipse/che/issues/142)
 - Build docker image failed [\#137](https://github.com/eclipse/che/issues/137)
 - Where is the docker image for che 4.x? [\#136](https://github.com/eclipse/che/issues/136)
 - How to delete a running workspace? [\#133](https://github.com/eclipse/che/issues/133)
