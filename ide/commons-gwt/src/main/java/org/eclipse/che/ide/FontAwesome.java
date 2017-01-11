@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,6 +36,16 @@ public class FontAwesome {
      * http://fortawesome.github.io/Font-Awesome/icon/certificate/
      */
     public static final String CERTIFICATE = "<i class=\"fa fa-certificate\"></i>";
+
+    /**
+     * http://fortawesome.github.io/Font-Awesome/icon/caret-down/
+     */
+    public static final String CARET_DOWN = "<i class=\"fa fa-caret-down\"></i>";
+
+    /**
+     * http://fortawesome.github.io/Font-Awesome/icon/cog/
+     */
+    public static final String COG = "<i class=\"fa fa-cog\"></i>";
 
     /**
      * http://fortawesome.github.io/Font-Awesome/icon/compress/

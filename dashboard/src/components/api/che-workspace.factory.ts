@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -98,7 +98,7 @@ export class CheWorkspace {
 
     cheEnvironmentRegistry.addEnvironmentManager('compose', new ComposeEnvironmentManager($log));
     cheEnvironmentRegistry.addEnvironmentManager('dockerfile', new DockerFileEnvironmentManager($log));
-    cheEnvironmentRegistry.addEnvironmentManager('dockerimage', new DockerImageEnvironmentManager());
+    cheEnvironmentRegistry.addEnvironmentManager('dockerimage', new DockerImageEnvironmentManager($log));
   }
 
   /**
@@ -188,7 +188,7 @@ export class CheWorkspace {
     let updatedPromise = promise.then((data: Array<che.IWorkspace>) => {
       let remoteWorkspaces = [];
       this.workspaces.length = 0;
-      //TODO It's a fix used not to loose account ID of the workspace.
+      // todo It's a fix used not to loose account ID of the workspace.
       // can be removed, when API will return accountId in the list of user workspaces response:
       let copyWorkspaceById = new Map();
       angular.copy(this.workspacesById, copyWorkspaceById);
@@ -233,11 +233,13 @@ export class CheWorkspace {
     let promise = this.remoteWorkspaceAPI.getDetails({workspaceKey: workspaceKey}).$promise;
     promise.then((data: che.IWorkspace) => {
       this.workspacesById.set(data.id, data);
-      this.lodash.remove(this.workspaces, (workspace: che.IWorkspace) => {
-        return workspace.id === data.id;
-      });
-      this.workspaces.push(data);
-      this.startUpdateWorkspaceStatus(data.id);
+      if (!data.temporary) {
+        this.lodash.remove(this.workspaces, (workspace: che.IWorkspace) => {
+          return workspace.id === data.id;
+        });
+        this.workspaces.push(data);
+        this.startUpdateWorkspaceStatus(data.id);
+      }
       defer.resolve();
     }, (error: any) => {
       if (error.status !== 304) {
@@ -536,7 +538,7 @@ export class CheWorkspace {
    * Add subscribe to websocket channel for specified workspaceId
    * to handle workspace's status changes.
    * @param workspaceId {string}
-     */
+   */
   startUpdateWorkspaceStatus(workspaceId: string): void {
     if (this.subscribedWorkspacesIds.indexOf(workspaceId) < 0) {
       let bus = this.cheWebsocket.getBus();

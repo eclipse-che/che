@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,7 +21,7 @@ import javax.validation.constraints.NotNull;
  */
 public interface CommitView extends View<CommitView.ActionDelegate> {
     /** Needs for delegate some function into Commit view. */
-    public interface ActionDelegate {
+    interface ActionDelegate {
         /** Performs any actions appropriate in response to the user having pressed the Commit button. */
         void onCommitClicked();
 
@@ -49,46 +49,43 @@ public interface CommitView extends View<CommitView.ActionDelegate> {
      */
     void setMessage(@NotNull String message);
 
-    /** @return <code>true</code> if need to include all changes except from new files, and <code>false</code> otherwise */
-    boolean isAllFilesInclued();
+    /**
+     * Returns <code>true</code> if need to add all changes to index except from new files before commit, and <code>false</code> otherwise
+     */
+    boolean isAddAllExceptNew();
 
     /**
-     * Set status of include changes to commit.
+     * Set status of flag that represents add all changes to index except from new files before commit.
      *
-     * @param isAllFiles
-     *         <code>true</code> need to include all changes except from new, <code>false</code> include all changes
+     * @param addAllExceptNew
+     *         <code>true</code> if need to add all changes to index except from new files before commit,
+     *         <code>false</code> otherwise
      */
-    void setAllFilesInclude(boolean isAllFiles);
+    void setAddAllExceptNew(boolean addAllExceptNew);
+
+    /** Returns true if the selection must be added to index before commit, and <code>false</code> otherwise. */
+    boolean isAddSelectedFiles();
 
     /**
-     * Returns true if the project explorer selection must be included in the commited files.
-     * 
-     * @return true iff the selection mus tbe commited
+     * Sets the status of flag that represents add selected files.
+     *
+     * @param addSelectedFiles
+     *         <code>true</code> if need to add selected files before commit, <code>false</code> otherwise
      */
-    boolean isIncludeSelection();
+    void setAddSelectedFiles(boolean addSelectedFiles);
+
+    /** Returns <code>true</code> if need to commit all files in the project, and <code>false</code> otherwise. */
+    boolean isCommitAllFiles();
 
     /**
-     * Sets the display of the include selection flag.
-     * 
-     * @param includeSelection is selection included
+     * Sets the status of flag that represents add selected files.
+     *
+     * @param commitAllFiles
+     *         <code>true</code> if need to add selected files before commit, <code>false</code> otherwise
      */
-    void setIncludeSelection(boolean includeSelection);
+    void setCommitAllFiles(boolean commitAllFiles);
 
-    /**
-     * Tells the state of the field 'commit only selection'.
-     * 
-     * @return true iff the field is checked
-     */
-    boolean isOnlySelection();
-
-    /**
-     * Sets the state of the field 'commit only selection'.
-     * 
-     * @return true to check the field
-     */
-    void setOnlySelection(boolean onlySelection);
-
-    /** @return <code>true</code> if need to amend the last commit, and <code>false</code> otherwise */
+    /** Returns <code>true</code> if need to amend the last commit, and <code>false</code> otherwise. */
     boolean isAmend();
 
     /**

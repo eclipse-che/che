@@ -7,6 +7,7 @@ node default {
   $che_config = getValue("CHE_CONFIG","/path/to/che/che/puppet/sources")
   $che_assembly = getValue("CHE_ASSEMBLY","/home/user/che")
   $che_env = getValue("CHE_ENVIRONMENT","production")
+  $che_dev_env = getValue("CHE_REPO","off")
   $che_debug_port = getValue("CHE_DEBUG_PORT","8000")
   $che_debug_suspend = getValue("CHE_DEBUG_SUSPEND","false")
   $docker_ip = getValue("CHE_DOCKER_IP","172.17.0.1")

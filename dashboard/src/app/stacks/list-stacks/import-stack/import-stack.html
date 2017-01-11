@@ -1,0 +1,41 @@
+<!--
+
+    Copyright (c) 2015 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<che-popup title="Import stack" on-close="importStackController.cancel()">
+  <div class="import-stack">
+    <span class="header-label">Select type of stack's recipe and match them:</span>
+    <div class="toggle-button-area">
+      <che-toggle ng-model="importStackController.recipeFormat" ng-change="importStackController.updateType()"
+                  md-theme="default">
+        <che-toggle-button che-title="Dockerfile" che-value="{{importStackController.DOCKERFILE}}"></che-toggle-button>
+        <che-toggle-button che-title="Composefile"
+                           che-value="{{importStackController.COMPOSE}}"></che-toggle-button>
+      </che-toggle>
+    </div>
+    <ui-codemirror ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 1000, 'blur': 0 } }"
+                   ui-codemirror="importStackController.editorOptions"
+                   ng-model="importStackController.recipeScript"
+                   ng-change="importStackController.updateImportedStack()"></ui-codemirror>
+    <div class="errors-container">
+      <span ng-repeat="error in importStackController.environmentValidation.errors | orderBy:'':'reverse'">
+        {{error}}
+      </span>
+    </div>
+    <che-button-notice che-button-title="Cancel"
+                       ng-click="importStackController.cancel()">
+    </che-button-notice>
+    <che-button-primary che-button-title="Ok"
+                        ng-disabled="!importStackController.environmentValidation.isValid"
+                        ng-click="importStackController.onImport()">
+    </che-button-primary>
+  </div>
+</che-popup>

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,7 +15,6 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.extension.Extension;
-import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.Set;
 
@@ -34,8 +33,6 @@ public class TestExtension {
     @Inject
     public TestExtension(ActionManager actionManager, TestLocalizationConstant localization,
                          Set<TestAction> testActions) {
-
-        Log.info(TestExtension.class, "Java TestRunner Plugin");
 
         DefaultActionGroup runMenu = (DefaultActionGroup) actionManager.getAction(GROUP_RUN);
 
@@ -65,6 +62,6 @@ public class TestExtension {
         explorerMenu.addSeparator();
         explorerMenu.add(testContextMenu);
         explorerMenu.addSeparator();
-
     }
+
 }
