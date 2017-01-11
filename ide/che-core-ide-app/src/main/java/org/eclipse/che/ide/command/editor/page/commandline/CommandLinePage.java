@@ -39,7 +39,7 @@ public class CommandLinePage extends AbstractPageWithTextEditor {
               editorBuilder,
               fileTypeRegistry,
               macroChooser,
-              messages.pageArgumentsTitle(),
+              messages.pageCommandLineTitle(),
               editorConfiguration);
     }
 

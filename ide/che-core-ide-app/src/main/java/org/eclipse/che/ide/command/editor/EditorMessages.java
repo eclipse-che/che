@@ -55,8 +55,8 @@ public interface EditorMessages extends Messages {
     @Key("page.with_text_editor.explore_macros")
     String pageWithTextEditorExploreMacros();
 
-    @Key("page.arguments.title")
-    String pageArgumentsTitle();
+    @Key("page.command_line.title")
+    String pageCommandLineTitle();
 
     @Key("page.preview_url.title")
     String pagePreviewUrlTitle();
