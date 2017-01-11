@@ -259,7 +259,7 @@ public class WorkspaceManager {
         requireNonNull(namespace, "Required non-null namespace");
         final List<WorkspaceImpl> workspaces = workspaceDao.getByNamespace(namespace);
         for (WorkspaceImpl workspace : workspaces) {
-            workspace.setStatus(runtimes.getStatus(workspace.getId()));
+            normalizeState(workspace);
         }
         return workspaces;
     }
