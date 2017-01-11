@@ -290,7 +290,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
             classPrepareRequests.put(className, request);
         }
 
-        LOG.debug("Deferred breakpoint: {}", breakpoint.getLocation());
+        LOG.debug("Deferred breakpoint: {}", breakpoint.getLocation().toString());
     }
 
     @Override
@@ -386,7 +386,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
                                                                  .withVariablePath(
                                                                          newDto(VariablePathDto.class)
                                                                                  .withPath(singletonList(var.getName()))
-                                                                                  )
+                                                                 )
                                                                  .withPrimitive(var.isPrimitive()));
             }
             return dump;
