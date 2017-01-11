@@ -399,8 +399,20 @@ public interface Resource extends Comparable<Resource> {
      * @return the {@link Optional} with related project
      * @see Project
      * @since 4.4.0
+     * @deprecated use {@link #getProject()}
      */
+    @Deprecated
     Optional<Project> getRelatedProject();
+
+    /**
+     * Returns the {@link Project} which is bound to this resource or {@code null}.
+     *
+     * Returns itself for projects.
+     *
+     * @return the bound instance of {@link Project} or null
+     * @since 5.1.0
+     */
+    Project getProject();
 
     /**
      * Returns the type of this resource.
