@@ -21,6 +21,7 @@ import org.eclipse.che.api.git.params.CommitParams;
 import org.eclipse.che.api.git.params.LogParams;
 import org.eclipse.che.api.git.shared.AddRequest;
 import org.eclipse.che.api.git.shared.Revision;
+import org.eclipse.che.api.git.shared.StatusFormat;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -29,11 +30,14 @@ import java.io.File;
 import java.io.IOException;
 
 import static java.nio.file.Files.write;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.git.impl.GitTestUtil.addFile;
 import static org.eclipse.che.git.impl.GitTestUtil.cleanupTestRepo;
 import static org.eclipse.che.git.impl.GitTestUtil.connectToGitRepositoryWithContent;
 import static org.eclipse.che.git.impl.GitTestUtil.connectToInitializedGitRepository;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author Eugene Voevodin
@@ -125,6 +129,22 @@ public class CommitTest {
         int afterCommitsCount = connection.log(LogParams.create()).getCommits().size();
         assertEquals(beforeCommitsCount, afterCommitsCount);
         assertEquals(connection.log(LogParams.create()).getCommits().get(0).getMessage(), commitParams.getMessage());
+    }
+
+    @Test(dataProvider = "GitConnectionFactory", dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
+    public void testCommitSeparateFiles(GitConnectionFactory connectionFactory) throws GitException, IOException {
+        //given
+        GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
+        addFile(connection, "File1.txt", CONTENT);
+        addFile(connection, "File2.txt", CONTENT);
+        connection.add(AddParams.create(asList("File1.txt", "File2.txt")));
+
+        //when
+        connection.commit(CommitParams.create("commit").withFiles(singletonList("File1.txt")));
+
+        //then
+        assertTrue(connection.status(StatusFormat.LONG).getAdded().contains("File2.txt"));
+        assertTrue(connection.status(StatusFormat.LONG).getAdded().size() == 1);
     }
 
     @Test(dataProvider = "GitConnectionFactory", dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class,

@@ -287,6 +287,7 @@ check_mounts() {
   REPO_MOUNT=$(get_container_folder ":/repo")
   SYNC_MOUNT=$(get_container_folder ":/sync")
   UNISON_PROFILE_MOUNT=$(get_container_folder ":/unison")
+  CHEDIR_MOUNT=$(get_container_folder ":/chedir")
 
   if [[ "${DATA_MOUNT}" = "not set" ]]; then
     info "Welcome to $CHE_FORMAL_PRODUCT_NAME!"

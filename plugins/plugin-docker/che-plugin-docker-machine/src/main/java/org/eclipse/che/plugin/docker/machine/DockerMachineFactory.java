@@ -19,7 +19,6 @@ import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceProcess;
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.machine.node.DockerNode;
 
@@ -81,12 +80,11 @@ public interface DockerMachineFactory {
      * Creates {@link DockerInstanceRuntimeInfo} instance using assisted injection
      *
      * @param containerInfo description of docker container
-     * @param containerExternalHostname docker host external hostname (used by the browser)
-     * @param containerInternalHostname docker host internal hostname (used by the wsmaster)
      * @param machineConfig config of machine
+     * @param internalHost docker host internal hostname (used by the wsmaster). May be overridden by Server
+     *                     Evaluation Strategy
      */
     DockerInstanceRuntimeInfo createMetadata(@Assisted ContainerInfo containerInfo,
-                                             @Assisted("externalhost") @Nullable String containerExternalHostname,
-                                             @Assisted("internalhost") String containerInternalHostname,
-                                             @Assisted MachineConfig machineConfig);
+                                             @Assisted MachineConfig machineConfig,
+                                             @Assisted String        internalHost);
 }

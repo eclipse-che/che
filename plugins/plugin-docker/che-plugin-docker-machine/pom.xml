@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-docker-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>5.0.0-SNAPSHOT</version>
+        <version>5.1.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-docker-machine</artifactId>
     <packaging>jar</packaging>
@@ -137,6 +137,25 @@
                 <configuration>
                     <excludes>
                         <exclude>**/integration/**</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <!-- Exclude files until #3281 is resolved -->
+                        <exclude>**/ServerEvaluationStrategyProvider.java</exclude>
+                        <exclude>**/ServerEvaluationStrategy.java</exclude>
+                        <exclude>**/ServerEvaluationStrategyTest.java</exclude>
+                        <exclude>**/DefaultServerEvaluationStrategy.java</exclude>
+                        <exclude>**/DefaultServerEvaluationStrategyTest.java</exclude>
+                        <exclude>**/LocalDockerServerEvaluationStrategy.java</exclude>
+                        <exclude>**/LocalDockerServerEvaluationStrategyTest.java</exclude>
+                        <exclude>**/DockerInstanceRuntimeInfo.java</exclude>
+                        <exclude>**/DockerInstanceRuntimeInfoTest.java</exclude>
+                        <!-- End excluded files -->
                     </excludes>
                 </configuration>
             </plugin>

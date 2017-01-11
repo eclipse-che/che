@@ -52,18 +52,22 @@ declare namespace _che {
   }
 
   export interface IStack {
+    id?: string;
     name: string;
-    description: string;
-    projects: Array<any>;
-    tags: Array<string>;
-    scope: string;
-    components: Array<any>;
+    description?: string;
+    tags?: Array<string>;
+    creator?: string;
+    scope?: string;
+    components?: Array<any>;
     source: any;
-    workspaceConfig: IWorkspace;
+    workspaceConfig: IWorkspaceConfig;
   }
 
   export interface IWorkspace {
     id?: string;
+    name: string;
+    projects?: any;
+    links?: Array<any>;
     runtime?: any;
     temporary?: boolean;
     status?: string;
@@ -71,7 +75,7 @@ declare namespace _che {
     attributes?: {
       updated?: number;
       created?: number;
-      [propName: string]: string;
+      [propName: string]: string | number;
     };
     config: IWorkspaceConfig;
   }
@@ -141,18 +145,37 @@ declare namespace _che {
 
   export interface IImportProject {
     source: {
-      type: string;
+      type?: string;
       location: string;
       parameters: Object;
     };
     project: {
       name: string;
-      type: string;
+      type?: string;
       description: string;
-      commands: Array<any>;
-      attributes: Array<any>;
-      options: Array<any>;
+      commands?: Array<any>;
+      attributes?: Array<any>;
+      options?: Array<any>;
     };
   }
 
+  export interface IEditorOptions {
+    mode: string;
+    lineNumbers: boolean;
+    lineWrapping: boolean;
+    matchBrackets: boolean;
+  }
+
+  export interface IValidation {
+    isValid: boolean;
+    errors: Array<string>;
+  }
+
+  export interface IProfile {
+    attributes?: Object;
+    email: string;
+    links?: Array<any>;
+    userId: string;
+    $promise?: any;
+  }
 }

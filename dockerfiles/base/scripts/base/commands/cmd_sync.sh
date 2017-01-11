@@ -22,6 +22,8 @@ cmd_sync() {
     return 2;
   fi
 
+  update_image_if_not_found ${UTILITY_IMAGE_CHEMOUNT}
+
   # Determine the mount path to do the mount
   info "mount" "Starting sync process to ${SYNC_MOUNT}"
 
@@ -30,7 +32,7 @@ cmd_sync() {
              -e CHE_VERSION=${CHE_VERSION} \
              --name che-mount \
              -v "${SYNC_MOUNT}":/mnthost \
-                  eclipse/che-mount:nightly $*
+                  ${UTILITY_IMAGE_CHEMOUNT} $*
 
   # Docker doesn't seem to normally clean up this container
   docker rm -f che-mount
