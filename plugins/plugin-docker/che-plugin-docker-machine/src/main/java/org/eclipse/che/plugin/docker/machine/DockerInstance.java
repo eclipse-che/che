@@ -382,7 +382,7 @@ public class DockerInstance extends AbstractInstance {
     private MachineRuntimeInfoImpl doGetRuntime() throws MachineException {
         try {
             return new MachineRuntimeInfoImpl(dockerMachineFactory.createMetadata(docker.inspectContainer(container),
-                                                                                  null,
+                                                                                  getConfig(),
                                                                                   node.getHost()));
         } catch (IOException x) {
             throw new MachineException(x.getMessage(), x);
