@@ -74,7 +74,7 @@ export class ListAgentsController {
    * @param agentId {string}
    */
   needToDisable(agentId: string): boolean {
-    return DISABLED_AGENTS.includes(agentId);
+    return DISABLED_AGENTS.indexOf(agentId) !== -1;
   }
 
   isEnabled(agentId: string, agents: string[]): boolean {
