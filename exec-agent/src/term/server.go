@@ -82,9 +82,7 @@ type ReadWriteRoutingFinalizer struct {
 }
 
 var (
-	upgrader = websocket.Upgrader{
-		ReadBufferSize:  1,
-		WriteBufferSize: 1,
+	upgrader = websocket.Upgrader {
 		CheckOrigin: func(r *http.Request) bool {
 			return true
 		},
@@ -253,15 +251,28 @@ func sendPtyOutputToConnection(conn *websocket.Conn, reader io.ReadCloser, final
 			log.Printf("Couldn't normalize byte buffer to UTF-8 sequence, due to an error: %s", err.Error())
 			return
 		}
-		if err = conn.WriteMessage(websocket.TextMessage, buffer.Bytes()); err != nil {
-			log.Printf("Failed to send websocket message: %s, due to occurred error %s", string(buffer.Bytes()), err.Error())
+
+		if err := writeToSocket(conn, buffer.Bytes(), finalizer); err != nil {
 			return
 		}
+
 		buffer.Reset()
 		if i < n {
 			buffer.Write(buf[i:n])
 		}
 	}
+}
+
+//we write message to websocket with help mutex finalizer to prevent send message after "close  connection" message.
+func writeToSocket(conn *websocket.Conn, bytes []byte, finalizer *ReadWriteRoutingFinalizer) error {
+	defer finalizer.Unlock()
+
+	finalizer.Lock()
+	if err := conn.WriteMessage(websocket.TextMessage, bytes); err != nil {
+		log.Printf("Failed to send websocket message: %s, due to occurred error %s", string(bytes), err.Error())
+		return err
+	}
+	return nil
 }
 
 func ptyHandler(w http.ResponseWriter, r *http.Request) {
@@ -324,7 +335,16 @@ func closeConn(conn *websocket.Conn, finalizer *ReadWriteRoutingFinalizer) {
 
 	finalizer.Lock()
 	if !finalizer.writeDone {
-		conn.Close()
+		//to cleanly close websocket connection, a client should send a close
+		//frame and wait for the server to close the connection.
+		err := conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+		if err != nil {
+			log.Printf("Failed to send websocket close message: '%s'", err.Error())
+		}
+		if err := conn.Close(); err != nil {
+			fmt.Printf("Close connection problem: '%s'", err.Error())
+		}
+
 		finalizer.writeDone = true
 		fmt.Println("Terminal writer closed.")
 	}
