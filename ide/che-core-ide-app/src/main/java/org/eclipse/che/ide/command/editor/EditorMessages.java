@@ -28,28 +28,28 @@ public interface EditorMessages extends Messages {
     @Key("button.save.text")
     String buttonSaveText();
 
-    @Key("page.info.title")
+    @Key("page.settings.title")
     String pageInfoTitle();
 
-    @Key("page.info.name.label")
+    @Key("page.settings.name.label")
     String pageInfoNameLabel();
 
-    @Key("page.info.goal.label")
+    @Key("page.settings.goal.label")
     String pageInfoGoalLabel();
 
-    @Key("page.info.section.context.label")
+    @Key("page.settings.section.context.label")
     String pageInfoSectionContextLabel();
 
-    @Key("page.info.workspace.label")
+    @Key("page.settings.workspace.label")
     String pageInfoWorkspaceLabel();
 
-    @Key("page.info.section.projects.label")
+    @Key("page.settings.section.projects.label")
     String pageInfoSectionProjectsLabel();
 
-    @Key("page.info.projects_table.header.project.label")
+    @Key("page.settings.projects_table.header.project.label")
     String pageInfoProjectsTableHeaderProjectLabel();
 
-    @Key("page.info.projects_table.header.applicable.label")
+    @Key("page.settings.projects_table.header.applicable.label")
     String pageInfoProjectsTableHeaderApplicableLabel();
 
     @Key("page.with_text_editor.explore_macros")
