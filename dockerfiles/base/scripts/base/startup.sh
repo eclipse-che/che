@@ -17,6 +17,7 @@ init_constants() {
   NC='\033[0m'
   LOG_INITIALIZED=false
   FAST_BOOT=false
+  CHE_DEBUG=false
 
   DEFAULT_CHE_PRODUCT_NAME="CHE"
   CHE_PRODUCT_NAME=${CHE_PRODUCT_NAME:-${DEFAULT_CHE_PRODUCT_NAME}}
@@ -81,6 +82,14 @@ init_constants() {
 
   DEFAULT_CHE_LICENSE=false
   CHE_LICENSE=${CHE_LICENSE:-${DEFAULT_CHE_LICENSE}}
+
+  # Replace all of these with digests
+  UTILITY_IMAGE_ALPINE="alpine:3.4"
+  UTILITY_IMAGE_CHEIP="eclipse/che-ip:nightly"
+  UTILITY_IMAGE_CHEACTION="eclipse/che-action:nightly"
+  UTILITY_IMAGE_CHEDIR="eclipse/che-dir:nightly"
+  UTILITY_IMAGE_CHETEST="eclipse/che-test:nightly"
+  UTILITY_IMAGE_CHEMOUNT="eclipse/che-mount:nightly"
 }
 
 
@@ -213,6 +222,13 @@ is_debug() {
   fi
 }
 
+debug_server() {
+  if [ "${CHE_DEBUG}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
 
 init_logging() {
   # Initialize CLI folder
@@ -227,8 +243,6 @@ init_logging() {
   log "$(date)"
 }
 
-
-
 init() {
   init_constants
 
@@ -239,6 +253,10 @@ init() {
 
   if [[ "$@" == *"--fast"* ]]; then
   	FAST_BOOT=true
+  fi
+
+  if [[ "$@" == *"--debug"* ]]; then
+  	CHE_DEBUG=true
   fi
 
   SCRIPTS_BASE_CONTAINER_SOURCE_DIR="/scripts/base"
@@ -264,7 +282,7 @@ init() {
   init_logging "$@"
 
   SCRIPTS_CONTAINER_SOURCE_DIR=""
-  if [[ "${CHE_DEVELOPMENT_MODE}" = "on" ]]; then
+  if $CHE_LOCAL_REPO; then
      # Use the CLI that is inside the repository.
      SCRIPTS_CONTAINER_SOURCE_DIR=${CHE_SCRIPTS_CONTAINER_SOURCE_DIR}
   else
@@ -366,11 +384,12 @@ cleanup() {
 }
 
 start() {
-  # Bootstrap enough stuff to load /cli/cli.sh
+  # Bootstrap networking, docker, logging, and ability to load cli.sh and cli-functions.sh
   init "$@"
 
-  # Removes "--fast" from the positional arguments if it is set.
+  # Removes "--fast" and "--debug" from the positional arguments if it is set.
   set -- "${@/\-\-fast/}"
+  set -- "${@/\-\-debug/}"
   
   # Begin product-specific CLI calls
   info "cli" "Loading cli..."

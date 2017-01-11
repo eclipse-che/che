@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -254,6 +254,24 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
         view.selectNode(machineToSelect);
         notifyTreeNodeSelected(machineToSelect);
+    }
+
+    /**
+     * Sets visibility for processes tree
+     *
+     * @param visible
+     */
+    public void setProcessesTreeVisible(boolean visible) {
+        view.setProcessesTreeVisible(visible);
+    }
+
+    /**
+     * determines whether process tree is visible.
+     *
+     * @return
+     */
+    public boolean isProcessesTreeVisible() {
+        return view.isProcessesTreeVisible();
     }
 
     @Override
@@ -1140,6 +1158,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                     .withConfig(dtoFactory.createDto(MachineConfigDto.class)
                                     .withDev("dev-machine".equals(machineName))
                                     .withName(machineName)
+                                    .withType("docker")
                     );
             provideMachineNode(new MachineItem(machineDto), true);
         }

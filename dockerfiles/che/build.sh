@@ -27,4 +27,4 @@ echo "Linking assembly ${BUILD_ASSEMBLY_ZIP} --> ${LOCAL_ASSEMBLY_ZIP}"
 ln ${BUILD_ASSEMBLY_ZIP} ${LOCAL_ASSEMBLY_ZIP}
 
 init "$@"
-build "$@"
+build

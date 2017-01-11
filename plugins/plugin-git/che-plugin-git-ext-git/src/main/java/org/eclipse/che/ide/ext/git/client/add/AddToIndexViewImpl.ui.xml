@@ -1,6 +1,6 @@
 <!--
 
-    Copyright (c) 2012-2016 Codenvy, S.A.
+    Copyright (c) 2012-2017 Codenvy, S.A.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
@@ -16,16 +16,12 @@
     <ui:with field='locale' type='org.eclipse.che.ide.ext.git.client.GitLocalizationConstant'/>
     <ui:with field='res' type='org.eclipse.che.ide.ext.git.client.GitResources'/>
     <ui:style>
-        .spacing {
-            margin-bottom: 10px;
-        }
 
-        .emptyBorder {
+        .content {
             margin: 6px;
-        }
 
-        .leftPadding {
-            padding-left: 3px;
+            width: 480px;
+            height: 80px;
         }
 
         .panel {
@@ -36,18 +32,17 @@
             -webkit-align-items: stretch;
             align-items: stretch;
         }
-        .items {
-            resize: none;
-            max-height: 10em;
-            -webkit-flex-grow: 1;
-            flex-grow: 1;
+
+        .label {
+            padding: 3px;
+            overflow: hidden;
         }
     </ui:style>
-    <g:HTMLPanel width="500px" height="15em" addStyleNames="{style.emptyBorder} {style.panel}" debugId="git-addToIndex-mainForm">
-        <g:HTML ui:field="message" addStyleNames="{res.gitCSS.textFont} {style.leftPadding}"/>
-        <g:TextArea ui:field="items" addStyleNames="{style.items}" visible="false" readOnly="true" />
+    <g:FlowPanel styleName="{style.content}" debugId="git-addToIndex-mainForm">
+        <g:FlowPanel styleName="{style.panel}">
+            <g:Label ui:field="message" addStyleNames="{res.gitCSS.textFont} {style.label}"/>
+        </g:FlowPanel>
         <g:CheckBox ui:field="update" text="{locale.addToIndexUpdateFieldTitle}" addStyleNames="{res.gitCSS.textFont}"
                     debugId="git-addToIndex-update"/>
-
-    </g:HTMLPanel>
+    </g:FlowPanel>
 </ui:UiBinder>

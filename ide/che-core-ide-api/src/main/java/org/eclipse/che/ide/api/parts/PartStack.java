@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -129,6 +129,11 @@ public interface PartStack extends Presenter {
      * Restores the part stack and the perspective to the default state.
      */
     void restore();
+
+    /**
+     * Displays part menu.
+     */
+    void showPartMenu(int mouseX, int mouseY);
 
     /**
      * Remove given part from PartStack.

@@ -89,7 +89,7 @@
     <div flex>
       <che-button-default class="che-list-add-button"
                           che-button-title="Add" name="addButton"
-                          ng-click="listEnvVariablesController.showAddDialog($event)"></che-button-default>
+                          ng-click="listEnvVariablesController.showEditDialog($event)"></che-button-default>
     </div>
     <div flex-offset="5" ng-if="listEnvVariablesController.envVariablesList.length > 0">
       <che-button-primary-flat ng-disabled="(listEnvVariablesController.envVariablesSelectedNumber === 0)"
