@@ -53,9 +53,8 @@ public abstract class AbstractPageWithTextEditor extends AbstractCommandEditorPa
                                          FileTypeRegistry fileTypeRegistry,
                                          MacroChooser macroChooser,
                                          String title,
-                                         String tooltip,
                                          TextEditorConfiguration editorConfiguration) {
-        super(title, tooltip);
+        super(title);
 
         this.view = view;
         this.fileTypeRegistry = fileTypeRegistry;

@@ -20,26 +20,19 @@ import org.eclipse.che.ide.api.command.ContextualCommand;
 public abstract class AbstractCommandEditorPage implements CommandEditorPage {
 
     private final String title;
-    private final String tooltip;
 
     protected ContextualCommand editedCommand;
 
     private DirtyStateListener listener;
 
     /** Creates new page with the given title and tooltip. */
-    protected AbstractCommandEditorPage(String title, String tooltip) {
+    protected AbstractCommandEditorPage(String title) {
         this.title = title;
-        this.tooltip = tooltip;
     }
 
     @Override
     public String getTitle() {
         return title;
-    }
-
-    @Override
-    public String getTooltip() {
-        return tooltip;
     }
 
     @Override

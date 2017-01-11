@@ -42,7 +42,6 @@ public class PreviewUrlPage extends AbstractPageWithTextEditor {
               fileTypeRegistry,
               macroChooser,
               messages.pagePreviewUrlTitle(),
-              messages.pagePreviewUrlTooltip(),
               editorConfiguration);
     }
 

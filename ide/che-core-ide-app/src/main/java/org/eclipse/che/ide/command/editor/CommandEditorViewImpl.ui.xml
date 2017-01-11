@@ -37,22 +37,6 @@
             background-color: tabsPanelBackground;
         }
 
-        .tabsPanel {
-            width: 285px;
-            height: 30px;
-            background-color: toolbarActionGroupBackgroundColor;
-            float: left;
-            box-shadow: 0 1px 0 0 toolbarActionGroupShadowColor;
-            border: 1px solid toolbarActionGroupBorderColor;
-            border-radius: 3px;
-            margin-left: 50px;
-            margin-right: 20px;
-        }
-
-        .switcher {
-            padding: 5px;
-        }
-
         .button {
             float: left;
             margin: 5px 0 0 10px;
@@ -78,11 +62,6 @@
     <g:DockLayoutPanel addStyleNames="{style.mainPanel}">
         <g:north size="44">
             <g:FlowPanel addStyleNames="{style.header}">
-                <g:FlowPanel addStyleNames="{style.tabsPanel}">
-                    <che:radiobuttongroup.RadioButtonGroup ui:field="pagesSwitcher"
-                                                           addStyleNames="{style.switcher}"
-                                                           debugId="command-editor-pages-switcher"/>
-                </g:FlowPanel>
                 <g:Button ui:field="saveButton"
                           text="{messages.buttonSaveText}"
                           addStyleNames="{style.button}"
@@ -94,7 +73,9 @@
             </g:FlowPanel>
         </g:north>
         <g:center>
-            <g:DeckPanel ui:field="pagesPanel"/>
+            <g:ScrollPanel>
+                <g:FlowPanel ui:field="pagesPanel"/>
+            </g:ScrollPanel>
         </g:center>
     </g:DockLayoutPanel>
 </ui:UiBinder>

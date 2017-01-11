@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.editor.page.arguments;
+package org.eclipse.che.ide.command.editor.page.commandline;
 
 import com.google.inject.Inject;
 
@@ -26,21 +26,20 @@ import org.eclipse.che.ide.macro.chooser.MacroChooser;
  *
  * @author Artem Zatsarynnyi
  */
-public class ArgumentsPage extends AbstractPageWithTextEditor {
+public class CommandLinePage extends AbstractPageWithTextEditor {
 
     @Inject
-    public ArgumentsPage(PageWithTextEditorView view,
-                         EditorBuilder editorBuilder,
-                         FileTypeRegistry fileTypeRegistry,
-                         MacroChooser macroChooser,
-                         EditorMessages messages,
-                         MacroEditorConfiguration editorConfiguration) {
+    public CommandLinePage(PageWithTextEditorView view,
+                           EditorBuilder editorBuilder,
+                           FileTypeRegistry fileTypeRegistry,
+                           MacroChooser macroChooser,
+                           EditorMessages messages,
+                           MacroEditorConfiguration editorConfiguration) {
         super(view,
               editorBuilder,
               fileTypeRegistry,
               macroChooser,
               messages.pageArgumentsTitle(),
-              messages.pageArgumentsTooltip(),
               editorConfiguration);
     }
 

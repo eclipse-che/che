@@ -199,7 +199,7 @@ public class EditorAgentImpl implements EditorAgent,
             return;
         }
 
-        editor.closing(new AsyncCallback<Void>() {
+        editor.onClosing(new AsyncCallback<Void>() {
             @Override
             public void onSuccess(Void result) {
                 EditorTab editorTab = editorPartStack.getTabByPart(editor);

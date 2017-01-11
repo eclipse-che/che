@@ -39,7 +39,7 @@
         }
     </ui:style>
 
-    <g:SimpleLayoutPanel width="500px">
+    <g:SimpleLayoutPanel width="500px" height="300px">
         <g:FlowPanel>
             <g:FlowPanel addStyleNames="{style.section}">
                 <g:Label text="{messages.pageInfoNameLabel}"/>
@@ -61,7 +61,7 @@
                     <g:Label text="{messages.pageInfoProjectsTableHeaderProjectLabel}" addStyleNames="{style.column-header}"/>
                     <g:Label text="{messages.pageInfoProjectsTableHeaderApplicableLabel}" addStyleNames="{style.column-header}"/>
                 </g:FlowPanel>
-                <g:FlowPanel ui:field="projectsPanel"/>
+                    <g:FlowPanel ui:field="projectsPanel"/>
             </g:FlowPanel>
         </g:FlowPanel>
     </g:SimpleLayoutPanel>

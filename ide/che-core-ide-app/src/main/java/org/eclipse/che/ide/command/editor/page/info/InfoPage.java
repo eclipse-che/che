@@ -77,7 +77,7 @@ public class InfoPage extends AbstractCommandEditorPage implements InfoPageView.
                     CommandManager commandManager,
                     EditorMessages messages,
                     EventBus eventBus) {
-        super(messages.pageInfoTitle(), messages.pageInfoTooltip());
+        super(messages.pageInfoTitle());
 
         this.view = view;
         this.appContext = appContext;

@@ -28,10 +28,8 @@ public interface CommandEditorView extends View<CommandEditorView.ActionDelegate
      *         page to add
      * @param title
      *         text that should be used as page's title
-     * @param tooltip
-     *         text that should be used as page's tooltip
      */
-    void addPage(IsWidget page, String title, String tooltip);
+    void addPage(IsWidget page, String title);
 
     /**
      * Set whether saving command is enabled or not.

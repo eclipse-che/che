@@ -36,7 +36,7 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.command.editor.page.CommandEditorPage;
-import org.eclipse.che.ide.command.editor.page.arguments.ArgumentsPage;
+import org.eclipse.che.ide.command.editor.page.commandline.CommandLinePage;
 import org.eclipse.che.ide.command.editor.page.info.InfoPage;
 import org.eclipse.che.ide.command.editor.page.previewurl.PreviewUrlPage;
 import org.eclipse.che.ide.command.node.CommandFileNode;
@@ -83,7 +83,7 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
                          IconRegistry iconRegistry,
                          CommandManager commandManager,
                          InfoPage infoPage,
-                         ArgumentsPage argumentsPage,
+                         CommandLinePage commandLinePage,
                          PreviewUrlPage previewUrlPage,
                          NotificationManager notificationManager,
                          DialogFactory dialogFactory,
@@ -110,7 +110,7 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
 
         pages = new LinkedList<>();
         pages.add(infoPage);
-        pages.add(argumentsPage);
+        pages.add(commandLinePage);
         pages.add(previewUrlPage);
     }
 
@@ -130,7 +130,7 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
             initializePages();
 
             for (CommandEditorPage page : pages) {
-                view.addPage(page.getView(), page.getTitle(), page.getTooltip());
+                view.addPage(page.getView(), page.getTitle());
             }
         } else {
             callback.onInitializationFailed();
@@ -249,35 +249,7 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
     }
 
     @Override
-    public void onClose(final AsyncCallback<Void> callback) {
-        // TODO: find the right place for this code since #onClose is never calling
-        if (!isDirty()) {
-            handleClose();
-            callback.onSuccess(null);
-        } else {
-            dialogFactory.createConfirmDialog(
-                    localizationConstants.askWindowCloseTitle(),
-                    localizationConstants.messagesSaveChanges(getEditorInput().getName()),
-                    new ConfirmCallback() {
-                        @Override
-                        public void accepted() {
-                            doSave();
-                            handleClose();
-                            callback.onSuccess(null);
-                        }
-                    },
-                    new CancelCallback() {
-                        @Override
-                        public void cancelled() {
-                            handleClose();
-                            callback.onSuccess(null);
-                        }
-                    }).show();
-        }
-    }
-
-    @Override
-    public void closing(final AsyncCallback<Void> callback) {
+    public void onClosing(final AsyncCallback<Void> callback) {
         if (!isDirty()) {
             callback.onSuccess(null);
         } else {

@@ -21,7 +21,7 @@
         }
     </ui:style>
 
-    <g:DockLayoutPanel>
+    <g:DockLayoutPanel width="800px" height="200px">
         <g:north size="20">
             <g:Hyperlink ui:field="exploreMacrosLink"
                          text="{messages.pageWithTextEditorExploreMacros}"

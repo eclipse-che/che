@@ -12,13 +12,13 @@ package org.eclipse.che.ide.command.editor;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.DeckPanel;
+import com.google.gwt.user.client.ui.DisclosurePanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
@@ -39,19 +39,13 @@ public class CommandEditorViewImpl extends Composite implements CommandEditorVie
     private static final Window.Resources              WINDOW_RESOURCES = GWT.create(Window.Resources.class);
 
     @UiField
-    RadioButtonGroup pagesSwitcher;
-
-    @UiField
     Button saveButton;
 
     @UiField
     Button testButton;
 
     @UiField
-    DeckPanel pagesPanel;
-
-    /** The total count of added pages. */
-    private int pagesCount;
+    FlowPanel pagesPanel;
 
     /** The delegate to receive events from this view. */
     private ActionDelegate delegate;
@@ -67,24 +61,12 @@ public class CommandEditorViewImpl extends Composite implements CommandEditorVie
     }
 
     @Override
-    public void addPage(IsWidget page, String title, String tooltip) {
-        final int pageIndex = pagesCount;
+    public void addPage(IsWidget page, String title) {
+        final DisclosurePanel panel = new DisclosurePanel(title);
+        panel.setAnimationEnabled(true);
+        panel.add(page);
 
-        pagesSwitcher.addButton(title, tooltip, null, new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                pagesPanel.showWidget(pageIndex);
-            }
-        });
-
-        pagesPanel.add(page);
-
-        if (pagesCount == 0) {
-            pagesSwitcher.selectButton(0);
-            pagesPanel.showWidget(0);
-        }
-
-        pagesCount++;
+        pagesPanel.add(panel);
     }
 
     @Override

@@ -113,5 +113,12 @@ public interface EditorPartPresenter extends PartPresenter {
      */
     void close(boolean save);
 
-    void closing(AsyncCallback<Void> callback);
+    /**
+     * Called when part is going to closing.
+     * Part can deny closing, by calling {@code callback#onFailure}.
+     *
+     * @param callback
+     *         callback to allow or deny closing the part
+     */
+    void onClosing(AsyncCallback<Void> callback);
 }

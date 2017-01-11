@@ -24,9 +24,6 @@ public interface CommandEditorPage {
     /** Returns page's title. */
     String getTitle();
 
-    /** Returns page's tooltip. */
-    String getTooltip();
-
     /** Returns page's view. */
     IsWidget getView();
 

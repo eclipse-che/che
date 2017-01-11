@@ -27,7 +27,7 @@ import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.command.editor.page.CommandEditorPage.DirtyStateListener;
-import org.eclipse.che.ide.command.editor.page.arguments.ArgumentsPage;
+import org.eclipse.che.ide.command.editor.page.commandline.CommandLinePage;
 import org.eclipse.che.ide.command.editor.page.info.InfoPage;
 import org.eclipse.che.ide.command.editor.page.previewurl.PreviewUrlPage;
 import org.eclipse.che.ide.command.node.CommandFileNode;
@@ -71,7 +71,7 @@ public class CommandEditorTest {
     @Mock
     private InfoPage                 infoPage;
     @Mock
-    private ArgumentsPage            argumentsPage;
+    private CommandLinePage          commandLinePage;
     @Mock
     private PreviewUrlPage           previewUrlPage;
     @Mock
@@ -121,10 +121,10 @@ public class CommandEditorTest {
         verify(view).setDelegate(editor);
         verify(commandManager).addCommandChangedListener(editor);
         verify(infoPage).setDirtyStateListener(any(DirtyStateListener.class));
-        verify(argumentsPage).setDirtyStateListener(any(DirtyStateListener.class));
+        verify(commandLinePage).setDirtyStateListener(any(DirtyStateListener.class));
         verify(previewUrlPage).setDirtyStateListener(any(DirtyStateListener.class));
         verify(infoPage).edit(any(ContextualCommand.class));
-        verify(argumentsPage).edit(any(ContextualCommand.class));
+        verify(commandLinePage).edit(any(ContextualCommand.class));
         verify(previewUrlPage).edit(any(ContextualCommand.class));
     }
 

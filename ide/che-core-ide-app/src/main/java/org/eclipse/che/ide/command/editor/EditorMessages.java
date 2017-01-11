@@ -31,9 +31,6 @@ public interface EditorMessages extends Messages {
     @Key("page.info.title")
     String pageInfoTitle();
 
-    @Key("page.info.tooltip")
-    String pageInfoTooltip();
-
     @Key("page.info.name.label")
     String pageInfoNameLabel();
 
@@ -61,12 +58,6 @@ public interface EditorMessages extends Messages {
     @Key("page.arguments.title")
     String pageArgumentsTitle();
 
-    @Key("page.arguments.tooltip")
-    String pageArgumentsTooltip();
-
     @Key("page.preview_url.title")
     String pagePreviewUrlTitle();
-
-    @Key("page.preview_url.tooltip")
-    String pagePreviewUrlTooltip();
 }

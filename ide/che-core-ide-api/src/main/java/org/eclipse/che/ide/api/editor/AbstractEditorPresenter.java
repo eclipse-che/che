@@ -92,7 +92,7 @@ public abstract class AbstractEditorPresenter extends AbstractPartPresenter impl
     }
 
     @Override
-    public void closing(AsyncCallback<Void> callback) {
+    public void onClosing(AsyncCallback<Void> callback) {
         callback.onSuccess(null);
     }
 }
