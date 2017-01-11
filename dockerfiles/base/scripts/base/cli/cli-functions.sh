@@ -92,7 +92,7 @@ initiate_offline_or_network_mode(){
     # If we are in networking mode, we have had some issues where users have failed DNS networking.
     # See: https://github.com/eclipse/che/issues/3266#issuecomment-265464165
     if [[ "${FAST_BOOT}" = "false" ]]; then
-      info "cli" "Checking network... (hint: '--fast' skips version and network checks)"
+      info "cli" "Checking network... (hint: '--fast' skips version, network, and nightly checks)"
       local HTTP_STATUS_CODE=$(curl -I -k dockerhub.com -s -o /dev/null --write-out '%{http_code}')
       if [[ ! $HTTP_STATUS_CODE -eq "301" ]]; then
         info "Welcome to $CHE_FORMAL_PRODUCT_NAME!"
@@ -310,9 +310,10 @@ verify_version_compatibility() {
       ;;
       "nightly")
         error ""
-        error "Your CLI version '${CHE_IMAGE_FULLNAME}' does not match your installed version '$INSTALLED_VERSION'."
+        error "Your CLI version '${CHE_IMAGE_FULLNAME}' does not match your installed version '$INSTALLED_VERSION' in ${DATA_MOUNT}."
         error ""
         error "The 'nightly' CLI is only compatible with 'nightly' installed versions."
+        error "You may use 'nightly' with a separate ${CHE_FORMAL_PRODUCT_NAME} installation by providing a different ':/data' volume mount."
         error "You may not '${CHE_MINI_PRODUCT_NAME} upgrade' from 'nightly' to a numbered (tagged) version."
         error ""
         error "Run the CLI as '${CHE_IMAGE_NAME}:<version>' to install a tagged version."
@@ -337,11 +338,20 @@ verify_version_compatibility() {
       ;;
     esac
   fi
+}
 
+is_nightly() {
+  if [[ $(get_image_version) = "nightly" ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+function verify_nightly_accuracy() {
   # Per request of the engineers, check to see if the locally cached nightly version is older
   # than the one stored on DockerHub.
-  if [[ "${CHE_IMAGE_VERSION}" = "nightly" ]]; then
-
+  if is_nightly; then
     REMOTE_NIGHTLY_JSON=$(curl -s https://hub.docker.com/v2/repositories/${CHE_IMAGE_NAME}/tags/nightly/)
 
     # Retrieve info on current nightly
@@ -363,6 +373,7 @@ verify_version_compatibility() {
     fi
   fi
 }
+
 
 # Convert a ISO 8601 date to timestamp
 timestamp_date_iso8601() {
