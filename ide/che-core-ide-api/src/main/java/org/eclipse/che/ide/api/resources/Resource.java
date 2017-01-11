@@ -96,6 +96,28 @@ public interface Resource extends Comparable<Resource> {
     boolean isFile();
 
     /**
+     * Casts current resource to the {@link File} if the last one's represents a file.
+     * <p>
+     * Example of usage:
+     * <pre>
+     *    public void doSome() {
+     *        Resource resource = ...;
+     *        if (resource.isFile()) {
+     *            File file = resource.asFile();
+     *        }
+     *    }
+     * </pre>
+     *
+     * @return instance of {@link File}
+     * @throws IllegalStateException
+     *         in case if current resource is not a file
+     * @see Resource#getResourceType()
+     * @see Resource#FILE
+     * @since 5.1.0
+     */
+    File asFile();
+
+    /**
      * Returns {@code true} if current represents a folder.
      *
      * @return true if current resource is folder based resource.
@@ -106,6 +128,28 @@ public interface Resource extends Comparable<Resource> {
     boolean isFolder();
 
     /**
+     * Casts current resource to the {@link Folder} if the last one's represents a folder.
+     * <p>
+     * Example of usage:
+     * <pre>
+     *    public void doSome() {
+     *        Resource resource = ...;
+     *        if (resource.isFolder()) {
+     *            Folder folder = resource.asFolder();
+     *        }
+     *    }
+     * </pre>
+     *
+     * @return instance of {@link Folder}
+     * @throws IllegalStateException
+     *         in case if current resource is not a folder
+     * @see Resource#getResourceType()
+     * @see Resource#FOLDER
+     * @since 5.1.0
+     */
+    Folder asFolder();
+
+    /**
      * Returns {@code true} if current represents a project.
      *
      * @return true if current resource is project based resource.
@@ -114,6 +158,28 @@ public interface Resource extends Comparable<Resource> {
      * @since 4.4.0
      */
     boolean isProject();
+
+    /**
+     * Casts current resource to the {@link Project} if the last one's represents a project.
+     * <p>
+     * Example of usage:
+     * <pre>
+     *    public void doSome() {
+     *        Resource resource = ...;
+     *        if (resource.isProject()) {
+     *            Project project = resource.asProject();
+     *        }
+     *    }
+     * </pre>
+     *
+     * @return instance of {@link Project}
+     * @throws IllegalStateException
+     *         in case if current resource is not a project
+     * @see Resource#getResourceType()
+     * @see Resource#PROJECT
+     * @since 5.1.0
+     */
+    Project asProject();
 
     /**
      * Copies resource to given {@code destination} path. Copy operation performs asynchronously and result of current
