@@ -382,8 +382,7 @@ timestamp_date_iso8601() {
 }
 
 # Compare two dates with ISO 8601 format and return
-# true if the first date is less than the second date (with a 1hour period)
-# else false
+# true if the first date is 24 hours less than the second date
 newer_date_period() {
   if [[ $(expr ${1} + 86400) -lt ${2} ]]; then
     return 0
