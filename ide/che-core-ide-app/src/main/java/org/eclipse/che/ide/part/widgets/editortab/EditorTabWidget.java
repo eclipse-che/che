@@ -29,6 +29,7 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.event.FileEvent.FileEventHandler;
@@ -84,11 +85,11 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
     @UiField(provided = true)
     final PartStackUIResources resources;
 
-    private final EventBus                    eventBus;
     private final EditorTabContextMenuFactory editorTabContextMenu;
     private final String                      id;
     private final EditorPartPresenter         relatedEditorPart;
     private final EditorPartStack             relatedEditorPartStack;
+    private final EditorAgent                 editorAgent;
 
     private ActionDelegate delegate;
     private SVGResource    icon;
@@ -96,15 +97,16 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
     private VirtualFile    file;
 
     @Inject
-    public EditorTabWidget(@Assisted EditorPartPresenter relatedEditorPart,
+    public EditorTabWidget(@Assisted final EditorPartPresenter relatedEditorPart,
                            @Assisted EditorPartStack relatedEditorPartStack,
                            PartStackUIResources resources,
                            EditorTabContextMenuFactory editorTabContextMenu,
-                           final EventBus eventBus) {
+                           final EventBus eventBus,
+                           final EditorAgent editorAgent) {
         this.resources = resources;
-        this.eventBus = eventBus;
         this.relatedEditorPart = relatedEditorPart;
         this.relatedEditorPartStack = relatedEditorPartStack;
+        this.editorAgent = editorAgent;
 
         initWidget(UI_BINDER.createAndBindUi(this));
 
@@ -126,7 +128,7 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
         closeButton.addDomHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                eventBus.fireEvent(FileEvent.createCloseFileEvent(EditorTabWidget.this));
+                editorAgent.closeEditor(relatedEditorPart);
             }
         }, ClickEvent.getType());
     }
@@ -215,7 +217,7 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
         if (NativeEvent.BUTTON_LEFT == event.getNativeButton()) {
             delegate.onTabClicked(this);
         } else if (NativeEvent.BUTTON_MIDDLE == event.getNativeButton()) {
-            eventBus.fireEvent(FileEvent.createCloseFileEvent(this));
+            editorAgent.closeEditor(relatedEditorPart);
         }
     }
 

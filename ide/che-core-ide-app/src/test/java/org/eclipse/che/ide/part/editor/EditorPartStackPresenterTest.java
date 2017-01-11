@@ -105,6 +105,8 @@ public class EditorPartStackPresenterTest {
     private CloseAllTabsPaneAction    closeAllTabsPaneAction;
     @Mock
     private EditorPaneMenuItemFactory editorPaneMenuItemFactory;
+    @Mock
+    private EditorAgent               editorAgent;
 
     //additional mocks
     @Mock
@@ -202,7 +204,8 @@ public class EditorPartStackPresenterTest {
                                                  editorPaneMenu,
                                                  actionManager,
                                                  closePaneAction,
-                                                 closeAllTabsPaneAction);
+                                                 closeAllTabsPaneAction,
+                                                 editorAgent);
 
         when(tabItemFactory.createEditorPartButton(partPresenter1, presenter)).thenReturn(editorTab1);
         when(tabItemFactory.createEditorPartButton(partPresenter2, presenter)).thenReturn(editorTab2);

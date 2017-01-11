@@ -277,6 +277,39 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
     }
 
     @Override
+    public void closing(final AsyncCallback<Void> callback) {
+        if (!isDirty()) {
+            callback.onSuccess(null);
+        } else {
+            dialogFactory.createConfirmDialog(
+                    localizationConstants.askWindowCloseTitle(),
+                    localizationConstants.messagesSaveChanges(getEditorInput().getName()),
+                    new ConfirmCallback() {
+                        @Override
+                        public void accepted() {
+                            doSave(new AsyncCallback<EditorInput>() {
+                                @Override
+                                public void onSuccess(EditorInput result) {
+                                    callback.onSuccess(null);
+                                }
+
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    callback.onFailure(null);
+                                }
+                            });
+                        }
+                    },
+                    new CancelCallback() {
+                        @Override
+                        public void cancelled() {
+                            callback.onSuccess(null);
+                        }
+                    }).show();
+        }
+    }
+
+    @Override
     public void onCommandSave() {
         doSave();
     }

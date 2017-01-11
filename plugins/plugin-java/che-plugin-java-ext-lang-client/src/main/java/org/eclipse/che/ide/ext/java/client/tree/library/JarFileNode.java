@@ -13,7 +13,6 @@ package org.eclipse.che.ide.ext.java.client.tree.library;
 import com.google.common.annotations.Beta;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
@@ -22,7 +21,7 @@ import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.data.tree.HasAction;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.data.tree.settings.NodeSettings;
-import org.eclipse.che.ide.api.event.FileEvent;
+import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.api.theme.Style;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
@@ -50,10 +49,10 @@ public class JarFileNode extends SyntheticNode<JarEntry> implements VirtualFile,
 
     private final int                   libId;
     private final Path                  project;
-    private final EventBus              eventBus;
     private final JavaResources         javaResources;
     private final NodesResources        nodesResources;
     private final JavaNavigationService service;
+    private final EditorAgent           editorAgent;
     private       boolean               contentGenerated;
 
     @Inject
@@ -61,17 +60,17 @@ public class JarFileNode extends SyntheticNode<JarEntry> implements VirtualFile,
                        @Assisted int libId,
                        @Assisted Path project,
                        @Assisted NodeSettings nodeSettings,
-                       EventBus eventBus,
                        JavaResources javaResources,
                        NodesResources nodesResources,
-                       JavaNavigationService service) {
+                       JavaNavigationService service,
+                       EditorAgent editorAgent) {
         super(jarEntry, nodeSettings);
         this.libId = libId;
         this.project = project;
-        this.eventBus = eventBus;
         this.javaResources = javaResources;
         this.nodesResources = nodesResources;
         this.service = service;
+        this.editorAgent = editorAgent;
 
         getAttributes().put(CUSTOM_BACKGROUND_FILL, singletonList(Style.theme.projectExplorerReadonlyItemBackground()));
     }
@@ -86,7 +85,7 @@ public class JarFileNode extends SyntheticNode<JarEntry> implements VirtualFile,
     /** {@inheritDoc} */
     @Override
     public void actionPerformed() {
-        eventBus.fireEvent(FileEvent.createOpenFileEvent(this));
+        editorAgent.openEditor(this);
     }
 
     /** {@inheritDoc} */

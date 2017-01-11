@@ -112,4 +112,6 @@ public interface EditorPartPresenter extends PartPresenter {
      *         <code>true</code> if unsaved changed should be saved, and <code>false</code> if unsaved changed should be discarded
      */
     void close(boolean save);
+
+    void closing(AsyncCallback<Void> callback);
 }

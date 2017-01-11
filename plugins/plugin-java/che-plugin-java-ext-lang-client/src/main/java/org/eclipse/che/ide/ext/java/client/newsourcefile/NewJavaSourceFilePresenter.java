@@ -17,6 +17,7 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
@@ -51,11 +52,13 @@ public class NewJavaSourceFilePresenter implements NewJavaSourceFileView.ActionD
     private final NewJavaSourceFileView    view;
     private final List<JavaSourceFileType> sourceFileTypes;
     private final EventBus                 eventBus;
+    private final EditorAgent              editorAgent;
     private       Container                parent;
 
     @Inject
-    public NewJavaSourceFilePresenter(NewJavaSourceFileView view, EventBus eventBus) {
+    public NewJavaSourceFilePresenter(NewJavaSourceFileView view, EventBus eventBus, EditorAgent editorAgent) {
         this.eventBus = eventBus;
+        this.editorAgent = editorAgent;
         sourceFileTypes = Arrays.asList(CLASS, INTERFACE, ENUM, ANNOTATION);
         this.view = view;
         this.view.setDelegate(this);
@@ -194,7 +197,7 @@ public class NewJavaSourceFilePresenter implements NewJavaSourceFileView.ActionD
                     pkg.newFile(nameWithoutExtension + ".java", content).then(new Operation<File>() {
                         @Override
                         public void apply(File file) throws OperationException {
-                            eventBus.fireEvent(FileEvent.createOpenFileEvent(file));
+                            editorAgent.openEditor(file);
                             eventBus.fireEvent(new RevealResourceEvent(file));
                         }
                     });
@@ -204,7 +207,7 @@ public class NewJavaSourceFilePresenter implements NewJavaSourceFileView.ActionD
             parent.newFile(nameWithoutExtension + ".java", content).then(new Operation<File>() {
                 @Override
                 public void apply(File file) throws OperationException {
-                    eventBus.fireEvent(FileEvent.createOpenFileEvent(file));
+                    editorAgent.openEditor(file);
                     eventBus.fireEvent(new RevealResourceEvent(file));
                 }
             });

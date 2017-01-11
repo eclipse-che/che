@@ -22,7 +22,7 @@ import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.OPEN;
 import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.SAVE;
 
 /**
- * Event that describes the fact that file is going to be opened.
+ * Event that describes the fact that file is opened/closed/saved.
  *
  * @author Nikolay Zamosenchuk
  * @author Artem Zatsarynnyi
@@ -69,7 +69,7 @@ public class FileEvent extends GwtEvent<FileEvent.FileEventHandler> {
     /**
      * Creates a event for {@code FileOperation.OPEN}.
      */
-    public static FileEvent createOpenFileEvent(VirtualFile file) {
+    public static FileEvent createFileOpenedEvent(VirtualFile file) {
         return new FileEvent(file, OPEN);
     }
 
@@ -80,14 +80,14 @@ public class FileEvent extends GwtEvent<FileEvent.FileEventHandler> {
      * @param tab
      *         tab of the file to close
      */
-    public static FileEvent createCloseFileEvent(EditorTab tab) {
+    public static FileEvent createFileClosedEvent(EditorTab tab) {
         return new FileEvent(tab, CLOSE);
     }
 
     /**
      * Creates a event for {@code FileOperation.SAVE}.
      */
-    public static FileEvent createSaveFileEvent(VirtualFile file) {
+    public static FileEvent createFileSavedEvent(VirtualFile file) {
         return new FileEvent(file, SAVE);
     }
 

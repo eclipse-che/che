@@ -14,6 +14,7 @@ import com.google.common.base.Optional;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.api.promises.client.Promise;
@@ -63,6 +64,8 @@ public class NavigateToFilePresenterTest {
     private Promise<Optional<File>> optFilePromise;
     @Mock
     private AppContext              appContext;
+    @Mock
+    private EditorAgent             editorAgent;
 
     private NavigateToFilePresenter presenter;
 
@@ -79,7 +82,8 @@ public class NavigateToFilePresenterTest {
                                                 eventBus,
                                                 dtoUnmarshallerFactory,
                                                 messageBusProvider,
-                                                appContext);
+                                                appContext,
+                                                editorAgent);
 
         presenter.onWsAgentStarted(wsAgentStateEvent);
     }

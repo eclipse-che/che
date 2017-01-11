@@ -16,6 +16,7 @@ import com.google.gwt.user.client.Element;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.filetypes.FileType;
@@ -78,6 +79,8 @@ public class EditorTabWidgetTest {
     @Mock
     private EventBus                    eventBus;
     @Mock
+    private EditorAgent                 editorAgent;
+    @Mock
     private EditorInput                 editorInput;
 
     private EditorTabWidget tab;
@@ -93,8 +96,8 @@ public class EditorTabWidgetTest {
                                   editorPartStack,
                                   resources,
                                   editorTabContextMenuFactory,
-                                  eventBus
-        );
+                                  eventBus,
+                                  editorAgent);
         tab.setDelegate(delegate);
     }
 
