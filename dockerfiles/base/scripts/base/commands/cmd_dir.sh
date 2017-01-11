@@ -20,5 +20,5 @@ cmd_dir() {
  
   # Not loaded as part of the init process to save on download time
   update_image_if_not_found ${UTILITY_IMAGE_CHEDIR}
-  docker_run -it -v ${HOST_FOLDER_TO_USE}:${HOST_FOLDER_TO_USE} ${UTILITY_IMAGE_CHEDIR} ${HOST_FOLDER_TO_USE} "$@"
+  docker_run -i -v ${HOST_FOLDER_TO_USE}:${HOST_FOLDER_TO_USE} ${UTILITY_IMAGE_CHEDIR} ${HOST_FOLDER_TO_USE} "$@"
 }

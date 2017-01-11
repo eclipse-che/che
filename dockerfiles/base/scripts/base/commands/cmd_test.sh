@@ -16,7 +16,7 @@ cmd_test() {
 
         # Not loaded as part of the init process to save on download time
         update_image_if_not_found eclipse/che-test:nightly
-        docker_run -it eclipse/che-test:nightly "$@"
+        docker_run -i eclipse/che-test:nightly "$@"
 
        return
     fi

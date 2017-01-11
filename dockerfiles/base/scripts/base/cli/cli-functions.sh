@@ -384,7 +384,7 @@ function verify_nightly_accuracy() {
     NIGHTLY_IMAGE=$(docker images -q --no-trunc $CHE_IMAGE_FULLNAME)
     NIGHTLY_IMAGE=${NIGHTLY_IMAGE#sha256:}
 
-    NIGHTLY_IMAGE_DATE_WRITTEN=$(docker run -it -v /var/lib/docker:/var/lib/docker \
+    NIGHTLY_IMAGE_DATE_WRITTEN=$(docker run -i -v /var/lib/docker:/var/lib/docker \
                   $UTILITY_IMAGE_ALPINE date -r /var/lib/docker/image/aufs/imagedb/content/sha256/$NIGHTLY_IMAGE)
     CURRENT_DATE=$(date)
 

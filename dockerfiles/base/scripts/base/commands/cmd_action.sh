@@ -19,7 +19,7 @@ cmd_action() {
 
         # Not loaded as part of the init process to save on download time
         update_image_if_not_found ${UTILITY_IMAGE_CHEACTION}
-        docker_run -it ${UTILITY_IMAGE_CHEACTION} "$@"
+        docker_run -i ${UTILITY_IMAGE_CHEACTION} "$@"
 
        return
     fi
