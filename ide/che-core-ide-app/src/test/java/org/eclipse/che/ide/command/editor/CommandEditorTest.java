@@ -28,7 +28,7 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.command.editor.page.CommandEditorPage.DirtyStateListener;
 import org.eclipse.che.ide.command.editor.page.commandline.CommandLinePage;
-import org.eclipse.che.ide.command.editor.page.info.InfoPage;
+import org.eclipse.che.ide.command.editor.page.settings.SettingsPage;
 import org.eclipse.che.ide.command.editor.page.previewurl.PreviewUrlPage;
 import org.eclipse.che.ide.command.node.CommandFileNode;
 import org.eclipse.che.ide.command.node.NodeFactory;
@@ -69,7 +69,7 @@ public class CommandEditorTest {
     @Mock
     private CommandManager           commandManager;
     @Mock
-    private InfoPage                 infoPage;
+    private SettingsPage             settingsPage;
     @Mock
     private CommandLinePage          commandLinePage;
     @Mock
@@ -120,10 +120,10 @@ public class CommandEditorTest {
     public void shouldBeInitialized() throws Exception {
         verify(view).setDelegate(editor);
         verify(commandManager).addCommandChangedListener(editor);
-        verify(infoPage).setDirtyStateListener(any(DirtyStateListener.class));
+        verify(settingsPage).setDirtyStateListener(any(DirtyStateListener.class));
         verify(commandLinePage).setDirtyStateListener(any(DirtyStateListener.class));
         verify(previewUrlPage).setDirtyStateListener(any(DirtyStateListener.class));
-        verify(infoPage).edit(any(ContextualCommand.class));
+        verify(settingsPage).edit(any(ContextualCommand.class));
         verify(commandLinePage).edit(any(ContextualCommand.class));
         verify(previewUrlPage).edit(any(ContextualCommand.class));
     }

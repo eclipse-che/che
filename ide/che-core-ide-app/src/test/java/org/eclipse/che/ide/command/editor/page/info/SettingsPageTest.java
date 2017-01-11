@@ -21,6 +21,8 @@ import org.eclipse.che.ide.api.command.PredefinedCommandGoalRegistry;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.command.editor.EditorMessages;
 import org.eclipse.che.ide.command.editor.page.CommandEditorPage.DirtyStateListener;
+import org.eclipse.che.ide.command.editor.page.settings.SettingsPage;
+import org.eclipse.che.ide.command.editor.page.settings.SettingsPageView;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,18 +43,18 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * Tests for {@link InfoPage}.
+ * Tests for {@link SettingsPage}.
  *
  * @author Artem Zatsarynnyi
  */
 @RunWith(MockitoJUnitRunner.class)
-public class InfoPageTest {
+public class SettingsPageTest {
 
     private static final String COMMAND_NAME    = "build";
     private static final String COMMAND_GOAL_ID = "build";
 
     @Mock
-    private InfoPageView                  view;
+    private SettingsPageView              view;
     @Mock
     private AppContext                    appContext;
     @Mock
@@ -65,7 +67,7 @@ public class InfoPageTest {
     private EventBus                      eventBus;
 
     @InjectMocks
-    private InfoPage page;
+    private SettingsPage page;
 
     @Mock
     private DirtyStateListener dirtyStateListener;

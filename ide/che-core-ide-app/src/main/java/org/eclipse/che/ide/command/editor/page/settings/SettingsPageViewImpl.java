@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.editor.page.info;
+package org.eclipse.che.ide.command.editor.page.settings;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -33,11 +33,11 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Implementation of {@link InfoPageView}.
+ * Implementation of {@link SettingsPageView}.
  *
  * @author Artem Zatsarynnyi
  */
-public class InfoPageViewImpl extends Composite implements InfoPageView {
+public class SettingsPageViewImpl extends Composite implements SettingsPageView {
 
     private static final InfoPageViewImplUiBinder UI_BINDER = GWT.create(InfoPageViewImplUiBinder.class);
 
@@ -59,7 +59,7 @@ public class InfoPageViewImpl extends Composite implements InfoPageView {
     private ActionDelegate delegate;
 
     @Inject
-    public InfoPageViewImpl() {
+    public SettingsPageViewImpl() {
         initWidget(UI_BINDER.createAndBindUi(this));
 
         projectsSection.setVisible(false);
@@ -138,6 +138,6 @@ public class InfoPageViewImpl extends Composite implements InfoPageView {
         delegate.onWorkspaceChanged(event.getValue());
     }
 
-    interface InfoPageViewImplUiBinder extends UiBinder<Widget, InfoPageViewImpl> {
+    interface InfoPageViewImplUiBinder extends UiBinder<Widget, SettingsPageViewImpl> {
     }
 }

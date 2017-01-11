@@ -37,7 +37,7 @@ import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.command.editor.page.CommandEditorPage;
 import org.eclipse.che.ide.command.editor.page.commandline.CommandLinePage;
-import org.eclipse.che.ide.command.editor.page.info.InfoPage;
+import org.eclipse.che.ide.command.editor.page.settings.SettingsPage;
 import org.eclipse.che.ide.command.editor.page.previewurl.PreviewUrlPage;
 import org.eclipse.che.ide.command.node.CommandFileNode;
 import org.eclipse.che.ide.command.node.NodeFactory;
@@ -82,7 +82,7 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
                          WorkspaceAgent workspaceAgent,
                          IconRegistry iconRegistry,
                          CommandManager commandManager,
-                         InfoPage infoPage,
+                         SettingsPage settingsPage,
                          CommandLinePage commandLinePage,
                          PreviewUrlPage previewUrlPage,
                          NotificationManager notificationManager,
@@ -109,7 +109,7 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
         commandManager.addCommandChangedListener(this);
 
         pages = new LinkedList<>();
-        pages.add(infoPage);
+        pages.add(settingsPage);
         pages.add(commandLinePage);
         pages.add(previewUrlPage);
     }

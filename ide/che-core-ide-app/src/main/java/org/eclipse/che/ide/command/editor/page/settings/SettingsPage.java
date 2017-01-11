@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.editor.page.info;
+package org.eclipse.che.ide.command.editor.page.settings;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -43,19 +43,18 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_GOAL_ATTRIBUTE_NAME;
 
 /**
- * {@link CommandEditorPage} which allows to edit basic command's information, like:
+ * {@link CommandEditorPage} which allows to edit basic command's settings, e.g.:
  * <ul>
- * <li>name;</li>
  * <li>goal;</li>
  * <li>applicable context.</li>
  * </ul>
  *
  * @author Artem Zatsarynnyi
  */
-public class InfoPage extends AbstractCommandEditorPage implements InfoPageView.ActionDelegate,
-                                                                   ResourceChangedHandler {
+public class SettingsPage extends AbstractCommandEditorPage implements SettingsPageView.ActionDelegate,
+                                                                       ResourceChangedHandler {
 
-    private final InfoPageView                  view;
+    private final SettingsPageView              view;
     private final AppContext                    appContext;
     private final PredefinedCommandGoalRegistry goalRegistry;
     private final CommandManager                commandManager;
@@ -71,12 +70,12 @@ public class InfoPage extends AbstractCommandEditorPage implements InfoPageView.
     private List<String> applicableProjectsInitial;
 
     @Inject
-    public InfoPage(InfoPageView view,
-                    AppContext appContext,
-                    PredefinedCommandGoalRegistry predefinedCommandGoalRegistry,
-                    CommandManager commandManager,
-                    EditorMessages messages,
-                    EventBus eventBus) {
+    public SettingsPage(SettingsPageView view,
+                        AppContext appContext,
+                        PredefinedCommandGoalRegistry predefinedCommandGoalRegistry,
+                        CommandManager commandManager,
+                        EditorMessages messages,
+                        EventBus eventBus) {
         super(messages.pageInfoTitle());
 
         this.view = view;

@@ -13,6 +13,7 @@ package org.eclipse.che.ide.command.editor.page.info;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 
+import org.eclipse.che.ide.command.editor.page.settings.ProjectSwitcher;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

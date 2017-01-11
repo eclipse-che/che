@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.editor.page.info;
+package org.eclipse.che.ide.command.editor.page.settings;
 
 import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.mvp.View;
@@ -18,11 +18,11 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * The view of {@link InfoPage}.
+ * The view of {@link SettingsPage}.
  *
  * @author Artem Zatsarynnyi
  */
-public interface InfoPageView extends View<InfoPageView.ActionDelegate> {
+public interface SettingsPageView extends View<SettingsPageView.ActionDelegate> {
 
     /** Sets the command's name value. */
     void setCommandName(String name);

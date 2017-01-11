@@ -30,8 +30,8 @@ import org.eclipse.che.ide.command.editor.CommandEditorView;
 import org.eclipse.che.ide.command.editor.CommandEditorViewImpl;
 import org.eclipse.che.ide.command.editor.page.text.PageWithTextEditorView;
 import org.eclipse.che.ide.command.editor.page.text.PageWithTextEditorViewImpl;
-import org.eclipse.che.ide.command.editor.page.info.InfoPageView;
-import org.eclipse.che.ide.command.editor.page.info.InfoPageViewImpl;
+import org.eclipse.che.ide.command.editor.page.settings.SettingsPageView;
+import org.eclipse.che.ide.command.editor.page.settings.SettingsPageViewImpl;
 import org.eclipse.che.ide.command.execute.GoalPopUpGroupFactory;
 import org.eclipse.che.ide.command.execute.ExecuteCommandActionFactory;
 import org.eclipse.che.ide.command.execute.ExecuteCommandActionManager;
@@ -97,7 +97,7 @@ public class CommandApiModule extends AbstractGinModule {
 
         // command editor
         bind(CommandEditorView.class).to(CommandEditorViewImpl.class);
-        bind(InfoPageView.class).to(InfoPageViewImpl.class);
+        bind(SettingsPageView.class).to(SettingsPageViewImpl.class);
         bind(PageWithTextEditorView.class).to(PageWithTextEditorViewImpl.class);
     }
 
