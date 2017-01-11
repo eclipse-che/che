@@ -23,7 +23,6 @@ import org.eclipse.che.plugin.sample.wizard.shared.Constants;
 
 import static com.google.common.base.Preconditions.checkState;
 
-
 /**
  * Presenter for creating
  *
@@ -33,9 +32,9 @@ import static com.google.common.base.Preconditions.checkState;
 public class NewXFilePresenter implements NewXFileView.ActionDelegate {
     private static final String DEFAULT_CONTENT = " #include <${header}>";
 
-    private final NewXFileView view;
+    private final NewXFileView         view;
     private final ProjectServiceClient projectServiceClient;
-    private final AppContext appContext;
+    private final AppContext           appContext;
 
     @Inject
     public NewXFilePresenter(NewXFileView view,
