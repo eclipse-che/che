@@ -102,9 +102,19 @@ generate_configuration_with_puppet() {
 
   if local_repo; then
     CHE_REPO="on"
-    WRITE_PARAMETERS="-v \"${CHE_HOST_DEVELOPMENT_REPO}/dockerfiles/init/manifests\":/etc/puppet/manifests:ro \
-                      -v \"${CHE_HOST_DEVELOPMENT_REPO}/dockerfiles/init/modules\":/etc/puppet/modules:ro \
-                      -e \"CHE_ASSEMBLY=${CHE_ASSEMBLY}\""
+    WRITE_PARAMETERS=" -e \"CHE_ASSEMBLY=${CHE_ASSEMBLY}\""
+    # add local mounts only if they are present
+    if [ -d "/repo/dockerfiles/init/manifests" ]; then
+      WRITE_PARAMETERS+=" -v \"${CHE_HOST_DEVELOPMENT_REPO}/dockerfiles/init/manifests\":/etc/puppet/manifests:ro"
+    fi
+    if [ -d "/repo/dockerfiles/init/modules" ]; then
+      WRITE_PARAMETERS+=" -v \"${CHE_HOST_DEVELOPMENT_REPO}/dockerfiles/init/modules\":/etc/puppet/modules:ro"
+    fi
+    # Handle override/addon
+    if [ -d "/repo/dockerfiles/init/addon" ]; then
+      WRITE_PARAMETERS+=" -v \"${CHE_HOST_DEVELOPMENT_REPO}/dockerfiles/init/addon/addon.pp\":/etc/puppet/manifests/addon.pp:ro"
+    fi
+
   else
     CHE_REPO="off"
     WRITE_PARAMETERS=""
@@ -125,7 +135,7 @@ generate_configuration_with_puppet() {
                       $IMAGE_INIT \
                           apply --modulepath \
                                 /etc/puppet/modules/ \
-                                /etc/puppet/manifests/${CHE_MINI_PRODUCT_NAME}.pp --show_diff ${WRITE_LOGS}"
+                                /etc/puppet/manifests/ --show_diff ${WRITE_LOGS}"
 
   log ${GENERATE_CONFIG_COMMAND}
   eval ${GENERATE_CONFIG_COMMAND}
