@@ -357,7 +357,7 @@ function verify_nightly_accuracy() {
     NIGHTLY_IMAGE=${NIGHTLY_IMAGE#sha256:}
 
     NIGHTLY_IMAGE_DATE_WRITTEN=$(docker run -it -v /var/lib/docker:/var/lib/docker \
-                  alpine date -r /var/lib/docker/image/aufs/imagedb/content/sha256/$NIGHTLY_IMAGE)
+                  $UTILITY_IMAGE_ALPINE date -r /var/lib/docker/image/aufs/imagedb/content/sha256/$NIGHTLY_IMAGE)
     CURRENT_DATE=$(date)
 
     if newer_date_period \
