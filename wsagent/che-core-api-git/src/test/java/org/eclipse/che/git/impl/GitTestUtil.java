@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,10 +13,9 @@ package org.eclipse.che.git.impl;
 import org.eclipse.che.api.git.GitConnection;
 import org.eclipse.che.api.git.GitConnectionFactory;
 import org.eclipse.che.api.git.exception.GitException;
-import org.eclipse.che.api.git.shared.AddRequest;
-import org.eclipse.che.api.git.shared.CommitRequest;
+import org.eclipse.che.api.git.params.AddParams;
+import org.eclipse.che.api.git.params.CommitParams;
 import org.eclipse.che.api.git.shared.GitUser;
-import org.eclipse.che.api.git.shared.InitRequest;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.subject.SubjectImpl;
@@ -24,12 +23,12 @@ import org.eclipse.che.commons.subject.SubjectImpl;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Arrays;
 
 import static java.nio.file.Files.createDirectories;
 import static java.nio.file.Files.delete;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.write;
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.core.util.LineConsumerFactory.NULL;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
@@ -46,8 +45,8 @@ public class GitTestUtil {
 
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
         addFile(connection, "README.txt", CONTENT);
-        connection.add(newDto(AddRequest.class).withFilepattern(Arrays.asList("README.txt")));
-        connection.commit(newDto(CommitRequest.class).withMessage("Initial commit"));
+        connection.add(AddParams.create(singletonList("README.txt")));
+        connection.commit(CommitParams.create("Initial commit"));
         return connection;
     }
 
@@ -55,7 +54,7 @@ public class GitTestUtil {
             throws GitException, IOException {
 
         GitConnection connection = getTestUserConnection(connectionFactory, repository);
-        connection.init(newDto(InitRequest.class).withBare(false));
+        connection.init(false);
         return connection;
     }
 
@@ -85,9 +84,5 @@ public class GitTestUtil {
 
     public static void deleteFile(GitConnection connection, String name) throws IOException {
         delete(connection.getWorkingDir().toPath().resolve(name));
-    }
-
-    public static void init(GitConnection connection) throws GitException {
-        connection.init(newDto(InitRequest.class).withBare(false));
     }
 }

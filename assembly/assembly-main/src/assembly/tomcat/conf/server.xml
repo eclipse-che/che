@@ -139,6 +139,10 @@
       <Host name="localhost"  appBase="webapps"
             unpackWARs="true" autoDeploy="false">
 
+
+        <!-- Provide Che Agent binaries (like workspace agent, terminal) -->
+        <Context docBase="${che.home}/lib" path="/agent-binaries" />
+
         <!-- SingleSignOn valve, share authentication between web applications
              Documentation at: /docs/config/valve.html -->
         <!--

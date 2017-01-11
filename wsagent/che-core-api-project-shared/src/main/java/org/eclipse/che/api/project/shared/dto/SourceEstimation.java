@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,7 +24,6 @@ import java.util.Map;
 @DTO
 public interface SourceEstimation {
 
-
     /** Gets unique id of type of project. */
     @ApiModelProperty(value = "type ID", position = 1)
     String getType();
@@ -44,4 +43,10 @@ public interface SourceEstimation {
 
     SourceEstimation withMatched(boolean matched);
 
+
+    /** Gets resolution  - the reason that source code not matches project type requirements. */
+    @ApiModelProperty(value = "Resolution", position = 4)
+    String getResolution();
+
+    SourceEstimation withResolution(String resolution);
 }

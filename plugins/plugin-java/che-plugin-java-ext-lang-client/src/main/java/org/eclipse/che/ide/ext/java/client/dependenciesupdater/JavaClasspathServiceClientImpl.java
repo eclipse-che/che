@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,10 +13,9 @@ package org.eclipse.che.ide.ext.java.client.dependenciesupdater;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.api.machine.WsAgentStateController;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.machine.WsAgentStateController;
 import org.eclipse.che.ide.ext.java.shared.dto.ClassPathBuilderResult;
 import org.eclipse.che.ide.websocket.Message;
 import org.eclipse.che.ide.websocket.MessageBuilder;
@@ -38,12 +37,11 @@ import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
 @Singleton
 public class JavaClasspathServiceClientImpl implements JavaClasspathServiceClient {
 
-    private final WsAgentStateController wsAgentStateController;
     private final String                 baseHttpUrl;
+    private final WsAgentStateController wsAgentStateController;
 
     @Inject
-    protected JavaClasspathServiceClientImpl(AppContext appContext,
-                                             WsAgentStateController wsAgentStateController) {
+    protected JavaClasspathServiceClientImpl(WsAgentStateController wsAgentStateController) {
         this.wsAgentStateController = wsAgentStateController;
         this.baseHttpUrl = "/java/";
     }

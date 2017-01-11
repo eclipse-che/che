@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.factory.server;
 
-import javax.persistence.Basic;
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import java.util.Arrays;
 import java.util.Objects;
@@ -19,13 +19,13 @@ import java.util.Objects;
 @Embeddable
 public class FactoryImage {
 
-    @Basic
+    @Column(name = "imagedata")
     private byte[] imageData;
 
-    @Basic
+    @Column(name = "mediatype")
     private String mediaType;
 
-    @Basic
+    @Column(name = "name")
     private String name;
 
     public FactoryImage() {}

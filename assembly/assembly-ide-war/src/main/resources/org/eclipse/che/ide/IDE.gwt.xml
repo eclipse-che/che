@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2012-2016 Codenvy, S.A.
+    Copyright (c) 2012-2017 Codenvy, S.A.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
@@ -46,6 +46,7 @@
     <inherits name='org.eclipse.che.plugin.gdb.Gdb'/>
     <inherits name='org.eclipse.che.plugin.nodejsdbg.NodeJsDebugger'/>
     <inherits name='org.eclipse.che.plugin.jdb.JavaDebugger'/>
+    <inherits name='org.eclipse.che.plugin.zdb.ZendDebugger'/>
     <inherits name='org.eclipse.che.ide.extension.machine.Machine'/>
     <inherits name='org.eclipse.che.plugin.maven.Maven'/>
     <inherits name='org.eclipse.che.ide.ext.gwt.GWT'/>
@@ -84,6 +85,7 @@
     <inherits name="org.eclipse.che.api.languageserver.LanguageServer"/>
 
     <inherits name="org.eclipse.che.plugin.svn.Subversion"/>
+    <inherits name="org.eclipse.che.ide.ext.java.testing.core.TestExtension"/>
 
     <stylesheet src="IDE.css"/>
 
@@ -93,4 +95,5 @@
     <!-- Specify the paths for translatable code                    -->
     <source path='client'/>
     <source path='shared'/>
+
 </module>

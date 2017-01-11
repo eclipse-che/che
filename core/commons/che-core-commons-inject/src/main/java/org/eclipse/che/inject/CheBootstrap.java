@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -273,7 +273,13 @@ public class CheBootstrap extends EverrestGuiceContextListener {
         public Map.Entry<String, String> apply(Map.Entry<String, String> entry) {
             String name = entry.getKey();
             name = name.toLowerCase();
+            // replace single underscore with dot and double underscores with single underscore
+            // at first replace double underscores with equal sign which is forbidden in env variable name
+            // then replace single underscores
+            // then recover underscore from equal sign
+            name = name.replace("__", "=");
             name = name.replace('_', '.');
+            name = name.replace("=", "_");
             return new SimpleEntry<>(name, entry.getValue());
         }
     }

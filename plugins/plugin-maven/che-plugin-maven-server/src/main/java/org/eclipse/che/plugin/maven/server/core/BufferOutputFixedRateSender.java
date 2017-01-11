@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.eclipse.che.plugin.maven.server.core;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import org.eclipse.che.api.core.util.ListLineConsumer;
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.everrest.websockets.WSConnectionContext;
 import org.everrest.websockets.message.ChannelBroadcastMessage;
 import org.slf4j.Logger;
@@ -40,6 +41,7 @@ public class BufferOutputFixedRateSender extends ListLineConsumer {
     public BufferOutputFixedRateSender(String channel, long delay) {
         this.channel = channel;
         ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat(BufferOutputFixedRateSender.class.getSimpleName() + "-%d")
+                                                                .setUncaughtExceptionHandler(LoggingUncaughtExceptionHandler.getInstance())
                                                                 .setDaemon(true)
                                                                 .build();
 

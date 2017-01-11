@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,7 +12,7 @@ package org.eclipse.che.plugin.docker.machine.local;
 
 import com.google.inject.assistedinject.Assisted;
 
-import org.eclipse.che.api.machine.server.exception.MachineException;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
 import org.eclipse.che.plugin.docker.machine.node.DockerNode;
 import org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider;
@@ -29,7 +29,6 @@ import java.io.IOException;
  */
 public class LocalDockerNode implements DockerNode {
 
-    private final String workspaceFolder;
     private final String host;
 
     @Inject
@@ -37,28 +36,24 @@ public class LocalDockerNode implements DockerNode {
                            WorkspaceFolderPathProvider workspaceFolderNodePathProvider,
                            DockerConnectorConfiguration dockerConnectorConfiguration) throws IOException {
 
-        workspaceFolder = workspaceFolderNodePathProvider.getPath(workspaceId);
+        // TODO investigate whether we can remove that after abandonment of native Che
+        workspaceFolderNodePathProvider.getPath(workspaceId);
         host = dockerConnectorConfiguration.getDockerHost();
     }
 
     @Override
-    public void bindWorkspace() throws MachineException {
-
-    }
+    public void bindWorkspace() throws ServerException {}
 
     @Override
-    public void unbindWorkspace() throws MachineException {
-
-    }
-
-    @Override
-    public String getProjectsFolder() {
-        return workspaceFolder;
-    }
-
+    public void unbindWorkspace() throws ServerException {}
 
     @Override
     public String getHost() {
         return host;
+    }
+
+    @Override
+    public String getIp() {
+        return null;
     }
 }

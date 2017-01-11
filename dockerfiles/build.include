@@ -1,0 +1,31 @@
+#!/bin/sh
+# Copyright (c) 2016 Codenvy, S.A.
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+
+init() {
+  BLUE='\033[1;34m'
+  GREEN='\033[0;32m'
+  RED='\033[0;31m'
+  NC='\033[0m'
+  if [ $# -eq 0 ] ; then
+    TAG="nightly"
+    echo "No tag provided, using nightly as default"
+  else
+    TAG=${1}
+  fi
+}
+
+build() {
+  DIR=$(cd "$(dirname "$0")"; pwd)
+  echo "Building Docker Image ${IMAGE_NAME} from $DIR directory with tag $TAG"
+  cd $DIR && docker build -t ${IMAGE_NAME}:${TAG} .
+  if [ $? -eq 0 ]; then
+    echo "${GREEN}Script run successfully: ${BLUE}${IMAGE_NAME}:${TAG}${NC}"
+    else
+      echo "${RED}Failure when building docker image ${IMAGE_NAME}:${TAG}${NC}"
+      exit 1
+  fi
+}

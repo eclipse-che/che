@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,7 +17,7 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.Resources;
-import org.eclipse.che.ide.api.event.ng.EditorFileStatusNotificationReceiver;
+import org.eclipse.che.ide.api.event.ng.EditorFileStatusNotificationOperation;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.notification.Notification;
 import org.eclipse.che.ide.api.notification.NotificationListener;
@@ -99,9 +99,8 @@ public class NotificationManagerImpl extends BasePresenter implements Notificati
     }
 
     @Inject
-    @PostConstruct
-    public void inject(EditorFileStatusNotificationReceiver editorFileStatusNotificationReceiver) {
-        editorFileStatusNotificationReceiver.inject(this);
+    public void inject(EditorFileStatusNotificationOperation editorFileStatusNotificationOperation) {
+        editorFileStatusNotificationOperation.inject(this);
     }
 
     /** {@inheritDoc} */
@@ -351,12 +350,6 @@ public class NotificationManagerImpl extends BasePresenter implements Notificati
 
     /** {@inheritDoc} */
     @Override
-    public void setVisible(boolean visible) {
-        view.setVisible(visible);
-    }
-
-    /** {@inheritDoc} */
-    @Override
     public SVGResource getTitleImage() {
         return resources.eventsPartIcon();
     }
@@ -390,4 +383,5 @@ public class NotificationManagerImpl extends BasePresenter implements Notificati
             nPopupStack.push(notification);
         }
     }
+
 }

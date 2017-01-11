@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,13 +11,16 @@
 package org.eclipse.che.ide.ext.web.inject;
 
 import com.google.gwt.inject.client.AbstractGinModule;
+import com.google.gwt.inject.client.multibindings.GinMultibinder;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.filetypes.FileType;
+import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar;
 import org.eclipse.che.ide.ext.web.WebExtensionResource;
+import org.eclipse.che.ide.ext.web.typescript.TSProjectWizardRegistrar;
 
 /**
  * Adds custom binding for Editors.
@@ -29,6 +32,7 @@ public class WebModule extends AbstractGinModule {
 
     @Override
     protected void configure() {
+        GinMultibinder.newSetBinder(binder(), ProjectWizardRegistrar.class).addBinding().to(TSProjectWizardRegistrar.class);
     }
 
     @Provides

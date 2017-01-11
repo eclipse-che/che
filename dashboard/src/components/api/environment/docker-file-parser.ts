@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -116,7 +116,7 @@ export class DockerfileParser {
 
     switch (instruction) {
       case 'ENV':
-        if (argumentStr.includes('=')) {
+        if (argumentStr.indexOf('=') >= 0) {
           // this argument string contains one or more environment variables
           let match;
           while (match = this.envVariablesRE.exec(argumentStr)) {

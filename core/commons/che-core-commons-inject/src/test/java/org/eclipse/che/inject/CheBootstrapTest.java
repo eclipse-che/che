@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -239,6 +239,31 @@ public class CheBootstrapTest {
     }
 
     @Test
+    public void environment_variables_prefixed_with_che_underscore_convert_double_underscores_into_one_underscore_in_variable_name()
+            throws Exception {
+        Properties cheProperties = new Properties();
+        cheProperties.put("che.some.other.name_with_underscores", "che_value");
+        cheProperties.put("che.some.name", "NULL");
+        writePropertiesFile(che, "che.properties", cheProperties);
+
+        Properties userProperties = new Properties();
+        userProperties.put("che.some.other.name_with_underscores", "user_value");
+        writePropertiesFile(userCongDir, "user.properties", userProperties);
+
+        systemPropertiesHelper.property("che.some.other.name_with_underscores", "che_dot_system_property_value");
+
+        ModuleScanner.modules.add(binder -> binder.bind(TestConfOverrideWithUnderscoresComponent.class));
+
+        cheBootstrap.contextInitialized(new ServletContextEvent(servletContext));
+
+        Injector injector = retrieveComponentFromServletContext(Injector.class);
+
+        TestConfOverrideWithUnderscoresComponent testComponent =
+                injector.getInstance(TestConfOverrideWithUnderscoresComponent.class);
+        assertEquals(testComponent.otherString, System.getenv("CHE_SOME_OTHER_NAME__WITH__UNDERSCORES"));
+    }
+
+    @Test
     public void processesPropertyAliases() throws Exception {
         Properties cheProperties = new Properties();
         cheProperties.put("very.new.some.name", "some_value");
@@ -391,6 +416,18 @@ public class CheBootstrapTest {
         String string;
 
         @Named("che.some.other.name")
+        @Inject
+        @Nullable
+        String otherString;
+    }
+
+    static class TestConfOverrideWithUnderscoresComponent {
+        @Named("che.some.name")
+        @Inject
+        @Nullable
+        String string;
+
+        @Named("che.some.other.name_with_underscores")
         @Inject
         @Nullable
         String otherString;

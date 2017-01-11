@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,6 +22,7 @@ import com.google.inject.Inject;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.parts.EditorMultiPartStackState;
 import org.eclipse.che.ide.api.parts.EditorPartStack;
+import org.eclipse.che.ide.part.editor.EmptyEditorsPanel;
 import org.eclipse.che.ide.util.loging.Log;
 
 import javax.validation.constraints.NotNull;
@@ -31,24 +32,27 @@ import static com.google.gwt.dom.client.Style.Unit.PCT;
 /**
  * @author Roman Nikitenko
  */
-public class EditorMultiPartStackViewImpl extends ResizeComposite implements EditorMultiPartStackView{
+public class EditorMultiPartStackViewImpl extends ResizeComposite implements EditorMultiPartStackView {
 
     private LayoutPanel contentPanel;
 
     private final BiMap<EditorPartStack, SplitEditorPartView> splitEditorParts;
     private final SplitEditorPartViewFactory                  splitEditorPartViewFactory;
+    private final EmptyEditorsPanel emptyEditorsPanel;
 
     private SplitEditorPartView rootView;
 
     @Inject
-    public EditorMultiPartStackViewImpl(SplitEditorPartViewFactory splitEditorPartViewFactory) {
+    public EditorMultiPartStackViewImpl(SplitEditorPartViewFactory splitEditorPartViewFactory, EmptyEditorsPanel emptyEditorsPanel) {
         this.splitEditorPartViewFactory = splitEditorPartViewFactory;
+        this.emptyEditorsPanel = emptyEditorsPanel;
         this.splitEditorParts = HashBiMap.create();
 
         contentPanel = new LayoutPanel();
         contentPanel.setSize("100%", "100%");
         contentPanel.ensureDebugId("editorMultiPartStack-contentPanel");
         initWidget(contentPanel);
+        contentPanel.add(emptyEditorsPanel);
     }
 
     @Override
@@ -60,6 +64,7 @@ public class EditorMultiPartStackViewImpl extends ResizeComposite implements Edi
                 if (relativePartStack == null) {
                     rootView = splitEditorPartViewFactory.create(widget);
                     splitEditorParts.put(partStack, rootView);
+                    contentPanel.remove(emptyEditorsPanel);
                     contentPanel.add(rootView);
                     return;
                 }
@@ -69,7 +74,6 @@ public class EditorMultiPartStackViewImpl extends ResizeComposite implements Edi
                     Log.error(getClass(), "Can not find container for specified editor");
                     return;
                 }
-
 
                 relativePartStackView.split(widget, constraints.direction, size);
                 splitEditorParts.put(partStack, relativePartStackView.getReplica());
@@ -84,6 +88,9 @@ public class EditorMultiPartStackViewImpl extends ResizeComposite implements Edi
         SplitEditorPartView splitEditorPartView = splitEditorParts.remove(partStack);
         if (splitEditorPartView != null) {
             splitEditorPartView.removeFromParent();
+        }
+        if (splitEditorParts.size() == 0) {
+            contentPanel.add(emptyEditorsPanel);
         }
     }
 

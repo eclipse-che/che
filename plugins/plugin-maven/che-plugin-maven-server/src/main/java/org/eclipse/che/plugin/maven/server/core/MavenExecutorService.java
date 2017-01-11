@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.eclipse.che.plugin.maven.server.core;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +34,9 @@ public class MavenExecutorService {
     private final ExecutorService service;
 
     public MavenExecutorService() {
-        ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("Maven Executor - %d").build();
+        ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("Maven Executor - %d")
+                                                                .setUncaughtExceptionHandler(LoggingUncaughtExceptionHandler.getInstance())
+                                                                .build();
         service = Executors.newFixedThreadPool(1, threadFactory);
     }
 

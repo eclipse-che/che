@@ -21,7 +21,7 @@ config/
 
 # Compiled source #
 ###################
-*.com
+!*.com/
 *.class
 *.dll
 *.exe
@@ -48,8 +48,8 @@ config/
 # Logs and databases #
 ######################
 *.log
-*.sql
 *.sqlite
+npm-debug.log.*
 
 # OS generated files #
 ######################
@@ -60,5 +60,12 @@ Thumbs.db
 */overlays
 *~
 
-# Che files
+# Che files #
+#############
 .che
+dockerfiles/che/eclipse-che.tar.gz
+.unison*
+docs/_site
+docs/.sass-cache
+docs/.jekyll-metadata
+docs/assets/imgs

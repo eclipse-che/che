@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,14 +30,16 @@ import static org.mockito.Mockito.when;
  */
 @RunWith(DataProviderRunner.class)
 public class MediaTypeFilterTest {
+
+
     @DataProvider
     public static Object[][] testData() throws Exception {
         return new Object[][]{
-                {virtualFileWithContent("to be or not to be".getBytes()), false},
-                {virtualFileWithContent("<html><head></head></html>".getBytes()), false},
-                {virtualFileWithContent("<a><b/></a>".getBytes()), false},
-                {virtualFileWithContent("public class SomeClass {}".getBytes()), false},
-                {virtualFileWithContent(new byte[10]), true}
+       {virtualFileWithContent("to be or not to be".getBytes()), false},
+       {virtualFileWithContent("<html><head></head></html>".getBytes()), false},
+       {virtualFileWithContent("<a><b/></a>".getBytes()), false},
+       {virtualFileWithContent("public class SomeClass {}".getBytes()), false},
+       {virtualFileWithContent(new byte[10]), true}
         };
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,7 +9,7 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
-import {ListCommandsController} from "../list-commands.controller";
+import {ListCommandsController} from '../list-commands.controller';
 
 /**
  * @ngdoc controller
@@ -44,7 +44,7 @@ export class EditCommandDialogController {
     }
 
     this.usedCommandsName = [];
-    this.commands.forEach((command) => {
+    this.commands.forEach((command: any) => {
       if (isAddMode || this.name !== command.name) {
         this.usedCommandsName.push(command.name);
       }

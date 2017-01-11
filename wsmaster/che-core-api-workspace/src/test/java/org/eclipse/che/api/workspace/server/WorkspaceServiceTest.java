@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,8 @@ package org.eclipse.che.api.workspace.server;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.jayway.restassured.response.Response;
 
 import org.eclipse.che.account.shared.model.Account;
@@ -57,6 +59,7 @@ import org.everrest.assured.EverrestJetty;
 import org.everrest.core.Filter;
 import org.everrest.core.GenericContainerRequest;
 import org.everrest.core.RequestFilter;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -126,6 +129,7 @@ public class WorkspaceServiceTest {
     private static final ApiExceptionMapper MAPPER       = new ApiExceptionMapper();
     private static final String             NAMESPACE    = "user";
     private static final String             USER_ID      = "user123";
+    private static final String             API_ENDPOINT = "http://localhost:8080/api";
     private static final Account            TEST_ACCOUNT = new AccountImpl("anyId", NAMESPACE, "test");
     @SuppressWarnings("unused")
     private static final EnvironmentFilter  FILTER       = new EnvironmentFilter();
@@ -143,10 +147,13 @@ public class WorkspaceServiceTest {
 
     @BeforeMethod
     public void setup() {
-        service = new WorkspaceService(wsManager,
+        service = new WorkspaceService(API_ENDPOINT,
+                                       wsManager,
                                        validator,
                                        wsAgentHealthChecker,
-                                       new WorkspaceServiceLinksInjector(new MachineServiceLinksInjector()));
+                                       new WorkspaceServiceLinksInjector(new MachineServiceLinksInjector()),
+                                       true,
+                                       false);
     }
 
     @Test
@@ -242,6 +249,36 @@ public class WorkspaceServiceTest {
         assertEquals(unwrapError(response), "Attribute 'stackId=stack123' is not valid, " +
                                             "it should contain name and value separated " +
                                             "with colon. For example: attributeName:attributeValue");
+    }
+
+    @Test
+    public void shouldRelativizeLinksOnCreateWorkspace() throws Exception {
+        final String initialLocation = "http://localhost:8080/api/recipe/idrecipe123456789/script";
+        final WorkspaceConfigDto configDto = createConfigDto();
+        configDto.getEnvironments().get(configDto.getDefaultEnv()).getRecipe().withLocation(initialLocation)
+                                                                              .withType("dockerfile");
+
+        ArgumentCaptor<WorkspaceConfigDto> captor = ArgumentCaptor.forClass(WorkspaceConfigDto.class);
+        when(wsManager.createWorkspace(captor.capture(), any(), any())).thenAnswer(invocation -> createWorkspace(captor.getValue()));
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .contentType("application/json")
+                                         .body(configDto)
+                                         .when()
+                                         .post(SECURE_PATH + "/workspace" +
+                                               "?namespace=test" +
+                                               "&attribute=stackId:stack123" +
+                                               "&attribute=custom:custom:value");
+
+        assertEquals(response.getStatusCode(), 201);
+        String savedLocation = unwrapDto(response, WorkspaceDto.class).getConfig()
+                                                                      .getEnvironments()
+                                                                      .get(configDto.getDefaultEnv())
+                                                                      .getRecipe()
+                                                                      .getLocation();
+
+        assertEquals(savedLocation, initialLocation.substring(API_ENDPOINT.length()));
     }
 
     @Test
@@ -620,7 +657,7 @@ public class WorkspaceServiceTest {
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
                                          .contentType("application/json")
-                                         .body(createCommandDto())
+                                         .body(createEnvDto())
                                          .when()
                                          .put(SECURE_PATH + "/workspace/" + workspace.getId() + "/environment/fake");
 
@@ -644,6 +681,34 @@ public class WorkspaceServiceTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(wsManager).updateWorkspace(any(), any());
+    }
+
+
+    @Test
+    public void shouldRelativizeLinksOnAddEnvironment() throws Exception {
+        final WorkspaceImpl workspace = createWorkspace(createConfigDto());
+        final String initialLocation = "http://localhost:8080/api/recipe/idrecipe123456789/script";
+        when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
+        when(wsManager.updateWorkspace(any(), any())).thenReturn(workspace);
+        final EnvironmentDto envDto = createEnvDto();
+        envDto.getRecipe().withLocation(initialLocation).withType("dockerfile");
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .contentType("application/json")
+                                         .body(envDto)
+                                         .when()
+                                         .queryParam("name", "new-env")
+                                         .post(SECURE_PATH + "/workspace/" + workspace.getId() + "/environment");
+
+        assertEquals(response.getStatusCode(), 200);
+        String savedLocation = unwrapDto(response, WorkspaceDto.class).getConfig()
+                                                                      .getEnvironments()
+                                                                      .get("new-env")
+                                                                      .getRecipe()
+                                                                      .getLocation();
+
+        assertEquals(savedLocation, initialLocation.substring(API_ENDPOINT.length()));
     }
 
 
@@ -896,6 +961,20 @@ public class WorkspaceServiceTest {
         List<SnapshotDto> snapshotDtos = unwrapDtoList(response, SnapshotDto.class);
         assertTrue(snapshotDtos.isEmpty());
         verify(wsManager).getSnapshot(workspaceId);
+    }
+
+    @Test
+    public void shouldBeAbleToGetSettings() throws Exception {
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .when()
+                                         .get(SECURE_PATH + "/workspace/settings");
+
+        assertEquals(response.getStatusCode(), 200);
+        final Map<String, String> settings = new Gson().fromJson(response.print(),
+                                                                 new TypeToken<Map<String, String>>() {}.getType());
+        assertEquals(settings, ImmutableMap.of("che.workspace.auto_snapshot", "true",
+                                               "che.workspace.auto_restore", "false"));
     }
 
     private static String unwrapError(Response response) {

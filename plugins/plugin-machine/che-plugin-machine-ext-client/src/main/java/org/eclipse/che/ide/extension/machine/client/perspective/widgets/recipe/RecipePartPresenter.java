@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -269,12 +269,6 @@ public class RecipePartPresenter extends BasePresenter implements RecipePartView
     @Override
     public String getTitle() {
         return locale.viewRecipePanelTitle();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setVisible(boolean visible) {
-        view.setVisible(visible);
     }
 
     /** {@inheritDoc} */

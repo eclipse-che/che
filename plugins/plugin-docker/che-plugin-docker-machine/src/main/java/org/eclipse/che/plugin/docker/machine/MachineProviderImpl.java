@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.machine;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
 import com.google.common.collect.ObjectArrays;
@@ -35,6 +34,8 @@ import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.Size;
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
+import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
 import org.eclipse.che.plugin.docker.client.ProgressLineFormatterImpl;
@@ -62,7 +63,6 @@ import org.eclipse.che.plugin.docker.client.params.TagParams;
 import org.eclipse.che.plugin.docker.client.params.network.ConnectContainerToNetworkParams;
 import org.eclipse.che.plugin.docker.client.params.network.CreateNetworkParams;
 import org.eclipse.che.plugin.docker.machine.node.DockerNode;
-import org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -74,7 +74,6 @@ import java.net.SocketTimeoutException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -83,12 +82,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.lang.Thread.sleep;
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
 import static org.eclipse.che.plugin.docker.machine.DockerInstance.LATEST_TAG;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -111,9 +112,9 @@ public class MachineProviderImpl implements MachineInstanceProvider {
     private final UserSpecificDockerRegistryCredentialsProvider dockerCredentials;
     private final ExecutorService                               executor;
     private final DockerInstanceStopDetector                    dockerInstanceStopDetector;
-    private final WorkspaceFolderPathProvider                   workspaceFolderPathProvider;
     private final boolean                                       doForcePullOnBuild;
-    private final boolean                                       privilegeMode;
+    private final boolean                                       privilegedMode;
+    private final int                                           pidsLimit;
     private final DockerMachineFactory                          dockerMachineFactory;
     private final List<String>                                  devMachinePortsToExpose;
     private final List<String>                                  commonMachinePortsToExpose;
@@ -122,10 +123,15 @@ public class MachineProviderImpl implements MachineInstanceProvider {
     private final Map<String, String>                           devMachineEnvVariables;
     private final Map<String, String>                           commonMachineEnvVariables;
     private final String[]                                      allMachinesExtraHosts;
-    private final String                                        projectFolderPath;
     private final boolean                                       snapshotUseRegistry;
     private final double                                        memorySwapMultiplier;
+    private final String                                        networkDriver;
     private final Set<String>                                   additionalNetworks;
+    private final String                                        parentCgroup;
+    private final String                                        cpusetCpus;
+    private final long                                          cpuPeriod;
+    private final long                                          cpuQuota;
+    private final WindowsPathEscaper                            windowsPathEscaper;
 
     @Inject
     public MachineProviderImpl(DockerConnector docker,
@@ -138,24 +144,27 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                @Named("machine.docker.dev_machine.machine_volumes") Set<String> devMachineSystemVolumes,
                                @Named("machine.docker.machine_volumes") Set<String> allMachinesSystemVolumes,
                                @Nullable @Named("che.workspace.hosts") String allMachinesExtraHosts,
-                               WorkspaceFolderPathProvider workspaceFolderPathProvider,
-                               @Named("che.workspace.projects.storage") String projectFolderPath,
                                @Named("che.docker.always_pull_image") boolean doForcePullOnBuild,
-                               @Named("che.docker.privilege") boolean privilegeMode,
+                               @Named("che.docker.privileged") boolean privilegedMode,
+                               @Named("che.docker.pids_limit") int pidsLimit,
                                @Named("machine.docker.dev_machine.machine_env") Set<String> devMachineEnvVariables,
                                @Named("machine.docker.machine_env") Set<String> allMachinesEnvVariables,
                                @Named("che.docker.registry_for_snapshots") boolean snapshotUseRegistry,
                                @Named("che.docker.swap") double memorySwapMultiplier,
-                               @Named("machine.docker.networks") Set<Set<String>> additionalNetworks)
+                               @Named("machine.docker.networks") Set<Set<String>> additionalNetworks,
+                               @Nullable @Named("che.docker.network_driver") String networkDriver,
+                               @Nullable @Named("che.docker.parent_cgroup") String parentCgroup,
+                               @Nullable @Named("che.docker.cpuset_cpus") String cpusetCpus,
+                               @Named("che.docker.cpu_period") long cpuPeriod,
+                               @Named("che.docker.cpu_quota") long cpuQuota,
+                               WindowsPathEscaper windowsPathEscaper)
             throws IOException {
         this.docker = docker;
         this.dockerCredentials = dockerCredentials;
         this.dockerMachineFactory = dockerMachineFactory;
         this.dockerInstanceStopDetector = dockerInstanceStopDetector;
-        this.workspaceFolderPathProvider = workspaceFolderPathProvider;
         this.doForcePullOnBuild = doForcePullOnBuild;
-        this.privilegeMode = privilegeMode;
-        this.projectFolderPath = projectFolderPath;
+        this.privilegedMode = privilegedMode;
         this.snapshotUseRegistry = snapshotUseRegistry;
         // use-cases:
         //  -1  enable unlimited swap
@@ -166,6 +175,13 @@ public class MachineProviderImpl implements MachineInstanceProvider {
         //  according to docker docs field  memorySwap should be equal to memory+swap
         //  we calculate this field as memorySwap=memory * (1 + multiplier) so we just add 1 to multiplier
         this.memorySwapMultiplier = memorySwapMultiplier == -1 ? -1 : memorySwapMultiplier + 1;
+        this.networkDriver = networkDriver;
+        this.parentCgroup = parentCgroup;
+        this.cpusetCpus = cpusetCpus;
+        this.cpuPeriod = cpuPeriod;
+        this.cpuQuota = cpuQuota;
+        this.windowsPathEscaper = windowsPathEscaper;
+        this.pidsLimit = pidsLimit;
 
         allMachinesSystemVolumes = removeEmptyAndNullValues(allMachinesSystemVolumes);
         devMachineSystemVolumes = removeEmptyAndNullValues(devMachineSystemVolumes);
@@ -174,13 +190,13 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                                            .map(line -> line.split(";"))
                                                            .flatMap(Arrays::stream)
                                                            .distinct()
-                                                           .collect(Collectors.toSet());
+                                                           .collect(toSet());
 
         devMachineSystemVolumes = devMachineSystemVolumes.stream()
                                                          .map(line -> line.split(";"))
                                                          .flatMap(Arrays::stream)
                                                          .distinct()
-                                                         .collect(Collectors.toSet());
+                                                         .collect(toSet());
 
         if (SystemInfo.isWindows()) {
             allMachinesSystemVolumes = escapePaths(allMachinesSystemVolumes);
@@ -228,10 +244,12 @@ public class MachineProviderImpl implements MachineInstanceProvider {
 
         this.additionalNetworks = additionalNetworks.stream()
                                                     .flatMap(Set::stream)
-                                                    .collect(Collectors.toSet());
+                                                    .collect(toSet());
 
         // TODO single point of failure in case of highly loaded system
         executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("MachineLogsStreamer-%d")
+                                                                           .setUncaughtExceptionHandler(
+                                                                                   LoggingUncaughtExceptionHandler.getInstance())
                                                                            .setDaemon(true)
                                                                            .build());
     }
@@ -282,16 +300,12 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                               machineLogger);
 
             DockerNode node = dockerMachineFactory.createNode(workspaceId, container);
-            if (isDev) {
-                node.bindWorkspace();
-                LOG.info("Machine with id '{}' backed by container '{}' has been deployed on node '{}'",
-                         service.getId(), container, node.getHost());
-            }
 
             dockerInstanceStopDetector.startDetection(container,
                                                       service.getId(),
                                                       workspaceId);
 
+            final String userId = EnvironmentContext.getCurrent().getSubject().getUserId();
             MachineImpl machine = new MachineImpl(MachineConfigImpl.builder()
                                                                    .setDev(isDev)
                                                                    .setName(machineName)
@@ -310,7 +324,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                                   service.getId(),
                                                   workspaceId,
                                                   envName,
-                                                  namespace,
+                                                  userId,
                                                   MachineStatus.RUNNING,
                                                   null);
 
@@ -331,6 +345,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
     public void createNetwork(String networkName) throws ServerException {
         try {
             docker.createNetwork(CreateNetworkParams.create(new NewNetwork().withName(networkName)
+                                                                            .withDriver(networkDriver)
                                                                             .withCheckDuplicate(true)));
         } catch (IOException e) {
             throw new ServerException(e.getLocalizedMessage(), e);
@@ -401,6 +416,9 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                             .withDoForcePull(doForcePullOnBuild)
                             .withMemoryLimit(service.getMemLimit())
                             .withMemorySwapLimit(-1)
+                            .withCpusetCpus(cpusetCpus)
+                            .withCpuPeriod(cpuPeriod)
+                            .withCpuQuota(cpuQuota)
                             .withBuildArgs(service.getBuild().getArgs());
 
             docker.buildImage(buildImageParams, progressMonitor);
@@ -489,17 +507,14 @@ public class MachineProviderImpl implements MachineInstanceProvider {
 
         HostConfig hostConfig = new HostConfig();
         hostConfig.withBinds(toArrayIfNotNull(service.getVolumes()))
-                  .withExtraHosts(allMachinesExtraHosts)
-                  .withPublishAllPorts(true)
                   .withMemorySwap(machineMemorySwap)
                   .withMemory(service.getMemLimit())
-                  .withPrivileged(privilegeMode)
                   .withNetworkMode(networkName)
                   .withLinks(toArrayIfNotNull(service.getLinks()))
                   .withPortBindings(service.getPorts()
                                            .stream()
-                                           .collect(Collectors.toMap(Function.identity(),
-                                                                     value -> new PortBinding[0])))
+                                           .collect(toMap(Function.identity(),
+                                                          value -> new PortBinding[0])))
                   .withVolumesFrom(toArrayIfNotNull(service.getVolumesFrom()));
 
         ContainerConfig config = new ContainerConfig();
@@ -507,7 +522,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
               .withExposedPorts(service.getExpose()
                                        .stream()
                                        .distinct()
-                                       .collect(Collectors.toMap(Function.identity(), value -> Collections.emptyMap())))
+                                       .collect(toMap(Function.identity(), value -> emptyMap())))
               .withHostConfig(hostConfig)
               .withCmd(toArrayIfNotNull(service.getCommand()))
               .withEntrypoint(toArrayIfNotNull(service.getEntrypoint()))
@@ -519,9 +534,26 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                               .map(entry -> entry.getKey() + "=" + entry.getValue())
                               .toArray(String[]::new));
 
+        addStaticDockerConfiguration(config);
+
         return docker.createContainer(CreateContainerParams.create(config)
                                                            .withContainerName(service.getContainerName()))
                      .getId();
+    }
+
+    private void addStaticDockerConfiguration(ContainerConfig config) {
+        config.getHostConfig()
+              .withPidsLimit(pidsLimit)
+              .withExtraHosts(allMachinesExtraHosts)
+              .withPrivileged(privilegedMode)
+              .withPublishAllPorts(true);
+        // CPU limits
+        config.getHostConfig()
+              .withCpusetCpus(cpusetCpus)
+              .withCpuQuota(cpuQuota)
+              .withCpuPeriod(cpuPeriod);
+        // Cgroup parent for custom limits
+        config.getHostConfig().setCgroupParent(parentCgroup);
     }
 
     private void addSystemWideContainerSettings(String workspaceId,
@@ -532,14 +564,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
         Map<String, String> env;
         if (isDev) {
             portsToExpose = devMachinePortsToExpose;
-
-            volumes = new ArrayList<>(devMachineSystemVolumes.size() + 1);
-            volumes.addAll(devMachineSystemVolumes);
-            String projectFolderVolume = format("%s:%s:Z",
-                                                workspaceFolderPathProvider.getPath(workspaceId),
-                                                projectFolderPath);
-            volumes.add(SystemInfo.isWindows() ? escapePath(projectFolderVolume)
-                                               : projectFolderVolume);
+            volumes = devMachineSystemVolumes;
 
             env = new HashMap<>(devMachineEnvVariables);
             env.put(DockerInstanceRuntimeInfo.CHE_WORKSPACE_ID, workspaceId);
@@ -644,7 +669,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
     protected Set<String> removeEmptyAndNullValues(Set<String> paths) {
         return paths.stream()
                     .filter(path -> !Strings.isNullOrEmpty(path))
-                    .collect(Collectors.toSet());
+                    .collect(toSet());
     }
 
     /**
@@ -656,33 +681,9 @@ public class MachineProviderImpl implements MachineInstanceProvider {
      * @return set of escaped path
      */
     private Set<String> escapePaths(Set<String> paths) {
-        return paths.stream().map(this::escapePath).collect(Collectors.toSet());
-    }
-
-    /**
-     * Escape path for Windows system with boot@docker according to rules given here :
-     * https://github.com/boot2docker/boot2docker/blob/master/README.md#virtualbox-guest-additions
-     *
-     * @param path
-     *         path to escape
-     * @return escaped path
-     */
-    @VisibleForTesting
-    String escapePath(String path) {
-        String esc;
-        if (path.indexOf(":") == 1) {
-            //check and replace only occurrence of ":" after disk label on Windows host (e.g. C:/)
-            // but keep other occurrences it can be marker for docker mount volumes
-            // (e.g. /path/dir/from/host:/name/of/dir/in/container                                               )
-            esc = path.replaceFirst(":", "").replace('\\', '/');
-            esc = Character.toLowerCase(esc.charAt(0)) + esc.substring(1); //letter of disk mark must be lower case
-        } else {
-            esc = path.replace('\\', '/');
-        }
-        if (!esc.startsWith("/")) {
-            esc = "/" + esc;
-        }
-        return esc;
+        return paths.stream()
+                    .map(windowsPathEscaper::escapePath)
+                    .collect(toSet());
     }
 
     /** Converts list to array if it is not null, otherwise returns null */

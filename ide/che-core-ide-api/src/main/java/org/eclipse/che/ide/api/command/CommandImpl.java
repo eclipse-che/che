@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,8 +15,6 @@ import org.eclipse.che.api.core.model.machine.Command;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
-
-import static java.util.Collections.unmodifiableMap;
 
 /**
  * Model of the command.
@@ -48,7 +46,7 @@ public class CommandImpl implements Command {
         this.name = name;
         this.commandLine = commandLine;
         this.type = type;
-        this.attributes = unmodifiableMap(attributes);
+        this.attributes = attributes;
     }
 
     /** Creates copy of the given {@link Command}. */
@@ -56,7 +54,7 @@ public class CommandImpl implements Command {
         this(command.getName(),
              command.getCommandLine(),
              command.getType(),
-             unmodifiableMap(command.getAttributes()));
+             command.getAttributes());
     }
 
     @Override
@@ -88,7 +86,7 @@ public class CommandImpl implements Command {
     }
 
     public void setAttributes(Map<String, String> attributes) {
-        this.attributes = unmodifiableMap(attributes);
+        this.attributes = attributes;
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.git.impl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.google.common.io.Files;
 
@@ -18,22 +17,19 @@ import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.git.GitConnection;
 import org.eclipse.che.api.git.GitConnectionFactory;
 import org.eclipse.che.api.git.exception.GitException;
-import org.eclipse.che.api.git.shared.AddRequest;
+import org.eclipse.che.api.git.params.AddParams;
+import org.eclipse.che.api.git.params.CheckoutParams;
+import org.eclipse.che.api.git.params.CommitParams;
 import org.eclipse.che.api.git.shared.Branch;
-import org.eclipse.che.api.git.shared.CheckoutRequest;
-import org.eclipse.che.api.git.shared.BranchCreateRequest;
-import org.eclipse.che.api.git.shared.BranchDeleteRequest;
-import org.eclipse.che.api.git.shared.BranchListRequest;
-import org.eclipse.che.api.git.shared.CommitRequest;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 
-import static org.eclipse.che.api.git.shared.BranchListRequest.LIST_LOCAL;
+import static java.util.Collections.singletonList;
+import static org.eclipse.che.api.git.shared.BranchListMode.LIST_LOCAL;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.git.impl.GitTestUtil.addFile;
 import static org.eclipse.che.git.impl.GitTestUtil.cleanupTestRepo;
@@ -63,13 +59,13 @@ public class BranchDeleteTest {
         //given
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
         addFile(connection, "README.txt", org.eclipse.che.git.impl.GitTestUtil.CONTENT);
-        connection.add(newDto(AddRequest.class).withFilepattern(ImmutableList.of("README.txt")));
-        connection.commit(newDto(CommitRequest.class).withMessage("Initial addd"));
-        connection.branchCreate(newDto(BranchCreateRequest.class).withName("newbranch"));
+        connection.add(AddParams.create(singletonList("README.txt")));
+        connection.commit(CommitParams.create("Initial addd"));
+        connection.branchCreate("newbranch", null);
 
         assertTrue(Sets.symmetricDifference(
                 Sets.newHashSet(
-                        connection.branchList(newDto(BranchListRequest.class).withListMode(LIST_LOCAL))),
+                        connection.branchList(LIST_LOCAL)),
                 Sets.newHashSet(
                         newDto(Branch.class).withName("refs/heads/master")
                                 .withDisplayName("master").withActive(true).withRemote(false),
@@ -78,11 +74,11 @@ public class BranchDeleteTest {
                 )
         ).isEmpty());
         //when
-        connection.branchDelete(newDto(BranchDeleteRequest.class).withName("newbranch").withForce(false));
+        connection.branchDelete("newbranch", false);
         //then
         assertTrue(Sets.symmetricDifference(
                 Sets.newHashSet(
-                        connection.branchList(newDto(BranchListRequest.class).withListMode(LIST_LOCAL))),
+                        connection.branchList(LIST_LOCAL)),
                 Sets.newHashSet(
                         newDto(Branch.class).withName("refs/heads/master")
                                 .withDisplayName("master").withActive(true).withRemote(false))
@@ -95,22 +91,22 @@ public class BranchDeleteTest {
         //given
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
         addFile(connection, "README.txt", org.eclipse.che.git.impl.GitTestUtil.CONTENT);
-        connection.add(newDto(AddRequest.class).withFilepattern(ImmutableList.of("README.txt")));
-        connection.commit(newDto(CommitRequest.class).withMessage("Initial addd"));
+        connection.add(AddParams.create(singletonList("README.txt")));
+        connection.commit(CommitParams.create("Initial addd"));
         //create new branch and make a commit
-        connection.checkout(newDto(CheckoutRequest.class).withName("newbranch").withCreateNew(true));
+        connection.checkout(CheckoutParams.create("newbranch").withCreateNew(true));
         addFile(connection, "newfile", "new file content");
-        connection.add(newDto(AddRequest.class).withFilepattern(Arrays.asList(".")));
-        connection.commit(newDto(CommitRequest.class).withMessage("second commit"));
-        connection.checkout(newDto(CheckoutRequest.class).withName("master"));
+        connection.add(AddParams.create(singletonList(".")));
+        connection.commit(CommitParams.create("second commit"));
+        connection.checkout(CheckoutParams.create("master"));
 
         //when
-        connection.branchDelete(newDto(BranchDeleteRequest.class).withName("newbranch").withForce(true));
+        connection.branchDelete("newbranch", true);
 
         //then
         assertTrue(Sets.symmetricDifference(
                 Sets.newHashSet(
-                        connection.branchList(newDto(BranchListRequest.class).withListMode(LIST_LOCAL))),
+                        connection.branchList(LIST_LOCAL)),
                 Sets.newHashSet(
                                 newDto(Branch.class).withName("refs/heads/master")
                                         .withDisplayName("master").withActive(true).withRemote(false)
@@ -125,15 +121,15 @@ public class BranchDeleteTest {
         //given
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
         addFile(connection, "README.txt", org.eclipse.che.git.impl.GitTestUtil.CONTENT);
-        connection.add(newDto(AddRequest.class).withFilepattern(ImmutableList.of("README.txt")));
-        connection.commit(newDto(CommitRequest.class).withMessage("Initial addd"));
+        connection.add(AddParams.create(singletonList("README.txt")));
+        connection.commit(CommitParams.create("Initial addd"));
         //create new branch and make a commit
-        connection.checkout(newDto(CheckoutRequest.class).withName("newbranch").withCreateNew(true));
+        connection.checkout(CheckoutParams.create("newbranch").withCreateNew(true));
         addFile(connection, "newfile", "new file content");
-        connection.add(newDto(AddRequest.class).withFilepattern(Arrays.asList(".")));
-        connection.commit(newDto(CommitRequest.class).withMessage("second commit"));
-        connection.checkout(newDto(CheckoutRequest.class).withName("master"));
+        connection.add(AddParams.create(singletonList(".")));
+        connection.commit(CommitParams.create("second commit"));
+        connection.checkout(CheckoutParams.create("master"));
 
-        connection.branchDelete(newDto(BranchDeleteRequest.class).withName("newbranch").withForce(false));
+        connection.branchDelete("newbranch", false);
     }
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.machine.node;
 
-import org.eclipse.che.api.machine.server.exception.MachineException;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.machine.server.spi.InstanceNode;
 
 /**
@@ -22,22 +22,24 @@ public interface DockerNode extends InstanceNode {
     /**
      * Bind the whole workspace on the Node.
      *
-     * @throws MachineException
+     * @throws ServerException
      *         if error occurs on binding
      */
-    void bindWorkspace() throws MachineException;
+    void bindWorkspace() throws ServerException;
 
     /**
      * Unbind the workspace on Node.
      *
-     * @throws MachineException
+     * @throws ServerException
      *         if error occurs on binding
      */
-    void unbindWorkspace() throws MachineException;
-
-    @Override
-    String getProjectsFolder();
+    void unbindWorkspace() throws ServerException;
 
     @Override
     String getHost();
+
+    /**
+     * Returns IP of the node where container is deployed.
+     */
+    String getIp();
 }

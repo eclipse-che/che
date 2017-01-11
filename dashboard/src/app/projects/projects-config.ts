@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,8 +24,6 @@ import {CreateProjectSamples} from './create-project/samples/create-project-samp
 import {CreateProjectWorkspacesController} from './create-project/workspaces/create-project-workspaces.controller';
 import {CreateProjectWorkspaces} from './create-project/workspaces/create-project-workspaces.directive';
 
-import {CreateProjectSamplesFilter} from './create-project/samples/create-project-samples.filter';
-import {CreateProjectSamplesNameFilter} from './create-project/samples/create-project-samples-name.filter';
 import {CreateProjectSamplesTagFilter} from './create-project/samples/create-project-samples-tag.filter';
 
 import {CreateProjectZip} from './create-project/zip/create-project-zip.directive';
@@ -37,10 +35,7 @@ import {ProjectItemCtrl} from './list-projects/project-item/project-item.control
 
 export class ProjectsConfig {
 
-  constructor(register) {
-
-    new CreateProjectSamplesFilter(register);
-    new CreateProjectSamplesNameFilter(register);
+  constructor(register: che.IRegisterService) {
     new CreateProjectSamplesTagFilter(register);
 
 

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2012-2016 Codenvy, S.A.
+# Copyright (c) 2012-2017 Codenvy, S.A.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
@@ -20,8 +20,18 @@ CHE_DIR=$HOME/che
 LS_DIR=${CHE_DIR}/ls-json
 LS_LAUNCHER=${LS_DIR}/launch.sh
 
-LINUX_TYPE=$(cat /etc/os-release | grep ^ID= | tr '[:upper:]' '[:lower:]')
-LINUX_VERSION=$(cat /etc/os-release | grep ^VERSION_ID=)
+if [ -f /etc/centos-release ]; then
+    FILE="/etc/centos-release"
+    LINUX_TYPE=$(cat $FILE | awk '{print $1}')
+ elif [ -f /etc/redhat-release ]; then
+    FILE="/etc/redhat-release"
+    LINUX_TYPE=$(cat $FILE | cut -c 1-8)
+ else
+    FILE="/etc/os-release"
+    LINUX_TYPE=$(cat $FILE | grep ^ID= | tr '[:upper:]' '[:lower:]')
+    LINUX_VERSION=$(cat $FILE | grep ^VERSION_ID=)
+fi
+
 MACHINE_TYPE=$(uname -m)
 
 mkdir -p ${CHE_DIR}
@@ -34,6 +44,18 @@ mkdir -p ${LS_DIR}
 # Red Hat Enterprise Linux 7
 ############################
 if echo ${LINUX_TYPE} | grep -qi "rhel"; then
+    test "${PACKAGES}" = "" || {
+        ${SUDO} yum install ${PACKAGES};
+    }
+
+    command -v nodejs >/dev/null 2>&1 || {
+        curl --silent --location https://rpm.nodesource.com/setup_6.x | ${SUDO} bash -;
+        ${SUDO} yum -y install nodejs;
+    }
+
+# Red Hat Enterprise Linux 6
+############################
+elif echo ${LINUX_TYPE} | grep -qi "Red Hat"; then
     test "${PACKAGES}" = "" || {
         ${SUDO} yum install ${PACKAGES};
     }
@@ -90,7 +112,7 @@ elif echo ${LINUX_TYPE} | grep -qi "debian"; then
 # Fedora 23
 ###########
 elif echo ${LINUX_TYPE} | grep -qi "fedora"; then
-    PACKAGES=${PACKAGES}" procps-ng"
+    command -v ps >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" procps-ng"; }
     test "${PACKAGES}" = "" || {
         ${SUDO} dnf -y install ${PACKAGES};
     }
@@ -127,7 +149,7 @@ elif echo ${LINUX_TYPE} | grep -qi "opensuse"; then
 
 else
     >&2 echo "Unrecognized Linux Type"
-    >&2 cat /etc/os-release
+    >&2 cat $FILE
     exit 1
 fi
 

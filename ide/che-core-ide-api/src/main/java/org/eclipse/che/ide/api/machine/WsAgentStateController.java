@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,8 +33,8 @@ import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.RestServiceInfo;
 import org.eclipse.che.ide.rest.StringUnmarshaller;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
+import org.eclipse.che.ide.util.browser.BrowserUtils;
 import org.eclipse.che.ide.util.loging.Log;
-import org.eclipse.che.ide.websocket.MachineMessageBus;
 import org.eclipse.che.ide.websocket.MessageBus;
 import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.eclipse.che.ide.websocket.events.ConnectionClosedHandler;
@@ -45,6 +45,7 @@ import org.eclipse.che.ide.websocket.events.WebSocketClosedEvent;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.ide.api.machine.WsAgentState.STARTED;
@@ -91,13 +92,9 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
         this.availableServices = new ArrayList<>();
     }
 
-    /**
-     * Initialize state of the agent.
-     *
-     * @param devMachine
-     *         development machine instance
-     */
     public void initialize(DevMachine devMachine) {
+        checkNotNull(devMachine, "Developer machine should not be a null");
+
         this.devMachine = devMachine;
         this.state = STOPPED;
         loader.show(LoaderPresenter.Phase.STARTING_WORKSPACE_AGENT);
@@ -139,7 +136,6 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
         return state;
     }
 
-    /** Returns instance of {@link MachineMessageBus}. */
     public Promise<MessageBus> getMessageBus() {
         return AsyncPromiseHelper.createFromAsyncRequest(new AsyncPromiseHelper.RequestCall<MessageBus>() {
             @Override
@@ -208,24 +204,45 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
     private void checkStateOfWsAgent(WsAgentHealthStateDto agentHealthStateDto) {
         final int statusCode = agentHealthStateDto.getCode();
         final String infoWindowTitle = "Workspace Agent Not Responding";
-        final ConfirmCallback restartCallback = new StopCallback();
+        final ConfirmCallback stopCallback = new StopCallback(false);
+        final ConfirmCallback stopAndReloadCallback = new StopCallback(true);
 
         if (statusCode == 200) {
-            dialogFactory.createMessageDialog(infoWindowTitle,
-                                              "Our workspace agent is no longer responding. To fix the problem, verify you have a" +
-                                              " good network connection and restart the workspace.",
-                                              restartCallback).show();
+            dialogFactory.createChoiceDialog(infoWindowTitle,
+                                             "Workspace agent is no longer responding. To fix the problem, verify you have a" +
+                                             " good network connection and restart the workspace.",
+                                             "Restart",
+                                             "Close",
+                                             stopAndReloadCallback,
+                                             stopCallback).show();
         } else {
-            dialogFactory.createMessageDialog(infoWindowTitle,
-                                              "Our workspace agent is no longer responding. To fix the problem, restart the workspace.",
-                                              restartCallback).show();
+            dialogFactory.createChoiceDialog(infoWindowTitle,
+                                             "Workspace agent is no longer responding. To fix the problem, restart the workspace.",
+                                             "Restart",
+                                             "Close",
+                                             stopAndReloadCallback,
+                                             stopCallback).show();
         }
     }
 
     private class StopCallback implements ConfirmCallback {
+
+        private final boolean reload;
+
+        public StopCallback(boolean reload) {
+            this.reload = reload;
+        }
+
         @Override
         public void accepted() {
-            workspaceServiceClient.stop(devMachine.getWorkspaceId());
+            workspaceServiceClient.stop(devMachine.getWorkspaceId()).then(new Operation<Void>() {
+                @Override
+                public void apply(Void arg) throws OperationException {
+                    if (reload) {
+                        BrowserUtils.reloadPage(false);
+                    }
+                }
+            });
         }
     }
 

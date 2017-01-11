@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -65,9 +65,12 @@ public class RecipeDownloader {
         try {
             UriBuilder targetUriBuilder = UriBuilder.fromUri(location);
             // add user token to be able to download user's private recipe
-            final String apiEndPointHost = apiEndpoint.getHost();
-            final String host = targetUriBuilder.build().getHost();
-            if (apiEndPointHost.equals(host)) {
+            final URI recipeUri = targetUriBuilder.build();
+            if (!recipeUri.isAbsolute() && recipeUri.getHost() == null) {
+                targetUriBuilder.scheme(apiEndpoint.getScheme())
+                                .host(apiEndpoint.getHost())
+                                .port(apiEndpoint.getPort())
+                                .replacePath(apiEndpoint.getPath() + location);
                 if (EnvironmentContext.getCurrent().getSubject() != null
                     && EnvironmentContext.getCurrent().getSubject().getToken() != null) {
                     targetUriBuilder.queryParam("token", EnvironmentContext.getCurrent().getSubject().getToken());
@@ -105,9 +108,12 @@ public class RecipeDownloader {
         try {
             UriBuilder targetUriBuilder = UriBuilder.fromUri(location);
             // add user token to be able to download user's private recipe
-            final String apiEndPointHost = apiEndpoint.getHost();
-            final String host = targetUriBuilder.build().getHost();
-            if (apiEndPointHost.equals(host)) {
+            final URI recipeUri = targetUriBuilder.build();
+            if (!recipeUri.isAbsolute() && recipeUri.getHost() == null) {
+                targetUriBuilder.scheme(apiEndpoint.getScheme())
+                                .host(apiEndpoint.getHost())
+                                .port(apiEndpoint.getPort())
+                                .replacePath(apiEndpoint.getPath() + location);
                 if (EnvironmentContext.getCurrent().getSubject() != null
                     && EnvironmentContext.getCurrent().getSubject().getToken() != null) {
                     targetUriBuilder.queryParam("token", EnvironmentContext.getCurrent().getSubject().getToken());

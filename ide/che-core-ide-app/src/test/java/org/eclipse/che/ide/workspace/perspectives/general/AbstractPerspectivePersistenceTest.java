@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,6 +39,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Matchers.anyString;
@@ -50,6 +55,7 @@ import static org.mockito.Mockito.when;
  */
 @RunWith(GwtMockitoTestRunner.class)
 public class AbstractPerspectivePersistenceTest {
+
     //constructor mocks
     @Mock
     private PerspectiveViewImpl        view;
@@ -90,7 +96,6 @@ public class AbstractPerspectivePersistenceTest {
     @Mock
     private Provider<PartPresenter> partProvider;
 
-
     private AbstractPerspective perspective;
 
     @Before
@@ -116,7 +121,7 @@ public class AbstractPerspectivePersistenceTest {
 
         perspective =
                 new AbstractPerspectiveTest.DummyPerspective(view, stackPresenterFactory, partStackViewFactory, controllerFactory, eventBus,
-                                                             partStackPresenter, dynaProvider);
+                                                             null, partStackPresenter, dynaProvider);
         perspective.onActivePartChanged(new ActivePartChangedEvent(activePart));
     }
 
@@ -146,28 +151,51 @@ public class AbstractPerspectivePersistenceTest {
     @Test
     public void shouldRestorePartStackSize() throws Exception {
         JsonObject state = Json.createObject();
-        JsonObject parts = Json.createObject();
-        state.put("PART_STACKS", parts);
-        JsonObject partStack = Json.createObject();
-        parts.put("INFORMATION", partStack);
-        partStack.put("SIZE", 42);
+
+            JsonObject parts = Json.createObject();
+            state.put("PART_STACKS", parts);
+
+                JsonObject partStack = Json.createObject();
+                parts.put("INFORMATION", partStack);
+
+                    JsonArray partsArray = Json.createArray();
+                    partStack.put("PARTS", partsArray);
+
+                        JsonObject part = Json.createObject();
+                        partsArray.set(0, part);
+                        part.put("CLASS", "foo.Bar");
+
+                    partStack.put("SIZE", 142);
+
+        // partStackPresenter.getParts() must return non empty list
+        final List<PartPresenter> partPresenters = new ArrayList<>();
+        partPresenters.add(partPresenter);
+        when(partStackPresenter.getParts()).thenAnswer(new Answer<List<? extends PartPresenter>>() {
+            @Override
+            public List<? extends PartPresenter> answer(InvocationOnMock invocationOnMock) throws Throwable {
+                return partPresenters;
+            }
+        });
 
         perspective.loadState(state);
 
-        verify(workBenchController).setSize(42d);
-
+        verify(workBenchController).setSize(142d);
     }
 
     @Test
     public void shouldRestoreHiddenPartStackState() throws Exception {
         JsonObject state = Json.createObject();
-        JsonObject parts = Json.createObject();
-        state.put("PART_STACKS", parts);
-        JsonObject partStack = Json.createObject();
-        parts.put("INFORMATION", partStack);
-        partStack.put("HIDDEN", true);
+
+            JsonObject parts = Json.createObject();
+            state.put("PART_STACKS", parts);
+
+                JsonObject partStack = Json.createObject();
+                parts.put("INFORMATION", partStack);
+
+                partStack.put("HIDDEN", true);
 
         perspective.loadState(state);
+
         verify(workBenchController).setHidden(true);
     }
 
@@ -194,6 +222,6 @@ public class AbstractPerspectivePersistenceTest {
         verify(partProvider).get();
 
         verify(partStackPresenter).addPart(partPresenter);
-
     }
+
 }

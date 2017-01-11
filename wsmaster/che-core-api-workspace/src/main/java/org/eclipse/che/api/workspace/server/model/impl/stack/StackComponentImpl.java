@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.eclipse.che.api.workspace.server.model.impl.stack;
 import org.eclipse.che.api.workspace.shared.stack.StackComponent;
 
 import javax.persistence.Basic;
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import java.util.Objects;
 
@@ -24,10 +25,10 @@ import java.util.Objects;
 @Embeddable
 public class StackComponentImpl implements StackComponent {
 
-    @Basic
+    @Column(name = "name")
     private String name;
 
-    @Basic
+    @Column(name = "version")
     private String version;
 
     public StackComponentImpl() {}

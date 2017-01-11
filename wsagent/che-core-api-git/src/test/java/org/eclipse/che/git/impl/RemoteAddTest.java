@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.git.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.google.common.io.Files;
 
@@ -17,13 +18,9 @@ import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.git.GitConnection;
 import org.eclipse.che.api.git.GitConnectionFactory;
 import org.eclipse.che.api.git.exception.GitException;
+import org.eclipse.che.api.git.params.PullParams;
+import org.eclipse.che.api.git.params.RemoteAddParams;
 import org.eclipse.che.api.git.shared.Branch;
-import org.eclipse.che.api.git.shared.BranchCreateRequest;
-import org.eclipse.che.api.git.shared.BranchListRequest;
-import org.eclipse.che.api.git.shared.InitRequest;
-import org.eclipse.che.api.git.shared.PullRequest;
-import org.eclipse.che.api.git.shared.RemoteAddRequest;
-import org.eclipse.che.api.git.shared.RemoteListRequest;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -31,8 +28,8 @@ import org.testng.annotations.Test;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Arrays;
 
+import static org.eclipse.che.api.git.shared.BranchListMode.LIST_REMOTE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.git.impl.GitTestUtil.cleanupTestRepo;
 import static org.eclipse.che.git.impl.GitTestUtil.connectToGitRepositoryWithContent;
@@ -64,11 +61,11 @@ public class RemoteAddTest {
     public void testSimpleRemoteAdd(GitConnectionFactory connectionFactory) throws GitException, IOException {
         //given
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
-        int beforeCount = connection.remoteList(newDto(RemoteListRequest.class)).size();
+        int beforeCount = connection.remoteList(null, false).size();
         //when
-        connection.remoteAdd(newDto(RemoteAddRequest.class).withName("origin").withUrl("some.url"));
+        connection.remoteAdd(RemoteAddParams.create("origin", "some.url"));
         //then
-        int afterCount = connection.remoteList(newDto(RemoteListRequest.class)).size();
+        int afterCount = connection.remoteList(null, false).size();
         assertEquals(afterCount, beforeCount + 1);
     }
 
@@ -77,26 +74,23 @@ public class RemoteAddTest {
             throws GitException, URISyntaxException, IOException, UnauthorizedException {
         //given
         GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
-        connection.branchCreate(newDto(BranchCreateRequest.class).withName("b1"));
-        connection.branchCreate(newDto(BranchCreateRequest.class).withName("b2"));
-        connection.branchCreate(newDto(BranchCreateRequest.class).withName("b3"));
+        connection.branchCreate("b1", null);
+        connection.branchCreate("b2", null);
+        connection.branchCreate("b3", null);
 
         GitConnection connection2 = connectionFactory.getConnection(remoteRepo.getAbsolutePath());
-        connection2.init(newDto(InitRequest.class).withBare(false));
+        connection2.init(false);
         //when
         //add remote tracked only to b1 and b3 branches.
-        RemoteAddRequest remoteAddRequest = newDto(RemoteAddRequest.class)
-                .withName("origin")
-                .withUrl(connection.getWorkingDir().getAbsolutePath());
-        remoteAddRequest.setBranches(Arrays.asList("b1", "b3"));
-        connection2.remoteAdd(remoteAddRequest);
+        RemoteAddParams params = RemoteAddParams.create("origin", connection.getWorkingDir().getAbsolutePath())
+                                                .withBranches(ImmutableList.of("b1", "b3"));
+        connection2.remoteAdd(params);
         //then
         //make pull
-        connection2.pull(newDto(PullRequest.class).withRemote("origin"));
+        connection2.pull(PullParams.create("origin"));
 
         assertTrue(Sets.symmetricDifference(
-                Sets.newHashSet(connection2.branchList(newDto(BranchListRequest.class)
-                                                               .withListMode(BranchListRequest.LIST_REMOTE))),
+                Sets.newHashSet(connection2.branchList(LIST_REMOTE)),
                 Sets.newHashSet(newDto(Branch.class).withName("refs/remotes/origin/b1")
                                                     .withDisplayName("origin/b1")
                                                     .withActive(false)

@@ -14,14 +14,18 @@
 
 package org.eclipse.che.ide.ui;
 
+import elemental.dom.Element;
 import elemental.dom.Node;
 import elemental.events.Event;
 import elemental.events.EventListener;
 import elemental.events.EventRemover;
 import elemental.events.EventTarget;
 import elemental.events.MouseEvent;
-import elemental.dom.Element;
 import elemental.util.Timer;
+
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.CssResource;
 
 import org.eclipse.che.ide.ui.menu.AutoHideComponent;
 import org.eclipse.che.ide.ui.menu.AutoHideView;
@@ -30,9 +34,6 @@ import org.eclipse.che.ide.util.AnimationController;
 import org.eclipse.che.ide.util.HoverController;
 import org.eclipse.che.ide.util.dom.Elements;
 import org.eclipse.che.ide.util.loging.Log;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.resources.client.ClientBundle;
-import com.google.gwt.resources.client.CssResource;
 
 import java.util.ArrayList;
 import java.util.List;

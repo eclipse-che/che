@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,8 +40,8 @@ public class SubPanelPresenter implements SubPanel, SubPanelView.ActionDelegate 
     private final List<WidgetToShow>                    widgets;
     private final Map<IsWidget, WidgetRemovingListener> removingListeners;
 
-    private FocusListener focusListener;
-
+    private FocusListener                               focusListener;
+    private DoubleClickListener                         doubleClickListener;
 
     @AssistedInject
     public SubPanelPresenter(SubPanelFactory subPanelFactory, SubPanelViewFactory subPanelViewFactory) {
@@ -81,6 +81,7 @@ public class SubPanelPresenter implements SubPanel, SubPanelView.ActionDelegate 
     public void splitHorizontally() {
         final SubPanel subPanel = subPanelFactory.newPanel(this);
         subPanel.setFocusListener(focusListener);
+        subPanel.setDoubleClickListener(doubleClickListener);
         view.splitHorizontally(subPanel.getView());
     }
 
@@ -88,6 +89,7 @@ public class SubPanelPresenter implements SubPanel, SubPanelView.ActionDelegate 
     public void splitVertically() {
         final SubPanel subPanel = subPanelFactory.newPanel(this);
         subPanel.setFocusListener(focusListener);
+        subPanel.setDoubleClickListener(doubleClickListener);
         view.splitVertically(subPanel.getView());
     }
 
@@ -135,8 +137,18 @@ public class SubPanelPresenter implements SubPanel, SubPanelView.ActionDelegate 
     }
 
     @Override
+    public void setDoubleClickListener(DoubleClickListener listener) {
+        doubleClickListener = listener;
+    }
+
+    @Override
     public void onWidgetFocused(IsWidget widget) {
         focusListener.focusGained(this, widget);
+    }
+
+    @Override
+    public void onWidgetDoubleClicked(IsWidget widget) {
+        doubleClickListener.onDoubleClicked(this, widget);
     }
 
     @Override
@@ -146,4 +158,5 @@ public class SubPanelPresenter implements SubPanel, SubPanelView.ActionDelegate 
             listener.onWidgetRemoving(removeCallback);
         }
     }
+
 }

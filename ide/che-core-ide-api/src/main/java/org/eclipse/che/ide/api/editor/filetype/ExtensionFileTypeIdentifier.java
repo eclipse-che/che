@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,7 +33,7 @@ public class ExtensionFileTypeIdentifier implements FileTypeIdentifier {
         final String filename = file.getName();
         if (filename != null) {
             final int dotPos = filename.lastIndexOf('.');
-            if (dotPos < 1) { // either -1 (not found) or 0 (first position, for example .project or .codenvy etc.
+            if (dotPos < 1) { // either -1 (not found) or 0 (first position, for example .project or .che etc.
                 Log.debug(ExtensionFileTypeIdentifier.class, "File name has no suffix ");
                 return null;
             }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,12 +24,14 @@ import java.util.List;
 /**
  * Part is a main UI block of the IDE.
  *
- * @author <a href="mailto:nzamosenchuk@exoplatform.com">Nikolay Zamosenchuk</a>
+ * @author Nikolay Zamosenchuk
  * @author Stéphane Daviet
  */
 public interface PartPresenter extends Presenter {
+
     /** The property id for <code>getTitle</code>, <code>getTitleImage</code> and <code>getTitleToolTip</code>. */
     int TITLE_PROPERTY     = 0x001;
+
     /** The property id for <code>getSelection</code>. */
     int SELECTION_PROPERTY = 0x002;
 
@@ -47,9 +49,14 @@ public interface PartPresenter extends Presenter {
 
     List<String> getRules();
 
-    void setVisible(boolean visible);
-
     IsWidget getView();
+
+    /**
+     * Returns corresponding part stack.
+     *
+     * @return
+     */
+    PartStack getPartStack();
 
     /**
      * Returns the title SVG image resource of this part. If this value changes the part must fire a property listener event with
@@ -124,4 +131,5 @@ public interface PartPresenter extends Presenter {
      *         a property listener
      */
     void removePropertyListener(@NotNull PropertyListener listener);
+
 }

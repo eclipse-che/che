@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,6 +22,7 @@ import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.dialogs.MessageDialog;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.resources.Container;
+import org.eclipse.che.plugin.maven.client.MavenLocalizationConstant;
 import org.eclipse.che.plugin.maven.shared.MavenAttributes;
 import org.junit.Before;
 import org.junit.Test;
@@ -52,13 +53,15 @@ public class MavenPagePresenterTest {
     private final static String TEXT = "to be or not to be";
 
     @Mock
-    private MavenPageView view;
+    private MavenPageView             view;
     @Mock
-    private EventBus      eventBus;
+    private EventBus                  eventBus;
     @Mock
-    private DialogFactory dialogFactory;
+    private DialogFactory             dialogFactory;
     @Mock
-    private AppContext    appContext;
+    private AppContext                appContext;
+    @Mock
+    private MavenLocalizationConstant localization;
 
     @InjectMocks
     private MavenPagePresenter mavenPagePresenter;
@@ -106,11 +109,13 @@ public class MavenPagePresenterTest {
 
     @Test
     public void warningWindowShouldBeShowedIfProjectEstimationHasSomeError() throws Exception {
+        final String dialogTitle = "Not valid Maven project";
         PromiseError promiseError = mock(PromiseError.class);
         MessageDialog messageDialog = mock(MessageDialog.class);
         context.put(WIZARD_MODE_KEY, UPDATE.toString());
 
         when(promiseError.getMessage()).thenReturn(TEXT);
+        when(localization.mavenPageErrorDialogTitle()).thenReturn(dialogTitle);
         when(dialogFactory.createMessageDialog(anyString(), anyString(), anyObject())).thenReturn(messageDialog);
         when(sourceEstimationPromise.then(Matchers.<Operation<SourceEstimation>>anyObject())).thenReturn(sourceEstimationPromise);
         when(sourceEstimationPromise.catchError(Matchers.<Operation<PromiseError>>anyObject())).thenReturn(sourceEstimationPromise);
@@ -124,7 +129,7 @@ public class MavenPagePresenterTest {
         containerArgumentErrorCapture.getValue().apply(promiseError);
 
         verify(promiseError).getMessage();
-        verify(dialogFactory).createMessageDialog("Not valid Maven project", TEXT, null);
+        verify(dialogFactory).createMessageDialog(dialogTitle, TEXT, null);
         verify(messageDialog).show();
     }
 

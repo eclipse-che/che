@@ -35,7 +35,8 @@ module.exports = function(config) {
     autoWatch: false,
 
     ngHtml2JsPreprocessor: {
-      stripPrefix: conf.paths.src + '/'
+      stripPrefix: conf.paths.src + '/',
+      moduleName: 'userDashboard'
     },
 
     logLevel: 'WARN',

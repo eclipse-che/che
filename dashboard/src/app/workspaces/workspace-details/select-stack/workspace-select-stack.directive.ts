@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,19 +15,22 @@
  * @author Oleksii Orel
  */
 export class WorkspaceSelectStack {
+  restrict: string = 'E';
+  templateUrl: string = 'app/workspaces/workspace-details/select-stack/workspace-select-stack.html';
+  replace: boolean = true;
+  bindToController: boolean = true;
+  controller: string = 'WorkspaceSelectStackController';
+  controllerAs: string = 'workspaceSelectStackCtrl';
+
+  scope: {
+    [propName: string]: string;
+  };
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
   constructor() {
-    this.restrict = 'E';
-    this.templateUrl = 'app/workspaces/workspace-details/select-stack/workspace-select-stack.html';
-    this.replace = true;
-    this.bindToController = true;
-    this.controller = 'WorkspaceSelectStackController';
-    this.controllerAs = 'workspaceSelectStackCtrl';
-
     // scope values
     this.scope = {
       tabName: '=cheTabName',

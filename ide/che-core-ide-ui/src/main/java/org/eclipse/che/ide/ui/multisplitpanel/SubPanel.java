@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -77,6 +77,12 @@ public interface SubPanel {
      */
     void setFocusListener(FocusListener listener);
 
+    /**
+     * Set the listener to be notified when some widget on
+     * this panel or on any child sub-panel was double clicked.
+     */
+    void setDoubleClickListener(DoubleClickListener listener);
+
     interface WidgetRemovingListener {
 
         /** Invoked when a widget is going to be removed. */
@@ -91,8 +97,15 @@ public interface SubPanel {
     }
 
     interface FocusListener {
-
         /** Invoked when a {@code widget} on a {@code panel} gains the focus. */
         void focusGained(SubPanel panel, IsWidget widget);
     }
+
+    interface DoubleClickListener {
+
+        /** Invoked when a {@code widget} on a {@code panel} was double clicked. */
+        void onDoubleClicked(SubPanel panel, IsWidget widget);
+
+    }
+
 }

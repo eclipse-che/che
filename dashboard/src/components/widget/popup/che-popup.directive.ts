@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,8 +20,8 @@
  * @description
  * `<che-popup>` defines popup component as wrapper for popup massages
  *
- * @param {string=} che-title the title of popup massage
- * @param {Function=} che-on-close close popup function
+ * @param {string=} title the title of popup massage
+ * @param {Function=} on-close close popup function
  *
  * @author Oleksii Orel
  */
@@ -44,8 +44,8 @@ export class ChePopup {
 
     // scope values
     this.scope = {
-      title: '@cheTitle',
-      onClose: '&cheOnClose'
+      title: '@',
+      onClose: '&'
     };
   }
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -31,6 +32,7 @@ public abstract class GdbProcess {
     private static final int    MAX_CAPACITY = 1000;
     private static final int    MAX_OUTPUT   = 4096;
 
+    protected       int                      pid;
     protected final Process                  process;
     protected final String                   outputSeparator;
     protected final BlockingQueue<GdbOutput> outputs;
@@ -46,6 +48,15 @@ public abstract class GdbProcess {
         outputReader = new OutputReader(commands[0] + " output reader");
         outputReader.setDaemon(true);
         outputReader.start();
+
+        try {
+            Field pidField = Thread.currentThread().getContextClassLoader().loadClass("java.lang.UNIXProcess").getDeclaredField("pid");
+            pidField.setAccessible(true);
+            pid = ((Number)pidField.get(process)).intValue();
+        } catch (Exception e) {
+            pid = -1;
+            LOG.error(e.getMessage(), e);
+        }
     }
 
     /**
@@ -54,7 +65,7 @@ public abstract class GdbProcess {
     protected void stop() {
         outputReader.interrupt();
         outputs.clear();
-        process.destroyForcibly();
+        process.destroy();
     }
 
     /**
@@ -140,5 +151,4 @@ public abstract class GdbProcess {
             return new String(buf, 0, read, StandardCharsets.UTF_8);
         }
     }
-
 }

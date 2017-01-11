@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,7 @@ import org.eclipse.che.api.debug.shared.dto.action.StartActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepIntoActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepOutActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepOverActionDto;
+import org.eclipse.che.api.debug.shared.dto.action.SuspendActionDto;
 import org.eclipse.che.api.debug.shared.model.action.Action;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.dto.shared.DTO;
@@ -86,6 +87,8 @@ public class DebuggerActionProvider implements MessageBodyReader<ActionDto> {
                 return DtoFactory.getInstance().createDtoFromJson(json, StepOutActionDto.class);
             case STEP_OVER:
                 return DtoFactory.getInstance().createDtoFromJson(json, StepOverActionDto.class);
+            case SUSPEND:
+                return DtoFactory.getInstance().createDtoFromJson(json, SuspendActionDto.class);
             default:
                 throw new IOException("Can't parse json. Unknown action type: "  + actionType);
         }

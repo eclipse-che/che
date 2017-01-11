@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,9 +12,10 @@ package org.eclipse.che.ide.api.git;
 
 import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.git.shared.Branch;
+import org.eclipse.che.api.git.shared.BranchListMode;
 import org.eclipse.che.api.git.shared.CheckoutRequest;
 import org.eclipse.che.api.git.shared.Commiters;
-import org.eclipse.che.api.git.shared.DiffRequest.DiffType;
+import org.eclipse.che.api.git.shared.DiffType;
 import org.eclipse.che.api.git.shared.GitUrlVendorInfo;
 import org.eclipse.che.api.git.shared.LogResponse;
 import org.eclipse.che.api.git.shared.MergeResult;
@@ -154,12 +155,12 @@ public interface GitServiceClient {
      * @param mode
      *         get remote branches
      * @param callback
-     * @deprecated use {@link #branchList(DevMachine, Path, String)}
+     * @deprecated use {@link #branchList(DevMachine, Path, BranchListMode)}
      */
     @Deprecated
     void branchList(DevMachine devMachine,
                     ProjectConfig project,
-                    @Nullable String mode,
+                    @Nullable BranchListMode mode,
                     AsyncRequestCallback<List<Branch>> callback);
 
     /**
@@ -173,7 +174,7 @@ public interface GitServiceClient {
      * @param mode
      *         get remote branches
      */
-    Promise<List<Branch>> branchList(DevMachine devMachine, Path project, String mode);
+    Promise<List<Branch>> branchList(DevMachine devMachine, Path project, BranchListMode mode);
 
     /**
      * Delete branch.
@@ -758,38 +759,53 @@ public interface GitServiceClient {
     Promise<Revision> commit(DevMachine devMachine, Path project, String message, Path[] files, boolean amend);
 
     /**
-     * Performs commit changes from index to repository. The result of the commit is represented by {@link Revision}, which is returned by
-     * callback in <code>onSuccess(Revision result)</code>. Sends request over WebSocket.
-     *
-     * @param devMachine
-     *         current machine
-     * @param projectConfig
-     *         project (root of GIT repository)
-     * @param all
-     *         automatically stage files that have been modified and deleted
-     * @param callback
-     *         callback for sending asynchronous response
-     * @deprecated use {@link #config(DevMachine, Path, List, boolean)}
-     */
-    @Deprecated
-    void config(DevMachine devMachine,
-                ProjectConfigDto projectConfig,
-                @Nullable List<String> entries,
-                boolean all,
-                AsyncRequestCallback<Map<String, String>> callback);
-
-    /**
-     * Performs commit changes from index to repository. The result of the commit is represented by {@link Revision}, which is returned by
-     * callback in <code>onSuccess(Revision result)</code>. Sends request over WebSocket.
+     * Performs commit changes from index to repository.
      *
      * @param devMachine
      *         current machine
      * @param project
      *         project (root of GIT repository)
+     * @param message
+     *         commit log message
      * @param all
      *         automatically stage files that have been modified and deleted
+     * @param files
+     *         the list of files that are committed, ignoring the index
+     * @param amend
+     *         indicates that previous commit must be overwritten
      */
-    Promise<Map<String, String>> config(DevMachine devMachine, Path project, List<String> entries, boolean all);
+    Promise<Revision> commit(DevMachine devMachine, Path project, String message, boolean all, Path[] files, boolean amend);
+
+    /**
+     * Get repository options.
+     *
+     * @param devMachine
+     *         current machine
+     * @param projectConfig
+     *         project (root of GIT repository)
+     * @param requestedConfig
+     *         list of config keys
+     * @param callback
+     *         callback for sending asynchronous response
+     * @deprecated use {@link #config(DevMachine, Path, List)}
+     */
+    @Deprecated
+    void config(DevMachine devMachine,
+                ProjectConfigDto projectConfig,
+                List<String> requestedConfig,
+                AsyncRequestCallback<Map<String, String>> callback);
+
+    /**
+     * Get repository options.
+     *
+     * @param devMachine
+     *         current machine
+     * @param project
+     *         project (root of GIT repository)
+     * @param requestedConfig
+     *         list of config keys
+     */
+    Promise<Map<String, String>> config(DevMachine devMachine, Path project, List<String> requestedConfig);
 
     /**
      * Compare two commits, get the diff for pointed file(s) or for the whole project in text format.
@@ -967,8 +983,10 @@ public interface GitServiceClient {
              AsyncRequestCallback<LogResponse> callback);
 
     /**
-     * Get log of commits. The result is the list of {@link Revision}, which is returned by callback in
-     * <code>onSuccess(Revision result)</code>.
+     * Get log of commits.
+     *
+     * Method is deprecated. Use {@link #log(DevMachine, Path, Path[], int, int, boolean)} to pass
+     * {@code skip} and {@code maxCount} parameters to limit the number of returning entries.
      *
      * @param devMachine
      *         current machine
@@ -979,7 +997,26 @@ public interface GitServiceClient {
      * @param plainText
      *         if <code>true</code> the loq response will be in text format
      */
-    Promise<LogResponse> log(DevMachine devMachine, Path project, Path[] fileFilter, boolean plainText);
+    @Deprecated
+    Promise<LogResponse> log(DevMachine devMachine, Path project, @Nullable Path[] fileFilter, boolean plainText);
+
+    /**
+     * Get log of commits.
+     *
+     * @param devMachine
+     *         current machine
+     * @param project
+     *         project (root of GIT repository)
+     * @param fileFilter
+     *         range of files to filter revisions list
+     * @param skip
+     *          the number of commits that will be skipped
+     * @param maxCount
+     *          the number of commits that will be returned
+     * @param plainText
+     *         if <code>true</code> the loq response will be in text format
+     */
+    Promise<LogResponse> log(DevMachine devMachine, Path project, @Nullable Path[] fileFilter, int skip, int maxCount, boolean plainText);
 
     /**
      * Merge the pointed commit with current HEAD.
@@ -1080,23 +1117,10 @@ public interface GitServiceClient {
      *         current machine
      * @param project
      *         project (root of GIT repository)
-     * @deprecated use {@link #status(DevMachine, ProjectConfig)}
-     */
-    @Deprecated
-    void status(DevMachine devMachine, ProjectConfigDto project, AsyncRequestCallback<Status> callback);
-
-    /**
-     * Returns the current working tree status.
-     *
-     * @param devMachine
-     *         current machine
-     * @param project
-     *         the project.
-     * @return the promise which either resolves working tree status or rejects with an error
      * @deprecated use {@link #getStatus(DevMachine, Path)}
      */
     @Deprecated
-    Promise<Status> status(DevMachine devMachine, ProjectConfig project);
+    void status(DevMachine devMachine, ProjectConfigDto project, AsyncRequestCallback<Status> callback);
 
     /**
      * Returns the current working tree status.

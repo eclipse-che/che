@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@ package org.eclipse.che.plugin.nodejsdbg.server;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.plugin.nodejsdbg.server.exception.NodeJsDebuggerException;
 import org.eclipse.che.plugin.nodejsdbg.server.exception.NodeJsDebuggerTerminatedException;
@@ -70,6 +71,8 @@ public class NodeJsDebugProcess implements NodeJsProcessObservable {
         processWriter = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
 
         executor = Executors.newScheduledThreadPool(1, new ThreadFactoryBuilder().setNameFormat("nodejs-debugger-%d")
+                                                                                 .setUncaughtExceptionHandler(
+                                                                                         LoggingUncaughtExceptionHandler.getInstance())
                                                                                  .setDaemon(true)
                                                                                  .build());
         executor.scheduleWithFixedDelay(new OutputReader(), 0, 100, TimeUnit.MILLISECONDS);

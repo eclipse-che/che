@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,12 +12,16 @@ package org.eclipse.che.api.workspace.server.model.impl;
 
 import org.eclipse.che.api.core.model.workspace.ServerConf2;
 
-import javax.persistence.Basic;
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.MapKeyColumn;
+import javax.persistence.Table;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -26,19 +30,25 @@ import java.util.Objects;
  * @author Alexander Garagatyi
  */
 @Entity(name = "ServerConf")
+@Table(name = "serverconf")
 public class ServerConf2Impl implements ServerConf2 {
 
     @Id
     @GeneratedValue
+    @Column(name = "id")
     private Long id;
 
-    @Basic
+    @Column(name = "port")
     private String port;
 
-    @Basic
+    @Column(name = "protocol")
     private String protocol;
 
     @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "serverconf_properties",
+                     joinColumns = @JoinColumn(name = "serverconf_id"))
+    @MapKeyColumn(name = "properties_key")
+    @Column(name = "properties")
     private Map<String, String> properties;
 
     public ServerConf2Impl() {}
@@ -92,24 +102,35 @@ public class ServerConf2Impl implements ServerConf2 {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ServerConf2Impl)) return false;
-        ServerConf2Impl that = (ServerConf2Impl)o;
-        return Objects.equals(port, that.port) &&
-               Objects.equals(protocol, that.protocol) &&
-               Objects.equals(properties, that.properties);
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof ServerConf2Impl)) {
+            return false;
+        }
+        final ServerConf2Impl that = (ServerConf2Impl)obj;
+        return Objects.equals(id, that.id)
+               && Objects.equals(port, that.port)
+               && Objects.equals(protocol, that.protocol)
+               && getProperties().equals(that.getProperties());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(port, protocol, properties);
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(id);
+        hash = 31 * hash + Objects.hashCode(port);
+        hash = 31 * hash + Objects.hashCode(protocol);
+        hash = 31 * hash + getProperties().hashCode();
+        return hash;
     }
 
     @Override
     public String toString() {
         return "ServerConf2Impl{" +
-               "port='" + port + '\'' +
+               "id=" + id +
+               ", port='" + port + '\'' +
                ", protocol='" + protocol + '\'' +
                ", properties=" + properties +
                '}';

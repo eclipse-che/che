@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -48,7 +48,7 @@ import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
 import org.eclipse.che.ide.api.resources.ResourceDelta;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
-import org.eclipse.che.ide.debug.dto.BreakpointDto;
+import org.eclipse.che.ide.api.debug.dto.StorableBreakpointDto;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.loging.Log;
@@ -119,7 +119,7 @@ public class BreakpointManagerImpl implements BreakpointManager,
 
         final VirtualFile activeFile = editor.getEditorInput().getFile();
 
-        List<Breakpoint> pathBreakpoints = breakpoints.get(activeFile.getPath());
+        List<Breakpoint> pathBreakpoints = breakpoints.get(activeFile.getLocation().toString());
         if (pathBreakpoints != null) {
             for (final Breakpoint breakpoint : pathBreakpoints) {
                 if (breakpoint.getLineNumber() == lineNumber) {
@@ -133,7 +133,7 @@ public class BreakpointManagerImpl implements BreakpointManager,
         if (isLineNotEmpty(activeFile, lineNumber)) {
             Breakpoint breakpoint = new Breakpoint(BREAKPOINT,
                                                    lineNumber,
-                                                   activeFile.getPath(),
+                                                   activeFile.getLocation().toString(),
                                                    activeFile,
                                                    false);
             addBreakpoint(breakpoint);
@@ -234,7 +234,7 @@ public class BreakpointManagerImpl implements BreakpointManager,
      * Indicates if line of code to add breakpoint at is executable.
      */
     private boolean isLineNotEmpty(final VirtualFile activeFile, int lineNumber) {
-        EditorPartPresenter editor = getEditorForFile(activeFile.getPath());
+        EditorPartPresenter editor = getEditorForFile(activeFile.getLocation().toString());
         if (editor instanceof TextEditor) {
             Document document = ((TextEditor)editor).getDocument();
             return !document.getLineContent(lineNumber).trim().isEmpty();
@@ -273,9 +273,9 @@ public class BreakpointManagerImpl implements BreakpointManager,
     }
 
     private void doSetCurrentBreakpoint(VirtualFile activeFile, int lineNumber) {
-        currentBreakpoint = new Breakpoint(Type.CURRENT, lineNumber, activeFile.getPath(), activeFile, true);
+        currentBreakpoint = new Breakpoint(Type.CURRENT, lineNumber, activeFile.getLocation().toString(), activeFile, true);
 
-        BreakpointRenderer breakpointRenderer = getBreakpointRendererForFile(activeFile.getPath());
+        BreakpointRenderer breakpointRenderer = getBreakpointRendererForFile(activeFile.getLocation().toString());
         if (breakpointRenderer != null) {
             breakpointRenderer.setLineActive(lineNumber, true);
         }
@@ -347,11 +347,11 @@ public class BreakpointManagerImpl implements BreakpointManager,
      */
     @Override
     public void onLineChange(final VirtualFile file, final int firstLine, final int linesAdded, final int linesRemoved) {
-        final List<Breakpoint> fileBreakpoints = breakpoints.get(file.getPath());
+        final List<Breakpoint> fileBreakpoints = breakpoints.get(file.getLocation().toString());
         final int delta = linesAdded - linesRemoved;
 
         if (fileBreakpoints != null) {
-            LOG.fine("Change in file with breakpoints " + file.getPath());
+            LOG.fine("Change in file with breakpoints " + file.getLocation().toString());
 
             final List<Breakpoint> toRemove = new ArrayList<>();
             final List<Breakpoint> toAdd = new ArrayList<>();
@@ -499,7 +499,7 @@ public class BreakpointManagerImpl implements BreakpointManager,
     private void preserveBreakpoints() {
         Storage localStorage = Storage.getLocalStorageIfSupported();
         if (localStorage != null) {
-            List<BreakpointDto> allDtoBreakpoints = new LinkedList<BreakpointDto>();
+            List<StorableBreakpointDto> allDtoBreakpoints = new LinkedList<StorableBreakpointDto>();
 
             List<Breakpoint> allBreakpoints = getBreakpointList();
             if (currentBreakpoint != null) {
@@ -507,7 +507,7 @@ public class BreakpointManagerImpl implements BreakpointManager,
             }
 
             for (Breakpoint breakpoint : allBreakpoints) {
-                BreakpointDto dto = dtoFactory.createDto(BreakpointDto.class);
+                StorableBreakpointDto dto = dtoFactory.createDto(StorableBreakpointDto.class);
                 dto.setType(breakpoint.getType());
                 dto.setPath(breakpoint.getPath());
                 dto.setLineNumber(breakpoint.getLineNumber());
@@ -547,11 +547,11 @@ public class BreakpointManagerImpl implements BreakpointManager,
             return;
         }
 
-        List<BreakpointDto> allDtoBreakpoints = dtoFactory.createListDtoFromJson(data, BreakpointDto.class);
+        List<StorableBreakpointDto> allDtoBreakpoints = dtoFactory.createListDtoFromJson(data, StorableBreakpointDto.class);
 
         Promise<Void> bpPromise = promises.resolve(null);
 
-        for (final BreakpointDto dto : allDtoBreakpoints) {
+        for (final StorableBreakpointDto dto : allDtoBreakpoints) {
             bpPromise.thenPromise(new Function<Void, Promise<Void>>() {
                 @Override
                 public Promise<Void> apply(Void ignored) throws FunctionException {

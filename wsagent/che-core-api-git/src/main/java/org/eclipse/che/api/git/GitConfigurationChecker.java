@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  *
  * Here we check that we have correct setting for git ignore.
  * Must be ignored files :
- *    .codenvy/misc.xml
+ *    .che/misc.xml
  *    .vfs/
  * like system files for Codenvy
  *
@@ -55,7 +55,7 @@ public class GitConfigurationChecker {
         GLOBAL_GITCONFIG_FILE_PATH = Paths.get(System.getProperty("user.home") + "/.gitconfig");
         DEFAULT_GITIGNORE_FILE_PATH = Paths.get(System.getProperty("user.home") + "/.gitignore_codenvy");
 
-        GITIGNORE_PATTERNS.add(Constants.CODENVY_DIR + "/");
+        GITIGNORE_PATTERNS.add(Constants.CHE_DIR + "/");
         GITIGNORE_PATTERNS.add(".che/");
         GITIGNORE_PATTERNS.add(".vfs/");
     }
@@ -65,7 +65,7 @@ public class GitConfigurationChecker {
         GLOBAL_GITCONFIG_FILE_PATH = globalGitconfigFilePath;
         DEFAULT_GITIGNORE_FILE_PATH = gitIgnoreFilePath;
 
-        GITIGNORE_PATTERNS.add(Constants.CODENVY_DIR + "/");
+        GITIGNORE_PATTERNS.add(Constants.CHE_DIR + "/");
         GITIGNORE_PATTERNS.add(".che/");
         GITIGNORE_PATTERNS.add(".vfs/");
     }

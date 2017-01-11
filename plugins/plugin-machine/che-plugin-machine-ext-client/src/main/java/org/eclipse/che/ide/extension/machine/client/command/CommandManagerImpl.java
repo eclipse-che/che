@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,7 +11,6 @@
 package org.eclipse.che.ide.extension.machine.client.command;
 
 import com.google.inject.Inject;
-import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.model.machine.Machine;
@@ -29,9 +28,9 @@ import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandPage;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
+import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
-import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandConsoleFactory;
@@ -60,11 +59,11 @@ public class CommandManagerImpl implements CommandManager {
     private final CommandTypeRegistry     commandTypeRegistry;
     private final AppContext              appContext;
     private final WorkspaceServiceClient  workspaceServiceClient;
-    private final MachineServiceClient    machineServiceClient;
     private final DtoFactory              dtoFactory;
     private final MacroProcessor          macroProcessor;
     private final CommandConsoleFactory   commandConsoleFactory;
     private final ProcessesPanelPresenter processesPanelPresenter;
+    private final ExecAgentCommandManager execAgentCommandManager;
 
     private final Map<String, CommandImpl>    commands;
     private final Set<CommandChangedListener> commandChangedListeners;
@@ -73,30 +72,23 @@ public class CommandManagerImpl implements CommandManager {
     public CommandManagerImpl(CommandTypeRegistry commandTypeRegistry,
                               AppContext appContext,
                               WorkspaceServiceClient workspaceServiceClient,
-                              MachineServiceClient machineServiceClient,
                               DtoFactory dtoFactory,
-                              EventBus eventBus,
                               MacroProcessor macroProcessor,
                               CommandConsoleFactory commandConsoleFactory,
-                              ProcessesPanelPresenter processesPanelPresenter) {
+                              ProcessesPanelPresenter processesPanelPresenter,
+                              ExecAgentCommandManager execAgentCommandManager) {
         this.commandTypeRegistry = commandTypeRegistry;
         this.appContext = appContext;
         this.workspaceServiceClient = workspaceServiceClient;
-        this.machineServiceClient = machineServiceClient;
         this.dtoFactory = dtoFactory;
         this.macroProcessor = macroProcessor;
         this.commandConsoleFactory = commandConsoleFactory;
         this.processesPanelPresenter = processesPanelPresenter;
+        this.execAgentCommandManager = execAgentCommandManager;
 
         commands = new HashMap<>();
         commandChangedListeners = new HashSet<>();
-
-        eventBus.addHandler(WorkspaceReadyEvent.getType(), new WorkspaceReadyEvent.WorkspaceReadyHandler() {
-            @Override
-            public void onWorkspaceReady(WorkspaceReadyEvent event) {
-                retrieveAllCommands();
-            }
-        });
+        retrieveAllCommands();
     }
 
     private void retrieveAllCommands() {
@@ -223,43 +215,26 @@ public class CommandManagerImpl implements CommandManager {
 
     @Override
     public void executeCommand(final CommandImpl command, final Machine machine) {
-        final String outputChannel = "process:output:" + UUID.uuid();
+        final String name = command.getName();
+        final String type = command.getType();
+        final String commandLine = command.getCommandLine();
+        final Map<String, String> attributes = command.getAttributes();
 
-        final CommandOutputConsole console = commandConsoleFactory.create(command, machine);
-        console.listenToOutput(outputChannel);
-        processesPanelPresenter.addCommandOutput(machine.getId(), console);
-
-        macroProcessor.expandMacros(command.getCommandLine()).then(new Operation<String>() {
+        macroProcessor.expandMacros(commandLine).then(new Operation<String>() {
             @Override
-            public void apply(String arg) throws OperationException {
-                final CommandImpl toExecute = new CommandImpl(command);
-                toExecute.setCommandLine(arg);
+            public void apply(String expandedCommandLine) throws OperationException {
+                CommandImpl expandedCommand = new CommandImpl(name, expandedCommandLine, type, attributes);
 
-                // if command line has not specified the shell attribute, use bash to be backward compliant for user commands
-                Map<String, String> attributes = toExecute.getAttributes();
-                if (attributes == null) {
-                    attributes = new HashMap<>(1);
-                    attributes.put("shell", "/bin/bash");
-                    toExecute.setAttributes(attributes);
-                } else if (!attributes.containsKey("shell")){
-                    attributes = new HashMap<>(attributes.size() + 1);
-                    attributes.put("shell", "/bin/bash");
-                    attributes.putAll(toExecute.getAttributes());
-                    toExecute.setAttributes(attributes);
-                }
+                final CommandOutputConsole console = commandConsoleFactory.create(expandedCommand, machine);
+                final String machineId = machine.getId();
 
-                Log.info(CommandManagerImpl.class, "Using shell " + toExecute.getAttributes().get("shell") + " for invoking command '" + command.getName() + "'");
+                processesPanelPresenter.addCommandOutput(machineId, console);
 
-                Promise<MachineProcessDto> processPromise = machineServiceClient.executeCommand(machine.getWorkspaceId(),
-                                                                                                machine.getId(),
-                                                                                                toExecute,
-                                                                                                outputChannel);
-                processPromise.then(new Operation<MachineProcessDto>() {
-                    @Override
-                    public void apply(MachineProcessDto process) throws OperationException {
-                        console.attachToProcess(process);
-                    }
-                });
+                execAgentCommandManager.startProcess(machineId, expandedCommand)
+                                       .thenIfProcessStartedEvent(console.getProcessStartedOperation())
+                                       .thenIfProcessDiedEvent(console.getProcessDiedOperation())
+                                       .thenIfProcessStdOutEvent(console.getStdOutOperation())
+                                       .thenIfProcessStdErrEvent(console.getStdErrOperation());
             }
         });
     }

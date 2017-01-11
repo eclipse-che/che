@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.editor.codeassist;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
 
 import org.eclipse.che.ide.api.icon.Icon;
@@ -28,10 +29,10 @@ public interface CompletionProposal {
     /**
      * Returns optional additional information about the proposal. The additional information will be presented to assist the user
      * in deciding if the selected proposal is the desired choice.
-     *
-     * @return the additional information or <code>null</code>
+     * 
+     * @param callback a callback to return a widget with additional information
      */
-    Widget getAdditionalProposalInfo();
+    void getAdditionalProposalInfo(AsyncCallback<Widget> callback);
 
     /**
      * Returns the string to be displayed in the list of completion proposals.

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,7 +24,8 @@ import org.eclipse.che.plugin.svn.shared.Depth;
  */
 public interface PropertyEditorView extends View<PropertyEditorView.ActionDelegate> {
 
-    public interface ActionDelegate extends BaseActionDelegate {
+    interface ActionDelegate {
+
         void onCancelClicked();
 
         void onOkClicked();
@@ -32,6 +33,7 @@ public interface PropertyEditorView extends View<PropertyEditorView.ActionDelega
         void onPropertyNameChanged(String propertyName);
 
         void obtainExistingPropertiesForPath();
+
     }
 
     /** Perform actions when close window performed. */

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -207,14 +207,16 @@ public class PreferencesPresenter implements PreferencesView.ActionDelegate, Pre
         for (PreferencePagePresenter preference : preferences) {
             if (preference.isDirty()) {
                 haveUnsavedData = true;
+                break;
             }
         }
         if (haveUnsavedData) {
-            dialogFactory.createConfirmDialog("", locale.messagesPromptSaveChanges(), getConfirmCallback(), getCancelCallback()).show();
+            dialogFactory.createConfirmDialog("", locale.messagesPromptSaveChanges(),
+                                              locale.yesButtonTitle(), locale.noButtonTitle(),
+                                              getConfirmCallback(), getCancelCallback()).show();
         } else {
             view.close();
         }
-        view.enableSaveButton(false);
     }
 
     private ConfirmCallback getConfirmCallback() {
@@ -226,6 +228,7 @@ public class PreferencesPresenter implements PreferencesView.ActionDelegate, Pre
                         preference.storeChanges();
                     }
                 }
+                view.enableSaveButton(false);
                 view.close();
             }
         };
@@ -244,4 +247,11 @@ public class PreferencesPresenter implements PreferencesView.ActionDelegate, Pre
             }
         };
     }
+
+    /** {@inheritDoc} */
+    @Override
+    public void onCloseWindow() {
+        onCloseClicked();
+    }
+
 }

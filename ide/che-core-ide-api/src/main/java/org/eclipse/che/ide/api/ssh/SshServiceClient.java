@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,6 +25,13 @@ public interface SshServiceClient {
      * Gets ssh pairs of given service
      */
     Promise<List<SshPairDto>> getPairs(String service);
+
+    /**
+     * Gets ssh pair of given service and specific name
+     * @param service the service name
+     * @param name the identifier of one the pair
+     */
+    Promise<SshPairDto> getPair(String service, String name);
 
     /**
      * Generates new ssh key pair with given service and name

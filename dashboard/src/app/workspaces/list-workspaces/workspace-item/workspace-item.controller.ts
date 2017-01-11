@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -46,7 +46,7 @@ export class WorkspaceItemCtrl {
       limits.forEach((limit) => {
         total += limit;
       });
-      return total + ' MB';
+      return Math.round(total) + ' MB';
     }
 
     let environment = this.getDefaultEnvironment(workspace);
@@ -58,7 +58,7 @@ export class WorkspaceItemCtrl {
           total += limit / (1024*1024);
         }
       });
-      return (total > 0) ? total + ' MB' : '-';
+      return (total > 0) ? Math.round(total) + ' MB' : '-';
     }
 
     return '-';

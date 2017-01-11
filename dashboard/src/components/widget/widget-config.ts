@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -64,7 +64,9 @@ import {CheToolbar} from './toolbar/che-toolbar.directive';
 import {CheErrorNotification} from './notification/che-error-notification.directive';
 import {CheInfoNotification} from './notification/che-info-notification.directive';
 import {ChePopup} from './popup/che-popup.directive';
+import {CheModalPopup} from './popup/che-modal-popup.directive';
 import {CheShowArea} from './show-area/che-show-area.directive';
+import {DemoSourceRender} from './html-source/demo-source-render.directive';
 
 
 export class WidgetConfig {
@@ -74,7 +76,7 @@ export class WidgetConfig {
     // accordion
     register.directive('cheAccordion', CheAccordion)
 
-      // button
+    // button
       .directive('cheButtonPrimary', CheButtonPrimary)
       .directive('cheButtonPrimaryFlat', CheButtonPrimaryFlat)
       .directive('cheButtonDanger', CheButtonDanger)
@@ -86,17 +88,18 @@ export class WidgetConfig {
       // dropdown
       .controller('CheButtonDropdownCtrl', CheButtonDropdownCtrl)
       .directive('cheButtonDropdown', CheButtonDropdown)
-      //clipboard
+      // clipboard
       .directive('cheClipboard', CheClipboard)
       .directive('cheCompile', CheCompile)
       .directive('cheDescription', CheDescription)
-      //dropzone
+      // dropzone
       .controller('CheDropZoneCtrl', CheDropZoneCtrl)
       .directive('cheDropzone', CheDropZone)
       .directive('cheEmptyState', CheEmptyState)
       .directive('cheFrame', CheFrame)
       .directive('cheFooter', CheFooter)
       .directive('cheHtmlSource', CheHtmlSource)
+      .directive('demoSourceRender', DemoSourceRender)
       .directive('cheInput', CheInput)
       .directive('cheInputBox', CheInputBox)
       .directive('cheTextarea', CheTextarea)
@@ -141,12 +144,13 @@ export class WidgetConfig {
       .directive('cheToggle', CheToggle)
 
       .directive('cheToolbar', CheToolbar)
-      //notifications
+      // notifications
       .directive('cheErrorNotification', CheErrorNotification)
       .directive('cheInfoNotification', CheInfoNotification)
-      //wrapper for popup
+      // wrapper for popup
       .directive('chePopup', ChePopup)
-      //show area
+      .directive('cheModalPopup', CheModalPopup)
+      // show area
       .directive('cheShowArea', CheShowArea)
   }
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,10 +16,9 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.git.GitConnection;
 import org.eclipse.che.api.git.GitConnectionFactory;
-import org.eclipse.che.api.git.shared.CloneRequest;
+import org.eclipse.che.api.git.params.CloneParams;
+import org.eclipse.che.api.git.params.RemoteAddParams;
 import org.eclipse.che.api.git.shared.Remote;
-import org.eclipse.che.api.git.shared.RemoteAddRequest;
-import org.eclipse.che.api.git.shared.RemoteListRequest;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -29,7 +28,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
 
-import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.git.impl.GitTestUtil.cleanupTestRepo;
 import static org.eclipse.che.git.impl.GitTestUtil.connectToGitRepositoryWithContent;
 import static org.testng.Assert.assertEquals;
@@ -60,18 +58,14 @@ public class RemoteListTest {
         //given
         GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
         GitConnection connection2 = connectionFactory.getConnection(remoteRepo.getAbsolutePath());
-        connection2.clone(newDto(CloneRequest.class).withRemoteUri(connection.getWorkingDir().getAbsolutePath())
-                                                    .withWorkingDir(connection2.getWorkingDir().getAbsolutePath()));
-        assertEquals(connection2.remoteList(newDto(RemoteListRequest.class)).size(), 1);
+        connection2.clone(CloneParams.create(connection.getWorkingDir().getAbsolutePath())
+                                     .withWorkingDir(connection2.getWorkingDir().getAbsolutePath()));
+        assertEquals(connection2.remoteList(null, false).size(), 1);
         //create new remote
-        connection2.remoteAdd(newDto(RemoteAddRequest.class)
-                                      .withName("newremote")
-                                      .withUrl("newremote.url"));
-        assertEquals(connection2.remoteList(newDto(RemoteListRequest.class)).size(), 2);
+        connection2.remoteAdd(RemoteAddParams.create("newremote", "newremote.url"));
+        assertEquals(connection2.remoteList(null, false).size(), 2);
         //when
-        RemoteListRequest request = newDto(RemoteListRequest.class);
-        request.setRemote("newremote");
-        List<Remote> one = connection2.remoteList(request);
+        List<Remote> one = connection2.remoteList("newremote", false);
         //then
         assertEquals(one.get(0).getUrl(), "newremote.url");
         assertEquals(one.size(), 1);

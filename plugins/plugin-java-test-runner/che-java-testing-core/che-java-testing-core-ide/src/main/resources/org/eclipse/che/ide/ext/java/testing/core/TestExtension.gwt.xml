@@ -1,0 +1,22 @@
+<!--
+
+    Copyright (c) 2012-2017 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<module>
+    <inherits name="com.google.gwt.user.User"/>
+    <inherits name="org.eclipse.che.ide.Api"/>
+    <inherits name="com.google.gwt.inject.Inject"/>
+    <inherits name="org.eclipse.che.ide.ui.CodenvyUI"/>
+    <inherits name="org.eclipse.che.ide.ext.java.Java"/>
+
+    <source path="client"/>
+    <source path="shared"/>
+</module>

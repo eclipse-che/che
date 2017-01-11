@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,9 +11,12 @@
 package org.eclipse.che.plugin.docker.machine.ext.provider;
 
 import org.eclipse.che.api.core.util.SystemInfo;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.docker.machine.WindowsHostUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Strings;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -37,28 +40,44 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 @Singleton
 public class WsAgentVolumeProvider implements Provider<String> {
 
-    private static final String CONTAINER_TARGET = ":/mnt/che/ws-agent.tar.gz:ro,Z";
+    private static final String CONTAINER_TARGET = ":/mnt/che/ws-agent.tar.gz";
     private static final String WS_AGENT         = "ws-agent.tar.gz";
 
     private static final Logger LOG = LoggerFactory.getLogger(WsAgentVolumeProvider.class);
 
+    private final String wsAgentArchivePath;
+
+    private final String agentVolumeOptions;
+
     @Inject
-    @Named("che.workspace.agent.dev")
-    private String wsAgentArchivePath;
+    public WsAgentVolumeProvider(@Nullable @Named("che.docker.volumes_agent_options") String agentVolumeOptions,
+                                 @Named("che.workspace.agent.dev") String wsAgentArchivePath) {
+        if (!Strings.isNullOrEmpty(agentVolumeOptions)) {
+            this.agentVolumeOptions = ":" + agentVolumeOptions;
+        } else {
+            this.agentVolumeOptions = "";
+        }
+        this.wsAgentArchivePath = wsAgentArchivePath;
+    }
 
     @Override
     public String get() {
+
         if (SystemInfo.isWindows()) {
             try {
                 final Path cheHome = WindowsHostUtils.ensureCheHomeExist();
                 final Path path = Files.copy(Paths.get(wsAgentArchivePath), cheHome.resolve(WS_AGENT), REPLACE_EXISTING);
-                return path.toString() + CONTAINER_TARGET;
+                return getTargetOptions(path.toString());
             } catch (IOException e) {
                 LOG.warn(e.getMessage());
                 throw new RuntimeException(e);
             }
         } else {
-            return wsAgentArchivePath + CONTAINER_TARGET;
+            return getTargetOptions(wsAgentArchivePath);
         }
+    }
+
+    private String getTargetOptions(final String path) {
+        return path + CONTAINER_TARGET + agentVolumeOptions;
     }
 }

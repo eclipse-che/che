@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.model.project.NewProjectConfig;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
@@ -27,6 +28,7 @@ import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.api.promises.client.js.Promises;
+import org.eclipse.che.api.workspace.shared.dto.NewProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectProblemDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
@@ -56,6 +58,7 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.Arrays;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,6 +71,8 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOf;
+import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingResumeEvent;
+import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingSuspendEvent;
 import static org.eclipse.che.ide.api.resources.Resource.FILE;
 import static org.eclipse.che.ide.api.resources.Resource.PROJECT;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
@@ -263,22 +268,22 @@ public final class ResourceManager {
      * @since 4.4.0
      */
     protected Promise<Project> update(final Path path, final ProjectRequest request) {
-
+        final ProjectConfig projectConfig = request.getBody();
+        final SourceStorage source = projectConfig.getSource();
         final SourceStorageDto sourceDto = dtoFactory.createDto(SourceStorageDto.class);
-
-        if (request.getBody().getSource() != null) {
-            sourceDto.setLocation(request.getBody().getSource().getLocation());
-            sourceDto.setType(request.getBody().getSource().getType());
-            sourceDto.setParameters(request.getBody().getSource().getParameters());
+        if (source != null) {
+            sourceDto.setLocation(source.getLocation());
+            sourceDto.setType(source.getType());
+            sourceDto.setParameters(source.getParameters());
         }
 
         final ProjectConfigDto dto = dtoFactory.createDto(ProjectConfigDto.class)
-                                               .withName(request.getBody().getName())
+                                               .withName(projectConfig.getName())
                                                .withPath(path.toString())
-                                               .withDescription(request.getBody().getDescription())
-                                               .withType(request.getBody().getType())
-                                               .withMixins(request.getBody().getMixins())
-                                               .withAttributes(request.getBody().getAttributes())
+                                               .withDescription(projectConfig.getDescription())
+                                               .withType(projectConfig.getType())
+                                               .withMixins(projectConfig.getMixins())
+                                               .withAttributes(projectConfig.getAttributes())
                                                .withSource(sourceDto);
 
         return ps.updateProject(dto).thenPromise(new Function<ProjectConfigDto, Promise<Project>>() {
@@ -410,21 +415,9 @@ public final class ResourceManager {
         checkArgument(typeRegistry.getProjectType(createRequest.getBody().getType()) != null, "Invalid project type");
 
         final Path path = Path.valueOf(createRequest.getBody().getPath());
-
         return findResource(path, true).thenPromise(new Function<Optional<Resource>, Promise<Project>>() {
             @Override
             public Promise<Project> apply(Optional<Resource> resource) throws FunctionException {
-
-                final MutableProjectConfig projectConfig = (MutableProjectConfig)createRequest.getBody();
-                final ProjectConfigDto dto = dtoFactory.createDto(ProjectConfigDto.class)
-                                                       .withName(projectConfig.getName())
-                                                       .withPath(path.toString())
-                                                       .withDescription(projectConfig.getDescription())
-                                                       .withType(projectConfig.getType())
-                                                       .withMixins(projectConfig.getMixins())
-                                                       .withAttributes(projectConfig.getAttributes());
-
-
                 if (resource.isPresent()) {
                     if (resource.get().isProject()) {
                         throw new IllegalStateException("Project already exists");
@@ -435,28 +428,78 @@ public final class ResourceManager {
                     return update(path, createRequest);
                 }
 
-                return ps.createProject(dto, projectConfig.getOptions()).thenPromise(new Function<ProjectConfigDto, Promise<Project>>() {
+                final MutableProjectConfig projectConfig = (MutableProjectConfig)createRequest.getBody();
+                final List<NewProjectConfig> projectConfigList = projectConfig.getProjects();
+                projectConfigList.add(asDto(projectConfig));
+                final List<NewProjectConfigDto> configDtoList = asDto(projectConfigList);
+
+                return ps.createBatchProjects(configDtoList).thenPromise(new Function<List<ProjectConfigDto>, Promise<Project>>() {
                     @Override
-                    public Promise<Project> apply(ProjectConfigDto config) throws FunctionException {
-                        final Project newResource = resourceFactory.newProjectImpl(config, ResourceManager.this);
-                        store.register(newResource);
+                    public Promise<Project> apply(final List<ProjectConfigDto> configList) throws FunctionException {
 
                         return ps.getProjects().then(new Function<List<ProjectConfigDto>, Project>() {
                             @Override
                             public Project apply(List<ProjectConfigDto> updatedConfiguration) throws FunctionException {
-
                                 //cache new configs
                                 cachedConfigs = updatedConfiguration.toArray(new ProjectConfigDto[updatedConfiguration.size()]);
 
-                                eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(newResource, ADDED | DERIVED)));
+                                for (ProjectConfigDto projectConfigDto : configList) {
+                                    if (projectConfigDto.getPath().equals(path.toString())) {
+                                        final Project newResource = resourceFactory.newProjectImpl(projectConfigDto, ResourceManager.this);
+                                        store.register(newResource);
+                                        eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(newResource, ADDED | DERIVED)));
 
-                                return newResource;
+                                        return newResource;
+                                    }
+                                }
+
+                                throw new IllegalStateException("Created project is not found");
                             }
                         });
                     }
                 });
             }
         });
+    }
+
+    private NewProjectConfigDto asDto(MutableProjectConfig config) {
+        final SourceStorage source = config.getSource();
+        final SourceStorageDto sourceStorageDto = dtoFactory.createDto(SourceStorageDto.class)
+                                                            .withType(source.getType())
+                                                            .withLocation(source.getLocation())
+                                                            .withParameters(source.getParameters());
+
+        return dtoFactory.createDto(NewProjectConfigDto.class)
+                         .withName(config.getName())
+                         .withPath(config.getPath())
+                         .withDescription(config.getDescription())
+                         .withSource(sourceStorageDto)
+                         .withType(config.getType())
+                         .withMixins(config.getMixins())
+                         .withAttributes(config.getAttributes())
+                         .withOptions(config.getOptions());
+    }
+
+    private List<NewProjectConfigDto> asDto(List<NewProjectConfig> configList) {
+        List<NewProjectConfigDto> result = new ArrayList<>(configList.size());
+        for (NewProjectConfig config : configList) {
+            final SourceStorage source = config.getSource();
+            final SourceStorageDto sourceStorageDto = dtoFactory.createDto(SourceStorageDto.class)
+                                                                .withType(source.getType())
+                                                                .withLocation(source.getLocation())
+                                                                .withParameters(source.getParameters());
+
+            result.add(dtoFactory.createDto(NewProjectConfigDto.class)
+                                 .withName(config.getName())
+                                 .withPath(config.getPath())
+                                 .withDescription(config.getDescription())
+                                 .withSource(sourceStorageDto)
+                                 .withType(config.getType())
+                                 .withMixins(config.getMixins())
+                                 .withAttributes(config.getAttributes())
+                                 .withOptions(config.getOptions()));
+        }
+        return result;
     }
 
     protected Promise<Project> importProject(final Project.ProjectRequest importRequest) {
@@ -507,20 +550,45 @@ public final class ResourceManager {
 
         return findResource(destination, true).thenPromise(new Function<Optional<Resource>, Promise<Resource>>() {
             @Override
-            public Promise<Resource> apply(Optional<Resource> resource) throws FunctionException {
+            public Promise<Resource> apply(final Optional<Resource> resource) throws FunctionException {
                 checkState(!resource.isPresent() || force, "Cannot create '" + destination.toString() + "'. Resource already exists.");
 
                 if (isResourceOpened(source)) {
                     deletedFilesController.add(source.getLocation().toString());
                 }
 
+                eventBus.fireEvent(newFileTrackingSuspendEvent());
+
                 return ps.move(source.getLocation(), destination.parent(), destination.lastSegment(), force)
                          .thenPromise(new Function<Void, Promise<Resource>>() {
                              @Override
                              public Promise<Resource> apply(Void ignored) throws FunctionException {
 
-                                 if (source.isProject()) {
-                                     return Promises.resolve(source);
+                                 if (source.isProject() && source.getLocation().segmentCount() == 1) {
+                                     return ps.getProjects().then(new Function<List<ProjectConfigDto>, Resource>() {
+                                         @Override
+                                         public Resource apply(List<ProjectConfigDto> updatedConfigs) throws FunctionException {
+                                             eventBus.fireEvent(newFileTrackingResumeEvent());
+
+                                             //cache new configs
+                                             cachedConfigs = updatedConfigs.toArray(new ProjectConfigDto[updatedConfigs.size()]);
+                                             store.dispose(source.getLocation(), true);
+
+                                             for (ProjectConfigDto projectConfigDto : cachedConfigs) {
+                                                 if (projectConfigDto.getPath().equals(destination.toString())) {
+                                                     final Project newResource = resourceFactory.newProjectImpl(projectConfigDto, ResourceManager.this);
+                                                     store.register(newResource);
+                                                     eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(newResource, source,
+                                                                                                                       ADDED | MOVED_FROM |
+                                                                                                                       MOVED_TO | DERIVED)));
+
+                                                     return newResource;
+                                                 }
+                                             }
+
+                                             throw new IllegalStateException("Resource not found");
+                                         }
+                                     });
                                  }
 
                                  return findResource(destination, false).then(new Function<Optional<Resource>, Resource>() {
@@ -530,8 +598,10 @@ public final class ResourceManager {
                                              eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(movedResource.get(), source,
                                                                                                                ADDED | MOVED_FROM |
                                                                                                                MOVED_TO | DERIVED)));
+                                             eventBus.fireEvent(newFileTrackingResumeEvent());
                                              return movedResource.get();
                                          }
+                                         eventBus.fireEvent(newFileTrackingResumeEvent());
 
                                          throw new IllegalStateException("Resource not found");
                                      }
@@ -631,10 +701,10 @@ public final class ResourceManager {
             return promises.resolve(NO_RESOURCES);
         }
 
+        int depthToReload = depth;
         final Optional<Resource[]> descendants = store.getAll(container.getLocation());
 
-        int depthToReload = depth;
-        if (descendants.isPresent()) {
+        if (depthToReload != -1 && descendants.isPresent()) {
             for (Resource resource : descendants.get()) {
                 if (resource.getLocation().segmentCount() - container.getLocation().segmentCount() > depth) {
                     depthToReload = resource.getLocation().segmentCount() - container.getLocation().segmentCount();
@@ -759,7 +829,7 @@ public final class ResourceManager {
     }
 
     protected Promise<Optional<File>> getFile(final Path absolutePath) {
-        return findResource(absolutePath, false).then(new Function<Optional<Resource>, Optional<File>>() {
+        return findResource(absolutePath, true).then(new Function<Optional<Resource>, Optional<File>>() {
             @Override
             public Optional<File> apply(Optional<Resource> optional) throws FunctionException {
                 if (optional.isPresent()) {
@@ -849,8 +919,8 @@ public final class ResourceManager {
         File file = (File)resource;
 
         for (EditorPartPresenter editor : editorAgent.getOpenedEditors()) {
-            String editorPath = editor.getEditorInput().getFile().getLocation().toString();
-            if (editorPath.equals(file.getPath())) {
+            Path editorPath = editor.getEditorInput().getFile().getLocation();
+            if (editorPath.equals(file.getLocation())) {
                 return true;
             }
         }
@@ -923,7 +993,7 @@ public final class ResourceManager {
             public Promise<Resource[]> apply(List<ProjectConfigDto> updatedConfiguration) throws FunctionException {
                 cachedConfigs = updatedConfiguration.toArray(new ProjectConfigDto[updatedConfiguration.size()]);
 
-                int maxDepth = 0;
+                int maxDepth = 1;
 
                 final Optional<Resource[]> descendants = store.getAll(container.getLocation());
 
@@ -1134,7 +1204,7 @@ public final class ResourceManager {
     protected Promise<Resource[]> search(final Container container, String fileMask, String contentMask) {
         QueryExpression queryExpression = new QueryExpression();
         if (!isNullOrEmpty(contentMask)) {
-            queryExpression.setText(contentMask + '*');
+            queryExpression.setText(contentMask);
         }
         if (!isNullOrEmpty(fileMask)) {
             queryExpression.setName(fileMask);

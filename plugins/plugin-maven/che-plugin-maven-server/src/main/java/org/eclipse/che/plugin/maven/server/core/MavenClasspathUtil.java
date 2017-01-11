@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,7 +31,7 @@ public class MavenClasspathUtil {
     private static final Logger            LOG   = LoggerFactory.getLogger(MavenClasspathUtil.class);
 
     public static IClasspathContainer readMavenClasspath(IJavaProject javaProject) {
-        IFile file = javaProject.getProject().getFile(".codenvy/classpath.maven");
+        IFile file = javaProject.getProject().getFile(".che/classpath.maven");
         IClasspathEntry[] entries;
         if (file.exists()) {
             try {

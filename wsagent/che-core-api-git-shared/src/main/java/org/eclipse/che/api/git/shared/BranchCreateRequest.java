@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,7 +18,7 @@ import org.eclipse.che.dto.shared.DTO;
  * @author andrew00x
  */
 @DTO
-public interface BranchCreateRequest extends GitRequest {
+public interface BranchCreateRequest {
     /** @return name of branch to be created */
     String getName();
     
@@ -26,7 +26,7 @@ public interface BranchCreateRequest extends GitRequest {
     
     BranchCreateRequest withName(String name);
 
-    /** @return name of a commit at which to start the new branch. If <code>null</code> the HEAD will be used */
+    /** @return hash commit from which to start new branch. If <code>null</code> HEAD will be used */
     String getStartPoint();
     
     void setStartPoint(String startPoint);

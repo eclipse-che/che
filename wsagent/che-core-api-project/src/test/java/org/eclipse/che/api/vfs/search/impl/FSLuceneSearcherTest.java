@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,6 +40,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@SuppressWarnings("Duplicates")
 public class FSLuceneSearcherTest {
     private static final String[] TEST_CONTENT = {
             "Apollo set several major human spaceflight milestones",
@@ -163,6 +164,18 @@ public class FSLuceneSearcherTest {
         assertTrue(paths.isEmpty());
         paths = searcher.search(new QueryExpression().setText("should")).getFilePaths();
         assertTrue(paths.isEmpty());
+    }
+
+
+    @Test
+    public void searchesByWordFragment() throws Exception {
+        VirtualFileSystem virtualFileSystem = virtualFileSystem();
+        VirtualFile folder = virtualFileSystem.getRoot().createFolder("folder");
+        folder.createFile("xxx.txt", TEST_CONTENT[0]);
+        searcher.init(virtualFileSystem);
+
+        List<String> paths = searcher.search(new QueryExpression().setText("*stone*")).getFilePaths();
+        assertEquals(newArrayList("/folder/xxx.txt"), paths);
     }
 
     @Test

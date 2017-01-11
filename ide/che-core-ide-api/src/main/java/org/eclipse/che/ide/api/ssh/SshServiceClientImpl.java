@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -46,6 +46,18 @@ public class SshServiceClientImpl implements SshServiceClient {
         this.sshApi = baseUrl + "/ssh";
     }
 
+    /**
+     * Gets ssh pair of given service and specific name
+     * @param service the service name
+     * @param name the identifier of one the pair
+     */
+    @Override
+    public Promise<SshPairDto> getPair(String service, String name) {
+        return asyncRequestFactory.createGetRequest(sshApi + "/" + service + "/" + name)
+                                  .header(HTTPHeader.ACCEPT, MimeType.APPLICATION_JSON)
+                                  .send(unmarshallerFactory.newUnmarshaller(SshPairDto.class));
+    }
+
     @Override
     public Promise<List<SshPairDto>> getPairs(String service) {
         return asyncRequestFactory.createGetRequest(sshApi + "/" + service)
@@ -64,7 +76,7 @@ public class SshServiceClientImpl implements SshServiceClient {
 
     @Override
     public Promise<Void> deletePair(String service, String name) {
-        return asyncRequestFactory.createDeleteRequest(sshApi + "/" + service + "/" + name)
+        return asyncRequestFactory.createDeleteRequest(sshApi + "/" + service + "?name=" + name)
                                   .send();
     }
 }

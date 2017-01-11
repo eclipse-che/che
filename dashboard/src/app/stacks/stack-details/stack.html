@@ -12,13 +12,16 @@
 -->
 <ng-form flex layout="column" name="stackForm">
   <che-toolbar che-title="{{stackController.stack ? stackController.stack.name : stackController.stackId}}"
-               che-button-name="Save"
-               che-button-disabled="!stackController.isStackChange || !stackForm.$valid"
-               che-button-on-click="stackController.saveStack()"
                che-title-icons-controller="stackController"
                che-breadcrumb-title="All stacks"
                che-breadcrumb-href="#/stacks"
                che-subheader-title="{{stackController.stack.type}}">
+    <che-button-primary ng-disabled="!stackForm.$valid"
+                        che-button-title="Test" name="testButton"
+                        ng-click="stackController.showSelectTemplateDialog($event)"></che-button-primary>
+    <che-button-save-flat ng-disabled="!stackController.isStackChange || !stackForm.$valid"
+                          che-button-title="Save" name="saveButton"
+                          ng-click="stackController.saveStack()"></che-button-save-flat>
   </che-toolbar>
   <md-progress-linear md-mode="indeterminate" ng-show="stackController.loading"></md-progress-linear>
   <md-content md-scroll-y flex class="stack-content" ng-if="!stackController.loading">
@@ -125,9 +128,14 @@
     </che-label-container>
 
   </md-content>
-  <workspace-edit-mode-overlay ng-show="stackController.isStackChange && stackForm.$valid"
+  <workspace-edit-mode-overlay ng-show="stackController.isStackChange"
+                               workspace-edit-disable-save-button="!stackForm.$valid"
                                workspace-edit-mode-on-save="stackController.saveStack()"
-                               workspace-edit-mode-on-cancel="stackController.cancelStackChanges()"></workspace-edit-mode-overlay>
+                               workspace-edit-mode-on-cancel="stackController.cancelStackChanges()">
+    <che-button-primary ng-disabled="!stackForm.$valid"
+                        che-button-title="Test" name="testButton"
+                        ng-click="stackController.showSelectTemplateDialog($event)"></che-button-primary>
+  </workspace-edit-mode-overlay>
 </ng-form>
 <md-content ng-show="stackController.invalidStack">
   {{stackController.invalidStack}}

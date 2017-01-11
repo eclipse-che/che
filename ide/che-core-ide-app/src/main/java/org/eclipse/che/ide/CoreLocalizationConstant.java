@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -263,7 +263,7 @@ public interface CoreLocalizationConstant extends Messages {
     String importProjectButton();
 
     @Key("importProject.importing")
-    String importingProject();
+    String importingProject(String projectName);
 
     @Key("importProject.uriFieldTitle")
     String importProjectUriFieldTitle();
@@ -342,6 +342,9 @@ public interface CoreLocalizationConstant extends Messages {
     @Key("action.newXmlFile.description")
     String actionNewXmlFileDescription();
 
+    @Key("action.link.with.editor")
+    String actionLinkWithEditor();
+
     @Key("action.projectConfiguration.description")
     String actionProjectConfigurationDescription();
 
@@ -359,6 +362,24 @@ public interface CoreLocalizationConstant extends Messages {
 
     @Key("action.showHiddenFiles.description")
     String actionShowHiddenFilesDescription();
+
+    @Key("action.maximizePart.title")
+    String actionMaximizePartTitle();
+
+    @Key("action.maximizePart.description")
+    String actionMaximizePartDescription();
+
+    @Key("action.restorePart.title")
+    String actionRestorePartTitle();
+
+    @Key("action.restorePart.description")
+    String actionRestorePartDescription();
+
+    @Key("action.minimizePart.title")
+    String actionMinimizePartTitle();
+
+    @Key("action.minimizePart.description")
+    String actionMinimizePartDescription();
 
     /* NewResource */
     @Key("newResource.title")
@@ -661,6 +682,9 @@ public interface CoreLocalizationConstant extends Messages {
     @Key("action.full.text.search.description")
     String actionFullTextSearchDescription();
 
+    @Key("text.search.wholeword.label")
+    String textSearchFileWholeWordLabel();
+
     String search();
 
     @Key("text.search.scope.label")
@@ -888,4 +912,10 @@ public interface CoreLocalizationConstant extends Messages {
 
     @Key("macro.explorer.current.file.path.description")
     String macroExplorerCurrentFilePathDescription();
+
+    @Key("empty.state.no.projects")
+    String emptyStateNoProjects();
+
+    @Key("empty.state.no.files")
+    String emptyStateNoFiles();
 }

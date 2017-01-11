@@ -1,0 +1,33 @@
+{
+  "name": "che-cli-library",
+  "version": "1.0.0",
+  "description": "CLI library used in dockerfiles",
+  "main": "lib/index.js",
+  "author": "Florent Benoit",
+  "license": "EPL-1.0",
+  "scripts": {
+    "prepublish": "./node_modules/.bin/tsc",
+    "pretest": "./node_modules/.bin/tsc --outDir test --target es6  src/**/*.spec.ts src/**/**/*.spec.ts",
+    "coverage": "./node_modules/.bin/istanbul --include-all-sources cover node_modules/.bin/_mocha -- -R spec test/*.spec.js && ./node_modules/.bin/remap-istanbul -i coverage/coverage.json -o coverage/html -t html && open coverage/html/index.html",
+    "test": "./node_modules/.bin/mocha --compilers js:babel-register --require babel-polyfill --recursive"
+  },
+  "dependencies": {
+    "reflect-metadata": "^0.1.8",
+    "websocket": "1.0.23"
+  },
+  "devDependencies": {
+    "babel": "^6.5.2",
+    "babel-polyfill": "^6.16.0",
+    "@types/mocha": "^2.2.32",
+    "@types/node": "^6.0.41",
+    "@types/reflect-metadata": "0.0.4",
+    "babel": "^6.5.2",
+    "babel-preset-es2015": "^6.16.0",
+    "babel-register": "^6.16.3",
+    "chai": "^3.4.33",
+    "istanbul": "^0.4.5",
+    "mocha": "^2.2.32",
+    "remap-istanbul": "^0.6.4",
+    "typescript": "2.1.4"
+  }
+}
