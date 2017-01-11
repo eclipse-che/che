@@ -8,12 +8,11 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.editor.page.info;
+package org.eclipse.che.ide.command.editor.page.settings;
 
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 
-import org.eclipse.che.ide.command.editor.page.settings.ProjectSwitcher;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
