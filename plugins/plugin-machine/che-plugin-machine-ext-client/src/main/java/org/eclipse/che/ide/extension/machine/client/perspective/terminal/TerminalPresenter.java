@@ -255,6 +255,9 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
 
         if (width == x && height == y) {
             return;
+        } else if (width > 0 && height > 0) {
+            //if it's not first initialization
+            setFocus(true);
         }
 
         terminal.resize(x, y);
@@ -268,7 +271,6 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
         jso.addField("type", "resize");
         jso.addField("data", arr);
         socket.send(jso.serialize());
-        setFocus(true);
     }
 
     @Override
