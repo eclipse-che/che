@@ -62,12 +62,14 @@ export class ListAgentsController {
   }
 
   /**
+   * Disables agents which shouldn't be switched by user.
    * Switching of the "ws-agent" must happen only via "Dev" slider.
    * "ws-agent" should be listed, but always disabled regardless of the state
    * @param agentId {string}
    */
   needToDisable(agentId: string): boolean {
-    return (agentId === 'org.eclipse.che.ws-agent');
+    return (agentId === 'org.eclipse.che.ws-agent' ||
+            agentId === 'com.codenvy.rsync_in_machine' || agentId === 'com.codenvy.external_rsync');
   }
 
   isEnabled(agentId: string, agents: string[]): boolean {
