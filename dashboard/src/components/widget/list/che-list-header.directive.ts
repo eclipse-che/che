@@ -15,6 +15,13 @@
  * @author Oleksii Orel
  */
 export class CheListHeader {
+  restrict: string;
+  replace: boolean;
+  templateUrl: string;
+  transclude: boolean;
+  scope: {
+    [propName: string]: string
+  };
 
   /**
    * Default constructor that is using resource
@@ -33,11 +40,13 @@ export class CheListHeader {
       addButtonTitle: '@?cheAddButtonTitle',
       addButtonHref: '@?cheAddButtonHref',
       onAdd: '&?cheOnAdd',
+      importButtonTitle: '@?cheImportButtonTitle',
+      onImport: '&?cheOnImport',
       deleteButtonTitle: '@?cheDeleteButtonTitle',
       onDelete: '&?cheOnDelete',
       hideDelete: '=?cheHideDelete',
       hideSearch: '=?cheHideSearch',
-      hideHeader:'=?cheHideHeader'
+      hideHeader: '=?cheHideHeader'
     };
   }
 }

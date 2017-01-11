@@ -9,9 +9,9 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
-import {CheStack} from "../../../components/api/che-stack.factory";
-import {CheNotification} from "../../../components/notification/che-notification.factory";
-import {CheProfile} from "../../../components/api/che-profile.factory";
+import {CheStack} from '../../../components/api/che-stack.factory';
+import {CheNotification} from '../../../components/notification/che-notification.factory';
+import {CheProfile} from '../../../components/api/che-profile.factory';
 
 /**
  * @ngdoc controller
@@ -86,13 +86,31 @@ export class ListStacksController {
         this.loading = false;
         this.stacks = this.cheStack.getStacks();
       },
-      (error) => {
+      (error: any) => {
         if (error.status === 304) {
           this.stacks = this.cheStack.getStacks();
         }
         this.state = 'error';
         this.loading = false;
       });
+  }
+
+  /**
+   * Show dialog for imported stack.
+   * @param $event {MouseEvent}
+   */
+  showSelectStackRecipeDialog($event: MouseEvent): void {
+    this.$mdDialog.show({
+      targetEvent: $event,
+      controller: 'ImportStackController',
+      controllerAs: 'importStackController',
+      bindToController: true,
+      clickOutsideToClose: true,
+      locals: {
+        callbackController: this
+      },
+      templateUrl: 'app/stacks/list-stacks/import-stack/import-stack.html'
+    });
   }
 
   /**
@@ -108,9 +126,9 @@ export class ListStacksController {
         delete this.stackSelectionState[stack.id];
         this.cheNotification.showInfo('Stack ' + stack.name + ' has been successfully removed.');
         this.getStacks();
-      }, (error) => {
+      }, (error: any) => {
         this.loading = false;
-        let message = 'Failed to delete ' + stack.name + 'stack.' + (error && error.message) ? error.message : "";
+        let message = 'Failed to delete ' + stack.name + 'stack.' + (error && error.message) ? error.message : '';
         this.cheNotification.showError(message);
       });
     });
@@ -131,9 +149,9 @@ export class ListStacksController {
     this.loading = true;
     this.cheStack.createStack(newStack).then(() => {
       this.getStacks();
-    }, (error) => {
+    }, (error: any) => {
       this.loading = false;
-      let message = 'Failed to create ' + newStack.name + 'stack.' + (error && error.message) ? error.message : "";
+      let message = 'Failed to create ' + newStack.name + 'stack.' + (error && error.message) ? error.message : '';
       this.cheNotification.showError(message);
     });
   }
@@ -185,7 +203,7 @@ export class ListStacksController {
    */
   selectAllStacks(): void {
     this.stackSelectionState = {};
-    this.stacks.forEach((stack) => {
+    this.stacks.forEach((stack: che.IStack) => {
       if (stack.creator === this.userId) {
         this.stackSelectionState[stack.id] = true;
       }
@@ -196,7 +214,7 @@ export class ListStacksController {
    * Make all stacks deselected.
    */
   deselectAllStacks(): void {
-    this.stacks.forEach((stack) => {
+    this.stacks.forEach((stack: che.IStack) => {
       if (this.stackSelectionState[stack.id]) {
         this.stackSelectionState[stack.id] = false;
       }
@@ -222,7 +240,7 @@ export class ListStacksController {
     this.isNoSelected = true;
     let keys: Array<string> = Object.keys(this.stackSelectionState);
     this.isAllSelected = keys.length > 0;
-    keys.forEach((key) => {
+    keys.forEach((key: string) => {
       if (this.stackSelectionState[key]) {
         this.isNoSelected = false;
       } else {
@@ -238,7 +256,7 @@ export class ListStacksController {
     let selectedStackIds: Array<any> = [];
 
 
-    Object.keys(this.stackSelectionState).forEach((key) => {
+    Object.keys(this.stackSelectionState).forEach((key: string) => {
       if (this.stackSelectionState[key]) {
         selectedStackIds.push(key);
       }
@@ -253,7 +271,7 @@ export class ListStacksController {
     confirmationPromise.then(() => {
       let deleteStackPromises = [];
 
-      selectedStackIds.forEach((stackId) => {
+      selectedStackIds.forEach((stackId: string) => {
         this.stackSelectionState[stackId] = false;
         deleteStackPromises.push(this.cheStack.deleteStack(stackId));
       });
