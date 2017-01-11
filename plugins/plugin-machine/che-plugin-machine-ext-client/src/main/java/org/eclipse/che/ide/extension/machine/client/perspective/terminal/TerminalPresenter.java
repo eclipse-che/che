@@ -33,17 +33,21 @@ import org.eclipse.che.ide.collections.Jso;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.tab.content.TabPresenter;
 import org.eclipse.che.ide.extension.machine.client.processes.AddTerminalClickHandler;
+
 import org.eclipse.che.ide.websocket.WebSocket;
+import org.eclipse.che.ide.websocket.events.ConnectionClosedHandler;
 import org.eclipse.che.ide.websocket.events.ConnectionErrorHandler;
 import org.eclipse.che.ide.websocket.events.ConnectionOpenedHandler;
 import org.eclipse.che.ide.websocket.events.MessageReceivedEvent;
 import org.eclipse.che.ide.websocket.events.MessageReceivedHandler;
+import org.eclipse.che.ide.websocket.events.WebSocketClosedEvent;
 
 import javax.validation.constraints.NotNull;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.websocket.events.WebSocketClosedEvent.CLOSE_NORMAL;
 
 /**
  * The class defines methods which contains business logic to control machine's terminal.
@@ -54,7 +58,6 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
 
     //event which is performed when user input data into terminal
     private static final String DATA_EVENT_NAME          = "data";
-    private static final String EXIT_COMMAND             = "\nexit";
     private static final int    TIME_BETWEEN_CONNECTIONS = 2_000;
 
     private final TerminalView                view;
@@ -164,6 +167,22 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
 
         socket = WebSocket.create(wsUrl);
 
+        socket.setOnMessageHandler(new MessageReceivedHandler() {
+            @Override
+            public void onMessageReceived(MessageReceivedEvent event) {
+                terminal.write(event.getMessage());
+            }
+        });
+
+        socket.setOnCloseHandler(new ConnectionClosedHandler() {
+            @Override
+            public void onClose(WebSocketClosedEvent event) {
+                if (CLOSE_NORMAL == event.getCode()) {
+                    terminalStateListener.onExit();
+                }
+            }
+        });
+
         socket.setOnOpenHandler(new ConnectionOpenedHandler() {
             @Override
             public void onOpen() {
@@ -184,18 +203,6 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
                         jso.addField("type", "data");
                         jso.addField("data", arg);
                         socket.send(jso.serialize());
-                    }
-                });
-                socket.setOnMessageHandler(new MessageReceivedHandler() {
-                    @Override
-                    public void onMessageReceived(MessageReceivedEvent event) {
-                        String message = event.getMessage();
-
-                        terminal.write(message);
-
-                        if (message.contains(EXIT_COMMAND) && terminalStateListener != null) {
-                            terminalStateListener.onExit();
-                        }
                     }
                 });
             }
