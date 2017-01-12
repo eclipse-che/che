@@ -89,9 +89,10 @@ public class EventService {
      *
      * @param event
      *         event
+     * @return published event
      */
     @SuppressWarnings("unchecked")
-    public void publish(Object event) {
+    public <T> T publish(T event) {
         if (event == null) {
             throw new IllegalArgumentException("Null event.");
         }
@@ -109,6 +110,7 @@ public class EventService {
                 }
             }
         }
+        return event;
     }
 
     /**

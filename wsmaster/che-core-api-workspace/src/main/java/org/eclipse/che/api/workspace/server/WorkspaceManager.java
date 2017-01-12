@@ -719,7 +719,7 @@ public class WorkspaceManager {
     private void removeWorkspaceQuietly(Workspace workspace) {
         try {
             workspaceDao.remove(workspace.getId());
-        } catch (ConflictException | ServerException x) {
+        } catch (ServerException x) {
             LOG.error("Unable to remove temporary workspace '{}'", workspace.getId());
         }
     }
