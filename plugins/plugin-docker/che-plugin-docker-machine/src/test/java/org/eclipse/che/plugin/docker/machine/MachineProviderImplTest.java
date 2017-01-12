@@ -59,6 +59,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
+import static java.util.Collections.singleton;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.plugin.docker.machine.DockerInstanceProvider.DOCKER_FILE_TYPE;
 import static org.eclipse.che.plugin.docker.machine.DockerInstanceProvider.MACHINE_SNAPSHOT_PREFIX;
@@ -744,14 +745,14 @@ public class MachineProviderImplTest {
         verify(dockerConnector).startContainer(any(StartContainerParams.class));
 
         final String[] extraHosts = argumentCaptor.getValue().getContainerConfig().getHostConfig().getExtraHosts();
-        assertEquals(extraHosts.length, 2);
+        assertEquals(extraHosts.length, 1);
         assertEquals(extraHosts[0], "dev.box.com:192.168.0.1");
     }
 
     @Test
     public void shouldAddExtraHostOnDevInstanceCreationFromSnapshot() throws Exception {
         //given
-        provider = new MachineProviderBuilder().setExtraHosts("dev.box.com:192.168.0.1,codenvy.com.com:185")
+        provider = new MachineProviderBuilder().setExtraHosts("dev.box.com:192.168.0.1", "codenvy.com.com:185")
                                                .build();
 
         final boolean isDev = true;
@@ -765,7 +766,7 @@ public class MachineProviderImplTest {
         verify(dockerConnector).startContainer(any(StartContainerParams.class));
 
         final String[] extraHosts = argumentCaptor.getValue().getContainerConfig().getHostConfig().getExtraHosts();
-        assertEquals(extraHosts.length, 3);
+        assertEquals(extraHosts.length, 2);
         assertEquals(extraHosts[0], "dev.box.com:192.168.0.1");
         assertEquals(extraHosts[1], "codenvy.com.com:185");
     }
@@ -787,14 +788,14 @@ public class MachineProviderImplTest {
         verify(dockerConnector).startContainer(any(StartContainerParams.class));
 
         final String[] extraHosts = argumentCaptor.getValue().getContainerConfig().getHostConfig().getExtraHosts();
-        assertEquals(extraHosts.length, 2);
+        assertEquals(extraHosts.length, 1);
         assertEquals(extraHosts[0], "dev.box.com:192.168.0.1");
     }
 
     @Test
     public void shouldAddExtraHostOnNonDevInstanceCreationFromSnapshot() throws Exception {
         //given
-        provider = new MachineProviderBuilder().setExtraHosts("dev.box.com:192.168.0.1,codenvy.com.com:185")
+        provider = new MachineProviderBuilder().setExtraHosts("dev.box.com:192.168.0.1", "codenvy.com.com:185")
                                                .build();
 
         final boolean isDev = false;
@@ -808,7 +809,7 @@ public class MachineProviderImplTest {
         verify(dockerConnector).startContainer(any(StartContainerParams.class));
 
         final String[] extraHosts = argumentCaptor.getValue().getContainerConfig().getHostConfig().getExtraHosts();
-        assertEquals(extraHosts.length, 3);
+        assertEquals(extraHosts.length, 2);
         assertEquals(extraHosts[0], "dev.box.com:192.168.0.1");
         assertEquals(extraHosts[1], "codenvy.com.com:185");
     }
@@ -1196,7 +1197,7 @@ public class MachineProviderImplTest {
         private Set<ServerConf>  allMachineServers;
         private Set<String>      devMachineVolumes;
         private Set<String>      allMachineVolumes;
-        private String           extraHosts;
+        private Set<Set<String>> extraHosts;
         private boolean          doForcePullOnBuild;
         private boolean          privilegedMode;
         private int              pidsLimit;
@@ -1222,7 +1223,7 @@ public class MachineProviderImplTest {
             allMachineServers = emptySet();
             devMachineVolumes = emptySet();
             allMachineVolumes = emptySet();
-            extraHosts = null;
+            extraHosts = emptySet();
             memorySwapMultiplier = MEMORY_SWAP_MULTIPLIER;
             pidsLimit = -1;
         }
@@ -1277,8 +1278,8 @@ public class MachineProviderImplTest {
             return this;
         }
 
-        public MachineProviderBuilder setExtraHosts(String extraHosts) {
-            this.extraHosts = extraHosts;
+        public MachineProviderBuilder setExtraHosts(String... extraHosts) {
+            this.extraHosts = singleton(new HashSet<>(Arrays.asList(extraHosts)));
             return this;
         }
 
@@ -1309,7 +1310,6 @@ public class MachineProviderImplTest {
 
         MachineProviderImpl build() throws IOException {
             return new MachineProviderImpl(dockerConnector,
-                                           dockerConnectorConfiguration,
                                            credentialsReader,
                                            dockerMachineFactory,
                                            dockerInstanceStopDetector,
@@ -1317,7 +1317,6 @@ public class MachineProviderImplTest {
                                            allMachineServers,
                                            devMachineVolumes,
                                            allMachineVolumes,
-                                           extraHosts,
                                            doForcePullOnBuild,
                                            privilegedMode,
                                            pidsLimit,
@@ -1331,7 +1330,8 @@ public class MachineProviderImplTest {
                                            cpuSet,
                                            cpuPeriod,
                                            cpuQuota,
-                                           pathEscaper);
+                                           pathEscaper,
+                                           extraHosts);
         }
     }
 }

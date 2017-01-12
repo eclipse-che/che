@@ -15,16 +15,21 @@
  * @author Florent Benoit
  */
 export class CheNavBar {
+  private replace: boolean;
+  private restrict: string;
+  private templateUrl: string;
+  private controller: string;
+  private controllerAs: string;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
   constructor () {
-    this.restrict='E';
+    this.restrict = 'E';
     this.replace = false;
     this.templateUrl = 'app/navbar/navbar.html';
-    this.controller = 'CheNavBarCtrl';
+    this.controller = 'CheNavBarController';
     this.controllerAs = 'navbarCtrl';
   }
 

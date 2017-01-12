@@ -247,7 +247,7 @@
     font-size: 9px;
     padding: 0;
     border-radius: 2px;
-    margin: 2px 5px 0 3px;
+    margin: 3px 5px 0 3px;
     box-shadow: 1px 1px 2px treeTextShadow;
 }
 
@@ -262,13 +262,14 @@
 .processTree .machineStatus {
     position: relative;
     float: left;
-    margin: 4px 4px;
+    margin: 0 4px;
     overflow: hidden;
 }
 
 .processTree .machineStatus .machineStatusRunning {
     width: 10px;
     height: 10px;
+    margin-top: 4px;
     background-color: #46af00;
     border: 1px solid #7ed321;
     border-radius: 5px;

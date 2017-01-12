@@ -14,10 +14,8 @@ import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
-import org.eclipse.che.plugin.docker.machine.DockerInstanceProvider;
-
 /**
- * Module for components that are needed for deal with proxy in {@link DockerInstanceProvider}
+ * Module that injects components needed to run docker machines behind proxies.
  *
  * @author Mykola Morhun
  * @author Roman Iuvshyn

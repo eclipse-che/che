@@ -439,8 +439,12 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         newTerminal.setListener(new TerminalPresenter.TerminalStateListener() {
             @Override
             public void onExit() {
-                onStopProcess(terminalNode);
-                terminals.remove(terminalId);
+                String terminalId = terminalNode.getId();
+                if (terminals.containsKey(terminalId)) {
+                    onStopProcess(terminalNode);
+                    terminals.remove(terminalId);
+                }
+                view.hideProcessOutput(terminalId );
             }
         });
     }
@@ -1158,6 +1162,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                     .withConfig(dtoFactory.createDto(MachineConfigDto.class)
                                     .withDev("dev-machine".equals(machineName))
                                     .withName(machineName)
+                                    .withType("docker")
                     );
             provideMachineNode(new MachineItem(machineDto), true);
         }
