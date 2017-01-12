@@ -397,7 +397,9 @@ function verify_nightly_accuracy() {
 
     if [[ -z ${REMOTE_CREATION_DATE} ]]; then
       warning "Unable to get published date on hub.docker.com for ${CHE_IMAGE_FULLNAME}"
-    elif $(newer_date_period ${LOCAL_CREATION_DATE} ${REMOTE_CREATION_DATE}); then
+    elif $(newer_date_period \
+         $(timestamp_date_iso8601 "${LOCAL_CREATION_DATE}") \
+         $(timestamp_date_iso8601 "${REMOTE_CREATION_DATE}")); then
      warning "There is a newer ${CHE_IMAGE_FULLNAME} image on DockerHub."
     fi
   fi
