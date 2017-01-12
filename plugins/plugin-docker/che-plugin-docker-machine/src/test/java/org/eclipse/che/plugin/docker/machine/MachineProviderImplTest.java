@@ -25,6 +25,7 @@ import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
 import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
+import org.eclipse.che.plugin.docker.client.Exec;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
 import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredentialsProvider;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
@@ -33,11 +34,13 @@ import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.json.ContainerState;
 import org.eclipse.che.plugin.docker.client.json.Volume;
 import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
+import org.eclipse.che.plugin.docker.client.params.CreateExecParams;
 import org.eclipse.che.plugin.docker.client.params.InspectContainerParams;
 import org.eclipse.che.plugin.docker.client.params.PullParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
 import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
+import org.eclipse.che.plugin.docker.client.params.StartExecParams;
 import org.eclipse.che.plugin.docker.client.params.TagParams;
 import org.eclipse.che.plugin.docker.machine.node.DockerNode;
 import org.mockito.ArgumentCaptor;
@@ -70,6 +73,7 @@ import static java.util.stream.Collectors.toMap;
 import static org.eclipse.che.plugin.docker.machine.DockerInstanceProvider.DOCKER_FILE_TYPE;
 import static org.eclipse.che.plugin.docker.machine.DockerInstanceProvider.MACHINE_SNAPSHOT_PREFIX;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -93,6 +97,7 @@ public class MachineProviderImplTest {
     private static final int     MEMORY_SWAP_MULTIPLIER = 0;
     private static final String  ENV_NAME               = "env";
     private static final String  NETWORK_NAME           = "networkName";
+    private static final String  EXEC_ID                = "exec";
 
     @Mock
     private DockerConnector dockerConnector;
@@ -123,6 +128,9 @@ public class MachineProviderImplTest {
 
     @Mock
     private WindowsPathEscaper pathEscaper;
+
+    @Mock
+    private Exec exec;
 
     private MachineProviderImpl provider;
 
@@ -158,6 +166,8 @@ public class MachineProviderImplTest {
         when(dockerConnector.inspectContainer(any(InspectContainerParams.class))).thenReturn(containerInfo);
         when(containerInfo.getState()).thenReturn(containerState);
         when(containerState.isRunning()).thenReturn(false);
+        when(dockerConnector.createExec(any(CreateExecParams.class))).thenReturn(exec);
+        when(exec.getId()).thenReturn(EXEC_ID);
     }
 
     @AfterMethod
@@ -335,6 +345,45 @@ public class MachineProviderImplTest {
         ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
         verify(dockerConnector).createContainer(argumentCaptor.capture());
         assertTrue(argumentCaptor.getValue().getContainerConfig().getHostConfig().isPrivileged());
+    }
+
+    @Test
+    public void shouldStartExecWithCheUserId() throws Exception {
+        final String user = "test";
+        provider = new MachineProviderBuilder().setUser(user)
+                                               .build();
+        final boolean isDev = true;
+        CheServiceImpl service = createService();
+        service.setVolumes(null);
+        createInstanceFromRecipe(service, isDev);
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        verify(dockerConnector).startContainer(any(StartContainerParams.class));
+        ArgumentCaptor<CreateExecParams> argumentCaptorExec = ArgumentCaptor.forClass(CreateExecParams.class);
+        verify(dockerConnector).createExec(argumentCaptorExec.capture());
+        String prepareCmd = "CHE_USER=`id -un`;"
+                + "sudo chown -R ${CHE_USER}:docker /home/user;"
+                + "sudo ln -s /home/user `eval echo \"~${CHE_USER}\"`";
+        final String[] command = {"/bin/sh", "-c", prepareCmd};
+        assertEquals(argumentCaptorExec.getValue().getCmd(), command);
+        verify(dockerConnector).startExec(eq(StartExecParams.create(EXEC_ID)), anyObject());
+        assertEquals(argumentCaptor.getValue().getContainerConfig().getUser(), user);
+    }
+
+    @Test
+    public void shouldNotStartExecWithoutCheUserId() throws Exception {
+        provider = new MachineProviderBuilder().build();
+        final boolean isDev = true;
+        CheServiceImpl service = createService();
+        service.setVolumes(null);
+        createInstanceFromRecipe(service, isDev);
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        verify(dockerConnector).startContainer(any(StartContainerParams.class));
+        ArgumentCaptor<CreateExecParams> argumentCaptorExec = ArgumentCaptor.forClass(CreateExecParams.class);
+        verify(dockerConnector, never()).createExec(argumentCaptorExec.capture());
+        verify(dockerConnector, never()).startExec(eq(StartExecParams.create(EXEC_ID)), anyObject());
+        assertTrue(argumentCaptor.getValue().getContainerConfig().getUser() == null);
     }
 
     @Test
@@ -708,6 +757,33 @@ public class MachineProviderImplTest {
                            .containsAll(asList("9090", "8080")));
     }
 
+    @Test
+    public void shouldAddUserOnDevInstanceCreationFromRecipe() throws Exception {
+        final String user = "test";
+        provider = new MachineProviderBuilder().setUser(user)
+                                               .build();
+        final boolean isDev = true;
+        CheServiceImpl service = createService();
+        service.setVolumes(null);
+        createInstanceFromRecipe(service, isDev);
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        verify(dockerConnector).startContainer(any(StartContainerParams.class));
+        assertEquals(argumentCaptor.getValue().getContainerConfig().getUser(), user);
+    }
+
+    @Test
+    public void shouldAddUserOnDevInstanceCreationFromSnapshot() throws Exception {
+        final String user = "test";
+        provider = new MachineProviderBuilder().setUser(user)
+                                               .build();
+        final boolean isDev = true;
+        createInstanceFromSnapshot(isDev);
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        verify(dockerConnector).startContainer(any(StartContainerParams.class));
+        assertEquals(argumentCaptor.getValue().getContainerConfig().getUser(), user);
+    }
     @Test
     public void shouldAddBindMountAndRegularVolumesOnInstanceCreationFromRecipe() throws Exception {
         String[] bindMountVolumesFromMachine = new String[] {"/my/bind/mount1:/from/host1",
@@ -1463,6 +1539,7 @@ public class MachineProviderImplTest {
         private String           networkDriver;
         private String           parentCgroup;
         private String           cpuSet;
+        private String           user;
         private long             cpuPeriod;
         private long             cpuQuota;
         private String[]         dnsResolvers;
@@ -1481,6 +1558,7 @@ public class MachineProviderImplTest {
             extraHosts = emptySet();
             memorySwapMultiplier = MEMORY_SWAP_MULTIPLIER;
             pidsLimit = -1;
+            user = null;
         }
 
         public MachineProviderBuilder setDevMachineEnvVars(Set<String> devMachineEnvVars) {
@@ -1535,6 +1613,11 @@ public class MachineProviderImplTest {
 
         public MachineProviderBuilder setExtraHosts(String... extraHosts) {
             this.extraHosts = singleton(new HashSet<>(Arrays.asList(extraHosts)));
+            return this;
+        }
+
+        public MachineProviderBuilder setUser(String user) {
+            this.user = user;
             return this;
         }
 
@@ -1593,7 +1676,8 @@ public class MachineProviderImplTest {
                                            cpuQuota,
                                            pathEscaper,
                                            extraHosts,
-                                           dnsResolvers);
+                                           dnsResolvers,
+                                           user);
         }
     }
 }
