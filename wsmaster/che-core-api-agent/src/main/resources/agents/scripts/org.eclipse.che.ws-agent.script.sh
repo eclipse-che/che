@@ -39,7 +39,14 @@ ${SUDO} sh -c "chown -R $(id -u -n) /projects"
 
 
 INSTALL_JDK=false
-command -v ${JAVA_HOME}/bin/java >/dev/null 2>&1 || INSTALL_JDK=true
+command -v ${JAVA_HOME}/bin/java >/dev/null 2>&1 || {
+    INSTALL_JDK=true;
+} && {
+    java_version=$(${JAVA_HOME}/bin/java -version 2>&1 | sed 's/.* version "\\(.*\\)\\.\\(.*\\)\\..*"/\\1\\2/; 1q')
+    if [ "${java_version}" -lt "18" ]; then
+        INSTALL_JDK=true;
+    fi
+}
 
 
 ########################
