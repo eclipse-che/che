@@ -390,7 +390,7 @@ function verify_nightly_accuracy() {
 
     # Unfortunatley, the "last_updated" date on DockerHub is the date it was uploaded, not created.
     # So after you download the image locally, then the local image "created" value reflects when it
-    # was originally built, creating a istuation where the local cached version is always older than
+    # was originally built, creating a situation where the local cached version is always older than
     # what is on DockerHub, even if you just pulled it.
     # Solution is to compare the dates, and only print warning message if the locally created ate
     # is less than the updated date on dockerhub.
