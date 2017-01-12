@@ -16,8 +16,10 @@ import com.google.common.collect.ImmutableMap;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
+import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
 import org.eclipse.che.api.workspace.server.event.WorkspaceRemovedEvent;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentRecipeImpl;
@@ -31,6 +33,8 @@ import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.commons.test.tck.TckListener;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepositoryException;
+import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
+import org.eclipse.che.core.db.cascade.event.CascadeEvent;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
@@ -49,8 +53,13 @@ import java.util.stream.Stream;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toList;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 /**
  * Tests {@link WorkspaceDao} contract.
@@ -189,6 +198,22 @@ public class WorkspaceDaoTest {
         workspaceDao.get(workspace.getId());
     }
 
+    @Test(dependsOnMethods = "shouldGetWorkspaceById")
+    public void shouldNotRemoveWorkspaceWhenSubscriberThrowsExceptionOnWorkspaceRemoving() throws Exception {
+        final WorkspaceImpl workspace = workspaces[0];
+        CascadeEventSubscriber<BeforeWorkspaceRemovedEvent> subscriber = mockCascadeEventSubscriber();
+        doThrow(new ServerException("error")).when(subscriber).onCascadeEvent(any());
+        eventService.subscribe(subscriber, BeforeWorkspaceRemovedEvent.class);
+
+        try {
+            workspaceDao.remove(workspace.getId());
+            fail("WorkspaceDao#remove had to throw server exception");
+        } catch (ServerException ignored) {
+        }
+
+        assertEquals(workspaceDao.get(workspace.getId()), workspace);
+        eventService.unsubscribe(subscriber, BeforeWorkspaceRemovedEvent.class);
+    }
 
     @Test
     public void shouldGetWorkspacesByNonTemporary() throws Exception {
@@ -536,5 +561,12 @@ public class WorkspaceDaoTest {
                                                               "attr3", "value3")));
         workspace.setConfig(wCfg);
         return workspace;
+    }
+
+    private <T extends CascadeEvent> CascadeEventSubscriber<T> mockCascadeEventSubscriber() {
+        @SuppressWarnings("unchecked")
+        CascadeEventSubscriber<T> subscriber = mock(CascadeEventSubscriber.class);
+        doCallRealMethod().when(subscriber).onEvent(any());
+        return subscriber;
     }
 }

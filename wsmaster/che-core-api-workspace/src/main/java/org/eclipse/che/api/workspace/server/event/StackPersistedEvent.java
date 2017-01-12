@@ -12,6 +12,7 @@ package org.eclipse.che.api.workspace.server.event;
 
 import org.eclipse.che.api.core.notification.EventOrigin;
 import org.eclipse.che.api.workspace.shared.stack.Stack;
+import org.eclipse.che.core.db.cascade.event.PersistEvent;
 
 /**
  * Published after stack instance is persisted.
@@ -19,7 +20,7 @@ import org.eclipse.che.api.workspace.shared.stack.Stack;
  * @author Yevhenii Voevodin
  */
 @EventOrigin("stack")
-public class StackPersistedEvent {
+public class StackPersistedEvent extends PersistEvent {
 
     private final Stack stack;
 

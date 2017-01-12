@@ -12,6 +12,7 @@ package org.eclipse.che.api.machine.server.event;
 
 import org.eclipse.che.api.core.notification.EventOrigin;
 import org.eclipse.che.api.machine.shared.ManagedRecipe;
+import org.eclipse.che.core.db.cascade.event.PersistEvent;
 
 /**
  * Published after recipe instance is persisted.
@@ -19,7 +20,7 @@ import org.eclipse.che.api.machine.shared.ManagedRecipe;
  * @author Anton Korneta.
  */
 @EventOrigin("recipe")
-public class RecipePersistedEvent {
+public class RecipePersistedEvent extends PersistEvent {
     private final ManagedRecipe recipe;
 
     public RecipePersistedEvent(ManagedRecipe recipe) {
