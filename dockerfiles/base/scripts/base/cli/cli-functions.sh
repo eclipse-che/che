@@ -381,14 +381,9 @@ function verify_nightly_accuracy() {
   # than the one stored on DockerHub.
   if is_nightly; then
 
-#    REMOTE_NIGHTLY_JSON=$(curl -s https://hub.docker.com/v2/repositories/${CHE_IMAGE_NAME}/tags/nightly/)
-
     # Retrieve info on current nightly
     LOCAL_CREATION_DATE=$(docker inspect --format="{{.Created }}" ${CHE_IMAGE_FULLNAME})
     CURRENT_DATE=$(date)
-    
-#    REMOTE_CREATION_DATE=$(echo $REMOTE_NIGHTLY_JSON | jq ".last_updated")
-#    REMOTE_CREATION_DATE="${REMOTE_CREATION_DATE//\"}"
 
     # Unfortunatley, the "last_updated" date on DockerHub is the date it was uploaded, not created.
     # So after you download the image locally, then the local image "created" value reflects when it
