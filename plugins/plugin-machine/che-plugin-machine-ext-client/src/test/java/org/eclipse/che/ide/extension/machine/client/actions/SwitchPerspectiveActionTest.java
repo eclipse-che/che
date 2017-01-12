@@ -52,7 +52,7 @@ public class SwitchPerspectiveActionTest {
 
     @Test
     public void buttonsShouldBeCreatedInGroup() {
-        verify(radioButtonGroup, times(2)).addButton(anyString(), anyString(), any(SVGResource.class), any(ClickHandler.class));
+        verify(radioButtonGroup).addButton(anyString(), anyString(), any(SVGResource.class), any(ClickHandler.class));
         verify(radioButtonGroup).selectButton(eq(0));
     }
 }
