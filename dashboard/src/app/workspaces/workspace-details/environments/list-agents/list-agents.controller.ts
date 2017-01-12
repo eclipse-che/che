@@ -18,6 +18,12 @@ import {CheAPI} from '../../../../../components/api/che-api.factory';
  * @description This class is handling the controller for list of agents
  * @author Ilya Buziuk
  */
+
+/** List of the agents which shouldn't be switched by user */
+const DISABLED_AGENTS: Array<string> = ['org.eclipse.che.ws-agent',
+                                        'com.codenvy.rsync_in_machine',
+                                        'com.codenvy.external_rsync'];
+
 export class ListAgentsController {
   cheAgent: CheAgent;
 
@@ -62,12 +68,13 @@ export class ListAgentsController {
   }
 
   /**
+   * Disables agents which shouldn't be switched by user.
    * Switching of the "ws-agent" must happen only via "Dev" slider.
    * "ws-agent" should be listed, but always disabled regardless of the state
    * @param agentId {string}
    */
   needToDisable(agentId: string): boolean {
-    return (agentId === 'org.eclipse.che.ws-agent');
+    return DISABLED_AGENTS.indexOf(agentId) !== -1;
   }
 
   isEnabled(agentId: string, agents: string[]): boolean {
