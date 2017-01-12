@@ -347,7 +347,9 @@ public class GitServiceClientImpl implements GitServiceClient {
         List<String> paths = new ArrayList<>(files.length);
 
         for (Path file : files) {
-            paths.add(file.isEmpty() ? "." : file.toString());
+            if (!file.isEmpty()) {
+                paths.add(file.toString());
+            }
         }
 
         CommitRequest commitRequest = dtoFactory.createDto(CommitRequest.class)

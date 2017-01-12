@@ -21,24 +21,25 @@ import org.eclipse.che.api.vfs.search.QueryExpression;
 import org.eclipse.che.api.vfs.search.SearchResult;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 import org.mockito.ArgumentMatcher;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 @SuppressWarnings("Duplicates")
 public class FSLuceneSearcherTest {
@@ -54,7 +55,7 @@ public class FSLuceneSearcherTest {
     private FSLuceneSearcher                             searcher;
     private AbstractLuceneSearcherProvider.CloseCallback closeCallback;
 
-    @Before
+    @BeforeMethod
     public void setUp() throws Exception {
         File targetDir = new File(Thread.currentThread().getContextClassLoader().getResource(".").getPath()).getParentFile();
         indexDirectory = new File(targetDir, NameGenerator.generate("index-", 4));
@@ -67,7 +68,7 @@ public class FSLuceneSearcherTest {
         searcher = new FSLuceneSearcher(indexDirectory, filter, closeCallback);
     }
 
-    @After
+    @AfterMethod
     public void tearDown() throws Exception {
         searcher.close();
         IoUtil.deleteRecursive(indexDirectory);
@@ -188,6 +189,34 @@ public class FSLuceneSearcherTest {
 
         List<String> paths = searcher.search(new QueryExpression().setText("be").setName("xxx.txt")).getFilePaths();
         assertEquals(newArrayList("/folder/xxx.txt"), paths);
+    }
+
+    @DataProvider
+    public Object[][] searchByName() {
+        return new Object[][]{
+                {"sameName.txt", "sameName.txt"},
+                {"notCaseSensitive.txt", "notcasesensitive.txt"},
+                {"fullName.txt", "full*"},
+                {"file name.txt", "file name"},
+                {"prefixFileName.txt", "prefixF*"},
+                {"name.with.dot.txt", "name.With.Dot.txt"},
+        };
+    }
+
+    @Test(dataProvider = "searchByName")
+    public void searchFileByName(String fileName, String searchedFileName) throws Exception {
+        VirtualFileSystem virtualFileSystem = virtualFileSystem();
+        VirtualFile folder = virtualFileSystem.getRoot().createFolder("parent/child");
+        VirtualFile folder2 = virtualFileSystem.getRoot().createFolder("folder2");
+        folder.createFile(NameGenerator.generate(null,10), TEST_CONTENT[3]);
+        folder.createFile(fileName, TEST_CONTENT[2]);
+        folder.createFile(NameGenerator.generate(null,10), TEST_CONTENT[1]);
+        folder2.createFile(NameGenerator.generate(null,10), TEST_CONTENT[2]);
+        folder2.createFile(NameGenerator.generate(null,10), TEST_CONTENT[2]);
+        searcher.init(virtualFileSystem);
+
+        List<String> paths = searcher.search(new QueryExpression().setName(searchedFileName)).getFilePaths();
+        assertEquals(newArrayList("/parent/child/" + fileName), paths);
     }
 
     @Test

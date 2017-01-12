@@ -162,7 +162,7 @@ public class WorkspaceRuntimes {
     public RuntimeDescriptor get(String workspaceId) throws NotFoundException,
                                                             ServerException {
         WorkspaceState workspaceState;
-        try (CloseableLock lock = locks.acquireReadLock(workspaceId)) {
+        try (@SuppressWarnings("unused") CloseableLock lock = locks.acquireReadLock(workspaceId)) {
             workspaceState = workspaces.get(workspaceId);
         }
         if (workspaceState == null) {
@@ -276,7 +276,7 @@ public class WorkspaceRuntimes {
         // The double check is required as it is still possible to get unlucky timing
         // between locking and stopping workspace.
         ensurePreDestroyIsNotExecuted();
-        try (CloseableLock lock = locks.acquireWriteLock(workspaceId)) {
+        try (@SuppressWarnings("unused") CloseableLock lock = locks.acquireWriteLock(workspaceId)) {
             ensurePreDestroyIsNotExecuted();
             WorkspaceState workspaceState = workspaces.get(workspaceId);
             if (workspaceState == null) {
@@ -303,7 +303,7 @@ public class WorkspaceRuntimes {
         } catch (ServerException | RuntimeException e) {
             error = e.getLocalizedMessage();
         } finally {
-            try (CloseableLock lock = locks.acquireWriteLock(workspaceId)) {
+            try (@SuppressWarnings("unused") CloseableLock lock = locks.acquireWriteLock(workspaceId)) {
                 workspaces.remove(workspaceId);
             }
         }
@@ -349,7 +349,7 @@ public class WorkspaceRuntimes {
      * @return true if workspace is running, otherwise false
      */
     public boolean hasRuntime(String workspaceId) {
-        try (CloseableLock lock = locks.acquireReadLock(workspaceId)) {
+        try (@SuppressWarnings("unused") CloseableLock lock = locks.acquireReadLock(workspaceId)) {
             return workspaces.containsKey(workspaceId);
         }
     }
@@ -375,7 +375,7 @@ public class WorkspaceRuntimes {
                                                                      NotFoundException,
                                                                      EnvironmentException {
 
-        try (CloseableLock lock = locks.acquireReadLock(workspaceId)) {
+        try (@SuppressWarnings("unused") CloseableLock lock = locks.acquireReadLock(workspaceId)) {
             getRunningState(workspaceId);
         }
 
@@ -388,7 +388,7 @@ public class WorkspaceRuntimes {
         Instance instance = envEngine.startMachine(workspaceId, machineConfigCopy, agents);
         launchAgents(instance, agents);
 
-        try (CloseableLock lock = locks.acquireWriteLock(workspaceId)) {
+        try (@SuppressWarnings("unused") CloseableLock lock = locks.acquireWriteLock(workspaceId)) {
             ensurePreDestroyIsNotExecuted();
             WorkspaceState workspaceState = workspaces.get(workspaceId);
             if (workspaceState == null || workspaceState.status != RUNNING) {
@@ -510,7 +510,7 @@ public class WorkspaceRuntimes {
     public void stopMachine(String workspaceId, String machineId) throws NotFoundException,
                                                                          ServerException,
                                                                          ConflictException {
-        try (CloseableLock lock = locks.acquireReadLock(workspaceId)) {
+        try (@SuppressWarnings("unused") CloseableLock lock = locks.acquireReadLock(workspaceId)) {
             getRunningState(workspaceId);
         }
         envEngine.stopMachine(workspaceId, machineId);
@@ -692,7 +692,7 @@ public class WorkspaceRuntimes {
                                                       getEnvironmentLogger(workspaceId));
             launchAgents(environment, machines);
 
-            try (CloseableLock lock = locks.acquireWriteLock(workspaceId)) {
+            try (@SuppressWarnings("unused") CloseableLock lock = locks.acquireWriteLock(workspaceId)) {
                 ensurePreDestroyIsNotExecuted();
                 WorkspaceState workspaceState = workspaces.get(workspaceId);
                 workspaceState.status = WorkspaceStatus.RUNNING;
@@ -712,7 +712,7 @@ public class WorkspaceRuntimes {
             }
             String environmentStartError = "Start of environment " + envName +
                                            " failed. Error: " + e.getLocalizedMessage();
-            try (CloseableLock lock = locks.acquireWriteLock(workspaceId)) {
+            try (@SuppressWarnings("unused") CloseableLock lock = locks.acquireWriteLock(workspaceId)) {
                 workspaces.remove(workspaceId);
             }
             eventsService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)

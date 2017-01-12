@@ -28,8 +28,8 @@ import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessLogsResponseDt
 import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessesResponseDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.workspace.shared.Utils;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
-import org.eclipse.che.api.workspace.shared.dto.ExtendedMachineDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.ide.CoreLocalizationConstant;
@@ -59,7 +59,6 @@ import org.eclipse.che.ide.websocket.rest.SubscriptionHandler;
 import org.eclipse.che.ide.workspace.start.StartWorkspaceNotification;
 
 import java.util.List;
-import java.util.Map;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_ENVIRONMENT_OUTPUT_CHANNEL;
@@ -345,12 +344,7 @@ public class WorkspaceEventsHandler {
         String activeEnv = runtime.getActiveEnv();
         EnvironmentDto environment = workspace.getConfig().getEnvironments().get(activeEnv);
         if (environment != null) {
-            for (Map.Entry<String, ExtendedMachineDto> machineEntry : environment.getMachines()
-                                                                                 .entrySet()) {
-                if (machineEntry.getValue().getAgents().contains("org.eclipse.che.ws-agent")) {
-                    return machineEntry.getKey();
-                }
-            }
+            return Utils.getDevMachineName(environment);
         }
 
         // if no machine with ws-agent found

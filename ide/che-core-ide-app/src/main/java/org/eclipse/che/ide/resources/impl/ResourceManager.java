@@ -27,7 +27,6 @@ import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
-import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.api.workspace.shared.dto.NewProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectProblemDto;
@@ -308,9 +307,9 @@ public final class ResourceManager {
                 Container container = (Container)resource;
 
                 if (resource instanceof Folder) {
-                    Optional<Container> parent = resource.getParent();
-                    checkState(parent.isPresent(), "Parent of the resource wasn't found");
-                    container = parent.get();
+                    Container parent = resource.getParent();
+                    checkState(parent != null, "Parent of the resource wasn't found");
+                    container = parent;
                 }
 
                 return synchronize(container).then(new Function<Resource[], Project>() {

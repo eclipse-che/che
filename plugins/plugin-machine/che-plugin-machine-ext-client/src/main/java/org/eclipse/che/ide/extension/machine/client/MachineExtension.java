@@ -22,7 +22,6 @@ import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.action.IdeActions;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.api.icon.Icon;
 import org.eclipse.che.ide.api.icon.IconRegistry;
@@ -34,13 +33,8 @@ import org.eclipse.che.ide.api.parts.Perspective;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
-import org.eclipse.che.ide.extension.machine.client.actions.CreateMachineAction;
-import org.eclipse.che.ide.extension.machine.client.actions.CreateSnapshotAction;
-import org.eclipse.che.ide.extension.machine.client.actions.DestroyMachineAction;
-import org.eclipse.che.ide.extension.machine.client.actions.RestartMachineAction;
 import org.eclipse.che.ide.extension.machine.client.actions.RunCommandAction;
 import org.eclipse.che.ide.extension.machine.client.actions.ShowConsoleTreeAction;
-import org.eclipse.che.ide.extension.machine.client.actions.SwitchPerspectiveAction;
 import org.eclipse.che.ide.extension.machine.client.command.macros.ServerPortProvider;
 import org.eclipse.che.ide.extension.machine.client.machine.MachineStatusHandler;
 import org.eclipse.che.ide.extension.machine.client.processes.NewTerminalAction;
@@ -51,11 +45,8 @@ import org.eclipse.che.ide.extension.machine.client.targets.EditTargetsAction;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
 
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_CONSOLES_TREE_CONTEXT_MENU;
-import static org.eclipse.che.ide.api.action.IdeActions.GROUP_MAIN_MENU;
-import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RIGHT_TOOLBAR;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RUN;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_WORKSPACE;
-import static org.eclipse.che.ide.api.constraints.Anchor.AFTER;
 import static org.eclipse.che.ide.api.constraints.Constraints.FIRST;
 
 /**
@@ -140,15 +131,9 @@ public class MachineExtension {
     }
 
     @Inject
-    private void prepareActions(MachineLocalizationConstant localizationConstant,
-                                ActionManager actionManager,
+    private void prepareActions(ActionManager actionManager,
                                 KeyBindingAgent keyBinding,
-                                CreateMachineAction createMachine,
-                                RestartMachineAction restartMachine,
-                                DestroyMachineAction destroyMachineAction,
                                 StopWorkspaceAction stopWorkspaceAction,
-                                SwitchPerspectiveAction switchPerspectiveAction,
-                                CreateSnapshotAction createSnapshotAction,
                                 RunCommandAction runCommandAction,
                                 NewTerminalAction newTerminalAction,
                                 EditTargetsAction editTargetsAction,
@@ -158,22 +143,12 @@ public class MachineExtension {
                                 StopProcessAction stopProcessAction,
                                 CloseConsoleAction closeConsoleAction,
                                 ShowConsoleTreeAction showConsoleTreeAction) {
-        final DefaultActionGroup mainMenu = (DefaultActionGroup)actionManager.getAction(GROUP_MAIN_MENU);
-
         final DefaultActionGroup workspaceMenu = (DefaultActionGroup)actionManager.getAction(GROUP_WORKSPACE);
         final DefaultActionGroup runMenu = (DefaultActionGroup)actionManager.getAction(GROUP_RUN);
 
         actionManager.registerAction("editTargets", editTargetsAction);
 
-        //add actions in machine menu
-        final DefaultActionGroup machineMenu = new DefaultActionGroup(localizationConstant.mainMenuMachine(), true, actionManager);
-
-        actionManager.registerAction("machine", machineMenu);
-        actionManager.registerAction("createMachine", createMachine);
-        actionManager.registerAction("destroyMachine", destroyMachineAction);
-        actionManager.registerAction("restartMachine", restartMachine);
         actionManager.registerAction("stopWorkspace", stopWorkspaceAction);
-        actionManager.registerAction("createSnapshot", createSnapshotAction);
         actionManager.registerAction("runCommand", runCommandAction);
         actionManager.registerAction("newTerminal", newTerminalAction);
 
@@ -183,16 +158,6 @@ public class MachineExtension {
         runMenu.add(editTargetsAction);
 
         workspaceMenu.add(stopWorkspaceAction);
-
-        mainMenu.add(machineMenu, new Constraints(AFTER, IdeActions.GROUP_PROJECT));
-        machineMenu.add(createMachine);
-        machineMenu.add(restartMachine);
-        machineMenu.add(destroyMachineAction);
-        machineMenu.add(createSnapshotAction);
-
-        // add actions on right part of toolbar
-        final DefaultActionGroup rightToolbarGroup = (DefaultActionGroup)actionManager.getAction(GROUP_RIGHT_TOOLBAR);
-        rightToolbarGroup.add(switchPerspectiveAction);
 
         // Consoles tree context menu group
         DefaultActionGroup consolesTreeContextMenu = (DefaultActionGroup)actionManager.getAction(GROUP_CONSOLES_TREE_CONTEXT_MENU);
@@ -208,5 +173,4 @@ public class MachineExtension {
 
         iconRegistry.registerIcon(new Icon("che.machine.icon", machineResources.devMachine()));
     }
-
 }
