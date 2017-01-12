@@ -175,8 +175,6 @@ public class MachineExtension {
                                 StopProcessAction stopProcessAction,
                                 CloseConsoleAction closeConsoleAction,
                                 ShowConsoleTreeAction showConsoleTreeAction) {
-        final DefaultActionGroup mainMenu = (DefaultActionGroup)actionManager.getAction(GROUP_MAIN_MENU);
-
         final DefaultActionGroup workspaceMenu = (DefaultActionGroup)actionManager.getAction(GROUP_WORKSPACE);
         final DefaultActionGroup runMenu = (DefaultActionGroup)actionManager.getAction(GROUP_RUN);
 
@@ -187,10 +185,6 @@ public class MachineExtension {
 
         actionManager.registerAction("editTargets", editTargetsAction);
 
-        //add actions in machine menu
-        final DefaultActionGroup machineMenu = new DefaultActionGroup(localizationConstant.mainMenuMachine(), true, actionManager);
-
-        actionManager.registerAction("machine", machineMenu);
         actionManager.registerAction("stopWorkspace", stopWorkspaceAction);
         actionManager.registerAction("runCommand", runCommandAction);
         actionManager.registerAction("newTerminal", newTerminalAction);
@@ -203,7 +197,6 @@ public class MachineExtension {
 
         workspaceMenu.add(stopWorkspaceAction);
 
-        mainMenu.add(machineMenu, new Constraints(AFTER, IdeActions.GROUP_PROJECT));
 
         if (centralToolbarVisible) {
             // add actions on center part of toolbar
@@ -216,8 +209,6 @@ public class MachineExtension {
             executeToolbarGroup.add(executeSelectedCommandAction);
             machineToolbarGroup.add(executeToolbarGroup);
         }
-
-        // addActionsOnRightPartOfToolbar(actionManager, switchPerspectiveAction);
 
         // add group for list of machines
         final DefaultActionGroup machinesList = new DefaultActionGroup(GROUP_MACHINES_DROPDOWN, true, actionManager);
@@ -243,10 +234,4 @@ public class MachineExtension {
 
         iconRegistry.registerIcon(new Icon("che.machine.icon", machineResources.devMachine()));
     }
-
-    private void addActionsOnRightPartOfToolbar(ActionManager actionManager, SwitchPerspectiveAction switchPerspectiveAction) {
-        final DefaultActionGroup rightToolbarGroup = (DefaultActionGroup)actionManager.getAction(GROUP_RIGHT_TOOLBAR);
-        rightToolbarGroup.add(switchPerspectiveAction);
-    }
-
 }
