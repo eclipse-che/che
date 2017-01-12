@@ -66,9 +66,11 @@ import static com.google.common.collect.Lists.newArrayList;
  * @author andrew00x
  */
 public abstract class LuceneSearcher implements Searcher {
-    private static final Logger LOG = LoggerFactory.getLogger(LuceneSearcher.class);
-
-    private static final int RESULT_LIMIT = 1000;
+    private static final Logger LOG          = LoggerFactory.getLogger(LuceneSearcher.class);
+    private static final int    RESULT_LIMIT = 1000;
+    private static final String PATH_FIELD   = "path";
+    private static final String NAME_FIELD   = "name";
+    private static final String TEXT_FIELD   = "text";
 
     private final List<VirtualFileFilter>                      excludeFileIndexFilters;
     private final AbstractLuceneSearcherProvider.CloseCallback closeCallback;
@@ -206,7 +208,7 @@ public abstract class LuceneSearcher implements Searcher {
             List<SearchResultEntry> results = newArrayList();
             for (int i = 0; i < topDocs.scoreDocs.length; i++) {
                 ScoreDoc scoreDoc = topDocs.scoreDocs[i];
-                String filePath = luceneSearcher.doc(scoreDoc.doc).getField("path").stringValue();
+                String filePath = luceneSearcher.doc(scoreDoc.doc).getField(PATH_FIELD).stringValue();
                 results.add(new SearchResultEntry(filePath));
             }
 
@@ -224,7 +226,7 @@ public abstract class LuceneSearcher implements Searcher {
                                .withNextPageQueryExpression(nextPageQueryExpression)
                                .withElapsedTimeMillis(elapsedTimeMillis)
                                .build();
-        } catch (IOException e) {
+        } catch (IOException | ParseException e) {
             throw new ServerException(e.getMessage(), e);
         } finally {
             try {
@@ -235,32 +237,25 @@ public abstract class LuceneSearcher implements Searcher {
         }
     }
 
-    private Query createLuceneQuery(QueryExpression query) throws ServerException {
+    private Query createLuceneQuery(QueryExpression query) throws ParseException {
         final BooleanQuery luceneQuery = new BooleanQuery();
-        final String nameQuery = query.getName();
-        final String pathQuery = query.getPath();
-        final String textQuery = query.getText();
-        final String nameField = "name";
-        final String pathField = "path";
-        final String textField = "text";
-        if (pathQuery != null) {
-            luceneQuery.add(new PrefixQuery(new Term(pathField, pathQuery)), BooleanClause.Occur.MUST);
+        final String name = query.getName();
+        final String path = query.getPath();
+        final String text = query.getText();
+        if (path != null) {
+            luceneQuery.add(new PrefixQuery(new Term(PATH_FIELD, path)), BooleanClause.Occur.MUST);
         }
-        createAndAddQueryParser(luceneQuery, nameField, nameQuery);
-        createAndAddQueryParser(luceneQuery, textField, textQuery);
-        return luceneQuery;
-    }
-
-    private void createAndAddQueryParser(BooleanQuery luceneQuery, String name, String query) throws ServerException {
-        if (query != null) {
-            QueryParser qParser = new QueryParser(name, makeAnalyzer());
+        if (name != null) {
+            QueryParser qParser = new QueryParser(NAME_FIELD, makeAnalyzer());
             qParser.setAllowLeadingWildcard(true);
-            try {
-                luceneQuery.add(qParser.parse(query), BooleanClause.Occur.MUST);
-            } catch (ParseException e) {
-                throw new ServerException(e.getMessage());
-            }
+            luceneQuery.add(qParser.parse(name), BooleanClause.Occur.MUST);
         }
+        if (text != null) {
+            QueryParser qParser = new QueryParser(TEXT_FIELD, makeAnalyzer());
+            qParser.setAllowLeadingWildcard(true);
+            luceneQuery.add(qParser.parse(text), BooleanClause.Occur.MUST);
+        }
+        return luceneQuery;
     }
 
     private ScoreDoc skipScoreDocs(IndexSearcher luceneSearcher, Query luceneQuery, int numSkipDocs) throws IOException {
@@ -332,8 +327,8 @@ public abstract class LuceneSearcher implements Searcher {
             try (Reader fContentReader = shouldIndexContent(virtualFile)
                                          ? new BufferedReader(new InputStreamReader(virtualFile.getContent()))
                                          : null) {
-                getIndexWriter()
-                        .updateDocument(new Term("path", virtualFile.getPath().toString()), createDocument(virtualFile, fContentReader));
+                getIndexWriter().updateDocument(new Term(PATH_FIELD, virtualFile.getPath().toString()),
+                                                createDocument(virtualFile, fContentReader));
             } catch (OutOfMemoryError oome) {
                 close();
                 throw oome;
@@ -349,10 +344,10 @@ public abstract class LuceneSearcher implements Searcher {
     public final void delete(String path, boolean isFile) throws ServerException {
         try {
             if (isFile) {
-                Term term = new Term("path", path);
+                Term term = new Term(PATH_FIELD, path);
                 getIndexWriter().deleteDocuments(term);
             } else {
-                Term term = new Term("path", path + "/");
+                Term term = new Term(PATH_FIELD, path + '/');
                 getIndexWriter().deleteDocuments(new PrefixQuery(term));
             }
         } catch (OutOfMemoryError oome) {
@@ -365,7 +360,7 @@ public abstract class LuceneSearcher implements Searcher {
 
     @Override
     public final void update(VirtualFile virtualFile) throws ServerException {
-        doUpdate(new Term("path", virtualFile.getPath().toString()), virtualFile);
+        doUpdate(new Term(PATH_FIELD, virtualFile.getPath().toString()), virtualFile);
     }
 
     protected void doUpdate(Term deleteTerm, VirtualFile virtualFile) throws ServerException {
@@ -385,10 +380,10 @@ public abstract class LuceneSearcher implements Searcher {
 
     protected Document createDocument(VirtualFile virtualFile, Reader reader) throws ServerException {
         final Document doc = new Document();
-        doc.add(new StringField("path", virtualFile.getPath().toString(), Field.Store.YES));
-        doc.add(new TextField("name", virtualFile.getName(), Field.Store.YES));
+        doc.add(new StringField(PATH_FIELD, virtualFile.getPath().toString(), Field.Store.YES));
+        doc.add(new TextField(NAME_FIELD, virtualFile.getName(), Field.Store.YES));
         if (reader != null) {
-            doc.add(new TextField("text", reader));
+            doc.add(new TextField(TEXT_FIELD, reader));
         }
         return doc;
     }
