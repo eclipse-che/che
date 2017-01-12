@@ -184,9 +184,7 @@ fi
 
 curl -s ${AGENT_BINARIES_URI} | tar xzf - -C ${LS_DIR}
 
-tempdir=$(mktemp -d /tmp/wheelhouse-XXXXX)
-(cd $tempdir; tar -xvf ${LS_DIR}/bundled.tar.bz2)
-${SUDO} pip3 install --force-reinstall --ignore-installed --upgrade --no-index --no-deps $tempdir/*
+cd ${LS_DIR} && ${SUDO} pip3 install -r ${LS_DIR}/requirements.txt
 
 touch ${LS_LAUNCHER}
 chmod +x ${LS_LAUNCHER}
