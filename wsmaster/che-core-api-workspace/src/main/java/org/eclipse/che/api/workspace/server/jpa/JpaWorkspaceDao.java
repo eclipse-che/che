@@ -231,7 +231,7 @@ public class JpaWorkspaceDao implements WorkspaceDao {
 
         @Override
         public void onRemovalEvent(BeforeAccountRemovedEvent event) throws Exception {
-            for (WorkspaceImpl workspace : workspaceManager.getByNamespace(event.getAccount().getName())) {
+            for (WorkspaceImpl workspace : workspaceManager.getByNamespace(event.getAccount().getName(), false)) {
                 workspaceManager.removeWorkspace(workspace.getId());
             }
         }

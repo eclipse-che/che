@@ -218,7 +218,7 @@ public class WorkspaceManagerTest {
         when(runtimes.getStatus(workspace1.getId())).thenReturn(STOPPED);
 
         // when
-        final List<WorkspaceImpl> result = workspaceManager.getWorkspaces(NAMESPACE);
+        final List<WorkspaceImpl> result = workspaceManager.getWorkspaces(NAMESPACE, false);
 
         // then
         assertEquals(result.size(), 2);
@@ -239,7 +239,7 @@ public class WorkspaceManagerTest {
         createAndMockDescriptor(workspace, RUNNING);
 
         // when
-        final List<WorkspaceImpl> result = workspaceManager.getByNamespace(workspace.getNamespace());
+        final List<WorkspaceImpl> result = workspaceManager.getByNamespace(workspace.getNamespace(), false);
 
         // then
         assertEquals(result.size(), 1);
@@ -856,6 +856,7 @@ public class WorkspaceManagerTest {
             throws ServerException, NotFoundException, ConflictException {
         RuntimeDescriptor descriptor = createDescriptor(workspace, status);
         when(runtimes.get(workspace.getId())).thenReturn(descriptor);
+        when(runtimes.getStatus(workspace.getId())).thenReturn(status);
         return descriptor;
     }
 

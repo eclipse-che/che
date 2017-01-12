@@ -232,11 +232,17 @@ public class WorkspaceManager {
      * @throws ServerException
      *         when any server error occurs while getting workspaces with {@link WorkspaceDao#getWorkspaces(String)}
      */
-    public List<WorkspaceImpl> getWorkspaces(String user) throws ServerException {
+    public List<WorkspaceImpl> getWorkspaces(String user, boolean includeRuntimes) throws ServerException {
         requireNonNull(user, "Required non-null user id");
         final List<WorkspaceImpl> workspaces = workspaceDao.getWorkspaces(user);
-        for (WorkspaceImpl workspace : workspaces) {
-            workspace.setStatus(runtimes.getStatus(workspace.getId()));
+        if (includeRuntimes) {
+            for (WorkspaceImpl workspace : workspaces) {
+                normalizeState(workspace);
+            }
+        } else {
+            for (WorkspaceImpl workspace : workspaces) {
+                workspace.setStatus(runtimes.getStatus(workspace.getId()));
+            }
         }
         return workspaces;
     }
@@ -249,17 +255,26 @@ public class WorkspaceManager {
      *
      * @param namespace
      *         the namespace to find workspaces
+     * @param includeRuntimes
+     *         if <code>true</code>, will fetch runtime info for workspaces.
+     *         If <code>false</code>, will not fetch runtime info.
      * @return the list of workspaces or empty list if no matches
      * @throws NullPointerException
      *         when {@code namespace} is null
      * @throws ServerException
      *         when any server error occurs while getting workspaces with {@link WorkspaceDao#getByNamespace(String)}
      */
-    public List<WorkspaceImpl> getByNamespace(String namespace) throws ServerException {
+    public List<WorkspaceImpl> getByNamespace(String namespace, boolean includeRuntimes) throws ServerException {
         requireNonNull(namespace, "Required non-null namespace");
         final List<WorkspaceImpl> workspaces = workspaceDao.getByNamespace(namespace);
-        for (WorkspaceImpl workspace : workspaces) {
-            normalizeState(workspace);
+        if (includeRuntimes) {
+            for (WorkspaceImpl workspace : workspaces) {
+                normalizeState(workspace);
+            }
+        } else {
+            for (WorkspaceImpl workspace : workspaces) {
+                workspace.setStatus(runtimes.getStatus(workspace.getId()));
+            }
         }
         return workspaces;
     }
@@ -737,10 +752,19 @@ public class WorkspaceManager {
     }
 
     private WorkspaceImpl normalizeState(WorkspaceImpl workspace) throws ServerException {
-        try {
-            return normalizeState(workspace, runtimes.get(workspace.getId()));
-        } catch (NotFoundException e) {
-            return normalizeState(workspace, null);
+        return normalizeState(workspace, true);
+    }
+
+    private WorkspaceImpl normalizeState(WorkspaceImpl workspace, boolean includeRuntimes) throws ServerException {
+        if (includeRuntimes) {
+            try {
+                return normalizeState(workspace, runtimes.get(workspace.getId()));
+            } catch (NotFoundException e) {
+                return normalizeState(workspace, null);
+            }
+        } else {
+            workspace.setStatus(runtimes.getStatus(workspace.getId()));
+            return workspace;
         }
     }
 
