@@ -16,16 +16,14 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
     <ui:with field='messages' type='org.eclipse.che.ide.command.editor.EditorMessages'/>
     <ui:style>
-        .link {
-            margin-left: 10px;
+        .main-panel {
+            margin-left: 22px;
         }
     </ui:style>
 
-    <g:DockLayoutPanel width="800px" height="200px">
+    <g:DockLayoutPanel width="800px" height="200px" addStyleNames="{style.main-panel}">
         <g:north size="20">
-            <g:Hyperlink ui:field="exploreMacrosLink"
-                         text="{messages.pageWithTextEditorExploreMacros}"
-                         addStyleNames="{style.link}"/>
+            <g:Hyperlink ui:field="exploreMacrosLink" text="{messages.pageWithTextEditorExploreMacros}"/>
         </g:north>
         <g:center>
             <g:SimpleLayoutPanel ui:field="editorPanel"/>

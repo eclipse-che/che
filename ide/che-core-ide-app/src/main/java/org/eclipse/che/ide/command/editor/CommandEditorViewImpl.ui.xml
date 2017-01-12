@@ -73,7 +73,7 @@
             </g:FlowPanel>
         </g:north>
         <g:center>
-            <g:ScrollPanel>
+            <g:ScrollPanel ui:field="scrollPanel">
                 <g:FlowPanel ui:field="pagesPanel"/>
             </g:ScrollPanel>
         </g:center>

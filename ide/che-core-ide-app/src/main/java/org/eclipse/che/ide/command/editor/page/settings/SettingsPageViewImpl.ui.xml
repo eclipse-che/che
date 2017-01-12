@@ -21,7 +21,7 @@
 
         .section {
             margin-left: 10px;
-            margin-top: 15px;
+            margin-bottom: 15px;
         }
 
         .checkbox-panel {

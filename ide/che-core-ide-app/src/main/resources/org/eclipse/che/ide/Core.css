@@ -518,6 +518,23 @@ a {
     background-color: keyboardSelectionBackgroundColor;
 }
 
+.gwt-DisclosurePanel .header td {
+    color: mainFontColor;
+    font-size: textFieldFontSize;
+    font-weight: bold;
+    font-family: textFieldFontFamily;
+}
+
+.gwt-DisclosurePanel .header td img {
+    width: 12px;
+    height: 12px;
+}
+
+.gwt-DisclosurePanel .content {
+    margin-left: 13px;
+    border: none;
+}
+
 .editorFullScreen {
     fill: #e7e7e7;
     width: 15px;

@@ -20,11 +20,11 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
 import org.eclipse.che.ide.command.CommandResources;
-import org.eclipse.che.ide.ui.radiobuttongroup.RadioButtonGroup;
 import org.eclipse.che.ide.ui.window.Window;
 import org.vectomatic.dom.svg.ui.SVGImage;
 
@@ -43,6 +43,9 @@ public class CommandEditorViewImpl extends Composite implements CommandEditorVie
 
     @UiField
     Button testButton;
+
+    @UiField
+    ScrollPanel scrollPanel;
 
     @UiField
     FlowPanel pagesPanel;
@@ -64,7 +67,12 @@ public class CommandEditorViewImpl extends Composite implements CommandEditorVie
     public void addPage(IsWidget page, String title) {
         final DisclosurePanel panel = new DisclosurePanel(title);
         panel.setAnimationEnabled(true);
-        panel.add(page);
+        panel.setContent(page.asWidget());
+
+        // expand the 1`st panel only
+        if (pagesPanel.getWidgetCount() == 0) {
+            panel.setOpen(true);
+        }
 
         pagesPanel.add(panel);
     }
