@@ -12,7 +12,6 @@ package org.eclipse.che.api.workspace.server;
 
 import com.google.common.annotations.VisibleForTesting;
 
-import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
@@ -22,7 +21,6 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
 import java.util.List;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -72,8 +70,8 @@ public class TemporaryWorkspaceRemover {
             for (WorkspaceImpl workspace : workspaces) {
                 try {
                     workspaceDao.remove(workspace.getId());
-                } catch (ServerException | ConflictException e) {
-                    LOG.error("Unable to cleanup temporary workspace {}. Reason is {}",workspace.getId(), e.getLocalizedMessage());
+                } catch (ServerException e) {
+                    LOG.error("Unable to cleanup temporary workspace {}. Reason is {}", workspace.getId(), e.getLocalizedMessage());
                 }
             }
             skip = skip + count;
