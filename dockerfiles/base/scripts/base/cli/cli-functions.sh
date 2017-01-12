@@ -400,7 +400,10 @@ function verify_nightly_accuracy() {
     elif $(newer_date_period \
          $(timestamp_date_iso8601 "${LOCAL_CREATION_DATE}") \
          $(timestamp_date_iso8601 "${REMOTE_CREATION_DATE}")); then
-     warning "There is a newer ${CHE_IMAGE_FULLNAME} image on DockerHub."
+     warning "Your 'nightly' image is over 24 hours old - checking for newer image..."
+     update_image $CHE_IMAGE_FULLNAME
+     warning "Pulled newer 'nightly' image - please rerun CLI"
+     return 2
     fi
   fi
 }
