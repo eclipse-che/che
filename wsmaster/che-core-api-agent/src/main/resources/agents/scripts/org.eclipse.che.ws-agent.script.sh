@@ -48,6 +48,10 @@ command -v ${JAVA_HOME}/bin/java >/dev/null 2>&1 || {
     fi
 }
 
+if [ ${INSTALL_JDK} = true ]; then
+    export JAVA_HOME=${CHE_DIR}/jdk1.8
+fi
+
 
 ########################
 ### Install packages ###
@@ -66,7 +70,6 @@ if echo ${LINUX_TYPE} | grep -qi "rhel"; then
     }
 
     if [ ${INSTALL_JDK} = true ]; then
-        export JAVA_HOME=${CHE_DIR}/jdk1.8
         ln -s /usr/lib/jvm/java-1.8.0-openjdk $JAVA_HOME
     fi
 
@@ -86,7 +89,6 @@ elif echo ${LINUX_TYPE} | grep -qi "ubuntu"; then
     }
 
     if [ ${INSTALL_JDK} = true ]; then
-        export JAVA_HOME=${CHE_DIR}/jdk1.8
         ln -s /usr/lib/jvm/java-1.8.0-openjdk-amd64 $JAVA_HOME
     fi
 
@@ -104,7 +106,6 @@ elif echo ${LINUX_TYPE} | grep -qi "debian"; then
     }
 
     if [ ${INSTALL_JDK} = true ]; then
-        export JAVA_HOME=${CHE_DIR}/jdk1.8
         ln -s /usr/lib/jvm/java-1.8.0-openjdk-amd64 $JAVA_HOME
     fi
 
@@ -123,7 +124,6 @@ elif echo ${LINUX_TYPE} | grep -qi "fedora"; then
     }
 
     if [ ${INSTALL_JDK} = true ]; then
-        export JAVA_HOME=${CHE_DIR}/jdk1.8
         ln -s /usr/lib/jvm/java-1.8.0-openjdk $JAVA_HOME
     fi
 
@@ -140,7 +140,6 @@ elif echo ${LINUX_TYPE} | grep -qi "centos"; then
     }
 
     if [ ${INSTALL_JDK} = true ]; then
-        export JAVA_HOME=${CHE_DIR}/jdk1.8
         ln -s /usr/lib/jvm/java-1.8.0-openjdk $JAVA_HOME
     fi
 
@@ -157,7 +156,6 @@ elif echo ${LINUX_TYPE} | grep -qi "opensuse"; then
     }
 
     if [ ${INSTALL_JDK} = true ]; then
-        export JAVA_HOME=${CHE_DIR}/jdk1.8
         ln -s /usr/lib/jvm/java-1.8.0-openjdk $JAVA_HOME
     fi
 
@@ -177,7 +175,6 @@ elif echo ${LINUX_TYPE} | grep -qi "alpine"; then
 
     # Link OpenJDK to JAVA_HOME
     if [ ${INSTALL_JDK} = true ]; then
-        export JAVA_HOME=${CHE_DIR}/jdk1.8
         ln -s /usr/lib/jvm/java-1.8-openjdk $JAVA_HOME
     fi
 
@@ -194,7 +191,6 @@ elif echo ${LINUX_TYPE} | grep -qi "CentOS"; then
      }
 
      if [ ${INSTALL_JDK} = true ]; then
-         export JAVA_HOME=${CHE_DIR}/jdk1.8
          ln -s /usr/lib/jvm/java-1.8.0-openjdk $JAVA_HOME
      fi
 
@@ -210,7 +206,6 @@ elif echo ${LINUX_TYPE} | grep -qi "Red Hat"; then
     }
 
     if [ ${INSTALL_JDK} = true ]; then
-        export JAVA_HOME=${CHE_DIR}/jdk1.8
         ln -s /usr/lib/jvm/java-1.8.0-openjdk $JAVA_HOME
     fi
 
