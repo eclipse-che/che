@@ -24,9 +24,7 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
-import org.eclipse.che.ide.command.CommandResources;
 import org.eclipse.che.ide.ui.window.Window;
-import org.vectomatic.dom.svg.ui.SVGImage;
 
 /**
  * Implementation of {@link CommandEditorView}.
@@ -42,9 +40,6 @@ public class CommandEditorViewImpl extends Composite implements CommandEditorVie
     Button saveButton;
 
     @UiField
-    Button testButton;
-
-    @UiField
     ScrollPanel scrollPanel;
 
     @UiField
@@ -54,13 +49,12 @@ public class CommandEditorViewImpl extends Composite implements CommandEditorVie
     private ActionDelegate delegate;
 
     @Inject
-    public CommandEditorViewImpl(CommandResources resources) {
+    public CommandEditorViewImpl() {
         initWidget(UI_BINDER.createAndBindUi(this));
 
         setSaveEnabled(false);
 
         saveButton.addStyleName(WINDOW_RESOURCES.windowCss().primaryButton());
-        testButton.getElement().appendChild(new SVGImage(resources.execute()).getElement());
     }
 
     @Override
@@ -85,11 +79,6 @@ public class CommandEditorViewImpl extends Composite implements CommandEditorVie
     @UiHandler("saveButton")
     public void handleSaveButton(ClickEvent clickEvent) {
         delegate.onCommandSave();
-    }
-
-    @UiHandler("testButton")
-    public void handleTestButton(ClickEvent clickEvent) {
-        delegate.onCommandTest();
     }
 
     @Override

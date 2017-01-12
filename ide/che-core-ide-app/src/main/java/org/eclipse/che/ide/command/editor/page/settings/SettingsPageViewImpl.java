@@ -12,12 +12,14 @@ package org.eclipse.che.ide.command.editor.page.settings;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -27,7 +29,9 @@ import com.google.inject.Inject;
 
 import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.command.CommandResources;
 import org.eclipse.che.ide.ui.listbox.CustomComboBox;
+import org.vectomatic.dom.svg.ui.SVGImage;
 
 import java.util.Map;
 import java.util.Set;
@@ -45,6 +49,9 @@ public class SettingsPageViewImpl extends Composite implements SettingsPageView 
     TextBox commandName;
 
     @UiField
+    Button testButton;
+
+    @UiField
     CustomComboBox goal;
 
     @UiField
@@ -59,8 +66,10 @@ public class SettingsPageViewImpl extends Composite implements SettingsPageView 
     private ActionDelegate delegate;
 
     @Inject
-    public SettingsPageViewImpl() {
+    public SettingsPageViewImpl(CommandResources resources) {
         initWidget(UI_BINDER.createAndBindUi(this));
+
+        testButton.getElement().appendChild(new SVGImage(resources.execute()).getElement());
 
         projectsSection.setVisible(false);
     }
@@ -121,6 +130,11 @@ public class SettingsPageViewImpl extends Composite implements SettingsPageView 
     @UiHandler({"commandName"})
     void onCommandNameChanged(KeyUpEvent event) {
         delegate.onNameChanged(commandName.getValue());
+    }
+
+    @UiHandler("testButton")
+    public void handleTestButton(ClickEvent clickEvent) {
+        delegate.onCommandTest();
     }
 
     @UiHandler({"goal"})

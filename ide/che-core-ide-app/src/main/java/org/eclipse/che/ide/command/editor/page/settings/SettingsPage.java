@@ -18,6 +18,7 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.BaseCommandGoal;
+import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.ContextualCommand;
@@ -58,6 +59,7 @@ public class SettingsPage extends AbstractCommandEditorPage implements SettingsP
     private final AppContext                    appContext;
     private final PredefinedCommandGoalRegistry goalRegistry;
     private final CommandManager                commandManager;
+    private final CommandExecutor               commandExecutor;
 
     private final Map<Project, Boolean> projectsState;
 
@@ -75,13 +77,15 @@ public class SettingsPage extends AbstractCommandEditorPage implements SettingsP
                         PredefinedCommandGoalRegistry predefinedCommandGoalRegistry,
                         CommandManager commandManager,
                         EditorMessages messages,
-                        EventBus eventBus) {
+                        EventBus eventBus,
+                        CommandExecutor commandExecutor) {
         super(messages.pageInfoTitle());
 
         this.view = view;
         this.appContext = appContext;
         this.goalRegistry = predefinedCommandGoalRegistry;
         this.commandManager = commandManager;
+        this.commandExecutor = commandExecutor;
 
         eventBus.addHandler(ResourceChangedEvent.getType(), this);
 
@@ -167,6 +171,11 @@ public class SettingsPage extends AbstractCommandEditorPage implements SettingsP
         editedCommand.setName(name);
 
         notifyDirtyStateChanged();
+    }
+
+    @Override
+    public void onCommandTest() {
+        commandExecutor.executeCommand(editedCommand);
     }
 
     @Override

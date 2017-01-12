@@ -18,6 +18,8 @@
     <ui:with field='messages' type='org.eclipse.che.ide.command.editor.EditorMessages'/>
     <ui:style>
         @eval projectExplorerSelectedRowBackground org.eclipse.che.ide.api.theme.Style.theme.projectExplorerSelectedRowBackground();
+        @eval blueIconColor org.eclipse.che.ide.api.theme.Style.theme.getBlueIconColor();
+        @eval greenIconColor org.eclipse.che.ide.api.theme.Style.theme.getSuccessEventColor();
 
         .section {
             margin-left: 10px;
@@ -37,17 +39,42 @@
             width: 150px;
             margin-left: 10px;
         }
+
+        .button, .button:hover, .button:active {
+            border: none;
+            background: transparent;
+            min-width: 25px;
+            padding: 0;
+            vertical-align: top;
+        }
+
+        .button > svg {
+            width: 21px;
+            height: 21px;
+            margin: 1px;
+        }
+
+        .button > svg g,
+        .button > svg g g path {
+            fill: blueIconColor;
+        }
+
+        .button:hover > svg g,
+        .button:hover > svg g g path {
+            fill: greenIconColor;
+        }
     </ui:style>
 
     <g:SimpleLayoutPanel width="500px" height="300px">
         <g:FlowPanel>
             <g:FlowPanel addStyleNames="{style.section}">
                 <g:Label text="{messages.pageInfoNameLabel}"/>
-                <g:TextBox ui:field="commandName" width="97%"/>
+                <g:TextBox ui:field="commandName" width="92%"/>
+                <g:Button ui:field="testButton" addStyleNames="{style.button}" debugId="command-editor-button-test"/>
             </g:FlowPanel>
             <g:FlowPanel addStyleNames="{style.section}">
                 <g:Label text="{messages.pageInfoGoalLabel}"/>
-                <che:CustomComboBox ui:field="goal" width="100%"/>
+                <che:CustomComboBox ui:field="goal" width="94%"/>
             </g:FlowPanel>
             <g:FlowPanel addStyleNames="{style.section}">
                 <g:Label text="{messages.pageInfoSectionContextLabel}"/>
@@ -61,7 +88,7 @@
                     <g:Label text="{messages.pageInfoProjectsTableHeaderProjectLabel}" addStyleNames="{style.column-header}"/>
                     <g:Label text="{messages.pageInfoProjectsTableHeaderApplicableLabel}" addStyleNames="{style.column-header}"/>
                 </g:FlowPanel>
-                    <g:FlowPanel ui:field="projectsPanel"/>
+                <g:FlowPanel ui:field="projectsPanel"/>
             </g:FlowPanel>
         </g:FlowPanel>
     </g:SimpleLayoutPanel>

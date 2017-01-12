@@ -14,7 +14,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
-             xmlns:che='urn:import:org.eclipse.che.ide.ui'>
+>
     <ui:with field='messages' type='org.eclipse.che.ide.command.editor.EditorMessages'/>
     <ui:with field='resources' type='org.eclipse.che.ide.command.CommandResources'/>
     <ui:style>
@@ -24,8 +24,6 @@
         @eval toolbarActionGroupBackgroundColor org.eclipse.che.ide.api.theme.Style.getToolbarActionGroupBackgroundColor();
         @eval toolbarActionGroupBorderColor org.eclipse.che.ide.api.theme.Style.getToolbarActionGroupBorderColor();
         @eval toolbarActionGroupShadowColor org.eclipse.che.ide.api.theme.Style.getToolbarActionGroupShadowColor();
-        @eval blueIconColor org.eclipse.che.ide.api.theme.Style.theme.getBlueIconColor();
-        @eval greenIconColor org.eclipse.che.ide.api.theme.Style.theme.getSuccessEventColor();
 
         .mainPanel {
             background-color: partBackground;
@@ -41,22 +39,6 @@
             float: left;
             margin: 5px 0 0 10px;
         }
-
-        .button > svg {
-            width: 16px;
-            height: 16px;
-            margin: 1px;
-        }
-
-        .button > svg g,
-        .button > svg g g path {
-            fill: blueIconColor;
-        }
-
-        .button:hover > svg g,
-        .button:hover > svg g g path {
-            fill: greenIconColor;
-        }
     </ui:style>
 
     <g:DockLayoutPanel addStyleNames="{style.mainPanel}">
@@ -66,10 +48,6 @@
                           text="{messages.buttonSaveText}"
                           addStyleNames="{style.button}"
                           debugId="command-editor-button-save"/>
-                <g:Button ui:field="testButton"
-                          addStyleNames="{style.button}"
-                          debugId="command-editor-button-test">
-                </g:Button>
             </g:FlowPanel>
         </g:north>
         <g:center>

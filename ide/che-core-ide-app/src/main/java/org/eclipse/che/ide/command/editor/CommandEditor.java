@@ -20,7 +20,6 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandManager.CommandChangedListener;
 import org.eclipse.che.ide.api.command.ContextualCommand;
@@ -37,8 +36,8 @@ import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.command.editor.page.CommandEditorPage;
 import org.eclipse.che.ide.command.editor.page.commandline.CommandLinePage;
-import org.eclipse.che.ide.command.editor.page.settings.SettingsPage;
 import org.eclipse.che.ide.command.editor.page.previewurl.PreviewUrlPage;
+import org.eclipse.che.ide.command.editor.page.settings.SettingsPage;
 import org.eclipse.che.ide.command.node.CommandFileNode;
 import org.eclipse.che.ide.command.node.NodeFactory;
 import org.vectomatic.dom.svg.ui.SVGImage;
@@ -68,7 +67,6 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
     private final CoreLocalizationConstant localizationConstants;
     private final EditorMessages           messages;
     private final NodeFactory              nodeFactory;
-    private final CommandExecutor          commandExecutor;
 
     private final List<CommandEditorPage> pages;
 
@@ -90,8 +88,7 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
                          EditorAgent editorAgent,
                          CoreLocalizationConstant localizationConstants,
                          EditorMessages messages,
-                         NodeFactory nodeFactory,
-                         CommandExecutor commandExecutor) {
+                         NodeFactory nodeFactory) {
         this.view = view;
         this.workspaceAgent = workspaceAgent;
         this.iconRegistry = iconRegistry;
@@ -102,7 +99,6 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
         this.localizationConstants = localizationConstants;
         this.messages = messages;
         this.nodeFactory = nodeFactory;
-        this.commandExecutor = commandExecutor;
 
         view.setDelegate(this);
 
@@ -284,11 +280,6 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
     @Override
     public void onCommandSave() {
         doSave();
-    }
-
-    @Override
-    public void onCommandTest() {
-        commandExecutor.executeCommand(editedCommand);
     }
 
     @Override

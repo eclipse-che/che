@@ -44,8 +44,5 @@ public interface CommandEditorView extends View<CommandEditorView.ActionDelegate
 
         /** Called when saving command is requested. */
         void onCommandSave();
-
-        /** Called when testing command is requested. */
-        void onCommandTest();
     }
 }

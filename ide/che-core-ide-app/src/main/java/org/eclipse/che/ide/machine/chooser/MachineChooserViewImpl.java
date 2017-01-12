@@ -157,8 +157,8 @@ public class MachineChooserViewImpl extends PopupPanel implements MachineChooser
         machinesList.setVisibleItemCount(machines.size());
         machinesList.setSelectedIndex(0);
 
-        // set height of the each row in the list to 15 px
-        final int listHeight = 15 * machines.size();
+        // set height of the each row in the list to 16 px
+        final int listHeight = 16 * machines.size();
         machinesList.setHeight(listHeight + "px");
 
         // set height of the entire panel

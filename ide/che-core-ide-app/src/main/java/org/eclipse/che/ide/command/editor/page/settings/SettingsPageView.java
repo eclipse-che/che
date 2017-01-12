@@ -56,6 +56,9 @@ public interface SettingsPageView extends View<SettingsPageView.ActionDelegate> 
          */
         void onNameChanged(String name);
 
+        /** Called when testing command is requested. */
+        void onCommandTest();
+
         void onWorkspaceChanged(boolean value);
 
         void onApplicableProjectChanged(Project project, boolean value);

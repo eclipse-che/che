@@ -157,8 +157,8 @@ public class CommandTypeChooserViewImpl extends PopupPanel implements CommandTyp
         typesList.setVisibleItemCount(commandTypes.size());
         typesList.setSelectedIndex(0);
 
-        // set height of the each row in the list to 15 px
-        final int listHeight = 15 * commandTypes.size();
+        // set height of the each row in the list to 16 px
+        final int listHeight = 16 * commandTypes.size();
         typesList.setHeight(listHeight + "px");
 
         // set height of the entire panel
