@@ -79,12 +79,10 @@ public interface WorkspaceDao {
      *         workspace identifier
      * @throws NullPointerException
      *         when {@code id} is null
-     * @throws ConflictException
-     *         when any conflict occurs during cascade removing of related to workspace data
      * @throws ServerException
      *         when any other error occurs during workspace removing
      */
-    void remove(String id) throws ConflictException, ServerException;
+    void remove(String id) throws ServerException;
 
     /**
      * Gets workspace by identifier.

@@ -8,21 +8,27 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.core.db.jpa;
+package org.eclipse.che.api.user.server.event;
 
-import javax.persistence.RollbackException;
+import org.eclipse.che.api.core.notification.EventOrigin;
+import org.eclipse.che.api.user.server.model.impl.UserImpl;
 
 /**
- * Throws when any exception during cascade remove occurs.
+ * Published after {@link UserImpl user} removed.
  *
- * <p>Note that in case of throwing this type of exception,
- * cascade removal transaction will be rolled back.
- *
- * @author Anton Korneta
+ * @author Sergii Kabashniuk
  */
-public class CascadeRemovalException extends RollbackException {
+@EventOrigin("user")
+public class UserRemovedEvent {
 
-    public CascadeRemovalException(Throwable cause) {
-        super(cause);
+    private final String userId;
+
+    public UserRemovedEvent(String userId) {
+        this.userId = userId;
+    }
+
+    /** Returns id of removed user */
+    public String getUserId() {
+        return userId;
     }
 }

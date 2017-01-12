@@ -8,15 +8,16 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.core.db.event;
+package org.eclipse.che.core.db.cascade;
 
 /**
- * Context that is used only for sharing the state of
- * the process cascading deleting among subscribers.
+ * Context that is used only for sharing the state
+ * of the cascading operation among subscribers.
  *
  * @author Anton Korneta
+ * @author Sergii Leshchenko
  */
-public class RemovalContext {
+public class CascadeContext {
     private Exception cause;
 
     /**
@@ -36,7 +37,7 @@ public class RemovalContext {
     /**
      * Sets the context into failed state.
      */
-    public RemovalContext fail(Exception cause) {
+    public CascadeContext fail(Exception cause) {
         this.cause = cause;
         return this;
     }

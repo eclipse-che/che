@@ -12,7 +12,6 @@ package org.eclipse.che.plugin.docker.machine;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
-import com.google.common.collect.ObjectArrays;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import org.eclipse.che.api.core.NotFoundException;
@@ -37,7 +36,6 @@ import org.eclipse.che.commons.lang.Size;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
-import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
 import org.eclipse.che.plugin.docker.client.ProgressLineFormatterImpl;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
 import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredentialsProvider;
@@ -83,7 +81,6 @@ import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.lang.Thread.sleep;
 import static java.util.Collections.emptyMap;
@@ -135,7 +132,6 @@ public class MachineProviderImpl implements MachineInstanceProvider {
 
     @Inject
     public MachineProviderImpl(DockerConnector docker,
-                               DockerConnectorConfiguration dockerConnectorConfiguration,
                                UserSpecificDockerRegistryCredentialsProvider dockerCredentials,
                                DockerMachineFactory dockerMachineFactory,
                                DockerInstanceStopDetector dockerInstanceStopDetector,
@@ -143,7 +139,6 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                @Named("machine.docker.machine_servers") Set<ServerConf> allMachinesServers,
                                @Named("machine.docker.dev_machine.machine_volumes") Set<String> devMachineSystemVolumes,
                                @Named("machine.docker.machine_volumes") Set<String> allMachinesSystemVolumes,
-                               @Nullable @Named("che.workspace.hosts") String allMachinesExtraHosts,
                                @Named("che.docker.always_pull_image") boolean doForcePullOnBuild,
                                @Named("che.docker.privileged") boolean privilegedMode,
                                @Named("che.docker.pids_limit") int pidsLimit,
@@ -157,7 +152,8 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                @Nullable @Named("che.docker.cpuset_cpus") String cpusetCpus,
                                @Named("che.docker.cpu_period") long cpuPeriod,
                                @Named("che.docker.cpu_quota") long cpuQuota,
-                               WindowsPathEscaper windowsPathEscaper)
+                               WindowsPathEscaper windowsPathEscaper,
+                               @Named("che.docker.extra_hosts") Set<Set<String>> additionalHosts)
             throws IOException {
         this.docker = docker;
         this.dockerCredentials = dockerCredentials;
@@ -233,14 +229,9 @@ public class MachineProviderImpl implements MachineInstanceProvider {
             this.devMachineEnvVariables.put(split[0], split[1]);
         });
 
-        // always add Che server to hosts list
-        String cheHost = dockerConnectorConfiguration.getDockerHostIp();
-        String cheHostAlias = DockerInstanceRuntimeInfo.CHE_HOST.concat(":").concat(cheHost);
-        if (isNullOrEmpty(allMachinesExtraHosts)) {
-            this.allMachinesExtraHosts = new String[] {cheHostAlias};
-        } else {
-            this.allMachinesExtraHosts = ObjectArrays.concat(allMachinesExtraHosts.split(","), cheHostAlias);
-        }
+        this.allMachinesExtraHosts = additionalHosts.stream()
+                                                    .flatMap(Set::stream)
+                                                    .toArray(String[]::new);
 
         this.additionalNetworks = additionalNetworks.stream()
                                                     .flatMap(Set::stream)

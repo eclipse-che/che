@@ -15,12 +15,12 @@ import com.google.inject.persist.Transactional;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.core.db.jpa.DuplicateKeyException;
-import org.eclipse.che.core.db.event.CascadeRemovalEventSubscriber;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
 import org.eclipse.che.api.ssh.server.spi.SshDao;
 import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
+import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
+import org.eclipse.che.core.db.jpa.DuplicateKeyException;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -120,7 +120,9 @@ public class JpaSshDao implements SshDao {
 
     @Transactional
     protected void doCreate(SshPairImpl entity) {
-        managerProvider.get().persist(entity);
+        EntityManager manager = managerProvider.get();
+        manager.persist(entity);
+        manager.flush();
     }
 
     @Transactional
@@ -131,11 +133,12 @@ public class JpaSshDao implements SshDao {
             throw new NotFoundException(format("Ssh pair with service '%s' and name '%s' was not found.", service, name));
         }
         manager.remove(entity);
+        manager.flush();
     }
 
     @Singleton
     public static class RemoveSshKeysBeforeUserRemovedEventSubscriber
-            extends CascadeRemovalEventSubscriber<BeforeUserRemovedEvent> {
+            extends CascadeEventSubscriber<BeforeUserRemovedEvent> {
         @Inject
         private SshDao       sshDao;
         @Inject
@@ -152,7 +155,7 @@ public class JpaSshDao implements SshDao {
         }
 
         @Override
-        public void onRemovalEvent(BeforeUserRemovedEvent event) throws Exception {
+        public void onCascadeEvent(BeforeUserRemovedEvent event) throws Exception {
             for (SshPairImpl sshPair : sshDao.get(event.getUser().getId())) {
                 sshDao.remove(sshPair.getOwner(), sshPair.getService(), sshPair.getName());
             }

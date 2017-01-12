@@ -12,7 +12,12 @@
 cmd_init() {
 
   # set an initial value for the flag
-  FORCE_UPDATE="--no-force"
+  if is_nightly && ! is_fast; then 
+    FORCE_UPDATE="--pull"
+  else
+    FORCE_UPDATE="--no-force"
+  fi
+
   AUTO_ACCEPT_LICENSE="false"
   REINIT="false"
 
