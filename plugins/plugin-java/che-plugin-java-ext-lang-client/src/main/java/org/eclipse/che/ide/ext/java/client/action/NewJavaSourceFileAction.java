@@ -62,9 +62,9 @@ public class NewJavaSourceFileAction extends ProjectAction {
         if (resource instanceof Container) {
             newJavaSourceFilePresenter.showDialog((Container)resource);
         } else {
-            final Optional<Container> parent = resource.getParent();
-            if (parent.isPresent()) {
-                newJavaSourceFilePresenter.showDialog(parent.get());
+            final Container parent = resource.getParent();
+            if (parent != null) {
+                newJavaSourceFilePresenter.showDialog(parent);
             } else {
                 throw new IllegalStateException("Failed to get parent container");
             }

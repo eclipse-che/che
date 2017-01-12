@@ -447,14 +447,14 @@ public interface Resource extends Comparable<Resource> {
     String getName();
 
     /**
-     * Returns the resource which is the parent of this resource or {@link Optional#absent()} if such parent
-     * doesn't exists. (This means that this resource is 'root' project).
+     * Returns the resource which is the parent of this resource or {@code null} if such parent
+     * doesn't exist. (This means that this resource is 'root' project)
      *
-     * @return the resource parent {@link Container}
+     * @return the resource's parent {@link Container}
      * @see Container
-     * @since 4.4.0
+     * @since 5.1.0
      */
-    Optional<Container> getParent();
+    Container getParent();
 
     /**
      * Returns the {@code Project} which contains this resource.

@@ -23,6 +23,8 @@ cmd_config() {
   elif [[ "${FORCE_UPDATE}" == "--pull" ]] || \
        [[ "${FORCE_UPDATE}" == "--force" ]]; then
     cmd_download $FORCE_UPDATE
+  elif is_nightly && ! is_fast; then
+    cmd_download --pull
   fi
 
   if [ -z ${IMAGE_PUPPET+x} ]; then

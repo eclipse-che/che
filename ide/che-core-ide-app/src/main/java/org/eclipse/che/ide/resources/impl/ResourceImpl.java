@@ -134,8 +134,10 @@ abstract class ResourceImpl implements Resource {
 
     /** {@inheritDoc} */
     @Override
-    public Optional<Container> getParent() {
-        return resourceManager.parentOf(this);
+    public Container getParent() {
+        final Optional<Container> parent = resourceManager.parentOf(this);
+
+        return parent.isPresent() ? parent.get() : null;
     }
 
     /** {@inheritDoc} */
@@ -145,7 +147,7 @@ abstract class ResourceImpl implements Resource {
             return of((Project)this);
         }
 
-        Optional<Container> optionalParent = getParent();
+        Optional<Container> optionalParent = resourceManager.parentOf(this);
 
         if (!optionalParent.isPresent()) {
             return absent();
@@ -154,7 +156,7 @@ abstract class ResourceImpl implements Resource {
         Container parent = optionalParent.get();
 
         while (!(parent instanceof Project)) {
-            optionalParent = parent.getParent();
+            optionalParent = resourceManager.parentOf(this);
 
             if (!optionalParent.isPresent()) {
                 return absent();
@@ -282,7 +284,7 @@ abstract class ResourceImpl implements Resource {
             return Optional.<Resource>of(this);
         }
 
-        Optional<Container> optParent = getParent();
+        Optional<Container> optParent = resourceManager.parentOf(this);
 
         while (optParent.isPresent()) {
             Container parent = optParent.get();
@@ -292,7 +294,7 @@ abstract class ResourceImpl implements Resource {
                 return Optional.<Resource>of(parent);
             }
 
-            optParent = parent.getParent();
+            optParent = resourceManager.parentOf(this);
         }
 
         return absent();
