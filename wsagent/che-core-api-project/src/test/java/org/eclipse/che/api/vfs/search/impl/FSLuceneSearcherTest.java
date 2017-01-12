@@ -196,16 +196,20 @@ public class FSLuceneSearcherTest {
         return new Object[][]{
                 {"sameName.txt", "sameName.txt"},
                 {"notCaseSensitive.txt", "notcasesensitive.txt"},
-                {"with white space.txt", "WiTh WhItE SpAcE"},
+                {"fullName.txt", "full*"},
+                {"file name.txt", "file name"},
+                {"prefixFileName.txt", "prefixF*"},
                 {"name.with.dot.txt", "name.With.Dot.txt"},
         };
     }
 
     @Test(dataProvider = "searchByName")
     public void searchFileByName(String fileName, String searchedFileName) throws Exception {
+        String prefix = "prefix";
         VirtualFileSystem virtualFileSystem = virtualFileSystem();
         VirtualFile folder = virtualFileSystem.getRoot().createFolder("folder");
         folder.createFile(fileName, TEST_CONTENT[2]);
+        folder.createFile(prefix + fileName, TEST_CONTENT[1]);
         searcher.init(virtualFileSystem);
 
         List<String> paths = searcher.search(new QueryExpression().setName(searchedFileName)).getFilePaths();
