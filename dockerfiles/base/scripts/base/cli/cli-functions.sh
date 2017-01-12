@@ -381,23 +381,26 @@ function verify_nightly_accuracy() {
   # than the one stored on DockerHub.
   if is_nightly; then
 
-    NIGHTLY_IMAGE=$(docker images -q --no-trunc $CHE_IMAGE_FULLNAME)
-    NIGHTLY_IMAGE=${NIGHTLY_IMAGE#sha256:}
+    REMOTE_NIGHTLY_JSON=$(curl -s https://hub.docker.com/v2/repositories/${CHE_IMAGE_NAME}/tags/nightly/)
 
-    NIGHTLY_IMAGE_DATE_WRITTEN=$(docker run -i -v /var/lib/docker:/var/lib/docker \
-                  $UTILITY_IMAGE_ALPINE date -r /var/lib/docker/image/aufs/imagedb/content/sha256/$NIGHTLY_IMAGE)
-    CURRENT_DATE=$(date)
+    # Retrieve info on current nightly
+    LOCAL_CREATION_DATE=$(docker inspect --format="{{.Created }}" ${CHE_IMAGE_FULLNAME})
+    REMOTE_CREATION_DATE=$(echo $REMOTE_NIGHTLY_JSON | jq ".last_updated")
+    REMOTE_CREATION_DATE="${REMOTE_CREATION_DATE//\"}"
 
-    if newer_date_period \
-          $(timestamp_date_iso8601 "${NIGHTLY_IMAGE_DATE_WRITTEN}") \
-          $(timestamp_date_iso8601 "${CURRENT_DATE}"); then
-      # This means that nightly image written to disk >24 hours ago.
-      # If nightly disk writing is > 24 hours then it is too old
-      warning "Your 'nightly' image is over 24 hours old - checking for newer image..."
-      update_image $CHE_IMAGE_FULLNAME
-      warning "Pulled newer 'nightly' image - please rerun CLI"
-      return 2
+    # Unfortunatley, the "last_updated" date on DockerHub is the date it was uploaded, not created.
+    # So after you download the image locally, then the local image "created" value reflects when it
+    # was originally built, creating a situation where the local cached version is always older than
+    # what is on DockerHub, even if you just pulled it.
+    # Solution is to compare the dates, and only print warning message if the locally created ate
+    # is less than the updated date on dockerhub.
 
+    if [[ -z ${REMOTE_CREATION_DATE} ]]; then
+      warning "Unable to get published date on hub.docker.com for ${CHE_IMAGE_FULLNAME}"
+    elif $(newer_date_period \
+         $(timestamp_date_iso8601 "${LOCAL_CREATION_DATE}") \
+         $(timestamp_date_iso8601 "${REMOTE_CREATION_DATE}")); then
+     warning "There is a newer ${CHE_IMAGE_FULLNAME} image on DockerHub."
     fi
   fi
 }
