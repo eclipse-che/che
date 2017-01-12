@@ -798,7 +798,7 @@ public class WorkspaceServiceTest {
                                                .get(workspace.getConfig().getDefaultEnv());
         assertNotNull(environment);
 
-        final WorkspaceRuntimeImpl runtime = new WorkspaceRuntimeImpl(workspace.getConfig().getDefaultEnv());
+        final WorkspaceRuntimeImpl runtime = new WorkspaceRuntimeImpl(workspace.getConfig().getDefaultEnv(), null);
         MachineConfigImpl devMachineConfig = MachineConfigImpl.builder()
                                                               .setDev(true)
                                                               .setEnvVariables(emptyMap())

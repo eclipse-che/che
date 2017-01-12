@@ -11,20 +11,28 @@
 package org.eclipse.che.commons.lang.concurrent;
 
 /**
- * Lock that is designed to use in try-with-resources statement.
+ * An interface that allows implementations to enclose
+ * locked instance and unlock it later by calling {@link #unlock()}.
  *
- * <p>Implementers should lock on instance creation
- * and unlock when {@link CloseableLock#close()} method invokes.
+ * <p>This is designed to be used in try-with-resources statement.
+ *
+ * <p>The example:
+ * <pre>
+ *     try (@SuppressWarnings("unused") Unlocker u = customLocks.lock("key")) {
+ *         // do something in lock
+ *     }
+ * </pre>
  *
  * @author Sergii Leschenko
+ * @author Yevhenii Voevodin
  */
-public interface CloseableLock extends AutoCloseable {
+public interface Unlocker extends AutoCloseable {
+
     /**
-     * Unlocks this lock.
-     *
-     * This method is invoked automatically on objects managed by the
-     * {@code try}-with-resources statement.
+     * Unlocks the corresponding lock in implementation specific manner.
      */
+    void unlock();
+
     @Override
-    void close();
+    default void close() { unlock(); }
 }
