@@ -205,15 +205,18 @@ public class FSLuceneSearcherTest {
 
     @Test(dataProvider = "searchByName")
     public void searchFileByName(String fileName, String searchedFileName) throws Exception {
-        String prefix = "prefix";
         VirtualFileSystem virtualFileSystem = virtualFileSystem();
-        VirtualFile folder = virtualFileSystem.getRoot().createFolder("folder");
+        VirtualFile folder = virtualFileSystem.getRoot().createFolder("parent/child");
+        VirtualFile folder2 = virtualFileSystem.getRoot().createFolder("folder2");
+        folder.createFile(NameGenerator.generate(null,10), TEST_CONTENT[3]);
         folder.createFile(fileName, TEST_CONTENT[2]);
-        folder.createFile(prefix + fileName, TEST_CONTENT[1]);
+        folder.createFile(NameGenerator.generate(null,10), TEST_CONTENT[1]);
+        folder2.createFile(NameGenerator.generate(null,10), TEST_CONTENT[2]);
+        folder2.createFile(NameGenerator.generate(null,10), TEST_CONTENT[2]);
         searcher.init(virtualFileSystem);
 
         List<String> paths = searcher.search(new QueryExpression().setName(searchedFileName)).getFilePaths();
-        assertEquals(newArrayList("/folder/" + fileName), paths);
+        assertEquals(newArrayList("/parent/child/" + fileName), paths);
     }
 
     @Test
