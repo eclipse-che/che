@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.command.editor.page.settings;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyUpEvent;
@@ -23,6 +24,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
@@ -44,6 +46,9 @@ import java.util.Set;
 public class SettingsPageViewImpl extends Composite implements SettingsPageView {
 
     private static final InfoPageViewImplUiBinder UI_BINDER = GWT.create(InfoPageViewImplUiBinder.class);
+
+    @UiField
+    SimpleLayoutPanel mainPanel;
 
     @UiField
     TextBox commandName;
@@ -119,6 +124,15 @@ public class SettingsPageViewImpl extends Composite implements SettingsPageView 
             switcher.setValue(entry.getValue());
 
             projectsPanel.add(switcher);
+        }
+
+        if (projects.size() > 0) {
+            Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+                @Override
+                public void execute() {
+                    mainPanel.setHeight(155 + 20 + projectsSection.getOffsetHeight() + "px");
+                }
+            });
         }
     }
 
