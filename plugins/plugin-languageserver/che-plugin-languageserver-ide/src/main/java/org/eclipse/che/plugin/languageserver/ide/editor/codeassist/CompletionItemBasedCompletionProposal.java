@@ -11,9 +11,10 @@
 package org.eclipse.che.plugin.languageserver.ide.editor.codeassist;
 
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.dom.client.Style.Overflow;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 import io.typefox.lsapi.ServerCapabilities;
 import org.eclipse.che.api.languageserver.shared.lsapi.CompletionItemDTO;
@@ -34,6 +35,8 @@ import org.eclipse.che.plugin.languageserver.ide.LanguageServerResources;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 
 import java.util.List;
+
+import static org.eclipse.che.ide.api.theme.Style.theme;
 
 /**
  * @author Anatolii Bazko
@@ -97,12 +100,15 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
             documentation = "No documentation found.";
         }
 
-        Label label = new Label(documentation);
-        label.setWordWrap(true);
-        label.getElement().getStyle().setFontSize(13, Style.Unit.PX);
-        label.getElement().getStyle().setMarginLeft(4, Style.Unit.PX);
-        label.setSize("100%", "100%");
-        return label;
+        HTML widget = new HTML(documentation);
+        widget.setWordWrap(true);
+        widget.getElement().getStyle().setColor(theme.completionPopupItemTextColor());
+        widget.getElement().getStyle().setFontSize(13, Style.Unit.PX);
+        widget.getElement().getStyle().setMarginLeft(4, Style.Unit.PX);
+        widget.getElement().getStyle().setOverflow(Overflow.AUTO);
+        widget.getElement().getStyle().setProperty("userSelect", "text");
+        widget.setHeight("100%");
+        return widget;
     }
 
     @Override

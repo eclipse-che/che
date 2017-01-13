@@ -8,21 +8,23 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.core.db.jpa;
+package com;
 
-import javax.persistence.RollbackException;
+public class HelloWorld {
 
-/**
- * Throws when any exception during cascade remove occurs.
- *
- * <p>Note that in case of throwing this type of exception,
- * cascade removal transaction will be rolled back.
- *
- * @author Anton Korneta
- */
-public class CascadeRemovalException extends RollbackException {
+    public static void main(String[] args) {
 
-    public CascadeRemovalException(Throwable cause) {
-        super(cause);
+        String test = "hello";
+        System.out.println(test);
+
+        String msg = say("world");
+        System.out.println(msg);
+
+        msg = say("debugger");
+        System.out.println(msg);
+    }
+
+    private static String say(String message) {
+        return "Hello, " + message + "!";
     }
 }

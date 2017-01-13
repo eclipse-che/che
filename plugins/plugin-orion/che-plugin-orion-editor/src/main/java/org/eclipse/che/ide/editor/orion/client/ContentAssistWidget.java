@@ -124,7 +124,9 @@ public class ContentAssistWidget implements EventListener {
                     final EventTarget target = mouseEvent.getTarget();
                     if (target instanceof Element) {
                         final Element elementTarget = (Element)target;
-                        if (elementTarget.equals(docPopup.getElement()) && docPopup.isVisible()) {
+                        if (docPopup.isVisible() && 
+                            (elementTarget.equals(docPopup.getElement()) || 
+                             elementTarget.getParentElement().equals(docPopup.getElement()))) {
                             return;
                         }
 
@@ -217,16 +219,11 @@ public class ContentAssistWidget implements EventListener {
                         if (info != null) {
                             docPopup.clear();
                             docPopup.add(info);
-
-                            if (docPopup.isAttached()) {
-                                return;
-                            }
-
-                            docPopup.getElement().getStyle()
-                                    .setLeft(popupElement.getOffsetLeft() + popupElement.getOffsetWidth() + 3, Style.Unit.PX);
-                            docPopup.getElement().getStyle().setTop(popupElement.getOffsetTop(), Style.Unit.PX);
-                            RootPanel.get().add(docPopup);
                             docPopup.getElement().getStyle().setOpacity(1);
+
+                            if (!docPopup.isAttached()) {
+                                RootPanel.get().add(docPopup);
+                            }
                         } else {
                             docPopup.getElement().getStyle().setOpacity(0);
                         }
@@ -410,7 +407,6 @@ public class ContentAssistWidget implements EventListener {
         selectedElement = element;
         selectedElement.setAttribute("selected", "true");
 
-        docPopup.clear();
         showDocTimer.cancel();
         showDocTimer.schedule(docPopup.isAttached() ? 100 : 1500);
 
@@ -519,7 +515,7 @@ public class ContentAssistWidget implements EventListener {
             this.popupElement.getStyle().setProperty("maxWidth", viewportWidth + caretLocation.getX() + "px");
         }
 
-        /* Don't attach handlers twice. Visible popup must already their attached. */
+        /* Don't attach handlers twice. Visible popup must already have their attached. */
         if (!visible) {
             addPopupEventListeners();
         }
@@ -528,16 +524,11 @@ public class ContentAssistWidget implements EventListener {
         visible = true;
         focused = false;
 
-        if (docPopup.isAttached()) {
-            docPopup.getElement().getStyle().setOpacity(0);
-            new Timer() {
-                @Override
-                public void run() {
-                    docPopup.removeFromParent();
-                    showDocTimer.schedule(1500);
-                }
-            }.schedule(250);
-        }
+        /* Update documentation popup position */
+        docPopup.getElement().getStyle()
+                .setLeft(popupElement.getOffsetLeft() + popupElement.getOffsetWidth() + 3, Style.Unit.PX);
+        docPopup.getElement().getStyle()
+                .setTop(popupElement.getOffsetTop(), Style.Unit.PX);
 
         /* Select first row. */
         selectFirst();

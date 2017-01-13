@@ -12,16 +12,18 @@ package org.eclipse.che.api.user.server.jpa;
 
 import com.google.inject.persist.Transactional;
 
+import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.user.server.event.PostUserRemovedEvent;
-import org.eclipse.che.core.db.jpa.CascadeRemovalException;
-import org.eclipse.che.core.db.jpa.DuplicateKeyException;
+import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
+import org.eclipse.che.api.user.server.event.PostUserPersistedEvent;
+import org.eclipse.che.api.user.server.event.UserRemovedEvent;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.server.spi.UserDao;
+import org.eclipse.che.core.db.jpa.DuplicateKeyException;
 import org.eclipse.che.security.PasswordEncryptor;
 
 import javax.inject.Inject;
@@ -105,22 +107,17 @@ public class JpaUserDao implements UserDao {
     }
 
     @Override
-    public void remove(String id) throws ServerException, ConflictException {
+    public void remove(String id) throws ServerException {
         requireNonNull(id, "Required non-null id");
         try {
-            Optional<UserImpl> user = doRemove(id);
-            if (user.isPresent()) {
-                eventService.publish(new PostUserRemovedEvent(id));
-            }
-        } catch (CascadeRemovalException removeEx) {
-            throw new ServerException(removeEx.getCause().getLocalizedMessage(), removeEx.getCause());
+            Optional<UserImpl> userOpt = doRemove(id);
+            userOpt.ifPresent(user -> eventService.publish(new UserRemovedEvent(user.getId())));
         } catch (RuntimeException x) {
             throw new ServerException(x.getLocalizedMessage(), x);
         }
     }
 
     @Override
-    @Transactional
     public UserImpl getByAlias(String alias) throws NotFoundException, ServerException {
         requireNonNull(alias, "Required non-null alias");
         try {
@@ -214,9 +211,12 @@ public class JpaUserDao implements UserDao {
         }
     }
 
-    @Transactional
-    protected void doCreate(UserImpl user) {
-        managerProvider.get().persist(user);
+    @Transactional(rollbackOn = {RuntimeException.class, ApiException.class})
+    protected void doCreate(UserImpl user) throws ConflictException, ServerException {
+        EntityManager manage = managerProvider.get();
+        manage.persist(user);
+        manage.flush();
+        eventService.publish(new PostUserPersistedEvent(new UserImpl(user))).propagateException();
     }
 
     @Transactional
@@ -233,15 +233,20 @@ public class JpaUserDao implements UserDao {
             update.setPassword(user.getPassword());
         }
         manager.merge(update);
+        manager.flush();
     }
 
-    @Transactional
-    protected Optional<UserImpl> doRemove(String id) {
+    @Transactional(rollbackOn = {RuntimeException.class, ServerException.class})
+    protected Optional<UserImpl> doRemove(String id) throws ServerException {
         final EntityManager manager = managerProvider.get();
-        final Optional<UserImpl> user = Optional.ofNullable(manager.find(UserImpl.class, id));
-        user.ifPresent(manager::remove);
-        return user;
-
+        final UserImpl user = manager.find(UserImpl.class, id);
+        if (user == null) {
+            return Optional.empty();
+        }
+        eventService.publish(new BeforeUserRemovedEvent(user)).propagateException();
+        manager.remove(user);
+        manager.flush();
+        return Optional.of(user);
     }
 
     // Returns user instance copy without password

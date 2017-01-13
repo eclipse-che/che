@@ -12,23 +12,23 @@ package org.eclipse.che.api.user.server.event;
 
 import org.eclipse.che.api.core.notification.EventOrigin;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
+import org.eclipse.che.core.db.cascade.event.PersistEvent;
 
 /**
- * Published after {@link UserImpl user} removed.
+ * Published after {@link UserImpl user} persisted.
  *
- * @author Sergii Kabashniuk
+ * @author Sergii Leschenko
  */
 @EventOrigin("user")
-public class PostUserRemovedEvent {
+public class PostUserPersistedEvent extends PersistEvent {
+    private final UserImpl user;
 
-    private final String userId;
-
-    public PostUserRemovedEvent(String userId) {
-        this.userId = userId;
+    public PostUserPersistedEvent(UserImpl user) {
+        this.user = user;
     }
 
-    /** Returns id of removed user*/
-    public String getUserId() {
-        return userId;
+    /** Returns user which is persisted. */
+    public UserImpl getUser() {
+        return user;
     }
 }
