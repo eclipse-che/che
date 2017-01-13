@@ -24,7 +24,6 @@ import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandManager.CommandChangedListener;
 import org.eclipse.che.ide.api.command.ContextualCommand;
-import org.eclipse.che.ide.api.dialogs.CancelCallback;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.editor.AbstractEditorPresenter;
@@ -65,7 +64,7 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
     private final NotificationManager      notificationManager;
     private final DialogFactory            dialogFactory;
     private final EditorAgent              editorAgent;
-    private final CoreLocalizationConstant localizationConstants;
+    private final CoreLocalizationConstant coreMessages;
     private final EditorMessages           messages;
     private final NodeFactory              nodeFactory;
     private final CommandExecutor          commandExecutor;
@@ -88,7 +87,7 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
                          NotificationManager notificationManager,
                          DialogFactory dialogFactory,
                          EditorAgent editorAgent,
-                         CoreLocalizationConstant localizationConstants,
+                         CoreLocalizationConstant coreMessages,
                          EditorMessages messages,
                          NodeFactory nodeFactory,
                          CommandExecutor commandExecutor) {
@@ -99,7 +98,7 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
         this.notificationManager = notificationManager;
         this.dialogFactory = dialogFactory;
         this.editorAgent = editorAgent;
-        this.localizationConstants = localizationConstants;
+        this.coreMessages = coreMessages;
         this.messages = messages;
         this.nodeFactory = nodeFactory;
         this.commandExecutor = commandExecutor;
@@ -253,9 +252,12 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
         if (!isDirty()) {
             callback.onSuccess(null);
         } else {
-            dialogFactory.createConfirmDialog(
-                    localizationConstants.askWindowCloseTitle(),
-                    localizationConstants.messagesSaveChanges(getEditorInput().getName()),
+            dialogFactory.createChoiceDialog(
+                    coreMessages.askWindowCloseTitle(),
+                    coreMessages.messagesSaveChanges(getEditorInput().getName()),
+                    coreMessages.yesButtonTitle(),
+                    coreMessages.noButtonTitle(),
+                    coreMessages.cancelButton(),
                     new ConfirmCallback() {
                         @Override
                         public void accepted() {
@@ -272,10 +274,15 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
                             });
                         }
                     },
-                    new CancelCallback() {
+                    new ConfirmCallback() {
                         @Override
-                        public void cancelled() {
+                        public void accepted() {
                             callback.onSuccess(null);
+                        }
+                    }, new ConfirmCallback() {
+                        @Override
+                        public void accepted() {
+                            callback.onFailure(null);
                         }
                     }).show();
         }

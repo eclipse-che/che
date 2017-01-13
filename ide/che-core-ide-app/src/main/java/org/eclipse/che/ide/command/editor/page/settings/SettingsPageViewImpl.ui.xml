@@ -37,6 +37,7 @@
             display: inline-block;
             width: 150px;
             margin-left: 10px;
+            margin-top: 3px;
         }
     </ui:style>
 

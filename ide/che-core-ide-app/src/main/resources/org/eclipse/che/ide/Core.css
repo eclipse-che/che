@@ -528,6 +528,7 @@ a {
 .gwt-DisclosurePanel .header td img {
     width: 12px;
     height: 12px;
+    margin-top: 5px;
 }
 
 .gwt-DisclosurePanel .content {
