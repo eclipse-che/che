@@ -36,11 +36,20 @@ import org.eclipse.che.plugin.docker.client.connection.DockerConnectionFactory;
 import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.json.ImageConfig;
+import org.eclipse.che.plugin.docker.client.json.NetworkCreated;
 import org.eclipse.che.plugin.docker.client.json.PortBinding;
+import org.eclipse.che.plugin.docker.client.json.network.ContainerInNetwork;
+import org.eclipse.che.plugin.docker.client.json.network.Ipam;
+import org.eclipse.che.plugin.docker.client.json.network.IpamConfig;
+import org.eclipse.che.plugin.docker.client.json.network.Network;
 import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
+import org.eclipse.che.plugin.docker.client.params.RemoveNetworkParams;
 import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
 import org.eclipse.che.plugin.docker.client.params.network.ConnectContainerToNetworkParams;
+import org.eclipse.che.plugin.docker.client.params.network.CreateNetworkParams;
+import org.eclipse.che.plugin.docker.client.params.network.DisconnectContainerFromNetworkParams;
+import org.eclipse.che.plugin.docker.client.params.network.InspectNetworkParams;
 import org.eclipse.che.plugin.openshift.client.kubernetes.KubernetesContainer;
 import org.eclipse.che.plugin.openshift.client.kubernetes.KubernetesEnvVar;
 import org.eclipse.che.plugin.openshift.client.kubernetes.KubernetesLabelConverter;
@@ -263,9 +272,97 @@ public class OpenShiftConnector extends DockerConnector {
     }
 
     @Override
+    public NetworkCreated createNetwork(CreateNetworkParams params) throws IOException {
+        // Not needed in OpenShift
+        return new NetworkCreated().withId(params.getNetwork().getName());
+    }
+
+    @Override
+    public void removeNetwork(String netId) throws IOException {
+        // Not needed in OpenShift
+    }
+
+    @Override
+    public void removeNetwork(RemoveNetworkParams params) throws IOException {
+        // Not needed in OpenShift
+    }
+
+    @Override
+    public void connectContainerToNetwork(String netId, String containerId) throws IOException {
+        // Not needed in OpenShift
+    }
+
+    @Override
     public void connectContainerToNetwork(ConnectContainerToNetworkParams params) throws IOException {
         // Not used in OpenShift
     }
+
+    @Override
+    public void disconnectContainerFromNetwork(String netId, String containerId) throws IOException {
+        // Not needed in OpenShift
+    }
+
+    @Override
+    public void disconnectContainerFromNetwork(DisconnectContainerFromNetworkParams params) throws IOException {
+        // Not needed in OpenShift
+    }
+
+    @Override
+    public Network inspectNetwork(String netId) throws IOException {
+        return inspectNetwork(InspectNetworkParams.create(netId));
+    }
+
+    @Override
+    public Network inspectNetwork(InspectNetworkParams params) throws IOException {
+        String netId = params.getNetworkId();
+
+        ServiceList services = openShiftClient.services()
+                                              .inNamespace(this.cheOpenShiftProjectName)
+                                              .list();
+        Map<String, ContainerInNetwork> containers = new HashMap<>();
+        for (Service svc : services.getItems()) {
+            String selector = svc.getSpec().getSelector().get(OPENSHIFT_DEPLOYMENT_LABEL);
+            if (selector == null || !selector.startsWith(CHE_OPENSHIFT_RESOURCES_PREFIX)) {
+                continue;
+            }
+
+            PodList pods = openShiftClient.pods()
+                                          .inNamespace(cheOpenShiftProjectName)
+                                          .withLabel(OPENSHIFT_DEPLOYMENT_LABEL, selector)
+                                          .list();
+            for (Pod pod : pods.getItems()) {
+                String podName = pod.getMetadata()
+                                    .getName();
+                ContainerInNetwork container = new ContainerInNetwork().withName(podName)
+                                                                       .withIPv4Address(svc.getSpec()
+                                                                                           .getClusterIP());
+                String podId = getLabelFromContainerID(pod.getMetadata()
+                                                          .getLabels()
+                                                          .get(CHE_CONTAINER_IDENTIFIER_LABEL_KEY));
+                if (podId == null) {
+                    continue;
+                }
+                containers.put(podId, container);
+            }
+        }
+
+        List<IpamConfig> ipamConfig = new ArrayList<>();
+        Ipam ipam = new Ipam().withDriver("bridge")
+                              .withOptions(Collections.emptyMap())
+                              .withConfig(ipamConfig);
+
+        return new Network().withName("OpenShift")
+                            .withId(netId)
+                            .withContainers(containers)
+                            .withLabels(Collections.emptyMap())
+                            .withOptions(Collections.emptyMap())
+                            .withDriver("default")
+                            .withIPAM(ipam)
+                            .withScope("local")
+                            .withInternal(false)
+                            .withEnableIPv6(false);
+    }
+
 
     private Service getCheServiceBySelector(String selectorKey, String selectorValue) {
         ServiceList svcs = openShiftClient.services()
