@@ -438,7 +438,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
      * <ol>
      * <li>Through field <i>a</i> in class <i>B</i>: ['this', 'a', 'str']</li>
      * <li>Through local variable <i>var</i> in method <i>B.method()</i>: ['var', 'str']</li>
-     * </ol>e
+     * </ol>
      *
      * @param variablePath
      *         path to variable
