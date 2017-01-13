@@ -238,14 +238,8 @@ public class WorkspaceManager {
     public List<WorkspaceImpl> getWorkspaces(String user, boolean includeRuntimes) throws ServerException {
         requireNonNull(user, "Required non-null user id");
         final List<WorkspaceImpl> workspaces = workspaceDao.getWorkspaces(user);
-        if (includeRuntimes) {
-            for (WorkspaceImpl workspace : workspaces) {
-                normalizeState(workspace);
-            }
-        } else {
-            for (WorkspaceImpl workspace : workspaces) {
-                workspace.setStatus(runtimes.getStatus(workspace.getId()));
-            }
+        for (WorkspaceImpl workspace : workspaces) {
+            normalizeState(workspace, includeRuntimes);
         }
         return workspaces;
     }
@@ -270,14 +264,8 @@ public class WorkspaceManager {
     public List<WorkspaceImpl> getByNamespace(String namespace, boolean includeRuntimes) throws ServerException {
         requireNonNull(namespace, "Required non-null namespace");
         final List<WorkspaceImpl> workspaces = workspaceDao.getByNamespace(namespace);
-        if (includeRuntimes) {
-            for (WorkspaceImpl workspace : workspaces) {
-                normalizeState(workspace);
-            }
-        } else {
-            for (WorkspaceImpl workspace : workspaces) {
-                workspace.setStatus(runtimes.getStatus(workspace.getId()));
-            }
+        for (WorkspaceImpl workspace : workspaces) {
+            normalizeState(workspace, includeRuntimes);
         }
         return workspaces;
     }
