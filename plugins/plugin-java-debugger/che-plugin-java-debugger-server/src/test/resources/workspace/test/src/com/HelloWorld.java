@@ -13,7 +13,14 @@ package com;
 public class HelloWorld {
 
     public static void main(String[] args) {
+
+        String test = "hello";
+        System.out.println(test);
+
         String msg = say("world");
+        System.out.println(msg);
+
+        msg = say("debugger");
         System.out.println(msg);
     }
 
