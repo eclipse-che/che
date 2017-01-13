@@ -5,6 +5,7 @@ excerpt: "cURL code that shows how to create a workspace with Che REST API"
 layout: docs
 permalink: /:categories/create-workspaces/
 ---
+{% include base.html %}
 Sample cURL code that creates a workspace named `workspace-debian` and displays resulting data in console:
 ```curl  
 # use of http://localhost:8080/api/workspace

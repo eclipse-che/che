@@ -5,6 +5,7 @@ excerpt: "Configure Eclipse Che to bend to your will..."
 layout: docs
 permalink: /:categories/configuration/
 ---
+{% include base.html %}
 Configuration is handled by modifying `che.env` placed in the host folder volume mounted to `:/data`. This configuration file is generated during the `che init` phase. If you rerun `che init` in an already initialized folder, the process will abort unless you pass `--force`, `--pull`, or `--reinit`.
 
 Each variable is documented with an explanation and usually commented out. If you need to set a variable, uncomment it and configure it with your value. You can then run `che config` to apply this configuration to your system. `che start` also reapplies the latest configuration.

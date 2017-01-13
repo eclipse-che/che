@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -568,6 +568,10 @@ class JGitConnection implements GitConnection {
                                                   .setMessage(message)
                                                   .setAll(params.isAll())
                                                   .setAmend(params.isAmend());
+
+            if (!params.isAll()) {
+                params.getFiles().forEach(commitCommand::setOnly);
+            }
 
             // Check if repository is configured with Gerrit Support
             String gerritSupportConfigValue = repository.getConfig().getString(ConfigConstants.CONFIG_GERRIT_SECTION, null,

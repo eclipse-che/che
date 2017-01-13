@@ -5,6 +5,7 @@ excerpt: "Run the Che server with Docker bypassing the CLI with workspaces mount
 layout: docs
 permalink: /:categories/docker/
 ---
+{% include base.html %}
 You can run the Che server directly by launching a Docker image. This approach bypasses the CLI, which has additional utilities to simplify administration and operation. The `eclipse/che-server` Docker image is appropriate for running Che within clusters, orchestrators, or by third party tools with automation.
 
 # Run the Image  

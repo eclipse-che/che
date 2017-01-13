@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,6 +23,7 @@ import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
@@ -114,6 +115,18 @@ public class ResetFilesPresenter implements ResetFilesView.ActionDelegate {
                 if (indexedFiles.length == 0) {
                     dialogFactory.createMessageDialog(constant.messagesWarningTitle(), constant.indexIsEmpty(), null).show();
                     return;
+                }
+
+                //Mark selected items to reset from index
+                Resource[] resources = appContext.getResources();
+                if (resources != null) {
+                    for (Resource selectedItem : resources) {
+                        String selectedItemPath = selectedItem.getLocation().removeFirstSegments(1).toString();
+                        for (IndexFile file : indexedFiles)
+                            if (file.getPath().startsWith(selectedItemPath)) {
+                                file.setIndexed(false);
+                            }
+                    }
                 }
 
                 view.setIndexedFiles(indexedFiles);

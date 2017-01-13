@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,6 +33,7 @@ import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStackView.TabItem;
 import org.eclipse.che.ide.api.parts.PropertyListener;
 import org.eclipse.che.ide.api.resources.VirtualFile;
+import org.eclipse.che.ide.menu.PartMenu;
 import org.eclipse.che.ide.part.PartStackPresenter.PartStackEventHandler;
 import org.eclipse.che.ide.part.PartsComparator;
 import org.eclipse.che.ide.part.editor.actions.CloseAllTabsPaneAction;
@@ -83,6 +84,8 @@ public class EditorPartStackPresenterTest {
     //constructor mocks
     @Mock
     private EditorPartStackView       view;
+    @Mock
+    private PartMenu                  partMenu;
     @Mock
     private PartsComparator           partsComparator;
     @Mock
@@ -193,6 +196,7 @@ public class EditorPartStackPresenterTest {
         when(editorPaneMenuItemFactory.createMenuItem((TabItem)anyObject())).thenReturn(editorPaneTabMenuItem);
 
         presenter = new EditorPartStackPresenter(view,
+                                                 partMenu,
                                                  partsComparator,
                                                  editorPaneMenuItemFactory,
                                                  presentationFactory,

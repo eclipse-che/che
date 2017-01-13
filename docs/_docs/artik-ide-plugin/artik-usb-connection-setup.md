@@ -5,6 +5,7 @@ excerpt: ""
 layout: artik
 permalink: /:categories/usb-connection-setup/
 ---
+{% include base.html %}
 After the workspace has been created, the first time that it is opened in the IDE, the ARTIK device discovery and management panel will appear. The workspace will manage your devices over SSH and configured by IP address.
 
 You can discover the IP address of USB-connected devices automatically using an embedded service powered by the Android Debug Bridge (ADB), which is running on the device and also has its client installed into your workspace.

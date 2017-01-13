@@ -5,6 +5,7 @@ excerpt: "Connect to your workspaces using SSH"
 layout: docs
 permalink: /:categories/ssh/
 ---
+{% include base.html %}
 Workspaces are configured with an SSH agent, which runs an SSH daemon within your workspace runtime. You can connect to your workspace on the command line and get root access to the runtime (similar to what the Web terminal provides) from other machines. You can optionally disable the SSH agent for your workspace from within the dashboard.
 
 # Public / Private Key Generation

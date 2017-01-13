@@ -5,6 +5,7 @@ excerpt: ""
 layout: tutorials
 permalink: /:categories/gae/
 ---
+{% include base.html %}
 ```text  
 # When on the Dashboard create a new project with PHP GAE or Python GAE stack from the Stack Library and a sample PHP or Python project. \
 ```

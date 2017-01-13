@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,6 +38,7 @@ import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent.ResourceChangedHandler;
 import org.eclipse.che.ide.api.resources.ResourceDelta;
 import org.eclipse.che.ide.api.resources.VirtualFile;
+import org.eclipse.che.ide.menu.PartMenu;
 import org.eclipse.che.ide.part.PartStackPresenter;
 import org.eclipse.che.ide.part.PartsComparator;
 import org.eclipse.che.ide.part.editor.actions.CloseAllTabsPaneAction;
@@ -107,6 +108,7 @@ public class EditorPartStackPresenter extends PartStackPresenter implements Edit
 
     @Inject
     public EditorPartStackPresenter(EditorPartStackView view,
+                                    PartMenu partMenu,
                                     PartsComparator partsComparator,
                                     EditorPaneMenuItemFactory editorPaneMenuItemFactory,
                                     PresentationFactory presentationFactory,
@@ -117,7 +119,7 @@ public class EditorPartStackPresenter extends PartStackPresenter implements Edit
                                     ActionManager actionManager,
                                     ClosePaneAction closePaneAction,
                                     CloseAllTabsPaneAction closeAllTabsPaneAction) {
-        super(eventBus, partStackEventHandler, tabItemFactory, partsComparator, view, null);
+        super(eventBus, partMenu, partStackEventHandler, tabItemFactory, partsComparator, view, null);
         this.editorPaneMenuItemFactory = editorPaneMenuItemFactory;
         this.eventBus = eventBus;
         this.presentationFactory = presentationFactory;
@@ -504,4 +506,5 @@ public class EditorPartStackPresenter extends PartStackPresenter implements Edit
             }
         }
     }
+
 }

@@ -16,13 +16,13 @@ che:
     - '<%= scope.lookupvar('che::che_instance') -%>/data:/data'
     - '<%= scope.lookupvar('che::che_instance') -%>/logs:/logs'
     - '<%= scope.lookupvar('che::che_instance') -%>/config:/conf'
-<% if scope.lookupvar('che::che_env') != 'production' -%>
+<% if scope.lookupvar('che::che_dev_env') == 'on' -%>
     - '<%= scope.lookupvar('che::che_assembly') -%>:/assembly'
 <% end -%>
   ports:
     - '<%= scope.lookupvar('che::che_port') -%>:8080'
-<% if scope.lookupvar('che::che_env') != 'production' -%>
-    - '8000:8000'
+<% if scope.lookupvar('che::che_env') == 'development' -%>
+    - '<%= scope.lookupvar('che::che_debug_port') -%>:8000'
 <% end -%>
   restart: always
   container_name: che

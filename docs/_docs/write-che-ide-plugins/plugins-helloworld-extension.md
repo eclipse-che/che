@@ -5,6 +5,7 @@ excerpt: "Create your first extension"
 layout: docs
 permalink: /:categories/helloworld-extension/
 ---
+{% include base.html %}
 This documentation is a step-by-step guide to build your first HelloWorld extension for Eclipse Che.
 
 In order to follow this guide, we consider you have successfully configured Eclipse Che sources inside of Eclipse IDE and have been able to execute your manually built assembly. If not, please refer to the following [documentation](https://eclipse-che.readme.io/docs/setup-che-workspace).

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -46,6 +46,7 @@ import javax.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
@@ -235,7 +236,7 @@ public class WorkspaceManager {
         requireNonNull(user, "Required non-null user id");
         final List<WorkspaceImpl> workspaces = workspaceDao.getWorkspaces(user);
         for (WorkspaceImpl workspace : workspaces) {
-            normalizeState(workspace);
+            workspace.setStatus(runtimes.getStatus(workspace.getId()));
         }
         return workspaces;
     }
@@ -718,7 +719,7 @@ public class WorkspaceManager {
     private void removeWorkspaceQuietly(Workspace workspace) {
         try {
             workspaceDao.remove(workspace.getId());
-        } catch (ConflictException | ServerException x) {
+        } catch (ServerException x) {
             LOG.error("Unable to remove temporary workspace '{}'", workspace.getId());
         }
     }

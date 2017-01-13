@@ -5,6 +5,7 @@ excerpt: ""
 layout: docs
 permalink: /:categories/recipes/
 ---
+{% include base.html %}
 A recipe defines part of the runtime of a workspace. A recipe is included in a [stack](https://eclipse-che.readme.io/docs/stacks) along with meta information that defines how the workspace runtime should be created. When creating custom workspace runtime it's often best to create a custom [stack](https://eclipse-che.readme.io/docs/stacks) with a custom recipe.
 
 Workspaces can have a single runtime or multiple runtimes.  Che uses Docker, though Che could handle runtimes other than Docker, to create runtime(s) from [Dockerfiles](https://docs.docker.com/engine/reference/builder/) for a single-container runtime, or [compose files](https://docs.docker.com/compose/overview/) to create single-container/multi-container runtime(s).

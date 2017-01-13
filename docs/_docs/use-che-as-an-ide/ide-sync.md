@@ -5,6 +5,7 @@ excerpt: "Synchronize Che workspaces with your desktop IDE with live sync."
 layout: docs
 permalink: /:categories/sync/
 ---
+{% include base.html %}
 
 Che ships a super fast Fuse-based mount and sync mechanism. This is delivered as a Docker container that combines `sshfs` with `unison`. You can perform a mount on any operating system that supports Docker. However, if you are on Windows using Boot2Docker, you can only mount directories in `%userprofile%`.
 # List Workspaces  

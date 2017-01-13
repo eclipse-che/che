@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,7 +13,7 @@ package org.eclipse.che.account.spi.jpa;
 
 import org.eclipse.che.account.event.BeforeAccountRemovedEvent;
 import org.eclipse.che.account.spi.AccountImpl;
-import org.eclipse.che.core.db.jpa.CascadeRemovalException;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 
 import javax.inject.Inject;
@@ -32,11 +32,7 @@ public class AccountEntityListener {
     private EventService eventService;
 
     @PreRemove
-    private void preRemove(AccountImpl account) {
-        final BeforeAccountRemovedEvent event = new BeforeAccountRemovedEvent(account);
-        eventService.publish(event);
-        if (event.getContext().isFailed()) {
-            throw new CascadeRemovalException(event.getContext().getCause());
-        }
+    private void preRemove(AccountImpl account) throws ServerException {
+        eventService.publish(new BeforeAccountRemovedEvent(account)).propagateException();
     }
 }

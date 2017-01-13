@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -214,8 +214,8 @@ public class WorkspaceManagerTest {
 
         when(workspaceDao.getWorkspaces(NAMESPACE)).thenReturn(asList(workspace1, workspace2));
         final RuntimeDescriptor descriptor = createDescriptor(workspace2, RUNNING);
-        when(runtimes.get(workspace2.getId())).thenReturn(descriptor);
-        when(runtimes.get(workspace1.getId())).thenThrow(new NotFoundException("no runtime"));
+        when(runtimes.getStatus(workspace2.getId())).thenReturn(RUNNING);
+        when(runtimes.getStatus(workspace1.getId())).thenReturn(STOPPED);
 
         // when
         final List<WorkspaceImpl> result = workspaceManager.getWorkspaces(NAMESPACE);

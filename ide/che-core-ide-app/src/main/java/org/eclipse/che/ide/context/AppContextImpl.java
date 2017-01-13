@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,7 +16,6 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
-
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.promises.client.Operation;
@@ -58,7 +57,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Arrays.binarySearch;
 import static java.util.Arrays.copyOf;
@@ -132,8 +130,13 @@ public class AppContextImpl implements AppContext,
 
     @Override
     public void setWorkspace(Workspace workspace) {
-        this.usersWorkspace = workspace;
-        runtime = new ActiveRuntime(workspace.getRuntime());
+        if (workspace != null) {
+            usersWorkspace = workspace;
+            runtime = new ActiveRuntime(workspace.getRuntime());
+        } else {
+            usersWorkspace = null;
+            runtime = null;
+        }
     }
 
     @Override
@@ -370,7 +373,7 @@ public class AppContextImpl implements AppContext,
 
     @Override
     public Project[] getProjects() {
-        return checkNotNull(projects, "Projects is not initialized");
+        return projects == null ? new Project[0] : projects;
     }
 
     @Override
@@ -392,6 +395,10 @@ public class AppContextImpl implements AppContext,
 
     @Override
     public Project getRootProject() {
+        if (projects == null) {
+            return null;
+        }
+
         if (currentResource == null || currentResources == null) {
 
             EditorAgent editorAgent = editorAgentProvider.get();
@@ -465,7 +472,6 @@ public class AppContextImpl implements AppContext,
                 resourceManager = null;
             }
         });
-        runtime = null;
 
         //goto close all editors
         final EditorAgent editorAgent = editorAgentProvider.get();
@@ -473,6 +479,7 @@ public class AppContextImpl implements AppContext,
         for (EditorPartPresenter editor : openedEditors) {
             editorAgent.closeEditor(editor);
         }
+        runtime = null;
     }
 
     @Override

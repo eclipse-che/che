@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -92,6 +92,9 @@ public interface ProcessesPanelView extends View<ProcessesPanelView.ActionDelega
 
     /** Sets visibility for processes tree */
     void setProcessesTreeVisible(boolean visible);
+
+    /** Determines whether process tree is visible */
+    boolean isProcessesTreeVisible();
 
     interface ActionDelegate extends BaseActionDelegate {
 

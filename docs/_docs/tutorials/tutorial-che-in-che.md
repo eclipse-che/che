@@ -5,6 +5,7 @@ excerpt: "There is nothing like a little Che inception to brighten your day."
 layout: tutorials
 permalink: /:categories/che-in-che/
 ---
+{% include base.html %}
 You can build and run Che using Che!  Since Che runs within a Docker container and its workspaces are generated as Docker containers, there is extra configuration that is needed to enable the Che that you build in Che to generate its own workspaces!
 # Concepts  
 We are going to setup Che to have the Che launcher, the Che server, your primary development workspace, and the new Che you will compile be Docker containers. All of these Docker containers will be launched and managed by a shared Docker daemon, which is running on your host system.

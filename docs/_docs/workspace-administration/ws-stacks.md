@@ -5,6 +5,7 @@ excerpt: "Stacks define the workspace runtime, commands, and configuration."
 layout: docs
 permalink: /:categories/stacks/
 ---
+{% include base.html %}
 A stack is a runtime configuration for a workspace. It contains a [runtime recipe](doc:recipes), meta information like tags, description, environment name, and security policies. Since Che supports different kinds of runtimes, there are different stack recipe formats.
 
 Stacks are displayed within the user dashboard and stack tags are used to filter the [project code samples](doc:templates) that are available. It is possible to have a single stack with a variety of different project samples, each of which are filtered differently.

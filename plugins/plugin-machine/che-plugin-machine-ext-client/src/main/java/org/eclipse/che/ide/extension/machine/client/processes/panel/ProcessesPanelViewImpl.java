@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -91,6 +91,8 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
     private String activeProcessId = "";
 
     private Focusable lastFosuced;
+
+    private boolean navigationPanelVisible;
 
     @Inject
     public ProcessesPanelViewImpl(PartStackUIResources partStackUIResources,
@@ -202,6 +204,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
         tuneSplitter();
         splitLayoutPanel.setWidgetHidden(navigationPanel, true);
+        navigationPanelVisible = false;
     }
 
     /**
@@ -389,6 +392,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
     @Override
     public void setProcessesData(ProcessTreeNode root) {
         splitLayoutPanel.setWidgetHidden(navigationPanel, false);
+        navigationPanelVisible = true;
 
         processTree.asWidget().setVisible(true);
         processTree.getModel().setRoot(root);
@@ -509,6 +513,12 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
     @Override
     public void setProcessesTreeVisible(boolean visible) {
         splitLayoutPanel.setWidgetHidden(navigationPanel, !visible);
+        navigationPanelVisible = visible;
+    }
+
+    @Override
+    public boolean isProcessesTreeVisible() {
+        return navigationPanelVisible;
     }
 
     interface ProcessesPartViewImplUiBinder extends UiBinder<Widget, ProcessesPanelViewImpl> {

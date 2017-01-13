@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,6 +18,9 @@ import {ListComponents} from './stack-details/list-components/list-components.di
 import {ListComponentsController} from './stack-details/list-components/list-components.controller';
 import {EditComponentDialogController} from './stack-details/list-components/edit-component-dialog/edit-component-dialog.controller';
 import {SelectTemplateController} from './stack-details/select-template/select-template.controller';
+import {ImportStackController} from './list-stacks/import-stack/import-stack.controller';
+import {ImportStackService} from './stack-details/import-stack.service';
+import {StackValidationService} from './stack-details/stack-validation.service';
 
 /**
  * @ngdoc controller
@@ -39,6 +42,9 @@ export class StacksConfig {
     register.controller('StackController', StackController);
     register.controller('EditComponentDialogController', EditComponentDialogController);
     register.controller('SelectTemplateController', SelectTemplateController);
+    register.controller('ImportStackController', ImportStackController);
+    register.service('importStackService', ImportStackService);
+    register.service('stackValidationService', StackValidationService);
 
     // config routes
     register.app.config(($routeProvider: any) => {

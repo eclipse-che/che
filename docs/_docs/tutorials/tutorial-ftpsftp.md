@@ -5,6 +5,7 @@ excerpt: ""
 layout: tutorials
 permalink: /:categories/ftpsftp/
 ---
+{% include base.html %}
 ##Add FTP / SFTP into a workspace
 Che has Midnight Commander installed in the Terminal, so it's possible to use it to connect to a remote FTP server.
 

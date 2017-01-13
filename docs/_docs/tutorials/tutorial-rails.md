@@ -5,6 +5,7 @@ excerpt: ""
 layout: tutorials
 permalink: /:categories/rails/
 ---
+{% include base.html %}
 Ruby on Rails, or simply Rails, is a web application framework written in Ruby under MIT License. Rails is a model–view–controller (MVC) framework, providing default structures for a database, a web service, and web pages.
 ```text  
 # When on the User Dashboard, create a new project using a Ruby_Rails stack and a Rails web app sample.\

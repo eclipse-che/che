@@ -5,3 +5,4 @@ excerpt: "Advanced configuration for the ARTIK IDE."
 layout: artik
 permalink: /:categories/config/
 ---
+{% include base.html %}

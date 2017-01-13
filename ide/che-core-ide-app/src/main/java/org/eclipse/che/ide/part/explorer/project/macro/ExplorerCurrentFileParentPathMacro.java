@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,7 +13,6 @@ package org.eclipse.che.ide.part.explorer.project.macro;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -27,7 +26,6 @@ import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
-import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.resources.tree.ResourceNode;
 
 import javax.annotation.Nullable;
@@ -84,13 +82,12 @@ public class ExplorerCurrentFileParentPathMacro implements Macro {
         public String apply(@Nullable Resource input) {
             checkNotNull(input);
 
-            final Optional<Container> parentOptional = input.getParent();
-            if (!parentOptional.isPresent()) {
+            final Container parent = input.getParent();
+            if (parent == null) {
                 return "";
             }
 
-            Path location = parentOptional.get().getLocation();
-            return appContext.getProjectsRoot().append(location).toString();
+            return appContext.getProjectsRoot().append(parent.getLocation()).toString();
         }
     };
 

@@ -8,6 +8,10 @@
                         ng-if="addButtonHref"
                         che-button-title="{{addButtonTitle}}"
                         ng-href="{{addButtonHref}}"></che-button-primary>
+    <che-button-primary class="che-list-import-button"
+                        ng-if="onImport"
+                        che-button-title="{{importButtonTitle}}"
+                        ng-click="onImport()"></che-button-primary>
     <div class="che-list-search"
          ng-show="inputPlaceholder && !hideSearch">
       <div flex="100" layout="row">

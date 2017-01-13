@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -226,7 +226,7 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
     }
 
     private SpanElement createCommandElement(ProcessTreeNode node) {
-        SpanElement root = Elements.createSpanElement();
+        SpanElement root = Elements.createSpanElement(resources.getCss().commandTreeNode());
         root.setAttribute("running", "" + node.isRunning());
 
         root.appendChild(createCloseElement(node));
@@ -262,7 +262,7 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
     }
 
     private SpanElement createTerminalElement(ProcessTreeNode node) {
-        SpanElement root = Elements.createSpanElement();
+        SpanElement root = Elements.createSpanElement(resources.getCss().commandTreeNode());
 
         root.appendChild(createCloseElement(node));
 

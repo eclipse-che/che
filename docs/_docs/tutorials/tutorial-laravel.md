@@ -5,6 +5,7 @@ excerpt: ""
 layout: tutorials
 permalink: /:categories/laravel/
 ---
+{% include base.html %}
 Laravel is a free, open-source PHP web framework, created by Taylor Otwell and intended for the development of web applications following the model-view-controller (MVC) architectural pattern.
 ```text  
 # In the dashboard, create a new workspace from the custom stack using the following image:

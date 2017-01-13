@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,6 +23,7 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Provider;
@@ -98,12 +99,15 @@ public class EmptyEditorsPanel extends Composite implements ResourceChangedEvent
 
         eventBus.addHandler(ResourceChangedEvent.getType(), this);
         logo.appendChild(new SVGImage(productInfoDataProvider.getLogo()).getSvgElement().getElement());
-        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+        //Sometimes initialization of Create/Import Project actions are completed after the Empty editor page is rendered.
+        //In this case we need to wait when actions will be initialized.
+        Timer hoverToRenderTimer = new Timer() {
             @Override
-            public void execute() {
+            public void run() {
                 renderNoProjects();
             }
-        });
+        };
+        hoverToRenderTimer.schedule(500);
     }
 
     public EmptyEditorsPanel(ActionManager actionManager,

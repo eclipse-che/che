@@ -5,6 +5,7 @@ excerpt: ""
 layout: docs
 permalink: /:categories/sharing/
 ---
+{% include base.html %}
 Eclipse Che helps teams collaborate in reproducible workspace environments. Team members can contribute to a project using the same environment (on any OS), knowing that all behaviors will match on every developer's machine.
 # Sharing Workspaces  
 ## Setting Up Che as a Shared Server

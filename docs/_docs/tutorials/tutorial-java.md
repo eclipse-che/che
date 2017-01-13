@@ -5,6 +5,7 @@ excerpt: ""
 layout: tutorials
 permalink: /:categories/java/
 ---
+{% include base.html %}
 # 1. Start any Java stack  
 Go to Workspaces tab in User Dashboard, pick any Java stack, create a workspace and run it.
 # 2. Create a Java project  

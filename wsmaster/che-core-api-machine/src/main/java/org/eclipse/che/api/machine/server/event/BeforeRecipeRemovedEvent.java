@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,15 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.server.event;
 
-import org.eclipse.che.core.db.event.CascadeRemovalEvent;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
+import org.eclipse.che.core.db.cascade.event.RemoveEvent;
 
 /**
  * Pre-removal event of {@link RecipeImpl}.
  *
  * @author Max Shaposhnik
  */
-public class BeforeRecipeRemovedEvent extends CascadeRemovalEvent {
+public class BeforeRecipeRemovedEvent extends RemoveEvent {
     private final RecipeImpl recipe;
 
     public BeforeRecipeRemovedEvent(RecipeImpl recipe) {

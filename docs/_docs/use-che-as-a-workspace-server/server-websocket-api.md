@@ -5,3 +5,4 @@ excerpt: ""
 layout: docs
 permalink: /:categories/websocket-api/
 ---
+{% include base.html %}
