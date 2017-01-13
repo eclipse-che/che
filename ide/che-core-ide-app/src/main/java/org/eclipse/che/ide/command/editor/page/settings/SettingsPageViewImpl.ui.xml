@@ -22,7 +22,6 @@
         @eval greenIconColor org.eclipse.che.ide.api.theme.Style.theme.getSuccessEventColor();
 
         .section {
-            margin-left: 10px;
             margin-bottom: 15px;
         }
 
@@ -39,42 +38,17 @@
             width: 150px;
             margin-left: 10px;
         }
-
-        .button, .button:hover, .button:active {
-            border: none;
-            background: transparent;
-            min-width: 25px;
-            padding: 0;
-            vertical-align: top;
-        }
-
-        .button > svg {
-            width: 21px;
-            height: 21px;
-            margin: 1px;
-        }
-
-        .button > svg g,
-        .button > svg g g path {
-            fill: blueIconColor;
-        }
-
-        .button:hover > svg g,
-        .button:hover > svg g g path {
-            fill: greenIconColor;
-        }
     </ui:style>
 
     <g:SimpleLayoutPanel width="500px" height="155px" ui:field="mainPanel">
         <g:FlowPanel>
             <g:FlowPanel addStyleNames="{style.section}">
                 <g:Label text="{messages.pageInfoNameLabel}"/>
-                <g:TextBox ui:field="commandName" width="92%"/>
-                <g:Button ui:field="testButton" addStyleNames="{style.button}" debugId="command-editor-button-test"/>
+                <g:TextBox ui:field="commandName" width="97%"/>
             </g:FlowPanel>
             <g:FlowPanel addStyleNames="{style.section}">
                 <g:Label text="{messages.pageInfoGoalLabel}"/>
-                <che:CustomComboBox ui:field="goal" width="94%"/>
+                <che:CustomComboBox ui:field="goal" width="100%"/>
             </g:FlowPanel>
             <g:FlowPanel addStyleNames="{style.section}">
                 <g:Label text="{messages.pageInfoSectionContextLabel}"/>

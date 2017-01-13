@@ -25,8 +25,14 @@ public interface EditorMessages extends Messages {
     @Key("editor.message.unable_save")
     String editorMessageUnableToSave();
 
+    @Key("button.test.text")
+    String buttonTestText();
+
     @Key("button.save.text")
     String buttonSaveText();
+
+    @Key("button.cancel.text")
+    String buttonCancelText();
 
     @Key("page.settings.title")
     String pageInfoTitle();

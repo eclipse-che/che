@@ -36,24 +36,38 @@
         }
 
         .button {
-            float: left;
+            float: right;
             margin: 5px 0 0 10px;
+            font-weight: bold;
+        }
+
+        .button-test, .button-test:hover {
+            float: left;
+            background: #51b200;
         }
     </ui:style>
 
     <g:DockLayoutPanel addStyleNames="{style.mainPanel}">
-        <g:north size="44">
-            <g:FlowPanel addStyleNames="{style.header}">
-                <g:Button ui:field="saveButton"
-                          text="{messages.buttonSaveText}"
-                          addStyleNames="{style.button}"
-                          debugId="command-editor-button-save"/>
-            </g:FlowPanel>
-        </g:north>
         <g:center>
             <g:ScrollPanel ui:field="scrollPanel">
                 <g:FlowPanel ui:field="pagesPanel"/>
             </g:ScrollPanel>
         </g:center>
+        <g:south size="44">
+            <g:FlowPanel addStyleNames="{style.header}">
+                <g:Button ui:field="testButton"
+                          text="{messages.buttonTestText}"
+                          addStyleNames="{style.button} {style.button-test}"
+                          debugId="command-editor-button-test"/>
+                <g:Button ui:field="cancelButton"
+                          text="{messages.buttonCancelText}"
+                          addStyleNames="{style.button}"
+                          debugId="command-editor-button-cancel"/>
+                <g:Button ui:field="saveButton"
+                          text="{messages.buttonSaveText}"
+                          addStyleNames="{style.button}"
+                          debugId="command-editor-button-save"/>
+            </g:FlowPanel>
+        </g:south>
     </g:DockLayoutPanel>
 </ui:UiBinder>

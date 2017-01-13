@@ -37,6 +37,12 @@ public class CommandEditorViewImpl extends Composite implements CommandEditorVie
     private static final Window.Resources              WINDOW_RESOURCES = GWT.create(Window.Resources.class);
 
     @UiField
+    Button testButton;
+
+    @UiField
+    Button cancelButton;
+
+    @UiField
     Button saveButton;
 
     @UiField
@@ -74,6 +80,16 @@ public class CommandEditorViewImpl extends Composite implements CommandEditorVie
     @Override
     public void setSaveEnabled(boolean enable) {
         saveButton.setEnabled(enable);
+    }
+
+    @UiHandler("testButton")
+    public void handleTestButton(ClickEvent clickEvent) {
+        delegate.onCommandTest();
+    }
+
+    @UiHandler("cancelButton")
+    public void handleCancelButton(ClickEvent clickEvent) {
+        delegate.onCommandCancel();
     }
 
     @UiHandler("saveButton")
