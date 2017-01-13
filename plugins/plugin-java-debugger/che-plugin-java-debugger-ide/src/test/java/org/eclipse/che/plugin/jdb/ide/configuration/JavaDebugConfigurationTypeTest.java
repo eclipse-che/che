@@ -10,22 +10,21 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.jdb.ide.configuration;
 
-import com.google.gwtmockito.GwtMockitoTestRunner;
-
 import org.eclipse.che.ide.api.debug.DebugConfiguration;
 import org.eclipse.che.ide.api.debug.DebugConfigurationPage;
 import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.plugin.jdb.ide.JavaDebuggerResources;
 import org.eclipse.che.plugin.jdb.ide.debug.JavaDebugger;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.Listeners;
+import org.testng.annotations.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.testng.Assert.assertEquals;
 
 /** @author Artem Zatsarynnyi */
-@RunWith(GwtMockitoTestRunner.class)
+@Listeners(MockitoTestNGListener.class)
 public class JavaDebugConfigurationTypeTest {
 
     @Mock
