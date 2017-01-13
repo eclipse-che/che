@@ -160,8 +160,6 @@ public class JavaDebuggerTest {
         DebuggerEvent debuggerEvent = events.take();
         assertTrue(debuggerEvent instanceof BreakpointActivatedEvent);
 
-        debugger.getAllBreakpoints();
-
         assertEquals(debugger.getAllBreakpoints().size(), 1);
 
         Breakpoint breakpoint = debugger.getAllBreakpoints().get(0);
