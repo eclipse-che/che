@@ -398,7 +398,6 @@ function verify_nightly_accuracy() {
       warning "Your 'nightly' image is over 24 hours old - checking for a newer image..."
       update_image $CHE_IMAGE_FULLNAME
       warning "Pulled new 'nightly' image - please rerun CLI"
-      return 2
     fi
   fi
 }
