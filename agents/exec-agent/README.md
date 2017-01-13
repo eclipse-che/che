@@ -23,7 +23,7 @@ Development
 ```bash
 export CHE_PATH=~/code/che
 mkdir $GOPATH/src/github.com/eclipse/che -p
-ln -s $CHE_PATH/exec-agent/src $GOPATH/src/github.com/eclipse/che/exec-agent
+ln -s $CHE_PATH/agents/exec-agent/src $GOPATH/src/github.com/eclipse/che/exec-agent
 ```
 
 ##### Install godep
