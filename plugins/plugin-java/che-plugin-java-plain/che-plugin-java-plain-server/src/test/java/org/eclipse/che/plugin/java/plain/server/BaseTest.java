@@ -117,8 +117,8 @@ public abstract class BaseTest {
                                             fileWatcherNotificationHandler,
                                             fileTreeWatcher,
                                             new TestWorkspaceHolder(new ArrayList<>()),
-                                            Mockito.mock(ReadmeInjectionHandler.class),
-                                            mock(FileWatcherManager.class));
+                                            mock(FileWatcherManager.class),
+                                            Mockito.mock(ReadmeInjectionHandler.class));
 
         ResourcesPlugin plugin = new ResourcesPlugin("target/index", wsPath, () -> projectRegistry, () -> projectManager);
 

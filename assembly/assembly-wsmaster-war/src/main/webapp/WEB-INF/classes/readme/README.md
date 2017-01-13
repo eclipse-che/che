@@ -20,5 +20,5 @@ http://www.eclipse.org/legal/epl-v10.html
 Contributors:
    Codenvy, S.A. - initial API and implementation
 
-Copyright (c) 2012-2016 Codenvy, S.A.
+Copyright (c) 2012-2017 Codenvy, S.A.
 

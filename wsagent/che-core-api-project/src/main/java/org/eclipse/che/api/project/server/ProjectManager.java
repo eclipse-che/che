@@ -235,8 +235,6 @@ public class ProjectManager {
                 throw new ConflictException("Project config already exists for " + path);
             }
 
-            readmeInjectionHandler.handleReadmeInjection(projectFolder);
-
             return doCreateProject(projectConfig, options);
         } finally {
             fileWatcherManager.resume();
@@ -272,6 +270,7 @@ public class ProjectManager {
         final RegisteredProject project = projectRegistry.putProject(projectConfig, projectFolder, true, false);
         workspaceProjectsHolder.sync(projectRegistry);
         projectRegistry.fireInitHandlers(project);
+        readmeInjectionHandler.handleReadmeInjection(projectFolder);
 
         return project;
     }
