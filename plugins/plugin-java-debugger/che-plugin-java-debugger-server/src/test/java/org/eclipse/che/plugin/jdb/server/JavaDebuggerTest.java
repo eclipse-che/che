@@ -263,7 +263,7 @@ public class JavaDebuggerTest {
 
     @BeforeClass
     protected void initProjectApi() throws Exception {
-        TestWorkspaceHolder workspaceHolder = new TestWorkspaceHolder();
+        TestWorkspaceHolder workspaceHolder = new TestWorkspaceHolder(new ArrayList<>());
         File root = new File("target/test-classes/workspace");
         assertTrue(root.exists());
 
@@ -297,7 +297,8 @@ public class JavaDebuggerTest {
                                                            importerRegistry,
                                                            fileWatcherNotificationHandler,
                                                            fileTreeWatcher,
-                                                           new TestWorkspaceHolder(new ArrayList<>()), mock(FileWatcherManager.class));
+                                                           workspaceHolder,
+                                                           mock(FileWatcherManager.class));
 
         ResourcesPlugin resourcesPlugin =
                 new ResourcesPlugin("target/index",
