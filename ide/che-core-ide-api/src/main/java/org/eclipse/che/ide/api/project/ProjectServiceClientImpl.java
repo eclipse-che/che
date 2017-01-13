@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,7 +15,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.WsAgentStateController;
 import org.eclipse.che.api.project.shared.dto.CopyOptions;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.project.shared.dto.MoveOptions;
@@ -27,14 +26,17 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
 import org.eclipse.che.api.promises.client.callback.PromiseHelper;
+import org.eclipse.che.api.workspace.shared.dto.NewProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.ide.MimeType;
+import org.eclipse.che.ide.api.machine.WsAgentStateController;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.StringUnmarshaller;
+import org.eclipse.che.ide.rest.UrlBuilder;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.websocket.Message;
 import org.eclipse.che.ide.websocket.MessageBuilder;
@@ -43,6 +45,7 @@ import org.eclipse.che.ide.websocket.WebSocketException;
 import org.eclipse.che.ide.websocket.rest.RequestCallback;
 
 import java.util.List;
+import java.util.Map;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.gwt.http.client.RequestBuilder.DELETE;
@@ -56,6 +59,8 @@ import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
 /**
  * Implementation of {@link ProjectServiceClient}.
  *
+ * TODO need to remove interface as this component is internal one and couldn't have more than one instance
+ *
  * @author Vitaly Parfonov
  * @author Artem Zatsarynnyi
  * @author Valeriy Svydenko
@@ -63,7 +68,8 @@ import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
  */
 public class ProjectServiceClientImpl implements ProjectServiceClient {
 
-    private static final String PROJECT = "/project";
+    private static final String PROJECT        = "/project";
+    private static final String BATCH_PROJECTS = "/batch";
 
     private static final String ITEM     = "/item";
     private static final String TREE     = "/tree";
@@ -200,13 +206,25 @@ public class ProjectServiceClientImpl implements ProjectServiceClient {
 
     /** {@inheritDoc} */
     @Override
-    public Promise<ProjectConfigDto> createProject(ProjectConfigDto configuration) {
-        final String url = getBaseUrl();
-
-        return reqFactory.createPostRequest(url, configuration)
+    public Promise<ProjectConfigDto> createProject(ProjectConfigDto configuration, Map<String, String> options) {
+        UrlBuilder urlBuilder = new UrlBuilder(getBaseUrl());
+        for(String key : options.keySet()) {
+            urlBuilder.setParameter(key, options.get(key));
+        }
+        return reqFactory.createPostRequest(urlBuilder.buildString(), configuration)
                          .header(ACCEPT, MimeType.APPLICATION_JSON)
                          .loader(loaderFactory.newLoader("Creating project..."))
                          .send(unmarshaller.newUnmarshaller(ProjectConfigDto.class));
+    }
+
+    @Override
+    public Promise<List<ProjectConfigDto>> createBatchProjects(List<NewProjectConfigDto> configurations) {
+        final String url = getBaseUrl() + BATCH_PROJECTS;
+        final String loaderMessage = configurations.size() > 1 ? "Creating the batch of projects..." : "Creating project...";
+        return reqFactory.createPostRequest(url, configurations)
+                         .header(ACCEPT, MimeType.APPLICATION_JSON)
+                         .loader(loaderFactory.newLoader(loaderMessage))
+                         .send(unmarshaller.newListUnmarshaller(ProjectConfigDto.class));
     }
 
     /** {@inheritDoc} */
@@ -294,9 +312,11 @@ public class ProjectServiceClientImpl implements ProjectServiceClient {
     public Promise<TreeElement> getTree(Path path, int depth, boolean includeFiles) {
         final String url = getBaseUrl() + TREE + path(path.toString()) + "?depth=" + depth + "&includeFiles=" + includeFiles;
 
+        // temporary workaround for CHE-3467, remove loader for disable UI blocking
+        // later this loader should be added with the new mechanism of client-server synchronization
+
         return reqFactory.createGetRequest(url)
                          .header(ACCEPT, MimeType.APPLICATION_JSON)
-                         .loader(loaderFactory.newLoader("Reading project structure..."))
                          .send(unmarshaller.newUnmarshaller(TreeElement.class));
     }
 

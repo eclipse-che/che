@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,8 +14,8 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 
+import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.ide.extension.machine.client.RecipeScriptDownloadServiceClient;
-import org.eclipse.che.ide.extension.machine.client.machine.Machine;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.tab.content.TabPresenter;
 
 import javax.validation.constraints.NotNull;

@@ -38,24 +38,26 @@
   </head>
   <body layout="row">
   <div ng-hide="hideLoader" class="main-page-loader">
-      <div layout="column" class="main-page-loader-content">
-        <div class="spinner">
-          <div class="rect1"></div>
-          <div class="rect2"></div>
-          <div class="rect3"></div>
-        </div>
+    <div class="ide-page-loader-content">
+      <img ng-src="{{branding.loaderURL}}">
     </div>
   </div>
   <!--[if lt IE 10]>
   <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
   <![endif]-->
 
-  <md-sidenav id="chenavmenu" class='ide-show not-visible' ng-class="waitingLoaded ? 'md-sidenav-left md-whiteframe-z2 dark-menu-bg sidebar-entry' : 'not-visible'" md-component-id="left" md-is-locked-open="!hideNavbar" layout="row">
+  <md-sidenav id="chenavmenu" class="ide-show not-visible" ng-class="waitingLoaded ? 'md-sidenav-left md-whiteframe-z2 dark-menu-bg sidebar-entry' : 'not-visible'" md-component-id="left" md-is-locked-open="!hideNavbar" layout="row">
     <che-nav-bar id="chenavbar" layout="row" flex></che-nav-bar>
   </md-sidenav>
   <div class="main-page ide-show" layout="column" flex>
     <div id="main-content" role="main" ng-view layout="column" flex ng-show="waitingLoaded && !showIDE"></div>
-    <che-footer che-support-help-path="{{branding.helpPath}}" che-support-help-title="{{branding.helpTitle}}" che-support-email="{{branding.supportEmail}}" che-product-name="Eclipse Che" ng-show="waitingLoaded && !showIDE"></che-footer>
+    <ide-iframe id="ide-iframe-window" ng-show="showIDE && ideIframeLink" flex style="height: 100%"></ide-iframe>
+    <che-footer che-support-help-path="{{branding.helpPath}}"
+                che-support-help-title="{{branding.helpTitle}}"
+                che-support-email="{{branding.supportEmail}}"
+                che-logo="{{branding.logoURL}}"
+                che-version="{{productVersion}}"
+                che-product-name="Eclipse Che" ng-show="waitingLoaded && !showIDE"></che-footer>
   </div>
     <!-- Addons are not automatically injected -->
 

@@ -15,7 +15,7 @@
   <che-list-header che-input-placeholder="Search"
                    che-search-model="workspaceDetailsProjectsCtrl.projectFilter.name"
                    che-add-button-title="Add Project"
-                   che-add-button-href="#/create-project?workspaceId = {{workspaceDetailsProjectsCtrl.workspaceId}}"
+                   che-add-button-href="#/create-project?workspaceId={{workspaceDetailsProjectsCtrl.workspaceId}}"
                    che-delete-button-title="Delete"
                    che-on-delete="workspaceDetailsProjectsCtrl.deleteSelectedProjects()"
                    che-hide-delete="workspaceDetailsProjectsCtrl.isNoSelected"
@@ -62,8 +62,8 @@
   </che-list>
   <div class="che-list-empty">
         <span ng-show="workspaceDetailsProjectsCtrl.projects.length > 0 && (workspaceDetailsProjectsCtrl.projects | filter:workspaceDetailsProjectsCtrl.projectFilter).length === 0">
-          No projects found
+          No projects found.
         </span>
-    <span ng-show="workspaceDetailsProjectsCtrl.projects.length === 0">There are no project yet</span>
+    <span ng-show="workspaceDetailsProjectsCtrl.projects.length === 0">There are no projects.</span>
   </div>
 </md-content>

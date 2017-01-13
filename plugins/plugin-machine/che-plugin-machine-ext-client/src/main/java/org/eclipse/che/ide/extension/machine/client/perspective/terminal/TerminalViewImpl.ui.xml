@@ -1,6 +1,6 @@
 <!--
 
-    Copyright (c) 2012-2016 Codenvy, S.A.
+    Copyright (c) 2012-2017 Codenvy, S.A.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
@@ -20,9 +20,14 @@
         @eval outputBackgroundColor org.eclipse.che.ide.api.theme.Style.theme.outputBackgroundColor();
 
         .terminalView {
+            position: relative;
         }
 
         .terminalPanel {
+            position: absolute;
+            -moz-user-select: text;
+            -webkit-user-select: auto;
+            user-select: text;
             width: 100%;
             height: 100%;
             overflow: hidden;

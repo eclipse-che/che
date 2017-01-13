@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,23 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.svn.server.repository;
 
-import java.io.IOException;
+import org.eclipse.che.plugin.svn.server.SubversionException;
 
+/**
+ * Detects repository url based on location.
+ *
+ * @author Anatolii Bazko
+ */
 public interface RepositoryUrlProvider {
 
-    String getRepositoryUrl(String projectPath) throws IOException;
+    /**
+     * Detects repository url based on location.
+     *
+     * @param projectPath
+     *      the absolute project path
+     * @return the repository url of the given project
+     * @throws SubversionException
+     *      if any error occurs
+     */
+    String getRepositoryUrl(String projectPath) throws SubversionException;
 }

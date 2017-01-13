@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,7 +12,6 @@ package org.eclipse.che.ide.notification;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwtmockito.GwtMockitoTestRunner;
-import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.notification.Notification;
@@ -20,7 +19,6 @@ import org.eclipse.che.ide.api.notification.NotificationListener;
 import org.eclipse.che.ide.api.notification.ReadState;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.part.PartStackPresenter;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,11 +49,7 @@ public class NotificationManagerImplTest {
     private Resources resources;
 
     @Mock
-    private EventBus                eventBus;
-    @Mock
     private NotificationManagerView view;
-    @Mock
-    private DialogFactory           dialogFactory;
     @Mock
     private NotificationContainer   notificationContainer;
     @Mock

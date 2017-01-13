@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,8 +14,10 @@ import elemental.util.ArrayOf;
 
 import com.google.common.annotations.Beta;
 import com.google.gwt.core.client.JsArrayMixed;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.ImplementedBy;
 
+import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
 import org.eclipse.che.api.promises.client.js.Executor;
 import org.eclipse.che.api.promises.client.js.JsPromiseProvider;
 
@@ -41,6 +43,37 @@ public interface PromiseProvider {
     <V> Promise<V> create(Executor<V> executor);
 
     /**
+     * Creates a new promise using the {@link AsyncCallback}.
+     *
+     * @param call
+     *         the request caller
+     * @param <V>
+     *         the type of the promised value
+     * @return a promise
+     */
+    <V> Promise<V> create(AsyncPromiseHelper.RequestCall<V> call);
+
+    /**
+     * Creates a promise that resolves as soon as all the promises used as parameters are resolved or
+     * rejected as soon as the first rejection happens on one of the included promises.
+     * This is useful for aggregating results of multiple promises together.
+     *
+     * @param promises
+     *         the included promises
+     * @return a promise with an array of unit values as fulfillment value
+     * @deprecated use {@link #all2(ArrayOf)}
+     */
+    @Deprecated
+    Promise<JsArrayMixed> all(ArrayOf<Promise<?>> promises);
+
+    /**
+     * @see {@link #all(ArrayOf)}
+     * @deprecated use {@link #all2(Promise[])}
+     */
+    @Deprecated
+    Promise<JsArrayMixed> all(final Promise<?>... promises);
+
+    /**
      * Creates a promise that resolves as soon as all the promises used as parameters are resolved or
      * rejected as soon as the first rejection happens on one of the included promises.
      * This is useful for aggregating results of multiple promises together.
@@ -49,10 +82,10 @@ public interface PromiseProvider {
      *         the included promises
      * @return a promise with an array of unit values as fulfillment value
      */
-    Promise<JsArrayMixed> all(ArrayOf<Promise<?>> promises);
+    Promise<ArrayOf<?>> all2(ArrayOf<Promise<?>> promises);
 
     /** @see {@link #all(ArrayOf)} */
-    Promise<JsArrayMixed> all(final Promise<?>... promises);
+    Promise<ArrayOf<?>> all2(final Promise<?>... promises);
 
     /**
      * Returns a promise that is rejected with the given reason.

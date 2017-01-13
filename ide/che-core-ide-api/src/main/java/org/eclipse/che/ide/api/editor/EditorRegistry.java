@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -61,4 +61,15 @@ public interface EditorRegistry {
      */
     @NotNull
     List<EditorProvider> getAllEditorsForFileType(@NotNull FileType fileType);
+
+    /**
+     * Search editor provider by his id.
+     * Should return default editor provider if provider with that id cannot be found.
+     *
+     * @param id
+     *         the provider id
+     * @return the editor provider
+     */
+    @NotNull
+    EditorProvider findEditorProviderById(@NotNull String id);
 }

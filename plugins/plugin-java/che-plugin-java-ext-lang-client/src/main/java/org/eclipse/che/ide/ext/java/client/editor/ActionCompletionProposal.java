@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,11 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.editor;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
 
+import org.eclipse.che.ide.api.editor.codeassist.CompletionProposal;
 import org.eclipse.che.ide.api.icon.Icon;
 import org.eclipse.che.ide.ext.java.client.action.ProposalAction;
-import org.eclipse.che.ide.api.editor.codeassist.CompletionProposal;
 import org.eclipse.che.ide.util.loging.Log;
 
 /**
@@ -35,8 +36,8 @@ public class ActionCompletionProposal implements CompletionProposal {
     }
 
     @Override
-    public Widget getAdditionalProposalInfo() {
-        return null;
+    public void getAdditionalProposalInfo(AsyncCallback<Widget> callback) {
+        callback.onSuccess(null);
     }
 
     @Override

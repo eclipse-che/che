@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,8 +13,9 @@ package org.eclipse.che.api.git.shared;
 import org.eclipse.che.dto.shared.DTO;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+
+import static java.util.Collections.singletonList;
 
 /**
  * Request to add content of working tree to Git index. This action prepares content to next commit.
@@ -22,16 +23,16 @@ import java.util.List;
  * @author andrew00x
  */
 @DTO
-public interface AddRequest extends GitRequest {
-    /** Default file pattern that will be used if {@link #filepattern} is not set. All content of working tree will be added in index. */
-    List<String> DEFAULT_PATTERN = new ArrayList<String>(Arrays.asList("."));
+public interface AddRequest {
+    /** Default file pattern that will be used if {@link #getFilePattern} is not set. All content of working tree will be added in index. */
+    List<String> DEFAULT_PATTERN = new ArrayList<>(singletonList("."));
 
     /** @return files to add content from */
-    List<String> getFilepattern();
+    List<String> getFilePattern();
     
-    void setFilepattern(List<String> pattern);
+    void setFilePattern(List<String> pattern);
     
-    AddRequest withFilepattern(List<String> filepattern);
+    AddRequest withFilePattern(List<String> filePattern);
 
     /**
      * @return if <code>true</code> than never stage new files, but stage modified new contents of tracked files. It will remove files from

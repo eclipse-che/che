@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -46,6 +46,9 @@ public class BuildImageParams {
     private Boolean             removeIntermediateContainer;
     private Boolean             forceRemoveIntermediateContainers;
     private Map<String, String> buildArgs;
+    private String              cpusetCpus;
+    private Long                cpuPeriod;
+    private Long                cpuQuota;
 
     /**
      * Creates arguments holder with required parameters.
@@ -315,6 +318,42 @@ public class BuildImageParams {
         return this;
     }
 
+    /**
+     * Sets CPU cores config that is allowed to use for image build.
+     *
+     * @param cpusetCpus
+     *         CPU cores config
+     * @return this params instance
+     */
+    public BuildImageParams withCpusetCpus(String cpusetCpus) {
+        this.cpusetCpus = cpusetCpus;
+        return this;
+    }
+
+    /**
+     * Sets length of a CPU period for CPU consumption limiting in microseconds.
+     *
+     * @param cpuPeriod
+     *         length of a CPU period
+     * @return this params instance
+     */
+    public BuildImageParams withCpuPeriod(Long cpuPeriod) {
+        this.cpuPeriod = cpuPeriod;
+        return this;
+    }
+
+    /**
+     * Sets amount of CPU time that build container can get in a CPU period.
+     *
+     * @param cpuQuota
+     *         amount of CPU time in microseconds
+     * @return this params instance
+     */
+    public BuildImageParams withCpuQuota(Long cpuQuota) {
+        this.cpuQuota = cpuQuota;
+        return this;
+    }
+
     public String getRepository() {
         return repository;
     }
@@ -371,6 +410,18 @@ public class BuildImageParams {
         return buildArgs;
     }
 
+    public String getCpusetCpus() {
+        return cpusetCpus;
+    }
+
+    public Long getCpuPeriod() {
+        return cpuPeriod;
+    }
+
+    public Long getCpuQuota() {
+        return cpuQuota;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -389,6 +440,9 @@ public class BuildImageParams {
                Objects.equals(noCache, that.noCache) &&
                Objects.equals(removeIntermediateContainer, that.removeIntermediateContainer) &&
                Objects.equals(forceRemoveIntermediateContainers, that.forceRemoveIntermediateContainers) &&
+               Objects.equals(cpusetCpus, that.cpusetCpus) &&
+               Objects.equals(cpuPeriod, that.cpuPeriod) &&
+               Objects.equals(cpuQuota, that.cpuQuota) &&
                Objects.equals(buildArgs, that.buildArgs);
     }
 
@@ -407,6 +461,9 @@ public class BuildImageParams {
                             noCache,
                             removeIntermediateContainer,
                             forceRemoveIntermediateContainers,
+                            cpusetCpus,
+                            cpuPeriod,
+                            cpuQuota,
                             buildArgs);
     }
 
@@ -415,18 +472,21 @@ public class BuildImageParams {
         return "BuildImageParams{" +
                "repository='" + repository + '\'' +
                ", tag='" + tag + '\'' +
-               ", authConfigs=" + authConfigs +
-               ", doForcePull=" + doForcePull +
-               ", memoryLimit=" + memoryLimit +
-               ", memorySwapLimit=" + memorySwapLimit +
-               ", files=" + files +
+               ", authConfigs='" + authConfigs + '\'' +
+               ", doForcePull='" + doForcePull + '\'' +
+               ", memoryLimit='" + memoryLimit + '\'' +
+               ", memorySwapLimit='" + memorySwapLimit + '\'' +
+               ", files=" + files + '\'' +
                ", dockerfile='" + dockerfile + '\'' +
                ", remote='" + remote + '\'' +
-               ", quiet=" + quiet +
-               ", noCache=" + noCache +
-               ", removeIntermediateContainer=" + removeIntermediateContainer +
-               ", forceRemoveIntermediateContainers=" + forceRemoveIntermediateContainers +
-               ", buildArgs=" + buildArgs +
+               ", quiet='" + quiet + '\'' +
+               ", noCache='" + noCache + '\'' +
+               ", removeIntermediateContainer='" + removeIntermediateContainer + '\'' +
+               ", forceRemoveIntermediateContainers='" + forceRemoveIntermediateContainers + '\'' +
+               ", cpusetCpus='" + cpusetCpus + '\'' +
+               ", cpuPeriod='" + cpuPeriod + '\'' +
+               ", cpuQuota='" + cpuQuota + '\'' +
+               ", buildArgs='" + buildArgs + '\'' +
                '}';
     }
 

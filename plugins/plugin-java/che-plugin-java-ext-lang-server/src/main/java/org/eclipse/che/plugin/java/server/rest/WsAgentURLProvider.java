@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,7 +41,7 @@ public class WsAgentURLProvider implements Provider<String> {
     private String cachedAgentUrl;
 
     @Inject
-    public WsAgentURLProvider(@Named("api.endpoint") String apiEndpoint,
+    public WsAgentURLProvider(@Named("che.api") String apiEndpoint,
                               @Named("env.CHE_WORKSPACE_ID") String wsId,
                               HttpJsonRequestFactory requestFactory) {
         this.wsId = wsId;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -68,7 +68,7 @@ public class FetchPresenterTest extends BaseTest {
         when(remoteListPromise.then(any(Operation.class))).thenReturn(remoteListPromise);
         when(remoteListPromise.catchError(any(Operation.class))).thenReturn(remoteListPromise);
 
-        when(service.branchList(anyObject(), any(Path.class), anyString())).thenReturn(branchListPromise);
+        when(service.branchList(anyObject(), any(Path.class), anyObject())).thenReturn(branchListPromise);
         when(branchListPromise.then(any(Operation.class))).thenReturn(branchListPromise);
         when(branchListPromise.catchError(any(Operation.class))).thenReturn(branchListPromise);
 

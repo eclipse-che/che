@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,16 +10,17 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ui.dialogs.input;
 
-import org.eclipse.che.ide.api.dialogs.InputDialog;
-import org.eclipse.che.ide.api.dialogs.InputValidator;
-import org.eclipse.che.ide.ui.UILocalizationConstant;
-import org.eclipse.che.ide.api.dialogs.CancelCallback;
-import org.eclipse.che.ide.api.dialogs.InputCallback;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
-import javax.validation.constraints.NotNull;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.api.dialogs.CancelCallback;
+import org.eclipse.che.ide.api.dialogs.InputCallback;
+import org.eclipse.che.ide.api.dialogs.InputDialog;
+import org.eclipse.che.ide.api.dialogs.InputValidator;
+import org.eclipse.che.ide.ui.UILocalizationConstant;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * {@link InputDialog} implementation.
@@ -68,6 +69,30 @@ public class InputDialogPresenter implements InputDialog, InputDialogView.Action
         this.view.setValue(initialValue);
         this.view.setSelectionStartIndex(selectionStartIndex);
         this.view.setSelectionLength(selectionLength);
+        this.inputCallback = inputCallback;
+        this.cancelCallback = cancelCallback;
+        this.view.setDelegate(this);
+        this.localizationConstant = localizationConstant;
+    }
+
+    @AssistedInject
+    public InputDialogPresenter(final @NotNull InputDialogView view,
+                                final @NotNull @Assisted("title") String title,
+                                final @NotNull @Assisted("label") String label,
+                                final @NotNull @Assisted("initialValue") String initialValue,
+                                final @NotNull @Assisted("selectionStartIndex") Integer selectionStartIndex,
+                                final @NotNull @Assisted("selectionLength") Integer selectionLength,
+                                final @NotNull @Assisted("okButtonLabel") String okButtonLabel,
+                                final @Nullable @Assisted InputCallback inputCallback,
+                                final @Nullable @Assisted CancelCallback cancelCallback,
+                                final UILocalizationConstant localizationConstant) {
+        this.view = view;
+        this.view.setContent(label);
+        this.view.setTitle(title);
+        this.view.setValue(initialValue);
+        this.view.setSelectionStartIndex(selectionStartIndex);
+        this.view.setSelectionLength(selectionLength);
+        this.view.setOkButtonLabel(okButtonLabel);
         this.inputCallback = inputCallback;
         this.cancelCallback = cancelCallback;
         this.view.setDelegate(this);
@@ -127,7 +152,7 @@ public class InputDialogPresenter implements InputDialog, InputDialogView.Action
     private boolean isInputValid() {
         String currentValue = view.getValue();
         if (currentValue.trim().isEmpty()) {
-            view.showErrorHint(localizationConstant.validationErrorMessage());
+            view.showErrorHint("");
             return false;
         }
 

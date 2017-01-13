@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,8 +9,6 @@
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.api.ssh.server;
-
-import com.google.common.collect.ImmutableMap;
 
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.BadRequestException;
@@ -40,7 +38,7 @@ public class HttpSshServiceClient implements SshServiceClient {
     private final HttpJsonRequestFactory requestFactory;
 
     @Inject
-    public HttpSshServiceClient(@Named("api.endpoint") String apiUrl,
+    public HttpSshServiceClient(@Named("che.api") String apiUrl,
                                 HttpJsonRequestFactory requestFactory) {
         this.sshUrl = UriBuilder.fromUri(apiUrl)
                                 .path(SshService.class)
@@ -88,12 +86,12 @@ public class HttpSshServiceClient implements SshServiceClient {
         try {
             final String url = UriBuilder.fromUri(sshUrl)
                                          .path(SshService.class, "getPair")
-                                         .buildFromMap(ImmutableMap.of("service", service,
-                                                                       "name", name))
+                                         .build(service)
                                          .toString();
 
             return requestFactory.fromUrl(url)
                                  .useGetMethod()
+                                 .addQueryParam("name", name)
                                  .request()
                                  .asDto(SshPairDto.class);
         } catch (IOException | ForbiddenException | BadRequestException | ConflictException | UnauthorizedException e) {
@@ -106,12 +104,12 @@ public class HttpSshServiceClient implements SshServiceClient {
         try {
             final String url = UriBuilder.fromUri(sshUrl)
                                          .path(SshService.class, "removePair")
-                                         .buildFromMap(ImmutableMap.of("service", service,
-                                                                       "name", name))
+                                         .build(service)
                                          .toString();
 
             requestFactory.fromUrl(url)
                           .useDeleteMethod()
+                          .addQueryParam("name", name)
                           .request();
         } catch (IOException | ForbiddenException | BadRequestException | ConflictException | UnauthorizedException e) {
             throw new ServerException(e);

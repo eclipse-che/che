@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 'use strict';
 
 import {EnvironmentManager} from './environment-manager';
+import {IEnvironmentManagerMachine} from './environment-manager-machine';
 
 /**
  * This is the implementation of environment manager that handles the docker image format of environment.
@@ -29,25 +30,32 @@ import {EnvironmentManager} from './environment-manager';
  */
 export class DockerImageEnvironmentManager extends EnvironmentManager {
 
-  constructor() {
-    super();
+  constructor($log: ng.ILogService) {
+    super($log);
   }
 
   /**
    * Retrieves the list of machines.
    *
-   * @param environment environment's configuration
-   * @returns {Array} list of machines defined in environment
+   * @param {che.IWorkspaceEnvironment} environment environment's configuration
+   * @param {any=} runtime runtime of an active environment
+   * @returns {IEnvironmentManagerMachine[]} list of machines defined in environment
    */
-  getMachines(environment) {
-    let machines = [];
+  getMachines(environment: che.IWorkspaceEnvironment, runtime?: any): IEnvironmentManagerMachine[] {
+    let machines: IEnvironmentManagerMachine[] = super.getMachines(environment, runtime);
 
-    Object.keys(environment.machines).forEach((machineName) => {
-      let machine = angular.copy(environment.machines[machineName]);
-      machine.name = machineName;
+    Object.keys(environment.machines).forEach((machineName: string) => {
+      let machine: IEnvironmentManagerMachine = machines.find((_machine: IEnvironmentManagerMachine) => {
+        return _machine.name === machineName;
+      });
+
+      if (!machine) {
+        machine = {name: machineName};
+        machines.push(machine);
+      }
+
+      angular.merge(machine, environment.machines[machineName]);
       machine.recipe = environment.recipe;
-
-      machines.push(machine);
     });
 
     return machines;
@@ -56,20 +64,20 @@ export class DockerImageEnvironmentManager extends EnvironmentManager {
   /**
    * Provides the environment configuration based on machines format.
    *
-   * @param environment origin of the environment to be edited
-   * @param machines the list of machines
-   * @returns environment's configuration
+   * @param {che.IWorkspaceEnvironment} environment origin of the environment to be edited
+   * @param {IEnvironmentManagerMachine[]} machines the list of machines
+   * @returns {che.IWorkspaceEnvironment} environment's configuration
    */
-  getEnvironment(environment, machines) {
+  getEnvironment(environment: che.IWorkspaceEnvironment, machines: IEnvironmentManagerMachine[]): che.IWorkspaceEnvironment {
     return super.getEnvironment(environment, machines);
   }
 
   /**
    * Returns a dockerimage.
    *
-   * @param machine {object}
+   * @param {IEnvironmentManagerMachine} machine
    * @returns {{image: string}}
    */
-  getSource(machine) {
+  getSource(machine: IEnvironmentManagerMachine): any {
     return {image: machine.recipe.location};
   }}

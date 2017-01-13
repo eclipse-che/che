@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -93,12 +93,10 @@ public interface UserDao {
      *         user identifier
      * @throws NullPointerException
      *         when {@code id} is null
-     * @throws ConflictException
-     *         when given user cannot be deleted
      * @throws ServerException
      *         when any other error occurs
      */
-    void remove(String id) throws ServerException, ConflictException;
+    void remove(String id) throws ServerException;
 
     /**
      * Finds user by his alias.
@@ -176,7 +174,7 @@ public interface UserDao {
      * @throws ServerException
      *         when any other error occurs
      */
-    Page<UserImpl> getAll(int maxItems, int skipCount) throws ServerException;
+    Page<UserImpl> getAll(int maxItems, long skipCount) throws ServerException;
 
     /**
      * Get count of all users from persistent layer.

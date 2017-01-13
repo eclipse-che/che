@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,14 +15,12 @@ import com.google.inject.persist.Transactional;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.jdbc.jpa.DuplicateKeyException;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
 import org.eclipse.che.api.ssh.server.spi.SshDao;
 import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
+import org.eclipse.che.core.db.jpa.DuplicateKeyException;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -43,8 +41,6 @@ import static java.util.Objects.requireNonNull;
  */
 @Singleton
 public class JpaSshDao implements SshDao {
-
-    private static final Logger LOG = LoggerFactory.getLogger(JpaSshDao.class);
 
     @Inject
     private Provider<EntityManager> managerProvider;
@@ -124,7 +120,9 @@ public class JpaSshDao implements SshDao {
 
     @Transactional
     protected void doCreate(SshPairImpl entity) {
-        managerProvider.get().persist(entity);
+        EntityManager manager = managerProvider.get();
+        manager.persist(entity);
+        manager.flush();
     }
 
     @Transactional
@@ -135,10 +133,12 @@ public class JpaSshDao implements SshDao {
             throw new NotFoundException(format("Ssh pair with service '%s' and name '%s' was not found.", service, name));
         }
         manager.remove(entity);
+        manager.flush();
     }
 
     @Singleton
-    public static class RemoveSshKeysBeforeUserRemovedEventSubscriber implements EventSubscriber<BeforeUserRemovedEvent> {
+    public static class RemoveSshKeysBeforeUserRemovedEventSubscriber
+            extends CascadeEventSubscriber<BeforeUserRemovedEvent> {
         @Inject
         private SshDao       sshDao;
         @Inject
@@ -146,22 +146,18 @@ public class JpaSshDao implements SshDao {
 
         @PostConstruct
         public void subscribe() {
-            eventService.subscribe(this);
+            eventService.subscribe(this, BeforeUserRemovedEvent.class);
         }
 
         @PreDestroy
         public void unsubscribe() {
-            eventService.unsubscribe(this);
+            eventService.unsubscribe(this, BeforeUserRemovedEvent.class);
         }
 
         @Override
-        public void onEvent(BeforeUserRemovedEvent event) {
-            try {
-                for (SshPairImpl sshPair : sshDao.get(event.getUser().getId())) {
-                    sshDao.remove(sshPair.getOwner(), sshPair.getService(), sshPair.getName());
-                }
-            } catch (Exception x) {
-                LOG.error(format("Couldn't remove ssh keys before user '%s' is removed", event.getUser().getId()), x);
+        public void onCascadeEvent(BeforeUserRemovedEvent event) throws Exception {
+            for (SshPairImpl sshPair : sshDao.get(event.getUser().getId())) {
+                sshDao.remove(sshPair.getOwner(), sshPair.getService(), sshPair.getName());
             }
         }
     }

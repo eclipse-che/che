@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,7 +24,7 @@ import org.eclipse.che.ide.api.dialogs.MessageDialog;
 import org.eclipse.che.ide.debug.Debugger;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.extension.machine.client.command.valueproviders.CurrentProjectPathProvider;
+import org.eclipse.che.ide.extension.machine.client.command.macros.CurrentProjectPathMacro;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
 import org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant;
 import org.junit.Test;
@@ -69,7 +69,7 @@ public class DebugConfigurationsManagerImplTest extends TestCase {
     @Mock
     private DebugConfigurationType         debugConfigurationType;
     @Mock
-    private CurrentProjectPathProvider currentProjectPathProvider;
+    private CurrentProjectPathMacro        currentProjectPathMacro;
     @Mock
     private Debugger                       debugger;
 
@@ -99,13 +99,13 @@ public class DebugConfigurationsManagerImplTest extends TestCase {
         when(debugConfiguration.getType()).thenReturn(debugConfigurationType);
         when(debuggerManager.getDebugger(debugId)).thenReturn(debugger);
         when(debugger.connect(anyMap())).thenReturn(mock(Promise.class));
-        when(currentProjectPathProvider.getValue()).thenReturn(mock(Promise.class));
-        when(currentProjectPathProvider.getKey()).thenReturn("key");
+        when(currentProjectPathMacro.expand()).thenReturn(mock(Promise.class));
+        when(currentProjectPathMacro.getName()).thenReturn("key");
 
         debugConfigurationsManager.apply(debugConfiguration);
 
         ArgumentCaptor<Operation> operationArgumentCaptor = ArgumentCaptor.forClass(Operation.class);
-        verify(currentProjectPathProvider.getValue()).then(operationArgumentCaptor.capture());
+        verify(currentProjectPathMacro.expand()).then(operationArgumentCaptor.capture());
         operationArgumentCaptor.getValue().apply("project path");
 
         verify(debuggerManager).setActiveDebugger(debugger);

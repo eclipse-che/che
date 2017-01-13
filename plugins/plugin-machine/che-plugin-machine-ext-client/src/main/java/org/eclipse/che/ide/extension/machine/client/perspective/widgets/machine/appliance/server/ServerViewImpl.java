@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.appliance.server;
 
+import com.google.common.base.Predicate;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -19,13 +20,15 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.machine.shared.Constants;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.TableResources;
 
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
 import java.util.List;
+
+import static com.google.common.collect.Iterables.filter;
+import static com.google.common.collect.Lists.newArrayList;
+import static org.eclipse.che.api.machine.shared.Constants.TERMINAL_REFERENCE;
 
 /**
  * The class displays server's information for current machine.
@@ -41,7 +44,7 @@ public class ServerViewImpl extends Composite implements ServerView {
     @UiField(provided = true)
     final MachineLocalizationConstant locale;
     @UiField(provided = true)
-    final CellTable<Server>           servers;
+    final CellTable<ServerEntity>     servers;
 
     @Inject
     public ServerViewImpl(MachineLocalizationConstant locale, TableResources tableResources) {
@@ -52,34 +55,34 @@ public class ServerViewImpl extends Composite implements ServerView {
     }
 
     @NotNull
-    private CellTable<Server> createTable(@NotNull TableResources tableResources) {
-        CellTable<Server> table = new CellTable<>(0, tableResources);
+    private CellTable<ServerEntity> createTable(@NotNull TableResources tableResources) {
+        CellTable<ServerEntity> table = new CellTable<>(0, tableResources);
         table.setLoadingIndicator(null);
 
-        TextColumn<Server> ref = new TextColumn<Server>() {
+        TextColumn<ServerEntity> ref = new TextColumn<ServerEntity>() {
             @Override
-            public String getValue(Server server) {
+            public String getValue(ServerEntity server) {
                 return server.getRef();
             }
         };
 
-        TextColumn<Server> exposedPort = new TextColumn<Server>() {
+        TextColumn<ServerEntity> exposedPort = new TextColumn<ServerEntity>() {
             @Override
-            public String getValue(Server server) {
+            public String getValue(ServerEntity server) {
                 return server.getPort();
             }
         };
 
-        TextColumn<Server> address = new TextColumn<Server>() {
+        TextColumn<ServerEntity> address = new TextColumn<ServerEntity>() {
             @Override
-            public String getValue(Server server) {
+            public String getValue(ServerEntity server) {
                 return server.getAddress();
             }
         };
 
-        TextColumn<Server> url = new TextColumn<Server>() {
+        TextColumn<ServerEntity> url = new TextColumn<ServerEntity>() {
             @Override
-            public String getValue(Server server) {
+            public String getValue(ServerEntity server) {
                 return server.getUrl();
             }
         };
@@ -94,14 +97,15 @@ public class ServerViewImpl extends Composite implements ServerView {
 
     /** {@inheritDoc} */
     @Override
-    public void setServers(@NotNull List<Server> servers) {
-        List<Server> list = new ArrayList<>();
-        for (Server server : servers) {
-           if (!Constants.TERMINAL_REFERENCE.equals(server.getRef())){//TODO: temporary hide terminal URL  
-               list.add(server);
-           }
-        }
-        this.servers.setRowData(list);
-    }
+    public void setServers(@NotNull List<ServerEntity> servers) {
+        Iterable<ServerEntity> serversToDisplay = filter(servers, new Predicate<ServerEntity>() {
+            @Override
+            public boolean apply(ServerEntity serverEntity) {
+                String reference = serverEntity.getRef();
+                return !TERMINAL_REFERENCE.equals(reference); //TODO: temporary hide terminal URL
+            }
+        });
 
+        this.servers.setRowData(newArrayList(serversToDisplay));
+    }
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -87,10 +87,8 @@ public class PageTest {
         assertEquals(page.getNumber(), -1, "page number");
 
         assertFalse(page.hasPreviousPage(), "has previous page");
-        assertFalse(page.getPreviousPageRef().isPresent(), "has previous page ref");
 
         assertFalse(page.hasNextPage(), "page has next page");
-        assertFalse(page.getNextPageRef().isPresent(), "page has next page ref");
 
         assertEquals(page.getItems(), asList("item3", "item4", "item5"));
         assertEquals(page.getItems(i -> i.substring(4)), asList("3", "4", "5"));
@@ -128,14 +126,12 @@ public class PageTest {
         assertEquals(page.getNumber(), 2, "page number");
 
         assertTrue(page.hasPreviousPage(), "has previous page");
-        assertTrue(page.getPreviousPageRef().isPresent(), "has previous page ref");
-        final Page.PageRef prevRef = page.getPreviousPageRef().get();
+        final Page.PageRef prevRef = page.getPreviousPageRef();
         assertEquals(prevRef.getItemsBefore(), 0, "items before prev page");
         assertEquals(prevRef.getPageSize(), 3, "prev page size");
 
         assertTrue(page.hasNextPage(), "page has next page");
-        assertTrue(page.getNextPageRef().isPresent(), "page has next page ref");
-        final Page.PageRef nextRef = page.getNextPageRef().get();
+        final Page.PageRef nextRef = page.getNextPageRef();
         assertEquals(nextRef.getItemsBefore(), 6, "items before next page");
         assertEquals(nextRef.getPageSize(), 3, "next page size");
 
@@ -172,11 +168,9 @@ public class PageTest {
         assertEquals(page.getNumber(), 1, "page number");
 
         assertFalse(page.hasPreviousPage(), "has previous page");
-        assertFalse(page.getPreviousPageRef().isPresent(), "page has previous page ref");
 
         assertTrue(page.hasNextPage(), "page has next page");
-        assertTrue(page.getNextPageRef().isPresent(), "page has next page ref");
-        final Page.PageRef nextRef = page.getNextPageRef().get();
+        final Page.PageRef nextRef = page.getNextPageRef();
         assertEquals(nextRef.getPageSize(), 5, "next page size");
         assertEquals(nextRef.getItemsBefore(), 5, "next page skip items");
 
@@ -211,13 +205,11 @@ public class PageTest {
         assertEquals(page.getNumber(), 3, "page number");
 
         assertTrue(page.hasPreviousPage(), "has previous page");
-        assertTrue(page.getPreviousPageRef().isPresent(), "page has previous page ref");
-        final Page.PageRef prevRef = page.getPreviousPageRef().get();
+        final Page.PageRef prevRef = page.getPreviousPageRef();
         assertEquals(prevRef.getPageSize(), 3, "prev page size");
         assertEquals(prevRef.getItemsBefore(), 3, "prev page skip items");
 
         assertFalse(page.hasNextPage(), "has next page");
-        assertFalse(page.getNextPageRef().isPresent(), "page has next page ref");
 
         assertEquals(page.getItems(), asList("item7", "item8"));
     }
@@ -243,10 +235,8 @@ public class PageTest {
         assertEquals(page.getNumber(), 1, "page number");
 
         assertFalse(page.hasPreviousPage(), "has previous page");
-        assertFalse(page.getPreviousPageRef().isPresent(), "page has previous page ref");
 
         assertFalse(page.hasNextPage(), "page has next page");
-        assertFalse(page.getNextPageRef().isPresent(), "page has next page ref");
 
         assertEquals(page.getItems(), singleton("item1"));
     }

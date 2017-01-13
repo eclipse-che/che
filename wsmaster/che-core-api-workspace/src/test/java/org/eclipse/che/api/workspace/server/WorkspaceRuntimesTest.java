@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,6 +24,7 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.environment.server.CheEnvironmentEngine;
 import org.eclipse.che.api.environment.server.NoOpMachineInstance;
+import org.eclipse.che.api.machine.server.exception.SnapshotException;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineLimitsImpl;
@@ -31,13 +32,18 @@ import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
+import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes.RuntimeDescriptor;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceRuntimeImpl;
+import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.EventType;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.dto.server.DtoFactory;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -45,20 +51,25 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -78,39 +89,49 @@ public class WorkspaceRuntimesTest {
 
     private static final String WORKSPACE_ID = "workspace123";
     private static final String ENV_NAME     = "default-env";
-    private static final String NAMESPACE    = "wsNamespace";
 
     @Mock
-    private EventService eventService;
-
+    private EventService         eventService;
     @Mock
-    private CheEnvironmentEngine environmentEngine;
-
+    private CheEnvironmentEngine envEngine;
     @Mock
     private AgentSorter          agentSorter;
     @Mock
     private AgentLauncherFactory launcherFactory;
     @Mock
     private AgentRegistry        agentRegistry;
+    @Mock
+    private WorkspaceSharedPool  sharedPool;
+    @Mock
+    private SnapshotDao          snapshotDao;
+
+    @Captor
+    private ArgumentCaptor<WorkspaceStatusEvent>     eventCaptor;
+    @Captor
+    private ArgumentCaptor<Callable>                 taskCaptor;
+    @Captor
+    private ArgumentCaptor<Collection<SnapshotImpl>> snapshotsCaptor;
 
     private WorkspaceRuntimes runtimes;
 
     @BeforeMethod
     public void setUp(Method method) throws Exception {
         runtimes = spy(new WorkspaceRuntimes(eventService,
-                                             environmentEngine,
+                                             envEngine,
                                              agentSorter,
                                              launcherFactory,
-                                             agentRegistry));
+                                             agentRegistry,
+                                             snapshotDao,
+                                             sharedPool));
 
         List<Instance> machines = asList(createMachine(true), createMachine(false));
-        when(environmentEngine.start(anyString(),
-                                     anyString(),
-                                     any(Environment.class),
-                                     anyBoolean(),
-                                     any()))
+        when(envEngine.start(anyString(),
+                             anyString(),
+                             any(Environment.class),
+                             anyBoolean(),
+                             any()))
                 .thenReturn(machines);
-        when(environmentEngine.getMachines(WORKSPACE_ID)).thenReturn(machines);
+        when(envEngine.getMachines(WORKSPACE_ID)).thenReturn(machines);
     }
 
     @Test(expectedExceptions = NotFoundException.class,
@@ -128,7 +149,7 @@ public class WorkspaceRuntimesTest {
         runtimes.start(workspace,
                        workspace.getConfig().getDefaultEnv(),
                        false);
-        when(environmentEngine.getMachines(workspace.getId()))
+        when(envEngine.getMachines(workspace.getId()))
                 .thenReturn(asList(createMachine(false), createMachine(false)));
 
         // when
@@ -141,13 +162,13 @@ public class WorkspaceRuntimesTest {
         WorkspaceImpl workspace = createWorkspace();
         Instance devMachine = createMachine(true);
         List<Instance> machines = asList(devMachine, createMachine(false));
-        when(environmentEngine.start(anyString(),
-                                     anyString(),
-                                     any(Environment.class),
-                                     anyBoolean(),
-                                     any()))
+        when(envEngine.start(anyString(),
+                             anyString(),
+                             any(Environment.class),
+                             anyBoolean(),
+                             any()))
                 .thenReturn(machines);
-        when(environmentEngine.getMachines(WORKSPACE_ID)).thenReturn(machines);
+        when(envEngine.getMachines(WORKSPACE_ID)).thenReturn(machines);
 
         runtimes.start(workspace,
                        workspace.getConfig().getDefaultEnv(),
@@ -164,7 +185,7 @@ public class WorkspaceRuntimesTest {
                                                                                               .projectsRoot(),
                                                                                     machines,
                                                                                     devMachine));
-        verify(environmentEngine, times(2)).getMachines(workspace.getId());
+        verify(envEngine, times(2)).getMachines(workspace.getId());
         assertEquals(runtimeDescriptor, expected);
     }
 
@@ -182,11 +203,11 @@ public class WorkspaceRuntimesTest {
     @Test
     public void workspaceShouldNotHaveRuntimeIfEnvStartFails() throws Exception {
         // given
-        when(environmentEngine.start(anyString(),
-                                     anyString(),
-                                     any(Environment.class),
-                                     anyBoolean(),
-                                     any()))
+        when(envEngine.start(anyString(),
+                             anyString(),
+                             any(Environment.class),
+                             anyBoolean(),
+                             any()))
                 .thenThrow(new ServerException("Test env start error"));
         WorkspaceImpl workspaceMock = createWorkspace();
 
@@ -294,9 +315,11 @@ public class WorkspaceRuntimesTest {
                        false);
 
         // then
-        verify(runtimes).publishWorkspaceEvent(EventType.STARTING,
-                                               workspace.getId(),
-                                               null);
+        verify(eventService).publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
+                                               .withWorkspaceId(workspace.getId())
+                                               .withStatus(WorkspaceStatus.STARTING)
+                                               .withEventType(EventType.STARTING)
+                                               .withPrevStatus(WorkspaceStatus.STOPPED));
     }
 
     @Test
@@ -310,20 +333,22 @@ public class WorkspaceRuntimesTest {
                        false);
 
         // then
-        verify(runtimes).publishWorkspaceEvent(EventType.RUNNING,
-                                               workspace.getId(),
-                                               null);
+        verify(eventService).publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
+                                               .withStatus(WorkspaceStatus.RUNNING)
+                                               .withWorkspaceId(workspace.getId())
+                                               .withEventType(EventType.RUNNING)
+                                               .withPrevStatus(WorkspaceStatus.STARTING));
     }
 
     @Test
     public void errorEventShouldBePublishedIfDevMachineFailedToStart() throws Exception {
         // given
         WorkspaceImpl workspace = createWorkspace();
-        when(environmentEngine.start(anyString(),
-                                     anyString(),
-                                     any(Environment.class),
-                                     anyBoolean(),
-                                     any()))
+        when(envEngine.start(anyString(),
+                             anyString(),
+                             any(Environment.class),
+                             anyBoolean(),
+                             any()))
                 .thenReturn(singletonList(createMachine(false)));
 
         try {
@@ -334,9 +359,10 @@ public class WorkspaceRuntimesTest {
 
         } catch (Exception e) {
             // then
-            verify(runtimes).publishWorkspaceEvent(EventType.ERROR,
-                                                   workspace.getId(),
-                                                   e.getLocalizedMessage());
+            verify(eventService).publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
+                                                   .withWorkspaceId(workspace.getId())
+                                                   .withEventType(EventType.ERROR)
+                                                   .withPrevStatus(WorkspaceStatus.STARTING));
         }
     }
 
@@ -352,9 +378,11 @@ public class WorkspaceRuntimesTest {
         runtimes.stop(workspace.getId());
 
         // then
-        verify(runtimes).publishWorkspaceEvent(EventType.STOPPING,
-                                               workspace.getId(),
-                                               null);
+        verify(eventService).publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
+                                               .withStatus(WorkspaceStatus.STOPPING)
+                                               .withWorkspaceId(workspace.getId())
+                                               .withEventType(EventType.STOPPING)
+                                               .withPrevStatus(WorkspaceStatus.RUNNING));
     }
 
     @Test
@@ -369,9 +397,11 @@ public class WorkspaceRuntimesTest {
         runtimes.stop(workspace.getId());
 
         // then
-        verify(runtimes).publishWorkspaceEvent(EventType.STOPPED,
-                                               workspace.getId(),
-                                               null);
+        verify(eventService).publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
+                                               .withStatus(WorkspaceStatus.STOPPED)
+                                               .withWorkspaceId(workspace.getId())
+                                               .withEventType(EventType.STOPPED)
+                                               .withPrevStatus(WorkspaceStatus.STOPPING));
     }
 
     @Test
@@ -387,9 +417,11 @@ public class WorkspaceRuntimesTest {
             runtimes.stop(workspace.getId());
         } catch (Exception e) {
             // then
-            verify(runtimes).publishWorkspaceEvent(EventType.ERROR,
-                                                   workspace.getId(),
-                                                   "Test error");
+            verify(eventService).publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
+                                                   .withWorkspaceId(workspace.getId())
+                                                   .withEventType(EventType.ERROR)
+                                                   .withPrevStatus(WorkspaceStatus.STOPPING)
+                                                   .withError("Test error"));
         }
     }
 
@@ -402,7 +434,7 @@ public class WorkspaceRuntimesTest {
                        false);
         MachineConfigImpl config = createConfig(false);
         Instance instance = mock(Instance.class);
-        when(environmentEngine.startMachine(anyString(), any(MachineConfig.class), any())).thenReturn(instance);
+        when(envEngine.startMachine(anyString(), any(MachineConfig.class), any())).thenReturn(instance);
         when(instance.getConfig()).thenReturn(config);
 
         // when
@@ -410,7 +442,7 @@ public class WorkspaceRuntimesTest {
 
         // then
         assertEquals(actual, instance);
-        verify(environmentEngine).startMachine(eq(workspace.getId()), eq(config), any());
+        verify(envEngine).startMachine(eq(workspace.getId()), eq(config), any());
     }
 
     @Test
@@ -422,7 +454,7 @@ public class WorkspaceRuntimesTest {
                        false);
         MachineConfigImpl config = createConfig(false);
         Instance instance = mock(Instance.class);
-        when(environmentEngine.startMachine(anyString(), any(MachineConfig.class), any())).thenReturn(instance);
+        when(envEngine.startMachine(anyString(), any(MachineConfig.class), any())).thenReturn(instance);
         when(instance.getConfig()).thenReturn(config);
 
         // when
@@ -430,14 +462,14 @@ public class WorkspaceRuntimesTest {
 
         // then
         assertEquals(actual, instance);
-        verify(environmentEngine).startMachine(eq(workspace.getId()),
-                                               eq(config),
-                                               eq(singletonList("org.eclipse.che.terminal")));
+        verify(envEngine).startMachine(eq(workspace.getId()),
+                                       eq(config),
+                                       eq(singletonList("org.eclipse.che.terminal")));
         verify(runtimes).launchAgents(instance, singletonList("org.eclipse.che.terminal"));
     }
 
-    @Test(expectedExceptions = ConflictException.class,
-          expectedExceptionsMessageRegExp = "Environment of workspace '.*' is not running")
+    @Test(expectedExceptions = NotFoundException.class,
+          expectedExceptionsMessageRegExp = "Workspace with id '.*' is not running")
     public void shouldNotStartMachineIfEnvironmentIsNotRunning() throws Exception {
         // when
         MachineConfigImpl config = createConfig(false);
@@ -446,7 +478,7 @@ public class WorkspaceRuntimesTest {
         runtimes.startMachine("someWsID", config);
 
         // then
-        verify(environmentEngine, never()).startMachine(anyString(), any(MachineConfig.class), any());
+        verify(envEngine, never()).startMachine(anyString(), any(MachineConfig.class), any());
     }
 
     @Test
@@ -461,71 +493,63 @@ public class WorkspaceRuntimesTest {
         runtimes.stopMachine(workspace.getId(), "testMachineId");
 
         // then
-        verify(environmentEngine).stopMachine(workspace.getId(), "testMachineId");
+        verify(envEngine).stopMachine(workspace.getId(), "testMachineId");
     }
 
-    @Test(expectedExceptions = ConflictException.class,
-          expectedExceptionsMessageRegExp = "Environment of workspace '.*' is not running")
+    @Test(expectedExceptions = NotFoundException.class,
+          expectedExceptionsMessageRegExp = "Workspace with id 'someWsID' is not running")
     public void shouldNotStopMachineIfEnvironmentIsNotRunning() throws Exception {
         // when
         runtimes.stopMachine("someWsID", "someMachineId");
 
         // then
-        verify(environmentEngine, never()).stopMachine(anyString(), anyString());
-    }
-
-    @Test
-    public void shouldBeAbleToSaveMachine() throws Exception {
-        // when
-        WorkspaceImpl workspace = createWorkspace();
-        runtimes.start(workspace,
-                       workspace.getConfig().getDefaultEnv(),
-                       false);
-        SnapshotImpl snapshot = mock(SnapshotImpl.class);
-        when(runtimes.saveMachine(workspace.getNamespace(), workspace.getId(), "machineId")).thenReturn(snapshot);
-
-        // when
-        SnapshotImpl actualSnapshot = runtimes.saveMachine(workspace.getNamespace(), workspace.getId(), "machineId");
-
-        // then
-        assertEquals(actualSnapshot, snapshot);
-        verify(environmentEngine).saveSnapshot(workspace.getNamespace(), workspace.getId(), "machineId");
-    }
-
-    @Test(expectedExceptions = ConflictException.class,
-          expectedExceptionsMessageRegExp = "Environment of workspace '.*' is not running")
-    public void shouldNotSaveMachineIfEnvironmentIsNotRunning() throws Exception {
-        // when
-        runtimes.saveMachine("namespace", "workspaceId", "machineId");
-
-        // then
-        verify(environmentEngine, never()).saveSnapshot(anyString(), anyString(), anyString());
-    }
-
-    @Test
-    public void shouldBeAbleToRemoveSnapshot() throws Exception {
-        // given
-        SnapshotImpl snapshot = mock(SnapshotImpl.class);
-
-        // when
-        runtimes.removeSnapshot(snapshot);
-
-        // then
-        verify(environmentEngine).removeSnapshot(snapshot);
+        verify(envEngine, never()).stopMachine(anyString(), anyString());
     }
 
     @Test
     public void shouldBeAbleToGetMachine() throws Exception {
         // given
         Instance expected = createMachine(false);
-        when(environmentEngine.getMachine(WORKSPACE_ID, expected.getId())).thenReturn(expected);
+        when(envEngine.getMachine(WORKSPACE_ID, expected.getId())).thenReturn(expected);
 
         // when
         Instance actualMachine = runtimes.getMachine(WORKSPACE_ID, expected.getId());
 
         // then
         assertEquals(actualMachine, expected);
-        verify(environmentEngine).getMachine(WORKSPACE_ID, expected.getId());
+        verify(envEngine).getMachine(WORKSPACE_ID, expected.getId());
+    }
+
+    @Test
+    public void shouldBeAbleToGetStatusOfRunningWorkspace() throws Exception {
+        // given
+        WorkspaceImpl workspace = createWorkspace();
+        runtimes.start(workspace,
+                       workspace.getConfig().getDefaultEnv(),
+                       false);
+
+        // when
+        WorkspaceStatus status = runtimes.getStatus(workspace.getId());
+
+        // then
+        assertEquals(status, RUNNING);
+    }
+
+
+    @Test
+    public void shouldBeAbleToGetStatusOfStoppedWorkspace() throws Exception {
+        // given
+        WorkspaceImpl workspace = createWorkspace();
+        runtimes.start(workspace,
+                       workspace.getConfig().getDefaultEnv(),
+                       false);
+        runtimes.stop(workspace.getId());
+
+        // when
+        WorkspaceStatus status = runtimes.getStatus(workspace.getId());
+
+        // then
+        assertEquals(status, STOPPED);
     }
 
     @Test(expectedExceptions = NotFoundException.class,
@@ -533,14 +557,14 @@ public class WorkspaceRuntimesTest {
     public void shouldThrowExceptionIfGetMachineFromEnvEngineThrowsException() throws Exception {
         // given
         Instance expected = createMachine(false);
-        when(environmentEngine.getMachine(WORKSPACE_ID, expected.getId()))
+        when(envEngine.getMachine(WORKSPACE_ID, expected.getId()))
                 .thenThrow(new NotFoundException("test exception"));
 
         // when
         runtimes.getMachine(WORKSPACE_ID, expected.getId());
 
         // then
-        verify(environmentEngine).getMachine(WORKSPACE_ID, expected.getId());
+        verify(envEngine).getMachine(WORKSPACE_ID, expected.getId());
     }
 
     @Test
@@ -556,7 +580,7 @@ public class WorkspaceRuntimesTest {
                                                                     workspace.getConfig().getDefaultEnv()));
         WorkspaceImpl workspace2 = spy(createWorkspace());
         when(workspace2.getId()).thenReturn("testWsId");
-        when(environmentEngine.getMachines(workspace2.getId()))
+        when(envEngine.getMachines(workspace2.getId()))
                 .thenReturn(Collections.singletonList(createMachine(true)));
         runtimes.start(workspace2,
                        workspace2.getConfig().getDefaultEnv(),
@@ -570,6 +594,121 @@ public class WorkspaceRuntimesTest {
 
         // then
         assertEquals(actualWorkspaces, expectedWorkspaces);
+    }
+
+    @Test
+    public void changesStatusFromRunningToSnapshotting() throws Exception {
+        final WorkspaceImpl workspace = createWorkspace();
+        runtimes.start(workspace, workspace.getConfig().getDefaultEnv(), false);
+
+        runtimes.snapshotAsync(workspace.getId());
+
+        assertEquals(runtimes.get(workspace.getId()).getRuntimeStatus(), WorkspaceStatus.SNAPSHOTTING);
+    }
+
+    @Test
+    public void changesStatusFromSnapshottingToRunning() throws Exception {
+        final WorkspaceImpl workspace = createWorkspace();
+        runtimes.start(workspace, workspace.getConfig().getDefaultEnv(), false);
+
+        runtimes.snapshotAsync(workspace.getId());
+
+        captureAsyncTaskAndExecuteSynchronously();
+        assertEquals(runtimes.get(workspace.getId()).getRuntimeStatus(), WorkspaceStatus.RUNNING);
+    }
+
+    @Test(expectedExceptions = NotFoundException.class,
+          expectedExceptionsMessageRegExp = "Workspace with id 'non-existing' is not running")
+    public void throwsNotFoundExceptionWhenBeginningSnapshottingForNonExistingWorkspace() throws Exception {
+        runtimes.snapshot("non-existing");
+    }
+
+    @Test(expectedExceptions = ConflictException.class,
+          expectedExceptionsMessageRegExp = "Workspace with id '.*' is not 'RUNNING', it's status is 'SNAPSHOTTING'")
+    public void throwsConflictExceptionWhenBeginningSnapshottingForNotRunningWorkspace() throws Exception {
+        final WorkspaceImpl workspace = createWorkspace();
+        runtimes.start(workspace, workspace.getConfig().getDefaultEnv(), false);
+
+        runtimes.snapshotAsync(workspace.getId());
+        runtimes.snapshotAsync(workspace.getId());
+    }
+
+    @Test(expectedExceptions = ServerException.class, expectedExceptionsMessageRegExp = "can't save")
+    public void failsToCreateSnapshotWhenDevMachineSnapshottingFailed() throws Exception {
+        final WorkspaceImpl workspace = createWorkspace();
+        runtimes.start(workspace, workspace.getConfig().getDefaultEnv(), false);
+        when(envEngine.saveSnapshot(any(), any())).thenThrow(new ServerException("can't save"));
+
+        try {
+            runtimes.snapshot(workspace.getId());
+        } catch (Exception x) {
+            verify(eventService).publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
+                                                   .withWorkspaceId(workspace.getId())
+                                                   .withStatus(WorkspaceStatus.SNAPSHOTTING)
+                                                   .withPrevStatus(WorkspaceStatus.RUNNING)
+                                                   .withEventType(EventType.SNAPSHOT_CREATING));
+            verify(eventService).publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
+                                                   .withWorkspaceId(workspace.getId())
+                                                   .withError("can't save")
+                                                   .withStatus(WorkspaceStatus.RUNNING)
+                                                   .withPrevStatus(WorkspaceStatus.SNAPSHOTTING)
+                                                   .withEventType(EventType.SNAPSHOT_CREATION_ERROR));
+            throw x;
+        }
+    }
+
+    @Test(expectedExceptions = ServerException.class, expectedExceptionsMessageRegExp = "test")
+    public void removesNewlyCreatedSnapshotsWhenFailedToSaveTheirsMetadata() throws Exception {
+        WorkspaceImpl workspace = createWorkspace();
+        runtimes.start(workspace, workspace.getConfig().getDefaultEnv(), false);
+        doThrow(new SnapshotException("test")).when(snapshotDao)
+                                              .replaceSnapshots(any(), any(), any());
+        SnapshotImpl snapshot = mock(SnapshotImpl.class);
+        when(envEngine.saveSnapshot(any(), any())).thenReturn(snapshot);
+
+        try {
+            runtimes.snapshot(workspace.getId());
+        } catch (Exception x) {
+            verify(eventService).publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
+                                                   .withStatus(WorkspaceStatus.SNAPSHOTTING)
+                                                   .withEventType(EventType.SNAPSHOT_CREATING)
+                                                   .withPrevStatus(WorkspaceStatus.RUNNING)
+                                                   .withWorkspaceId(workspace.getId()));
+            verify(eventService).publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
+                                                   .withStatus(WorkspaceStatus.RUNNING)
+                                                   .withEventType(EventType.SNAPSHOT_CREATION_ERROR)
+                                                   .withWorkspaceId(workspace.getId())
+                                                   .withPrevStatus(WorkspaceStatus.SNAPSHOTTING)
+                                                   .withError("test"));
+            verify(snapshotDao).replaceSnapshots(any(),
+                                                 any(),
+                                                 snapshotsCaptor.capture());
+            verify(envEngine, times(snapshotsCaptor.getValue().size())).removeSnapshot(snapshot);
+            throw x;
+        }
+    }
+
+    @Test
+    public void removesOldSnapshotsWhenNewSnapshotsMetadataSuccessfullySaved() throws Exception {
+        WorkspaceImpl workspace = createWorkspace();
+        runtimes.start(workspace, workspace.getConfig().getDefaultEnv(), false);
+        SnapshotImpl oldSnapshot = mock(SnapshotImpl.class);
+        doReturn((singletonList(oldSnapshot))).when(snapshotDao)
+                                              .replaceSnapshots(any(), any(), any());
+
+        runtimes.snapshot(workspace.getId());
+
+        verify(eventService).publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
+                                               .withStatus(WorkspaceStatus.SNAPSHOTTING)
+                                               .withEventType(EventType.SNAPSHOT_CREATING)
+                                               .withPrevStatus(WorkspaceStatus.RUNNING)
+                                               .withWorkspaceId(workspace.getId()));
+        verify(eventService).publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
+                                               .withStatus(WorkspaceStatus.RUNNING)
+                                               .withEventType(EventType.SNAPSHOT_CREATED)
+                                               .withPrevStatus(WorkspaceStatus.SNAPSHOTTING)
+                                               .withWorkspaceId(workspace.getId()));
+        verify(envEngine).removeSnapshot(oldSnapshot);
     }
 
     private static Instance createMachine(boolean isDev) {
@@ -604,6 +743,12 @@ public class WorkspaceRuntimesTest {
                                                           .setDefaultEnv(ENV_NAME)
                                                           .build();
         return new WorkspaceImpl(WORKSPACE_ID, new AccountImpl("accountId", "user123", "test"), wsConfig);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void captureAsyncTaskAndExecuteSynchronously() throws Exception {
+        verify(sharedPool).submit(taskCaptor.capture());
+        taskCaptor.getValue().call();
     }
 
     private static class TestMachineInstance extends NoOpMachineInstance {

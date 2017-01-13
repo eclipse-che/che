@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,9 +19,6 @@ import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.plugin.svn.server.SubversionApi;
 import org.eclipse.che.plugin.svn.server.SubversionException;
-import org.eclipse.che.plugin.svn.server.credentials.CredentialsException;
-import org.eclipse.che.plugin.svn.server.credentials.CredentialsProvider;
-import org.eclipse.che.plugin.svn.server.credentials.CredentialsProvider.Credentials;
 import org.eclipse.che.plugin.svn.shared.AddRequest;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponseList;
@@ -45,10 +42,10 @@ import org.eclipse.che.plugin.svn.shared.PropertySetRequest;
 import org.eclipse.che.plugin.svn.shared.RemoveRequest;
 import org.eclipse.che.plugin.svn.shared.ResolveRequest;
 import org.eclipse.che.plugin.svn.shared.RevertRequest;
-import org.eclipse.che.plugin.svn.shared.SaveCredentialsRequest;
 import org.eclipse.che.plugin.svn.shared.ShowDiffRequest;
 import org.eclipse.che.plugin.svn.shared.ShowLogRequest;
 import org.eclipse.che.plugin.svn.shared.StatusRequest;
+import org.eclipse.che.plugin.svn.shared.SwitchRequest;
 import org.eclipse.che.plugin.svn.shared.UpdateRequest;
 
 import javax.inject.Inject;
@@ -77,9 +74,6 @@ public class SubversionService extends Service {
 
     @Inject
     private SubversionApi subversionApi;
-
-    @Inject
-    private CredentialsProvider credentialsProvider;
 
 
     /**
@@ -237,6 +231,25 @@ public class SubversionService extends Service {
     }
 
     /**
+     * Update the working copy to a different URL within the same repository.
+     *
+     * @param request
+     *         the switch request
+     * @return the switch response
+     * @throws ApiException
+     *         if there is a Subversion issue
+     */
+    @Path("switch")
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+    public CLIOutputWithRevisionResponse doSwitch(final SwitchRequest request) throws ApiException {
+        request.setProjectPath(getAbsoluteProjectPath(request.getProjectPath()));
+        return subversionApi.doSwitch(request);
+    }
+
+
+    /**
      * Show log.
      *
      * @param request
@@ -277,24 +290,55 @@ public class SubversionService extends Service {
     }
 
     /**
-     * List remote directory.
+     * Lists remote directory.
      *
      * @param request
-     *         a list request
-     * @return children of requested target
-     *
-     * @throws IOException
-     *         if there is a problem executing the command
-     * @throws SubversionException
-     *         if there is a Subversion issue
+     *      the list request
+     * @return children of the requested target path
+     * @throws ApiException
+     *       if there is a Subversion issue
      */
     @Path("list")
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    public ListResponse list(final ListRequest request) throws ApiException, IOException {
-        request.withProjectPath(getAbsoluteProjectPath(request.getProjectPath()));
-        return this.subversionApi.list(request);
+    public ListResponse list(final ListRequest request) throws ApiException {
+        request.setProjectPath(getAbsoluteProjectPath(request.getProjectPath()));
+        return subversionApi.list(request);
+    }
+
+    /**
+     * Returns list of the branches of the project.
+     *
+     * @param request
+     *      the list request
+     * @throws ApiException
+     *         if there is a Subversion issue
+     */
+    @Path("branches")
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+    public ListResponse listBranches(final ListRequest request) throws ApiException {
+        request.setProjectPath(getAbsoluteProjectPath(request.getProjectPath()));
+        return this.subversionApi.listBranches(request);
+    }
+
+    /**
+     * Returns list of the tags of the project.
+     *
+     * @param request
+     *      the list request
+     * @throws ApiException
+     *         if there is a Subversion issue
+     */
+    @Path("tags")
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+    public ListResponse listTags(final ListRequest request) throws ApiException {
+        request.setProjectPath(getAbsoluteProjectPath(request.getProjectPath()));
+        return subversionApi.listTags(request);
     }
 
     /**
@@ -369,19 +413,6 @@ public class SubversionService extends Service {
     public CLIOutputResponse unlock(final LockRequest request) throws ApiException, IOException {
         request.setProjectPath(getAbsoluteProjectPath(request.getProjectPath()));
         return this.subversionApi.lockUnlock(request, false);
-    }
-
-    @Path("saveCredentials")
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    public void saveCredentials(final SaveCredentialsRequest request) throws ServerException, IOException {
-        try {
-            this.credentialsProvider.storeCredential(request.getRepositoryUrl(),
-                                                     new Credentials(request.getUsername(), request.getPassword()));
-        } catch (final CredentialsException e) {
-            throw new ServerException(e.getMessage());
-        }
     }
 
     @Path("export/{projectPath:.*}")
@@ -517,7 +548,7 @@ public class SubversionService extends Service {
         }
     }
 
-    private String getAbsoluteProjectPath(String wsRelatedProjectPath) throws ApiException {
+    private String getAbsoluteProjectPath(String wsRelatedProjectPath) {
         final RegisteredProject project = projectRegistry.getProject(wsRelatedProjectPath);
         return project.getBaseFolder().getVirtualFile().toIoFile().getAbsolutePath();
     }

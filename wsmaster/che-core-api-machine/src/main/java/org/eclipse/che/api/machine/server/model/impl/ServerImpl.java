@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 package org.eclipse.che.api.machine.server.model.impl;
 
 import org.eclipse.che.api.core.model.machine.Server;
+import org.eclipse.che.api.core.model.machine.ServerProperties;
 
 import java.util.Objects;
 
@@ -22,22 +23,24 @@ import java.util.Objects;
  */
 public class ServerImpl implements Server {
 
-    private String ref;
-    private String address;
-    private String url;
-    private String protocol;
-    private String path;
+    private String               ref;
+    private String               protocol;
+    private String               address;
+    private String               url;
+    private ServerPropertiesImpl properties;
 
-    public ServerImpl(String ref, String protocol, String address, String path, String url) {
+    public ServerImpl(String ref, String protocol, String address, String url, ServerProperties properties) {
         this.ref = ref;
+        this.protocol = protocol;
         this.address = address;
         this.url = url;
-        this.protocol = protocol;
-        this.path = path;
+        if (properties != null) {
+            this.properties = new ServerPropertiesImpl(properties);
+        }
     }
 
     public ServerImpl(Server server) {
-        this(server.getRef(), server.getProtocol(), server.getAddress(), server.getPath(), server.getUrl());
+        this(server.getRef(), server.getProtocol(), server.getAddress(), server.getUrl(), server.getProperties());
     }
 
     @Override
@@ -77,12 +80,12 @@ public class ServerImpl implements Server {
     }
 
     @Override
-    public String getPath() {
-        return path;
+    public ServerProperties getProperties() {
+        return properties;
     }
 
-    public void setPath(String path) {
-        this.path = path;
+    public void setProperties(ServerPropertiesImpl properties) {
+        this.properties = properties;
     }
 
     @Override
@@ -93,8 +96,8 @@ public class ServerImpl implements Server {
         return Objects.equals(ref, other.ref) &&
                Objects.equals(protocol, other.protocol) &&
                Objects.equals(address, other.address) &&
-               Objects.equals(path, other.path) &&
-               Objects.equals(url, other.url);
+               Objects.equals(url, other.url) &&
+               Objects.equals(properties, other.properties);
     }
 
     @Override
@@ -103,8 +106,8 @@ public class ServerImpl implements Server {
         hash = hash * 31 + Objects.hashCode(ref);
         hash = hash * 31 + Objects.hashCode(protocol);
         hash = hash * 31 + Objects.hashCode(address);
-        hash = hash * 31 + Objects.hashCode(path);
         hash = hash * 31 + Objects.hashCode(url);
+        hash = hash * 31 + Objects.hashCode(properties);
         return hash;
     }
 
@@ -114,8 +117,8 @@ public class ServerImpl implements Server {
                "ref='" + ref + '\'' +
                ", protocol='" + protocol + '\'' +
                ", address='" + address + '\'' +
-               ", path='" + path + '\'' +
                ", url='" + url + '\'' +
+               ", properties='" + properties + '\'' +
                '}';
     }
 }

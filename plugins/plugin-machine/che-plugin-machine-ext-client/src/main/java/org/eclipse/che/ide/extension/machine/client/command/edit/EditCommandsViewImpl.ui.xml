@@ -1,6 +1,6 @@
 <!--
 
-    Copyright (c) 2012-2016 Codenvy, S.A.
+    Copyright (c) 2012-2017 Codenvy, S.A.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
@@ -108,14 +108,14 @@
             user-select: text;
         }
 
-        .overFooter {
+        .buttonsPanel {
             float: right;
             position: absolute;
             bottom: 0;
             right: 0;
         }
 
-        .overFooter button {
+        .buttonsPanel button {
             margin-right: 6px;
         }
     </ui:style>
@@ -137,16 +137,16 @@
                 <g:FlowPanel>
                     <g:Label width="200px" text="Command Definition" addStyleNames="{style.title}"/>
                 </g:FlowPanel>
-                <g:FlowPanel ui:field="savePanel" addStyleNames="{style.commandDefinitionHeader}">
+                <g:FlowPanel ui:field="namePanel" addStyleNames="{style.commandDefinitionHeader}">
                     <g:Label width="50px" text="{machineLocale.editCommandsViewNameText}" addStyleNames="{style.label}"/>
-                    <g:TextBox width="100%" height="14px" ui:field="configurationName" tabIndex="0"/>
+                    <g:TextBox width="100%" height="14px" ui:field="commandName" tabIndex="0"/>
                 </g:FlowPanel>
-                <g:SimplePanel ui:field="contentPanel" addStyleNames="{style.commandDefinitionBody}"/>
+                <g:SimplePanel ui:field="commandPageContainer" addStyleNames="{style.commandDefinitionBody}"/>
                 <g:FlowPanel ui:field="previewUrlPanel" addStyleNames="{style.commandDefinitionHeader}">
                     <g:Label width="auto" text="Preview URL" addStyleNames="{style.label}"/>
-                    <g:TextBox width="100%" height="14px" ui:field="configurationPreviewUrl" tabIndex="0"/>
+                    <g:TextBox width="100%" height="14px" ui:field="commandPreviewUrl" tabIndex="0"/>
                 </g:FlowPanel>
-                <g:FlowPanel ui:field="overFooter" addStyleNames="{style.overFooter}"/>
+                <g:FlowPanel ui:field="buttonsPanel" addStyleNames="{style.buttonsPanel}"/>
             </g:FlowPanel>
         </g:center>
     </g:DockLayoutPanel>

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,13 +12,18 @@ package org.eclipse.che.api.user.server.jpa;
 
 import com.google.inject.persist.Transactional;
 
+import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.jdbc.jpa.DuplicateKeyException;
+import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
+import org.eclipse.che.api.user.server.event.PostUserPersistedEvent;
+import org.eclipse.che.api.user.server.event.UserRemovedEvent;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.server.spi.UserDao;
+import org.eclipse.che.core.db.jpa.DuplicateKeyException;
 import org.eclipse.che.security.PasswordEncryptor;
 
 import javax.inject.Inject;
@@ -27,6 +32,7 @@ import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import java.util.List;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
@@ -38,6 +44,7 @@ import static java.util.stream.Collectors.toList;
  *
  * @author Yevhenii Voevodin
  * @author Anton Korneta
+ * @author Igor Vinokur
  */
 @Singleton
 public class JpaUserDao implements UserDao {
@@ -46,6 +53,8 @@ public class JpaUserDao implements UserDao {
     protected Provider<EntityManager> managerProvider;
     @Inject
     private   PasswordEncryptor       encryptor;
+    @Inject
+    private   EventService            eventService;
 
     @Override
     @Transactional
@@ -98,17 +107,17 @@ public class JpaUserDao implements UserDao {
     }
 
     @Override
-    public void remove(String id) throws ServerException, ConflictException {
+    public void remove(String id) throws ServerException {
         requireNonNull(id, "Required non-null id");
         try {
-            doRemove(id);
+            Optional<UserImpl> userOpt = doRemove(id);
+            userOpt.ifPresent(user -> eventService.publish(new UserRemovedEvent(user.getId())));
         } catch (RuntimeException x) {
             throw new ServerException(x.getLocalizedMessage(), x);
         }
     }
 
     @Override
-    @Transactional
     public UserImpl getByAlias(String alias) throws NotFoundException, ServerException {
         requireNonNull(alias, "Required non-null alias");
         try {
@@ -172,15 +181,16 @@ public class JpaUserDao implements UserDao {
 
     @Override
     @Transactional
-    public Page<UserImpl> getAll(int maxItems, int skipCount) throws ServerException {
+    public Page<UserImpl> getAll(int maxItems, long skipCount) throws ServerException {
         // TODO need to ensure that 'getAll' query works with same data as 'getTotalCount'
         checkArgument(maxItems >= 0, "The number of items to return can't be negative.");
-        checkArgument(skipCount >= 0, "The number of items to skip can't be negative.");
+        checkArgument(skipCount >= 0 && skipCount <= Integer.MAX_VALUE,
+                      "The number of items to skip can't be negative or greater than " + Integer.MAX_VALUE);
         try {
             final List<UserImpl> list = managerProvider.get()
                                                        .createNamedQuery("User.getAll", UserImpl.class)
                                                        .setMaxResults(maxItems)
-                                                       .setFirstResult(skipCount)
+                                                       .setFirstResult((int)skipCount)
                                                        .getResultList()
                                                        .stream()
                                                        .map(JpaUserDao::erasePassword)
@@ -201,9 +211,12 @@ public class JpaUserDao implements UserDao {
         }
     }
 
-    @Transactional
-    protected void doCreate(UserImpl user) {
-        managerProvider.get().persist(user);
+    @Transactional(rollbackOn = {RuntimeException.class, ApiException.class})
+    protected void doCreate(UserImpl user) throws ConflictException, ServerException {
+        EntityManager manage = managerProvider.get();
+        manage.persist(user);
+        manage.flush();
+        eventService.publish(new PostUserPersistedEvent(new UserImpl(user))).propagateException();
     }
 
     @Transactional
@@ -220,15 +233,20 @@ public class JpaUserDao implements UserDao {
             update.setPassword(user.getPassword());
         }
         manager.merge(update);
+        manager.flush();
     }
 
-    @Transactional
-    protected void doRemove(String id) {
+    @Transactional(rollbackOn = {RuntimeException.class, ServerException.class})
+    protected Optional<UserImpl> doRemove(String id) throws ServerException {
         final EntityManager manager = managerProvider.get();
         final UserImpl user = manager.find(UserImpl.class, id);
-        if (user != null) {
-            manager.remove(user);
+        if (user == null) {
+            return Optional.empty();
         }
+        eventService.publish(new BeforeUserRemovedEvent(user)).propagateException();
+        manager.remove(user);
+        manager.flush();
+        return Optional.of(user);
     }
 
     // Returns user instance copy without password

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,10 +13,12 @@ package org.eclipse.che.ide.api.machine;
 import com.google.inject.Inject;
 
 import org.eclipse.che.api.core.model.machine.Command;
+import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.RestContext;
@@ -53,17 +55,7 @@ public class MachineServiceClientImpl implements MachineServiceClient {
     }
 
     @Override
-    public Promise<MachineDto> getMachine(@NotNull final String workspaceId,
-                                          @NotNull final String machineId) {
-        return asyncRequestFactory.createGetRequest(baseHttpUrl + workspaceId +
-                                                    "/machine/" + machineId)
-                                  .header(ACCEPT, APPLICATION_JSON)
-                                  .loader(loaderFactory.newLoader("Getting info about machine..."))
-                                  .send(dtoUnmarshallerFactory.newUnmarshaller(MachineDto.class));
-    }
-
-    @Override
-    public Promise<List<MachineDto>> getMachines(@NotNull String workspaceId) {
+    public Promise<List<MachineDto>> getMachines(String workspaceId) {
         return asyncRequestFactory.createGetRequest(baseHttpUrl + workspaceId + "/machine")
                                   .header(ACCEPT, APPLICATION_JSON)
                                   .loader(loaderFactory.newLoader("Getting info about bound machines..."))
@@ -79,42 +71,6 @@ public class MachineServiceClientImpl implements MachineServiceClient {
                                                  null,
                                                  false)
                                   .loader(loaderFactory.newLoader("Destroying machine..."))
-                                  .send();
-    }
-
-    @Override
-    public Promise<MachineProcessDto> executeCommand(@NotNull final String workspaceId,
-                                                     @NotNull final String machineId,
-                                                     @NotNull final Command command,
-                                                     @Nullable final String outputChannel) {
-        return asyncRequestFactory.createPostRequest(baseHttpUrl + workspaceId +
-                                                     "/machine/" + machineId +
-                                                     "/command?outputChannel=" + outputChannel,
-                                                     command)
-                                  .header(ACCEPT, APPLICATION_JSON)
-                                  .loader(loaderFactory.newLoader("Executing command..."))
-                                  .send(dtoUnmarshallerFactory.newUnmarshaller(MachineProcessDto.class));
-    }
-
-    @Override
-    public Promise<List<MachineProcessDto>> getProcesses(@NotNull final String workspaceId,
-                                                         @NotNull final String machineId) {
-        return asyncRequestFactory.createGetRequest(baseHttpUrl + workspaceId +
-                                                    "/machine/" + machineId +
-                                                    "/process")
-                                  .header(ACCEPT, APPLICATION_JSON)
-                                  .loader(loaderFactory.newLoader("Getting machine processes..."))
-                                  .send(dtoUnmarshallerFactory.newListUnmarshaller(MachineProcessDto.class));
-    }
-
-    @Override
-    public Promise<Void> stopProcess(@NotNull final String workspaceId,
-                                     @NotNull final String machineId,
-                                     final int processId) {
-        return asyncRequestFactory.createDeleteRequest(baseHttpUrl + workspaceId +
-                                                       "/machine/" + machineId +
-                                                       "/process/" + processId)
-                                  .loader(loaderFactory.newLoader("Stopping process..."))
                                   .send();
     }
 }

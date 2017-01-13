@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,42 +10,49 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.svn.shared;
 
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.dto.shared.DTO;
 
-import javax.validation.constraints.NotNull;
-
+/**
+ * DTO object for {@code svn list} requests.
+ *
+ * @author Anatolii Bazko
+ */
 @DTO
 public interface ListRequest {
 
     /**
-     * @return the project path the request is associated with.
+     * Returns the project path.
      */
     String getProjectPath();
 
-    /**
-     * @param projectPath
-     */
-    void setProjectPath(@NotNull final String projectPath);
+    void setProjectPath(String projectPath);
+
+    ListRequest withProjectPath(String projectPath);
 
     /**
-     * @param projectPath project path
+     * Returns the target path to browse.
      */
-    ListRequest withProjectPath(@NotNull final String projectPath);
+    String getTargetPath();
+
+    void setTargetPath(String targetPath);
+
+    ListRequest withTargetPath(String targetPath);
 
 
-    /**
-     * @return target URL to list
-     */
-    String getTarget();
+    /**************************************************************************
+     * Credentials
+     **************************************************************************/
 
-    /**
-     * @param target
-     */
-    void setTarget(@NotNull final String target);
+    String getUsername();
 
-    /**
-     * @param target target to list
-     */
-    ListRequest withTarget(@NotNull final String target);
+    void setUsername(@Nullable final String username);
 
+    ListRequest withUsername(@Nullable final String username);
+
+    String getPassword();
+
+    void setPassword(@Nullable final String password);
+
+    ListRequest withPassword(@Nullable final String password);
 }

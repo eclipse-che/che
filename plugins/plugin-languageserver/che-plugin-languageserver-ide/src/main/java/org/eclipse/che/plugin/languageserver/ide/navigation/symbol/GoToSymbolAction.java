@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,10 @@ import io.typefox.lsapi.ServerCapabilities;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.languageserver.shared.lsapi.DocumentSymbolParamsDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.RangeDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.SymbolInformationDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentIdentifierDTO;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -39,10 +43,6 @@ import org.eclipse.che.plugin.languageserver.ide.filters.Match;
 import org.eclipse.che.plugin.languageserver.ide.quickopen.QuickOpenModel;
 import org.eclipse.che.plugin.languageserver.ide.quickopen.QuickOpenPresenter;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.DocumentSymbolParamsDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.RangeDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.SymbolInformationDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.TextDocumentIdentifierDTO;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
@@ -101,7 +101,7 @@ public class GoToSymbolAction extends AbstractPerspectiveAction implements Quick
     public void actionPerformed(ActionEvent e) {
         DocumentSymbolParamsDTO paramsDTO = dtoFactory.createDto(DocumentSymbolParamsDTO.class);
         TextDocumentIdentifierDTO identifierDTO = dtoFactory.createDto(TextDocumentIdentifierDTO.class);
-        identifierDTO.setUri(editorAgent.getActiveEditor().getEditorInput().getFile().getPath());
+        identifierDTO.setUri(editorAgent.getActiveEditor().getEditorInput().getFile().getLocation().toString());
         paramsDTO.setTextDocument(identifierDTO);
         activeEditor = (TextEditor)editorAgent.getActiveEditor();
         cursorPosition = activeEditor.getDocument().getCursorPosition();

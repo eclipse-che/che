@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.commons.schedule.executor;
 
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.schedule.Launcher;
 import org.eclipse.che.inject.ConfigurationException;
 
@@ -44,7 +45,10 @@ public class ThreadPullLauncher implements Launcher {
     @Inject
     public ThreadPullLauncher(@Named("schedule.core_pool_size") Integer corePoolSize) {
         this.service = new CronThreadPoolExecutor(corePoolSize,
-                                                  new ThreadFactoryBuilder().setNameFormat("Annotated-scheduler-%d").setDaemon(false)
+                                                  new ThreadFactoryBuilder().setNameFormat("Annotated-scheduler-%d")
+                                                                            .setUncaughtExceptionHandler(
+                                                                                    LoggingUncaughtExceptionHandler.getInstance())
+                                                                            .setDaemon(false)
                                                                             .build());
     }
 

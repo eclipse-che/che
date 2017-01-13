@@ -11,7 +11,7 @@
 
 -->
 <che-toolbar che-title="Workspaces" border-none></che-toolbar>
-<che-description che-link-title="Learn more." che-link="https://eclipse-che.readme.io/docs/environments">A workspace is where your projects live and run. Create workspaces from stacks that define projects, runtimes, and commands.</che-description>
+<che-description che-link-title="Learn more." che-link="https://eclipse-che.readme.io/docs/introduction">A workspace is where your projects live and run. Create workspaces from stacks that define projects, runtimes, and commands.</che-description>
 <md-content md-scroll-y flex layout="column" md-theme="maincontent-theme">
   <md-progress-linear md-mode="indeterminate" class="workspaces-list-progress"
                       ng-show="listWorkspacesCtrl.isInfoLoading"></md-progress-linear>
@@ -43,23 +43,23 @@
              layout-align="start center"
              class="che-list-item-details">
           <che-list-header-column flex-gt-xs="25"
-                                  che-sort-value='listWorkspacesCtrl.workspaceOrderBy'
-                                  che-sort-item='config.name'
-                                  che-column-title='Name'></che-list-header-column>
+                                  che-sort-value="listWorkspacesCtrl.workspaceOrderBy"
+                                  che-sort-item="config.name"
+                                  che-column-title="Name"></che-list-header-column>
           <che-list-header-column flex-gt-xs="15"
-                                  che-sort-value='listWorkspacesCtrl.workspaceOrderBy'
-                                  che-sort-item='config.environments[0].machineConfigs[0].limits.ram'
-                                  che-column-title='RAM'></che-list-header-column>
+                                  che-sort-value="listWorkspacesCtrl.workspaceOrderBy"
+                                  che-sort-item="config.environments[0].machineConfigs[0].limits.ram"
+                                  che-column-title="RAM"></che-list-header-column>
           <che-list-header-column flex-gt-xs="15"
-                                  che-sort-value='listWorkspacesCtrl.workspaceOrderBy'
-                                  che-sort-item='config.projects'
-                                  che-column-title='Projects'></che-list-header-column>
+                                  che-sort-value="listWorkspacesCtrl.workspaceOrderBy"
+                                  che-sort-item="config.projects"
+                                  che-column-title="Projects"></che-list-header-column>
           <che-list-header-column flex-gt-xs="30"
-                                  che-sort-value='listWorkspacesCtrl.workspaceOrderBy'
-                                  che-sort-item='attributes.stackId'
-                                  che-column-title='Stack'></che-list-header-column>
+                                  che-sort-value="listWorkspacesCtrl.workspaceOrderBy"
+                                  che-sort-item="attributes.stackId"
+                                  che-column-title="Stack"></che-list-header-column>
           <che-list-header-column flex-gt-xs="15"
-                                  che-column-title='Actions'></che-list-header-column>
+                                  che-column-title="Actions"></che-list-header-column>
         </div>
       </div>
     </che-list-header>
@@ -74,9 +74,9 @@
     </che-list>
     <div class="che-list-empty">
         <span ng-show="listWorkspacesCtrl.userWorkspaces.length > 0 && (listWorkspacesCtrl.userWorkspaces | filter:listWorkspacesCtrl.workspaceFilter).length === 0">
-          No workspaces found
+          No workspaces found.
         </span>
-      <span ng-show="listWorkspacesCtrl.userWorkspaces.length === 0">There are no workspace yet</span>
+      <span ng-show="listWorkspacesCtrl.userWorkspaces.length === 0">There are no workspaces.</span>
     </div>
   </md-content>
 </md-content>

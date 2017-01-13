@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,7 +20,7 @@ import java.util.List;
  * @author andrew00x
  */
 @DTO
-public interface FetchRequest extends GitRequest {
+public interface FetchRequest {
     /** @return list of refspec to fetch */
     List<String> getRefSpec();
     
@@ -48,4 +48,22 @@ public interface FetchRequest extends GitRequest {
     void setTimeout(int timeout);
     
     FetchRequest withTimeout(int timeout);
+
+    /** Returns user name for authentication */
+    String getUsername();
+
+    /** Set user name for authentication. */
+    void setUsername(String username);
+
+    /** @return {@link FetchRequest} with specified user name for authentication */
+    FetchRequest withUsername(String username);
+
+    /** @return password for authentication */
+    String getPassword();
+
+    /** Set password for authentication. */
+    void setPassword(String password);
+
+    /** @return {@link FetchRequest} with specified password for authentication */
+    FetchRequest withPassword(String password);
 }

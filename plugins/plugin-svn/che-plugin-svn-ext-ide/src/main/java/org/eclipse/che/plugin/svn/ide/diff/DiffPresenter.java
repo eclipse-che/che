@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,11 +15,14 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.subversion.Credentials;
+import org.eclipse.che.ide.api.subversion.SubversionCredentialsDialog;
 import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.util.Arrays;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
@@ -47,11 +50,12 @@ public class DiffPresenter extends SubversionActionPresenter {
     protected DiffPresenter(final AppContext appContext,
                             final NotificationManager notificationManager,
                             final SubversionOutputConsoleFactory consoleFactory,
+                            final SubversionCredentialsDialog subversionCredentialsDialog,
                             final ProcessesPanelPresenter processesPanelPresenter,
                             final SubversionClientService service,
                             final SubversionExtensionLocalizationConstants constants,
                             final StatusColors statusColors) {
-        super(appContext, consoleFactory, processesPanelPresenter, statusColors);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors, constants, notificationManager, subversionCredentialsDialog);
 
         this.service = service;
         this.notificationManager = notificationManager;
@@ -67,10 +71,15 @@ public class DiffPresenter extends SubversionActionPresenter {
 
         checkState(!Arrays.isNullOrEmpty(resources));
 
-        service.showDiff(project.getLocation(), toRelative(project, resources), "HEAD").then(new Operation<CLIOutputResponse>() {
+        performOperationWithCredentialsRequestIfNeeded(new RemoteSubversionOperation<CLIOutputResponse>() {
+            @Override
+            public Promise<CLIOutputResponse> perform(Credentials credentials) {
+                return service.showDiff(project.getLocation(), toRelative(project, resources), "HEAD", credentials);
+            }
+        }, null).then(new Operation<CLIOutputResponse>() {
             @Override
             public void apply(CLIOutputResponse response) throws OperationException {
-                printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(), constants.commandDiff());
+                printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(), constants.commandDiff());;
             }
         }).catchError(new Operation<PromiseError>() {
             @Override
@@ -79,5 +88,4 @@ public class DiffPresenter extends SubversionActionPresenter {
             }
         });
     }
-
 }

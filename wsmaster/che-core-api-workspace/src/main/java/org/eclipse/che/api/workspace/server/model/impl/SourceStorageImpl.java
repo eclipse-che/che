@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,13 +12,16 @@ package org.eclipse.che.api.workspace.server.model.impl;
 
 import org.eclipse.che.api.core.model.project.SourceStorage;
 
-import javax.persistence.Basic;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.Lob;
+import javax.persistence.JoinColumn;
+import javax.persistence.MapKeyColumn;
+import javax.persistence.Table;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -29,19 +32,24 @@ import java.util.Objects;
  * @author Yevhenii Voevodin
  */
 @Entity(name = "SourceStorage")
+@Table(name = "sourcestorage")
 public class SourceStorageImpl implements SourceStorage {
 
     @Id
     @GeneratedValue
+    @Column(name = "id")
     private Long id;
 
-    @Basic
+    @Column(name = "type")
     private String type;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "location", columnDefinition = "TEXT")
     private String location;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "sourcestorage_parameters", joinColumns = @JoinColumn(name = "sourcestorage_id"))
+    @MapKeyColumn(name = "parameters_key")
+    @Column(name = "parameters")
     private Map<String, String> parameters;
 
     public SourceStorageImpl() {}
@@ -86,28 +94,35 @@ public class SourceStorageImpl implements SourceStorage {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof SourceStorageImpl)) return false;
-        final SourceStorageImpl other = (SourceStorageImpl)o;
-        return Objects.equals(type, other.type) &&
-               Objects.equals(location, other.location) &&
-               getParameters().equals(other.getParameters());
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof SourceStorageImpl)) {
+            return false;
+        }
+        final SourceStorageImpl that = (SourceStorageImpl)obj;
+        return Objects.equals(id, that.id)
+               && Objects.equals(type, that.type)
+               && Objects.equals(location, that.location)
+               && getParameters().equals(that.getParameters());
     }
 
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = hash * 31 + Objects.hashCode(type);
-        hash = hash * 31 + Objects.hashCode(location);
-        hash = hash * 31 + getParameters().hashCode();
+        hash = 31 * hash + Objects.hashCode(id);
+        hash = 31 * hash + Objects.hashCode(type);
+        hash = 31 * hash + Objects.hashCode(location);
+        hash = 31 * hash + getParameters().hashCode();
         return hash;
     }
 
     @Override
     public String toString() {
         return "SourceStorageImpl{" +
-               "type='" + type + '\'' +
+               "id=" + id +
+               ", type='" + type + '\'' +
                ", location='" + location + '\'' +
                ", parameters=" + parameters +
                '}';

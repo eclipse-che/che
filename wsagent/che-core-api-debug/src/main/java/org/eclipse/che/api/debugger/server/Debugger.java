@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -67,6 +67,17 @@ public interface Debugger {
      *      if any error occur
      */
     void start(StartAction action) throws DebuggerException;
+
+    /**
+     * Suspends the application is being debugged.
+     * When process stops then {@link SuspendEvent} must be fired.
+     *
+     * @throws DebuggerException
+     *         if any error occur
+     */
+    default void suspend() throws DebuggerException {
+        throw new DebuggerException("Unsupported operation for current debugger implementation.");
+    }
 
     /**
      * Adds given breakpoint. When breakpoint is accepted by server

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
+import org.eclipse.che.ide.api.parts.EditorPartStack;
 import org.eclipse.che.ide.api.parts.EditorTab;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.vectomatic.dom.svg.ui.SVGResource;
@@ -33,9 +34,10 @@ public abstract class EditorAbstractAction extends AbstractPerspectiveAction {
 
     public static final String CURRENT_FILE_PROP = "source";
     public static final String CURRENT_TAB_PROP  = "tab";
+    public static final String CURRENT_PANE_PROP = "pane";
 
-    protected final EventBus                      eventBus;
-    protected final EditorAgent                   editorAgent;
+    protected final EventBus    eventBus;
+    protected final EditorAgent editorAgent;
 
     public EditorAbstractAction(String tooltip,
                                 String description,
@@ -80,5 +82,15 @@ public abstract class EditorAbstractAction extends AbstractPerspectiveAction {
         }
 
         throw new IllegalStateException("Tab doesn't provided");
+    }
+
+    protected EditorPartStack getEditorPane(ActionEvent e) {
+        Object o = e.getPresentation().getClientProperty(CURRENT_PANE_PROP);
+
+        if (o instanceof EditorPartStack) {
+            return (EditorPartStack)o;
+        }
+
+        throw new IllegalStateException("Editor pane doesn't provided");
     }
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,6 +26,7 @@ import org.eclipse.che.api.debug.shared.dto.action.StartActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepIntoActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepOutActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepOverActionDto;
+import org.eclipse.che.api.debug.shared.dto.action.SuspendActionDto;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.json.JsonHelper;
@@ -81,6 +82,11 @@ public class DebuggerServiceClientImpl implements DebuggerServiceClient {
     }
 
     @Override
+    public Promise<Void> suspend(String id, SuspendActionDto action) {
+        return performAction(id, action);
+    }
+
+    @Override
     public Promise<DebugSessionDto> getSessionInfo(String id) {
         final String requestUrl = getBaseUrl(id);
         return asyncRequestFactory.createGetRequest(requestUrl)
@@ -96,7 +102,6 @@ public class DebuggerServiceClientImpl implements DebuggerServiceClient {
     public Promise<Void> addBreakpoint(String id, BreakpointDto breakpointDto) {
         final String requestUrl = getBaseUrl(id) + "/breakpoint";
         return asyncRequestFactory.createPostRequest(requestUrl, breakpointDto)
-                                  .loader(loaderFactory.newLoader())
                                   .send();
     }
 
@@ -104,7 +109,6 @@ public class DebuggerServiceClientImpl implements DebuggerServiceClient {
     public Promise<List<BreakpointDto>> getAllBreakpoints(String id) {
         final String requestUrl = getBaseUrl(id) + "/breakpoint";
         return asyncRequestFactory.createGetRequest(requestUrl)
-                                  .loader(loaderFactory.newLoader())
                                   .send(dtoUnmarshallerFactory.newListUnmarshaller(BreakpointDto.class));
     }
 
@@ -148,7 +152,6 @@ public class DebuggerServiceClientImpl implements DebuggerServiceClient {
         }
 
         return asyncRequestFactory.createGetRequest(requestUrl + params)
-                                  .loader(loaderFactory.newLoader())
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(SimpleValueDto.class));
     }
 
@@ -156,7 +159,6 @@ public class DebuggerServiceClientImpl implements DebuggerServiceClient {
     public Promise<Void> setValue(String id, VariableDto variableDto) {
         final String requestUrl = getBaseUrl(id) + "/value";
         return asyncRequestFactory.createPutRequest(requestUrl, variableDto)
-                                  .loader(loaderFactory.newLoader())
                                   .send();
     }
 
@@ -195,7 +197,6 @@ public class DebuggerServiceClientImpl implements DebuggerServiceClient {
     protected Promise<Void> performAction(String id, ActionDto actionDto) {
         final String requestUrl = getBaseUrl(id);
         return asyncRequestFactory.createPostRequest(requestUrl, actionDto)
-                                  .loader(loaderFactory.newLoader())
                                   .send();
     }
 }

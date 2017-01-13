@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,7 +34,7 @@ import javax.validation.constraints.NotNull;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.api.git.shared.DiffRequest.DiffType.NAME_STATUS;
+import static org.eclipse.che.api.git.shared.DiffType.NAME_STATUS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.defineStatus;

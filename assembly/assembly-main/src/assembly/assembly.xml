@@ -1,6 +1,6 @@
 <!--
 
-    Copyright (c) 2012-2016 Codenvy, S.A.
+    Copyright (c) 2012-2017 Codenvy, S.A.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
@@ -19,6 +19,15 @@
         <format>tar.gz</format>
     </formats>
     <dependencySets>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <unpack>false</unpack>
+            <outputDirectory>tomcat/webapps</outputDirectory>
+            <outputFileNameMapping>docs.war</outputFileNameMapping>
+            <includes>
+                <include>org.eclipse.che.docs:che-docs</include>
+            </includes>
+        </dependencySet>
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>false</unpack>
@@ -70,7 +79,7 @@
             <outputDirectory>lib/linux_amd64/terminal</outputDirectory>
             <outputFileNameMapping>websocket-terminal-linux_amd64.tar.gz</outputFileNameMapping>
             <includes>
-                <include>org.eclipse.che.lib:che-websocket-terminal:tar.gz:linux_amd64</include>
+                <include>org.eclipse.che:exec-agent:tar.gz:linux_amd64</include>
             </includes>
         </dependencySet>
         <dependencySet>
@@ -79,7 +88,7 @@
             <outputDirectory>lib/linux_arm7/terminal</outputDirectory>
             <outputFileNameMapping>websocket-terminal-linux_arm7.tar.gz</outputFileNameMapping>
             <includes>
-                <include>org.eclipse.che.lib:che-websocket-terminal:tar.gz:linux_arm7</include>
+                <include>org.eclipse.che:exec-agent:tar.gz:linux_arm7</include>
             </includes>
         </dependencySet>
         <dependencySet>
@@ -112,19 +121,6 @@
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>true</unpack>
-            <outputDirectory>stacks</outputDirectory>
-            <includes>
-                <include>org.eclipse.che.core:che-core-ide-stacks</include>
-            </includes>
-            <unpackOptions>
-                <excludes>
-                    <exclude>META-INF/**</exclude>
-                </excludes>
-            </unpackOptions>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <unpack>true</unpack>
             <outputDirectory>templates</outputDirectory>
             <includes>
                 <include>org.eclipse.che.core:che-core-ide-templates</include>
@@ -137,6 +133,13 @@
         </dependencySet>
     </dependencySets>
     <fileSets>
+        <fileSet>
+            <directory>${project.build.directory}/stacks/</directory>
+            <outputDirectory>stacks/</outputDirectory>
+            <excludes>
+                <exclude>META-INF/**</exclude>
+            </excludes>
+        </fileSet>
         <fileSet>
             <directory>${project.build.directory}/dependency/</directory>
             <outputDirectory>tomcat/</outputDirectory>

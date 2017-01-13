@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.eclipse.che.api.vfs.search.impl;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.api.vfs.VirtualFileFilter;
 import org.eclipse.che.api.vfs.VirtualFileFilters;
 import org.eclipse.che.api.vfs.VirtualFileSystem;
@@ -30,18 +31,20 @@ import java.util.concurrent.atomic.AtomicReference;
 import static com.google.common.collect.Lists.newArrayList;
 
 public abstract class AbstractLuceneSearcherProvider implements SearcherProvider {
-    protected final VirtualFileFilter fileIndexFilter;
+    protected final VirtualFileFilter excludeFileIndexFilters;
     protected final AtomicReference<Searcher> searcherReference = new AtomicReference<>();
     private final ExecutorService executor;
 
     /**
-     * @param fileIndexFilters
+     * @param excludeFileIndexFilters
      *         set filter for files that should not be indexed
      */
-    protected AbstractLuceneSearcherProvider(Set<VirtualFileFilter> fileIndexFilters) {
-        this.fileIndexFilter = mergeFileIndexFilters(fileIndexFilters);
+    protected AbstractLuceneSearcherProvider(Set<VirtualFileFilter> excludeFileIndexFilters) {
+        this.excludeFileIndexFilters = mergeFileIndexFilters(excludeFileIndexFilters);
         executor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder()
                                                              .setDaemon(true)
+                                                             .setUncaughtExceptionHandler(
+                                                                     LoggingUncaughtExceptionHandler.getInstance())
                                                              .setNameFormat("LuceneSearcherInitThread")
                                                              .build());
     }
@@ -53,7 +56,7 @@ public abstract class AbstractLuceneSearcherProvider implements SearcherProvider
         } else {
             final List<VirtualFileFilter> myFilters = newArrayList(new MediaTypeFilter());
             myFilters.addAll(fileIndexFilters);
-            filter = VirtualFileFilters.createAndFilter(myFilters);
+            filter = VirtualFileFilters.createOrFilter(myFilters);
         }
         return filter;
     }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,6 +22,7 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.util.CompositeLineConsumer;
 import org.eclipse.che.api.core.util.FileLineConsumer;
 import org.eclipse.che.api.core.util.LineConsumer;
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.api.core.util.WebsocketLineConsumer;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.spi.Instance;
@@ -67,7 +68,7 @@ public class MachineProcessManager {
     final ExecutorService executor;
 
     @Inject
-    public MachineProcessManager(@Named("machine.logs.location") String machineLogsDir,
+    public MachineProcessManager(@Named("che.workspace.logs") String machineLogsDir,
                                  EventService eventService,
                                  CheEnvironmentEngine environmentEngine) {
         this.eventService = eventService;
@@ -75,6 +76,8 @@ public class MachineProcessManager {
         this.environmentEngine = environmentEngine;
 
         executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("MachineProcessManager-%d")
+                                                                           .setUncaughtExceptionHandler(
+                                                                                   LoggingUncaughtExceptionHandler.getInstance())
                                                                            .setDaemon(false)
                                                                            .build());
     }

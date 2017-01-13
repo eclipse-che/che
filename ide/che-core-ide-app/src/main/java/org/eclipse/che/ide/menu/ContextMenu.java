@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.menu;
 
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -18,13 +19,11 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.action.Action;
-import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionGroup;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.ActionSelectedHandler;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.action.IdeActions;
-import org.eclipse.che.ide.api.action.Presentation;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.ui.toolbar.CloseMenuHandler;
@@ -53,7 +52,6 @@ public class ContextMenu implements CloseMenuHandler, ActionSelectedHandler {
     private PopupMenu     popupMenu;
     private MenuLockLayer lockLayer;
 
-    protected final DefaultActionGroup  actions;
     protected final PresentationFactory presentationFactory;
 
     @Inject
@@ -63,7 +61,6 @@ public class ContextMenu implements CloseMenuHandler, ActionSelectedHandler {
         this.managerProvider = managerProvider;
 
         presentationFactory = new PresentationFactory();
-        actions = new DefaultActionGroup(actionManager);
 
         blockBrowserMenu();
     }
@@ -92,9 +89,9 @@ public class ContextMenu implements CloseMenuHandler, ActionSelectedHandler {
      * @param y
      *         y coordinate
      */
-    public void show(int x, int y) {
+    public void show(final int x, final int y) {
         hide();
-        updateActions();
+        ActionGroup actions = updateActions();
 
         lockLayer = new MenuLockLayer(this);
         popupMenu = new PopupMenu(actions,
@@ -105,42 +102,46 @@ public class ContextMenu implements CloseMenuHandler, ActionSelectedHandler {
                                   this,
                                   keyBindingAgent,
                                   "contextMenu");
+
+        popupMenu.getElement().getStyle().setProperty("opacity", "0");
+        popupMenu.getElement().getStyle().setProperty("transition", "opacity 0.5s ease");
+
         lockLayer.add(popupMenu);
 
-        calculatePosition(popupMenu, x, y);
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                popupMenu.getElement().getStyle().setProperty("opacity", "1");
+                updateMenuPosition(popupMenu, x, y);
+            }
+        });
     }
 
-    private void calculatePosition(PopupMenu popupMenu, int x, int y) {
-        int windowHeight = Window.getClientHeight();
-        int popupHeight = popupMenu.getOffsetHeight();
+    private void updateMenuPosition(PopupMenu popupMenu, int x, int y) {
+        if (x + popupMenu.getOffsetWidth() > Window.getClientWidth()) {
+            popupMenu.getElement().getStyle().setLeft(x - popupMenu.getOffsetWidth() - 1, PX);
+        } else {
+            popupMenu.getElement().getStyle().setLeft(x, PX);
+        }
 
-        boolean isMenuWithinWindow = popupHeight + y < windowHeight;
-
-        popupMenu.getElement().getStyle().setTop(isMenuWithinWindow ? y : y - popupHeight, PX);
-        popupMenu.getElement().getStyle().setLeft(x, PX);
+        if (y + popupMenu.getOffsetHeight() > Window.getClientHeight()) {
+            popupMenu.getElement().getStyle().setTop(y - popupMenu.getOffsetHeight() - 1, PX);
+        } else {
+            popupMenu.getElement().getStyle().setTop(y, PX);
+        }
     }
 
     /**
      * Updates the list of visible actions.
      */
-    private void updateActions() {
-        actions.removeAll();
+    protected ActionGroup updateActions() {
+        final ActionGroup actionGroup = (ActionGroup)actionManager.getAction(getGroupMenu());
 
-        final ActionGroup mainActionGroup = (ActionGroup)actionManager.getAction(getGroupMenu());
-        if (mainActionGroup == null) {
-            return;
+        if (actionGroup == null) {
+            return new DefaultActionGroup(actionManager);
         }
 
-        final Action[] children = mainActionGroup.getChildren(null);
-        for (final Action action : children) {
-            final Presentation presentation = presentationFactory.getPresentation(action);
-            final ActionEvent e = new ActionEvent(presentation, actionManager, managerProvider.get());
-
-            action.update(e);
-            if (presentation.isVisible()) {
-                actions.add(action);
-            }
-        }
+        return actionGroup;
     }
 
     protected String getGroupMenu() {
@@ -171,4 +172,5 @@ public class ContextMenu implements CloseMenuHandler, ActionSelectedHandler {
             lockLayer = null;
         }
     }
+
 }

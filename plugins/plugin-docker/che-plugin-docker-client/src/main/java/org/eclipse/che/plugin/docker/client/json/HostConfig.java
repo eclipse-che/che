@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,9 +41,12 @@ public class HostConfig {
     private String         pidMode;
     private boolean        readonlyRootfs;
     private Ulimit[]       ulimits;
+    private Long           cpuQuota;
+    private Long           cpuPeriod;
 
     private Map<String, PortBinding[]> portBindings     = new HashMap<>();
     private int                        memorySwappiness = -1;
+    private int                        pidsLimit        = -1;
 
     public String[] getBinds() {
         return binds;
@@ -85,6 +88,10 @@ public class HostConfig {
         this.publishAllPorts = publishAllPorts;
     }
 
+    public void setPidsLimit(int pidsLimit) {
+        this.pidsLimit = pidsLimit;
+    }
+
     public HostConfig withBinds(String... binds) {
         this.binds = binds;
         return this;
@@ -107,6 +114,11 @@ public class HostConfig {
 
     public HostConfig withPublishAllPorts(boolean publishAllPorts) {
         this.publishAllPorts = publishAllPorts;
+        return this;
+    }
+
+    public HostConfig withPidsLimit(int pidsLimit) {
+        this.pidsLimit = pidsLimit;
         return this;
     }
 
@@ -257,6 +269,10 @@ public class HostConfig {
         return memory;
     }
 
+    public long getPidsLimit() {
+        return pidsLimit;
+    }
+
     public void setMemory(long memory) {
         this.memory = memory;
     }
@@ -357,6 +373,32 @@ public class HostConfig {
         return this;
     }
 
+    public Long getCpuQuota() {
+        return cpuQuota;
+    }
+
+    public void setCpuQuota(Long cpuQuota) {
+        this.cpuQuota = cpuQuota;
+    }
+
+    public HostConfig withCpuQuota(Long cpuQuota) {
+        this.cpuQuota = cpuQuota;
+        return this;
+    }
+
+    public Long getCpuPeriod() {
+        return cpuPeriod;
+    }
+
+    public void setCpuPeriod(Long cpuPeriod) {
+        this.cpuPeriod = cpuPeriod;
+    }
+
+    public HostConfig withCpuPeriod(Long cpuPeriod) {
+        this.cpuPeriod = cpuPeriod;
+        return this;
+    }
+
     public String getPidMode() {
         return pidMode;
     }
@@ -422,10 +464,13 @@ public class HostConfig {
                ", cpuShares=" + cpuShares +
                ", cpusetCpus='" + cpusetCpus + '\'' +
                ", pidMode='" + pidMode + '\'' +
+               ", pidsLimit='" + pidsLimit + '\'' +
                ", readonlyRootfs=" + readonlyRootfs +
                ", ulimits=" + Arrays.toString(ulimits) +
                ", portBindings=" + portBindings +
                ", memorySwappiness=" + memorySwappiness +
+               ", cpuPeriod='" + cpuPeriod + '\'' +
+               ", cpuQuota='" + cpuQuota + '\'' +
                '}';
     }
 }

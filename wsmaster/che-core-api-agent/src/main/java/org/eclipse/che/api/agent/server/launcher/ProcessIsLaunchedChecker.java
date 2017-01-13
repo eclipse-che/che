@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,7 +43,7 @@ public class ProcessIsLaunchedChecker implements AgentLaunchingChecker {
 
     @Override
     public boolean isLaunched(Agent agent, InstanceProcess process, Instance machine) throws MachineException {
-            Command command = new CommandImpl(format("Wait for %s, try %d", agent.getName(), ++counter),
+            Command command = new CommandImpl(format("Wait for %s, try %d", agent.getId(), ++counter),
                                           format(CHECK_COMMAND, processNameToWait),
                                           "test");
 

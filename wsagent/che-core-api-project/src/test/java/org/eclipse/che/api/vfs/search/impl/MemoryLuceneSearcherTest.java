@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,7 +52,7 @@ public class MemoryLuceneSearcherTest {
     @Before
     public void setUp() throws Exception {
         filter = mock(VirtualFileFilter.class);
-        when(filter.accept(any(VirtualFile.class))).thenReturn(true);
+        when(filter.accept(any(VirtualFile.class))).thenReturn(false);
         closeCallback = mock(AbstractLuceneSearcherProvider.CloseCallback.class);
         searcher = new MemoryLuceneSearcher(filter, closeCallback);
     }
@@ -222,7 +222,7 @@ public class MemoryLuceneSearcherTest {
         folder.createFile("yyy.txt", TEST_CONTENT[2]);
         folder.createFile("zzz.txt", TEST_CONTENT[2]);
 
-        when(filter.accept(withName("yyy.txt"))).thenReturn(false);
+        when(filter.accept(withName("yyy.txt"))).thenReturn(true);
         searcher.init(virtualFileSystem);
 
         List<String> paths = searcher.search(new QueryExpression().setText("be")).getFilePaths();

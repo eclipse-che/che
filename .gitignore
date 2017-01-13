@@ -1,12 +1,16 @@
 # Eclipse  #
 ###################
 
+*.launch
 .classpath
 .project
 .settings/
 target/
 bin/
 test-output/
+maven-eclipse.xml
+instance/
+config/
 
 # Idea #
 ##################
@@ -17,7 +21,7 @@ test-output/
 
 # Compiled source #
 ###################
-*.com
+!*.com/
 *.class
 *.dll
 *.exe
@@ -44,8 +48,8 @@ test-output/
 # Logs and databases #
 ######################
 *.log
-*.sql
 *.sqlite
+npm-debug.log.*
 
 # OS generated files #
 ######################
@@ -56,5 +60,12 @@ Thumbs.db
 */overlays
 *~
 
-# Che files
+# Che files #
+#############
 .che
+dockerfiles/che/eclipse-che.tar.gz
+.unison*
+docs/_site
+docs/.sass-cache
+docs/.jekyll-metadata
+docs/assets/imgs

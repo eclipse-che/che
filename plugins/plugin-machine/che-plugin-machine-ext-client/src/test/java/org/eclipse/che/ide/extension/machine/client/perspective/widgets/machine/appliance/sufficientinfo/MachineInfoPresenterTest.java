@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,11 +14,11 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.user.shared.dto.ProfileDto;
+import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.user.UserProfileServiceClient;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
-import org.eclipse.che.ide.extension.machine.client.machine.Machine;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.Unmarshallable;
@@ -62,7 +62,7 @@ public class MachineInfoPresenterTest {
 
     //additional mocks
     @Mock
-    private Machine                      machine;
+    private MachineEntity                machine;
     @Mock
     private AcceptsOneWidget             container;
     @Mock

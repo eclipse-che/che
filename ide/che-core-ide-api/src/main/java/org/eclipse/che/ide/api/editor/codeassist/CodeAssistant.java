@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -50,8 +50,9 @@ public interface CodeAssistant {
      * appropriate content assist processor to invoke.
      * 
      * @param offset a document offset
+     * @param triggered if triggered by the content assist key binding
      * @param callback the callback to use once completions are ready
      */
-    void computeCompletionProposals(int offset, CodeAssistCallback callback);
+    void computeCompletionProposals(int offset, boolean triggered, CodeAssistCallback callback);
 
 }

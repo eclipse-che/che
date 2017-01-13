@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,12 +15,17 @@
  * @author Florent Benoit
  */
 export class CheWorkspaceRamAllocationSliderController {
+  onChangeTimeoutPromise: ng.IPromise;
+  $timeout: ng.ITimeoutService;
+  ngModel: number;
+  inputVal: number;
+  cheOnChange: any;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor ($timeout, $scope) {
+  constructor ($timeout: ng.ITimeoutService, $scope: ng.IScope) {
     "ngInject";
     this.$timeout = $timeout;
 
@@ -33,24 +38,29 @@ export class CheWorkspaceRamAllocationSliderController {
 
   /**
    * Rounds value to first decimal
-   * @param value original value
+   * @param value: number original value
    * @returns {number} rounded value
    */
-  init(value) {
-    var factor = Math.pow(10, 1);
-    var tempValue = value * factor;
-    var roundedTempValue = Math.round(tempValue);
+  init(value: number): number {
+    var factor: number = Math.pow(10, 1);
+    var tempValue: number = value * factor;
+    var roundedTempValue: number = Math.round(tempValue);
     return roundedTempValue / factor;
   }
 
-  onChange() {
+  /**
+   * Update model value
+   */
+  onChange(): void {
     if (!this.inputVal) {
       return;
     }
-    this.ngModel = this.inputVal * Math.pow(1024,3);
-
-    this.$timeout(() => {
+    this.ngModel = this.inputVal * Math.pow(1024, 3);
+    if (this.onChangeTimeoutPromise) {
+      this.$timeout.cancel(this.onChangeTimeoutPromise);
+    }
+    this.onChangeTimeoutPromise = this.$timeout(() => {
       this.cheOnChange();
-    });
+    }, 500);
   }
 }

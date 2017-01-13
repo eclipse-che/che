@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,12 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.ide.part.editor.multipart;
 
+import com.google.common.collect.BiMap;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.NodeList;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
@@ -24,6 +24,8 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
 import org.eclipse.che.ide.api.constraints.Direction;
+import org.eclipse.che.ide.api.parts.EditorMultiPartStackState;
+import org.eclipse.che.ide.api.parts.EditorPartStack;
 import org.eclipse.che.ide.api.theme.Style;
 
 import static org.eclipse.che.ide.api.constraints.Direction.HORIZONTALLY;
@@ -32,7 +34,7 @@ import static org.eclipse.che.ide.api.constraints.Direction.VERTICALLY;
 /**
  * @author Roman Nikitenko
  */
-public class SplitEditorPartViewImpl extends Composite implements SplitEditorPartView {
+public class SplitEditorPartViewImpl implements SplitEditorPartView {
     private final static int    SPLITTER_SIZE            = 5;
     private final static String VERTICAL_DRAGGER_CLASS   = "gwt-SplitLayoutPanel-VDragger";
     private final static String HORIZONTAL_DRAGGER_CLASS = "gwt-SplitLayoutPanel-HDragger";
@@ -43,6 +45,7 @@ public class SplitEditorPartViewImpl extends Composite implements SplitEditorPar
     private final IsWidget            specimenWidget;
     private final SimpleLayoutPanel   rootPanel;
     private       SplitLayoutPanel    splitLayoutPanel;
+    private Direction direction;
 
 
     @AssistedInject
@@ -69,15 +72,16 @@ public class SplitEditorPartViewImpl extends Composite implements SplitEditorPar
     }
 
     @Override
-    public void split(IsWidget replicaWidget, Direction direction) {
+    public void split(IsWidget replicaWidget, Direction direction, double size) {
+        this.direction = direction;
         splitLayoutPanel = new SplitLayoutPanel(SPLITTER_SIZE);
         specimenView = new SplitEditorPartViewImpl(specimenWidget, this);
         replicaView = new SplitEditorPartViewImpl(replicaWidget, this);
 
         if (direction == VERTICALLY) {
-            splitVertically();
+            splitVertically(size);
         } else if (direction == HORIZONTALLY) {
-            splitHorizontally();
+            splitHorizontally(size);
         }
 
         splitLayoutPanel.add(replicaView);
@@ -87,13 +91,13 @@ public class SplitEditorPartViewImpl extends Composite implements SplitEditorPar
         tuneSplitter(splitLayoutPanel);
     }
 
-    private void splitVertically() {
-        int newSize = rootPanel.getOffsetWidth() / 2;
+    private void splitVertically(double size) {
+        double newSize = size == -1 ? rootPanel.getOffsetWidth() / 2 : size;
         splitLayoutPanel.addWest(specimenView, newSize);
     }
 
-    private void splitHorizontally() {
-        int newSize = rootPanel.getOffsetHeight() / 2;
+    private void splitHorizontally(double size) {
+        double newSize = size == -1 ? rootPanel.getOffsetHeight() / 2 : size;
         splitLayoutPanel.addNorth(specimenView, newSize);
     }
 
@@ -127,6 +131,25 @@ public class SplitEditorPartViewImpl extends Composite implements SplitEditorPar
         } else {
             rootPanel.removeFromParent();
         }
+    }
+
+    @Override
+    public EditorMultiPartStackState getState(BiMap<SplitEditorPartView, EditorPartStack> splitEditorParts) {
+        if (splitLayoutPanel == null) {
+            return new EditorMultiPartStackState(splitEditorParts.get(this));
+
+        } else if(specimenView == null && replicaView != null){
+            return replicaView.getState(splitEditorParts);
+        } else if(replicaView == null && specimenView != null){
+            return specimenView.getState(splitEditorParts);
+        }
+        if(specimenView != null){
+            return new EditorMultiPartStackState(direction,
+                                                 splitLayoutPanel.getWidgetSize(specimenView.asWidget()),
+                                                 specimenView.getState(splitEditorParts),
+                                                 replicaView.getState(splitEditorParts));
+        }
+        throw new IllegalStateException("Can't create state, specimenView and replicaView are both null.");
     }
 
     private boolean isEmpty() {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,8 +13,8 @@ package org.eclipse.che.api.user.server;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.jdbc.jpa.guice.JpaInitializer;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
+import org.eclipse.che.core.db.DBInitializer;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -35,9 +35,7 @@ public class CheUserCreator {
 
     @Inject
     @SuppressWarnings("unused")
-    // this work around needed for Guice to help initialize components in right sequence,
-    // because instance of JpaInitializer should be created before components that dependent on dao (such as UserManager)
-    private JpaInitializer jpaInitializer;
+    private DBInitializer initializer;
 
     @PostConstruct
     public void createCheUser() throws ServerException {

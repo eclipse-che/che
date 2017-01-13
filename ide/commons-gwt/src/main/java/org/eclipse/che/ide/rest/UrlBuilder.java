@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,7 +37,12 @@ public class UrlBuilder extends com.google.gwt.http.client.UrlBuilder {
         JSONObject o = new JSONObject(jso);
         setHost(o.get("host").isString().stringValue());
         setProtocol(o.get("protocol").isString().stringValue());
-        setPort(Integer.valueOf(o.get("port").isString().stringValue()));
+        if (o.containsKey("port")) {
+            final String port = o.get("port").isString().stringValue();
+            if (!port.isEmpty()) {
+                setPort(Integer.valueOf(port));
+            }
+        }
         setPath(o.get("path").isString().stringValue());
         //fill query parameters
         JSONObject query = o.get("queryKey").isObject();
@@ -58,10 +63,8 @@ public class UrlBuilder extends com.google.gwt.http.client.UrlBuilder {
                 parser: /(?:^|&)([^&=]*)=?([^&]*)/g
             },
             parser: {
-                strict: /^(?:([^:\/?#]+):)?(?:\/\/((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?))?((((?:[^?#\/]*\/)*)([^?#]*))
-                    (?:\?([^#]*))?(?:#(.*))?)/,
-                loose: /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/
-                    (?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/
+                strict: /^(?:([^:\/?#]+):)?(?:\/\/((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?))?((((?:[^?#\/]*\/)*)([^?#]*))(?:\?([^#]*))?(?:#(.*))?)/,
+                loose: /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/
             }
         }
         var o = options, m = o.parser[o.strictMode ? "strict" : "loose"]

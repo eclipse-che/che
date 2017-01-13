@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,10 +16,12 @@ import com.google.common.io.Files;
 import org.eclipse.che.api.git.GitConnection;
 import org.eclipse.che.api.git.GitConnectionFactory;
 import org.eclipse.che.api.git.exception.GitException;
+import org.eclipse.che.api.git.params.AddParams;
+import org.eclipse.che.api.git.params.CommitParams;
+import org.eclipse.che.api.git.params.LogParams;
 import org.eclipse.che.api.git.shared.AddRequest;
-import org.eclipse.che.api.git.shared.CommitRequest;
-import org.eclipse.che.api.git.shared.LogRequest;
 import org.eclipse.che.api.git.shared.Revision;
+import org.eclipse.che.api.git.shared.StatusFormat;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -28,12 +30,14 @@ import java.io.File;
 import java.io.IOException;
 
 import static java.nio.file.Files.write;
-import static org.eclipse.che.dto.server.DtoFactory.newDto;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.git.impl.GitTestUtil.addFile;
 import static org.eclipse.che.git.impl.GitTestUtil.cleanupTestRepo;
 import static org.eclipse.che.git.impl.GitTestUtil.connectToGitRepositoryWithContent;
 import static org.eclipse.che.git.impl.GitTestUtil.connectToInitializedGitRepository;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author Eugene Voevodin
@@ -59,15 +63,14 @@ public class CommitTest {
         //add new File
         addFile(connection, "DONTREADME", "secret");
         //add changes
-        connection.add(newDto(AddRequest.class).withFilepattern(AddRequest.DEFAULT_PATTERN));
+        connection.add(AddParams.create(AddRequest.DEFAULT_PATTERN));
 
         //when
-        CommitRequest commitRequest = newDto(CommitRequest.class)
-                .withMessage("Commit message").withAmend(false).withAll(false);
-        Revision revision = connection.commit(commitRequest);
+        CommitParams commitParams = CommitParams.create("Commit message").withAmend(false).withAll(false);
+        Revision revision = connection.commit(commitParams);
 
         //then
-        assertEquals(revision.getMessage(), commitRequest.getMessage());
+        assertEquals(revision.getMessage(), commitParams.getMessage());
     }
 
     @Test(dataProvider = "GitConnectionFactory", dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
@@ -75,18 +78,17 @@ public class CommitTest {
         //given
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
         addFile(connection, "README.txt", CONTENT);
-        connection.add(newDto(AddRequest.class).withFilepattern(ImmutableList.of("README.txt")));
-        connection.commit(newDto(CommitRequest.class).withMessage("Initial addd"));
+        connection.add(AddParams.create(ImmutableList.of("README.txt")));
+        connection.commit(CommitParams.create("Initial addd"));
 
         //when
         //change existing README
         addFile(connection, "README.txt", "not secret");
 
         //then
-        CommitRequest commitRequest = newDto(CommitRequest.class)
-                .withMessage("Other commit message").withAmend(false).withAll(true);
-        Revision revision = connection.commit(commitRequest);
-        assertEquals(revision.getMessage(), commitRequest.getMessage());
+        CommitParams commitParams = CommitParams.create("Other commit message").withAmend(false).withAll(true);
+        Revision revision = connection.commit(commitParams);
+        assertEquals(revision.getMessage(), commitParams.getMessage());
     }
 
     @Test(dataProvider = "GitConnectionFactory", dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
@@ -94,20 +96,19 @@ public class CommitTest {
         //given
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
         addFile(connection, "README.txt", CONTENT);
-        connection.add(newDto(AddRequest.class).withFilepattern(ImmutableList.of("README.txt")));
-        connection.commit(newDto(CommitRequest.class).withMessage("Initial addd"));
-        int beforeCommitsCount = connection.log(newDto(LogRequest.class)).getCommits().size();
+        connection.add(AddParams.create(ImmutableList.of("README.txt")));
+        connection.commit(CommitParams.create("Initial addd"));
+        int beforeCommitsCount = connection.log(LogParams.create()).getCommits().size();
 
         //when
         //change existing README
         addFile(connection, "README.txt", "some new content");
-        CommitRequest commitRequest = newDto(CommitRequest.class)
-                .withMessage("Amend commit").withAmend(true).withAll(true);
+        CommitParams commitParams = CommitParams.create("Amend commit").withAmend(true).withAll(true);
 
         //then
-        Revision revision = connection.commit(commitRequest);
-        int afterCommitsCount = connection.log(newDto(LogRequest.class)).getCommits().size();
-        assertEquals(revision.getMessage(), commitRequest.getMessage());
+        Revision revision = connection.commit(commitParams);
+        int afterCommitsCount = connection.log(LogParams.create()).getCommits().size();
+        assertEquals(revision.getMessage(), commitParams.getMessage());
         assertEquals(beforeCommitsCount, afterCommitsCount);
     }
 
@@ -116,18 +117,34 @@ public class CommitTest {
         //given
         GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
         addFile(connection, "NewFile.txt", CONTENT);
-        connection.add(newDto(AddRequest.class).withFilepattern(ImmutableList.of("NewFile.txt")));
-        connection.commit(newDto(CommitRequest.class).withMessage("First commit"));
-        int beforeCommitsCount = connection.log(newDto(LogRequest.class)).getCommits().size();
+        connection.add(AddParams.create(ImmutableList.of("NewFile.txt")));
+        connection.commit(CommitParams.create("First commit"));
+        int beforeCommitsCount = connection.log(LogParams.create()).getCommits().size();
 
         //when
-        CommitRequest commitRequest = newDto(CommitRequest.class).withMessage("Changed message").withAmend(true);
-        connection.commit(commitRequest);
+        CommitParams commitParams = CommitParams.create("Changed message").withAmend(true);
+        connection.commit(commitParams);
 
         //then
-        int afterCommitsCount = connection.log(newDto(LogRequest.class)).getCommits().size();
+        int afterCommitsCount = connection.log(LogParams.create()).getCommits().size();
         assertEquals(beforeCommitsCount, afterCommitsCount);
-        assertEquals(connection.log(newDto(LogRequest.class)).getCommits().get(0).getMessage(), commitRequest.getMessage());
+        assertEquals(connection.log(LogParams.create()).getCommits().get(0).getMessage(), commitParams.getMessage());
+    }
+
+    @Test(dataProvider = "GitConnectionFactory", dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
+    public void testCommitSeparateFiles(GitConnectionFactory connectionFactory) throws GitException, IOException {
+        //given
+        GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
+        addFile(connection, "File1.txt", CONTENT);
+        addFile(connection, "File2.txt", CONTENT);
+        connection.add(AddParams.create(asList("File1.txt", "File2.txt")));
+
+        //when
+        connection.commit(CommitParams.create("commit").withFiles(singletonList("File1.txt")));
+
+        //then
+        assertTrue(connection.status(StatusFormat.LONG).getAdded().contains("File2.txt"));
+        assertTrue(connection.status(StatusFormat.LONG).getAdded().size() == 1);
     }
 
     @Test(dataProvider = "GitConnectionFactory", dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class,
@@ -137,8 +154,8 @@ public class CommitTest {
         GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
         //Prepare unstaged deletion
         addFile(connection, "FileToDelete.txt", "content");
-        connection.add(newDto(AddRequest.class).withFilepattern(ImmutableList.of("FileToDelete.txt")));
-        connection.commit(newDto(CommitRequest.class).withMessage("File to delete"));
+        connection.add(AddParams.create(ImmutableList.of("FileToDelete.txt")));
+        connection.commit(CommitParams.create("File to delete"));
         new File(connection.getWorkingDir().getAbsolutePath(), "FileToDelete.txt").delete();
         //Prepare unstaged new file
         addFile(connection, "newFile", "content");
@@ -146,7 +163,7 @@ public class CommitTest {
         write(new File(connection.getWorkingDir(), "README.txt").toPath(), "new content".getBytes());
 
         //when
-        connection.commit(newDto(CommitRequest.class)).withMessage("test commit");
+        connection.commit(CommitParams.create("test commit"));
     }
 
     @Test(dataProvider = "GitConnectionFactory", dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class,
@@ -156,6 +173,6 @@ public class CommitTest {
         GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
 
         //when
-        connection.commit(newDto(CommitRequest.class)).withMessage("test commit");
+        connection.commit(CommitParams.create("test commit"));
     }
 }

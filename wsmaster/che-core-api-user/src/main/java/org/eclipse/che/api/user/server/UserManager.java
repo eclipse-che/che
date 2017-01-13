@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,17 +20,16 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.Profile;
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
+import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
-import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-
 import java.util.Set;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
@@ -62,7 +61,7 @@ public class UserManager {
     public UserManager(UserDao userDao,
                        ProfileDao profileDao,
                        PreferenceDao preferencesDao,
-                       @Named("che.account.reserved_names") String[] reservedNames) {
+                       @Named("che.auth.reserved_user_names") String[] reservedNames) {
         this.userDao = userDao;
         this.profileDao = profileDao;
         this.preferencesDao = preferencesDao;
@@ -106,7 +105,7 @@ public class UserManager {
                 userDao.remove(user.getId());
                 profileDao.remove(user.getId());
                 preferencesDao.remove(user.getId());
-            } catch (ConflictException | ServerException rollbackEx) {
+            } catch (ServerException rollbackEx) {
                 LOG.error(format("An attempt to clean up resources due to user creation failure was unsuccessful." +
                                  "Now the system may be in inconsistent state. " +
                                  "User with id '%s' must not exist",
@@ -222,7 +221,7 @@ public class UserManager {
      * @throws ServerException
      *         when any other error occurs
      */
-    public Page<UserImpl> getAll(int maxItems, int skipCount) throws ServerException {
+    public Page<UserImpl> getAll(int maxItems, long skipCount) throws ServerException {
         checkArgument(maxItems >= 0, "The number of items to return can't be negative.");
         checkArgument(skipCount >= 0, "The number of items to skip can't be negative.");
         return userDao.getAll(maxItems, skipCount);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -113,12 +113,18 @@ public class FullTextSearchPresenter implements FullTextSearchView.ActionDelegat
             }
             sb.append(character);
         }
-        String escapedText = sb.toString();
+        String escapedText;
+        if (view.isWholeWordsOnly()) {
+            escapedText = sb.toString();
+        } else {
+            sb.append('*');
+            escapedText = '*' + sb.toString();
+        }
 
         String[] items = escapedText.trim().split("\\s+");
         int numberItem = items.length;
         if (numberItem == 1) {
-            return items[0] + '*';
+            return items[0];
         }
 
         String lastItem = items[numberItem - 1];
@@ -127,7 +133,6 @@ public class FullTextSearchPresenter implements FullTextSearchView.ActionDelegat
         sb.append(escapedText.substring(0, escapedText.lastIndexOf(lastItem)));
         sb.append("\" " + AND_OPERATOR + " ");
         sb.append(lastItem);
-        sb.append('*');
         return sb.toString();
     }
 

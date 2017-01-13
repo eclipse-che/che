@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,7 +32,7 @@ public class DefaultOutputConsole implements OutputConsole, OutputConsoleView.Ac
     private final MachineResources              resources;
     private       String                        title;
 
-    private final List<ConsoleOutputListener>   outputListeners;
+    private final List<ActionDelegate>          actionDelegates = new ArrayList<>();
 
     private boolean                             wrapText;
 
@@ -46,7 +46,7 @@ public class DefaultOutputConsole implements OutputConsole, OutputConsoleView.Ac
         this.view = view;
         this.title = title;
         this.resources = resources;
-        outputListeners = new ArrayList<>();
+        this.view.enableAutoScroll(true);
 
         view.setDelegate(this);
 
@@ -57,6 +57,14 @@ public class DefaultOutputConsole implements OutputConsole, OutputConsoleView.Ac
     }
 
     /**
+     * Enables auto scroll when output.
+     */
+    public void enableAutoScroll(boolean enable) {
+        view.enableAutoScroll(enable);
+    }
+
+
+    /**
      * Print text in the console.
      *
      * @param text
@@ -65,8 +73,8 @@ public class DefaultOutputConsole implements OutputConsole, OutputConsoleView.Ac
     public void printText(String text) {
         view.print(text, text.endsWith("\r"));
 
-        for (ConsoleOutputListener outputListener : outputListeners) {
-            outputListener.onConsoleOutput(this);
+        for (ActionDelegate actionDelegate : actionDelegates) {
+            actionDelegate.onConsoleOutput(this);
         }
     }
 
@@ -81,9 +89,19 @@ public class DefaultOutputConsole implements OutputConsole, OutputConsoleView.Ac
     public void printText(String text, String color) {
         view.print(text, text.endsWith("\r"), color);
 
-        for (ConsoleOutputListener outputListener : outputListeners) {
-            outputListener.onConsoleOutput(this);
+        for (ActionDelegate actionDelegate : actionDelegates) {
+            actionDelegate.onConsoleOutput(this);
         }
+    }
+
+    /**
+     * Returns the console text.
+     *
+     * @return
+     *          console text
+     */
+    public String getText() {
+        return view.getText();
     }
 
     /** {@inheritDoc} */
@@ -116,12 +134,12 @@ public class DefaultOutputConsole implements OutputConsole, OutputConsoleView.Ac
 
     @Override
     public void close() {
-        outputListeners.clear();
+        actionDelegates.clear();
     }
 
     @Override
-    public void addOutputListener(ConsoleOutputListener listener) {
-        outputListeners.add(listener);
+    public void addActionDelegate(ActionDelegate actionDelegate) {
+        actionDelegates.add(actionDelegate);
     }
 
     @Override
@@ -135,6 +153,13 @@ public class DefaultOutputConsole implements OutputConsole, OutputConsoleView.Ac
     @Override
     public void clearOutputsButtonClicked() {
         view.clearConsole();
+    }
+
+    @Override
+    public void downloadOutputsButtonClicked() {
+        for (ActionDelegate actionDelegate : actionDelegates) {
+            actionDelegate.onDownloadOutput(this);
+        }
     }
 
     @Override

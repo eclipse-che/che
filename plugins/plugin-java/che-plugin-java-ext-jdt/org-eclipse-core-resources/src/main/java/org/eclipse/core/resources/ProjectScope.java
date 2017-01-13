@@ -74,7 +74,7 @@ public final class ProjectScope implements IScopeContext {
                 if(!cache.containsKey(context.getName())){
                     String pathToWorkspace = ResourcesPlugin.getPathToWorkspace();
                     IPath fullPath = context.getFullPath();
-                    cache.putIfAbsent(context.getName(), new ChePreferences(pathToWorkspace + fullPath + "/.codenvy/project.preferences"));
+                    cache.putIfAbsent(context.getName(), new ChePreferences(pathToWorkspace + fullPath + "/.che/project.preferences"));
                 }
             }
         }

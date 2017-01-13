@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,23 +20,27 @@ import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
  * assisting process.
  * </p>
  *
- * @author <a href="mailto:evidolob@exoplatform.com">Evgen Vidolob</a>
- * @version $Id:
+ * @author Evgen Vidolob
  */
 public interface CodeAssistProcessor {
 
     /**
-     * Returns a list of completion proposals based on the
-     * specified location within the document that corresponds
-     * to the current cursor position within the text view.
+     * Returns a list of completion proposals based on the specified location
+     * within the document that corresponds to the current cursor position
+     * within the text view.
      *
-     * @param view
-     *         the editor whose document is used to compute the proposals
+     * @param editor
+     *            the editor whose document is used to compute the proposals
      * @param offset
-     *         an offset within the document for which completions should be computed
-     * @return an array of completion proposals or <code>null</code> if no proposals are possible
+     *            an offset within the document for which completions should be
+     *            computed
+     * @param triggered
+     *            if triggered by the content assist key binding
+     * 
+     * @return an array of completion proposals or <code>null</code> if no
+     *         proposals are possible
      */
-    void computeCompletionProposals(TextEditor editor, int offset, CodeAssistCallback callback);
+    void computeCompletionProposals(TextEditor editor, int offset, boolean triggered, CodeAssistCallback callback);
 
     /**
      * Returns the reason why this content assist processor

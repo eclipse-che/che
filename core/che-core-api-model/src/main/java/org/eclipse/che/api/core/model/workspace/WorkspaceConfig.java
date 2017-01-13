@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,11 +26,8 @@ import java.util.Map;
 public interface WorkspaceConfig {
 
     /**
-     * Optional.
-     * Returns possible name of the workspace created from this configuration.
-     * If name doesn't conflict then the target workspace
-     * will have exactly the same name, but if the name conflicts or it is absent
-     * then any other name will be chose for the workspace.
+     * Returns the name of the current workspace instance.
+     * Workspace name is unique per namespace.
      */
     String getName();
 

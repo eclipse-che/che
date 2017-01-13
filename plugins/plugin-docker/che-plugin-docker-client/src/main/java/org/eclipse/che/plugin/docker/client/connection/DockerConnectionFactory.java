@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,7 +13,6 @@ package org.eclipse.che.plugin.docker.client.connection;
 import com.google.inject.Inject;
 
 import org.eclipse.che.plugin.docker.client.DockerCertificates;
-import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
 
 import javax.inject.Named;
@@ -27,8 +26,8 @@ import java.net.URI;
  * @author Alexander Garagatyi
  */
 public class DockerConnectionFactory {
-    public static final String CONNECTION_TIMEOUT_MS_PROPERTY      = "docker.connection.tcp.connection_timeout_ms";
-    public static final String CONNECTION_READ_TIMEOUT_MS_PROPERTY = "docker.connection.tcp.read_timeout_ms";
+    public static final String CONNECTION_TIMEOUT_MS_PROPERTY      = "che.docker.tcp_connection_timeout_ms";
+    public static final String CONNECTION_READ_TIMEOUT_MS_PROPERTY = "che.docker.tcp_connection_read_timeout_ms";
 
     @Inject(optional = true)
     @Named(CONNECTION_TIMEOUT_MS_PROPERTY)

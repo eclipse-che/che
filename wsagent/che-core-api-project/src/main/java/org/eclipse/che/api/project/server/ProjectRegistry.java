@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,15 +14,13 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.project.NewProjectConfig;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.project.server.RegisteredProject.Problem;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
 import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
-import org.eclipse.che.api.project.server.type.ProjectTypeConstraintException;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
-import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.eclipse.che.api.vfs.Path;
 import org.eclipse.che.api.vfs.VirtualFile;
 import org.eclipse.che.api.vfs.VirtualFileSystem;
@@ -55,7 +53,7 @@ public class ProjectRegistry {
     private final ProjectTypeRegistry            projectTypeRegistry;
     private final ProjectHandlerRegistry         handlers;
     private final FolderEntry                    root;
-    private final EventService eventService;
+    private final EventService                   eventService;
 
     private boolean initialized;
 
@@ -76,7 +74,6 @@ public class ProjectRegistry {
 
     @PostConstruct
     public void initProjects() throws ConflictException, NotFoundException, ServerException, ForbiddenException {
-        //final Workspace workspace = workspaceHolder.getWorkspace();
 
         List<? extends ProjectConfig> projectConfigs = workspaceHolder.getProjects();
 
@@ -85,19 +82,9 @@ public class ProjectRegistry {
             final String path = projectConfig.getPath();
             final VirtualFile vf = vfs.getRoot().getChild(Path.of(path));
             final FolderEntry projectFolder = ((vf == null) ? null : new FolderEntry(vf, this));
-            // need that to make "problematic" project and not break the workspace
-            try {
-                putProject(projectConfig, projectFolder, false, false);
-            } catch (ProjectTypeConstraintException e) {
-                //in case bad config
-                projects.put(path, new RegisteredProject(projectFolder, false, false, projectTypeRegistry, new Problem(12, e.getMessage())));
-            } catch (NotFoundException e) {
-                //in case project type not found
-                projects.put(path, new RegisteredProject(projectFolder, false, false, projectTypeRegistry, new Problem(13, e.getMessage())));
-            } catch (ValueStorageException e) {
-                //in case can't calculate Attributes
-                projects.put(path, new RegisteredProject(projectFolder, false, false, projectTypeRegistry, new Problem(14, e.getMessage())));
-            }
+
+            putProject(projectConfig, projectFolder, false, false);
+
         }
 
         initUnconfiguredFolders();
@@ -140,7 +127,7 @@ public class ProjectRegistry {
     /**
      * @param parentPath
      *         parent path
-     * @return list projects of pojects 
+     * @return list projects of pojects
      */
     public List<String> getProjects(String parentPath) {
         checkInitializationState();
@@ -195,23 +182,18 @@ public class ProjectRegistry {
      *         whether this is automatically detected or explicitly defined project
      * @return project
      * @throws ServerException
-     * @throws ConflictException
-     * @throws NotFoundException
+     *         when path for project is undefined
      */
     RegisteredProject putProject(ProjectConfig config,
                                  FolderEntry folder,
                                  boolean updated,
-                                 boolean detected) throws ServerException,
-                                                          ConflictException,
-                                                          NotFoundException {
+                                 boolean detected) throws ServerException {
 
         final RegisteredProject project = new RegisteredProject(folder, config, updated, detected, this.projectTypeRegistry);
         projects.put(project.getPath(), project);
 
         return project;
     }
-
-
 
     /**
      * Removes all projects on and under the incoming path.
@@ -239,8 +221,7 @@ public class ProjectRegistry {
      * Attributes defined with particular Project Type
      * If incoming Project Type is primary and:
      * - If the folder located on projectPath is a Project, its Primary PT will be converted to incoming PT
-     * - If the folder located on projectPath is NOT a Project the folder will be converted to "detected" Project
-     * with incoming Primary PT
+     * - If the folder located on projectPath is NOT a Project the folder will be converted to "detected" Project with incoming Primary PT
      * If incoming Project Type is mixin and:
      * - If the folder located on projectPath is a Project, this PT will be added (if not already there) to its Mixin PTs
      * - If the folder located on projectPath is NOT a Project - ConflictException will be thrown
@@ -284,7 +265,7 @@ public class ProjectRegistry {
                 final String path = absolutizePath(projectPath);
                 final String name = Path.of(projectPath).getName();
 
-                conf = new NewProjectConfig(path, type, newMixins, name, name, null, null);
+                conf = new NewProjectConfigImpl(path, type, newMixins, name, name, null, null, null);
 
                 return putProject(conf, root.getChildFolder(path), true, true);
             }
@@ -299,12 +280,13 @@ public class ProjectRegistry {
                 newType = type;
             }
 
-            conf = new NewProjectConfig(project.getPath(),
+            conf = new NewProjectConfigImpl(project.getPath(),
                                         newType,
                                         newMixins,
                                         project.getName(),
                                         project.getDescription(),
                                         project.getAttributes(),
+                                        null,
                                         project.getSource());
 
             return putProject(conf, project.getBaseFolder(), true, project.isDetected());
@@ -355,12 +337,13 @@ public class ProjectRegistry {
             newType = BaseProjectType.ID;
         }
 
-        final NewProjectConfig conf = new NewProjectConfig(project.getPath(),
+        final NewProjectConfig conf = new NewProjectConfigImpl(project.getPath(),
                                                            newType,
                                                            newMixins,
                                                            project.getName(),
                                                            project.getDescription(),
                                                            project.getAttributes(),
+                                                           null,
                                                            project.getSource());
 
         return putProject(conf, project.getBaseFolder(), true, project.isDetected());
@@ -383,7 +366,7 @@ public class ProjectRegistry {
                     putProject(null, folder, true, false);
                 }
             }
-        } catch (ServerException | ConflictException | NotFoundException e) {
+        } catch (ServerException e) {
             LOG.warn(e.getLocalizedMessage());
         }
     }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,13 +17,13 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.PartStack;
-import org.eclipse.che.ide.api.parts.ProjectExplorerPart;
 import org.eclipse.che.ide.part.editor.multipart.EditorMultiPartStackPresenter;
 import org.eclipse.che.ide.workspace.PartStackPresenterFactory;
 import org.eclipse.che.ide.workspace.PartStackViewFactory;
 import org.eclipse.che.ide.workspace.WorkBenchControllerFactory;
 import org.eclipse.che.ide.workspace.perspectives.general.AbstractPerspective;
 import org.eclipse.che.ide.workspace.perspectives.general.PerspectiveViewImpl;
+import org.eclipse.che.providers.DynaProvider;
 
 import javax.validation.constraints.NotNull;
 
@@ -31,7 +31,6 @@ import static org.eclipse.che.ide.api.parts.PartStackType.EDITING;
 import static org.eclipse.che.ide.api.parts.PartStackType.INFORMATION;
 import static org.eclipse.che.ide.api.parts.PartStackType.NAVIGATION;
 import static org.eclipse.che.ide.api.parts.PartStackType.TOOLING;
-
 
 /**
  * General-purpose, displaying all the PartStacks in a default manner:
@@ -54,22 +53,15 @@ public class ProjectPerspective extends AbstractPerspective {
                               PartStackPresenterFactory stackPresenterFactory,
                               PartStackViewFactory partViewFactory,
                               WorkBenchControllerFactory controllerFactory,
-                              ProjectExplorerPart projectExplorerPart,
-                              NotificationManager notificationManager,
-                              EventBus eventBus) {
-        super(PROJECT_PERSPECTIVE_ID, view, stackPresenterFactory, partViewFactory, controllerFactory, eventBus);
-
-        notificationManager.addRule(PROJECT_PERSPECTIVE_ID);
+                              EventBus eventBus,
+                              DynaProvider dynaProvider,
+                              NotificationManager notificationManager) {
+        super(PROJECT_PERSPECTIVE_ID, view, stackPresenterFactory, partViewFactory, controllerFactory, eventBus, dynaProvider);
 
         partStacks.put(EDITING, editorMultiPartStackPresenter);
 
         addPart(notificationManager, INFORMATION);
-        addPart(projectExplorerPart, NAVIGATION);
-    }
 
-    /** {@inheritDoc} */
-    @Override
-    public void go(@NotNull AcceptsOneWidget container) {
         PartStack navigatorPanel = getPartStack(NAVIGATION);
         PartStack editorPanel = getPartStack(EDITING);
         PartStack toolPanel = getPartStack(TOOLING);
@@ -79,17 +71,16 @@ public class ProjectPerspective extends AbstractPerspective {
             return;
         }
 
-        infoPanel.updateStack();
-
         navigatorPanel.go(view.getNavigationPanel());
         editorPanel.go(view.getEditorPanel());
         toolPanel.go(view.getToolPanel());
         infoPanel.go(view.getInformationPanel());
-
-        container.setWidget(view);
-
-        openActivePart(NAVIGATION);
-
-        restoreState();
     }
+
+    /** {@inheritDoc} */
+    @Override
+    public void go(@NotNull AcceptsOneWidget container) {
+        container.setWidget(view);
+    }
+
 }

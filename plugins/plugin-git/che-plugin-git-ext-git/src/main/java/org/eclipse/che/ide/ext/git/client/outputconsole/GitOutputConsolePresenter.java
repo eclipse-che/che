@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,11 +31,12 @@ import java.util.List;
  */
 
 public class GitOutputConsolePresenter implements GitOutputPartView.ActionDelegate, GitOutputConsole {
-    private final GitOutputPartView view;
-    private final GitResources      resources;
-    private final String            title;
 
-    private final List<ConsoleOutputListener> outputListeners = new ArrayList<>();
+    private final GitOutputPartView     view;
+    private final GitResources          resources;
+    private final String                title;
+
+    private final List<ActionDelegate>  actionDelegates = new ArrayList<>();
 
     /** Construct empty Part */
     @Inject
@@ -77,8 +78,8 @@ public class GitOutputConsolePresenter implements GitOutputPartView.ActionDelega
         }
         view.scrollBottom();
 
-        for (ConsoleOutputListener outputListener : outputListeners) {
-            outputListener.onConsoleOutput(this);
+        for (ActionDelegate actionDelegate : actionDelegates) {
+            actionDelegate.onConsoleOutput(this);
         }
     }
 
@@ -87,8 +88,8 @@ public class GitOutputConsolePresenter implements GitOutputPartView.ActionDelega
         view.print(text, color);
         view.scrollBottom();
 
-        for (ConsoleOutputListener outputListener : outputListeners) {
-            outputListener.onConsoleOutput(this);
+        for (ActionDelegate actionDelegate : actionDelegates) {
+            actionDelegate.onConsoleOutput(this);
         }
     }
 
@@ -134,12 +135,12 @@ public class GitOutputConsolePresenter implements GitOutputPartView.ActionDelega
 
     @Override
     public void close() {
-        outputListeners.clear();
+        actionDelegates.clear();
     }
 
     @Override
-    public void addOutputListener(ConsoleOutputListener listener) {
-        outputListeners.add(listener);
+    public void addActionDelegate(ActionDelegate actionDelegate) {
+        actionDelegates.add(actionDelegate);
     }
 
 }

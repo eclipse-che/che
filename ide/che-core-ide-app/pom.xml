@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2012-2016 Codenvy, S.A.
+    Copyright (c) 2012-2017 Codenvy, S.A.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-core-ide-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>5.0.0-M4-SNAPSHOT</version>
+        <version>5.1.0-SNAPSHOT</version>
     </parent>
     <groupId>org.eclipse.che.core</groupId>
     <artifactId>che-core-ide-app</artifactId>
@@ -49,8 +49,8 @@
             <artifactId>guice-assistedinject</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.annotation</groupId>
-            <artifactId>javax.annotation-api</artifactId>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.inject</groupId>
@@ -67,10 +67,6 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-debug-shared</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-dto</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -107,6 +103,10 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-commons-gwt</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-commons-lang</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -282,46 +282,42 @@
                     </execution>
                 </executions>
             </plugin>
+            <!--<plugin>-->
+            <!--<groupId>org.eclipse.che.core</groupId>-->
+            <!--<artifactId>che-core-api-dto-maven-plugin</artifactId>-->
+            <!--<version>${project.version}</version>-->
+            <!--<executions>-->
+            <!--<execution>-->
+            <!--<phase>process-sources</phase>-->
+            <!--<goals>-->
+            <!--<goal>generate</goal>-->
+            <!--</goals>-->
+            <!--</execution>-->
+            <!--</executions>-->
+            <!--<configuration>-->
+            <!--<dtoPackages>-->
+            <!--<package>org.eclipse.che.ide.statepersistance.dto</package>-->
+            <!--</dtoPackages>-->
+            <!--<outputDirectory>${dto-generator-out-directory}</outputDirectory>-->
+            <!--<genClassName>org.eclipse.che.ide.statepersistance.dto.DtoClientImpls</genClassName>-->
+            <!--<impl>client</impl>-->
+            <!--</configuration>-->
+            <!--</plugin>-->
             <plugin>
                 <groupId>org.eclipse.che.core</groupId>
-                <artifactId>che-core-api-dto-maven-plugin</artifactId>
+                <artifactId>che-core-dyna-provider-generator-maven-plugin</artifactId>
                 <version>${project.version}</version>
                 <executions>
                     <execution>
-                        <phase>process-sources</phase>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>generate</goal>
                         </goals>
                     </execution>
                 </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>${project.groupId}</groupId>
-                        <artifactId>${project.artifactId}</artifactId>
-                        <version>${project.version}</version>
-                    </dependency>
-                </dependencies>
                 <configuration>
-                    <dtoPackages>
-                        <package>org.eclipse.che.ide.statepersistance.dto</package>
-                        <package>org.eclipse.che.ide.debug.dto</package>
-                    </dtoPackages>
-                    <outputDirectory>${dto-generator-out-directory}</outputDirectory>
-                    <genClassName>org.eclipse.che.ide.statepersistance.dto.DtoClientImpls</genClassName>
-                    <impl>client</impl>
+                    <outputDirectory>${generated.sources.directory}</outputDirectory>
                 </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>pre-compile</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>com.mycila</groupId>
@@ -332,6 +328,14 @@
                         <exclude>**/*.gif</exclude>
                         <exclude>**/*.jpg</exclude>
                     </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
                 </configuration>
             </plugin>
         </plugins>

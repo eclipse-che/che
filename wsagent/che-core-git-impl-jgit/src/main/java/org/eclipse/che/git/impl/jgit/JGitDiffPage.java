@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,8 +12,8 @@
 package org.eclipse.che.git.impl.jgit;
 
 import org.eclipse.che.api.git.DiffPage;
-import org.eclipse.che.api.git.shared.DiffRequest;
-import org.eclipse.che.api.git.shared.DiffRequest.DiffType;
+import org.eclipse.che.api.git.params.DiffParams;
+import org.eclipse.che.api.git.shared.DiffType;
 import org.eclipse.jgit.diff.ContentSource;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
@@ -51,11 +51,11 @@ import static java.lang.System.lineSeparator;
  * @author Andrey Parfonov
  */
 class JGitDiffPage extends DiffPage {
-    private final DiffRequest request;
-    private final Repository  repository;
+    private final DiffParams params;
+    private final Repository repository;
 
-    JGitDiffPage(DiffRequest request, Repository repository) {
-        this.request = request;
+    JGitDiffPage(DiffParams params, Repository repository) {
+        this.params = params;
         this.repository = repository;
     }
 
@@ -63,15 +63,15 @@ class JGitDiffPage extends DiffPage {
     public final void writeTo(OutputStream out) throws IOException {
         DiffFormatter formatter = new DiffFormatter(new BufferedOutputStream(out));
         formatter.setRepository(repository);
-        List<String> rawFileFilter = request.getFileFilter();
+        List<String> rawFileFilter = params.getFileFilter();
         TreeFilter pathFilter = (rawFileFilter != null && rawFileFilter.size() > 0)
                                 ? PathFilterGroup.createFromStrings(rawFileFilter) : TreeFilter.ALL;
         formatter.setPathFilter(AndTreeFilter.create(TreeFilter.ANY_DIFF, pathFilter));
 
         try {
-            String commitA = request.getCommitA();
-            String commitB = request.getCommitB();
-            boolean cached = request.isCached();
+            String commitA = params.getCommitA();
+            String commitB = params.getCommitB();
+            boolean cached = params.isCached();
 
             List<DiffEntry> diff;
             if (commitA == null && commitB == null && !cached) {
@@ -84,7 +84,7 @@ class JGitDiffPage extends DiffPage {
                 diff = commitToCommit(commitA, commitB, formatter);
             }
 
-            DiffType type = request.getType();
+            DiffType type = params.getType();
             if (type == DiffType.NAME_ONLY) {
                 writeNames(diff, out);
             } else if (type == DiffType.NAME_STATUS) {
@@ -119,7 +119,7 @@ class JGitDiffPage extends DiffPage {
             // renames by formatter and do it later.
             formatter.setDetectRenames(false);
             diff = formatter.scan(iterA, iterB);
-            if (!request.isNoRenames()) {
+            if (!params.isNoRenames()) {
                 // Detect renames.
                 RenameDetector renameDetector = createRenameDetector();
                 ContentSource.Pair sourcePairReader = new ContentSource.Pair(ContentSource.create(reader),
@@ -170,7 +170,7 @@ class JGitDiffPage extends DiffPage {
             // renames by formatter and do it later.
             formatter.setDetectRenames(false);
             diff = formatter.scan(iterA, iterB);
-            if (!request.isNoRenames()) {
+            if (!params.isNoRenames()) {
                 // Detect renames.
                 RenameDetector renameDetector = createRenameDetector();
                 ContentSource.Pair sourcePairReader = new ContentSource.Pair(ContentSource.create(reader),
@@ -215,11 +215,11 @@ class JGitDiffPage extends DiffPage {
             CanonicalTreeParser iterA = new CanonicalTreeParser();
             iterA.reset(reader, treeA);
             DirCacheIterator iterB = new DirCacheIterator(dirCache);
-            if (!request.isNoRenames()) {
+            if (!params.isNoRenames()) {
                 // Use embedded RenameDetector it works well with index and
                 // revision history.
                 formatter.setDetectRenames(true);
-                int renameLimit = request.getRenameLimit();
+                int renameLimit = params.getRenameLimit();
                 if (renameLimit > 0) {
                     formatter.getRenameDetector().setRenameLimit(renameLimit);
                 }
@@ -271,11 +271,11 @@ class JGitDiffPage extends DiffPage {
             treeB = revWalkB.parseTree(commitB);
         }
 
-        if (!request.isNoRenames()) {
+        if (!params.isNoRenames()) {
             // Use embedded RenameDetector it works well with index and revision
             // history.
             formatter.setDetectRenames(true);
-            int renameLimit = request.getRenameLimit();
+            int renameLimit = params.getRenameLimit();
             if (renameLimit > 0) {
                 formatter.getRenameDetector().setRenameLimit(renameLimit);
             }
@@ -285,7 +285,7 @@ class JGitDiffPage extends DiffPage {
 
     private RenameDetector createRenameDetector() {
         RenameDetector renameDetector = new RenameDetector(repository);
-        int renameLimit = request.getRenameLimit();
+        int renameLimit = params.getRenameLimit();
         if (renameLimit > 0) {
             renameDetector.setRenameLimit(renameLimit);
         }

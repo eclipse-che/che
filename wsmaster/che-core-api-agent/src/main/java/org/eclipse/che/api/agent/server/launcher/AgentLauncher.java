@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,9 +25,9 @@ import org.eclipse.che.api.machine.server.spi.Instance;
 public interface AgentLauncher {
 
     /**
-     * @return the name of the agent that launcher is designed for
+     * @return the id of the agent that launcher is designed for
      */
-    String getAgentName();
+    String getAgentId();
 
     /**
      * @return the machine type that launcher is designed for

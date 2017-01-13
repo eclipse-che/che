@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,21 +15,30 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
+import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.recipe.RecipeDescriptor;
+import org.eclipse.che.api.promises.client.Function;
+import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceRuntimeDto;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.MachineServiceClient;
+import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.machine.RecipeServiceClient;
+import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
+import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Collections.emptyList;
 import static org.eclipse.che.api.core.model.machine.MachineStatus.RUNNING;
 
 /**
@@ -41,29 +50,32 @@ import static org.eclipse.che.api.core.model.machine.MachineStatus.RUNNING;
 public class TargetsPresenter implements TargetsTreeManager, TargetsView.ActionDelegate {
 
     private final TargetsView                 view;
+    private final EntityFactory               entityFactory;
+    private final WorkspaceServiceClient      workspaceServiceClient;
     private final RecipeServiceClient         recipeServiceClient;
     private final MachineLocalizationConstant machineLocale;
     private final AppContext                  appContext;
-    private final MachineServiceClient        machineService;
     private final CategoryPageRegistry        categoryPageRegistry;
 
-    private final Map<String, Target>     targets  = new HashMap<>();
-    private final Map<String, MachineDto> machines = new HashMap<>();
+    private final Map<String, Target>        targets  = new HashMap<>();
+    private final Map<String, MachineEntity> machines = new HashMap<>();
 
     private Target selectedTarget;
 
     @Inject
     public TargetsPresenter(TargetsView view,
+                            EntityFactory entityFactory,
+                            WorkspaceServiceClient workspaceServiceClient,
                             RecipeServiceClient recipeServiceClient,
                             MachineLocalizationConstant machineLocale,
                             AppContext appContext,
-                            MachineServiceClient machineService,
                             CategoryPageRegistry categoryPageRegistry) {
         this.view = view;
+        this.entityFactory = entityFactory;
+        this.workspaceServiceClient = workspaceServiceClient;
         this.recipeServiceClient = recipeServiceClient;
         this.machineLocale = machineLocale;
         this.appContext = appContext;
-        this.machineService = machineService;
         this.categoryPageRegistry = categoryPageRegistry;
 
         view.setDelegate(this);
@@ -92,12 +104,12 @@ public class TargetsPresenter implements TargetsTreeManager, TargetsView.ActionD
         targets.clear();
         machines.clear();
 
-        machineService.getMachines(appContext.getWorkspaceId()).then(new Operation<List<MachineDto>>() {
+        getMachines(appContext.getWorkspaceId()).then(new Operation<List<MachineEntity>>() {
             @Override
-            public void apply(List<MachineDto> machineList) throws OperationException {
+            public void apply(List<MachineEntity> machineList) throws OperationException {
                 //create Target objects from all machines
-                for (MachineDto machine : machineList) {
-                    final MachineConfigDto machineConfig = machine.getConfig();
+                for (MachineEntity machine : machineList) {
+                    final MachineConfig machineConfig = machine.getConfig();
                     machines.put(machineConfig.getName(), machine);
                     final String targetCategory = machineConfig.isDev() ? machineLocale.devMachineCategory() : machineConfig.getType();
                     final Target target = createTarget(machineConfig.getName(), targetCategory);
@@ -125,7 +137,27 @@ public class TargetsPresenter implements TargetsTreeManager, TargetsView.ActionD
                         selectTarget(preselectTargetName == null ? selectedTarget : targets.get(preselectTargetName));
                     }
                 });
+            }
+        });
 
+    }
+
+    public Promise<List<MachineEntity>> getMachines(String workspaceId) {
+        return workspaceServiceClient.getWorkspace(workspaceId).then(new Function<WorkspaceDto, List<MachineEntity>>() {
+            @Override
+            public List<MachineEntity> apply(WorkspaceDto workspace) throws FunctionException {
+                WorkspaceRuntimeDto workspaceRuntime = workspace.getRuntime();
+                if (workspaceRuntime == null) {
+                    return emptyList();
+                }
+
+                List<MachineDto> runtimeMachines = workspaceRuntime.getMachines();
+                List<MachineEntity> machines = new ArrayList<>(runtimeMachines.size());
+                for (MachineDto machineDto : runtimeMachines) {
+                    MachineEntity machineEntity = entityFactory.createMachine(machineDto);
+                    machines.add(machineEntity);
+                }
+                return machines;
             }
         });
     }
@@ -152,7 +184,7 @@ public class TargetsPresenter implements TargetsTreeManager, TargetsView.ActionD
      *
      * @return true for running machine
      */
-    private boolean isMachineRunning(MachineDto machine) {
+    private boolean isMachineRunning(Machine machine) {
         return machine != null && machine.getStatus() == RUNNING;
     }
 
@@ -225,7 +257,7 @@ public class TargetsPresenter implements TargetsTreeManager, TargetsView.ActionD
     }
 
     @Override
-    public MachineDto getMachineByName(String machineName) {
+    public MachineEntity getMachineByName(String machineName) {
         return machines.get(machineName);
     }
 }

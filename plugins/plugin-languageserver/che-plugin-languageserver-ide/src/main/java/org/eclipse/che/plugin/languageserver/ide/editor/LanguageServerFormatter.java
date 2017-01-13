@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,14 @@ import io.typefox.lsapi.ServerCapabilities;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
+import org.eclipse.che.api.languageserver.shared.lsapi.DocumentFormattingParamsDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.DocumentOnTypeFormattingParamsDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.DocumentRangeFormattingParamsDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.FormattingOptionsDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.PositionDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.RangeDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentIdentifierDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.TextEditDTO;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -30,17 +38,12 @@ import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.editor.texteditor.UndoableEditor;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.editor.preferences.editorproperties.EditorProperties;
+import org.eclipse.che.ide.editor.preferences.editorproperties.EditorPropertiesManager;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.DocumentFormattingParamsDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.DocumentOnTypeFormattingParamsDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.DocumentRangeFormattingParamsDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.FormattingOptionsDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.PositionDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.RangeDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.TextDocumentIdentifierDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.TextEditDTO;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -52,22 +55,20 @@ public class LanguageServerFormatter implements ContentFormatter {
     private final DtoFactory                dtoFactory;
     private final NotificationManager       manager;
     private final ServerCapabilities        capabilities;
-    private       int                       tabWidth;
+    private final EditorPropertiesManager   editorPropertiesManager;
     private       TextEditor                editor;
 
     @Inject
     public LanguageServerFormatter(TextDocumentServiceClient client,
                                    DtoFactory dtoFactory,
                                    NotificationManager manager,
-                                   @Assisted ServerCapabilities capabilities) {
+                                   @Assisted ServerCapabilities capabilities,
+                                   EditorPropertiesManager editorPropertiesManager) {
         this.client = client;
         this.dtoFactory = dtoFactory;
         this.manager = manager;
         this.capabilities = capabilities;
-    }
-
-    public void setTabWidth(int tabWidth) {
-        this.tabWidth = tabWidth;
+        this.editorPropertiesManager = editorPropertiesManager;
     }
 
     @Override
@@ -124,7 +125,7 @@ public class LanguageServerFormatter implements ContentFormatter {
         DocumentFormattingParamsDTO params = dtoFactory.createDto(DocumentFormattingParamsDTO.class);
 
         TextDocumentIdentifierDTO identifier = dtoFactory.createDto(TextDocumentIdentifierDTO.class);
-        identifier.setUri(document.getFile().getPath());
+        identifier.setUri(document.getFile().getLocation().toString());
 
         params.setTextDocument(identifier);
         params.setOptions(getFormattingOptions());
@@ -156,6 +157,9 @@ public class LanguageServerFormatter implements ContentFormatter {
             if (undoRedo != null) {
                 undoRedo.beginCompoundChange();
             }
+            
+            // #2437: apply the text edits from last to first to avoid messing up the document
+            Collections.reverse(edits);
             for (TextEditDTO change : edits) {
                 RangeDTO range = change.getRange();
                 document.replace(range.getStart().getLine(), range.getStart().getCharacter(),
@@ -172,16 +176,20 @@ public class LanguageServerFormatter implements ContentFormatter {
 
     private FormattingOptionsDTO getFormattingOptions() {
         FormattingOptionsDTO options = dtoFactory.createDto(FormattingOptionsDTO.class);
-        options.setInsertSpaces(true);
-        options.setTabSize(tabWidth);
+        options.setInsertSpaces(Boolean.parseBoolean(getEditorProperty(EditorProperties.EXPAND_TAB)));
+        options.setTabSize(Integer.parseInt(getEditorProperty(EditorProperties.TAB_SIZE)));
         return options;
+    }
+
+    private String getEditorProperty(EditorProperties property) {
+        return editorPropertiesManager.getEditorProperties().get(property.toString()).toString();
     }
 
     private void formatRange(TextRange selectedRange, Document document) {
         DocumentRangeFormattingParamsDTO params = dtoFactory.createDto(DocumentRangeFormattingParamsDTO.class);
 
         TextDocumentIdentifierDTO identifier = dtoFactory.createDto(TextDocumentIdentifierDTO.class);
-        identifier.setUri(document.getFile().getPath());
+        identifier.setUri(document.getFile().getLocation().toString());
 
         params.setTextDocument(identifier);
         params.setOptions(getFormattingOptions());

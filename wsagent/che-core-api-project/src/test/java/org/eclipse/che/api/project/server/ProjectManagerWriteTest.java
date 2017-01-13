@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,21 +10,26 @@
  *******************************************************************************/
 package org.eclipse.che.api.project.server;
 
+import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.project.NewProjectConfig;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.core.util.LineConsumerFactory;
 import org.eclipse.che.api.core.util.ValueHolder;
+import org.eclipse.che.api.project.server.RegisteredProject.Problem;
+import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
+import org.eclipse.che.api.project.server.importer.ProjectImportOutputWSLineConsumer;
 import org.eclipse.che.api.project.server.importer.ProjectImporter;
 import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
-import org.eclipse.che.api.project.server.type.ProjectTypeConstraintException;
 import org.eclipse.che.api.project.server.type.Variable;
 import org.eclipse.che.api.vfs.Path;
+import org.eclipse.che.api.workspace.shared.dto.NewProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.dto.server.DtoFactory;
@@ -33,8 +38,10 @@ import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +50,7 @@ import java.util.zip.ZipOutputStream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -52,7 +60,7 @@ import static org.junit.Assert.fail;
  * @author gazarenkov
  */
 public class ProjectManagerWriteTest extends WsAgentTestBase {
-
+    private static final String FILE_CONTENT = "to be or not to be";
 
     @Before
     public void setUp() throws Exception {
@@ -65,15 +73,413 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
         projectTypeRegistry.registerProjectType(new M2());
         projectTypeRegistry.registerProjectType(new PTsettableVP());
 
-        projectHandlerRegistry.register(new PT3.SrcGenerator());
-
+        projectHandlerRegistry.register(new SrcGenerator());
     }
 
+    @Test
+    public void testCreateBatchProjectsByConfigs() throws Exception {
+        final String projectPath1 = "/testProject1";
+        final String projectPath2 = "/testProject2";
+
+        final NewProjectConfig config1 = createProjectConfigObject("testProject1", projectPath1, BaseProjectType.ID, null);
+        final NewProjectConfig config2 = createProjectConfigObject("testProject2", projectPath2, BaseProjectType.ID, null);
+
+        final List<NewProjectConfig> configs = new ArrayList<>(2);
+        configs.add(config1);
+        configs.add(config2);
+
+        pm.createBatchProjects(configs, false, new ProjectOutputLineConsumerFactory("ws", 300));
+
+        checkProjectExist(projectPath1);
+        checkProjectExist(projectPath2);
+        assertEquals(2, projectRegistry.getProjects().size());
+    }
+
+    @Test
+    public void testCreateBatchProjectsByImportingSourceCode() throws Exception {
+        final String projectPath1 = "/testProject1";
+        final String projectPath2 = "/testProject2";
+        final String importType1 = "importType1";
+        final String importType2 = "importType2";
+
+        final String [] paths1 = {"folder1/", "folder1/file1.txt"};
+        final List<String> children1 = new ArrayList<>(Arrays.asList(paths1));
+        registerImporter(importType1, prepareZipArchiveBasedOn(children1));
+
+        final String [] paths2 = {"folder2/", "folder2/file2.txt"};
+        final List<String> children2 = new ArrayList<>(Arrays.asList(paths2));
+        registerImporter(importType2, prepareZipArchiveBasedOn(children2));
+
+        final SourceStorageDto source1 = DtoFactory.newDto(SourceStorageDto.class).withLocation("someLocation").withType(importType1);
+        final NewProjectConfigDto config1 = createProjectConfigObject("testProject1", projectPath1, BaseProjectType.ID, source1);
+
+        final SourceStorageDto source2 = DtoFactory.newDto(SourceStorageDto.class).withLocation("someLocation").withType(importType2);
+        final NewProjectConfigDto config2 = createProjectConfigObject("testProject2", projectPath2, BaseProjectType.ID, source2);
+
+        final List<NewProjectConfig> configs = new ArrayList<>(2);
+        configs.add(config1);
+        configs.add(config2);
+
+        pm.createBatchProjects(configs, false, new ProjectOutputLineConsumerFactory("ws", 300));
+
+        final RegisteredProject project1 = projectRegistry.getProject(projectPath1);
+        final FolderEntry projectFolder1 = project1.getBaseFolder();
+        checkProjectExist(projectPath1);
+        checkChildrenFor(projectFolder1, children1);
+
+        final RegisteredProject project2 = projectRegistry.getProject(projectPath2);
+        final FolderEntry projectFolder2 = project2.getBaseFolder();
+        checkProjectExist(projectPath2);
+        checkChildrenFor(projectFolder2, children2);
+    }
+
+    @Test
+    public void testCreateProjectWhenSourceCodeIsNotReachable() throws Exception {
+        final String projectPath = "/testProject";
+        final SourceStorageDto source = DtoFactory.newDto(SourceStorageDto.class).withLocation("someLocation").withType("importType");
+        final NewProjectConfigDto config = createProjectConfigObject("testProject1", projectPath, BaseProjectType.ID, source);
+
+        final List<NewProjectConfig> configs = new ArrayList<>(1);
+        configs.add(config);
+
+        try {
+            pm.createBatchProjects(configs, false, new ProjectOutputLineConsumerFactory("ws", 300));
+            fail("Exception should be thrown when source code is not reachable");
+        } catch (Exception e) {
+            assertEquals(0, projectRegistry.getProjects().size());
+            assertNull(projectRegistry.getProject(projectPath));
+            assertNull(pm.getProjectsRoot().getChild(projectPath));
+        }
+    }
+
+    @Test
+    public void shouldRollbackCreatingBatchProjects() throws Exception {
+        // we should rollback operation of creating batch projects when we have not source code for at least one project
+        // For example: two projects were success created, but we could not get source code for third configuration
+        // At this use case we should rollback the operation and clean up all created projects
+
+        final String projectPath1 = "/testProject1";
+        final String projectPath2 = "/testProject2";
+        final String projectPath3 = "/testProject3";
+        final String importType1 = "importType1";
+        final String importType2 = "importType2";
+
+        final String [] paths1 = {"folder1/", "folder1/file1.txt"};
+        final List<String> children1 = new ArrayList<>(Arrays.asList(paths1));
+        registerImporter(importType1, prepareZipArchiveBasedOn(children1));
+
+        final String [] paths2 = {"folder2/", "folder2/file2.txt"};
+        final List<String> children2 = new ArrayList<>(Arrays.asList(paths2));
+        registerImporter(importType2, prepareZipArchiveBasedOn(children2));
+
+        final SourceStorageDto source1 = DtoFactory.newDto(SourceStorageDto.class).withLocation("someLocation").withType(importType1);
+        final NewProjectConfigDto config1 = createProjectConfigObject("testProject1", projectPath1, BaseProjectType.ID, source1);
+
+        final SourceStorageDto source2 = DtoFactory.newDto(SourceStorageDto.class).withLocation("someLocation").withType(importType2);
+        final NewProjectConfigDto config2 = createProjectConfigObject("testProject2", projectPath2, BaseProjectType.ID, source2);
+
+        final SourceStorageDto source = DtoFactory.newDto(SourceStorageDto.class).withLocation("someLocation").withType("importType");
+        final NewProjectConfigDto config3 = createProjectConfigObject("testProject3", projectPath3, BaseProjectType.ID, source);
+
+        final List<NewProjectConfig> configs = new ArrayList<>(2);
+        configs.add(config1); //will be success created
+        configs.add(config2); //will be success created
+        configs.add(config3); //we be failed - we have not registered importer - source code will not be imported
+
+        try {
+            pm.createBatchProjects(configs, false, new ProjectOutputLineConsumerFactory("ws", 300));
+            fail("We should rollback operation of creating batch projects when we could not get source code for at least one project");
+        } catch (Exception e) {
+            assertEquals(0, projectRegistry.getProjects().size());
+
+            assertNull(projectRegistry.getProject(projectPath1));
+            assertNull(pm.getProjectsRoot().getChild(projectPath1));
+
+            assertNull(projectRegistry.getProject(projectPath2));
+            assertNull(pm.getProjectsRoot().getChild(projectPath2));
+
+            assertNull(projectRegistry.getProject(projectPath3));
+            assertNull(pm.getProjectsRoot().getChild(projectPath3));
+        }
+    }
+
+    @Test
+    public void testCreateBatchProjectsWithInnerProject() throws Exception {
+        final String rootProjectPath = "/testProject1";
+        final String innerProjectPath = "/testProject1/innerProject";
+        final String importType = "importType1";
+        final String innerProjectType = "pt2";
+
+        Map<String, List<String>> attributes = new HashMap<>();
+        attributes.put("pt2-var2", new AttributeValue("test").getList());
+
+        final String [] paths1 = {"folder1/", "folder1/file1.txt"};
+        final String [] paths2 = {"innerProject/", "innerProject/folder2/", "innerProject/folder2/file2.txt"};
+        final List<String> children1 = Arrays.asList(paths1);
+        final List<String> children2 = Arrays.asList(paths2);
+        final List<String> children = new ArrayList<>(children1);
+        children.addAll(children2);
+        registerImporter(importType, prepareZipArchiveBasedOn(children));
+
+        SourceStorageDto source = DtoFactory.newDto(SourceStorageDto.class).withLocation("someLocation").withType(importType);
+        NewProjectConfigDto config1 = createProjectConfigObject("testProject1", rootProjectPath, BaseProjectType.ID, source);
+        NewProjectConfigDto config2 = createProjectConfigObject("innerProject", innerProjectPath, innerProjectType, null);
+        config2.setAttributes(attributes);
+
+        List<NewProjectConfig> configs = new ArrayList<>(2);
+        configs.add(config1);
+        configs.add(config2);
+
+        pm.createBatchProjects(configs, false, new ProjectOutputLineConsumerFactory("ws", 300));
+
+        RegisteredProject rootProject = projectRegistry.getProject(rootProjectPath);
+        FolderEntry rootProjectFolder = rootProject.getBaseFolder();
+        RegisteredProject innerProject = projectRegistry.getProject(innerProjectPath);
+        FolderEntry innerProjectFolder = innerProject.getBaseFolder();
+
+
+        assertNotNull(rootProject);
+        assertTrue(rootProjectFolder.getVirtualFile().exists());
+        assertEquals(rootProjectPath, rootProject.getPath());
+        checkChildrenFor(rootProjectFolder, children1);
+
+        assertNotNull(innerProject);
+        assertTrue(innerProjectFolder.getVirtualFile().exists());
+        assertEquals(innerProjectPath, innerProject.getPath());
+        assertEquals(innerProjectType, innerProject.getType());
+        checkChildrenFor(rootProjectFolder, children2);
+    }
+
+    @Test
+    public void testCreateBatchProjectsWithInnerProjectWhenInnerProjectContainsSource() throws Exception {
+        final String rootProjectPath = "/rootProject";
+        final String innerProjectPath = "/rootProject/innerProject";
+        final String rootImportType = "rootImportType";
+        final String innerImportType = "innerImportType";
+
+        final String innerProjectType = "pt2";
+
+        Map<String, List<String>> attributes = new HashMap<>();
+        attributes.put("pt2-var2", new AttributeValue("test").getList());
+
+        final String [] paths1 = {"folder1/", "folder1/file1.txt"};
+        final List<String> children1 = new ArrayList<>(Arrays.asList(paths1));
+        registerImporter(rootImportType, prepareZipArchiveBasedOn(children1));
+
+        final String [] paths2 = {"folder2/", "folder2/file2.txt"};
+        final List<String> children2 = new ArrayList<>(Arrays.asList(paths2));
+        registerImporter(innerImportType, prepareZipArchiveBasedOn(children2));
+
+        final SourceStorageDto source1 = DtoFactory.newDto(SourceStorageDto.class).withLocation("someLocation").withType(rootImportType);
+        final NewProjectConfigDto config1 = createProjectConfigObject("testProject1", rootProjectPath, BaseProjectType.ID, source1);
+
+        final SourceStorageDto source2 = DtoFactory.newDto(SourceStorageDto.class).withLocation("someLocation").withType(innerImportType);
+        final NewProjectConfigDto config2 = createProjectConfigObject("testProject2", innerProjectPath, innerProjectType, source2);
+        config2.setAttributes(attributes);
+
+        final List<NewProjectConfig> configs = new ArrayList<>(2);
+        configs.add(config2);
+        configs.add(config1);
+
+        pm.createBatchProjects(configs, false, new ProjectOutputLineConsumerFactory("ws", 300));
+
+        RegisteredProject rootProject = projectRegistry.getProject(rootProjectPath);
+        FolderEntry rootProjectFolder = rootProject.getBaseFolder();
+        checkProjectExist(rootProjectPath);
+        checkChildrenFor(rootProjectFolder, children1);
+
+        RegisteredProject innerProject = projectRegistry.getProject(innerProjectPath);
+        FolderEntry innerProjectFolder = innerProject.getBaseFolder();
+        assertNotNull(innerProject);
+        assertTrue(innerProjectFolder.getVirtualFile().exists());
+        assertEquals(innerProjectPath, innerProject.getPath());
+        assertEquals(innerProjectType, innerProject.getType());
+        checkChildrenFor(innerProjectFolder, children2);
+    }
+
+    @Test
+    public void testCreateBatchProjectsWithMixInnerProjects() throws Exception { // Projects should be sorted by path before creating
+        final String [] paths = {"/1/z", "/2/z", "/1/d", "/2", "/1", "/1/a"};
+        final List<String> projectsPaths = new ArrayList<>(Arrays.asList(paths));
+
+        final List<NewProjectConfig> configs = new ArrayList<>(projectsPaths.size());
+        for (String path : projectsPaths) {
+            configs.add(createProjectConfigObject(path.substring(path.length() - 1, path.length()), path, BaseProjectType.ID, null));
+        }
+
+        pm.createBatchProjects(configs, false, new ProjectOutputLineConsumerFactory("ws", 300));
+
+        for (String path : projectsPaths) {
+            checkProjectExist(path);
+        }
+    }
+
+    @Test
+    public void testCreateBatchProjectsWhenConfigContainsOnlyPath()
+            throws Exception { // NewProjectConfig object contains only one mandatory Project Path field
+
+        final String projectPath1 = "/testProject1";
+        final String projectPath2 = "/testProject2";
+
+        final NewProjectConfig config1 = createProjectConfigObject(null, projectPath1, null, null);
+        final NewProjectConfig config2 = createProjectConfigObject(null, projectPath2, null, null);
+
+        final List<NewProjectConfig> configs = new ArrayList<>(2);
+        configs.add(config1);
+        configs.add(config2);
+
+        pm.createBatchProjects(configs, false, new ProjectOutputLineConsumerFactory("ws", 300));
+
+        checkProjectExist(projectPath1);
+        checkProjectExist(projectPath2);
+        assertEquals(2, projectRegistry.getProjects().size());
+    }
+
+    @Test
+    public void shouldThrowBadRequestExceptionAtCreatingBatchProjectsWhenConfigNotContainsPath()
+            throws Exception { //Path is mandatory field for NewProjectConfig
+        final SourceStorageDto source = DtoFactory.newDto(SourceStorageDto.class).withLocation("someLocation").withType("importType");
+        final NewProjectConfig config = createProjectConfigObject("project", null, BaseProjectType.ID, source);
+
+        final List<NewProjectConfig> configs = new ArrayList<>(1);
+        configs.add(config);
+
+        try {
+            pm.createBatchProjects(configs, false, new ProjectOutputLineConsumerFactory("ws", 300));
+            fail("BadRequestException should be thrown : path field is mandatory");
+        } catch (BadRequestException e) {
+            assertEquals(0, projectRegistry.getProjects().size());
+        }
+    }
+
+    @Test
+    public void shouldThrowConflictExceptionAtCreatingBatchProjectsWhenProjectWithPathAlreadyExist() throws Exception {
+        final String path = "/somePath";
+        final NewProjectConfig config = createProjectConfigObject("project", path, BaseProjectType.ID, null);
+
+        final List<NewProjectConfig> configs = new ArrayList<>(1);
+        configs.add(config);
+
+        pm.createBatchProjects(configs, false, new ProjectOutputLineConsumerFactory("ws", 300));
+        checkProjectExist(path);
+        assertEquals(1, projectRegistry.getProjects().size());
+
+        try {
+            pm.createBatchProjects(configs, false, new ProjectOutputLineConsumerFactory("ws", 300));
+            fail("ConflictException should be thrown : Project config with the same path is already exists");
+        } catch (ConflictException e) {
+            assertEquals(1, projectRegistry.getProjects().size());
+        }
+    }
+
+    @Test
+    public void shouldCreateParentFolderAtCreatingProjectWhenParentDoesNotExist() throws Exception {
+        final String nonExistentParentPath = "/rootProject";
+        final String innerProjectPath = "/rootProject/innerProject";
+
+        final NewProjectConfig config = createProjectConfigObject(null, innerProjectPath, null, null);
+
+        final List<NewProjectConfig> configs = new ArrayList<>(2);
+        configs.add(config);
+
+        pm.createBatchProjects(configs, false, new ProjectOutputLineConsumerFactory("ws", 300));
+
+        checkProjectExist(nonExistentParentPath);
+        checkProjectExist(innerProjectPath);
+        assertEquals(2, projectRegistry.getProjects().size());
+    }
+
+    @Test
+    public void shouldRewriteProjectAtCreatingBatchProjectsWhenProjectAlreadyExist() throws Exception {
+        final String projectPath = "/testProject";
+        final String importType1 = "importType1";
+        final String importType2 = "importType2";
+
+        final String [] paths1 = {"folder1/", "folder1/file1.txt"};
+        final List<String> children1 = new ArrayList<>(Arrays.asList(paths1));
+        registerImporter(importType1, prepareZipArchiveBasedOn(children1));
+
+        final String [] paths2 = {"folder2/", "folder2/file2.txt"};
+        final List<String> children2 = new ArrayList<>(Arrays.asList(paths2));
+        registerImporter(importType2, prepareZipArchiveBasedOn(children2));
+
+        final SourceStorageDto source1 = DtoFactory.newDto(SourceStorageDto.class).withLocation("someLocation").withType(importType1);
+        final NewProjectConfigDto config1 = createProjectConfigObject("testProject1", projectPath, "blank", source1);
+
+        final SourceStorageDto source2 = DtoFactory.newDto(SourceStorageDto.class).withLocation("someLocation").withType(importType2);
+        final NewProjectConfigDto config2 = createProjectConfigObject("testProject2", projectPath, "blank", source2);
+
+        final List<NewProjectConfig> configs = new ArrayList<>(1);
+        configs.add(config1);
+
+        pm.createBatchProjects(configs, false, new ProjectOutputLineConsumerFactory("ws", 300));
+
+        final FolderEntry projectFolder1 = projectRegistry.getProject(projectPath).getBaseFolder();
+        checkProjectExist(projectPath);
+        checkChildrenFor(projectFolder1, children1);
+        assertEquals(1, projectRegistry.getProjects().size());
+
+        configs.clear();
+        configs.add(config2);
+        pm.createBatchProjects(configs, true, new ProjectOutputLineConsumerFactory("ws", 300));
+
+        final FolderEntry projectFolder2 = projectRegistry.getProject(projectPath).getBaseFolder();
+        checkProjectExist(projectPath);
+        checkChildrenFor(projectFolder2, children2);
+        assertEquals(1, projectRegistry.getProjects().size());
+        assertNull(projectFolder2.getChild("folder1/"));
+        assertNull(projectFolder2.getChild("folder1/file1.txt"));
+    }
+
+    @Test
+    public void shouldSetBlankTypeAtCreatingBatchProjectsWhenConfigContainsUnregisteredProjectType()
+            throws Exception {// If declared primary PT is not registered, project is created as Blank, with Problem 12
+
+        final String projectPath = "/testProject";
+        final String projectType = "unregisteredProjectType";
+
+        final NewProjectConfig config = createProjectConfigObject("projectName", projectPath, projectType, null);
+
+        final List<NewProjectConfig> configs = new ArrayList<>(1);
+        configs.add(config);
+
+        pm.createBatchProjects(configs, false, new ProjectOutputLineConsumerFactory("ws", 300));
+
+        final RegisteredProject project = projectRegistry.getProject(projectPath);
+        final List<Problem> problems = project.getProblems();
+        checkProjectExist(projectPath);
+        assertNotEquals(projectType, project.getType());
+        assertEquals(1, problems.size());
+        assertEquals(12, problems.get(0).code);
+        assertEquals(1, projectRegistry.getProjects().size());
+    }
+
+    @Test
+    public void shouldCreateBatchProjectsWithoutMixinPTWhenThisOneIsUnregistered()
+            throws Exception {// If declared mixin PT is not registered, project is created w/o it, with Problem 12
+
+        final String projectPath = "/testProject";
+        final String mixinPType = "unregistered";
+
+        final NewProjectConfig config = createProjectConfigObject("projectName", projectPath, BaseProjectType.ID, null);
+        config.getMixins().add(mixinPType);
+
+        final List<NewProjectConfig> configs = new ArrayList<>(1);
+        configs.add(config);
+
+        pm.createBatchProjects(configs, false, new ProjectOutputLineConsumerFactory("ws", 300));
+
+        final RegisteredProject project = projectRegistry.getProject(projectPath);
+        final List<Problem> problems = project.getProblems();
+        checkProjectExist(projectPath);
+        assertEquals(1, problems.size());
+        assertEquals(12, problems.get(0).code);
+        assertTrue(project.getMixins().isEmpty());
+        assertEquals(1, projectRegistry.getProjects().size());
+    }
 
     @Test
     public void testCreateProject() throws Exception {
-
-
         Map<String, List<String>> attrs = new HashMap<>();
         List<String> v = new ArrayList<>();
         v.add("meV");
@@ -95,74 +501,85 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
         assertEquals("/createProject", project.getPath());
         assertEquals(2, project.getAttributeEntries().size());
         assertEquals("meV", project.getAttributeEntries().get("var1").getString());
-
     }
 
     @Test
-    public void testCreateProjectInvalidAttribute() throws Exception {
-
-        ProjectConfig pc = new NewProjectConfig("/testCreateProjectInvalidAttributes", "pt2", null, "name", "descr", null, null);
-
-        try {
-            pm.createProject(pc, null);
-            fail("ProjectTypeConstraintException should be thrown : pt-var2 attribute is mandatory");
-        } catch (ProjectTypeConstraintException e) {
-            //
-        }
-
-    }
-
-
-    @Test
-    public void testCreateProjectWithRequiredProvidedAttribute() throws Exception {
-
+    public void testCreateProjectWithInvalidAttribute() throws Exception {
         // SPECS:
-        // If project type has provided required attributes,
-        // respective CreateProjectHandler MUST be provided
+        // Project will be created with problem code = 13(Value for required attribute is not initialized)
+        // when required attribute is not initialized
+        final String path = "/testCreateProjectInvalidAttributes";
+        final String projectType = "pt2";
+        final NewProjectConfig config = new NewProjectConfigImpl(path, projectType, null, "name", "descr", null, null, null);
 
-        Map<String, List<String>> attributes = new HashMap<>();
+        pm.createProject(config, null);
+
+        RegisteredProject project = projectRegistry.getProject(path);
+        assertNotNull(project);
+        assertNotNull(pm.getProjectsRoot().getChild(path));
+        assertEquals(projectType, project.getType());
+
+        List<Problem> problems = project.getProblems();
+        assertNotNull(problems);
+        assertFalse(problems.isEmpty());
+        assertEquals(1, problems.size());
+        assertEquals(13, problems.get(0).code);
+    }
+
+
+    @Test
+    public void testCreateProjectWithRequiredProvidedAttributeWhenGivenProjectTypeHasGenerator() throws Exception {
+        final String path = "/testCreateProjectWithRequiredProvidedAttribute";
+        final String projectTypeId = "pt3";
+        final Map<String, List<String>> attributes = new HashMap<>();
         attributes.put("pt2-var2", new AttributeValue("test").getList());
-        ProjectConfig pc =
-                new NewProjectConfig("/testCreateProjectWithRequiredProvidedAttribute", "pt3", null, "name", "descr", attributes, null);
+        final ProjectConfig pc = new NewProjectConfigImpl(path, projectTypeId, null, "name", "descr", attributes, null, null);
 
         pm.createProject(pc, null);
 
-        RegisteredProject project = projectRegistry.getProject("testCreateProjectWithRequiredProvidedAttribute");
-        assertEquals("pt3", project.getType());
+        final RegisteredProject project = projectRegistry.getProject(path);
+        assertEquals(projectTypeId, project.getType());
         assertNotNull(project.getBaseFolder().getChild("file1"));
         assertEquals("pt2-provided1", project.getAttributes().get("pt2-provided1").get(0));
-
     }
 
     @Test
-    public void testFailCreateProjectWithNoRequiredGenerator() throws Exception {
-
+    public void testCreateProjectWithRequiredProvidedAttributeWhenGivenProjectTypeHasNotGenerator() throws Exception {
         // SPECS:
-        // If there are no respective CreateProjectHandler ProjectTypeConstraintException will be thrown
+        // Project will be created with problem code = 13 (Value for required attribute is not initialized)
+        // when project type has provided required attributes
+        // but have not respective generator(CreateProjectHandler)
 
-        ProjectConfig pc = new NewProjectConfig("/testFailCreateProjectWithNoRequiredGenerator", "pt4", null, "name", "descr", null, null);
+        final String path = "/testCreateProjectWithRequiredProvidedAttribute";
+        final String projectTypeId = "pt4";
+        final ProjectConfig pc = new NewProjectConfigImpl(path, projectTypeId, null, "name", "descr", null, null, null);
 
-        try {
-            pm.createProject(pc, null);
-            fail("ProjectTypeConstraintException: Value for required attribute is not initialized pt4:pt4-provided1");
-        } catch (ProjectTypeConstraintException e) {
-        }
+        pm.createProject(pc, null);
 
-
+        final RegisteredProject project = projectRegistry.getProject(path);
+        final List<VirtualFileEntry> children = project.getBaseFolder().getChildren();
+        final List<Problem> problems = project.getProblems();
+        assertNotNull(project);
+        assertNotNull(pm.getProjectsRoot().getChild(path));
+        assertEquals(projectTypeId, project.getType());
+        assertTrue(children.isEmpty());
+        assertTrue(project.getAttributes().isEmpty());
+        assertFalse(problems.isEmpty());
+        assertEquals(1, problems.size());
+        assertEquals(13, problems.get(0).code);
     }
 
 
     @Test
     public void testSamePathProjectCreateFailed() throws Exception {
-
         // SPECS:
         // If there is a project with the same path ConflictException will be thrown on create project
 
-        ProjectConfig pc = new NewProjectConfig("/testSamePathProjectCreateFailed", "blank", null, "name", "descr", null, null);
+        ProjectConfig pc = new NewProjectConfigImpl("/testSamePathProjectCreateFailed", "blank", null, "name", "descr", null, null, null);
 
         pm.createProject(pc, null);
 
-        pc = new NewProjectConfig("/testSamePathProjectCreateFailed", "blank", null, "name", "descr", null, null);
+        pc = new NewProjectConfigImpl("/testSamePathProjectCreateFailed", "blank", null, "name", "descr", null, null, null);
 
         try {
             pm.createProject(pc, null);
@@ -171,94 +588,109 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
         }
 
         assertNotNull(projectRegistry.getProject("/testSamePathProjectCreateFailed"));
-
     }
 
     @Test
     public void testInvalidPTProjectCreateFailed() throws Exception {
+        // SPECS:
+        // project will be created as project of "blank" type
+        // with problem code 12(Primary type "someType" is not registered. Base Project Type assigned.)
+        // when primary project type is not registered in PT registry
+        final String path = "/testInvalidPTProjectCreateFailed";
+        ProjectConfig pc = new NewProjectConfigImpl(path, "invalid", null, "name", "descr", null, null, null);
+
+        pm.createProject(pc, null);
+
+        RegisteredProject project = projectRegistry.getProject(path);
+        assertNotNull(project);
+        assertNotNull(pm.getProjectsRoot().getChild(path));
+        assertEquals(BaseProjectType.ID, project.getType());
+
+        List<Problem> problems = project.getProblems();
+        assertNotNull(problems);
+        assertFalse(problems.isEmpty());
+        assertEquals(1, problems.size());
+        assertEquals(12, problems.get(0).code);
+
+        //clean up
+        project.getBaseFolder().getVirtualFile().delete();
+        projectRegistry.removeProjects(path);
+        assertNull(projectRegistry.getProject(path));
+
 
         // SPECS:
-        // If either primary or some mixin project type is not registered in PT registry
-        // project creation failed with NotFoundException
-
-        ProjectConfig pc = new NewProjectConfig("/testInvalidPTProjectCreateFailed", "invalid", null, "name", "descr", null, null);
-
-        try {
-            pm.createProject(pc, null);
-            fail("NotFoundException: Project Type not found: invalid");
-        } catch (NotFoundException e) {
-        }
-
-        assertNull(projectRegistry.getProject("/testInvalidPTProjectCreateFailed"));
-        assertNull(pm.getProjectsRoot().getChild("/testInvalidPTProjectCreateFailed"));
-        //assertNull(projectRegistry.folder("/testInvalidPTProjectCreateFailed"));
-
-        // check mixin as well
+        // project will be created without mixin project type and
+        // with problem code 12(Project type "someType" is not registered. Skipped.)
+        // when mixin project type is not registered in PT registry
         List<String> ms = new ArrayList<>();
         ms.add("invalid");
 
-        pc = new NewProjectConfig("/testInvalidPTProjectCreateFailed", "blank", ms, "name", "descr", null, null);
+        pc = new NewProjectConfigImpl(path, "blank", ms, "name", "descr", null, null, null);
+        pm.createProject(pc, null);
 
-        try {
-            pm.createProject(pc, null);
-            fail("NotFoundException: Project Type not found: invalid");
-        } catch (NotFoundException e) {
-        }
+        project = projectRegistry.getProject(path);
+        assertNotNull(project);
+        assertNotNull(pm.getProjectsRoot().getChild(path));
+        assertTrue(project.getMixins().isEmpty());
 
-
+        problems = project.getProblems();
+        assertNotNull(problems);
+        assertFalse(problems.isEmpty());
+        assertEquals(1, problems.size());
+        assertEquals(12, problems.get(0).code);
     }
 
     @Test
     public void testConflictAttributesProjectCreateFailed() throws Exception {
-
         // SPECS:
-        // If there are attributes with the same name in primary and mixin PT or between mixins
-        // Project creation failed with ProjectTypeConstraintException
+        // project will be created with problem code 13(Attribute name conflict)
+        // when there are attributes with the same name in primary and mixin PT or between mixins
 
+        final String path = "/testConflictAttributesProjectCreateFailed";
+        final String projectTypeId = "pt2";
+        final String mixin = "m2";
+        final List<String> ms = new ArrayList<>(1);
+        ms.add(mixin);
 
-        List<String> ms = new ArrayList<>();
-        ms.add("m2");
+        ProjectConfig pc = new NewProjectConfigImpl(path, projectTypeId, ms, "name", "descr", null, null, null);
+        pm.createProject(pc, null);
 
-        ProjectConfig pc = new NewProjectConfig("/testConflictAttributesProjectCreateFailed", "pt2", ms, "name", "descr", null, null);
-        try {
-            pm.createProject(pc, null);
-            fail("ProjectTypeConstraintException: Attribute name conflict. Duplicated attributes detected /testConflictAttributesProjectCreateFailed Attribute pt2-const1 declared in m2 already declared in pt2");
-        } catch (ProjectTypeConstraintException e) {
-        }
+        final RegisteredProject project = projectRegistry.getProject(path);
+        assertNotNull(project);
+        assertNotNull(pm.getProjectsRoot().getChild(path));
 
-        //assertNull(projectRegistry.folder("/testConflictAttributesProjectCreateFailed"));
+        final List<String> mixins = project.getMixins();
+        assertFalse(mixins.isEmpty());
+        assertEquals(mixin, mixins.get(0));
 
-        assertNull(pm.getProjectsRoot().getChild("/testConflictAttributesProjectCreateFailed"));
-
+        final List<Problem> problems = project.getProblems();
+        assertNotNull(problems);
+        assertFalse(problems.isEmpty());
+        assertEquals(13, problems.get(0).code);
     }
 
     @Test
     public void testInvalidConfigProjectCreateFailed() throws Exception {
-
         // SPECS:
         // If project path is not defined
         // Project creation failed with ConflictException
 
-        ProjectConfig pc = new NewProjectConfig(null, "pt2", null, "name", "descr", null, null);
+        ProjectConfig pc = new NewProjectConfigImpl(null, "pt2", null, "name", "descr", null, null, null);
 
         try {
             pm.createProject(pc, null);
             fail("ConflictException: Path for new project should be defined ");
         } catch (ConflictException e) {
         }
-
-
     }
 
 
     @Test
     public void testCreateInnerProject() throws Exception {
-
-
-        ProjectConfig pc = new NewProjectConfig("/testCreateInnerProject", BaseProjectType.ID, null, "name", "descr", null, null);
+        ProjectConfig pc = new NewProjectConfigImpl("/testCreateInnerProject", BaseProjectType.ID, null, "name", "descr", null, null, null);
         pm.createProject(pc, null);
 
-        pc = new NewProjectConfig("/testCreateInnerProject/inner", BaseProjectType.ID, null, "name", "descr", null, null);
+        pc = new NewProjectConfigImpl("/testCreateInnerProject/inner", BaseProjectType.ID, null, "name", "descr", null, null, null);
         pm.createProject(pc, null);
 
         assertNotNull(projectRegistry.getProject("/testCreateInnerProject/inner"));
@@ -267,13 +699,12 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
 
         // If there are no parent folder it will be created
 
-        pc = new NewProjectConfig("/nothing/inner", BaseProjectType.ID, null, "name", "descr", null, null);
+        pc = new NewProjectConfigImpl("/nothing/inner", BaseProjectType.ID, null, "name", "descr", null, null, null);
 
         pm.createProject(pc, null);
         assertNotNull(projectRegistry.getProject("/nothing/inner"));
         assertNotNull(projectRegistry.getProject("/nothing"));
         assertNotNull(pm.getProjectsRoot().getChildFolder("/nothing"));
-
     }
 
 
@@ -281,14 +712,14 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
     public void testUpdateProjectWithPersistedAttributes() throws Exception {
         Map<String, List<String>> attributes = new HashMap<>();
 
-        ProjectConfig pc = new NewProjectConfig("/testUpdateProject", BaseProjectType.ID, null, "name", "descr", null, null);
+        ProjectConfig pc = new NewProjectConfigImpl("/testUpdateProject", BaseProjectType.ID, null, "name", "descr", null, null, null);
         RegisteredProject p = pm.createProject(pc, null);
 
         assertEquals(BaseProjectType.ID, p.getType());
         assertEquals("name", p.getName());
 
         attributes.put("pt2-var2", new AttributeValue("updated").getList());
-        ProjectConfig pc1 = new NewProjectConfig("/testUpdateProject", "pt2", null, "updatedName", "descr", attributes, null);
+        ProjectConfig pc1 = new NewProjectConfigImpl("/testUpdateProject", "pt2", null, "updatedName", "descr", attributes, null, null);
 
         p = pm.updateProject(pc1);
 
@@ -301,38 +732,30 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
 
     @Test
     public void testUpdateProjectWithProvidedAttributes() throws Exception {
+        // SPECS: Project should be updated with problem code = 13 when value for required attribute is not initialized
 
         Map<String, List<String>> attributes = new HashMap<>();
         attributes.put("pt2-var2", new AttributeValue("test").getList());
 
-        ProjectConfig pc = new NewProjectConfig("/testUpdateProject", "pt2", null, "name", "descr", attributes, null);
-        RegisteredProject p = pm.createProject(pc, null);
+        ProjectConfig pc = new NewProjectConfigImpl("/testUpdateProject", "pt2", null, "name", "descr", attributes, null, null);
+        pm.createProject(pc, null);
 
-        // SPECS:
-        // If project type is updated with one required provided attributes
-        // those attributes should be provided before update
-
-        pc = new NewProjectConfig("/testUpdateProject", "pt3", null, "updatedName", "descr", attributes, null);
-
-        try {
-            pm.updateProject(pc);
-            fail("ProjectTypeConstraintException: Value for required attribute is not initialized pt3:pt2-provided1 ");
-        } catch (ProjectTypeConstraintException e) {
-        }
+        pc = new NewProjectConfigImpl("/testUpdateProject", "pt3", null, "updatedName", "descr", attributes, null, null);
 
 
-        p.getBaseFolder().createFolder("file1");
-        p = pm.updateProject(pc);
-        assertEquals(new AttributeValue("pt2-provided1"), p.getAttributeEntries().get("pt2-provided1"));
+        RegisteredProject project = pm.updateProject(pc);
 
-
+        final List<Problem> problems = project.getProblems();
+        assertNotNull(problems);
+        assertFalse(problems.isEmpty());
+        assertEquals(1, problems.size());
+        assertEquals(13, problems.get(0).code);
     }
 
 
     @Test
     public void testUpdateProjectOnRawFolder() throws Exception {
-
-        ProjectConfig pc = new NewProjectConfig("/testUpdateProjectOnRawFolder", BaseProjectType.ID, null, "name", "descr", null, null);
+        ProjectConfig pc = new NewProjectConfigImpl("/testUpdateProjectOnRawFolder", BaseProjectType.ID, null, "name", "descr", null, null, null);
         pm.createProject(pc, null);
         String folderPath = "/testUpdateProjectOnRawFolder/folder";
         pm.getProjectsRoot().createFolder(folderPath);
@@ -340,18 +763,15 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
         // SPECS:
         // If update is called on raw folder new project should be created
 
-        pc = new NewProjectConfig(folderPath, BaseProjectType.ID, null, "raw", "descr", null, null);
+        pc = new NewProjectConfigImpl(folderPath, BaseProjectType.ID, null, "raw", "descr", null, null, null);
         pm.updateProject(pc);
 
         assertEquals(BaseProjectType.ID, pm.getProject(folderPath).getType());
-
-
     }
 
     @Test
     public void testInvalidUpdateConfig() throws Exception {
-
-        ProjectConfig pc = new NewProjectConfig(null, BaseProjectType.ID, null, "name", "descr", null, null);
+        ProjectConfig pc = new NewProjectConfigImpl(null, BaseProjectType.ID, null, "name", "descr", null, null,  null);
 
         try {
             pm.updateProject(pc);
@@ -359,7 +779,7 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
         } catch (ConflictException e) {
         }
 
-        pc = new NewProjectConfig("/nothing", BaseProjectType.ID, null, "name", "descr", null, null);
+        pc = new NewProjectConfigImpl("/nothing", BaseProjectType.ID, null, "name", "descr", null, null, null);
         try {
             pm.updateProject(pc);
             fail("NotFoundException: Project '/nothing' doesn't exist.");
@@ -371,9 +791,9 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
     @Test
     public void testDeleteProject() throws Exception {
 
-        ProjectConfig pc = new NewProjectConfig("/testDeleteProject", BaseProjectType.ID, null, "name", "descr", null, null);
+        ProjectConfig pc = new NewProjectConfigImpl("/testDeleteProject", BaseProjectType.ID, null, "name", "descr", null, null, null);
         pm.createProject(pc, null);
-        pc = new NewProjectConfig("/testDeleteProject/inner", BaseProjectType.ID, null, "name", "descr", null, null);
+        pc = new NewProjectConfigImpl("/testDeleteProject/inner", BaseProjectType.ID, null, "name", "descr", null, null, null);
         pm.createProject(pc, null);
 
         assertNotNull(projectRegistry.getProject("/testDeleteProject/inner"));
@@ -384,13 +804,11 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
         assertNull(projectRegistry.getProject("/testDeleteProject"));
         assertNull(pm.getProjectsRoot().getChild("/testDeleteProject/inner"));
         //assertNull(projectRegistry.folder("/testDeleteProject/inner"));
-
     }
 
     @Test
     public void testDeleteProjectEvent() throws Exception {
-
-        ProjectConfig pc = new NewProjectConfig("/testDeleteProject", BaseProjectType.ID, null, "name", "descr", null, null);
+        ProjectConfig pc = new NewProjectConfigImpl("/testDeleteProject", BaseProjectType.ID, null, "name", "descr", null, null, null);
         pm.createProject(pc, null);
 
         String[] deletedPath = new String[1];
@@ -401,13 +819,11 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
         pm.delete("/testDeleteProject");
 
         assertEquals("/testDeleteProject", deletedPath[0]);
-
     }
 
 
     @Test
     public void testImportProject() throws Exception {
-
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         String fileContent = "to be or not to be";
         ZipOutputStream zipOut = new ZipOutputStream(bout);
@@ -422,7 +838,7 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
 
         SourceStorage sourceConfig = DtoFactory.newDto(SourceStorageDto.class).withType(importType);
 
-        pm.importProject("/testImportProject", sourceConfig, false);
+        pm.importProject("/testImportProject", sourceConfig, false, () -> new ProjectImportOutputWSLineConsumer("BATCH", "ws", 300));
 
         RegisteredProject project = projectRegistry.getProject("/testImportProject");
 
@@ -433,7 +849,6 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
 
         assertNotNull(project.getBaseFolder().getChild("file1"));
         assertEquals(fileContent, project.getBaseFolder().getChild("file1").getVirtualFile().getContentAsString());
-
     }
 
     @Test
@@ -445,7 +860,7 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
 
         SourceStorage sourceConfig = DtoFactory.newDto(SourceStorageDto.class).withType(importType);
         try {
-            pm.importProject(projectPath, sourceConfig, false);
+            pm.importProject(projectPath, sourceConfig, false, () -> new ProjectImportOutputWSLineConsumer("testImportProject", "ws", 300));
         } catch (Exception e) {
         }
 
@@ -458,7 +873,7 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
         SourceStorage sourceConfig = DtoFactory.newDto(SourceStorageDto.class).withType("nothing");
 
         try {
-            pm.importProject("/testImportProject", sourceConfig, false);
+            pm.importProject("/testImportProject", sourceConfig, false, () -> new ProjectImportOutputWSLineConsumer("testImportProject", "ws", 300));
             fail("NotFoundException: Unable import sources project from 'null'. Sources type 'nothing' is not supported.");
         } catch (NotFoundException e) {
         }
@@ -467,11 +882,11 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
 
     @Test
     public void testProvidedAttributesNotSerialized() throws Exception {
-
         Map<String, List<String>> attributes = new HashMap<>();
         attributes.put("pt2-var2", new AttributeValue("test2").getList());
         attributes.put("pt2-var1", new AttributeValue("test1").getList());
-        ProjectConfig pc = new NewProjectConfig("/testProvidedAttributesNotSerialized", "pt3", null, "name", "descr", attributes, null);
+        ProjectConfig pc =
+                new NewProjectConfigImpl("/testProvidedAttributesNotSerialized", "pt3", null, "name", "descr", attributes, null, null);
 
         pm.createProject(pc, null);
 
@@ -493,10 +908,9 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
 
     @Test
     public void testSettableValueProvider() throws Exception {
-
         assertTrue(((Variable)projectTypeRegistry.getProjectType("settableVPPT").getAttribute("my")).isValueProvided());
 
-        ProjectConfig pc = new NewProjectConfig("/testSettableValueProvider", "settableVPPT", null, "", "", new HashMap<>(), null);
+        ProjectConfig pc = new NewProjectConfigImpl("/testSettableValueProvider", "settableVPPT", null, "", "", new HashMap<>(), null, null);
 
         pm.createProject(pc, null);
 
@@ -507,17 +921,63 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
 
         Map<String, List<String>> attributes = new HashMap<>();
         attributes.put("my", new AttributeValue("set").getList());
-        pc = new NewProjectConfig("/testSettableValueProvider", "settableVPPT", null, "", "", attributes, null);
+        pc = new NewProjectConfigImpl("/testSettableValueProvider", "settableVPPT", null, "", "", attributes, null, null);
 
         pm.updateProject(pc);
         project = pm.getProject("/testSettableValueProvider");
         assertEquals("set", project.getAttributes().get("my").get(0));
-
     }
 
      /* ---------------------------------- */
     /* private */
     /* ---------------------------------- */
+
+    private void checkProjectExist(String projectPath) {
+        RegisteredProject project = projectRegistry.getProject(projectPath);
+        FolderEntry projectFolder = project.getBaseFolder();
+        assertNotNull(project);
+        assertTrue(projectFolder.getVirtualFile().exists());
+        assertEquals(projectPath, project.getPath());
+        assertEquals(BaseProjectType.ID, project.getType());
+    }
+
+    private void checkChildrenFor(FolderEntry projectFolder, List<String> children) throws ServerException, ForbiddenException {
+        for (String path : children) {
+            assertNotNull(projectFolder.getChild(path));
+            if (path.contains("file")) {
+                String fileContent = projectFolder.getChild(path).getVirtualFile().getContentAsString();
+                assertEquals(FILE_CONTENT, fileContent);
+            }
+        }
+    }
+
+    private InputStream prepareZipArchiveBasedOn(List<String> paths) throws IOException {
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        ZipOutputStream zipOut = new ZipOutputStream(bout);
+
+        for (String path : paths) {
+            zipOut.putNextEntry(new ZipEntry(path));
+
+            if (path.contains("file")) {
+                zipOut.write(FILE_CONTENT.getBytes());
+            }
+        }
+        zipOut.close();
+        return new ByteArrayInputStream(bout.toByteArray());
+    }
+
+    private NewProjectConfigDto createProjectConfigObject(String projectName,
+                                                          String projectPath,
+                                                          String projectType,
+                                                          SourceStorageDto sourceStorage) {
+        return DtoFactory.newDto(NewProjectConfigDto.class)
+                         .withPath(projectPath)
+                         .withName(projectName)
+                         .withType(projectType)
+                         .withDescription("description")
+                         .withSource(sourceStorage)
+                         .withAttributes(new HashMap<>());
+    }
 
     private void registerImporter(String importType, InputStream zip) throws Exception {
         final ValueHolder<FolderEntry> folderHolder = new ValueHolder<>();
@@ -563,4 +1023,18 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
     }
 
 
+    class SrcGenerator implements CreateProjectHandler {
+
+        @Override
+        public void onCreateProject(Path projectPath, Map<String, AttributeValue> attributes, Map<String, String> options)
+                throws ForbiddenException, ConflictException, ServerException {
+            FolderEntry baseFolder = new FolderEntry(vfsProvider.getVirtualFileSystem().getRoot().createFolder(projectPath.toString()));
+            baseFolder.createFolder("file1");
+        }
+
+        @Override
+        public String getProjectType() {
+            return "pt3";
+        }
+    }
 }

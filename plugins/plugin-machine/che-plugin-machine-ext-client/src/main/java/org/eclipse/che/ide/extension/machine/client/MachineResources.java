@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,10 +43,6 @@ public interface MachineResources extends ClientBundle {
     /** Returns the icon for 'Edit Commands...' action. */
     @Source("images/recipe.svg")
     SVGResource recipe();
-
-    /** Returns the icon for 'Arbitrary' command type. */
-    @Source("command/arbitrary/arbitrary-command-type.svg")
-    SVGResource customCommandTypeSubElementIcon();
 
     @Source("images/process/output-icon.svg")
     SVGResource output();
@@ -150,6 +146,8 @@ public interface MachineResources extends ClientBundle {
         String processTree();
 
         String processTreeNode();
+
+        String commandTreeNode();
 
         String differentMachineLabel();
 

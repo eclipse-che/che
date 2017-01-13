@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,14 +22,17 @@ import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceProcess;
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 
 /**
@@ -46,6 +49,8 @@ public abstract class AbstractAgentLauncher implements AgentLauncher {
     private static final Logger          LOG      = LoggerFactory.getLogger(AbstractAgentLauncher.class);
     private static final ExecutorService executor =
             Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("AgentLauncher-%d")
+                                                                    .setUncaughtExceptionHandler(
+                                                                            LoggingUncaughtExceptionHandler.getInstance())
                                                                     .setDaemon(true)
                                                                     .build());
 
@@ -63,9 +68,12 @@ public abstract class AbstractAgentLauncher implements AgentLauncher {
 
     @Override
     public void launch(Instance machine, Agent agent) throws ServerException {
+        if (isNullOrEmpty(agent.getScript())) {
+            return;
+        }
         try {
             final InstanceProcess process = start(machine, agent);
-            LOG.debug("Waiting for agent {} is launched. Workspace ID:{}", agent.getName(), machine.getWorkspaceId());
+            LOG.debug("Waiting for agent {} is launched. Workspace ID:{}", agent.getId(), machine.getWorkspaceId());
 
             final long pingStartTimestamp = System.currentTimeMillis();
             while (System.currentTimeMillis() - pingStartTimestamp < agentMaxStartTimeMs) {
@@ -89,19 +97,20 @@ public abstract class AbstractAgentLauncher implements AgentLauncher {
         throw new ServerException(errMsg);
     }
 
-
-    protected InstanceProcess start(final Instance machine, final Agent agent) throws ServerException {
-        final Command command = new CommandImpl(agent.getName(), agent.getScript(), "agent");
-        final InstanceProcess process = machine.createProcess(command, null);
-        final LineConsumer lineConsumer = new AbstractLineConsumer() {
+    protected InstanceProcess start(Instance machine, Agent agent) throws ServerException {
+        Command command = new CommandImpl(agent.getId(), agent.getScript(), "agent");
+        InstanceProcess process = machine.createProcess(command, null);
+        LineConsumer lineConsumer = new AbstractLineConsumer() {
             @Override
             public void writeLine(String line) throws IOException {
                 machine.getLogger().writeLine(line);
             }
         };
 
+        CountDownLatch countDownLatch = new CountDownLatch(1);
         executor.execute(ThreadLocalPropagateContext.wrap(() -> {
             try {
+                countDownLatch.countDown();
                 process.start(lineConsumer);
             } catch (ConflictException | MachineException e) {
                 try {
@@ -115,6 +124,12 @@ public abstract class AbstractAgentLauncher implements AgentLauncher {
                 }
             }
         }));
+        try {
+            // ensure that code inside of task submitted to executor is called before end of this method
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
 
         return process;
     }

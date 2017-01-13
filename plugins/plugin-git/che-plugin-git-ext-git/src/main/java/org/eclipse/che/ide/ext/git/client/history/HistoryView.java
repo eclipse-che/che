@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,7 +24,7 @@ import java.util.List;
  */
 public interface HistoryView extends View<HistoryView.ActionDelegate> {
     /** Needs for delegate some function into History view. */
-    public interface ActionDelegate extends BaseActionDelegate {
+    interface ActionDelegate extends BaseActionDelegate {
         /** Performs any actions appropriate in response to the user having pressed the Refresh button. */
         void onRefreshClicked();
 
@@ -50,6 +50,11 @@ public interface HistoryView extends View<HistoryView.ActionDelegate> {
          *         selected revision
          */
         void onRevisionSelected(@NotNull Revision revision);
+
+        /**
+         * Occurs when the last entry in the list has been displayed.
+         */
+        void onScrolledToButton();
     }
 
     void setVisible(boolean visible);

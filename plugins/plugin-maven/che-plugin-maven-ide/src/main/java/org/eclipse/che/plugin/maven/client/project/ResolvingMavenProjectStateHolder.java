@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,8 @@
 package org.eclipse.che.plugin.maven.client.project;
 
 import com.google.gwt.user.client.Timer;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.promises.client.Operation;
@@ -28,8 +30,6 @@ import org.eclipse.che.ide.websocket.events.MessageHandler;
 import org.eclipse.che.plugin.maven.shared.MessageType;
 import org.eclipse.che.plugin.maven.shared.dto.StartStopNotification;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.util.HashSet;
 
 import static org.eclipse.che.ide.project.ResolvingProjectStateHolder.ResolvingProjectState.IN_PROGRESS;
@@ -52,10 +52,10 @@ import static org.eclipse.che.plugin.maven.shared.MessageType.START_STOP;
  */
 @Singleton
 public class ResolvingMavenProjectStateHolder implements ResolvingProjectStateHolder, WsAgentStateHandler {
-    private final DtoFactory factory;
-    private final WsAgentStateController wsAgentStateController;
-    private ResolvingProjectState                  state;
-    private HashSet<ResolvingProjectStateListener> listeners;
+    private final DtoFactory                             factory;
+    private final WsAgentStateController                 wsAgentStateController;
+    private       ResolvingProjectState                  state;
+    private       HashSet<ResolvingProjectStateListener> listeners;
 
     @Inject
     public ResolvingMavenProjectStateHolder(DtoFactory factory,

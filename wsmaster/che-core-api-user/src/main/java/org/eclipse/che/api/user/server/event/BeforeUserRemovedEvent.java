@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,14 +10,17 @@
  *******************************************************************************/
 package org.eclipse.che.api.user.server.event;
 
+import org.eclipse.che.api.core.notification.EventOrigin;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
+import org.eclipse.che.core.db.cascade.event.RemoveEvent;
 
 /**
  * Published before {@link UserImpl user} removed.
  *
  * @author Yevhenii Voevodin
  */
-public class BeforeUserRemovedEvent {
+@EventOrigin("user")
+public class BeforeUserRemovedEvent extends RemoveEvent {
 
     private final UserImpl user;
 

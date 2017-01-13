@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,7 +33,6 @@ import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.SearcherFactory;
 import org.apache.lucene.search.SearcherManager;
 import org.apache.lucene.search.TopDocs;
-import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.util.IOUtils;
 import org.eclipse.che.api.core.ForbiddenException;
@@ -67,11 +66,13 @@ import static com.google.common.collect.Lists.newArrayList;
  * @author andrew00x
  */
 public abstract class LuceneSearcher implements Searcher {
-    private static final Logger LOG = LoggerFactory.getLogger(LuceneSearcher.class);
+    private static final Logger LOG          = LoggerFactory.getLogger(LuceneSearcher.class);
+    private static final int    RESULT_LIMIT = 1000;
+    private static final String PATH_FIELD   = "path";
+    private static final String NAME_FIELD   = "name";
+    private static final String TEXT_FIELD   = "text";
 
-    private static final int RESULT_LIMIT = 1000;
-
-    private final List<VirtualFileFilter>                      indexFilters;
+    private final List<VirtualFileFilter>                      excludeFileIndexFilters;
     private final AbstractLuceneSearcherProvider.CloseCallback closeCallback;
 
     private IndexWriter     luceneIndexWriter;
@@ -88,24 +89,24 @@ public abstract class LuceneSearcher implements Searcher {
     }
 
     /**
-     * @param indexFilter
+     * @param excludeFileIndexFilter
      *         common filter for files that should not be indexed. If complex excluding rules needed then few filters might be combined
      *         with {@link VirtualFileFilters#createAndFilter} or {@link VirtualFileFilters#createOrFilter} methods
      */
-    protected LuceneSearcher(VirtualFileFilter indexFilter, AbstractLuceneSearcherProvider.CloseCallback closeCallback) {
+    protected LuceneSearcher(VirtualFileFilter excludeFileIndexFilter, AbstractLuceneSearcherProvider.CloseCallback closeCallback) {
         this.closeCallback = closeCallback;
-        indexFilters = new CopyOnWriteArrayList<>();
-        indexFilters.add(indexFilter);
+        excludeFileIndexFilters = new CopyOnWriteArrayList<>();
+        excludeFileIndexFilters.add(excludeFileIndexFilter);
     }
 
     @Override
     public boolean addIndexFilter(VirtualFileFilter indexFilter) {
-        return indexFilters.add(indexFilter);
+        return excludeFileIndexFilters.add(indexFilter);
     }
 
     @Override
     public boolean removeIndexFilter(VirtualFileFilter indexFilter) {
-        return indexFilters.remove(indexFilter);
+        return excludeFileIndexFilters.remove(indexFilter);
     }
 
     protected Analyzer makeAnalyzer() {
@@ -207,7 +208,7 @@ public abstract class LuceneSearcher implements Searcher {
             List<SearchResultEntry> results = newArrayList();
             for (int i = 0; i < topDocs.scoreDocs.length; i++) {
                 ScoreDoc scoreDoc = topDocs.scoreDocs[i];
-                String filePath = luceneSearcher.doc(scoreDoc.doc).getField("path").stringValue();
+                String filePath = luceneSearcher.doc(scoreDoc.doc).getField(PATH_FIELD).stringValue();
                 results.add(new SearchResultEntry(filePath));
             }
 
@@ -225,7 +226,7 @@ public abstract class LuceneSearcher implements Searcher {
                                .withNextPageQueryExpression(nextPageQueryExpression)
                                .withElapsedTimeMillis(elapsedTimeMillis)
                                .build();
-        } catch (IOException e) {
+        } catch (IOException | ParseException e) {
             throw new ServerException(e.getMessage(), e);
         } finally {
             try {
@@ -236,24 +237,23 @@ public abstract class LuceneSearcher implements Searcher {
         }
     }
 
-    private Query createLuceneQuery(QueryExpression query) throws ServerException {
+    private Query createLuceneQuery(QueryExpression query) throws ParseException {
         final BooleanQuery luceneQuery = new BooleanQuery();
         final String name = query.getName();
         final String path = query.getPath();
         final String text = query.getText();
         if (path != null) {
-            luceneQuery.add(new PrefixQuery(new Term("path", path)), BooleanClause.Occur.MUST);
+            luceneQuery.add(new PrefixQuery(new Term(PATH_FIELD, path)), BooleanClause.Occur.MUST);
         }
         if (name != null) {
-            luceneQuery.add(new WildcardQuery(new Term("name", name)), BooleanClause.Occur.MUST);
+            QueryParser qParser = new QueryParser(NAME_FIELD, makeAnalyzer());
+            qParser.setAllowLeadingWildcard(true);
+            luceneQuery.add(qParser.parse(name), BooleanClause.Occur.MUST);
         }
         if (text != null) {
-            QueryParser qParser = new QueryParser("text", makeAnalyzer());
-            try {
-                luceneQuery.add(qParser.parse(text), BooleanClause.Occur.MUST);
-            } catch (ParseException e) {
-                throw new ServerException(e.getMessage());
-            }
+            QueryParser qParser = new QueryParser(TEXT_FIELD, makeAnalyzer());
+            qParser.setAllowLeadingWildcard(true);
+            luceneQuery.add(qParser.parse(text), BooleanClause.Occur.MUST);
         }
         return luceneQuery;
     }
@@ -327,8 +327,8 @@ public abstract class LuceneSearcher implements Searcher {
             try (Reader fContentReader = shouldIndexContent(virtualFile)
                                          ? new BufferedReader(new InputStreamReader(virtualFile.getContent()))
                                          : null) {
-                getIndexWriter()
-                        .updateDocument(new Term("path", virtualFile.getPath().toString()), createDocument(virtualFile, fContentReader));
+                getIndexWriter().updateDocument(new Term(PATH_FIELD, virtualFile.getPath().toString()),
+                                                createDocument(virtualFile, fContentReader));
             } catch (OutOfMemoryError oome) {
                 close();
                 throw oome;
@@ -344,10 +344,10 @@ public abstract class LuceneSearcher implements Searcher {
     public final void delete(String path, boolean isFile) throws ServerException {
         try {
             if (isFile) {
-                Term term = new Term("path", path);
+                Term term = new Term(PATH_FIELD, path);
                 getIndexWriter().deleteDocuments(term);
             } else {
-                Term term = new Term("path", path + "/");
+                Term term = new Term(PATH_FIELD, path + '/');
                 getIndexWriter().deleteDocuments(new PrefixQuery(term));
             }
         } catch (OutOfMemoryError oome) {
@@ -360,7 +360,7 @@ public abstract class LuceneSearcher implements Searcher {
 
     @Override
     public final void update(VirtualFile virtualFile) throws ServerException {
-        doUpdate(new Term("path", virtualFile.getPath().toString()), virtualFile);
+        doUpdate(new Term(PATH_FIELD, virtualFile.getPath().toString()), virtualFile);
     }
 
     protected void doUpdate(Term deleteTerm, VirtualFile virtualFile) throws ServerException {
@@ -380,17 +380,17 @@ public abstract class LuceneSearcher implements Searcher {
 
     protected Document createDocument(VirtualFile virtualFile, Reader reader) throws ServerException {
         final Document doc = new Document();
-        doc.add(new StringField("path", virtualFile.getPath().toString(), Field.Store.YES));
-        doc.add(new StringField("name", virtualFile.getName(), Field.Store.YES));
+        doc.add(new StringField(PATH_FIELD, virtualFile.getPath().toString(), Field.Store.YES));
+        doc.add(new TextField(NAME_FIELD, virtualFile.getName(), Field.Store.YES));
         if (reader != null) {
-            doc.add(new TextField("text", reader));
+            doc.add(new TextField(TEXT_FIELD, reader));
         }
         return doc;
     }
 
     private boolean shouldIndexContent(VirtualFile virtualFile) {
-        for (VirtualFileFilter indexFilter : indexFilters) {
-            if (!indexFilter.accept(virtualFile)) {
+        for (VirtualFileFilter indexFilter : excludeFileIndexFilters) {
+            if (indexFilter.accept(virtualFile)) {
                 return false;
             }
         }

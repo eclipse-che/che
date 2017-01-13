@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,13 +13,13 @@ package org.eclipse.che.plugin.languageserver.ide.editor.sync;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.languageserver.shared.lsapi.DidChangeTextDocumentParamsDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentContentChangeEventDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.VersionedTextDocumentIdentifierDTO;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.DidChangeTextDocumentParamsDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.TextDocumentContentChangeEventDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.VersionedTextDocumentIdentifierDTO;
 
 import java.util.Collections;
 

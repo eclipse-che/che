@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -437,4 +437,20 @@ public interface JavaLocalizationConstant extends Messages {
 
     @Key("code.assist.errorMessage.resolvingProject")
     String codeAssistErrorMessageResolvingProject();
+
+
+    @Key("macro.current.class.fqn.description")
+    String macroCurrentClassFQN_Description();
+
+    @Key("macro.project.java.sourcepath.description")
+    String macroProjectJavaSourcePathDescription();
+
+    @Key("macro.java.main.class.description")
+    String macroJavaMainClassDescription();
+
+    @Key("macro.project.java.output.dir.description")
+    String macroProjectJavaOutputDirDescription();
+
+    @Key("macro.project.java.classpath.description")
+    String macroProjectJavaClasspathDescription();
 }

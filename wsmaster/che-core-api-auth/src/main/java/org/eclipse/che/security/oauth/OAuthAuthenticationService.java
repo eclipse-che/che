@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,21 +40,20 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.net.URLDecoder;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.util.Collections.emptyList;
+import static org.eclipse.che.commons.lang.UrlUtils.getParameter;
+import static org.eclipse.che.commons.lang.UrlUtils.getQueryParametersFromState;
+import static org.eclipse.che.commons.lang.UrlUtils.getRequestUrl;
+import static org.eclipse.che.commons.lang.UrlUtils.getState;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /** RESTful wrapper for OAuthAuthenticator. */
@@ -62,7 +61,7 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 public class OAuthAuthenticationService {
     private static final Logger LOG = LoggerFactory.getLogger(OAuthAuthenticationService.class);
     @Inject
-    @Named("auth.oauth.access_denied_error_page")
+    @Named("che.auth.access_denied_error_page")
     protected String                     errorPage;
     @Inject
     protected OAuthAuthenticatorProvider providers;
@@ -97,17 +96,11 @@ public class OAuthAuthenticationService {
     @GET
     @Path("authenticate")
     public Response authenticate(@Required @QueryParam("oauth_provider") String oauthProvider,
-                                 @QueryParam("userId") String userId,
-                                 @QueryParam("scope") List<String> scopes)
-            throws ForbiddenException, BadRequestException, OAuthAuthenticationException {
-
+                                 @QueryParam("scope") List<String> scopes)throws ForbiddenException,
+                                                                                 BadRequestException,
+                                                                                 OAuthAuthenticationException {
         OAuthAuthenticator oauth = getAuthenticator(oauthProvider);
-        if (!isNullOrEmpty(userId) && !userId.equals(EnvironmentContext.getCurrent().getSubject().getUserId())) {
-            throw new ForbiddenException(
-                    "Provided userId " + userId + " is not related to current user " + EnvironmentContext.getCurrent().getSubject().getUserId());
-        }
-
-        final String authUrl = oauth.getAuthenticateUrl(getRequestUrl(uriInfo), scopes == null ? Collections.<String>emptyList() : scopes);
+        final String authUrl = oauth.getAuthenticateUrl(getRequestUrl(uriInfo), scopes == null ? emptyList() : scopes);
         return Response.temporaryRedirect(URI.create(authUrl)).build();
     }
 
@@ -115,7 +108,7 @@ public class OAuthAuthenticationService {
     @Path("callback")
     public Response callback(@QueryParam("errorValues") List<String> errorValues) throws OAuthAuthenticationException, BadRequestException {
         URL requestUrl = getRequestUrl(uriInfo);
-        Map<String, List<String>> params = getRequestParameters(getState(requestUrl));
+        Map<String, List<String>> params = getQueryParametersFromState(getState(requestUrl));
         if (errorValues != null && errorValues.contains("access_denied")) {
             return Response.temporaryRedirect(uriInfo.getRequestUriBuilder().replacePath(errorPage).replaceQuery(null).build()).build();
         }
@@ -202,88 +195,10 @@ public class OAuthAuthenticationService {
         }
     }
 
-    protected URL getRequestUrl(UriInfo uriInfo) {
-        try {
-            return uriInfo.getRequestUri().toURL();
-        } catch (MalformedURLException e) {
-            // should never happen
-            throw new RuntimeException(e.getMessage(), e);
-        }
-    }
-
-    /**
-     * OAuth 2.0 support pass query parameters 'state' to OAuth authorization server. Authorization server sends it
-     * back
-     * to callback URL. Here restore all parameters specified in initial request to {@link * #authenticate} .
-     *
-     * @param state
-     *         query parameter state
-     * @return map contains request parameters to method {@link #authenticate}
-     */
-    protected Map<String, List<String>> getRequestParameters(String state) {
-        Map<String, List<String>> params = new HashMap<>();
-        if (!(state == null || state.isEmpty())) {
-            String decodedState;
-            try {
-                decodedState = URLDecoder.decode(state, "UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                // should never happen, UTF-8 supported.
-                throw new RuntimeException(e.getMessage(), e);
-            }
-
-            for (String pair : decodedState.split("&")) {
-                if (!pair.isEmpty()) {
-                    String name;
-                    String value;
-                    int eq = pair.indexOf('=');
-                    if (eq < 0) {
-                        name = pair;
-                        value = "";
-                    } else {
-                        name = pair.substring(0, eq);
-                        value = pair.substring(eq + 1);
-                    }
-
-                    List<String> paramValues = params.get(name);
-                    if (paramValues == null) {
-                        paramValues = new ArrayList<>();
-                        params.put(name, paramValues);
-                    }
-                    paramValues.add(value);
-                }
-            }
-        }
-        return params;
-    }
-
-    protected String getState(URL requestUrl) {
-        final String query = requestUrl.getQuery();
-        if (!(query == null || query.isEmpty())) {
-            int start = query.indexOf("state=");
-            if (start < 0) {
-                return null;
-            }
-            int end = query.indexOf('&', start);
-            if (end < 0) {
-                end = query.length();
-            }
-            return query.substring(start + 6, end);
-        }
-        return null;
-    }
-
-    protected String getParameter(Map<String, List<String>> params, String name) {
-        List<String> l = params.get(name);
-        if (!(l == null || l.isEmpty())) {
-            return l.get(0);
-        }
-        return null;
-    }
-
     protected OAuthAuthenticator getAuthenticator(String oauthProviderName) throws BadRequestException {
         OAuthAuthenticator oauth = providers.getAuthenticator(oauthProviderName);
         if (oauth == null) {
-            LOG.error("Unsupported OAuth provider {} ", oauthProviderName);
+            LOG.warn("Unsupported OAuth provider {} ", oauthProviderName);
             throw new BadRequestException("Unsupported OAuth provider " + oauthProviderName);
         }
         return oauth;

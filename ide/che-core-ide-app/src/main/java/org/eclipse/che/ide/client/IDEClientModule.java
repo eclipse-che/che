@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,13 +16,12 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.parts.EditorPartStack;
-import org.eclipse.che.ide.part.editor.EditorPartStackFactory;
+import org.eclipse.che.ide.api.parts.EditorTab;
 import org.eclipse.che.ide.part.editor.EditorPartStackPresenter;
-import org.eclipse.che.ide.part.editor.multipart.SplitEditorPartViewFactory;
 import org.eclipse.che.ide.part.editor.multipart.SplitEditorPartView;
+import org.eclipse.che.ide.part.editor.multipart.SplitEditorPartViewFactory;
 import org.eclipse.che.ide.part.editor.multipart.SplitEditorPartViewImpl;
 import org.eclipse.che.ide.part.widgets.TabItemFactory;
-import org.eclipse.che.ide.api.parts.EditorTab;
 import org.eclipse.che.ide.part.widgets.editortab.EditorTabWidget;
 import org.eclipse.che.ide.part.widgets.partbutton.PartButton;
 import org.eclipse.che.ide.part.widgets.partbutton.PartButtonWidget;
@@ -49,8 +48,7 @@ public class IDEClientModule extends AbstractGinModule {
 
         bind(ResolvingProjectStateHolderRegistry.class).to(ResolvingProjectStateHolderRegistryImpl.class);
 
-        install(new GinFactoryModuleBuilder().implement(EditorPartStack.class, EditorPartStackPresenter.class)
-                                             .build(EditorPartStackFactory.class));
+        bind(EditorPartStack.class).to(EditorPartStackPresenter.class);
 
         install(new GinFactoryModuleBuilder().implement(SplitEditorPartView.class, SplitEditorPartViewImpl.class)
                                              .build(SplitEditorPartViewFactory.class));

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,7 +24,7 @@ import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.debug.Debugger;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.extension.machine.client.command.valueproviders.CurrentProjectPathProvider;
+import org.eclipse.che.ide.extension.machine.client.command.macros.CurrentProjectPathMacro;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.util.storage.LocalStorage;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
@@ -57,7 +57,7 @@ public class DebugConfigurationsManagerImpl implements DebugConfigurationsManage
     private final DebuggerManager                   debuggerManager;
     private final DialogFactory                     dialogFactory;
     private final DebuggerLocalizationConstant      localizationConstants;
-    private final CurrentProjectPathProvider currentProjectPathProvider;
+    private final CurrentProjectPathMacro           currentProjectPathMacro;
 
     private DebugConfiguration currentDebugConfiguration;
 
@@ -68,13 +68,13 @@ public class DebugConfigurationsManagerImpl implements DebugConfigurationsManage
                                           DebuggerManager debuggerManager,
                                           DialogFactory dialogFactory,
                                           DebuggerLocalizationConstant localizationConstants,
-                                          CurrentProjectPathProvider currentProjectPathProvider) {
+                                          CurrentProjectPathMacro currentProjectPathMacro) {
         this.dtoFactory = dtoFactory;
         this.configurationTypeRegistry = debugConfigurationTypeRegistry;
         this.debuggerManager = debuggerManager;
         this.dialogFactory = dialogFactory;
         this.localizationConstants = localizationConstants;
-        this.currentProjectPathProvider = currentProjectPathProvider;
+        this.currentProjectPathMacro = currentProjectPathMacro;
         localStorageOptional = Optional.fromNullable(localStorageProvider.get());
         configurationChangedListeners = new HashSet<>();
         configurations = new ArrayList<>();
@@ -238,7 +238,7 @@ public class DebugConfigurationsManagerImpl implements DebugConfigurationsManage
         if (debugger != null) {
             debuggerManager.setActiveDebugger(debugger);
 
-            currentProjectPathProvider.getValue().then(new Operation<String>() {
+            currentProjectPathMacro.expand().then(new Operation<String>() {
                 @Override
                 public void apply(String arg) throws OperationException {
                     Map<String, String> connectionProperties = prepareConnectionProperties(debugConfiguration, arg);
@@ -260,7 +260,7 @@ public class DebugConfigurationsManagerImpl implements DebugConfigurationsManage
         connectionProperties.put("PORT", String.valueOf(debugConfiguration.getPort()));
 
         for (Map.Entry<String, String> entry : debugConfiguration.getConnectionProperties().entrySet()) {
-            String newValue = entry.getValue().replace(currentProjectPathProvider.getKey(), currentProjectPath);
+            String newValue = entry.getValue().replace(currentProjectPathMacro.getName(), currentProjectPath);
             connectionProperties.put(entry.getKey(), newValue);
         }
         return connectionProperties;

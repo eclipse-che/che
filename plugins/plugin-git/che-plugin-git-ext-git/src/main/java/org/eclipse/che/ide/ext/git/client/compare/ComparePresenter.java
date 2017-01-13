@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -151,13 +151,13 @@ public class ComparePresenter implements CompareView.ActionDelegate {
                 comparedFile.updateContent(newContent).then(new Operation<Void>() {
                     @Override
                     public void apply(Void ignored) throws OperationException {
-                        final Optional<Container> parent = comparedFile.getParent();
+                        final Container parent = comparedFile.getParent();
 
-                        if (parent.isPresent()) {
-                            parent.get().synchronize();
+                        if (parent != null) {
+                            parent.synchronize();
                         }
 
-                        eventBus.fireEvent(new FileContentUpdateEvent(comparedFile.getPath()));
+                        eventBus.fireEvent(new FileContentUpdateEvent(comparedFile.getLocation().toString()));
                         view.hide();
                     }
                 });

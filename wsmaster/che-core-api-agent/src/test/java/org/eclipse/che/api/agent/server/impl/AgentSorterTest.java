@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,12 +57,12 @@ public class AgentSorterTest {
         when(agentRegistry.getAgent(eq(AgentKeyImpl.parse("fqn4")))).thenThrow(new AgentNotFoundException("Agent not found"));
 
         when(agent1.getDependencies()).thenReturn(singletonList("fqn3"));
-        when(agent1.getName()).thenReturn("fqn1");
+        when(agent1.getId()).thenReturn("fqn1");
 
         when(agent2.getDependencies()).thenReturn(singletonList("fqn3"));
-        when(agent2.getName()).thenReturn("fqn2");
+        when(agent2.getId()).thenReturn("fqn2");
 
-        when(agent3.getName()).thenReturn("fqn3");
+        when(agent3.getId()).thenReturn("fqn3");
     }
 
     @Test
@@ -70,9 +70,9 @@ public class AgentSorterTest {
         List<AgentKey> sorted = agentSorter.sort(Arrays.asList("fqn1", "fqn2", "fqn3"));
 
         assertEquals(sorted.size(), 3);
-        assertEquals(sorted.get(0).getName(), "fqn3");
-        assertEquals(sorted.get(1).getName(), "fqn1");
-        assertEquals(sorted.get(2).getName(), "fqn2");
+        assertEquals(sorted.get(0).getId(), "fqn3");
+        assertEquals(sorted.get(1).getId(), "fqn1");
+        assertEquals(sorted.get(2).getId(), "fqn2");
     }
 
     @Test(expectedExceptions = AgentException.class, expectedExceptionsMessageRegExp = ".*fqn1.*fqn2.*")

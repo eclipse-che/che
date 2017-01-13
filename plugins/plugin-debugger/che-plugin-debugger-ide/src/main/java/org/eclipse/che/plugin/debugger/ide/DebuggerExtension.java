@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,9 +15,12 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
+import org.eclipse.che.ide.api.constraints.Anchor;
+import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.keybinding.KeyBuilder;
+import org.eclipse.che.ide.util.browser.UserAgent;
 import org.eclipse.che.plugin.debugger.ide.actions.ChangeVariableValueAction;
 import org.eclipse.che.plugin.debugger.ide.actions.DebugAction;
 import org.eclipse.che.plugin.debugger.ide.actions.DeleteAllBreakpointsAction;
@@ -29,6 +32,7 @@ import org.eclipse.che.plugin.debugger.ide.actions.ShowHideDebuggerPanelAction;
 import org.eclipse.che.plugin.debugger.ide.actions.StepIntoAction;
 import org.eclipse.che.plugin.debugger.ide.actions.StepOutAction;
 import org.eclipse.che.plugin.debugger.ide.actions.StepOverAction;
+import org.eclipse.che.plugin.debugger.ide.actions.SuspendAction;
 import org.eclipse.che.plugin.debugger.ide.configuration.DebugConfigurationsGroup;
 import org.eclipse.che.plugin.debugger.ide.debug.DebuggerPresenter;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
@@ -57,6 +61,7 @@ public class DebuggerExtension {
     private static final String STEP_OVER_ID                = "stepOver";
     private static final String STEP_OUT_ID                 = "stepOut";
     private static final String RESUME_EXECUTION_ID         = "resumeExecution";
+    private static final String SUSPEND_EXECUTION_ID        = "suspendExecution";
     private static final String EVALUATE_EXPRESSION_ID      = "evaluateExpression";
     private static final String CHANGE_VARIABLE_VALUE_ID    = "changeVariableValue";
     private static final String SHOW_HIDE_DEBUGGER_PANEL_ID = "showHideDebuggerPanel";
@@ -71,6 +76,7 @@ public class DebuggerExtension {
                              StepOverAction stepOverAction,
                              StepOutAction stepOutAction,
                              ResumeExecutionAction resumeExecutionAction,
+                             SuspendAction suspendAction,
                              EvaluateExpressionAction evaluateExpressionAction,
                              DeleteAllBreakpointsAction deleteAllBreakpointsAction,
                              ChangeVariableValueAction changeVariableValueAction,
@@ -91,6 +97,7 @@ public class DebuggerExtension {
         actionManager.registerAction(STEP_OVER_ID, stepOverAction);
         actionManager.registerAction(STEP_OUT_ID, stepOutAction);
         actionManager.registerAction(RESUME_EXECUTION_ID, resumeExecutionAction);
+        actionManager.registerAction(SUSPEND_EXECUTION_ID, suspendAction);
         actionManager.registerAction(EVALUATE_EXPRESSION_ID, evaluateExpressionAction);
         actionManager.registerAction(CHANGE_VARIABLE_VALUE_ID, changeVariableValueAction);
         actionManager.registerAction(SHOW_HIDE_DEBUGGER_PANEL_ID, showHideDebuggerPanelAction);
@@ -113,12 +120,14 @@ public class DebuggerExtension {
         runMenu.add(stepOverAction, LAST);
         runMenu.add(stepOutAction, LAST);
         runMenu.add(resumeExecutionAction, LAST);
+        runMenu.add(suspendAction, new Constraints(Anchor.BEFORE, RESUME_EXECUTION_ID));
         runMenu.addSeparator();
         runMenu.add(evaluateExpressionAction, LAST);
 
         // create debugger toolbar action group
         DefaultActionGroup debuggerToolbarActionGroup = new DefaultActionGroup(actionManager);
         debuggerToolbarActionGroup.add(resumeExecutionAction);
+        debuggerToolbarActionGroup.add(suspendAction);
         debuggerToolbarActionGroup.add(stepIntoAction);
         debuggerToolbarActionGroup.add(stepOverAction);
         debuggerToolbarActionGroup.add(stepOutAction);
@@ -143,6 +152,11 @@ public class DebuggerExtension {
         keyBinding.getGlobal().addKey(new KeyBuilder().charCode(KeyCodeMap.F9).build(), RESUME_EXECUTION_ID);
         keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode(KeyCodeMap.F8).build(), EVALUATE_EXPRESSION_ID);
         keyBinding.getGlobal().addKey(new KeyBuilder().charCode(KeyCodeMap.F2).build(), CHANGE_VARIABLE_VALUE_ID);
-        keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode('5').build(), SHOW_HIDE_DEBUGGER_PANEL_ID);
+
+        if (UserAgent.isMac()) {
+            keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('5').build(), SHOW_HIDE_DEBUGGER_PANEL_ID);
+        } else {
+            keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode('5').build(), SHOW_HIDE_DEBUGGER_PANEL_ID);
+        }
     }
 }

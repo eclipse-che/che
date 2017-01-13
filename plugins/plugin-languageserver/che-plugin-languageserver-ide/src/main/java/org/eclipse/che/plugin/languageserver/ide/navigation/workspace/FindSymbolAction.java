@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,12 +15,16 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.languageserver.shared.lsapi.LocationDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.RangeDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.SymbolInformationDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.WorkspaceSymbolParamsDTO;
+import org.eclipse.che.api.promises.async.Task;
+import org.eclipse.che.api.promises.async.ThrottledDelayer;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
-import org.eclipse.che.api.promises.async.Task;
-import org.eclipse.che.api.promises.async.ThrottledDelayer;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
@@ -35,10 +39,6 @@ import org.eclipse.che.plugin.languageserver.ide.quickopen.QuickOpenModel;
 import org.eclipse.che.plugin.languageserver.ide.quickopen.QuickOpenPresenter;
 import org.eclipse.che.plugin.languageserver.ide.service.WorkspaceServiceClient;
 import org.eclipse.che.plugin.languageserver.ide.util.OpenFileInEditorHelper;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.LocationDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.RangeDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.SymbolInformationDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.WorkspaceSymbolParamsDTO;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
@@ -123,7 +123,7 @@ public class FindSymbolAction extends AbstractPerspectiveAction implements Quick
     private Promise<List<SymbolEntry>> searchSymbols(final String value) {
         WorkspaceSymbolParamsDTO params = dtoFactory.createDto(WorkspaceSymbolParamsDTO.class);
         params.setQuery(value);
-        params.setFileUri(editorAgent.getActiveEditor().getEditorInput().getFile().getPath());
+        params.setFileUri(editorAgent.getActiveEditor().getEditorInput().getFile().getLocation().toString());
         return workspaceServiceClient.symbol(params).then(new Function<List<SymbolInformationDTO>, List<SymbolEntry>>() {
             @Override
             public List<SymbolEntry> apply(List<SymbolInformationDTO> types) throws FunctionException {

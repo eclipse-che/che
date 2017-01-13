@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,6 +45,7 @@ import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
+import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
@@ -79,7 +80,7 @@ public class CheEnvironmentValidatorTest {
         when(machineInstanceProviders.hasProvider("docker")).thenReturn(true);
         when(machineInstanceProviders.getProviderTypes()).thenReturn(asList("docker", "ssh"));
         when(environmentParser.parse(any(Environment.class))).thenReturn(cheServicesEnv);
-        when(environmentParser.getEnvironmentTypes()).thenReturn(singletonList("compose"));
+        when(environmentParser.getEnvironmentTypes()).thenReturn(singleton("compose"));
     }
 
     @Test
@@ -118,7 +119,7 @@ public class CheEnvironmentValidatorTest {
         // given
         when(environmentParser.parse(any(Environment.class)))
                 .thenThrow(new IllegalArgumentException("test exception"));
-        when(environmentParser.getEnvironmentTypes()).thenReturn(singletonList("otherType"));
+        when(environmentParser.getEnvironmentTypes()).thenReturn(singleton("otherType"));
 
         // when
         environmentValidator.validate("env", environment);
@@ -342,28 +343,31 @@ public class CheEnvironmentValidatorTest {
         serviceEntry = getAnyService(env);
         service = serviceEntry.getValue();
         service.setImage(null);
-        service.setBuild(new CheServiceBuildContextImpl(null, "dockerfile", null));
+        service.setBuild(new CheServiceBuildContextImpl(null, "dockerfile", null, null));
         data.add(asList(env, format("Field 'image' or 'build.context' is required in machine '%s' in environment 'env'", serviceEntry.getKey())));
 
         env = createServicesEnv();
         serviceEntry = getAnyService(env);
         service = serviceEntry.getValue();
         service.setImage("");
-        service.setBuild(new CheServiceBuildContextImpl("", "dockerfile", null));
+        service.setBuild(new CheServiceBuildContextImpl("", "dockerfile", null, null));
         data.add(asList(env, format("Field 'image' or 'build.context' is required in machine '%s' in environment 'env'", serviceEntry.getKey())));
 
         env = createServicesEnv();
         serviceEntry = getAnyService(env);
         service = serviceEntry.getValue();
         service.setImage("");
-        service.setBuild(new CheServiceBuildContextImpl(null, null, null));
+        service.setBuild(new CheServiceBuildContextImpl(null, null, null, null));
         data.add(asList(env, format("Field 'image' or 'build.context' is required in machine '%s' in environment 'env'", serviceEntry.getKey())));
 
         env = createServicesEnv();
         serviceEntry = getAnyService(env);
         service = serviceEntry.getValue();
         service.setImage("");
-        service.setBuild(new CheServiceBuildContextImpl("some url", null, "some content"));
+        service.setBuild(new CheServiceBuildContextImpl("some url",
+                                                        null,
+                                                        "some content",
+                                                        new HashMap<String, String>() {{put("argkey","argvalue");}}));
         data.add(asList(env, format("Machine '%s' in environment 'env' contains mutually exclusive dockerfile content and build context.",
                                     serviceEntry.getKey())));
 
@@ -598,8 +602,8 @@ public class CheEnvironmentValidatorTest {
 
     private static CheServicesEnvironmentImpl createServicesEnv() {
         CheServicesEnvironmentImpl cheServicesEnvironment = new CheServicesEnvironmentImpl();
-        cheServicesEnvironment.setVersion("2");
         Map<String, CheServiceImpl> services = new HashMap<>();
+        Map<String, String> buildArgs =  new HashMap<String, String>() {{put("argkey","argvalue");}};
         cheServicesEnvironment.setServices(services);
 
         services.put("dev-machine", createCheService("_dev",
@@ -613,7 +617,7 @@ public class CheEnvironmentValidatorTest {
                                                   null,
                                                   emptyList(),
                                                   null);
-        service.setBuild(new CheServiceBuildContextImpl("context", "file", null));
+        service.setBuild(new CheServiceBuildContextImpl("context", "file", null, buildArgs));
 
         services.put("machine2", service);
 

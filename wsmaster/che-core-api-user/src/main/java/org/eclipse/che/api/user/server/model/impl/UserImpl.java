@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,15 +12,12 @@ package org.eclipse.che.api.user.server.model.impl;
 
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.model.user.User;
-import org.eclipse.che.api.user.server.jpa.UserEntityListener;
 
-import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
 import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
@@ -59,22 +56,22 @@ import java.util.Objects;
 
         }
 )
-@EntityListeners(UserEntityListener.class)
-@Table(indexes = {@Index(columnList = "email", unique = true)})
+@Table(name = "usr")
 public class UserImpl implements User {
     public static final String PERSONAL_ACCOUNT = "personal";
 
     @Id
+    @Column(name = "id")
     private String id;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(nullable = false)
+    @JoinColumn(nullable = false, name = "account_id")
     private AccountImpl account;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "email")
     private String email;
 
-    @Basic
+    @Column(name = "password")
     private String password;
 
     @ElementCollection

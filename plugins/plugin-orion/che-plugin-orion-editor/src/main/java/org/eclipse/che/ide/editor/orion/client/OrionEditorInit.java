@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,9 +40,11 @@ import org.eclipse.che.ide.api.editor.partition.DocumentPartitioner;
 import org.eclipse.che.ide.api.editor.position.PositionConverter;
 import org.eclipse.che.ide.api.editor.quickfix.QuickAssistAssistant;
 import org.eclipse.che.ide.api.editor.reconciler.Reconciler;
+import org.eclipse.che.ide.api.editor.signature.SignatureHelpProvider;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.text.TypedRegion;
 import org.eclipse.che.ide.api.editor.texteditor.HasKeyBindings;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.util.browser.UserAgent;
 
 import java.util.List;
@@ -92,13 +94,26 @@ public class OrionEditorInit {
         configureCodeAssist(documentHandle);
         configureChangeInterceptors(documentHandle);
         configureFormatter(textEditor);
+        configureSignatureHelp(textEditor);
         addQuickAssistKeyBinding();
     }
+
 
     public void uninstall() {
         Reconciler reconciler = configuration.getReconciler();
         if (reconciler != null) {
             reconciler.uninstall();
+        }
+        SignatureHelpProvider signatureHelpProvider = configuration.getSignatureHelpProvider();
+        if (signatureHelpProvider != null) {
+            signatureHelpProvider.uninstall();
+        }
+    }
+
+    private void configureSignatureHelp(TextEditor textEditor) {
+        SignatureHelpProvider signatureHelpProvider = configuration.getSignatureHelpProvider();
+        if (signatureHelpProvider != null) {
+            signatureHelpProvider.install(textEditor);
         }
     }
 
@@ -177,8 +192,9 @@ public class OrionEditorInit {
 
             final KeyBindingAction action = new KeyBindingAction() {
                 @Override
-                public void action() {
-                    showCompletion(codeAssistant);
+                public boolean action() {
+                    showCompletion(codeAssistant, true);
+                    return true;
                 }
             };
             final HasKeyBindings hasKeyBindings = this.textEditor.getHasKeybindings();
@@ -188,14 +204,15 @@ public class OrionEditorInit {
             documentHandle.getDocEventBus().addHandler(CompletionRequestEvent.TYPE, new CompletionRequestHandler() {
                 @Override
                 public void onCompletionRequest(final CompletionRequestEvent event) {
-                    showCompletion(codeAssistant);
+                    showCompletion(codeAssistant, false);
                 }
             });
         } else {
             final KeyBindingAction action = new KeyBindingAction() {
                 @Override
-                public void action() {
+                public boolean action() {
                     showCompletion();
+                    return true;
                 }
             };
             final HasKeyBindings hasKeyBindings = this.textEditor.getHasKeybindings();
@@ -219,8 +236,9 @@ public class OrionEditorInit {
      * Show the available completions.
      *
      * @param codeAssistant the code assistant
+     * @param triggered if triggered by the content assist key binding
      */
-    private void showCompletion(final CodeAssistant codeAssistant) {
+    private void showCompletion(final CodeAssistant codeAssistant, final boolean triggered) {
         final int cursor = textEditor.getCursorOffset();
         if (cursor < 0) {
             return;
@@ -233,7 +251,7 @@ public class OrionEditorInit {
                     // cursor must be computed here again so it's original value is not baked in
                     // the SMI instance closure - important for completion update when typing
                     final int cursor = textEditor.getCursorOffset();
-                    codeAssistant.computeCompletionProposals(cursor, new CodeAssistCallback() {
+                    codeAssistant.computeCompletionProposals(cursor, triggered, new CodeAssistCallback() {
                         @Override
                         public void proposalComputed(final List<CompletionProposal> proposals) {
                             callback.onCompletionReady(proposals);
@@ -258,11 +276,12 @@ public class OrionEditorInit {
         if (this.quickAssist != null) {
             final KeyBindingAction action = new KeyBindingAction() {
                 @Override
-                public void action() {
+                public boolean action() {
                     final PositionConverter positionConverter = textEditor.getPositionConverter();
                     if (positionConverter != null) {
                         textEditor.showQuickAssist();
                     }
+                    return true;
                 }
             };
             final HasKeyBindings hasKeyBindings = this.textEditor.getHasKeybindings();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,17 +14,17 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.dialogs.CancelCallback;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
-import org.eclipse.che.ide.extension.machine.client.machine.MachineStateEvent;
+import org.eclipse.che.ide.api.machine.events.MachineStateEvent;
 import org.eclipse.che.ide.extension.machine.client.targets.CategoryPage;
 import org.eclipse.che.ide.extension.machine.client.targets.Target;
 import org.eclipse.che.ide.extension.machine.client.targets.TargetManager;
@@ -34,6 +34,7 @@ import static org.eclipse.che.api.core.model.machine.MachineStatus.RUNNING;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
+import static org.eclipse.che.ide.api.machine.events.MachineStateEvent.MachineAction.DESTROYED;
 
 /**
  * Docker type page presenter.
@@ -88,7 +89,7 @@ public class DockerCategoryPresenter implements CategoryPage, TargetManager, Doc
         container.setWidget(dockerView);
     }
 
-    private MachineDto getMachineByName(String machineName) {
+    private MachineEntity getMachineByName(String machineName) {
         return this.targetsTreeManager != null ? this.targetsTreeManager.getMachineByName(machineName) : null;
     }
 
@@ -105,7 +106,7 @@ public class DockerCategoryPresenter implements CategoryPage, TargetManager, Doc
             return false;
         }
 
-        final MachineDto machine = this.getMachineByName(target.getName());
+        final MachineEntity machine = this.getMachineByName(target.getName());
         if (machine == null) {
             return false;
         }
@@ -137,7 +138,7 @@ public class DockerCategoryPresenter implements CategoryPage, TargetManager, Doc
     }
 
     private void destroyTargetMachine(final Target target) {
-        final MachineDto machine = this.getMachineByName(target.getName());
+        final MachineEntity machine = this.getMachineByName(target.getName());
 
         if (machine == null || machine.getStatus() != RUNNING) {
             return;
@@ -147,7 +148,7 @@ public class DockerCategoryPresenter implements CategoryPage, TargetManager, Doc
                                       machine.getId()).then(new Operation<Void>() {
             @Override
             public void apply(Void arg) throws OperationException {
-                eventBus.fireEvent(new MachineStateEvent(machine, MachineStateEvent.MachineAction.DESTROYED));
+                eventBus.fireEvent(new MachineStateEvent(machine, DESTROYED));
                 notificationManager.notify(machineLocale.targetsViewDisconnectSuccess(target.getName()), SUCCESS, FLOAT_MODE);
                 updateTargets(null);
             }

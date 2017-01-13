@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,12 +24,10 @@ export class EditMachineNameDialogController {
    */
   constructor($mdDialog) {
     this.$mdDialog = $mdDialog;
-
-    this.updateInProgress = false;
   }
 
   isUnique(name) {
-    return !this.machinesNames.includes(name);
+    return this.machinesNames.indexOf(name) < 0;
   }
 
   /**
@@ -43,11 +41,7 @@ export class EditMachineNameDialogController {
    * Update machine name
    */
   updateMachineName() {
-    this.updateInProgress = true;
-
-    this.callbackController.updateMachineName(this.name).finally(() => {
-      this.updateInProgress = false;
-      this.hide();
-    });
+    this.callbackController.updateMachineName(this.name);
+    this.hide();
   }
 }

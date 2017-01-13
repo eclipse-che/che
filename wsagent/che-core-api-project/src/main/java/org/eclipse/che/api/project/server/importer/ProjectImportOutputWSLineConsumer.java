@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,10 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.api.project.server.importer;
 
-import org.eclipse.che.api.core.util.LineConsumer;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.google.gson.JsonObject;
 
-import org.everrest.core.impl.provider.json.JsonUtils;
+import org.eclipse.che.api.core.util.LineConsumer;
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.everrest.websockets.WSConnectionContext;
 import org.everrest.websockets.message.ChannelBroadcastMessage;
 import org.slf4j.Logger;
@@ -44,7 +45,10 @@ public class ProjectImportOutputWSLineConsumer implements LineConsumer {
         this.workspaceId = workspaceId;
         lineToSendQueue = new ArrayBlockingQueue<>(1024);
         executor = Executors.newSingleThreadScheduledExecutor(
-                new ThreadFactoryBuilder().setNameFormat(ProjectImportOutputWSLineConsumer.class.getSimpleName()+"-%d").setDaemon(true).build());
+                new ThreadFactoryBuilder().setNameFormat(ProjectImportOutputWSLineConsumer.class.getSimpleName() + "-%d")
+                                          .setDaemon(true)
+                                          .setUncaughtExceptionHandler(LoggingUncaughtExceptionHandler.getInstance())
+                                          .build());
         executor.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
@@ -77,9 +81,12 @@ public class ProjectImportOutputWSLineConsumer implements LineConsumer {
 
     protected void sendMessage(String line) {
         final ChannelBroadcastMessage bm = new ChannelBroadcastMessage();
-        bm.setChannel("importProject:output:" + workspaceId + ":" + projectName);
-        bm.setBody(String.format("{\"num\":%d, \"line\":%s}",
-                                 lineCounter.getAndIncrement(), JsonUtils.getJsonString(line)));
+        bm.setChannel("importProject:output");
+        JsonObject json = new JsonObject();
+        json.addProperty("num", lineCounter.getAndIncrement());
+        json.addProperty("line", line);
+        json.addProperty("project", projectName);
+        bm.setBody(json.toString());
         sendMessageToWS(bm);
     }
 

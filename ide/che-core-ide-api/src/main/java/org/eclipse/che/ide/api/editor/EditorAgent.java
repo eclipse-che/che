@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -89,12 +89,14 @@ public interface EditorAgent {
     List<EditorPartPresenter> getOpenedEditors();
 
     /**
-     * Get all opened editors for {@link EditorPartStack} which contains given {@code editorPart}
+     * Get all opened editors for given {@link EditorPartStack}
      *
-     * @return list with all opened editors for evaluated {@link EditorPartStack} or empty list when {@link EditorPartStack} is not found
+     * @param editorPartStack
+     *         editor part stack for searching opened editors
+     * @return list with all opened editors for {@code editorPartStack}
      */
     @NotNull
-    List<EditorPartPresenter> getOpenedEditorsBasedOn(EditorPartPresenter editorPart);
+    List<EditorPartPresenter> getOpenedEditorsFor(EditorPartStack editorPartStack);
 
     /**
      * Get opened editor by related file path for current {@link EditorPartStack}
@@ -139,16 +141,6 @@ public interface EditorAgent {
      */
     @Nullable
     EditorPartPresenter getPreviousFor(EditorPartPresenter editorPart);
-
-    /**
-     * Get last closed editor for {@link EditorPartStack} which contains given {@code editorPart}
-     *
-     * @param editorPart
-     *         the starting point to evaluate last closed editor
-     * @return opened editor or null if it does not exist
-     */
-    @Nullable
-    EditorPartPresenter getLastClosedBasedOn(EditorPartPresenter editorPart);
 
     interface OpenEditorCallback {
         void onEditorOpened(EditorPartPresenter editor);

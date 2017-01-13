@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,17 +24,18 @@ import javax.inject.Inject;
  */
 public class JsonExampleEditorProvider extends AbstractTextEditorProvider {
 
-    private final JsonExampleEditorConfigurationFactory editorConfigurationFactory;
+
+    private JsonExampleEditorConfigurationProvider jsonExampleEditorConfigurationProvider;
 
     /**
-     * Constructor.
      *
-     * @param editorConfigurationFactory
-     *         the JSON Example Editor configuration factory
+     *
+     * @param jsonExampleEditorConfigurationProvider
+     *         the JSON Example Editor configuration provider
      */
     @Inject
-    public JsonExampleEditorProvider(final JsonExampleEditorConfigurationFactory editorConfigurationFactory) {
-        this.editorConfigurationFactory = editorConfigurationFactory;
+    public JsonExampleEditorProvider(final JsonExampleEditorConfigurationProvider jsonExampleEditorConfigurationProvider) {
+        this.jsonExampleEditorConfigurationProvider = jsonExampleEditorConfigurationProvider;
     }
 
     @Override
@@ -47,11 +48,9 @@ public class JsonExampleEditorProvider extends AbstractTextEditorProvider {
         return "JSON Example Editor";
     }
 
+
     @Override
-    public TextEditor getEditor() {
-        TextEditor editor = super.getEditor();
-        TextEditorConfiguration configuration = this.editorConfigurationFactory.create(editor);
-        editor.initialize(configuration);
-        return editor;
+    protected TextEditorConfiguration getEditorConfiguration() {
+        return jsonExampleEditorConfigurationProvider.get();
     }
 }

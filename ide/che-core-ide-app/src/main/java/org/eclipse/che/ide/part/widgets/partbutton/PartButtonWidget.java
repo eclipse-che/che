@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.eclipse.che.ide.part.widgets.partbutton;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.DoubleClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -23,6 +24,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStackView.TabPosition;
@@ -30,8 +32,6 @@ import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
-
-import org.eclipse.che.commons.annotation.Nullable;
 
 import static org.eclipse.che.ide.api.parts.PartStackView.TabPosition.BELOW;
 import static org.eclipse.che.ide.api.parts.PartStackView.TabPosition.LEFT;
@@ -71,6 +71,7 @@ public class PartButtonWidget extends Composite implements PartButton {
         setStyleName(resources.partStackCss().idePartStackTab());
         ensureDebugId("partButton-" + title);
 
+        addDomHandler(this, DoubleClickEvent.getType());
         addDomHandler(this, ClickEvent.getType());
 
         tabName.setText(title);
@@ -182,13 +183,19 @@ public class PartButtonWidget extends Composite implements PartButton {
         delegate.onTabClicked(this);
     }
 
+    @Override
+    public void onDoubleClick(DoubleClickEvent event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
+
     /** {@inheritDoc} */
     @Override
     public void select() {
         tabSelected = true;
 
         addStyleName(tabPosition == BELOW ? resources.partStackCss().selectedBottomTab()
-                                          : resources.partStackCss().selectedRightOrLeftTab());
+                : resources.partStackCss().selectedRightOrLeftTab());
 
         updateBadge();
     }
@@ -237,4 +244,5 @@ public class PartButtonWidget extends Composite implements PartButton {
 
     interface PartButtonWidgetUiBinder extends UiBinder<Widget, PartButtonWidget> {
     }
+
 }

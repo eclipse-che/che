@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -139,7 +139,7 @@ public class ProjectWizardTest {
     public void shouldImportProjectSuccessfully() throws Exception {
         prepareWizard(IMPORT);
 
-        when(workspaceRoot.importProject()).thenReturn(createProjectRequest);
+        when(workspaceRoot.newProject()).thenReturn(createProjectRequest);
         when(createProjectRequest.withBody(any(ProjectConfig.class))).thenReturn(createProjectRequest);
         when(createProjectRequest.send()).thenReturn(createProjectPromise);
         when(createProjectPromise.then(any(Operation.class))).thenReturn(createProjectPromise);
@@ -159,7 +159,7 @@ public class ProjectWizardTest {
     public void shouldFailOnImportProject() throws Exception {
         prepareWizard(IMPORT);
 
-        when(workspaceRoot.importProject()).thenReturn(createProjectRequest);
+        when(workspaceRoot.newProject()).thenReturn(createProjectRequest);
         when(createProjectRequest.withBody(any(ProjectConfig.class))).thenReturn(createProjectRequest);
         when(createProjectRequest.send()).thenReturn(createProjectPromise);
         when(createProjectPromise.then(any(Operation.class))).thenReturn(createProjectPromise);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,12 +11,13 @@
 package org.eclipse.che.api.project.server;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.TypeLiteral;
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
-import org.eclipse.che.api.core.jsonrpc.JsonRpcRequestReceiver;
+import org.eclipse.che.api.core.jsonrpc.RequestHandler;
 import org.eclipse.che.api.project.server.handlers.CreateBaseProjectTypeHandler;
 import org.eclipse.che.api.project.server.handlers.ProjectHandler;
 import org.eclipse.che.api.project.server.importer.ProjectImporter;
@@ -29,19 +30,21 @@ import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
 import org.eclipse.che.api.vfs.impl.file.DefaultFileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
-import org.eclipse.che.api.vfs.impl.file.event.HiEventDetector;
-import org.eclipse.che.api.vfs.impl.file.event.HiEventService;
-import org.eclipse.che.api.vfs.impl.file.event.LoEventListener;
-import org.eclipse.che.api.vfs.impl.file.event.LoEventService;
-import org.eclipse.che.api.vfs.impl.file.event.detectors.FileStatusDetector;
 import org.eclipse.che.api.vfs.impl.file.event.detectors.FileTrackingOperationReceiver;
-import org.eclipse.che.api.vfs.impl.file.event.detectors.FileTrackingOperationTransmitter;
-import org.eclipse.che.api.vfs.impl.file.event.detectors.ProjectTreeChangesDetector;
+import org.eclipse.che.api.vfs.impl.file.event.detectors.ProjectTreeTrackingOperationReceiver;
 import org.eclipse.che.api.vfs.search.MediaTypeFilter;
 import org.eclipse.che.api.vfs.search.SearcherProvider;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
+import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.nio.file.PathMatcher;
+import java.nio.file.WatchService;
+
+import static com.google.inject.multibindings.Multibinder.newSetBinder;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Guice module contains configuration of Project API components.
@@ -54,12 +57,12 @@ public class ProjectApiModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        Multibinder<ProjectImporter> projectImportersMultibinder = Multibinder.newSetBinder(binder(), ProjectImporter.class);
+        Multibinder<ProjectImporter> projectImportersMultibinder = newSetBinder(binder(), ProjectImporter.class);
         projectImportersMultibinder.addBinding().to(ZipProjectImporter.class);
 
-        Multibinder.newSetBinder(binder(), ProjectTypeDef.class).addBinding().to(BaseProjectType.class);
+        newSetBinder(binder(), ProjectTypeDef.class).addBinding().to(BaseProjectType.class);
 
-        Multibinder<ProjectHandler> projectHandlersMultibinder = Multibinder.newSetBinder(binder(), ProjectHandler.class);
+        Multibinder<ProjectHandler> projectHandlersMultibinder = newSetBinder(binder(), ProjectHandler.class);
         projectHandlersMultibinder.addBinding().to(CreateBaseProjectTypeHandler.class);
         projectHandlersMultibinder.addBinding().to(InitBaseProjectTypeHandler.class);
 
@@ -71,40 +74,59 @@ public class ProjectApiModule extends AbstractModule {
         bind(WorkspaceProjectsSyncer.class).to(WorkspaceHolder.class);
 
         // configure VFS
-        Multibinder<VirtualFileFilter> filtersMultibinder = Multibinder.newSetBinder(binder(),
-                                                                                     VirtualFileFilter.class,
-                                                                                     Names.named("vfs.index_filter"));
+        Multibinder<VirtualFileFilter> filtersMultibinder =
+                newSetBinder(binder(), VirtualFileFilter.class, Names.named("vfs.index_filter"));
+
         filtersMultibinder.addBinding().to(MediaTypeFilter.class);
 
-        Multibinder<PathMatcher> pathMatcherMultibinder = Multibinder.newSetBinder(binder(),
-                                                                                   PathMatcher.class,
-                                                                                   Names.named("vfs.index_filter_matcher"));
+        Multibinder<PathMatcher> excludeMatcher = newSetBinder(binder(), PathMatcher.class, Names.named("vfs.index_filter_matcher"));
+        Multibinder<PathMatcher> fileWatcherExcludes =
+                newSetBinder(binder(), PathMatcher.class, Names.named("che.user.workspaces.storage.excludes"));
 
         bind(SearcherProvider.class).to(FSLuceneSearcherProvider.class);
         bind(VirtualFileSystemProvider.class).to(LocalVirtualFileSystemProvider.class);
 
         bind(FileWatcherNotificationHandler.class).to(DefaultFileWatcherNotificationHandler.class);
 
+        configureVfsFilters(excludeMatcher);
+        configureVfsFilters(fileWatcherExcludes);
         configureVfsEvent();
     }
 
+    private void configureVfsFilters(Multibinder<PathMatcher> excludeMatcher) {
+        addVfsFilter(excludeMatcher, ".che");
+        addVfsFilter(excludeMatcher, ".#");
+    }
+
+    private void addVfsFilter(Multibinder<PathMatcher> excludeMatcher, String filter) {
+        excludeMatcher.addBinding().toInstance(path -> {
+            for (Path pathElement : path) {
+                if (pathElement == null || filter.equals(pathElement.toString())) {
+                    return true;
+                }
+            }
+            return false;
+        });
+    }
+
     private void configureVfsEvent() {
-        bind(LoEventListener.class);
-        bind(LoEventService.class);
-        bind(HiEventService.class);
+        MapBinder.newMapBinder(binder(), String.class, RequestHandler.class)
+                 .addBinding("track:editor-file")
+                 .to(FileTrackingOperationReceiver.class);
 
-        Multibinder<HiEventDetector<?>> highLevelVfsEventDetectorMultibinder =
-                Multibinder.newSetBinder(binder(), new TypeLiteral<HiEventDetector<?>>() {
-                });
+        MapBinder.newMapBinder(binder(), String.class, RequestHandler.class)
+                 .addBinding("track:project-tree")
+                 .to(ProjectTreeTrackingOperationReceiver.class);
+    }
 
-        highLevelVfsEventDetectorMultibinder.addBinding().to(FileStatusDetector.class);
-        highLevelVfsEventDetectorMultibinder.addBinding().to(ProjectTreeChangesDetector.class);
-
-        bind(FileTrackingOperationTransmitter.class).asEagerSingleton();
-
-        MapBinder<String, JsonRpcRequestReceiver> requestReceivers =
-                MapBinder.newMapBinder(binder(), String.class, JsonRpcRequestReceiver.class);
-
-        requestReceivers.addBinding("track:editor-file").to(FileTrackingOperationReceiver.class);
+    @Provides
+    @Singleton
+    protected WatchService watchService() {
+        try {
+            return FileSystems.getDefault().newWatchService();
+        } catch (IOException e) {
+            getLogger(ProjectApiModule.class).error("Error provisioning watch service", e);
+            return null;
+        }
     }
 }

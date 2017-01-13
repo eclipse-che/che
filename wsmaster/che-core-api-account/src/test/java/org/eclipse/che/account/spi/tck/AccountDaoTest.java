@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,12 +14,12 @@ import org.eclipse.che.account.spi.AccountDao;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.commons.test.tck.TckModuleFactory;
+import org.eclipse.che.commons.test.tck.TckListener;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepositoryException;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Guice;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import javax.inject.Inject;
@@ -32,7 +32,7 @@ import static org.testng.Assert.assertEquals;
  *
  * @author Sergii Leschenko
  */
-@Guice(moduleFactory = TckModuleFactory.class)
+@Listeners(TckListener.class)
 @Test(suiteName = AccountDaoTest.SUITE_NAME)
 public class AccountDaoTest {
     public static final String SUITE_NAME = "AccountDaoTck";

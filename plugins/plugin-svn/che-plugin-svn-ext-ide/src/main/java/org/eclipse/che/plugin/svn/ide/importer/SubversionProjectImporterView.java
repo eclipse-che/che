@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,8 +32,6 @@ public interface SubversionProjectImporterView extends View<SubversionProjectImp
 
         /** Performs any actions appropriate in response to the user having changed the relative path in the project. */
         void onProjectRelativePathChanged(String relativePath);
-
-        void onCredentialsChanged();
     }
 
     /** Set error marker on project name field. */
@@ -68,16 +66,6 @@ public interface SubversionProjectImporterView extends View<SubversionProjectImp
 
     /** Return custom relative project path. */
     String getProjectRelativePath();
-
-    /** Return user name. */
-    String getUserName();
-
-    /** Return user password. */
-    String getPassword();
-
-    /** Clean username and password fields */
-    void cleanCredentials();
-
     /**
      * Set the enable state of the inputs.
      *

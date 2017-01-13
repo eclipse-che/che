@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,12 @@ public interface MachineLocalizationConstant extends Messages {
 
     @Key("button.cancel")
     String cancelButton();
+
+    @Key("button.download")
+    String downloadButton();
+
+    @Key("downloadOutputs")
+    String downloadOutputs();
 
     @Key("main.menu.machine")
     String mainMenuMachine();
@@ -91,10 +97,10 @@ public interface MachineLocalizationConstant extends Messages {
     @Key("control.connect.ssh")
     String connectViaSSH();
 
-    /* Messages */
-    @Key("messages.noDevMachine")
-    String noDevMachine();
+    @Key("action.showConsoleTree.title")
+    String actionShowConsoleTreeTitle();
 
+    /* Messages */
     @Key("messages.machine.not.found")
     String machineNotFound(String machineId);
 
@@ -467,5 +473,20 @@ public interface MachineLocalizationConstant extends Messages {
     String failedToGetProcesses(String machineId);
 
     @Key("ssh.connect.info")
-    String sshConnectInfo(String machineName, String machineHost, String machinePort);
+    String sshConnectInfo(String machineName, String machineHost, String machinePort, String workspaceName, String userName, String sshKeyDetails);
+
+    @Key("ssh.connect.ssh.key.available")
+    String sshConnectInfoPrivateKey(String privateKey);
+
+    @Key("ssh.connect.ssh.key.not.available")
+    String sshConnectInfoNoPrivateKey();
+
+    @Key("macro.current.project.relpath.description")
+    String macroCurrentProjectRelpathDescription();
+
+    @Key("macro.current.project.path.description")
+    String macroCurrentProjectPathDescription();
+
+    @Key("macro.machine.dev.hostname.description")
+    String macroMachineDevHostnameDescription();
 }

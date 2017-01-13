@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 package org.eclipse.che.api.agent.shared.dto;
 
 import org.eclipse.che.api.agent.shared.model.Agent;
+import org.eclipse.che.api.workspace.shared.dto.ServerConf2Dto;
 import org.eclipse.che.dto.shared.DTO;
 
 import java.util.List;
@@ -21,6 +22,13 @@ import java.util.Map;
  */
 @DTO
 public interface AgentDto extends Agent {
+
+    @Override
+    String getId();
+
+    void setId(String id);
+
+    AgentDto withId(String id);
 
     @Override
     String getName();
@@ -35,6 +43,13 @@ public interface AgentDto extends Agent {
     void setVersion(String version);
 
     AgentDto withVersion(String version);
+
+    @Override
+    String getDescription();
+
+    void setDescription(String description);
+
+    AgentDto withDescription(String description);
 
     @Override
     List<String> getDependencies();
@@ -56,4 +71,11 @@ public interface AgentDto extends Agent {
     void setProperties(Map<String, String> properties);
 
     AgentDto withProperties(Map<String, String> properties);
+
+    @Override
+    Map<String, ServerConf2Dto> getServers();
+
+    void setServers(Map<String, ServerConf2Dto> servers);
+
+    AgentDto withServers(Map<String, ServerConf2Dto> servers);
 }

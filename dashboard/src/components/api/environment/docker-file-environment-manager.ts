@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@
 
 import {EnvironmentManager} from './environment-manager';
 import {DockerfileParser} from './docker-file-parser';
+import {IEnvironmentManagerMachine} from './environment-manager-machine';
 
 /**
  * This is the implementation of environment manager that handles the docker file format of environment.
@@ -31,19 +32,19 @@ import {DockerfileParser} from './docker-file-parser';
  *
  * @author Ann Shumilova
  */
+
+const ENV_INSTRUCTION: string = 'ENV';
+
 export class DockerFileEnvironmentManager extends EnvironmentManager {
+  parser: DockerfileParser;
 
-  constructor($log) {
-    super();
-
-    this.$log = $log;
-
-    this.ENV_INSTRUCTION = 'ENV';
+  constructor($log: ng.ILogService) {
+    super($log);
 
     this.parser = new DockerfileParser();
   }
 
-  get editorMode() {
+  get editorMode(): string {
     return 'text/x-dockerfile';
   }
 
@@ -54,8 +55,8 @@ export class DockerFileEnvironmentManager extends EnvironmentManager {
    * @returns {Array} a list of instructions and arguments
    * @private
    */
-  _parseRecipe(content) {
-    let recipe = [];
+  _parseRecipe(content: string): any[] {
+    let recipe: any[] = null;
     try {
       recipe = this.parser.parse(content);
     } catch (e) {
@@ -67,11 +68,11 @@ export class DockerFileEnvironmentManager extends EnvironmentManager {
   /**
    * Dumps a list of instructions and arguments into dockerfile
    *
-   * @param instructions {array} array of objects
+   * @param instructions {Array} array of objects
    * @returns {string} dockerfile
    * @private
    */
-  _stringifyRecipe(instructions) {
+  _stringifyRecipe(instructions: any[]): string {
     let content = '';
 
     try {
@@ -86,11 +87,11 @@ export class DockerFileEnvironmentManager extends EnvironmentManager {
   /**
    * Provides the environment configuration based on machines format.
    *
-   * @param environment origin of the environment to be edited
-   * @param machines the list of machines
-   * @returns environment's configuration
+   * @param {che.IWorkspaceEnvironment} environment origin of the environment to be edited
+   * @param {IEnvironmentManagerMachine[]} machines the list of machines
+   * @returns {che.IWorkspaceEnvironment} environment's configuration
    */
-  getEnvironment(environment, machines) {
+  getEnvironment(environment: che.IWorkspaceEnvironment, machines: IEnvironmentManagerMachine[]): che.IWorkspaceEnvironment {
     let newEnvironment = super.getEnvironment(environment, machines);
 
     // machines should contain one machine only
@@ -108,23 +109,30 @@ export class DockerFileEnvironmentManager extends EnvironmentManager {
   /**
    * Retrieves the list of machines.
    *
-   * @param environment environment's configuration
-   * @returns {Array} list of machines defined in environment
+   * @param {che.IWorkspaceEnvironment} environment environment's configuration
+   * @param {any=} runtime runtime of active environment
+   * @returns {IEnvironmentManagerMachine[]} list of machines defined in environment
    */
-  getMachines(environment) {
+  getMachines(environment: che.IWorkspaceEnvironment, runtime?: any): IEnvironmentManagerMachine[] {
     let recipe = null,
-        machines = [];
+        machines: IEnvironmentManagerMachine[] = super.getMachines(environment, runtime);
 
     if (environment.recipe.content) {
       recipe = this._parseRecipe(environment.recipe.content);
     }
 
-    Object.keys(environment.machines).forEach((machineName) => {
-      let machine = angular.copy(environment.machines[machineName]);
-      machine.name = machineName;
-      machine.recipe = recipe;
+    Object.keys(environment.machines).forEach((machineName: string) => {
+      let machine: IEnvironmentManagerMachine = machines.find((_machine: IEnvironmentManagerMachine) => {
+        return _machine.name === machineName;
+      });
 
-      machines.push(machine);
+      if (!machine) {
+        machine = {name: machineName};
+        machines.push(machine);
+      }
+
+      angular.merge(machine, environment.machines[machineName]);
+      machine.recipe = recipe;
     });
 
     return machines;
@@ -133,15 +141,15 @@ export class DockerFileEnvironmentManager extends EnvironmentManager {
   /**
    * Returns a docker image from the recipe.
    *
-   * @param machine
+   * @param {IEnvironmentManagerMachine} machine
    * @returns {*}
    */
-  getSource(machine) {
+  getSource(machine: IEnvironmentManagerMachine): any {
     if (!machine.recipe) {
       return null;
     }
 
-    let from = machine.recipe.find((line) => {
+    let from = machine.recipe.find((line: any) => {
       return line.instruction === 'FROM';
     });
 
@@ -151,31 +159,31 @@ export class DockerFileEnvironmentManager extends EnvironmentManager {
   /**
    * Returns true if environment recipe content is present.
    *
-   * @param machine {object}
+   * @param {IEnvironmentManagerMachine} machine
    * @returns {boolean}
    */
-  canEditEnvVariables(machine) {
+  canEditEnvVariables(machine: IEnvironmentManagerMachine): boolean {
     return !!machine.recipe;
   }
 
   /**
    * Returns environment variables from recipe
    *
-   * @param machine {object}
+   * @param {IEnvironmentManagerMachine} machine
    * @returns {*}
    */
-  getEnvVariables(machine) {
+  getEnvVariables(machine: IEnvironmentManagerMachine): any {
     if (!machine.recipe) {
       return null;
     }
 
     let envVariables = {};
 
-    let envList = machine.recipe.filter((line) => {
-      return line.instruction === this.ENV_INSTRUCTION;
+    let envList = machine.recipe.filter((line: any) => {
+      return line.instruction === ENV_INSTRUCTION;
     }) || [];
 
-    envList.forEach((line) => {
+    envList.forEach((line: any) => {
       envVariables[line.argument[0]] = line.argument[1];
     });
 
@@ -185,10 +193,10 @@ export class DockerFileEnvironmentManager extends EnvironmentManager {
   /**
    * Updates machine with new environment variables.
    *
-   * @param machine {object}
-   * @param envVariables {object}
+   * @param {IEnvironmentManagerMachine} machine
+   * @param {any} envVariables
    */
-  setEnvVariables(machine, envVariables) {
+  setEnvVariables(machine: IEnvironmentManagerMachine, envVariables: any): void {
     if (!machine.recipe) {
       return;
     }
@@ -196,19 +204,19 @@ export class DockerFileEnvironmentManager extends EnvironmentManager {
     let newRecipe = [];
 
     // new recipe without any 'ENV' instruction
-    newRecipe = machine.recipe.filter((line) => {
-      return line.instruction !== this.ENV_INSTRUCTION;
+    newRecipe = machine.recipe.filter((line: any) => {
+      return line.instruction !== ENV_INSTRUCTION;
     });
 
     // add environments if any
     if (Object.keys(envVariables).length) {
-      Object.keys(envVariables).forEach((name) => {
+      Object.keys(envVariables).forEach((name: string) => {
         let line = {
-          instruction: this.ENV_INSTRUCTION,
+          instruction: ENV_INSTRUCTION,
           argument: [name, envVariables[name]]
         };
-        newRecipe.splice(1,0,line);
-      })
+        newRecipe.splice(1, 0, line);
+      });
     }
 
     machine.recipe = newRecipe;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,10 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.ide.workspace;
 
+import elemental.json.Json;
+import elemental.json.JsonObject;
+
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
+import org.eclipse.che.ide.api.component.StateComponent;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.mvp.Presenter;
 import org.eclipse.che.ide.api.parts.PartPresenter;
@@ -29,6 +34,7 @@ import org.eclipse.che.ide.ui.toolbar.MainToolbar;
 import org.eclipse.che.ide.ui.toolbar.ToolbarPresenter;
 
 import javax.validation.constraints.NotNull;
+import java.util.Map;
 
 /**
  * Root Presenter that implements Workspace logic. Descendant Presenters are injected
@@ -40,9 +46,11 @@ import javax.validation.constraints.NotNull;
  * @author Dmitry Shnurenko
  */
 @Singleton
-public class WorkspacePresenter implements Presenter, WorkspaceView.ActionDelegate, WorkspaceAgent, PerspectiveTypeListener {
+public class WorkspacePresenter implements Presenter, WorkspaceView.ActionDelegate, WorkspaceAgent, PerspectiveTypeListener,
+                                           StateComponent {
 
     private final WorkspaceView             view;
+    private final String                    defaultPerspectiveId;
     private final MainMenuPresenter         mainMenu;
     private final StatusPanelGroupPresenter bottomMenu;
     private final ToolbarPresenter          toolbarPresenter;
@@ -51,12 +59,14 @@ public class WorkspacePresenter implements Presenter, WorkspaceView.ActionDelega
     private Perspective activePerspective;
 
     @Inject
-    protected WorkspacePresenter(WorkspaceView view,
-                                 PerspectiveManager perspectiveManager,
-                                 MainMenuPresenter mainMenu,
-                                 StatusPanelGroupPresenter bottomMenu,
-                                 @MainToolbar ToolbarPresenter toolbarPresenter) {
+    public WorkspacePresenter(WorkspaceView view,
+                              PerspectiveManager perspectiveManager,
+                              MainMenuPresenter mainMenu,
+                              StatusPanelGroupPresenter bottomMenu,
+                              @MainToolbar ToolbarPresenter toolbarPresenter,
+                              @Named("defaultPerspectiveId") String defaultPerspectiveId) {
         this.view = view;
+        this.defaultPerspectiveId = defaultPerspectiveId;
         this.view.setDelegate(this);
 
         this.toolbarPresenter = toolbarPresenter;
@@ -134,5 +144,33 @@ public class WorkspacePresenter implements Presenter, WorkspaceView.ActionDelega
      */
     public PartStack getPartStack(PartStackType type) {
         return activePerspective.getPartStack(type);
+    }
+
+    @Override
+    public JsonObject getState() {
+        JsonObject state = Json.createObject();
+        JsonObject perspectivesJs = Json.createObject();
+        state.put("perspectives", perspectivesJs);
+        Map<String, Perspective> perspectives = perspectiveManager.getPerspectives();
+        for (Map.Entry<String, Perspective> entry : perspectives.entrySet()) {
+            //store only default perspective
+            if (entry.getKey().equals(defaultPerspectiveId)) {
+                perspectivesJs.put(entry.getKey(), entry.getValue().getState());
+            }
+        }
+        return state;
+    }
+
+    @Override
+    public void loadState(JsonObject state) {
+        if (state.hasKey("perspectives")) {
+            JsonObject perspectives = state.getObject("perspectives");
+            Map<String, Perspective> perspectiveMap = perspectiveManager.getPerspectives();
+            for (String key : perspectives.keys()) {
+                if (perspectiveMap.containsKey(key)) {
+                    perspectiveMap.get(key).loadState(perspectives.getObject(key));
+                }
+            }
+        }
     }
 }

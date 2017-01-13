@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,10 +11,13 @@
 package org.eclipse.che.plugin.docker.machine.ext.provider;
 
 import org.eclipse.che.api.core.util.SystemInfo;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.plugin.docker.machine.WindowsHostUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Strings;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -34,13 +37,24 @@ import java.nio.file.Paths;
 @Singleton
 public class TerminalVolumeProvider implements Provider<String> {
 
-    private static final String CONTAINER_TARGET = ":/mnt/che/terminal:ro,Z";
+    private static final String CONTAINER_TARGET = ":/mnt/che/terminal";
     private static final String TERMINAL         = "terminal";
     private static final Logger LOG              = LoggerFactory.getLogger(TerminalVolumeProvider.class);
 
+    private final String terminalArchivePath;
+
+    private final String agentVolumeOptions;
+
     @Inject
-    @Named("machine.server.terminal.path_to_archive.linux_amd64")
-    private String terminalArchivePath;
+    public TerminalVolumeProvider(@Nullable @Named("che.docker.volumes_agent_options") String agentVolumeOptions,
+                                  @Named("che.workspace.terminal_linux_amd64") String terminalArchivePath) {
+        if (!Strings.isNullOrEmpty(agentVolumeOptions)) {
+            this.agentVolumeOptions = ":" + agentVolumeOptions;
+        } else {
+            this.agentVolumeOptions = "";
+        }
+        this.terminalArchivePath = terminalArchivePath;
+    }
 
     @Override
     public String get() {
@@ -49,13 +63,18 @@ public class TerminalVolumeProvider implements Provider<String> {
                 final Path cheHome = WindowsHostUtils.ensureCheHomeExist();
                 final Path terminalPath = cheHome.resolve(TERMINAL);
                 IoUtil.copy(Paths.get(terminalArchivePath).toFile(), terminalPath.toFile(), null, true);
-                return terminalPath.toString() + CONTAINER_TARGET;
+                return getTargetOptions(terminalPath.toString());
             } catch (IOException e) {
                 LOG.warn(e.getMessage());
                 throw new RuntimeException(e);
             }
         } else {
-            return terminalArchivePath + CONTAINER_TARGET;
+            return getTargetOptions(terminalArchivePath);
         }
     }
+
+    private String getTargetOptions(final String path) {
+        return path + CONTAINER_TARGET + agentVolumeOptions;
+    }
+
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,8 +28,7 @@ import java.util.Map;
 /**
  * Registry for holding {@link EditorProvider} for specific {@link FileType}.
  *
- * @author <a href="mailto:evidolob@exoplatform.com">Evgen Vidolob</a>
- * @version $Id:
+ * @author Evgen Vidolob
  */
 @SDK(title = "ide.api.editorRegistry")
 public class EditorRegistryImpl implements EditorRegistry {
@@ -77,5 +76,17 @@ public class EditorRegistryImpl implements EditorRegistry {
             result.addAll(registry.get(fileType));
         }
         return result;
+    }
+
+    @Override
+    public EditorProvider findEditorProviderById(String id) {
+        for (List<EditorProvider> providers : registry.values()) {
+            for (EditorProvider provider : providers) {
+                if (provider.getId().equals(id)) {
+                    return provider;
+                }
+            }
+        }
+        return defaultProvider;
     }
 }

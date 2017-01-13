@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,7 +29,7 @@ import org.eclipse.che.ide.ext.git.client.GitResources;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
 import org.eclipse.che.ide.project.shared.NodesResources;
 import org.eclipse.che.ide.resource.Path;
-import org.eclipse.che.ide.ui.FontAwesome;
+import org.eclipse.che.ide.FontAwesome;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage;
 import org.eclipse.che.ide.ui.smartTree.SelectionModel;

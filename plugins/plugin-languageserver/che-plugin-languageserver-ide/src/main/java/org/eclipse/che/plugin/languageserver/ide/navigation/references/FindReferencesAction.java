@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,11 @@ import io.typefox.lsapi.ServerCapabilities;
 
 import com.google.inject.Inject;
 
+import org.eclipse.che.api.languageserver.shared.lsapi.LocationDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.PositionDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.ReferenceContextDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.ReferenceParamsDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentIdentifierDTO;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
@@ -26,11 +31,6 @@ import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorConf
 import org.eclipse.che.plugin.languageserver.ide.location.OpenLocationPresenter;
 import org.eclipse.che.plugin.languageserver.ide.location.OpenLocationPresenterFactory;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.LocationDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.PositionDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.ReferenceContextDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.ReferenceParamsDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.TextDocumentIdentifierDTO;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -82,7 +82,7 @@ public class FindReferencesAction extends AbstractPerspectiveAction {
             return;
         }
         TextEditor textEditor = ((TextEditor)activeEditor);
-        String path = activeEditor.getEditorInput().getFile().getPath();
+        String path = activeEditor.getEditorInput().getFile().getLocation().toString();
         ReferenceParamsDTO paramsDTO = dtoFactory.createDto(ReferenceParamsDTO.class);
 
         PositionDTO positionDTO = dtoFactory.createDto(PositionDTO.class);

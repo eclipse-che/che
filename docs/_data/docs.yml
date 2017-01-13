@@ -1,0 +1,78 @@
+- title: SETUP
+  docs:
+  - che-setup-intro                                                                                       
+  - che-setup-getting-started                                                                                         
+  - che-setup-getting-started-saas-cloud                                                                                                   
+  - che-setup-bitnami
+  - che-setup-configuration
+  - che-setup-managing 
+  - che-setup-cli                                                                                                  
+  - che-setup-glossary
+  - che-setup-docker   
+- title: WORKSPACE ADMINISTRATION
+  docs:                                                                           
+  - ws-admin-intro
+  - ws-stacks                                                                                                    
+  - ws-recipes                                                                                                             
+  - ws-samples                                                                                                             
+  - ws-machines                                                                                                              
+  - ws-volume-mounts                                                                                                      
+  - ws-agents 
+  - ws-data-model-stacks
+  - ws-data-model-samples
+- title: USER GUIDE
+  docs:                                                                               
+  - ide-projects                                                                                                            
+  - ide-import-a-project                                                                                                    
+  - ide-ssh                                                                                                        
+  - ide-sync                                                                                            
+  - ide-editor-settings                                                                                                     
+  - ide-intellisense                                                                                                        
+  - ide-commands                                                                                                            
+  - ide-git-svn                                                                                                                 
+  - ide-previews                                                                                                            
+  - ide-build                                                                                                               
+  - ide-run                                                                                                                 
+  - ide-sharing
+  - ide-debug                                                                                                               
+  - ide-docker    
+  - ide-electron 
+- title: CHEDIR - PORTABLE WORKSPACES
+  docs:                                                                               
+  - chedir-getting-started                                                                                               
+  - chedir-why
+  - chedir-installation                                                                                                 
+  - chedir-project-setup                                                                                                
+  - chedir-up-and-down                                                                                                  
+  - chedir-chefiles                                                                                                     
+  - chedir-ssh                                                                                                          
+  - chedir-factories 
+- title: DEVELOPER GUIDE - REST API
+  docs:                                                                               
+  - server-rest-api                                          
+  - server-api-projects                                                                                                 
+  - server-build-run                                                                                                    
+  - server-create-workspaces                                                                                   
+  - server-events                                                                                                       
+  - server-project-types                                                                                                
+  - server-stack                                                                                                        
+  - server-websocket-api
+- title: DEVELOPER GUIDE - IDE PLUGINS
+  docs:                                                                               
+  - plugins-introduction                                                                                                      
+  - plugins-setup-che-workspace                                                                                                 
+  - plugins-create-and-build-extensions                                                                                         
+  - plugins-assemblies                                                                                                          
+  - plugins-dependency-injection-basics                                                                                         
+  - plugins-code-editors                                                                                                        
+  - plugins-project-types                                                                                                       
+  - plugins-actions                                                                                                             
+  - plugins-serverworkspace-access                                                                                              
+  - plugins-parts                                                                                                               
+  - plugins-calling-workspace-apis                                                                                              
+  - plugins-java-class-reference                                                                                                
+  - plugins-che-properties                                                                                                      
+  - plugins-native-access-to-the-workspace                                                                                      
+  - plugins-embed-htmljs                                                                                                        
+  - plugins-helloworld-extension                                                                                                
+  - plugins-themes 

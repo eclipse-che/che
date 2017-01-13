@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -51,11 +51,11 @@ public class LocalWorkspaceFolderPathProvider implements WorkspaceFolderPathProv
     /**
      * Value provide path to directory on host machine where will by all created and mount to the
      * created workspaces folder that become root of workspace inside machine.
-     * Inside machine it will point to the directory described by {@literal che.machine.projects.internal.storage}.
+     * Inside machine it will point to the directory described by {@literal che.workspace.projects.storage}.
      * <p>
      * For example:
      * if you set {@literal che.workspaces.storage} to the /home/user/che/workspaces after creating new workspace will be created new folder
-     * /home/user/che/workspaces/{workspaceName} and it will be mount to the  dev-machine to {@literal che.machine.projects.internal.storage}
+     * /home/user/che/workspaces/{workspaceName} and it will be mount to the  dev-machine to {@literal che.workspace.projects.storage}
      */
     private String workspacesMountPoint;
     /**
@@ -105,22 +105,30 @@ public class LocalWorkspaceFolderPathProvider implements WorkspaceFolderPathProv
 
     @Override
     public String getPath(@Assisted("workspace") String workspaceId) throws IOException {
-        if (isWindows || hostProjectsFolder == null) {
-            try {
-                WorkspaceManager workspaceManager = this.workspaceManager.get();
-                Workspace workspace = workspaceManager.getWorkspace(workspaceId);
-                String wsName = workspace.getConfig().getName();
-                String workspaceFolderPath = Paths.get(workspacesMountPoint).resolve(wsName).toString();
-
-                ensureExist(workspaceFolderPath, null);
-
-                return workspaceFolderPath;
-            } catch (NotFoundException | ServerException e) {
-                throw new IOException(e.getLocalizedMessage());
-            }
-        } else {
+        if (!isWindows && hostProjectsFolder != null) {
             return hostProjectsFolder;
         }
+        try {
+            WorkspaceManager workspaceManager = this.workspaceManager.get();
+            Workspace workspace = workspaceManager.getWorkspace(workspaceId);
+            String wsName = workspace.getConfig().getName();
+            return doGetPathByName(wsName);
+        } catch (NotFoundException | ServerException e) {
+            throw new IOException(e.getLocalizedMessage());
+        }
+    }
+
+    public String getPathByName(String workspaceName) throws IOException {
+        if (!isWindows && hostProjectsFolder != null) {
+            return hostProjectsFolder;
+        }
+        return doGetPathByName(workspaceName);
+    }
+
+    private String doGetPathByName(String workspaceName) throws IOException {
+        final String workspaceFolderPath = Paths.get(workspacesMountPoint).resolve(workspaceName).toString();
+        ensureExist(workspaceFolderPath, null);
+        return workspaceFolderPath;
     }
 
     @VisibleForTesting
@@ -181,6 +189,7 @@ public class LocalWorkspaceFolderPathProvider implements WorkspaceFolderPathProv
                 }
             } else {
                 try {
+                    // TODO we should not create folders in this provider
                     Files.createDirectories(folder);
                 } catch (AccessDeniedException e) {
                     throw new IOException(

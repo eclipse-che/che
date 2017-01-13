@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,8 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
+import org.eclipse.che.api.languageserver.shared.lsapi.LocationDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.RangeDTO;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -28,8 +30,6 @@ import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerResources;
 import org.eclipse.che.plugin.languageserver.ide.util.OpenFileInEditorHelper;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.LocationDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.RangeDTO;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import java.util.List;
@@ -97,10 +97,6 @@ public class OpenLocationPresenter extends BasePresenter implements OpenLocation
     @Override
     public String getTitle() {
         return title;
-    }
-
-    @Override
-    public void setVisible(boolean visible) {
     }
 
     @Override

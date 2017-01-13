@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,8 +18,12 @@ import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.Presentation;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.editor.EditorAgent;
+import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.project.ProjectServiceClient;
 import org.eclipse.che.ide.api.resources.RenamingSupport;
+import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.dto.DtoFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,7 +50,15 @@ public class RenameItemActionTest {
     @Mock
     private CoreLocalizationConstant localization;
     @Mock
+    private DtoFactory               dtoFactory;
+    @Mock
     private DialogFactory            dialogFactory;
+    @Mock
+    private ProjectServiceClient     projectServiceClient;
+    @Mock
+    private EditorAgent              editorAgent;
+    @Mock
+    private NotificationManager      notificationManager;
     @Mock
     private AppContext               appContext;
     @Mock
@@ -99,7 +111,8 @@ public class RenameItemActionTest {
         renamingSupport.add(renamingSupportValidator);
         when(renamingSupportValidator.isRenameAllowed((Resource)anyObject())).thenReturn(false);
 
-        action = new RenameItemAction(resources, localization, renamingSupport, dialogFactory, appContext);
+        action =
+                new RenameItemAction(resources, localization, renamingSupport, editorAgent, notificationManager, dialogFactory, appContext);
         action.updateInPerspective(event);
 
         verify(presentation).setVisible(true);
@@ -111,7 +124,8 @@ public class RenameItemActionTest {
         renamingSupport.add(renamingSupportValidator);
         when(renamingSupportValidator.isRenameAllowed((Resource)anyObject())).thenReturn(true);
 
-        action = new RenameItemAction(resources, localization, renamingSupport, dialogFactory, appContext);
+        action =
+                new RenameItemAction(resources, localization, renamingSupport, editorAgent, notificationManager, dialogFactory, appContext);
         action.updateInPerspective(event);
 
         verify(presentation).setVisible(true);

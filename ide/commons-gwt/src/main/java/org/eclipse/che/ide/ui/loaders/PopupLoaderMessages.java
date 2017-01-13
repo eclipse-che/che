@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,6 +31,12 @@ public interface PopupLoaderMessages extends Messages {
     @Key("startingWorkspaceAgent.description")
     String startingWorkspaceAgentDescription();
 
+    @Key("stoppingWorkspace.title")
+    String stoppingWorkspace();
+
+    @Key("stoppingWorkspace.description")
+    String stoppingWorkspaceDescription();
+
     @Key("creatingProject.title")
     String creatingProject();
 
@@ -48,5 +54,8 @@ public interface PopupLoaderMessages extends Messages {
 
     @Key("workspaceStopped.description")
     String workspaceStoppedDescription();
+
+    @Key("downloadOutputs")
+    String downloadOutputs();
 
 }

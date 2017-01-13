@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,19 +22,21 @@ import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-
 /**
  * Abstract base implementation of all PartPresenter
  *
- * @author <a href="mailto:evidolob@exoplatform.com">Evgen Vidolob</a>
+ * @author Evgen Vidolob
  * @author Stéphane Daviet
  * @author Valeriy Svydenko
  */
 public abstract class AbstractPartPresenter implements PartPresenter {
+
     private final ListenerManager<PropertyListener> manager;
     private final List<String>                      rules;
 
     private Selection<?> selection;
+
+    protected PartStack partStack;
 
     public AbstractPartPresenter() {
         manager = ListenerManager.create();
@@ -52,6 +54,20 @@ public abstract class AbstractPartPresenter implements PartPresenter {
     @Override
     public void restoreState() {
         //default implementation is empty. Add some logic for particular part to restore it's state
+    }
+
+    /**
+     * Set PartStack where this part added.
+     *
+     * @param partStack
+     */
+    public void setPartStack(@NotNull PartStack partStack) {
+        this.partStack = partStack;
+    }
+
+    @Override
+    public PartStack getPartStack() {
+        return partStack;
     }
 
     /** {@inheritDoc} */

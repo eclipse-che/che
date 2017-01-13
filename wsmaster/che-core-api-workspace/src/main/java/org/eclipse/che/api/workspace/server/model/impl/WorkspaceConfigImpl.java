@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,16 +17,16 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 
-import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.MapKeyColumn;
 import javax.persistence.OneToMany;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
+import javax.persistence.Table;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -44,6 +44,7 @@ import static java.util.stream.Collectors.toMap;
  * @author Yevhenii Voevodin
  */
 @Entity(name = "WorkspaceConfig")
+@Table(name = "workspaceconfig")
 public class WorkspaceConfigImpl implements WorkspaceConfig {
 
     public static WorkspaceConfigImplBuilder builder() {
@@ -52,27 +53,29 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
 
     @Id
     @GeneratedValue
+    @Column(name = "id")
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
 
-    @Basic
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    @Column(nullable = false)
+    @Column(name = "defaultenv", nullable = false)
     private String defaultEnv;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JoinColumn(name = "commands_id")
     private List<CommandImpl> commands;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JoinColumn(name = "projects_id")
     private List<ProjectConfigImpl> projects;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JoinColumn(name = "environments_id")
+    @MapKeyColumn(name = "environments_key")
     private Map<String, EnvironmentImpl> environments;
 
     public WorkspaceConfigImpl() {}
@@ -179,45 +182,46 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof WorkspaceConfigImpl)) return false;
-        final WorkspaceConfigImpl other = (WorkspaceConfigImpl)obj;
-        return Objects.equals(name, other.name)
-               && Objects.equals(defaultEnv, other.defaultEnv)
-               && getCommands().equals(other.getCommands())
-               && getEnvironments().equals(other.getEnvironments())
-               && getProjects().equals(other.getProjects())
-               && Objects.equals(description, other.description);
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof WorkspaceConfigImpl)) {
+            return false;
+        }
+        final WorkspaceConfigImpl that = (WorkspaceConfigImpl)obj;
+        return Objects.equals(id, that.id)
+               && Objects.equals(name, that.name)
+               && Objects.equals(description, that.description)
+               && Objects.equals(defaultEnv, that.defaultEnv)
+               && getCommands().equals(that.getCommands())
+               && getProjects().equals(that.getProjects())
+               && getEnvironments().equals(that.getEnvironments());
     }
 
     @Override
     public int hashCode() {
         int hash = 7;
+        hash = 31 * hash + Objects.hashCode(id);
         hash = 31 * hash + Objects.hashCode(name);
+        hash = 31 * hash + Objects.hashCode(description);
         hash = 31 * hash + Objects.hashCode(defaultEnv);
         hash = 31 * hash + getCommands().hashCode();
-        hash = 31 * hash + getEnvironments().hashCode();
         hash = 31 * hash + getProjects().hashCode();
-        hash = 31 * hash + Objects.hashCode(description);
+        hash = 31 * hash + getEnvironments().hashCode();
         return hash;
     }
 
     @Override
     public String toString() {
-        return "UsersWorkspaceImpl{" +
+        return "WorkspaceConfigImpl{" +
+               "id=" + id +
                ", name='" + name + '\'' +
+               ", description='" + description + '\'' +
                ", defaultEnv='" + defaultEnv + '\'' +
                ", commands=" + commands +
                ", projects=" + projects +
                ", environments=" + environments +
-               ", description='" + description + '\'' +
                '}';
-    }
-
-    @PreUpdate
-    @PrePersist
-    public void syncProjects() {
-        getProjects().forEach(ProjectConfigImpl::syncDbAttributes);
     }
 
     /**

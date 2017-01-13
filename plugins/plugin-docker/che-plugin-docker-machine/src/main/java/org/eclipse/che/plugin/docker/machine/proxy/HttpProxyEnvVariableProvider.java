@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,7 +24,7 @@ public class HttpProxyEnvVariableProvider implements Provider<String> {
     private static final String HTTP_PROXY = "http_proxy=";
 
     @Inject
-    @Named("http.proxy")
+    @Named("che.workspace.http_proxy")
     private String httpProxy;
 
     @Override

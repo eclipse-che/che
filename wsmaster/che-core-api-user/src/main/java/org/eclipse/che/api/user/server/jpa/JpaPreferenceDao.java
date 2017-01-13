@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,11 +14,9 @@ import com.google.inject.persist.Transactional;
 
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -31,7 +29,6 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -41,8 +38,6 @@ import static java.util.Objects.requireNonNull;
  */
 @Singleton
 public class JpaPreferenceDao implements PreferenceDao {
-
-    private static final Logger LOG = LoggerFactory.getLogger(JpaPreferenceDao.class);
 
     @Inject
     private Provider<EntityManager> managerProvider;
@@ -122,6 +117,7 @@ public class JpaPreferenceDao implements PreferenceDao {
         } else {
             manager.persist(prefs);
         }
+        manager.flush();
     }
 
     @Transactional
@@ -130,11 +126,13 @@ public class JpaPreferenceDao implements PreferenceDao {
         final PreferenceEntity prefs = manager.find(PreferenceEntity.class, userId);
         if (prefs != null) {
             manager.remove(prefs);
+            manager.flush();
         }
     }
 
     @Singleton
-    public static class RemovePreferencesBeforeUserRemovedEventSubscriber implements EventSubscriber<BeforeUserRemovedEvent> {
+    public static class RemovePreferencesBeforeUserRemovedEventSubscriber
+            extends CascadeEventSubscriber<BeforeUserRemovedEvent> {
 
         @Inject
         private EventService     eventService;
@@ -143,21 +141,17 @@ public class JpaPreferenceDao implements PreferenceDao {
 
         @PostConstruct
         public void subscribe() {
-            eventService.subscribe(this);
+            eventService.subscribe(this, BeforeUserRemovedEvent.class);
         }
 
         @PreDestroy
         public void unsubscribe() {
-            eventService.unsubscribe(this);
+            eventService.unsubscribe(this, BeforeUserRemovedEvent.class);
         }
 
         @Override
-        public void onEvent(BeforeUserRemovedEvent event) {
-            try {
-                preferenceDao.remove(event.getUser().getId());
-            } catch (Exception x) {
-                LOG.error(format("Couldn't remove preferences before user '%s' is removed", event.getUser().getId()), x);
-            }
+        public void onCascadeEvent(BeforeUserRemovedEvent event) throws Exception {
+            preferenceDao.remove(event.getUser().getId());
         }
     }
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,7 +13,7 @@ package org.eclipse.che.api.machine.server.jpa;
 import com.google.inject.persist.Transactional;
 
 import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.jdbc.jpa.DuplicateKeyException;
+import org.eclipse.che.core.db.jpa.DuplicateKeyException;
 import org.eclipse.che.api.machine.server.exception.SnapshotException;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
@@ -23,6 +23,7 @@ import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
+import java.util.Collection;
 import java.util.List;
 
 import static java.lang.String.format;
@@ -117,6 +118,20 @@ public class JpaSnapshotDao implements SnapshotDao {
         }
     }
 
+    @Override
+    public List<SnapshotImpl> replaceSnapshots(String workspaceId,
+                                               String envName,
+                                               Collection<? extends SnapshotImpl> newSnapshots) throws SnapshotException {
+        requireNonNull(workspaceId, "Required non-null workspace id");
+        requireNonNull(envName, "Required non-null environment name");
+        requireNonNull(newSnapshots, "Required non-null new snapshots");
+        try {
+            return doReplaceSnapshots(workspaceId, envName, newSnapshots);
+        } catch (RuntimeException x) {
+            throw new SnapshotException(x.getLocalizedMessage(), x);
+        }
+    }
+
     @Transactional
     protected void doSave(SnapshotImpl snapshot) {
         managerProvider.get().persist(snapshot);
@@ -130,5 +145,20 @@ public class JpaSnapshotDao implements SnapshotDao {
             throw new NotFoundException(format("Snapshot with id '%s' doesn't exist", snapshotId));
         }
         manager.remove(snapshot);
+    }
+
+    @Transactional
+    protected List<SnapshotImpl> doReplaceSnapshots(String workspaceId,
+                                                    String envName,
+                                                    Collection<? extends SnapshotImpl> newSnapshots) {
+        final EntityManager manager = managerProvider.get();
+        final List<SnapshotImpl> existing = manager.createNamedQuery("Snapshot.findByWorkspaceAndEnvironment", SnapshotImpl.class)
+                                                   .setParameter("workspaceId", workspaceId)
+                                                   .setParameter("envName", envName)
+                                                   .getResultList();
+        existing.forEach(manager::remove);
+        manager.flush();
+        newSnapshots.forEach(manager::persist);
+        return existing;
     }
 }

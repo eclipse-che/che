@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,28 +25,28 @@
  * @author Oleksii Kurinnyi
  */
 export class WorkspaceMachineConfig {
+  restrict = 'E';
+  templateUrl = 'app/workspaces/workspace-details/environments/machine-config/machine-config.html';
+
+  controller = 'WorkspaceMachineConfigController';
+  controllerAs = 'workspaceMachineConfigController';
+  bindToController = true;
+
+  scope = {
+    machineName: '=',
+    machinesList: '=',
+    environmentManager: '=',
+    machineDevOnChange: '&',
+    machineNameOnChange: '&',
+    machineConfigOnChange: '&',
+    machineOnDelete: '&',
+    machineIsOpened: '='
+  };
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor () {
-    this.restrict = 'E';
-    this.templateUrl = 'app/workspaces/workspace-details/environments/machine-config/machine-config.html';
-
-    this.controller = 'WorkspaceMachineConfigController';
-    this.controllerAs = 'workspaceMachineConfigController';
-    this.bindToController = true;
-
-    this.scope = {
-      machineName: '=',
-      machinesList: '=',
-      environmentManager: '=',
-      machineNameOnChange: '&',
-      machineConfigOnChange: '&',
-      machineOnDelete: '&',
-      machineIsOpened: '='
-    };
-  }
+  constructor () { }
 }
 

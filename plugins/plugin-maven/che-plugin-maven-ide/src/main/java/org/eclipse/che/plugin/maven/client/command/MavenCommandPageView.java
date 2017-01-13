@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,25 +22,25 @@ import org.eclipse.che.ide.api.mvp.View;
 @ImplementedBy(MavenCommandPageViewImpl.class)
 public interface MavenCommandPageView extends View<MavenCommandPageView.ActionDelegate> {
 
-    /** Returns working directory. */
+    /** Returns value of the 'Working directory' field. */
     String getWorkingDirectory();
 
-    /** Sets working directory. */
+    /** Sets value of the 'Working directory' field. */
     void setWorkingDirectory(String workingDirectory);
 
-    /** Returns command line. */
-    String getCommandLine();
+    /** Returns value of the 'Arguments' field. */
+    String getArguments();
 
-    /** Sets command line. */
-    void setCommandLine(String commandLine);
+    /** Sets value of the 'Arguments' field. */
+    void setArguments(String args);
 
     /** Action handler for the view actions/controls. */
     interface ActionDelegate {
 
-        /** Called when working directory has been changed. */
+        /** Called when value of the 'Working directory' field has been changed. */
         void onWorkingDirectoryChanged();
 
-        /** Called when command line has been changed. */
-        void onCommandLineChanged();
+        /** Called when value of the 'Arguments' field has been changed. */
+        void onArgumentsChanged();
     }
 }

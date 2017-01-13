@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,6 +44,7 @@ import org.eclipse.che.ide.api.debug.DebuggerServiceClient;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
+import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.VirtualFile;
@@ -117,6 +118,8 @@ public class DebuggerTest extends BaseTest {
     @Mock
     private DebuggerManager       debuggerManager;
     @Mock
+    private NotificationManager   notificationManager;
+    @Mock
     private BreakpointManager     breakpointManager;
 
     @Mock
@@ -127,17 +130,17 @@ public class DebuggerTest extends BaseTest {
     private PromiseError          promiseError;
 
     @Mock
-    private VirtualFile        file;
+    private VirtualFile       file;
     @Mock
-    private LocalStorage       localStorage;
+    private LocalStorage      localStorage;
     @Mock
-    private DebuggerObserver   observer;
+    private DebuggerObserver  observer;
     @Mock
-    private LocationDto        locationDto;
+    private LocationDto       locationDto;
     @Mock
-    private BreakpointDto      breakpointDto;
+    private BreakpointDto     breakpointDto;
     @Mock
-    private Optional<Project>  optional;
+    private Optional<Project> optional;
 
     @Captor
     private ArgumentCaptor<WsAgentStateHandler>             extServerStateHandlerCaptor;
@@ -176,10 +179,10 @@ public class DebuggerTest extends BaseTest {
         doReturn(DEBUG_INFO).when(localStorage).getItem(AbstractDebugger.LOCAL_STORAGE_DEBUGGER_SESSION_KEY);
         doReturn(debugSessionDto).when(dtoFactory).createDtoFromJson(anyString(), eq(DebugSessionDto.class));
 
-        doReturn(PATH).when(file).getPath();
+        doReturn(Path.valueOf(PATH)).when(file).getLocation();
 
         debugger = new TestDebugger(service, dtoFactory, localStorageProvider, messageBusProvider, eventBus,
-                                    activeFileHandler, debuggerManager, "id");
+                                    activeFileHandler, debuggerManager, notificationManager, "id");
         doReturn(promiseInfo).when(service).getSessionInfo(SESSION_ID);
         doReturn(promiseInfo).when(promiseInfo).then(any(Operation.class));
 
@@ -586,6 +589,7 @@ public class DebuggerTest extends BaseTest {
                             EventBus eventBus,
                             ActiveFileHandler activeFileHandler,
                             DebuggerManager debuggerManager,
+                            NotificationManager notificationManager,
                             String id) {
             super(service,
                   dtoFactory,
@@ -594,6 +598,7 @@ public class DebuggerTest extends BaseTest {
                   eventBus,
                   activeFileHandler,
                   debuggerManager,
+                  notificationManager,
                   breakpointManager,
                   id);
         }

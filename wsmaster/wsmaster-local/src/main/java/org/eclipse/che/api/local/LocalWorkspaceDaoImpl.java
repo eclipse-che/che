@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,6 +37,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
@@ -89,7 +90,7 @@ public class LocalWorkspaceDaoImpl implements WorkspaceDao {
         if (workspaces.containsKey(workspace.getId())) {
             throw new ConflictException("Workspace with id " + workspace.getId() + " already exists");
         }
-        if (find(workspace.getName(), workspace.getNamespace()).isPresent()) {
+        if (find(workspace.getConfig().getName(), workspace.getNamespace()).isPresent()) {
             throw new ConflictException(format("Workspace with name %s and owner %s already exists",
                                                workspace.getConfig().getName(),
                                                workspace.getNamespace()));
@@ -109,7 +110,7 @@ public class LocalWorkspaceDaoImpl implements WorkspaceDao {
         if (!workspaces.containsKey(workspace.getId())) {
             throw new NotFoundException("Workspace with id " + workspace.getId() + " was not found");
         }
-        if (find(workspace.getName(), workspace.getNamespace()).isPresent()) {
+        if (find(workspace.getConfig().getName(), workspace.getNamespace()).isPresent()) {
             throw new ConflictException(format("Workspace with name %s and owner %s already exists",
                                                workspace.getConfig().getName(),
                                                workspace.getNamespace()));
@@ -121,7 +122,7 @@ public class LocalWorkspaceDaoImpl implements WorkspaceDao {
     }
 
     @Override
-    public synchronized void remove(String id) throws ConflictException, ServerException {
+    public synchronized void remove(String id) throws ServerException {
         requireNonNull(id, "Required non-null id");
         workspaces.remove(id);
     }
@@ -162,6 +163,18 @@ public class LocalWorkspaceDaoImpl implements WorkspaceDao {
     public List<WorkspaceImpl> getWorkspaces(String userId) throws ServerException {
         return new ArrayList<>(workspaces.values());
     }
+
+    @Override
+    public List<WorkspaceImpl> getWorkspaces(boolean isTemporary, int skipCount, int maxItems) throws ServerException {
+        Stream<WorkspaceImpl> stream = workspaces.values().stream();
+        stream.filter(ws -> ws.isTemporary() == isTemporary);
+        stream.skip(skipCount);
+        if (maxItems != 0) {
+            stream.limit(maxItems);
+        }
+        return  stream.collect(toList());
+    }
+
 
     private Optional<WorkspaceImpl> find(String name, String owner) {
         return workspaces.values()

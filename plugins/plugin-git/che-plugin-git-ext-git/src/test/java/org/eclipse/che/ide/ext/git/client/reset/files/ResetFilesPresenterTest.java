@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ import org.eclipse.che.api.git.shared.IndexFile;
 import org.eclipse.che.api.git.shared.ResetRequest;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.git.client.BaseTest;
 import org.eclipse.che.ide.api.dialogs.MessageDialog;
 import org.eclipse.che.ide.resource.Path;
@@ -66,10 +67,10 @@ public class ResetFilesPresenterTest extends BaseTest {
         when(indexFile.withIndexed(anyBoolean())).thenReturn(indexFile);
         when(indexFile.withPath(anyString())).thenReturn(indexFile);
         when(indexFile.getPath()).thenReturn("foo");
-
         when(service.getStatus(anyObject(), any(Path.class))).thenReturn(statusPromise);
         when(statusPromise.then(any(Operation.class))).thenReturn(statusPromise);
         when(statusPromise.catchError(any(Operation.class))).thenReturn(statusPromise);
+        when(appContext.getResources()).thenReturn(new Resource[]{});
     }
 
     @Test

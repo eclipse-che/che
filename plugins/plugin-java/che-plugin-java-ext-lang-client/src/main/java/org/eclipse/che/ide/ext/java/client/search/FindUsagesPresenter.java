@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,6 +40,7 @@ import org.eclipse.che.ide.ext.java.shared.dto.search.FindUsagesResponse;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.rest.HTTPStatus;
 import org.eclipse.che.ide.util.loging.Log;
+import org.eclipse.che.providers.DynaObject;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
@@ -51,6 +52,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
  * @author Evgen Vidolob
  */
 @Singleton
+@DynaObject
 public class FindUsagesPresenter extends BasePresenter implements FindUsagesView.ActionDelegate {
 
 
@@ -83,11 +85,6 @@ public class FindUsagesPresenter extends BasePresenter implements FindUsagesView
     @Override
     public String getTitle() {
         return localizationConstant.findUsagesPartTitle();
-    }
-
-    @Override
-    public void setVisible(boolean visible) {
-        view.setVisible(visible);
     }
 
     @Override

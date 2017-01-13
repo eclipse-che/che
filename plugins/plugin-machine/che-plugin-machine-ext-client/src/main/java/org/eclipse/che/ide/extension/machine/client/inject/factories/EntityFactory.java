@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,12 +12,13 @@ package org.eclipse.che.ide.extension.machine.client.inject.factories;
 
 import com.google.inject.assistedinject.Assisted;
 
+import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.api.core.model.machine.Server;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
-import org.eclipse.che.api.machine.shared.dto.ServerDto;
 import org.eclipse.che.api.machine.shared.dto.recipe.RecipeDescriptor;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.ide.extension.machine.client.machine.Machine;
-import org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.appliance.server.Server;
+import org.eclipse.che.ide.api.machine.MachineEntity;
+import org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.appliance.server.ServerEntity;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.panel.MachineTreeNode;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.recipe.editor.RecipeEditorPanel;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.tab.Tab;
@@ -39,9 +40,9 @@ public interface EntityFactory {
     /**
      * Creates machine object.
      *
-     * @return an instance of {@link Machine}
+     * @return an implementation of {@link Machine}
      */
-    Machine createMachine(@NotNull MachineDto descriptor);
+    MachineEntity createMachine(@NotNull MachineDto descriptor);
 
     /**
      * Creates tab entity using special parameters.
@@ -71,9 +72,9 @@ public interface EntityFactory {
      *         server port
      * @param descriptor
      *         server descriptor which contains information about current server
-     * @return an instance of {@link Server}
+     * @return an instance of {@link ServerEntity}
      */
-    Server createServer(@NotNull String port, @NotNull ServerDto descriptor);
+    ServerEntity createServer(@NotNull String port, @NotNull Server descriptor);
 
     /**
      * Creates machine node which will be displayed in special table on view.

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,8 @@ import com.google.common.base.Optional;
 
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.resources.Container;
+import org.eclipse.che.ide.api.resources.File;
+import org.eclipse.che.ide.api.resources.Folder;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.marker.Marker;
@@ -27,6 +29,7 @@ import static com.google.common.base.Optional.absent;
 import static com.google.common.base.Optional.of;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOf;
@@ -60,16 +63,37 @@ abstract class ResourceImpl implements Resource {
         return getResourceType() == FILE;
     }
 
+    @Override
+    public File asFile() {
+        checkState(isFile(), "Current resource is not a file");
+
+        return (File)this;
+    }
+
     /** {@inheritDoc} */
     @Override
     public boolean isFolder() {
         return getResourceType() == FOLDER;
     }
 
+    @Override
+    public Folder asFolder() {
+        checkState(isFolder(), "Current resource is not a folder");
+
+        return (Folder)this;
+    }
+
     /** {@inheritDoc} */
     @Override
     public boolean isProject() {
         return getResourceType() == PROJECT;
+    }
+
+    @Override
+    public Project asProject() {
+        checkState(isProject(), "Current resource is not a project");
+
+        return (Project)this;
     }
 
     /** {@inheritDoc} */
@@ -110,8 +134,10 @@ abstract class ResourceImpl implements Resource {
 
     /** {@inheritDoc} */
     @Override
-    public Optional<Container> getParent() {
-        return resourceManager.parentOf(this);
+    public Container getParent() {
+        final Optional<Container> parent = resourceManager.parentOf(this);
+
+        return parent.isPresent() ? parent.get() : null;
     }
 
     /** {@inheritDoc} */
@@ -121,25 +147,32 @@ abstract class ResourceImpl implements Resource {
             return of((Project)this);
         }
 
-        Optional<Container> optionalParent = getParent();
+        Container optionalParent = getParent();
 
-        if (!optionalParent.isPresent()) {
+        if (optionalParent == null) {
             return absent();
         }
 
-        Container parent = optionalParent.get();
+        Container parent = optionalParent;
 
         while (!(parent instanceof Project)) {
             optionalParent = parent.getParent();
 
-            if (!optionalParent.isPresent()) {
+            if (optionalParent == null) {
                 return absent();
             }
 
-            parent = optionalParent.get();
+            parent = optionalParent;
         }
 
         return of((Project)parent);
+    }
+
+    @Override
+    public Project getProject() {
+        final Optional<Project> project = getRelatedProject();
+
+        return project.isPresent() ? project.get() : null;
     }
 
     /** {@inheritDoc} */
@@ -251,10 +284,10 @@ abstract class ResourceImpl implements Resource {
             return Optional.<Resource>of(this);
         }
 
-        Optional<Container> optParent = getParent();
+        Container optParent = getParent();
 
-        while (optParent.isPresent()) {
-            Container parent = optParent.get();
+        while (optParent != null) {
+            Container parent = optParent;
 
             final Optional<Marker> marker = parent.getMarker(type);
             if (marker.isPresent()) {

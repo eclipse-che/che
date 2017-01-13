@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,18 +18,14 @@ import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.git.shared.AddRequest;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.BranchCreateRequest;
-import org.eclipse.che.api.git.shared.BranchDeleteRequest;
-import org.eclipse.che.api.git.shared.BranchListRequest;
+import org.eclipse.che.api.git.shared.BranchListMode;
 import org.eclipse.che.api.git.shared.CheckoutRequest;
 import org.eclipse.che.api.git.shared.CloneRequest;
 import org.eclipse.che.api.git.shared.CommitRequest;
 import org.eclipse.che.api.git.shared.Commiters;
-import org.eclipse.che.api.git.shared.ConfigRequest;
-import org.eclipse.che.api.git.shared.DiffRequest;
+import org.eclipse.che.api.git.shared.DiffType;
 import org.eclipse.che.api.git.shared.FetchRequest;
 import org.eclipse.che.api.git.shared.GitUrlVendorInfo;
-import org.eclipse.che.api.git.shared.InitRequest;
-import org.eclipse.che.api.git.shared.LogRequest;
 import org.eclipse.che.api.git.shared.LogResponse;
 import org.eclipse.che.api.git.shared.MergeRequest;
 import org.eclipse.che.api.git.shared.MergeResult;
@@ -39,17 +35,13 @@ import org.eclipse.che.api.git.shared.PushRequest;
 import org.eclipse.che.api.git.shared.PushResponse;
 import org.eclipse.che.api.git.shared.Remote;
 import org.eclipse.che.api.git.shared.RemoteAddRequest;
-import org.eclipse.che.api.git.shared.RemoteListRequest;
 import org.eclipse.che.api.git.shared.RepoInfo;
 import org.eclipse.che.api.git.shared.ResetRequest;
 import org.eclipse.che.api.git.shared.Revision;
-import org.eclipse.che.api.git.shared.RmRequest;
-import org.eclipse.che.api.git.shared.ShowFileContentRequest;
 import org.eclipse.che.api.git.shared.ShowFileContentResponse;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.git.shared.StatusFormat;
 import org.eclipse.che.ide.api.machine.DevMachine;
-import org.eclipse.che.ide.api.machine.WsAgentStateController;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -58,8 +50,10 @@ import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.machine.WsAgentStateController;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.rest.AsyncRequest;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.AsyncRequestLoader;
@@ -79,7 +73,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static com.google.gwt.http.client.RequestBuilder.GET;
+import static com.google.gwt.http.client.RequestBuilder.DELETE;
 import static com.google.gwt.http.client.RequestBuilder.POST;
 import static org.eclipse.che.api.git.shared.StatusFormat.PORCELAIN;
 import static org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper.createFromAsyncRequest;
@@ -87,7 +81,6 @@ import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
 import static org.eclipse.che.ide.MimeType.TEXT_PLAIN;
 import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
 import static org.eclipse.che.ide.rest.HTTPHeader.CONTENTTYPE;
-import static org.eclipse.che.ide.util.Arrays.isNullOrEmpty;
 
 /**
  * Implementation of the {@link GitServiceClient}.
@@ -97,38 +90,33 @@ import static org.eclipse.che.ide.util.Arrays.isNullOrEmpty;
  */
 @Singleton
 public class GitServiceClientImpl implements GitServiceClient {
-    public static final String ADD               = "/git/add";
-    public static final String BRANCH_LIST       = "/git/branch-list";
-    public static final String CHECKOUT          = "/git/checkout";
-    public static final String BRANCH_CREATE     = "/git/branch-create";
-    public static final String BRANCH_DELETE     = "/git/branch-delete";
-    public static final String BRANCH_RENAME     = "/git/branch-rename";
-    public static final String CLONE             = "/git/clone";
-    public static final String COMMIT            = "/git/commit";
-    public static final String CONFIG            = "/git/config";
-    public static final String DIFF              = "/git/diff";
-    public static final String FETCH             = "/git/fetch";
-    public static final String INIT              = "/git/init";
-    public static final String LOG               = "/git/log";
-    public static final String SHOW              = "/git/show";
-    public static final String MERGE             = "/git/merge";
-    public static final String STATUS            = "/git/status";
-    public static final String PUSH              = "/git/push";
-    public static final String PULL              = "/git/pull";
-    public static final String REMOTE_LIST       = "/git/remote-list";
-    public static final String REMOTE_ADD        = "/git/remote-add";
-    public static final String REMOTE_DELETE     = "/git/remote-delete";
-    public static final String REMOVE            = "/git/rm";
-    public static final String RESET             = "/git/reset";
-    public static final String COMMITERS         = "/git/commiters";
-    public static final String DELETE_REPOSITORY = "/git/delete-repository";
+    private static final String ADD         = "/git/add";
+    private static final String BRANCH      = "/git/branch";
+    private static final String CHECKOUT    = "/git/checkout";
+    private static final String CLONE       = "/git/clone";
+    private static final String COMMIT      = "/git/commit";
+    private static final String CONFIG      = "/git/config";
+    private static final String DIFF        = "/git/diff";
+    private static final String FETCH       = "/git/fetch";
+    private static final String INIT        = "/git/init";
+    private static final String LOG         = "/git/log";
+    private static final String SHOW        = "/git/show";
+    private static final String MERGE       = "/git/merge";
+    private static final String STATUS      = "/git/status";
+    private static final String PUSH        = "/git/push";
+    private static final String PULL        = "/git/pull";
+    private static final String REMOTE      = "/git/remote";
+    private static final String REMOVE      = "/git/remove";
+    private static final String RESET       = "/git/reset";
+    private static final String COMMITERS   = "/git/commiters";
+    private static final String REPOSITORY  = "/git/repository";
 
     /** Loader to be displayed. */
     private final AsyncRequestLoader     loader;
-    private final WsAgentStateController wsAgentStateController;
     private final DtoFactory             dtoFactory;
     private final DtoUnmarshallerFactory dtoUnmarshallerFactory;
     private final AsyncRequestFactory    asyncRequestFactory;
+    private final WsAgentStateController wsAgentStateController;
     private final AppContext             appContext;
 
     @Inject
@@ -138,27 +126,20 @@ public class GitServiceClientImpl implements GitServiceClient {
                                    AsyncRequestFactory asyncRequestFactory,
                                    DtoUnmarshallerFactory dtoUnmarshallerFactory,
                                    AppContext appContext) {
+        this.wsAgentStateController = wsAgentStateController;
         this.appContext = appContext;
         this.loader = loaderFactory.newLoader();
-        this.wsAgentStateController = wsAgentStateController;
         this.dtoFactory = dtoFactory;
         this.asyncRequestFactory = asyncRequestFactory;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
     }
 
-    /** {@inheritDoc} */
     @Override
     public void init(DevMachine devMachine, ProjectConfigDto project, boolean bare, final RequestCallback<Void> callback)
             throws WebSocketException {
-        InitRequest initRequest = dtoFactory.createDto(InitRequest.class);
-        initRequest.setBare(bare);
-        initRequest.setWorkingDir(project.getName());
+        String url = INIT + "?projectPath=" + project.getPath() + "&bare=" + bare;
 
-        String url = INIT + "?projectPath=" + project.getPath();
-
-        MessageBuilder builder = new MessageBuilder(POST, url);
-        builder.data(dtoFactory.toJson(initRequest)).header(CONTENTTYPE, APPLICATION_JSON);
-        Message message = builder.build();
+        Message message = new MessageBuilder(POST, url).header(ACCEPT, TEXT_PLAIN).build();
 
         sendMessageToWS(message, callback);
     }
@@ -168,15 +149,9 @@ public class GitServiceClientImpl implements GitServiceClient {
         return createFromAsyncRequest(new RequestCall<Void>() {
             @Override
             public void makeCall(final AsyncCallback<Void> callback) {
-                InitRequest initRequest = dtoFactory.createDto(InitRequest.class);
-                initRequest.setBare(bare);
-                initRequest.setWorkingDir(project.toString());
+                String url = INIT + "?projectPath=" + project.toString() + "&bare=" + bare;
 
-                String url = INIT + "?projectPath=" + project.toString();
-
-                MessageBuilder builder = new MessageBuilder(POST, url);
-                builder.data(dtoFactory.toJson(initRequest)).header(CONTENTTYPE, APPLICATION_JSON);
-                Message message = builder.build();
+                Message message = new MessageBuilder(POST, url).header(ACCEPT, TEXT_PLAIN).build();
 
                 sendMessageToWS(message, new RequestCallback<Void>() {
                     @Override
@@ -193,7 +168,6 @@ public class GitServiceClientImpl implements GitServiceClient {
         });
     }
 
-    /** {@inheritDoc} */
     @Override
     public void cloneRepository(DevMachine devMachine,
                                 ProjectConfigDto project,
@@ -231,13 +205,13 @@ public class GitServiceClientImpl implements GitServiceClient {
         });
     }
 
-    /** {@inheritDoc} */
     @Override
+    @Deprecated
     public void statusText(DevMachine devMachine, ProjectConfigDto project, StatusFormat format, AsyncRequestCallback<String> callback) {
-        String url = appContext.getDevMachine().getWsAgentBaseUrl() + STATUS;
         String params = "?projectPath=" + project.getPath() + "&format=" + format;
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + STATUS + params;
 
-        asyncRequestFactory.createPostRequest(url + params, null)
+        asyncRequestFactory.createGetRequest(url)
                            .loader(loader)
                            .header(CONTENTTYPE, APPLICATION_JSON)
                            .header(ACCEPT, TEXT_PLAIN)
@@ -246,17 +220,16 @@ public class GitServiceClientImpl implements GitServiceClient {
 
     @Override
     public Promise<String> statusText(DevMachine devMachine, Path project, StatusFormat format) {
-        String url = devMachine.getWsAgentBaseUrl() + STATUS;
-        String params = "?projectPath=" + project + "&format=" + format;
+        String params = "?projectPath=" + project.toString() + "&format=" + format;
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + STATUS + params;
 
-        return asyncRequestFactory.createPostRequest(url + params, null)
+        return asyncRequestFactory.createGetRequest(url)
                                   .loader(loader)
                                   .header(CONTENTTYPE, APPLICATION_JSON)
                                   .header(ACCEPT, TEXT_PLAIN)
                                   .send(new StringUnmarshaller());
     }
 
-    /** {@inheritDoc} */
     @Override
     public void add(DevMachine devMachine,
                     ProjectConfig project,
@@ -265,9 +238,9 @@ public class GitServiceClientImpl implements GitServiceClient {
                     RequestCallback<Void> callback) throws WebSocketException {
         AddRequest addRequest = dtoFactory.createDto(AddRequest.class).withUpdate(update);
         if (filePattern == null) {
-            addRequest.setFilepattern(AddRequest.DEFAULT_PATTERN);
+            addRequest.setFilePattern(AddRequest.DEFAULT_PATTERN);
         } else {
-            addRequest.setFilepattern(filePattern);
+            addRequest.setFilePattern(filePattern);
         }
         String url = ADD + "?projectPath=" + project.getPath();
 
@@ -287,7 +260,7 @@ public class GitServiceClientImpl implements GitServiceClient {
                 final AddRequest addRequest = dtoFactory.createDto(AddRequest.class).withUpdate(update);
 
                 if (paths == null) {
-                    addRequest.setFilepattern(AddRequest.DEFAULT_PATTERN);
+                    addRequest.setFilePattern(AddRequest.DEFAULT_PATTERN);
                 } else {
 
                     final List<String> patterns = new ArrayList<>(); //need for compatible with server side
@@ -295,7 +268,7 @@ public class GitServiceClientImpl implements GitServiceClient {
                         patterns.add(path.isEmpty() ? "." : path.toString());
                     }
 
-                    addRequest.setFilepattern(patterns);
+                    addRequest.setFilePattern(patterns);
                 }
 
                 final String url = ADD + "?projectPath=" + project.toString();
@@ -318,7 +291,6 @@ public class GitServiceClientImpl implements GitServiceClient {
         });
     }
 
-    /** {@inheritDoc} */
     @Override
     public void commit(DevMachine devMachine,
                        ProjectConfig project,
@@ -367,17 +339,23 @@ public class GitServiceClientImpl implements GitServiceClient {
 
     @Override
     public Promise<Revision> commit(DevMachine devMachine, Path project, String message, Path[] files, boolean amend) {
+        return commit(devMachine, project, message, false, files, amend);
+    }
 
+    @Override
+    public Promise<Revision> commit(DevMachine devMachine, Path project, String message, boolean all, Path[] files, boolean amend) {
         List<String> paths = new ArrayList<>(files.length);
 
         for (Path file : files) {
-            paths.add(file.isEmpty() ? "." : file.toString());
+            if (!file.isEmpty()) {
+                paths.add(file.toString());
+            }
         }
 
         CommitRequest commitRequest = dtoFactory.createDto(CommitRequest.class)
                                                 .withMessage(message)
                                                 .withAmend(amend)
-                                                .withAll(false)
+                                                .withAll(all)
                                                 .withFiles(paths);
         String url = devMachine.getWsAgentBaseUrl() + COMMIT + "?projectPath=" + project;
 
@@ -390,28 +368,30 @@ public class GitServiceClientImpl implements GitServiceClient {
     @Override
     public void config(DevMachine devMachine,
                        ProjectConfigDto project,
-                       @Nullable List<String> entries,
-                       boolean all,
+                       List<String> requestedConfig,
                        AsyncRequestCallback<Map<String, String>> callback) {
-        ConfigRequest configRequest = dtoFactory.createDto(ConfigRequest.class)
-                                                .withGetAll(all)
-                                                .withConfigEntry(entries);
-        String url = appContext.getDevMachine().getWsAgentBaseUrl() + CONFIG + "?projectPath=" + project.getPath();
-
-        asyncRequestFactory.createPostRequest(url, configRequest).loader(loader).send(callback);
+        String params = "?projectPath=" + project.getPath();
+        if (requestedConfig != null) {
+            for (String entry : requestedConfig) {
+                params += "&requestedConfig=" + entry;
+            }
+        }
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + CONFIG + params;
+        asyncRequestFactory.createGetRequest(url).loader(loader).send(callback);
     }
 
     @Override
-    public Promise<Map<String, String>> config(DevMachine devMachine, Path project, List<String> entries, boolean all) {
-        ConfigRequest configRequest = dtoFactory.createDto(ConfigRequest.class)
-                                                .withGetAll(all)
-                                                .withConfigEntry(entries);
-        String url = devMachine.getWsAgentBaseUrl() + CONFIG + "?projectPath=" + project;
-
-        return asyncRequestFactory.createPostRequest(url, configRequest).loader(loader).send(new StringMapUnmarshaller());
+    public Promise<Map<String, String>> config(DevMachine devMachine, Path project, List<String> requestedConfig) {
+        String params = "?projectPath=" + project.toString();
+        if (requestedConfig != null) {
+            for (String entry : requestedConfig) {
+                params += "&requestedConfig=" + entry;
+            }
+        }
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + CONFIG + params;
+        return asyncRequestFactory.createGetRequest(url).loader(loader).send(new StringMapUnmarshaller());
     }
 
-    /** {@inheritDoc} */
     @Override
     public void push(DevMachine devMachine,
                      ProjectConfigDto project,
@@ -445,117 +425,97 @@ public class GitServiceClientImpl implements GitServiceClient {
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(PushResponse.class));
     }
 
-    /** {@inheritDoc} */
     @Override
     public void remoteList(DevMachine devMachine,
                            ProjectConfigDto project,
                            @Nullable String remoteName,
                            boolean verbose,
                            AsyncRequestCallback<List<Remote>> callback) {
-        RemoteListRequest remoteListRequest = dtoFactory.createDto(RemoteListRequest.class).withVerbose(verbose);
-        if (remoteName != null) {
-            remoteListRequest.setRemote(remoteName);
-        }
-        String url = appContext.getDevMachine().getWsAgentBaseUrl() + REMOTE_LIST + "?projectPath=" + project.getPath();
-        asyncRequestFactory.createPostRequest(url, remoteListRequest).loader(loader).send(callback);
+        String params = "?projectPath=" + project.getPath() + (remoteName != null ? "&remoteName=" + remoteName : "") +
+                        "&verbose=" + String.valueOf(verbose);
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + REMOTE + params;
+        asyncRequestFactory.createGetRequest(url).loader(loader).send(callback);
     }
 
-    /** {@inheritDoc} */
     @Override
     public Promise<List<Remote>> remoteList(DevMachine devMachine, ProjectConfig project, @Nullable String remoteName, boolean verbose) {
-        RemoteListRequest remoteListRequest = dtoFactory.createDto(RemoteListRequest.class).withVerbose(verbose);
+        String params = "?projectPath=" + project.getPath() + "&verbose=" + String.valueOf(verbose);
         if (remoteName != null) {
-            remoteListRequest.setRemote(remoteName);
+            params += "&remoteName=" + remoteName;
         }
-        String url = devMachine.getWsAgentBaseUrl() + REMOTE_LIST + "?projectPath=" + project.getPath();
-        return asyncRequestFactory.createPostRequest(url, remoteListRequest)
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + REMOTE + params;
+        return asyncRequestFactory.createGetRequest(url)
                                   .loader(loader)
                                   .send(dtoUnmarshallerFactory.newListUnmarshaller(Remote.class));
     }
 
     @Override
-    public Promise<List<Remote>> remoteList(DevMachine devMachine, Path project, String remote, boolean verbose) {
-        RemoteListRequest remoteListRequest = dtoFactory.createDto(RemoteListRequest.class).withVerbose(verbose);
-        if (remote != null) {
-            remoteListRequest.setRemote(remote);
-        }
-        String url = devMachine.getWsAgentBaseUrl() + REMOTE_LIST + "?projectPath=" + project;
-        return asyncRequestFactory.createPostRequest(url, remoteListRequest)
+    public Promise<List<Remote>> remoteList(DevMachine devMachine, Path project, String remoteName, boolean verbose) {
+        String params = "?projectPath=" + project.toString() + (remoteName != null ? "&remoteName=" + remoteName : "") +
+                        "&verbose=" + String.valueOf(verbose);
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + REMOTE + params;
+        return asyncRequestFactory.createGetRequest(url)
                                   .loader(loader)
                                   .send(dtoUnmarshallerFactory.newListUnmarshaller(Remote.class));
     }
 
-    /** {@inheritDoc} */
     @Override
+    @Deprecated
     public void branchList(DevMachine devMachine,
                            ProjectConfig project,
-                           @Nullable String remoteMode,
+                           BranchListMode listMode,
                            AsyncRequestCallback<List<Branch>> callback) {
-        BranchListRequest branchListRequest = dtoFactory.createDto(BranchListRequest.class).withListMode(remoteMode);
-        String url =appContext.getDevMachine().getWsAgentBaseUrl() + BRANCH_LIST + "?projectPath=" + project.getPath();
-        asyncRequestFactory.createPostRequest(url, branchListRequest).send(callback);
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + BRANCH + "?projectPath=" + project.getPath() +
+                     (listMode == null ? "" : "&listMode=" + listMode);
+        asyncRequestFactory.createGetRequest(url).send(callback);
     }
 
     @Override
-    public Promise<List<Branch>> branchList(DevMachine devMachine, Path project, String mode) {
-        BranchListRequest branchListRequest = dtoFactory.createDto(BranchListRequest.class).withListMode(mode);
-        String url = devMachine.getWsAgentBaseUrl() + BRANCH_LIST + "?projectPath=" + project;
-        return asyncRequestFactory.createPostRequest(url, branchListRequest).send(dtoUnmarshallerFactory.newListUnmarshaller(Branch.class));
-    }
-
-    @Override
-    public Promise<Status> status(DevMachine devMachine, ProjectConfig project) {
-        final String params = "?projectPath=" + project.getPath() + "&format=" + PORCELAIN;
-        final String url = devMachine.getWsAgentBaseUrl() + STATUS + params;
-        return asyncRequestFactory.createPostRequest(url, null)
-                                  .loader(loader)
-                                  .header(CONTENTTYPE, APPLICATION_JSON)
-                                  .header(ACCEPT, APPLICATION_JSON)
-                                  .send(dtoUnmarshallerFactory.newUnmarshaller(Status.class));
+    public Promise<List<Branch>> branchList(DevMachine devMachine, Path project, BranchListMode listMode) {
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + BRANCH + "?projectPath=" + project.toString() +
+                     (listMode == null ? "" : "&listMode=" + listMode);
+        return asyncRequestFactory.createGetRequest(url).send(dtoUnmarshallerFactory.newListUnmarshaller(Branch.class));
     }
 
     @Override
     public Promise<Status> getStatus(DevMachine devMachine, Path project) {
         final String params = "?projectPath=" + project.toString() + "&format=" + PORCELAIN;
-        final String url = devMachine.getWsAgentBaseUrl() + STATUS + params;
-        return asyncRequestFactory.createPostRequest(url, null)
+        final String url = appContext.getDevMachine().getWsAgentBaseUrl() + STATUS + params;
+        return asyncRequestFactory.createGetRequest(url)
                                   .loader(loader)
                                   .header(CONTENTTYPE, APPLICATION_JSON)
                                   .header(ACCEPT, APPLICATION_JSON)
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(Status.class));
     }
 
-    /** {@inheritDoc} */
     @Override
     public void status(DevMachine devMachine, ProjectConfigDto project, AsyncRequestCallback<Status> callback) {
         String params = "?projectPath=" + project.getPath() + "&format=" + PORCELAIN;
         String url = appContext.getDevMachine().getWsAgentBaseUrl() + STATUS + params;
-        asyncRequestFactory.createPostRequest(url, null).loader(loader)
+        asyncRequestFactory.createGetRequest(url).loader(loader)
                            .header(CONTENTTYPE, APPLICATION_JSON)
                            .header(ACCEPT, APPLICATION_JSON)
                            .send(callback);
     }
 
-    /** {@inheritDoc} */
     @Override
     public void branchDelete(DevMachine devMachine,
                              ProjectConfigDto project,
                              String name,
                              boolean force,
                              AsyncRequestCallback<String> callback) {
-        BranchDeleteRequest branchDeleteRequest = dtoFactory.createDto(BranchDeleteRequest.class).withName(name).withForce(force);
-        String url =appContext.getDevMachine().getWsAgentBaseUrl() + BRANCH_DELETE + "?projectPath=" + project.getPath();
-        asyncRequestFactory.createPostRequest(url, branchDeleteRequest).loader(loader).send(callback);
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + BRANCH + "?projectPath=" + project.getPath()
+                     + "&name=" + name + "&force=" + force;
+        asyncRequestFactory.createDeleteRequest(url).loader(loader).send(callback);
     }
 
     @Override
     public Promise<Void> branchDelete(DevMachine devMachine, Path project, String name, boolean force) {
-        BranchDeleteRequest branchDeleteRequest = dtoFactory.createDto(BranchDeleteRequest.class).withName(name).withForce(force);
-        String url = devMachine.getWsAgentBaseUrl() + BRANCH_DELETE + "?projectPath=" + project;
-        return asyncRequestFactory.createPostRequest(url, branchDeleteRequest).loader(loader).send();
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + BRANCH + "?projectPath=" + project.toString()
+                     + "&name=" + name + "&force=" + force;
+        return asyncRequestFactory.createDeleteRequest(url).loader(loader).send();
     }
 
-    /** {@inheritDoc} */
     @Override
     public void branchRename(DevMachine devMachine,
                              ProjectConfigDto project,
@@ -563,7 +523,7 @@ public class GitServiceClientImpl implements GitServiceClient {
                              String newName,
                              AsyncRequestCallback<String> callback) {
         String params = "?projectPath=" + project.getPath() + "&oldName=" + oldName + "&newName=" + newName;
-        String url = appContext.getDevMachine().getWsAgentBaseUrl() + BRANCH_RENAME + params;
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + BRANCH + params;
         asyncRequestFactory.createPostRequest(url, null).loader(loader)
                            .header(CONTENTTYPE, MimeType.APPLICATION_FORM_URLENCODED)
                            .send(callback);
@@ -571,33 +531,31 @@ public class GitServiceClientImpl implements GitServiceClient {
 
     @Override
     public Promise<Void> branchRename(DevMachine devMachine, Path project, String oldName, String newName) {
-        String params = "?projectPath=" + project + "&oldName=" + oldName + "&newName=" + newName;
-        String url = devMachine.getWsAgentBaseUrl() + BRANCH_RENAME + params;
+        String params = "?projectPath=" + project.toString() + "&oldName=" + oldName + "&newName=" + newName;
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + BRANCH + params;
         return asyncRequestFactory.createPostRequest(url, null).loader(loader)
                                   .header(CONTENTTYPE, MimeType.APPLICATION_FORM_URLENCODED)
                                   .send();
     }
 
-    /** {@inheritDoc} */
     @Override
     public void branchCreate(DevMachine devMachine, ProjectConfigDto project, String name, String startPoint,
                              AsyncRequestCallback<Branch> callback) {
         BranchCreateRequest branchCreateRequest = dtoFactory.createDto(BranchCreateRequest.class).withName(name).withStartPoint(startPoint);
-        String url = appContext.getDevMachine().getWsAgentBaseUrl() + BRANCH_CREATE + "?projectPath=" + project.getPath();
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + BRANCH + "?projectPath=" + project.getPath();
         asyncRequestFactory.createPostRequest(url, branchCreateRequest).loader(loader).header(ACCEPT, APPLICATION_JSON).send(callback);
     }
 
     @Override
     public Promise<Branch> branchCreate(DevMachine devMachine, Path project, String name, String startPoint) {
         BranchCreateRequest branchCreateRequest = dtoFactory.createDto(BranchCreateRequest.class).withName(name).withStartPoint(startPoint);
-        String url = devMachine.getWsAgentBaseUrl() + BRANCH_CREATE + "?projectPath=" + project;
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + BRANCH + "?projectPath=" + project.toString();
         return asyncRequestFactory.createPostRequest(url, branchCreateRequest)
                                   .loader(loader)
                                   .header(ACCEPT, APPLICATION_JSON)
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(Branch.class));
     }
 
-    /** {@inheritDoc} */
     @Override
     public void checkout(DevMachine devMachine,
                          ProjectConfig project,
@@ -616,34 +574,36 @@ public class GitServiceClientImpl implements GitServiceClient {
         return asyncRequestFactory.createPostRequest(url, request).loader(loader).send();
     }
 
-    /** {@inheritDoc} */
     @Override
     public void remove(DevMachine devMachine,
                        ProjectConfigDto project,
                        List<String> items,
                        boolean cached,
                        AsyncRequestCallback<String> callback) {
-        RmRequest rmRequest = dtoFactory.createDto(RmRequest.class).withItems(items).withCached(cached).withRecursively(true);
-        String url = appContext.getDevMachine().getWsAgentBaseUrl() + REMOVE + "?projectPath=" + project.getPath();
-        asyncRequestFactory.createPostRequest(url, rmRequest).loader(loader).send(callback);
+        String params = "?projectPath=" + project.getPath();
+        if (items != null) {
+            for (String item : items) {
+                params += "&items=" + item;
+            }
+        }
+        params += "&cached=" + String.valueOf(cached);
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + REMOVE + params;
+        asyncRequestFactory.createDeleteRequest(url).loader(loader).send(callback);
     }
 
     @Override
     public Promise<Void> remove(DevMachine devMachine, Path project, Path[] items, boolean cached) {
-        List<String> files = new ArrayList<>();
-
+        String params = "?projectPath=" + project.toString();
         if (items != null) {
             for (Path item : items) {
-                files.add(item.isEmpty() ? "." : item.toString());
+                params += "&items=" + item.toString();
             }
         }
-
-        RmRequest rmRequest = dtoFactory.createDto(RmRequest.class).withItems(files).withCached(cached).withRecursively(true);
-        String url = devMachine.getWsAgentBaseUrl() + REMOVE + "?projectPath=" + project;
-        return asyncRequestFactory.createPostRequest(url, rmRequest).loader(loader).send();
+        params += "&cached=" + String.valueOf(cached);
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + REMOVE + params;
+        return asyncRequestFactory.createDeleteRequest(url).loader(loader).send();
     }
 
-    /** {@inheritDoc} */
     @Override
     public void reset(DevMachine devMachine,
                       ProjectConfigDto project,
@@ -679,48 +639,49 @@ public class GitServiceClientImpl implements GitServiceClient {
         return asyncRequestFactory.createPostRequest(url, resetRequest).loader(loader).send();
     }
 
-    /** {@inheritDoc} */
     @Override
     public void log(DevMachine devMachine, ProjectConfigDto project, List<String> fileFilter, boolean isTextFormat,
                     @NotNull AsyncRequestCallback<LogResponse> callback) {
-        LogRequest logRequest = dtoFactory.createDto(LogRequest.class).withFileFilter(fileFilter);
-        String url = appContext.getDevMachine().getWsAgentBaseUrl() + LOG + "?projectPath=" + project.getPath();
+        StringBuilder params = new StringBuilder().append("?projectPath=").append(project.getPath());
+        if (fileFilter != null) {
+            for (String file : fileFilter) {
+                params.append("&fileFilter=").append(file);
+            }
+        }
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + LOG + params;
         if (isTextFormat) {
-            asyncRequestFactory.createPostRequest(url, logRequest).send(callback);
+            asyncRequestFactory.createGetRequest(url).send(callback);
         } else {
-            asyncRequestFactory.createPostRequest(url, logRequest).loader(loader).header(ACCEPT, APPLICATION_JSON).send(callback);
+            asyncRequestFactory.createGetRequest(url).loader(loader).header(ACCEPT, APPLICATION_JSON).send(callback);
         }
     }
 
     @Override
     public Promise<LogResponse> log(DevMachine devMachine, Path project, Path[] fileFilter, boolean plainText) {
+        return log(devMachine, project, fileFilter, -1, -1, plainText);
+    }
 
-        List<String> paths = null;
-
-        if (!isNullOrEmpty(fileFilter)) {
-            paths = new ArrayList<>(fileFilter.length);
-
+    @Override
+    public Promise<LogResponse> log(DevMachine devMachine, Path project, Path[] fileFilter, int skip, int maxCount, boolean plainText) {
+        StringBuilder params = new StringBuilder().append("?projectPath=").append(project.toString());
+        if (fileFilter != null) {
             for (Path file : fileFilter) {
-                paths.add(file.isEmpty() ? "." : file.toString());
+                params.append("&fileFilter=").append(file.toString());
             }
         }
-
-        LogRequest logRequest = dtoFactory.createDto(LogRequest.class)
-                                          .withFileFilter(paths);
-        String url = devMachine.getWsAgentBaseUrl() + LOG + "?projectPath=" + project;
+        params.append("&skip=").append(skip);
+        params.append("&maxCount=").append(maxCount);
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + LOG + params;
         if (plainText) {
-            return asyncRequestFactory.createPostRequest(url, logRequest)
-                                      .loader(loader)
+            return asyncRequestFactory.createGetRequest(url)
                                       .send(dtoUnmarshallerFactory.newUnmarshaller(LogResponse.class));
         } else {
-            return asyncRequestFactory.createPostRequest(url, logRequest)
-                                      .loader(loader)
+            return asyncRequestFactory.createGetRequest(url)
                                       .header(ACCEPT, APPLICATION_JSON)
                                       .send(dtoUnmarshallerFactory.newUnmarshaller(LogResponse.class));
         }
     }
 
-    /** {@inheritDoc} */
     @Override
     public void remoteAdd(DevMachine devMachine,
                           ProjectConfig project,
@@ -728,34 +689,32 @@ public class GitServiceClientImpl implements GitServiceClient {
                           String repositoryURL,
                           AsyncRequestCallback<String> callback) {
         RemoteAddRequest remoteAddRequest = dtoFactory.createDto(RemoteAddRequest.class).withName(name).withUrl(repositoryURL);
-        String url = appContext.getDevMachine().getWsAgentBaseUrl() + REMOTE_ADD + "?projectPath=" + project.getPath();
-        asyncRequestFactory.createPostRequest(url, remoteAddRequest).loader(loader).send(callback);
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + REMOTE + "?projectPath=" + project.getPath();
+        asyncRequestFactory.createPutRequest(url, remoteAddRequest).loader(loader).send(callback);
     }
 
     @Override
     public Promise<Void> remoteAdd(DevMachine devMachine, Path project, String name, String url) {
         RemoteAddRequest remoteAddRequest = dtoFactory.createDto(RemoteAddRequest.class).withName(name).withUrl(url);
-        String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + REMOTE_ADD + "?projectPath=" + project.toString();
-        return asyncRequestFactory.createPostRequest(requestUrl, remoteAddRequest).loader(loader).send();
+        String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + REMOTE + "?projectPath=" + project.toString();
+        return asyncRequestFactory.createPutRequest(requestUrl, remoteAddRequest).loader(loader).send();
     }
 
-    /** {@inheritDoc} */
     @Override
     public void remoteDelete(DevMachine devMachine,
                              ProjectConfig project,
                              String name,
                              AsyncRequestCallback<String> callback) {
-        String url = appContext.getDevMachine().getWsAgentBaseUrl() + REMOTE_DELETE + '/' + name + "?projectPath=" + project.getPath();
-        asyncRequestFactory.createPostRequest(url, null).loader(loader).send(callback);
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + REMOTE + '/' + name + "?projectPath=" + project.getPath();
+        asyncRequestFactory.createDeleteRequest(url).loader(loader).send(callback);
     }
 
     @Override
     public Promise<Void> remoteDelete(DevMachine devMachine, Path project, String name) {
-        String url = devMachine.getWsAgentBaseUrl() + REMOTE_DELETE + '/' + name + "?projectPath=" + project;
-        return asyncRequestFactory.createPostRequest(url, null).loader(loader).send();
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + REMOTE + '/' + name + "?projectPath=" + project.toString();
+        return asyncRequestFactory.createDeleteRequest(url).loader(loader).send();
     }
 
-    /** {@inheritDoc} */
     @Override
     public void fetch(DevMachine devMachine,
                       ProjectConfigDto project,
@@ -787,7 +746,6 @@ public class GitServiceClientImpl implements GitServiceClient {
         return asyncRequestFactory.createPostRequest(url, fetchRequest).send();
     }
 
-    /** {@inheritDoc} */
     @Override
     public void pull(DevMachine devMachine,
                      ProjectConfigDto project,
@@ -806,129 +764,107 @@ public class GitServiceClientImpl implements GitServiceClient {
         return asyncRequestFactory.createPostRequest(url, pullRequest).send(dtoUnmarshallerFactory.newUnmarshaller(PullResponse.class));
     }
 
-    /** {@inheritDoc} */
     @Override
     public void diff(DevMachine devMachine,
                      ProjectConfigDto project,
                      List<String> fileFilter,
-                     DiffRequest.DiffType type,
+                     DiffType type,
                      boolean noRenames,
                      int renameLimit,
                      String commitA,
                      String commitB, @NotNull AsyncRequestCallback<String> callback) {
-        DiffRequest diffRequest = dtoFactory.createDto(DiffRequest.class)
-                                            .withFileFilter(fileFilter)
-                                            .withType(type)
-                                            .withNoRenames(noRenames)
-                                            .withCommitA(commitA)
-                                            .withCommitB(commitB)
-                                            .withRenameLimit(renameLimit);
+        diff(Path.valueOf(project.getPath()), fileFilter, type, noRenames, renameLimit, commitA, commitB, false).send(callback);
+    }
 
-        diff(devMachine, diffRequest, project.getPath(), callback);
+    @Override
+    public void diff(DevMachine devMachine,
+                     ProjectConfigDto project,
+                     List<String> fileFilter,
+                     DiffType type,
+                     boolean noRenames,
+                     int renameLimit,
+                     String commitA,
+                     boolean cached,
+                     AsyncRequestCallback<String> callback) {
+        diff(Path.valueOf(project.getPath()), fileFilter, type, noRenames, renameLimit, commitA, null, cached).send(callback);
     }
 
     @Override
     public Promise<String> diff(DevMachine devMachine,
                                 Path project,
                                 List<String> fileFilter,
-                                DiffRequest.DiffType type,
+                                DiffType type,
                                 boolean noRenames,
                                 int renameLimit,
                                 String commitA,
                                 String commitB) {
-        DiffRequest diffRequest = dtoFactory.createDto(DiffRequest.class)
-                                            .withFileFilter(fileFilter)
-                                            .withType(type)
-                                            .withNoRenames(noRenames)
-                                            .withCommitA(commitA)
-                                            .withCommitB(commitB)
-                                            .withRenameLimit(renameLimit);
-
-        String url = devMachine.getWsAgentBaseUrl() + DIFF + "?projectPath=" + project;
-        return asyncRequestFactory.createPostRequest(url, diffRequest).loader(loader).send(new StringUnmarshaller());
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void showFileContent(DevMachine devMachine,
-                                @NotNull ProjectConfigDto project,
-                                String file,
-                                String version,
-                                @NotNull AsyncRequestCallback<ShowFileContentResponse> callback) {
-        ShowFileContentRequest showRequest = dtoFactory.createDto(ShowFileContentRequest.class).withFile(file).withVersion(version);
-        String url = appContext.getDevMachine().getWsAgentBaseUrl() + SHOW + "?projectPath=" + project.getPath();
-        asyncRequestFactory.createPostRequest(url, showRequest).loader(loader).send(callback);
-    }
-
-    @Override
-    public Promise<ShowFileContentResponse> showFileContent(DevMachine devMachine, Path project, Path file, String version) {
-        ShowFileContentRequest showRequest = dtoFactory.createDto(ShowFileContentRequest.class)
-                                                       .withFile(file.toString())
-                                                       .withVersion(version);
-        String url = devMachine.getWsAgentBaseUrl() + SHOW + "?projectPath=" + project;
-        return asyncRequestFactory.createPostRequest(url, showRequest)
-                                  .loader(loader)
-                                  .send(dtoUnmarshallerFactory.newUnmarshaller(ShowFileContentResponse.class));
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void diff(DevMachine devMachine,
-                     ProjectConfigDto project,
-                     List<String> fileFilter,
-                     DiffRequest.DiffType type,
-                     boolean noRenames,
-                     int renameLimit,
-                     String commitA,
-                     boolean cached,
-                     AsyncRequestCallback<String> callback) {
-        DiffRequest diffRequest = dtoFactory.createDto(DiffRequest.class)
-                                            .withFileFilter(fileFilter).withType(type)
-                                            .withNoRenames(noRenames)
-                                            .withCommitA(commitA)
-                                            .withRenameLimit(renameLimit)
-                                            .withCached(cached);
-
-        diff(devMachine, diffRequest, project.getPath(), callback);
+        return diff(project, fileFilter, type, noRenames, renameLimit, commitA, commitB, false).send(new StringUnmarshaller());
     }
 
     @Override
     public Promise<String> diff(DevMachine devMachine,
                                 Path project,
                                 List<String> files,
-                                DiffRequest.DiffType type,
+                                DiffType type,
                                 boolean noRenames,
                                 int renameLimit,
                                 String commitA,
                                 boolean cached) {
-        DiffRequest diffRequest = dtoFactory.createDto(DiffRequest.class)
-                                            .withFileFilter(files)
-                                            .withType(type)
-                                            .withNoRenames(noRenames)
-                                            .withCommitA(commitA)
-                                            .withRenameLimit(renameLimit)
-                                            .withCached(cached);
-
-        String url = devMachine.getWsAgentBaseUrl() + DIFF + "?projectPath=" + project;
-        return asyncRequestFactory.createPostRequest(url, diffRequest).loader(loader).send(new StringUnmarshaller());
+        return diff(project, files, type, noRenames, renameLimit, commitA, null, cached).send(new StringUnmarshaller());
     }
 
-    /**
-     * Make diff request.
-     *
-     * @param diffRequest
-     *         request for diff
-     * @param projectPath
-     *         project path
-     * @param callback
-     *         callback
-     */
-    private void diff(DevMachine devMachine, DiffRequest diffRequest, @NotNull String projectPath, AsyncRequestCallback<String> callback) {
-        String url = appContext.getDevMachine().getWsAgentBaseUrl() + DIFF + "?projectPath=" + projectPath;
-        asyncRequestFactory.createPostRequest(url, diffRequest).loader(loader).send(callback);
+    private AsyncRequest diff(Path project,
+                              List<String> fileFilter,
+                              DiffType type,
+                              boolean noRenames,
+                              int renameLimit,
+                              String commitA,
+                              String commitB,
+                              boolean cached) {
+        StringBuilder params = new StringBuilder().append("?projectPath=").append(project.toString());
+        if (fileFilter != null) {
+            for (String file : fileFilter) {
+                if (file.isEmpty()) {
+                    continue;
+                }
+                params.append("&fileFilter=").append(file);
+            }
+        }
+        if (type != null) {
+            params.append("&diffType=").append(type);
+        }
+        params.append("&noRenames=").append(noRenames);
+        params.append("&renameLimit=").append(renameLimit);
+        params.append("&commitA=").append(commitA);
+        if (commitB != null) {
+            params.append("&commitB=").append(commitB);
+        }
+        params.append("&cached=").append(cached);
+
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + DIFF + params;
+        return asyncRequestFactory.createGetRequest(url).loader(loader);
     }
 
-    /** {@inheritDoc} */
+    @Override
+    public void showFileContent(DevMachine devMachine,
+                                @NotNull ProjectConfigDto project,
+                                String file,
+                                String version,
+                                @NotNull AsyncRequestCallback<ShowFileContentResponse> callback) {
+        String params = "?projectPath=" + project.getPath() + "&file=" + file + "&version=" + version ;
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + SHOW + params;
+        asyncRequestFactory.createGetRequest(url).loader(loader).send(callback);
+    }
+
+    @Override
+    public Promise<ShowFileContentResponse> showFileContent(DevMachine devMachine, Path project, Path file, String version) {
+        String params = "?projectPath=" + project.toString() + "&file=" + file + "&version=" + version ;
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + SHOW + params;
+        return asyncRequestFactory.createGetRequest(url)
+                                  .loader(loader)
+                                  .send(dtoUnmarshallerFactory.newUnmarshaller(ShowFileContentResponse.class));
+    }
+
     @Override
     public void merge(DevMachine devMachine,
                       ProjectConfigDto project,
@@ -951,19 +887,18 @@ public class GitServiceClientImpl implements GitServiceClient {
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(MergeResult.class));
     }
 
-    /** {@inheritDoc} */
     @Override
     public void getCommitters(DevMachine devMachine, ProjectConfigDto project, AsyncRequestCallback<Commiters> callback) {
         String url = appContext.getDevMachine().getWsAgentBaseUrl() + COMMITERS + "?projectPath=" + project.getPath();
         asyncRequestFactory.createGetRequest(url).header(ACCEPT, APPLICATION_JSON).send(callback);
     }
 
-    /** {@inheritDoc} */
+
     @Override
     public void deleteRepository(DevMachine devMachine, ProjectConfigDto project, AsyncRequestCallback<Void> callback) {
-        String url = appContext.getDevMachine().getWsAgentBaseUrl() + DELETE_REPOSITORY + "?projectPath=" + project.getPath();
-        asyncRequestFactory.createGetRequest(url).loader(loader)
-                           .header(CONTENTTYPE, APPLICATION_JSON).header(ACCEPT, TEXT_PLAIN)
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + REPOSITORY + "?projectPath=" + project.getPath();
+        asyncRequestFactory.createDeleteRequest(url).loader(loader)
+                           .header(ACCEPT, TEXT_PLAIN)
                            .send(callback);
     }
 
@@ -972,10 +907,9 @@ public class GitServiceClientImpl implements GitServiceClient {
         return createFromAsyncRequest(new RequestCall<Void>() {
             @Override
             public void makeCall(final AsyncCallback<Void> callback) {
-                String url = DELETE_REPOSITORY + "?projectPath=" + project.toString();
-                final Message message = new MessageBuilder(GET, url).header(CONTENTTYPE, APPLICATION_JSON)
-                                                                    .header(ACCEPT, TEXT_PLAIN)
-                                                                    .build();
+                String url = REPOSITORY + "?projectPath=" + project.toString();
+                final Message message = new MessageBuilder(DELETE, url).header(ACCEPT, TEXT_PLAIN)
+                                                                       .build();
 
                 sendMessageToWS(message, new RequestCallback<Void>() {
                     @Override
@@ -992,7 +926,6 @@ public class GitServiceClientImpl implements GitServiceClient {
         });
     }
 
-    /** {@inheritDoc} */
     @Override
     public void getUrlVendorInfo(DevMachine devMachine, @NotNull String vcsUrl, @NotNull AsyncRequestCallback<GitUrlVendorInfo> callback) {
         asyncRequestFactory.createGetRequest(appContext.getDevMachine().getWsAgentBaseUrl() + "/git-service/info?vcsurl=" + vcsUrl)

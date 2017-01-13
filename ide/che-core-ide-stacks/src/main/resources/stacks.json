@@ -24,7 +24,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/ubuntu_jdk8"
+      "origin": "eclipse/ubuntu_jdk8"
     },
     "workspaceConfig": {
       "environments": {
@@ -46,7 +46,7 @@
             }
           },
           "recipe": {
-            "content": "services:\n db:\n  image: codenvy/mysql\n  environment:\n   MYSQL_DATABASE: petclinic\n   MYSQL_USER: petclinic\n   MYSQL_PASSWORD: password\n  mem_limit: 1073741824\n dev-machine:\n  image: codenvy/ubuntu_jdk8\n  mem_limit: 2147483648\n  depends_on:\n    - db",
+            "content": "services:\n db:\n  image: mysql\n  environment:\n   MYSQL_ROOT_PASSWORD: password\n   MYSQL_DATABASE: petclinic\n   MYSQL_USER: petclinic\n   MYSQL_PASSWORD: password\n  mem_limit: 1073741824\n dev-machine:\n  image: eclipse/ubuntu_jdk8\n  mem_limit: 2147483648\n  depends_on:\n    - db",
             "contentType": "application/x-yaml",
             "type": "compose"
           }
@@ -65,98 +65,6 @@
     },
     "stackIcon": {
       "name": "type-java-mysql.svg",
-      "mediaType": "image/svg+xml"
-    }
-  },
-  {
-    "id": "che-in-che",
-    "creator": "ide",
-    "name": "Eclipse Che",
-    "description": "Utilities to build Che in Che with Docker, JDK 8, and Maven.",
-    "scope": "general",
-    "tags": [
-      "Docker",
-      "Java",
-      "JDK",
-      "Maven",
-      "Alpine",
-      "Git"
-    ],
-    "components": [
-      {
-        "name": "Docker",
-        "version": "1.12.0"
-      },
-      {
-        "name": "JDK",
-        "version": "1.8.0_92"
-      },
-      {
-        "name": "Maven",
-        "version": "3.3.9"
-      }
-    ],
-    "source": {
-      "type": "image",
-      "origin": "codenvy/alpine_jdk8"
-    },
-    "workspaceConfig": {
-      "environments": {
-        "default": {
-          "machines": {
-            "dev-machine": {
-              "agents": [
-                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
-              ],
-              "servers": {},
-              "attributes" : {
-                "memoryLimitBytes": "2147483648"
-              }
-            }
-          },
-          "recipe": {
-            "location": "codenvy/alpine_jdk8",
-            "type": "dockerimage"
-          }
-        }
-      },
-      "name": "default",
-      "defaultEnv": "default",
-      "description": null,
-      "commands": [
-        {
-          "commandLine": "sudo docker rename che-server che-host;sudo apk update; sudo apk add curl;export HOST_IP=$(curl -s https://4.ifcfg.me/)",
-          "name": "1. Setup Che in Che",
-          "type": "custom"
-        },
-        {
-          "commandLine": "mvn clean install -f /projects/che/assembly/assembly-main",
-          "name": "2. Build Che in Che",
-          "type": "custom"
-        },
-        {
-          "commandLine": "export CHE_BIN_PATH=$(ls -d /projects/che/assembly/assembly-main/target/eclipse-che-*/eclipse-che-*); sudo docker run -t -v /var/run/docker.sock:/var/run/docker.sock --env CHE_LOCAL_BINARY=${CHE_BIN_PATH//projects/\"home/user/che/workspaces/che\"} --env CHE_HOST_IP=$HOST_IP --env CHE_PORT=54321 codenvy/che-launcher start",
-          "name": "3. Run Che in Che",
-          "type": "custom",
-          "attributes": {
-              "previewUrl": "http://<host.ip>:54321/"
-            }
-        },
-        {
-          "commandLine": "sudo docker run -t -v /var/run/docker.sock:/var/run/docker.sock codenvy/che-launcher stop",
-          "name": "4. Stop Che in Che",
-          "type": "custom"
-        },
-        {
-          "commandLine": "sudo docker rm -f che-server",
-          "name": "** Kill Che in Che **",
-          "type": "custom"
-        }
-
-      ]
-    },
-    "stackIcon": {
-      "name": "type-che.svg",
       "mediaType": "image/svg+xml"
     }
   },
@@ -191,7 +99,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/ubuntu_jdk8"
+      "origin": "eclipse/ubuntu_jdk8"
     },
     "workspaceConfig": {
       "environments": {
@@ -208,7 +116,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/ubuntu_jdk8",
+            "location": "eclipse/ubuntu_jdk8",
             "type": "dockerimage"
           }
         }
@@ -244,7 +152,7 @@
     "components": [],
     "source": {
       "type": "image",
-      "origin": "codenvy/ubuntu_jdk8"
+      "origin": "eclipse/ubuntu_jdk8"
     },
     "workspaceConfig": {
       "environments": {
@@ -261,7 +169,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/ubuntu_jdk8",
+            "location": "eclipse/ubuntu_jdk8",
             "type": "dockerimage"
           }
         }
@@ -302,7 +210,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/ubuntu_android"
+      "origin": "eclipse/ubuntu_android"
     },
     "workspaceConfig": {
       "environments": {
@@ -319,7 +227,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/ubuntu_android",
+            "location": "eclipse/ubuntu_android",
             "type": "dockerimage"
           }
         }
@@ -369,7 +277,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/cpp_gcc"
+      "origin": "eclipse/cpp_gcc"
     },
     "workspaceConfig": {
       "environments": {
@@ -386,7 +294,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/cpp_gcc",
+            "location": "eclipse/cpp_gcc",
             "type": "dockerimage"
           }
         }
@@ -430,7 +338,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/dotnet_core"
+      "origin": "eclipse/dotnet_core"
     },
     "workspaceConfig": {
       "environments": {
@@ -447,7 +355,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/dotnet_core",
+            "location": "eclipse/dotnet_core",
             "type": "dockerimage"
           }
         }
@@ -501,7 +409,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/ubuntu_go"
+      "origin": "eclipse/ubuntu_go"
     },
     "workspaceConfig": {
       "environments": {
@@ -518,7 +426,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/ubuntu_go",
+            "location": "eclipse/ubuntu_go",
             "type": "dockerimage"
           }
         }
@@ -570,7 +478,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/hadoop-dev"
+      "origin": "eclipse/hadoop-dev"
     },
     "workspaceConfig": {
       "environments": {
@@ -587,7 +495,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/hadoop-dev",
+            "location": "eclipse/hadoop-dev",
             "type": "dockerimage"
           }
         }
@@ -647,7 +555,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/node"
+      "origin": "eclipse/node"
     },
     "workspaceConfig": {
       "environments": {
@@ -664,7 +572,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/node",
+            "location": "eclipse/node",
             "type": "dockerimage"
           }
         }
@@ -682,7 +590,7 @@
     "id": "php-default",
     "creator": "ide",
     "name": "PHP",
-    "description": "Default PHP Stack with PHP 5.5, most popular extensions and dockerimager.",
+    "description": "Default PHP Stack with PHP 5.6, most popular extensions and dockerimager.",
     "scope": "general",
     "tags": [
       "Ubuntu",
@@ -690,16 +598,16 @@
       "PHP",
       "mysql",
       "sqlite",
-      "Apaide",
+      "Apache",
       "dockerimager"
     ],
     "components": [
       {
         "name": "PHP",
-        "version": "5.5.9"
+        "version": "5.6.24"
       },
       {
-        "name": "Apaide",
+        "name": "Apache",
         "version": "2"
       },
       {
@@ -717,7 +625,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/php"
+      "origin": "eclipse/php"
     },
     "workspaceConfig": {
       "environments": {
@@ -725,7 +633,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.php", "org.eclipse.che.ls.json"
               ],
               "servers": {},
               "attributes" : {
@@ -734,7 +642,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/php",
+            "location": "eclipse/php",
             "type": "dockerimage"
           }
         }
@@ -743,6 +651,22 @@
       "defaultEnv": "default",
       "description": null,
       "commands": [
+        {
+          "name": "run php script",
+          "type": "custom",
+          "commandLine": "[ -z ${editor.current.file.path} ] && echo \"Open a PHP file in the editor before executing this command.\" || php ${editor.current.file.path}",
+          "attributes": {
+            "previewUrl": ""
+          }
+        },
+        {
+          "name": "debug php script",
+          "type": "custom",
+          "commandLine": "[ -z ${editor.current.file.path} ] && echo \"Open a PHP file in the editor before executing this command.\" || QUERY_STRING=\"start_debug=1&debug_host=localhost&debug_port=10137\" php ${editor.current.file.path}",
+          "attributes": {
+            "previewUrl": ""
+          }
+        },
         {
           "name": "start apache",
           "type": "custom",
@@ -798,7 +722,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/ubuntu_python:latest"
+      "origin": "eclipse/ubuntu_python:latest"
     },
     "workspaceConfig": {
       "environments": {
@@ -815,7 +739,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/ubuntu_python:latest",
+            "location": "eclipse/ubuntu_python:latest",
             "type": "dockerimage"
           }
         }
@@ -868,7 +792,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/ubuntu_rails"
+      "origin": "eclipse/ubuntu_rails"
     },
     "workspaceConfig": {
       "environments": {
@@ -885,7 +809,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/ubuntu_rails",
+            "location": "eclipse/ubuntu_rails",
             "type": "dockerimage"
           }
         }
@@ -934,7 +858,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/debian_jre"
+      "origin": "eclipse/debian_jre"
     },
     "workspaceConfig": {
       "environments": {
@@ -951,7 +875,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/debian_jre",
+            "location": "eclipse/debian_jre",
             "type": "dockerimage"
           }
         }
@@ -979,7 +903,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/debian_jre"
+      "origin": "eclipse/debian_jre"
     },
     "workspaceConfig": {
       "environments": {
@@ -987,8 +911,8 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.terminal", 
-                "org.eclipse.che.ws-agent", 
+                "org.eclipse.che.terminal",
+                "org.eclipse.che.ws-agent",
                 "org.eclipse.che.ssh",
                 "org.eclipse.che.ls.csharp",
                 "org.eclipse.che.ls.json",
@@ -1001,7 +925,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/debian_jre",
+            "location": "eclipse/debian_jre",
             "type": "dockerimage"
           }
         }
@@ -1045,7 +969,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/centos_jdk8"
+      "origin": "eclipse/centos_jdk8"
     },
     "workspaceConfig": {
       "environments": {
@@ -1062,7 +986,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/centos_jdk8",
+            "location": "eclipse/centos_jdk8",
             "type": "dockerimage"
           }
         }
@@ -1117,7 +1041,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/debian_jdk8"
+      "origin": "eclipse/debian_jdk8"
     },
     "workspaceConfig": {
       "environments": {
@@ -1134,7 +1058,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/debian_jdk8",
+            "location": "eclipse/debian_jdk8",
             "type": "dockerimage"
           }
         }
@@ -1192,7 +1116,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/php:gae"
+      "origin": "eclipse/php:gae"
     },
     "workspaceConfig": {
       "environments": {
@@ -1200,7 +1124,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.php", "org.eclipse.che.ls.json"
               ],
               "servers": {},
               "attributes" : {
@@ -1209,7 +1133,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/php:gae",
+            "location": "eclipse/php:gae",
             "type": "dockerimage"
           }
         }
@@ -1257,7 +1181,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/ubuntu_python:2.7"
+      "origin": "eclipse/ubuntu_python:2.7"
     },
     "workspaceConfig": {
       "environments": {
@@ -1274,7 +1198,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/ubuntu_python:2.7",
+            "location": "eclipse/ubuntu_python:2.7",
             "type": "dockerimage"
           }
         }
@@ -1319,7 +1243,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/ubuntu_python:gae_python2.7"
+      "origin": "eclipse/ubuntu_python:gae_python2.7"
     },
     "workspaceConfig": {
       "environments": {
@@ -1336,7 +1260,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/ubuntu_python:gae_python2.7",
+            "location": "eclipse/ubuntu_python:gae_python2.7",
             "type": "dockerimage"
           }
         }
@@ -1400,7 +1324,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/selenium"
+      "origin": "eclipse/selenium"
     },
     "workspaceConfig": {
       "environments": {
@@ -1417,7 +1341,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/selenium",
+            "location": "eclipse/selenium",
             "type": "dockerimage"
           }
         }
@@ -1520,7 +1444,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/ubuntu_jre",
+            "location": "eclipse/ubuntu_jre",
             "type": "dockerimage"
           }
         }
@@ -1531,46 +1455,43 @@
     },
     "source": {
       "type": "image",
-      "origin": "codenvy/ubuntu_jre"
-    }    
+      "origin": "eclipse/ubuntu_jre"
+    }
   },
   {
     "id": "bitnami-express",
     "creator": "Bitnami",
     "name": "Bitnami Express",
-    "description": "Default Express stack with Node.js 6.4.0, Express 4.14.0, MongoDB 3.2.7.",
+    "description": "Default Express stack with Node 7.0.0, Express 4.14.0, MongoDB 3.2.9.",
     "scope": "advanced",
     "tags": [
-      "Ubuntu",
-      "Node.JS",
-      "NPM",
       "Express"
     ],
     "components": [
       {
         "name": "Node.JS",
-        "version": "6.4.0"
-      },
-      {
-        "name": "NPM",
-        "version": "---"
+        "version": "7.0.0"
       },
       {
         "name": "Express",
         "version": "4.14.0"
       },
       {
-        "name": "MongoDB",
-        "version": "3.2.7"
+        "name": "Bower",
+        "version": "1.7.9"
       },
       {
-        "name": "Git",
+        "name": "NPM",
         "version": "---"
+      },
+      {
+        "name": "MongoDB",
+        "version": "3.2.9"
       }
     ],
     "source": {
       "type": "image",
-      "origin": "bitnami/che-express:che-4.14.0-r1"
+      "origin": "bitnami/che-express:4.14.0-r13"
     },
     "workspaceConfig": {
       "environments": {
@@ -1587,7 +1508,7 @@
             }
           },
           "recipe": {
-            "location": "bitnami/che-express:che-4.14.0-r1",
+            "location": "bitnami/che-express:4.14.0-r13",
             "type": "dockerimage"
           }
         }
@@ -1606,49 +1527,20 @@
     "id": "bitnami-swift",
     "creator": "Bitnami",
     "name": "Bitnami Swift",
-    "description": "Default Swift stack with Swift 3.0-PREVIEW-6",
+    "description": "Default Swift stack with Swift 3.0.1",
     "scope": "advanced",
     "tags": [
-      "Ubuntu",
       "Swift"
     ],
     "components": [
       {
         "name": "Swift",
-        "version": "3.0-PREVIEW-6"
-      },
-      {
-        "name": "JDK",
-        "version": "1.8.0_91"
-      },
-      {
-        "name": "Python",
-        "version": "2.7.12rc1"
-      },
-      {
-        "name": "CLANG",
-        "version": "---"
-      },
-      {
-        "name": "libxml2",
-        "version": "---"
-      },
-      {
-        "name": "libedit2",
-        "version": "---"
-      },
-      {
-        "name": "libicu52",
-        "version": "---"
-      },
-      {
-        "name": "Git",
-        "version": "---"
+        "version": "3.0.1"
       }
     ],
     "source": {
       "type": "image",
-      "origin": "bitnami/che-swift:che-3.0-PREVIEW-6-r2"
+      "origin": "bitnami/che-swift:3.0.1-RELEASE-r2"
     },
     "workspaceConfig": {
       "environments": {
@@ -1665,7 +1557,7 @@
             }
           },
           "recipe": {
-            "location": "bitnami/che-swift:che-3.0-PREVIEW-6-r2",
+            "location": "bitnami/che-swift:3.0.1-RELEASE-r2",
             "type": "dockerimage"
           }
         }
@@ -1684,14 +1576,10 @@
     "id": "bitnami-laravel",
     "creator": "Bitnami",
     "name": "Bitnami Laravel",
-    "description": "Default Laravel stack with PHP 7.0.10, Laravel 5.2.31, MariaDB 10.1.14.",
+    "description": "Default Laravel stack with PHP 7.0.10, Laravel 5.2.31, MariaDB 10.1.19.",
     "scope": "advanced",
     "tags": [
-      "Ubuntu",
-      "Node.JS",
-      "Laravel",
-      "PHP",
-      "MariaDB"
+      "Laravel"
     ],
     "components": [
       {
@@ -1705,19 +1593,11 @@
       {
         "name": "MariaDB",
         "version": "10.1.14"
-      },
-      {
-        "name": "Gulp",
-        "version": "---"
-      },
-      {
-        "name": "Git",
-        "version": "---"
       }
     ],
     "source": {
       "type": "image",
-      "origin": "bitnami/che-laravel:che-5.2.31-r5"
+      "origin": "bitnami/che-laravel:5.2.31-r11"
     },
     "workspaceConfig": {
       "environments": {
@@ -1725,7 +1605,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.php", "org.eclipse.che.ls.json"
               ],
               "servers": {},
               "attributes" : {
@@ -1734,7 +1614,7 @@
             }
           },
           "recipe": {
-            "location": "bitnami/che-laravel:che-5.2.31-r5",
+            "location": "bitnami/che-laravel:5.2.31-r11",
             "type": "dockerimage"
           }
         }
@@ -1756,16 +1636,9 @@
     "description": "Bitnami Rails stack with Ruby 2.3.1, Rails 5.0.0.1, MariaDB 10.1.14.",
     "scope": "advanced",
     "tags": [
-      "Ubuntu",
-      "BitnamiRails",
-      "MariaDB",
-      "Ruby"
+      "BitnamiRails"
     ],
     "components": [
-      {
-        "name": "MariaDb",
-        "version": "10.1.14"
-      },
       {
         "name": "Ruby",
         "version": "2.3.1"
@@ -1775,17 +1648,13 @@
         "version": "5.0.0.1"
       },
       {
-        "name": "MySQL Client",
-        "version": "10.1.13"
-      },
-      {
-        "name": "Git",
-        "version": "---"
+        "name": "MariaDB",
+        "version": "10.1.14"
       }
     ],
     "source": {
       "type": "image",
-      "origin": "bitnami/che-rails:che-5.0.0.1-r0"
+      "origin": "bitnami/che-rails:5.0.0.1-r5"
     },
     "workspaceConfig": {
       "environments": {
@@ -1802,7 +1671,7 @@
             }
           },
           "recipe": {
-            "location": "bitnami/che-rails:che-5.0.0.1-r0",
+            "location": "bitnami/che-rails:5.0.0.1-r5",
             "type": "dockerimage"
           }
         }
@@ -1821,18 +1690,15 @@
     "id": "bitnami-codeigniter",
     "creator": "Bitnami",
     "name": "Bitnami Codeigniter",
-    "description": "Default CodeIgniter stack with PHP 7.0.10, CodeIgniter 3.1.0, MariaDB 10.1.14.",
+    "description": "Default CodeIgniter stack with PHP 7.0.11, CodeIgniter 3.1.0, MariaDB 10.1.19.",
     "scope": "advanced",
     "tags": [
-      "Ubuntu",
-      "CodeIgniter",
-      "MariaDB",
-      "PHP"
+      "CodeIgniter"
     ],
     "components": [
       {
         "name": "PHP",
-        "version": "7.0.10"
+        "version": "7.0.11"
       },
       {
         "name": "Codeigniter",
@@ -1840,20 +1706,12 @@
       },
       {
         "name": "MariaDB",
-        "version": "10.1.14"
-      },
-      {
-        "name": "MySQL Client",
-        "version": "10.1.13"
-      },
-      {
-        "name": "Git",
-        "version": "---"
+        "version": "10.1.19"
       }
     ],
     "source": {
       "type": "image",
-      "origin": "bitnami/che-codeigniter:che-3.1.0-r2"
+      "origin": "bitnami/che-codeigniter:3.1.0-r11"
     },
     "workspaceConfig": {
       "environments": {
@@ -1861,7 +1719,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.php", "org.eclipse.che.ls.json"
               ],
               "servers": {},
               "attributes" : {
@@ -1870,7 +1728,7 @@
             }
           },
           "recipe": {
-            "location": "bitnami/che-codeigniter:che-3.1.0-r2",
+            "location": "bitnami/che-codeigniter:3.1.0-r11",
             "type": "dockerimage"
           }
         }
@@ -1889,18 +1747,15 @@
     "id": "bitnami-symfony",
     "creator": "Bitnami",
     "name": "Bitnami Symfony",
-    "description": "Default Symfony stack with PHP 7.0.10, Symfony 3.1.3, MariaDB 10.1.14.",
+    "description": "Default Symfony stack with PHP 7.0.11, Symfony 3.1.3, MariaDB 10.1.19.",
     "scope": "advanced",
     "tags": [
-      "Ubuntu",
-      "Symfony",
-      "PHP",
-      "MariaDB"
+      "Symfony"
     ],
     "components": [
       {
         "name": "PHP",
-        "version": "7.0.10"
+        "version": "7.0.11"
       },
       {
         "name": "Symfony",
@@ -1908,20 +1763,12 @@
       },
       {
         "name": "MariaDB",
-        "version": "10.1.14"
-      },
-      {
-        "name": "MySQL Client",
-        "version": "10.1.13"
-      },
-      {
-        "name": "Git",
-        "version": "---"
+        "version": "10.1.19"
       }
     ],
     "source": {
       "type": "image",
-      "origin": "bitnami/che-symfony:che-3.1.3-r0"
+      "origin": "bitnami/che-symfony:3.1.3-r8"
     },
     "workspaceConfig": {
       "environments": {
@@ -1929,7 +1776,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.php", "org.eclipse.che.ls.json"
               ],
               "servers": {},
               "attributes" : {
@@ -1938,7 +1785,7 @@
             }
           },
           "recipe": {
-            "location": "bitnami/che-symfony:che-3.1.3-r0",
+            "location": "bitnami/che-symfony:3.1.3-r8",
             "type": "dockerimage"
           }
         }
@@ -1957,13 +1804,10 @@
     "id": "bitnami-java-play",
     "creator": "Bitnami",
     "name": "Bitnami Play for Java",
-    "description": "Default Play stack with OpenJDK 1.8.0 and Play 2.55.",
+    "description": "Default Play stack with OpenJDK 1.8.0 and Play 1.3.10.",
     "scope": "advanced",
     "tags": [
-      "Ubuntu",
-      "Activator",
-      "Play",
-      "Java"
+      "Play"
     ],
     "components": [
       {
@@ -1975,21 +1819,13 @@
         "version": "2.55"
       },
       {
-        "name": "Node",
-        "version": "6.4.0"
-      },
-      {
         "name": "Activator",
         "version": "1.13.10"
-      },
-      {
-        "name": "Git",
-        "version": "---"
       }
     ],
     "source": {
       "type": "image",
-      "origin": "bitnami/che-java-play:che-2.55-r3"
+      "origin": "bitnami/che-java-play:1.3.10-r6"
     },
     "workspaceConfig": {
       "environments": {
@@ -2006,7 +1842,7 @@
             }
           },
           "recipe": {
-            "location": "bitnami/che-java-play:che-2.55-r3",
+            "location": "bitnami/che-java-play:1.3.10-r6",
             "type": "dockerimage"
           }
         }
@@ -2018,6 +1854,214 @@
     },
     "stackIcon": {
       "name": "type-bitnami.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
+    "id": "zend",
+    "creator": "ide",
+    "name": "Zend",
+    "description": "Zend stack with PHP 7, Zend Server 9 and Z-Ray.",
+    "scope": "advanced",
+    "tags": [
+      "PHP",
+      "Zend",
+      "Z-Ray",
+      "Composer",
+      "Ubuntu",
+      "Git"
+    ],
+    "components": [
+      {
+        "name": "PHP",
+        "version": "7.0.11"
+      },
+      {
+        "name": "Zend Server",
+        "version": "9.0.1"
+      },
+      {
+        "name": "Composer",
+        "version": "---"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "kaloyanraev/che-zendserver"
+    },
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "machines": {
+            "dev-machine": {
+              "agents": [
+                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.php", "org.eclipse.che.ls.json"
+              ],
+              "servers": {},
+              "attributes" : {
+                "memoryLimitBytes": "2147483648"
+              }
+            }
+          },
+          "recipe": {
+            "location": "kaloyanraev/che-zendserver",
+            "type": "dockerimage"
+          }
+        }
+      },
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "commands": [
+        {
+          "name": "run php script",
+          "type": "custom",
+          "commandLine": "[ -z ${editor.current.file.path} ] && echo \"Open a PHP file in the editor before executing this command.\" || php ${editor.current.file.path}",
+          "attributes": {
+            "previewUrl": ""
+          }
+        },
+        {
+          "name": "debug php script",
+          "type": "custom",
+          "commandLine": "[ -z ${editor.current.file.path} ] && echo \"Open a PHP file in the editor before executing this command.\" || QUERY_STRING=\"start_debug=1&debug_host=localhost&debug_port=10137\" php ${editor.current.file.path}",
+          "attributes": {
+            "previewUrl": ""
+          }
+        },
+        {
+          "name": "restart zend server",
+          "type": "custom",
+          "commandLine": "sudo sqlite3 /usr/local/zend/var/db/zsd.db \"UPDATE ZSD_DIRECTIVES SET DISK_VALUE='http://${server.port.10081}/ZendServer' WHERE NAME='zray.zendserver_ui_url'\" && sudo sed -i 's#zray.zendserver_ui_url=.*#zray.zendserver_ui_url=http://${server.port.10081}/ZendServer#g' /usr/local/zend/etc/conf.d/zray.ini && sudo /usr/local/zend/bin/zendctl.sh restart",
+          "attributes": {
+            "previewUrl": "http://${server.port.80}"
+          }
+        },
+        {
+          "name": "stop zend server",
+          "type": "custom",
+          "commandLine": "sudo /usr/local/zend/bin/zendctl.sh stop",
+          "attributes": {
+            "previewUrl": ""
+          }
+        },
+        {
+          "name": "show admin password",
+          "type": "custom",
+          "commandLine": "echo \"Zend Server admin password is `sudo cat /root/zend-password`\"",
+          "attributes": {
+            "previewUrl": "http://${server.port.10081}"
+          }
+        }
+      ]
+    },
+    "stackIcon": {
+      "name": "type-zend.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
+    "id": "platformio",
+    "creator": "ide",
+    "name": "PlatformIO",
+    "description": "Stack for IoT development",
+    "scope": "general",
+    "tags": [
+      "PlatformIO",
+      "IoT",
+      "embedded",
+      "arduino",
+      "mbed"
+    ],
+    "components": [
+      {
+        "name": "Python",
+        "version": "2.7"
+      },
+      {
+        "name": "pip",
+        "version": "8.1.1"
+      },
+      {
+        "name": "PlatformIO",
+        "version": "3.2.0"
+      }
+    ],
+    "source": {
+      "type": "image",
+        "origin": "code/pio:latest"
+    },
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "machines": {
+            "dev-machine": {
+              "agents": [
+                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+              ],
+              "servers": {},
+              "attributes" : {
+                "memoryLimitBytes": "2147483648",
+                "auto_snapshot": "true",
+                "auto_restore": "true"
+
+              }
+            }
+          },
+          "recipe": {
+            "location": "eclipse/platformio:latest",
+            "type": "dockerimage"
+          }
+        }
+      },
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "commands": [
+        {
+          "name": "run",
+          "type": "custom",
+          "commandLine": "pio run -d ${current.project.path}",
+          "attributes": {
+            "previewUrl": ""
+          }
+        },
+        {
+          "name": "upload",
+          "type": "custom",
+          "commandLine": "pio run -d ${current.project.path} -t upload",
+          "attributes": {
+            "previewUrl": ""
+          }
+        },
+        {
+          "name": "clean",
+          "type": "custom",
+          "commandLine": "pio run -d ${current.project.path} -t clean",
+          "attributes": {
+            "previewUrl": ""
+          }
+        },
+        {
+          "name": "Remote: Device list",
+          "type": "custom",
+          "commandLine": "pio remote device list",
+          "attributes": {
+            "previewUrl": ""
+          }
+        },
+        {
+          "name": "Remote: Upload",
+          "type": "custom",
+          "commandLine": "pio remote run -d ${current.project.path} -t upload",
+          "attributes": {
+            "previewUrl": ""
+          }
+        }
+      ]
+    },
+    "stackIcon": {
+      "name": "type-python.svg",
       "mediaType": "image/svg+xml"
     }
   }

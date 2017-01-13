@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,6 +43,7 @@ export class CheProject {
     this.remoteProjectsAPI = this.$resource(wsagentPath + '/project', {}, {
       import: {method: 'POST', url: wsagentPath + '/project/import/:path'},
       create: {method: 'POST', url: wsagentPath + '/project?name=:path'},
+      batchCreate: {method: 'POST', url: wsagentPath + '/project/batch', isArray: true},
       details: {method: 'GET', url: wsagentPath + '/project/:path'},
       estimate: {method: 'GET', url: wsagentPath + '/project/estimate/:path?type=:type'},
       rename: {method: 'POST', url: wsagentPath + '/project/rename/:path?name=:name'},
@@ -76,6 +77,16 @@ export class CheProject {
    */
   createProject(path, data) {
     let promise = this.remoteProjectsAPI.create({path: path}, data).$promise;
+    return promise;
+  }
+
+  /**
+   * Create a batch of projects.
+   * @param projects the list of projects to be created
+   * @returns {$promise|*|T.$promise}
+   */
+  createProjects(projects) {
+    let promise = this.remoteProjectsAPI.batchCreate(projects).$promise;
     return promise;
   }
 

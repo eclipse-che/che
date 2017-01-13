@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,7 +41,7 @@ public class FileEvent extends GwtEvent<FileEvent.FileEventHandler> {
     private EditorTab     tab;
 
     /**
-     * Creates new {@link FileEvent}.
+     * Creates new {@link FileEvent} with info about virtual file.
      *
      * @param file
      *         {@link VirtualFile} that represents an affected file
@@ -53,6 +53,14 @@ public class FileEvent extends GwtEvent<FileEvent.FileEventHandler> {
         this.fileOperation = fileOperation;
     }
 
+    /**
+     * Creates new {@link FileEvent} with info about editor tab.
+     *
+     * @param tab
+     *         {@link EditorTab} that represents an affected file to perform {@code fileOperation}
+     * @param fileOperation
+     *         file operation
+     */
     private FileEvent(EditorTab tab, FileOperation fileOperation) {
         this(tab.getFile(), fileOperation);
         this.tab = tab;
@@ -67,6 +75,10 @@ public class FileEvent extends GwtEvent<FileEvent.FileEventHandler> {
 
     /**
      * Creates a event for {@code FileOperation.CLOSE}.
+     * Note: the pane which contains this {@code tab} will be closed when the pane doesn't contains editors anymore.
+     *
+     * @param tab
+     *         tab of the file to close
      */
     public static FileEvent createCloseFileEvent(EditorTab tab) {
         return new FileEvent(tab, CLOSE);

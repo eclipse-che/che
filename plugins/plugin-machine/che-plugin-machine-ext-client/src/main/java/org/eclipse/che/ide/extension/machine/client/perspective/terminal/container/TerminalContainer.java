@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,9 +14,9 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 
+import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.TerminalFactory;
-import org.eclipse.che.ide.extension.machine.client.machine.Machine;
-import org.eclipse.che.ide.extension.machine.client.machine.MachineStateEvent;
+import org.eclipse.che.ide.api.machine.events.MachineStateEvent;
 import org.eclipse.che.ide.extension.machine.client.perspective.terminal.TerminalPresenter;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.tab.content.TabPresenter;
 
@@ -48,20 +48,17 @@ public class TerminalContainer implements TabPresenter, MachineStateEvent.Handle
      * @param machine
      *         machine for which terminal will be added or updated
      */
-    public void addOrShowTerminal(Machine machine) {
+    public void addOrShowTerminal(MachineEntity machine) {
         String machineId = machine.getId();
 
         TerminalPresenter terminal = terminals.get(machineId);
-
         if (terminal != null) {
             terminal.connect();
-
             view.showTerminal(terminal);
-
             return;
         }
 
-        TerminalPresenter newTerminal = terminalFactory.create(machine);
+        TerminalPresenter newTerminal = terminalFactory.create(machine, this);
 
         terminals.put(machineId, newTerminal);
 
@@ -103,5 +100,4 @@ public class TerminalContainer implements TabPresenter, MachineStateEvent.Handle
 
         terminals.remove(destroyedMachineId);
     }
-
 }

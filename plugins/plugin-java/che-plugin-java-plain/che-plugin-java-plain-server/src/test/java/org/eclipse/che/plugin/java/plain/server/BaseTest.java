@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,7 +29,7 @@ import org.eclipse.che.api.vfs.impl.file.DefaultFileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.FileTreeWatcher;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
-import org.eclipse.che.api.vfs.impl.file.event.detectors.ProjectTreeChangesDetector;
+import org.eclipse.che.api.vfs.watcher.FileWatcherManager;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.commons.lang.IoUtil;
@@ -53,6 +53,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.mockito.Mockito.mock;
+
 /**
  * @author Valeriy Svydenko
  */
@@ -64,7 +66,6 @@ public abstract class BaseTest {
     protected ProjectRegistry                projectRegistry;
     protected ProjectManager                 projectManager;
     protected LocalVirtualFileSystemProvider vfsProvider;
-    protected ProjectTreeChangesDetector     projectTreeChangesDetector;
 
     @BeforeClass
     protected void initProjectApi() throws Exception {
@@ -107,8 +108,6 @@ public abstract class BaseTest {
         FileWatcherNotificationHandler fileWatcherNotificationHandler = new DefaultFileWatcherNotificationHandler(vfsProvider);
         FileTreeWatcher fileTreeWatcher = new FileTreeWatcher(root, new HashSet<>(), fileWatcherNotificationHandler);
 
-        projectTreeChangesDetector = new ProjectTreeChangesDetector(null);
-
         projectManager = new ProjectManager(vfsProvider,
                                             eventService,
                                             projectTypeRegistry,
@@ -118,8 +117,8 @@ public abstract class BaseTest {
                                             fileWatcherNotificationHandler,
                                             fileTreeWatcher,
                                             new TestWorkspaceHolder(new ArrayList<>()),
-                                            projectTreeChangesDetector,
-                                            Mockito.mock(ReadmeInjectionHandler.class));
+                                            Mockito.mock(ReadmeInjectionHandler.class),
+                                            mock(FileWatcherManager.class));
 
         ResourcesPlugin plugin = new ResourcesPlugin("target/index", wsPath, () -> projectRegistry, () -> projectManager);
 
@@ -141,7 +140,7 @@ public abstract class BaseTest {
         FolderEntry parent = projectManager.getProjectsRoot().createFolder("project");
         parent.createFolder("bin");
         parent.createFolder("src");
-        FolderEntry codenvyFolder = parent.createFolder(".codenvy");
+        FolderEntry codenvyFolder = parent.createFolder(".che");
         FolderEntry libFolder = parent.createFolder("lib");
 
         libFolder.createFile("a.jar", "text".getBytes());

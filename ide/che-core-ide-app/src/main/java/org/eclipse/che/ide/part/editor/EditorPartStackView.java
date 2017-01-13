@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,7 +28,7 @@ import com.google.gwt.user.client.ui.Widget;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStackView;
-import org.eclipse.che.ide.part.widgets.listtab.ListButton;
+import org.eclipse.che.ide.part.widgets.panemenu.EditorPaneMenu;
 
 import javax.validation.constraints.NotNull;
 import java.util.HashMap;
@@ -56,7 +56,7 @@ public class EditorPartStackView extends ResizeComposite implements PartStackVie
     DockLayoutPanel parent;
 
     @UiField
-    FlowPanel       tabsPanel;
+    FlowPanel tabsPanel;
 
     @UiField
     DeckLayoutPanel contentPanel;
@@ -66,7 +66,7 @@ public class EditorPartStackView extends ResizeComposite implements PartStackVie
     private final LinkedList<PartPresenter>   contents;
 
     private ActionDelegate delegate;
-    private ListButton     listButton;
+    private EditorPaneMenu editorPaneMenu;
     private TabItem        activeTab;
 
     public EditorPartStackView() {
@@ -83,6 +83,8 @@ public class EditorPartStackView extends ResizeComposite implements PartStackVie
         };
 
         addDomHandler(this, MouseDownEvent.getType());
+
+        setMaximized(false);
     }
 
     /** {@inheritDoc} */
@@ -96,15 +98,14 @@ public class EditorPartStackView extends ResizeComposite implements PartStackVie
     }
 
     /**
-     * Adds list button in special place on view.
+     * Adds editor pane menu button in special place on view.
      *
-     * @param listButton
+     * @param editorPaneMenu
      *         button which will be added
      */
-    public void setListButton(@NotNull ListButton listButton) {
-        this.listButton = listButton;
-        tabsPanel.add(listButton);
-        listButton.setVisible(false);
+    public void addPaneMenuButton(@NotNull EditorPaneMenu editorPaneMenu) {
+        this.editorPaneMenu = editorPaneMenu;
+        tabsPanel.add(editorPaneMenu);
     }
 
     /** {@inheritDoc} */
@@ -137,35 +138,6 @@ public class EditorPartStackView extends ResizeComposite implements PartStackVie
     }
 
     /**
-     * Updates visibility of file list button.
-     */
-    private void updateDropdownVisibility() {
-        if (listButton == null) {
-            return;
-        }
-
-        if (tabsPanel.getWidgetCount() == 1) {
-            listButton.setVisible(false);
-            return;
-        }
-
-        int width = 0;
-        for (int i = 0; i < tabsPanel.getWidgetCount(); i++) {
-            if (listButton != tabsPanel.getWidget(i)) {
-                if (tabsPanel.getWidget(i).isVisible()) {
-                    width += tabsPanel.getWidget(i).getOffsetWidth();
-                } else {
-                    tabsPanel.getWidget(i).setVisible(true);
-                    width += tabsPanel.getWidget(i).getOffsetWidth();
-                    tabsPanel.getWidget(i).setVisible(false);
-                }
-            }
-        }
-
-        listButton.setVisible(width >= tabsPanel.getOffsetWidth());
-    }
-
-    /**
      * Makes active tab visible.
      */
     private void ensureActiveTabVisible() {
@@ -174,7 +146,7 @@ public class EditorPartStackView extends ResizeComposite implements PartStackVie
         }
 
         for (int i = 0; i < tabsPanel.getWidgetCount(); i++) {
-            if (listButton != null && listButton != tabsPanel.getWidget(i)) {
+            if (editorPaneMenu != null && editorPaneMenu != tabsPanel.getWidget(i)) {
                 tabsPanel.getWidget(i).setVisible(true);
             }
         }
@@ -182,7 +154,7 @@ public class EditorPartStackView extends ResizeComposite implements PartStackVie
         for (int i = 0; i < tabsPanel.getWidgetCount(); i++) {
             Widget currentWidget = tabsPanel.getWidget(i);
             Widget activeTabWidget = activeTab.getView().asWidget();
-            if (listButton != null && listButton == currentWidget) {
+            if (editorPaneMenu != null && editorPaneMenu == currentWidget) {
                 continue;
             }
 
@@ -202,9 +174,7 @@ public class EditorPartStackView extends ResizeComposite implements PartStackVie
         tabs.remove(presenter);
         contents.remove(presenter);
 
-        if (contents.isEmpty()) {
-            getElement().getParentElement().getStyle().setDisplay(NONE);
-        } else {
+        if (!contents.isEmpty()) {
             selectTab(contents.getLast());
         }
 
@@ -257,7 +227,6 @@ public class EditorPartStackView extends ResizeComposite implements PartStackVie
 
         delegate.onRequestFocus();
 
-        updateDropdownVisibility();
         ensureActiveTabVisible();
     }
 
@@ -270,11 +239,20 @@ public class EditorPartStackView extends ResizeComposite implements PartStackVie
     /** {@inheritDoc} */
     @Override
     public void setFocus(boolean focused) {
+        if (activeTab == null) {
+            return;
+        }
+
         if (focused) {
             activeTab.select();
         } else {
             activeTab.unSelect();
         }
+    }
+
+    @Override
+    public void setMaximized(boolean maximized) {
+        getElement().setAttribute("maximized", Boolean.toString(maximized));
     }
 
     /** {@inheritDoc} */
@@ -290,7 +268,6 @@ public class EditorPartStackView extends ResizeComposite implements PartStackVie
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             @Override
             public void execute() {
-                updateDropdownVisibility();
                 ensureActiveTabVisible();
             }
         });

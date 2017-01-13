@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,19 +11,20 @@
 package org.eclipse.che.ide.projectimport.zip;
 
 
-import org.eclipse.che.ide.CoreLocalizationConstant;
-
-import org.eclipse.che.ide.api.project.MutableProjectConfig;
-import org.eclipse.che.ide.api.wizard.AbstractWizardPage;
-import org.eclipse.che.ide.util.NameUtils;
-
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 
-import javax.validation.constraints.NotNull;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.CoreLocalizationConstant;
+import org.eclipse.che.ide.api.project.MutableProjectConfig;
+import org.eclipse.che.ide.api.wizard.AbstractWizardPage;
+import org.eclipse.che.ide.util.NameUtils;
+
+import javax.validation.constraints.NotNull;
 import java.util.Map;
+
+import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
  * @author Roman Nikitenko
@@ -50,7 +51,7 @@ public class ZipImporterPagePresenter extends AbstractWizardPage<MutableProjectC
     public void init(MutableProjectConfig dataObject) {
         super.init(dataObject);
 
-        setImportParameterValue(SKIP_FIRST_LEVEL_PARAM_NAME, String.valueOf(true));
+        setImportParameterValue(SKIP_FIRST_LEVEL_PARAM_NAME, String.valueOf(false));
     }
 
     @Override
@@ -157,6 +158,11 @@ public class ZipImporterPagePresenter extends AbstractWizardPage<MutableProjectC
      * @return <code>true</code> if url is correct
      */
     private boolean isUrlCorrect(@NotNull String url) {
+        if(isNullOrEmpty(url)) {
+            view.showUrlError("");
+            return false;
+        }
+
         if (!END_URL.test(url)) {
             view.showUrlError(locale.importProjectMessageUrlInvalid());
             return false;

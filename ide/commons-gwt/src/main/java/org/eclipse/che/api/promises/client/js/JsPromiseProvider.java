@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@ package org.eclipse.che.api.promises.client.js;
 
 import elemental.js.util.JsArrayOf;
 import elemental.util.ArrayOf;
+import elemental.util.Collections;
 
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayMixed;
@@ -19,6 +20,7 @@ import com.google.gwt.core.client.JsArrayMixed;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.PromiseProvider;
+import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
 
 /**
  * Default implementation of {@link PromiseProvider}.
@@ -36,6 +38,12 @@ public class JsPromiseProvider implements PromiseProvider {
 
     /** {@inheritDoc} */
     @Override
+    public <V> Promise<V> create(AsyncPromiseHelper.RequestCall<V> call) {
+        return AsyncPromiseHelper.createFromAsyncRequest(call);
+    }
+
+    /** {@inheritDoc} */
+    @Override
     public native Promise<JsArrayMixed> all(ArrayOf<Promise<?>> promises) /*-{
         return Promise.all(promises);
     }-*/;
@@ -49,6 +57,24 @@ public class JsPromiseProvider implements PromiseProvider {
         }
         return all(promisesArray);
     }
+
+    @Override
+    public Promise<ArrayOf<?>> all2(ArrayOf<Promise<?>> promises) {
+        return internalAll(promises);
+    }
+
+    @Override
+    public Promise<ArrayOf<?>> all2(Promise<?>... promises) {
+        ArrayOf<Promise<?>> arrayOf = Collections.arrayOf();
+        for (Promise<?> promise : promises) {
+            arrayOf.push(promise);
+        }
+        return internalAll(arrayOf);
+    }
+
+    private native Promise<ArrayOf<?>> internalAll(ArrayOf<Promise<?>> promises) /*-{
+        return Promise.all(promises);
+    }-*/;
 
     /** {@inheritDoc} */
     @Override

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -62,10 +62,10 @@ public final class PagingUtil {
         pageRefs.add(Pair.of("first", page.getFirstPageRef()));
         pageRefs.add(Pair.of("last", page.getLastPageRef()));
         if (page.hasPreviousPage()) {
-            pageRefs.add(Pair.of("prev", page.getPreviousPageRef().get()));
+            pageRefs.add(Pair.of("prev", page.getPreviousPageRef()));
         }
         if (page.hasNextPage()) {
-            pageRefs.add(Pair.of("next", page.getNextPageRef().get()));
+            pageRefs.add(Pair.of("next", page.getNextPageRef()));
         }
         final UriBuilder ub = UriBuilder.fromUri(uri);
         return pageRefs.stream()

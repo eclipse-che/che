@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,21 +14,17 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.api.machine.MachineServiceClient;
-import org.eclipse.che.api.machine.shared.dto.MachineDto;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.core.model.machine.Server;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.DebugConfiguration;
 import org.eclipse.che.ide.api.debug.DebugConfigurationPage;
-import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
-import org.eclipse.che.ide.extension.machine.client.machine.Machine;
-import org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.appliance.server.Server;
+import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.util.Pair;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Page allows to edit Java debug configuration.
@@ -40,9 +36,7 @@ public class JavaDebugConfigurationPagePresenter implements JavaDebugConfigurati
                                                             DebugConfigurationPage<DebugConfiguration> {
 
     private final JavaDebugConfigurationPageView view;
-    private final MachineServiceClient           machineServiceClient;
     private final AppContext                     appContext;
-    private final EntityFactory                  entityFactory;
 
     private DebugConfiguration editedConfiguration;
     private String             originHost;
@@ -51,13 +45,9 @@ public class JavaDebugConfigurationPagePresenter implements JavaDebugConfigurati
 
     @Inject
     public JavaDebugConfigurationPagePresenter(JavaDebugConfigurationPageView view,
-                                               MachineServiceClient machineServiceClient,
-                                               AppContext appContext,
-                                               EntityFactory entityFactory) {
+                                               AppContext appContext) {
         this.view = view;
-        this.machineServiceClient = machineServiceClient;
         this.appContext = appContext;
-        this.entityFactory = entityFactory;
 
         view.setDelegate(this);
     }
@@ -84,24 +74,23 @@ public class JavaDebugConfigurationPagePresenter implements JavaDebugConfigurati
     }
 
     private void setPortsList() {
-        machineServiceClient.getMachine(appContext.getWorkspaceId(),
-                                        appContext.getDevMachine().getId()).then(new Operation<MachineDto>() {
-            @Override
-            public void apply(MachineDto machineDto) throws OperationException {
-                Machine machine = entityFactory.createMachine(machineDto);
-                List<Pair<String, String>> ports = extractPortsList(machine);
-                view.setPortsList(ports);
-            }
-        });
+        List<Pair<String, String>> ports = extractPortsList(appContext.getDevMachine());
+        view.setPortsList(ports);
     }
 
     /** Extracts list of ports available for connecting to the remote debugger. */
-    private List<Pair<String, String>> extractPortsList(Machine machine) {
+    private List<Pair<String, String>> extractPortsList(final MachineEntity machine) {
         List<Pair<String, String>> ports = new ArrayList<>();
-        for (Server server : machine.getServersList()) {
-            if (server.getPort().endsWith("/tcp")) {
-                String portWithoutTcp = server.getPort().substring(0, server.getPort().length() - 4);
-                String description = portWithoutTcp + " (" + server.getRef() + ")";
+        if (machine == null || machine.getRuntime() == null) {
+            return ports;
+        }
+
+        Map<String, ? extends Server> servers = machine.getRuntime().getServers();
+        for (Map.Entry<String, ? extends Server> entry : servers.entrySet()) {
+            String port = entry.getKey();
+            if (port.endsWith("/tcp")) {
+                String portWithoutTcp = port.substring(0, port.length() - 4);
+                String description = portWithoutTcp + " (" + entry.getValue().getRef() + ")";
                 Pair<String, String> pair = new Pair<>(description, portWithoutTcp);
 
                 ports.add(pair);

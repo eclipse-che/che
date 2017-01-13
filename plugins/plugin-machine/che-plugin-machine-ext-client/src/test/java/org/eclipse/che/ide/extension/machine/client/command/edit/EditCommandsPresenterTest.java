@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,17 +14,14 @@ import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
-import org.eclipse.che.ide.extension.machine.client.command.CommandConfiguration;
-import org.eclipse.che.ide.extension.machine.client.command.CommandManager;
-import org.eclipse.che.ide.extension.machine.client.command.CommandType;
-import org.eclipse.che.ide.extension.machine.client.command.CommandTypeRegistry;
+import org.eclipse.che.ide.api.command.CommandImpl;
+import org.eclipse.che.ide.api.command.CommandManager;
+import org.eclipse.che.ide.api.command.CommandType;
+import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,14 +34,13 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -52,88 +48,73 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class EditCommandsPresenterTest {
 
-    private static String WORKSPACE_ID = "workspaceId";
     private static String COMMAND_NAME = "commandName";
+    private static String COMMAND_TYPE = "commandType";
 
     @Mock
-    private EditCommandsView                                        view;
+    private EditCommandsView            view;
     @Mock
-    private WorkspaceServiceClient                                  workspaceServiceClient;
-    @Mock
-    private CommandManager                                          commandManager;
-    @Mock
-    private DtoFactory                  dtoFactory;
+    private CommandManager              commandManager;
     @Mock
     private CommandTypeRegistry         commandTypeRegistry;
-    @Mock
-    private AppContext                  appContext;
     @Mock
     private DialogFactory               dialogFactory;
     @Mock
     private MachineLocalizationConstant machineLocale;
     @Mock
     private CoreLocalizationConstant    coreLocale;
-    @Mock
-    private WorkspaceDto                workspace;
 
     @Mock
-    private Promise<List<CommandDto>>                                              commandsPromise;
-    @Mock
-    private Promise<WorkspaceDto>                                             workspacePromise;
-    @Mock
-    private Promise<List<CommandConfiguration>>                                    commandConfigurationPromise;
-    @Captor
-    private ArgumentCaptor<Function<List<CommandDto>, List<CommandConfiguration>>> commandsCaptor;
-    @Captor
-    private ArgumentCaptor<Operation<List<CommandConfiguration>>>                  commandConfigurationCaptor;
-    @Captor
-    private ArgumentCaptor<Operation<WorkspaceDto>>                           workspaceCaptor;
+    private CommandImpl command;
 
+    @Mock
+    private Promise<List<CommandImpl>>                                    commandsPromise;
+    @Mock
+    private Promise<CommandImpl>                                          commandPromise;
+    @Captor
+    private ArgumentCaptor<Function<List<CommandDto>, List<CommandImpl>>> commandsCaptor;
+    @Captor
+    private ArgumentCaptor<Operation<CommandImpl>>                        commandCaptor;
+    @Captor
+    private ArgumentCaptor<Operation<WorkspaceDto>>                       workspaceCaptor;
 
     @InjectMocks
     private EditCommandsPresenter presenter;
 
     @Before
     public void setUp() {
-        presenter.editedCommandOriginName = COMMAND_NAME;
-        presenter.workspaceId = WORKSPACE_ID;
-        when(workspace.getId()).thenReturn(WORKSPACE_ID);
-        when(workspaceServiceClient.getCommands(anyString())).thenReturn(commandsPromise);
-        when(commandsPromise.then((Function<List<CommandDto>, List<CommandConfiguration>>)anyObject()))
-                .thenReturn(commandConfigurationPromise);
-        when(commandConfigurationPromise.then((Operation<List<CommandConfiguration>>)anyObject())).thenReturn(commandConfigurationPromise);
-        when(workspaceServiceClient.updateCommand(anyString(), anyString(), anyObject())).thenReturn(workspacePromise);
+        presenter.editedCommandNameInitial = COMMAND_NAME;
+
+        when(commandManager.update(anyString(), anyObject())).thenReturn(commandPromise);
+
+        CommandType commandType = mock(CommandType.class);
+        when(commandType.getId()).thenReturn(COMMAND_TYPE);
+        List<CommandType> commandTypes = new ArrayList<>(1);
+        commandTypes.add(commandType);
+        when(commandTypeRegistry.getCommandTypes()).thenReturn(commandTypes);
+
+        when(command.getType()).thenReturn(COMMAND_TYPE);
+        when(command.getName()).thenReturn(COMMAND_NAME);
+        List<CommandImpl> commands = new ArrayList<>(1);
+        commands.add(command);
+        when(commandManager.getCommands()).thenReturn(commands);
     }
 
     @Test
     public void onEnterClickedWhenCancelButtonInFocus() throws Exception {
         when(view.isCancelButtonInFocus()).thenReturn(true);
-        CommandDto command = mock(CommandDto.class);
-        CommandConfiguration commandConfiguration = mock(CommandConfiguration.class);
-        List<CommandDto> commands = new ArrayList<>(1);
-        List<CommandConfiguration> confiqurations = new ArrayList<>(1);
-        commands.add(command);
-        confiqurations.add(commandConfiguration);
 
         presenter.onEnterClicked();
 
         verify(view).setCancelButtonState(false);
         verify(view).setSaveButtonState(false);
-        verify(workspaceServiceClient).getCommands(anyString());
-
-        verify(commandsPromise).then(commandsCaptor.capture());
-        commandsCaptor.getValue().apply(commands);
-
-        verify(commandConfigurationPromise).then(commandConfigurationCaptor.capture());
-        commandConfigurationCaptor.getValue().apply(confiqurations);
-
+        verify(commandManager).getCommands();
         verify(view).setData(anyObject());
         verify(view).setFilterState(anyBoolean());
         verify(view).setCloseButtonInFocus();
-
         verify(view, never()).close();
-        verify(workspaceServiceClient, never()).updateCommand(anyString(), anyString(), anyObject());
-        verify(workspaceServiceClient, never()).deleteCommand(anyString(), anyString());
+        verify(commandManager, never()).update(anyString(), anyObject());
+        verify(commandManager, never()).remove(anyString());
     }
 
     @Test
@@ -143,50 +124,31 @@ public class EditCommandsPresenterTest {
         presenter.onEnterClicked();
 
         verify(view).close();
-        verify(workspaceServiceClient, never()).getCommands(anyString());
-        verify(workspaceServiceClient, never()).updateCommand(anyString(), anyString(), anyObject());
-        verify(workspaceServiceClient, never()).deleteCommand(anyString(), anyString());
+        verify(commandManager, never()).getCommands();
+        verify(commandManager, never()).update(anyString(), anyObject());
+        verify(commandManager, never()).remove(anyString());
     }
 
     @Test
     public void onEnterClickedWhenSaveButtonInFocus() throws Exception {
         when(view.isCancelButtonInFocus()).thenReturn(false);
         when(view.isCloseButtonInFocus()).thenReturn(false);
-        CommandDto command = mock(CommandDto.class);
-        CommandConfiguration commandConfiguration = mock(CommandConfiguration.class);
-        List<CommandDto> commands = new ArrayList<>(1);
-        List<CommandConfiguration> confiqurations = new ArrayList<>(1);
-        commands.add(command);
-        confiqurations.add(commandConfiguration);
-        when(dtoFactory.createDto(CommandDto.class)).thenReturn(command);
-        when(command.withName(anyString())).thenReturn(command);
-        when(command.withCommandLine(anyString())).thenReturn(command);
-        when(command.withType(anyString())).thenReturn(command);
-        when(command.withAttributes(anyMap())).thenReturn(command);
-        when(view.getSelectedConfiguration()).thenReturn(commandConfiguration);
-        when(commandConfiguration.getType()).thenReturn(mock(CommandType.class));
-        when(commandConfiguration.getName()).thenReturn(COMMAND_NAME);
 
-        when(workspacePromise.thenPromise(any(Function.class))).thenReturn(workspacePromise);
-        when(workspacePromise.then((Operation)anyObject())).thenReturn(workspacePromise);
+        when(view.getSelectedCommand()).thenReturn(command);
+
+        when(commandPromise.then((Operation)anyObject())).thenReturn(commandPromise);
+        when(commandPromise.catchError((Operation)anyObject())).thenReturn(commandPromise);
 
         presenter.onEnterClicked();
 
-        verify(dtoFactory).createDto(CommandDto.class);
-        verify(workspaceServiceClient).updateCommand(eq(WORKSPACE_ID), anyString(), eq(command));
-        verify(workspacePromise).then(workspaceCaptor.capture());
-        workspaceCaptor.getValue().apply(workspace);
+        verify(commandManager).update(anyString(), eq(command));
+
+        verify(commandPromise, times(2)).then(commandCaptor.capture());
+        commandCaptor.getValue().apply(command);
 
         verify(view).setCancelButtonState(false);
         verify(view).setSaveButtonState(false);
-        verify(workspaceServiceClient).getCommands(anyString());
-
-        verify(commandsPromise).then(commandsCaptor.capture());
-        commandsCaptor.getValue().apply(commands);
-
-        verify(commandConfigurationPromise).then(commandConfigurationCaptor.capture());
-        commandConfigurationCaptor.getValue().apply(confiqurations);
-
+        verify(commandManager).getCommands();
         verify(view).setData(anyObject());
         verify(view).setFilterState(anyBoolean());
         verify(view).setCloseButtonInFocus();

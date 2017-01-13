@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,12 +35,6 @@ public interface Workspace {
      * Workspace name is unique for workspaces in the same namespace.
      */
     String getNamespace();
-
-    /**
-     * Returns the name of the current workspace instance.
-     * Workspace name is unique per namespace.
-     */
-    String getName();
 
     /**
      * Returns the status of the current workspace instance.

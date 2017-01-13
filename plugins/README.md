@@ -12,4 +12,4 @@ Add a module to plugins parent pom.xml:
 
 ## How to Add a Custom Plugin to Che Assembly?
 
-See: [Building Custom Assemblies] (https://eclipse-che.readme.io/docs/plug-ins#add-plug-in-by-referencing-from-che)
+See: [Building Custom Assemblies] ()

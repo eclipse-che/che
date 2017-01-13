@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,11 +35,11 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 @Singleton
 public class GitHubOAuthAuthenticator extends OAuthAuthenticator {
     @Inject
-    public GitHubOAuthAuthenticator(@Nullable @Named("oauth.github.clientid") String clientId,
-                                    @Nullable @Named("oauth.github.clientsecret") String clientSecret,
-                                    @Nullable @Named("oauth.github.redirecturis") String[] redirectUris,
-                                    @Nullable @Named("oauth.github.authuri") String authUri,
-                                    @Nullable @Named("oauth.github.tokenuri") String tokenUri) throws IOException {
+    public GitHubOAuthAuthenticator(@Nullable @Named("che.oauth.github.clientid") String clientId,
+                                    @Nullable @Named("che.oauth.github.clientsecret") String clientSecret,
+                                    @Nullable @Named("che.oauth.github.redirecturis") String[] redirectUris,
+                                    @Nullable @Named("che.oauth.github.authuri") String authUri,
+                                    @Nullable @Named("che.oauth.github.tokenuri") String tokenUri) throws IOException {
         if (!isNullOrEmpty(clientId)
             && !isNullOrEmpty(clientSecret)
             && !isNullOrEmpty(authUri)

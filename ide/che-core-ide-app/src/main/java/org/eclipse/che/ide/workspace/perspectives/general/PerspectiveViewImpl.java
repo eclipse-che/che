@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,7 +27,7 @@ import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
-import org.eclipse.che.ide.api.parts.WorkBenchView;
+import org.eclipse.che.ide.api.parts.PerspectiveView;
 import org.eclipse.che.ide.api.theme.Style;
 import org.eclipse.che.ide.workspace.WorkBenchResources;
 
@@ -37,7 +37,7 @@ import org.eclipse.che.ide.workspace.WorkBenchResources;
  * @author Nikolay Zamosenchuk
  * @author Dmitry Shnurenko
  */
-public class PerspectiveViewImpl extends LayoutPanel implements WorkBenchView<WorkBenchView.ActionDelegate> {
+public class PerspectiveViewImpl extends LayoutPanel implements PerspectiveView<PerspectiveView.ActionDelegate> {
 
     interface PerspectiveViewImplUiBinder extends UiBinder<Widget, PerspectiveViewImpl> {
     }
@@ -70,6 +70,8 @@ public class PerspectiveViewImpl extends LayoutPanel implements WorkBenchView<Wo
     @UiField(provided = true)
     final WorkBenchResources resources;
 
+    private ActionDelegate delegate;
+
     @Inject
     public PerspectiveViewImpl(WorkBenchResources resources) {
         this.resources = resources;
@@ -87,12 +89,14 @@ public class PerspectiveViewImpl extends LayoutPanel implements WorkBenchView<Wo
         bottomPanel = new FlowPanel();
         bottomPanelContainer.add(bottomPanel);
         bottomPanel.addStyleName(resources.workBenchCss().ideWorkBenchToolPanelBottom());
+         /* Makes splitters much better */
+        tuneSplitters();
     }
 
     /** {@inheritDoc} */
     @Override
     public void setDelegate(ActionDelegate delegate) {
-        // do nothing
+        this.delegate = delegate;
     }
 
     /** {@inheritDoc} */
@@ -250,7 +254,7 @@ public class PerspectiveViewImpl extends LayoutPanel implements WorkBenchView<Wo
         delimiter.getStyle().setProperty("height", "1px");
         delimiter.getStyle().setProperty("left", "0px");
         delimiter.getStyle().setProperty("top", "2px");
-        delimiter.getStyle().setProperty("backgroundColor", Style.getSplitterSmallBorderColor());
+        delimiter.getStyle().setProperty("backgroundColor", Style.theme.tabsPanelBackground());
         el.appendChild(delimiter);
     }
 
@@ -280,6 +284,13 @@ public class PerspectiveViewImpl extends LayoutPanel implements WorkBenchView<Wo
         Widget widget = infoPanel.getWidget();
         if (widget instanceof RequiresResize) {
             ((RequiresResize)widget).onResize();
+        }
+
+        int width = getOffsetWidth();
+        int height = getOffsetHeight();
+
+        if (delegate != null) {
+            delegate.onResize(width, height);
         }
     }
 

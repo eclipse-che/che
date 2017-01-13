@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,15 +27,15 @@ public class WsAgentServletModule extends ServletModule {
         getServletContext().addListener(new WSConnectionTracker());
 
         filter("/*").through(CheCorsFilter.class);
-        filter("/ext/*").through(EnvironmentInitializationFilter.class);
+        filter("/api/*").through(EnvironmentInitializationFilter.class);
 
-        serveRegex("^/ext((?!(/(ws|eventbus)($|/.*)))/.*)").with(GuiceEverrestServlet.class);
+        serveRegex("^/api((?!(/(ws|eventbus)($|/.*)))/.*)").with(GuiceEverrestServlet.class);
 
         bind(io.swagger.jaxrs.config.DefaultJaxrsConfig.class).asEagerSingleton();
         serve("/swaggerinit").with(io.swagger.jaxrs.config.DefaultJaxrsConfig.class, ImmutableMap
                 .of("api.version", "1.0",
                     "swagger.api.title", "Eclipse Che",
-                    "swagger.api.basepath", "/wsagent/ext"
+                    "swagger.api.basepath", "/api"
                    ));
     }
 }

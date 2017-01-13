@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -77,7 +77,7 @@ public class ProjectManagerReadTest extends WsAgentTestBase {
         projectRegistry.initProjects();
 
         pm = new ProjectManager(vfsProvider, null, projectTypeRegistry, projectRegistry, projectHandlerRegistry,
-                                null, fileWatcherNotificationHandler, fileTreeWatcher, workspaceHolder, projectTreeChangesDetector,
+                                null, fileWatcherNotificationHandler, fileTreeWatcher, workspaceHolder, fileWatcherManager,
                                 Mockito.mock(ReadmeInjectionHandler.class));
         pm.initWatcher();
     }
@@ -118,9 +118,12 @@ public class ProjectManagerReadTest extends WsAgentTestBase {
 
         assertEquals(6, projectRegistry.getProjects().size());
         assertEquals(1, projectRegistry.getProject("/foo").getProblems().size());
-        assertEquals(13, projectRegistry.getProject("/foo").getProblems().get(0).code);
-        assertEquals(1, projectRegistry.getProject("/bar").getProblems().size());
-        assertEquals(12, projectRegistry.getProject("/bar").getProblems().get(0).code);
+        assertEquals(12, projectRegistry.getProject("/foo").getProblems().get(0).code);
+
+        //Value for required attribute is not initialized pt3:pt2-var2
+        //Value for required attribute is not initialized pt3:pt2-provided1
+        assertEquals(2, projectRegistry.getProject("/bar").getProblems().size());
+        assertEquals(13, projectRegistry.getProject("/bar").getProblems().get(0).code);
     }
 
 

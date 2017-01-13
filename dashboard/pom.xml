@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2015-2016 Codenvy, S.A.
+    Copyright (c) 2015-2017 Codenvy, S.A.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
@@ -16,12 +16,12 @@
     <parent>
         <artifactId>che-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>5.0.0-M4-SNAPSHOT</version>
+        <version>5.1.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <groupId>org.eclipse.che.dashboard</groupId>
     <artifactId>che-dashboard-war</artifactId>
-    <version>5.0.0-M4-SNAPSHOT</version>
+    <version>5.1.0-SNAPSHOT</version>
     <packaging>war</packaging>
     <name>Che Dashboard :: Web App</name>
     <inceptionYear>2015</inceptionYear>
@@ -62,13 +62,13 @@
                                 <exec dir="${basedir}" executable="npm" failonerror="true">
                                     <arg value="install" />
                                 </exec>
+                                <!-- Download Typings dependencies -->
+                                <exec dir="${basedir}" executable="typings" failonerror="true">
+                                    <arg value="install" />
+                                </exec>
                                 <!-- Download Bower dependencies -->
                                 <exec dir="${basedir}" executable="bower" failonerror="true">
                                     <arg value="install" />
-                                </exec>
-                                <!-- Run unit tests -->
-                                <exec dir="${basedir}" executable="gulp" failonerror="true">
-                                    <arg value="test" />
                                 </exec>
                                 <!-- Build the application -->
                                 <exec dir="${basedir}" executable="gulp" failonerror="true">
@@ -79,6 +79,21 @@
                                     <replacetoken><![CDATA[<base href="/">]]></replacetoken>
                                     <replacevalue><![CDATA[<base href="/dashboard/">]]></replacevalue>
                                 </replace>
+                            </target>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>compilation</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target unless="skipTests">
+                                <!-- Run unit tests -->
+                                <exec dir="${basedir}" executable="gulp" failonerror="true">
+                                    <arg value="test" />
+                                </exec>
                             </target>
                         </configuration>
                     </execution>
@@ -110,6 +125,8 @@
                         <exclude>**/*.eot</exclude>
                         <exclude>**/*.css</exclude>
                         <exclude>**/*.woff</exclude>
+                        <exclude>src/app/colors/che-output-colors.constant.ts</exclude>
+                        <exclude>src/app/proxy/proxy-settings.constant.ts</exclude>
                     </excludes>
                 </configuration>
             </plugin>

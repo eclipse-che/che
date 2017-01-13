@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,16 +13,14 @@ package org.eclipse.che.ide.extension.machine.client.command.custom;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.ide.api.command.CommandPage;
+import org.eclipse.che.ide.api.command.CommandType;
+import org.eclipse.che.ide.api.icon.Icon;
+import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
-import org.eclipse.che.ide.extension.machine.client.command.CommandConfiguration;
-import org.eclipse.che.ide.extension.machine.client.command.CommandConfigurationFactory;
-import org.eclipse.che.ide.extension.machine.client.command.CommandConfigurationPage;
-import org.eclipse.che.ide.extension.machine.client.command.CommandType;
-import org.vectomatic.dom.svg.ui.SVGResource;
 
-import javax.validation.constraints.NotNull;
-import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Arbitrary command type.
@@ -33,55 +31,40 @@ import java.util.LinkedList;
 public class CustomCommandType implements CommandType {
 
     private static final String ID               = "custom";
-    private static final String DISPLAY_NAME     = "Custom";
     private static final String COMMAND_TEMPLATE = "echo \"hello\"";
 
-    private final MachineResources                  resources;
-    private final CustomCommandConfigurationFactory configurationFactory;
-
-    private final Collection<CommandConfigurationPage<? extends CommandConfiguration>> pages;
+    private final List<CommandPage> pages;
 
     @Inject
-    public CustomCommandType(MachineResources resources, CustomPagePresenter page) {
-        this.resources = resources;
-        configurationFactory = new CustomCommandConfigurationFactory(this);
+    public CustomCommandType(MachineResources resources, IconRegistry iconRegistry, CustomPagePresenter page) {
         pages = new LinkedList<>();
         pages.add(page);
+
+        iconRegistry.registerIcon(new Icon(ID + ".commands.category.icon", resources.customCommandType()));
     }
 
-    @NotNull
     @Override
     public String getId() {
         return ID;
     }
 
-    @NotNull
     @Override
     public String getDisplayName() {
-        return DISPLAY_NAME;
+        return "Custom";
     }
 
-    @NotNull
     @Override
-    public SVGResource getIcon() {
-        return resources.customCommandTypeSubElementIcon();
+    public String getDescription() {
+        return "Arbitrary command";
     }
 
-    @NotNull
     @Override
-    public Collection<CommandConfigurationPage<? extends CommandConfiguration>> getConfigurationPages() {
+    public List<CommandPage> getPages() {
         return pages;
     }
 
-    @NotNull
     @Override
-    public CommandConfigurationFactory<CustomCommandConfiguration> getConfigurationFactory() {
-        return configurationFactory;
-    }
-
-    @NotNull
-    @Override
-    public String getCommandTemplate() {
+    public String getCommandLineTemplate() {
         return COMMAND_TEMPLATE;
     }
 

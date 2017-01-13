@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,11 +12,11 @@ package org.eclipse.che.plugin.svn.server.utils;
 
 import com.google.common.collect.ImmutableList;
 
-import org.eclipse.che.plugin.svn.server.utils.SubversionUtils;
 import org.junit.Test;
 
 import java.util.List;
 
+import static org.eclipse.che.plugin.svn.server.utils.SubversionUtils.recognizeProjectUri;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -75,4 +75,12 @@ public class SubversionUtilsTest {
         )));
     }
 
+    @Test()
+    public void testRecognizeProjectUri() throws Exception {
+        assertEquals("http://a/b/c/project", recognizeProjectUri("http://a/b/c", "^/project/branches/3.1"));
+        assertEquals("http://a/b/c/project", recognizeProjectUri("http://a/b/c", "^/project/trunk"));
+        assertEquals("http://a/b/c/project", recognizeProjectUri("http://a/b/c", "^/project/d/e/f"));
+        assertEquals("http://a/b/c", recognizeProjectUri("http://a/b/c", "^/trunk"));
+        assertEquals("http://a/b/c", recognizeProjectUri("http://a/b/c", "^/"));
+    }
 }

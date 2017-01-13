@@ -25,6 +25,7 @@
              class="che-checkbox-area">
           <div layout="row" layout-align="start center" class="che-list-item-checkbox-main">
             <md-checkbox class="che-list-item-checkbox"
+                         aria-label="All environment variables"
                          md-theme="default"
                          ng-checked="listEnvVariablesController.isBulkChecked"
                          ng-click="listEnvVariablesController.changeBulkSelection()"></md-checkbox>
@@ -36,11 +37,11 @@
           <che-list-header-column flex="25"
                                   che-sort-value="listEnvVariablesController.envVariableOrderBy"
                                   che-sort-item="name"
-                                  che-column-title='Variable'></che-list-header-column>
+                                  che-column-title="Variable"></che-list-header-column>
           <che-list-header-column flex="65"
-                                  che-column-title='Value'></che-list-header-column>
+                                  che-column-title="Value"></che-list-header-column>
           <che-list-header-column flex="10"
-                                  che-column-title='Action'></che-list-header-column>
+                                  che-column-title="Action"></che-list-header-column>
         </div>
       </div>
     </che-list-header>
@@ -88,7 +89,7 @@
     <div flex>
       <che-button-default class="che-list-add-button"
                           che-button-title="Add" name="addButton"
-                          ng-click="listEnvVariablesController.showAddDialog($event)"></che-button-default>
+                          ng-click="listEnvVariablesController.showEditDialog($event)"></che-button-default>
     </div>
     <div flex-offset="5" ng-if="listEnvVariablesController.envVariablesList.length > 0">
       <che-button-primary-flat ng-disabled="(listEnvVariablesController.envVariablesSelectedNumber === 0)"

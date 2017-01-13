@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,24 +18,30 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.java.client.command.mainclass.SelectNodePresenter;
-import org.eclipse.che.ide.extension.machine.client.command.CommandConfigurationPage;
+import org.eclipse.che.ide.api.command.CommandPage;
+import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.resource.Path;
 
-import javax.validation.constraints.NotNull;
-
 /**
- * Page allows to configure Java command parameters.
+ * Page allows to customize command of {@link JavaCommandType}.
  *
  * @author Valeriy Svydenko
+ * @author Artem Zatsarynnyi
  */
 @Singleton
-public class JavaCommandPagePresenter implements JavaCommandPageView.ActionDelegate, CommandConfigurationPage<JavaCommandConfiguration> {
+public class JavaCommandPagePresenter implements JavaCommandPageView.ActionDelegate, CommandPage {
+
     private final JavaCommandPageView view;
     private final SelectNodePresenter selectNodePresenter;
 
-    private JavaCommandConfiguration editedConfiguration;
-    private String                   originCommandLine;
-    private String                   originMainClass;
+    private CommandImpl      editedCommand;
+    private JavaCommandModel editedCommandModel;
+
+    // initial value of the 'Main class' parameter
+    private String mainClassInitial;
+    // initial value of the command line
+    private String commandLineInitial;
+
     private DirtyStateListener       listener;
     private FieldStateActionDelegate delegate;
 
@@ -48,30 +54,39 @@ public class JavaCommandPagePresenter implements JavaCommandPageView.ActionDeleg
     }
 
     @Override
-    public void resetFrom(JavaCommandConfiguration configuration) {
-        editedConfiguration = configuration;
-        originCommandLine = configuration.getCommandLine();
-        originMainClass = configuration.getMainClass();
+    public void resetFrom(CommandImpl command) {
+        editedCommand = command;
+
+        editedCommandModel = JavaCommandModel.fromCommandLine(command.getCommandLine());
+
+        mainClassInitial = editedCommandModel.getMainClass();
+        commandLineInitial = editedCommandModel.getCommandLine();
     }
 
     @Override
     public void go(AcceptsOneWidget container) {
         container.setWidget(view);
 
-        view.setMainClass(editedConfiguration.getMainClass());
-        view.setCommandLine(editedConfiguration.getCommandLine());
+        view.setMainClass(editedCommandModel.getMainClass());
+        view.setCommandLine(editedCommandModel.getCommandLine());
 
         delegate.updatePreviewURLState(false);
     }
 
     @Override
-    public boolean isDirty() {
-        return !originCommandLine.equals(editedConfiguration.getCommandLine()) ||
-               !originMainClass.equals(editedConfiguration.getMainClass());
+    public void onSave() {
+        mainClassInitial = editedCommandModel.getMainClass();
+        commandLineInitial = editedCommandModel.getCommandLine();
     }
 
     @Override
-    public void setDirtyStateListener(@NotNull DirtyStateListener listener) {
+    public boolean isDirty() {
+        return !commandLineInitial.equals(editedCommandModel.getCommandLine()) ||
+               !mainClassInitial.equals(editedCommandModel.getMainClass());
+    }
+
+    @Override
+    public void setDirtyStateListener(DirtyStateListener listener) {
         this.listener = listener;
     }
 
@@ -87,12 +102,14 @@ public class JavaCommandPagePresenter implements JavaCommandPageView.ActionDeleg
 
     @Override
     public void onCommandLineChanged() {
-        editedConfiguration.setCommandLine(view.getCommandLine());
+        editedCommandModel.setCommandLine(view.getCommandLine());
+
+        editedCommand.setCommandLine(editedCommandModel.toCommandLine());
         listener.onDirtyStateChanged();
     }
 
     public void setMainClass(Resource resource, String fqn) {
-        if (editedConfiguration.getMainClass().equals(resource.getLocation().toString())) {
+        if (editedCommandModel.getMainClass().equals(resource.getLocation().toString())) {
             return;
         }
 
@@ -106,16 +123,18 @@ public class JavaCommandPagePresenter implements JavaCommandPageView.ActionDeleg
 
         view.setMainClass(relPath.toString());
 
-        String commandLine = editedConfiguration.getCommandLine();
-        commandLine = commandLine.replace(editedConfiguration.getMainClass(), relPath.toString());
-        commandLine = commandLine.replace(' ' + editedConfiguration.getMainClassFqn(),' ' + fqn);
-        editedConfiguration.setCommandLine(commandLine);
+        String commandLine = editedCommandModel.getCommandLine();
+        commandLine = commandLine.replace(editedCommandModel.getMainClass(), relPath.toString());
+        commandLine = commandLine.replace(' ' + editedCommandModel.getMainClassFQN(), ' ' + fqn);
 
-        editedConfiguration.setMainClass(relPath.toString());
+        editedCommandModel.setMainClass(view.getMainClass());
+        editedCommandModel.setCommandLine(commandLine);
+
+        editedCommand.setCommandLine(editedCommandModel.toCommandLine());
         listener.onDirtyStateChanged();
     }
 
-    public JavaCommandConfiguration getConfiguration() {
-        return editedConfiguration;
+    public JavaCommandModel getEditedCommandModel() {
+        return editedCommandModel;
     }
 }

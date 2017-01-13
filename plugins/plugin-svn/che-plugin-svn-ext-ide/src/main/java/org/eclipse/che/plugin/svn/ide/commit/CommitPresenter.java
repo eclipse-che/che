@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,12 +15,15 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.subversion.Credentials;
+import org.eclipse.che.ide.api.subversion.SubversionCredentialsDialog;
 import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.Arrays;
@@ -57,7 +60,8 @@ public class CommitPresenter extends SubversionActionPresenter implements Action
 
     private final SubversionClientService                  service;
     private final CommitView                               view;
-    private       DiffViewerPresenter                      diffViewerPresenter;
+    private final SubversionCredentialsDialog              subversionCredentialsDialog;
+    private final DiffViewerPresenter                      diffViewerPresenter;
     private final NotificationManager                      notificationManager;
     private final SubversionExtensionLocalizationConstants constants;
 
@@ -75,12 +79,14 @@ public class CommitPresenter extends SubversionActionPresenter implements Action
                            SubversionOutputConsoleFactory consoleFactory,
                            SubversionExtensionLocalizationConstants constants,
                            SubversionClientService service,
+                           SubversionCredentialsDialog subversionCredentialsDialog,
                            ProcessesPanelPresenter processesPanelPresenter,
                            DiffViewerPresenter diffViewerPresenter,
                            StatusColors statusColors) {
-        super(appContext, consoleFactory, processesPanelPresenter, statusColors);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors, constants, notificationManager, subversionCredentialsDialog);
         this.service = service;
         this.view = view;
+        this.subversionCredentialsDialog = subversionCredentialsDialog;
         this.diffViewerPresenter = diffViewerPresenter;
         this.view.setDelegate(this);
         this.notificationManager = notificationManager;
@@ -98,24 +104,24 @@ public class CommitPresenter extends SubversionActionPresenter implements Action
 
         service.status(project.getLocation(), new Path[0], null, false, false, false, true, false, null)
                .then(new Operation<CLIOutputResponse>() {
-                    @Override
-                    public void apply(CLIOutputResponse response) throws OperationException {
-                        List<StatusItem> statusItems = parseChangesList(response);
-                        view.setChangesList(statusItems);
-                        view.onShow();
+                   @Override
+                   public void apply(CLIOutputResponse response) throws OperationException {
+                       List<StatusItem> statusItems = parseChangesList(response);
+                       view.setChangesList(statusItems);
+                       view.onShow();
 
-                        cache.put(Changes.ALL, statusItems);
-                    }
-                })
-                .catchError(new Operation<PromiseError>() {
-                    @Override
-                    public void apply(PromiseError error) throws OperationException {
-                        Log.error(CommitPresenter.class, error.getMessage());
-                    }
-                });
+                       cache.put(Changes.ALL, statusItems);
+                   }
+               })
+               .catchError(new Operation<PromiseError>() {
+                   @Override
+                   public void apply(PromiseError error) throws OperationException {
+                       Log.error(CommitPresenter.class, error.getMessage());
+                   }
+               });
     }
 
-    private  List<StatusItem> parseChangesList(CLIOutputResponse response) {
+    private List<StatusItem> parseChangesList(CLIOutputResponse response) {
         return CLIOutputParser.parseFilesStatus(response.getOutput());
     }
 
@@ -183,12 +189,20 @@ public class CommitPresenter extends SubversionActionPresenter implements Action
 
     /** {@inheritDoc} */
     @Override
-    public void showDiff(String path) {
+    public void showDiff(final String path) {
         final Project project = appContext.getRootProject();
 
         checkState(project != null);
 
-        service.showDiff(project.getLocation(), new Path[]{valueOf(path)}, "HEAD").then(new Operation<CLIOutputResponse>() {
+        performOperationWithCredentialsRequestIfNeeded(new RemoteSubversionOperation<CLIOutputResponse>() {
+            @Override
+            public Promise<CLIOutputResponse> perform(Credentials credentials) {
+                return service.showDiff(project.getLocation(),
+                                        new Path[]{valueOf(path)},
+                                        "HEAD",
+                                        credentials);
+            }
+        }, null).then(new Operation<CLIOutputResponse>() {
             @Override
             public void apply(CLIOutputResponse response) throws OperationException {
                 String content = Joiner.on('\n').join(response.getOutput());

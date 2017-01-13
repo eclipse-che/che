@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,12 +16,10 @@ import org.eclipse.che.api.core.model.machine.Snapshot;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.commons.lang.NameGenerator;
 
-import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.Index;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
@@ -44,10 +42,15 @@ import java.util.Objects;
                 @NamedQuery(name = "Snapshot.findSnapshots",
                             query = "SELECT snapshot " +
                                     "FROM Snapshot snapshot " +
-                                    "WHERE snapshot.workspaceId = :workspaceId")
+                                    "WHERE snapshot.workspaceId = :workspaceId"),
+                @NamedQuery(name = "Snapshot.findByWorkspaceAndEnvironment",
+                            query = "SELECT snapshot " +
+                                    "FROM Snapshot snapshot " +
+                                    "WHERE snapshot.workspaceId = :workspaceId " +
+                                    "  AND snapshot.envName = :envName")
         }
 )
-@Table(indexes = @Index(columnList = "workspaceId, envName, machineName", unique = true))
+@Table(name = "snapshot")
 public class SnapshotImpl implements Snapshot {
 
     public static SnapshotBuilder builder() {
@@ -55,27 +58,28 @@ public class SnapshotImpl implements Snapshot {
     }
 
     @Id
+    @Column(name = "id")
     private String id;
 
-    @Column(nullable = false)
+    @Column(name = "workspaceid", nullable = false)
     private String workspaceId;
 
-    @Column(nullable = false)
+    @Column(name = "machinename", nullable = false)
     private String machineName;
 
-    @Column(nullable = false)
+    @Column(name = "envname", nullable = false)
     private String envName;
 
-    @Basic
+    @Column(name = "type")
     private String type;
 
-    @Basic
+    @Column(name = "isdev")
     private boolean isDev;
 
-    @Basic
+    @Column(name = "creationdate")
     private long creationDate;
 
-    @Basic
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
     @Embedded

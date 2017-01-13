@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -148,8 +148,7 @@ public class OrionTextViewOverlay extends JavaScriptObject {
 
     public final native void setAction(String actionId, Action action) /*-{
         this.setAction(actionId, function () {
-            action.@org.eclipse.che.ide.editor.orion.client.Action::onAction()();
-            return true;
+            return action.@org.eclipse.che.ide.editor.orion.client.Action::onAction()();
         });
     }-*/;
 
@@ -166,8 +165,7 @@ public class OrionTextViewOverlay extends JavaScriptObject {
     public final native void setAction(String actionId, Action action, String description) /*-{
         var actionDescription = {name: description};
         this.setAction(actionId, function () {
-            action.@org.eclipse.che.ide.editor.orion.client.Action::onAction()();
-            return true;
+            return action.@org.eclipse.che.ide.editor.orion.client.Action::onAction()();
         }, actionDescription);
     }-*/;
 

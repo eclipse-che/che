@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,12 +14,15 @@ import com.google.inject.Inject;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.subversion.Credentials;
+import org.eclipse.che.ide.api.subversion.SubversionCredentialsDialog;
 import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.Arrays;
@@ -53,11 +56,12 @@ public class LockUnlockPresenter extends SubversionActionPresenter {
                                   ChoiceDialogFactory choiceDialogFactory,
                                   NotificationManager notificationManager,
                                   SubversionOutputConsoleFactory consoleFactory,
+                                  SubversionCredentialsDialog subversionCredentialsDialog,
                                   ProcessesPanelPresenter processesPanelPresenter,
                                   SubversionExtensionLocalizationConstants constants,
                                   SubversionClientService service,
                                   StatusColors statusColors) {
-        super(appContext, consoleFactory, processesPanelPresenter, statusColors);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors, constants, notificationManager, subversionCredentialsDialog);
 
         this.service = service;
         this.notificationManager = notificationManager;
@@ -155,7 +159,12 @@ public class LockUnlockPresenter extends SubversionActionPresenter {
 
         checkState(project != null);
 
-        service.lock(project.getLocation(), paths, force).then(new Operation<CLIOutputResponse>() {
+        performOperationWithCredentialsRequestIfNeeded(new RemoteSubversionOperation<CLIOutputResponse>() {
+            @Override
+            public Promise<CLIOutputResponse> perform(Credentials credentials) {
+                return service.lock(project.getLocation(), paths, force, credentials);
+            }
+        }, null).then(new Operation<CLIOutputResponse>() {
             @Override
             public void apply(CLIOutputResponse response) throws OperationException {
                 printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(), constants.commandLock());
@@ -174,7 +183,12 @@ public class LockUnlockPresenter extends SubversionActionPresenter {
 
         checkState(project != null);
 
-        service.unlock(project.getLocation(), paths, force).then(new Operation<CLIOutputResponse>() {
+        performOperationWithCredentialsRequestIfNeeded(new RemoteSubversionOperation<CLIOutputResponse>() {
+            @Override
+            public Promise<CLIOutputResponse> perform(Credentials credentials) {
+                return service.unlock(project.getLocation(), paths, force, credentials);
+            }
+        }, null).then(new Operation<CLIOutputResponse>() {
             @Override
             public void apply(CLIOutputResponse response) throws OperationException {
                 printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(), constants.commandUnlock());

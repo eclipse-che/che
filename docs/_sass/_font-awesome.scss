@@ -1,0 +1,19 @@
+@font-face {
+  font-family: 'FontAwesome';
+  font-weight: normal;
+  font-style: normal;
+}
+.fa {
+  display: inline-block;
+  font: normal normal normal 14px/1 FontAwesome;
+  font-size: inherit;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.fa-link:before {
+  content: "\f0c1";
+}
+.fa-pencil:before {
+  content: "\f040";
+}

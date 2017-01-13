@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat Inc.  - refactor getServers() method
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.machine;
 
@@ -22,15 +23,12 @@ import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.json.ContainerState;
 import org.eclipse.che.plugin.docker.client.json.HostConfig;
 import org.eclipse.che.plugin.docker.client.json.NetworkSettings;
-import org.eclipse.che.plugin.docker.client.json.PortBinding;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -58,7 +56,7 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
     /**
      * Env variable for dev machine that contains url of Che API
      */
-    public static final String API_ENDPOINT_URL_VARIABLE = "CHE_API_ENDPOINT";
+    public static final String API_ENDPOINT_URL_VARIABLE = "CHE_API";
 
     /**
      * Environment variable that will be setup in developer machine will contain ID of a workspace for which this machine has been created
@@ -76,23 +74,20 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
      */
     public static final String USER_TOKEN = "USER_TOKEN";
 
-    protected static final String SERVER_CONF_LABEL_PREFIX          = "che:server:";
-    protected static final String SERVER_CONF_LABEL_REF_SUFFIX      = ":ref";
-    protected static final String SERVER_CONF_LABEL_PROTOCOL_SUFFIX = ":protocol";
-    protected static final String SERVER_CONF_LABEL_PATH_SUFFIX     = ":path";
-
     private final ContainerInfo               info;
-    private final String                      containerHost;
     private final Map<String, ServerConfImpl> serversConf;
+    private final String                      internalHost;
+    private final ServerEvaluationStrategyProvider provider;
 
     @Inject
     public DockerInstanceRuntimeInfo(@Assisted ContainerInfo containerInfo,
-                                     @Assisted String containerHost,
                                      @Assisted MachineConfig machineConfig,
+                                     @Assisted String internalHost,
+                                     ServerEvaluationStrategyProvider provider,
                                      @Named("machine.docker.dev_machine.machine_servers") Set<ServerConf> devMachineSystemServers,
                                      @Named("machine.docker.machine_servers") Set<ServerConf> allMachinesSystemServers) {
         this.info = containerInfo;
-        this.containerHost = containerHost;
+
         Stream<ServerConf> confStream = Stream.concat(machineConfig.getServers().stream(), allMachinesSystemServers.stream());
         if (machineConfig.isDev()) {
             confStream = Stream.concat(confStream, devMachineSystemServers.stream());
@@ -102,6 +97,9 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
                                                                srvConf.getPort() :
                                                                srvConf.getPort() + "/tcp",
                                                     ServerConfImpl::new));
+
+        this.internalHost = internalHost;
+        this.provider = provider;
     }
 
     @Override
@@ -134,12 +132,10 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
             md.put("config.workingDir", config.getWorkingDir());
             md.put("config.cmd", Arrays.toString(config.getCmd()));
             md.put("config.volumes", String.valueOf(config.getVolumes()));
-            md.put("config.cpuset", config.getCpuset());
             md.put("config.entrypoint", Arrays.toString(config.getEntrypoint()));
             md.put("config.exposedPorts", String.valueOf(config.getExposedPorts()));
             md.put("config.macAddress", config.getMacAddress());
             md.put("config.securityOpts", Arrays.toString(config.getSecurityOpts()));
-            md.put("config.cpuShares", Integer.toString(config.getCpuShares()));
             md.put("config.env", Arrays.toString(config.getEnv()));
             md.put("config.attachStderr", Boolean.toString(config.isAttachStderr()));
             md.put("config.attachStdin", Boolean.toString(config.isAttachStdin()));
@@ -175,7 +171,7 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
             md.put("network.linkLocalIPv6PrefixLen", String.valueOf(networkSettings.getLinkLocalIPv6PrefixLen()));
             md.put("network.globalIPv6Address", networkSettings.getGlobalIPv6Address());
             md.put("network.globalIPv6PrefixLen", String.valueOf(networkSettings.getGlobalIPv6PrefixLen()));
-            md.put("network.iPv6Gateway", networkSettings.getiPv6Gateway());
+            md.put("network.iPv6Gateway", networkSettings.getIpV6Gateway());
             md.put("network.linkLocalIPv6Address", networkSettings.getLinkLocalIPv6Address());
         }
         HostConfig hostConfig = info.getHostConfig();
@@ -203,8 +199,7 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
             md.put("hostConfig.restartPolicy", String.valueOf(hostConfig.getRestartPolicy()));
             md.put("hostConfig.ulimits", Arrays.toString(hostConfig.getUlimits()));
             md.put("hostConfig.volumesFrom", Arrays.toString(hostConfig.getVolumesFrom()));
-            md.put("hostConfig.memory", Long.toString(hostConfig.getMemory()));
-            md.put("hostConfig.memorySwap", Long.toString(hostConfig.getMemorySwap()));
+            md.put("hostConfig.pidsLimit", Long.toString(hostConfig.getPidsLimit()));
         }
 
         return md;
@@ -229,112 +224,7 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
 
     @Override
     public Map<String, ServerImpl> getServers() {
-        Map<String, List<PortBinding>> ports;
-        if (info.getNetworkSettings() != null && info.getNetworkSettings().getPorts() != null) {
-            ports = info.getNetworkSettings().getPorts();
-        } else {
-            ports = Collections.emptyMap();
-        }
-        Map<String, String> labels;
-        if (info.getConfig() != null && info.getConfig().getLabels() != null) {
-            labels = info.getConfig().getLabels();
-        } else {
-            labels = Collections.emptyMap();
-        }
-        return addDefaultReferenceForServersWithoutReference(
-                addRefAndUrlToServers(
-                        getServersWithFilledPorts(containerHost,
-                                                  ports),
-                        labels));
-    }
-
-    private Map<String, ServerImpl> addDefaultReferenceForServersWithoutReference(Map<String, ServerImpl> servers) {
-        // replace / if server port contains it. E.g. 5411/udp
-        servers.entrySet()
-               .stream()
-               .filter(server -> server.getValue().getRef() == null)
-               .forEach(server -> {
-                   // replace / if server port contains it. E.g. 5411/udp
-                   server.getValue().setRef("Server-" + server.getKey().replace("/", "-"));
-               });
-        return servers;
-    }
-
-    protected Map<String, ServerImpl> addRefAndUrlToServers(final Map<String, ServerImpl> servers, final Map<String, String> labels) {
-        final Map<String, ServerConfImpl> serversConfFromLabels = getServersConfFromLabels(servers.keySet(), labels);
-        for (Map.Entry<String, ServerImpl> serverEntry : servers.entrySet()) {
-            ServerConf serverConf = serversConf.getOrDefault(serverEntry.getKey(), serversConfFromLabels.get(serverEntry.getKey()));
-            if (serverConf != null) {
-                if (serverConf.getRef() != null) {
-                    serverEntry.getValue().setRef(serverConf.getRef());
-                }
-                if (serverConf.getPath() != null) {
-                    serverEntry.getValue().setPath(serverConf.getPath());
-                }
-                if (serverConf.getProtocol() != null) {
-                    serverEntry.getValue().setProtocol(serverConf.getProtocol());
-
-                    String url = serverConf.getProtocol() + "://" + serverEntry.getValue().getAddress();
-                    if (serverConf.getPath() != null) {
-                        if (serverConf.getPath().charAt(0) != '/') {
-                            url = url + '/';
-                        }
-                        url = url + serverConf.getPath();
-                    }
-                    serverEntry.getValue().setUrl(url);
-                }
-            }
-        }
-
-        return servers;
-    }
-
-    protected Map<String, ServerImpl> getServersWithFilledPorts(final String host, final Map<String, List<PortBinding>> exposedPorts) {
-        final HashMap<String, ServerImpl> servers = new LinkedHashMap<>();
-
-        for (Map.Entry<String, List<PortBinding>> portEntry : exposedPorts.entrySet()) {
-            // in form 1234/tcp
-            String portProtocol = portEntry.getKey();
-            // we are assigning ports automatically, so have 1 to 1 binding (at least per protocol)
-            String externalPort = portEntry.getValue().get(0).getHostPort();
-            servers.put(portProtocol, new ServerImpl(null,
-                                                     null,
-                                                     host + ":" + externalPort,
-                                                     null,
-                                                     null));
-        }
-
-        return servers;
-    }
-
-    private Map<String, ServerConfImpl> getServersConfFromLabels(final Set<String> portProtocols, final Map<String, String> labels) {
-        final HashMap<String, ServerConfImpl> serversConf = new LinkedHashMap<>();
-        for (String portProtocol : portProtocols) {
-            String ref = labels.get(SERVER_CONF_LABEL_PREFIX + portProtocol + SERVER_CONF_LABEL_REF_SUFFIX);
-            String protocol = labels.get(SERVER_CONF_LABEL_PREFIX + portProtocol + SERVER_CONF_LABEL_PROTOCOL_SUFFIX);
-            String path = labels.get(SERVER_CONF_LABEL_PREFIX + portProtocol + SERVER_CONF_LABEL_PATH_SUFFIX);
-            // it is allowed to use label without part /tcp that describes tcp port, e.g. 8080 describes 8080/tcp
-            if (ref == null && !portProtocol.endsWith("/udp")) {
-                ref = labels.get(SERVER_CONF_LABEL_PREFIX +
-                                 portProtocol.substring(0, portProtocol.length() - 4) +
-                                 SERVER_CONF_LABEL_REF_SUFFIX);
-            }
-            if (protocol == null && !portProtocol.endsWith("/udp")) {
-                protocol = labels.get(SERVER_CONF_LABEL_PREFIX +
-                                      portProtocol.substring(0, portProtocol.length() - 4) +
-                                      SERVER_CONF_LABEL_PROTOCOL_SUFFIX);
-            }
-            if (path == null && !portProtocol.endsWith("/udp")) {
-                path = labels.get(SERVER_CONF_LABEL_PREFIX +
-                                  portProtocol.substring(0, portProtocol.length() - 4) +
-                                  SERVER_CONF_LABEL_PATH_SUFFIX);
-            }
-            serversConf.put(portProtocol, new ServerConfImpl(ref,
-                                                             portProtocol,
-                                                             protocol,
-                                                             path));
-        }
-
-        return serversConf;
+        ServerEvaluationStrategy strategy = provider.get();
+        return strategy.getServers(info, internalHost, serversConf);
     }
 }

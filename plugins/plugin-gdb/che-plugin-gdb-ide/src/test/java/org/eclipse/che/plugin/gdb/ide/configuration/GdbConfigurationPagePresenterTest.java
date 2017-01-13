@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,13 +12,11 @@ package org.eclipse.che.plugin.gdb.ide.configuration;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 
-import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.DebugConfiguration;
 import org.eclipse.che.ide.api.debug.DebugConfigurationPage;
-import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.machine.RecipeServiceClient;
-import org.eclipse.che.ide.extension.machine.client.command.valueproviders.CurrentProjectPathProvider;
+import org.eclipse.che.ide.extension.machine.client.command.macros.CurrentProjectPathMacro;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,17 +44,15 @@ public class GdbConfigurationPagePresenterTest {
     private static final int    PORT = 8000;
 
     @Mock
-    private GdbConfigurationPageView   pageView;
+    private GdbConfigurationPageView pageView;
     @Mock
-    private DebugConfiguration         configuration;
+    private DebugConfiguration       configuration;
     @Mock
-    private CurrentProjectPathProvider currentProjectPathProvider;
+    private CurrentProjectPathMacro  currentProjectPathMacro;
     @Mock
-    private AppContext                 appContext;
+    private AppContext               appContext;
     @Mock
-    private RecipeServiceClient        recipeServiceClient;
-    @Mock
-    private MachineServiceClient       machineServiceClient;
+    private RecipeServiceClient      recipeServiceClient;
 
     @InjectMocks
     private GdbConfigurationPagePresenter pagePresenter;
@@ -74,16 +70,16 @@ public class GdbConfigurationPagePresenterTest {
         verify(configuration, atLeastOnce()).getHost();
         verify(configuration, atLeastOnce()).getPort();
         verify(configuration, atLeastOnce()).getConnectionProperties();
-        verify(currentProjectPathProvider).getKey();
+        verify(currentProjectPathMacro).getName();
     }
 
     @Test
     public void testGo() throws Exception {
         AcceptsOneWidget container = Mockito.mock(AcceptsOneWidget.class);
-        when(machineServiceClient.getMachines(appContext.getWorkspaceId())).thenReturn(mock(Promise.class));
 
         pagePresenter.go(container);
 
+        verify(appContext).getWorkspace();
         verify(container).setWidget(eq(pageView));
         verify(configuration, atLeastOnce()).getHost();
         verify(configuration, atLeastOnce()).getPort();

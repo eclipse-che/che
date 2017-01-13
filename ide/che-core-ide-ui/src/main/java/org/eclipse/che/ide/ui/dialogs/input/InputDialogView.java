@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,6 +36,9 @@ public interface InputDialogView {
     /** Sets the window title. */
     void setTitle(String title);
 
+    /** Sets new label for Ok button */
+    void setOkButtonLabel(String label);
+
     /** Returns the input value. */
     String getValue();
 
@@ -62,7 +65,7 @@ public interface InputDialogView {
     boolean isCancelButtonInFocus();
 
     /** The interface for the action delegate. */
-    public interface ActionDelegate {
+    interface ActionDelegate {
 
         /** Defines what's done when the user clicks cancel. */
         void cancelled();
@@ -76,4 +79,5 @@ public interface InputDialogView {
         /** Performs any actions appropriate in response to the user having clicked the Enter key. */
         void onEnterClicked();
     }
+
 }

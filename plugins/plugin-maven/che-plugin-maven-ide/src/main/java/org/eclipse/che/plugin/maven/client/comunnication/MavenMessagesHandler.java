@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,26 +14,27 @@ import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
-
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.WsAgentStateController;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
-import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.resources.Container;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.collections.Jso;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandConsoleFactory;
+import org.eclipse.che.ide.extension.machine.client.outputspanel.console.DefaultOutputConsole;
+import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.websocket.MessageBus;
 import org.eclipse.che.ide.websocket.WebSocketException;
 import org.eclipse.che.ide.websocket.events.MessageHandler;
 import org.eclipse.che.plugin.maven.client.comunnication.progressor.background.BackgroundLoaderPresenter;
-import org.eclipse.che.plugin.maven.shared.MavenAttributes;
 import org.eclipse.che.plugin.maven.shared.MessageType;
+import org.eclipse.che.plugin.maven.shared.dto.ArchetypeOutput;
 import org.eclipse.che.plugin.maven.shared.dto.NotificationMessage;
 import org.eclipse.che.plugin.maven.shared.dto.ProjectsUpdateMessage;
 import org.eclipse.che.plugin.maven.shared.dto.StartStopNotification;
@@ -42,7 +43,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
+import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_ARCHETYPE_CHANEL_NAME;
+import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_CHANEL_NAME;
 
 /**
  * Handler which receives messages from the maven server.
@@ -54,62 +56,44 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMod
 public class MavenMessagesHandler {
 
     private final EventBus                  eventBus;
-    private final NotificationManager       notificationManager;
+    private final DtoFactory                factory;
     private final BackgroundLoaderPresenter dependencyResolver;
     private final PomEditorReconciler       pomEditorReconciler;
-    private final AppContext                appContext;
+    private final ProcessesPanelPresenter   processesPanelPresenter;
+    private final CommandConsoleFactory     commandConsoleFactory;
+    private final AppContext appContext;
 
     @Inject
     public MavenMessagesHandler(EventBus eventBus,
-                                NotificationManager notificationManager,
                                 DtoFactory factory,
                                 BackgroundLoaderPresenter dependencyResolver,
                                 PomEditorReconciler pomEditorReconciler,
-                                WsAgentStateController agentStateController,
+                                WsAgentStateController wsAgentStateController,
+                                ProcessesPanelPresenter processesPanelPresenter,
+                                CommandConsoleFactory commandConsoleFactory,
                                 AppContext appContext) {
         this.eventBus = eventBus;
+        this.factory = factory;
 
-        this.notificationManager = notificationManager;
         this.dependencyResolver = dependencyResolver;
         this.pomEditorReconciler = pomEditorReconciler;
+        this.processesPanelPresenter = processesPanelPresenter;
+        this.commandConsoleFactory = commandConsoleFactory;
         this.appContext = appContext;
 
-        handleOperations(factory, agentStateController);
+        handleOperations(factory, wsAgentStateController);
     }
 
-    private void handleOperations(final DtoFactory factory, final WsAgentStateController agentStateController) {
+    private void handleOperations(final DtoFactory factory, final WsAgentStateController wsAgentStateController) {
         eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
             @Override
             public void onWsAgentStarted(WsAgentStateEvent event) {
-                agentStateController.getMessageBus().then(new Operation<MessageBus>() {
+                wsAgentStateController.getMessageBus().then(new Operation<MessageBus>() {
                     @Override
                     public void apply(MessageBus messageBus) throws OperationException {
                         try {
-                            messageBus.subscribe(MavenAttributes.MAVEN_CHANEL_NAME, new MessageHandler() {
-                                @Override
-                                public void onMessage(String message) {
-                                    Jso jso = Jso.deserialize(message);
-                                    int type = jso.getFieldCastedToInteger("$type");
-                                    MessageType messageType = MessageType.valueOf(type);
-                                    switch (messageType) {
-                                        case NOTIFICATION:
-                                            NotificationMessage dto = factory.createDtoFromJson(message, NotificationMessage.class);
-                                            handleNotification(dto);
-                                            break;
-
-                                        case UPDATE:
-                                            handleUpdate(factory.createDtoFromJson(message, ProjectsUpdateMessage.class));
-                                            break;
-
-                                        case START_STOP:
-                                            handleStartStop(factory.createDtoFromJson(message, StartStopNotification.class));
-                                            break;
-
-                                        default:
-                                            Log.error(getClass(), "Unknown message type:" + messageType);
-                                    }
-                                }
-                            });
+                            handleMavenServerEvents(messageBus);
+                            handleMavenArchetype(messageBus);
                         } catch (WebSocketException e) {
                             dependencyResolver.hide();
                             Log.error(getClass(), e);
@@ -123,8 +107,77 @@ public class MavenMessagesHandler {
                 dependencyResolver.hide();
             }
         });
+
+        eventBus.addHandler(WorkspaceStoppedEvent.TYPE, new WorkspaceStoppedEvent.Handler() {
+            @Override
+            public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
+                dependencyResolver.hide();
+            }
+        });
     }
 
+
+    private void handleMavenServerEvents(final MessageBus messageBus) throws WebSocketException {
+        messageBus.subscribe(MAVEN_CHANEL_NAME, new MessageHandler() {
+            @Override
+            public void onMessage(String message) {
+                Jso jso = Jso.deserialize(message);
+                int type = jso.getFieldCastedToInteger("$type");
+                MessageType messageType = MessageType.valueOf(type);
+                switch (messageType) {
+                    case NOTIFICATION:
+                        NotificationMessage dto = factory.createDtoFromJson(message, NotificationMessage.class);
+                        handleNotification(dto);
+                        break;
+
+                    case UPDATE:
+                        handleUpdate(factory.createDtoFromJson(message, ProjectsUpdateMessage.class));
+                        break;
+
+                    case START_STOP:
+                        handleStartStop(factory.createDtoFromJson(message, StartStopNotification.class));
+                        break;
+
+                    default:
+                        Log.error(getClass(), "Unknown message type:" + messageType);
+                }
+            }
+        });
+    }
+
+    private void handleMavenArchetype(final MessageBus messageBus)  {
+        final DefaultOutputConsole outputConsole = (DefaultOutputConsole)commandConsoleFactory.create("Maven Archetype");
+
+        try {
+            messageBus.subscribe(MAVEN_ARCHETYPE_CHANEL_NAME, new MessageHandler() {
+                @Override
+                public void onMessage(String message) {
+                    Log.info(getClass(), message);
+                    ArchetypeOutput archetypeOutput = factory.createDtoFromJson(message, ArchetypeOutput.class);
+                    processesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), outputConsole);
+                    switch (archetypeOutput.getState()) {
+                        case START:
+                            outputConsole.clearOutputsButtonClicked();
+                            outputConsole.printText(archetypeOutput.getOutput(),"green");
+                            break;
+                        case IN_PROGRESS:
+                            outputConsole.printText(archetypeOutput.getOutput());
+                            break;
+                        case DONE:
+                            outputConsole.printText(archetypeOutput.getOutput(),"green");
+                            break;
+                        case ERROR:
+                            outputConsole.printText(archetypeOutput.getOutput(),"red");
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            });
+        } catch (WebSocketException e) {
+            e.printStackTrace();
+        }
+    }
 
     private void handleStartStop(StartStopNotification dto) {
         if (dto.isStart()) {
@@ -146,22 +199,6 @@ public class MavenMessagesHandler {
                     }
                 }
             });
-        }
-
-        int updatedNumber = 0;
-        String deletedProject = "";
-
-        for (String path : dto.getDeletedProjects()) {
-            if (!updatedProjects.contains(path)) {
-                updatedNumber++;
-                deletedProject = path;
-            }
-        }
-
-        if (updatedNumber > 1) {
-            notificationManager.notify("Maven", updatedNumber + " modules were deleted", StatusNotification.Status.SUCCESS, EMERGE_MODE);
-        } else if (updatedNumber == 1) {
-            notificationManager.notify("Maven", "Module was deleted: " + deletedProject, StatusNotification.Status.SUCCESS, EMERGE_MODE);
         }
 
         pomEditorReconciler.reconcilePoms(updatedProjects);

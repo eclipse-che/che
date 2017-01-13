@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,7 +25,7 @@ import java.util.Objects;
 @Embeddable
 public class PoliciesImpl implements Policies {
 
-    @Basic
+    @Column(name = "referer")
     private String referer;
 
     @Column(name = "match_reopen")
@@ -34,10 +34,10 @@ public class PoliciesImpl implements Policies {
     @Column(name = "creation_strategy")
     private String create;
 
-    @Basic
+    @Column(name = "until")
     private Long until;
 
-    @Basic
+    @Column(name = "since")
     private Long since;
 
     public PoliciesImpl() {}
@@ -125,8 +125,8 @@ public class PoliciesImpl implements Policies {
         result = 31 * result + Objects.hashCode(referer);
         result = 31 * result + Objects.hashCode(match);
         result = 31 * result + Objects.hashCode(create);
-        result = 31 * result + Long.hashCode(until);
-        result = 31 * result + Long.hashCode(since);
+        result = 31 * result + Objects.hashCode(until);
+        result = 31 * result + Objects.hashCode(since);
         return result;
     }
 

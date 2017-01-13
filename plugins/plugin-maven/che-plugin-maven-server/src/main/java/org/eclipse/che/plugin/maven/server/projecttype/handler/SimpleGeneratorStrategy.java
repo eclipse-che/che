@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,9 +15,14 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.type.AttributeValue;
+import org.eclipse.che.api.vfs.Path;
+import org.eclipse.che.api.vfs.VirtualFileSystem;
+import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
 import org.eclipse.che.ide.maven.tools.Build;
 import org.eclipse.che.ide.maven.tools.Model;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Map;
 
 import static org.eclipse.che.ide.ext.java.shared.Constants.SOURCE_FOLDER;
@@ -38,7 +43,16 @@ import static org.eclipse.che.plugin.maven.shared.MavenAttributes.VERSION;
  *
  * @author Artem Zatsarynnyi
  */
+@Singleton
 public class SimpleGeneratorStrategy implements GeneratorStrategy {
+
+
+    private final VirtualFileSystem vfs;
+
+    @Inject
+    public SimpleGeneratorStrategy(VirtualFileSystemProvider vfsProvider) throws ServerException {
+        vfs = vfsProvider.getVirtualFileSystem();
+    }
 
     @Override
     public String getId() {
@@ -46,7 +60,7 @@ public class SimpleGeneratorStrategy implements GeneratorStrategy {
     }
 
     @Override
-    public void generateProject(FolderEntry baseFolder, Map<String, AttributeValue> attributes, Map<String, String> options)
+    public void generateProject(Path projectPath, Map<String, AttributeValue> attributes, Map<String, String> options)
             throws ForbiddenException, ConflictException, ServerException {
         AttributeValue artifactId = attributes.get(ARTIFACT_ID);
         AttributeValue groupId = attributes.get(GROUP_ID);
@@ -65,6 +79,9 @@ public class SimpleGeneratorStrategy implements GeneratorStrategy {
 
         Model model = Model.createModel();
         model.setModelVersion("4.0.0");
+
+        final FolderEntry baseFolder = new FolderEntry(vfs.getRoot().createFolder(projectPath.toString()));
+
 
         if (baseFolder.getChild("pom.xml") == null) {
             baseFolder.createFile("pom.xml", new byte[0]);

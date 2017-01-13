@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,6 +32,7 @@ import org.eclipse.che.ide.actions.FullTextSearchAction;
 import org.eclipse.che.ide.actions.GoIntoAction;
 import org.eclipse.che.ide.actions.HotKeysListAction;
 import org.eclipse.che.ide.actions.ImportProjectAction;
+import org.eclipse.che.ide.actions.LinkWithEditorAction;
 import org.eclipse.che.ide.actions.NavigateToFileAction;
 import org.eclipse.che.ide.actions.OpenFileAction;
 import org.eclipse.che.ide.actions.ProjectConfigurationAction;
@@ -43,9 +44,13 @@ import org.eclipse.che.ide.actions.SaveAllAction;
 import org.eclipse.che.ide.actions.ShowHiddenFilesAction;
 import org.eclipse.che.ide.actions.ShowPreferencesAction;
 import org.eclipse.che.ide.actions.ShowReferenceAction;
+import org.eclipse.che.ide.actions.SignatureHelpAction;
 import org.eclipse.che.ide.actions.UndoAction;
 import org.eclipse.che.ide.actions.UploadFileAction;
 import org.eclipse.che.ide.actions.UploadFolderAction;
+import org.eclipse.che.ide.actions.common.MaximizePartAction;
+import org.eclipse.che.ide.actions.common.MinimizePartAction;
+import org.eclipse.che.ide.actions.common.RestorePartAction;
 import org.eclipse.che.ide.actions.find.FindActionAction;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
@@ -63,10 +68,10 @@ import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.keybinding.KeyBuilder;
 import org.eclipse.che.ide.connection.WsConnectionListener;
 import org.eclipse.che.ide.imageviewer.ImageViewerProvider;
-import org.eclipse.che.ide.machine.macro.ServerHostNameMacroProvider;
-import org.eclipse.che.ide.machine.macro.ServerMacroProvider;
-import org.eclipse.che.ide.machine.macro.ServerPortMacroProvider;
-import org.eclipse.che.ide.machine.macro.ServerProtocolMacroProvider;
+import org.eclipse.che.ide.macro.ServerHostNameMacro;
+import org.eclipse.che.ide.macro.ServerMacro;
+import org.eclipse.che.ide.macro.ServerPortMacro;
+import org.eclipse.che.ide.macro.ServerProtocolMacro;
 import org.eclipse.che.ide.newresource.NewFileAction;
 import org.eclipse.che.ide.newresource.NewFolderAction;
 import org.eclipse.che.ide.part.editor.actions.CloseAction;
@@ -95,6 +100,14 @@ import org.eclipse.che.ide.util.input.KeyCodeMap;
 import org.eclipse.che.ide.xml.NewXmlFileAction;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
+import static org.eclipse.che.ide.actions.EditorActions.CLOSE;
+import static org.eclipse.che.ide.actions.EditorActions.CLOSE_ALL;
+import static org.eclipse.che.ide.actions.EditorActions.CLOSE_ALL_EXCEPT_PINNED;
+import static org.eclipse.che.ide.actions.EditorActions.CLOSE_OTHER;
+import static org.eclipse.che.ide.actions.EditorActions.PIN_TAB;
+import static org.eclipse.che.ide.actions.EditorActions.REOPEN_CLOSED;
+import static org.eclipse.che.ide.actions.EditorActions.SPLIT_HORIZONTALLY;
+import static org.eclipse.che.ide.actions.EditorActions.SPLIT_VERTICALLY;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_FILE_NEW;
 import static org.eclipse.che.ide.api.constraints.Constraints.FIRST;
 import static org.eclipse.che.ide.api.constraints.Constraints.LAST;
@@ -297,6 +310,21 @@ public class StandardComponentInitializer {
     private RefreshPathAction refreshPathAction;
 
     @Inject
+    private LinkWithEditorAction linkWithEditorAction;
+
+    @Inject
+    private SignatureHelpAction signatureHelpAction;
+
+    @Inject
+    private MaximizePartAction maximizePartAction;
+
+    @Inject
+    private MinimizePartAction minimizePartAction;
+
+    @Inject
+    private RestorePartAction restorePartAction;
+
+    @Inject
     @Named("XMLFileType")
     private FileType xmlFile;
 
@@ -352,16 +380,16 @@ public class StandardComponentInitializer {
 
     // do not remove the injections below
     @Inject
-    private ServerMacroProvider serverMacroProvider;
+    private ServerMacro serverMacro;
 
     @Inject
-    private ServerProtocolMacroProvider serverProtocolMacroProvider;
+    private ServerProtocolMacro serverProtocolMacro;
 
     @Inject
-    private ServerHostNameMacroProvider serverHostNameMacroProvider;
+    private ServerHostNameMacro serverHostNameMacro;
 
     @Inject
-    private ServerPortMacroProvider serverPortMacroProvider;
+    private ServerPortMacro serverPortMacro;
 
 
     /** Instantiates {@link StandardComponentInitializer} an creates standard content. */
@@ -556,6 +584,7 @@ public class StandardComponentInitializer {
         DefaultActionGroup resourceOperation = new DefaultActionGroup(actionManager);
         actionManager.registerAction("resourceOperation", resourceOperation);
         actionManager.registerAction("refreshPathAction", refreshPathAction);
+        actionManager.registerAction("linkWithEditor", linkWithEditorAction);
         resourceOperation.addSeparator();
         resourceOperation.add(showReferenceAction);
         resourceOperation.add(goIntoAction);
@@ -569,6 +598,7 @@ public class StandardComponentInitializer {
         resourceOperation.addSeparator();
         resourceOperation.add(downloadResourceAction);
         resourceOperation.add(refreshPathAction);
+        resourceOperation.add(linkWithEditorAction);
         resourceOperation.addSeparator();
         resourceOperation.add(convertFolderToProjectAction);
         resourceOperation.addSeparator();
@@ -577,6 +607,11 @@ public class StandardComponentInitializer {
         mainContextMenuGroup.add(newGroup, Constraints.FIRST);
         mainContextMenuGroup.addSeparator();
         mainContextMenuGroup.add(resourceOperation);
+
+        DefaultActionGroup partMenuGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_PART_MENU);
+        partMenuGroup.add(maximizePartAction);
+        partMenuGroup.add(minimizePartAction);
+        partMenuGroup.add(restorePartAction);
 
         actionManager.registerAction("expandEditor", expandEditorAction);
         DefaultActionGroup rightMenuGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_RIGHT_MAIN_MENU);
@@ -616,25 +651,38 @@ public class StandardComponentInitializer {
         DefaultActionGroup editorTabContextMenu =
                 (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_EDITOR_TAB_CONTEXT_MENU);
         editorTabContextMenu.add(closeAction);
-        actionManager.registerAction("closeEditor", closeAction);
+        actionManager.registerAction(CLOSE, closeAction);
         editorTabContextMenu.add(closeAllAction);
-        actionManager.registerAction("closeAllEditors", closeAllAction);
+        actionManager.registerAction(CLOSE_ALL, closeAllAction);
         editorTabContextMenu.add(closeOtherAction);
-        actionManager.registerAction("closeOtherEditorExceptCurrent", closeOtherAction);
+        actionManager.registerAction(CLOSE_OTHER, closeOtherAction);
         editorTabContextMenu.add(closeAllExceptPinnedAction);
-        actionManager.registerAction("closeAllEditorExceptPinned", closeAllExceptPinnedAction);
+        actionManager.registerAction(CLOSE_ALL_EXCEPT_PINNED, closeAllExceptPinnedAction);
         editorTabContextMenu.addSeparator();
         editorTabContextMenu.add(reopenClosedFileAction);
-        actionManager.registerAction("reopenClosedEditorTab", reopenClosedFileAction);
+        actionManager.registerAction(REOPEN_CLOSED, reopenClosedFileAction);
         editorTabContextMenu.add(pinEditorTabAction);
-        actionManager.registerAction("pinEditorTab", pinEditorTabAction);
+        actionManager.registerAction(PIN_TAB, pinEditorTabAction);
         editorTabContextMenu.addSeparator();
-        actionManager.registerAction("splitVertically", splitVerticallyAction);
-        editorTabContextMenu.add(splitVerticallyAction);
-        actionManager.registerAction("splitHorizontally", splitHorizontallyAction);
+        actionManager.registerAction(SPLIT_HORIZONTALLY, splitHorizontallyAction);
         editorTabContextMenu.add(splitHorizontallyAction);
+        actionManager.registerAction(SPLIT_VERTICALLY, splitVerticallyAction);
+        editorTabContextMenu.add(splitVerticallyAction);
 
         actionManager.registerAction("noOpAction", new NoOpAction());
+        actionManager.registerAction("signatureHelp", signatureHelpAction);
+
+        DefaultActionGroup editorContextMenuGroup = new DefaultActionGroup(actionManager);
+        actionManager.registerAction(IdeActions.GROUP_EDITOR_CONTEXT_MENU, editorContextMenuGroup);
+
+        editorContextMenuGroup.add(undoAction);
+        editorContextMenuGroup.add(redoAction);
+        editorContextMenuGroup.addSeparator();
+        editorContextMenuGroup.add(formatterAction);
+
+        editorContextMenuGroup.addSeparator();
+        editorContextMenuGroup.add(fullTextSearchAction);
+        editorContextMenuGroup.add(closeActiveEditorAction);
 
         // Define hot-keys
         keyBinding.getGlobal().addKey(new KeyBuilder().action().alt().charCode('n').build(), "navigateToFile");
@@ -650,10 +698,16 @@ public class StandardComponentInitializer {
         keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('s').build(), "noOpAction");
         keyBinding.getGlobal().addKey(new KeyBuilder().charCode(KeyCodeMap.DELETE).build(), "deleteItem");
 
+        keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode('N').build(), "newFile");
+        keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode('x').build(), "createProject");
+        keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode('A').build(), "importProject");
+
         if (UserAgent.isMac()) {
             keyBinding.getGlobal().addKey(new KeyBuilder().control().charCode('w').build(), "closeActiveEditor");
+            keyBinding.getGlobal().addKey(new KeyBuilder().control().charCode('p').build(), "signatureHelp");
         } else {
             keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode('w').build(), "closeActiveEditor");
+            keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('p').build(), "signatureHelp");
         }
     }
 

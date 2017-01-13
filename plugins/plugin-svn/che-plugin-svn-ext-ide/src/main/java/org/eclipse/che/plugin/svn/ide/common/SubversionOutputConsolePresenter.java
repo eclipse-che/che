@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,7 +34,7 @@ public class SubversionOutputConsolePresenter implements SubversionOutputConsole
     private final SubversionOutputConsoleView  view;
     private final String                       title;
 
-    private final List<ConsoleOutputListener> outputListeners = new ArrayList<>();
+    private final List<ActionDelegate>         actionDelegates = new ArrayList<>();
 
     @Inject
     public SubversionOutputConsolePresenter(final SubversionExtensionLocalizationConstants constants,
@@ -67,8 +67,8 @@ public class SubversionOutputConsolePresenter implements SubversionOutputConsole
         }
         view.scrollBottom();
 
-        for (ConsoleOutputListener outputListener : outputListeners) {
-            outputListener.onConsoleOutput(this);
+        for (ActionDelegate actionDelegate : actionDelegates) {
+            actionDelegate.onConsoleOutput(this);
         }
     }
 
@@ -84,8 +84,8 @@ public class SubversionOutputConsolePresenter implements SubversionOutputConsole
         view.print(text, color);
         view.scrollBottom();
 
-        for (ConsoleOutputListener outputListener : outputListeners) {
-            outputListener.onConsoleOutput(this);
+        for (ActionDelegate actionDelegate : actionDelegates) {
+            actionDelegate.onConsoleOutput(this);
         }
     }
 
@@ -99,8 +99,8 @@ public class SubversionOutputConsolePresenter implements SubversionOutputConsole
     public void printCommand(@NotNull String text) {
         view.printPredefinedStyle(text, "font-weight: bold; font-style: italic;");
 
-        for (ConsoleOutputListener outputListener : outputListeners) {
-            outputListener.onConsoleOutput(this);
+        for (ActionDelegate actionDelegate : actionDelegates) {
+            actionDelegate.onConsoleOutput(this);
         }
     }
 
@@ -130,7 +130,9 @@ public class SubversionOutputConsolePresenter implements SubversionOutputConsole
     }
 
     @Override
-    public String getTitle() { return title; }
+    public String getTitle() {
+        return title;
+    }
 
     /**
      * Returns the title SVG image resource of this console.
@@ -155,7 +157,6 @@ public class SubversionOutputConsolePresenter implements SubversionOutputConsole
      */
     @Override
     public void stop() {
-
     }
 
     /**
@@ -163,16 +164,12 @@ public class SubversionOutputConsolePresenter implements SubversionOutputConsole
      */
     @Override
     public void close() {
-        outputListeners.clear();
+        actionDelegates.clear();
     }
 
-    /**
-     * Adds an output listener.
-     *
-     * @param listener
-     */
     @Override
-    public void addOutputListener(ConsoleOutputListener listener) {
-        outputListeners.add(listener);
+    public void addActionDelegate(ActionDelegate actionDelegate) {
+        actionDelegates.add(actionDelegate);
     }
+
 }

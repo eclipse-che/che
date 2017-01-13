@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.agent.server.model.impl;
 
-import com.google.common.base.MoreObjects;
-
 import org.eclipse.che.api.agent.shared.model.Agent;
+import org.eclipse.che.api.core.model.workspace.ServerConf2;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,30 +23,47 @@ import java.util.Objects;
  * @author Anatoliy Bazko
  */
 public class AgentImpl implements Agent {
-    private final String              name;
-    private final String              version;
-    private final List<String>        dependencies;
-    private final Map<String, String> properties;
-    private final String              script;
+    private String                             id;
+    private String                             name;
+    private String                             version;
+    private String                             description;
+    private List<String>                       dependencies;
+    private Map<String, String>                properties;
+    private String                             script;
+    private Map<String, ? extends ServerConf2> servers;
 
-    public AgentImpl(String name,
+    public AgentImpl(String id,
+                     String name,
                      String version,
+                     String description,
                      List<String> dependencies,
                      Map<String, String> properties,
-                     String script) {
+                     String script,
+                     Map<String, ? extends ServerConf2> servers) {
+        this.id = id;
         this.name = name;
         this.version = version;
+        this.description = description;
         this.dependencies = dependencies;
         this.properties = properties;
         this.script = script;
+        this.servers = servers;
     }
 
     public AgentImpl(Agent agent) {
-        this(agent.getName(),
+        this(agent.getId(),
+             agent.getName(),
              agent.getVersion(),
+             agent.getDescription(),
              agent.getDependencies(),
              agent.getProperties(),
-             agent.getScript());
+             agent.getScript(),
+             agent.getServers());
+    }
+
+    @Override
+    public String getId() {
+        return id;
     }
 
     @Override
@@ -61,13 +77,24 @@ public class AgentImpl implements Agent {
     }
 
     @Override
+    public String getDescription() {
+        return description;
+    }
+
+    @Override
     public List<String> getDependencies() {
-        return MoreObjects.firstNonNull(dependencies, new ArrayList<String>());
+        if (dependencies == null) {
+            dependencies = new ArrayList<>();
+        }
+        return dependencies;
     }
 
     @Override
     public Map<String, String> getProperties() {
-        return MoreObjects.firstNonNull(properties, new HashMap<String, String>());
+        if (properties == null) {
+            properties = new HashMap<>();
+        }
+        return properties;
     }
 
     @Override
@@ -75,40 +102,58 @@ public class AgentImpl implements Agent {
         return script;
     }
 
+    public void setScript(String script) {
+        this.script = script;
+    }
+
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
+    public Map<String, ? extends ServerConf2> getServers() {
+        if (servers == null) {
+            servers = new HashMap<>();
         }
-        if (!(obj instanceof AgentImpl)) {
-            return false;
-        }
-        final AgentImpl that = (AgentImpl)obj;
-        return Objects.equals(name, that.name)
-               && Objects.equals(version, that.version)
-               && getDependencies().equals(that.getDependencies())
-               && getProperties().equals(that.getProperties())
-               && Objects.equals(script, that.script);
+        return servers;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof AgentImpl)) return false;
+        AgentImpl agent = (AgentImpl)o;
+        return Objects.equals(getId(), agent.getId()) &&
+               Objects.equals(getName(), agent.getName()) &&
+               Objects.equals(getVersion(), agent.getVersion()) &&
+               Objects.equals(getDescription(), agent.getDescription()) &&
+               Objects.equals(getDependencies(), agent.getDependencies()) &&
+               Objects.equals(getProperties(), agent.getProperties()) &&
+               Objects.equals(getScript(), agent.getScript()) &&
+               Objects.equals(getServers(), agent.getServers());
     }
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 31 * hash + Objects.hashCode(name);
-        hash = 31 * hash + Objects.hashCode(version);
-        hash = 31 * hash + getDependencies().hashCode();
-        hash = 31 * hash + getProperties().hashCode();
-        hash = 31 * hash + Objects.hashCode(script);
-        return hash;
+        return Objects
+                .hash(getId(),
+                      getName(),
+                      getVersion(),
+                      getDescription(),
+                      getDependencies(),
+                      getProperties(),
+                      getScript(),
+                      getServers());
     }
 
     @Override
     public String toString() {
         return "AgentImpl{" +
-               "name='" + name + '\'' +
+               "id='" + id + '\'' +
+               ", name='" + name + '\'' +
                ", version='" + version + '\'' +
-               ", dependencies='" + dependencies + '\'' +
-               ", properties='" + properties + "\'}";
+               ", description='" + description + '\'' +
+               ", dependencies=" + dependencies +
+               ", properties=" + properties +
+               ", script='" + script + '\'' +
+               ", servers=" + servers +
+               '}';
     }
 }
 

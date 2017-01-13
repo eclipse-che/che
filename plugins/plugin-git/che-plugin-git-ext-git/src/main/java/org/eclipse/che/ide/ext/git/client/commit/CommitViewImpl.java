@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.eclipse.che.ide.ext.git.client.commit;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitResources;
 import org.eclipse.che.ide.ui.window.Window;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -49,7 +50,7 @@ public class CommitViewImpl extends Window implements CommitView {
     @UiField
     CheckBox addAll;
     /**
-     * The 'include selection' in commit field.
+     * The 'add to index selected files' selection in commit field.
      */
     @UiField
     CheckBox addSelection;
@@ -57,7 +58,7 @@ public class CommitViewImpl extends Window implements CommitView {
      * The 'commit only selection' field.
      */
     @UiField
-    CheckBox onlySelection;
+    CheckBox commitAllSelection;
 
     /**
      * The amend commit flag.
@@ -142,14 +143,14 @@ public class CommitViewImpl extends Window implements CommitView {
 
     /** {@inheritDoc} */
     @Override
-    public boolean isAllFilesInclued() {
+    public boolean isAddAllExceptNew() {
         return this.addAll.getValue();
     }
 
     /** {@inheritDoc} */
     @Override
-    public void setAllFilesInclude(boolean isAllFiles) {
-        this.addAll.setValue(isAllFiles);
+    public void setAddAllExceptNew(boolean isAddAllExceptNew) {
+        this.addAll.setValue(isAddAllExceptNew);
     }
 
     /** {@inheritDoc} */
@@ -165,23 +166,23 @@ public class CommitViewImpl extends Window implements CommitView {
     }
 
     @Override
-    public boolean isIncludeSelection() {
+    public boolean isAddSelectedFiles() {
         return this.addSelection.getValue();
     }
 
     @Override
-    public void setIncludeSelection(final boolean includeSelection) {
+    public void setAddSelectedFiles(final boolean includeSelection) {
         this.addSelection.setValue(includeSelection);
     }
 
     @Override
-    public boolean isOnlySelection() {
-        return this.onlySelection.getValue();
+    public boolean isCommitAllFiles() {
+        return this.commitAllSelection.getValue();
     }
 
     @Override
-    public void setOnlySelection(final boolean onlySelection) {
-        this.onlySelection.setValue(onlySelection);
+    public void setCommitAllFiles(final boolean onlySelection) {
+        this.commitAllSelection.setValue(onlySelection);
     }
 
     /** {@inheritDoc} */
@@ -228,7 +229,6 @@ public class CommitViewImpl extends Window implements CommitView {
     public void onAddAllValueChange(final ValueChangeEvent<Boolean> event) {
         if (event.getValue()) {
             this.addSelection.setValue(false);
-            this.onlySelection.setValue(false);
         }
     }
 
@@ -236,16 +236,12 @@ public class CommitViewImpl extends Window implements CommitView {
     public void onAddSelectionValueChange(final ValueChangeEvent<Boolean> event) {
         if (event.getValue()) {
             this.addAll.setValue(false);
-            this.onlySelection.setValue(false);
         }
     }
 
-    @UiHandler("onlySelection")
+    @UiHandler("commitAllSelection")
     public void onOnlySelectionValueChange(final ValueChangeEvent<Boolean> event) {
-        if (event.getValue()) {
-            this.addAll.setValue(false);
-            this.addSelection.setValue(false);
-        }
+        this.commitAllSelection.setValue(event.getValue());
     }
 
     @UiHandler("amend")

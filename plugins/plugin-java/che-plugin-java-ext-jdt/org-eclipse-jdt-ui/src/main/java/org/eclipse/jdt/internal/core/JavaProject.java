@@ -75,7 +75,6 @@ import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -97,7 +96,7 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
     /**
      * Name of file containing project classpath
      */
-    public static final String INNER_DIR = Constants.CODENVY_DIR;
+    public static final String INNER_DIR = Constants.CHE_DIR;
     public static final String CLASSPATH_FILENAME = INNER_DIR + "/classpath";
 
     /**

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.api.machine.server.event.InstanceStateEvent;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
@@ -74,6 +75,8 @@ public class DockerInstanceStopDetector {
                                                    .build();
         this.executorService = Executors.newSingleThreadExecutor(
                 new ThreadFactoryBuilder().setNameFormat("DockerInstanceStopDetector-%d")
+                                          .setUncaughtExceptionHandler(
+                                                  LoggingUncaughtExceptionHandler.getInstance())
                                           .setDaemon(true)
                                           .build());
     }

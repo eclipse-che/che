@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,6 +18,7 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
+import org.eclipse.che.ide.api.parts.EditorPartStack;
 
 import javax.validation.constraints.NotNull;
 
@@ -46,8 +47,9 @@ public class CloseOtherAction extends EditorAbstractAction {
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent event) {
+        EditorPartStack currentPartStack = getEditorPane(event);
         EditorPartPresenter currentEditor = getEditorTab(event).getRelativeEditorPart();
-        for (EditorPartPresenter editorPart : editorAgent.getOpenedEditorsBasedOn(currentEditor)) {
+        for (EditorPartPresenter editorPart : editorAgent.getOpenedEditorsFor(currentPartStack)) {
             if (currentEditor != editorPart) {
                 editorAgent.closeEditor(editorPart);
             }
@@ -55,8 +57,9 @@ public class CloseOtherAction extends EditorAbstractAction {
     }
 
     private boolean isFilesToCloseExist(ActionEvent event) {
+        EditorPartStack currentPartStack = getEditorPane(event);
         EditorPartPresenter currentEditor = getEditorTab(event).getRelativeEditorPart();
-        for (EditorPartPresenter openedEditor : editorAgent.getOpenedEditorsBasedOn(currentEditor)) {
+        for (EditorPartPresenter openedEditor : editorAgent.getOpenedEditorsFor(currentPartStack)) {
             if (currentEditor != openedEditor) {
                 return true;
             }

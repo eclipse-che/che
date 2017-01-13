@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,7 +13,6 @@ package org.eclipse.che.commons.test.tck;
 import com.google.inject.AbstractModule;
 import com.google.inject.Module;
 
-import org.testng.IModuleFactory;
 import org.testng.ITestContext;
 
 import java.util.ServiceLoader;
@@ -26,20 +25,18 @@ import java.util.ServiceLoader;
  * and for injecting them later. So each module which is TCK module must
  * provide the implementations list(as described by {@code ServiceLoader} mechanism)
  * in the file named <i>org.eclipse.che.commons.test.tck.TckModule</i> usually under
- * <i>test/resources/META-INF/services</i> directory, then the {@link TckModuleFactory}
+ * <i>test/resources/META-INF/services</i> directory, then the {@link TckListener}
  * will recognise and load it.
  *
  * @author Yevhenii Voevodin
- * @see TckModuleFactory
+ * @see TckListener
  */
 public abstract class TckModule extends AbstractModule {
 
     /**
      * It is guaranteed that this field is always present and
-     * can be reused by implementation, the value is equal to the
-     * {@link IModuleFactory#createModule(ITestContext, Class)} first
-     * parameter and will be set by {@link TckModuleFactory} immediately after module
-     * implementation is loaded by {@link ServiceLoader}.
+     * can be reused by implementation, it will be set by {@link TckListener} immediately
+     * after module implementation is loaded by {@link ServiceLoader}.
      */
     private ITestContext testContext;
 
@@ -50,7 +47,7 @@ public abstract class TckModule extends AbstractModule {
 
     /**
      * Sets the context of currently executing test suite.
-     * This method designed to be used by {@link TckModuleFactory} for setting
+     * This method designed to be used by {@link TckListener} for setting
      * the context before installing modules.
      */
     void setTestContext(ITestContext testContext) {

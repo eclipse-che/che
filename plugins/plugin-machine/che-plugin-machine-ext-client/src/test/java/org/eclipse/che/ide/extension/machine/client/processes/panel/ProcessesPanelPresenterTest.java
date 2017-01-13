@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,36 +16,41 @@ import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.machine.MachineStatus;
-import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
+import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessesResponseDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceRuntimeDto;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.command.CommandType;
+import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.dialogs.ConfirmDialog;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.machine.DevMachine;
+import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
+import org.eclipse.che.ide.api.machine.MachineEntity;
+import org.eclipse.che.ide.api.machine.MachineManager;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
+import org.eclipse.che.ide.api.machine.events.MachineStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
+import org.eclipse.che.ide.api.macro.MacroProcessor;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
+import org.eclipse.che.ide.api.parts.PartStack;
+import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
+import org.eclipse.che.ide.api.ssh.SshServiceClient;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
-import org.eclipse.che.ide.extension.machine.client.command.CommandConfiguration;
-import org.eclipse.che.ide.extension.machine.client.command.CommandConfigurationFactory;
-import org.eclipse.che.ide.extension.machine.client.command.CommandType;
-import org.eclipse.che.ide.extension.machine.client.command.CommandTypeRegistry;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.TerminalFactory;
-import org.eclipse.che.ide.extension.machine.client.machine.Machine;
-import org.eclipse.che.ide.extension.machine.client.machine.MachineStateEvent;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandConsoleFactory;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandOutputConsole;
 import org.eclipse.che.ide.extension.machine.client.perspective.terminal.TerminalPresenter;
@@ -68,7 +73,6 @@ import static org.eclipse.che.ide.extension.machine.client.processes.ProcessTree
 import static org.eclipse.che.ide.extension.machine.client.processes.ProcessTreeNode.ProcessNodeType.ROOT_NODE;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -84,6 +88,7 @@ import static org.mockito.Mockito.when;
 @RunWith(GwtMockitoTestRunner.class)
 public class ProcessesPanelPresenterTest {
     private static final String MACHINE_ID     = "machineID";
+    private static final String MACHINE_NAME   = "machineName";
     private static final String WORKSPACE_ID   = "workspaceID";
     private static final String PROCESS_ID     = "processID";
     private static final String PROCESS_NAME   = "processName";
@@ -91,13 +96,11 @@ public class ProcessesPanelPresenterTest {
     private static final int    PID            = 101;
 
     @Mock
-    private DtoFactory                    dtoFactory;
-    @Mock
     private CommandConsoleFactory         commandConsoleFactory;
     @Mock
-    private CommandTypeRegistry           commandTypeRegistry;
-    @Mock
     private ConsoleTreeContextMenuFactory consoleTreeContextMenuFactory;
+    @Mock
+    private CommandTypeRegistry           commandTypeRegistry;
     @Mock
     private DialogFactory                 dialogFactory;
     @Mock
@@ -115,33 +118,37 @@ public class ProcessesPanelPresenterTest {
     @Mock
     private AppContext                    appContext;
     @Mock
-    private MachineServiceClient          machineService;
-    @Mock
-    private EntityFactory                 entityFactory;
+    private SshServiceClient              sshService;
     @Mock
     private EventBus                      eventBus;
     @Mock
     private WorkspaceDto                  workspace;
     @Mock
     private OutputConsole                 outputConsole;
-
     @Mock
-    private Promise<List<MachineDto>> machinesPromise;
+    private MachineManager                machineManager;
+    @Mock
+    private EntityFactory                 entityFactory;
+    @Mock
+    private WorkspaceRuntimeDto           workspaceRuntime;
+    @Mock
+    private PartStack                     partStack;
+    @Mock
+    private ExecAgentCommandManager       execAgentCommandManager;
+    @Mock
+    private MacroProcessor                macroProcessor;
+    @Mock
+    private DtoFactory                    dtoFactory;
 
     @Mock
     private Promise<List<MachineProcessDto>> processesPromise;
-
     @Mock
-    private Promise<MachineDto> machinePromise;
+    private Promise<List<GetProcessesResponseDto>> promise;
 
     @Captor
     private ArgumentCaptor<AcceptsOneWidget>                   acceptsOneWidgetCaptor;
     @Captor
-    private ArgumentCaptor<Operation<List<MachineDto>>>        machinesCaptor;
-    @Captor
     private ArgumentCaptor<Operation<List<MachineProcessDto>>> processesCaptor;
-    @Captor
-    private ArgumentCaptor<Operation<MachineDto>>              machineCaptor;
     @Captor
     private ArgumentCaptor<MachineStateEvent.Handler>          machineStateHandlerCaptor;
     @Captor
@@ -154,22 +161,22 @@ public class ProcessesPanelPresenterTest {
         DevMachine devMachine = mock(DevMachine.class);
         when(devMachine.getId()).thenReturn(WORKSPACE_ID);
         when(appContext.getDevMachine()).thenReturn(devMachine);
+        when(appContext.getWorkspace()).thenReturn(workspace);
+        when(workspace.getRuntime()).thenReturn(workspaceRuntime);
 
-        when(machineService.getMachines(anyString())).thenReturn(machinesPromise);
-        when(machineService.getMachine(anyString(), anyString())).thenReturn(machinePromise);
-        when(machinePromise.then(Matchers.<Operation<MachineDto>>anyObject())).thenReturn(machinePromise);
-
-        when(machineService.getProcesses(anyString(), anyString())).thenReturn(processesPromise);
         when(processesPromise.then(Matchers.<Operation<List<MachineProcessDto>>>anyObject())).thenReturn(processesPromise);
         when(commandConsoleFactory.create(anyString())).thenReturn(mock(OutputConsole.class));
 
         when(appContext.getWorkspaceId()).thenReturn(WORKSPACE_ID);
+        when(workspaceAgent.getPartStack(eq(PartStackType.INFORMATION))).thenReturn(partStack);
+
+        when(execAgentCommandManager.getProcesses(anyString(), anyBoolean())).thenReturn(promise);
+        when(promise.then(any(Operation.class))).thenReturn(promise);
 
         presenter = new ProcessesPanelPresenter(view,
                                                 localizationConstant,
                                                 resources,
                                                 eventBus,
-                                                machineService,
                                                 workspaceAgent,
                                                 appContext,
                                                 notificationManager,
@@ -177,40 +184,27 @@ public class ProcessesPanelPresenterTest {
                                                 terminalFactory,
                                                 commandConsoleFactory,
                                                 dialogFactory,
-                                                dtoFactory,
+                                                consoleTreeContextMenuFactory,
                                                 commandTypeRegistry,
-                                                consoleTreeContextMenuFactory);
-    }
-
-    @Test
-    public void shouldFetchMachinesAtCreatingInstanceOfConsolesPanelPresenter() throws Exception {
-        MachineDto machineDto = mock(MachineDto.class);
-        MachineConfigDto machineConfigDto = mock(MachineConfigDto.class);
-        when(machineDto.getConfig()).thenReturn(machineConfigDto);
-        when(machineConfigDto.isDev()).thenReturn(true);
-        when(machineDto.getStatus()).thenReturn(MachineStatus.RUNNING);
-        List<MachineDto> machines = new ArrayList<>(2);
-        machines.add(machineDto);
-
-        verify(machineService).getMachines(eq(WORKSPACE_ID));
-        verify(machinesPromise).then(machinesCaptor.capture());
-        machinesCaptor.getValue().apply(machines);
-        verify(view).setProcessesData(anyObject());
+                                                sshService,
+                                                execAgentCommandManager,
+                                                macroProcessor,
+                                                dtoFactory);
     }
 
     @Test
     public void shouldAddMachineWhenMachineCreating() throws Exception {
-        MachineDto machineDto = mock(MachineDto.class);
+        MachineEntity machine = mock(MachineEntity.class);
         MachineConfigDto machineConfigDto = mock(MachineConfigDto.class);
         OutputConsole outputConsole = mock(OutputConsole.class);
-        when(machineConfigDto.getName()).thenReturn("machine_name");
-        when(machineDto.getConfig()).thenReturn(machineConfigDto);
+        when(machineConfigDto.getName()).thenReturn(MACHINE_NAME);
+        when(machine.getConfig()).thenReturn(machineConfigDto);
         when(appContext.getWorkspaceId()).thenReturn(WORKSPACE_ID);
-        when(commandConsoleFactory.create(eq("machine_name"))).thenReturn(outputConsole);
+        when(commandConsoleFactory.create(eq(MACHINE_NAME))).thenReturn(outputConsole);
 
         MachineStateEvent machineStateEvent = mock(MachineStateEvent.class);
-        when(machineStateEvent.getMachine()).thenReturn(machineDto);
-        verify(eventBus, times(5)).addHandler(anyObject(), machineStateHandlerCaptor.capture());
+        when(machineStateEvent.getMachine()).thenReturn(machine);
+        verify(eventBus, times(8)).addHandler(anyObject(), machineStateHandlerCaptor.capture());
         MachineStateEvent.Handler machineStateHandler = machineStateHandlerCaptor.getAllValues().get(0);
         machineStateHandler.onMachineCreating(machineStateEvent);
 
@@ -218,8 +212,7 @@ public class ProcessesPanelPresenterTest {
         IsWidget widget = mock(IsWidget.class);
         acceptsOneWidgetCaptor.getValue().setWidget(widget);
 
-        verify(workspaceAgent).setActivePart(anyObject());
-        verify(commandConsoleFactory).create(eq("machine_name"));
+        verify(commandConsoleFactory).create(eq(MACHINE_NAME));
         verify(view).addWidget(anyString(), anyString(), anyObject(), anyObject(), anyBoolean());
         verify(view).setProcessesData(eq(presenter.rootNode));
     }
@@ -325,10 +318,16 @@ public class ProcessesPanelPresenterTest {
     @Test
     public void shouldHideStopProcessButtonAtAddingTerminal() throws Exception {
         MachineDto machineDto = mock(MachineDto.class);
+        MachineEntity machine = mock(MachineEntity.class);
+        when(machine.getId()).thenReturn(MACHINE_ID);
         MachineConfigDto machineConfigDto = mock(MachineConfigDto.class);
-        when(machineDto.getConfig()).thenReturn(machineConfigDto);
+        when(machine.getConfig()).thenReturn(machineConfigDto);
         when(machineConfigDto.isDev()).thenReturn(true);
-        when(machineDto.getStatus()).thenReturn(MachineStatus.RUNNING);
+        when(machine.getStatus()).thenReturn(MachineStatus.RUNNING);
+        List<MachineDto> machines = new ArrayList<>(1);
+        machines.add(machineDto);
+        when(workspaceRuntime.getMachines()).thenReturn(machines);
+        when(entityFactory.createMachine(machineDto)).thenReturn(machine);
 
         ProcessTreeNode machineNode = mock(ProcessTreeNode.class);
         when(machineNode.getId()).thenReturn(MACHINE_ID);
@@ -336,21 +335,15 @@ public class ProcessesPanelPresenterTest {
         children.add(machineNode);
         presenter.rootNode = new ProcessTreeNode(ROOT_NODE, null, null, null, children);
 
-        Machine machine = mock(Machine.class);
-        when(entityFactory.createMachine(anyObject())).thenReturn(machine);
         TerminalPresenter terminal = mock(TerminalPresenter.class);
-        when(terminalFactory.create(machine)).thenReturn(terminal);
+        when(terminalFactory.create(machine, presenter)).thenReturn(terminal);
         IsWidget terminalWidget = mock(IsWidget.class);
         when(terminal.getView()).thenReturn(terminalWidget);
 
         presenter.addCommandOutput(MACHINE_ID, outputConsole);
-        presenter.onAddTerminal(WORKSPACE_ID, MACHINE_ID);
+        presenter.onAddTerminal(MACHINE_ID, presenter);
 
-        verify(machinePromise).then(machineCaptor.capture());
-        machineCaptor.getValue().apply(machineDto);
-
-        verify(entityFactory).createMachine(anyObject());
-        verify(terminalFactory).create(eq(machine));
+        verify(terminalFactory).create(eq(machine), eq(presenter));
         verify(terminal).getView();
         verify(view, times(2)).setProcessesData(anyObject());
         verify(view, times(2)).selectNode(anyObject());
@@ -364,15 +357,15 @@ public class ProcessesPanelPresenterTest {
 
     @Test
     public void shouldReplaceCommandOutput() throws Exception {
-        MachineDto machineDto = mock(MachineDto.class);
-        when(machineDto.getId()).thenReturn(MACHINE_ID);
+        MachineEntity machine = mock(MachineEntity.class);
+        when(machine.getId()).thenReturn(MACHINE_ID);
         MachineConfigDto machineConfigDto = mock(MachineConfigDto.class);
-        when(machineDto.getConfig()).thenReturn(machineConfigDto);
+        when(machine.getConfig()).thenReturn(machineConfigDto);
 
         List<ProcessTreeNode> children = new ArrayList<>();
         ProcessTreeNode commandNode = new ProcessTreeNode(COMMAND_NODE, null, PROCESS_NAME, null, children);
         children.add(commandNode);
-        ProcessTreeNode machineNode = new ProcessTreeNode(MACHINE_NODE, null, machineDto, null, children);
+        ProcessTreeNode machineNode = new ProcessTreeNode(MACHINE_NODE, null, machine, null, children);
         children.add(machineNode);
         when(machineNode.getId()).thenReturn(MACHINE_ID);
 
@@ -398,33 +391,30 @@ public class ProcessesPanelPresenterTest {
     @Test
     public void shouldAddTerminal() throws Exception {
         MachineDto machineDto = mock(MachineDto.class);
+        MachineEntity machine = mock(MachineEntity.class);
+        when(machine.getId()).thenReturn(MACHINE_ID);
         MachineConfigDto machineConfigDto = mock(MachineConfigDto.class);
-        when(machineDto.getConfig()).thenReturn(machineConfigDto);
+        when(machine.getConfig()).thenReturn(machineConfigDto);
         when(machineConfigDto.isDev()).thenReturn(true);
-        when(machineDto.getStatus()).thenReturn(MachineStatus.RUNNING);
+        when(machine.getStatus()).thenReturn(MachineStatus.RUNNING);
+        List<MachineDto> machines = new ArrayList<>(1);
+        machines.add(machineDto);
+        when(workspaceRuntime.getMachines()).thenReturn(machines);
+        when(entityFactory.createMachine(machineDto)).thenReturn(machine);
 
-        ProcessTreeNode machineNode = mock(ProcessTreeNode.class);
-        when(machineNode.getId()).thenReturn(MACHINE_ID);
-        List<ProcessTreeNode> children = new ArrayList<>();
-        children.add(machineNode);
-        presenter.rootNode = new ProcessTreeNode(ROOT_NODE, null, null, null, children);
+        presenter.rootNode = new ProcessTreeNode(ROOT_NODE, null, null, null, new ArrayList<ProcessTreeNode>());
 
-        Machine machine = mock(Machine.class);
-        when(entityFactory.createMachine(anyObject())).thenReturn(machine);
         TerminalPresenter terminal = mock(TerminalPresenter.class);
-        when(terminalFactory.create(machine)).thenReturn(terminal);
+        when(terminalFactory.create(machine, presenter)).thenReturn(terminal);
         IsWidget terminalWidget = mock(IsWidget.class);
         when(terminal.getView()).thenReturn(terminalWidget);
 
-        presenter.onAddTerminal(WORKSPACE_ID, MACHINE_ID);
+        presenter.onAddTerminal(MACHINE_ID, presenter);
 
-        verify(machinePromise).then(machineCaptor.capture());
-        machineCaptor.getValue().apply(machineDto);
-
-        verify(entityFactory).createMachine(anyObject());
-        verify(terminalFactory).create(eq(machine));
+        verify(terminalFactory).create(eq(machine), eq(presenter));
+        verify(workspaceAgent).setActivePart(presenter);
         verify(terminal).getView();
-        verify(view).setProcessesData(anyObject());
+        verify(view, times(2)).setProcessesData(anyObject());
         verify(view).selectNode(anyObject());
         verify(view).addWidget(anyString(), anyString(), anyObject(), eq(terminalWidget), anyBoolean());
         verify(view).addProcessNode(anyObject());
@@ -609,18 +599,21 @@ public class ProcessesPanelPresenterTest {
     }
 
     @Test
-    public void commandShouldBeRestoredWheWsAgentIsStarted() throws Exception {
+    public void commandShouldBeRestoredWhenWsAgentIsStarted() throws Exception {
         WsAgentStateEvent event = mock(WsAgentStateEvent.class);
-        CommandConfigurationFactory commandConfigurationFactory = mock(CommandConfigurationFactory.class);
-        CommandConfiguration commandConfiguration = mock(CommandConfiguration.class);
 
-        MachineDto machineDto = mock(MachineDto.class);
+        MachineEntity machineEntity = mock(MachineEntity.class);
+        MachineDto machine = mock(MachineDto.class);
+        when(machineEntity.getId()).thenReturn(MACHINE_ID);
+        when(machineEntity.getWorkspaceId()).thenReturn(WORKSPACE_ID);
+        when(entityFactory.createMachine(machine)).thenReturn(machineEntity);
         MachineConfigDto machineConfigDto = mock(MachineConfigDto.class);
-        when(machineDto.getConfig()).thenReturn(machineConfigDto);
+        when(machine.getConfig()).thenReturn(machineConfigDto);
         when(machineConfigDto.isDev()).thenReturn(true);
-        when(machineDto.getStatus()).thenReturn(MachineStatus.RUNNING);
+        when(machine.getStatus()).thenReturn(MachineStatus.RUNNING);
         List<MachineDto> machines = new ArrayList<>(2);
-        machines.add(machineDto);
+        machines.add(machine);
+        when(workspaceRuntime.getMachines()).thenReturn(machines);
 
         MachineProcessDto machineProcessDto = mock(MachineProcessDto.class);
         when(machineProcessDto.getOutputChannel()).thenReturn(OUTPUT_CHANNEL);
@@ -628,30 +621,14 @@ public class ProcessesPanelPresenterTest {
         List<MachineProcessDto> processes = new ArrayList<>(1);
         processes.add(machineProcessDto);
 
-        CommandDto commandDto = mock(CommandDto.class);
-        when(dtoFactory.createDto(anyObject())).thenReturn(commandDto);
-        when(commandDto.withName(anyString())).thenReturn(commandDto);
-        when(commandDto.withCommandLine(anyString())).thenReturn(commandDto);
-        when(commandDto.withType(anyString())).thenReturn(commandDto);
-        when(commandDto.withAttributes(anyMap())).thenReturn(commandDto);
         CommandOutputConsole outputConsole = mock(CommandOutputConsole.class);
 
         CommandType commandType = mock(CommandType.class);
         when(commandTypeRegistry.getCommandTypeById(anyString())).thenReturn(commandType);
-        when(commandConsoleFactory.create(anyObject(), any(org.eclipse.che.api.core.model.machine.Machine.class)))
-                .thenReturn(outputConsole);
-        when(commandType.getConfigurationFactory()).thenReturn(commandConfigurationFactory);
-        when(commandConfigurationFactory.createFromDto(anyObject())).thenReturn(commandConfiguration);
+        when(commandConsoleFactory.create(anyObject(),
+                                          any(org.eclipse.che.api.core.model.machine.Machine.class))).thenReturn(outputConsole);
 
         presenter.onWsAgentStarted(event);
-
-        verify(machinesPromise, times(2)).then(machinesCaptor.capture());
-        machinesCaptor.getValue().apply(machines);
-
-        verify(processesPromise).then(processesCaptor.capture());
-        processesCaptor.getValue().apply(processes);
-
-        verify(outputConsole).listenToOutput(eq(OUTPUT_CHANNEL));
-        verify(outputConsole).attachToProcess(machineProcessDto);
     }
+
 }

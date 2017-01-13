@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,7 +14,10 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.subversion.SubversionCredentialsDialog;
 import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
+import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.common.StatusColors;
 import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
 import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
@@ -32,10 +35,13 @@ public class DiffViewerPresenter extends SubversionActionPresenter implements Di
     @Inject
     protected DiffViewerPresenter(AppContext appContext,
                                   SubversionOutputConsoleFactory consoleFactory,
+                                  SubversionCredentialsDialog credentialsDialog,
+                                  SubversionExtensionLocalizationConstants constants,
+                                  NotificationManager notificationManager,
                                   ProcessesPanelPresenter processesPanelPresenter,
                                   DiffViewerView view,
                                   StatusColors statusColors) {
-        super(appContext, consoleFactory, processesPanelPresenter, statusColors);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors, constants, notificationManager, credentialsDialog);
         this.view = view;
         this.view.setDelegate(this);
     }

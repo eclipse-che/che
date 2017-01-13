@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,16 +16,15 @@ import org.eclipse.che.account.event.BeforeAccountRemovedEvent;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.jdbc.jpa.DuplicateKeyException;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.core.notification.EventSubscriber;
-import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
-import org.eclipse.che.api.machine.server.spi.SnapshotDao;
+import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
+import org.eclipse.che.api.workspace.server.event.WorkspaceRemovedEvent;
+import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
+import org.eclipse.che.core.db.jpa.DuplicateKeyException;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -35,9 +34,13 @@ import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 
 /**
  * JPA based implementation of {@link WorkspaceDao}.
@@ -47,10 +50,10 @@ import static java.util.Objects.requireNonNull;
 @Singleton
 public class JpaWorkspaceDao implements WorkspaceDao {
 
-    private static final Logger LOG = LoggerFactory.getLogger(JpaWorkspaceDao.class);
-
     @Inject
-    private Provider<EntityManager> manager;
+    private EventService            eventService;
+    @Inject
+    private Provider<EntityManager> managerProvider;
 
     @Override
     public WorkspaceImpl create(WorkspaceImpl workspace) throws ConflictException, ServerException {
@@ -60,22 +63,22 @@ public class JpaWorkspaceDao implements WorkspaceDao {
         } catch (DuplicateKeyException dkEx) {
             throw new ConflictException(format("Workspace with id '%s' or name '%s' in namespace '%s' already exists",
                                                workspace.getId(),
-                                               workspace.getName(),
+                                               workspace.getConfig().getName(),
                                                workspace.getNamespace()));
         } catch (RuntimeException x) {
             throw new ServerException(x.getMessage(), x);
         }
-        return workspace;
+        return new WorkspaceImpl(workspace);
     }
 
     @Override
     public WorkspaceImpl update(WorkspaceImpl update) throws NotFoundException, ConflictException, ServerException {
         requireNonNull(update, "Required non-null update");
         try {
-            return doUpdate(update);
+            return new WorkspaceImpl(doUpdate(update));
         } catch (DuplicateKeyException dkEx) {
             throw new ConflictException(format("Workspace with name '%s' in namespace '%s' already exists",
-                                               update.getName(),
+                                               update.getConfig().getName(),
                                                update.getNamespace()));
         } catch (RuntimeException x) {
             throw new ServerException(x.getMessage(), x);
@@ -83,10 +86,11 @@ public class JpaWorkspaceDao implements WorkspaceDao {
     }
 
     @Override
-    public void remove(String id) throws ConflictException, ServerException {
+    public void remove(String id) throws ServerException {
         requireNonNull(id, "Required non-null id");
         try {
-            doRemove(id);
+            Optional<WorkspaceImpl> workspaceOpt = doRemove(id);
+            workspaceOpt.ifPresent(workspace -> eventService.publish(new WorkspaceRemovedEvent(workspace)));
         } catch (RuntimeException x) {
             throw new ServerException(x.getLocalizedMessage(), x);
         }
@@ -97,11 +101,11 @@ public class JpaWorkspaceDao implements WorkspaceDao {
     public WorkspaceImpl get(String id) throws NotFoundException, ServerException {
         requireNonNull(id, "Required non-null id");
         try {
-            final WorkspaceImpl workspace = manager.get().find(WorkspaceImpl.class, id);
+            final WorkspaceImpl workspace = managerProvider.get().find(WorkspaceImpl.class, id);
             if (workspace == null) {
                 throw new NotFoundException(format("Workspace with id '%s' doesn't exist", id));
             }
-            return workspace;
+            return new WorkspaceImpl(workspace);
         } catch (RuntimeException x) {
             throw new ServerException(x.getLocalizedMessage(), x);
         }
@@ -113,11 +117,11 @@ public class JpaWorkspaceDao implements WorkspaceDao {
         requireNonNull(name, "Required non-null name");
         requireNonNull(namespace, "Required non-null namespace");
         try {
-            return manager.get()
-                          .createNamedQuery("Workspace.getByName", WorkspaceImpl.class)
-                          .setParameter("namespace", namespace)
-                          .setParameter("name", name)
-                          .getSingleResult();
+            return new WorkspaceImpl(managerProvider.get()
+                                                    .createNamedQuery("Workspace.getByName", WorkspaceImpl.class)
+                                                    .setParameter("namespace", namespace)
+                                                    .setParameter("name", name)
+                                                    .getSingleResult());
         } catch (NoResultException noResEx) {
             throw new NotFoundException(format("Workspace with name '%s' in namespace '%s' doesn't exist",
                                                name,
@@ -132,10 +136,13 @@ public class JpaWorkspaceDao implements WorkspaceDao {
     public List<WorkspaceImpl> getByNamespace(String namespace) throws ServerException {
         requireNonNull(namespace, "Required non-null namespace");
         try {
-            return manager.get()
-                          .createNamedQuery("Workspace.getByNamespace", WorkspaceImpl.class)
-                          .setParameter("namespace", namespace)
-                          .getResultList();
+            return managerProvider.get()
+                                  .createNamedQuery("Workspace.getByNamespace", WorkspaceImpl.class)
+                                  .setParameter("namespace", namespace)
+                                  .getResultList()
+                                  .stream()
+                                  .map(WorkspaceImpl::new)
+                                  .collect(Collectors.toList());
         } catch (RuntimeException x) {
             throw new ServerException(x.getLocalizedMessage(), x);
         }
@@ -144,9 +151,33 @@ public class JpaWorkspaceDao implements WorkspaceDao {
     @Override
     @Transactional
     public List<WorkspaceImpl> getWorkspaces(String userId) throws ServerException {
-        // TODO respect userId when workers become a part of che
         try {
-            return manager.get().createNamedQuery("Workspace.getAll", WorkspaceImpl.class).getResultList();
+            return managerProvider.get()
+                                  .createNamedQuery("Workspace.getAll", WorkspaceImpl.class)
+                                  .getResultList()
+                                  .stream()
+                                  .map(WorkspaceImpl::new)
+                                  .collect(Collectors.toList());
+        } catch (RuntimeException x) {
+            throw new ServerException(x.getLocalizedMessage(), x);
+        }
+    }
+
+    @Override
+    @Transactional
+    public List<WorkspaceImpl> getWorkspaces(boolean isTemporary, int skipCount, int maxItems) throws ServerException {
+        checkArgument(maxItems >= 0, "The number of items to return can't be negative.");
+        checkArgument(skipCount >= 0, "The number of items to skip can't be negative or greater than " + Integer.MAX_VALUE);
+        try {
+            return managerProvider.get()
+                                  .createNamedQuery("Workspace.getByTemporary", WorkspaceImpl.class)
+                                  .setParameter("temporary", isTemporary)
+                                  .setMaxResults(maxItems)
+                                  .setFirstResult(skipCount)
+                                  .getResultList()
+                                  .stream()
+                                  .map(WorkspaceImpl::new)
+                                  .collect(toList());
         } catch (RuntimeException x) {
             throw new ServerException(x.getLocalizedMessage(), x);
         }
@@ -154,80 +185,89 @@ public class JpaWorkspaceDao implements WorkspaceDao {
 
     @Transactional
     protected void doCreate(WorkspaceImpl workspace) {
-        manager.get().persist(workspace);
+        if (workspace.getConfig() != null) {
+            workspace.getConfig().getProjects().forEach(ProjectConfigImpl::prePersistAttributes);
+        }
+        EntityManager manager = managerProvider.get();
+        manager.persist(workspace);
+        manager.flush();
     }
 
-    @Transactional
-    protected void doRemove(String id) {
-        final WorkspaceImpl workspace = manager.get().find(WorkspaceImpl.class, id);
-        if (workspace != null) {
-            manager.get().remove(workspace);
+    @Transactional(rollbackOn = {RuntimeException.class, ServerException.class})
+    protected Optional<WorkspaceImpl> doRemove(String id) throws ServerException {
+        final WorkspaceImpl workspace = managerProvider.get().find(WorkspaceImpl.class, id);
+        if (workspace == null) {
+            return Optional.empty();
         }
+        final EntityManager manager = managerProvider.get();
+        eventService.publish(new BeforeWorkspaceRemovedEvent(new WorkspaceImpl(workspace))).propagateException();
+        manager.remove(workspace);
+        manager.flush();
+        return Optional.of(workspace);
     }
 
     @Transactional
     protected WorkspaceImpl doUpdate(WorkspaceImpl update) throws NotFoundException {
-        if (manager.get().find(WorkspaceImpl.class, update.getId()) == null) {
+        EntityManager manager = managerProvider.get();
+        if (manager.find(WorkspaceImpl.class, update.getId()) == null) {
             throw new NotFoundException(format("Workspace with id '%s' doesn't exist", update.getId()));
         }
-        return manager.get().merge(update);
+        if (update.getConfig() != null) {
+            update.getConfig().getProjects().forEach(ProjectConfigImpl::prePersistAttributes);
+        }
+        WorkspaceImpl merged = manager.merge(update);
+        manager.flush();
+        return merged;
     }
 
     @Singleton
-    public static class RemoveWorkspaceBeforeAccountRemovedEventSubscriber implements EventSubscriber<BeforeAccountRemovedEvent> {
+    public static class RemoveWorkspaceBeforeAccountRemovedEventSubscriber
+            extends CascadeEventSubscriber<BeforeAccountRemovedEvent> {
+
         @Inject
-        private EventService eventService;
+        private EventService     eventService;
         @Inject
-        private WorkspaceDao workspaceDao;
+        private WorkspaceManager workspaceManager;
 
         @PostConstruct
         public void subscribe() {
-            eventService.subscribe(this);
+            eventService.subscribe(this, BeforeAccountRemovedEvent.class);
         }
 
         @PreDestroy
         public void unsubscribe() {
-            eventService.unsubscribe(this);
+            eventService.unsubscribe(this, BeforeAccountRemovedEvent.class);
         }
 
         @Override
-        public void onEvent(BeforeAccountRemovedEvent event) {
-            try {
-                for (WorkspaceImpl workspace : workspaceDao.getByNamespace(event.getAccount().getName())) {
-                    workspaceDao.remove(workspace.getId());
-                }
-            } catch (Exception x) {
-                LOG.error(format("Couldn't remove workspaces before account '%s' is removed", event.getAccount().getId()), x);
+        public void onCascadeEvent(BeforeAccountRemovedEvent event) throws Exception {
+            for (WorkspaceImpl workspace : workspaceManager.getByNamespace(event.getAccount().getName())) {
+                workspaceManager.removeWorkspace(workspace.getId());
             }
         }
     }
 
     @Singleton
-    public static class RemoveSnapshotsBeforeWorkspaceRemovedEventSubscriber implements EventSubscriber<BeforeWorkspaceRemovedEvent> {
+    public static class RemoveSnapshotsBeforeWorkspaceRemovedEventSubscriber
+            extends CascadeEventSubscriber<BeforeWorkspaceRemovedEvent> {
         @Inject
-        private EventService eventService;
+        private EventService     eventService;
         @Inject
-        private SnapshotDao  snapshotDao;
+        private WorkspaceManager workspaceManager;
 
         @PostConstruct
         public void subscribe() {
-            eventService.subscribe(this);
+            eventService.subscribe(this, BeforeWorkspaceRemovedEvent.class);
         }
 
         @PreDestroy
         public void unsubscribe() {
-            eventService.unsubscribe(this);
+            eventService.unsubscribe(this, BeforeWorkspaceRemovedEvent.class);
         }
 
         @Override
-        public void onEvent(BeforeWorkspaceRemovedEvent event) {
-            try {
-                for (SnapshotImpl snapshot : snapshotDao.findSnapshots(event.getWorkspace().getId())) {
-                    snapshotDao.removeSnapshot(snapshot.getId());
-                }
-            } catch (Exception x) {
-                LOG.error(format("Couldn't remove snapshots before workspace '%s' is removed", event.getWorkspace().getId()), x);
-            }
+        public void onCascadeEvent(BeforeWorkspaceRemovedEvent event) throws Exception {
+            workspaceManager.removeSnapshots(event.getWorkspace().getId());
         }
     }
 }

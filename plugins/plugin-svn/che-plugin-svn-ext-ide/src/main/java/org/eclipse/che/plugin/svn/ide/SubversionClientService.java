@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,8 @@
 package org.eclipse.che.plugin.svn.ide;
 
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.api.subversion.Credentials;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponseList;
@@ -84,18 +86,24 @@ public interface SubversionClientService {
      *         source item path
      * @param destination
      *         destination path
+     * @param credentials
+     *         {@link Credentials} object that contains user name and password for authentication
      */
-    Promise<CLIOutputResponse> copy(Path project, Path source, Path destination, String comment);
+    Promise<CLIOutputResponse> copy(Path project,
+                                    Path source,
+                                    Path destination,
+                                    String comment,
+                                    @Nullable Credentials credentials);
 
     /**
      * Merge specified URL with target.
      *
      * @param project
-     *          project path
+     *         project path
      * @param target
-     *          target directory
+     *         target directory
      * @param sourceUrl
-     *          source URL to merge
+     *         source URL to merge
      */
     Promise<CLIOutputResponse> merge(Path project, Path target, Path sourceUrl);
 
@@ -103,15 +111,16 @@ public interface SubversionClientService {
      * Retrieves the information about repository item.
      *
      * @param project
-     *          relative path to the project in local workspace
+     *         relative path to the project in local workspace
      * @param target
-     *          target to operate
+     *         target to operate
      * @param revision
-     *          revision, use HEAD to specify latest revision
-     * @param children
-     *          whether list children or not
+     *         revision, use HEAD to specify latest revision
+     * @param credentials
+     *         {@link Credentials} object that contains user name and password for authentication
      */
-    Promise<InfoResponse> info(Path project, Path target, String revision, boolean children);
+    Promise<InfoResponse> info(Path project, String target, String revision, boolean children, @Nullable Credentials credentials);
+
     Promise<InfoResponse> info(Path project, String target, String revision, boolean children);
 
     /**
@@ -161,12 +170,37 @@ public interface SubversionClientService {
      *         whether or not to ignore externals (--ignore-externals)
      * @param accept
      *         the accept argument (--accept)
+     * @param credentials
+     *         {@link Credentials} object that contains user name and password for authentication
      */
-    Promise<CLIOutputWithRevisionResponse> update(Path project, Path[] paths, String revision, String depth, boolean ignoreExternals, String accept);
+    Promise<CLIOutputWithRevisionResponse> update(Path project,
+                                                  Path[] paths,
+                                                  String revision,
+                                                  String depth,
+                                                  boolean ignoreExternals,
+                                                  String accept,
+                                                  @Nullable Credentials credentials);
+
+    /**
+     * Update the working copy to a different URL within the same repository.
+     *
+     * @see org.eclipse.che.plugin.svn.shared.SwitchRequest
+     */
+    Promise<CLIOutputWithRevisionResponse> doSwitch(String location,
+                                                    Path project,
+                                                    String revision,
+                                                    String depth,
+                                                    String setDepth,
+                                                    String accept,
+                                                    boolean ignoreExternals,
+                                                    boolean ignoreAncestry,
+                                                    boolean relocate,
+                                                    boolean force,
+                                                    @Nullable Credentials credentials);
 
     Promise<CLIOutputResponse> showLog(Path project, Path[] paths, String revision);
 
-    Promise<CLIOutputResponse> showDiff(Path project, Path[] paths, String revision);
+    Promise<CLIOutputResponse> showDiff(Path project, Path[] paths, String revision, @Nullable Credentials credentials);
 
     /**
      * Locks the given paths.
@@ -178,8 +212,10 @@ public interface SubversionClientService {
      * @param force
      *         if false, will warn if another user already has a lock on a target, leave this target unchanged, and continue.<br>
      *         if true, will steal the lock from the previous owner instead
+     * @param credentials
+     *         {@link Credentials} object that contains user name and password for authentication
      */
-    Promise<CLIOutputResponse> lock(Path project, Path[] paths, boolean force);
+    Promise<CLIOutputResponse> lock(Path project, Path[] paths, boolean force, @Nullable Credentials credentials);
 
     /**
      * Unocks the given paths.
@@ -191,8 +227,10 @@ public interface SubversionClientService {
      * @param force
      *         if false, will warn if another user already has a lock on a target, leave this target unchanged, and continue.<br>
      *         if true, will unlock anyway
+     * @param credentials
+     *         {@link Credentials} object that contains user name and password for authentication
      */
-    Promise<CLIOutputResponse> unlock(Path project, Path[] paths, boolean force);
+    Promise<CLIOutputResponse> unlock(Path project, Path[] paths, boolean force, @Nullable Credentials credentials);
 
     /**
      * Commits the changes in the repository.
@@ -224,8 +262,6 @@ public interface SubversionClientService {
 
     Promise<CLIOutputResponseList> resolve(Path project, Map<String, String> resolutions, String depth);
 
-    Promise<Void> saveCredentials(String repositoryUrl, String username, String password);
-
     /**
      * Move provided path.
      *
@@ -233,10 +269,14 @@ public interface SubversionClientService {
      *         the project path
      * @param source
      *         source item path
-     * @param destination
-     *         destination path
+     * @param credentials
+     *         {@link Credentials} object that contains user name and password for authentication
      */
-    Promise<CLIOutputResponse> move(Path project, Path source, Path destination, String comment);
+    Promise<CLIOutputResponse> move(Path project,
+                                    Path source,
+                                    Path destination,
+                                    String comment,
+                                    @Nullable Credentials credentials);
 
     /**
      * Set specified property to a path or a target.
@@ -259,17 +299,22 @@ public interface SubversionClientService {
     /**
      * Get specified property for a path or a target.
      *
-     * @param project the project path
-     * @param propertyName the property name
-     * @param path path to which property get
+     * @param project
+     *         the project path
+     * @param propertyName
+     *         the property name
+     * @param path
+     *         path to which property get
      */
     Promise<CLIOutputResponse> propertyGet(Path project, String propertyName, Path path);
 
     /**
      * Get properties set for a path or a target.
      *
-     * @param project the project path
-     * @param path path to which property get
+     * @param project
+     *         the project path
+     * @param path
+     *         path to which property get
      */
     Promise<CLIOutputResponse> propertyList(Path project, Path path);
 
@@ -300,4 +345,30 @@ public interface SubversionClientService {
      *         the range of revisions to check
      */
     Promise<GetRevisionsResponse> getRevisions(Path project, Path path, String revisionRange);
+
+    /**
+     * Lists directory entries in the repository.
+     *
+     * @param project
+     *      the project path
+     * @param target
+     *      the target path to browse
+     */
+    Promise<CLIOutputResponse> list(Path project, String target, @Nullable Credentials credentials);
+
+    /**
+     * Returns list of the branches of the project.
+     *
+     * @param project
+     *      the project path
+     */
+    Promise<CLIOutputResponse> listBranches(Path project, @Nullable Credentials credentials);
+
+    /**
+     * Returns list of the tags of the project.
+     *
+     * @param project
+     *      the project path
+     */
+    Promise<CLIOutputResponse> listTags(Path project, @Nullable Credentials credentials);
 }

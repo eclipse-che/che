@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.MachineSource;
@@ -30,7 +31,6 @@ import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.Exec;
 import org.eclipse.che.plugin.docker.client.LogMessage;
 import org.eclipse.che.plugin.docker.client.ProgressLineFormatterImpl;
-import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.params.CommitParams;
 import org.eclipse.che.plugin.docker.client.params.CreateExecParams;
 import org.eclipse.che.plugin.docker.client.params.GetResourceParams;
@@ -101,13 +101,12 @@ public class DockerInstance extends AbstractInstance {
     private final DockerInstanceProcessesCleaner              processesCleaner;
     private final ConcurrentHashMap<Integer, InstanceProcess> machineProcesses;
     private final boolean                                     snapshotUseRegistry;
-
-    private MachineRuntimeInfoImpl machineRuntime;
+    private final MachineRuntimeInfoImpl                      machineRuntime;
 
     @Inject
     public DockerInstance(DockerConnector docker,
-                          @Named("machine.docker.registry") String registry,
-                          @Named("machine.docker.snapshot.registry_namespace") @Nullable String registryNamespace,
+                          @Named("che.docker.registry") String registry,
+                          @Named("che.docker.namespace") @Nullable String registryNamespace,
                           DockerMachineFactory dockerMachineFactory,
                           @Assisted Machine machine,
                           @Assisted("container") String container,
@@ -116,7 +115,7 @@ public class DockerInstance extends AbstractInstance {
                           @Assisted LineConsumer outputConsumer,
                           DockerInstanceStopDetector dockerInstanceStopDetector,
                           DockerInstanceProcessesCleaner processesCleaner,
-                          @Named("machine.docker.snapshot_use_registry") boolean snapshotUseRegistry) {
+                          @Named("che.docker.registry_for_snapshots") boolean snapshotUseRegistry) throws MachineException {
         super(machine);
         this.dockerMachineFactory = dockerMachineFactory;
         this.container = container;
@@ -131,6 +130,7 @@ public class DockerInstance extends AbstractInstance {
         this.machineProcesses = new ConcurrentHashMap<>();
         processesCleaner.trackProcesses(this);
         this.snapshotUseRegistry = snapshotUseRegistry;
+        this.machineRuntime = doGetRuntime();
     }
 
     @Override
@@ -140,18 +140,6 @@ public class DockerInstance extends AbstractInstance {
 
     @Override
     public MachineRuntimeInfoImpl getRuntime() {
-        // if runtime info is not evaluated yet
-        if (machineRuntime == null) {
-            try {
-                final ContainerInfo containerInfo = docker.inspectContainer(container);
-                machineRuntime = new MachineRuntimeInfoImpl(dockerMachineFactory.createMetadata(containerInfo,
-                                                                                                node.getHost(),
-                                                                                                getConfig()));
-            } catch (IOException e) {
-                LOG.error(e.getLocalizedMessage(), e);
-                return null;
-            }
-        }
         return machineRuntime;
     }
 
@@ -175,7 +163,7 @@ public class DockerInstance extends AbstractInstance {
         List<InstanceProcess> processes = new LinkedList<>();
         try {
             final Exec exec = docker.createExec(CreateExecParams.create(container,
-                                                                        new String[] {"/bin/bash",
+                                                                        new String[] {"/bin/sh",
                                                                                       "-c",
                                                                                       GET_ALIVE_PROCESSES_COMMAND})
                                                                 .withDetach(false));
@@ -246,7 +234,7 @@ public class DockerInstance extends AbstractInstance {
     }
 
     @VisibleForTesting
-    void commitContainer(String repository, String tag) throws IOException {
+    protected void commitContainer(String repository, String tag) throws IOException {
         String comment = format("Suspended at %1$ta %1$tb %1$td %1$tT %1$tZ %1$tY",
                                 System.currentTimeMillis());
         // !! We SHOULD NOT pause container before commit because all execs will fail
@@ -284,7 +272,8 @@ public class DockerInstance extends AbstractInstance {
             docker.removeContainer(RemoveContainerParams.create(container)
                                                         .withRemoveVolumes(true)
                                                         .withForce(true));
-        } catch (IOException e) {
+        } catch (IOException | ServerException e) {
+            LOG.error(e.getLocalizedMessage(), e);
             throw new MachineException(e.getLocalizedMessage());
         }
 
@@ -327,9 +316,9 @@ public class DockerInstance extends AbstractInstance {
         }
 
         // command sed getting file content from startFrom line to (startFrom + limit)
-        String bashCommand = format("sed -n \'%1$2s, %2$2sp\' %3$2s", startFrom, startFrom + limit, filePath);
+        String shCommand = format("sed -n \'%1$2s, %2$2sp\' %3$2s", startFrom, startFrom + limit, filePath);
 
-        final String[] command = {"/bin/bash", "-c", bashCommand};
+        final String[] command = {"/bin/sh", "-c", shCommand};
 
         ListLineConsumer lines = new ListLineConsumer();
         try {
@@ -386,7 +375,17 @@ public class DockerInstance extends AbstractInstance {
     /**
      * Can be used for docker specific operations with machine
      */
-    String getContainer() {
+    public String getContainer() {
         return container;
+    }
+
+    private MachineRuntimeInfoImpl doGetRuntime() throws MachineException {
+        try {
+            return new MachineRuntimeInfoImpl(dockerMachineFactory.createMetadata(docker.inspectContainer(container),
+                                                                                  getConfig(),
+                                                                                  node.getHost()));
+        } catch (IOException x) {
+            throw new MachineException(x.getMessage(), x);
+        }
     }
 }

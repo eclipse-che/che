@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,13 +17,30 @@ package org.eclipse.che.ide.api.parts.base;
  */
 public interface BaseActionDelegate {
 
-    /** Hide Part from UI */
-    void minimize();
+    /**
+     * Toggles maximized state of the part.
+     */
+    void onToggleMaximize();
+
+    /**
+     * Minimizes the part.
+     */
+    void onMinimize();
 
     /**
      * Activate Part when clicking the mouse.
      * Is used when the Part contains frames and mouse events are blocked.
      */
-    void activatePart();
+    void onActivate();
+
+    /**
+     * Asks to display part toolbar menu.
+     *
+     * @param mouseX
+     *          mouse left
+     * @param mouseY
+     *          mouse top
+     */
+    void onPartMenu(int mouseX, int mouseY);
 
 }

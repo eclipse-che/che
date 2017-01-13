@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -89,9 +89,10 @@ public class EventService {
      *
      * @param event
      *         event
+     * @return published event
      */
     @SuppressWarnings("unchecked")
-    public void publish(Object event) {
+    public <T> T publish(T event) {
         if (event == null) {
             throw new IllegalArgumentException("Null event.");
         }
@@ -109,6 +110,7 @@ public class EventService {
                 }
             }
         }
+        return event;
     }
 
     /**
@@ -154,6 +156,14 @@ public class EventService {
      */
     public void unsubscribe(EventSubscriber<?> subscriber) {
         final Class<?> eventType = getEventType(subscriber);
+        doUnsubscribe(subscriber, eventType);
+    }
+
+    public <T> void unsubscribe(EventSubscriber<T> subscriber, Class<T> eventType) {
+        doUnsubscribe(subscriber, eventType);
+    }
+
+    private void doUnsubscribe(EventSubscriber<?> subscriber, Class<?> eventType) {
         final Set<EventSubscriber> entries = subscribersByEventType.get(eventType);
         if (entries != null && !entries.isEmpty()) {
             boolean changed = entries.remove(subscriber);

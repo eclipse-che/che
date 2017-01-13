@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,13 +14,12 @@ import com.google.common.io.Files;
 import org.eclipse.che.api.git.GitConnection;
 import org.eclipse.che.api.git.GitConnectionFactory;
 import org.eclipse.che.api.git.exception.GitException;
-import org.eclipse.che.api.git.shared.TagCreateRequest;
-import org.eclipse.che.api.git.shared.TagListRequest;
+import org.eclipse.che.api.git.params.TagCreateParams;
+
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.git.impl.GitTestUtil.*;
 import static org.testng.Assert.assertEquals;
 
@@ -47,14 +46,11 @@ public class TagCreateTest {
     public void testCreateTag(GitConnectionFactory connectionFactory) throws GitException, IOException {
         //given
         GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
-        int beforeTagCount = connection.tagList(newDto(TagListRequest.class)).size();
+        int beforeTagCount = connection.tagList(null).size();
         //when
-        TagCreateRequest request = newDto(TagCreateRequest.class);
-        request.setName("v1");
-        request.setMessage("first version");
-        connection.tagCreate(request);
+        connection.tagCreate(TagCreateParams.create("v1").withMessage("first version"));
         //then
-        int afterTagCount = connection.tagList(newDto(TagListRequest.class)).size();
+        int afterTagCount = connection.tagList(null).size();
         assertEquals(afterTagCount, beforeTagCount + 1);
     }
 }

@@ -13,7 +13,7 @@
 <div class="workspace-environments">
 
   <!-- Name -->
-  <che-label-container che-label-name="Name">
+  <che-label-container che-label-name="Runtime name">
     <ng-form flex layout="column" name="workspaceEnvironmentsForm">
       <div layout="column" class="workspace-environments-input">
         <che-input che-form="workspaceEnvironmentsForm"
@@ -26,10 +26,10 @@
                    custom-validator="workspaceEnvironmentsController.isUnique($value)"
                    required
                    ng-maxlength="128"
-                   ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
+                   ng-pattern="/^[A-Za-z0-9_\-\.]+$/"
+                   che-readonly="workspaceEnvironmentsController.workspaceCreationFlow===false">
           <div ng-message="required">A name is required.</div>
-          <div ng-message="pattern">The name should not contain special characters like space, dollar, etc.
-          </div>
+          <div ng-message="pattern">The name should not contain special characters like space, dollar, etc.</div>
           <div ng-message="maxlength">The name has to be less than 128 characters long.</div>
           <div ng-message="md-maxlength">The name has to be less than 128 characters long.</div>
           <div ng-message="customValidator">This environment name is already used.</div>
@@ -38,30 +38,56 @@
     </ng-form>
   </che-label-container>
 
+  <!-- Stacks -->
+  <che-label-container ng-if="workspaceEnvironmentsController.workspaceCreationFlow"
+                       che-label-name="Select Stack"
+                       che-label-description="Stacks are recipes or images used to define your environment runtime. Workspace environments are used to build and run your project.">
+    <ng-form name="workspaceStackForm">
+      <workspace-stacks workspace-stack-on-change="workspaceEnvironmentsController.changeWorkspaceStack(config, stackId)"
+                        workspace-name="workspaceEnvironmentsController.workspaceName"
+                        environment-name="workspaceEnvironmentsController.environmentName"
+                        workspace-imported-recipe="workspaceEnvironmentsController.workspaceImportedRecipe"></workspace-stacks>
+    </ng-form>
+  </che-label-container>
+
   <!-- Machines -->
-  <che-label-container ng-if="workspaceEnvironmentsController.environment.machines.length"
+  <che-label-container ng-if="workspaceEnvironmentsController.machines.length > 0"
                        che-label-name="Machines"
                        class="che-label-container-last">
+    <ng-form name="workspaceDevMachineForm">
+      <div class="workspace-environments-input">
+        <che-input che-form="workspaceDevMachineForm"
+                   che-name="dev"
+                   type="hidden"
+                   ng-model="workspaceEnvironmentsController.devMachineName"
+                   ng-required>
+          <div ng-message="required">The environment should contain exactly one dev machine. Switch on Dev property to
+            have terminal, SSH and IDE tooling injected to the machine.
+          </div>
+        </che-input>
+      </div>
+    </ng-form>
   </che-label-container>
   <workspace-machine-config ng-repeat="machine in workspaceEnvironmentsController.machines | orderBy:'name'"
                             machine-name="machine.name"
                             machines-list="workspaceEnvironmentsController.machines"
                             environment-manager="workspaceEnvironmentsController.environmentManager"
+                            machine-dev-on-change="workspaceEnvironmentsController.changeMachineDev(name)"
                             machine-name-on-change="workspaceEnvironmentsController.updateMachineName(oldName,newName)"
                             machine-config-on-change="workspaceEnvironmentsController.updateEnvironmentConfig()"
                             machine-on-delete="workspaceEnvironmentsController.deleteMachine(name)"
-                            machine-is-opened="workspaceEnvironmentsController.machinesViewStatus[machine.name]"></workspace-machine-config>
+                            machine-is-opened="workspaceEnvironmentsController.machinesViewStatus[workspaceEnvironmentsController.environmentName][machine.name]"></workspace-machine-config>
 
   <!-- Recipe Content-->
   <che-label-container che-label-name="Recipe"
                        che-label-description="The contents of the runtime started by the workspace."
                        ng-if="workspaceEnvironmentsController.environment.recipe.content">
-    <div layout="row" layout-wrap>
+    <che-show-area>
       <div flex class="recipe-editor">
         <ui-codemirror ui-codemirror="workspaceEnvironmentsController.editorOptions"
                        ng-model="workspaceEnvironmentsController.environment.recipe.content"></ui-codemirror>
       </div>
-    </div>
+    </che-show-area>
   </che-label-container>
   <!-- OR Location -->
   <che-label-container che-label-name="Recipe Location"
@@ -71,4 +97,11 @@
                    che-copy-clipboard="true"
                    class="recipe-location"></che-text-info>
   </che-label-container>
+  <che-button-default class="add-machine-button"
+                      che-button-title="Add" name="addButton"
+                      ng-disabled="workspaceEnvironmentsController.recipe.type !== 'compose' || !workspaceEnvironmentsController.recipe.content"
+                      ng-click="workspaceEnvironmentsController.showAddMachineDialog($event)"></che-button-default>
+  <div class="recipe-warning-container" ng-show="workspaceEnvironmentsController.recipe.type !== 'compose' || !workspaceEnvironmentsController.recipe.content">
+    Add another machine by changing the environment type to <b>compose</b>
+  </div>
 </div>

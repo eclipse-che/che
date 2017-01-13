@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.eclipse.che.ide.extension.machine.client.processes.panel;
 import elemental.events.KeyboardEvent;
 import elemental.events.MouseEvent;
 
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
@@ -21,6 +22,7 @@ import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
@@ -48,6 +50,7 @@ import org.eclipse.che.ide.ui.tree.TreeNodeElement;
 import org.eclipse.che.ide.util.input.SignalEvent;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
+import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -62,6 +65,7 @@ import static org.eclipse.che.ide.extension.machine.client.processes.ProcessTree
  */
 public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDelegate> implements ProcessesPanelView,
                                                                                                    SubPanel.FocusListener,
+                                                                                                   SubPanel.DoubleClickListener,
                                                                                                    RequiresResize {
 
     @UiField(provided = true)
@@ -86,6 +90,10 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
     private String activeProcessId = "";
 
+    private Focusable lastFosuced;
+
+    private boolean navigationPanelVisible;
+
     @Inject
     public ProcessesPanelViewImpl(PartStackUIResources partStackUIResources,
                                   org.eclipse.che.ide.Resources resources,
@@ -106,8 +114,8 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
         renderer.setAddTerminalClickHandler(new AddTerminalClickHandler() {
             @Override
-            public void onAddTerminalClick(String workspaceId, String machineId) {
-                delegate.onAddTerminal(workspaceId, machineId);
+            public void onAddTerminalClick(@NotNull String machineId) {
+                delegate.onAddTerminal(machineId, this);
             }
         });
 
@@ -190,11 +198,13 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
         final SubPanel subPanel = subPanelFactory.newPanel();
         subPanel.setFocusListener(this);
+        subPanel.setDoubleClickListener(this);
         splitLayoutPanel.add(subPanel.getView());
         focusedSubPanel = subPanel;
 
         tuneSplitter();
         splitLayoutPanel.setWidgetHidden(navigationPanel, true);
+        navigationPanelVisible = false;
     }
 
     /**
@@ -312,7 +322,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
     }
 
     @Override
-    public void selectNode(ProcessTreeNode node) {
+    public void selectNode(final ProcessTreeNode node) {
         final SelectionModel<ProcessTreeNode> selectionModel = processTree.getSelectionModel();
 
         if (node == null) {
@@ -324,6 +334,13 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
             node.getTreeNodeElement().scrollIntoView();
         }
+
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                delegate.onTreeNodeSelected(node);
+            }
+        });
     }
 
     @Override
@@ -375,6 +392,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
     @Override
     public void setProcessesData(ProcessTreeNode root) {
         splitLayoutPanel.setWidgetHidden(navigationPanel, false);
+        navigationPanelVisible = true;
 
         processTree.asWidget().setVisible(true);
         processTree.getModel().setRoot(root);
@@ -428,7 +446,9 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
     public void hideProcessOutput(String processId) {
         final WidgetToShow widgetToShow = processWidgets.get(processId);
         final SubPanel subPanel = widget2Panels.get(widgetToShow);
-        subPanel.removeWidget(widgetToShow);
+        if (subPanel != null) {
+            subPanel.removeWidget(widgetToShow);
+        }
         processWidgets.remove(processId);
     }
 
@@ -463,6 +483,21 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
         if (processTreeNode != null) {
             selectNode(processTreeNode);
         }
+
+        if (lastFosuced != null && !lastFosuced.equals(widget)) {
+            lastFosuced.setFocus(false);
+        }
+
+        if (widget instanceof Focusable) {
+            ((Focusable)widget).setFocus(true);
+
+            lastFosuced = (Focusable)widget;
+        }
+    }
+
+    @Override
+    public void onDoubleClicked(final SubPanel panel, final IsWidget widget) {
+        delegate.onToggleMaximizeConsole();
     }
 
     @Override
@@ -475,6 +510,18 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
         }
     }
 
+    @Override
+    public void setProcessesTreeVisible(boolean visible) {
+        splitLayoutPanel.setWidgetHidden(navigationPanel, !visible);
+        navigationPanelVisible = visible;
+    }
+
+    @Override
+    public boolean isProcessesTreeVisible() {
+        return navigationPanelVisible;
+    }
+
     interface ProcessesPartViewImplUiBinder extends UiBinder<Widget, ProcessesPanelViewImpl> {
     }
+
 }

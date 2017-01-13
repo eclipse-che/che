@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,7 +33,7 @@ public class ExtensionFileTypeIdentifier implements FileTypeIdentifier {
         final String filename = file.getName();
         if (filename != null) {
             final int dotPos = filename.lastIndexOf('.');
-            if (dotPos < 1) { // either -1 (not found) or 0 (first position, for example .project or .codenvy etc.
+            if (dotPos < 1) { // either -1 (not found) or 0 (first position, for example .project or .che etc.
                 Log.debug(ExtensionFileTypeIdentifier.class, "File name has no suffix ");
                 return null;
             }
@@ -59,6 +59,7 @@ public class ExtensionFileTypeIdentifier implements FileTypeIdentifier {
         this.mappings.put("C", makeList("text/x-c++src"));
         this.mappings.put("cc", makeList("text/x-c++src"));
         this.mappings.put("cpp", makeList("text/x-c++src"));
+        this.mappings.put("ino", makeList("text/x-c++src"));
         this.mappings.put("h", makeList("text/x-chdr"));
         this.mappings.put("hh", makeList("text/x-c++hdr"));
         this.mappings.put("c++", Collections.singletonList("text/x-c++src"));
@@ -113,6 +114,7 @@ public class ExtensionFileTypeIdentifier implements FileTypeIdentifier {
         this.mappings.put("py", makeList("text/x-python"));
         this.mappings.put("pyx", makeList("text/x-cython"));
         this.mappings.put("rb", makeList("text/x-ruby"));
+        this.mappings.put("erb", makeList("text/html"));//templates with embedded ruby
         this.mappings.put("gemspec", makeList("text/x-ruby"));
         this.mappings.put("go", makeList("text/x-go"));
         this.mappings.put("rs", makeList("text/x-rustsrc"));
@@ -123,6 +125,7 @@ public class ExtensionFileTypeIdentifier implements FileTypeIdentifier {
         this.mappings.put("pm", makeList("text/x-perl"));// perl module
 
         this.mappings.put("php", makeList("text/x-php"));
+        this.mappings.put("phtml", makeList("text/x-php"));
         this.mappings.put("ejs", makeList("application/x-ejs"));
         this.mappings.put("jsp", makeList("application/x-jsp"));
         this.mappings.put("asp", makeList("application/x-aspx"));

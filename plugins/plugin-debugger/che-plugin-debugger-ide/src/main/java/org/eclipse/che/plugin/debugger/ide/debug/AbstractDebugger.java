@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,6 +26,7 @@ import org.eclipse.che.api.debug.shared.dto.action.StartActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepIntoActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepOutActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepOverActionDto;
+import org.eclipse.che.api.debug.shared.dto.action.SuspendActionDto;
 import org.eclipse.che.api.debug.shared.dto.event.BreakpointActivatedEventDto;
 import org.eclipse.che.api.debug.shared.dto.event.DebuggerEventDto;
 import org.eclipse.che.api.debug.shared.dto.event.SuspendEventDto;
@@ -53,6 +54,7 @@ import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.DebuggerServiceClient;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
+import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.VirtualFile;
@@ -77,6 +79,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+
 /**
  * The common debugger.
  *
@@ -87,7 +92,8 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     public static final String LOCAL_STORAGE_DEBUGGER_SESSION_KEY = "che-debugger-session";
     public static final String LOCAL_STORAGE_DEBUGGER_STATE_KEY   = "che-debugger-state";
 
-    protected final DtoFactory dtoFactory;
+    protected final DtoFactory          dtoFactory;
+    protected final NotificationManager notificationManager;
 
     private final List<DebuggerObserver> observers;
     private final DebuggerServiceClient  service;
@@ -112,6 +118,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
                             EventBus eventBus,
                             ActiveFileHandler activeFileHandler,
                             DebuggerManager debuggerManager,
+                            NotificationManager notificationManager,
                             BreakpointManager breakpointManager,
                             String type) {
         this.service = service;
@@ -120,6 +127,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
         this.eventBus = eventBus;
         this.activeFileHandler = activeFileHandler;
         this.debuggerManager = debuggerManager;
+        this.notificationManager = notificationManager;
         this.breakpointManager = breakpointManager;
         this.observers = new ArrayList<>();
         this.debuggerType = type;
@@ -136,34 +144,36 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
             public void onWsAgentStarted(WsAgentStateEvent event) {
                 messageBus = messageBusProvider.getMachineMessageBus();
 
-                if (isConnected()) {
-                    Promise<DebugSessionDto> promise = service.getSessionInfo(debugSessionDto.getId());
-                    promise.then(new Operation<DebugSessionDto>() {
-                        @Override
-                        public void apply(DebugSessionDto arg) throws OperationException {
-                            debuggerManager.setActiveDebugger(AbstractDebugger.this);
-                            setDebugSession(arg);
-
-                            DebuggerInfo debuggerInfo = arg.getDebuggerInfo();
-                            String info = debuggerInfo.getName() + " " + debuggerInfo.getVersion();
-                            String address = debuggerInfo.getHost() + ":" + debuggerInfo.getPort();
-                            DebuggerDescriptor debuggerDescriptor = new DebuggerDescriptor(info, address);
-                            JsPromise<Void> promise = Promises.resolve(null);
-
-                            for (DebuggerObserver observer : observers) {
-                                observer.onDebuggerAttached(debuggerDescriptor, promise);
-                            }
-
-                            startCheckingEvents();
-                        }
-                    }).catchError(new Operation<PromiseError>() {
-                        @Override
-                        public void apply(PromiseError arg) throws OperationException {
-                            invalidateDebugSession();
-                            preserveDebuggerState();
-                        }
-                    });
+                if (!isConnected()) {
+                    return;
                 }
+                Promise<DebugSessionDto> promise = service.getSessionInfo(debugSessionDto.getId());
+                promise.then(new Operation<DebugSessionDto>() {
+                    @Override
+                    public void apply(DebugSessionDto arg) throws OperationException {
+                        debuggerManager.setActiveDebugger(AbstractDebugger.this);
+                        setDebugSession(arg);
+
+                        DebuggerInfo debuggerInfo = arg.getDebuggerInfo();
+                        String info = debuggerInfo.getName() + " " + debuggerInfo.getVersion();
+                        String address = debuggerInfo.getHost() + ":" + debuggerInfo.getPort();
+                        DebuggerDescriptor debuggerDescriptor = new DebuggerDescriptor(info, address);
+                        JsPromise<Void> promise = Promises.resolve(null);
+
+                        for (DebuggerObserver observer : observers) {
+                            observer.onDebuggerAttached(debuggerDescriptor, promise);
+                        }
+
+                        startCheckingEvents();
+                    }
+                }).catchError(new Operation<PromiseError>() {
+                    @Override
+                    public void apply(PromiseError arg) throws OperationException {
+                        if (!isConnected()) {
+                            invalidateDebugSession();
+                        }
+                    }
+                });
             }
 
             @Override
@@ -174,28 +184,30 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
         this.debuggerEventsHandler = new SubscriptionHandler<DebuggerEventDto>(new DebuggerEventUnmarshaller(dtoFactory)) {
             @Override
             public void onMessageReceived(DebuggerEventDto result) {
-                if (isConnected()) {
-                    onEventListReceived(result);
+                if (!isConnected()) {
+                    return;
                 }
+                onEventListReceived(result);
             }
 
             @Override
             public void onErrorReceived(Throwable exception) {
-                if (isConnected()) {
-                    try {
-                        messageBus.unsubscribe(eventChannel, this);
-                    } catch (WebSocketException e) {
-                        Log.error(AbstractDebugger.class, e);
-                    }
+                if (!isConnected()) {
+                    return;
+                }
+                try {
+                    messageBus.unsubscribe(eventChannel, this);
+                } catch (WebSocketException e) {
+                    Log.error(AbstractDebugger.class, e);
+                }
 
-                    if (exception instanceof ServerException) {
-                        ServerException serverException = (ServerException)exception;
-                        if (HTTPStatus.INTERNAL_ERROR == serverException.getHTTPStatus()
-                            && serverException.getMessage() != null
-                            && serverException.getMessage().contains("not found")) {
+                if (exception instanceof ServerException) {
+                    ServerException serverException = (ServerException)exception;
+                    if (HTTPStatus.INTERNAL_ERROR == serverException.getHTTPStatus()
+                        && serverException.getMessage() != null
+                        && serverException.getMessage().contains("not found")) {
 
-                            disconnect();
-                        }
+                        disconnect();
                     }
                 }
             }
@@ -245,7 +257,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
                                        @Override
                                        public void onSuccess(VirtualFile result) {
                                            for (DebuggerObserver observer : observers) {
-                                               observer.onBreakpointStopped(result.getPath(),
+                                               observer.onBreakpointStopped(result.getLocation().toString(),
                                                                             currentLocation.getTarget(),
                                                                             currentLocation.getLineNumber());
                                            }
@@ -347,7 +359,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
                 }
             });
         } else {
-            Breakpoint breakpoint = new Breakpoint(Breakpoint.Type.BREAKPOINT, lineNumber, file.getPath(), file, false);
+            Breakpoint breakpoint = new Breakpoint(Breakpoint.Type.BREAKPOINT, lineNumber, file.getLocation().toString(), file, false);
             for (DebuggerObserver observer : observers) {
                 observer.onBreakpointAdded(breakpoint);
             }
@@ -356,53 +368,55 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
 
     @Override
     public void deleteBreakpoint(final VirtualFile file, final int lineNumber) {
-        if (isConnected()) {
-            LocationDto locationDto = dtoFactory.createDto(LocationDto.class);
-            locationDto.setLineNumber(lineNumber + 1);
-
-            String fqn = pathToFqn(file);
-            if (fqn == null) {
-                return;
-            }
-            locationDto.setTarget(fqn);
-
-            Promise<Void> promise = service.deleteBreakpoint(debugSessionDto.getId(), locationDto);
-            promise.then(new Operation<Void>() {
-                @Override
-                public void apply(Void arg) throws OperationException {
-                    for (DebuggerObserver observer : observers) {
-                        Breakpoint breakpoint = new Breakpoint(Breakpoint.Type.BREAKPOINT, lineNumber, file.getPath(), file, false);
-                        observer.onBreakpointDeleted(breakpoint);
-                    }
-                }
-            }).catchError(new Operation<PromiseError>() {
-                @Override
-                public void apply(PromiseError arg) throws OperationException {
-                    Log.error(AbstractDebugger.class, arg.getMessage());
-                }
-            });
+        if (!isConnected()) {
+            return;
         }
+        LocationDto locationDto = dtoFactory.createDto(LocationDto.class);
+        locationDto.setLineNumber(lineNumber + 1);
+
+        String fqn = pathToFqn(file);
+        if (fqn == null) {
+            return;
+        }
+        locationDto.setTarget(fqn);
+
+        Promise<Void> promise = service.deleteBreakpoint(debugSessionDto.getId(), locationDto);
+        promise.then(new Operation<Void>() {
+            @Override
+            public void apply(Void arg) throws OperationException {
+                for (DebuggerObserver observer : observers) {
+                    Breakpoint breakpoint = new Breakpoint(Breakpoint.Type.BREAKPOINT, lineNumber, file.getLocation().toString(), file, false);
+                    observer.onBreakpointDeleted(breakpoint);
+                }
+            }
+        }).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError arg) throws OperationException {
+                Log.error(AbstractDebugger.class, arg.getMessage());
+            }
+        });
     }
 
     @Override
     public void deleteAllBreakpoints() {
-        if (isConnected()) {
-            Promise<Void> promise = service.deleteAllBreakpoints(debugSessionDto.getId());
-
-            promise.then(new Operation<Void>() {
-                @Override
-                public void apply(Void arg) throws OperationException {
-                    for (DebuggerObserver observer : observers) {
-                        observer.onAllBreakpointsDeleted();
-                    }
-                }
-            }).catchError(new Operation<PromiseError>() {
-                @Override
-                public void apply(PromiseError arg) throws OperationException {
-                    Log.error(AbstractDebugger.class, arg.getMessage());
-                }
-            });
+        if (!isConnected()) {
+            return;
         }
+        Promise<Void> promise = service.deleteAllBreakpoints(debugSessionDto.getId());
+
+        promise.then(new Operation<Void>() {
+            @Override
+            public void apply(Void arg) throws OperationException {
+                for (DebuggerObserver observer : observers) {
+                    observer.onAllBreakpointsDeleted();
+                }
+            }
+        }).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError arg) throws OperationException {
+                Log.error(AbstractDebugger.class, arg.getMessage());
+            }
+        });
     }
 
     @Override
@@ -508,7 +522,8 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
             for (DebuggerObserver observer : observers) {
                 observer.onPreStepInto();
             }
-            currentLocation = null;
+            removeCurrentLocation();
+            preserveDebuggerState();
 
             StepIntoActionDto action = dtoFactory.createDto(StepIntoActionDto.class);
             action.setType(Action.TYPE.STEP_INTO);
@@ -529,7 +544,8 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
             for (DebuggerObserver observer : observers) {
                 observer.onPreStepOver();
             }
-            currentLocation = null;
+            removeCurrentLocation();
+            preserveDebuggerState();
 
             StepOverActionDto action = dtoFactory.createDto(StepOverActionDto.class);
             action.setType(Action.TYPE.STEP_OVER);
@@ -550,7 +566,8 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
             for (DebuggerObserver observer : observers) {
                 observer.onPreStepOut();
             }
-            currentLocation = null;
+            removeCurrentLocation();
+            preserveDebuggerState();
 
             StepOutActionDto action = dtoFactory.createDto(StepOutActionDto.class);
             action.setType(Action.TYPE.STEP_OUT);
@@ -571,7 +588,8 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
             for (DebuggerObserver observer : observers) {
                 observer.onPreResume();
             }
-            currentLocation = null;
+            removeCurrentLocation();
+            preserveDebuggerState();
 
             ResumeActionDto action = dtoFactory.createDto(ResumeActionDto.class);
             action.setType(Action.TYPE.RESUME);
@@ -584,6 +602,23 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
                 }
             });
         }
+    }
+
+    @Override
+    public void suspend() {
+        if (!isConnected()) {
+            return;
+        }
+
+        SuspendActionDto suspendAction = dtoFactory.createDto(SuspendActionDto.class);
+        suspendAction.setType(Action.TYPE.SUSPEND);
+
+        service.suspend(debugSessionDto.getId(), suspendAction).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError arg) throws OperationException {
+                notificationManager.notify(arg.getMessage(), FAIL, FLOAT_MODE);
+            }
+        });
     }
 
     @Override
@@ -626,6 +661,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
         return isConnected() && currentLocation != null;
     }
 
+    @Override
     public String getDebuggerType() {
         return debuggerType;
     }
@@ -646,7 +682,11 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
 
     private void invalidateDebugSession() {
         this.debugSessionDto = null;
-        this.currentLocation = null;
+        this.removeCurrentLocation();
+    }
+
+    private void removeCurrentLocation() {
+        currentLocation = null;
     }
 
     /**

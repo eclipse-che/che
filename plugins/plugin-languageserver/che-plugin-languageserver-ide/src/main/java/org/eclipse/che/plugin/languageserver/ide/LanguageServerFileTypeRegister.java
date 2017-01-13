@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,7 +14,7 @@ import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JsArrayString;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
+import org.eclipse.che.api.languageserver.shared.lsapi.LanguageDescriptionDTO;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -30,9 +30,10 @@ import org.eclipse.che.ide.editor.orion.client.jso.OrionHighlightingConfiguratio
 import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorProvider;
 import org.eclipse.che.plugin.languageserver.ide.hover.HoverProvider;
 import org.eclipse.che.plugin.languageserver.ide.service.LanguageServerRegistryServiceClient;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.LanguageDescriptionDTO;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
 
@@ -44,13 +45,15 @@ public class LanguageServerFileTypeRegister implements WsAgentComponent {
 
 
     private final LanguageServerRegistryServiceClient serverLanguageRegistry;
-    private final FileTypeRegistry                    fileTypeRegistry;
-    private final LanguageServerResources             resources;
-    private final EditorRegistry                      editorRegistry;
-    private final OrionContentTypeRegistrant          contentTypeRegistrant;
-    private final OrionHoverRegistrant                orionHoverRegistrant;
+    private final FileTypeRegistry fileTypeRegistry;
+    private final LanguageServerResources resources;
+    private final EditorRegistry editorRegistry;
+    private final OrionContentTypeRegistrant contentTypeRegistrant;
+    private final OrionHoverRegistrant orionHoverRegistrant;
     private final LanguageServerEditorProvider editorProvider;
     private final HoverProvider hoverProvider;
+
+    private final Map<String, String> ext2langId = new HashMap<>();
 
     @Inject
     public LanguageServerFileTypeRegister(LanguageServerRegistryServiceClient serverLanguageRegistry,
@@ -85,6 +88,7 @@ public class LanguageServerFileTypeRegister implements WsAgentComponent {
                             final FileType fileType = new FileType(resources.file(), ext);
                             fileTypeRegistry.registerFileType(fileType);
                             editorRegistry.registerDefaultEditor(fileType, editorProvider);
+                            ext2langId.put(ext, lang.getLanguageId());
                         }
                         List<String> mimeTypes = lang.getMimeTypes();
                         if (mimeTypes.isEmpty()) {
@@ -118,5 +122,13 @@ public class LanguageServerFileTypeRegister implements WsAgentComponent {
                 callback.onFailure(new Exception(arg.getMessage(), arg.getCause()));
             }
         });
+    }
+
+    boolean hasLSForExtension(String ext) {
+        return ext2langId.containsKey(ext);
+    }
+
+    String findLangId(String ext) {
+        return ext2langId.get(ext);
     }
 }

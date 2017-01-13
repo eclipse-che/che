@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,9 +14,10 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import org.eclipse.che.api.git.GitConnection;
 import org.eclipse.che.api.git.GitConnectionFactory;
-import org.eclipse.che.api.git.shared.AddRequest;
-import org.eclipse.che.api.git.shared.CommitRequest;
-import org.eclipse.che.api.git.shared.LogRequest;
+import org.eclipse.che.api.git.params.AddParams;
+import org.eclipse.che.api.git.params.CommitParams;
+import org.eclipse.che.api.git.params.LogParams;
+import org.eclipse.che.api.git.params.ResetParams;
 import org.eclipse.che.api.git.shared.ResetRequest;
 import org.eclipse.che.api.git.shared.StatusFormat;
 import org.testng.annotations.AfterMethod;
@@ -26,8 +27,8 @@ import org.testng.annotations.Test;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.git.impl.GitTestUtil.addFile;
 import static org.eclipse.che.git.impl.GitTestUtil.cleanupTestRepo;
@@ -63,15 +64,13 @@ public class ResetTest {
         fos.write("MODIFIED\n".getBytes());
         fos.flush();
         fos.close();
-        String initMessage = connection.log(newDto(LogRequest.class)).getCommits().get(0).getMessage();
-        connection.add(newDto(AddRequest.class).withFilepattern(new ArrayList<>(Arrays.asList("."))));
-        connection.commit(newDto(CommitRequest.class).withMessage("add file"));
+        String initMessage = connection.log(LogParams.create()).getCommits().get(0).getMessage();
+        connection.add(AddParams.create(new ArrayList<>(singletonList("."))));
+        connection.commit(CommitParams.create("add file"));
         //when
-        ResetRequest resetRequest = newDto(ResetRequest.class).withCommit("HEAD^");
-        resetRequest.setType(ResetRequest.ResetType.HARD);
-        connection.reset(resetRequest);
+        connection.reset(ResetParams.create("HEAD^", ResetRequest.ResetType.HARD));
         //then
-        assertEquals(connection.log(newDto(LogRequest.class)).getCommits().get(0).getMessage(), initMessage);
+        assertEquals(connection.log(LogParams.create()).getCommits().get(0).getMessage(), initMessage);
         assertFalse(aaa.exists());
         assertTrue(connection.status(StatusFormat.SHORT).isClean());
         assertEquals(CONTENT, Files.toString(new File(connection.getWorkingDir(), "README.txt"), Charsets.UTF_8));
@@ -86,15 +85,13 @@ public class ResetTest {
         fos.write("MODIFIED\n".getBytes());
         fos.flush();
         fos.close();
-        String initMessage = connection.log(newDto(LogRequest.class)).getCommits().get(0).getMessage();
-        connection.add(newDto(AddRequest.class).withFilepattern(new ArrayList<>(Arrays.asList("."))));
-        connection.commit(newDto(CommitRequest.class).withMessage("add file"));
+        String initMessage = connection.log(LogParams.create()).getCommits().get(0).getMessage();
+        connection.add(AddParams.create(new ArrayList<>(singletonList("."))));
+        connection.commit(CommitParams.create("add file"));
         //when
-        ResetRequest resetRequest = newDto(ResetRequest.class).withCommit("HEAD^");
-        resetRequest.setType(ResetRequest.ResetType.SOFT);
-        connection.reset(resetRequest);
+        connection.reset(ResetParams.create("HEAD^", ResetRequest.ResetType.SOFT));
         //then
-        assertEquals(connection.log(newDto(LogRequest.class)).getCommits().get(0).getMessage(), initMessage);
+        assertEquals(connection.log(LogParams.create()).getCommits().get(0).getMessage(), initMessage);
         assertTrue(aaa.exists());
         assertEquals(connection.status(StatusFormat.SHORT).getAdded().get(0), "aaa");
         assertEquals(connection.status(StatusFormat.SHORT).getChanged().get(0), "README.txt");
@@ -110,15 +107,14 @@ public class ResetTest {
         fos.write("MODIFIED\n".getBytes());
         fos.flush();
         fos.close();
-        String initMessage = connection.log(newDto(LogRequest.class)).getCommits().get(0).getMessage();
-        connection.add(newDto(AddRequest.class).withFilepattern(new ArrayList<>(Arrays.asList("."))));
-        connection.commit(newDto(CommitRequest.class).withMessage("add file"));
+        String initMessage = connection.log(LogParams.create()).getCommits().get(0).getMessage();
+        connection.add(AddParams.create(new ArrayList<>(singletonList("."))));
+        connection.commit(CommitParams.create("add file"));
         //when
         ResetRequest resetRequest = newDto(ResetRequest.class).withCommit("HEAD^");
-        resetRequest.setType(ResetRequest.ResetType.MIXED);
-        connection.reset(resetRequest);
+        connection.reset(ResetParams.create("HEAD^", ResetRequest.ResetType.MIXED));
         //then
-        assertEquals(connection.log(newDto(LogRequest.class)).getCommits().get(0).getMessage(), initMessage);
+        assertEquals(connection.log(LogParams.create()).getCommits().get(0).getMessage(), initMessage);
         assertTrue(aaa.exists());
         assertEquals(connection.status(StatusFormat.SHORT).getUntracked().get(0), "aaa");
         assertEquals(connection.status(StatusFormat.SHORT).getModified().get(0), "README.txt");

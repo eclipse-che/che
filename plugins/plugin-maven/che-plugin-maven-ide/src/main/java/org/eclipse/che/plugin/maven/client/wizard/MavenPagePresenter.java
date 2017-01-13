@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,6 +27,7 @@ import org.eclipse.che.ide.api.wizard.AbstractWizardPage;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.maven.client.MavenArchetype;
 import org.eclipse.che.plugin.maven.client.MavenExtension;
+import org.eclipse.che.plugin.maven.client.MavenLocalizationConstant;
 
 import javax.validation.constraints.NotNull;
 import java.util.Arrays;
@@ -39,6 +40,10 @@ import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode.CREA
 import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode.UPDATE;
 import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar.WIZARD_MODE_KEY;
 import static org.eclipse.che.ide.ext.java.shared.Constants.SOURCE_FOLDER;
+import static org.eclipse.che.plugin.maven.shared.MavenAttributes.ARCHETYPE_ARTIFACT_ID_OPTION;
+import static org.eclipse.che.plugin.maven.shared.MavenAttributes.ARCHETYPE_GROUP_ID_OPTION;
+import static org.eclipse.che.plugin.maven.shared.MavenAttributes.ARCHETYPE_REPOSITORY_OPTION;
+import static org.eclipse.che.plugin.maven.shared.MavenAttributes.ARCHETYPE_VERSION_OPTION;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.ARTIFACT_ID;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.DEFAULT_PACKAGING;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.DEFAULT_SOURCE_FOLDER;
@@ -58,18 +63,21 @@ import static org.eclipse.che.plugin.maven.shared.MavenAttributes.VERSION;
  */
 public class MavenPagePresenter extends AbstractWizardPage<MutableProjectConfig> implements MavenPageView.ActionDelegate {
 
-    private final MavenPageView view;
-    private final DialogFactory dialogFactory;
-    private final AppContext    appContext;
+    private final MavenPageView             view;
+    private final DialogFactory             dialogFactory;
+    private final AppContext                appContext;
+    private final MavenLocalizationConstant localization;
 
     @Inject
     public MavenPagePresenter(MavenPageView view,
                               DialogFactory dialogFactory,
-                              AppContext appContext) {
+                              AppContext appContext,
+                              MavenLocalizationConstant localization) {
         super();
         this.view = view;
         this.dialogFactory = dialogFactory;
         this.appContext = appContext;
+        this.localization = localization;
         view.setDelegate(this);
     }
 
@@ -100,6 +108,13 @@ public class MavenPagePresenter extends AbstractWizardPage<MutableProjectConfig>
                 container.get().estimate(MAVEN_ID).then(new Operation<SourceEstimation>() {
                     @Override
                     public void apply(SourceEstimation estimation) throws OperationException {
+                        if (!estimation.isMatched()) {
+                            final String resolution = estimation.getResolution();
+                            final String errorMessage = resolution.isEmpty() ? localization.mavenPageEstimateErrorMessage() : resolution;
+                            dialogFactory.createMessageDialog(localization.mavenPageErrorDialogTitle(), errorMessage, null).show();
+                            return;
+                        }
+
                         Map<String, List<String>> estimatedAttributes = estimation.getAttributes();
                         List<String> artifactIdValues = estimatedAttributes.get(ARTIFACT_ID);
                         if (artifactIdValues != null && !artifactIdValues.isEmpty()) {
@@ -132,7 +147,7 @@ public class MavenPagePresenter extends AbstractWizardPage<MutableProjectConfig>
                 }).catchError(new Operation<PromiseError>() {
                     @Override
                     public void apply(PromiseError arg) throws OperationException {
-                        dialogFactory.createMessageDialog("Not valid Maven project", arg.getMessage(), null).show();
+                        dialogFactory.createMessageDialog(localization.mavenPageErrorDialogTitle(), arg.getMessage(), null).show();
                         Log.error(MavenPagePresenter.class, arg);
                     }
                 });
@@ -237,12 +252,17 @@ public class MavenPagePresenter extends AbstractWizardPage<MutableProjectConfig>
         } else {
             view.setArchetypes(MavenExtension.getAvailableArchetypes());
         }
-
+        archetypeChanged(MavenExtension.getAvailableArchetypes().get(0));
         updateDelegate.updateControls();
     }
 
     @Override
     public void archetypeChanged(MavenArchetype archetype) {
+        dataObject.getOptions().put("type", "archetype");
+        dataObject.getOptions().put(ARCHETYPE_GROUP_ID_OPTION, archetype.getGroupId());
+        dataObject.getOptions().put(ARCHETYPE_ARTIFACT_ID_OPTION, archetype.getArtifactId());
+        dataObject.getOptions().put(ARCHETYPE_VERSION_OPTION, archetype.getVersion());
+        dataObject.getOptions().put(ARCHETYPE_REPOSITORY_OPTION, archetype.getRepository());
         updateDelegate.updateControls();
     }
 

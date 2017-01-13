@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,7 +41,7 @@ public class AgentLauncherFactory {
      * Find launcher for given agent independently of version.
      * If the specific {@link AgentLauncher} isn't registered then the default one will be used.
      *
-     * @see Agent#getName()
+     * @see Agent#getId()
      * @see MachineConfig#getType()
      *
      * @param agentName
@@ -50,9 +50,9 @@ public class AgentLauncherFactory {
      *      the machine type
      * @return {@link AgentLauncher}
      */
-    public AgentLauncher find(String agentName, String machineType) {
+    public AgentLauncher find(String agentId, String machineType) {
         return launchers.stream()
-                        .filter(l -> l.getAgentName().equals(agentName))
+                        .filter(l -> l.getAgentId().equals(agentId))
                         .filter(l -> l.getMachineType().equals(machineType))
                         .findAny()
                         .orElse(defaultLauncher);

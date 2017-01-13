@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,39 +10,38 @@
  *******************************************************************************/
 package org.eclipse.che.api.environment.server;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
 import org.eclipse.che.api.agent.server.AgentRegistry;
 import org.eclipse.che.api.agent.server.exception.AgentException;
 import org.eclipse.che.api.agent.server.impl.AgentSorter;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.agent.shared.model.AgentKey;
+import org.eclipse.che.api.core.model.workspace.Environment;
+import org.eclipse.che.api.core.model.workspace.ExtendedMachine;
+import org.eclipse.che.api.core.model.workspace.ServerConf2;
 import org.eclipse.che.api.environment.server.model.CheServiceImpl;
+import org.eclipse.che.api.environment.server.model.CheServicesEnvironmentImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static org.eclipse.che.api.environment.server.AgentConfigApplier.PROPERTIES.ENVIRONMENT;
-import static org.eclipse.che.api.environment.server.AgentConfigApplier.PROPERTIES.PORTS;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
- * Applies docker specific properties of the agents over {@link CheServiceImpl}.
+ * Applies docker specific properties of the agents to {@link CheServiceImpl} or {@link CheServicesEnvironmentImpl}.
+ *
+ * </p>
  * Dependencies between agents are respected.
- * Docker instance must't be started, otherwise changing configuration has no effect.
- *
+ * This class must be called before machines represented by {@link CheServiceImpl} is started,
+ * otherwise changing configuration has no effect.
+ * </br>
  * The list of supported properties are:
- * <li>ports</li>
  * <li>environment</li>
- *
- * The {@code ports} property contains comma separated ports to expose respecting
- * the following format: "label:port/protocol" or "port/protocol.
  *
  * The {@code environment} property contains command separated environment variables to set
  * respecting the following format: "name=value".
@@ -50,14 +49,15 @@ import static org.eclipse.che.api.environment.server.AgentConfigApplier.PROPERTI
  * @see Agent#getProperties()
  * @see CheServiceImpl#getEnvironment()
  * @see CheServiceImpl#getPorts()
+ * @see CheServiceImpl#getLabels()
  *
  * @author Anatolii Bazko
+ * @author Alexander Garagatyi
  */
-@Singleton
 public class AgentConfigApplier {
-    private static final Logger LOG = LoggerFactory.getLogger(AgentConfigApplier.class);
+    private static final Logger LOG = getLogger(AgentConfigApplier.class);
 
-    private final AgentSorter sorter;
+    private final AgentSorter   sorter;
     private final AgentRegistry agentRegistry;
 
     @Inject
@@ -67,20 +67,61 @@ public class AgentConfigApplier {
     }
 
     /**
-     * Applies docker specific properties.
+     * Applies docker specific properties to an environment of machines.
      *
-     * @param service
-     *      the service
-     * @param agentKeys
-     *      the list of injected agents into machine
-     *
+     * @param envConfig
+     *         environment config with the list of agents that should be injected into machine
+     * @param internalEnv
+     *         affected environment of machines
      * @throws AgentException
+     *         if any error occurs
      */
-    public void modify(CheServiceImpl service, @Nullable List<String> agentKeys) throws AgentException {
-        for (AgentKey agentKey : sorter.sort(agentKeys)) {
-            Agent agent = agentRegistry.getAgent(agentKey);
-            addEnv(service, agent.getProperties());
-            addExposedPorts(service, agent.getProperties());
+    public void apply(Environment envConfig,
+                      CheServicesEnvironmentImpl internalEnv) throws AgentException {
+        for (Map.Entry<String, ? extends ExtendedMachine> machineEntry : envConfig.getMachines()
+                                                                                  .entrySet()) {
+            String machineName = machineEntry.getKey();
+            ExtendedMachine machineConf = machineEntry.getValue();
+            CheServiceImpl internalMachine = internalEnv.getServices().get(machineName);
+
+            apply(machineConf, internalMachine);
+        }
+    }
+
+    /**
+     * Applies docker specific properties to a machine.
+     *
+     * @param machineConf
+     *         machine config with the list of agents that should be injected into machine
+     * @param machine
+     *         affected machine
+     * @throws AgentException
+     *         if any error occurs
+     */
+    public void apply(@Nullable ExtendedMachine machineConf,
+                      CheServiceImpl machine) throws AgentException {
+        if (machineConf != null) {
+            for (AgentKey agentKey : sorter.sort(machineConf.getAgents())) {
+                Agent agent = agentRegistry.getAgent(agentKey);
+                addEnv(machine, agent.getProperties());
+                addExposedPorts(machine, agent.getServers());
+                addLabels(machine, agent.getServers());
+            }
+        }
+    }
+
+    private void addLabels(CheServiceImpl service, Map<String, ? extends ServerConf2> servers) {
+        for (Map.Entry<String, ? extends ServerConf2> entry : servers.entrySet()) {
+            String ref = entry.getKey();
+            ServerConf2 conf = entry.getValue();
+
+            service.getLabels().put("che:server:" + conf.getPort() + ":protocol", conf.getProtocol());
+            service.getLabels().put("che:server:" + conf.getPort() + ":ref", ref);
+
+            String path = conf.getProperties().get("path");
+            if (!isNullOrEmpty(path)) {
+                service.getLabels().put("che:server:" + conf.getPort() + ":path", path);
+            }
         }
     }
 
@@ -110,25 +151,13 @@ public class AgentConfigApplier {
         service.setEnvironment(newEnv);
     }
 
-    private void addExposedPorts(CheServiceImpl service, Map<String, String> properties) {
-        String ports = properties.get(PORTS.toString());
-        if (isNullOrEmpty(ports)) {
-            return;
-        }
-
-        for (String port : ports.split(",")) {
-            String[] items = port.split(":"); // ref:port
-            if (items.length == 1) {
-                service.getExpose().add(items[0]);
-            } else {
-                service.getExpose().add(items[1]);
-            }
+    private void addExposedPorts(CheServiceImpl service, Map<String, ? extends ServerConf2> servers) {
+        for (ServerConf2 server : servers.values()) {
+            service.getExpose().add(server.getPort());
         }
     }
 
-
-    enum PROPERTIES {
-        PORTS("ports"),
+    public enum PROPERTIES {
         ENVIRONMENT("environment");
 
         private final String value;
@@ -143,4 +172,3 @@ public class AgentConfigApplier {
         }
     }
 }
-

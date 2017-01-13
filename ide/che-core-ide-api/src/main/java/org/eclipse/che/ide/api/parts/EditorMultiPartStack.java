@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.api.parts;
 
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 
 import javax.validation.constraints.NotNull;
@@ -21,6 +22,24 @@ import javax.validation.constraints.NotNull;
  * @author Roman Nikitenko
  */
 public interface EditorMultiPartStack extends PartStack {
+
+    /**
+     * Get active {@link EditorPartStack}
+     *
+     * @return active editor part stack or null if this one is absent
+     */
+    @Nullable
+    EditorPartStack getActivePartStack();
+
+    /**
+     * Get {@link EditorPartStack} for given {@code part}
+     *
+     * @param part
+     *         editor part to find corresponding editor part stack
+     * @return editor part stack which contains given {@code part} or null if this one is not found in any {@link EditorPartStack}
+     */
+    @Nullable
+    EditorPartStack getPartStackByPart(PartPresenter part);
 
     /**
      * Get editor part which associated with given {@code tabId}
@@ -63,12 +82,26 @@ public interface EditorMultiPartStack extends PartStack {
     EditorPartPresenter getPreviousFor(EditorPartPresenter editorPart);
 
     /**
-     * Get last closed editor for {@link EditorPartStack} which contains given {@code editorPart}
-     *
-     * @param editorPart
-     *         the starting point to evaluate last closed editor
-     * @return opened editor or null if it does not exist
+     * Create first(root) part stack
+     * @return the first part stack
      */
-    @Nullable
-    EditorPartPresenter getLastClosedBasedOn(EditorPartPresenter editorPart);
+    EditorPartStack createRootPartStack();
+
+    /**
+     * Split part stack
+     *
+     * @param relativePartStack
+     *          the relative part stack
+     * @param constraints
+     *          the constraints of split(should contains direction of splitting:vertical or horizontal)
+     * @param size
+     *          the size of splits part stack (use -1 if not set)
+     * @return the new splits part stack
+     */
+    EditorPartStack split(EditorPartStack relativePartStack, Constraints constraints, double size);
+
+    /**
+     * @return the editor multi part stack state
+     */
+    EditorMultiPartStackState getState();
 }

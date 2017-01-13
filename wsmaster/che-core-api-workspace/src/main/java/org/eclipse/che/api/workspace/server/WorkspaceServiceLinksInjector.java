@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,6 +37,7 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.util.LinksHelper.createLink;
 import static org.eclipse.che.api.machine.shared.Constants.ENVIRONMENT_OUTPUT_CHANNEL_TEMPLATE;
 import static org.eclipse.che.api.machine.shared.Constants.ENVIRONMENT_STATUS_CHANNEL_TEMPLATE;
+import static org.eclipse.che.api.machine.shared.Constants.EXEC_AGENT_REFERENCE;
 import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_ENVIRONMENT_OUTPUT_CHANNEL;
 import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_ENVIRONMENT_STATUS_CHANNEL;
 import static org.eclipse.che.api.machine.shared.Constants.TERMINAL_REFERENCE;
@@ -122,7 +123,6 @@ public class WorkspaceServiceLinksInjector {
         final Link workspaceChannelLink = createLink("GET",
                                                      serviceContext.getBaseUriBuilder()
                                                                    .path("ws")
-                                                                   .path(workspace.getId())
                                                                    .scheme("https".equals(ideUri.getScheme()) ? "wss" : "ws")
                                                                    .build()
                                                                    .toString(),
@@ -145,7 +145,7 @@ public class WorkspaceServiceLinksInjector {
                                                                                                                workspace.getId())))));
 
         // add links for running workspace
-        injectRuntimeLinks(workspace, ideUri, uriBuilder);
+        injectRuntimeLinks(workspace, ideUri, uriBuilder, serviceContext);
         return workspace.withLinks(links);
     }
 
@@ -175,7 +175,7 @@ public class WorkspaceServiceLinksInjector {
         return snapshotDto.withLinks(asList(machineLink, workspaceLink, workspaceSnapshotLink));
     }
 
-    protected void injectRuntimeLinks(WorkspaceDto workspace, URI ideUri, UriBuilder uriBuilder) {
+    protected void injectRuntimeLinks(WorkspaceDto workspace, URI ideUri, UriBuilder uriBuilder, ServiceContext serviceContext) {
         final WorkspaceRuntimeDto runtime = workspace.getRuntime();
         // add links for running workspace
         if (workspace.getStatus() == RUNNING && runtime != null) {
@@ -186,6 +186,8 @@ public class WorkspaceServiceLinksInjector {
                                              .build(workspace.getId())
                                              .toString(),
                                    LINK_REL_STOP_WORKSPACE));
+
+            runtime.getMachines().forEach(machine -> injectMachineLinks(machine, serviceContext));
 
             final MachineDto devMachine = runtime.getDevMachine();
             if (devMachine != null) {
@@ -221,15 +223,25 @@ public class WorkspaceServiceLinksInjector {
                 servers.stream()
                        .filter(server -> TERMINAL_REFERENCE.equals(server.getRef()))
                        .findAny()
-                       .ifPresent(terminal -> devMachine.getLinks()
-                                                        .add(createLink("GET",
-                                                                        UriBuilder.fromUri(terminal.getUrl())
-                                                                                  .scheme("https".equals(ideUri.getScheme()) ? "wss"
-                                                                                                                             : "ws")
-                                                                                  .path("/pty")
-                                                                                  .build()
-                                                                                  .toString(),
-                                                                        TERMINAL_REFERENCE)));
+                       .ifPresent(terminal -> {
+                           devMachine.getLinks()
+                                     .add(createLink("GET",
+                                                     UriBuilder.fromUri(terminal.getUrl())
+                                                               .scheme("https".equals(ideUri.getScheme()) ? "wss"
+                                                                                                          : "ws")
+                                                               .path("/pty")
+                                                               .build()
+                                                               .toString(),
+                                                     TERMINAL_REFERENCE));
+                           devMachine.getLinks()
+                                     .add(createLink("GET",
+                                                     UriBuilder.fromUri(terminal.getUrl())
+                                                               .scheme("https".equals(ideUri.getScheme()) ? "wss" : "ws")
+                                                               .path("/connect")
+                                                               .build()
+                                                               .toString(),
+                                                     EXEC_AGENT_REFERENCE));
+                       });
             }
         }
     }

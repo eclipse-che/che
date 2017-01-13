@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,10 +15,13 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
+import org.eclipse.che.ide.api.subversion.Credentials;
+import org.eclipse.che.ide.api.subversion.SubversionCredentialsDialog;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
@@ -50,11 +53,12 @@ public class UpdatePresenter extends SubversionActionPresenter {
     public UpdatePresenter(AppContext appContext,
                            SubversionOutputConsoleFactory consoleFactory,
                            SubversionClientService service,
+                           SubversionCredentialsDialog subversionCredentialsDialog,
                            ProcessesPanelPresenter processesPanelPresenter,
                            SubversionExtensionLocalizationConstants constants,
                            NotificationManager notificationManager,
                            StatusColors statusColors) {
-        super(appContext, consoleFactory, processesPanelPresenter,  statusColors);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors, constants, notificationManager, subversionCredentialsDialog);
 
         this.constants = constants;
         this.notificationManager = notificationManager;
@@ -79,28 +83,40 @@ public class UpdatePresenter extends SubversionActionPresenter {
         final StatusNotification notification = new StatusNotification(constants.updateToRevisionStarted(revision), PROGRESS, FLOAT_MODE);
         notificationManager.notify(notification);
 
-        service.update(project.getLocation(), toRelative(project, resources), revision, depth, ignoreExternals, "postpone")
-                .then(new Operation<CLIOutputWithRevisionResponse>() {
-                    @Override
-                    public void apply(CLIOutputWithRevisionResponse response) throws OperationException {
-                        printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(),
-                                      constants.commandUpdate());
+        performOperationWithCredentialsRequestIfNeeded(new RemoteSubversionOperation<CLIOutputWithRevisionResponse>() {
+            @Override
+            public Promise<CLIOutputWithRevisionResponse> perform(Credentials credentials) {
 
-                        notification.setTitle(constants.updateSuccessful(Long.toString(response.getRevision())));
-                        notification.setStatus(SUCCESS);
+                notification.setStatus(PROGRESS);
+                notification.setTitle(constants.updateToRevisionStarted(revision));
 
-                        if (view != null) {
-                            view.close();
-                        }
-                    }
-                })
-                .catchError(new Operation<PromiseError>() {
-                    @Override
-                    public void apply(PromiseError error) throws OperationException {
-                        notification.setTitle(constants.updateFailed());
-                        notification.setStatus(FAIL);
-                    }
-                });
+                return service.update(project.getLocation(),
+                                      toRelative(project, resources),
+                                      revision,
+                                      depth,
+                                      ignoreExternals,
+                                      "postpone",
+                                      credentials);
+            }
+        }, notification).then(new Operation<CLIOutputWithRevisionResponse>() {
+            @Override
+            public void apply(CLIOutputWithRevisionResponse response) throws OperationException {
+                printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(),
+                              constants.commandUpdate());
+
+                notification.setTitle(constants.updateSuccessful(Long.toString(response.getRevision())));
+                notification.setStatus(SUCCESS);
+
+                if (view != null) {
+                    view.close();
+                }
+            }
+        }).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError error) throws OperationException {
+                notification.setTitle(constants.updateFailed());
+                notification.setStatus(FAIL);
+            }
+        });
     }
-
 }

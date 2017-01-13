@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,25 +39,29 @@ import org.eclipse.che.api.workspace.server.model.impl.ServerConf2Impl;
 import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.commons.lang.Pair;
-import org.eclipse.che.commons.test.tck.TckModuleFactory;
+import org.eclipse.che.commons.test.tck.TckListener;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Guice;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static java.util.stream.Collectors.toList;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -65,7 +69,7 @@ import static org.testng.Assert.assertEquals;
  *
  * @author Anton Korneta
  */
-@Guice(moduleFactory = TckModuleFactory.class)
+@Listeners(TckListener.class)
 @Test(suiteName = FactoryDaoTest.SUITE_NAME)
 public class FactoryDaoTest {
 
@@ -95,8 +99,8 @@ public class FactoryDaoTest {
         for (int i = 0; i < ENTRY_COUNT; i++) {
             factories[i] = createFactory(i, users[i].getId());
         }
-        userTckRepository.createAll(asList(users));
-        factoryTckRepository.createAll(asList(factories));
+        userTckRepository.createAll(Arrays.asList(users));
+        factoryTckRepository.createAll(Stream.of(factories).map(FactoryImpl::new).collect(toList()));
     }
 
     @AfterMethod
@@ -111,7 +115,7 @@ public class FactoryDaoTest {
         factory.getCreator().setUserId(factories[0].getCreator().getUserId());
         factoryDao.create(factory);
 
-        assertEquals(factoryDao.getById(factory.getId()), factory);
+        assertEquals(factoryDao.getById(factory.getId()), new FactoryImpl(factory));
     }
 
     @Test(expectedExceptions = NullPointerException.class)
@@ -257,17 +261,18 @@ public class FactoryDaoTest {
         final List<ActionImpl> a3 = new ArrayList<>(singletonList(new ActionImpl("id" + index, ImmutableMap.of("key3", "value3"))));
         final OnAppClosedImpl onAppClosed = new OnAppClosedImpl(a3);
         final IdeImpl ide = new IdeImpl(onAppLoaded, onProjectsLoaded, onAppClosed);
-        return FactoryImpl.builder()
-                          .generateId()
-                          .setVersion("4_0")
-                          .setName("factoryName" + index)
-                          .setWorkspace(createWorkspaceConfig(index))
-                          .setButton(factoryButton)
-                          .setCreator(creator)
-                          .setPolicies(policies)
-                          .setImages(images)
-                          .setIde(ide)
-                          .build();
+        final FactoryImpl factory = FactoryImpl.builder()
+                                               .generateId()
+                                               .setVersion("4_0")
+                                               .setName("factoryName" + index)
+                                               .setButton(factoryButton)
+                                               .setCreator(creator)
+                                               .setPolicies(policies)
+                                               .setImages(images)
+                                               .setIde(ide)
+                                               .build();
+        factory.setWorkspace(createWorkspaceConfig(index));
+        return factory;
     }
 
     public static WorkspaceConfigImpl createWorkspaceConfig(int index) {
@@ -363,6 +368,7 @@ public class FactoryDaoTest {
         wCfg.setCommands(commands);
         wCfg.setProjects(projects);
         wCfg.setEnvironments(environments);
+
         return wCfg;
     }
 }

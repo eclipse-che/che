@@ -1,6 +1,6 @@
 <!--
 
-    Copyright (c) 2012-2016 Codenvy, S.A.
+    Copyright (c) 2012-2017 Codenvy, S.A.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
@@ -13,6 +13,8 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
              xmlns:g="urn:import:com.google.gwt.user.client.ui">
+
+    <ui:with field='messages' type='org.eclipse.che.ide.ui.loaders.PopupLoaderMessages'/>
 
     <ui:style>
 
@@ -66,12 +68,25 @@
             overflow: hidden;
         }
 
+        .hyperlink {
+            position: absolute;
+            top: 25px;
+            left: 15px;
+        }
+
+        .hyperlink a {
+            font-size: 11px;
+            color: #94b6d4;
+        }
+
     </ui:style>
 
     <g:FlowPanel styleName="{style.main}">
         <g:Label ui:field="titleLabel" addStyleNames="{style.title}" />
         <g:Label ui:field="descriptionLabel" addStyleNames="{style.description}" />
-        <g:FlowPanel ui:field="customWidget" styleName="{style.customWidget}" visible="false"></g:FlowPanel>
+        <g:FlowPanel ui:field="customWidget" styleName="{style.customWidget}" visible="false">
+            <g:Hyperlink ui:field="downloadOutputs" styleName="{style.hyperlink}" visible="false" text="{messages.downloadOutputs}" ></g:Hyperlink>
+        </g:FlowPanel>
     </g:FlowPanel>
 
 </ui:UiBinder>

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,6 +22,7 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.subversion.SubversionCredentialsDialog;
 import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.Arrays;
@@ -58,13 +59,14 @@ public class ExportPresenter extends SubversionActionPresenter implements Export
     @Inject
     public ExportPresenter(AppContext appContext,
                            SubversionOutputConsoleFactory consoleFactory,
+                           SubversionCredentialsDialog credentialsDialog,
                            ProcessesPanelPresenter processesPanelPresenter,
                            ExportView view,
                            SubversionClientService service,
                            NotificationManager notificationManager,
                            SubversionExtensionLocalizationConstants constants,
                            StatusColors statusColors) {
-        super(appContext, consoleFactory, processesPanelPresenter, statusColors);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors, constants, notificationManager, credentialsDialog);
         this.appContext = appContext;
         this.view = view;
         this.service = service;
@@ -168,18 +170,6 @@ public class ExportPresenter extends SubversionActionPresenter implements Export
         Window.open(url.toString(), "_self", "");
         notification.setTitle(constants.exportSuccessful(exportPath.toString()));
         notification.setStatus(SUCCESS);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void minimize() {
-
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void activatePart() {
-
     }
 
 }

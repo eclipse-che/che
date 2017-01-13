@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,6 +55,11 @@ public class DarkTheme implements Theme {
     @Override
     public String selectionBackground() {
         return "#256c9f";
+    }
+
+    @Override
+    public String inputSelectionBackground() {
+        return "#b1b1b1";
     }
 
     @Override
@@ -507,6 +512,11 @@ public class DarkTheme implements Theme {
     }
 
     @Override
+    public String completionPopupItemHighlightTextColor() {
+        return "#4EABFF";
+    }
+
+    @Override
     public String getWindowContentBackground() {
         return "#292C2F";
     }
@@ -788,7 +798,7 @@ public class DarkTheme implements Theme {
 
     @Override
     public String consolesToolbarButtonColor() {
-        return "#aaaaaa";
+        return "#808080";
     }
 
     @Override
@@ -1352,6 +1362,11 @@ public class DarkTheme implements Theme {
     }
 
     @Override
+    public String notificationPopupWarningBackground() {
+    	return "#F0AD4E";
+    }
+    
+    @Override
     public String notificationPopupPanelShadow() {
         return "0 0 10px rgba(0,0,0,0.6)";
     }
@@ -1371,6 +1386,11 @@ public class DarkTheme implements Theme {
         return "#9b9b9b";
     }
 
+    @Override
+    public String notificationPopupIconWarningFill() {
+    	return "#F0AD4E";
+    }
+    
     @Override
     public String notificationPopupIconSvgFill() {
         return "#FFFFFF";
@@ -1452,23 +1472,23 @@ public class DarkTheme implements Theme {
     }
 
     @Override
-    public String toolButtonBorder() {
-        return "1px solid transparent";
-    }
-
-    @Override
     public String toolButtonActiveBorder() {
-        return "1px solid #24272c";
+        return "1px solid #262626";
     }
 
     @Override
     public String toolButtonHoverBackgroundColor() {
-        return "#44484D";
+        return "#262626";
     }
 
     @Override
     public String toolButtonActiveBackgroundColor() {
-        return "#33373B";
+        return "#262626";
+    }
+
+    @Override
+    public String toolButtonActiveColor() {
+        return "#4eabff";
     }
 
     @Override

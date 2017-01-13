@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,15 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.api.project.server;
 
-import org.eclipse.che.api.core.ConflictException;
-import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
 import org.eclipse.che.api.project.server.importer.ProjectImporterRegistry;
-import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
 import org.eclipse.che.api.project.server.type.ReadonlyValueProvider;
@@ -30,7 +26,7 @@ import org.eclipse.che.api.vfs.impl.file.DefaultFileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.FileTreeWatcher;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
-import org.eclipse.che.api.vfs.impl.file.event.detectors.ProjectTreeChangesDetector;
+import org.eclipse.che.api.vfs.watcher.FileWatcherManager;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.mockito.Mockito;
@@ -44,6 +40,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import static org.mockito.Mockito.mock;
 
 /**
  * @author gazarenkov
@@ -75,7 +73,7 @@ public class WsAgentTestBase {
 
     protected ProjectImporterRegistry importerRegistry;
 
-    protected ProjectTreeChangesDetector projectTreeChangesDetector;
+    protected FileWatcherManager fileWatcherManager;
 
     public void setUp() throws Exception {
 
@@ -118,14 +116,13 @@ public class WsAgentTestBase {
 
         fileWatcherNotificationHandler = new DefaultFileWatcherNotificationHandler(vfsProvider);
         fileTreeWatcher = new FileTreeWatcher(root, new HashSet<>(), fileWatcherNotificationHandler);
-
+        fileWatcherManager = mock(FileWatcherManager.class);
         TestWorkspaceHolder wsHolder = new  TestWorkspaceHolder();
 
-        projectTreeChangesDetector = new ProjectTreeChangesDetector(null);
 
         pm = new ProjectManager(vfsProvider, eventService, projectTypeRegistry, projectRegistry, projectHandlerRegistry,
-                                importerRegistry, fileWatcherNotificationHandler, fileTreeWatcher, wsHolder,
-                                projectTreeChangesDetector, Mockito.mock(ReadmeInjectionHandler.class));
+                                importerRegistry, fileWatcherNotificationHandler, fileTreeWatcher, wsHolder, fileWatcherManager,
+                                Mockito.mock(ReadmeInjectionHandler.class));
         pm.initWatcher();
     }
 
@@ -207,7 +204,7 @@ public class WsAgentTestBase {
         }
     }
 
-    protected static class PT3 extends ProjectTypeDef {
+    public class PT3 extends ProjectTypeDef {
 
         protected PT3() {
             super("pt3", "pt3", true, false);
@@ -249,23 +246,6 @@ public class WsAgentTestBase {
                 };
             }
         }
-
-        protected static class SrcGenerator implements CreateProjectHandler {
-
-            @Override
-            public void onCreateProject(FolderEntry baseFolder, Map<String, AttributeValue> attributes, Map<String, String> options)
-                    throws ForbiddenException, ConflictException, ServerException {
-
-                baseFolder.createFolder("file1");
-
-            }
-
-            @Override
-            public String getProjectType() {
-                return "pt3";
-            }
-        }
-
     }
 
     protected static class PT4NoGen extends ProjectTypeDef {

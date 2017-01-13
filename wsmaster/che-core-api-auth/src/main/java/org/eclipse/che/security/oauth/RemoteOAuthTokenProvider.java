@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,7 +45,7 @@ public class RemoteOAuthTokenProvider implements OAuthTokenProvider {
     private final HttpJsonRequestFactory httpJsonRequestFactory;
 
     @Inject
-    public RemoteOAuthTokenProvider(@Named("api.endpoint") String apiEndpoint, HttpJsonRequestFactory httpJsonRequestFactory) {
+    public RemoteOAuthTokenProvider(@Named("che.api") String apiEndpoint, HttpJsonRequestFactory httpJsonRequestFactory) {
         this.apiEndpoint = apiEndpoint;
         this.httpJsonRequestFactory = httpJsonRequestFactory;
     }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,7 +25,6 @@ import org.eclipse.che.api.vfs.VirtualFile;
 import org.eclipse.che.api.vfs.VirtualFileSystem;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.plugin.ssh.key.script.SshKeyProvider;
-import org.eclipse.che.plugin.svn.server.credentials.CredentialsProvider;
 import org.eclipse.che.plugin.svn.server.repository.RepositoryUrlProvider;
 import org.eclipse.che.plugin.svn.server.utils.TestUtils;
 import org.junit.Before;
@@ -48,9 +47,6 @@ public class SubversionProjectImporterTest {
 
     @Mock
     private ProfileDao userProfileDao;
-
-    @Mock
-    private CredentialsProvider   credentialsProvider;
     @Mock
     private RepositoryUrlProvider repositoryUrlProvider;
     @Mock
@@ -75,7 +71,6 @@ public class SubversionProjectImporterTest {
 
                 bind(SshKeyProvider.class).toInstance(sshKeyProvider);
                 bind(ProfileDao.class).toInstance(userProfileDao);
-                bind(CredentialsProvider.class).toInstance(credentialsProvider);
                 bind(RepositoryUrlProvider.class).toInstance(repositoryUrlProvider);
             }
         });
@@ -167,14 +162,15 @@ public class SubversionProjectImporterTest {
     @Test
     public void testValidImportSources() throws Exception {
         final String projectName = NameGenerator.generate("project-", 3);
-        final VirtualFile virtualFile = root.createFolder(projectName);//root.getChild(org.eclipse.che.api.vfs.Path.of(projectName));
+        final VirtualFile virtualFile = root.createFolder(projectName);
         FolderEntry projectFolder = new FolderEntry(virtualFile);
         String repoUrl = Paths.get(repoRoot.getAbsolutePath()).toUri().toString();
         when(sourceStorage.getLocation()).thenReturn(repoUrl);
         projectImporter.importSources(projectFolder, sourceStorage, new TestUtils.SystemOutLineConsumerFactory());
 
         assertTrue(projectFolder.getChild(".svn").isFolder());
-        assertTrue(projectFolder.getChild("A").isFolder());
-        assertTrue(projectFolder.getChild("iota").isFile());
+        assertTrue(projectFolder.getChild("trunk").isFolder());
+        assertTrue(projectFolder.getChildFolder("trunk").getChild("A").isFolder());
+        assertTrue(projectFolder.getChildFolder("trunk").getChildFolder("A").getChild("mu").isFile());
     }
 }

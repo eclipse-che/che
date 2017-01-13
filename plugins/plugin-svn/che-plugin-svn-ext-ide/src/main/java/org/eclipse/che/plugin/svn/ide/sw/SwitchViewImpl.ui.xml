@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2012-2017 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <ui:with field='constants' type='org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants'/>
+    <ui:with field='resources' type='org.eclipse.che.plugin.svn.ide.SubversionExtensionResources'/>
+    <ui:style>
+        .panel {
+            margin-bottom: 5px;
+        }
+
+        .label {
+            width: 115px;
+            display: inline-block;
+            float: left;
+            text-align: right;
+        }
+
+        .space {
+            padding-right: 8px;
+            padding-top: 3px;
+        }
+
+        .space123 {
+            padding-left: 123px;
+        }
+
+        .treeButton {
+            min-width: 24px;
+            margin-left: 2px;
+            padding: 0 0 0 0;
+        }
+
+    </ui:style>
+    <g:DockPanel addStyleNames="{style.panel}">
+        <g:Dock direction="NORTH">
+            <g:FlowPanel addStyleNames="{style.panel}">
+                <g:Label text="{constants.switchToLabel}:" addStyleNames="{resources.subversionCSS.textFont} {style.label} {style.space}"/>
+                <g:RadioButton name="switchTo" text="{constants.switchToTrunk}"
+                               ui:field="switchToTrunk" addStyleNames="{resources.subversionCSS.textFont} {style.space}"/>
+                <g:RadioButton name="switchTo" text="{constants.switchToBranch}"
+                               ui:field="switchToBranch" addStyleNames="{resources.subversionCSS.textFont} {style.space}"/>
+                <g:RadioButton name="switchTo" text="{constants.switchToTag}"
+                               ui:field="switchToTag" addStyleNames="{resources.subversionCSS.textFont} {style.space}"/>
+                <g:RadioButton name="switchTo" text="{constants.switchToOtherLocation}"
+                               ui:field="switchToOtherLocation" addStyleNames="{resources.subversionCSS.textFont} {style.space}"/>
+
+            </g:FlowPanel>
+        </g:Dock>
+        <g:Dock direction="NORTH">
+            <g:FlowPanel addStyleNames="{style.panel}">
+                <g:Label text="" addStyleNames="{resources.subversionCSS.textFont} {style.label} {style.space}"/>
+                <g:ListBox ui:field="switchToLocation" width="200px"/>
+            </g:FlowPanel>
+        </g:Dock>
+        <g:Dock direction="NORTH">
+            <g:FlowPanel addStyleNames="{style.panel}">
+                <g:Label text="{constants.switchLocationLabel}:"
+                         addStyleNames="{resources.subversionCSS.textFont} {style.label} {style.space}"/>
+                <g:TextBox ui:field="location" width="350px"/>
+                <g:Button ui:field="selectOtherLocation" text="..." addStyleNames="{style.treeButton}"/>
+            </g:FlowPanel>
+        </g:Dock>
+        <g:Dock direction="NORTH">
+            <g:FlowPanel addStyleNames="{style.panel}">
+                <g:Label text="{constants.switchRevisionAtLabel}:"
+                         addStyleNames="{resources.subversionCSS.textFont} {style.label} {style.space}"/>
+                <g:RadioButton name="switchRevision" text="{constants.switchRevisionHead}" checked="true"
+                               ui:field="switchToHeadRevision" addStyleNames="{resources.subversionCSS.textFont} {style.space}"/>
+                <g:RadioButton name="switchRevision" text="{constants.switchRevisionRevision}"
+                               ui:field="switchToRevision" addStyleNames="{resources.subversionCSS.textFont} {style.space}"/>
+                <g:TextBox ui:field="revision" width="52px"/>
+            </g:FlowPanel>
+        </g:Dock>
+        <g:Dock direction="NORTH">
+            <g:FlowPanel addStyleNames="{style.panel}">
+                <g:Label text="{constants.switchDepthLabel}:"
+                         addStyleNames="{resources.subversionCSS.textFont} {style.label} {style.space}"/>
+                <g:ListBox ui:field="depth" width="200px"/>
+            </g:FlowPanel>
+        </g:Dock>
+        <g:Dock direction="NORTH">
+            <g:CheckBox text="{constants.switchForce}" ui:field="force"
+                        addStyleNames="{resources.subversionCSS.textFont} {style.space123}"/>
+        </g:Dock>
+        <g:Dock direction="NORTH">
+            <g:CheckBox text="{constants.switchIgnoreAncestry}" ui:field="ignoreAncestry" checked="true"
+                        addStyleNames="{resources.subversionCSS.textFont} {style.space123}"/>
+
+        </g:Dock>
+        <g:Dock direction="NORTH">
+            <g:CheckBox text="{constants.switchIgnoreExternals}" ui:field="ignoreExternals"
+                        addStyleNames="{resources.subversionCSS.textFont} {style.space123}"/>
+        </g:Dock>
+        <g:Dock direction="NORTH">
+            <g:FlowPanel addStyleNames="{style.panel}">
+                <g:Label text="{constants.switchWorkingCopyDepthLabel}:"
+                         addStyleNames="{resources.subversionCSS.textFont} {style.label} {style.space}"/>
+                <g:ListBox ui:field="workingCopyDepth" width="200px"/>
+            </g:FlowPanel>
+        </g:Dock>
+        <g:Dock direction="NORTH">
+            <g:FlowPanel addStyleNames="{style.panel}">
+                <g:Label text="{constants.switchConflictResolutionLabel}:"
+                         addStyleNames="{resources.subversionCSS.textFont} {style.label} {style.space}"/>
+                <g:ListBox ui:field="accept" width="200px"/>
+            </g:FlowPanel>
+        </g:Dock>
+    </g:DockPanel>
+</ui:UiBinder>

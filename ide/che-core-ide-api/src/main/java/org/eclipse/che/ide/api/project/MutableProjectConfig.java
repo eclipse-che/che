@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,10 +12,10 @@ package org.eclipse.che.ide.api.project;
 
 import com.google.common.annotations.Beta;
 
+import org.eclipse.che.api.core.model.project.NewProjectConfig;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.model.project.SourceStorage;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -35,6 +35,8 @@ public class MutableProjectConfig implements ProjectConfig {
     private List<String>              mixins;
     private Map<String, List<String>> attributes;
     private MutableSourceStorage      sourceStorage;
+    private Map<String, String>       options;
+    private List<NewProjectConfig>    projects;
 
     public MutableProjectConfig(ProjectConfig source) {
         name = source.getName();
@@ -88,7 +90,7 @@ public class MutableProjectConfig implements ProjectConfig {
     @Override
     public List<String> getMixins() {
         if (mixins == null) {
-            mixins = new ArrayList<>();
+            mixins = newArrayList();
         }
 
         return mixins;
@@ -122,6 +124,39 @@ public class MutableProjectConfig implements ProjectConfig {
 
     public void setSource(SourceStorage sourceStorage) {
         this.sourceStorage = new MutableSourceStorage(sourceStorage);
+    }
+
+    public Map<String, String> getOptions() {
+        if (options == null) {
+            options = newHashMap();
+        }
+        return options;
+    }
+
+    public void setOptions(Map<String, String> options) {
+        this.options = options;
+    }
+
+    /**
+     * Returns the list of configurations to creating projects
+     *
+     * @return the list of {@link NewProjectConfig} to creating projects
+     */
+    public List<NewProjectConfig> getProjects() {
+        if (projects == null) {
+            return newArrayList();
+        }
+        return projects;
+    }
+
+    /**
+     * Sets the list of configurations to creating projects
+     *
+     * @param projects
+     *         the list of {@link NewProjectConfig} to creating projects
+     */
+    public void setProjects(List<NewProjectConfig> projects) {
+        this.projects = projects;
     }
 
     public class MutableSourceStorage implements SourceStorage {

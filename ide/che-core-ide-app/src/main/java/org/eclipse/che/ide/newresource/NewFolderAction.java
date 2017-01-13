@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.newresource;
 
-import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
@@ -70,24 +69,24 @@ public class NewFolderAction extends AbstractNewResourceAction {
                 new InputCallback() {
                     @Override
                     public void accepted(String value) {
-                        onAccepted(value);
+                        createFolder(value);
                     }
                 }, null).withValidator(folderNameValidator);
         inputDialog.show();
     }
 
-    private void onAccepted(String value) {
+    final void createFolder(String name) {
         Resource resource = appContext.getResource();
 
         if (!(resource instanceof Container)) {
-            final Optional<Container> parent = resource.getParent();
+            final Container parent = resource.getParent();
 
-            checkState(!parent.isPresent(), "Parent should be a container");
+            checkState(parent != null, "Parent should be a container");
 
-            resource = parent.get();
+            resource = parent;
         }
 
-        ((Container)resource).newFolder(value).then(new Operation<Folder>() {
+        ((Container)resource).newFolder(name).then(new Operation<Folder>() {
             @Override
             public void apply(Folder folder) throws OperationException {
                 eventBus.fireEvent(new RevealResourceEvent(folder));

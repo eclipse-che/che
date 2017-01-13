@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,11 +17,9 @@ import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.wizard.AbstractWizardPage;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
-import org.eclipse.che.plugin.svn.shared.ImportParameterKeys;
 import org.eclipse.che.ide.util.NameUtils;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -73,9 +71,6 @@ public class SubversionProjectImporterPresenter extends AbstractWizardPage<Mutab
         view.setProjectName(dataObject.getName());
         view.setProjectDescription(dataObject.getDescription());
         view.setProjectUrl(dataObject.getSource().getLocation());
-
-        view.cleanCredentials();
-        onCredentialsChanged();
 
         container.setWidget(view);
 
@@ -139,13 +134,6 @@ public class SubversionProjectImporterPresenter extends AbstractWizardPage<Mutab
     @Override
     public void onProjectDescriptionChanged(final String projectDescription) {
         dataObject.setDescription(projectDescription);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void onCredentialsChanged() {
-        dataObject.getSource().getParameters().put(ImportParameterKeys.PARAMETER_USERNAME, view.getUserName());
-        dataObject.getSource().getParameters().put(ImportParameterKeys.PARAMETER_PASSWORD, view.getPassword());
     }
 
     private boolean isSubversionUrlCorrect(final String url) {

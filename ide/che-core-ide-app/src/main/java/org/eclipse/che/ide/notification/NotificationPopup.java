@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -199,6 +199,10 @@ public class NotificationPopup extends SimplePanel implements NotificationObserv
                 icon = resources.fail();
                 status = "fail";
                 break;
+            case WARNING:
+            	icon = resources.warning();
+            	status = "warning";
+            	break;
             default:
                 throw new IllegalArgumentException("Can't determine notification icon");
         }
@@ -301,6 +305,7 @@ public class NotificationPopup extends SimplePanel implements NotificationObserv
         removeStyleName(resources.notificationCss().notificationStatusProgress());
         removeStyleName(resources.notificationCss().notificationStatusSuccess());
         removeStyleName(resources.notificationCss().notificationStatusFail());
+        removeStyleName(resources.notificationCss().notificationStatusWarning());
 
         DisplayMode displayMode = notification.getDisplayMode();
         Status status = notification.getStatus();
@@ -312,8 +317,11 @@ public class NotificationPopup extends SimplePanel implements NotificationObserv
                 setStyleName(resources.notificationCss().notificationStatusSuccess(), true);
                 break;
             case FAIL:
-                setStyleName(resources.notificationCss().notificationStatusFail(), true);
+            	setStyleName(resources.notificationCss().notificationStatusFail(), true);
                 break;
+            case WARNING:
+            	setStyleName(resources.notificationCss().notificationStatusWarning(), true);
+            	break;
         }
 
         if (FLOAT_MODE == displayMode && PROGRESS == status) {

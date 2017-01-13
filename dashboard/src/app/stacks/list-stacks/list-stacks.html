@@ -24,6 +24,8 @@
                      che-hide-search="listStacksController.stacks.length === 0"
                      che-add-button-title="Add Stack"
                      che-add-button-href="#stack/create"
+                     che-import-button-title="Import"
+                     che-on-import="listStacksController.showSelectStackRecipeDialog($event)"
                      che-delete-button-title="Delete"
                      che-on-delete="listStacksController.deleteSelectedStacks()"
                      che-hide-delete="listStacksController.isNoSelected"
@@ -38,7 +40,7 @@
           <div layout="row" layout-align="center center" class="che-list-item-checkbox-main">
             <md-checkbox class="che-list-item-checkbox"
                          aria-label="Stack list"
-                         ng-checked="listStacksController.isAllChecked"
+                         ng-checked="listStacksController.isAllSelected"
                          ng-click="listStacksController.changeSelectionState()"></md-checkbox>
           </div>
         </div>
@@ -46,15 +48,15 @@
              layout-align="start center"
              class="che-list-item-details">
           <che-list-header-column flex-gt-xs="20"
-                                  che-sort-value='listStacksController.stackOrderBy'
-                                  che-sort-item='name'
-                                  che-column-title='Name'></che-list-header-column>
+                                  che-sort-value="listStacksController.stackOrderBy"
+                                  che-sort-item="name"
+                                  che-column-title="Name"></che-list-header-column>
           <che-list-header-column flex-gt-xs="35"
-                                  che-column-title='Description'></che-list-header-column>
+                                  che-column-title="Description"></che-list-header-column>
           <che-list-header-column flex-gt-xs="30"
-                                  che-column-title='Components'></che-list-header-column>
+                                  che-column-title="Components"></che-list-header-column>
           <che-list-header-column flex-gt-xs="18"
-                                  che-column-title='Actions'></che-list-header-column>
+                                  che-column-title="Actions"></che-list-header-column>
         </div>
       </div>
     </che-list-header>
@@ -66,13 +68,14 @@
               che-on-checkbox-click="listStacksController.updateSelectionState()"
               che-on-delete="listStacksController.deleteStack(stack)"
               che-on-duplicate="listStacksController.duplicateStack(stack)"
-              che-stack="stack"></stack-item>
+              stack="stack"
+              user-id="listStacksController.userId"></stack-item>
     </che-list>
     <div class="che-list-empty">
         <span ng-show="listStacksController.stacks.length > 0 && (listStacksController.stacks | filter:listStacksController.stackFilter).length === 0">
           No stacks found.
         </span>
-      <span ng-show="listStacksController.stacks.length === 0">There are no stacks yet</span>
+      <span ng-show="listStacksController.stacks.length === 0">There are no stacks.</span>
     </div>
   </md-content>
 </md-content>

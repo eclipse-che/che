@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,11 +13,10 @@ package org.eclipse.che.plugin.maven.server.projecttype.handler;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
 import org.eclipse.che.api.project.server.type.AttributeValue;
+import org.eclipse.che.api.vfs.Path;
 import org.eclipse.che.plugin.maven.shared.MavenAttributes;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,12 +37,9 @@ public class MavenProjectGenerator implements CreateProjectHandler {
     private final Map<String, GeneratorStrategy> strategies = new HashMap<>();
 
     @Inject
-    public MavenProjectGenerator(Set<GeneratorStrategy> generatorStrategies) {
+    public MavenProjectGenerator(Set<GeneratorStrategy> generatorStrategies) throws ServerException {
         for (GeneratorStrategy generatorStrategy : generatorStrategies) {
             strategies.put(generatorStrategy.getId(), generatorStrategy);
-        }
-        if (!strategies.containsKey(MavenAttributes.SIMPLE_GENERATION_STRATEGY)) { //must always be if not added in DI we add it here
-            strategies.put(MavenAttributes.SIMPLE_GENERATION_STRATEGY, new SimpleGeneratorStrategy());
         }
     }
 
@@ -53,13 +49,13 @@ public class MavenProjectGenerator implements CreateProjectHandler {
     }
 
     @Override
-    public void onCreateProject(FolderEntry baseFolder, Map<String, AttributeValue> attributes,
-                                Map<String, String> options) throws ForbiddenException, ConflictException, ServerException {
+    public void onCreateProject(Path projectPath,  Map<String, AttributeValue> attributes, Map<String, String> options)
+            throws ForbiddenException, ConflictException, ServerException {
         if (options == null || options.isEmpty() || !options.containsKey("type")) {
-            strategies.get(MavenAttributes.SIMPLE_GENERATION_STRATEGY).generateProject(baseFolder, attributes, options);
+            strategies.get(MavenAttributes.SIMPLE_GENERATION_STRATEGY).generateProject(projectPath, attributes, options);
         } else {
             if (strategies.containsKey(options.get("type"))) {
-                strategies.get(options.get("type")).generateProject(baseFolder, attributes, options);
+                strategies.get(options.get("type")).generateProject(projectPath, attributes, options);
             } else {
                 String errorMsg = String.format("Generation strategy %s not found", options.get("type"));
                 LOG.warn("MavenProjectGenerator", errorMsg);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,17 +8,15 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.che.plugin.java.server.rest;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.ide.ext.java.shared.dto.Change;
 import org.eclipse.che.ide.ext.java.shared.dto.ConflictImportDTO;
+import org.eclipse.che.ide.ext.java.shared.dto.OrganizeImportResult;
 import org.eclipse.che.ide.ext.java.shared.dto.Problem;
 import org.eclipse.che.ide.ext.java.shared.dto.ProposalApplyResult;
 import org.eclipse.che.ide.ext.java.shared.dto.Proposals;
@@ -112,8 +110,8 @@ public class CodeAssistService {
     @POST
     @Path("/organize-imports")
     @Produces({MediaType.APPLICATION_JSON})
-    public List<ConflictImportDTO> organizeImports(@QueryParam("projectpath") String projectPath,
-                                                   @QueryParam("fqn") String fqn) throws NotFoundException,
+    public OrganizeImportResult organizeImports(@QueryParam("projectpath") String projectPath,
+                                                @QueryParam("fqn") String fqn) throws NotFoundException,
                                                                                         CoreException,
                                                                                         BadLocationException {
         IJavaProject project = model.getJavaProject(projectPath);
@@ -128,18 +126,19 @@ public class CodeAssistService {
      * @param fqn
      *         fully qualified name of the java file
      * @param  chosen
-     *          list of chosen imports from conflicts which needed to add to all imports.
+     * @return list of document changes
      */
     @POST
     @Path("/apply-imports")
     @Consumes(MediaType.APPLICATION_JSON)
-    public void applyChosenImports(@QueryParam("projectpath") String projectPath,
-                                   @QueryParam("fqn") String fqn,
-                                   ConflictImportDTO chosen) throws NotFoundException,
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<Change> applyChosenImports(@QueryParam("projectpath") String projectPath,
+                                           @QueryParam("fqn") String fqn,
+                                           ConflictImportDTO chosen) throws NotFoundException,
                                                                     CoreException,
                                                                     BadLocationException {
         IJavaProject project = model.getJavaProject(projectPath);
-        codeAssist.applyChosenImports(project, fqn, chosen.getTypeMatches());
+        return codeAssist.applyChosenImports(project, fqn, chosen.getTypeMatches());
     }
 
     @POST

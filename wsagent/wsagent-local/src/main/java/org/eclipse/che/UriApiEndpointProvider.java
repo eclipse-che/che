@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,14 +20,14 @@ import java.net.URI;
  */
 public class UriApiEndpointProvider implements Provider<URI> {
 
-    public static final String API_ENDPOINT_URL_VARIABLE = "CHE_API_ENDPOINT";
+    public static final String API_ENDPOINT_URL_VARIABLE = "CHE_API";
 
     @Override
     public URI get() {
         try {
             return new URI(System.getenv(API_ENDPOINT_URL_VARIABLE));
         } catch (Exception e) {
-            throw new RuntimeException("System variable CHE_API_ENDPOINT contain invalid value of Che api endpoint:" +
+            throw new RuntimeException("System variable CHE_API contain invalid value of Che api endpoint:" +
                                        System.getenv(API_ENDPOINT_URL_VARIABLE));
         }
     }

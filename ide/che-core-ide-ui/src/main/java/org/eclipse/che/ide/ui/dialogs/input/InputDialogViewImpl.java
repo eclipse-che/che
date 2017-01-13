@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -102,6 +102,11 @@ public class InputDialogViewImpl extends Window implements InputDialogView {
     @Override
     public void setValue(String value) {
         this.value.setText(value);
+    }
+
+    @Override
+    public void setOkButtonLabel(String label) {
+        footer.getOkButton().setText(label);
     }
 
     @Override

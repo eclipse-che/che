@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,12 +13,17 @@ package org.eclipse.che.api.factory.server.model.impl;
 import org.eclipse.che.api.core.model.factory.Action;
 import org.eclipse.che.api.core.model.factory.OnAppLoaded;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Data object for {@link OnAppLoaded}.
@@ -29,13 +34,18 @@ import static java.util.stream.Collectors.toList;
 import static javax.persistence.CascadeType.ALL;
 
 @Entity(name = "OnAppLoaded")
+@Table(name = "onapploaded")
 public class OnAppLoadedImpl implements OnAppLoaded {
 
     @Id
     @GeneratedValue
+    @Column(name = "id")
     private Long id;
 
     @OneToMany(cascade = ALL, orphanRemoval = true)
+    @JoinTable(name = "onapploaded_action",
+               joinColumns = @JoinColumn(name = "onapploaded_id"),
+               inverseJoinColumns = @JoinColumn(name = "actions_entityid"))
     private List<ActionImpl> actions;
 
     public OnAppLoadedImpl() {}
@@ -66,21 +76,30 @@ public class OnAppLoadedImpl implements OnAppLoaded {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof OnAppLoadedImpl)) return false;
-        final OnAppLoadedImpl other = (OnAppLoadedImpl)obj;
-        return getActions().equals(other.getActions());
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof OnAppLoadedImpl)) {
+            return false;
+        }
+        final OnAppLoadedImpl that = (OnAppLoadedImpl)obj;
+        return Objects.equals(id, that.id)
+               && getActions().equals(that.getActions());
     }
 
     @Override
     public int hashCode() {
-        return getActions().hashCode();
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(id);
+        hash = 31 * hash + getActions().hashCode();
+        return hash;
     }
 
     @Override
     public String toString() {
         return "OnAppLoadedImpl{" +
-               "actions=" + actions +
+               "id=" + id +
+               ", actions=" + actions +
                '}';
     }
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,11 +16,12 @@ import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
+import org.eclipse.che.ide.api.machine.MachineEntity;
+import org.eclipse.che.ide.menu.PartMenu;
 import org.eclipse.che.ide.part.widgets.TabItemFactory;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.WidgetsFactory;
-import org.eclipse.che.ide.extension.machine.client.machine.Machine;
 import org.eclipse.che.ide.extension.machine.client.perspective.terminal.container.TerminalContainer;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.appliance.recipe.RecipeTabPresenter;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.appliance.server.ServerPresenter;
@@ -66,6 +67,8 @@ public class MachineAppliancePresenterTest {
     @Mock
     private EventBus                    eventBus;
     @Mock
+    private PartMenu                    partMenu;
+    @Mock
     private PartStackEventHandler       partStackEventHandler;
     @Mock
     private MachineApplianceView        view;
@@ -107,7 +110,7 @@ public class MachineAppliancePresenterTest {
     @Mock
     private TabContainerView       tabContainerView;
     @Mock
-    private Machine                machine;
+    private MachineEntity          machine;
     @Mock
     private Widget                 widget;
     @Mock
@@ -159,6 +162,7 @@ public class MachineAppliancePresenterTest {
                                      Matchers.<TabSelectHandler>anyObject())).thenReturn(recipeTab);
 
         presenter = new MachineAppliancePresenter(eventBus,
+                                                  partMenu,
                                                   comparator,
                                                   partStackEventHandler,
                                                   view,
@@ -166,7 +170,6 @@ public class MachineAppliancePresenterTest {
                                                   widgetsFactory,
                                                   entityFactory,
                                                   tabItemFactory,
-                                                  terminalContainer,
                                                   infoPresenter,
                                                   recipesContainerPresenter,
                                                   serverPresenter,
@@ -176,17 +179,14 @@ public class MachineAppliancePresenterTest {
 
     @Test
     public void constructorShouldBeVerified() {
-        verify(widgetsFactory, times(3)).createTabHeader(SOME_TEXT);
+        verify(widgetsFactory, times(2)).createTabHeader(SOME_TEXT);
 
-        verify(entityFactory).createTab(eq(tabHeader), eq(terminalContainer), Matchers.<TabSelectHandler>anyObject());
         verify(entityFactory).createTab(eq(tabHeader), eq(infoPresenter), Matchers.<TabSelectHandler>anyObject());
         verify(entityFactory).createTab(eq(tabHeader), eq(serverPresenter), Matchers.<TabSelectHandler>anyObject());
 
-        verify(locale).tabTerminal();
         verify(locale).tabInfo();
         verify(locale).tabServer();
 
-        verify(tabContainer).addTab(terminalTab);
         verify(tabContainer).addTab(infoTab);
         verify(tabContainer).addTab(serverTab);
 
@@ -196,28 +196,21 @@ public class MachineAppliancePresenterTest {
         verify(view).addContainer(recipePartView);
     }
 
-    @Test
-    public void terminalHandlerShouldBePerformed() {
-        callAndVerifyHandler();
-
-        verify(locale).tabTerminal();
-        verify(terminalContainer, times(2)).addOrShowTerminal(machine);
-    }
 
     private void callAndVerifyHandler() {
         presenter.showAppliance(machine);
 
-        verify(entityFactory).createTab(eq(tabHeader), eq(terminalContainer), handlerCaptor.capture());
+        verify(entityFactory).createTab(eq(tabHeader), eq(infoPresenter), handlerCaptor.capture());
         handlerCaptor.getValue().onTabSelected();
 
-        verify(machine).setActiveTabName(SOME_TEXT);
+        verify(machine, times(2)).getId();
     }
 
     @Test
     public void infoHandlerShouldBePerformed() {
         callAndVerifyHandler();
 
-        verify(locale).tabInfo();
+        verify(locale, times(2)).tabInfo();
     }
 
     @Test
@@ -230,7 +223,6 @@ public class MachineAppliancePresenterTest {
     @Test
     public void infoShouldBeShown() {
         reset(tabContainer);
-        when(machine.getActiveTabName()).thenReturn(SOME_TEXT);
         when(tabContainer.getView()).thenReturn(tabContainerView);
 
         presenter.showAppliance(machine);
@@ -239,7 +231,6 @@ public class MachineAppliancePresenterTest {
         verify(view).showContainer(tabContainerView);
 
         verify(tabContainer).showTab(SOME_TEXT);
-        verify(terminalContainer).addOrShowTerminal(machine);
         verify(infoPresenter).update(machine);
         verify(serverPresenter).updateInfo(machine);
     }
@@ -282,4 +273,5 @@ public class MachineAppliancePresenterTest {
         verify(view, never()).showContainer(tabContainerView);
         verify(view).showStub(anyString());
     }
+
 }

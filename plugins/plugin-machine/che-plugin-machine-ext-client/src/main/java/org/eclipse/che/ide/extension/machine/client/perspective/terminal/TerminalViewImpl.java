@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
@@ -27,7 +28,7 @@ import javax.validation.constraints.NotNull;
  *
  * @author Dmitry Shnurenko
  */
-final class TerminalViewImpl extends Composite implements TerminalView, RequiresResize{
+final class TerminalViewImpl extends Composite implements TerminalView, Focusable, RequiresResize {
 
     interface TerminalViewImplUiBinder extends UiBinder<Widget, TerminalViewImpl> {
     }
@@ -60,7 +61,6 @@ final class TerminalViewImpl extends Composite implements TerminalView, Requires
         terminalPanel.getElement().getStyle().setProperty("opacity", "0");
 
         terminal.open(terminalPanel.getElement());
-        resizeTerminal();
 
         terminalPanel.getElement().getFirstChildElement().getStyle().clearProperty("backgroundColor");
         terminalPanel.getElement().getFirstChildElement().getStyle().clearProperty("color");
@@ -93,6 +93,8 @@ final class TerminalViewImpl extends Composite implements TerminalView, Requires
         int offsetWidth = terminalPanel.getOffsetWidth();
         int offsetHeight = terminalPanel.getOffsetHeight();
         if (offsetWidth <= 0 || offsetHeight <= 0) {
+            resizeTimer.cancel();
+            resizeTimer.schedule(500);
             return;
         }
 
@@ -101,4 +103,23 @@ final class TerminalViewImpl extends Composite implements TerminalView, Requires
         delegate.setTerminalSize(x, y);
     }
 
+    @Override
+    public int getTabIndex() {
+        return 0;
+    }
+
+    @Override
+    public void setAccessKey(char key) {
+
+    }
+
+    @Override
+    public void setFocus(boolean focused) {
+        delegate.setFocus(focused);
+    }
+
+    @Override
+    public void setTabIndex(int index) {
+
+    }
 }

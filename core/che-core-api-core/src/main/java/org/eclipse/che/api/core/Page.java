@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,7 +13,6 @@ package org.eclipse.che.api.core;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -143,26 +142,24 @@ public class Page<ITEM_T> {
     }
 
     /**
-     * Returns an {@link Optional} describing reference to the next page,
-     * or the empty {@code Optional} when this page is the first one.
+     * Returns a reference to the next page.
+     *
+     * <p>Note: This method was designed to be used in couple with {@link #hasNextPage()}.
+     * Returns reference to the next page even when {@link #hasNextPage()} returns false.
      */
-    public Optional<PageRef> getNextPageRef() {
-        if (!hasNextPage()) {
-            return Optional.empty();
-        }
-        return Optional.of(new PageRef(itemsBefore + pageSize, pageSize));
+    public PageRef getNextPageRef() {
+        return new PageRef(itemsBefore + pageSize, pageSize);
     }
 
     /**
-     * Returns an {@link Optional} describing reference to the previous page,
-     * or the empty {@code Optional} when this page is the last one.
+     * Returns a reference to the previous page.
+     *
+     * <p>Note: This method was designed to be used in couple with {@link #hasPreviousPage()}.
+     * Returns reference to the first page when {@link #hasPreviousPage()} returns false.
      */
-    public Optional<PageRef> getPreviousPageRef() {
-        if (!hasPreviousPage()) {
-            return Optional.empty();
-        }
+    public PageRef getPreviousPageRef() {
         final long skipItems = itemsBefore <= pageSize ? 0 : itemsBefore - pageSize;
-        return Optional.of(new PageRef(skipItems, pageSize));
+        return new PageRef(skipItems, pageSize);
     }
 
     /** Returns the reference to the last page. */

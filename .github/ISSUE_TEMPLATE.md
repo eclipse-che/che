@@ -1,25 +1,15 @@
-[Short description of problem here]
+<!--- 
+Replace this comment with a description of the problem.
+
+Please help us by providing all of the details listed below. A complete and thoughtful issue request with research on possible root causes and diagnostics goes a very long way in helping us rapidly get your issues resolved. 
+--> 
 
 **Reproduction Steps:**
 
-1. [First Step]
-2. [Second Step]
-3. [Other Steps...]
+**Che version:**    <!--- Retrieve with 'docker run eclipse/che version' - it is also the value of :<version> tag -->
 
-**Expected behavior:**
+**OS and version:**    
 
-[Describe expected behavior here]
+**Docker version:** <!--- Use 'docker version' to get the client and engine versions -->   
 
-**Observed behavior:**
-
-[Describe observed behavior here]
-
-**Che version:**    [Enter Che version here]   
-**OS and version:** [Enter OS name and version here]   
-**Docker version:** [Enter your Docker version here `docker version` on CLI]   
-**Che install:**    [Vagrant, Docker container, server (zip), Bitnami, Yatta, or Codenvy?]   
-
-**Additional information:**
-
-* Problem started happening recently, didn't happen in an older version of Che: [Yes/No]
-* Problem can be reliably reproduced, doesn't happen randomly: [Yes/No]
+**Che cli.log output:**  <!--- This file is in the path mounted to `:/data` -->

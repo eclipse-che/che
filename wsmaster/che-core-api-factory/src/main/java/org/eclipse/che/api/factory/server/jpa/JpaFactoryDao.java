@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,15 +15,15 @@ import com.google.inject.persist.Transactional;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.jdbc.jpa.DuplicateKeyException;
-import org.eclipse.che.api.core.jdbc.jpa.IntegrityConstraintViolationException;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.factory.server.model.impl.FactoryImpl;
 import org.eclipse.che.api.factory.server.spi.FactoryDao;
 import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
-import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.commons.lang.Pair;
+import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
+import org.eclipse.che.core.db.jpa.DuplicateKeyException;
+import org.eclipse.che.core.db.jpa.IntegrityConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,12 +33,12 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
-import java.util.Collections;
 import javax.persistence.TypedQuery;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
@@ -66,14 +66,14 @@ public class JpaFactoryDao implements FactoryDao {
         } catch (RuntimeException ex) {
             throw new ServerException(ex.getLocalizedMessage(), ex);
         }
-        return factory;
+        return new FactoryImpl(factory);
     }
 
     @Override
     public FactoryImpl update(FactoryImpl update) throws NotFoundException, ConflictException, ServerException {
         requireNonNull(update);
         try {
-            return doUpdate(update);
+            return new FactoryImpl(doUpdate(update));
         } catch (DuplicateKeyException ex) {
             throw new ConflictException(ex.getLocalizedMessage());
         } catch (RuntimeException ex) {
@@ -100,7 +100,7 @@ public class JpaFactoryDao implements FactoryDao {
             if (factory == null) {
                 throw new NotFoundException(format("Factory with id '%s' doesn't exist", id));
             }
-            return factory;
+            return new FactoryImpl(factory);
         } catch (RuntimeException ex) {
             throw new ServerException(ex.getLocalizedMessage(), ex);
         }
@@ -132,7 +132,10 @@ public class JpaFactoryDao implements FactoryDao {
             for (Map.Entry<String, String> entry : params.entrySet()) {
                 typedQuery.setParameter(entry.getKey(), entry.getValue());
             }
-            return typedQuery.getResultList();
+            return typedQuery.getResultList()
+                             .stream()
+                             .map(FactoryImpl::new)
+                             .collect(Collectors.toList());
         } catch (RuntimeException ex) {
             throw new ServerException(ex.getLocalizedMessage(), ex);
         }
@@ -141,7 +144,11 @@ public class JpaFactoryDao implements FactoryDao {
     @Transactional
     protected void doCreate(FactoryImpl factory) {
         final EntityManager manager = managerProvider.get();
+        if (factory.getWorkspace() != null) {
+            factory.getWorkspace().getProjects().forEach(ProjectConfigImpl::prePersistAttributes);
+        }
         manager.persist(factory);
+        manager.flush();
     }
 
     @Transactional
@@ -150,7 +157,12 @@ public class JpaFactoryDao implements FactoryDao {
         if (manager.find(FactoryImpl.class, update.getId()) == null) {
             throw new NotFoundException(format("Could not update factory with id %s because it doesn't exist", update.getId()));
         }
-        return manager.merge(update);
+        if (update.getWorkspace() != null) {
+            update.getWorkspace().getProjects().forEach(ProjectConfigImpl::prePersistAttributes);
+        }
+        FactoryImpl merged = manager.merge(update);
+        manager.flush();
+        return merged;
     }
 
     @Transactional
@@ -159,11 +171,13 @@ public class JpaFactoryDao implements FactoryDao {
         final FactoryImpl factory = manager.find(FactoryImpl.class, id);
         if (factory != null) {
             manager.remove(factory);
+            manager.flush();
         }
     }
 
     @Singleton
-    public static class RemoveFactoriesBeforeUserRemovedEventSubscriber implements EventSubscriber<BeforeUserRemovedEvent> {
+    public static class RemoveFactoriesBeforeUserRemovedEventSubscriber
+            extends CascadeEventSubscriber<BeforeUserRemovedEvent> {
         @Inject
         private FactoryDao   factoryDao;
         @Inject
@@ -171,23 +185,19 @@ public class JpaFactoryDao implements FactoryDao {
 
         @PostConstruct
         public void subscribe() {
-            eventService.subscribe(this);
+            eventService.subscribe(this, BeforeUserRemovedEvent.class);
         }
 
         @PreDestroy
         public void unsubscribe() {
-            eventService.unsubscribe(this);
+            eventService.unsubscribe(this, BeforeUserRemovedEvent.class);
         }
 
         @Override
-        public void onEvent(BeforeUserRemovedEvent event) {
-            try {
-                final Pair<String, String> factoryCreator = Pair.of("creator.userId", event.getUser().getId());
-                for (FactoryImpl factory : factoryDao.getByAttribute(0, 0, singletonList(factoryCreator))) {
-                    factoryDao.remove(factory.getId());
-                }
-            } catch (Exception x) {
-                LOG.error(format("Couldn't remove factories before user '%s' removed", event.getUser().getId()), x);
+        public void onCascadeEvent(BeforeUserRemovedEvent event) throws ServerException {
+            final Pair<String, String> factoryCreator = Pair.of("creator.userId", event.getUser().getId());
+            for (FactoryImpl factory : factoryDao.getByAttribute(0, 0, singletonList(factoryCreator))) {
+                factoryDao.remove(factory.getId());
             }
         }
     }

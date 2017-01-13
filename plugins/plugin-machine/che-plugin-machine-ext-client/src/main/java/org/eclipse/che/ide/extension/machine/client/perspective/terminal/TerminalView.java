@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,8 +24,16 @@ import javax.validation.constraints.NotNull;
 @ImplementedBy(TerminalViewImpl.class)
 interface TerminalView extends View<TerminalView.ActionDelegate> {
 
-    interface ActionDelegate{
+    interface ActionDelegate {
         void setTerminalSize(int x, int y);
+
+        /**
+         * Set focus on the terminal panel.
+         *
+         * @param focused
+         *         {@code true} if terminal should be in focus
+         */
+        void setFocus(boolean focused);
     }
 
     /**

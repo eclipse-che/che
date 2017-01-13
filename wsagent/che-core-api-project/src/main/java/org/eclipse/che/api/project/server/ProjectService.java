@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,6 +31,7 @@ import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.annotations.Description;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
+import org.eclipse.che.api.project.server.importer.ProjectImportOutputWSLineConsumer;
 import org.eclipse.che.api.project.server.notification.ProjectItemModifiedEvent;
 import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
 import org.eclipse.che.api.project.shared.dto.CopyOptions;
@@ -43,6 +44,7 @@ import org.eclipse.che.api.vfs.search.QueryExpression;
 import org.eclipse.che.api.vfs.search.SearchResult;
 import org.eclipse.che.api.vfs.search.SearchResultEntry;
 import org.eclipse.che.api.vfs.search.Searcher;
+import org.eclipse.che.api.workspace.shared.dto.NewProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -64,10 +66,13 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.UriInfo;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -87,6 +92,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.eclipse.che.api.core.util.LinksHelper.createLink;
 import static org.eclipse.che.api.project.server.DtoConverter.asDto;
 import static org.eclipse.che.api.project.shared.Constants.LINK_REL_CHILDREN;
+import static org.eclipse.che.api.project.shared.Constants.LINK_REL_CREATE_BATCH_PROJECTS;
 import static org.eclipse.che.api.project.shared.Constants.LINK_REL_CREATE_PROJECT;
 import static org.eclipse.che.api.project.shared.Constants.LINK_REL_DELETE;
 import static org.eclipse.che.api.project.shared.Constants.LINK_REL_GET_CONTENT;
@@ -172,10 +178,16 @@ public class ProjectService extends Service {
      * NOTE: parentPath is added to make a module
      */
     public ProjectConfigDto createProject(@ApiParam(value = "Add to this project as module", required = false)
+                                          @Context UriInfo uriInfo,
                                           @Description("descriptor of project") ProjectConfigDto projectConfig) throws ConflictException,
                                                                                                                        ForbiddenException,
                                                                                                                        ServerException,
                                                                                                                        NotFoundException {
+        Map<String, String> options = new HashMap<>();
+        MultivaluedMap<String, String> map = uriInfo.getQueryParameters();
+        for(String key: map.keySet()) {
+            options.put(key, map.get(key).get(0));
+        }
         String pathToProject = projectConfig.getPath();
         String pathToParent = pathToProject.substring(0, pathToProject.lastIndexOf("/"));
 
@@ -186,7 +198,7 @@ public class ProjectService extends Service {
             }
         }
 
-        final RegisteredProject project = projectManager.createProject(projectConfig, null);
+        final RegisteredProject project = projectManager.createProject(projectConfig, options);
         final ProjectConfigDto configDto = asDto(project);
 
         eventService.publish(new ProjectCreatedEvent(workspace, project.getPath()));
@@ -195,6 +207,40 @@ public class ProjectService extends Service {
         //logProjectCreatedEvent(configDto.getName(), configDto.getProjectType());
 
         return injectProjectLinks(configDto);
+    }
+
+    @POST
+    @Path("/batch")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Creates batch of projects according to their configurations",
+                  notes = "A project will be created by importing when project configuration contains source object. " +
+                          "For creating a project by generator options should be specified.",
+                  response = ProjectConfigDto.class)
+    @ApiResponses({@ApiResponse(code = 200, message = "OK"),
+                   @ApiResponse(code = 400, message = "Path for new project should be defined"),
+                   @ApiResponse(code = 403, message = "Operation is forbidden"),
+                   @ApiResponse(code = 409, message = "Project with specified name already exist in workspace"),
+                   @ApiResponse(code = 500, message = "Server error")})
+    @GenerateLink(rel = LINK_REL_CREATE_BATCH_PROJECTS)
+    public List<ProjectConfigDto> createBatchProjects(
+            @Description("list of descriptors for projects") List<NewProjectConfigDto> projectConfigList,
+            @ApiParam(value = "Force rewrite existing project", allowableValues = "true,false")
+            @QueryParam("force") boolean rewrite)
+            throws ConflictException, ForbiddenException, ServerException, NotFoundException, IOException, UnauthorizedException,
+                   BadRequestException {
+
+        List<ProjectConfigDto> result = new ArrayList<>(projectConfigList.size());
+        final ProjectOutputLineConsumerFactory outputOutputConsumerFactory = new ProjectOutputLineConsumerFactory(workspace, 300);
+
+        for (RegisteredProject registeredProject : projectManager.createBatchProjects(projectConfigList, rewrite, outputOutputConsumerFactory)) {
+
+            ProjectConfigDto projectConfig = injectProjectLinks(asDto(registeredProject));
+            result.add(projectConfig);
+
+            eventService.publish(new ProjectCreatedEvent(workspace, registeredProject.getPath()));
+        }
+        return result;
     }
 
     @PUT
@@ -262,6 +308,7 @@ public class ProjectService extends Service {
         return DtoFactory.newDto(SourceEstimation.class)
                          .withType(projectType)
                          .withMatched(resolution.matched())
+                         .withResolution(resolution.getResolution())
                          .withAttributes(attributes);
     }
 
@@ -313,7 +360,8 @@ public class ProjectService extends Service {
                                                                      ServerException,
                                                                      NotFoundException,
                                                                      BadRequestException {
-        projectManager.importProject(path, sourceStorage, force);
+        projectManager.importProject(path, sourceStorage, force,
+                                     () -> new ProjectImportOutputWSLineConsumer(path, workspace, 300));
     }
 
     @POST
@@ -568,13 +616,6 @@ public class ProjectService extends Service {
         final URI location = getServiceContext().getServiceUriBuilder()
                                                 .path(getClass(), move.isFile() ? "getFile" : "getChildren")
                                                 .build(new String[]{move.getPath().toString().substring(1)}, false);
-
-        eventService.publish(new ProjectItemModifiedEvent(ProjectItemModifiedEvent.EventType.MOVED,
-                                                          workspace,
-                                                          entry.getProject(),
-                                                          entry.getPath().toString(),
-                                                          entry.isFolder(),
-                                                          path));
 
         return Response.created(location).build();
     }
