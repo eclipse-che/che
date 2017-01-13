@@ -391,7 +391,7 @@ public class WorkspaceEventsHandler {
 
                 case ERROR:
                     notificationManager.notify(locale.workspaceStartFailed(), FAIL, FLOAT_MODE);
-                    loader.setError(LoaderPresenter.Phase.STARTING_WORKSPACE_RUNTIME);
+                    startWorkspaceNotification.show(workspaceId);
                     final String workspaceName = workspace.getConfig().getName();
                     final String error = statusEvent.getError();
                     workspaceServiceClient.getWorkspaces(SKIP_COUNT, MAX_COUNT).then(showErrorDialog(workspaceName, error));
