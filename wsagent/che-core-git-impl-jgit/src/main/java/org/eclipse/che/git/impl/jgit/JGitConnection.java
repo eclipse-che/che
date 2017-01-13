@@ -569,6 +569,10 @@ class JGitConnection implements GitConnection {
                                                   .setAll(params.isAll())
                                                   .setAmend(params.isAmend());
 
+            if (!params.isAll()) {
+                params.getFiles().forEach(commitCommand::setOnly);
+            }
+
             // Check if repository is configured with Gerrit Support
             String gerritSupportConfigValue = repository.getConfig().getString(ConfigConstants.CONFIG_GERRIT_SECTION, null,
                                                                                ConfigConstants.CONFIG_KEY_CREATECHANGEID);

@@ -57,7 +57,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Arrays.binarySearch;
 import static java.util.Arrays.copyOf;
@@ -131,8 +130,13 @@ public class AppContextImpl implements AppContext,
 
     @Override
     public void setWorkspace(Workspace workspace) {
-        this.usersWorkspace = workspace;
-        runtime = new ActiveRuntime(workspace.getRuntime());
+        if (workspace != null) {
+            usersWorkspace = workspace;
+            runtime = new ActiveRuntime(workspace.getRuntime());
+        } else {
+            usersWorkspace = null;
+            runtime = null;
+        }
     }
 
     @Override
@@ -369,7 +373,7 @@ public class AppContextImpl implements AppContext,
 
     @Override
     public Project[] getProjects() {
-        return checkNotNull(projects, "Projects is not initialized");
+        return projects == null ? new Project[0] : projects;
     }
 
     @Override
@@ -391,6 +395,10 @@ public class AppContextImpl implements AppContext,
 
     @Override
     public Project getRootProject() {
+        if (projects == null) {
+            return null;
+        }
+
         if (currentResource == null || currentResources == null) {
 
             EditorAgent editorAgent = editorAgentProvider.get();

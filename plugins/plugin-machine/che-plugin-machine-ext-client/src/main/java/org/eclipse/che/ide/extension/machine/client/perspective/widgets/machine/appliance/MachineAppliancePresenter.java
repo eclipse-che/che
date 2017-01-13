@@ -33,6 +33,7 @@ import org.eclipse.che.ide.extension.machine.client.perspective.widgets.tab.cont
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.tab.container.TabContainerView.TabSelectHandler;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.tab.content.TabPresenter;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.tab.header.TabHeader;
+import org.eclipse.che.ide.menu.PartMenu;
 import org.eclipse.che.ide.part.PartStackPresenter;
 import org.eclipse.che.ide.part.PartsComparator;
 import org.eclipse.che.ide.part.widgets.TabItemFactory;
@@ -54,7 +55,6 @@ public class MachineAppliancePresenter extends PartStackPresenter implements Act
 
     private final MachineApplianceView        view;
     private final TabContainerPresenter       tabContainer;
-//    private final TerminalContainer           terminalContainer;
     private final MachineInfoPresenter        infoPresenter;
     private final ServerPresenter             serverPresenter;
     private final RecipeTabPresenter          recipeTabPresenter;
@@ -73,6 +73,7 @@ public class MachineAppliancePresenter extends PartStackPresenter implements Act
 
     @Inject
     public MachineAppliancePresenter(EventBus eventBus,
+                                     PartMenu partMenu,
                                      PartsComparator partsComparator,
                                      PartStackEventHandler partStackEventHandler,
                                      MachineApplianceView view,
@@ -80,17 +81,15 @@ public class MachineAppliancePresenter extends PartStackPresenter implements Act
                                      WidgetsFactory widgetsFactory,
                                      EntityFactory entityFactory,
                                      TabItemFactory tabItemFactory,
-//                                     final TerminalContainer terminalContainer,
                                      MachineInfoPresenter infoPresenter,
                                      RecipesContainerPresenter recipesContainer,
                                      ServerPresenter serverPresenter,
                                      RecipeTabPresenter recipeTabPresenter,
                                      TabContainerPresenter tabContainer) {
-        super(eventBus, partStackEventHandler, tabItemFactory, partsComparator, view, null);
+        super(eventBus, partMenu, partStackEventHandler, tabItemFactory, partsComparator, view, null);
 
         this.view = view;
         this.tabContainer = tabContainer;
-//        this.terminalContainer = terminalContainer;
         this.recipesContainerPresenter = recipesContainer;
         this.infoPresenter = infoPresenter;
         this.recipeTabPresenter = recipeTabPresenter;
@@ -100,18 +99,8 @@ public class MachineAppliancePresenter extends PartStackPresenter implements Act
         this.locale = locale;
         this.activeTabs = new HashMap<>();
 
-        final String terminalTabName = locale.tabTerminal();
         final String infoTabName = locale.tabInfo();
         final String serverTabName = locale.tabServer();
-
-//        TabSelectHandler terminalHandler = new TabSelectHandler() {
-//            @Override
-//            public void onTabSelected() {
-//                activeTabs.put(selectedMachine.getId(), terminalTabName);
-//                terminalContainer.addOrShowTerminal(selectedMachine);
-//            }
-//        };
-//        createAndAddTab(terminalTabName, terminalContainer, terminalHandler);
 
         TabSelectHandler infoHandler = new TabSelectHandler() {
             @Override
@@ -157,7 +146,6 @@ public class MachineAppliancePresenter extends PartStackPresenter implements Act
         activeTab = activeTab != null ? activeTab : locale.tabInfo();
         tabContainer.showTab(activeTab);
 
-//        terminalContainer.addOrShowTerminal(machine);
         infoPresenter.update(machine);
         recipeTabPresenter.updateInfo(machine);
         serverPresenter.updateInfo(machine);
@@ -194,4 +182,5 @@ public class MachineAppliancePresenter extends PartStackPresenter implements Act
     public void showStub(String message) {
         view.showStub(message);
     }
+
 }

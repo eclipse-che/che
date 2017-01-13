@@ -151,10 +151,10 @@ public class ComparePresenter implements CompareView.ActionDelegate {
                 comparedFile.updateContent(newContent).then(new Operation<Void>() {
                     @Override
                     public void apply(Void ignored) throws OperationException {
-                        final Optional<Container> parent = comparedFile.getParent();
+                        final Container parent = comparedFile.getParent();
 
-                        if (parent.isPresent()) {
-                            parent.get().synchronize();
+                        if (parent != null) {
+                            parent.synchronize();
                         }
 
                         eventBus.fireEvent(new FileContentUpdateEvent(comparedFile.getLocation().toString()));

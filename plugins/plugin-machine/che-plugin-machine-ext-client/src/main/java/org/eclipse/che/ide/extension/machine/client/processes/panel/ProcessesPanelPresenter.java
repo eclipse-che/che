@@ -256,6 +256,24 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         notifyTreeNodeSelected(machineToSelect);
     }
 
+    /**
+     * Sets visibility for processes tree
+     *
+     * @param visible
+     */
+    public void setProcessesTreeVisible(boolean visible) {
+        view.setProcessesTreeVisible(visible);
+    }
+
+    /**
+     * determines whether process tree is visible.
+     *
+     * @return
+     */
+    public boolean isProcessesTreeVisible() {
+        return view.isProcessesTreeVisible();
+    }
+
     @Override
     public void go(AcceptsOneWidget container) {
         container.setWidget(view);
@@ -421,8 +439,12 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         newTerminal.setListener(new TerminalPresenter.TerminalStateListener() {
             @Override
             public void onExit() {
-                onStopProcess(terminalNode);
-                terminals.remove(terminalId);
+                String terminalId = terminalNode.getId();
+                if (terminals.containsKey(terminalId)) {
+                    onStopProcess(terminalNode);
+                    terminals.remove(terminalId);
+                }
+                view.hideProcessOutput(terminalId );
             }
         });
     }
@@ -1141,6 +1163,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                     .withConfig(dtoFactory.createDto(MachineConfigDto.class)
                                     .withDev("dev-machine".equals(machineName))
                                     .withName(machineName)
+                                    .withType("docker")
                     );
             provideMachineNode(new MachineItem(machineDto), true);
         }

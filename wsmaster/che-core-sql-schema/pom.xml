@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-master-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>5.0.0-SNAPSHOT</version>
+        <version>5.1.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-core-sql-schema</artifactId>
     <name>Che Core :: SQL :: Schema</name>
@@ -26,7 +26,9 @@
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
                 <configuration>
-                    <excludes>**/*.sql</excludes>
+                    <excludes>
+                        <exclude>**/*.sql</exclude>
+                    </excludes>
                 </configuration>
             </plugin>
         </plugins>
