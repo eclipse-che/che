@@ -79,6 +79,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 /**
@@ -205,7 +206,7 @@ public class WorkspaceManagerTest {
     }
 
     @Test
-    public void shouldBeAbleToGetWorkspacesAvailableForUser() throws Exception {
+    public void shouldBeAbleToGetWorkspacesAvailableForUserWithRuntimes() throws Exception {
         // given
         final WorkspaceConfig config = createConfig();
 
@@ -214,6 +215,35 @@ public class WorkspaceManagerTest {
 
         when(workspaceDao.getWorkspaces(NAMESPACE)).thenReturn(asList(workspace1, workspace2));
         final RuntimeDescriptor descriptor = createDescriptor(workspace2, RUNNING);
+        when(runtimes.get(workspace2.getId())).thenReturn(descriptor);
+        when(runtimes.get(workspace1.getId())).thenThrow(new NotFoundException("no runtime"));
+
+        // when
+        final List<WorkspaceImpl> result = workspaceManager.getWorkspaces(NAMESPACE, true);
+
+        // then
+        assertEquals(result.size(), 2);
+
+        final WorkspaceImpl res1 = result.get(0);
+        assertEquals(res1.getStatus(), STOPPED, "Workspace status wasn't changed from STARTING to STOPPED");
+        assertNull(res1.getRuntime(), "Workspace has unexpected runtime");
+        assertFalse(res1.isTemporary(), "Workspace must be permanent");
+
+        final WorkspaceImpl res2 = result.get(1);
+        assertEquals(res2.getStatus(), RUNNING, "Workspace status wasn't changed to the runtime instance status");
+        assertEquals(res2.getRuntime(), descriptor.getRuntime(), "Workspace doesn't have expected runtime");
+        assertFalse(res2.isTemporary(), "Workspace must be permanent");
+    }
+
+    @Test
+    public void shouldBeAbleToGetWorkspacesAvailableForUserWithoutRuntimes() throws Exception {
+        // given
+        final WorkspaceConfig config = createConfig();
+
+        final WorkspaceImpl workspace1 = createAndMockWorkspace(config, NAMESPACE);
+        final WorkspaceImpl workspace2 = createAndMockWorkspace(config, NAMESPACE_2);
+
+        when(workspaceDao.getWorkspaces(NAMESPACE)).thenReturn(asList(workspace1, workspace2));
         when(runtimes.getStatus(workspace2.getId())).thenReturn(RUNNING);
         when(runtimes.getStatus(workspace1.getId())).thenReturn(STOPPED);
 
@@ -225,15 +255,17 @@ public class WorkspaceManagerTest {
 
         final WorkspaceImpl res1 = result.get(0);
         assertEquals(res1.getStatus(), STOPPED, "Workspace status wasn't changed from STARTING to STOPPED");
+        assertNull(res1.getRuntime(), "Workspace has unexpected runtime");
         assertFalse(res1.isTemporary(), "Workspace must be permanent");
 
         final WorkspaceImpl res2 = result.get(1);
         assertEquals(res2.getStatus(), RUNNING, "Workspace status wasn't changed to the runtime instance status");
+        assertNull(res1.getRuntime(), "Workspace has unexpected runtime");
         assertFalse(res2.isTemporary(), "Workspace must be permanent");
     }
 
     @Test
-    public void shouldBeAbleToGetWorkspacesByNamespace() throws Exception {
+    public void shouldBeAbleToGetWorkspacesByNamespaceWithoutRuntimes() throws Exception {
         // given
         final WorkspaceImpl workspace = createAndMockWorkspace();
         createAndMockDescriptor(workspace, RUNNING);
@@ -246,6 +278,25 @@ public class WorkspaceManagerTest {
 
         final WorkspaceImpl res1 = result.get(0);
         assertEquals(res1.getStatus(), RUNNING, "Workspace status wasn't changed to the runtime instance status");
+        assertNull(res1.getRuntime(), "workspace has unexpected runtime");
+        assertFalse(res1.isTemporary(), "Workspace must be permanent");
+    }
+
+    @Test
+    public void shouldBeAbleToGetWorkspacesByNamespaceWithRuntimes() throws Exception {
+        // given
+        final WorkspaceImpl workspace = createAndMockWorkspace();
+        final RuntimeDescriptor descriptor = createAndMockDescriptor(workspace, RUNNING);
+
+        // when
+        final List<WorkspaceImpl> result = workspaceManager.getByNamespace(workspace.getNamespace(), true);
+
+        // then
+        assertEquals(result.size(), 1);
+
+        final WorkspaceImpl res1 = result.get(0);
+        assertEquals(res1.getStatus(), RUNNING, "Workspace status wasn't changed to the runtime instance status");
+        assertEquals(res1.getRuntime(), descriptor.getRuntime(), "Workspace doesn't have expected runtime");
         assertFalse(res1.isTemporary(), "Workspace must be permanent");
     }
 

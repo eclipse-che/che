@@ -226,6 +226,9 @@ public class WorkspaceManager {
      *
      * @param user
      *         the id of the user
+     * @param includeRuntimes
+     *         if <code>true</code>, will fetch runtime info for workspaces.
+     *         If <code>false</code>, will not fetch runtime info.
      * @return the list of workspaces or empty list if user can't read any workspace
      * @throws NullPointerException
      *         when {@code user} is null
