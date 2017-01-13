@@ -36,10 +36,6 @@ public interface File extends Resource, VirtualFile, ModificationTracker {
     @Override
     String getDisplayName();
 
-    /** @see VirtualFile#getMediaType() */
-    @Override
-    String getMediaType();
-
     /** @see VirtualFile#isReadOnly() */
     @Override
     boolean isReadOnly();

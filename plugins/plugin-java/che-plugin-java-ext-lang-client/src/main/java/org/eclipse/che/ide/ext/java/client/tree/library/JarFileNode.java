@@ -177,11 +177,6 @@ public class JarFileNode extends SyntheticNode<JarEntry> implements VirtualFile,
     }
 
     @Override
-    public String getMediaType() {
-        return null;
-    }
-
-    @Override
     public Path getProject() {
         return project;
     }
