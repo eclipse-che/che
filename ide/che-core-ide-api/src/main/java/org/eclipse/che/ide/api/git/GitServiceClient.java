@@ -759,6 +759,24 @@ public interface GitServiceClient {
     Promise<Revision> commit(DevMachine devMachine, Path project, String message, Path[] files, boolean amend);
 
     /**
+     * Performs commit changes from index to repository.
+     *
+     * @param devMachine
+     *         current machine
+     * @param project
+     *         project (root of GIT repository)
+     * @param message
+     *         commit log message
+     * @param all
+     *         automatically stage files that have been modified and deleted
+     * @param files
+     *         the list of files that are committed, ignoring the index
+     * @param amend
+     *         indicates that previous commit must be overwritten
+     */
+    Promise<Revision> commit(DevMachine devMachine, Path project, String message, boolean all, Path[] files, boolean amend);
+
+    /**
      * Get repository options.
      *
      * @param devMachine

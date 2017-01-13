@@ -68,6 +68,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -107,15 +109,15 @@ public class WorkspaceRuntimes {
 
     private static final Logger LOG = getLogger(WorkspaceRuntimes.class);
 
-    private final Map<String, WorkspaceState> workspaces;
-    private final EventService                eventsService;
-    private final StripedLocks                locks;
-    private final CheEnvironmentEngine        envEngine;
-    private final AgentSorter                 agentSorter;
-    private final AgentLauncherFactory        launcherFactory;
-    private final AgentRegistry               agentRegistry;
-    private final SnapshotDao                 snapshotDao;
-    private final WorkspaceSharedPool         sharedPool;
+    private final ConcurrentMap<String, WorkspaceState> workspaces;
+    private final EventService                          eventsService;
+    private final StripedLocks                          locks;
+    private final CheEnvironmentEngine                  envEngine;
+    private final AgentSorter                           agentSorter;
+    private final AgentLauncherFactory                  launcherFactory;
+    private final AgentRegistry                         agentRegistry;
+    private final SnapshotDao                           snapshotDao;
+    private final WorkspaceSharedPool                   sharedPool;
 
     private volatile boolean isPreDestroyInvoked;
 
@@ -133,7 +135,7 @@ public class WorkspaceRuntimes {
         this.launcherFactory = launcherFactory;
         this.agentRegistry = agentRegistry;
         this.snapshotDao = snapshotDao;
-        this.workspaces = new HashMap<>();
+        this.workspaces = new ConcurrentHashMap<>();
         // 16 - experimental value for stripes count, it comes from default hash map size
         this.locks = new StripedLocks(16);
         this.sharedPool = sharedPool;
@@ -160,7 +162,7 @@ public class WorkspaceRuntimes {
     public RuntimeDescriptor get(String workspaceId) throws NotFoundException,
                                                             ServerException {
         WorkspaceState workspaceState;
-        try (CloseableLock lock = locks.acquireReadLock(workspaceId)) {
+        try (@SuppressWarnings("unused") CloseableLock lock = locks.acquireReadLock(workspaceId)) {
             workspaceState = workspaces.get(workspaceId);
         }
         if (workspaceState == null) {
@@ -274,7 +276,7 @@ public class WorkspaceRuntimes {
         // The double check is required as it is still possible to get unlucky timing
         // between locking and stopping workspace.
         ensurePreDestroyIsNotExecuted();
-        try (CloseableLock lock = locks.acquireWriteLock(workspaceId)) {
+        try (@SuppressWarnings("unused") CloseableLock lock = locks.acquireWriteLock(workspaceId)) {
             ensurePreDestroyIsNotExecuted();
             WorkspaceState workspaceState = workspaces.get(workspaceId);
             if (workspaceState == null) {
@@ -301,7 +303,7 @@ public class WorkspaceRuntimes {
         } catch (ServerException | RuntimeException e) {
             error = e.getLocalizedMessage();
         } finally {
-            try (CloseableLock lock = locks.acquireWriteLock(workspaceId)) {
+            try (@SuppressWarnings("unused") CloseableLock lock = locks.acquireWriteLock(workspaceId)) {
                 workspaces.remove(workspaceId);
             }
         }
@@ -347,7 +349,7 @@ public class WorkspaceRuntimes {
      * @return true if workspace is running, otherwise false
      */
     public boolean hasRuntime(String workspaceId) {
-        try (CloseableLock lock = locks.acquireReadLock(workspaceId)) {
+        try (@SuppressWarnings("unused") CloseableLock lock = locks.acquireReadLock(workspaceId)) {
             return workspaces.containsKey(workspaceId);
         }
     }
@@ -373,7 +375,7 @@ public class WorkspaceRuntimes {
                                                                      NotFoundException,
                                                                      EnvironmentException {
 
-        try (CloseableLock lock = locks.acquireReadLock(workspaceId)) {
+        try (@SuppressWarnings("unused") CloseableLock lock = locks.acquireReadLock(workspaceId)) {
             getRunningState(workspaceId);
         }
 
@@ -386,7 +388,7 @@ public class WorkspaceRuntimes {
         Instance instance = envEngine.startMachine(workspaceId, machineConfigCopy, agents);
         launchAgents(instance, agents);
 
-        try (CloseableLock lock = locks.acquireWriteLock(workspaceId)) {
+        try (@SuppressWarnings("unused") CloseableLock lock = locks.acquireWriteLock(workspaceId)) {
             ensurePreDestroyIsNotExecuted();
             WorkspaceState workspaceState = workspaces.get(workspaceId);
             if (workspaceState == null || workspaceState.status != RUNNING) {
@@ -508,7 +510,7 @@ public class WorkspaceRuntimes {
     public void stopMachine(String workspaceId, String machineId) throws NotFoundException,
                                                                          ServerException,
                                                                          ConflictException {
-        try (CloseableLock lock = locks.acquireReadLock(workspaceId)) {
+        try (@SuppressWarnings("unused") CloseableLock lock = locks.acquireReadLock(workspaceId)) {
             getRunningState(workspaceId);
         }
         envEngine.stopMachine(workspaceId, machineId);
@@ -534,6 +536,23 @@ public class WorkspaceRuntimes {
      */
     public Map<String, WorkspaceState> getWorkspaces() {
         return new HashMap<>(workspaces);
+    }
+
+    /**
+     * Return status of the workspace.
+     *
+     * @param workspaceId
+     *         ID of requested workspace
+     * @return workspace status
+     */
+    public WorkspaceStatus getStatus(String workspaceId) {
+        try (@SuppressWarnings("unused") CloseableLock l = locks.acquireReadLock(workspaceId)) {
+            final WorkspaceState state = workspaces.get(workspaceId);
+            if (state == null) {
+                return WorkspaceStatus.STOPPED;
+            }
+            return state.status;
+        }
     }
 
     private MessageConsumer<MachineLogMessage> getEnvironmentLogger(String workspaceId) throws ServerException {
@@ -673,7 +692,7 @@ public class WorkspaceRuntimes {
                                                       getEnvironmentLogger(workspaceId));
             launchAgents(environment, machines);
 
-            try (CloseableLock lock = locks.acquireWriteLock(workspaceId)) {
+            try (@SuppressWarnings("unused") CloseableLock lock = locks.acquireWriteLock(workspaceId)) {
                 ensurePreDestroyIsNotExecuted();
                 WorkspaceState workspaceState = workspaces.get(workspaceId);
                 workspaceState.status = WorkspaceStatus.RUNNING;
@@ -693,7 +712,7 @@ public class WorkspaceRuntimes {
             }
             String environmentStartError = "Start of environment " + envName +
                                            " failed. Error: " + e.getLocalizedMessage();
-            try (CloseableLock lock = locks.acquireWriteLock(workspaceId)) {
+            try (@SuppressWarnings("unused") CloseableLock lock = locks.acquireWriteLock(workspaceId)) {
                 workspaces.remove(workspaceId);
             }
             eventsService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)

@@ -10,7 +10,7 @@
  */
 'use strict';
 
-import {CheNavBarCtrl} from './navbar.controller';
+import {CheNavBarController} from './navbar.controller';
 import {CheNavBar} from './navbar.directive';
 import {NavBarSelectedCtrl} from './navbar-selected.controller';
 import {NavBarSelected} from './navbar-selected.directive';
@@ -25,7 +25,7 @@ import {NavbarNotification} from './notification/navbar-notification.directive';
 export class NavbarConfig {
 
   constructor(register: che.IRegisterService) {
-    register.controller('CheNavBarCtrl', CheNavBarCtrl);
+    register.controller('CheNavBarController', CheNavBarController);
     register.controller('NavBarSelectedCtrl', NavBarSelectedCtrl);
     register.directive('cheNavBar', CheNavBar);
     register.directive('navBarSelected', NavBarSelected);

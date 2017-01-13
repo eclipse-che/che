@@ -63,6 +63,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
@@ -517,6 +518,38 @@ public class WorkspaceRuntimesTest {
         // then
         assertEquals(actualMachine, expected);
         verify(envEngine).getMachine(WORKSPACE_ID, expected.getId());
+    }
+
+    @Test
+    public void shouldBeAbleToGetStatusOfRunningWorkspace() throws Exception {
+        // given
+        WorkspaceImpl workspace = createWorkspace();
+        runtimes.start(workspace,
+                       workspace.getConfig().getDefaultEnv(),
+                       false);
+
+        // when
+        WorkspaceStatus status = runtimes.getStatus(workspace.getId());
+
+        // then
+        assertEquals(status, RUNNING);
+    }
+
+
+    @Test
+    public void shouldBeAbleToGetStatusOfStoppedWorkspace() throws Exception {
+        // given
+        WorkspaceImpl workspace = createWorkspace();
+        runtimes.start(workspace,
+                       workspace.getConfig().getDefaultEnv(),
+                       false);
+        runtimes.stop(workspace.getId());
+
+        // when
+        WorkspaceStatus status = runtimes.getStatus(workspace.getId());
+
+        // then
+        assertEquals(status, STOPPED);
     }
 
     @Test(expectedExceptions = NotFoundException.class,

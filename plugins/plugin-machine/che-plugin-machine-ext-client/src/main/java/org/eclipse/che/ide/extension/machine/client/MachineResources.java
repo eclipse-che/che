@@ -147,6 +147,8 @@ public interface MachineResources extends ClientBundle {
 
         String processTreeNode();
 
+        String commandTreeNode();
+
         String differentMachineLabel();
 
         String dockerMachineLabel();

@@ -20,7 +20,6 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.model.machine.Machine;
-import static org.eclipse.che.api.core.model.machine.MachineStatus.CREATING;
 import org.eclipse.che.api.core.model.machine.Server;
 import org.eclipse.che.api.core.model.workspace.Environment;
 import org.eclipse.che.api.core.model.workspace.ExtendedMachine;
@@ -92,6 +91,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static org.eclipse.che.api.core.model.machine.MachineStatus.CREATING;
 import static org.eclipse.che.api.core.model.machine.MachineStatus.RUNNING;
 import static org.eclipse.che.api.machine.shared.Constants.TERMINAL_REFERENCE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
@@ -254,6 +254,24 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
         view.selectNode(machineToSelect);
         notifyTreeNodeSelected(machineToSelect);
+    }
+
+    /**
+     * Sets visibility for processes tree
+     *
+     * @param visible
+     */
+    public void setProcessesTreeVisible(boolean visible) {
+        view.setProcessesTreeVisible(visible);
+    }
+
+    /**
+     * determines whether process tree is visible.
+     *
+     * @return
+     */
+    public boolean isProcessesTreeVisible() {
+        return view.isProcessesTreeVisible();
     }
 
     @Override
@@ -421,8 +439,12 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         newTerminal.setListener(new TerminalPresenter.TerminalStateListener() {
             @Override
             public void onExit() {
-                onStopProcess(terminalNode);
-                terminals.remove(terminalId);
+                String terminalId = terminalNode.getId();
+                if (terminals.containsKey(terminalId)) {
+                    onStopProcess(terminalNode);
+                    terminals.remove(terminalId);
+                }
+                view.hideProcessOutput(terminalId );
             }
         });
     }
@@ -1059,8 +1081,9 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
             private void subscribeToProcess(CommandOutputConsole console, int pid) {
                 String stderr = "stderr";
                 String stdout = "stdout";
+                String processStatus = "process_status";
                 String after = null;
-                execAgentCommandManager.subscribe(machine.getId(), pid, asList(stderr, stdout), after)
+                execAgentCommandManager.subscribe(machine.getId(), pid, asList(stderr, stdout, processStatus), after)
                                        .thenIfProcessStartedEvent(console.getProcessStartedOperation())
                                        .thenIfProcessDiedEvent(console.getProcessDiedOperation())
                                        .thenIfProcessStdOutEvent(console.getStdOutOperation())
@@ -1140,6 +1163,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                     .withConfig(dtoFactory.createDto(MachineConfigDto.class)
                                     .withDev("dev-machine".equals(machineName))
                                     .withName(machineName)
+                                    .withType("docker")
                     );
             provideMachineNode(new MachineItem(machineDto), true);
         }

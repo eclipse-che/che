@@ -11,8 +11,8 @@
 package org.eclipse.che.api.user.server.event;
 
 import org.eclipse.che.api.core.notification.EventOrigin;
-import org.eclipse.che.core.db.event.CascadeRemovalEvent;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
+import org.eclipse.che.core.db.cascade.event.RemoveEvent;
 
 /**
  * Published before {@link UserImpl user} removed.
@@ -20,7 +20,7 @@ import org.eclipse.che.api.user.server.model.impl.UserImpl;
  * @author Yevhenii Voevodin
  */
 @EventOrigin("user")
-public class BeforeUserRemovedEvent extends CascadeRemovalEvent {
+public class BeforeUserRemovedEvent extends RemoveEvent {
 
     private final UserImpl user;
 

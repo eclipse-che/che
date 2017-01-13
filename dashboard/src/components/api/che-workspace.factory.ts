@@ -233,11 +233,13 @@ export class CheWorkspace {
     let promise = this.remoteWorkspaceAPI.getDetails({workspaceKey: workspaceKey}).$promise;
     promise.then((data: che.IWorkspace) => {
       this.workspacesById.set(data.id, data);
-      this.lodash.remove(this.workspaces, (workspace: che.IWorkspace) => {
-        return workspace.id === data.id;
-      });
-      this.workspaces.push(data);
-      this.startUpdateWorkspaceStatus(data.id);
+      if (!data.temporary) {
+        this.lodash.remove(this.workspaces, (workspace: che.IWorkspace) => {
+          return workspace.id === data.id;
+        });
+        this.workspaces.push(data);
+        this.startUpdateWorkspaceStatus(data.id);
+      }
       defer.resolve();
     }, (error: any) => {
       if (error.status !== 304) {
