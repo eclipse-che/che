@@ -50,7 +50,6 @@ public class JUnitTestRunner implements TestRunner {
 
     private static final String JUNIT4X_RUNNER_CLASS = "org.junit.runner.JUnitCore";
     private static final String JUNIT3X_RUNNER_CLASS = "junit.textui.TestRunner";
-    private String projectAbsolutePath;
     private ClassLoader projectClassLoader;
     private ProjectManager projectManager;
     private TestClasspathRegistry classpathRegistry;
@@ -67,7 +66,7 @@ public class JUnitTestRunner implements TestRunner {
      */
     @Override
     public TestResult execute(Map<String, String> testParameters) throws Exception {
-        projectAbsolutePath = testParameters.get("absoluteProjectPath");
+        String projectAbsolutePath = testParameters.get("absoluteProjectPath");
         boolean updateClasspath = Boolean.valueOf(testParameters.get("updateClasspath"));
         boolean runClass = Boolean.valueOf(testParameters.get("runClass"));
         String projectPath = testParameters.get("projectPath");
@@ -84,7 +83,7 @@ public class JUnitTestRunner implements TestRunner {
                 String fqn = testParameters.get("fqn");
                 testResult = run4x(fqn);
             } else {
-                testResult = runAll4x();
+                testResult = runAll4x(projectAbsolutePath);
             }
             return testResult;
         } catch (Exception ignored) {
@@ -95,7 +94,7 @@ public class JUnitTestRunner implements TestRunner {
                 String fqn = testParameters.get("fqn");
                 testResult = run3x(fqn);
             } else {
-                testResult = runAll3x();
+                testResult = runAll3x(projectAbsolutePath);
             }
             return testResult;
         } catch (Exception ignored) {
@@ -117,7 +116,7 @@ public class JUnitTestRunner implements TestRunner {
         return run4xTestClasses(clsTest);
     }
 
-    private TestResult runAll4x() throws Exception {
+    private TestResult runAll4x(String projectAbsolutePath) throws Exception {
         List<String> testClassNames = new ArrayList<>();
         Files.walk(Paths.get(projectAbsolutePath, "target", "test-classes")).forEach(filePath -> {
             if (Files.isRegularFile(filePath) && filePath.toString().toLowerCase().endsWith(".class")) {
@@ -205,7 +204,7 @@ public class JUnitTestRunner implements TestRunner {
 
     }
 
-    private TestResult runAll3x() throws Exception {
+    private TestResult runAll3x(String projectAbsolutePath) throws Exception {
         List<String> testClassNames = new ArrayList<>();
         Files.walk(Paths.get(projectAbsolutePath, "target", "test-classes")).forEach(filePath -> {
             if (Files.isRegularFile(filePath) && filePath.toString().toLowerCase().endsWith(".class")) {

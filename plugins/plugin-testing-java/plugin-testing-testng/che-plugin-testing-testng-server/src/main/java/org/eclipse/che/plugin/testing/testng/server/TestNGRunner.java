@@ -54,7 +54,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
  */
 public class TestNGRunner implements TestRunner {
 
-    private String absoluteProjectPath;
     private ClassLoader projectClassLoader;
     private ProjectManager projectManager;
     private TestClasspathRegistry classpathRegistry;
@@ -70,7 +69,7 @@ public class TestNGRunner implements TestRunner {
      */
     @Override
     public TestResult execute(Map<String, String> testParameters) throws Exception {
-        absoluteProjectPath = testParameters.get("absoluteProjectPath");
+        String projectAbsolutePath = testParameters.get("absoluteProjectPath");
         String xmlPath = testParameters.get("testngXML");
         boolean updateClasspath = Boolean.valueOf(testParameters.get("updateClasspath"));
         boolean runClass = Boolean.valueOf(testParameters.get("runClass"));
@@ -80,16 +79,16 @@ public class TestNGRunner implements TestRunner {
             projectType = projectManager.getProject(projectPath).getType();
         }
         TestClasspathProvider classpathProvider = classpathRegistry.getTestClasspathProvider(projectType);
-        projectClassLoader = classpathProvider.getClassLoader(absoluteProjectPath, updateClasspath);
+        projectClassLoader = classpathProvider.getClassLoader(projectAbsolutePath, updateClasspath);
         TestResult testResult;
         if (runClass) {
             String fqn = testParameters.get("fqn");
-            testResult = run(fqn);
+            testResult = run(projectAbsolutePath, fqn);
         } else {
             if (xmlPath == null) {
-                testResult = runAll();
+                testResult = runAll(projectAbsolutePath);
             } else {
-                testResult = runTestXML(ResourcesPlugin.getPathToWorkspace() + xmlPath);
+                testResult = runTestXML(projectAbsolutePath, ResourcesPlugin.getPathToWorkspace() + xmlPath);
             }
         }
         return testResult;
@@ -103,18 +102,18 @@ public class TestNGRunner implements TestRunner {
         return "testng";
     }
 
-    private TestResult run(String testClass) throws Exception {
+    private TestResult run(String projectAbsolutePath, String testClass) throws Exception {
         ClassLoader classLoader = projectClassLoader;
         Class<?> clsTest = Class.forName(testClass, true, classLoader);
-        return runTestClasses(clsTest);
+        return runTestClasses(projectAbsolutePath, clsTest);
 
     }
 
-    private TestResult runAll() throws Exception {
+    private TestResult runAll(String projectAbsolutePath) throws Exception {
         List<String> testClassNames = new ArrayList<>();
-        Files.walk(Paths.get(absoluteProjectPath, "target", "test-classes")).forEach(filePath -> {
+        Files.walk(Paths.get(projectAbsolutePath, "target", "test-classes")).forEach(filePath -> {
             if (Files.isRegularFile(filePath) && filePath.toString().toLowerCase().endsWith(".class")) {
-                String path = Paths.get(absoluteProjectPath, "target", "test-classes").relativize(filePath).toString();
+                String path = Paths.get(projectAbsolutePath, "target", "test-classes").relativize(filePath).toString();
                 String className = path.replace(File.separatorChar, '.');
                 className = className.substring(0, className.length() - 6);
                 testClassNames.add(className);
@@ -128,7 +127,7 @@ public class TestNGRunner implements TestRunner {
                 testableClasses.add(clazz);
             }
         }
-        return runTestClasses(testableClasses.toArray(new Class[testableClasses.size()]));
+        return runTestClasses(projectAbsolutePath, testableClasses.toArray(new Class[testableClasses.size()]));
 
     }
 
@@ -143,7 +142,7 @@ public class TestNGRunner implements TestRunner {
         return false;
     }
 
-    private TestResult runTestClasses(Class<?>... classes) throws Exception {
+    private TestResult runTestClasses(String projectAbsolutePath, Class<?>... classes) throws Exception {
         ClassLoader classLoader = projectClassLoader;
         Class<?> clsTestNG = Class.forName("org.testng.TestNG", true, classLoader);
         Class<?> clsTestListner = Class.forName("org.testng.TestListenerAdapter", true, classLoader);
@@ -157,7 +156,7 @@ public class TestNGRunner implements TestRunner {
         clsTestNG.getMethod("addListener", clsITestListner).invoke(testNG, testListner);
         clsTestNG.getMethod("setTestClasses", Class[].class).invoke(testNG, new Object[] { classes });
         clsTestNG.getMethod("setOutputDirectory", String.class).invoke(testNG,
-                Paths.get(absoluteProjectPath, "target", "testng-out").toString());
+                Paths.get(projectAbsolutePath, "target", "testng-out").toString());
         clsTestNG.getMethod("run").invoke(testNG);
         List<?> failures = (List<?>) clsTestListner.getMethod("getFailedTests").invoke(testListner);
         TestResult dtoResult = DtoFactory.getInstance().createDto(TestResult.class);
@@ -202,7 +201,7 @@ public class TestNGRunner implements TestRunner {
         return dtoResult;
     }
 
-    private TestResult runTestXML(String xmlPath) throws Exception {
+    private TestResult runTestXML(String projectAbsolutePath, String xmlPath) throws Exception {
         ClassLoader classLoader = projectClassLoader;
         Class<?> clsTestNG = Class.forName("org.testng.TestNG", true, classLoader);
         Class<?> clsTestListner = Class.forName("org.testng.TestListenerAdapter", true, classLoader);
@@ -218,7 +217,7 @@ public class TestNGRunner implements TestRunner {
         testSuites.add(xmlPath);
         clsTestNG.getMethod("setTestSuites", List.class).invoke(testNG, testSuites);
         clsTestNG.getMethod("setOutputDirectory", String.class).invoke(testNG,
-                Paths.get(absoluteProjectPath, "target", "testng-out").toString());
+                Paths.get(projectAbsolutePath, "target", "testng-out").toString());
         clsTestNG.getMethod("run").invoke(testNG);
         List<?> failures = (List<?>) clsTestListner.getMethod("getFailedTests").invoke(testListner);
         TestResult dtoResult = DtoFactory.getInstance().createDto(TestResult.class);
