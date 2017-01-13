@@ -13,11 +13,11 @@ package org.eclipse.che.ide.user;
 import com.google.inject.Inject;
 
 import org.eclipse.che.api.user.shared.dto.ProfileDto;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.user.UserProfileServiceClient;
 import org.eclipse.che.ide.json.JsonHelper;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
-import org.eclipse.che.ide.rest.RestContext;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 
 import javax.validation.constraints.NotNull;
@@ -38,12 +38,12 @@ public class UserProfileServiceClientImpl implements UserProfileServiceClient {
     private final AsyncRequestFactory asyncRequestFactory;
 
     @Inject
-    protected UserProfileServiceClientImpl(@RestContext String restContext,
+    protected UserProfileServiceClientImpl(AppContext appContext,
                                            LoaderFactory loaderFactory,
                                            AsyncRequestFactory asyncRequestFactory) {
         this.loaderFactory = loaderFactory;
         this.asyncRequestFactory = asyncRequestFactory;
-        PROFILE = restContext + "/profile/";
+        PROFILE = appContext.getMasterEndpoint() + "/profile/";
     }
 
     /** {@inheritDoc} */

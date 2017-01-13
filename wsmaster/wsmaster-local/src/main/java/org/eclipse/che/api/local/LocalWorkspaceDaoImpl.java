@@ -122,7 +122,7 @@ public class LocalWorkspaceDaoImpl implements WorkspaceDao {
     }
 
     @Override
-    public synchronized void remove(String id) throws ConflictException, ServerException {
+    public synchronized void remove(String id) throws ServerException {
         requireNonNull(id, "Required non-null id");
         workspaces.remove(id);
     }

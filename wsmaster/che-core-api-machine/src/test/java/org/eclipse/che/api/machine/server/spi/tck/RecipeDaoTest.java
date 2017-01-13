@@ -15,11 +15,17 @@ import com.google.common.collect.ImmutableSet;
 
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.machine.server.event.BeforeRecipeRemovedEvent;
+import org.eclipse.che.api.machine.server.event.RecipePersistedEvent;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.machine.server.spi.RecipeDao;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.test.tck.TckListener;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
+import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
+import org.eclipse.che.core.db.cascade.event.CascadeEvent;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
@@ -31,8 +37,13 @@ import java.util.HashSet;
 import java.util.List;
 
 import static java.util.Arrays.asList;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 /**
  * Tests {@link RecipeDao} contract.
@@ -55,6 +66,9 @@ public class RecipeDaoTest {
     @Inject
     private TckRepository<RecipeImpl> tckRepository;
 
+    @Inject
+    private EventService eventService;
+
     @BeforeMethod
     public void setUp() throws Exception {
         recipes = new ArrayList<>(5);
@@ -75,6 +89,25 @@ public class RecipeDaoTest {
         recipeDao.create(recipe);
 
         assertEquals(recipeDao.getById(recipe.getId()), recipe);
+    }
+
+    @Test(dependsOnMethods = "shouldThrowNotFoundExceptionWhenGettingNonExistingRecipe",
+          expectedExceptions = NotFoundException.class)
+    public void shouldNotCreateRecipeWhenSubscriberThrowsExceptionOnRecipeStoring() throws Exception {
+        final RecipeImpl recipe = createRecipe(0);
+
+        CascadeEventSubscriber<RecipePersistedEvent> subscriber = mockCascadeEventSubscriber();
+        doThrow(new ConflictException("error")).when(subscriber).onCascadeEvent(any());
+        eventService.subscribe(subscriber, RecipePersistedEvent.class);
+
+        try {
+            recipeDao.create(recipe);
+            fail("RecipeDao#create had to throw conflict exception");
+        } catch (ConflictException ignored) {
+        }
+
+        eventService.unsubscribe(subscriber, RecipePersistedEvent.class);
+        recipeDao.getById(recipe.getId());
     }
 
     @Test(expectedExceptions = NullPointerException.class)
@@ -124,6 +157,23 @@ public class RecipeDaoTest {
 
         recipeDao.remove(existedId);
         recipeDao.getById(existedId);
+    }
+
+    @Test(dependsOnMethods = "shouldGetRecipeById")
+    public void shouldNotRemoveRecipeWhenSubscriberThrowsExceptionOnRecipeRemoving() throws Exception {
+        final RecipeImpl recipe = recipes.get(0);
+        CascadeEventSubscriber<BeforeRecipeRemovedEvent> subscriber = mockCascadeEventSubscriber();
+        doThrow(new ServerException("error")).when(subscriber).onCascadeEvent(any());
+        eventService.subscribe(subscriber, BeforeRecipeRemovedEvent.class);
+
+        try {
+            recipeDao.remove(recipe.getId());
+            fail("RecipeDao#remove had to throw server exception");
+        } catch (ServerException ignored) {
+        }
+
+        assertEquals(recipeDao.getById(recipe.getId()), recipe);
+        eventService.unsubscribe(subscriber, BeforeRecipeRemovedEvent.class);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
@@ -208,5 +258,12 @@ public class RecipeDaoTest {
         for (RecipeImpl recipe : recipes) {
             recipeDao.update(recipe);
         }
+    }
+
+    private <T extends CascadeEvent> CascadeEventSubscriber<T> mockCascadeEventSubscriber() {
+        @SuppressWarnings("unchecked")
+        CascadeEventSubscriber<T> subscriber = mock(CascadeEventSubscriber.class);
+        doCallRealMethod().when(subscriber).onEvent(any());
+        return subscriber;
     }
 }

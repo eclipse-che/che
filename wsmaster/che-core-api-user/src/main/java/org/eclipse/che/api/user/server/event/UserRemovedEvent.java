@@ -14,21 +14,21 @@ import org.eclipse.che.api.core.notification.EventOrigin;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 
 /**
- * Published before {@link UserImpl user} is persisted.
+ * Published after {@link UserImpl user} removed.
  *
- * @author Max Shaposhnik
+ * @author Sergii Kabashniuk
  */
 @EventOrigin("user")
-public class BeforeUserPersistedEvent {
+public class UserRemovedEvent {
 
-    private final UserImpl user;
+    private final String userId;
 
-    public BeforeUserPersistedEvent(UserImpl user) {
-        this.user = user;
+    public UserRemovedEvent(String userId) {
+        this.userId = userId;
     }
 
-    /** Returns user which is going to be removed. */
-    public UserImpl getUser() {
-        return user;
+    /** Returns id of removed user */
+    public String getUserId() {
+        return userId;
     }
 }

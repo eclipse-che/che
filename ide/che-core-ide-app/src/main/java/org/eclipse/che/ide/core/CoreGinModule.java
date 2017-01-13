@@ -122,6 +122,7 @@ public class CoreGinModule extends AbstractGinModule {
 
         bind(EventBus.class).to(SimpleEventBus.class).in(Singleton.class);
 
+        //TODO: don't remove binding until not fix Codenvy and other packaging  
         bind(String.class).annotatedWith(RestContext.class).toProvider(RestContextProvider.class).in(Singleton.class);
 
         install(new GinFactoryModuleBuilder().build(LoaderFactory.class));

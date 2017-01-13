@@ -20,7 +20,6 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.model.machine.Machine;
-import static org.eclipse.che.api.core.model.machine.MachineStatus.CREATING;
 import org.eclipse.che.api.core.model.machine.Server;
 import org.eclipse.che.api.core.model.workspace.Environment;
 import org.eclipse.che.api.core.model.workspace.ExtendedMachine;
@@ -92,6 +91,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static org.eclipse.che.api.core.model.machine.MachineStatus.CREATING;
 import static org.eclipse.che.api.core.model.machine.MachineStatus.RUNNING;
 import static org.eclipse.che.api.machine.shared.Constants.TERMINAL_REFERENCE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
@@ -1081,8 +1081,9 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
             private void subscribeToProcess(CommandOutputConsole console, int pid) {
                 String stderr = "stderr";
                 String stdout = "stdout";
+                String processStatus = "process_status";
                 String after = null;
-                execAgentCommandManager.subscribe(machine.getId(), pid, asList(stderr, stdout), after)
+                execAgentCommandManager.subscribe(machine.getId(), pid, asList(stderr, stdout, processStatus), after)
                                        .thenIfProcessStartedEvent(console.getProcessStartedOperation())
                                        .thenIfProcessDiedEvent(console.getProcessDiedOperation())
                                        .thenIfProcessStdOutEvent(console.getStdOutOperation())

@@ -22,9 +22,16 @@
     <packaging>jar</packaging>
     <name>Che Plugin :: Java :: Java Debugger Server</name>
     <properties>
+        <docker.showLogs>true</docker.showLogs>
         <findbugs.excludeFilterFile>${project.build.testSourceDirectory}/../resources/findbugs-exclude.xml</findbugs.excludeFilterFile>
+        <java.image.name>java-8-jdk:debugger</java.image.name>
+        <run.cmd>java -Xdebug -Xrunjdwp:transport=dt_socket,address=8001,server=y,suspend=y -Xmx128m com.HelloWorld</run.cmd>
     </properties>
     <dependencies>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
@@ -44,6 +51,10 @@
         <dependency>
             <groupId>org.eclipse.birt.runtime</groupId>
             <artifactId>org.eclipse.equinox.common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -81,6 +92,10 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>org.eclipse.core.resources</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>org.eclipse.jdt.ui</artifactId>
         </dependency>
         <dependency>
@@ -99,7 +114,22 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-commons-test</artifactId>
+            <artifactId>che-core-api-model</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-project</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-workspace-shared</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-java-ext-lang-server</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -136,6 +166,11 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>**/**</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>com.mycila</groupId>
@@ -145,9 +180,100 @@
                         <exclude>**/*.tokens</exclude>
                         <exclude>**/*.g</exclude>
                         <exclude>**/*.txt</exclude>
+                        <exclude>**/*.class</exclude>
                     </excludes>
                 </configuration>
             </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>integration</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <debug.port>${debug.port}</debug.port>
+                            </systemPropertyVariables>
+                            <includes>
+                                <include>**/JavaDebuggerTest.java</include>
+                            </includes>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>io.fabric8</groupId>
+                        <artifactId>docker-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>build</id>
+                                <phase>process-test-resources</phase>
+                                <goals>
+                                    <goal>build</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>start</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>stop</goal>
+                                    <goal>start</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>stop</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>stop</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <images>
+                                <image>
+                                    <alias>java</alias>
+                                    <name>${java.image.name}</name>
+                                    <build>
+                                        <from>java:8-jdk</from>
+                                        <assembly>
+                                            <descriptor>${project.build.testOutputDirectory}/docker-assembly.xml</descriptor>
+                                        </assembly>
+                                        <workdir>maven</workdir>
+                                    </build>
+                                    <run>
+                                        <ports>
+                                            <port>debug.port:8001</port>
+                                        </ports>
+                                        <wait>
+                                            <log>Listening for transport dt_socket at address: 8001</log>
+                                            <time>20000</time>
+                                        </wait>
+                                        <restartPolicy>
+                                            <name>always</name>
+                                        </restartPolicy>
+                                        <cmd>
+                                            <shell>${run.cmd}</shell>
+                                        </cmd>
+                                    </run>
+                                </image>
+                            </images>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

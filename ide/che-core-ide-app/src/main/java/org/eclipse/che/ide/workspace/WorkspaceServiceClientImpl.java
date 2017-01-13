@@ -27,10 +27,10 @@ import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.WsAgentHealthStateDto;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.ide.rest.RestContext;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 
 import javax.validation.constraints.NotNull;
@@ -61,14 +61,14 @@ public class WorkspaceServiceClientImpl implements WorkspaceServiceClient {
     private final String                 baseHttpUrl;
 
     @Inject
-    private WorkspaceServiceClientImpl(@RestContext String restContext,
+    private WorkspaceServiceClientImpl(AppContext appContext,
                                        DtoUnmarshallerFactory dtoUnmarshallerFactory,
                                        AsyncRequestFactory asyncRequestFactory,
                                        LoaderFactory loaderFactory) {
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.asyncRequestFactory = asyncRequestFactory;
         this.loaderFactory = loaderFactory;
-        this.baseHttpUrl = restContext + "/workspace";
+        this.baseHttpUrl = appContext.getMasterEndpoint() + "/workspace";
     }
 
     @Override
