@@ -17,6 +17,7 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.CoreLocalizationConstant;
+import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.command.ContextualCommand.ApplicableContext;
@@ -28,8 +29,8 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.command.editor.page.CommandEditorPage.DirtyStateListener;
 import org.eclipse.che.ide.command.editor.page.commandline.CommandLinePage;
-import org.eclipse.che.ide.command.editor.page.settings.SettingsPage;
 import org.eclipse.che.ide.command.editor.page.previewurl.PreviewUrlPage;
+import org.eclipse.che.ide.command.editor.page.settings.SettingsPage;
 import org.eclipse.che.ide.command.node.CommandFileNode;
 import org.eclipse.che.ide.command.node.NodeFactory;
 import org.junit.Before;
@@ -46,6 +47,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.WAR
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -86,6 +88,8 @@ public class CommandEditorTest {
     private EditorMessages           editorMessages;
     @Mock
     private NodeFactory              nodeFactory;
+    @Mock
+    private CommandExecutor          commandExecutor;
 
     @InjectMocks
     private CommandEditor editor;
@@ -123,9 +127,9 @@ public class CommandEditorTest {
         verify(settingsPage).setDirtyStateListener(any(DirtyStateListener.class));
         verify(commandLinePage).setDirtyStateListener(any(DirtyStateListener.class));
         verify(previewUrlPage).setDirtyStateListener(any(DirtyStateListener.class));
-        verify(settingsPage).edit(any(ContextualCommand.class));
-        verify(commandLinePage).edit(any(ContextualCommand.class));
-        verify(previewUrlPage).edit(any(ContextualCommand.class));
+        verify(settingsPage).edit(editor.editedCommand);
+        verify(commandLinePage).edit(editor.editedCommand);
+        verify(previewUrlPage).edit(editor.editedCommand);
     }
 
     @Test
@@ -156,18 +160,18 @@ public class CommandEditorTest {
     }
 
     @Test
-    public void shouldSave() throws Exception {
-        when(commandManager.updateCommand(anyString(), any(ContextualCommand.class))).thenReturn(commandPromise);
+    public void shouldSaveCommand() throws Exception {
+        when(commandManager.updateCommand(anyString(), eq(editor.editedCommand))).thenReturn(commandPromise);
         when(commandPromise.then(any(Operation.class))).thenReturn(commandPromise);
 
         editor.doSave();
 
-        verify(commandManager).updateCommand(anyString(), any(ContextualCommand.class));
+        verify(commandManager).updateCommand(anyString(), eq(editor.editedCommand));
     }
 
     @Test(expected = OperationException.class)
-    public void shouldShowNotificationWhenFailedToSave() throws Exception {
-        when(commandManager.updateCommand(anyString(), any(ContextualCommand.class))).thenReturn(commandPromise);
+    public void shouldShowNotificationWhenFailedToSaveCommand() throws Exception {
+        when(commandManager.updateCommand(anyString(), eq(editor.editedCommand))).thenReturn(commandPromise);
         when(commandPromise.then(any(Operation.class))).thenReturn(commandPromise);
 
         editor.doSave();
@@ -179,10 +183,34 @@ public class CommandEditorTest {
     }
 
     @Test
-    public void shouldClose() throws Exception {
+    public void shouldCloseEditor() throws Exception {
         editor.close(true);
 
         verify(workspaceAgent).removePart(editor);
+    }
+
+    @Test
+    public void shouldExecuteCommandWhenTestingRequested() throws Exception {
+        editor.onCommandTest();
+
+        verify(commandExecutor).executeCommand(editor.editedCommand);
+    }
+
+    @Test
+    public void shouldCloseEditorWhenCancellingRequested() throws Exception {
+        editor.onCommandCancel();
+
+        verify(workspaceAgent).removePart(editor);
+    }
+
+    @Test
+    public void shouldSaveCommandWhenSavingRequested() throws Exception {
+        when(commandManager.updateCommand(anyString(), eq(editor.editedCommand))).thenReturn(commandPromise);
+        when(commandPromise.then(any(Operation.class))).thenReturn(commandPromise);
+
+        editor.onCommandSave();
+
+        verify(commandManager).updateCommand(anyString(), eq(editor.editedCommand));
     }
 
     @Test

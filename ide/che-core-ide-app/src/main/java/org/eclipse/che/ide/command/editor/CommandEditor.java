@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.editor;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -72,9 +73,10 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
     private final List<CommandEditorPage> pages;
 
     /** Edited command. */
-    private ContextualCommand editedCommand;
+    @VisibleForTesting
+    protected ContextualCommand editedCommand;
     /** Initial (before any modification) name of the edited command. */
-    private String            commandNameInitial;
+    private   String            commandNameInitial;
 
     @Inject
     public CommandEditor(CommandEditorView view,
