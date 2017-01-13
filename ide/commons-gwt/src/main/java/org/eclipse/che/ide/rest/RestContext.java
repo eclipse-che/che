@@ -20,6 +20,7 @@ import java.lang.annotation.Target;
 /**
  * @author Vitaly Parfonov
  */
+@Deprecated
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @BindingAnnotation
