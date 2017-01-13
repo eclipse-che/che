@@ -520,7 +520,7 @@ a {
 
 .gwt-DisclosurePanel .header td {
     color: mainFontColor;
-    font-size: textFieldFontSize;
+    font-size: 13px;
     font-weight: bold;
     font-family: textFieldFontFamily;
 }
