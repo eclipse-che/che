@@ -381,44 +381,22 @@ function verify_nightly_accuracy() {
   # than the one stored on DockerHub.
   if is_nightly; then
 
-    # Retrieve info on current nightly
-    LOCAL_CREATION_DATE=$(docker inspect --format="{{.Created }}" ${CHE_IMAGE_FULLNAME})
-    CURRENT_DATE=$(date)
+    local CURRENT_DIGEST=$(docker images -q --no-trunc --digests ${CHE_IMAGE_FULLNAME})
 
-    # Unfortunatley, the "last_updated" date on DockerHub is the date it was uploaded, not created.
-    # So after you download the image locally, then the local image "created" value reflects when it
-    # was originally built, creating a situation where the local cached version is always older than
-    # what is on DockerHub, even if you just pulled it.
-    # Solution is to compare the dates, and only print warning message if the locally created ate
-    # is less than the updated date on dockerhub.
-
-    if $(newer_date_period \
-         $(timestamp_date_iso8601 "${LOCAL_CREATION_DATE}") \
-         $(timestamp_date_iso8601 "${CURRENT_DATE}")); then
-      warning "Your 'nightly' image is over 24 hours old - checking for a newer image..."
+    if ! is_fast; then
       update_image $CHE_IMAGE_FULLNAME
+    else
+      warning "Skipping nightly image check..."
+    fi 
+
+    local NEW_DIGEST=$(docker images -q --no-trunc --digests ${CHE_IMAGE_FULLNAME})
+
+    if [[ "${CURRENT_DIGEST}" != "${NEW_DIGEST}" ]]; then
       warning "Pulled new 'nightly' image - please rerun CLI"
-      return 2
+      return 2;
     fi
   fi
 }
-
-# Convert a ISO 8601 date to timestamp
-timestamp_date_iso8601() {
-  local TMP_DATE=$(date -d "${1}" +%s)
-  echo ${TMP_DATE}
-}
-
-# Compare two dates with ISO 8601 format and return
-# true if the first date is 24 hours less than the second date
-newer_date_period() {
-  if [[ $(expr ${1} + 86400) -lt ${2} ]]; then
-    return 0
-  else
-    return 1
-  fi
-}
-
 
 verify_version_upgrade_compatibility() {
   ## Two levels of checks
