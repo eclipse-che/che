@@ -381,7 +381,7 @@ function verify_nightly_accuracy() {
   # than the one stored on DockerHub.
   if is_nightly; then
 
-    CURRENT_DIGEST=$(docker images -q --no-trunc --digests ${CHE_IMAGE_FULLNAME})
+    local CURRENT_DIGEST=$(docker images -q --no-trunc --digests ${CHE_IMAGE_FULLNAME})
 
     if ! is_fast; then
       update_image $CHE_IMAGE_FULLNAME
@@ -389,7 +389,7 @@ function verify_nightly_accuracy() {
       warning "Skipping nightly image check..."
     fi 
 
-    NEW_DIGEST=$(docker images -q --no-trunc --digests ${CHE_IMAGE_FULLNAME})
+    local NEW_DIGEST=$(docker images -q --no-trunc --digests ${CHE_IMAGE_FULLNAME})
 
     if [[ "${CURRENT_DIGEST}" != "${NEW_DIGEST}" ]]; then
       warning "Pulled new 'nightly' image - please rerun CLI"
