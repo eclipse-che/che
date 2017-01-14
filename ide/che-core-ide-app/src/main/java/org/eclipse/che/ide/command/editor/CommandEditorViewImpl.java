@@ -65,12 +65,17 @@ public class CommandEditorViewImpl extends Composite implements CommandEditorVie
 
     @Override
     public void addPage(IsWidget page, String title) {
+        if (pagesPanel.getWidgetCount() == 0) {
+            pagesPanel.add(page);
+            return;
+        }
+
         final DisclosurePanel panel = new DisclosurePanel(title);
         panel.setAnimationEnabled(true);
         panel.setContent(page.asWidget());
 
-        // expand the 1`st panel only
-        if (pagesPanel.getWidgetCount() == 0) {
+        // expand the 2`st panel only
+        if (pagesPanel.getWidgetCount() == 1) {
             panel.setOpen(true);
         }
 

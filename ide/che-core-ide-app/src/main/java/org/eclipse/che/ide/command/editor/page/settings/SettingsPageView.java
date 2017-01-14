@@ -24,9 +24,6 @@ import java.util.Set;
  */
 public interface SettingsPageView extends View<SettingsPageView.ActionDelegate> {
 
-    /** Sets the command's name value. */
-    void setCommandName(String name);
-
     /** Set the list of goals which are available to set for command. */
     void setAvailableGoals(Set<CommandGoal> goals);
 
@@ -47,14 +44,6 @@ public interface SettingsPageView extends View<SettingsPageView.ActionDelegate> 
          *         new value of the command goal
          */
         void onGoalChanged(String goalId);
-
-        /**
-         * Called when command's name has been changed.
-         *
-         * @param name
-         *         changed value of the command's name
-         */
-        void onNameChanged(String name);
 
         void onWorkspaceChanged(boolean value);
 

@@ -61,9 +61,8 @@ public class SettingsPage extends AbstractCommandEditorPage implements SettingsP
 
     private final Map<Project, Boolean> projectsState;
 
+    /** Initial value of the command's goal. */
     private String       goalInitial;
-    /** Initial value of the command's name. */
-    private String       commandNameInitial;
     /** Initial value of the workspace flag. */
     private boolean      workspaceInitial;
     /** Initial value of the applicable projects list. */
@@ -105,7 +104,6 @@ public class SettingsPage extends AbstractCommandEditorPage implements SettingsP
         final ApplicableContext context = editedCommand.getApplicableContext();
 
         goalInitial = goalId;
-        commandNameInitial = editedCommand.getName();
         workspaceInitial = context.isWorkspaceApplicable();
         applicableProjectsInitial = new ArrayList<>(context.getApplicableProjects());
 
@@ -115,7 +113,6 @@ public class SettingsPage extends AbstractCommandEditorPage implements SettingsP
 
         view.setAvailableGoals(goals);
         view.setGoal(goalId);
-        view.setCommandName(editedCommand.getName());
         view.setWorkspace(editedCommand.getApplicableContext().isWorkspaceApplicable());
 
         refreshProjects();
@@ -150,7 +147,6 @@ public class SettingsPage extends AbstractCommandEditorPage implements SettingsP
         final ApplicableContext applicableContext = editedCommand.getApplicableContext();
 
         return !(goalInitial.equals(goalId) &&
-                 commandNameInitial.equals(editedCommand.getName()) &&
                  workspaceInitial == applicableContext.isWorkspaceApplicable() &&
                  applicableProjectsInitial.equals(applicableContext.getApplicableProjects()));
     }
@@ -158,13 +154,6 @@ public class SettingsPage extends AbstractCommandEditorPage implements SettingsP
     @Override
     public void onGoalChanged(String goalId) {
         editedCommand.getAttributes().put(COMMAND_GOAL_ATTRIBUTE_NAME, goalId);
-
-        notifyDirtyStateChanged();
-    }
-
-    @Override
-    public void onNameChanged(String name) {
-        editedCommand.setName(name);
 
         notifyDirtyStateChanged();
     }

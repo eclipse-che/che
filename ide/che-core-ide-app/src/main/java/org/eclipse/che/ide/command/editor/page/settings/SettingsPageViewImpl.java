@@ -23,13 +23,11 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
 import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.resources.Project;
-import org.eclipse.che.ide.command.CommandResources;
 import org.eclipse.che.ide.ui.listbox.CustomComboBox;
 
 import java.util.Map;
@@ -48,9 +46,6 @@ public class SettingsPageViewImpl extends Composite implements SettingsPageView 
     SimpleLayoutPanel mainPanel;
 
     @UiField
-    TextBox commandName;
-
-    @UiField
     CustomComboBox goal;
 
     @UiField
@@ -65,7 +60,7 @@ public class SettingsPageViewImpl extends Composite implements SettingsPageView 
     private ActionDelegate delegate;
 
     @Inject
-    public SettingsPageViewImpl(CommandResources resources) {
+    public SettingsPageViewImpl() {
         initWidget(UI_BINDER.createAndBindUi(this));
 
         projectsSection.setVisible(false);
@@ -83,11 +78,6 @@ public class SettingsPageViewImpl extends Composite implements SettingsPageView 
     @Override
     public void setGoal(String goal) {
         this.goal.setValue(goal);
-    }
-
-    @Override
-    public void setCommandName(String name) {
-        commandName.setValue(name);
     }
 
     @Override
@@ -122,7 +112,9 @@ public class SettingsPageViewImpl extends Composite implements SettingsPageView 
             Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
                 @Override
                 public void execute() {
-                    mainPanel.setHeight(155 + 20 + projectsSection.getOffsetHeight() + "px");
+                    // 100 is a initial height of the view
+                    // 20 is a height of the header of the 'Projects' table
+                    mainPanel.setHeight(100 + 20 + projectsSection.getOffsetHeight() + "px");
                 }
             });
         }
@@ -133,18 +125,13 @@ public class SettingsPageViewImpl extends Composite implements SettingsPageView 
         this.delegate = delegate;
     }
 
-    @UiHandler({"commandName"})
-    void onCommandNameChanged(KeyUpEvent event) {
-        delegate.onNameChanged(commandName.getValue());
-    }
-
     @UiHandler({"goal"})
-    void onPortKeyUp(KeyUpEvent event) {
+    void onGoalKeyUp(KeyUpEvent event) {
         delegate.onGoalChanged(goal.getValue());
     }
 
     @UiHandler({"goal"})
-    void onPortChanged(ChangeEvent event) {
+    void onGoalChanged(ChangeEvent event) {
         delegate.onGoalChanged(goal.getValue());
     }
 

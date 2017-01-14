@@ -29,6 +29,7 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.command.editor.page.CommandEditorPage.DirtyStateListener;
 import org.eclipse.che.ide.command.editor.page.commandline.CommandLinePage;
+import org.eclipse.che.ide.command.editor.page.name.NamePage;
 import org.eclipse.che.ide.command.editor.page.previewurl.PreviewUrlPage;
 import org.eclipse.che.ide.command.editor.page.settings.SettingsPage;
 import org.eclipse.che.ide.command.node.CommandFileNode;
@@ -72,6 +73,8 @@ public class CommandEditorTest {
     private CommandManager           commandManager;
     @Mock
     private SettingsPage             settingsPage;
+    @Mock
+    private NamePage                 namePage;
     @Mock
     private CommandLinePage          commandLinePage;
     @Mock

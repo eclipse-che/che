@@ -18,8 +18,6 @@
     <ui:with field='messages' type='org.eclipse.che.ide.command.editor.EditorMessages'/>
     <ui:style>
         @eval projectExplorerSelectedRowBackground org.eclipse.che.ide.api.theme.Style.theme.projectExplorerSelectedRowBackground();
-        @eval blueIconColor org.eclipse.che.ide.api.theme.Style.theme.getBlueIconColor();
-        @eval greenIconColor org.eclipse.che.ide.api.theme.Style.theme.getSuccessEventColor();
 
         .section {
             margin-bottom: 15px;
@@ -41,12 +39,8 @@
         }
     </ui:style>
 
-    <g:SimpleLayoutPanel width="500px" height="155px" ui:field="mainPanel">
+    <g:SimpleLayoutPanel width="500px" height="100px" ui:field="mainPanel">
         <g:FlowPanel>
-            <g:FlowPanel addStyleNames="{style.section}">
-                <g:Label text="{messages.pageInfoNameLabel}"/>
-                <g:TextBox ui:field="commandName" width="97%"/>
-            </g:FlowPanel>
             <g:FlowPanel addStyleNames="{style.section}">
                 <g:Label text="{messages.pageInfoGoalLabel}"/>
                 <che:CustomComboBox ui:field="goal" width="100%"/>

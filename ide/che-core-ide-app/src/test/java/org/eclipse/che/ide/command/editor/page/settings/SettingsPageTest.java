@@ -21,8 +21,6 @@ import org.eclipse.che.ide.api.command.PredefinedCommandGoalRegistry;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.command.editor.EditorMessages;
 import org.eclipse.che.ide.command.editor.page.CommandEditorPage.DirtyStateListener;
-import org.eclipse.che.ide.command.editor.page.settings.SettingsPage;
-import org.eclipse.che.ide.command.editor.page.settings.SettingsPageView;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -102,7 +100,6 @@ public class SettingsPageTest {
         verify(predefinedCommandGoalRegistry).getAllGoals();
         verify(view).setAvailableGoals(Matchers.<CommandGoal>anySet());
         verify(view).setGoal(eq(COMMAND_GOAL_ID));
-        verify(view).setCommandName(eq(COMMAND_NAME));
         verify(view).setWorkspace(eq(true));
     }
 
@@ -114,13 +111,6 @@ public class SettingsPageTest {
     @Test
     public void shouldNotifyListenerWhenGoalChanged() throws Exception {
         page.onGoalChanged("test");
-
-        verify(dirtyStateListener, times(2)).onDirtyStateChanged();
-    }
-
-    @Test
-    public void shouldNotifyListenerWhenNameChanged() throws Exception {
-        page.onNameChanged("mvn");
 
         verify(dirtyStateListener, times(2)).onDirtyStateChanged();
     }
