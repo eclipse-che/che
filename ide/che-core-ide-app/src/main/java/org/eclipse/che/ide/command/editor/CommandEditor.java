@@ -213,6 +213,11 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
             public void apply(ContextualCommand arg) throws OperationException {
                 updateDirtyState(false);
 
+                // according to the CommandManager#updateCommand contract
+                // command's name after updating may differ from the proposed name
+                // in order to prevent name duplication
+                editedCommand.setName(arg.getName());
+
                 if (!commandNameInitial.equals(editedCommand.getName())) {
                     input.setFile(nodeFactory.newCommandFileNode(editedCommand));
                 }

@@ -15,6 +15,7 @@ import elemental.util.Collections;
 
 import com.google.common.base.Optional;
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.Scheduler;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
@@ -250,8 +251,15 @@ public class CommandManagerImpl implements CommandManager,
     public Promise<ContextualCommand> createCommand(ContextualCommand command) {
         return doCreateCommand(command).then(new Operation<ContextualCommand>() {
             @Override
-            public void apply(ContextualCommand newCommand) throws OperationException {
-                notifyCommandAdded(newCommand);
+            public void apply(final ContextualCommand newCommand) throws OperationException {
+                // listeners should be notified after returning from #createCommand method
+                // so let's postpone notification
+                Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+                    @Override
+                    public void execute() {
+                        notifyCommandAdded(newCommand);
+                    }
+                });
             }
         });
     }
@@ -329,10 +337,19 @@ public class CommandManagerImpl implements CommandManager,
         return doRemoveCommand(commandName).thenPromise(new Function<Void, Promise<ContextualCommand>>() {
             @Override
             public Promise<ContextualCommand> apply(Void arg) throws FunctionException {
-                return doCreateCommand(commandToUpdate).then(new Operation<ContextualCommand>() {
+                return doCreateCommand(commandToUpdate).then(new Function<ContextualCommand, ContextualCommand>() {
                     @Override
-                    public void apply(ContextualCommand arg) throws OperationException {
-                        notifyCommandUpdated(arg);
+                    public ContextualCommand apply(final ContextualCommand arg) throws FunctionException {
+                        // listeners should be notified after returning from #updateCommand method
+                        // so let's postpone notification
+                        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+                            @Override
+                            public void execute() {
+                                notifyCommandUpdated(arg);
+                            }
+                        });
+
+                        return arg;
                     }
                 });
             }
@@ -350,7 +367,14 @@ public class CommandManagerImpl implements CommandManager,
         return doRemoveCommand(commandName).then(new Operation<Void>() {
             @Override
             public void apply(Void arg) throws OperationException {
-                notifyCommandRemoved(command);
+                // listeners should be notified after returning from #removeCommand method
+                // so let's postpone notification
+                Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+                    @Override
+                    public void execute() {
+                        notifyCommandRemoved(command);
+                    }
+                });
             }
         });
     }
