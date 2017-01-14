@@ -23,6 +23,10 @@ import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.constraints.Constraints;
+import org.eclipse.che.ide.api.dialogs.CancelCallback;
+import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
+import org.eclipse.che.ide.api.dialogs.ConfirmDialog;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
@@ -44,6 +48,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -56,49 +61,39 @@ import static org.mockito.Mockito.when;
 public class CommandsExplorerPresenterTest {
 
     @Mock
-    private CommandsExplorerView view;
-
+    private CommandsExplorerView                      view;
     @Mock
-    private CommandResources resources;
-
+    private CommandResources                          resources;
     @Mock
-    private WorkspaceAgent workspaceAgent;
-
+    private WorkspaceAgent                            workspaceAgent;
     @Mock
-    private CommandManager commandManager;
-
+    private CommandManager                            commandManager;
     @Mock
-    private NotificationManager notificationManager;
-
+    private NotificationManager                       notificationManager;
     @Mock
-    private CommandTypeChooser commandTypeChooser;
-
+    private CommandTypeChooser                        commandTypeChooser;
     @Mock
-    private ExplorerMessages messages;
-
+    private ExplorerMessages                          messages;
     @Mock
     private CommandsExplorerPresenter.RefreshViewTask refreshViewTask;
+    @Mock
+    private DialogFactory                             dialogFactory;
 
     @InjectMocks
     private CommandsExplorerPresenter presenter;
 
     @Mock
-    private Promise<Void> voidPromise;
-
+    private Promise<Void>                                voidPromise;
     @Mock
-    private Promise<ContextualCommand> commandPromise;
-
+    private Promise<ContextualCommand>                   commandPromise;
     @Mock
-    private Promise<CommandType> commandTypePromise;
-
+    private Promise<CommandType>                         commandTypePromise;
     @Captor
-    private ArgumentCaptor<Operation<PromiseError>> errorOperationCaptor;
-
+    private ArgumentCaptor<Operation<PromiseError>>      errorOperationCaptor;
     @Captor
     private ArgumentCaptor<Operation<ContextualCommand>> commandOperationCaptor;
-
     @Captor
-    private ArgumentCaptor<Operation<CommandType>> commandTypeOperationCaptor;
+    private ArgumentCaptor<Operation<CommandType>>       commandTypeOperationCaptor;
 
     @Test
     public void shouldSetViewDelegate() throws Exception {
@@ -261,21 +256,63 @@ public class CommandsExplorerPresenterTest {
 
     @Test
     public void shouldRemoveCommand() throws Exception {
+        // given
+        ConfirmDialog confirmDialog = mock(ConfirmDialog.class);
+        when(dialogFactory.createConfirmDialog(anyString(),
+                                               anyString(),
+                                               any(ConfirmCallback.class),
+                                               any(CancelCallback.class))).thenReturn(confirmDialog);
+        ArgumentCaptor<ConfirmCallback> confirmCallbackCaptor = ArgumentCaptor.forClass(ConfirmCallback.class);
+
         ContextualCommand command = mock(ContextualCommand.class);
         String cmdName = "build";
         when(command.getName()).thenReturn(cmdName);
         when(commandManager.removeCommand(anyString())).thenReturn(voidPromise);
 
+        // when
         presenter.onCommandRemove(command);
 
+        // then
+        verify(dialogFactory).createConfirmDialog(anyString(), anyString(), confirmCallbackCaptor.capture(), isNull(CancelCallback.class));
+        confirmCallbackCaptor.getValue().accepted();
+        verify(confirmDialog).show();
         verify(commandManager).removeCommand(cmdName);
     }
 
     @Test
+    public void shouldNotRemoveCommandWhenCancelled() throws Exception {
+        ConfirmDialog confirmDialog = mock(ConfirmDialog.class);
+        when(dialogFactory.createConfirmDialog(anyString(),
+                                               anyString(),
+                                               any(ConfirmCallback.class),
+                                               any(CancelCallback.class))).thenReturn(confirmDialog);
+        ContextualCommand command = mock(ContextualCommand.class);
+
+        presenter.onCommandRemove(command);
+
+        verify(dialogFactory).createConfirmDialog(anyString(), anyString(), any(ConfirmCallback.class), isNull(CancelCallback.class));
+        verify(confirmDialog).show();
+        verify(commandManager, never()).removeCommand(anyString());
+    }
+
+    @Test
     public void shouldShowNotificationWhenFailedToRemoveCommand() throws Exception {
+        // given
+        ConfirmDialog confirmDialog = mock(ConfirmDialog.class);
+        when(dialogFactory.createConfirmDialog(anyString(),
+                                               anyString(),
+                                               any(ConfirmCallback.class),
+                                               any(CancelCallback.class))).thenReturn(confirmDialog);
+        ArgumentCaptor<ConfirmCallback> confirmCallbackCaptor = ArgumentCaptor.forClass(ConfirmCallback.class);
+
         when(commandManager.removeCommand(anyString())).thenReturn(voidPromise);
 
+        // when
         presenter.onCommandRemove(mock(ContextualCommand.class));
+
+        // then
+        verify(dialogFactory).createConfirmDialog(anyString(), anyString(), confirmCallbackCaptor.capture(), isNull(CancelCallback.class));
+        confirmCallbackCaptor.getValue().accepted();
 
         verify(voidPromise).catchError(errorOperationCaptor.capture());
         errorOperationCaptor.getValue().apply(mock(PromiseError.class));

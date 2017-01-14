@@ -33,6 +33,8 @@ import org.eclipse.che.ide.api.command.ContextualCommand.ApplicableContext;
 import org.eclipse.che.ide.api.command.PredefinedCommandGoalRegistry;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.constraints.Constraints;
+import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
@@ -69,6 +71,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     private final CommandTypeChooser   commandTypeChooser;
     private final ExplorerMessages     messages;
     private final RefreshViewTask      refreshViewTask;
+    private final DialogFactory        dialogFactory;
 
     @Inject
     public CommandsExplorerPresenter(CommandsExplorerView view,
@@ -78,7 +81,8 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
                                      NotificationManager notificationManager,
                                      CommandTypeChooser commandTypeChooser,
                                      ExplorerMessages messages,
-                                     RefreshViewTask refreshViewTask) {
+                                     RefreshViewTask refreshViewTask,
+                                     DialogFactory dialogFactory) {
         this.view = view;
         this.resources = commandResources;
         this.workspaceAgent = workspaceAgent;
@@ -87,6 +91,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
         this.commandTypeChooser = commandTypeChooser;
         this.messages = messages;
         this.refreshViewTask = refreshViewTask;
+        this.dialogFactory = dialogFactory;
 
         view.setDelegate(this);
     }
@@ -179,16 +184,23 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     }
 
     @Override
-    public void onCommandRemove(ContextualCommand command) {
-        commandManager.removeCommand(command.getName()).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError arg) throws OperationException {
-                notificationManager.notify(messages.explorerMessageUnableRemove(),
-                                           arg.getMessage(),
-                                           FAIL,
-                                           EMERGE_MODE);
-            }
-        });
+    public void onCommandRemove(final ContextualCommand command) {
+        dialogFactory.createConfirmDialog(messages.explorerRemoveCommandConfirmationTitle(),
+                                          messages.explorerRemoveCommandConfirmationMessage(command.getName()),
+                                          new ConfirmCallback() {
+                                              @Override
+                                              public void accepted() {
+                                                  commandManager.removeCommand(command.getName()).catchError(new Operation<PromiseError>() {
+                                                      @Override
+                                                      public void apply(PromiseError arg) throws OperationException {
+                                                          notificationManager.notify(messages.explorerMessageUnableRemove(),
+                                                                                     arg.getMessage(),
+                                                                                     FAIL,
+                                                                                     EMERGE_MODE);
+                                                      }
+                                                  });
+                                              }
+                                          }, null).show();
     }
 
     @Override

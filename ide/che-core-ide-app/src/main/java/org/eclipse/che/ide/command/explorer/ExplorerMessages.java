@@ -36,4 +36,10 @@ public interface ExplorerMessages extends Messages {
 
     @Key("explorer.message.unable_remove")
     String explorerMessageUnableRemove();
+
+    @Key("explorer.remove_confirmation.title")
+    String explorerRemoveCommandConfirmationTitle();
+
+    @Key("explorer.remove_confirmation.message")
+    String explorerRemoveCommandConfirmationMessage(String commandName);
 }
