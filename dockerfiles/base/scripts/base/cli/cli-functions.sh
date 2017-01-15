@@ -92,7 +92,7 @@ initiate_offline_or_network_mode(){
     # If we are in networking mode, we have had some issues where users have failed DNS networking.
     # See: https://github.com/eclipse/che/issues/3266#issuecomment-265464165
     if [[ "${FAST_BOOT}" = "false" ]]; then
-      info "cli" "Checking network... (hint: '--fast' skips version and network checks)"
+      info "cli" "Checking network... (hint: '--fast' skips version, network, and nightly checks)"
       local HTTP_STATUS_CODE=$(curl -I -k dockerhub.com -s -o /dev/null --write-out '%{http_code}')
       if [[ ! $HTTP_STATUS_CODE -eq "301" ]]; then
         info "Welcome to $CHE_FORMAL_PRODUCT_NAME!"
@@ -118,24 +118,24 @@ initiate_offline_or_network_mode(){
 
 grab_initial_images() {
   # Prep script by getting default image
-  if [ "$(docker images -q alpine:3.4 2> /dev/null)" = "" ]; then
-    info "cli" "Pulling image alpine:3.4"
-    log "docker pull alpine:3.4 >> \"${LOGS}\" 2>&1"
+  if [ "$(docker images -q ${UTILITY_IMAGE_ALPINE} 2> /dev/null)" = "" ]; then
+    info "cli" "Pulling image ${UTILITY_IMAGE_ALPINE}"
+    log "docker pull ${UTILITY_IMAGE_ALPINE} >> \"${LOGS}\" 2>&1"
     TEST=""
-    docker pull alpine:3.4 >> "${LOGS}" > /dev/null 2>&1 || TEST=$?
+    docker pull ${UTILITY_IMAGE_ALPINE} >> "${LOGS}" > /dev/null 2>&1 || TEST=$?
     if [ "$TEST" = "1" ]; then
-      error "Image alpine:3.4 unavailable. Not on dockerhub or built locally."
+      error "Image ${UTILITY_IMAGE_ALPINE} unavailable. Not on dockerhub or built locally."
       return 2;
     fi
   fi
 
-  if [ "$(docker images -q eclipse/che-ip:nightly 2> /dev/null)" = "" ]; then
-    info "cli" "Pulling image eclipse/che-ip:nightly"
-    log "docker pull eclipse/che-ip:nightly >> \"${LOGS}\" 2>&1"
+  if [ "$(docker images -q ${UTILITY_IMAGE_CHEIP} 2> /dev/null)" = "" ]; then
+    info "cli" "Pulling image ${UTILITY_IMAGE_CHEIP}"
+    log "docker pull ${UTILITY_IMAGE_CHEIP} >> \"${LOGS}\" 2>&1"
     TEST=""
-    docker pull eclipse/che-ip:nightly >> "${LOGS}" > /dev/null 2>&1 || TEST=$?
+    docker pull ${UTILITY_IMAGE_CHEIP} >> "${LOGS}" > /dev/null 2>&1 || TEST=$?
     if [ "$TEST" = "1" ]; then
-      error "Image eclipse/che-ip:nightly unavailable. Not on dockerhub or built locally."
+      error "Image ${UTILITY_IMAGE_CHEIP} unavailable. Not on dockerhub or built locally."
       return 2;
     fi
   fi
@@ -204,8 +204,8 @@ is_initialized() {
 
 is_configured() {
   debug $FUNCNAME
-  if [[ -d "${CHE_CONTAINER_CONFIG_MANIFESTS_FOLDER}" ]] && \
-     [[ -d "${CHE_CONTAINER_CONFIG_MODULES_FOLDER}" ]]; then
+  if [[ -d "${CHE_CONTAINER_INSTANCE}/config" ]] && \
+     [[ -f "${CHE_CONTAINER_INSTANCE}/${CHE_VERSION_FILE}" ]]; then
     return 0
   else
     return 1
@@ -275,16 +275,44 @@ less_than() {
   return 1
 }
 
+# Check if a version is < than another version (provide like for example : version_lt 5.0 5.1)
+version_lt() {
+ test "$(printf '%s\n' "$@" | sort -V | head -n 1)" == "$1";
+ return $?;
+}
+
+# return true if the provided version is an intermediate version (like a Milestone or a Release Candidate)
+is_intermediate_version() {
+  if [[ "$1" =~ .*-M.* ]]; then
+     return 0
+  fi
+  if [[ "$1" =~ .*-RC.* ]]; then
+     return 0
+  fi
+  return 1
+}
+
 compare_cli_version_to_installed_version() {
   IMAGE_VERSION=$(get_image_version)
   INSTALLED_VERSION=$(get_installed_version)
+
+  # add -ZZ suffix if not intermediate version
+  # So for example 5.0.0 is transformed into 5.0.0-ZZ and is greater than 5.0.0-M8
+  IMAGE_VERSION_SUFFIXED=${IMAGE_VERSION}
+  INSTALLED_VERSION_SUFFIXED=${INSTALLED_VERSION}
+  if ! is_intermediate_version  ${IMAGE_VERSION}; then
+    IMAGE_VERSION_SUFFIXED="${IMAGE_VERSION}-ZZ"
+  fi
+  if ! is_intermediate_version ${INSTALLED_VERSION}; then
+    INSTALLED_VERSION_SUFFIXED="${INSTALLED_VERSION}-ZZ"
+  fi
 
   if [[ "$INSTALLED_VERSION" = "$IMAGE_VERSION" ]]; then
     echo "match"
   elif [ "$INSTALLED_VERSION" = "nightly" ] ||
        [ "$IMAGE_VERSION" = "nightly" ]; then
     echo "nightly"
-  elif less_than $INSTALLED_VERSION $IMAGE_VERSION; then
+  elif version_lt $INSTALLED_VERSION_SUFFIXED $IMAGE_VERSION_SUFFIXED; then
     echo "install-less-cli"
   else
     echo "cli-less-install"
@@ -310,9 +338,10 @@ verify_version_compatibility() {
       ;;
       "nightly")
         error ""
-        error "Your CLI version '${CHE_IMAGE_FULLNAME}' does not match your installed version '$INSTALLED_VERSION'."
+        error "Your CLI version '${CHE_IMAGE_FULLNAME}' does not match your installed version '$INSTALLED_VERSION' in ${DATA_MOUNT}."
         error ""
         error "The 'nightly' CLI is only compatible with 'nightly' installed versions."
+        error "You may use 'nightly' with a separate ${CHE_FORMAL_PRODUCT_NAME} installation by providing a different ':/data' volume mount."
         error "You may not '${CHE_MINI_PRODUCT_NAME} upgrade' from 'nightly' to a numbered (tagged) version."
         error ""
         error "Run the CLI as '${CHE_IMAGE_NAME}:<version>' to install a tagged version."
@@ -337,53 +366,37 @@ verify_version_compatibility() {
       ;;
     esac
   fi
-
-  # Per request of the engineers, check to see if the locally cached nightly version is older
-  # than the one stored on DockerHub.
-  if [[ "${CHE_IMAGE_VERSION}" = "nightly" ]]; then
-
-    REMOTE_NIGHTLY_JSON=$(curl -s https://hub.docker.com/v2/repositories/${CHE_IMAGE_NAME}/tags/nightly/)
-
-    # Retrieve info on current nightly
-    LOCAL_CREATION_DATE=$(docker inspect --format="{{.Created }}" ${CHE_IMAGE_FULLNAME})
-    REMOTE_CREATION_DATE=$(echo $REMOTE_NIGHTLY_JSON | jq ".last_updated")
-    REMOTE_CREATION_DATE="${REMOTE_CREATION_DATE//\"}"
-
-    # Unfortunatley, the "last_updated" date on DockerHub is the date it was uploaded, not created.
-    # So after you download the image locally, then the local image "created" value reflects when it
-    # was originally built, creating a istuation where the local cached version is always older than
-    # what is on DockerHub, even if you just pulled it.
-    # Solution is to compare the dates, and only print warning message if the locally created ate
-    # is less than the updated date on dockerhub.
-
-    if [[ -z ${REMOTE_CREATION_DATE} ]]; then
-      warning "Unable to get published date on hub.docker.com for ${CHE_IMAGE_FULLNAME}"
-    elif $(newer_date_period ${LOCAL_CREATION_DATE} ${REMOTE_CREATION_DATE}); then
-      warning "There is a newer ${CHE_IMAGE_FULLNAME} image on DockerHub."
-    fi
-  fi
 }
 
-# Convert a ISO 8601 date to timestamp
-timestamp_date_iso8601() {
-  local TMP_DATE=$(date -d "${1}" +%s)
-  echo ${TMP_DATE}
-}
-
-# Compare two dates with ISO 8601 format and return
-# true if the first date is less than the second date (with a 1hour period)
-# else false
-newer_date_period() {
-  local FIRST_DATE=$(timestamp_date_iso8601 $1)
-  local SECOND_DATE=$(timestamp_date_iso8601 $2)
-
-  if [[ $(expr ${FIRST_DATE} + 3600) -lt ${SECOND_DATE} ]]; then
+is_nightly() {
+  if [[ $(get_image_version) = "nightly" ]]; then
     return 0
   else
     return 1
   fi
 }
 
+function verify_nightly_accuracy() {
+  # Per request of the engineers, check to see if the locally cached nightly version is older
+  # than the one stored on DockerHub.
+  if is_nightly; then
+
+    local CURRENT_DIGEST=$(docker images -q --no-trunc --digests ${CHE_IMAGE_FULLNAME})
+
+    if ! is_fast; then
+      update_image $CHE_IMAGE_FULLNAME
+    else
+      warning "Skipping nightly image check..."
+    fi 
+
+    local NEW_DIGEST=$(docker images -q --no-trunc --digests ${CHE_IMAGE_FULLNAME})
+
+    if [[ "${CURRENT_DIGEST}" != "${NEW_DIGEST}" ]]; then
+      warning "Pulled new 'nightly' image - please rerun CLI"
+      return 2;
+    fi
+  fi
+}
 
 verify_version_upgrade_compatibility() {
   ## Two levels of checks
@@ -406,7 +419,7 @@ verify_version_upgrade_compatibility() {
     case "${COMPARE_CLI_ENV}" in
       "match")
         error ""
-        error "Your CLI version '${CHE_IMAGE_FULLNAME}' is identical to your installed version '$INSTALLED_VERSION'."
+        error "Your CLI version '${CHE_IMAGE_FULLNAME}' is identical to your installed version '$CONFIGURED_VERSION'."
         error ""
         error "Run '${CHE_IMAGE_NAME}:<version> upgrade' with a newer version to upgrade."
         error "View available versions with '$CHE_FORMAL_PRODUCT_NAME version'."
@@ -414,7 +427,7 @@ verify_version_upgrade_compatibility() {
       ;;
       "nightly")
         error ""
-        error "Your CLI version '${CHE_IMAGE_FULLNAME}' or installed version '$INSTALLED_VERSION' is nightly."
+        error "Your CLI version '${CHE_IMAGE_FULLNAME}' or installed version '$CONFIGURED_VERSION' is nightly."
         error ""
         error "You may not '${CHE_IMAGE_NAME} upgrade' from 'nightly' to a numbered (tagged) version."
         error "You can 'docker pull ${CHE_IMAGE_FULLNAME}' to get a newer nightly version."
@@ -424,7 +437,7 @@ verify_version_upgrade_compatibility() {
       ;;
       "cli-less-install")
         error ""
-        error "Your CLI version '${CHE_IMAGE_FULLNAME}' is older than your installed version '$INSTALLED_VERSION'."
+        error "Your CLI version '${CHE_IMAGE_FULLNAME}' is older than your installed version '$CONFIGURED_VERSION'."
         error ""
         error "You cannot use '${CHE_IMAGE_NAME} upgrade' to downgrade versions."
         error ""
@@ -460,7 +473,7 @@ confirm_operation() {
 port_open() {
   debug $FUNCNAME
 
-  docker run -d -p $1:$1 --name fake alpine:3.4 httpd -f -p $1 -h /etc/ > /dev/null 2>&1
+  docker run -d -p $1:$1 --name fake ${UTILITY_IMAGE_ALPINE} httpd -f -p $1 -h /etc/ > /dev/null 2>&1
   NETSTAT_EXIT=$?
   docker rm -f fake > /dev/null 2>&1
 

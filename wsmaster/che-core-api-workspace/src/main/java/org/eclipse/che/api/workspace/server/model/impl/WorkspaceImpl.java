@@ -17,7 +17,6 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceRuntime;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
-import org.eclipse.che.api.workspace.server.jpa.WorkspaceEntityListener;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
 import org.eclipse.persistence.descriptors.DescriptorEventAdapter;
@@ -66,7 +65,7 @@ import java.util.Objects;
 
         }
 )
-@EntityListeners({WorkspaceEntityListener.class, WorkspaceImpl.SyncNameOnUpdateAndPersistEventListener.class})
+@EntityListeners(WorkspaceImpl.SyncNameOnUpdateAndPersistEventListener.class)
 public class WorkspaceImpl implements Workspace {
 
     public static WorkspaceImplBuilder builder() {

@@ -339,17 +339,23 @@ public class GitServiceClientImpl implements GitServiceClient {
 
     @Override
     public Promise<Revision> commit(DevMachine devMachine, Path project, String message, Path[] files, boolean amend) {
+        return commit(devMachine, project, message, false, files, amend);
+    }
 
+    @Override
+    public Promise<Revision> commit(DevMachine devMachine, Path project, String message, boolean all, Path[] files, boolean amend) {
         List<String> paths = new ArrayList<>(files.length);
 
         for (Path file : files) {
-            paths.add(file.isEmpty() ? "." : file.toString());
+            if (!file.isEmpty()) {
+                paths.add(file.toString());
+            }
         }
 
         CommitRequest commitRequest = dtoFactory.createDto(CommitRequest.class)
                                                 .withMessage(message)
                                                 .withAmend(amend)
-                                                .withAll(false)
+                                                .withAll(all)
                                                 .withFiles(paths);
         String url = devMachine.getWsAgentBaseUrl() + COMMIT + "?projectPath=" + project;
 

@@ -52,8 +52,8 @@ export class SelectTemplateController {
 
   /**
    * Helper method used to get the length of keys of the given object
-   * @param projectTemplate: che.IProject
-   * @param isAdd: boolean
+   * @param projectTemplate {che.IProject}
+   * @param isAdd {boolean}
    */
   updateSelectedTemplates(projectTemplate: che.IProject, isAdd: boolean): void {
     if (isAdd) {
@@ -71,15 +71,16 @@ export class SelectTemplateController {
    */
   startTest(): void {
     let stack: che.IStack = angular.copy(this.stack);
+    /* tslint:disable */
     stack.workspaceConfig.name = 'test-wksp-' + (('0000' + (Math.random() * Math.pow(36, 4) << 0).toString(36)).slice(-4));
-    stack.workspaceConfig.projects = this.selectedTemplates;
-    this.callbackController.showStackTestPopup(stack);
+    /* tslint:enable */
+    this.callbackController.showStackTestPopup(stack, this.selectedTemplates);
     this.hide();
   }
 
   /**
    * Helper method used to get the length of keys of the given object
-   * @param items: Array<any>
+   * @param items {Array<any>}
    * @returns {number} - length of keys
    */
   getItemsSize(items: Array<any>): number {

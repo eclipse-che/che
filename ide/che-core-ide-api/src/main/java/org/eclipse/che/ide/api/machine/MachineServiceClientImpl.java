@@ -12,16 +12,11 @@ package org.eclipse.che.ide.api.machine;
 
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.core.model.machine.Command;
-import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
-import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.ide.rest.RestContext;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 
 import javax.validation.constraints.NotNull;
@@ -44,14 +39,14 @@ public class MachineServiceClientImpl implements MachineServiceClient {
     private final String                 baseHttpUrl;
 
     @Inject
-    protected MachineServiceClientImpl(@RestContext String restContext,
+    protected MachineServiceClientImpl(AppContext appContext,
                                        DtoUnmarshallerFactory dtoUnmarshallerFactory,
                                        AsyncRequestFactory asyncRequestFactory,
                                        LoaderFactory loaderFactory) {
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.asyncRequestFactory = asyncRequestFactory;
         this.loaderFactory = loaderFactory;
-        this.baseHttpUrl = restContext + "/workspace/";
+        this.baseHttpUrl = appContext.getMasterEndpoint() + "/workspace/";
     }
 
     @Override

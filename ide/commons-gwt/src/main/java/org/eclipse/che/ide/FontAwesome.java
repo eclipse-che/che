@@ -38,6 +38,16 @@ public class FontAwesome {
     public static final String CERTIFICATE = "<i class=\"fa fa-certificate\"></i>";
 
     /**
+     * http://fortawesome.github.io/Font-Awesome/icon/caret-down/
+     */
+    public static final String CARET_DOWN = "<i class=\"fa fa-caret-down\"></i>";
+
+    /**
+     * http://fortawesome.github.io/Font-Awesome/icon/cog/
+     */
+    public static final String COG = "<i class=\"fa fa-cog\"></i>";
+
+    /**
      * http://fortawesome.github.io/Font-Awesome/icon/compress/
      */
     public static final String COMPRESS = "<i class=\"fa fa-compress\"></i>";

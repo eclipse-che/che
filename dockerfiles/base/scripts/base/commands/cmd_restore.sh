@@ -39,13 +39,13 @@ cmd_restore() {
 
   # remove config and instance folders
   log "docker_run -v \"${CHE_HOST_CONFIG}\":${CHE_CONTAINER_ROOT} \
-                    alpine:3.4 sh -c \"rm -rf /root${CHE_CONTAINER_ROOT}/docs \
-                                   && rm -rf /root${CHE_CONTAINER_ROOT}/instance \
-                                   && rm -rf /root${CHE_CONTAINER_ROOT}/${CHE_MINI_PRODUCT_NAME}.env\""
+                    ${UTILITY_IMAGE_ALPINE} sh -c \"rm -rf /root${CHE_CONTAINER_ROOT}/docs \
+                                   ; rm -rf /root${CHE_CONTAINER_ROOT}/instance \
+                                   ; rm -rf /root${CHE_CONTAINER_ROOT}/${CHE_MINI_PRODUCT_NAME}.env\""
   docker_run -v "${CHE_HOST_CONFIG}":/root${CHE_CONTAINER_ROOT} \
-                alpine:3.4 sh -c "rm -rf /root${CHE_CONTAINER_ROOT}/docs \
-                              && rm -rf /root${CHE_CONTAINER_ROOT}/instance \
-                              &&  rm -rf /root${CHE_CONTAINER_ROOT}/${CHE_MINI_PRODUCT_NAME}.env"
+                ${UTILITY_IMAGE_ALPINE} sh -c "rm -rf /root${CHE_CONTAINER_ROOT}/docs \
+                              ; rm -rf /root${CHE_CONTAINER_ROOT}/instance \
+                              ; rm -rf /root${CHE_CONTAINER_ROOT}/${CHE_MINI_PRODUCT_NAME}.env"
 
   info "restore" "Recovering ${CHE_FORMAL_PRODUCT_NAME} data..."
 
@@ -54,5 +54,5 @@ cmd_restore() {
   docker_run -v "${CHE_HOST_CONFIG}":/root${CHE_CONTAINER_ROOT} \
              -v "${CHE_HOST_BACKUP}/${CHE_BACKUP_FILE_NAME}":"/root/backup/${CHE_BACKUP_FILE_NAME}" \
              $(cmd_restore_extra_args) \
-             alpine:3.4 sh -c "tar xf /root/backup/${CHE_BACKUP_FILE_NAME} -C /root${CHE_CONTAINER_ROOT}"
+             ${UTILITY_IMAGE_ALPINE} sh -c "tar xf /root/backup/${CHE_BACKUP_FILE_NAME} -C /root${CHE_CONTAINER_ROOT}"
 }

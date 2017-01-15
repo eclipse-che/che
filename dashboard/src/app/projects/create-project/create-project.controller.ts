@@ -1046,7 +1046,7 @@ export class CreateProjectController {
    * @param workspace existing workspace
    */
   checkExistingWorkspaceState(workspace: any): void {
-    if (workspace.runtime) {
+    if (workspace.status === 'RUNNING') {
       let websocketUrl = this.cheAPI.getWorkspace().getWebsocketUrl(workspace.id);
       // get bus
       let websocketStream = this.$websocket(websocketUrl);

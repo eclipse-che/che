@@ -10,16 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.jdb.server.utils;
 
-import javax.validation.constraints.NotNull;
-
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
@@ -37,6 +35,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IRegion;
 
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -126,7 +125,6 @@ public class JavaDebuggerUtils {
         List<IType> result = new ArrayList<>();
 
         SearchEngine searchEngine = new SearchEngine();
-
         searchEngine.searchAllTypeNames(packages,
                                         names,
                                         scope,

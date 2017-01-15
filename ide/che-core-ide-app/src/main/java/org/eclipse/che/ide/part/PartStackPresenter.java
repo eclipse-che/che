@@ -28,6 +28,7 @@ import org.eclipse.che.ide.api.parts.PartStackView;
 import org.eclipse.che.ide.api.parts.PartStackView.TabItem;
 import org.eclipse.che.ide.api.parts.PropertyListener;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
+import org.eclipse.che.ide.menu.PartMenu;
 import org.eclipse.che.ide.part.widgets.TabItemFactory;
 import org.eclipse.che.ide.part.widgets.partbutton.PartButton;
 import org.eclipse.che.ide.workspace.WorkBenchPartController;
@@ -64,6 +65,7 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
     private final Map<PartPresenter, Constraints> constraints;
     private final PartStackEventHandler           partStackHandler;
     private final EventBus                        eventBus;
+    private final PartMenu                        partMenu;
 
     protected final Map<TabItem, PartPresenter> parts;
     protected final TabItemFactory              tabItemFactory;
@@ -80,6 +82,7 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
 
     @Inject
     public PartStackPresenter(final EventBus eventBus,
+                              final PartMenu partMenu,
                               PartStackEventHandler partStackEventHandler,
                               TabItemFactory tabItemFactory,
                               PartsComparator partsComparator,
@@ -89,6 +92,7 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
         this.view.setDelegate(this);
 
         this.eventBus = eventBus;
+        this.partMenu = partMenu;
         this.partStackHandler = partStackEventHandler;
         this.workBenchPartController = workBenchPartController;
         this.tabItemFactory = tabItemFactory;
@@ -499,6 +503,11 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
 
         PartPresenter selectedPart = parts.get(selectedTab);
         view.selectTab(selectedPart);
+    }
+
+    @Override
+    public void showPartMenu(int mouseX, int mouseY) {
+        partMenu.show(mouseX, mouseY);
     }
 
     /** Handles PartStack actions */

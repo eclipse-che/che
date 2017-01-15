@@ -33,4 +33,14 @@ public interface BaseActionDelegate {
      */
     void onActivate();
 
+    /**
+     * Asks to display part toolbar menu.
+     *
+     * @param mouseX
+     *          mouse left
+     * @param mouseY
+     *          mouse top
+     */
+    void onPartMenu(int mouseX, int mouseY);
+
 }

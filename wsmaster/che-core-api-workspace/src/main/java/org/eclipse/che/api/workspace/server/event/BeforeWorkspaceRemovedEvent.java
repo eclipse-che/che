@@ -10,15 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server.event;
 
-import org.eclipse.che.core.db.event.CascadeRemovalEvent;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.core.db.cascade.event.RemoveEvent;
 
 /**
  * Published before {@link WorkspaceImpl workspace} removed.
  *
  * @author Yevhenii Voevodin
  */
-public class BeforeWorkspaceRemovedEvent extends CascadeRemovalEvent {
+public class BeforeWorkspaceRemovedEvent extends RemoveEvent {
 
     private final WorkspaceImpl workspace;
 

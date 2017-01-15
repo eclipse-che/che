@@ -20,7 +20,7 @@ import java.util.Comparator;
  *
  * @author andrew00x
  */
-final class BreakPointComparator implements Comparator<Breakpoint> {
+public final class BreakPointComparator implements Comparator<Breakpoint> {
     @Override
     public int compare(Breakpoint o1, Breakpoint o2) {
         String className1 = o1.getLocation().getTarget();

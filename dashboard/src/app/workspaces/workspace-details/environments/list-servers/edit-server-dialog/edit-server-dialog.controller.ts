@@ -9,8 +9,8 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
-import {IServer} from '../server';
 import {ListServersController} from '../list-servers.controller';
+import {IEnvironmentManagerMachineServer} from '../../../../../../components/api/environment/environment-manager-machine';
 
 /**
  * @ngdoc controller
@@ -26,7 +26,7 @@ export class EditServerDialogController {
 
   toEdit: string;
   servers: {
-    [reference: string]: IServer
+    [reference: string]: IEnvironmentManagerMachineServer
   };
 
   usedPorts: number[];
@@ -53,8 +53,8 @@ export class EditServerDialogController {
     if (this.toEdit && serversCopy[this.toEdit]) {
       delete serversCopy[this.toEdit];
     }
-    this.usedPorts = this.lodash.map(serversCopy, (server: IServer) => {
-      return  parseInt(<string>server.port, 10);
+    this.usedPorts = this.lodash.map(serversCopy, (server: IEnvironmentManagerMachineServer) => {
+      return parseInt(<string>server.port, 10);
     });
     this.usedReferences = Object.keys(serversCopy);
 

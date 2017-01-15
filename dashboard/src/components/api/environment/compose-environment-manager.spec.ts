@@ -11,7 +11,7 @@
 'use strict';
 
 import {ComposeEnvironmentManager} from './compose-environment-manager';
-import {IEnvironmentManagerMachine} from './environment-manager-machine';
+import {IEnvironmentManagerMachine, IEnvironmentManagerMachineServer} from './environment-manager-machine';
 
 /**
  * Test the environment manager for compose based recipes
@@ -61,7 +61,11 @@ describe('ComposeEnvironmentManager', () => {
           });
       let servers = envManager.getServers(machine);
 
-      let expectedServers = environment.machines[machineName].servers;
+      let expectedServers = <{[serverRef: string]: IEnvironmentManagerMachineServer}> environment.machines[machineName].servers;
+      Object.keys(expectedServers).forEach((serverRef: string) => {
+        expectedServers[serverRef].userScope = true;
+      });
+
       expect(servers).toEqual(expectedServers);
     });
 

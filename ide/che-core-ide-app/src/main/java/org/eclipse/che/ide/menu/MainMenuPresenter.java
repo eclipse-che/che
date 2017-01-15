@@ -15,11 +15,10 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-
 /**
  * Manages Main Menu Items, their runtime visibility and enabled state.
  *
- * @author <a href="mailto:nzamosenchuk@exoplatform.com">Nikolay Zamosenchuk</a>
+ * @author Nikolay Zamosenchuk
  */
 @Singleton
 public class MainMenuPresenter implements Presenter, MainMenuView.ActionDelegate {
@@ -42,4 +41,5 @@ public class MainMenuPresenter implements Presenter, MainMenuView.ActionDelegate
     public void go(AcceptsOneWidget container) {
         container.setWidget(view);
     }
+
 }

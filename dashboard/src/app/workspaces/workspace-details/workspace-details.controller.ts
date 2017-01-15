@@ -412,10 +412,12 @@ export class WorkspaceDetailsController {
    * @returns {String} name of workspace
    */
   generateWorkspaceName(): string {
-    let name,
-        iterations = 100;
+    let name: string,
+        iterations: number = 100;
     while (iterations--) {
-      name = 'wksp-' + (('0000' + (Math.random() * Math.pow(36, 4) << 0).toString(36)).slice(-4)); // jshint ignore:line
+      /* tslint:disable */
+      name = 'wksp-' + (('0000' + (Math.random() * Math.pow(36, 4) << 0).toString(36)).slice(-4));
+      /* tslint:enable */
       if (this.usedNamesList.indexOf(name) >= 0) {
         break;
       }
