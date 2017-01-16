@@ -10,19 +10,25 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server;
 
+import com.google.common.base.MoreObjects;
+import com.google.common.primitives.Ints;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.google.inject.Inject;
 
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Named;
 import javax.inject.Singleton;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -35,12 +41,35 @@ public class WorkspaceSharedPool {
 
     private final ExecutorService executor;
 
-    public WorkspaceSharedPool() {
-        executor = Executors.newFixedThreadPool(2 * Runtime.getRuntime().availableProcessors(),
-                                                new ThreadFactoryBuilder().setNameFormat("WorkspaceSharedPool-%d")
-                                                                          .setUncaughtExceptionHandler(LoggingUncaughtExceptionHandler.getInstance())
-                                                                          .setDaemon(false)
-                                                                          .build());
+    @Inject
+    public WorkspaceSharedPool(@Named("che.workspace.pool.type") String poolType,
+                               @Named("che.workspace.pool.exact_size") @Nullable String exactSizeProp,
+                               @Named("che.workspace.pool.cores_multiplier") @Nullable String coresMultiplierProp) {
+        ThreadFactory factory = new ThreadFactoryBuilder().setNameFormat("WorkspaceSharedPool-%d")
+                                                          .setUncaughtExceptionHandler(LoggingUncaughtExceptionHandler.getInstance())
+                                                          .setDaemon(false)
+                                                          .build();
+        switch (poolType.toLowerCase()) {
+            case "cached":
+                executor = Executors.newCachedThreadPool(factory);
+                break;
+            case "fixed":
+                Integer exactSize = exactSizeProp == null ? null : Ints.tryParse(exactSizeProp);
+                int size;
+                if (exactSize != null && exactSize > 0) {
+                    size = exactSize;
+                } else {
+                    size = Runtime.getRuntime().availableProcessors();
+                    Integer coresMultiplier = coresMultiplierProp == null ? null : Ints.tryParse(coresMultiplierProp);
+                    if (coresMultiplier != null && coresMultiplier > 0) {
+                        size *= coresMultiplier;
+                    }
+                }
+                executor = Executors.newFixedThreadPool(size, factory);
+                break;
+            default:
+                throw new IllegalArgumentException("The type of the pool '" + poolType + "' is not supported");
+        }
     }
 
     /** Returns an {@link ExecutorService} managed by this pool instance. */
@@ -66,7 +95,11 @@ public class WorkspaceSharedPool {
 
     /**
      * Terminates this pool, may be called multiple times,
-     * waits until pool is terminated or timeout reached.
+     * waits until pool is terminated or timeout is reached.
+     *
+     * <p>Note that the method is not designed to be used from
+     * different threads, but the other components may use it in their
+     * post construct methods to ensure that all the tasks finished their execution.
      *
      * @return true if executor successfully terminated and false if not
      * terminated(either await termination timeout is reached or thread was interrupted)
