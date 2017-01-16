@@ -22,7 +22,7 @@ public interface SimpleValue {
     List<? extends Variable> getVariables();
 
     /**
-     * The value.
+     * Returns string representation of the value.
      */
-    String getValue();
+    String getString();
 }

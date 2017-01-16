@@ -158,13 +158,13 @@ public class GdbDebuggerTest {
         Variable variable = new VariableImpl("int", "i", "2", true, variablePath, Collections.emptyList(), false);
 
         SimpleValue value = gdbDebugger.getValue(variablePath);
-        assertEquals(value.getValue(), "0");
+        assertEquals(value.getString(), "0");
 
         gdbDebugger.setValue(variable);
 
         value = gdbDebugger.getValue(variablePath);
 
-        assertEquals(value.getValue(), "2");
+        assertEquals(value.getString(), "2");
 
         String expression = gdbDebugger.evaluate("i");
         assertEquals(expression, "2");

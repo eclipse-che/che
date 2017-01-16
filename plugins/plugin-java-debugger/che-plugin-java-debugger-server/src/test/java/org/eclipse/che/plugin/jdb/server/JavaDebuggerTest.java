@@ -237,12 +237,12 @@ public class JavaDebuggerTest {
 
     @Test(priority = 11)
     public void testSetAndGetValue() throws Exception {
-        assertEquals(debugger.getValue(new VariablePathImpl("test")).getValue(), "\"hello\"");
-        assertEquals(debugger.getValue(new VariablePathImpl("msg")).getValue(), "\"Hello, debugger!\"");
+        assertEquals(debugger.getValue(new VariablePathImpl("test")).getString(), "\"hello\"");
+        assertEquals(debugger.getValue(new VariablePathImpl("msg")).getString(), "\"Hello, debugger!\"");
 
         debugger.setValue(new VariableImpl("\"new hello\"", (new VariablePathImpl("test"))));
 
-        assertEquals(debugger.getValue(new VariablePathImpl("test")).getValue(), "\"new hello\"");
+        assertEquals(debugger.getValue(new VariablePathImpl("test")).getString(), "\"new hello\"");
 
         StackFrameDump stackFrameDump = debugger.dumpStackFrame();
         Set<String> vars = stackFrameDump.getVariables().stream().map(Variable::getName).collect(Collectors.toSet());

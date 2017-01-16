@@ -154,7 +154,7 @@ public class DebuggerPresenter extends BasePresenter implements DebuggerView.Act
                 promise.then(new Operation<SimpleValue>() {
                     @Override
                     public void apply(SimpleValue arg) throws OperationException {
-                        selectedVariable.setValue(arg.getValue());
+                        selectedVariable.setValue(arg.getString());
                         view.setVariablesIntoSelectedVariable(arg.getVariables());
                         view.updateSelectedVariable();
                     }

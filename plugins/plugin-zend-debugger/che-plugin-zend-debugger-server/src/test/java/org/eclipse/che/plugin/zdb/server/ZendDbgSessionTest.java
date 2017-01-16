@@ -10,15 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.zdb.server;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
@@ -32,6 +23,15 @@ import org.eclipse.che.api.debug.shared.model.impl.action.StepIntoActionImpl;
 import org.eclipse.che.api.debug.shared.model.impl.action.StepOutActionImpl;
 import org.eclipse.che.api.debug.shared.model.impl.action.StepOverActionImpl;
 import org.testng.annotations.Test;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 /**
  * Class providing different tests for active Zend Debugger session.
@@ -161,15 +161,15 @@ public class ZendDbgSessionTest extends AbstractZendDbgSessionTest {
         List<String> path = Arrays.asList("0", "0");
         variablePath = new VariablePathImpl(path);
         simpleValue = debugger.getValue(variablePath);
-        assertEquals(simpleValue.getValue(), "\"A\"");
+        assertEquals(simpleValue.getString(), "\"A\"");
         path = Arrays.asList("0", "1");
         variablePath = new VariablePathImpl(path);
         simpleValue = debugger.getValue(variablePath);
-        assertEquals(simpleValue.getValue(), "123");
+        assertEquals(simpleValue.getString(), "123");
         path = Arrays.asList("0", "2");
         variablePath = new VariablePathImpl(path);
         simpleValue = debugger.getValue(variablePath);
-        assertEquals(simpleValue.getValue(), "array [3]");
+        assertEquals(simpleValue.getString(), "array [3]");
     }
 
     @Test(groups = { "zendDbg" }, dependsOnGroups = { "checkPHP" })

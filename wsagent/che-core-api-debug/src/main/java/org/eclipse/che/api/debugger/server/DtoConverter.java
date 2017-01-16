@@ -85,8 +85,8 @@ public final class DtoConverter {
     }
 
     public static SimpleValueDto asDto(SimpleValue value) {
-        return newDto(SimpleValueDto.class).withValue(value.getValue())
-                                     .withVariables(asVariablesDto(value.getVariables()));
+        return newDto(SimpleValueDto.class).withString(value.getString())
+                                           .withVariables(asVariablesDto(value.getVariables()));
     }
 
     public static FieldDto asDto(Field field) {
