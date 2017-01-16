@@ -265,7 +265,7 @@ public class WorkspaceManager {
     /**
      * Gets list of workspaces which has given namespace. Runtimes are included
      *
-     * @deprecated use #getWorkspaces(String user, boolean includeRuntimes) instead
+     * @deprecated use #getByNamespace(String user, boolean includeRuntimes) instead
      *
      * @param namespace
      *         the namespace to find workspaces
