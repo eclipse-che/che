@@ -16,13 +16,13 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.DebugConfiguration;
 import org.eclipse.che.ide.api.debug.DebugConfigurationPage;
 import org.eclipse.che.ide.api.machine.DevMachine;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Listeners;
+import org.testng.annotations.Test;
 
 import static java.lang.Boolean.TRUE;
 import static org.mockito.Matchers.eq;
@@ -32,7 +32,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /** @author Artem Zatsarynnyi */
-@RunWith(MockitoJUnitRunner.class)
+@Listeners(MockitoTestNGListener.class)
 public class JavaDebugConfigurationPagePresenterTest {
 
     private static final String HOST = "localhost";
@@ -51,7 +51,7 @@ public class JavaDebugConfigurationPagePresenterTest {
     @InjectMocks
     private JavaDebugConfigurationPagePresenter pagePresenter;
 
-    @Before
+    @BeforeMethod
     public void setUp() {
         when(configuration.getHost()).thenReturn(HOST);
         when(configuration.getPort()).thenReturn(PORT);

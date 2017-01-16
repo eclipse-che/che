@@ -75,4 +75,5 @@ public abstract class AbstractImporter {
      * @return returns instance of Promise
      */
     protected abstract Promise<Project> importProject(Path path, SourceStorage sourceStorage);
+
 }
