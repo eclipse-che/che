@@ -18,7 +18,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/eclipse/che/exec-agent/rest"
+	"github.com/eclipse/che/agents/exec-agent/rest"
 )
 
 const (

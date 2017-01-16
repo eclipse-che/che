@@ -22,11 +22,11 @@ import (
 
 	"regexp"
 
-	"github.com/eclipse/che/exec-agent/auth"
-	"github.com/eclipse/che/exec-agent/process"
-	"github.com/eclipse/che/exec-agent/rest"
-	"github.com/eclipse/che/exec-agent/rpc"
-	"github.com/eclipse/che/exec-agent/term"
+	"github.com/eclipse/che/agents/exec-agent/auth"
+	"github.com/eclipse/che/agents/exec-agent/process"
+	"github.com/eclipse/che/agents/exec-agent/rest"
+	"github.com/eclipse/che/agents/exec-agent/rpc"
+	"github.com/eclipse/che/agents/exec-agent/term"
 	"github.com/julienschmidt/httprouter"
 )
 
