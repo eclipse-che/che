@@ -61,11 +61,6 @@ public class SyntheticFile implements VirtualFile {
     }
 
     @Override
-    public String getMediaType() {
-        return null;
-    }
-
-    @Override
     public boolean isReadOnly() {
         return true;
     }
