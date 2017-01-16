@@ -46,14 +46,16 @@ cmd_start() {
   COMPOSE_UP_COMMAND="docker_compose --file=\"${REFERENCE_CONTAINER_COMPOSE_FILE}\" -p=\"${CHE_MINI_PRODUCT_NAME}\" up -d"
 
   ## validate the compose file (quiet mode)
-  docker_compose --file=${REFERENCE_CONTAINER_COMPOSE_FILE} config -q || (error "Invalid docker compose file content at ${REFERENCE_CONTAINER_COMPOSE_FILE}" && return 2)
+  if local_repo; then
+    docker_compose --file=${REFERENCE_CONTAINER_COMPOSE_FILE} config -q || (error "Invalid docker compose file content at ${REFERENCE_CONTAINER_COMPOSE_FILE}" && return 2)
+  fi
 
   if ! debug_server; then
     COMPOSE_UP_COMMAND+=" >> \"${LOGS}\" 2>&1"
   fi
 
   log ${COMPOSE_UP_COMMAND}
-  eval ${COMPOSE_UP_COMMAND} || (error "Error while running compose up command" && tail -30 ${LOGS} && error "The command compose UP has failed. Latest 30lines of log files ${CHE_HOST_CONFIG}/cli.log have been printed." && return 2)
+  eval ${COMPOSE_UP_COMMAND} || (error "Error during 'compose up' - printing 30 line tail of ${CHE_HOST_CONFIG}/cli.log:" && tail -30 ${LOGS} && return 2)
 
   check_if_booted
 }
