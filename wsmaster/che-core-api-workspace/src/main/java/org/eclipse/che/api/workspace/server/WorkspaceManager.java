@@ -219,6 +219,24 @@ public class WorkspaceManager {
     }
 
     /**
+     * Gets list of workspaces which user can read. Runtimes are included
+     *
+     * @deprecated use #getWorkspaces(String user, boolean includeRuntimes) instead
+     *
+     * @param user
+     *         the id of the user
+     * @return the list of workspaces or empty list if user can't read any workspace
+     * @throws NullPointerException
+     *         when {@code user} is null
+     * @throws ServerException
+     *         when any server error occurs while getting workspaces with {@link WorkspaceDao#getWorkspaces(String)}
+     */
+    @Deprecated
+    public List<WorkspaceImpl> getWorkspaces(String user) throws ServerException {
+        return getWorkspaces(user, true);
+    }
+
+    /**
      * Gets list of workspaces which user can read
      *
      * <p>Returned workspaces have either {@link WorkspaceStatus#STOPPED} status
@@ -242,6 +260,24 @@ public class WorkspaceManager {
             normalizeState(workspace, includeRuntimes);
         }
         return workspaces;
+    }
+
+    /**
+     * Gets list of workspaces which has given namespace. Runtimes are included
+     *
+     * @deprecated use #getWorkspaces(String user, boolean includeRuntimes) instead
+     *
+     * @param namespace
+     *         the namespace to find workspaces
+     * @return the list of workspaces or empty list if no matches
+     * @throws NullPointerException
+     *         when {@code namespace} is null
+     * @throws ServerException
+     *         when any server error occurs while getting workspaces with {@link WorkspaceDao#getByNamespace(String)}
+     */
+    @Deprecated
+    public List<WorkspaceImpl> getByNamespace(String namespace) throws ServerException {
+        return getByNamespace(namespace, true);
     }
 
     /**
