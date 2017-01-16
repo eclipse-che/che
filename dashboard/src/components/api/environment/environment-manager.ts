@@ -9,7 +9,7 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
-import {IEnvironmentManagerMachine} from './environment-manager-machine';
+import {IEnvironmentManagerMachine, IEnvironmentManagerMachineServer} from './environment-manager-machine';
 
 /**
  * This is base class, which describes the environment manager.
@@ -58,12 +58,12 @@ export class EnvironmentManager {
     let machines: IEnvironmentManagerMachine[] = [];
     runtime.machines.forEach((runtimeMachine: any) => {
       let name = runtimeMachine.config.name,
-          machine: any = {
-            name: name,
-            runtime: {
-              servers: runtimeMachine.runtime.servers
-            }
-          };
+          machine: any = {name: name};
+      if (runtimeMachine.runtime && runtimeMachine.runtime.servers) {
+        machine.runtime = {
+          servers: runtimeMachine.runtime.servers
+        };
+      }
       machines.push(machine);
     });
 
@@ -161,27 +161,61 @@ export class EnvironmentManager {
     }
   }
 
-  getServers(machine: IEnvironmentManagerMachine): {[serverName: string]: che.IEnvironmentMachineServer} {
+  getServers(machine: IEnvironmentManagerMachine): {[serverName: string]: IEnvironmentManagerMachineServer} {
     if (!machine.servers) {
       return {};
     }
+
+    Object.keys(machine.servers).forEach((serverName: string) => {
+      machine.servers[serverName].userScope = true;
+    });
 
     if (!machine.runtime) {
       return machine.servers;
     }
 
-    Object.keys(machine.runtime.servers).forEach((serverName: string) => {
-      let runtimeServer = machine.runtime.servers[serverName];
-      if (machine.servers[runtimeServer.ref]) {
-        machine.servers[runtimeServer.ref].runtimeUrl = runtimeServer.url;
+    Object.keys(machine.runtime.servers).forEach((runtimeServerName: string) => {
+      let runtimeServer: che.IWorkspaceRuntimeMachineServer = machine.runtime.servers[runtimeServerName],
+          runtimeServerReference = runtimeServer.ref;
+
+      if (machine.servers[runtimeServerReference]) {
+        machine.servers[runtimeServerReference].runtime = runtimeServer;
+      } else {
+        let port;
+        if (runtimeServer.port) {
+          port = runtimeServer.port;
+        } else {
+          [port, ] = runtimeServerName.split('/');
+        }
+        machine.servers[runtimeServerReference] = {
+          userScope: false,
+          port: port,
+          protocol: runtimeServer.protocol,
+          runtime: runtimeServer
+        };
       }
     });
 
     return machine.servers;
   }
 
-  setServers(machine: IEnvironmentManagerMachine, servers: {[serverRef: string]: che.IEnvironmentMachineServer}): void {
-    machine.servers = angular.copy(servers);
+  setServers(machine: IEnvironmentManagerMachine, _servers: {[serverRef: string]: IEnvironmentManagerMachineServer}): void {
+    let servers = angular.copy(_servers);
+
+    Object.keys(_servers).forEach((serverName: string) => {
+      // remove system defined servers
+      if (!_servers[serverName].userScope) {
+        delete servers[serverName];
+        return;
+      }
+
+      // remove unnecessary keys from user defined servers
+      let server = servers[serverName];
+      delete server.userScope;
+      delete server.runtime;
+    });
+
+    machine.servers = servers;
   }
 
   getAgents(machine: IEnvironmentManagerMachine): string[] {

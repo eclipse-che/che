@@ -9,9 +9,9 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
-import {IServer} from './server';
+import {IEnvironmentManagerMachineServer} from '../../../../../components/api/environment/environment-manager-machine';
 
-interface IServerListItem extends IServer {
+interface IServerListItem extends IEnvironmentManagerMachineServer {
   reference: string;
 }
 
@@ -32,9 +32,9 @@ export class ListServersController {
   }  = {};
   serversSelectedNumber: number = 0;
   serversOrderBy: string = 'reference';
-  server: IServer;
+  server: IEnvironmentManagerMachineServer;
   servers: {
-    [reference: string]: IServer
+    [reference: string]: IEnvironmentManagerMachineServer
   };
   serversList: IServerListItem[];
 
@@ -55,7 +55,7 @@ export class ListServersController {
    * Build list of servers
    */
   buildServersList(): void {
-    this.serversList = this.lodash.map(this.servers, (server: IServer, reference: string) => {
+    this.serversList = this.lodash.map(this.servers, (server: IEnvironmentManagerMachineServer, reference: string) => {
       let serverItem: IServerListItem = angular.extend({}, {reference: reference}, server);
       serverItem.protocol = serverItem.protocol ? serverItem.protocol : 'http';
       return serverItem;
@@ -63,7 +63,7 @@ export class ListServersController {
   }
 
   /**
-   * Update port selected status
+   * Update server selected status
    */
   updateSelectedStatus(): void {
     this.serversSelectedNumber = 0;
@@ -80,7 +80,7 @@ export class ListServersController {
   /**
    * @param {string} name
    */
-  changePortSelection(name: string): void {
+  changeServerSelection(name: string): void {
     this.serversSelectedStatus[name] = !this.serversSelectedStatus[name];
     this.updateSelectedStatus();
   }
@@ -90,28 +90,32 @@ export class ListServersController {
    */
   changeBulkSelection(): void {
     if (this.isBulkChecked) {
-      this.deselectAllPorts();
+      this.deselectAllServers();
       this.isBulkChecked = false;
       return;
     }
-    this.selectAllPorts();
+    this.selectAllServers();
     this.isBulkChecked = true;
   }
 
   /**
-   * Check all ports in list
+   * Check all servers in list
    */
-  selectAllPorts(): void {
-    this.serversSelectedNumber = this.serversList.length;
+  selectAllServers(): void {
+    this.serversSelectedNumber = 0;
     this.serversList.forEach((serverListItem: IServerListItem) => {
+      if (serverListItem.userScope === false) {
+        return;
+      }
+      this.serversSelectedNumber++;
       this.serversSelectedStatus[serverListItem.reference] = true;
     });
   }
 
   /**
-   * Uncheck all ports in list
+   * Uncheck all servers in list
    */
-  deselectAllPorts(): void {
+  deselectAllServers(): void {
     this.serversSelectedStatus = {};
     this.serversSelectedNumber = 0;
   }
@@ -124,7 +128,11 @@ export class ListServersController {
    * @param {string} protocol
    */
   addServer(reference: string, port: number, protocol: string): void {
-    this.servers[reference] = {'port': port, 'protocol': protocol};
+    this.servers[reference] = {
+      port: port,
+      protocol: protocol,
+      userScope: true
+    };
 
     this.updateSelectedStatus();
     this.serversOnChange();
@@ -146,7 +154,7 @@ export class ListServersController {
   }
 
   /**
-   * Show dialog to add new or edit existing port
+   * Show dialog to add new or edit existing server
    *
    * @param {MouseEvent} $event
    * @param {string=} reference
@@ -168,14 +176,14 @@ export class ListServersController {
   }
 
   /**
-   * Removes selected ports
+   * Removes selected servers
    */
-  deleteSelectedPorts(): void {
+  deleteSelectedServers(): void {
     this.showDeleteConfirmation(this.serversSelectedNumber).then(() => {
-      this.lodash.forEach(this.serversSelectedStatus, (server: IServer, name: string) => {
+      this.lodash.forEach(this.serversSelectedStatus, (server: IEnvironmentManagerMachineServer, name: string) => {
         delete this.servers[name];
       });
-      this.deselectAllPorts();
+      this.deselectAllServers();
       this.isBulkChecked = false;
       this.serversOnChange();
       this.buildServersList();
@@ -183,20 +191,20 @@ export class ListServersController {
   }
 
   /**
-   * Show confirmation popup before port to delete
+   * Show confirmation popup before server to delete
    * @param {number} numberToDelete
    * @returns {angular.IPromise<any>}
    */
   showDeleteConfirmation(numberToDelete: number): ng.IPromise<any> {
     let confirmTitle = 'Would you like to delete ';
     if (numberToDelete > 1) {
-      confirmTitle += 'these ' + numberToDelete + ' ports?';
+      confirmTitle += 'these ' + numberToDelete + ' servers?';
     } else {
-      confirmTitle += 'this selected port?';
+      confirmTitle += 'this selected server?';
     }
     let confirm = this.$mdDialog.confirm()
       .title(confirmTitle)
-      .ariaLabel('Remove port')
+      .ariaLabel('Remove server')
       .ok('Delete!')
       .cancel('Cancel')
       .clickOutsideToClose(true);
