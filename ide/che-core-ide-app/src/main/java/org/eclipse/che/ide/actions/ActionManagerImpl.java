@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -112,6 +112,10 @@ public class ActionManagerImpl implements ActionManager {
         DefaultActionGroup debugContextMenuGroup = new DefaultActionGroup(IdeActions.GROUP_DEBUG_CONTEXT_MENU, false, this);
         registerAction(IdeActions.GROUP_DEBUG_CONTEXT_MENU, debugContextMenuGroup);
         mainContextMenuGroup.add(debugContextMenuGroup);
+
+        // register default action groups for part menu
+        DefaultActionGroup partMenuGroup = new DefaultActionGroup(IdeActions.GROUP_PART_MENU, false, this);
+        registerAction(IdeActions.GROUP_PART_MENU, partMenuGroup);
 
         DefaultActionGroup leftMainMenu = new DefaultActionGroup(this);
         registerAction(IdeActions.GROUP_LEFT_MAIN_MENU, leftMainMenu);

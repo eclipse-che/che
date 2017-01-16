@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,7 +24,6 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.commons.exception.UnauthorizedException;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
-import org.eclipse.che.ide.rest.RestContext;
 import org.eclipse.che.plugin.ssh.key.client.SshKeyUploader;
 import org.eclipse.che.security.oauth.JsOAuthWindow;
 import org.eclipse.che.security.oauth.OAuthCallback;
@@ -53,14 +52,13 @@ public class GitHubSshKeyUploader implements SshKeyUploader, OAuthCallback {
 
     @Inject
     public GitHubSshKeyUploader(GitHubClientService gitHubService,
-                                @RestContext String baseUrl,
                                 GitHubLocalizationConstant constant,
                                 NotificationManager notificationManager,
                                 ProductInfoDataProvider productInfoDataProvider,
                                 DialogFactory dialogFactory,
                                 AppContext appContext) {
         this.gitHubService = gitHubService;
-        this.baseUrl = baseUrl;
+        this.baseUrl = appContext.getMasterEndpoint();
         this.constant = constant;
         this.notificationManager = notificationManager;
         this.productInfoDataProvider = productInfoDataProvider;

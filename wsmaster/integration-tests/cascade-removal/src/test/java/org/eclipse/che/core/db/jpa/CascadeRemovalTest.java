@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,6 +42,7 @@ import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
+import org.eclipse.che.api.workspace.server.WorkspaceSharedPool;
 import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
 import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao.RemoveSnapshotsBeforeWorkspaceRemovedEventSubscriber;
 import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao.RemoveWorkspaceBeforeAccountRemovedEventSubscriber;
@@ -49,8 +50,8 @@ import org.eclipse.che.api.workspace.server.jpa.WorkspaceJpaModule;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.core.db.DBInitializer;
-import org.eclipse.che.core.db.event.CascadeRemovalEvent;
-import org.eclipse.che.core.db.event.CascadeRemovalEventSubscriber;
+import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
+import org.eclipse.che.core.db.cascade.event.CascadeEvent;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.core.db.schema.impl.flyway.FlywaySchemaInitializer;
 import org.eclipse.che.inject.lifecycle.InitModule;
@@ -142,6 +143,7 @@ public class CascadeRemovalTest {
                 bind(AccountManager.class);
                 bind(Boolean.class).annotatedWith(Names.named("che.workspace.auto_snapshot")).toInstance(false);
                 bind(Boolean.class).annotatedWith(Names.named("che.workspace.auto_restore")).toInstance(false);
+                bind(WorkspaceSharedPool.class).toInstance(new WorkspaceSharedPool("cached", null, null));
             }
         });
 
@@ -178,8 +180,8 @@ public class CascadeRemovalTest {
 
     @Test(dataProvider = "beforeRemoveRollbackActions")
     public void shouldRollbackTransactionWhenFailedToRemoveAnyOfEntries(
-            Class<CascadeRemovalEventSubscriber<CascadeRemovalEvent>> subscriberClass,
-            Class<CascadeRemovalEvent> eventClass) throws Exception {
+            Class<CascadeEventSubscriber<CascadeEvent>> subscriberClass,
+            Class<CascadeEvent> eventClass) throws Exception {
         createTestData();
         eventService.unsubscribe(injector.getInstance(subscriberClass), eventClass);
 

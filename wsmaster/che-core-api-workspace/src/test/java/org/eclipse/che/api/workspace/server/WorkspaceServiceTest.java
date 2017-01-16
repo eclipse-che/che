@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -311,7 +311,7 @@ public class WorkspaceServiceTest {
     public void shouldGetWorkspaces() throws Exception {
         final WorkspaceImpl workspace1 = createWorkspace(createConfigDto());
         final WorkspaceImpl workspace2 = createWorkspace(createConfigDto(), STARTING);
-        when(wsManager.getWorkspaces(USER_ID)).thenReturn(asList(workspace1, workspace2));
+        when(wsManager.getWorkspaces(USER_ID, false)).thenReturn(asList(workspace1, workspace2));
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -329,7 +329,7 @@ public class WorkspaceServiceTest {
     public void shouldGetWorkspacesByNamespace() throws Exception {
         final WorkspaceImpl workspace1 = createWorkspace(createConfigDto());
         final WorkspaceImpl workspace2 = createWorkspace(createConfigDto(), STARTING);
-        when(wsManager.getByNamespace(NAMESPACE)).thenReturn(asList(workspace1, workspace2));
+        when(wsManager.getByNamespace(NAMESPACE, false)).thenReturn(asList(workspace1, workspace2));
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -347,7 +347,7 @@ public class WorkspaceServiceTest {
     public void shouldGetWorkspacesByStatus() throws Exception {
         final WorkspaceImpl workspace1 = createWorkspace(createConfigDto());
         final WorkspaceImpl workspace2 = createWorkspace(createConfigDto(), STARTING);
-        when(wsManager.getWorkspaces(USER_ID)).thenReturn(asList(workspace1, workspace2));
+        when(wsManager.getWorkspaces(USER_ID, false)).thenReturn(asList(workspace1, workspace2));
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -798,7 +798,7 @@ public class WorkspaceServiceTest {
                                                .get(workspace.getConfig().getDefaultEnv());
         assertNotNull(environment);
 
-        final WorkspaceRuntimeImpl runtime = new WorkspaceRuntimeImpl(workspace.getConfig().getDefaultEnv());
+        final WorkspaceRuntimeImpl runtime = new WorkspaceRuntimeImpl(workspace.getConfig().getDefaultEnv(), null);
         MachineConfigImpl devMachineConfig = MachineConfigImpl.builder()
                                                               .setDev(true)
                                                               .setEnvVariables(emptyMap())

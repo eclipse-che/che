@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,9 +15,9 @@ import com.google.gwt.user.client.ui.FormPanel;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.ext.ssh.client.SshLocalizationConstant;
-import org.eclipse.che.ide.rest.RestContext;
 
 import javax.validation.constraints.NotNull;
 
@@ -40,12 +40,12 @@ public class UploadSshKeyPresenter implements UploadSshKeyView.ActionDelegate {
     @Inject
     public UploadSshKeyPresenter(UploadSshKeyView view,
                                  SshLocalizationConstant constant,
-                                 @RestContext String restContext,
+                                 AppContext appContext,
                                  NotificationManager notificationManager) {
         this.view = view;
         this.view.setDelegate(this);
         this.constant = constant;
-        this.restContext = restContext;
+        this.restContext = appContext.getMasterEndpoint();
         this.notificationManager = notificationManager;
     }
 

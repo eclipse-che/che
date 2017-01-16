@@ -23,7 +23,7 @@ cmd_offline() {
   readarray -t STACK_IMAGE_LIST < /version/$CHE_VERSION/images-stacks
 
   # List all images to be saved
-  if [ $1 = "--list" ]; then
+  if [[ $# -gt 0 ]] && [[ $1 = "--list" ]]; then
     # First display mandatory 
     info "offline" "Listing images to save for offline usage"
     info ""
@@ -53,6 +53,14 @@ cmd_offline() {
 
   info "offline" "Saving ${CHE_MINI_PRODUCT_NAME} cli image..."
   save_image ${CHE_IMAGE_FULLNAME}
+
+  info "offline" "Saving utility images..."
+  download_and_save_image "${UTILITY_IMAGE_CHEIP}"
+  download_and_save_image "${UTILITY_IMAGE_ALPINE}"
+  download_and_save_image "${UTILITY_IMAGE_CHEACTION}"
+  download_and_save_image "${UTILITY_IMAGE_CHEDIR}"
+  download_and_save_image "${UTILITY_IMAGE_CHETEST}"
+  download_and_save_image "${UTILITY_IMAGE_CHEMOUNT}"
 
   info "offline" "Saving ${CHE_MINI_PRODUCT_NAME} system images..."
   IFS=$'\n'

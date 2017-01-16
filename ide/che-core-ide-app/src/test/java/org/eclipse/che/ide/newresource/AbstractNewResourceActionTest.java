@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.newresource;
 
-import com.google.common.base.Optional;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
 
@@ -79,7 +78,7 @@ public class AbstractNewResourceActionTest {
 
     @Test
     public void testShouldCreateFileIfSelectedFile() throws Exception {
-        when(file.getParent()).thenReturn(Optional.of(parent));
+        when(file.getParent()).thenReturn(parent);
         when(appContext.getResource()).thenReturn(file);
         when(parent.newFile(anyString(), anyString())).thenReturn(filePromise);
         when(filePromise.then(any(Operation.class))).thenReturn(filePromise);
@@ -106,7 +105,7 @@ public class AbstractNewResourceActionTest {
     @Test(expected = IllegalStateException.class)
     public void testShouldThrowExceptionIfFileDoesNotContainParent() throws Exception {
         when(appContext.getResource()).thenReturn(file);
-        when(file.getParent()).thenReturn(Optional.<Container>absent());
+        when(file.getParent()).thenReturn(null);
 
         action.createFile("name");
     }

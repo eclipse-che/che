@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -126,7 +126,6 @@ public class PopupMenu extends Composite {
             }
         }
     };
-
 
     /**
      * Creates new popup.
@@ -310,19 +309,24 @@ public class PopupMenu extends Composite {
                                                                                : POPUP_RESOURCES.popup().popupMenuIconFieldDisabled());
 
                 int work = 1;
-                if (hasCheckedItems && menuItem instanceof ToggleAction) {
-                    ToggleAction toggleAction = (ToggleAction)menuItem;
-                    ActionEvent e = new ActionEvent(presentationFactory.getPresentation(toggleAction),
-                                                    actionManager,
-                                                    managerProvider.get());
+                if (hasCheckedItems) {
+                    if (menuItem instanceof ToggleAction) {
+                        ToggleAction toggleAction = (ToggleAction)menuItem;
+                        ActionEvent e = new ActionEvent(presentationFactory.getPresentation(toggleAction),
+                                actionManager,
+                                managerProvider.get());
 
-                    if (toggleAction.isSelected(e)) {
-                        // Temporary solution
-                        table.setHTML(i, work, "<i class=\"fa fa-check\"></i>");
+                        if (toggleAction.isSelected(e)) {
+                            // Temporary solution
+                            table.setHTML(i, work, "<i class=\"fa fa-check\"></i>");
+                        }
+
+                        table.getCellFormatter().setStyleName(i, work, presentation.isEnabled() ? POPUP_RESOURCES.popup().popupMenuCheckField()
+                                : POPUP_RESOURCES.popup().popupMenuCheckFieldDisabled());
+                    } else {
+                        table.setHTML(i, work, "");
                     }
 
-                    table.getCellFormatter().setStyleName(i, work, presentation.isEnabled() ? POPUP_RESOURCES.popup().popupMenuCheckField()
-                                                                                   : POPUP_RESOURCES.popup().popupMenuCheckFieldDisabled());
                     work++;
                 }
 

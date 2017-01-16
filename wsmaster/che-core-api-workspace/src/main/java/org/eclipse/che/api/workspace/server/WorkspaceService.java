@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -211,7 +211,7 @@ public class WorkspaceService extends Service {
                                             @QueryParam("status")
                                             String status) throws ServerException, BadRequestException {
         //TODO add maxItems & skipCount to manager
-        return workspaceManager.getWorkspaces(EnvironmentContext.getCurrent().getSubject().getUserId())
+        return workspaceManager.getWorkspaces(EnvironmentContext.getCurrent().getSubject().getUserId(), false)
                                .stream()
                                .filter(ws -> status == null || status.equalsIgnoreCase(ws.getStatus().toString()))
                                .map(workspace -> linksInjector.injectLinks(asDto(workspace), getServiceContext()))
@@ -234,7 +234,7 @@ public class WorkspaceService extends Service {
                                              @ApiParam("The namespace")
                                              @PathParam("namespace")
                                              String namespace) throws ServerException, BadRequestException {
-        return workspaceManager.getByNamespace(namespace)
+        return workspaceManager.getByNamespace(namespace, false)
                                .stream()
                                .filter(ws -> status == null || status.equalsIgnoreCase(ws.getStatus().toString()))
                                .map(workspace -> linksInjector.injectLinks(asDto(workspace), getServiceContext()))

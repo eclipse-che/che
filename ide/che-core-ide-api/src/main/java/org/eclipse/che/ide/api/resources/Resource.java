@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -96,6 +96,28 @@ public interface Resource extends Comparable<Resource> {
     boolean isFile();
 
     /**
+     * Casts current resource to the {@link File} if the last one's represents a file.
+     * <p>
+     * Example of usage:
+     * <pre>
+     *    public void doSome() {
+     *        Resource resource = ...;
+     *        if (resource.isFile()) {
+     *            File file = resource.asFile();
+     *        }
+     *    }
+     * </pre>
+     *
+     * @return instance of {@link File}
+     * @throws IllegalStateException
+     *         in case if current resource is not a file
+     * @see Resource#getResourceType()
+     * @see Resource#FILE
+     * @since 5.1.0
+     */
+    File asFile();
+
+    /**
      * Returns {@code true} if current represents a folder.
      *
      * @return true if current resource is folder based resource.
@@ -106,6 +128,28 @@ public interface Resource extends Comparable<Resource> {
     boolean isFolder();
 
     /**
+     * Casts current resource to the {@link Folder} if the last one's represents a folder.
+     * <p>
+     * Example of usage:
+     * <pre>
+     *    public void doSome() {
+     *        Resource resource = ...;
+     *        if (resource.isFolder()) {
+     *            Folder folder = resource.asFolder();
+     *        }
+     *    }
+     * </pre>
+     *
+     * @return instance of {@link Folder}
+     * @throws IllegalStateException
+     *         in case if current resource is not a folder
+     * @see Resource#getResourceType()
+     * @see Resource#FOLDER
+     * @since 5.1.0
+     */
+    Folder asFolder();
+
+    /**
      * Returns {@code true} if current represents a project.
      *
      * @return true if current resource is project based resource.
@@ -114,6 +158,28 @@ public interface Resource extends Comparable<Resource> {
      * @since 4.4.0
      */
     boolean isProject();
+
+    /**
+     * Casts current resource to the {@link Project} if the last one's represents a project.
+     * <p>
+     * Example of usage:
+     * <pre>
+     *    public void doSome() {
+     *        Resource resource = ...;
+     *        if (resource.isProject()) {
+     *            Project project = resource.asProject();
+     *        }
+     *    }
+     * </pre>
+     *
+     * @return instance of {@link Project}
+     * @throws IllegalStateException
+     *         in case if current resource is not a project
+     * @see Resource#getResourceType()
+     * @see Resource#PROJECT
+     * @since 5.1.0
+     */
+    Project asProject();
 
     /**
      * Copies resource to given {@code destination} path. Copy operation performs asynchronously and result of current
@@ -381,14 +447,14 @@ public interface Resource extends Comparable<Resource> {
     String getName();
 
     /**
-     * Returns the resource which is the parent of this resource or {@link Optional#absent()} if such parent
-     * doesn't exists. (This means that this resource is 'root' project).
+     * Returns the resource which is the parent of this resource or {@code null} if such parent
+     * doesn't exist. (This means that this resource is 'root' project)
      *
-     * @return the resource parent {@link Container}
+     * @return the resource's parent {@link Container}
      * @see Container
-     * @since 4.4.0
+     * @since 5.1.0
      */
-    Optional<Container> getParent();
+    Container getParent();
 
     /**
      * Returns the {@code Project} which contains this resource.
@@ -399,8 +465,20 @@ public interface Resource extends Comparable<Resource> {
      * @return the {@link Optional} with related project
      * @see Project
      * @since 4.4.0
+     * @deprecated use {@link #getProject()}
      */
+    @Deprecated
     Optional<Project> getRelatedProject();
+
+    /**
+     * Returns the {@link Project} which is bound to this resource or {@code null}.
+     *
+     * Returns itself for projects.
+     *
+     * @return the bound instance of {@link Project} or null
+     * @since 5.1.0
+     */
+    Project getProject();
 
     /**
      * Returns the type of this resource.

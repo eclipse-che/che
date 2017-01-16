@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,11 +26,10 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.oauth.OAuth2Authenticator;
 import org.eclipse.che.ide.api.oauth.OAuth2AuthenticatorUrlProvider;
 import org.eclipse.che.ide.api.ssh.SshServiceClient;
-import org.eclipse.che.ide.rest.RestContext;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.github.ide.GitHubLocalizationConstant;
-import org.eclipse.che.plugin.ssh.key.client.SshKeyUploaderRegistry;
 import org.eclipse.che.plugin.ssh.key.client.SshKeyUploader;
+import org.eclipse.che.plugin.ssh.key.client.SshKeyUploaderRegistry;
 import org.eclipse.che.plugin.ssh.key.client.manage.SshKeyManagerPresenter;
 import org.eclipse.che.security.oauth.JsOAuthWindow;
 import org.eclipse.che.security.oauth.OAuthCallback;
@@ -67,7 +66,6 @@ public class GitHubAuthenticatorImpl implements OAuth2Authenticator, OAuthCallba
                                    GitHubAuthenticatorView view,
                                    DialogFactory dialogFactory,
                                    GitHubLocalizationConstant locale,
-                                   @RestContext String baseUrl,
                                    NotificationManager notificationManager,
                                    AppContext appContext) {
         this.registry = registry;
@@ -75,7 +73,7 @@ public class GitHubAuthenticatorImpl implements OAuth2Authenticator, OAuthCallba
         this.view = view;
         this.view.setDelegate(this);
         this.locale = locale;
-        this.baseUrl = baseUrl;
+        this.baseUrl = appContext.getMasterEndpoint();
         this.dialogFactory = dialogFactory;
         this.notificationManager = notificationManager;
         this.appContext = appContext;

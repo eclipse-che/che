@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.agent.shared.model.AgentKey;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.MachineLogMessage;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
@@ -24,6 +25,7 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.MessageConsumer;
 import org.eclipse.che.api.environment.server.exception.EnvironmentNotRunningException;
+import org.eclipse.che.api.environment.server.exception.EnvironmentStartInterruptedException;
 import org.eclipse.che.api.environment.server.model.CheServiceBuildContextImpl;
 import org.eclipse.che.api.environment.server.model.CheServiceImpl;
 import org.eclipse.che.api.environment.server.model.CheServicesEnvironmentImpl;
@@ -65,6 +67,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
@@ -88,6 +91,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 /**
  * @author Alexander Garagatyi
@@ -105,23 +109,25 @@ public class CheEnvironmentEngineTest {
     @Mock
     private MachineInstanceProvider            machineProvider;
     @Mock
-    private MachineInstanceProviders machineInstanceProviders;
+    private MachineInstanceProviders           machineInstanceProviders;
     @Mock
-    private EventService             eventService;
+    private EventService                       eventService;
     @Mock
-    private SnapshotDao              snapshotDao;
+    private SnapshotDao                        snapshotDao;
     @Mock
-    private RecipeDownloader         recipeDownloader;
+    private RecipeDownloader                   recipeDownloader;
     @Mock
-    InfrastructureProvisioner          infrastructureProvisioner;
+    InfrastructureProvisioner infrastructureProvisioner;
     @Mock
-    private ContainerNameGenerator   containerNameGenerator;
+    private ContainerNameGenerator containerNameGenerator;
     @Mock
-    private AgentRegistry            agentRegistry;
+    private AgentRegistry          agentRegistry;
     @Mock
-    private Agent                    agent;
+    private Agent                  agent;
     @Mock
-    private EnvironmentParser        environmentParser;
+    private EnvironmentParser      environmentParser;
+    @Mock
+    private MachineStartedHandler  startedHandler;
 
     private CheEnvironmentEngine engine;
 
@@ -241,10 +247,76 @@ public class CheEnvironmentEngineTest {
                                                envName,
                                                env,
                                                false,
-                                               messageConsumer);
+                                               messageConsumer,
+                                               startedHandler);
 
         // then
         assertEquals(machines, expectedMachines);
+        for (Instance expectedMachine : expectedMachines) {
+            verify(startedHandler).started(expectedMachine);
+        }
+    }
+
+    @Test
+    public void stopsTheEnvironmentWhileStartOfMachineIsInterrupted() throws Exception {
+        // given
+        EnvironmentImpl env = createEnv();
+        String envName = "env-1";
+        String workspaceId = "wsId";
+
+        int[] counter = new int[] {env.getMachines().size()};
+        ArrayList<Instance> created = new ArrayList<>();
+        when(machineProvider.startService(anyString(),
+                                          eq(workspaceId),
+                                          eq(envName),
+                                          anyString(),
+                                          anyBoolean(),
+                                          anyString(),
+                                          any(CheServiceImpl.class),
+                                          any(LineConsumer.class)))
+                .thenAnswer(invocationOnMock -> {
+                    // interrupt when the last machine from environment is started
+                    if (--counter[0] == 0) {
+                        Thread.currentThread().interrupt();
+                        throw new ServerException("interrupted!");
+                    }
+                    Object[] arguments = invocationOnMock.getArguments();
+                    NoOpMachineInstance instance = spy(new NoOpMachineInstance(createMachine(workspaceId,
+                                                                                             envName,
+                                                                                             (CheServiceImpl)arguments[6],
+                                                                                             (String)arguments[3],
+                                                                                             (boolean)arguments[4])));
+                    created.add(instance);
+                    return instance;
+                });
+        when(environmentParser.parse(env)).thenReturn(createCheServicesEnv());
+
+        // when, then
+        try {
+            engine.start(workspaceId,
+                         envName,
+                         env,
+                         false,
+                         messageConsumer,
+                         startedHandler);
+            fail("environment must not be running");
+        } catch (EnvironmentStartInterruptedException x) {
+            assertEquals(x.getMessage(), format("Start of environment '%s' in workspace '%s' is interrupted",
+                                                envName, workspaceId));
+        }
+
+        // environment must not be running
+        try {
+            engine.getMachines(workspaceId);
+            fail("environment must not be running");
+        } catch (EnvironmentNotRunningException x) {
+            assertEquals(x.getMessage(), format("Environment with ID '%s' is not found", workspaceId));
+        }
+
+        // all the machines expect of the last one must be destroyed
+        for (Instance instance : created) {
+            verify(instance).destroy();
+        }
     }
 
     @Test
@@ -433,7 +505,7 @@ public class CheEnvironmentEngineTest {
     }
 
     @Test
-    public void shouldBeAbleToStartEnvironmentWithRrcover() throws Exception {
+    public void shouldBeAbleToStartEnvironmentWithRecover() throws Exception {
         // given
         SnapshotImpl snapshot = mock(SnapshotImpl.class);
         MachineSourceImpl machineSource = new MachineSourceImpl("image", "registry.com/snapshot123:latest@sha256:abc1234567890", null);
@@ -471,10 +543,10 @@ public class CheEnvironmentEngineTest {
 
         // when
         List<Instance> machines = engine.start(workspaceId,
-                     envName,
-                     env,
-                     true,
-                     messageConsumer);
+                                               envName,
+                                               env,
+                                               true,
+                                               messageConsumer);
 
         // then
         assertEquals(machines, expectedMachines);
@@ -491,6 +563,68 @@ public class CheEnvironmentEngineTest {
         CheServiceImpl actualService = captor.getValue();
 
         assertEquals(actualService.getImage(), "registry.com/snapshot123:latest");
+    }
+
+    @Test
+    public void shouldBeAbleToStartEnvironmentWhenRecoverFailed() throws Exception {
+        // given
+        String machineImage = "che/ubuntu_jdk";
+        when(snapshotDao.getSnapshot(anyString(), anyString(), anyString())).thenThrow(new NotFoundException("Snapshot not found"));
+
+        EnvironmentImpl env = createEnv();
+        String envName = "env-1";
+        String workspaceId = "wsId";
+        List<Instance> expectedMachines = new ArrayList<>();
+        when(machineProvider.startService(anyString(),
+                                          eq(workspaceId),
+                                          eq(envName),
+                                          anyString(),
+                                          anyBoolean(),
+                                          anyString(),
+                                          any(CheServiceImpl.class),
+                                          any(LineConsumer.class)))
+                .thenAnswer(invocationOnMock -> {
+                    Object[] arguments = invocationOnMock.getArguments();
+                    String machineName = (String)arguments[3];
+                    boolean isDev = (boolean)arguments[4];
+                    CheServiceImpl service = (CheServiceImpl)arguments[6];
+                    Machine machine = createMachine(workspaceId,
+                                                    envName,
+                                                    service,
+                                                    machineName,
+                                                    isDev);
+                    NoOpMachineInstance instance = spy(new NoOpMachineInstance(machine));
+                    expectedMachines.add(instance);
+                    return instance;
+                });
+        CheServicesEnvironmentImpl servicesEnvironment = createCheServicesEnv();
+        for (CheServiceImpl service : servicesEnvironment.getServices().values()) {
+            service.setImage(machineImage);
+        }
+        when(environmentParser.parse(env)).thenReturn(servicesEnvironment);
+
+        // when
+        List<Instance> machines = engine.start(workspaceId,
+                                               envName,
+                                               env,
+                                               true,
+                                               messageConsumer);
+
+        // then
+        assertEquals(machines, expectedMachines);
+
+        ArgumentCaptor<CheServiceImpl> captor = ArgumentCaptor.forClass(CheServiceImpl.class);
+        verify(machineProvider).startService(anyString(),
+                                             anyString(),
+                                             anyString(),
+                                             anyString(),
+                                             eq(false),
+                                             anyString(),
+                                             captor.capture(),
+                                             any(LineConsumer.class));
+        CheServiceImpl actualService = captor.getValue();
+
+        assertEquals(actualService.getImage(), machineImage);
     }
 
     @Test

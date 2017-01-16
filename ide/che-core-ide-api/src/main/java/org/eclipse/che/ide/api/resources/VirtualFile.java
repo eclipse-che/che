@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -53,16 +53,6 @@ public interface VirtualFile {
      * @return non-null display name.
      */
     String getDisplayName();
-
-    /**
-     * Returns media type for the virtual file. Media type may be a {@code null} for folders or for those files that
-     * don't have media type.
-     *
-     * @return media type or null.
-     * @deprecated this method is going to be removed soon, because we don't use media type for any purposes
-     */
-    @Deprecated
-    String getMediaType();
 
     /**
      * Returns {@code true} in case if virtual file doesn't have ability to be updated.

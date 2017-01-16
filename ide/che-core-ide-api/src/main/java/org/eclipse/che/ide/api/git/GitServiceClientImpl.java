@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -339,17 +339,23 @@ public class GitServiceClientImpl implements GitServiceClient {
 
     @Override
     public Promise<Revision> commit(DevMachine devMachine, Path project, String message, Path[] files, boolean amend) {
+        return commit(devMachine, project, message, false, files, amend);
+    }
 
+    @Override
+    public Promise<Revision> commit(DevMachine devMachine, Path project, String message, boolean all, Path[] files, boolean amend) {
         List<String> paths = new ArrayList<>(files.length);
 
         for (Path file : files) {
-            paths.add(file.isEmpty() ? "." : file.toString());
+            if (!file.isEmpty()) {
+                paths.add(file.toString());
+            }
         }
 
         CommitRequest commitRequest = dtoFactory.createDto(CommitRequest.class)
                                                 .withMessage(message)
                                                 .withAmend(amend)
-                                                .withAll(false)
+                                                .withAll(all)
                                                 .withFiles(paths);
         String url = devMachine.getWsAgentBaseUrl() + COMMIT + "?projectPath=" + project;
 

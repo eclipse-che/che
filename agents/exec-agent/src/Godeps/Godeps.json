@@ -1,0 +1,22 @@
+{
+	"ImportPath": "github.com/eclipse/che/agents/exec-agent",
+	"GoVersion": "go1.6",
+	"GodepVersion": "v74",
+	"Deps": [
+		{
+			"ImportPath": "github.com/eclipse/che-lib/pty",
+			"Comment": "4.6.0-2-g69a9cee",
+			"Rev": "69a9cee57914086c88c8400f5f66cd25422f1fa7"
+		},
+		{
+			"ImportPath": "github.com/eclipse/che-lib/websocket",
+			"Comment": "4.6.0-2-g69a9cee",
+			"Rev": "69a9cee57914086c88c8400f5f66cd25422f1fa7"
+		},
+		{
+			"ImportPath": "github.com/julienschmidt/httprouter",
+			"Comment": "v1.1-38-g4563b0b",
+			"Rev": "4563b0ba73e4db6c6423b60a26f3cadd2e9a1ec9"
+		}
+	]
+}

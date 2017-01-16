@@ -18,6 +18,7 @@ package org.eclipse.che.ide.util.browser;
 import org.eclipse.che.ide.util.StringUtils;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.Window.Location;
 
 /** Utility methods relating to the browser. */
 public abstract class BrowserUtils {
@@ -67,12 +68,27 @@ public abstract class BrowserUtils {
     }
 
     public static boolean hasUrlParameter(String parameter) {
-        return Window.Location.getParameter(parameter) != null;
+        return Location.getParameter(parameter) != null;
     }
 
     public static boolean hasUrlParameter(String parameter, String value) {
-        return StringUtils.equalNonEmptyStrings(Window.Location.getParameter(parameter), value);
+        return StringUtils.equalNonEmptyStrings(Location.getParameter(parameter), value);
     }
+
+    /**
+     * Wrapper for calling {@link Location#reload()} with ability to force reloading page.
+     * <p>
+     * By default, the reload() method reloads the page from the cache, but you can force
+     * it to reload the page from the server by setting the forceGet parameter to true: location.reload(true).
+     * <p>
+     * See more details about argument {@code forceGet} here: http://www.w3schools.com/jsref/met_loc_reload.asp
+     *
+     * @param forceGet
+     *         reloads the current page from the server
+     */
+    public static native void reloadPage(boolean forceGet) /*-{
+        $wnd.location.reload(forceGet);
+    }-*/;
 
     private BrowserUtils() {
     }

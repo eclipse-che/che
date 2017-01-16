@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,7 +20,7 @@ import java.util.Comparator;
  *
  * @author andrew00x
  */
-final class BreakPointComparator implements Comparator<Breakpoint> {
+public final class BreakPointComparator implements Comparator<Breakpoint> {
     @Override
     public int compare(Breakpoint o1, Breakpoint o2) {
         String className1 = o1.getLocation().getTarget();
