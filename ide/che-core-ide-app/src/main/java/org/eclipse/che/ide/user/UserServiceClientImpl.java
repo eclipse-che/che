@@ -14,10 +14,10 @@ import com.google.inject.Inject;
 
 import org.eclipse.che.api.user.shared.dto.UserDto;
 import org.eclipse.che.ide.MimeType;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.user.UserServiceClient;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
-import org.eclipse.che.ide.rest.RestContext;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 
 import javax.validation.constraints.NotNull;
@@ -40,12 +40,12 @@ public class UserServiceClientImpl implements UserServiceClient {
     private final AsyncRequestFactory asyncRequestFactory;
 
     @Inject
-    protected UserServiceClientImpl(@RestContext String restContext,
+    protected UserServiceClientImpl(AppContext appContext,
                                     LoaderFactory loaderFactory,
                                     AsyncRequestFactory asyncRequestFactory) {
         this.loaderFactory = loaderFactory;
         this.asyncRequestFactory = asyncRequestFactory;
-        USER = restContext + "/user/";
+        USER = appContext.getMasterEndpoint() + "/user/";
         CREATE = USER + "create";
         FIND = USER + "find";
         PASSWORD = USER + "password";

@@ -13,6 +13,16 @@ cmd_upgrade() {
   debug $FUNCNAME
 
   CHE_IMAGE_VERSION=$(get_image_version)
+  DO_BACKUP="true"
+
+  while [ $# -gt 0 ]; do
+    case $1 in
+      --skip-backup)
+        DO_BACKUP="false"
+        shift ;;
+      *) error "Unknown parameter: $1; did you mean --skip-backup?" ; return 2 ;;
+    esac
+  done
 
   # If we got here, this means:
   #   image version > configured & installed version
@@ -39,8 +49,13 @@ cmd_upgrade() {
       cmd_stop
     fi
   fi
-  info "upgrade" "Preparing backup..."
-  cmd_backup
+
+  if [[ "${DO_BACKUP}" == "true" ]]; then
+    info "upgrade" "Preparing backup..."
+    cmd_backup
+  else
+    info "upgrade" "Skipping backup."
+  fi
 
   info "upgrade" "Reinitializing the system with your configuration..."
   cmd_init --accept-license --reinit

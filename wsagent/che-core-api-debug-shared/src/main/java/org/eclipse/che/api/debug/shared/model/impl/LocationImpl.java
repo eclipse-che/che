@@ -103,4 +103,16 @@ public class LocationImpl implements Location {
         result = 31 * result + Objects.hashCode(resourceProjectPath);
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "LocationImpl{" +
+               "target='" + target + '\'' +
+               ", lineNumber=" + lineNumber +
+               ", resourcePath='" + resourcePath + '\'' +
+               ", externalResource=" + externalResource +
+               ", externalResourceId=" + externalResourceId +
+               ", resourceProjectPath='" + resourceProjectPath + '\'' +
+               '}';
+    }
 }

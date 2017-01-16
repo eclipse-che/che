@@ -203,7 +203,11 @@ public interface AppContext {
      */
     void setWorkspace(Workspace workspace);
 
-
     ActiveRuntime getActiveRuntime();
 
+
+    String getMasterEndpoint();
+
+
+    String getDevAgentEndpoint();
 }

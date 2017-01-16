@@ -227,6 +227,12 @@
 .processTree .processTreeNode {
 }
 
+.commandTreeNode {
+    position: relative;
+    left: 0px;
+    top: -1px;
+}
+
 .dockerMachineLabel {
     background-color: blueIconColor;
 }
