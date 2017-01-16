@@ -25,10 +25,13 @@
                  ng-maxlength="128"
                  ng-pattern="/^[A-Za-z0-9_\-\.]+$/"
                  required>
-        <div ng-message="required">Machine's name is required.</div>
-        <div ng-message="pattern">The name should not contain special characters like space, dollar, etc.</div>
-        <div ng-message="customValidator">This machine's name is already in use.</div>
-        <div ng-message="maxlength">Machine's name should be less than 128 characters long.</div>
+        <che-error-messages che-message-scope="workspace-details-environment"
+                            che-message-name="Machine name">
+          <div ng-message="required">Machine's name is required.</div>
+          <div ng-message="pattern">The name should not contain special characters like space, dollar, etc.</div>
+          <div ng-message="customValidator">This machine's name is already in use.</div>
+          <div ng-message="maxlength">Machine's name should be less than 128 characters long.</div>
+        </che-error-messages>
       </che-input>
       <div layout="row" layout-align="start start" class="ram-slider">
         <div flex="15">

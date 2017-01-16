@@ -9,6 +9,8 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {CheErrorMessagesService} from '../../../../components/error-messages/che-error-messages.service';
+import {StackValidationService} from '../../../stacks/stack-details/stack-validation.service';
 
 /**
  * @ngdoc controller
@@ -18,6 +20,10 @@
  */
 export class WorkspaceConfigImportController {
   $log: ng.ILogService;
+  $scope: ng.IScope;
+  $timeout: ng.ITimeoutService;
+  errorMessagesService: CheErrorMessagesService;
+  validationService: StackValidationService;
 
   editorOptions: {
     lineWrapping: boolean,
@@ -27,9 +33,14 @@ export class WorkspaceConfigImportController {
     onLoad: Function
   };
 
-  validationError: string;
+  configValidationMessages: string[] = [];
+  configErrorsNumber: number = 0;
+  otherValidationMessages: {
+    [errorsScope: string]: string[]
+  } = {};
+  errorsScopeSettings: string = 'workspace-details-settings';
+  errorsScopeEnvironment: string = 'workspace-details-environment';
   importWorkspaceJson: string;
-  copyImportWorkspaceJson: string;
   workspaceConfig: any;
   newWorkspaceConfig: any;
   workspaceConfigOnChange: Function;
@@ -38,8 +49,12 @@ export class WorkspaceConfigImportController {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($log: ng.ILogService, $scope: ng.IScope, $timeout: ng.ITimeoutService) {
+  constructor($log: ng.ILogService, $scope: ng.IScope, $timeout: ng.ITimeoutService, cheErrorMessagesService: CheErrorMessagesService, stackValidationService: StackValidationService) {
     this.$log = $log;
+    this.$scope = $scope;
+    this.$timeout = $timeout;
+    this.errorMessagesService = cheErrorMessagesService;
+    this.validationService = stackValidationService;
 
     this.editorOptions = {
       lineWrapping: true,
@@ -55,90 +70,64 @@ export class WorkspaceConfigImportController {
 
     $scope.$watch(() => { return this.workspaceConfig; }, () => {
       try {
-        this.importWorkspaceJson = angular.toJson(this.workspaceConfig, true);
-        this.copyImportWorkspaceJson = this.importWorkspaceJson;
+        let editedWorkspaceConfig = angular.fromJson(this.importWorkspaceJson) || {};
+        angular.extend(editedWorkspaceConfig, this.workspaceConfig);
+
+        this.importWorkspaceJson = angular.toJson(editedWorkspaceConfig, true);
+        this.onChange();
       } catch (e) {
         this.$log.error(e);
       }
     }, true);
+
+    this.errorMessagesService.registerCallback(this.errorsScopeSettings, this.updateErrorsList.bind(this, this.errorsScopeSettings));
+    this.errorMessagesService.registerCallback(this.errorsScopeEnvironment, this.updateErrorsList.bind(this, this.errorsScopeEnvironment));
+  }
+
+  updateErrorsList(errorsScope: string, otherErrors: string[]) {
+    this.otherValidationMessages[errorsScope] = angular.copy(otherErrors);
   }
 
   configValid(): boolean {
-    return !this.validationError;
+    return this.configValidationMessages.length === 0;
   }
 
   /**
    * Callback when editor content is changed.
    */
   onChange(): void {
-    this.validationError = '';
-
     if (!this.importWorkspaceJson) {
-      this.validationError = 'The config is required.';
+      this.configValidationMessages = ['The config is required.'];
       return;
     }
 
     try {
       let config = angular.fromJson(this.importWorkspaceJson);
-      this.validationError = this.validateConfig(config);
-      if (!this.validationError) {
-        this.newWorkspaceConfig = angular.copy(config);
+      let validationResult = this.validationService.getWorkspaceConfigValidation(config);
+
+      if (validationResult.errors.length) {
+        this.configValidationMessages = angular.copy(validationResult.errors);
+      } else {
+        // avoid flickering messages from other tabs
+        // while model is applying
+        this.$timeout(() => {
+          this.configValidationMessages.length = 0;
+          this.configErrorsNumber = this.configValidationMessages.length;
+        }, 500);
       }
+
+      // immediately apply config on IU
+      this.newWorkspaceConfig = angular.copy(config);
+      this.applyChanges();
+
     } catch (e) {
-      this.validationError = 'JSON is invalid.';
+      if (this.configValidationMessages.length === 0) {
+        this.configValidationMessages = ['JSON is invalid.'];
+      }
       this.$log.error(e);
     }
-  }
 
-  /**
-   * Performs checks for workspace config. Returns error message if config doesn't contain a mandatory property or those property has incorrect type.
-   *
-   * @param config {Object} workspace config provided by user
-   * @returns {string} validation error message
-   */
-  validateConfig(config: any): string {
-    if (!config.name) {
-      return 'Config should contain property "name" which is a string.';
-    }
-
-    if (!angular.isObject(config.environments)) {
-      return 'Config should contain property "environments" which is an Object.';
-    }
-
-    if (!config.defaultEnv) {
-      return 'Config should contain property "defaultEnv" which is a string.';
-    }
-
-    if (!config.environments[config.defaultEnv]) {
-      return 'Section "environments" should contain default environment.';
-    }
-
-    let envNames = Object.keys(config.environments);
-    for (let i = 0; i < envNames.length; i++) {
-      let envName = envNames[i];
-      let machines = config.environments[envName].machines;
-      if (!angular.isObject(machines)) {
-        return `Environment "${envName}" should contain property "machines" which is an Object.`;
-      }
-
-      let recipe = config.environments[config.defaultEnv].recipe;
-      if (!angular.isObject(recipe)) {
-        return `Environment "${envName}" should contain property "recipe" which is an Object.`;
-      } else if (!recipe.type) {
-        return `Environment "${envName}": recipe should contain property "type" which is a string.`;
-      } else if (!recipe.location && !recipe.content) {
-        return `Environment "${envName}": recipe should have either "location" or "content" property which is a string.`;
-      }
-    }
-  }
-
-  /**
-   * Returns true if config has been changed.
-   *
-   * @returns {boolean}
-   */
-  configChanged(): boolean {
-    return this.copyImportWorkspaceJson !== this.importWorkspaceJson;
+    this.configErrorsNumber = this.configValidationMessages.length;
   }
 
   /**
