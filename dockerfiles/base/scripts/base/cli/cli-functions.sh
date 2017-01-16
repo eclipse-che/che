@@ -39,9 +39,23 @@ get_boot_url() {
   echo "$CHE_HOST:$CHE_PORT/api/"
 }
 
+# Input is a variable that would exist in the che.env file such as CHE_HOST.
+# We then lookup the vlaue of this variable and return it
+get_value_of_var_from_env_file() {
+  local LOOKUP_LOCAL=$(docker_run --env-file="${REFERENCE_CONTAINER_ENVIRONMENT_FILE}" \
+                                ${UTILITY_IMAGE_ALPINE} sh -c "echo \$$1")
+  echo $LOOKUP_LOCAL
+
+}
+
 get_display_url() {
+
+  # If the user has modified che.env with a custom CHE_HOST, we need to detect that here
+  # and not use the in-memory one which is always set with eclipse/che-ip.
+  local CHE_HOST_LOCAL=$(get_value_of_var_from_env_file CHE_HOST)
+
   if ! is_docker_for_mac; then
-    echo "http://${CHE_HOST}:${CHE_PORT}"
+    echo "http://${CHE_HOST_LOCAL}:${CHE_PORT}"
   else
     echo "http://localhost:${CHE_PORT}"
   fi
