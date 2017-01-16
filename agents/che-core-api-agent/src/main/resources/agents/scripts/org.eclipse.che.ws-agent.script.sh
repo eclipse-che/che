@@ -43,7 +43,7 @@ command -v ${JAVA_HOME}/bin/java >/dev/null 2>&1 || {
     INSTALL_JDK=true;
 } && {
     java_version=$(${JAVA_HOME}/bin/java -version 2>&1 | sed 's/.* version "\\(.*\\)\\.\\(.*\\)\\..*"/\\1\\2/; 1q')
-    if [ "${java_version}" -lt "18" ]; then
+    if [ ! -z "${java_version##*[!0-9]*}" ] && [ "${java_version}" -lt "18" ]; then
         INSTALL_JDK=true;
     fi
 }
@@ -98,6 +98,7 @@ elif echo ${LINUX_TYPE} | grep -qi "debian"; then
 
     if [ ${INSTALL_JDK} = true ]; then
         PACKAGES=${PACKAGES}" openjdk-8-jdk-headless";
+        echo "deb http://httpredir.debian.org/debian jessie-backports main" | ${SUDO} tee --append /etc/apt/sources.list
     fi
 
     test "${PACKAGES}" = "" || {
