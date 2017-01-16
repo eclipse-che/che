@@ -361,9 +361,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
             return;
         }
         try {
-            if (exec != null) {
-                docker.startExec(StartExecParams.create(exec.getId()), new LogMessagePrinter(machineLogger));
-            }
+            docker.startExec(StartExecParams.create(exec.getId()), new LogMessagePrinter(machineLogger));
         } catch (IOException e) {
             LOG.error(format("Error occurs while executing command %s in docker container %s: %s",
                                               Arrays.toString(exec.getCommand()), containerId, e.getMessage()), e);
