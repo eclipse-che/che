@@ -22,7 +22,7 @@
         }
     </ui:style>
 
-    <g:SimpleLayoutPanel width="500px" height="70px">
+    <g:SimpleLayoutPanel width="535px" height="70px">
         <g:FlowPanel addStyleNames="{style.section}">
             <g:Label text="{messages.pageInfoNameLabel}"/>
             <g:TextBox ui:field="commandName" width="97%"/>
