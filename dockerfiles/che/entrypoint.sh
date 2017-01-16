@@ -237,7 +237,7 @@ init() {
       echo "!!!"
       exit 1
     fi
-    export CHE_USER_ID=${CHE_USER}
+    export CHE_DOCKER_USER__ID=${CHE_USER}
     sudo chown -R ${CHE_USER} ${CHE_DATA}
     sudo chown -R ${CHE_USER} ${CHE_HOME}
     sudo chown -R ${CHE_USER} ${CHE_LOGS_DIR}

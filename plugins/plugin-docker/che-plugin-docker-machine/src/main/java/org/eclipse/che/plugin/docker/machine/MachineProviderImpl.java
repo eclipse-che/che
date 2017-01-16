@@ -161,7 +161,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                WindowsPathEscaper windowsPathEscaper,
                                @Named("che.docker.extra_hosts") Set<Set<String>> additionalHosts,
                                @Nullable @Named("che.docker.dns_resolvers") String[] dnsResolvers,
-                               @Nullable @Named("che.docker.che.user.id") String cheUserId)
+                               @Nullable @Named("che.docker.user_id") String cheUserId)
             throws IOException {
         this.docker = dockerProvider.get();
         this.dockerCredentials = dockerCredentials;
@@ -170,11 +170,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
         this.doForcePullOnBuild = doForcePullOnBuild;
         this.privilegedMode = privilegedMode;
         this.snapshotUseRegistry = snapshotUseRegistry;
-        if (Strings.isNullOrEmpty(cheUserId)) {
-            this.cheUserId = System.getenv("CHE_USER_ID") == null ? "" : System.getenv("CHE_USER_ID");
-        } else {
-            this.cheUserId = cheUserId;
-        }
+        this.cheUserId = cheUserId;
         // use-cases:
         //  -1  enable unlimited swap
         //  0   disable swap

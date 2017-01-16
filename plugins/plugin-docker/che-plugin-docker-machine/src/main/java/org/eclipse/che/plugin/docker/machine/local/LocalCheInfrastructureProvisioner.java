@@ -72,11 +72,7 @@ public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProv
         this.wsAgentVolumeProvider = wsAgentVolumeProvider;
         this.dockerExtConfBindingProvider = dockerExtConfBindingProvider;
         this.terminalVolumeProvider = terminalVolumeProvider;
-        if (Strings.isNullOrEmpty(cheUserId)) {
-            this.cheUserId = System.getenv("CHE_USER_ID");
-        } else {
-            this.cheUserId = cheUserId;
-        }
+        this.cheUserId = cheUserId;
         if (!Strings.isNullOrEmpty(projectsVolumeOptions)) {
             this.projectsVolumeOptions = ":" + projectsVolumeOptions;
         } else {
