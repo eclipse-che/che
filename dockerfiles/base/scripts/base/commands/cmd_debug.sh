@@ -21,8 +21,7 @@ cmd_debug() {
   info "${CHE_PRODUCT_NAME}_CONFIG            = ${CHE_HOST_CONFIG}"
   local CHE_HOST_LOCAL=${CHE_HOST}
   if is_initialized; then
-    CHE_HOST_LOCAL=$(docker_run --env-file="${REFERENCE_CONTAINER_ENVIRONMENT_FILE}" \
-                                ${UTILITY_IMAGE_ALPINE} sh -c 'echo $CHE_HOST')
+    CHE_HOST_LOCAL=$(get_value_of_var_from_env_file CHE_HOST)
   fi
   info "${CHE_PRODUCT_NAME}_HOST              = ${CHE_HOST_LOCAL}"
   info "${CHE_PRODUCT_NAME}_REGISTRY          = ${CHE_MANIFEST_DIR}"
