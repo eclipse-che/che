@@ -311,7 +311,7 @@ public class WorkspaceServiceTest {
     public void shouldGetWorkspaces() throws Exception {
         final WorkspaceImpl workspace1 = createWorkspace(createConfigDto());
         final WorkspaceImpl workspace2 = createWorkspace(createConfigDto(), STARTING);
-        when(wsManager.getWorkspaces(USER_ID)).thenReturn(asList(workspace1, workspace2));
+        when(wsManager.getWorkspaces(USER_ID, false)).thenReturn(asList(workspace1, workspace2));
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -329,7 +329,7 @@ public class WorkspaceServiceTest {
     public void shouldGetWorkspacesByNamespace() throws Exception {
         final WorkspaceImpl workspace1 = createWorkspace(createConfigDto());
         final WorkspaceImpl workspace2 = createWorkspace(createConfigDto(), STARTING);
-        when(wsManager.getByNamespace(NAMESPACE)).thenReturn(asList(workspace1, workspace2));
+        when(wsManager.getByNamespace(NAMESPACE, false)).thenReturn(asList(workspace1, workspace2));
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -347,7 +347,7 @@ public class WorkspaceServiceTest {
     public void shouldGetWorkspacesByStatus() throws Exception {
         final WorkspaceImpl workspace1 = createWorkspace(createConfigDto());
         final WorkspaceImpl workspace2 = createWorkspace(createConfigDto(), STARTING);
-        when(wsManager.getWorkspaces(USER_ID)).thenReturn(asList(workspace1, workspace2));
+        when(wsManager.getWorkspaces(USER_ID, false)).thenReturn(asList(workspace1, workspace2));
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
