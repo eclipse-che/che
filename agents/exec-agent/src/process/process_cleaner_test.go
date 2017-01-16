@@ -14,7 +14,7 @@ package process_test
 import (
 	"testing"
 
-	"github.com/eclipse/che/exec-agent/process"
+	"github.com/eclipse/che/agents/exec-agent/process"
 	"time"
 )
 
