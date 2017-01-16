@@ -27,10 +27,6 @@ cmd_config() {
     cmd_download --pull
   fi
 
-  if [ -z ${IMAGE_PUPPET+x} ]; then
-    get_image_manifest $CHE_VERSION
-  fi
-
   # If using a local repository, then we need to always perform an updated init with those files
   if local_repo; then
     # if user has mounted local repo, use configuration files from the repo.

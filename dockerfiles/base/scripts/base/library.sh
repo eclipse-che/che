@@ -135,6 +135,9 @@ initiate_offline_or_network_mode(){
 }
 
 grab_initial_images() {
+  # get list of images
+  get_image_manifest ${CHE_VERSION}
+
   # Prep script by getting default image
   if [ "$(docker images -q ${UTILITY_IMAGE_ALPINE} 2> /dev/null)" = "" ]; then
     info "cli" "Pulling image ${UTILITY_IMAGE_ALPINE}"
@@ -254,7 +257,7 @@ version_error(){
 ### Returns the list of ${CHE_FORMAL_PRODUCT_NAME} images for a particular version of ${CHE_FORMAL_PRODUCT_NAME}
 ### Sets the images as environment variables after loading from file
 get_image_manifest() {
-  info "cli" "Checking registry for version '$1' images"
+  log "Checking registry for version '$1' images"
   if ! has_version_registry $1; then
     version_error $1
     return 1;

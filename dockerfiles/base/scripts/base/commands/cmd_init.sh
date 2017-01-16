@@ -52,10 +52,6 @@ cmd_init() {
 
   cmd_download $FORCE_UPDATE
 
-  if [ -z ${IMAGE_INIT+x} ]; then
-    get_image_manifest $CHE_VERSION
-  fi
-
   if require_license; then
     if [[ "${AUTO_ACCEPT_LICENSE}" = "false" ]]; then
       info ""
