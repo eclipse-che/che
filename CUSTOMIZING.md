@@ -15,7 +15,7 @@ A recipe defines the runtime of a workspace environment.  Workspaces can have mu
 * [Che Included Recipes](https://github.com/eclipse/che-dockerfiles)
 
 #### Project Samples
-A prooject sample is a packaged set of sample code that is launched in the workspace when a user creates a new project. Users can select from a sample while using the user dashboard. Samples have both sample code and a default set of commands associated with them. Samples are loaded based upon the type of stack selected. You can add your own samples to the default Che distribution.
+A project sample is a packaged set of sample code that is launched in the workspace when a user creates a new project. Users can select from a sample while using the user dashboard. Samples have both sample code and a default set of commands associated with them. Samples are loaded based upon the type of stack selected. You can add your own samples to the default Che distribution.
 * [Samples](https://www.eclipse.org/che/docs/workspace/samples)
 * [Add Samples](https://www.eclipse.org/che/docs/workspace/samples/#register-new-project-templates)
 * [Samples Data Model](https://www.eclipse.org/che/docs/workspace/samples)
