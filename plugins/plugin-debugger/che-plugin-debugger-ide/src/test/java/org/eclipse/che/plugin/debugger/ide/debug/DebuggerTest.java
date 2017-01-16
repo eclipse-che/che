@@ -152,8 +152,6 @@ public class DebuggerTest extends BaseTest {
     private ArgumentCaptor<Breakpoint>                      breakpointCaptor;
     @Captor
     private ArgumentCaptor<Function<DebugSessionDto, Void>> argumentCaptorFunctionJavaDebugSessionVoid;
-    @Captor
-    private ArgumentCaptor<Operation<DebuggerInfo>>         argumentCaptorOperationJavaDebuggerInfo;
 
 
     public final Breakpoint TEST_BREAKPOINT = new Breakpoint(Breakpoint.Type.BREAKPOINT, LINE_NUMBER, PATH, file, true);
@@ -487,6 +485,16 @@ public class DebuggerTest extends BaseTest {
         final Variable variable = mock(Variable.class);
         final Promise<SimpleValueDto> promiseValue = mock(Promise.class);
 
+        SimpleValueDto simpleValueDto = mock(SimpleValueDto.class);
+        doReturn(simpleValueDto).when(dtoFactory).createDto(SimpleValueDto.class);
+        doReturn(simpleValueDto).when(simpleValueDto).withString(anyString());
+
+        SimpleValue simpleValue = mock(SimpleValue.class);
+        doReturn(simpleValue).when(variable).getValue();
+        doReturn(Collections.emptyList()).when(variable).getVariables();
+
+        doReturn(simpleValue).when(variable).getValue();
+
         doReturn(variableDto).when(dtoFactory).createDto(VariableDto.class);
         doReturn(mock(VariablePathDto.class)).when(dtoFactory).createDto(VariablePathDto.class);
         doReturn(mock(VariablePathDto.class)).when(variable).getVariablePath();
@@ -560,10 +568,17 @@ public class DebuggerTest extends BaseTest {
         VariableDto variableDto = mock(VariableDto.class);
         doReturn(variableDto).when(dtoFactory).createDto(VariableDto.class);
 
+        SimpleValueDto simpleValueDto = mock(SimpleValueDto.class);
+        doReturn(simpleValueDto).when(dtoFactory).createDto(SimpleValueDto.class);
+        doReturn(simpleValueDto).when(simpleValueDto).withString(anyString());
+
         Variable variable = mock(Variable.class);
         doReturn(mock(VariablePathDto.class)).when(dtoFactory).createDto(VariablePathDto.class);
         doReturn(variablePath).when(variable).getVariablePath();
-        doReturn(newValue).when(variable).getValue();
+
+        SimpleValue simpleValue = mock(SimpleValue.class);
+        doReturn(newValue).when(simpleValue).getString();
+        doReturn(simpleValue).when(variable).getValue();
         doReturn(Collections.emptyList()).when(variable).getVariables();
 
         doReturn(promiseVoid).when(service).setValue(SESSION_ID, variableDto);

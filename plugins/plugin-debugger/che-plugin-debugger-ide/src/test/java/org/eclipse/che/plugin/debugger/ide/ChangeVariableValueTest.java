@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.debugger.ide;
 
+import org.eclipse.che.api.debug.shared.dto.SimpleValueDto;
 import org.eclipse.che.api.debug.shared.dto.VariableDto;
 import org.eclipse.che.api.debug.shared.dto.VariablePathDto;
 import org.eclipse.che.api.debug.shared.model.MutableVariable;
@@ -58,20 +59,23 @@ public class ChangeVariableValueTest extends BaseTest {
     private MutableVariable      variable;
     @Mock
     private VariablePathDto      variablePathDto;
+    @Mock
+    private SimpleValueDto       simpleValueDto;
 
     @Before
     public void setUp() {
         super.setUp();
         when(var.getName()).thenReturn(VAR_NAME);
-        when(var.getValue()).thenReturn(VAR_VALUE);
+        when(var.getValue()).thenReturn(simpleValueDto);
         when(var.getVariablePath()).thenReturn(varPath);
+        when(simpleValueDto.getString()).thenReturn(VAR_VALUE);
         when(dtoFactory.createDto(VariableDto.class)).thenReturn(mock(VariableDto.class));
     }
 
     @Test
     public void shouldShowDialog() throws Exception {
         when(debuggerPresenter.getSelectedVariable()).thenReturn(variable);
-        when(variable.getValue()).thenReturn(VAR_VALUE);
+        when(variable.getValue()).thenReturn(simpleValueDto);
 
         presenter.showDialog();
 
@@ -115,6 +119,7 @@ public class ChangeVariableValueTest extends BaseTest {
         when(debuggerManager.getActiveDebugger()).thenReturn(debugger);
         when(view.getValue()).thenReturn(VAR_VALUE);
         when(variable.getVariablePath()).thenReturn(variablePathDto);
+        when(variable.getValue()).thenReturn(mock(SimpleValueDto.class));
         when(variablePathDto.getPath()).thenReturn(new ArrayList<>());
 
         presenter.showDialog();

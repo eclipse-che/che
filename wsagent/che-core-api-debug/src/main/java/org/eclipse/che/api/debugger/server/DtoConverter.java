@@ -29,17 +29,16 @@ import org.eclipse.che.api.debug.shared.model.DebugSession;
 import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
 import org.eclipse.che.api.debug.shared.model.Field;
 import org.eclipse.che.api.debug.shared.model.Location;
-import org.eclipse.che.api.debug.shared.model.StackFrameDump;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
+import org.eclipse.che.api.debug.shared.model.StackFrameDump;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.debug.shared.model.event.BreakpointActivatedEvent;
 import org.eclipse.che.api.debug.shared.model.event.DebuggerEvent;
 import org.eclipse.che.api.debug.shared.model.event.SuspendEvent;
 
-import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
@@ -71,8 +70,15 @@ public final class DtoConverter {
                                           .withLocation(asDto(breakpoint.getLocation()));
     }
 
-    public static List<BreakpointDto> asBreakpointsDto(List<Breakpoint> breakpoints) {
-        return breakpoints.stream().map(DtoConverter::asDto).collect(Collectors.toList());
+    public static List<BreakpointDto> breakpointsAsDtos(List<Breakpoint> breakpoints) {
+        List<BreakpointDto> dtos = new LinkedList<>();
+
+        if (breakpoints != null) {
+            for (int i = 0; i < breakpoints.size(); i++) {
+                dtos.add(asDto(breakpoints.get(i)));
+            }
+        }
+        return dtos;
     }
 
     public static LocationDto asDto(Location location) {
@@ -86,7 +92,7 @@ public final class DtoConverter {
 
     public static SimpleValueDto asDto(SimpleValue value) {
         return newDto(SimpleValueDto.class).withString(value.getString())
-                                           .withVariables(asVariablesDto(value.getVariables()));
+                                           .withVariables(variablesAsDtos(value.getVariables()));
     }
 
     public static FieldDto asDto(Field field) {
@@ -94,21 +100,35 @@ public final class DtoConverter {
                                      .withExistInformation(field.isExistInformation())
                                      .withName(field.getName())
                                      .withPrimitive(field.isPrimitive())
-                                     .withValue(field.getValue())
+                                     .withValue(asDto(field.getValue()))
                                      .withVariablePath(asDto(field.getVariablePath()))
-                                     .withVariables(asVariablesDto(field.getVariables()))
+                                     .withVariables(variablesAsDtos(field.getVariables()))
                                      .withIsFinal(field.isIsFinal())
                                      .withIsStatic(field.isIsStatic())
                                      .withIsTransient(field.isIsTransient())
                                      .withIsVolatile(field.isIsVolatile());
     }
 
-    public static List<FieldDto> asFieldsDto(List<? extends Field> fields) {
-        return fields.stream().map(DtoConverter::asDto).collect(Collectors.toList());
+    public static List<FieldDto> fieldsAsDtos(List<? extends Field> fields) {
+        List<FieldDto> dtos = new LinkedList<>();
+
+        if (fields != null) {
+            for (int i = 0; i < fields.size(); i++) {
+                dtos.add(asDto(fields.get(i)));
+            }
+        }
+        return dtos;
     }
 
-    public static List<VariableDto> asVariablesDto(List<? extends Variable> variables) {
-        return variables.stream().map(DtoConverter::asDto).collect(Collectors.toList());
+    public static List<VariableDto> variablesAsDtos(List<? extends Variable> variables) {
+        List<VariableDto> dtos = new LinkedList<>();
+
+        if (variables != null) {
+            for (int i = 0; i < variables.size(); i++) {
+                dtos.add(asDto(variables.get(i)));
+            }
+        }
+        return dtos;
     }
 
     public static VariableDto asDto(Variable variable) {
@@ -116,10 +136,9 @@ public final class DtoConverter {
                                         .withExistInformation(variable.isExistInformation())
                                         .withName(variable.getName())
                                         .withPrimitive(variable.isPrimitive())
-                                        .withValue(variable.getValue())
+                                        .withValue(asDto(variable.getValue()))
                                         .withVariablePath(asDto(variable.getVariablePath()))
-                                        .withVariables(variable.getVariables().isEmpty() ? Collections.emptyList()
-                                                                                         : asVariablesDto(variable.getVariables()));
+                                        .withVariables(variablesAsDtos(variable.getVariables()));
     }
 
     public static VariablePathDto asDto(VariablePath variablePath) {
@@ -127,8 +146,8 @@ public final class DtoConverter {
     }
 
     public static StackFrameDumpDto asDto(StackFrameDump stackFrameDump) {
-        return newDto(StackFrameDumpDto.class).withVariables(asVariablesDto(stackFrameDump.getVariables()))
-                                              .withFields(asFieldsDto(stackFrameDump.getFields()));
+        return newDto(StackFrameDumpDto.class).withVariables(variablesAsDtos(stackFrameDump.getVariables()))
+                                              .withFields(fieldsAsDtos(stackFrameDump.getFields()));
     }
 
     public static DebuggerEventDto asDto(DebuggerEvent debuggerEvent) {

@@ -30,11 +30,11 @@ public interface VariableDto extends Variable {
 
     VariableDto withExistInformation(boolean existInformation);
 
-    String getValue();
+    SimpleValueDto getValue();
 
-    void setValue(String value);
+    void setValue(SimpleValueDto value);
 
-    VariableDto withValue(String value);
+    VariableDto withValue(SimpleValueDto value);
 
     String getType();
 

@@ -61,7 +61,7 @@ public class VariableTreeNodeRenderer implements NodeRenderer<MutableVariable> {
     public SpanElement renderNodeContents(@NotNull MutableVariable data) {
         SpanElement root = Elements.createSpanElement(css.variableRoot());
         SpanElement label = Elements.createSpanElement(css.variableLabel());
-        String content = data.getName() + ": " + data.getValue();
+        String content = data.getName() + ": " + data.getValue().getString();
         label.setTextContent(content);
 
         root.appendChild(label);

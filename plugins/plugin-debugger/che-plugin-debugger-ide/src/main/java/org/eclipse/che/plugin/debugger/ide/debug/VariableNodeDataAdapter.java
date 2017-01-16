@@ -72,7 +72,7 @@ public class VariableNodeDataAdapter implements NodeDataAdapter<MutableVariable>
     @Override
     @NotNull
     public String getNodeName(@NotNull MutableVariable data) {
-        return data.getName() + ": " + data.getValue();
+        return data.getName() + ": " + data.getValue().getString();
     }
 
     /** {@inheritDoc} */

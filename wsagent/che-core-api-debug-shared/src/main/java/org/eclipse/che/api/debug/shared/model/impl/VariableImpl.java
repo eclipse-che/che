@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.debug.shared.model.impl;
 
+import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.debug.shared.model.Variable;
 
@@ -22,7 +23,7 @@ import java.util.List;
 public class VariableImpl implements Variable {
     private final String                   name;
     private final boolean                  isExistInformation;
-    private final String                   value;
+    private final SimpleValue              value;
     private final String                   type;
     private final boolean                  isPrimitive;
     private final List<? extends Variable> variables;
@@ -30,7 +31,7 @@ public class VariableImpl implements Variable {
 
     public VariableImpl(String type,
                         String name,
-                        String value,
+                        SimpleValue value,
                         boolean isPrimitive,
                         VariablePath variablePath,
                         List<? extends Variable> variables,
@@ -44,7 +45,7 @@ public class VariableImpl implements Variable {
         this.variablePath = variablePath;
     }
 
-    public VariableImpl(String value, VariablePath variablePath) {
+    public VariableImpl(SimpleValue value, VariablePath variablePath) {
         this(null, null, value, false, variablePath, Collections.<Variable>emptyList(), false);
     }
 
@@ -58,7 +59,7 @@ public class VariableImpl implements Variable {
     }
 
     @Override
-    public String getValue() {
+    public SimpleValue getValue() {
         return value;
     }
 

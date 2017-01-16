@@ -231,7 +231,7 @@ public class NodeJsDebugger implements Debugger {
             if (path.isEmpty()) {
                 throw new DebuggerException("Variable path is empty");
             }
-            library.setVar(path.get(0), variable.getValue());
+            library.setVar(path.get(0), variable.getValue().getString());
         } catch (NodeJsDebuggerTerminatedException e) {
             disconnect();
             throw e;

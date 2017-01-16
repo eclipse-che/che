@@ -54,11 +54,11 @@ public interface FieldDto extends Field {
 
     FieldDto withExistInformation(boolean existInformation);
 
-    String getValue();
+    SimpleValueDto getValue();
 
-    void setValue(String value);
+    void setValue(SimpleValueDto value);
 
-    FieldDto withValue(String value);
+    FieldDto withValue(SimpleValueDto value);
 
     String getType();
 

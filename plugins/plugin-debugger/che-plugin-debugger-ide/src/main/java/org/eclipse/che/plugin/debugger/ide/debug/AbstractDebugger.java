@@ -76,6 +76,7 @@ import org.eclipse.che.ide.websocket.rest.exceptions.ServerException;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -639,7 +640,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
                 @Override
                 public void apply(Void arg) throws OperationException {
                     for (DebuggerObserver observer : observers) {
-                        observer.onValueChanged(variable.getVariablePath().getPath(), variable.getValue());
+                        observer.onValueChanged(variable.getVariablePath().getPath(), variable.getValue().getString());
                     }
                 }
             }).catchError(new Operation<PromiseError>() {
@@ -739,19 +740,11 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
         }
     }
 
-    private VariableDto asDto(Variable variable) {
-        VariableDto dto = dtoFactory.createDto(VariableDto.class);
-        dto.withValue(variable.getValue());
-        dto.withVariablePath(asDto(variable.getVariablePath()));
-        dto.withPrimitive(variable.isPrimitive());
-        dto.withType(variable.getType());
-        dto.withName(variable.getName());
-        dto.withExistInformation(variable.isExistInformation());
-        dto.withVariables(asDto(variable.getVariables()));
-        return dto;
-    }
-
     private List<VariableDto> asDto(List<? extends Variable> variables) {
+        if (variables == null || variables.isEmpty()) {
+            return Collections.emptyList();
+        }
+
         List<VariableDto> dtos = new ArrayList<>(variables.size());
         for (Variable v : variables) {
             dtos.add(asDto(v));
@@ -759,8 +752,24 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
         return dtos;
     }
 
-    private VariablePathDto asDto(VariablePath variablePath) {
-        return dtoFactory.createDto(VariablePathDto.class).withPath(variablePath.getPath());
+    private VariableDto asDto(Variable variable) {
+        SimpleValue simpleValue = variable.getValue();
+        VariablePath variablePath = variable.getVariablePath();
+
+        VariableDto dto = dtoFactory.createDto(VariableDto.class);
+        dto.withValue(dtoFactory.createDto(SimpleValueDto.class)
+                                .withString(simpleValue.getString())
+                                .withVariables(asDto(simpleValue.getVariables())));
+
+        dto.withVariablePath(dtoFactory.createDto(VariablePathDto.class)
+                                       .withPath(variablePath.getPath()));
+
+        dto.withPrimitive(variable.isPrimitive());
+        dto.withType(variable.getType());
+        dto.withName(variable.getName());
+        dto.withExistInformation(variable.isExistInformation());
+        dto.withVariables(asDto(variable.getVariables()));
+        return dto;
     }
 
     @Nullable

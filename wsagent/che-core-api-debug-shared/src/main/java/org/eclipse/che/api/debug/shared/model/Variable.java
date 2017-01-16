@@ -26,7 +26,7 @@ public interface Variable {
     /**
      * The variable value.
      */
-    String getValue();
+    SimpleValue getValue();
 
     /**
      * The variable type. E.g.: String, int etc.

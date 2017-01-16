@@ -10,17 +10,19 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.zdb.server.variables;
 
-import static org.eclipse.che.plugin.zdb.server.expressions.IDbgDataFacet.Facet.KIND_ARRAY_MEMBER;
-import static org.eclipse.che.plugin.zdb.server.expressions.IDbgDataFacet.Facet.KIND_OBJECT_MEMBER;
+import org.eclipse.che.api.debug.shared.model.SimpleValue;
+import org.eclipse.che.api.debug.shared.model.VariablePath;
+import org.eclipse.che.api.debug.shared.model.impl.SimpleValueImpl;
+import org.eclipse.che.api.debug.shared.model.impl.VariablePathImpl;
+import org.eclipse.che.plugin.zdb.server.expressions.IDbgDataType.DataType;
+import org.eclipse.che.plugin.zdb.server.expressions.IDbgExpression;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.che.api.debug.shared.model.VariablePath;
-import org.eclipse.che.api.debug.shared.model.impl.VariablePathImpl;
-import org.eclipse.che.plugin.zdb.server.expressions.IDbgDataType.DataType;
-import org.eclipse.che.plugin.zdb.server.expressions.IDbgExpression;
+import static org.eclipse.che.plugin.zdb.server.expressions.IDbgDataFacet.Facet.KIND_ARRAY_MEMBER;
+import static org.eclipse.che.plugin.zdb.server.expressions.IDbgDataFacet.Facet.KIND_OBJECT_MEMBER;
 
 /**
  * PHP Zend debugger specific variable.
@@ -28,11 +30,11 @@ import org.eclipse.che.plugin.zdb.server.expressions.IDbgExpression;
  * @author Bartlomiej Laczkowski
  */
 public class ZendDbgVariable implements IDbgVariable {
-    private final IDbgExpression zendDbgExpression;
-    private final VariablePath variablePath;
-    private final String name;
-    private List<IDbgVariable> variables;
-    private boolean isComplete;
+    private final IDbgExpression     zendDbgExpression;
+    private final VariablePath       variablePath;
+    private final String             name;
+    private       List<IDbgVariable> variables;
+    private       boolean            isComplete;
 
     public ZendDbgVariable(VariablePath variablePath, IDbgExpression zendDbgExpression) {
         this.variablePath = variablePath;
@@ -53,10 +55,11 @@ public class ZendDbgVariable implements IDbgVariable {
     }
 
     @Override
-    public String getValue() {
-        if (zendDbgExpression.getDataType() == DataType.PHP_STRING)
-            return '"' + zendDbgExpression.getValue() + '"';
-        return zendDbgExpression.getValue();
+    public SimpleValue getValue() {
+        String value = zendDbgExpression.getDataType() == DataType.PHP_STRING
+                       ? '"' + zendDbgExpression.getValue() + '"'
+                       : zendDbgExpression.getValue();
+        return new SimpleValueImpl(variables, value);
     }
 
     @Override
@@ -67,15 +70,15 @@ public class ZendDbgVariable implements IDbgVariable {
     @Override
     public boolean isPrimitive() {
         switch (zendDbgExpression.getDataType()) {
-        case PHP_BOOL:
-        case PHP_FLOAT:
-        case PHP_INT:
-        case PHP_STRING:
-        case PHP_NULL:
-        case PHP_UNINITIALIZED:
-            return true;
-        default:
-            return false;
+            case PHP_BOOL:
+            case PHP_FLOAT:
+            case PHP_INT:
+            case PHP_STRING:
+            case PHP_NULL:
+            case PHP_UNINITIALIZED:
+                return true;
+            default:
+                return false;
         }
     }
 
@@ -123,5 +126,5 @@ public class ZendDbgVariable implements IDbgVariable {
         }
         return name;
     }
-    
+
 }

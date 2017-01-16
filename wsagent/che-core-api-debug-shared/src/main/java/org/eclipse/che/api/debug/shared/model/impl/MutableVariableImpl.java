@@ -11,6 +11,7 @@
 package org.eclipse.che.api.debug.shared.model.impl;
 
 import org.eclipse.che.api.debug.shared.model.MutableVariable;
+import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 
@@ -28,12 +29,12 @@ public class MutableVariableImpl implements MutableVariable {
     private final boolean      isPrimitive;
     private final VariablePath variablePath;
 
-    private String                value;
+    private SimpleValue           value;
     private List<MutableVariable> variables;
 
     public MutableVariableImpl(String type,
                                String name,
-                               String value,
+                               SimpleValue value,
                                VariablePath variablePath,
                                boolean isPrimitive,
                                List<? extends Variable> variables,
@@ -61,7 +62,7 @@ public class MutableVariableImpl implements MutableVariable {
     }
 
     @Override
-    public String getValue() {
+    public SimpleValue getValue() {
         return value;
     }
 
@@ -81,7 +82,7 @@ public class MutableVariableImpl implements MutableVariable {
     }
 
     @Override
-    public void setValue(String value) {
+    public void setValue(SimpleValue value) {
         this.value = value;
     }
 

@@ -10,21 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.zdb.server;
 
-import static org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.NOTIFICATION_READY;
-import static org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.NOTIFICATION_SESSION_STARTED;
-import static org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.NOTIFICATION_SRIPT_ENDED;
-import static org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.NOTIFICATION_START_PROCESS_FILE;
-import static org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.REQUEST_GET_LOCAL_FILE_CONTENT;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
 import org.eclipse.che.api.debug.shared.model.Location;
@@ -38,7 +23,6 @@ import org.eclipse.che.api.debug.shared.model.action.StepIntoAction;
 import org.eclipse.che.api.debug.shared.model.action.StepOutAction;
 import org.eclipse.che.api.debug.shared.model.action.StepOverAction;
 import org.eclipse.che.api.debug.shared.model.impl.DebuggerInfoImpl;
-import org.eclipse.che.api.debug.shared.model.impl.SimpleValueImpl;
 import org.eclipse.che.api.debug.shared.model.impl.StackFrameDumpImpl;
 import org.eclipse.che.api.debug.shared.model.impl.VariablePathImpl;
 import org.eclipse.che.api.debug.shared.model.impl.event.BreakpointActivatedEventImpl;
@@ -84,6 +68,21 @@ import org.eclipse.che.plugin.zdb.server.variables.ZendDbgVariable;
 import org.eclipse.che.plugin.zdb.server.variables.ZendDbgVariables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.NOTIFICATION_READY;
+import static org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.NOTIFICATION_SESSION_STARTED;
+import static org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.NOTIFICATION_SRIPT_ENDED;
+import static org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.NOTIFICATION_START_PROCESS_FILE;
+import static org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.REQUEST_GET_LOCAL_FILE_CONTENT;
 
 /**
  * Zend Debugger for PHP.
@@ -136,7 +135,7 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
             return new ZendDbgBreakpoint(dbgLocation, vfsBreakpoint);
         }
 
-        private Location dbgLocation;
+        private Location   dbgLocation;
         private Breakpoint vfsBreakpoint;
 
         private ZendDbgBreakpoint(Location dbgLocation, Breakpoint vfsBreakpoint) {
@@ -154,23 +153,23 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
 
     }
 
-    public static final Logger LOG = LoggerFactory.getLogger(ZendDebugger.class);
-    private static final int SUPPORTED_PROTOCOL_ID = 2012121702;
+    public static final  Logger LOG                   = LoggerFactory.getLogger(ZendDebugger.class);
+    private static final int    SUPPORTED_PROTOCOL_ID = 2012121702;
 
-    private final DebuggerCallback debugCallback;
-    private final ZendDbgSettings debugSettings;
+    private final DebuggerCallback       debugCallback;
+    private final ZendDbgSettings        debugSettings;
     private final ZendDbgLocationHandler debugLocationHandler;
-    private final ZendDbgConnection debugConnection;
+    private final ZendDbgConnection      debugConnection;
 
     private final ZendDbgExpressionEvaluator debugExpressionEvaluator;
-    private VariablesStorage debugVariableStorage;
-    private String debugStartFile;
-    private Map<Breakpoint, ZendDbgBreakpoint> breakpoints = new LinkedHashMap<>();
-    private Map<ZendDbgBreakpoint, Integer> breakpointIds = new LinkedHashMap<>();
-    private Integer breakpointAflId = null;
+    private       VariablesStorage           debugVariableStorage;
+    private       String                     debugStartFile;
+    private Map<Breakpoint, ZendDbgBreakpoint> breakpoints     = new LinkedHashMap<>();
+    private Map<ZendDbgBreakpoint, Integer>    breakpointIds   = new LinkedHashMap<>();
+    private Integer                            breakpointAflId = null;
 
     public ZendDebugger(ZendDbgSettings debugSettings, ZendDbgLocationHandler debugLocationHandler,
-            DebuggerCallback debugCallback) throws DebuggerException {
+                        DebuggerCallback debugCallback) throws DebuggerException {
         this.debugCallback = debugCallback;
         this.debugSettings = debugSettings;
         this.debugLocationHandler = debugLocationHandler;
@@ -182,24 +181,24 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
     @Override
     public void handleNotification(IDbgEngineNotification notification) {
         switch (notification.getType()) {
-        case NOTIFICATION_SESSION_STARTED: {
-            handleSessionStarted((SessionStartedNotification) notification);
-            break;
-        }
-        case NOTIFICATION_START_PROCESS_FILE: {
-            handleStartProcessFile((StartProcessFileNotification) notification);
-            break;
-        }
-        case NOTIFICATION_READY: {
-            handleReady((ReadyNotification) notification);
-            break;
-        }
-        case NOTIFICATION_SRIPT_ENDED: {
-            handleScriptEnded((ScriptEndedNotification) notification);
-            break;
-        }
-        default:
-            break;
+            case NOTIFICATION_SESSION_STARTED: {
+                handleSessionStarted((SessionStartedNotification)notification);
+                break;
+            }
+            case NOTIFICATION_START_PROCESS_FILE: {
+                handleStartProcessFile((StartProcessFileNotification)notification);
+                break;
+            }
+            case NOTIFICATION_READY: {
+                handleReady((ReadyNotification)notification);
+                break;
+            }
+            case NOTIFICATION_SRIPT_ENDED: {
+                handleScriptEnded((ScriptEndedNotification)notification);
+                break;
+            }
+            default:
+                break;
         }
     }
 
@@ -207,8 +206,8 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
     @Override
     public <T extends IDbgClientResponse> T handleRequest(IDbgEngineRequest<T> request) {
         switch (request.getType()) {
-        case REQUEST_GET_LOCAL_FILE_CONTENT:
-            return (T) handleGetLocalFileContent((GetLocalFileContentRequest) request);
+            case REQUEST_GET_LOCAL_FILE_CONTENT:
+                return (T)handleGetLocalFileContent((GetLocalFileContentRequest)request);
         }
         return null;
     }
@@ -232,7 +231,7 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
     @Override
     public DebuggerInfo getInfo() throws DebuggerException {
         return new DebuggerInfoImpl(debugSettings.getClientHostIP(), debugSettings.getDebugPort(), "Zend Debugger", "",
-                0, null);
+                                    0, null);
     }
 
     @Override
@@ -245,7 +244,7 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
     public SimpleValue getValue(VariablePath variablePath) {
         IDbgVariable matchingVariable = debugVariableStorage.findVariable(variablePath);
         matchingVariable.makeComplete();
-        return new SimpleValueImpl(matchingVariable.getVariables(), matchingVariable.getValue());
+        return matchingVariable.getValue();
     }
 
     @Override
@@ -310,13 +309,12 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
     @Override
     public void setValue(Variable variable) throws DebuggerException {
         Variable matchingVariable = debugVariableStorage.findVariable(variable.getVariablePath());
-        ((ZendDbgVariable) matchingVariable).setValue(variable.getValue());
+        ((ZendDbgVariable)matchingVariable).setValue(variable.getValue().getString());
     }
 
     @Override
     public String evaluate(String expression) throws DebuggerException {
-        ZendDbgExpression zendDbgExpression = new ZendDbgExpression(debugExpressionEvaluator, expression,
-                Collections.emptyList());
+        ZendDbgExpression zendDbgExpression = new ZendDbgExpression(debugExpressionEvaluator, expression, Collections.emptyList());
         zendDbgExpression.evaluate();
         return zendDbgExpression.getValue();
     }
@@ -324,14 +322,14 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
     @Override
     public String toString() {
         return "ZendDebugger [clientHostIP=" + debugSettings.getClientHostIP() + ", debugPort="
-                + debugSettings.getDebugPort() + ", useSsslEncryption=" + debugSettings.isUseSsslEncryption() + "]";
+               + debugSettings.getDebugPort() + ", useSsslEncryption=" + debugSettings.isUseSsslEncryption() + "]";
     }
 
     private void handleSessionStarted(SessionStartedNotification notification) {
         if (!sendSetProtocol()) {
             sendCloseSession();
             LOG.error("Unsupported protocol version: " + notification.getServerProtocolID()
-                    + ", only most recent protocol version: " + SUPPORTED_PROTOCOL_ID + " is supported.");
+                      + ", only most recent protocol version: " + SUPPORTED_PROTOCOL_ID + " is supported.");
         }
         debugStartFile = notification.getFileName();
         if (debugSettings.isBreakAtFirstLine()) {
@@ -379,14 +377,14 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
             byte[] localFileContent = localFileEntry.getVirtualFile().getContentAsBytes();
             // Check if remote content is equal to corresponding local one
             if (ZendDbgConnectionUtils.isRemoteContentEqual(request.getSize(), request.getCheckSum(),
-                    localFileContent)) {
+                                                            localFileContent)) {
                 // Remote and local contents are identical
                 return new GetLocalFileContentResponse(request.getID(),
-                        GetLocalFileContentResponse.STATUS_FILES_IDENTICAL, null);
+                                                       GetLocalFileContentResponse.STATUS_FILES_IDENTICAL, null);
             }
             // Remote and local contents are different, send local content to the engine
             return new GetLocalFileContentResponse(request.getID(), GetLocalFileContentResponse.STATUS_SUCCESS,
-                    localFileContent);
+                                                   localFileContent);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
@@ -418,7 +416,7 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
             if (VariablesStorage.GLOBALS_VARIABLE.equalsIgnoreCase(zendVariableExpression.getExpression()))
                 continue;
             IDbgVariable variable = new ZendDbgVariable(new VariablePathImpl(String.valueOf(variableId++)),
-                    zendVariableExpression);
+                                                        zendVariableExpression);
             if (ZendDbgVariableUtils.isThis(zendVariableExpression.getExpression())) {
                 // $this always on top
                 variables.add(0, variable);
@@ -457,7 +455,9 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
 
     private void sendAddBreakpoint(ZendDbgBreakpoint dbgBreakpoint) {
         AddBreakpointResponse response = debugConnection.sendRequest(new AddBreakpointRequest(1, 2,
-                dbgBreakpoint.getLocation().getLineNumber(), dbgBreakpoint.getLocation().getResourcePath()));
+                                                                                              dbgBreakpoint.getLocation().getLineNumber(),
+                                                                                              dbgBreakpoint.getLocation()
+                                                                                                           .getResourcePath()));
         if (isOK(response)) {
             // Breakpoint was successfully registered in active session, send breakpoint activated event
             breakpointIds.put(dbgBreakpoint, response.getBreakpointID());

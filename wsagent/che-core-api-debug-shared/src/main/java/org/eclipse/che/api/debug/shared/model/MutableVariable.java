@@ -25,7 +25,7 @@ public interface MutableVariable extends Variable {
     /**
      * Sets the new variable value.
      */
-    void setValue(String value);
+    void setValue(SimpleValue value);
 
     /**
      * Sets the new list of nested variables.

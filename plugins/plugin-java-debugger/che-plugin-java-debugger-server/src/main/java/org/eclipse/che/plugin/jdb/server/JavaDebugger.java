@@ -30,16 +30,15 @@ import com.sun.jdi.request.InvalidRequestStateException;
 import com.sun.jdi.request.StepRequest;
 
 import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
-import org.eclipse.che.api.debug.shared.dto.FieldDto;
 import org.eclipse.che.api.debug.shared.dto.LocationDto;
-import org.eclipse.che.api.debug.shared.dto.StackFrameDumpDto;
-import org.eclipse.che.api.debug.shared.dto.VariableDto;
 import org.eclipse.che.api.debug.shared.dto.VariablePathDto;
 import org.eclipse.che.api.debug.shared.dto.action.ResumeActionDto;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
+import org.eclipse.che.api.debug.shared.model.Field;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
+import org.eclipse.che.api.debug.shared.model.StackFrameDump;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.debug.shared.model.action.ResumeAction;
@@ -52,7 +51,9 @@ import org.eclipse.che.api.debug.shared.model.impl.DebuggerInfoImpl;
 import org.eclipse.che.api.debug.shared.model.impl.FieldImpl;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.debug.shared.model.impl.SimpleValueImpl;
+import org.eclipse.che.api.debug.shared.model.impl.StackFrameDumpImpl;
 import org.eclipse.che.api.debug.shared.model.impl.VariableImpl;
+import org.eclipse.che.api.debug.shared.model.impl.VariablePathImpl;
 import org.eclipse.che.api.debug.shared.model.impl.event.BreakpointActivatedEventImpl;
 import org.eclipse.che.api.debug.shared.model.impl.event.DisconnectEventImpl;
 import org.eclipse.che.api.debug.shared.model.impl.event.SuspendEventImpl;
@@ -71,6 +72,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -79,7 +81,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
@@ -361,11 +362,10 @@ public class JavaDebugger implements EventsHandler, Debugger {
     }
 
     @Override
-    public StackFrameDumpDto dumpStackFrame() throws DebuggerException {
+    public StackFrameDump dumpStackFrame() throws DebuggerException {
         lock.lock();
         try {
             final JdiStackFrame currentFrame = getCurrentFrame();
-            StackFrameDumpDto dump = newDto(StackFrameDumpDto.class);
             boolean existInformation = true;
             JdiLocalVariable[] variables = new JdiLocalVariable[0];
             try {
@@ -373,31 +373,35 @@ public class JavaDebugger implements EventsHandler, Debugger {
             } catch (DebuggerAbsentInformationException e) {
                 existInformation = false;
             }
+
+            List<Field> fields = new LinkedList<>();
             for (JdiField f : currentFrame.getFields()) {
                 List<String> variablePath = asList(f.isStatic() ? "static" : "this", f.getName());
-                dump.getFields().add(newDto(FieldDto.class).withIsFinal(f.isFinal())
-                                                           .withIsStatic(f.isStatic())
-                                                           .withIsTransient(f.isTransient())
-                                                           .withIsVolatile(f.isVolatile())
-                                                           .withName(f.getName())
-                                                           .withExistInformation(existInformation)
-                                                           .withValue(f.getValue().getAsString())
-                                                           .withType(f.getTypeName())
-                                                           .withVariablePath(newDto(VariablePathDto.class).withPath(variablePath))
-                                                           .withPrimitive(f.isPrimitive()));
+                fields.add(new FieldImpl(f.getName(),
+                                         existInformation,
+                                         new SimpleValueImpl(f.getValue().getAsString()),
+                                         f.getTypeName(),
+                                         f.isPrimitive(),
+                                         Collections.emptyList(),
+                                         new VariablePathImpl(variablePath),
+                                         f.isFinal(),
+                                         f.isStatic(),
+                                         f.isTransient(),
+                                         f.isVolatile()));
             }
+
+            List<Variable> vars = new LinkedList<>();
             for (JdiLocalVariable var : variables) {
-                dump.getVariables().add(newDto(VariableDto.class).withName(var.getName())
-                                                                 .withExistInformation(existInformation)
-                                                                 .withValue(var.getValue().getAsString())
-                                                                 .withType(var.getTypeName())
-                                                                 .withVariablePath(
-                                                                         newDto(VariablePathDto.class)
-                                                                                 .withPath(singletonList(var.getName()))
-                                                                 )
-                                                                 .withPrimitive(var.isPrimitive()));
+                vars.add(new VariableImpl(var.getTypeName(),
+                                          var.getName(),
+                                          new SimpleValueImpl(var.getValue().getAsString()),
+                                          var.isPrimitive(),
+                                          new VariablePathImpl(var.getName()),
+                                          Collections.emptyList(),
+                                          existInformation));
             }
-            return dump;
+
+            return new StackFrameDumpImpl(fields, vars);
         } finally {
             lock.unlock();
         }
@@ -485,7 +489,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
                 JdiField f = (JdiField)ch;
                 variables.add(new FieldImpl(f.getName(),
                                             true,
-                                            f.getValue().getAsString(),
+                                            new SimpleValueImpl(f.getValue().getAsString()),
                                             f.getTypeName(),
                                             f.isPrimitive(),
                                             Collections.<Variable>emptyList(),
@@ -498,7 +502,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
                 // Array element.
                 variables.add(new VariableImpl(ch.getTypeName(),
                                                ch.getName(),
-                                               ch.getValue().getAsString(),
+                                               new SimpleValueImpl(ch.getValue().getAsString()),
                                                ch.isPrimitive(),
                                                chPath,
                                                Collections.emptyList(),
@@ -524,7 +528,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
             expression.append(s);
         }
         expression.append('=');
-        expression.append(variable.getValue());
+        expression.append(variable.getValue().getString());
         evaluate(expression.toString());
     }
 

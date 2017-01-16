@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.debug.shared.model.impl;
 
+import org.eclipse.che.api.debug.shared.model.Field;
+import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 
@@ -18,7 +20,7 @@ import java.util.List;
 /**
  * @author Anatoliy Bazko
  */
-public class FieldImpl extends VariableImpl {
+public class FieldImpl extends VariableImpl implements Field {
     private boolean isFinal;
     private boolean isStatic;
     private boolean isTransient;
@@ -26,7 +28,7 @@ public class FieldImpl extends VariableImpl {
 
     public FieldImpl(String name,
                      boolean isExistInformation,
-                     String value,
+                     SimpleValue value,
                      String type,
                      boolean isPrimitive,
                      List<Variable> variables,
@@ -42,19 +44,23 @@ public class FieldImpl extends VariableImpl {
         this.isVolatile = isVolatile;
     }
 
-    public boolean isFinal() {
+    @Override
+    public boolean isIsFinal() {
         return isFinal;
     }
 
-    public boolean isStatic() {
+    @Override
+    public boolean isIsStatic() {
         return isStatic;
     }
 
-    public boolean isTransient() {
+    @Override
+    public boolean isIsTransient() {
         return isTransient;
     }
 
-    public boolean isVolatile() {
+    @Override
+    public boolean isIsVolatile() {
         return isVolatile;
     }
 

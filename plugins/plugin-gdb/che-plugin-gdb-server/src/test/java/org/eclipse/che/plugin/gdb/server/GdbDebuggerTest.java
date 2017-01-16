@@ -12,6 +12,7 @@ package org.eclipse.che.plugin.gdb.server;
 
 import com.google.common.collect.ImmutableMap;
 
+import org.eclipse.che.api.debug.shared.model.impl.SimpleValueImpl;
 import org.eclipse.che.api.debugger.server.Debugger;
 import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
@@ -155,7 +156,7 @@ public class GdbDebuggerTest {
 
     private void doSetAndGetValues() throws DebuggerException {
         VariablePath variablePath = new VariablePathImpl("i");
-        Variable variable = new VariableImpl("int", "i", "2", true, variablePath, Collections.emptyList(), false);
+        Variable variable = new VariableImpl("int", "i", new SimpleValueImpl("2"), true, variablePath, Collections.emptyList(), false);
 
         SimpleValue value = gdbDebugger.getValue(variablePath);
         assertEquals(value.getString(), "0");
@@ -176,7 +177,7 @@ public class GdbDebuggerTest {
         assertTrue(stackFrameDump.getFields().isEmpty());
         assertEquals(stackFrameDump.getVariables().size(), 1);
         assertEquals(stackFrameDump.getVariables().get(0).getName(), "i");
-        assertEquals(stackFrameDump.getVariables().get(0).getValue(), "2");
+        assertEquals(stackFrameDump.getVariables().get(0).getValue().getString(), "2");
         assertEquals(stackFrameDump.getVariables().get(0).getType(), "int");
     }
 

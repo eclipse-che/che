@@ -26,6 +26,7 @@ import org.eclipse.che.api.debug.shared.model.event.DisconnectEvent;
 import org.eclipse.che.api.debug.shared.model.event.SuspendEvent;
 import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
+import org.eclipse.che.api.debug.shared.model.impl.SimpleValueImpl;
 import org.eclipse.che.api.debug.shared.model.impl.VariableImpl;
 import org.eclipse.che.api.debug.shared.model.impl.VariablePathImpl;
 import org.eclipse.che.api.debug.shared.model.impl.action.ResumeActionImpl;
@@ -240,7 +241,7 @@ public class JavaDebuggerTest {
         assertEquals(debugger.getValue(new VariablePathImpl("test")).getString(), "\"hello\"");
         assertEquals(debugger.getValue(new VariablePathImpl("msg")).getString(), "\"Hello, debugger!\"");
 
-        debugger.setValue(new VariableImpl("\"new hello\"", (new VariablePathImpl("test"))));
+        debugger.setValue(new VariableImpl(new SimpleValueImpl("\"new hello\""), (new VariablePathImpl("test"))));
 
         assertEquals(debugger.getValue(new VariablePathImpl("test")).getString(), "\"new hello\"");
 

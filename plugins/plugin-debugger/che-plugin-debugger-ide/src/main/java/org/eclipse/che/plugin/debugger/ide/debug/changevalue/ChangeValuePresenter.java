@@ -14,6 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.debug.shared.model.Variable;
+import org.eclipse.che.api.debug.shared.model.impl.SimpleValueImpl;
 import org.eclipse.che.api.debug.shared.model.impl.VariableImpl;
 import org.eclipse.che.ide.debug.Debugger;
 import org.eclipse.che.ide.debug.DebuggerManager;
@@ -51,7 +52,7 @@ public class ChangeValuePresenter implements ChangeValueView.ActionDelegate {
     public void showDialog() {
         variable = debuggerPresenter.getSelectedVariable();
         view.setValueTitle(constant.changeValueViewExpressionFieldTitle(variable.getName()));
-        view.setValue(variable.getValue());
+        view.setValue(variable.getValue().getString());
         view.focusInValueField();
         view.selectAllText();
         view.setEnableChangeButton(false);
@@ -69,7 +70,7 @@ public class ChangeValuePresenter implements ChangeValueView.ActionDelegate {
     public void onChangeClicked() {
         Debugger debugger = debuggerManager.getActiveDebugger();
         if (debugger != null) {
-            Variable newVariable = new VariableImpl(view.getValue(), variable.getVariablePath());
+            Variable newVariable = new VariableImpl(new SimpleValueImpl(view.getValue()), variable.getVariablePath());
             debugger.setValue(newVariable);
         }
 

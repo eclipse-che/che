@@ -49,7 +49,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.eclipse.che.api.debugger.server.DtoConverter.asBreakpointsDto;
+import static org.eclipse.che.api.debugger.server.DtoConverter.breakpointsAsDtos;
 import static org.eclipse.che.api.debugger.server.DtoConverter.asDto;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
@@ -143,7 +143,7 @@ public class DebuggerService {
     @Path("{id}/breakpoint")
     @Produces(MediaType.APPLICATION_JSON)
     public List<BreakpointDto> getBreakpoints(@PathParam("id") String sessionId) throws DebuggerException {
-        return asBreakpointsDto(debuggerManager.getDebugger(sessionId).getAllBreakpoints());
+        return breakpointsAsDtos(debuggerManager.getDebugger(sessionId).getAllBreakpoints());
     }
 
     @DELETE
