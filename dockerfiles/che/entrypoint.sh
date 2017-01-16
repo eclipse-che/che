@@ -79,9 +79,9 @@ usage () {
 set_environment_variables () {
   ### Set value of derived environment variables.
 
-  # CHE_DOCKER_MACHINE_HOST is used internally by Che to set its IP address
+  # CHE_DOCKER_IP is used internally by Che to set its IP address
   if [[ -n "${CHE_IP}" ]]; then
-    export CHE_DOCKER_MACHINE_HOST="${CHE_IP}"
+    export CHE_DOCKER_IP="${CHE_IP}"
   fi
 
   # Convert Tomcat environment variables to POSIX format.

@@ -74,9 +74,9 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
      */
     public static final String USER_TOKEN = "USER_TOKEN";
 
-    private final ContainerInfo               info;
-    private final Map<String, ServerConfImpl> serversConf;
-    private final String                      internalHost;
+    private final ContainerInfo                    info;
+    private final Map<String, ServerConfImpl>      serversConf;
+    private final String                           internalHost;
     private final ServerEvaluationStrategyProvider provider;
 
     @Inject
