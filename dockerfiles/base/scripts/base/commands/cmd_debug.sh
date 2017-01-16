@@ -19,7 +19,12 @@ cmd_debug() {
   info "${CHE_PRODUCT_NAME}_VERSION           = ${CHE_VERSION}"
   info "${CHE_PRODUCT_NAME}_INSTANCE          = ${CHE_HOST_INSTANCE}"
   info "${CHE_PRODUCT_NAME}_CONFIG            = ${CHE_HOST_CONFIG}"
-  info "${CHE_PRODUCT_NAME}_HOST              = ${CHE_HOST}"
+  local CHE_HOST_LOCAL=${CHE_HOST}
+  if is_initialized; then
+    CHE_HOST_LOCAL=$(docker_run --env-file="${REFERENCE_CONTAINER_ENVIRONMENT_FILE}" \
+                                ${UTILITY_IMAGE_ALPINE} sh -c 'echo $CHE_HOST')
+  fi
+  info "${CHE_PRODUCT_NAME}_HOST              = ${CHE_HOST_LOCAL}"
   info "${CHE_PRODUCT_NAME}_REGISTRY          = ${CHE_MANIFEST_DIR}"
   info "${CHE_PRODUCT_NAME}_DEBUG             = ${CHE_DEBUG}"
   info "${CHE_PRODUCT_NAME}_BACKUP            = ${CHE_HOST_BACKUP}"
