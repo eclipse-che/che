@@ -98,6 +98,7 @@ elif echo ${LINUX_TYPE} | grep -qi "debian"; then
 
     if [ ${INSTALL_JDK} = true ]; then
         PACKAGES=${PACKAGES}" openjdk-8-jdk-headless";
+        echo "deb http://ftp.de.debian.org/debian jessie-backports main" | ${SUDO} tee --append /etc/apt/sources.list
     fi
 
     test "${PACKAGES}" = "" || {
