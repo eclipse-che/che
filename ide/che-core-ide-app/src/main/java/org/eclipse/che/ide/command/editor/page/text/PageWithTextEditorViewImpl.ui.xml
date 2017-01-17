@@ -15,7 +15,7 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
     <ui:with field='messages' type='org.eclipse.che.ide.command.editor.EditorMessages'/>
-    <g:DockLayoutPanel width="800px" height="200px">
+    <g:DockLayoutPanel width="800px" ui:field="mainPanel">
         <g:center>
             <g:SimpleLayoutPanel ui:field="editorPanel"/>
         </g:center>

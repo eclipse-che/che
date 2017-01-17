@@ -24,6 +24,9 @@ public interface PageWithTextEditorView extends View<PageWithTextEditorView.Acti
     /** Returns the container where the editor should be placed. */
     SimpleLayoutPanel getEditorContainer();
 
+    /** Sets height of the view. */
+    void setHeight(int height);
+
     /** The action delegate for this view. */
     interface ActionDelegate {
 

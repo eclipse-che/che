@@ -56,4 +56,9 @@ public class PreviewUrlPage extends AbstractPageWithTextEditor {
     protected void updateCommandPropertyValue(String content) {
         editedCommand.getAttributes().put(COMMAND_PREVIEW_URL_ATTRIBUTE_NAME, content);
     }
+
+    @Override
+    protected int getHeight() {
+        return 100;
+    }
 }

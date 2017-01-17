@@ -52,4 +52,9 @@ public class CommandLinePage extends AbstractPageWithTextEditor {
     protected void updateCommandPropertyValue(String content) {
         editedCommand.setCommandLine(content);
     }
+
+    @Override
+    protected String getType() {
+        return ".sh";
+    }
 }

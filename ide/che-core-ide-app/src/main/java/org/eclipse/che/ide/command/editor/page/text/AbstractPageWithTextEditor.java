@@ -62,6 +62,7 @@ public abstract class AbstractPageWithTextEditor extends AbstractCommandEditorPa
         this.editorConfiguration = editorConfiguration;
 
         view.setDelegate(this);
+        view.setHeight(getHeight());
 
         initializeEditor(editorBuilder);
     }
@@ -104,7 +105,7 @@ public abstract class AbstractPageWithTextEditor extends AbstractCommandEditorPa
 
     /** Sets editor's content. */
     private void setContent(String content) {
-        final VirtualFile file = new VirtualFileImpl(editedCommand.getName() + ".sh", content);
+        final VirtualFile file = new VirtualFileImpl(editedCommand.getName() + getType(), content);
 
         editor.init(new EditorInputImpl(fileTypeRegistry.getFileTypeByFile(file), file), new OpenEditorCallbackImpl());
     }
@@ -128,6 +129,20 @@ public abstract class AbstractPageWithTextEditor extends AbstractCommandEditorPa
      *         new value of the edited command's property
      */
     protected abstract void updateCommandPropertyValue(String newValue);
+
+    /** Returns height of the page in pixels. Default height is 200 px. */
+    protected int getHeight() {
+        return 200;
+    }
+
+    /**
+     * Returns type of the edited content.
+     * Type should be specified as file extension e.g.: .sh, .css.
+     * Default type is text/plain.
+     */
+    protected String getType() {
+        return "";
+    }
 
     @Override
     public void onExploreMacros() {
