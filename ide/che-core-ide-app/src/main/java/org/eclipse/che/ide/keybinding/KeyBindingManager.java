@@ -13,6 +13,7 @@ package org.eclipse.che.ide.keybinding;
 import elemental.dom.Element;
 import elemental.events.Event;
 import elemental.events.EventListener;
+import elemental.events.KeyboardEvent;
 
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.AreaElement;
@@ -86,6 +87,7 @@ public class KeyBindingManager implements KeyBindingAgent {
 
                 //handle event in active scheme
                 int digest = CharCodeWithModifiers.computeKeyDigest(signalEvent);
+                preventDefaultBrowserAction((KeyboardEvent)event, digest);
 
                 List<String> actionIds = activeScheme.getActionIds(digest);
 
@@ -106,6 +108,13 @@ public class KeyBindingManager implements KeyBindingAgent {
         } else {
             //webkit fires keydown events
             documentElement.addEventListener(Event.KEYDOWN, downListener, true);
+        }
+    }
+
+    private void preventDefaultBrowserAction(KeyboardEvent keyboardEvent, int digest) {
+        //prevent browser default action on Ctrl + S
+        if (digest == 65651) {
+            keyboardEvent.preventDefault();
         }
     }
 

@@ -59,7 +59,7 @@ cmd_start_check_ports() {
 
   # If dev mode is on, then we also need to check the debug port set by the user for availability
   if debug_server; then
-    USER_DEBUG_PORT=$(docker_run --env-file="${REFERENCE_CONTAINER_ENVIRONMENT_FILE}" ${UTILITY_IMAGE_ALPINE} sh -c 'echo $CHE_DEBUG_PORT')
+    USER_DEBUG_PORT=$(get_value_of_var_from_env_file CHE_DEBUG_PORT)
 
     if [[ "$USER_DEBUG_PORT" = "" ]]; then
       # If the user has not set a debug port, then use the default

@@ -14,9 +14,9 @@ package process
 import (
 	"errors"
 	"fmt"
-	"github.com/eclipse/che/exec-agent/rest"
-	"github.com/eclipse/che/exec-agent/rest/restutil"
-	"github.com/eclipse/che/exec-agent/rpc"
+	"github.com/eclipse/che/agents/exec-agent/rest"
+	"github.com/eclipse/che/agents/exec-agent/rest/restutil"
+	"github.com/eclipse/che/agents/exec-agent/rpc"
 	"io"
 	"math"
 	"net/http"
