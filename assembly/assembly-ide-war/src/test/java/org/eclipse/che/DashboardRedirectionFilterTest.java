@@ -15,7 +15,6 @@ import org.eclipse.che.commons.subject.SubjectImpl;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
-import org.omg.CORBA.ServerRequest;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -60,7 +59,7 @@ public class DashboardRedirectionFilterTest {
         filter.doFilter(request, response, chain);
 
         //then
-        verify(chain).doFilter((ServletRequest)any(ServerRequest.class), any(ServletResponse.class));
+        verify(chain).doFilter(any(ServletRequest.class), any(ServletResponse.class));
     }
 
     @Test(dataProvider = "nonNamespacePathProvider")
@@ -98,7 +97,7 @@ public class DashboardRedirectionFilterTest {
         filter.doFilter(request, response, chain);
 
         //then
-        verify(chain).doFilter((ServletRequest)any(ServerRequest.class), any(ServletResponse.class));
+        verify(chain).doFilter(any(ServletRequest.class), any(ServletResponse.class));
     }
 
     @DataProvider(name = "notGETMethodProvider")

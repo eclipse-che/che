@@ -14,7 +14,6 @@ import org.eclipse.che.api.core.rest.HttpJsonHelper;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
-import org.omg.CORBA.ServerRequest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
@@ -45,7 +44,7 @@ import static org.mockito.Mockito.when;
  * @author Max Shaposhnik (mshaposhnik@codenvy.com) on 1/17/17.
  */
 @Listeners(value = {MockitoTestNGListener.class})
-public class CheCacheForcingTest {
+public class CheCacheForcingFilterTest {
 
     @Mock
     private FilterChain chain;
@@ -78,7 +77,7 @@ public class CheCacheForcingTest {
         verify(response).setDateHeader(eq("Date"), anyLong());
         verify(response).setDateHeader(eq("Expires"), anyLong());
         verify(response).setHeader(eq("Cache-control"), matches("public, max-age=[0-9]+"));
-        verify(chain).doFilter((ServletRequest)any(ServerRequest.class), any(ServletResponse.class));
+        verify(chain).doFilter(any(ServletRequest.class), any(ServletResponse.class));
     }
 
     @Test(dataProvider = "nonCachedPathProvider")
@@ -89,7 +88,7 @@ public class CheCacheForcingTest {
         filter.doFilter(request, response, chain);
 
         verify(response, never()).setHeader(eq("Cache-control"), anyString());
-        verify(chain).doFilter((ServletRequest)any(ServerRequest.class), any(ServletResponse.class));
+        verify(chain).doFilter(any(ServletRequest.class), any(ServletResponse.class));
     }
 
 
