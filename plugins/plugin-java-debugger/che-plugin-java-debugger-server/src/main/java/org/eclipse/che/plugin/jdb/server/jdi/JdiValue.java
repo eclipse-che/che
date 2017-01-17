@@ -37,14 +37,4 @@ public interface JdiValue extends SimpleValue {
      */
     @Nullable
     JdiVariable getVariableByName(String name);
-
-    /**
-     * Indicates if value is an array.
-     */
-    boolean isArray();
-
-    /**
-     * Indicates if value is a primitive type.
-     */
-    boolean isPrimitive();
 }

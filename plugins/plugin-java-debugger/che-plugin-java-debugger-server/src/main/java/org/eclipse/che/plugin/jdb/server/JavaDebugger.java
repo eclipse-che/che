@@ -451,7 +451,6 @@ public class JavaDebugger implements EventsHandler, Debugger {
             if (ch instanceof JdiField) {
                 JdiField f = (JdiField)ch;
                 variables.add(new FieldImpl(f.getName(),
-                                            true,
                                             new SimpleValueImpl(f.getValue().getString()),
                                             f.getType(),
                                             f.isPrimitive(),
@@ -466,8 +465,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
                                                ch.getName(),
                                                new SimpleValueImpl(ch.getValue().getString()),
                                                ch.isPrimitive(),
-                                               chPath,
-                                               true));
+                                               chPath));
             }
         }
         return new SimpleValueImpl(variables, variable.getValue().getString());

@@ -19,8 +19,6 @@ public interface Variable {
      */
     String getName();
 
-    boolean isExistInformation();
-
     /**
      * The variable value.
      */

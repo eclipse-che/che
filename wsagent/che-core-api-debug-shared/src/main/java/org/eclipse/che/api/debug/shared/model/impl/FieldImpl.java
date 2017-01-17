@@ -24,7 +24,6 @@ public class FieldImpl extends VariableImpl implements Field {
     private boolean isVolatile;
 
     public FieldImpl(String name,
-                     boolean isExistInformation,
                      SimpleValue value,
                      String type,
                      boolean isPrimitive,
@@ -33,7 +32,7 @@ public class FieldImpl extends VariableImpl implements Field {
                      boolean isStatic,
                      boolean isTransient,
                      boolean isVolatile) {
-        super(type, name, value, isPrimitive, variablePath, isExistInformation);
+        super(type, name, value, isPrimitive, variablePath);
         this.isFinal = isFinal;
         this.isStatic = isStatic;
         this.isTransient = isTransient;

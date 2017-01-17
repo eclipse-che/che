@@ -33,11 +33,6 @@ public class JdiVariableImpl implements JdiVariable {
     }
 
     @Override
-    public boolean isExistInformation() {
-        return !isPrimitive();
-    }
-
-    @Override
     public String getName() {
         return variable.name();
     }

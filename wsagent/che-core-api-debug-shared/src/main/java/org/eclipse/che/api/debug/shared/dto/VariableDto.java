@@ -22,12 +22,6 @@ public interface VariableDto extends Variable {
 
     VariableDto withName(String name);
 
-    boolean isExistInformation();
-
-    void setExistInformation(boolean existInformation);
-
-    VariableDto withExistInformation(boolean existInformation);
-
     SimpleValueDto getValue();
 
     void setValue(SimpleValueDto value);

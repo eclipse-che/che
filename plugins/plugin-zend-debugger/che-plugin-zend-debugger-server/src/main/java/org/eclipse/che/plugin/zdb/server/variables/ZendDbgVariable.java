@@ -45,11 +45,6 @@ public class ZendDbgVariable implements IDbgVariable {
     }
 
     @Override
-    public boolean isExistInformation() {
-        return true;
-    }
-
-    @Override
     public String getName() {
         return name;
     }

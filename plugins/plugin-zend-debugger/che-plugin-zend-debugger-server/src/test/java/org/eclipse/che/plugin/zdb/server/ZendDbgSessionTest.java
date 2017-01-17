@@ -186,16 +186,14 @@ public class ZendDbgSessionTest extends AbstractZendDbgSessionTest {
                                                    null,
                                                    new SimpleValueImpl("123"),
                                                    false,
-                                                   new VariablePathImpl(String.valueOf(lastVar)),
-                                                   false);
+                                                   new VariablePathImpl(String.valueOf(lastVar)));
         debugger.setValue(variableToFind);
         assertEquals(stackFrameDump.getVariables().get(lastVar).getValue().getString(), "123");
         variableToFind = new VariableImpl(null,
                                           null,
                                           new SimpleValueImpl("\"ABC\""),
                                           false,
-                                          new VariablePathImpl(String.valueOf(lastVar)),
-                                          false);
+                                          new VariablePathImpl(String.valueOf(lastVar)));
         debugger.setValue(variableToFind);
         assertEquals(stackFrameDump.getVariables().get(lastVar).getValue().getString(), "\"ABC\"");
     }

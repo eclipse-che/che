@@ -39,11 +39,6 @@ public class JdiArrayElementImpl implements JdiArrayElement {
     }
 
     @Override
-    public boolean isExistInformation() {
-        return !getValue().isPrimitive();
-    }
-
-    @Override
     public boolean isPrimitive() {
         return value instanceof PrimitiveValue;
     }

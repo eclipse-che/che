@@ -97,7 +97,6 @@ public final class DtoConverter {
 
     public static FieldDto asDto(Field field) {
         return newDto(FieldDto.class).withType(field.getType())
-                                     .withExistInformation(field.isExistInformation())
                                      .withName(field.getName())
                                      .withPrimitive(field.isPrimitive())
                                      .withValue(asDto(field.getValue()))
@@ -132,7 +131,6 @@ public final class DtoConverter {
 
     public static VariableDto asDto(Variable variable) {
         return newDto(VariableDto.class).withType(variable.getType())
-                                        .withExistInformation(variable.isExistInformation())
                                         .withName(variable.getName())
                                         .withPrimitive(variable.isPrimitive())
                                         .withValue(asDto(variable.getValue()))

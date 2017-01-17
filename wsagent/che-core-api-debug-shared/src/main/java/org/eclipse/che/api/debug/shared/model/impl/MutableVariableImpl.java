@@ -24,7 +24,6 @@ import java.util.List;
  */
 public class MutableVariableImpl implements MutableVariable {
     private final String       name;
-    private final boolean      isExistInformation;
     private final String       type;
     private final boolean      isPrimitive;
     private final VariablePath variablePath;
@@ -37,10 +36,8 @@ public class MutableVariableImpl implements MutableVariable {
                                SimpleValue value,
                                VariablePath variablePath,
                                boolean isPrimitive,
-                               List<? extends Variable> variables,
-                               boolean isExistInformation) {
+                               List<? extends Variable> variables) {
         this.name = name;
-        this.isExistInformation = isExistInformation;
         this.value = value;
         this.type = type;
         this.isPrimitive = isPrimitive;
@@ -49,16 +46,12 @@ public class MutableVariableImpl implements MutableVariable {
     }
 
     public MutableVariableImpl() {
-        this(null, null, null, null, false, null, false);
+        this(null, null, null, null, false, null);
     }
 
     @Override
     public String getName() {
         return name;
-    }
-
-    public boolean isExistInformation() {
-        return isExistInformation;
     }
 
     @Override
@@ -103,7 +96,6 @@ public class MutableVariableImpl implements MutableVariable {
 
         MutableVariableImpl variable = (MutableVariableImpl)o;
 
-        if (isExistInformation != variable.isExistInformation) return false;
         if (isPrimitive != variable.isPrimitive) return false;
         if (name != null ? !name.equals(variable.name) : variable.name != null) return false;
         if (value != null ? !value.equals(variable.value) : variable.value != null) return false;
@@ -115,7 +107,6 @@ public class MutableVariableImpl implements MutableVariable {
     @Override
     public int hashCode() {
         int result = name != null ? name.hashCode() : 0;
-        result = 31 * result + (isExistInformation ? 1 : 0);
         result = 31 * result + (value != null ? value.hashCode() : 0);
         result = 31 * result + (type != null ? type.hashCode() : 0);
         result = 31 * result + (isPrimitive ? 1 : 0);
@@ -130,8 +121,7 @@ public class MutableVariableImpl implements MutableVariable {
                                        variable.getValue(),
                                        variable.getVariablePath(),
                                        variable.isPrimitive(),
-                                       variable.getValue().getVariables(),
-                                       variable.isExistInformation());
+                                       variable.getValue().getVariables());
     }
 
     private static List<MutableVariable> toMutable(List<? extends Variable> variables) {

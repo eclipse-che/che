@@ -32,14 +32,4 @@ public final class JdiNullValue implements JdiValue {
     public JdiVariable getVariableByName(String name) {
         return null;
     }
-
-    @Override
-    public boolean isArray() {
-        return false;
-    }
-
-    @Override
-    public boolean isPrimitive() {
-        return true;
-    }
 }

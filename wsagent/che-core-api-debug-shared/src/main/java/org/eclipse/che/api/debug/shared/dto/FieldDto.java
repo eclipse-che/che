@@ -46,12 +46,6 @@ public interface FieldDto extends Field {
 
     FieldDto withName(String name);
 
-    boolean isExistInformation();
-
-    void setExistInformation(boolean existInformation);
-
-    FieldDto withExistInformation(boolean existInformation);
-
     SimpleValueDto getValue();
 
     void setValue(SimpleValueDto value);

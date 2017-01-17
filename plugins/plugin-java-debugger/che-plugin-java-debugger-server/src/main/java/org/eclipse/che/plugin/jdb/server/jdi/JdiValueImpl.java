@@ -78,12 +78,10 @@ public class JdiValueImpl implements JdiValue {
         return null;
     }
 
-    @Override
     public boolean isArray() {
         return value instanceof ArrayReference;
     }
 
-    @Override
     public boolean isPrimitive() {
         return value instanceof PrimitiveValue;
     }

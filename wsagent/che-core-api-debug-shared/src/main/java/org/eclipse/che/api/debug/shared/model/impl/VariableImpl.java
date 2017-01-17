@@ -19,7 +19,6 @@ import org.eclipse.che.api.debug.shared.model.VariablePath;
  */
 public class VariableImpl implements Variable {
     private final String       name;
-    private final boolean      isExistInformation;
     private final SimpleValue  value;
     private final String       type;
     private final boolean      isPrimitive;
@@ -29,10 +28,8 @@ public class VariableImpl implements Variable {
                         String name,
                         SimpleValue value,
                         boolean isPrimitive,
-                        VariablePath variablePath,
-                        boolean isExistInformation) {
+                        VariablePath variablePath) {
         this.name = name;
-        this.isExistInformation = isExistInformation;
         this.value = value;
         this.type = type;
         this.isPrimitive = isPrimitive;
@@ -40,16 +37,12 @@ public class VariableImpl implements Variable {
     }
 
     public VariableImpl(SimpleValue value, VariablePath variablePath) {
-        this(null, null, value, false, variablePath, false);
+        this(null, null, value, false, variablePath);
     }
 
     @Override
     public String getName() {
         return name;
-    }
-
-    public boolean isExistInformation() {
-        return isExistInformation;
     }
 
     @Override
@@ -79,7 +72,6 @@ public class VariableImpl implements Variable {
 
         VariableImpl variable = (VariableImpl)o;
 
-        if (isExistInformation != variable.isExistInformation) return false;
         if (isPrimitive != variable.isPrimitive) return false;
         if (name != null ? !name.equals(variable.name) : variable.name != null) return false;
         if (value != null ? !value.equals(variable.value) : variable.value != null) return false;
@@ -90,7 +82,6 @@ public class VariableImpl implements Variable {
     @Override
     public int hashCode() {
         int result = name != null ? name.hashCode() : 0;
-        result = 31 * result + (isExistInformation ? 1 : 0);
         result = 31 * result + (value != null ? value.hashCode() : 0);
         result = 31 * result + (type != null ? type.hashCode() : 0);
         result = 31 * result + (isPrimitive ? 1 : 0);

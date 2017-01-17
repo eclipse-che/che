@@ -44,11 +44,6 @@ public class JdiFieldImpl implements JdiField {
     }
 
     @Override
-    public boolean isExistInformation() {
-        return !isPrimitive();
-    }
-
-    @Override
     public boolean isIsStatic() {
         return field.isStatic();
     }

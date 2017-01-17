@@ -448,8 +448,7 @@ public class GdbDebugger implements Debugger {
                                                          varName,
                                                          new SimpleValueImpl(varValue),
                                                          true,
-                                                         variablePath,
-                                                         true);
+                                                         variablePath);
                 variables.add(variable);
             }
 
