@@ -19,11 +19,13 @@ import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.type.ProjectTypeRegistry;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.projecttype.wizard.presenter.ProjectWizardPresenter;
+import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.List;
 
@@ -81,6 +83,18 @@ public class ProjectResolver {
 
                     return promiseProvider.resolve(project);
                 }
+
+                return project.update().withBody(config).send();
+            }
+        }).catchErrorPromise(new Function<PromiseError, Promise<Project>>() {
+            @Override
+            public Promise<Project> apply(PromiseError error) throws FunctionException {
+                Log.warn(ProjectResolver.class, error.getMessage());
+
+                //this error may be occurred when resolve method is called on empty project, so just skip it and return empty configuration
+
+                final MutableProjectConfig config = new MutableProjectConfig(project);
+                config.setType(Constants.BLANK_ID);
 
                 return project.update().withBody(config).send();
             }
