@@ -9,6 +9,9 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {CheAPI} from '../../../components/api/che-api.factory';
+import {CheNotification} from '../../../components/notification/che-notification.factory';
+import {CheWorkspace} from '../../../components/api/che-workspace.factory';
 
 /**
  * @ngdoc controller
@@ -17,12 +20,33 @@
  * @author Ann Shumilova
  */
 export class ListWorkspacesCtrl {
+  $q: ng.IQService;
+  $log: ng.ILogService;
+  $mdDialog: ng.material.IDialogService;
+  cheAPI: CheAPI;
+  cheNotification: CheNotification;
+  cheWorkspace: CheWorkspace;
+
+  state: string;
+  isInfoLoading: boolean;
+  workspaceFilter: any;
+  userWorkspaces: che.IWorkspace[];
+
+  workspacesById: Map<string, che.IWorkspace>;
+  workspaceUsedResources: Map<string, string>;
+
+  workspacesSelectedStatus: {
+    [workspaceId: string]: boolean;
+  };
+  isAllSelected: boolean;
+  isBulkChecked: boolean;
+  isNoSelected: boolean;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheAPI, $q, $log, $mdDialog, cheNotification, cheWorkspace, $rootScope) {
+  constructor($log: ng.ILogService, $mdDialog: ng.material.IDialogService, $q: ng.IQService, $rootScope: che.IRootScopeService, cheAPI: CheAPI, cheNotification: CheNotification, cheWorkspace: CheWorkspace) {
     this.cheAPI = cheAPI;
     this.$q = $q;
     this.$log = $log;
@@ -34,9 +58,9 @@ export class ListWorkspacesCtrl {
     this.isInfoLoading = true;
     this.workspaceFilter = {config: {name: ''}};
 
-    //Map of all workspaces with additional info by id:
+    // map of all workspaces with additional info by id:
     this.workspacesById = new Map();
-    //Map of workspaces' used resources (consumed GBH):
+    // map of workspaces' used resources (consumed GBH):
     this.workspaceUsedResources = new Map();
 
     this.getUserWorkspaces();
@@ -48,15 +72,17 @@ export class ListWorkspacesCtrl {
     $rootScope.showIDE = false;
   }
 
-  //Fetch current user's workspaces (where he is a member):
-  getUserWorkspaces() {
+  /**
+   * Fetch current user's workspaces (where he is a member):
+   */
+  getUserWorkspaces(): void {
     // fetch workspaces when initializing
     let promise = this.cheAPI.getWorkspace().fetchWorkspaces();
 
     promise.then(() => {
         this.updateSharedWorkspaces();
       },
-      (error) => {
+      (error: any) => {
         if (error.status === 304) {
           // ok
           this.updateSharedWorkspaces();
@@ -67,16 +93,17 @@ export class ListWorkspacesCtrl {
       });
   }
 
-
-  //Update the info of all user workspaces:
-  updateSharedWorkspaces() {
+  /**
+   * Update the info of all user workspaces:
+   */
+  updateSharedWorkspaces(): void {
     this.userWorkspaces = [];
     let workspaces = this.cheAPI.getWorkspace().getWorkspaces();
     if (workspaces.length === 0) {
       this.isInfoLoading = false;
     }
-    workspaces.forEach((workspace) => {
-      //First check the list of already received workspace info:
+    workspaces.forEach((workspace: che.IWorkspace) => {
+      // first check the list of already received workspace info:
       if (!this.workspacesById.get(workspace.id)) {
         this.cheAPI.getWorkspace().fetchWorkspaceDetails(workspace.id).then(() => {
           let userWorkspace = this.cheAPI.getWorkspace().getWorkspaceById(workspace.id);
@@ -93,22 +120,30 @@ export class ListWorkspacesCtrl {
     this.state = 'loaded';
   }
 
-  //Represents given account resources as a map with workspace id as a key.
-  processUsedResources(resources) {
-    resources.forEach((resource) => {
+  /**
+   * Represents given account resources as a map with workspace id as a key.
+   *
+   * @param {any[]} resources
+   */
+  processUsedResources(resources: any[]): void {
+    resources.forEach((resource: any) => {
       this.workspaceUsedResources.set(resource.workspaceId, resource.memory.toFixed(2));
     });
   }
 
-  //Gets all necessary workspace info to be displayed.
-  getWorkspaceInfo(workspace) {
+  /**
+   * Gets all necessary workspace info to be displayed.
+   *
+   * @param {che.IWorkspace} workspace
+   */
+  getWorkspaceInfo(workspace: che.IWorkspace): void {
     let promises = [];
     this.workspacesById.set(workspace.id, workspace);
 
     workspace.isLocked = false;
     workspace.usedResources = this.workspaceUsedResources.get(workspace.id);
 
-    //No access to runner resources if workspace is locked:
+    // no access to runner resources if workspace is locked:
     if (!workspace.isLocked) {
       let promiseWorkspace = this.cheAPI.getWorkspace().fetchWorkspaceDetails(workspace.id);
       promises.push(promiseWorkspace);
@@ -123,7 +158,7 @@ export class ListWorkspacesCtrl {
    * return true if all workspaces in list are checked
    * @returns {boolean}
    */
-  isAllWorkspacesSelected() {
+  isAllWorkspacesSelected(): boolean {
     return this.isAllSelected;
   }
 
@@ -131,14 +166,14 @@ export class ListWorkspacesCtrl {
    * returns true if all workspaces in list are not checked
    * @returns {boolean}
    */
-  isNoWorkspacesSelected() {
+  isNoWorkspacesSelected(): boolean {
     return this.isNoSelected;
   }
 
   /**
    * Check all workspaces in list
    */
-  selectAllWorkspaces() {
+  selectAllWorkspaces(): void {
     for (let key of this.workspacesById.keys()) {
       this.workspacesSelectedStatus[key] = true;
     }
@@ -147,8 +182,8 @@ export class ListWorkspacesCtrl {
   /**
    * Uncheck all workspaces in list
    */
-  deselectAllWorkspaces() {
-    Object.keys(this.workspacesSelectedStatus).forEach((key) => {
+  deselectAllWorkspaces(): void {
+    Object.keys(this.workspacesSelectedStatus).forEach((key: string) => {
       this.workspacesSelectedStatus[key] = false;
     });
   }
@@ -156,7 +191,7 @@ export class ListWorkspacesCtrl {
   /**
    * Change bulk selection value
    */
-  changeBulkSelection() {
+  changeBulkSelection(): void {
     if (this.isBulkChecked) {
       this.deselectAllWorkspaces();
       this.isBulkChecked = false;
@@ -170,11 +205,11 @@ export class ListWorkspacesCtrl {
   /**
    * Update workspace selected status
    */
-  updateSelectedStatus() {
+  updateSelectedStatus(): void {
     this.isNoSelected = true;
     this.isAllSelected = true;
 
-    Object.keys(this.workspacesSelectedStatus).forEach((key) => {
+    Object.keys(this.workspacesSelectedStatus).forEach((key: string) => {
       if (this.workspacesSelectedStatus[key]) {
         this.isNoSelected = false;
       } else {
@@ -195,7 +230,7 @@ export class ListWorkspacesCtrl {
   /**
    * Delete all selected workspaces
    */
-  deleteSelectedWorkspaces() {
+  deleteSelectedWorkspaces(): void {
     let workspacesSelectedStatusKeys = Object.keys(this.workspacesSelectedStatus);
     let checkedWorkspacesKeys = [];
 
@@ -204,7 +239,7 @@ export class ListWorkspacesCtrl {
       return;
     }
 
-    workspacesSelectedStatusKeys.forEach((key) => {
+    workspacesSelectedStatusKeys.forEach((key: string) => {
       if (this.workspacesSelectedStatus[key] === true) {
         checkedWorkspacesKeys.push(key);
       }
@@ -223,7 +258,7 @@ export class ListWorkspacesCtrl {
       let deleteWorkspacePromises = [];
       let workspaceName;
 
-      checkedWorkspacesKeys.forEach((workspaceId) => {
+      checkedWorkspacesKeys.forEach((workspaceId: string) => {
         this.workspacesSelectedStatus[workspaceId] = false;
 
         let workspace = this.cheWorkspace.getWorkspaceById(workspaceId);
@@ -242,7 +277,7 @@ export class ListWorkspacesCtrl {
             this.workspacesById.delete(workspaceId);
             queueLength--;
           },
-          (error) => {
+          (error: any) => {
             isError = true;
             this.$log.error('Cannot delete workspace: ', error);
           });
@@ -254,12 +289,10 @@ export class ListWorkspacesCtrl {
         this.updateSelectedStatus();
         if (isError) {
           this.cheNotification.showError('Delete failed.');
-        }
-        else {
+        } else {
           if (numberToDelete === 1) {
             this.cheNotification.showInfo(workspaceName + ' has been removed.');
-          }
-          else {
+          } else {
             this.cheNotification.showInfo('Selected workspaces have been removed.');
           }
         }
@@ -269,10 +302,10 @@ export class ListWorkspacesCtrl {
 
   /**
    * Show confirmation popup before workspaces to delete
-   * @param numberToDelete
-   * @returns {*}
+   * @param {Number} numberToDelete
+   * @returns {ng.IPromise<any>}
    */
-  showDeleteWorkspacesConfirmation(numberToDelete) {
+  showDeleteWorkspacesConfirmation(numberToDelete: number): ng.IPromise<any> {
     let confirmTitle = 'Would you like to delete ';
     if (numberToDelete > 1) {
       confirmTitle += 'these ' + numberToDelete + ' workspaces?';

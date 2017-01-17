@@ -10,11 +10,28 @@
  */
 'use strict';
 
+interface IUsageChartScope extends ng.IScope {
+  usedColor: string;
+  loaded: boolean;
+  provided: number;
+  used: number;
+  config: any;
+  data: any;
+  large: boolean;
+}
+
 /**
  * Defines a directive for displaying usage of resource: chart + description.
  * @author Ann Shumilova
  */
 export class UsageChart {
+  restrict: string;
+  templateUrl: string;
+  replace: boolean;
+
+  scope: {
+    [propName: string]: string
+  };
 
   /**
    * Default constructor that is using resource
@@ -37,7 +54,7 @@ export class UsageChart {
 
   }
 
-  link($scope, element, attrs) {
+  link($scope: IUsageChartScope, element: ng.IAugmentedJQuery, attrs: any): void {
     if ($scope.usedColor) {
       element.find('.usage-chart-used-value').css('color', $scope.usedColor);
       element.find('.usage-chart-label').css('color', $scope.usedColor);
@@ -51,7 +68,7 @@ export class UsageChart {
       }
     });
 
-    var t = this;
+    let t = this;
     attrs.$observe('cheUsed', function () {
       if ($scope.used && $scope.provided) {
         t.initChart($scope);
@@ -66,18 +83,18 @@ export class UsageChart {
 
   }
 
-  initChart($scope) {
+  initChart($scope: IUsageChartScope): void {
     let available = $scope.provided - $scope.used;
     let usedPercents = ($scope.used * 100 / $scope.provided).toFixed(0);
-    let availablePercents = 100 - usedPercents;
+    let availablePercents = 100 - parseInt(usedPercents, 10);
     let usedColor = $scope.usedColor ? $scope.usedColor : '#4e5a96';
 
     $scope.config = {
       tooltips: true,
       labels: false,
-      mouseover: function() {},
-      mouseout: function() {},
-      click: function() {},
+      mouseover: () => {},
+      mouseout: () => {},
+      click: () => {},
       legend: {
         display: false,
         position: 'right'
