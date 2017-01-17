@@ -35,10 +35,17 @@ cmd_start() {
   # If the current directory is not configured with an .env file, it will initialize
   cmd_config $FORCE_UPDATE
 
-  # Begin tests of open ports that we require
-  info "start" "Preflight checks"
-  cmd_start_check_ports
-  text "\n"
+  # Preflight checks
+  #   a) Check for open ports
+  #   b) Test simulated connections for failures
+  if ! is_fast; then
+    info "start" "Preflight checks"
+    cmd_start_check_ports
+    cmd_start_check_agent_network
+    text "\n"
+  else
+    warning "Skipping preflight checks..."
+  fi
 
   # Start ${CHE_FORMAL_PRODUCT_NAME}
   # Note bug in docker requires relative path, not absolute path to compose file
@@ -70,21 +77,56 @@ cmd_start_check_ports() {
     fi
   fi
 
-  text   "         port ${CHE_PORT} (http):       $(port_open ${CHE_PORT} && echo "${GREEN}[AVAILABLE]${NC}" || echo "${RED}[ALREADY IN USE]${NC}") \n"
+  text "         port ${CHE_PORT} (http):       $(port_open ${CHE_PORT} \
+             && echo "${GREEN}[AVAILABLE]${NC}" \
+             || echo "${RED}[ALREADY IN USE]${NC}") \n"
+
   if debug_server; then
-    text   "         port ${CHE_DEBUG_PORT} (debug):      $(port_open ${CHE_DEBUG_PORT} && echo "${GREEN}[AVAILABLE]${NC}" || echo "${RED}[ALREADY IN USE]${NC}") \n"
+    text "         port ${CHE_DEBUG_PORT} (debug):      $(port_open ${CHE_DEBUG_PORT} \
+               && echo "${GREEN}[AVAILABLE]${NC}" \
+               || echo "${RED}[ALREADY IN USE]${NC}") \n"
   fi
+
   if ! $(port_open ${CHE_PORT}); then
     echo ""
     error "Ports required to run $CHE_MINI_PRODUCT_NAME are used by another program."
-    return 1;
+    return 2;
   fi
+
   if debug_server; then
     if ! $(port_open ${CHE_DEBUG_PORT}); then
       echo ""
       error "Ports required to run $CHE_MINI_PRODUCT_NAME are used by another program."
-      return 1;
+      return 2;
     fi
+  fi
+}
+
+# See cmd_network.sh for utilities for unning these tests
+cmd_start_check_agent_network() {
+  start_test_server
+
+  PREFLIGHT="success"
+  if test1 && test2; then
+    text "         conn (browser => ws):   ${GREEN}[OK]${NC}\n"
+  else
+    text "         conn (browser => ws):   ${RED}[NOT OK]${NC}\n"
+    PREFLIGHT="fail"
+  fi
+
+  if test3 && test4; then
+    text "         conn (server => ws):    ${GREEN}[OK]${NC}\n"
+  else
+    text "         conn (server => ws):    ${RED}[NOT OK]${NC}\n\n"
+    PREFLIGHT="fail"
+  fi
+
+  stop_test_server
+
+  if [[ "${PREFLIGHT}" = "fail" ]]; then
+    text "\n"
+    error "Try 'docker run <options> ${CHE_IMAGE_FULLNAME} info --network' for more tests."
+    return 2;
   fi
 }
 

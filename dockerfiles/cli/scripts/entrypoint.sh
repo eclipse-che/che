@@ -47,7 +47,7 @@ COMMANDS:
   version                              Installed version and upgrade paths
 
 GLOBAL COMMAND OPTIONS:
-  --fast                               Skips networking and version checks (saves 5 secs during bootstrap)
+  --fast                               Skips networking, version, nightly and preflight checks
   --debug                              Enable debugging of ${CHE_MINI_PRODUCT_NAME} server
 "
 }
