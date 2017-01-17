@@ -8,17 +8,19 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.jdb.server;
+package org.eclipse.che.plugin.jdb.server.jdi;
 
-import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
-import org.eclipse.che.plugin.jdb.server.exceptions.DebuggerAbsentInformationException;
+import org.eclipse.che.api.debug.shared.model.StackFrameDump;
+import org.eclipse.che.commons.annotation.Nullable;
+
+import java.util.List;
 
 /**
  * State of method invocation.
  *
  * @author andrew00x
  */
-public interface JdiStackFrame {
+public interface JdiStackFrame extends StackFrameDump {
     /**
      * Get all available instance or class members.
      *
@@ -27,39 +29,26 @@ public interface JdiStackFrame {
      *         <li>static fields should go before non-static fields</li>
      *         <li>fields of the same type should be ordered by name</li>
      *         </ul>
-     * @throws DebuggerException
-     *         if an error occurs
      */
-    JdiField[] getFields() throws DebuggerException;
+    @Override
+    List<JdiField> getFields();
 
     /**
      * Get field by name.
      *
      * @return field or <code>null</code> if there is not such field
-     * @throws DebuggerException
-     *         if an error occurs
      */
-    JdiField getFieldByName(String name) throws DebuggerException;
+    @Nullable
+    JdiField getFieldByName(String name);
 
-    /**
-     * Get all available local variables.
-     *
-     * @return list of local variables
-     * @throws DebuggerException
-     *         if an error occurs
-     * @throws DebuggerAbsentInformationException
-     *         if an error occurs
-     */
-    JdiLocalVariable[] getLocalVariables() throws DebuggerException;
+    @Override
+    List<JdiVariable> getVariables();
 
     /**
      * Get local variable by name.
      *
      * @return local variable or <code>null</code> if there is not such local variable
-     * @throws DebuggerException
-     *         if an error occurs
-     * @throws DebuggerAbsentInformationException
-     *         if an error occurs
      */
-    JdiLocalVariable getLocalVariableByName(String name) throws DebuggerException;
+    @Nullable
+    JdiVariable getVariableByName(String name);
 }

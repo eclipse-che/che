@@ -8,15 +8,22 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.jdb.server.exceptions;
+package org.eclipse.che.plugin.jdb.server.jdi;
 
 import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
 
 /**
- * @author Anatoliy Bazko
+ * Element of array in debuggee JVM.
+ *
+ * @author andrew00x
  */
-public class DebuggerAbsentInformationException extends DebuggerException {
-    public DebuggerAbsentInformationException(String message, Exception cause) {
-        super(message, cause);
-    }
+public interface JdiArrayElement extends JdiVariable {
+    /**
+     * Get index of this element of array.
+     *
+     * @return index of this array element
+     * @throws DebuggerException
+     *         if an error occurs
+     */
+    int getIndex() throws DebuggerException;
 }

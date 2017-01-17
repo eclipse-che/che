@@ -35,7 +35,6 @@ import org.eclipse.che.api.debug.shared.dto.VariablePathDto;
 import org.eclipse.che.api.debug.shared.dto.action.ResumeActionDto;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
-import org.eclipse.che.api.debug.shared.model.Field;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
@@ -53,16 +52,18 @@ import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.debug.shared.model.impl.SimpleValueImpl;
 import org.eclipse.che.api.debug.shared.model.impl.StackFrameDumpImpl;
 import org.eclipse.che.api.debug.shared.model.impl.VariableImpl;
-import org.eclipse.che.api.debug.shared.model.impl.VariablePathImpl;
 import org.eclipse.che.api.debug.shared.model.impl.event.BreakpointActivatedEventImpl;
 import org.eclipse.che.api.debug.shared.model.impl.event.DisconnectEventImpl;
 import org.eclipse.che.api.debug.shared.model.impl.event.SuspendEventImpl;
 import org.eclipse.che.api.debugger.server.Debugger;
 import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
-import org.eclipse.che.plugin.jdb.server.exceptions.DebuggerAbsentInformationException;
 import org.eclipse.che.plugin.jdb.server.expression.Evaluator;
 import org.eclipse.che.plugin.jdb.server.expression.ExpressionException;
 import org.eclipse.che.plugin.jdb.server.expression.ExpressionParser;
+import org.eclipse.che.plugin.jdb.server.jdi.JdiField;
+import org.eclipse.che.plugin.jdb.server.jdi.JdiStackFrame;
+import org.eclipse.che.plugin.jdb.server.jdi.JdiStackFrameImpl;
+import org.eclipse.che.plugin.jdb.server.jdi.JdiVariable;
 import org.eclipse.che.plugin.jdb.server.utils.JavaDebuggerUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +73,6 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -80,7 +80,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static java.util.Arrays.asList;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
@@ -366,40 +365,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
         lock.lock();
         try {
             final JdiStackFrame currentFrame = getCurrentFrame();
-            boolean existInformation = true;
-            JdiLocalVariable[] variables = new JdiLocalVariable[0];
-            try {
-                variables = currentFrame.getLocalVariables();
-            } catch (DebuggerAbsentInformationException e) {
-                existInformation = false;
-            }
-
-            List<Field> fields = new LinkedList<>();
-            for (JdiField f : currentFrame.getFields()) {
-                List<String> variablePath = asList(f.isStatic() ? "static" : "this", f.getName());
-                fields.add(new FieldImpl(f.getName(),
-                                         existInformation,
-                                         new SimpleValueImpl(f.getValue().getAsString()),
-                                         f.getTypeName(),
-                                         f.isPrimitive(),
-                                         new VariablePathImpl(variablePath),
-                                         f.isFinal(),
-                                         f.isStatic(),
-                                         f.isTransient(),
-                                         f.isVolatile()));
-            }
-
-            List<Variable> vars = new LinkedList<>();
-            for (JdiLocalVariable var : variables) {
-                vars.add(new VariableImpl(var.getTypeName(),
-                                          var.getName(),
-                                          new SimpleValueImpl(var.getValue().getAsString()),
-                                          var.isPrimitive(),
-                                          new VariablePathImpl(var.getName()),
-                                          existInformation));
-            }
-
-            return new StackFrameDumpImpl(fields, vars);
+            return new StackFrameDumpImpl(currentFrame.getFields(), currentFrame.getVariables());
         } finally {
             lock.unlock();
         }
@@ -463,9 +429,8 @@ public class JavaDebugger implements EventsHandler, Debugger {
             variable = getCurrentFrame().getFieldByName(path.get(1));
             offset = 2;
         } else {
-            try {
-                variable = getCurrentFrame().getLocalVariableByName(path.get(0));
-            } catch (DebuggerAbsentInformationException e) {
+            variable = getCurrentFrame().getVariableByName(path.get(0));
+            if (variable == null) {
                 return null;
             }
             offset = 1;
@@ -487,25 +452,25 @@ public class JavaDebugger implements EventsHandler, Debugger {
                 JdiField f = (JdiField)ch;
                 variables.add(new FieldImpl(f.getName(),
                                             true,
-                                            new SimpleValueImpl(f.getValue().getAsString()),
-                                            f.getTypeName(),
+                                            new SimpleValueImpl(f.getValue().getString()),
+                                            f.getType(),
                                             f.isPrimitive(),
                                             chPath,
-                                            f.isFinal(),
-                                            f.isStatic(),
-                                            f.isTransient(),
-                                            f.isVolatile()));
+                                            f.isIsFinal(),
+                                            f.isIsStatic(),
+                                            f.isIsTransient(),
+                                            f.isIsVolatile()));
             } else {
                 // Array element.
-                variables.add(new VariableImpl(ch.getTypeName(),
+                variables.add(new VariableImpl(ch.getType(),
                                                ch.getName(),
-                                               new SimpleValueImpl(ch.getValue().getAsString()),
+                                               new SimpleValueImpl(ch.getValue().getString()),
                                                ch.isPrimitive(),
                                                chPath,
                                                true));
             }
         }
-        return new SimpleValueImpl(variables, variable.getValue().getAsString());
+        return new SimpleValueImpl(variables, variable.getValue().getString());
     }
 
     @Override

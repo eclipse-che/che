@@ -8,34 +8,23 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.jdb.server;
+package org.eclipse.che.plugin.jdb.server.jdi;
 
-import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
+import org.eclipse.che.api.debug.shared.model.SimpleValue;
+import org.eclipse.che.commons.annotation.Nullable;
+
+import java.util.List;
 
 /**
- * Value of JdiVariable.
+ * Wrapper for {@link com.sun.jdi.Value}
  *
  * @author andrew00x
+ * @author Anatolii Bazko
  */
-public interface JdiValue {
-    /**
-     * Get value in String representation.
-     *
-     * @return value in String representation
-     * @throws DebuggerException
-     *         if an error occurs
-     */
-    String getAsString() throws DebuggerException;
+public interface JdiValue extends SimpleValue {
 
-    /**
-     * Get nested variables.
-     *
-     * @return nested variables. This method always returns empty array for primitive type since primitive type has not
-     *         any fields. If value represents array this method returns array members
-     * @throws DebuggerException
-     *         if an error occurs
-     */
-    JdiVariable[] getVariables() throws DebuggerException;
+    @Override
+    List<JdiVariable> getVariables();
 
     /**
      * Get nested variable by name.
@@ -44,9 +33,18 @@ public interface JdiValue {
      *         name of variable. Typically it is name of field. If this value represents array then name should be in form:
      *         <i>[i]</i>, where <i>i</i> is index of element
      * @return nested variable with specified name or <code>null</code> if there is no such variable
-     * @throws DebuggerException
-     *         if an error occurs
      * @see JdiVariable#getName()
      */
-    JdiVariable getVariableByName(String name) throws DebuggerException;
+    @Nullable
+    JdiVariable getVariableByName(String name);
+
+    /**
+     * Indicates if value is an array.
+     */
+    boolean isArray();
+
+    /**
+     * Indicates if value is a primitive type.
+     */
+    boolean isPrimitive();
 }

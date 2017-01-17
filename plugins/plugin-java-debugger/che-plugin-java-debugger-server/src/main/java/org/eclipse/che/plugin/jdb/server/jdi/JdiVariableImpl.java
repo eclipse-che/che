@@ -8,22 +8,33 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.jdb.server;
+package org.eclipse.che.plugin.jdb.server.jdi;
 
 import com.sun.jdi.LocalVariable;
 import com.sun.jdi.StackFrame;
 import com.sun.jdi.Value;
 
-import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
+import org.eclipse.che.api.debug.shared.model.VariablePath;
+import org.eclipse.che.api.debug.shared.model.impl.VariablePathImpl;
 
 /** @author andrew00x */
-public class JdiLocalVariableImpl implements JdiLocalVariable {
+public class JdiVariableImpl implements JdiVariable {
     private final LocalVariable variable;
     private final StackFrame    stackFrame;
 
-    public JdiLocalVariableImpl(StackFrame stackFrame, LocalVariable variable) {
+    @Override
+    public VariablePath getVariablePath() {
+        return new VariablePathImpl(getName());
+    }
+
+    public JdiVariableImpl(StackFrame stackFrame, LocalVariable variable) {
         this.stackFrame = stackFrame;
         this.variable = variable;
+    }
+
+    @Override
+    public boolean isExistInformation() {
+        return !isPrimitive();
     }
 
     @Override
@@ -32,12 +43,7 @@ public class JdiLocalVariableImpl implements JdiLocalVariable {
     }
 
     @Override
-    public boolean isArray() throws DebuggerException {
-        return JdiType.isArray(variable.signature());
-    }
-
-    @Override
-    public boolean isPrimitive() throws DebuggerException {
+    public boolean isPrimitive() {
         return JdiType.isPrimitive(variable.signature());
     }
 
@@ -51,7 +57,7 @@ public class JdiLocalVariableImpl implements JdiLocalVariable {
     }
 
     @Override
-    public String getTypeName() {
+    public String getType() {
         return variable.typeName();
     }
 }

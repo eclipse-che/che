@@ -8,11 +8,13 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.jdb.server;
+package org.eclipse.che.plugin.jdb.server.jdi;
 
-import com.sun.jdi.ArrayReference;
 import com.sun.jdi.PrimitiveValue;
 import com.sun.jdi.Value;
+
+import org.eclipse.che.api.debug.shared.model.VariablePath;
+import org.eclipse.che.api.debug.shared.model.impl.VariablePathImpl;
 
 /** @author andrew00x */
 public class JdiArrayElementImpl implements JdiArrayElement {
@@ -37,8 +39,8 @@ public class JdiArrayElementImpl implements JdiArrayElement {
     }
 
     @Override
-    public boolean isArray() {
-        return value instanceof ArrayReference;
+    public boolean isExistInformation() {
+        return !getValue().isPrimitive();
     }
 
     @Override
@@ -55,10 +57,15 @@ public class JdiArrayElementImpl implements JdiArrayElement {
     }
 
     @Override
-    public String getTypeName() {
+    public String getType() {
         if (value == null) {
             return "null";
         }
         return value.type().name();
+    }
+
+    @Override
+    public VariablePath getVariablePath() {
+        return new VariablePathImpl(getName());
     }
 }

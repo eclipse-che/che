@@ -8,24 +8,17 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.jdb.server;
+package org.eclipse.che.plugin.jdb.server.jdi;
 
-import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
+import org.eclipse.che.api.debug.shared.model.Variable;
 
-/** @author andrew00x */
-public final class JdiNullValue implements JdiValue {
+/**
+ * Wrapper for {@link com.sun.jdi.LocalVariable}
+ *
+ * @author andrew00x
+ * @author Anatolii Bazko
+ */
+public interface JdiVariable extends Variable {
     @Override
-    public String getAsString() throws DebuggerException {
-        return "null";
-    }
-
-    @Override
-    public JdiVariable[] getVariables() throws DebuggerException {
-        return new JdiVariable[0];
-    }
-
-    @Override
-    public JdiVariable getVariableByName(String name) throws DebuggerException {
-        return null;
-    }
+    JdiValue getValue();
 }

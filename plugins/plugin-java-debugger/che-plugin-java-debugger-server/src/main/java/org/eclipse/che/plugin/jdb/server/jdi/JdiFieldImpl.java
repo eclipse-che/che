@@ -8,17 +8,20 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.jdb.server;
+package org.eclipse.che.plugin.jdb.server.jdi;
 
 import com.sun.jdi.Field;
 import com.sun.jdi.ObjectReference;
 import com.sun.jdi.ReferenceType;
 import com.sun.jdi.Value;
 
-import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
+import org.eclipse.che.api.debug.shared.model.VariablePath;
+import org.eclipse.che.api.debug.shared.model.impl.VariablePathImpl;
+
+import static java.util.Arrays.asList;
 
 /** @author andrew00x */
-public class JdiFieldImpl implements JdiField, Comparable<JdiFieldImpl> {
+public class JdiFieldImpl implements JdiField {
     private final Field           field;
     private final ReferenceType   type;
     private final ObjectReference object;
@@ -41,32 +44,32 @@ public class JdiFieldImpl implements JdiField, Comparable<JdiFieldImpl> {
     }
 
     @Override
-    public boolean isStatic() {
+    public boolean isExistInformation() {
+        return !isPrimitive();
+    }
+
+    @Override
+    public boolean isIsStatic() {
         return field.isStatic();
     }
 
     @Override
-    public boolean isTransient() {
+    public boolean isIsTransient() {
         return field.isTransient();
     }
 
     @Override
-    public boolean isVolatile() {
+    public boolean isIsVolatile() {
         return field.isVolatile();
     }
 
     @Override
-    public boolean isFinal() {
+    public boolean isIsFinal() {
         return field.isFinal();
     }
 
     @Override
-    public boolean isArray() throws DebuggerException {
-        return JdiType.isArray(field.signature());
-    }
-
-    @Override
-    public boolean isPrimitive() throws DebuggerException {
+    public boolean isPrimitive() {
         return JdiType.isPrimitive(field.signature());
     }
 
@@ -80,22 +83,12 @@ public class JdiFieldImpl implements JdiField, Comparable<JdiFieldImpl> {
     }
 
     @Override
-    public String getTypeName() {
+    public String getType() {
         return field.typeName();
     }
 
     @Override
-    public int compareTo(JdiFieldImpl o) {
-        final boolean thisStatic = isStatic();
-        final boolean thatStatic = o.isStatic();
-        if (thisStatic && !thatStatic) {
-            return -1;
-        }
-        if (!thisStatic && thatStatic) {
-            return 1;
-        }
-        final String thisName = getName();
-        final String thatName = o.getName();
-        return thisName.compareTo(thatName);
+    public VariablePath getVariablePath() {
+        return new VariablePathImpl(asList(isIsStatic() ? "static" : "this", getName()));
     }
 }

@@ -8,24 +8,23 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.jdb.server;
+package org.eclipse.che.plugin.jdb.server.jdi;
 
 import com.sun.jdi.ArrayReference;
 import com.sun.jdi.Field;
 import com.sun.jdi.ObjectReference;
 import com.sun.jdi.PrimitiveValue;
-import com.sun.jdi.ReferenceType;
 import com.sun.jdi.Value;
 
-import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
-
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /** @author andrew00x */
 public class JdiValueImpl implements JdiValue {
-    private final Value         value;
-    private       JdiVariable[] variables;
+    private final Value             value;
+    private       List<JdiVariable> variables;
 
     public JdiValueImpl(Value value) {
         if (value == null) {
@@ -35,34 +34,31 @@ public class JdiValueImpl implements JdiValue {
     }
 
     @Override
-    public String getAsString() {
+    public String getString() {
         return value.toString();
     }
 
     @Override
-    public JdiVariable[] getVariables() {
+    public List<JdiVariable> getVariables() {
         if (variables == null) {
             if (isPrimitive()) {
-                variables = new JdiVariable[0];
+                variables = Collections.emptyList();
             } else {
+                variables = new LinkedList<>();
                 if (isArray()) {
                     ArrayReference array = (ArrayReference)value;
-                    int length = array.length();
-                    variables = new JdiVariable[length];
-                    for (int i = 0; i < length; i++) {
-                        variables[i] = new JdiArrayElementImpl(i, array.getValue(i));
+                    for (int i = 0; i < array.length(); i++) {
+                        variables.add(new JdiArrayElementImpl(i, array.getValue(i)));
                     }
                 } else {
                     ObjectReference object = (ObjectReference)value;
-                    ReferenceType type = object.referenceType();
-                    List<Field> fields = type.allFields();
-                    variables = new JdiVariable[fields.size()];
-                    int i = 0;
-                    for (Field f : fields) {
-                        variables[i++] = new JdiFieldImpl(f, object);
+                    for (Field f : object.referenceType().allFields()) {
+                        variables.add(new JdiFieldImpl(f, object));
                     }
-                    // See JdiFieldImpl#compareTo(JdiFieldImpl).
-                    Arrays.sort(variables);
+                    variables = variables.stream()
+                                         .map(v -> (JdiField)v)
+                                         .sorted(new JdiFieldComparator())
+                                         .collect(Collectors.toList());
                 }
             }
         }
@@ -70,7 +66,7 @@ public class JdiValueImpl implements JdiValue {
     }
 
     @Override
-    public JdiVariable getVariableByName(String name) throws DebuggerException {
+    public JdiVariable getVariableByName(String name) {
         if (name == null) {
             throw new IllegalArgumentException("Variable name may not be null. ");
         }
@@ -82,11 +78,13 @@ public class JdiValueImpl implements JdiValue {
         return null;
     }
 
-    private boolean isArray() {
+    @Override
+    public boolean isArray() {
         return value instanceof ArrayReference;
     }
 
-    private boolean isPrimitive() {
+    @Override
+    public boolean isPrimitive() {
         return value instanceof PrimitiveValue;
     }
 }
