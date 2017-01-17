@@ -37,7 +37,7 @@ export class WorkspaceStatusController {
   }
 
   startWorkspace(): void {
-    if (this.isLoading || !this.workspace || !this.workspace.config || this.workspace.status !== 'STOPPED') {
+    if (this.isLoading || !this.workspace || !this.workspace.config || !(this.workspace.status === 'STOPPED' || this.workspace.status === 'ERROR')) {
       return;
     }
 
