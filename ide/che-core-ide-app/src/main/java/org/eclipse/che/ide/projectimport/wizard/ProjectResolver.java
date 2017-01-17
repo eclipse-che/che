@@ -91,12 +91,7 @@ public class ProjectResolver {
             public Promise<Project> apply(PromiseError error) throws FunctionException {
                 Log.warn(ProjectResolver.class, error.getMessage());
 
-                //this error may be occurred when resolve method is called on empty project, so just skip it and return empty configuration
-
-                final MutableProjectConfig config = new MutableProjectConfig(project);
-                config.setType(Constants.BLANK_ID);
-
-                return project.update().withBody(config).send();
+                return promiseProvider.resolve(project);
             }
         });
     }
