@@ -25,18 +25,17 @@ import org.eclipse.che.plugin.zdb.server.utils.ZendDbgFileUtils;
  */
 public class ZendDbgLocationHandler {
 
-    public static final Location createVFS(String target, String resourcePath, String resourceProjectPath,
-            int lineNumber) {
-        return new LocationImpl(target, lineNumber, resourcePath, false, 0, resourceProjectPath);
+    public static final Location createVFS(String target, String resourcePath, String resourceProjectPath, int lineNumber) {
+        return new LocationImpl(target, lineNumber, resourcePath, false, 0, resourceProjectPath, null);
     }
 
     public static final Location createDBG(String resourcePath, int lineNumber) {
-        return new LocationImpl(Path.of(resourcePath).getName(), lineNumber, resourcePath, false, 0, null);
+        return new LocationImpl(Path.of(resourcePath).getName(), lineNumber, resourcePath, false, 0, null, null);
     }
 
     /**
      * Convert DBG specific location to VFS one.
-     * 
+     *
      * @param dbgLocation
      * @return VFS specific location.
      */
@@ -49,19 +48,18 @@ public class ZendDbgLocationHandler {
         String target = localFileEntry.getName();
         String resourcePath = localFileEntry.getPath().toString();
         int lineNumber = dbgLocation.getLineNumber();
-        return new LocationImpl(target, lineNumber, resourcePath, false, 0, resourceProjectPath);
+        return new LocationImpl(target, lineNumber, resourcePath, false, 0, resourceProjectPath, dbgLocation.getMethod());
     }
 
     /**
      * Convert VFS specific location to DBG one.
-     * 
-     * @param dbgLocation
+     *
+     * @param vfsLocation
      * @return DBG specific location.
      */
     public Location convertToDBG(Location vfsLocation) {
         String resourcePath = ZendDbgFileUtils.findAbsolutePath(vfsLocation.getResourcePath());
         int lineNumber = vfsLocation.getLineNumber();
-        return new LocationImpl(null, lineNumber, resourcePath, false, 0, null);
+        return new LocationImpl(null, lineNumber, resourcePath, false, 0, null, vfsLocation.getMethod());
     }
-
 }

@@ -81,12 +81,12 @@ public class JavaDebuggerUtils {
         if (type.isBinary()) {
             IClassFile classFile = type.getClassFile();
             int libId = classFile.getAncestor(IPackageFragmentRoot.PACKAGE_FRAGMENT_ROOT).hashCode();
-            return new LocationImpl(fqn, location.lineNumber(), null, true, libId, typeProjectPath);
+            return new LocationImpl(fqn, location.lineNumber(), null, true, libId, typeProjectPath, null);
         } else {
             ICompilationUnit compilationUnit = type.getCompilationUnit();
             typeProjectPath = type.getJavaProject().getPath().toOSString();
             String resourcePath = compilationUnit.getPath().toOSString();
-            return new LocationImpl(fqn, location.lineNumber(), resourcePath, false, -1, typeProjectPath);
+            return new LocationImpl(fqn, location.lineNumber(), resourcePath, false, -1, typeProjectPath, null);
         }
     }
 

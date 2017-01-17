@@ -16,8 +16,10 @@ import org.eclipse.che.api.debug.shared.dto.DebugSessionDto;
 import org.eclipse.che.api.debug.shared.dto.DebuggerInfoDto;
 import org.eclipse.che.api.debug.shared.dto.FieldDto;
 import org.eclipse.che.api.debug.shared.dto.LocationDto;
+import org.eclipse.che.api.debug.shared.dto.MethodDto;
 import org.eclipse.che.api.debug.shared.dto.SimpleValueDto;
 import org.eclipse.che.api.debug.shared.dto.StackFrameDumpDto;
+import org.eclipse.che.api.debug.shared.dto.ThreadDumpDto;
 import org.eclipse.che.api.debug.shared.dto.VariableDto;
 import org.eclipse.che.api.debug.shared.dto.VariablePathDto;
 import org.eclipse.che.api.debug.shared.dto.event.BreakpointActivatedEventDto;
@@ -29,8 +31,10 @@ import org.eclipse.che.api.debug.shared.model.DebugSession;
 import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
 import org.eclipse.che.api.debug.shared.model.Field;
 import org.eclipse.che.api.debug.shared.model.Location;
+import org.eclipse.che.api.debug.shared.model.Method;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
+import org.eclipse.che.api.debug.shared.model.ThreadDump;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.debug.shared.model.event.BreakpointActivatedEvent;
@@ -81,13 +85,19 @@ public final class DtoConverter {
         return dtos;
     }
 
+    public static MethodDto asDto(Method method) {
+        return newDto(MethodDto.class).withName(method.getName())
+                                      .withArguments(variablesAsDtos(method.getArguments()));
+    }
+
     public static LocationDto asDto(Location location) {
         return newDto(LocationDto.class).withTarget(location.getTarget())
                                         .withLineNumber(location.getLineNumber())
                                         .withExternalResourceId(location.getExternalResourceId())
                                         .withResourcePath(location.getResourcePath())
                                         .withResourceProjectPath(location.getResourceProjectPath())
-                                        .withExternalResource(location.isExternalResource());
+                                        .withExternalResource(location.isExternalResource())
+                                        .withMethod(asDto(location.getMethod()));
     }
 
     public static SimpleValueDto asDto(SimpleValue value) {
@@ -162,6 +172,24 @@ public final class DtoConverter {
         }
     }
 
+    public static List<StackFrameDumpDto> framesAsDtos(List<? extends StackFrameDump> frames) {
+        List<StackFrameDumpDto> dtos = new LinkedList<>();
+
+        if (frames != null) {
+            for (int i = 0; i < frames.size(); i++) {
+                dtos.add(asDto(frames.get(i)));
+            }
+        }
+        return dtos;
+    }
+
+    public static ThreadDumpDto asDto(ThreadDump threadDump) {
+        return newDto(ThreadDumpDto.class).withName(threadDump.getName())
+                                          .withGroupName(threadDump.getGroupName())
+                                          .withSuspended(threadDump.isSuspended())
+                                          .withStatus(threadDump.getStatus())
+                                          .withFrames(framesAsDtos(threadDump.getFrames()));
+    }
 
     private DtoConverter() {}
 }

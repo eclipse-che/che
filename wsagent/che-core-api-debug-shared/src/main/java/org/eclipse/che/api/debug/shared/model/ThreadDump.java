@@ -12,43 +12,36 @@ package org.eclipse.che.api.debug.shared.model;
 
 import org.eclipse.che.commons.annotation.Nullable;
 
+import java.util.List;
+
 /**
  * @author Anatoliy Bazko
  */
-public interface Location {
-    /**
-     *  The target, e.g.: file, fqn, memory address etc.
-     */
-    String getTarget();
+public interface ThreadDump {
 
     /**
-     * The line number in a file or in a class.
+     * Returns thread name.
      */
-    int getLineNumber();
+    String getName();
 
     /**
-     * Returns path to the resource.
-     */
-    String getResourcePath();
-
-    /**
-     * Returns true if breakpoint resource is external resource, or false otherwise.
-     */
-    boolean isExternalResource();
-
-    /**
-     * Returns external resource id in case if {@link #isExternalResource()} return true.
-     */
-    int getExternalResourceId();
-
-    /**
-     * Returns project path, for resource which we are debugging now.
-     */
-    String getResourceProjectPath();
-
-    /**
-     * Returns the method is being executed.
+     * Returns thread group name.
      */
     @Nullable
-    Method getMethod();
+    String getGroupName();
+
+    /**
+     * Returns list of frames of the thread.
+     */
+    List<? extends StackFrameDump> getFrames();
+
+    /**
+     * Returns thread state.
+     */
+    ThreadStatus getStatus();
+
+    /**
+     * Indicates if thread is suspended.
+     */
+    boolean isSuspended();
 }

@@ -11,6 +11,7 @@
 package org.eclipse.che.api.debug.shared.model.impl;
 
 import org.eclipse.che.api.debug.shared.model.Location;
+import org.eclipse.che.api.debug.shared.model.Method;
 
 import java.util.Objects;
 
@@ -24,27 +25,30 @@ public class LocationImpl implements Location {
     private final boolean externalResource;
     private final int     externalResourceId;
     private final String  resourceProjectPath;
+    private final Method  method;
 
     public LocationImpl(String target,
                         int lineNumber,
                         String resourcePath,
                         boolean externalResource,
                         int externalResourceId,
-                        String resourceProjectPath) {
+                        String resourceProjectPath,
+                        Method method) {
         this.target = target;
         this.lineNumber = lineNumber;
         this.resourcePath = resourcePath;
         this.externalResource = externalResource;
         this.externalResourceId = externalResourceId;
         this.resourceProjectPath = resourceProjectPath;
+        this.method = method;
     }
 
     public LocationImpl(String target, int lineNumber) {
-        this(target, lineNumber, null, false, 0, null);
+        this(target, lineNumber, null, false, 0, null, null);
     }
 
     public LocationImpl(String target) {
-        this(target, 0, null, false, 0, null);
+        this(target, 0, null, false, 0, null, null);
     }
 
     @Override
@@ -77,31 +81,28 @@ public class LocationImpl implements Location {
         return resourceProjectPath;
     }
 
+    @Override
+    public Method getMethod() {
+        return method;
+    }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof LocationImpl)) return false;
-
         LocationImpl location = (LocationImpl)o;
-
         return lineNumber == location.lineNumber &&
-               externalResourceId == location.externalResourceId &&
                externalResource == location.externalResource &&
-               Objects.equals(resourcePath ,location.resourcePath) &&
+               externalResourceId == location.externalResourceId &&
+               Objects.equals(target, location.target) &&
+               Objects.equals(resourcePath, location.resourcePath) &&
                Objects.equals(resourceProjectPath, location.resourceProjectPath) &&
-               !(target != null ? !target.equals(location.target) : location.target != null);
+               Objects.equals(method, location.method);
     }
 
     @Override
     public int hashCode() {
-        int result = target != null ? target.hashCode() : 0;
-        result = 31 * result + lineNumber;
-        result = 31 * result + externalResourceId;
-        result = 31 * result + Objects.hashCode(resourcePath);
-        result = 31 * result + (externalResource ? 1 : 0);
-        result = 31 * result + Objects.hashCode(resourceProjectPath);
-        return result;
+        return Objects.hash(target, lineNumber, resourcePath, externalResource, externalResourceId, resourceProjectPath, method);
     }
 
     @Override
@@ -113,6 +114,7 @@ public class LocationImpl implements Location {
                ", externalResource=" + externalResource +
                ", externalResourceId=" + externalResourceId +
                ", resourceProjectPath='" + resourceProjectPath + '\'' +
+               ", method=" + method +
                '}';
     }
 }
