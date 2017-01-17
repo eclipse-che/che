@@ -20,6 +20,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -28,10 +29,9 @@ import java.util.regex.Pattern;
  */
 public class CheCacheForcingFilter extends CacheForcingFilter {
 
-    private Set<Pattern> actionPatterns;
+    private Set<Pattern> actionPatterns = new HashSet<>();
 
     public void init(FilterConfig filterConfig) {
-
         Enumeration<String> names = filterConfig.getInitParameterNames();
         while (names.hasMoreElements()) {
             String name = names.nextElement();
@@ -41,16 +41,15 @@ public class CheCacheForcingFilter extends CacheForcingFilter {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        try {
-            for (Pattern pattern : actionPatterns) {
-                if (pattern.matcher(((HttpServletRequest)request).getRequestURL()).matches()) {
-                    super.doFilter(request, response, chain);
-                }
+        for (Pattern pattern : actionPatterns) {
+            if (pattern.matcher(((HttpServletRequest)request).getRequestURL()).matches()) {
+                super.doFilter(request, response, chain);
+                return;
             }
-        } finally {
-            chain.doFilter(request, response);
         }
+        chain.doFilter(request, response);
     }
 }
