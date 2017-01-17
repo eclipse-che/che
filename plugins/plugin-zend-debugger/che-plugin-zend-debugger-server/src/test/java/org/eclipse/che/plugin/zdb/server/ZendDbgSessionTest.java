@@ -28,7 +28,6 @@ import org.testng.annotations.Test;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static org.testng.Assert.assertEquals;
@@ -188,7 +187,6 @@ public class ZendDbgSessionTest extends AbstractZendDbgSessionTest {
                                                    new SimpleValueImpl("123"),
                                                    false,
                                                    new VariablePathImpl(String.valueOf(lastVar)),
-                                                   Collections.emptyList(),
                                                    false);
         debugger.setValue(variableToFind);
         assertEquals(stackFrameDump.getVariables().get(lastVar).getValue().getString(), "123");
@@ -197,7 +195,6 @@ public class ZendDbgSessionTest extends AbstractZendDbgSessionTest {
                                           new SimpleValueImpl("\"ABC\""),
                                           false,
                                           new VariablePathImpl(String.valueOf(lastVar)),
-                                          Collections.emptyList(),
                                           false);
         debugger.setValue(variableToFind);
         assertEquals(stackFrameDump.getVariables().get(lastVar).getValue().getString(), "\"ABC\"");

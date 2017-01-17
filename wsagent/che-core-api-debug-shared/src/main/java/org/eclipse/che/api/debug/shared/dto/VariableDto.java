@@ -13,8 +13,6 @@ package org.eclipse.che.api.debug.shared.dto;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.dto.shared.DTO;
 
-import java.util.List;
-
 /** @author andrew00x */
 @DTO
 public interface VariableDto extends Variable {
@@ -53,10 +51,4 @@ public interface VariableDto extends Variable {
     void setPrimitive(boolean primitive);
 
     VariableDto withPrimitive(boolean primitive);
-
-    List<VariableDto> getVariables();
-
-    void setVariables(List<VariableDto> variables);
-
-    VariableDto withVariables(List<VariableDto> variables);
 }

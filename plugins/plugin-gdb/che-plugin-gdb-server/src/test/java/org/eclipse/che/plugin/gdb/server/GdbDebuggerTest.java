@@ -156,7 +156,7 @@ public class GdbDebuggerTest {
 
     private void doSetAndGetValues() throws DebuggerException {
         VariablePath variablePath = new VariablePathImpl("i");
-        Variable variable = new VariableImpl("int", "i", new SimpleValueImpl("2"), true, variablePath, Collections.emptyList(), false);
+        Variable variable = new VariableImpl("int", "i", new SimpleValueImpl("2"), true, variablePath, false);
 
         SimpleValue value = gdbDebugger.getValue(variablePath);
         assertEquals(value.getString(), "0");

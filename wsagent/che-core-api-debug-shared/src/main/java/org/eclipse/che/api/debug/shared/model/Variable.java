@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.debug.shared.model;
 
-import java.util.List;
-
 /**
  * @author Anatoliy Bazko
  */
@@ -42,9 +40,4 @@ public interface Variable {
      * Indicates if variable is primitive.
      */
     boolean isPrimitive();
-
-    /**
-     * The nested variables.
-     */
-    List<? extends Variable> getVariables();
 }

@@ -12,10 +12,7 @@ package org.eclipse.che.api.debug.shared.model.impl;
 
 import org.eclipse.che.api.debug.shared.model.Field;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
-import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
-
-import java.util.List;
 
 /**
  * @author Anatoliy Bazko
@@ -31,13 +28,12 @@ public class FieldImpl extends VariableImpl implements Field {
                      SimpleValue value,
                      String type,
                      boolean isPrimitive,
-                     List<Variable> variables,
                      VariablePath variablePath,
                      boolean isFinal,
                      boolean isStatic,
                      boolean isTransient,
                      boolean isVolatile) {
-        super(type, name, value, isPrimitive, variablePath, variables, isExistInformation);
+        super(type, name, value, isPrimitive, variablePath, isExistInformation);
         this.isFinal = isFinal;
         this.isStatic = isStatic;
         this.isTransient = isTransient;

@@ -130,7 +130,7 @@ public class MutableVariableImpl implements MutableVariable {
                                        variable.getValue(),
                                        variable.getVariablePath(),
                                        variable.isPrimitive(),
-                                       variable.getVariables(),
+                                       variable.getValue().getVariables(),
                                        variable.isExistInformation());
     }
 

@@ -13,8 +13,6 @@ package org.eclipse.che.api.debug.shared.dto;
 import org.eclipse.che.api.debug.shared.model.Field;
 import org.eclipse.che.dto.shared.DTO;
 
-import java.util.List;
-
 /** @author andrew00x */
 @DTO
 public interface FieldDto extends Field {
@@ -77,10 +75,4 @@ public interface FieldDto extends Field {
     void setPrimitive(boolean primitive);
 
     FieldDto withPrimitive(boolean primitive);
-
-    List<VariableDto> getVariables();
-
-    void setVariables(List<VariableDto> variables);
-
-    FieldDto withVariables(List<VariableDto> variables);
 }

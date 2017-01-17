@@ -77,6 +77,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.NOTIFICATION_READY;
 import static org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.NOTIFICATION_SESSION_STARTED;
@@ -117,7 +118,11 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
                     if (currentVariablePathElement.equals(pathElement)) {
                         matchingVariable = currentVariable;
                         if (pathIterator.hasNext()) {
-                            currentVariables = new ArrayList<>(currentVariable.getVariables());
+                            currentVariables = currentVariable.getValue()
+                                                              .getVariables()
+                                                              .stream()
+                                                              .map(v -> (IDbgVariable)v)
+                                                              .collect(Collectors.toList());
                         }
                         break;
                     }

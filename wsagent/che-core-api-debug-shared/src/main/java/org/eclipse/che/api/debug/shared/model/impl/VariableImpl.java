@@ -11,42 +11,36 @@
 package org.eclipse.che.api.debug.shared.model.impl;
 
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
-import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.debug.shared.model.Variable;
-
-import java.util.Collections;
-import java.util.List;
+import org.eclipse.che.api.debug.shared.model.VariablePath;
 
 /**
  * @author Anatoliy Bazko
  */
 public class VariableImpl implements Variable {
-    private final String                   name;
-    private final boolean                  isExistInformation;
-    private final SimpleValue              value;
-    private final String                   type;
-    private final boolean                  isPrimitive;
-    private final List<? extends Variable> variables;
-    private final VariablePath             variablePath;
+    private final String       name;
+    private final boolean      isExistInformation;
+    private final SimpleValue  value;
+    private final String       type;
+    private final boolean      isPrimitive;
+    private final VariablePath variablePath;
 
     public VariableImpl(String type,
                         String name,
                         SimpleValue value,
                         boolean isPrimitive,
                         VariablePath variablePath,
-                        List<? extends Variable> variables,
                         boolean isExistInformation) {
         this.name = name;
         this.isExistInformation = isExistInformation;
         this.value = value;
         this.type = type;
         this.isPrimitive = isPrimitive;
-        this.variables = variables;
         this.variablePath = variablePath;
     }
 
     public VariableImpl(SimpleValue value, VariablePath variablePath) {
-        this(null, null, value, false, variablePath, Collections.<Variable>emptyList(), false);
+        this(null, null, value, false, variablePath, false);
     }
 
     @Override
@@ -74,11 +68,6 @@ public class VariableImpl implements Variable {
     }
 
     @Override
-    public List<Variable> getVariables() {
-        return Collections.unmodifiableList(variables);
-    }
-
-    @Override
     public VariablePath getVariablePath() {
         return variablePath;
     }
@@ -95,7 +84,6 @@ public class VariableImpl implements Variable {
         if (name != null ? !name.equals(variable.name) : variable.name != null) return false;
         if (value != null ? !value.equals(variable.value) : variable.value != null) return false;
         if (type != null ? !type.equals(variable.type) : variable.type != null) return false;
-        if (variables != null ? !variables.equals(variable.variables) : variable.variables != null) return false;
         return !(variablePath != null ? !variablePath.equals(variable.variablePath) : variable.variablePath != null);
     }
 
@@ -106,7 +94,6 @@ public class VariableImpl implements Variable {
         result = 31 * result + (value != null ? value.hashCode() : 0);
         result = 31 * result + (type != null ? type.hashCode() : 0);
         result = 31 * result + (isPrimitive ? 1 : 0);
-        result = 31 * result + (variables != null ? variables.hashCode() : 0);
         result = 31 * result + (variablePath != null ? variablePath.hashCode() : 0);
         return result;
     }

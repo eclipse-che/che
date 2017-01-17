@@ -768,7 +768,6 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
         dto.withType(variable.getType());
         dto.withName(variable.getName());
         dto.withExistInformation(variable.isExistInformation());
-        dto.withVariables(asDto(variable.getVariables()));
         return dto;
     }
 

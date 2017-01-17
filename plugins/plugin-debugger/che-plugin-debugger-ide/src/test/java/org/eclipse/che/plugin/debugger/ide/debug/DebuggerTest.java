@@ -68,7 +68,6 @@ import org.mockito.MockSettings;
 import org.mockito.MockitoAnnotations;
 import org.mockito.internal.creation.MockSettingsImpl;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -491,14 +490,12 @@ public class DebuggerTest extends BaseTest {
 
         SimpleValue simpleValue = mock(SimpleValue.class);
         doReturn(simpleValue).when(variable).getValue();
-        doReturn(Collections.emptyList()).when(variable).getVariables();
 
         doReturn(simpleValue).when(variable).getValue();
 
         doReturn(variableDto).when(dtoFactory).createDto(VariableDto.class);
         doReturn(mock(VariablePathDto.class)).when(dtoFactory).createDto(VariablePathDto.class);
         doReturn(mock(VariablePathDto.class)).when(variable).getVariablePath();
-        doReturn(Collections.emptyList()).when(variable).getVariables();
         doReturn(promiseValue).when(service).getValue(SESSION_ID, variableDto);
         doReturn(promiseValue).when(promiseValue).then((Function<SimpleValueDto, Object>)any());
         doReturn(promiseValue).when(promiseValue).catchError((Operation<PromiseError>)any());
@@ -579,7 +576,6 @@ public class DebuggerTest extends BaseTest {
         SimpleValue simpleValue = mock(SimpleValue.class);
         doReturn(newValue).when(simpleValue).getString();
         doReturn(simpleValue).when(variable).getValue();
-        doReturn(Collections.emptyList()).when(variable).getVariables();
 
         doReturn(promiseVoid).when(service).setValue(SESSION_ID, variableDto);
         doReturn(promiseVoid).when(promiseVoid).then((Operation<Void>)any());

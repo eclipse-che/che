@@ -83,11 +83,6 @@ public class ZendDbgVariable implements IDbgVariable {
     }
 
     @Override
-    public List<IDbgVariable> getVariables() {
-        return variables;
-    }
-
-    @Override
     public VariablePath getVariablePath() {
         return variablePath;
     }

@@ -102,7 +102,6 @@ public final class DtoConverter {
                                      .withPrimitive(field.isPrimitive())
                                      .withValue(asDto(field.getValue()))
                                      .withVariablePath(asDto(field.getVariablePath()))
-                                     .withVariables(variablesAsDtos(field.getVariables()))
                                      .withIsFinal(field.isIsFinal())
                                      .withIsStatic(field.isIsStatic())
                                      .withIsTransient(field.isIsTransient())
@@ -137,8 +136,7 @@ public final class DtoConverter {
                                         .withName(variable.getName())
                                         .withPrimitive(variable.isPrimitive())
                                         .withValue(asDto(variable.getValue()))
-                                        .withVariablePath(asDto(variable.getVariablePath()))
-                                        .withVariables(variablesAsDtos(variable.getVariables()));
+                                        .withVariablePath(asDto(variable.getVariablePath()));
     }
 
     public static VariablePathDto asDto(VariablePath variablePath) {

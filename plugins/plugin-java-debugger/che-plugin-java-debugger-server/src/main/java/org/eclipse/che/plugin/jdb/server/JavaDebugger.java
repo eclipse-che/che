@@ -382,7 +382,6 @@ public class JavaDebugger implements EventsHandler, Debugger {
                                          new SimpleValueImpl(f.getValue().getAsString()),
                                          f.getTypeName(),
                                          f.isPrimitive(),
-                                         Collections.emptyList(),
                                          new VariablePathImpl(variablePath),
                                          f.isFinal(),
                                          f.isStatic(),
@@ -397,7 +396,6 @@ public class JavaDebugger implements EventsHandler, Debugger {
                                           new SimpleValueImpl(var.getValue().getAsString()),
                                           var.isPrimitive(),
                                           new VariablePathImpl(var.getName()),
-                                          Collections.emptyList(),
                                           existInformation));
             }
 
@@ -492,7 +490,6 @@ public class JavaDebugger implements EventsHandler, Debugger {
                                             new SimpleValueImpl(f.getValue().getAsString()),
                                             f.getTypeName(),
                                             f.isPrimitive(),
-                                            Collections.<Variable>emptyList(),
                                             chPath,
                                             f.isFinal(),
                                             f.isStatic(),
@@ -505,7 +502,6 @@ public class JavaDebugger implements EventsHandler, Debugger {
                                                new SimpleValueImpl(ch.getValue().getAsString()),
                                                ch.isPrimitive(),
                                                chPath,
-                                               Collections.emptyList(),
                                                true));
             }
         }
