@@ -25,6 +25,8 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
+ * Forcing caching for the given URL resource patterns.
+ *
  * @author Max Shaposhnik
  */
 public class CheCacheForcingFilter extends CacheForcingFilter {
@@ -45,7 +47,7 @@ public class CheCacheForcingFilter extends CacheForcingFilter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         for (Pattern pattern : actionPatterns) {
-            if (pattern.matcher(((HttpServletRequest)request).getRequestURL()).matches()) {
+            if (pattern.matcher(((HttpServletRequest)request).getRequestURI()).matches()) {
                 super.doFilter(request, response, chain);
                 return;
             }
