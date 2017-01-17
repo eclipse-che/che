@@ -238,7 +238,6 @@ public class TreeView {
             if (e != null) {
                 setClassName(e, tree.getTreeStyles().styles().selected(), select);
             }
-            tree.moveFocus(nodeDescriptor.getRootContainer());
         }
     }
 
