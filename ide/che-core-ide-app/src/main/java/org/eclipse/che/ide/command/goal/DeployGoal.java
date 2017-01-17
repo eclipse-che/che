@@ -23,6 +23,6 @@ public class DeployGoal extends BaseCommandGoal {
 
     @Inject
     public DeployGoal(GoalMessages messages) {
-        super(messages.goalDeployId(), messages.goalDeployName());
+        super("deploy", messages.goalDeployName());
     }
 }

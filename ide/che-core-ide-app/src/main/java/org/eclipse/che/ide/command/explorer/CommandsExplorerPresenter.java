@@ -214,7 +214,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     }
 
     @Override
-    public void onCommandUpdated(ContextualCommand command) {
+    public void onCommandUpdated(ContextualCommand previousCommand, ContextualCommand command) {
         refreshView();
     }
 

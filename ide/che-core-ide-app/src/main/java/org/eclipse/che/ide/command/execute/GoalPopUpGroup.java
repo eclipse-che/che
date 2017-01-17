@@ -16,12 +16,15 @@ import com.google.inject.assistedinject.Assisted;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
+import org.eclipse.che.ide.api.command.BaseCommandGoal;
 import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.command.PredefinedCommandGoalRegistry;
 import org.eclipse.che.ide.api.icon.Icon;
 import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
+
+import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
  * Action group that represents command goal.
@@ -34,15 +37,20 @@ class GoalPopUpGroup extends DefaultActionGroup {
     private final IconRegistry iconRegistry;
 
     @Inject
-    GoalPopUpGroup(@Assisted String commandGoalId,
+    GoalPopUpGroup(@Assisted String goalId,
                    ActionManager actionManager,
-                   PredefinedCommandGoalRegistry predefinedCommandGoalRegistry,
+                   PredefinedCommandGoalRegistry goalRegistry,
                    IconRegistry iconRegistry) {
         super(actionManager);
 
         this.iconRegistry = iconRegistry;
 
-        commandGoal = predefinedCommandGoalRegistry.getGoalByIdOrDefault(commandGoalId);
+        if (isNullOrEmpty(goalId)) {
+            commandGoal = goalRegistry.getDefaultGoal();
+        } else {
+            commandGoal = goalRegistry.getGoalById(goalId)
+                                      .or(new BaseCommandGoal(goalId, goalId));
+        }
 
         setPopup(true);
 

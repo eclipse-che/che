@@ -23,6 +23,6 @@ public class RunGoal extends BaseCommandGoal {
 
     @Inject
     public RunGoal(GoalMessages messages) {
-        super(messages.goalRunId(), messages.goalRunName());
+        super("run", messages.goalRunName());
     }
 }

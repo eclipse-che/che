@@ -23,6 +23,6 @@ public class BuildGoal extends BaseCommandGoal {
 
     @Inject
     public BuildGoal(GoalMessages messages) {
-        super(messages.goalBuildId(), messages.goalBuildName());
+        super("build", messages.goalBuildName());
     }
 }

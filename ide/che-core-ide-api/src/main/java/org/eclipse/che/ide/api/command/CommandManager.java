@@ -87,8 +87,15 @@ public interface CommandManager {
         /** Called when command has been added. */
         void onCommandAdded(ContextualCommand command);
 
-        /** Called when command has been updated. */
-        void onCommandUpdated(ContextualCommand command);
+        /**
+         * Called when command has been updated.
+         *
+         * @param previousCommand
+         *         command before updating
+         * @param command
+         *         updated command
+         */
+        void onCommandUpdated(ContextualCommand previousCommand, ContextualCommand command);
 
         /** Called when command has been removed. */
         void onCommandRemoved(ContextualCommand command);

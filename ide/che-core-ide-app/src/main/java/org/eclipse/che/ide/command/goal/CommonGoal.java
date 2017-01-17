@@ -24,6 +24,6 @@ public class CommonGoal extends BaseCommandGoal {
 
     @Inject
     public CommonGoal(GoalMessages messages) {
-        super(messages.goalCommonId(), messages.goalCommonName());
+        super("common", messages.goalCommonName());
     }
 }

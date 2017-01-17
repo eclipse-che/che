@@ -338,7 +338,7 @@ public class CommandsExplorerPresenterTest {
 
     @Test
     public void shouldRefreshViewWhenCommandUpdated() throws Exception {
-        presenter.onCommandUpdated(mock(ContextualCommand.class));
+        presenter.onCommandUpdated(mock(ContextualCommand.class), mock(ContextualCommand.class));
 
         verify(refreshViewTask).delayAndSelectCommand(isNull(ContextualCommand.class));
     }

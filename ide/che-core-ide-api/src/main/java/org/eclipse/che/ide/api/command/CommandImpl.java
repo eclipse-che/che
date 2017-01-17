@@ -11,10 +11,13 @@
 package org.eclipse.che.ide.api.command;
 
 import org.eclipse.che.api.core.model.machine.Command;
+import org.eclipse.che.commons.annotation.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+
+import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_GOAL_ATTRIBUTE_NAME;
 
 /**
  * Model of the command.
@@ -79,6 +82,17 @@ public class CommandImpl implements Command {
 
     public void setAttributes(Map<String, String> attributes) {
         this.attributes = attributes;
+    }
+
+    /** Returns ID of the command's goal or {@code null} if none. */
+    @Nullable
+    public String getGoal() {
+        return getAttributes().get(COMMAND_GOAL_ATTRIBUTE_NAME);
+    }
+
+    /** Sets command's goal ID. */
+    public void setGoal(String id) {
+        getAttributes().put(COMMAND_GOAL_ATTRIBUTE_NAME, id);
     }
 
     @Override

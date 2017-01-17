@@ -23,6 +23,6 @@ public class TestGoal extends BaseCommandGoal {
 
     @Inject
     public TestGoal(GoalMessages messages) {
-        super(messages.goalTestId(), messages.goalTestName());
+        super("test", messages.goalTestName());
     }
 }

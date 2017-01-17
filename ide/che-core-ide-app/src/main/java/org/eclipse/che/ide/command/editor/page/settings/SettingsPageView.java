@@ -28,7 +28,7 @@ public interface SettingsPageView extends View<SettingsPageView.ActionDelegate> 
     void setAvailableGoals(Set<CommandGoal> goals);
 
     /** Sets the command's goal value. */
-    void setGoal(String goal);
+    void setGoal(String goalId);
 
     void setWorkspace(boolean value);
 

@@ -324,7 +324,7 @@ public class CommandManagerImpl implements CommandManager,
     }
 
     @Override
-    public Promise<ContextualCommand> updateCommand(String commandName, final ContextualCommand commandToUpdate) {
+    public Promise<ContextualCommand> updateCommand(final String commandName, final ContextualCommand commandToUpdate) {
         final ContextualCommand existedCommand = commands.get(commandName);
 
         if (existedCommand == null) {
@@ -345,7 +345,7 @@ public class CommandManagerImpl implements CommandManager,
                         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
                             @Override
                             public void execute() {
-                                notifyCommandUpdated(arg);
+                                notifyCommandUpdated(existedCommand, arg);
                             }
                         });
 
@@ -482,9 +482,9 @@ public class CommandManagerImpl implements CommandManager,
         }
     }
 
-    private void notifyCommandUpdated(ContextualCommand command) {
+    private void notifyCommandUpdated(ContextualCommand prevCommand, ContextualCommand command) {
         for (CommandChangedListener listener : commandChangedListeners) {
-            listener.onCommandUpdated(command);
+            listener.onCommandUpdated(prevCommand, command);
         }
     }
 

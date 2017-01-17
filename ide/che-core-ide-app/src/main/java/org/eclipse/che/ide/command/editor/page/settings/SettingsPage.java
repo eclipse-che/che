@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.editor.page.settings;
 
+import com.google.common.base.Optional;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -40,7 +41,6 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_GOAL_ATTRIBUTE_NAME;
 
 /**
  * {@link CommandEditorPage} which allows to edit basic command's settings, e.g.:
@@ -96,14 +96,19 @@ public class SettingsPage extends AbstractCommandEditorPage implements SettingsP
 
     @Override
     protected void initialize() {
-        String goalId = editedCommand.getAttributes().get(COMMAND_GOAL_ATTRIBUTE_NAME);
+        final String goalId = editedCommand.getGoal();
+        final CommandGoal commandGoal;
+
         if (isNullOrEmpty(goalId)) {
-            goalId = "";
+            commandGoal = goalRegistry.getDefaultGoal();
+        } else {
+            commandGoal = goalRegistry.getGoalById(goalId)
+                                      .or(new BaseCommandGoal(goalId, goalId));
         }
 
         final ApplicableContext context = editedCommand.getApplicableContext();
 
-        goalInitial = goalId;
+        goalInitial = commandGoal.getId();
         workspaceInitial = context.isWorkspaceApplicable();
         applicableProjectsInitial = new ArrayList<>(context.getApplicableProjects());
 
@@ -112,7 +117,7 @@ public class SettingsPage extends AbstractCommandEditorPage implements SettingsP
         goals.addAll(getCustomGoals());
 
         view.setAvailableGoals(goals);
-        view.setGoal(goalId);
+        view.setGoal(commandGoal.getId());
         view.setWorkspace(editedCommand.getApplicableContext().isWorkspaceApplicable());
 
         refreshProjects();
@@ -139,7 +144,7 @@ public class SettingsPage extends AbstractCommandEditorPage implements SettingsP
             return false;
         }
 
-        String goalId = editedCommand.getAttributes().get(COMMAND_GOAL_ATTRIBUTE_NAME);
+        String goalId = editedCommand.getGoal();
         if (isNullOrEmpty(goalId)) {
             goalId = "";
         }
@@ -153,7 +158,7 @@ public class SettingsPage extends AbstractCommandEditorPage implements SettingsP
 
     @Override
     public void onGoalChanged(String goalId) {
-        editedCommand.getAttributes().put(COMMAND_GOAL_ATTRIBUTE_NAME, goalId);
+        editedCommand.setGoal(goalId);
 
         notifyDirtyStateChanged();
     }
@@ -185,10 +190,11 @@ public class SettingsPage extends AbstractCommandEditorPage implements SettingsP
         final Set<CommandGoal> list = new HashSet<>();
 
         for (ContextualCommand command : commandManager.getCommands()) {
-            final String goal = command.getAttributes().get(COMMAND_GOAL_ATTRIBUTE_NAME);
+            final String goalId = command.getGoal();
 
-            if (!isNullOrEmpty(goal)) {
-                list.add(new BaseCommandGoal(goal, goal));
+            final Optional<CommandGoal> goalOptional = goalRegistry.getGoalById(goalId);
+            if (!goalOptional.isPresent() && !isNullOrEmpty(goalId)) {
+                list.add(new BaseCommandGoal(goalId, goalId));
             }
         }
 

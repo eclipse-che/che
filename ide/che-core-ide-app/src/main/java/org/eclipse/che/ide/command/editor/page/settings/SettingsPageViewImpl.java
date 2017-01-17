@@ -71,13 +71,13 @@ public class SettingsPageViewImpl extends Composite implements SettingsPageView 
         goal.clear();
 
         for (CommandGoal g : goals) {
-            goal.addItem(g.getDisplayName());
+            goal.addItem(g.getId());
         }
     }
 
     @Override
-    public void setGoal(String goal) {
-        this.goal.setValue(goal);
+    public void setGoal(String goalId) {
+        goal.setValue(goalId);
     }
 
     @Override

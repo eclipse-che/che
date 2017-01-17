@@ -28,7 +28,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_GOAL_ATTRIBUTE_NAME;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_CONSOLES_TREE_CONTEXT_MENU;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_EDITOR_TAB_CONTEXT_MENU;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_MAIN_CONTEXT_MENU;
@@ -49,7 +48,7 @@ public class ExecuteCommandActionManager implements Component,
     private final CommandsActionGroup           commandsActionGroup;
     private final GoalPopUpGroupFactory         goalPopUpGroupFactory;
     private final ExecuteCommandActionFactory   executeCommandActionFactory;
-    private final PredefinedCommandGoalRegistry predefinedCommandGoalRegistry;
+    private final PredefinedCommandGoalRegistry goalRegistry;
 
     private final Map<String, Action>             command2Action;
     private final Map<String, DefaultActionGroup> commandGoalPopUpGroups;
@@ -60,13 +59,13 @@ public class ExecuteCommandActionManager implements Component,
                                        CommandsActionGroup commandsActionGroup,
                                        GoalPopUpGroupFactory goalPopUpGroupFactory,
                                        ExecuteCommandActionFactory executeCommandActionFactory,
-                                       PredefinedCommandGoalRegistry predefinedCommandGoalRegistry) {
+                                       PredefinedCommandGoalRegistry goalRegistry) {
         this.commandManager = commandManager;
         this.actionManager = actionManager;
         this.commandsActionGroup = commandsActionGroup;
         this.goalPopUpGroupFactory = goalPopUpGroupFactory;
         this.executeCommandActionFactory = executeCommandActionFactory;
-        this.predefinedCommandGoalRegistry = predefinedCommandGoalRegistry;
+        this.goalRegistry = goalRegistry;
 
         command2Action = new HashMap<>();
         commandGoalPopUpGroups = new HashMap<>();
@@ -117,9 +116,10 @@ public class ExecuteCommandActionManager implements Component,
      * If appropriate action group doesn't exist it will be created and added to the right place.
      */
     private DefaultActionGroup getActionGroupForCommand(ContextualCommand command) {
-        String goalId = command.getAttributes().get(COMMAND_GOAL_ATTRIBUTE_NAME);
+        String goalId = command.getGoal();
+
         if (isNullOrEmpty(goalId)) {
-            goalId = predefinedCommandGoalRegistry.getDefaultGoal().getId();
+            goalId = goalRegistry.getDefaultGoal().getId();
         }
 
         DefaultActionGroup commandGoalPopUpGroup = commandGoalPopUpGroups.get(goalId);
@@ -137,8 +137,9 @@ public class ExecuteCommandActionManager implements Component,
     }
 
     @Override
-    public void onCommandUpdated(ContextualCommand command) {
-        // TODO: update/replace action
+    public void onCommandUpdated(ContextualCommand previousCommand, ContextualCommand command) {
+        removeAction(previousCommand);
+        addAction(command);
     }
 
     @Override
@@ -161,14 +162,20 @@ public class ExecuteCommandActionManager implements Component,
             }
 
             // remove action from it's action group
-            final DefaultActionGroup commandTypePopUpGroup = commandGoalPopUpGroups.get(command.getType());
+            String goalId = command.getGoal();
+            if (isNullOrEmpty(goalId)) {
+                goalId = goalRegistry.getDefaultGoal().getId();
+            }
 
-            if (commandTypePopUpGroup != null) {
-                commandTypePopUpGroup.remove(action);
+            final DefaultActionGroup commandGoalPopUpGroup = commandGoalPopUpGroups.get(goalId);
+
+            if (commandGoalPopUpGroup != null) {
+                commandGoalPopUpGroup.remove(action);
 
                 // remove action group if it is empty
-                if (commandTypePopUpGroup.getChildrenCount() == 0) {
-                    commandsActionGroup.remove(commandTypePopUpGroup);
+                if (commandGoalPopUpGroup.getChildrenCount() == 0) {
+                    commandsActionGroup.remove(commandGoalPopUpGroup);
+                    commandGoalPopUpGroups.remove(goalId);
                 }
             }
         }

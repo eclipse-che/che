@@ -24,17 +24,17 @@ import java.util.List;
 public interface PredefinedCommandGoalRegistry {
 
     /**
-     * Returns an {@code Optional} instance containing the {@link CommandGoal} with the given ID
-     * or {@code Optional.absent()} otherwise.
+     * Returns an {@code Optional} {@link CommandGoal} by the given ID
+     * or {@code Optional.absent()} if none was registered.
      *
      * @param id
      *         the ID of the command goal to get
-     * @return an {@code Optional} instance containing the {@link CommandGoal} or {@code Optional.absent()} otherwise
+     * @return an {@code Optional} instance containing the {@link CommandGoal} or {@code Optional.absent()} if none was registered
      */
     Optional<CommandGoal> getGoalById(String id);
 
     /**
-     * Returns a {@link CommandGoal} with the given ID or the default goal if none was registered.
+     * Returns a {@link CommandGoal} by the given ID or the default goal if none was registered.
      *
      * @param id
      *         the ID of the command goal to get. May be {@code null}

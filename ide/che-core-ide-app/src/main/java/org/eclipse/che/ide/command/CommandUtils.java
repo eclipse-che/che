@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_GOAL_ATTRIBUTE_NAME;
 
 /**
  * A smattering of useful methods to work with commands.
@@ -64,9 +63,9 @@ public class CommandUtils {
         final Map<CommandGoal, List<ContextualCommand>> commandsByGoal = new HashMap<>();
 
         for (ContextualCommand command : commands) {
-            final String goalId = command.getAttributes().get(COMMAND_GOAL_ATTRIBUTE_NAME);
-
+            final String goalId = command.getGoal();
             final CommandGoal commandGoal;
+
             if (isNullOrEmpty(goalId)) {
                 commandGoal = goalRegistry.getDefaultGoal();
             } else {

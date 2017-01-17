@@ -318,7 +318,7 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
     }
 
     @Override
-    public void onCommandUpdated(ContextualCommand command) {
+    public void onCommandUpdated(ContextualCommand previousCommand, ContextualCommand command) {
     }
 
     @Override
