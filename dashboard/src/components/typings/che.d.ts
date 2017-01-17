@@ -97,12 +97,14 @@ declare namespace _che {
     machines: {
       [machineName: string]: IEnvironmentMachine
     };
-    recipe: {
-      content?: string;
-      location?: string;
-      contentType: string;
-      type: string;
-    };
+    recipe: IRecipe;
+  }
+
+  export interface IRecipe {
+    content?: string;
+    location?: string;
+    contentType: string;
+    type: string;
   }
 
   export interface IEnvironmentMachine {
@@ -158,18 +160,21 @@ declare namespace _che {
 
   export interface IProject {
     name: string;
-    displayName: string;
+    displayName?: string;
     description: string;
     source: {
       location: string;
-      parameters: any;
-      type: string;
+      parameters?: {
+        [paramName: string]: string
+      };
+      type?: string;
     };
-    commands: Array<any>;
-    projectType: string;
-    tags: Array<string>;
-    attributes: Array<any>;
-    options: Array<any>;
+    commands?: Array<any>;
+    projectType?: string;
+    type?: string;
+    tags?: Array<string>;
+    attributes?: any;
+    options?: Array<any>;
     workspaceId?: string;
     workspaceName?: string;
   }
@@ -182,14 +187,17 @@ declare namespace _che {
     source: {
       type?: string;
       location: string;
-      parameters: Object;
+      parameters?: {
+        [paramName: string]: string
+      };
     };
     project: {
       name: string;
+      path?: string;
       type?: string;
       description: string;
       commands?: Array<any>;
-      attributes?: Array<any>;
+      attributes?: any;
       options?: Array<any>;
     };
   }
@@ -207,7 +215,11 @@ declare namespace _che {
   }
 
   export interface IProfile {
-    attributes?: Object;
+    attributes?: {
+      firstName?: string;
+      lastName?: string;
+      [propName: string]: string | number;
+    };
     email: string;
     links?: Array<any>;
     userId: string;

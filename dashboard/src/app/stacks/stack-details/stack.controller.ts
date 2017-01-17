@@ -82,7 +82,7 @@ export class StackController {
       lineNumbers: false,
       matchBrackets: true,
       mode: 'application/json',
-      onLoad: (editor: {refresh: Function}) => {
+      onLoad: (editor: { refresh: Function }) => {
         $timeout(() => {
           editor.refresh();
         }, 1000);
@@ -119,7 +119,7 @@ export class StackController {
       this.updateData();
     }
 
-    $window.addEventListener('message', (event: {data: string}) => {
+    $window.addEventListener('message', (event: { data: string }) => {
       if (!this.showIDE && 'show-ide' === event.data) {
         this.showIDE = true;
         this.$scope.$digest();
@@ -228,7 +228,6 @@ export class StackController {
     if (this.stackTags.indexOf(tag) > -1) {
       return null;
     }
-
     return tag;
   }
 
@@ -399,31 +398,20 @@ export class StackController {
    * @param index{number} - the index of the array of commands
    * @param deferred{ng.IDeferred<any>}
    */
-  updateProjects(workspaceId: string, projects: Array<any>, index: number, deferred: ng.IDeferred<any>): void {
+  updateProjects(workspaceId: string, projects: Array<che.IProject>, index: number, deferred: ng.IDeferred<any>): void {
     if (index < projects.length) {
-      let project = angular.copy(projects[index]);
-      let projectService = this.cheWorkspace.getWorkspaceAgent(workspaceId).getProject();
-      projectService.updateProject(project.name, project).then(() => {
-        let resolvePromise = projectService.fetchResolve(project.name);
-        resolvePromise.then(() => {
-          this.updateProjects(workspaceId, projects, ++index, deferred);
-        }, (error: any) => {
-          deferred.reject(error);
-        });
-        if (project.commands && project.commands.length > 0) {
-          let deferredAddCommand = this.$q.defer();
-          this.addCommands(workspaceId, project.name, project.commands, 0, deferredAddCommand);
-          deferredAddCommand.promise.then(() => {
+      let project = projects[index];
+      let projectTypeResolverService = this.cheWorkspace.getWorkspaceAgent(workspaceId).getProjectTypeResolver();
+
+        let deferredAddCommand = this.$q.defer();
+        this.addCommands(workspaceId, project.name, project.commands, 0, deferredAddCommand);
+        deferredAddCommand.promise.finally(() => {
+          projectTypeResolverService.resolveProjectType(project).then(() => {
             this.updateProjects(workspaceId, projects, ++index, deferred);
           }, (error: any) => {
             deferred.reject(error);
           });
-        } else {
-          this.updateProjects(workspaceId, projects, ++index, deferred);
-        }
-      }, (error: any) => {
-        deferred.reject(error);
-      });
+        });
     } else {
       deferred.resolve();
     }
@@ -433,13 +421,14 @@ export class StackController {
    * Add projects.
    * @param workspaceId{string} - the ID of the workspace to use for adding projects
    * @param projects{Array<che.IProject>} - the adding projects
+   * @param deferred{ng.IDeferred<any>}
    *
    * @returns {ng.IPromise<any>}
    */
-  addProjects(workspaceId: string, projects: Array<che.IProject>): ng.IPromise<any> {
-    let deferred = this.$q.defer();
+  addProjects(workspaceId: string, projects: Array<che.IProject>, deferred: ng.IDeferred<any>): void {
     if (projects && projects.length) {
-      this.cheWorkspace.getWorkspaceAgent(workspaceId).getProject().createProjects(projects).then(() => {
+      let workspaceAgent = this.cheWorkspace.getWorkspaceAgent(workspaceId);
+      workspaceAgent.getProject().createProjects(projects).then(() => {
         this.updateProjects(workspaceId, projects, 0, deferred);
       }, (error: any) => {
         deferred.reject(error);
@@ -447,8 +436,6 @@ export class StackController {
     } else {
       deferred.resolve();
     }
-
-    return deferred.promise;
   }
 
   /**
@@ -467,22 +454,9 @@ export class StackController {
         if (projects && projects.length) {
           this.cheWorkspace.fetchWorkspaceDetails(workspace.id).then(() => {
             this.showIDE = false;
-            this.addProjects(workspace.id, projects).then(() => {
-              deferred.resolve();
-            }, (error: any) => {
-              deferred.reject(error);
-            });
+            this.addProjects(workspace.id, projects, deferred);
           }, (error: any) => {
-            if (error.status === 304) {
-              this.showIDE = false;
-              this.addProjects(workspace.id, projects).then(() => {
-                deferred.resolve();
-              }, (error: any) => {
-                deferred.reject(error);
-              });
-            } else {
-              this.$log.error(error);
-            }
+            deferred.reject(error);
           });
         }
       }, (error: any) => {
@@ -511,6 +485,7 @@ export class StackController {
       deferred.promise.then(() => {
         this.cheUIElementsInjectorService.injectAdditionalElement(bodyEl, testPopupEl, this.$scope);
       }, (error: any) => {
+        this.showIDE = true;
         this.$log.error(error);
       });
     }, (error: any) => {
