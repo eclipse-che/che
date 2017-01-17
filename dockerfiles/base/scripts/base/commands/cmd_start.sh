@@ -107,7 +107,7 @@ cmd_start_check_agent_network() {
   start_test_server
 
   PREFLIGHT="success"
-  if test1 && test2; then
+  if test1 || test2; then
     text "         conn (browser => ws):   ${GREEN}[OK]${NC}\n"
   else
     text "         conn (browser => ws):   ${RED}[NOT OK]${NC}\n"
