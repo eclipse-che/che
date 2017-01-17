@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.editor.page.settings;
 
-import com.google.common.base.Optional;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.app.AppContext;
@@ -30,8 +29,11 @@ import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_GOAL_ATTRIBUTE_NAME;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -77,16 +79,17 @@ public class SettingsPageTest {
     public void setUp() throws Exception {
         when(appContext.getProjects()).thenReturn(new Project[0]);
 
+        CommandGoal commandGoal = mock(CommandGoal.class);
+        when(commandGoal.getId()).thenReturn(COMMAND_GOAL_ID);
+        when(goalRegistry.getGoalForId(anyString())).thenReturn(commandGoal);
+
         when(editedCommandApplicableContext.isWorkspaceApplicable()).thenReturn(true);
         when(editedCommand.getName()).thenReturn(COMMAND_NAME);
         when(editedCommand.getApplicableContext()).thenReturn(editedCommandApplicableContext);
-        when(editedCommand.getGoal()).thenReturn(COMMAND_GOAL_ID);
 
-        CommandGoal commandGoal = mock(CommandGoal.class);
-        when(commandGoal.getId()).thenReturn(COMMAND_GOAL_ID);
-        Optional optionalGoal = mock(Optional.class);
-        when(optionalGoal.or(any(CommandGoal.class))).thenReturn(commandGoal);
-        when(goalRegistry.getGoalById(anyString())).thenReturn(optionalGoal);
+        Map<String, String> attributes = new HashMap<>();
+        attributes.put(COMMAND_GOAL_ATTRIBUTE_NAME, COMMAND_GOAL_ID);
+        when(editedCommand.getAttributes()).thenReturn(attributes);
 
         page.setDirtyStateListener(dirtyStateListener);
         page.edit(editedCommand);

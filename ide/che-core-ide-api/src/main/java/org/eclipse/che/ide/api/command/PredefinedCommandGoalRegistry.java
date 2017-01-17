@@ -23,6 +23,12 @@ import java.util.List;
  */
 public interface PredefinedCommandGoalRegistry {
 
+    /** Returns all registered predefined {@link CommandGoal}s. */
+    List<CommandGoal> getAllGoals();
+
+    /** Returns the default command goal which is used for grouping commands which doesn't belong to any goal. */
+    CommandGoal getDefaultGoal();
+
     /**
      * Returns an {@code Optional} {@link CommandGoal} by the given ID
      * or {@code Optional.absent()} if none was registered.
@@ -34,17 +40,14 @@ public interface PredefinedCommandGoalRegistry {
     Optional<CommandGoal> getGoalById(String id);
 
     /**
-     * Returns a {@link CommandGoal} by the given ID or the default goal if none was registered.
+     * Returns a {@link CommandGoal} for the given ID or the custom (non-predefined) goal if none was registered.
+     * Returns the default goal if the given {@code id} is {@code null} or empty string.
      *
      * @param id
-     *         the ID of the command goal to get. May be {@code null}
-     * @return a {@link CommandGoal} with the given ID or the default goal if none was registered
+     *         the ID of the command goal. May be {@code null}
+     * @return a {@link CommandGoal} with the given ID
+     * or the custom (non-predefined) goal if none was registered.
+     * or the default goal if the given {@code id} is {@code null} or empty string.
      */
-    CommandGoal getGoalByIdOrDefault(@Nullable String id);
-
-    /** Returns the default command goal which is used for grouping commands which doesn't belong to any goal. */
-    CommandGoal getDefaultGoal();
-
-    /** Returns all registered predefined {@link CommandGoal}s. */
-    List<CommandGoal> getAllGoals();
+    CommandGoal getGoalForId(@Nullable String id);
 }

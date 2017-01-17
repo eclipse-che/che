@@ -15,7 +15,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.ide.api.command.BaseCommandGoal;
 import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
@@ -30,8 +29,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
  * A smattering of useful methods to work with commands.
@@ -64,14 +61,7 @@ public class CommandUtils {
 
         for (ContextualCommand command : commands) {
             final String goalId = command.getGoal();
-            final CommandGoal commandGoal;
-
-            if (isNullOrEmpty(goalId)) {
-                commandGoal = goalRegistry.getDefaultGoal();
-            } else {
-                commandGoal = goalRegistry.getGoalById(goalId)
-                                          .or(new BaseCommandGoal(goalId, goalId));
-            }
+            final CommandGoal commandGoal = goalRegistry.getGoalForId(goalId);
 
             List<ContextualCommand> commandsOfGoal = commandsByGoal.get(commandGoal);
 

@@ -16,6 +16,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.api.command.BaseCommandGoal;
 import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.command.PredefinedCommandGoalRegistry;
 import org.eclipse.che.ide.util.loging.Log;
@@ -26,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Collections.unmodifiableList;
 
 /**
@@ -63,17 +65,8 @@ public class PredefinedCommandGoalRegistryImpl implements PredefinedCommandGoalR
     }
 
     @Override
-    public Optional<CommandGoal> getGoalById(String id) {
-        return Optional.fromNullable(commandGoals.get(id));
-    }
-
-    @Override
-    public CommandGoal getGoalByIdOrDefault(@Nullable String id) {
-        if (id == null) {
-            return getDefaultGoal();
-        }
-
-        return getGoalById(id).or(getDefaultGoal());
+    public List<CommandGoal> getAllGoals() {
+        return unmodifiableList(new ArrayList<>(commandGoals.values()));
     }
 
     @Override
@@ -82,7 +75,16 @@ public class PredefinedCommandGoalRegistryImpl implements PredefinedCommandGoalR
     }
 
     @Override
-    public List<CommandGoal> getAllGoals() {
-        return unmodifiableList(new ArrayList<>(commandGoals.values()));
+    public Optional<CommandGoal> getGoalById(String id) {
+        return Optional.fromNullable(commandGoals.get(id));
+    }
+
+    @Override
+    public CommandGoal getGoalForId(@Nullable String id) {
+        if (isNullOrEmpty(id)) {
+            return getDefaultGoal();
+        }
+
+        return getGoalById(id).or(new BaseCommandGoal(id, id));
     }
 }

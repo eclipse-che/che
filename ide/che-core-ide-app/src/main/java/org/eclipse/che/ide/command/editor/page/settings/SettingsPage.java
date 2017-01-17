@@ -97,15 +97,7 @@ public class SettingsPage extends AbstractCommandEditorPage implements SettingsP
     @Override
     protected void initialize() {
         final String goalId = editedCommand.getGoal();
-        final CommandGoal commandGoal;
-
-        if (isNullOrEmpty(goalId)) {
-            commandGoal = goalRegistry.getDefaultGoal();
-        } else {
-            commandGoal = goalRegistry.getGoalById(goalId)
-                                      .or(new BaseCommandGoal(goalId, goalId));
-        }
-
+        final CommandGoal commandGoal = goalRegistry.getGoalForId(goalId);
         final ApplicableContext context = editedCommand.getApplicableContext();
 
         goalInitial = commandGoal.getId();
