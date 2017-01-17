@@ -45,12 +45,18 @@ cmd_start() {
   info "start" "Starting containers..."
   COMPOSE_UP_COMMAND="docker_compose --file=\"${REFERENCE_CONTAINER_COMPOSE_FILE}\" -p=\"${CHE_MINI_PRODUCT_NAME}\" up -d"
 
+  ## validate the compose file (quiet mode)
+  if local_repo; then
+    docker_compose --file=${REFERENCE_CONTAINER_COMPOSE_FILE} config -q || (error "Invalid docker compose file content at ${REFERENCE_CONTAINER_COMPOSE_FILE}" && return 2)
+  fi
+
   if ! debug_server; then
     COMPOSE_UP_COMMAND+=" >> \"${LOGS}\" 2>&1"
   fi
 
   log ${COMPOSE_UP_COMMAND}
-  eval ${COMPOSE_UP_COMMAND}
+  eval ${COMPOSE_UP_COMMAND} || (error "Error during 'compose up' - printing 30 line tail of ${CHE_HOST_CONFIG}/cli.log:" && tail -30 ${LOGS} && return 2)
+
   check_if_booted
 }
 
@@ -136,8 +142,10 @@ check_if_booted() {
     info "start" "Server logs at \"docker logs -f ${CHE_SERVER_CONTAINER_NAME}\""
   fi
 
+  check_containers_are_running
   wait_until_server_is_booted 60 ${CURRENT_CHE_SERVER_CONTAINER_ID}
- 
+  check_containers_are_running
+
   if debug_server; then
     kill $LOG_PID > /dev/null 2>&1
     info ""
@@ -159,3 +167,26 @@ check_if_booted() {
   fi
 }
 
+check_containers_are_running() {
+
+  # get list of docker compose services started by this docker compose
+  local LIST_OF_COMPOSE_CONTAINERS=$(docker_compose --file=${REFERENCE_CONTAINER_COMPOSE_FILE} config --services)
+
+  # For each service of docker-compose file, get container and then check it is running
+  while IFS= read -r DOCKER_COMPOSE_SERVICE_NAME ; do
+    local CONTAINER_ID_MATCHING_SERVICE_NAME=$(docker ps -q --filter label=com.docker.compose.service=${DOCKER_COMPOSE_SERVICE_NAME})
+    if [[ -z "${CONTAINER_ID_MATCHING_SERVICE_NAME}" ]]; then
+      error "Unable to find a matching container for the docker compose service named ${DOCKER_COMPOSE_SERVICE_NAME}. Check logs at ${CHE_HOST_CONFIG}/cli.log"
+      return 2
+    fi
+    debug "Container with id ${CONTAINER_ID_MATCHING_SERVICE_NAME} is matching ${DOCKER_COMPOSE_SERVICE_NAME} service"
+    local IS_RUNNING_CONTAINER=$(docker inspect -f {{.State.Running}} ${CONTAINER_ID_MATCHING_SERVICE_NAME})
+    debug "Running state of container ${CONTAINER_ID_MATCHING_SERVICE_NAME} is ${IS_RUNNING_CONTAINER}"
+
+    if [[ ${IS_RUNNING_CONTAINER} != "true" ]]; then
+      error "The container with ID ${CONTAINER_ID_MATCHING_SERVICE_NAME} of docker-compose service ${DOCKER_COMPOSE_SERVICE_NAME} is not running, aborting."
+      docker inspect ${CONTAINER_ID_MATCHING_SERVICE_NAME}
+      return 2
+    fi
+  done <<< "${LIST_OF_COMPOSE_CONTAINERS}"
+}
