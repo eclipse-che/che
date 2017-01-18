@@ -160,6 +160,7 @@ public class GitExtension {
         gitContextMenuGroup.add(removeFromIndexAction);
         gitContextMenuGroup.add(resetFilesAction);
         gitContextMenuGroup.add(commitAction);
+        gitContextMenuGroup.add(historyAction);
         gitContextMenuGroup.addSeparator();
         gitContextMenuGroup.add(compareWithLatestAction);
         gitContextMenuGroup.add(compareWithBranchAction);

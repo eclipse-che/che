@@ -18,10 +18,10 @@
         <g:north size="15">
             <g:HorizontalPanel width="100%">
                 <g:cell width="50%" horizontalAlignment="ALIGN_CENTER">
-                    <g:Label text="{locale.compareYourVersionTitle}"/>
+                    <g:Label ui:field="leftTitle"/>
                 </g:cell>
                 <g:cell width="50%" horizontalAlignment="ALIGN_CENTER">
-                    <g:Label ui:field="revision"/>
+                    <g:Label ui:field="rightTitle"/>
                 </g:cell>
             </g:HorizontalPanel>
         </g:north>

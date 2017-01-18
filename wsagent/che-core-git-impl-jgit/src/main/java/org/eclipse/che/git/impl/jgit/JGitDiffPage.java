@@ -29,6 +29,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
+import org.eclipse.jgit.treewalk.EmptyTreeIterator;
 import org.eclipse.jgit.treewalk.FileTreeIterator;
 import org.eclipse.jgit.treewalk.filter.AndTreeFilter;
 import org.eclipse.jgit.treewalk.filter.PathFilterGroup;
@@ -78,6 +79,8 @@ class JGitDiffPage extends DiffPage {
                 diff = indexToWorkingTree(formatter);
             } else if (commitA != null && commitB == null && !cached) {
                 diff = commitToWorkingTree(commitA, formatter);
+            } else if (commitA == null && commitB != null) {
+                diff = EmptyToCommit(commitB, formatter);
             } else if (commitB == null) {
                 diff = commitToIndex(commitA, formatter);
             } else {
@@ -96,6 +99,25 @@ class JGitDiffPage extends DiffPage {
             formatter.close();
             repository.close();
         }
+    }
+
+    private List<DiffEntry> EmptyToCommit(String commitId, DiffFormatter formatter) throws IOException {
+        ObjectId commit = repository.resolve(commitId);
+        if (commit == null) {
+            throw new IllegalArgumentException("Invalid commit id " + commitId);
+        }
+        RevTree tree;
+        try (RevWalk revWalkA = new RevWalk(repository)) {
+            tree = revWalkA.parseTree(commit);
+        }
+
+        List<DiffEntry> diff;
+        try (ObjectReader reader = repository.newObjectReader()) {
+            CanonicalTreeParser iterator = new CanonicalTreeParser();
+            iterator.reset(reader, tree);
+            diff = formatter.scan(new EmptyTreeIterator(), iterator);
+        }
+        return diff;
     }
 
     /**
