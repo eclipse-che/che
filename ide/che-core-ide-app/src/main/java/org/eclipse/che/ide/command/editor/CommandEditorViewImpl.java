@@ -24,6 +24,7 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
+import org.eclipse.che.ide.command.CommandResources;
 import org.eclipse.che.ide.ui.window.Window;
 
 /**
@@ -35,6 +36,9 @@ public class CommandEditorViewImpl extends Composite implements CommandEditorVie
 
     private static final CommandEditorViewImplUiBinder UI_BINDER        = GWT.create(CommandEditorViewImplUiBinder.class);
     private static final Window.Resources              WINDOW_RESOURCES = GWT.create(Window.Resources.class);
+
+    @UiField
+    CommandResources resources;
 
     @UiField
     Button testButton;
@@ -70,7 +74,7 @@ public class CommandEditorViewImpl extends Composite implements CommandEditorVie
             return;
         }
 
-        final DisclosurePanel panel = new DisclosurePanel(title);
+        final DisclosurePanel panel = new DisclosurePanel(resources.iconExpanded(), resources.iconCollapsed(), title);
         panel.setAnimationEnabled(true);
         panel.setContent(page.asWidget());
 
