@@ -411,7 +411,6 @@ start() {
   # specific to that implementation of the CLI. This method must be called after
   # networking has been established and initial images downloaded.
   cli_pre_init
-
   cli_init "$@"
   cli_parse "$@"
   cli_execute "$@"

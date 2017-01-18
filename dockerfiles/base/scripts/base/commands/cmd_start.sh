@@ -12,10 +12,9 @@
 cmd_start() {
   debug $FUNCNAME
 
-  DISPLAY_URL=$(get_display_url)
-
   # If ${CHE_FORMAL_PRODUCT_NAME} is already started or booted, then terminate early.
   if container_exist_by_name $CHE_SERVER_CONTAINER_NAME; then
+    DISPLAY_URL=$(get_display_url)
     CURRENT_CHE_SERVER_CONTAINER_ID=$(get_server_container_id $CHE_SERVER_CONTAINER_NAME)
     if container_is_running ${CURRENT_CHE_SERVER_CONTAINER_ID} && \
        server_is_booted ${CURRENT_CHE_SERVER_CONTAINER_ID}; then
