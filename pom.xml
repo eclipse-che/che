@@ -16,7 +16,7 @@
     <parent>
         <artifactId>maven-depmgt-pom</artifactId>
         <groupId>org.eclipse.che.depmgt</groupId>
-        <version>5.1.0</version>
+        <version>5.2.0-SNAPSHOT</version>
     </parent>
     <groupId>org.eclipse.che</groupId>
     <artifactId>che-parent</artifactId>
@@ -41,8 +41,8 @@
         <url>https://github.com/eclipse/che</url>
     </scm>
     <properties>
-        <che.docs.version>5.1.0</che.docs.version>
-        <che.lib.version>5.1.0</che.lib.version>
+        <che.docs.version>5.2.0-SNAPSHOT</che.docs.version>
+        <che.lib.version>5.2.0-SNAPSHOT</che.lib.version>
         <che.version>5.2.0-SNAPSHOT</che.version>
         <specification.version>1.0-beta2</specification.version>
     </properties>
