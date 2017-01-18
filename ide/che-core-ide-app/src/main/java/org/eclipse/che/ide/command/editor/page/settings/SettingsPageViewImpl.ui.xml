@@ -43,7 +43,7 @@
         <g:FlowPanel>
             <g:FlowPanel addStyleNames="{style.section}">
                 <g:Label text="{messages.pageInfoGoalLabel}"/>
-                <che:CustomComboBox ui:field="goal" width="100%"/>
+                <che:CustomComboBox ui:field="goal" width="95%"/>
             </g:FlowPanel>
             <g:FlowPanel addStyleNames="{style.section}">
                 <g:Label text="{messages.pageInfoSectionContextLabel}"/>

@@ -32,5 +32,8 @@ public interface NamePageView extends View<NamePageView.ActionDelegate> {
          *         changed value of the command's name
          */
         void onNameChanged(String name);
+
+        /** Called when testing command is requested. */
+        void onCommandTest();
     }
 }

@@ -40,6 +40,9 @@ public interface CommandResources extends ClientBundle {
     @Source("explorer/remove-command-button.svg")
     SVGResource removeCommand();
 
+    @Source("editor/execute.svg")
+    SVGResource execute();
+
     @Source({"explorer/styles.css", "org/eclipse/che/ide/api/ui/style.css"})
     ExplorerCSS commandsExplorerCss();
 

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.editor.page.name;
 
+import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.command.editor.EditorMessages;
 import org.eclipse.che.ide.command.editor.page.CommandEditorPage.DirtyStateListener;
@@ -37,9 +38,11 @@ public class NamePageTest {
     private static final String COMMAND_NAME = "build";
 
     @Mock
-    private NamePageView   view;
+    private NamePageView    view;
     @Mock
-    private EditorMessages messages;
+    private EditorMessages  messages;
+    @Mock
+    private CommandExecutor commandExecutor;
 
     @InjectMocks
     private NamePage page;
@@ -77,5 +80,12 @@ public class NamePageTest {
         page.onNameChanged("mvn");
 
         verify(dirtyStateListener, times(2)).onDirtyStateChanged();
+    }
+
+    @Test
+    public void shouldExecuteCommandWhenTestRequested() throws Exception {
+        page.onCommandTest();
+
+        verify(commandExecutor).executeCommand(eq(editedCommand));
     }
 }
