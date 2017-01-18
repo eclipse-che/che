@@ -12,8 +12,8 @@
 package process_test
 
 import (
-	"github.com/eclipse/che/agents/exec-agent/process"
-	"github.com/eclipse/che/agents/exec-agent/rpc"
+	"github.com/eclipse/che/agents/exec/process"
+	"github.com/eclipse/che/agents/exec/rpc"
 	"os"
 	"strings"
 	"testing"
