@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-java-testing-testng</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>5.1.0-SNAPSHOT</version>
+        <version>5.1.0</version>
     </parent>
     <artifactId>che-java-testing-testng-server</artifactId>
     <name>Che Plugin :: Java Testing :: TestNG Server</name>
