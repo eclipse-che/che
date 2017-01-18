@@ -17,8 +17,13 @@ import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
+import org.eclipse.che.api.debug.shared.model.Field;
 import org.eclipse.che.api.debug.shared.model.Location;
+import org.eclipse.che.api.debug.shared.model.Method;
+import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
+import org.eclipse.che.api.debug.shared.model.ThreadDump;
+import org.eclipse.che.api.debug.shared.model.ThreadStatus;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.event.BreakpointActivatedEvent;
 import org.eclipse.che.api.debug.shared.model.event.DebuggerEvent;
@@ -63,6 +68,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -84,7 +90,7 @@ public class JavaDebuggerTest {
     private BlockingQueue<DebuggerEvent> events;
 
 
-    @Test(priority = 1)
+    @Test(priority = 10)
     public void testGetInfo() throws Exception {
         DebuggerInfo info = debugger.getInfo();
 
@@ -95,7 +101,7 @@ public class JavaDebuggerTest {
         assertNotNull(info.getVersion());
     }
 
-    @Test(priority = 2)
+    @Test(priority = 20)
     public void testStartDebugger() throws Exception {
         BreakpointImpl breakpoint = new BreakpointImpl(new LocationImpl("com.HelloWorld", 17), false, null);
         debugger.start(new StartActionImpl(singletonList(breakpoint)));
@@ -111,7 +117,7 @@ public class JavaDebuggerTest {
         assertEquals(location.getTarget(), "com.HelloWorld");
     }
 
-    @Test(priority = 3)
+    @Test(priority = 30)
     public void testAddBreakpoint() throws Exception {
         int breakpointsCount = debugger.getAllBreakpoints().size();
 
@@ -128,18 +134,18 @@ public class JavaDebuggerTest {
         assertEquals(debugger.getAllBreakpoints().size(), breakpointsCount + 1);
     }
 
-    @Test(priority = 5, expectedExceptions = DebuggerException.class)
+    @Test(priority = 50, expectedExceptions = DebuggerException.class)
     public void testAddBreakpointToUnExistedLocation() throws Exception {
         debugger.addBreakpoint(new BreakpointImpl(new LocationImpl("com.HelloWorld", 1), false, null));
     }
 
-    @Test(priority = 6)
+    @Test(priority = 60)
     public void testRemoveBreakpoint() throws Exception {
         debugger.deleteBreakpoint(new LocationImpl("com.HelloWorld", 17));
         assertEquals(debugger.getAllBreakpoints().size(), 1);
     }
 
-    @Test(priority = 7)
+    @Test(priority = 70)
     public void testRemoveUnExistedBreakpoint() throws Exception {
         int breakpointsCount = debugger.getAllBreakpoints().size();
 
@@ -148,7 +154,7 @@ public class JavaDebuggerTest {
         assertEquals(debugger.getAllBreakpoints().size(), breakpointsCount);
     }
 
-    @Test(priority = 8)
+    @Test(priority = 80)
     public void testGetAllBreakpoints() throws Exception {
         assertFalse(debugger.getAllBreakpoints().isEmpty());
 
@@ -169,7 +175,7 @@ public class JavaDebuggerTest {
         assertTrue(breakpoint.isEnabled());
     }
 
-    @Test(priority = 9)
+    @Test(priority = 90)
     public void testSteps() throws Exception {
         debugger.deleteAllBreakpoints();
 
@@ -229,14 +235,61 @@ public class JavaDebuggerTest {
         assertEquals(location.getLineNumber(), 24);
     }
 
-    @Test(priority = 10)
+    @Test(priority = 95)
+    public void testGetThreadDumps() throws Exception {
+        List<ThreadDump> threadDumps = debugger.getThreadDumps();
+
+        Optional<ThreadDump> mainThread = threadDumps.stream().filter(t -> t.getName().equals("main")).findAny();
+        assertTrue(mainThread.isPresent());
+
+        ThreadDump threadDump = mainThread.get();
+        assertEquals(threadDump.getName(), "main");
+        assertEquals(threadDump.getGroupName(), "main");
+        assertTrue(threadDump.isSuspended());
+        assertEquals(threadDump.getStatus(), ThreadStatus.RUNNABLE);
+
+        List<? extends StackFrameDump> frames = threadDump.getFrames();
+        assertEquals(frames.size(), 1);
+
+        StackFrameDump stackFrameDump = frames.get(0);
+
+        List<? extends Variable> variables = stackFrameDump.getVariables();
+        //TODO
+        List<? extends Field> fields = stackFrameDump.getFields();
+        //TODO
+
+        Location location = stackFrameDump.getLocation();
+        assertEquals(location.getLineNumber(), 24);
+        assertEquals(location.getTarget(), "com.HelloWorld");
+        assertEquals(location.getExternalResourceId(), -1);
+        assertEquals(location.getResourceProjectPath(), "/test");
+        assertEquals(location.getResourcePath(), "/test/src/com/HelloWorld.java");
+
+        Method method = location.getMethod();
+        assertEquals(method.getName(), "main");
+
+        List<? extends Variable> arguments = method.getArguments();
+        assertEquals(arguments.size(), 1);
+
+        Variable variable = arguments.get(0);
+        assertEquals(variable.getName(), "args");
+        assertEquals(variable.getType(), "java.lang.String[]");
+        assertEquals(variable.getVariablePath(), new VariablePathImpl("args"));
+
+        //TODO
+        SimpleValue value = variable.getValue();
+        //TODO
+        value.getString();
+    }
+
+    @Test(priority = 100)
     public void testEvaluateExpression() throws Exception {
         assertEquals(debugger.evaluate("2+2"), "4");
         assertEquals(debugger.evaluate("\"hello\""), "\"hello\"");
         assertEquals(debugger.evaluate("test"), "\"hello\"");
     }
 
-    @Test(priority = 11)
+    @Test(priority = 110)
     public void testSetAndGetValue() throws Exception {
         assertEquals(debugger.getValue(new VariablePathImpl("test")).getString(), "\"hello\"");
         assertEquals(debugger.getValue(new VariablePathImpl("msg")).getString(), "\"Hello, debugger!\"");
@@ -252,7 +305,7 @@ public class JavaDebuggerTest {
         assertTrue(vars.contains("test"));
     }
 
-    @Test(priority = 12)
+    @Test(priority = 120)
     public void testDisconnect() throws Exception {
         debugger.disconnect();
 

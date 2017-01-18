@@ -153,7 +153,8 @@ public final class DtoConverter {
 
     public static StackFrameDumpDto asDto(StackFrameDump stackFrameDump) {
         return newDto(StackFrameDumpDto.class).withVariables(variablesAsDtos(stackFrameDump.getVariables()))
-                                              .withFields(fieldsAsDtos(stackFrameDump.getFields()));
+                                              .withFields(fieldsAsDtos(stackFrameDump.getFields()))
+                                              .withLocation(asDto(stackFrameDump.getLocation()));
     }
 
     public static DebuggerEventDto asDto(DebuggerEvent debuggerEvent) {
@@ -178,6 +179,17 @@ public final class DtoConverter {
         if (frames != null) {
             for (int i = 0; i < frames.size(); i++) {
                 dtos.add(asDto(frames.get(i)));
+            }
+        }
+        return dtos;
+    }
+
+    public static List<ThreadDumpDto> dumpsAsDtos(List<? extends ThreadDump> dumps) {
+        List<ThreadDumpDto> dtos = new LinkedList<>();
+
+        if (dumps != null) {
+            for (int i = 0; i < dumps.size(); i++) {
+                dtos.add(asDto(dumps.get(i)));
             }
         }
         return dtos;

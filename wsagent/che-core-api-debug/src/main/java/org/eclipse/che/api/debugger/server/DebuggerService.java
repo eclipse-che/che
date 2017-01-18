@@ -12,12 +12,11 @@ package org.eclipse.che.api.debugger.server;
 
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.debug.shared.dto.SimpleValueDto;
-import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
-import org.eclipse.che.api.debugger.server.exceptions.DebuggerNotFoundException;
 import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
 import org.eclipse.che.api.debug.shared.dto.DebugSessionDto;
+import org.eclipse.che.api.debug.shared.dto.SimpleValueDto;
 import org.eclipse.che.api.debug.shared.dto.StackFrameDumpDto;
+import org.eclipse.che.api.debug.shared.dto.ThreadDumpDto;
 import org.eclipse.che.api.debug.shared.dto.VariableDto;
 import org.eclipse.che.api.debug.shared.dto.action.ActionDto;
 import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
@@ -30,6 +29,8 @@ import org.eclipse.che.api.debug.shared.model.action.StepOutAction;
 import org.eclipse.che.api.debug.shared.model.action.StepOverAction;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.debug.shared.model.impl.VariablePathImpl;
+import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
+import org.eclipse.che.api.debugger.server.exceptions.DebuggerNotFoundException;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -49,8 +50,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.eclipse.che.api.debugger.server.DtoConverter.breakpointsAsDtos;
 import static org.eclipse.che.api.debugger.server.DtoConverter.asDto;
+import static org.eclipse.che.api.debugger.server.DtoConverter.breakpointsAsDtos;
+import static org.eclipse.che.api.debugger.server.DtoConverter.dumpsAsDtos;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
@@ -164,6 +166,13 @@ public class DebuggerService {
     @Produces(MediaType.APPLICATION_JSON)
     public StackFrameDumpDto getStackFrameDump(@PathParam("id") String sessionId) throws DebuggerException {
         return asDto(debuggerManager.getDebugger(sessionId).dumpStackFrame());
+    }
+
+    @GET
+    @Path("{id}/threaddumps")
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<ThreadDumpDto> getThreadDumps(@PathParam("id") String sessionId) throws DebuggerException {
+        return dumpsAsDtos(debuggerManager.getDebugger(sessionId).getThreadDumps());
     }
 
     @GET

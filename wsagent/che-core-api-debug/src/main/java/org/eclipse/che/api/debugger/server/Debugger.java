@@ -11,6 +11,7 @@
 package org.eclipse.che.api.debugger.server;
 
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
+import org.eclipse.che.api.debug.shared.model.ThreadDump;
 import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
@@ -28,6 +29,7 @@ import org.eclipse.che.api.debug.shared.model.event.DebuggerEvent;
 import org.eclipse.che.api.debug.shared.model.event.DisconnectEvent;
 import org.eclipse.che.api.debug.shared.model.event.SuspendEvent;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -201,6 +203,17 @@ public interface Debugger {
      *      if any error occur
      */
     StackFrameDump dumpStackFrame() throws DebuggerException;
+
+    /**
+     * Gets thread dumps.
+     *
+     * @return {@link ThreadDump}
+     * @throws DebuggerException
+     *      if any error occur
+     */
+    default List<ThreadDump> getThreadDumps() throws DebuggerException {
+        return Collections.emptyList();
+    }
 
     /**
      * Is used to send back any events to client.

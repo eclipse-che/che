@@ -15,6 +15,7 @@ import org.eclipse.che.api.debug.shared.dto.DebugSessionDto;
 import org.eclipse.che.api.debug.shared.dto.LocationDto;
 import org.eclipse.che.api.debug.shared.dto.StackFrameDumpDto;
 import org.eclipse.che.api.debug.shared.dto.SimpleValueDto;
+import org.eclipse.che.api.debug.shared.dto.ThreadDumpDto;
 import org.eclipse.che.api.debug.shared.dto.VariableDto;
 import org.eclipse.che.api.debug.shared.dto.action.ResumeActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StartActionDto;
@@ -125,6 +126,14 @@ public interface DebuggerServiceClient {
      *      debug session id
      */
     Promise<StackFrameDumpDto> getStackFrameDump(String id);
+
+    /**
+     * Gets thread dumps.
+     *
+     * @param id
+     *      debug session id
+     */
+    Promise<List<ThreadDumpDto>> getThreadDumps(String id);
 
     /**
      * Resumes application.

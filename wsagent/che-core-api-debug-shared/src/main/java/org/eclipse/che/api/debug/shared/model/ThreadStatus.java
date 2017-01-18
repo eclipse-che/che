@@ -17,5 +17,6 @@ public enum ThreadStatus {
     RUNNABLE,
     BLOCKED,
     WAITING,
-    TIMED_WAITING
+    TIMED_WAITING,
+    UNKNOWN
 }

@@ -10,12 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.jdb.server;
 
+import sun.misc.VM;
+
 import com.sun.jdi.AbsentInformationException;
 import com.sun.jdi.Bootstrap;
 import com.sun.jdi.ClassNotPreparedException;
 import com.sun.jdi.IncompatibleThreadStateException;
 import com.sun.jdi.NativeMethodException;
 import com.sun.jdi.ReferenceType;
+import com.sun.jdi.StackFrame;
 import com.sun.jdi.ThreadReference;
 import com.sun.jdi.VMCannotBeModifiedException;
 import com.sun.jdi.VirtualMachine;
@@ -38,6 +41,8 @@ import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
+import org.eclipse.che.api.debug.shared.model.ThreadDump;
+import org.eclipse.che.api.debug.shared.model.ThreadStatus;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.debug.shared.model.action.ResumeAction;
@@ -48,9 +53,9 @@ import org.eclipse.che.api.debug.shared.model.action.StepOverAction;
 import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
 import org.eclipse.che.api.debug.shared.model.impl.DebuggerInfoImpl;
 import org.eclipse.che.api.debug.shared.model.impl.FieldImpl;
-import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.debug.shared.model.impl.SimpleValueImpl;
 import org.eclipse.che.api.debug.shared.model.impl.StackFrameDumpImpl;
+import org.eclipse.che.api.debug.shared.model.impl.ThreadDumpImpl;
 import org.eclipse.che.api.debug.shared.model.impl.VariableImpl;
 import org.eclipse.che.api.debug.shared.model.impl.event.BreakpointActivatedEventImpl;
 import org.eclipse.che.api.debug.shared.model.impl.event.DisconnectEventImpl;
@@ -61,6 +66,7 @@ import org.eclipse.che.plugin.jdb.server.expression.Evaluator;
 import org.eclipse.che.plugin.jdb.server.expression.ExpressionException;
 import org.eclipse.che.plugin.jdb.server.expression.ExpressionParser;
 import org.eclipse.che.plugin.jdb.server.jdi.JdiField;
+import org.eclipse.che.plugin.jdb.server.jdi.JdiLocationImpl;
 import org.eclipse.che.plugin.jdb.server.jdi.JdiStackFrame;
 import org.eclipse.che.plugin.jdb.server.jdi.JdiStackFrameImpl;
 import org.eclipse.che.plugin.jdb.server.jdi.JdiVariable;
@@ -73,6 +79,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -371,6 +378,36 @@ public class JavaDebugger implements EventsHandler, Debugger {
         }
     }
 
+    @Override
+    public List<ThreadDump> getThreadDumps() throws DebuggerException {
+        List<ThreadReference> threadRefs = vm.allThreads();
+        List<ThreadDump> threadDumps = new ArrayList<>(threadRefs.size());
+
+        for (ThreadReference t : threadRefs) {
+            ThreadStatus status = ThreadStatus.UNKNOWN;
+            try {
+                status = ThreadStatus.valueOf(VM.toThreadState(t.status()).toString());
+            } catch (IllegalArgumentException ignored) {
+            }
+
+            List<JdiStackFrame> frames = new LinkedList<>();
+            try {
+                for (StackFrame sf : t.frames()) {
+                    frames.add(new JdiStackFrameImpl(sf));
+                }
+            } catch (IncompatibleThreadStateException ignored) {
+            }
+
+            threadDumps.add(new ThreadDumpImpl(t.name(),
+                                               t.threadGroup().name(),
+                                               status,
+                                               t.isSuspended(),
+                                               frames));
+        }
+
+        return threadDumps;
+    }
+
     /**
      * Get value of variable with specified path. Each item in path is name of variable.
      * <p>
@@ -542,11 +579,10 @@ public class JavaDebugger implements EventsHandler, Debugger {
 
             Location location;
             try {
-                location = debuggerUtil.getLocation(jdiLocation);
-            } catch (DebuggerException e) {
-                location = new LocationImpl(jdiLocation.declaringType().name(), jdiLocation.lineNumber());
+                location = new JdiLocationImpl(event.thread().frame(0));
+            } catch (IncompatibleThreadStateException e) {
+                location = new JdiLocationImpl(jdiLocation);
             }
-
             debuggerCallback.onEvent(new SuspendEventImpl(location));
         }
 

@@ -20,16 +20,17 @@ import org.eclipse.che.api.debug.shared.model.impl.VariablePathImpl;
 /** @author andrew00x */
 public class JdiVariableImpl implements JdiVariable {
     private final LocalVariable variable;
-    private final StackFrame    stackFrame;
-
-    @Override
-    public VariablePath getVariablePath() {
-        return new VariablePathImpl(getName());
-    }
+    private final JdiValue      jdiValue;
 
     public JdiVariableImpl(StackFrame stackFrame, LocalVariable variable) {
-        this.stackFrame = stackFrame;
+        Value value = stackFrame.getValue(variable);
         this.variable = variable;
+        this.jdiValue = value == null ? new JdiNullValue() : new JdiValueImpl(value);
+    }
+
+    public JdiVariableImpl(LocalVariable variable) {
+        this.variable = variable;
+        this.jdiValue = null;
     }
 
     @Override
@@ -44,15 +45,16 @@ public class JdiVariableImpl implements JdiVariable {
 
     @Override
     public JdiValue getValue() {
-        Value value = stackFrame.getValue(variable);
-        if (value == null) {
-            return new JdiNullValue();
-        }
-        return new JdiValueImpl(value);
+        return jdiValue;
     }
 
     @Override
     public String getType() {
         return variable.typeName();
+    }
+
+    @Override
+    public VariablePath getVariablePath() {
+        return new VariablePathImpl(getName());
     }
 }

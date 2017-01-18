@@ -21,6 +21,7 @@ import java.util.List;
  * @author andrew00x
  */
 public interface JdiStackFrame extends StackFrameDump {
+
     /**
      * Get all available instance or class members.
      *
@@ -51,4 +52,7 @@ public interface JdiStackFrame extends StackFrameDump {
      */
     @Nullable
     JdiVariable getVariableByName(String name);
+
+    @Override
+    JdiLocation getLocation();
 }

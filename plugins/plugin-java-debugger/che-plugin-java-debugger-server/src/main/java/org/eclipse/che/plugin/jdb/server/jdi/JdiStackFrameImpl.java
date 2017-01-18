@@ -28,9 +28,11 @@ import java.util.stream.Collectors;
  * @author Anatolii Bazko
  */
 public class JdiStackFrameImpl implements JdiStackFrame {
-    private final StackFrame        stackFrame;
-    private       List<JdiField>    fields;
-    private       List<JdiVariable> variables;
+    private final StackFrame stackFrame;
+
+    private List<JdiField>    fields;
+    private List<JdiVariable> variables;
+    private JdiLocation       jdiLocation;
 
     public JdiStackFrameImpl(StackFrame stackFrame) {
         this.stackFrame = stackFrame;
@@ -103,5 +105,13 @@ public class JdiStackFrameImpl implements JdiStackFrame {
         }
 
         return null;
+    }
+
+    @Override
+    public JdiLocation getLocation() {
+        if (jdiLocation == null) {
+            jdiLocation = new JdiLocationImpl(stackFrame);
+        }
+        return jdiLocation;
     }
 }

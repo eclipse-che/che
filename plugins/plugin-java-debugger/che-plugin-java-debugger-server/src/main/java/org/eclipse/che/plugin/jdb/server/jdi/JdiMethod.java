@@ -8,29 +8,16 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.debug.shared.model;
+package org.eclipse.che.plugin.jdb.server.jdi;
 
-import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.api.debug.shared.model.Method;
 
 import java.util.List;
 
 /**
- * @author Anatoliy Bazko
+ * @author Anatolii Bazko
  */
-public interface StackFrameDump {
-    /**
-     * The list of fields.
-     */
-    List<? extends Field> getFields();
-
-    /**
-     * The list of local variables.
-     */
-    List<? extends Variable> getVariables();
-
-    /**
-     * Returns location of the frame.
-     */
-    @Nullable
-    Location getLocation();
+public interface JdiMethod extends Method {
+    @Override
+    List<JdiVariable> getArguments();
 }
