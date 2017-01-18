@@ -202,18 +202,6 @@
     </fileSets>
       <files>
         <file>
-            <source>${project.basedir}/src/assembly/bin/che.sh</source>
-            <outputDirectory>bin</outputDirectory>
-            <destName>che.sh</destName>
-            <fileMode>755</fileMode>
-        </file>
-        <file>
-            <source>${project.basedir}/src/assembly/bin/che.bat</source>
-            <outputDirectory>bin</outputDirectory>
-            <destName>che.bat</destName>
-            <fileMode>755</fileMode>
-        </file>
-        <file>
             <source>${project.basedir}/src/assembly/bin/che-install-plugin.sh</source>
             <outputDirectory>bin</outputDirectory>
             <destName>che-install-plugin.sh</destName>
