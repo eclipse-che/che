@@ -30,11 +30,11 @@
         <filter-name>cacheDisablingFilter</filter-name>
         <filter-class>org.eclipse.che.CheCacheDisablingFilter</filter-class>
         <init-param>
-            <param-name>pattern1</param-name>
+            <param-name>pattern_filename</param-name>
             <param-value>^.*\.nocache\..*$</param-value>
         </init-param>
         <init-param>
-            <param-name>pattern2</param-name>
+            <param-name>pattern_appname</param-name>
             <param-value>^.*/_app/.*$</param-value>
         </init-param>
     </filter>
@@ -42,7 +42,7 @@
         <filter-name>cacheForcingFilter</filter-name>
         <filter-class>org.eclipse.che.CheCacheForcingFilter</filter-class>
         <init-param>
-            <param-name>pattern</param-name>
+            <param-name>pattern_filename</param-name>
             <param-value>^.*\.cache\..*$</param-value>
         </init-param>
     </filter>
