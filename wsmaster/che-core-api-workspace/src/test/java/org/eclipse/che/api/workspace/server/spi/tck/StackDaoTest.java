@@ -17,9 +17,9 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
+import org.eclipse.che.api.workspace.server.event.BeforeStackRemovedEvent;
 import org.eclipse.che.api.workspace.server.event.StackPersistedEvent;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
-import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackSourceImpl;
@@ -28,6 +28,8 @@ import org.eclipse.che.api.workspace.server.stack.image.StackIcon;
 import org.eclipse.che.commons.test.tck.TckListener;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepositoryException;
+import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
+import org.eclipse.che.core.db.cascade.event.CascadeEvent;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
@@ -41,8 +43,13 @@ import java.util.stream.Stream;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.workspace.server.spi.tck.WorkspaceDaoTest.createWorkspaceConfig;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 /**
  * Tests {@link SnapshotDao} contract.
@@ -108,6 +115,25 @@ public class StackDaoTest {
         assertEquals(stackDao.getById(stack.getId()), new StackImpl(stack));
     }
 
+    @Test(dependsOnMethods = "shouldThrowNotFoundExceptionWhenGettingNonExistingStack",
+          expectedExceptions = NotFoundException.class)
+    public void shouldNotCreateStackWhenSubscriberThrowsExceptionOnStackStoring() throws Exception {
+        final StackImpl stack = createStack("new-stack", "new-stack-name");
+
+        CascadeEventSubscriber<StackPersistedEvent> subscriber = mockCascadeEventSubscriber();
+        doThrow(new ConflictException("error")).when(subscriber).onCascadeEvent(any());
+        eventService.subscribe(subscriber, StackPersistedEvent.class);
+
+        try {
+            stackDao.create(stack);
+            fail("StackDao#create had to throw conflict exception");
+        } catch (ConflictException ignored) {
+        }
+
+        eventService.unsubscribe(subscriber, StackPersistedEvent.class);
+        stackDao.getById(stack.getId());
+    }
+
     @Test(expectedExceptions = ConflictException.class)
     public void shouldThrowConflictExceptionWhenCreatingStackWithIdThatAlreadyExists() throws Exception {
         final StackImpl stack = createStack(stacks[0].getId(), "new-name");
@@ -136,6 +162,23 @@ public class StackDaoTest {
 
         // Should throw an exception
         stackDao.getById(stack.getId());
+    }
+
+    @Test(dependsOnMethods = "shouldGetById")
+    public void shouldNotRemoveStackWhenSubscriberThrowsExceptionOnStackRemoving() throws Exception {
+        final StackImpl stack = stacks[0];
+        CascadeEventSubscriber<BeforeStackRemovedEvent> subscriber = mockCascadeEventSubscriber();
+        doThrow(new ServerException("error")).when(subscriber).onCascadeEvent(any());
+        eventService.subscribe(subscriber, BeforeStackRemovedEvent.class);
+
+        try {
+            stackDao.remove(stack.getId());
+            fail("StackDao#remove had to throw server exception");
+        } catch (ServerException ignored) {
+        }
+
+        assertEquals(stackDao.getById(stack.getId()), stack);
+        eventService.unsubscribe(subscriber, BeforeStackRemovedEvent.class);
     }
 
     @Test
@@ -263,5 +306,12 @@ public class StackDaoTest {
         final WorkspaceConfigImpl config = createWorkspaceConfig("test");
         stack.setWorkspaceConfig(config);
         return stack;
+    }
+
+    private <T extends CascadeEvent> CascadeEventSubscriber<T> mockCascadeEventSubscriber() {
+        @SuppressWarnings("unchecked")
+        CascadeEventSubscriber<T> subscriber = mock(CascadeEventSubscriber.class);
+        doCallRealMethod().when(subscriber).onEvent(any());
+        return subscriber;
     }
 }

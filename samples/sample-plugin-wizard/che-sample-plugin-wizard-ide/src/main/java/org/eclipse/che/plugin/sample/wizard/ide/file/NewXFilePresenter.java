@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.sample.wizard.ide.file;
 
-import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -70,9 +69,9 @@ public class NewXFilePresenter implements NewXFileView.ActionDelegate {
     private void createSourceFile(final String nameWithoutExtension, final String content) {
         Resource resource = appContext.getResource();
         if (!(resource instanceof Container)) {
-            final Optional<Container> parent = resource.getParent();
-            checkState(!parent.isPresent(), "Parent should be a container");
-            resource = parent.get();
+            final Container parent = resource.getParent();
+            checkState(parent != null, "Parent should be a container");
+            resource = parent;
         }
         createFile(resource.getLocation().toString(), nameWithoutExtension, content);
     }

@@ -12,15 +12,17 @@ package org.eclipse.che.api.machine.server.jpa;
 
 import com.google.inject.persist.Transactional;
 
+import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.core.db.jpa.DuplicateKeyException;
-import org.eclipse.che.core.db.jpa.IntegrityConstraintViolationException;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.machine.server.event.BeforeRecipeRemovedEvent;
 import org.eclipse.che.api.machine.server.event.RecipePersistedEvent;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.machine.server.spi.RecipeDao;
+import org.eclipse.che.core.db.jpa.DuplicateKeyException;
+import org.eclipse.che.core.db.jpa.IntegrityConstraintViolationException;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -56,8 +58,7 @@ public class JpaRecipeDao implements RecipeDao {
     public void create(RecipeImpl recipe) throws ConflictException, ServerException {
         requireNonNull(recipe);
         try {
-            doCreateRecipe(recipe);
-            eventService.publish(new RecipePersistedEvent(recipe));
+            doCreate(recipe);
         } catch (DuplicateKeyException ex) {
             throw new ConflictException(format("Recipe with id %s already exists", recipe.getId()));
         } catch (IntegrityConstraintViolationException ex) {
@@ -140,12 +141,14 @@ public class JpaRecipeDao implements RecipeDao {
         }
     }
 
-    @Transactional
-    protected void doRemove(String id) {
+    @Transactional(rollbackOn = {RuntimeException.class, ServerException.class})
+    protected void doRemove(String id) throws ServerException {
         final EntityManager manager = managerProvider.get();
         final RecipeImpl recipe = manager.find(RecipeImpl.class, id);
         if (recipe != null) {
+            eventService.publish(new BeforeRecipeRemovedEvent(new RecipeImpl(recipe))).propagateException();
             manager.remove(recipe);
+            manager.flush();
         }
     }
 
@@ -155,11 +158,16 @@ public class JpaRecipeDao implements RecipeDao {
         if (manager.find(RecipeImpl.class, update.getId()) == null) {
             throw new NotFoundException(format("Could not update recipe with id %s because it doesn't exist", update.getId()));
         }
-        return manager.merge(update);
+        RecipeImpl merged = manager.merge(update);
+        manager.flush();
+        return merged;
     }
 
-    @Transactional
-    protected void doCreateRecipe(RecipeImpl recipe) {
-        managerProvider.get().persist(recipe);
+    @Transactional(rollbackOn = {RuntimeException.class, ApiException.class})
+    protected void doCreate(RecipeImpl recipe) throws ConflictException, ServerException {
+        EntityManager manage = managerProvider.get();
+        manage.persist(recipe);
+        manage.flush();
+        eventService.publish(new RecipePersistedEvent(recipe)).propagateException();
     }
 }

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.actions;
 
-import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -58,10 +57,10 @@ public class RefreshPathAction extends AbstractPerspectiveAction {
         if (resource instanceof Container) {
             event.getPresentation().setText("Refresh '" + resource.getName() + "'");
         } else {
-            final Optional<Container> parent = resource.getParent();
+            final Container parent = resource.getParent();
 
-            if (parent.isPresent()) {
-                event.getPresentation().setText("Refresh '" + parent.get().getName() + "'");
+            if (parent != null) {
+                event.getPresentation().setText("Refresh '" + parent.getName() + "'");
             } else {
                 event.getPresentation().setEnabled(false);
                 return;
@@ -85,10 +84,10 @@ public class RefreshPathAction extends AbstractPerspectiveAction {
         if (resource instanceof Container) {
             ((Container)resource).synchronize();
         } else {
-            final Optional<Container> parent = resource.getParent();
+            final Container parent = resource.getParent();
 
-            if (parent.isPresent()) {
-                parent.get().synchronize();
+            if (parent != null) {
+                parent.synchronize();
             }
         }
     }

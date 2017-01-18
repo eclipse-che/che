@@ -11,7 +11,6 @@
 package org.eclipse.che.api.workspace.server.model.impl.stack;
 
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
-import org.eclipse.che.api.workspace.server.jpa.StackEntityListener;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.stack.image.StackIcon;
 import org.eclipse.che.api.workspace.shared.stack.Stack;
@@ -25,7 +24,6 @@ import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.NamedQueries;
@@ -58,7 +56,6 @@ import static java.util.stream.Collectors.toList;
         }
 
 )
-@EntityListeners(StackEntityListener.class)
 @Table(name = "stack")
 public class StackImpl implements Stack {
 

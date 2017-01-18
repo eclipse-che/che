@@ -826,6 +826,7 @@ public class DockerConnector {
                     throw new DockerException(e.getCause().getLocalizedMessage(), 500);
                 }
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 throw new DockerException("Docker image build was interrupted", 500);
             }
         }
@@ -952,6 +953,7 @@ public class DockerConnector {
                 // unwrap exception thrown by task with .getCause()
                 throw new DockerException("Docker image pushing failed. Cause: " + e.getCause().getLocalizedMessage(), 500);
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 throw new DockerException("Docker image pushing was interrupted", 500);
             }
         }
@@ -1048,6 +1050,7 @@ public class DockerConnector {
                 // unwrap exception thrown by task with .getCause()
                 throw new DockerException(e.getCause().getLocalizedMessage(), 500);
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 throw new DockerException("Docker image pulling was interrupted", 500);
             }
         }

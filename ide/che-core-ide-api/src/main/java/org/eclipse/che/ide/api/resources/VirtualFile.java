@@ -55,16 +55,6 @@ public interface VirtualFile {
     String getDisplayName();
 
     /**
-     * Returns media type for the virtual file. Media type may be a {@code null} for folders or for those files that
-     * don't have media type.
-     *
-     * @return media type or null.
-     * @deprecated this method is going to be removed soon, because we don't use media type for any purposes
-     */
-    @Deprecated
-    String getMediaType();
-
-    /**
      * Returns {@code true} in case if virtual file doesn't have ability to be updated.
      *
      * @return {@code true} if file is read only, otherwise false.

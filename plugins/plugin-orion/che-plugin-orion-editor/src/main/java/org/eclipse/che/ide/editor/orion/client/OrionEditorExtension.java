@@ -163,6 +163,7 @@ public class OrionEditorExtension {
     private void defineDefaultTheme() {
         // The codenvy theme uses both an orion css file and a CssResource
         orionResource.editorStyle().ensureInjected();
+        orionResource.getIncrementalFindStyle().ensureInjected();
         OrionTextThemeOverlay.setDefaultTheme("orionCodenvy", "orion-codenvy-theme.css");
     }
 

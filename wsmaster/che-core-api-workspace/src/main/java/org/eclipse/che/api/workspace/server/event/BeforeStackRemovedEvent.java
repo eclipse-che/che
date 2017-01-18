@@ -10,15 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server.event;
 
-import org.eclipse.che.core.db.event.CascadeRemovalEvent;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
+import org.eclipse.che.core.db.cascade.event.RemoveEvent;
 
 /**
  * Pre-removal event of {@link StackImpl}.
  *
  * @author Max Shaposhnik
  */
-public class BeforeStackRemovedEvent extends CascadeRemovalEvent {
+public class BeforeStackRemovedEvent extends RemoveEvent {
 
     private final StackImpl stack;
 

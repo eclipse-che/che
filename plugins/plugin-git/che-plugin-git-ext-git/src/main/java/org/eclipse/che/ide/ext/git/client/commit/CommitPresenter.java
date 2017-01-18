@@ -131,10 +131,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
 
         for (int i = 0; i < resources.length; i++) {
             checkState(project.getLocation().isPrefixOf(resources[i].getLocation()));
-
-            final Path tmpPath = resources[i].getLocation().removeFirstSegments(project.getLocation().segmentCount());
-
-            paths[i] = tmpPath.isEmpty() ? tmpPath.append(".") : tmpPath;
+            paths[i] = resources[i].getLocation().removeFirstSegments(project.getLocation().segmentCount());
         }
 
         return paths;
@@ -148,7 +145,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
                        project.getLocation(),
                        message,
                        addAll,
-                       commitAll ? new Path[]{Path.valueOf(".")} : toRelativePaths(resources),
+                       commitAll ? new Path[]{} : toRelativePaths(resources),
                        amend)
                .then(new Operation<Revision>() {
                    @Override

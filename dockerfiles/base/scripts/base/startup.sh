@@ -230,6 +230,14 @@ debug_server() {
   fi
 }
 
+is_fast() {
+  if [ "${FAST_BOOT}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
 init_logging() {
   # Initialize CLI folder
   CLI_DIR=$CHE_CONTAINER_ROOT
@@ -357,6 +365,9 @@ cli_init() {
       warning "Boot2docker for Windows - CHE_CONFIG set to $CHE_HOST_CONFIG"
     fi
   fi
+
+  # Special function to perform special behaviors if you are running nightly version
+  verify_nightly_accuracy
 
   # Do not perform a version compatibility check if running upgrade command.
   # The upgrade command has its own internal checks for version compatibility.

@@ -24,14 +24,13 @@ import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.plugin.php.ide.action.CreatePhpSourceFileAction;
 
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_FILE_NEW;
+import static org.eclipse.che.plugin.php.shared.Constants.PHP_CATEGORY;
 
 /**
  * @author Kaloyan Raev
  */
 @Extension(title = "PHP")
 public class PhpExtension {
-
-    public static String PHP_CATEGORY = "PHP";
 
     @Inject
     public PhpExtension(FileTypeRegistry fileTypeRegistry,

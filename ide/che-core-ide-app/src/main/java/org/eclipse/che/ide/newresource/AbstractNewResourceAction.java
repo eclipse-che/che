@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.newresource;
 
-import com.google.common.base.Optional;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.promises.client.Operation;
@@ -99,11 +98,11 @@ public abstract class AbstractNewResourceAction extends AbstractPerspectiveActio
         Resource resource = appContext.getResource();
 
         if (!(resource instanceof Container)) {
-            final Optional<Container> parent = resource.getParent();
+            final Container parent = resource.getParent();
 
-            checkState(parent.isPresent(), "Parent should be a container");
+            checkState(parent != null, "Parent should be a container");
 
-            resource = parent.get();
+            resource = parent;
         }
 
         ((Container)resource).newFile(name, getDefaultContent()).then(new Operation<File>() {
@@ -132,7 +131,7 @@ public abstract class AbstractNewResourceAction extends AbstractPerspectiveActio
             if (resource instanceof Container) {
                 e.getPresentation().setEnabled(true);
             } else {
-                e.getPresentation().setEnabled(resource.getParent().isPresent());
+                e.getPresentation().setEnabled(resource.getParent() != null);
             }
 
         } else {

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.newresource;
 
-import com.google.common.base.Optional;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
 
@@ -77,7 +76,7 @@ public class NewFolderActionTest {
 
     @Test
     public void testShouldCreateFolderIfSelectedFile() throws Exception {
-        when(file.getParent()).thenReturn(Optional.of(parent));
+        when(file.getParent()).thenReturn(parent);
         when(appContext.getResource()).thenReturn(file);
         when(parent.newFolder(anyString())).thenReturn(folderPromise);
         when(folderPromise.then(any(Operation.class))).thenReturn(folderPromise);
@@ -104,7 +103,7 @@ public class NewFolderActionTest {
     @Test(expected = IllegalStateException.class)
     public void testShouldThrowExceptionIfFileDoesNotContainParent() throws Exception {
         when(appContext.getResource()).thenReturn(file);
-        when(file.getParent()).thenReturn(Optional.<Container>absent());
+        when(file.getParent()).thenReturn(null);
 
         action.createFolder("name");
     }
