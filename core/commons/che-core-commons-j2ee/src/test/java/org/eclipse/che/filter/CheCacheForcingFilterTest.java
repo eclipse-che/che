@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che;
 
-import org.eclipse.che.api.core.rest.HttpJsonHelper;
+import org.eclipse.che.filter.CheCacheForcingFilter;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -35,21 +35,19 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.matches;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * @author Max Shaposhnik (mshaposhnik@codenvy.com)
+ * @author Max Shaposhnik (mshaposhnik@codenvy.com) on 1/17/17.
  */
 @Listeners(value = {MockitoTestNGListener.class})
-public class CheCacheDisablingFilterTest {
+public class CheCacheForcingFilterTest {
 
     @Mock
     private FilterChain chain;
-
-    @Mock
-    HttpJsonHelper helper;
 
     @Mock
     private HttpServletRequest request;
@@ -58,16 +56,16 @@ public class CheCacheDisablingFilterTest {
     private HttpServletResponse response;
 
     @InjectMocks
-    private CheCacheDisablingFilter filter;
+    private CheCacheForcingFilter filter;
 
     @BeforeMethod
-    public void init() throws Exception {
+    public void setUp() throws Exception {
         filter.init(new MockFilterConfig());
     }
 
 
-    @Test(dataProvider = "nonCachedPathProvider")
-    public void shouldSetDisablingCacheHeaders(String uri) throws Exception {
+    @Test(dataProvider = "cachedPathProvider")
+    public void shouldSetForceCacheHeaders(String uri) throws Exception {
         when(request.getRequestURI()).thenReturn(uri);
 
         //when
@@ -75,12 +73,12 @@ public class CheCacheDisablingFilterTest {
 
         verify(response).setDateHeader(eq("Date"), anyLong());
         verify(response).setDateHeader(eq("Expires"), anyLong());
-        verify(response).setHeader(eq("Cache-control"), eq("no-cache, no-store, must-revalidate"));
+        verify(response).setHeader(eq("Cache-control"), matches("public, max-age=[0-9]+"));
         verify(chain).doFilter(any(ServletRequest.class), any(ServletResponse.class));
     }
 
-    @Test(dataProvider = "cachedPathProvider")
-    public void shouldBypassDisablingCacheHeaders(String uri) throws Exception {
+    @Test(dataProvider = "nonCachedPathProvider")
+    public void shouldBypassForceCacheHeaders(String uri) throws Exception {
         when(request.getRequestURI()).thenReturn(uri);
 
         //when
@@ -91,17 +89,17 @@ public class CheCacheDisablingFilterTest {
     }
 
 
-    @DataProvider(name = "nonCachedPathProvider")
-    public Object[][] nonCachedPathProvider() {
+    @DataProvider(name = "cachedPathProvider")
+    public Object[][] cachedPathProvider() {
         return new Object[][]{{"/_app/browserNotSupported.js"},
-                              {"/_app/_app.nocache.js"},
-                              {"/other/_app/something.js"},
-                              {"/other/something.nocache.js"}
+                              {"/_app/_app.cache.js"},
+                              {"/other/_app/cache.js"},
+                              {"/other/something.cache.js"}
         };
     }
 
-    @DataProvider(name = "cachedPathProvider")
-    public Object[][] cachedPathProvider() {
+    @DataProvider(name = "nonCachedPathProvider")
+    public Object[][] nonCachedPathProvider() {
         return new Object[][]{{"/other/.something.js"},
                               {"/app/something.js"},
                               {"/something/something"}
@@ -112,7 +110,7 @@ public class CheCacheDisablingFilterTest {
         private final Map<String, String> filterParams = new HashMap<>();
 
         public MockFilterConfig() {
-            this.filterParams.put("pattern1", "^.*\\.nocache\\..*$");
+            this.filterParams.put("pattern1", "^.*\\.cache\\..*$");
             this.filterParams.put("pattern2", "^.*/_app/.*$");
         }
 
@@ -129,7 +127,7 @@ public class CheCacheDisablingFilterTest {
         }
 
         public Enumeration<String> getInitParameterNames() {
-               return Collections.enumeration(filterParams.keySet());
+            return Collections.enumeration(filterParams.keySet());
         }
     }
 }

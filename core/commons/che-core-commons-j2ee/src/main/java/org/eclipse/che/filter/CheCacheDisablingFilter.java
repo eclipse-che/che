@@ -8,9 +8,9 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che;
+package org.eclipse.che.filter;
 
-import com.xemantic.tadedon.servlet.CacheForcingFilter;
+import com.xemantic.tadedon.servlet.CacheDisablingFilter;
 
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -25,11 +25,11 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
- * Forcing caching for the given URL resource patterns.
+ * Disabling caching for the given URL resource patterns.
  *
- * @author Max Shaposhnik
+ * @author Max Shaposhnik (mshaposhnik@codenvy.com)
  */
-public class CheCacheForcingFilter extends CacheForcingFilter {
+public class CheCacheDisablingFilter extends CacheDisablingFilter {
 
     private Set<Pattern> actionPatterns = new HashSet<>();
 
