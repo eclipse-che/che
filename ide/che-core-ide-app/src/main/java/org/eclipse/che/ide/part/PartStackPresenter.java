@@ -483,7 +483,7 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
         }
 
         if (activePart != null) {
-            updateWorkBenchPartSize();
+            updateWorkBenchPartSize(); //we need to update the workbench part size depending on the size of the active part
         }
     }
 
@@ -533,6 +533,11 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
         }
     }
 
+    /**
+     * Each part has own size. This method checks whether the given size is redefined by user.
+     *
+     * @return {@code true} when the given size does not match to any own part size of the part stack
+     */
     private boolean isSizeOverridden(double size) {
         if (size < MIN_PART_SIZE) {
             return false;
