@@ -43,6 +43,7 @@ import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.System.lineSeparator;
 
 /**
@@ -80,7 +81,7 @@ class JGitDiffPage extends DiffPage {
             } else if (commitA != null && commitB == null && !cached) {
                 diff = commitToWorkingTree(commitA, formatter);
             } else if (commitA == null && commitB != null) {
-                diff = EmptyToCommit(commitB, formatter);
+                diff = emptyToCommit(commitB, formatter);
             } else if (commitB == null) {
                 diff = commitToIndex(commitA, formatter);
             } else {
@@ -101,11 +102,20 @@ class JGitDiffPage extends DiffPage {
         }
     }
 
-    private List<DiffEntry> EmptyToCommit(String commitId, DiffFormatter formatter) throws IOException {
+    /**
+     * Show changes between specified revision and empty tree.
+     *
+     * @param commitId
+     *            id of commit
+     * @param formatter
+     *            diff formatter
+     * @return list of diff entries
+     * @throws IOException
+     *             if any i/o errors occurs
+     */
+    private List<DiffEntry> emptyToCommit(String commitId, DiffFormatter formatter) throws IOException {
         ObjectId commit = repository.resolve(commitId);
-        if (commit == null) {
-            throw new IllegalArgumentException("Invalid commit id " + commitId);
-        }
+        checkArgument(commit != null, "Invalid commit id " + commitId);
         RevTree tree;
         try (RevWalk revWalkA = new RevWalk(repository)) {
             tree = revWalkA.parseTree(commit);

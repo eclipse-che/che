@@ -45,7 +45,7 @@ import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 @Singleton
 public class ResetToCommitPresenter implements ResetToCommitView.ActionDelegate {
     public static final String RESET_COMMAND_NAME = "Git reset to commit";
-    public static final String LOG_COMMAND_NAME = "Git log";
+    public static final String LOG_COMMAND_NAME   = "Git log";
 
     private final ResetToCommitView       view;
     private final GitOutputConsoleFactory gitOutputConsoleFactory;

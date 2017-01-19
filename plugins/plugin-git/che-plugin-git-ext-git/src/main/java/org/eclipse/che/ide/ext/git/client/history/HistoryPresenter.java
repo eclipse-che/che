@@ -98,7 +98,7 @@ public class HistoryPresenter implements HistoryView.ActionDelegate {
                                       .getLocation()
                                       .removeFirstSegments(project.getLocation().segmentCount())
                                       .removeTrailingSeparator();
-        FetchRevisions();
+        fetchRevisions();
     }
 
     @Override
@@ -120,7 +120,7 @@ public class HistoryPresenter implements HistoryView.ActionDelegate {
 
     @Override
     public void onScrolledToButton() {
-        FetchRevisions();
+        fetchRevisions();
     }
 
     @Override
@@ -135,7 +135,7 @@ public class HistoryPresenter implements HistoryView.ActionDelegate {
         compare();
     }
 
-    private void FetchRevisions() {
+    private void fetchRevisions() {
         service.log(appContext.getDevMachine(),
                     project.getLocation(),
                     selectedPath.isEmpty() ? null : new Path[]{selectedPath},
