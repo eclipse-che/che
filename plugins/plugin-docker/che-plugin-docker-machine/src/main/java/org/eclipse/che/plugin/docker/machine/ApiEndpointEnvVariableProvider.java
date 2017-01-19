@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.docker.machine.ext.provider;
+package org.eclipse.che.plugin.docker.machine;
 
 import com.google.common.base.Strings;
 
