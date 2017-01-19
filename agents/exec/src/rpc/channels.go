@@ -24,7 +24,7 @@ import (
 	"time"
 
 	"github.com/eclipse/che-lib/websocket"
-	"github.com/eclipse/che/agents/exec-agent/rest"
+	"github.com/eclipse/che/agents/exec/rest"
 )
 
 const (

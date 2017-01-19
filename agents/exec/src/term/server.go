@@ -28,7 +28,7 @@ import (
 	"fmt"
 	"github.com/eclipse/che-lib/pty"
 	"github.com/eclipse/che-lib/websocket"
-	"github.com/eclipse/che/agents/exec-agent/rest"
+	"github.com/eclipse/che/agents/exec/rest"
 	"io"
 	"io/ioutil"
 	"log"

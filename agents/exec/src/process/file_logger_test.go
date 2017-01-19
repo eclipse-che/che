@@ -13,7 +13,7 @@ package process_test
 
 import (
 	"encoding/json"
-	"github.com/eclipse/che/agents/exec-agent/process"
+	"github.com/eclipse/che/agents/exec/process"
 	"io/ioutil"
 	"math/rand"
 	"os"

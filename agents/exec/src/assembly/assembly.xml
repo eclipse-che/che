@@ -30,7 +30,7 @@
             <outputDirectory></outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>${project.build.directory}/${go.workspace.name}/src/github.com/eclipse/che/agents/exec-agent/static</directory>
+            <directory>${project.build.directory}/${go.workspace.name}/src/github.com/eclipse/che/agents/exec/static</directory>
             <outputDirectory></outputDirectory>
         </fileSet>
     </fileSets>

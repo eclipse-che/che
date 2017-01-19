@@ -25,7 +25,7 @@
     <packaging>pom</packaging>
     <name>Che Agents Parent</name>
     <modules>
-        <module>exec-agent</module>
+        <module>exec</module>
         <module>che-core-api-agent-shared</module>
         <module>che-core-api-agent</module>
     </modules>
