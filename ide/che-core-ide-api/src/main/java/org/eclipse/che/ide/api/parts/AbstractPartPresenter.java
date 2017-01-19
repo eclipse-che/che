@@ -141,7 +141,7 @@ public abstract class AbstractPartPresenter implements PartPresenter {
     /** {@inheritDoc} */
     @Override
     public int getSize() {
-        return 285;
+        return DEFAULT_PART_SIZE;
     }
 
     /** {@inheritDoc} */
@@ -155,5 +155,4 @@ public abstract class AbstractPartPresenter implements PartPresenter {
     public SVGResource getTitleImage() {
         return null;
     }
-
 }

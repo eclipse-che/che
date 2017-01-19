@@ -41,6 +41,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.eclipse.che.ide.api.parts.PartPresenter.DEFAULT_PART_SIZE;
+import static org.eclipse.che.ide.api.parts.PartPresenter.MIN_PART_SIZE;
+
 /**
  * Implements "Tab-like" UI Component, that accepts PartPresenters as child elements.
  * <p/>
@@ -53,13 +56,6 @@ import java.util.Map;
  * @author Valeriy Svydenko
  */
 public class PartStackPresenter implements Presenter, PartStackView.ActionDelegate, PartButton.ActionDelegate, PartStack {
-
-    /** The default size for the part. */
-    private static final double DEFAULT_PART_SIZE = 260;
-
-    /** The minimum allowable size for the part. */
-    private static final int MIN_PART_SIZE = 100;
-
     private final WorkBenchPartController         workBenchPartController;
     private final PartsComparator                 partsComparator;
     private final Map<PartPresenter, Constraints> constraints;
@@ -113,8 +109,8 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
         };
 
         if (workBenchPartController != null) {
-            this.workBenchPartController.setSize(DEFAULT_PART_SIZE);
             this.workBenchPartController.setMinSize(MIN_PART_SIZE);
+            this.workBenchPartController.setSize(DEFAULT_PART_SIZE);
         }
 
         currentSize = DEFAULT_PART_SIZE;
@@ -210,15 +206,8 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
 
         if (state == State.MINIMIZED) {
             state = State.NORMAL;
-
-            if (currentSize < MIN_PART_SIZE) {
-                currentSize = DEFAULT_PART_SIZE;
-            }
-
-            workBenchPartController.setSize(currentSize);
-            workBenchPartController.setMinSize(MIN_PART_SIZE);
+            updateWorkBenchPartSize();
             workBenchPartController.setHidden(false);
-
         } else if (state == State.COLLAPSED) {
             // Collapsed state means the other part stack is maximized.
             // Ask the delegate to restore part stacks.
@@ -227,11 +216,7 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
             }
 
         } else if (state == State.NORMAL) {
-            if (workBenchPartController.getSize() < MIN_PART_SIZE) {
-                workBenchPartController.setMinSize(MIN_PART_SIZE);
-                workBenchPartController.setSize(DEFAULT_PART_SIZE);
-            }
-
+            updateWorkBenchPartSize();
             workBenchPartController.setHidden(false);
         }
 
@@ -423,22 +408,17 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
         State prevState = state;
         state = State.NORMAL;
 
-        if (!parts.isEmpty()) {
-
-            if (currentSize < MIN_PART_SIZE) {
-                currentSize = DEFAULT_PART_SIZE;
-            }
-
-            workBenchPartController.setSize(currentSize);
-            workBenchPartController.setMinSize(MIN_PART_SIZE);
-            workBenchPartController.setHidden(false);
-        }
-
         // Ask the delegate to restore part stacks if this part stack was maximized.
         if (prevState == State.MAXIMIZED) {
+            workBenchPartController.setSize(currentSize);
+            workBenchPartController.setHidden(false);
+
             if (delegate != null) {
                 delegate.onRestore(this);
             }
+        } else if (!parts.isEmpty()) {
+            updateWorkBenchPartSize();
+            workBenchPartController.setHidden(false);
         }
 
         // Select active tab.
@@ -496,6 +476,15 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
         activePart = parts.get(selectedTab);
         activePart.onOpen();
         selectActiveTab(activeTab);
+
+        final double workbenchPartSize = workBenchPartController.getSize();
+        if (state != State.MAXIMIZED && isSizeOverridden(workbenchPartSize)) {
+            currentSize = workbenchPartSize;
+        }
+
+        if (activePart != null) {
+            updateWorkBenchPartSize();
+        }
     }
 
     private void selectActiveTab(@NotNull TabItem selectedTab) {
@@ -510,10 +499,56 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
         partMenu.show(mouseX, mouseY);
     }
 
+    private void updateWorkBenchPartSize() {
+        double newSize = getNewWorkBenchPartSize();
+        workBenchPartController.setMinSize(MIN_PART_SIZE);
+        workBenchPartController.setSize(newSize);
+    }
+
+    private double getNewWorkBenchPartSize() {
+        PartPresenter part = parts.get(activeTab);
+        if (part == null) {
+            return DEFAULT_PART_SIZE;
+        }
+
+        boolean isHidden = workBenchPartController.isHidden();
+        if (isHidden && currentSize >= MIN_PART_SIZE && isSizeOverridden(currentSize)) {
+            return currentSize; //use overridden by user size
+        }
+
+        int partSize = part.getSize();
+        if (isHidden) {
+            return partSize; //use own size of part when part stack is hidden
+        }
+
+        double workBenchPartSize = workBenchPartController.getSize();
+        if (isSizeOverridden(workBenchPartSize)) {
+            return workBenchPartSize; //use current size of workbench part when part stack is visible and size is overridden by user
+        }
+
+        if (workBenchPartSize < partSize) {
+            return partSize; //use own size of part when part need more size than current size of workbench part
+        } else {
+            return workBenchPartSize; //use current size of workbench part when this one has enough place for the part
+        }
+    }
+
+    private boolean isSizeOverridden(double size) {
+        if (size < MIN_PART_SIZE) {
+            return false;
+        }
+
+        for (PartPresenter part : parts.values()) {
+            if (part.getSize() == size) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /** Handles PartStack actions */
     public interface PartStackEventHandler {
         /** PartStack is being clicked and requests Focus */
         void onRequestFocus(PartStack partStack);
     }
-
 }

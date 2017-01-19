@@ -58,14 +58,11 @@ import org.eclipse.che.ide.ui.smartTree.event.ExpandNodeEvent;
 import org.eclipse.che.ide.ui.smartTree.event.PostLoadEvent;
 import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent;
 import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent.SelectionChangedHandler;
-import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.providers.DynaObject;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -101,8 +98,6 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
 
     private UpdateTask updateTask = new UpdateTask();
     private Set<Path> expandQueue = new HashSet<>();
-
-    private static final int PART_SIZE = 500;
 
     private boolean hiddenFilesAreShown;
 
@@ -387,12 +382,6 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
     @Override
     public String getTitleToolTip() {
         return locale.projectExplorerPartTooltip();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public int getSize() {
-        return PART_SIZE;
     }
 
     /** {@inheritDoc} */
