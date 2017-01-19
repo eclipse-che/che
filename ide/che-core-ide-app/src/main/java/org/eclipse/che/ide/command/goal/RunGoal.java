@@ -22,7 +22,7 @@ import org.eclipse.che.ide.api.command.BaseCommandGoal;
 public class RunGoal extends BaseCommandGoal {
 
     @Inject
-    public RunGoal(GoalMessages messages) {
-        super("run", messages.goalRunName());
+    public RunGoal() {
+        super("Run");
     }
 }

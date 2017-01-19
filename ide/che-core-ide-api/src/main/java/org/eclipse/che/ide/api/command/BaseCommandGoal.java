@@ -20,21 +20,14 @@ import java.util.Objects;
 public class BaseCommandGoal implements CommandGoal {
 
     private final String id;
-    private final String displayName;
 
-    public BaseCommandGoal(String id, String displayName) {
+    public BaseCommandGoal(String id) {
         this.id = id;
-        this.displayName = displayName;
     }
 
     @Override
     public String getId() {
         return id;
-    }
-
-    @Override
-    public String getDisplayName() {
-        return displayName;
     }
 
     @Override
@@ -49,12 +42,11 @@ public class BaseCommandGoal implements CommandGoal {
 
         CommandGoal other = (CommandGoal)o;
 
-        return Objects.equals(getId(), other.getId())
-               && Objects.equals(getDisplayName(), other.getDisplayName());
+        return Objects.equals(getId(), other.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, displayName);
+        return Objects.hash(id);
     }
 }

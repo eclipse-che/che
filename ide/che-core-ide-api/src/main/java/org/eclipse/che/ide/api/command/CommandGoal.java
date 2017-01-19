@@ -19,7 +19,4 @@ public interface CommandGoal {
 
     /** Returns goal ID. */
     String getId();
-
-    /** Returns goal's display name. */
-    String getDisplayName();
 }

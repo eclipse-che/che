@@ -85,6 +85,6 @@ public class PredefinedCommandGoalRegistryImpl implements PredefinedCommandGoalR
             return getDefaultGoal();
         }
 
-        return getGoalById(id).or(new BaseCommandGoal(id, id));
+        return getGoalById(id).or(new BaseCommandGoal(id));
     }
 }

@@ -88,12 +88,10 @@ public class SettingsPageViewImpl extends Composite implements SettingsPageView 
     @Override
     public void setProjects(Map<Project, Boolean> projects) {
         projectsPanel.clear();
-
         projectsSection.setVisible(!projects.isEmpty());
 
         for (final Map.Entry<Project, Boolean> entry : projects.entrySet()) {
             final Project project = entry.getKey();
-
             final ProjectSwitcher switcher = new ProjectSwitcher(project.getName());
 
             switcher.addValueChangeHandler(new ValueChangeHandler<Boolean>() {

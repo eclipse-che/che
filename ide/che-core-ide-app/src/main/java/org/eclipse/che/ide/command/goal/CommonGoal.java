@@ -23,7 +23,7 @@ import org.eclipse.che.ide.api.command.BaseCommandGoal;
 public class CommonGoal extends BaseCommandGoal {
 
     @Inject
-    public CommonGoal(GoalMessages messages) {
-        super("common", messages.goalCommonName());
+    public CommonGoal() {
+        super("Common");
     }
 }

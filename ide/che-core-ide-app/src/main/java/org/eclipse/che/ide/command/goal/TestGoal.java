@@ -22,7 +22,7 @@ import org.eclipse.che.ide.api.command.BaseCommandGoal;
 public class TestGoal extends BaseCommandGoal {
 
     @Inject
-    public TestGoal(GoalMessages messages) {
-        super("test", messages.goalTestName());
+    public TestGoal() {
+        super("Test");
     }
 }

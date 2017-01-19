@@ -61,7 +61,7 @@ public class CommandGoalNode extends SyntheticNode<CommandGoal> {
 
     @Override
     public String getName() {
-        return getData().getDisplayName();
+        return getData().getId();
     }
 
     @Override

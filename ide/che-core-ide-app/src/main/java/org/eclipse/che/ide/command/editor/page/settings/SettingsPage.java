@@ -182,7 +182,7 @@ public class SettingsPage extends AbstractCommandEditorPage implements SettingsP
 
             final Optional<CommandGoal> goalOptional = goalRegistry.getGoalById(goalId);
             if (!goalOptional.isPresent() && !isNullOrEmpty(goalId)) {
-                list.add(new BaseCommandGoal(goalId, goalId));
+                list.add(new BaseCommandGoal(goalId));
             }
         }
 

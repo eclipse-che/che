@@ -22,7 +22,7 @@ import org.eclipse.che.ide.api.command.BaseCommandGoal;
 public class BuildGoal extends BaseCommandGoal {
 
     @Inject
-    public BuildGoal(GoalMessages messages) {
-        super("build", messages.goalBuildName());
+    public BuildGoal() {
+        super("Build");
     }
 }

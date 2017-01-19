@@ -19,21 +19,6 @@ import com.google.gwt.i18n.client.Messages;
  */
 public interface GoalMessages extends Messages {
 
-    @Key("goal.build.name")
-    String goalBuildName();
-
-    @Key("goal.common.name")
-    String goalCommonName();
-
-    @Key("goal.deploy.name")
-    String goalDeployName();
-
-    @Key("goal.run.name")
-    String goalRunName();
-
-    @Key("goal.test.name")
-    String goalTestName();
-
     @Key("message.goal_already_registered")
     String messageGoalAlreadyRegistered(String id);
 }
