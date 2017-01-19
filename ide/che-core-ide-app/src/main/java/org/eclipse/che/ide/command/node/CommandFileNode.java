@@ -72,11 +72,6 @@ public class CommandFileNode extends AbstractCommandNode implements HasAction, V
     }
 
     @Override
-    public String getMediaType() {
-        return null;
-    }
-
-    @Override
     public boolean isReadOnly() {
         return false;
     }
