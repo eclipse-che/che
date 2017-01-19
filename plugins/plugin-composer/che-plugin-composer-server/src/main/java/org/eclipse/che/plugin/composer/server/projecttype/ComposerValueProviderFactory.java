@@ -48,6 +48,9 @@ public class ComposerValueProviderFactory implements ValueProviderFactory {
         @Override
         public List<String> getValues(String attributeName) throws ValueStorageException {
             try {
+                if (projectFolder.getChild("composer.json") == null) {
+                    return Collections.emptyList();
+                }
                 JsonObject model = readModel(projectFolder);
                 String value = "";
 

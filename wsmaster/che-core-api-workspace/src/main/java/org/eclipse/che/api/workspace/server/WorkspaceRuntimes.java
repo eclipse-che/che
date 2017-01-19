@@ -1024,7 +1024,10 @@ public class WorkspaceRuntimes {
 
         @Override
         public void started(Instance machine) throws ServerException {
-            launchAgents(machine, nameToMachine.get(machine.getConfig().getName()).getAgents());
+            ExtendedMachine extMachine = nameToMachine.get(machine.getConfig().getName());
+            if (extMachine != null) {
+                launchAgents(machine, extMachine.getAgents());
+            }
         }
     }
 
