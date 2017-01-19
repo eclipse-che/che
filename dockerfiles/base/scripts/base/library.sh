@@ -181,13 +181,13 @@ load_utilities_images_if_not_done() {
 update_image_if_not_found() {
   debug $FUNCNAME
 
-  text "${GREEN}INFO:${NC} (${CHE_MINI_PRODUCT_NAME} download): Checking for image '$1'..."
+  local CHECKING_TEXT="${GREEN}INFO:${NC} (${CHE_MINI_PRODUCT_NAME} download): Checking for image '$1'..."
   CURRENT_IMAGE=$(docker images -q "$1")
   if [ "${CURRENT_IMAGE}" == "" ]; then
-    text "not found\n"
+    text "${CHECKING_TEXT} not found\n"
     update_image $1
   else
-    text "found\n"
+    log "${CHECKING_TEXT} found"
   fi
 }
 
