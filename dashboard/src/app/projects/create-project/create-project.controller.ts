@@ -653,13 +653,14 @@ export class CreateProjectController {
         this.showAddSecretKeyDialog(projectData.source.location, workspaceId);
         return;
       }
-      this.$mdDialog.show(
-        this.$mdDialog.alert()
-          .title('Error while creating the project')
-          .content(error.statusText + ': ' + error.data.message)
-          .ariaLabel('Project creation')
-          .ok('OK')
-      );
+      this.$mdDialog.show({
+        bindToController: true,
+        clickOutsideToClose: true,
+        controller: 'ProjectErrorNotificationController',
+        controllerAs: 'projectErrorNotificationController',
+        locals: { title: 'Error while creating the project', content: error.statusText + ': ' + error.data.message},
+        templateUrl: 'app/projects/create-project/project-error-notification/project-error-notification.html'
+      });
     });
 
   }
@@ -716,15 +717,12 @@ export class CreateProjectController {
    * @param workspaceId  the workspace IDL
    */
   showAddSecretKeyDialog(repoURL: string, workspaceId: string): void {
-    let parentEl = angular.element(this.$document.find('body'));
-
     this.$mdDialog.show({
       bindToController: true,
       clickOutsideToClose: true,
-      controller: 'AddSecretKeyNotificationCtrl',
-      controllerAs: 'addSecretKeyNotificationCtrl',
+      controller: 'AddSecretKeyNotificationController',
+      controllerAs: 'addSecretKeyNotificationController',
       locals: {repoURL: repoURL, workspaceId: workspaceId},
-      parent: parentEl,
       templateUrl: 'app/projects/create-project/add-ssh-key-notification/add-ssh-key-notification.html'
     });
   }
