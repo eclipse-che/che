@@ -17,8 +17,8 @@ cmd_network() {
   info "--------   CONNECTIVITY TEST   --------"
   info "---------------------------------------"
   # Start a fake workspace agent
-  log "docker run -d -p 12345:80 --name fakeagent ${UTILITY_IMAGE_ALPINE} httpd -f -p 80 -h /etc/ >> \"${LOGS}\""
-  docker run -d -p 12345:80 --name fakeagent ${UTILITY_IMAGE_ALPINE} httpd -f -p 80 -h /etc/ >> "${LOGS}"
+  log "docker run -d -p 12345:80 --name fakeagent ${BOOTSTRAP_IMAGE_ALPINE} httpd -f -p 80 -h /etc/ >> \"${LOGS}\""
+  docker run -d -p 12345:80 --name fakeagent ${BOOTSTRAP_IMAGE_ALPINE} httpd -f -p 80 -h /etc/ >> "${LOGS}"
 
   AGENT_INTERNAL_IP=$(docker inspect --format='{{.NetworkSettings.IPAddress}}' fakeagent)
   AGENT_INTERNAL_PORT=80

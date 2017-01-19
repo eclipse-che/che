@@ -1,0 +1,4 @@
+UTILITY_IMAGE_CHEACTION=eclipse/che-action:latest
+UTILITY_IMAGE_CHEDIR=eclipse/che-dir:latest
+UTILITY_IMAGE_CHETEST=eclipse/che-test:latest
+UTILITY_IMAGE_CHEMOUNT=eclipse/che-mount:latest
