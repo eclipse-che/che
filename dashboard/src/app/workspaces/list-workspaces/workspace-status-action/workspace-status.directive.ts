@@ -25,13 +25,24 @@
  * @author Oleksii Orel
  */
 export class CheWorkspaceStatus {
+  restrict: string;
+  replace: boolean;
+
+  scope: {
+    [propName: string]: string
+  };
+
+  templateUrl: string;
+  controller: string;
+  controllerAs: string;
+  bindToController: boolean;
 
   /**
    * Default constructor.
    */
   constructor() {
     this.restrict = 'E';
-    this.replace= false;
+    this.replace = false;
 
     // scope values
     this.scope = {

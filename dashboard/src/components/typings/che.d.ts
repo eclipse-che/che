@@ -79,6 +79,8 @@ declare namespace _che {
     };
     config: IWorkspaceConfig;
     runtime?: IWorkspaceRuntime;
+    isLocked?: boolean;
+    usedResources: string;
   }
 
   export interface IWorkspaceConfig {
