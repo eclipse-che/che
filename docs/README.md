@@ -1,2 +1,1 @@
-# Eclipse Che Docs 
-REPLACE ME WITH INSTRUCTIONS ABOUT HOW TO VIEW, EDIT, AND CONTRIBUTE TO CHE DOCS.
+Docs are located in seperate repository [https://github.com/codenvy/che-docs](https://github.com/codenvy/che-docs).

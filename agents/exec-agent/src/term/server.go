@@ -28,7 +28,7 @@ import (
 	"fmt"
 	"github.com/eclipse/che-lib/pty"
 	"github.com/eclipse/che-lib/websocket"
-	"github.com/eclipse/che/exec-agent/rest"
+	"github.com/eclipse/che/agents/exec-agent/rest"
 	"io"
 	"io/ioutil"
 	"log"
@@ -37,8 +37,8 @@ import (
 	"os"
 	"os/exec"
 	"sync"
-	"unicode/utf8"
 	"syscall"
+	"unicode/utf8"
 )
 
 type wsPty struct {
@@ -57,11 +57,11 @@ type wsPty struct {
 // by default terminates them.
 func (wp *wsPty) Close(finalizer *ReadWriteRoutingFinalizer) {
 	closeFile(wp.PtyFile, finalizer)
-	pid := wp.Cmd.Process.Pid;
+	pid := wp.Cmd.Process.Pid
 
 	if pgid, err := syscall.Getpgid(pid); err == nil {
 		if err := syscall.Kill(-pgid, syscall.SIGHUP); err != nil {
-			fmt.Errorf("Failed to SIGHUP terminal process by pgid: '%s'. Cause: '%s'", pgid, err);
+			fmt.Errorf("Failed to SIGHUP terminal process by pgid: '%s'. Cause: '%s'", pgid, err)
 		}
 	}
 	if err := syscall.Kill(pid, syscall.SIGHUP); err != nil {
@@ -76,13 +76,13 @@ type WebSocketMessage struct {
 
 type ReadWriteRoutingFinalizer struct {
 	*sync.Mutex
-	readDone  bool
-	writeDone bool
+	readDone   bool
+	writeDone  bool
 	fileClosed bool
 }
 
 var (
-	upgrader = websocket.Upgrader {
+	upgrader = websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool {
 			return true
 		},
@@ -166,7 +166,7 @@ func sendConnectionInputToPty(conn *websocket.Conn, reader io.ReadCloser, wp *ws
 				continue
 			}
 			if msg.Type == "close" {
-				wp.Close(finalizer);
+				wp.Close(finalizer)
 				return
 			}
 			if errMsg := handleMessage(msg, f); errMsg != nil {

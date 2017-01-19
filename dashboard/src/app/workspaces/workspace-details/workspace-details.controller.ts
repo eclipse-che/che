@@ -183,6 +183,15 @@ export class WorkspaceDetailsController {
   }
 
   /**
+   * Returns the value of workspace auto-snapshot property.
+   * 
+   * @returns {boolean} workspace auto-snapshot property value
+   */
+  getAutoSnapshot(): boolean {
+    return this.cheWorkspace.getAutoSnapshotSettings();
+  }
+
+  /**
    * Fetches the workspace details.
    *
    * @returns {Promise}
@@ -497,7 +506,7 @@ export class WorkspaceDetailsController {
       .targetEvent(event);
     this.$mdDialog.show(confirm).then(() => {
       if (this.getWorkspaceStatus() === 'RUNNING') {
-        this.cheWorkspace.stopWorkspace(this.workspaceId);
+        this.cheWorkspace.stopWorkspace(this.workspaceId, false);
       }
 
       this.cheWorkspace.fetchStatusChange(this.workspaceId, 'STOPPED').then(() => {
@@ -552,7 +561,7 @@ export class WorkspaceDetailsController {
   }
 
   stopWorkspace(): void {
-    let promise = this.cheWorkspace.stopWorkspace(this.workspaceId);
+    let promise = this.cheWorkspace.stopWorkspace(this.workspaceId, this.getAutoSnapshot());
 
     promise.then(() => {}, (error: any) => {
       this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Stop workspace failed.');

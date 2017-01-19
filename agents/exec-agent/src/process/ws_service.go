@@ -14,7 +14,7 @@ package process
 import (
 	"encoding/json"
 	"errors"
-	"github.com/eclipse/che/exec-agent/rpc"
+	"github.com/eclipse/che/agents/exec-agent/rpc"
 	"math"
 	"time"
 )

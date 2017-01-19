@@ -12,7 +12,7 @@
 package process
 
 import (
-	"github.com/eclipse/che/exec-agent/rpc"
+	"github.com/eclipse/che/agents/exec-agent/rpc"
 	"time"
 )
 

@@ -75,6 +75,9 @@ import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.editor.orion.client.events.HasScrollHandlers;
 import org.eclipse.che.ide.editor.orion.client.events.ScrollEvent;
 import org.eclipse.che.ide.editor.orion.client.events.ScrollHandler;
+import org.eclipse.che.ide.editor.orion.client.incremental.find.IncrementalFindReportStatusObserver;
+import org.eclipse.che.ide.status.message.StatusMessageReporter;
+import org.eclipse.che.ide.editor.orion.client.jso.OrionEditorOptionsOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionAnnotationModelOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionAnnotationOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionCodeEditWidgetOverlay;
@@ -92,6 +95,7 @@ import org.eclipse.che.ide.editor.orion.client.jso.OrionRulerClickEventOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionSelectionOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionStyleOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionTextViewOverlay;
+import org.eclipse.che.ide.editor.orion.client.jso.StatusMessageReporterOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.UiUtilsOverlay;
 import org.eclipse.che.ide.editor.preferences.editorproperties.EditorPropertiesManager;
 import org.eclipse.che.ide.editor.preferences.keymaps.KeyMapsPreferencePresenter;
@@ -172,7 +176,10 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
                              final DialogFactory dialogFactory,
                              final PreferencesManager preferencesManager,
                              @Assisted final List<String> editorModes,
-                             @Assisted final WidgetInitializedCallback widgetInitializedCallback) {
+                             @Assisted final WidgetInitializedCallback widgetInitializedCallback,
+                             final Provider<OrionEditorOptionsOverlay> editorOptionsProvider,
+                             final StatusMessageReporter statusMessageReporter,
+                             final IncrementalFindReportStatusObserver incrementalFindObserver) {
         this.contentAssistWidgetFactory = contentAssistWidgetFactory;
         this.moduleHolder = moduleHolder;
         this.keyModeInstances = keyModeInstances;
@@ -193,8 +200,13 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
         panel.getElement().setId("orion-parent-" + Document.get().createUniqueId());
         panel.getElement().addClassName(this.editorElementStyle.editorParent());
 
-        orionCodeEditWidgetProvider.get().createEditorView(panel.getElement(), JavaScriptObject.createObject())
-                                   .then(new EditorViewCreatedOperation(widgetInitializedCallback));
+        OrionEditorOptionsOverlay editorOptions = initEditorOptions(editorOptionsProvider.get(), statusMessageReporter);
+
+        orionCodeEditWidgetProvider.get().createEditorView(panel.getElement(), editorOptions)
+                                         .then(new EditorViewCreatedOperation(widgetInitializedCallback));
+
+        incrementalFindObserver.setEditorWidget(this);
+        statusMessageReporter.registerObserver(incrementalFindObserver);
 
         registerPromptFunction();
         eventBus.addHandler(EditorSettingsChangedEvent.TYPE, new EditorSettingsChangedHandler() {
@@ -204,6 +216,13 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
                 editorViewOverlay.updateSettings(properties.getJavaScriptObject());
             }
         });
+    }
+
+    private OrionEditorOptionsOverlay initEditorOptions(OrionEditorOptionsOverlay orionEditorOptionsOverlay,
+                                                        StatusMessageReporter statusMessageReporter) {
+        StatusMessageReporterOverlay statusMessageReporterOverlay = StatusMessageReporterOverlay.create(statusMessageReporter);
+        orionEditorOptionsOverlay.setStatusReporter(statusMessageReporterOverlay);
+        return orionEditorOptionsOverlay;
     }
 
     private Gutter initBreakpointRuler(ModuleHolder moduleHolder) {

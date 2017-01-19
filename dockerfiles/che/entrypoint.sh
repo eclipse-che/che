@@ -264,12 +264,11 @@ init() {
   sed -i "/che.workspace.terminal_linux_amd64=/c\che.workspace.terminal_linux_amd64=${CHE_DATA_HOST}/lib/linux_amd64/terminal" $CHE_LOCAL_CONF_DIR/che.properties
   sed -i "/che.workspace.terminal_linux_arm7=/c\che.workspace.terminal_linux_arm7=${CHE_DATA_HOST}/lib/linux_arm7/terminal" $CHE_LOCAL_CONF_DIR/che.properties
 
-  # CHE_DOCKER_MACHINE_HOST_EXTERNAL must be set if you are in a VM.
-  HOSTNAME=${CHE_DOCKER_MACHINE_HOST_EXTERNAL:-$(get_docker_external_hostname)}
+  # CHE_DOCKER_IP_EXTERNAL must be set if you are in a VM.
+  HOSTNAME=${CHE_DOCKER_IP_EXTERNAL:-$(get_docker_external_hostname)}
   if has_external_hostname; then
     # Internal property used by Che to set hostname.
-    # See: LocalDockerInstanceRuntimeInfo.java#L9
-    export CHE_DOCKER_MACHINE_HOST_EXTERNAL=${HOSTNAME}
+    export CHE_DOCKER_IP_EXTERNAL=${HOSTNAME}
   fi
   ### Necessary to allow the container to write projects to the folder
   export CHE_WORKSPACE_STORAGE="${CHE_DATA_HOST}/workspaces"

@@ -471,8 +471,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                 docker.removeImage(RemoveImageParams.create(fullNameOfPulledImage).withForce(false));
             }
         } catch (IOException e) {
-            LOG.error(e.getLocalizedMessage(), e);
-            throw new MachineException("Can't create machine from image. Cause: " + e.getLocalizedMessage());
+            throw new MachineException("Can't create machine from image. Cause: " + e.getLocalizedMessage(), e);
         }
     }
 
