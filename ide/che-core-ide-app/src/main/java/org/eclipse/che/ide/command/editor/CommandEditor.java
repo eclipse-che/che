@@ -145,18 +145,29 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
     private void initializePages() {
         commandNameInitial = editedCommand.getName();
 
-        for (final CommandEditorPage page : pages) {
+        for (CommandEditorPage page : pages) {
+            page.edit(editedCommand);
+
             page.setDirtyStateListener(new CommandEditorPage.DirtyStateListener() {
                 @Override
                 public void onDirtyStateChanged() {
-                    updateDirtyState(page.isDirty());
+                    updateDirtyState(isDirtyPage());
 
-                    view.setSaveEnabled(page.isDirty());
+                    view.setSaveEnabled(isDirtyPage());
                 }
             });
-
-            page.edit(editedCommand);
         }
+    }
+
+    /** Checks whether any page is dirty. */
+    private boolean isDirtyPage() {
+        for (CommandEditorPage page : pages) {
+            if (page.isDirty()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Nullable

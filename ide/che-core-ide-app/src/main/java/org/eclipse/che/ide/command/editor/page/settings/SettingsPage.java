@@ -136,14 +136,10 @@ public class SettingsPage extends AbstractCommandEditorPage implements SettingsP
             return false;
         }
 
-        String goalId = editedCommand.getGoal();
-        if (isNullOrEmpty(goalId)) {
-            goalId = "";
-        }
-
+        final CommandGoal commandGoal = goalRegistry.getGoalForId(editedCommand.getGoal());
         final ApplicableContext applicableContext = editedCommand.getApplicableContext();
 
-        return !(goalInitial.equals(goalId) &&
+        return !(goalInitial.equals(commandGoal.getId()) &&
                  workspaceInitial == applicableContext.isWorkspaceApplicable() &&
                  applicableProjectsInitial.equals(applicableContext.getApplicableProjects()));
     }
