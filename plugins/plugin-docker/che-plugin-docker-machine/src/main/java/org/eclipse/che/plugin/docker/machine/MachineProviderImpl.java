@@ -134,7 +134,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
     private final long                                          cpuQuota;
     private final WindowsPathEscaper                            windowsPathEscaper;
     private final String[]                                      dnsResolvers;
-    private final String                                        cheUserId;
+    private final String                                        cheDockerUserId;
 
     @Inject
     public MachineProviderImpl(DockerConnectorProvider dockerProvider,
@@ -161,7 +161,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                WindowsPathEscaper windowsPathEscaper,
                                @Named("che.docker.extra_hosts") Set<Set<String>> additionalHosts,
                                @Nullable @Named("che.docker.dns_resolvers") String[] dnsResolvers,
-                               @Nullable @Named("che.docker.user_id") String cheUserId)
+                               @Nullable @Named("che.docker.user_id") String cheDockerUserId)
             throws IOException {
         this.docker = dockerProvider.get();
         this.dockerCredentials = dockerCredentials;
@@ -170,7 +170,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
         this.doForcePullOnBuild = doForcePullOnBuild;
         this.privilegedMode = privilegedMode;
         this.snapshotUseRegistry = snapshotUseRegistry;
-        this.cheUserId = cheUserId;
+        this.cheDockerUserId = cheDockerUserId;
         // use-cases:
         //  -1  enable unlimited swap
         //  0   disable swap
@@ -295,7 +295,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
 
             docker.startContainer(StartContainerParams.create(container));
 
-            if (!Strings.isNullOrEmpty(cheUserId)) {
+            if (!Strings.isNullOrEmpty(cheDockerUserId)) {
                 changeWorkingDirOwner(container, machineLogger);
             }
 
@@ -552,7 +552,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
               .withEntrypoint(toArrayIfNotNull(service.getEntrypoint()))
               .withLabels(service.getLabels())
               .withNetworkingConfig(networkingConfig)
-              .withUser(cheUserId)
+              .withUser(cheDockerUserId)
               .withEnv(service.getEnvironment()
                               .entrySet()
                               .stream()
