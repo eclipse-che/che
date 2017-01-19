@@ -37,7 +37,7 @@
                         <exclude>src/static/term.js</exclude>
                         <exclude>src/.idea/**</exclude>
                         <exclude>src/exec</exclude>
-                        <exclude>src/exec-agent.iml</exclude>
+                        <exclude>src/*.iml</exclude>
                     </excludes>
                 </configuration>
             </plugin>
