@@ -279,9 +279,9 @@ get_image_manifest() {
   fi
 
   # Load images from file
-  BOOTSTRAP_IMAGE_LIST=$(cat /version/$1/images-bootstrap)
+  BOOTSTRAP_IMAGE_LIST=$(cat ${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}/images/images-bootstrap)
   IMAGE_LIST=$(cat /version/$1/images)
-  UTILITY_IMAGE_LIST=$(cat /version/$1/images-utilities)
+  UTILITY_IMAGE_LIST=$(cat ${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}/images/images-utilities)
 
   # set variables
   set_variables_images_list "${BOOTSTRAP_IMAGE_LIST}"
