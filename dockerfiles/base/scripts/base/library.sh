@@ -88,7 +88,7 @@ initiate_offline_or_network_mode(){
   # If you are using ${CHE_FORMAL_PRODUCT_NAME} in offline mode, images must be loaded here
   # This is the point where we know that docker is working, but before we run any utilities
   # that require docker.
-  if [[ "$@" == *"--offline"* ]]; then
+  if is_offline; then
     info "init" "Importing ${CHE_MINI_PRODUCT_NAME} Docker images from tars..."
 
     if [ ! -d ${CHE_CONTAINER_OFFLINE_FOLDER} ]; then
@@ -109,7 +109,7 @@ initiate_offline_or_network_mode(){
     # If we are here, then we want to run in networking mode.
     # If we are in networking mode, we have had some issues where users have failed DNS networking.
     # See: https://github.com/eclipse/che/issues/3266#issuecomment-265464165
-    if [[ "${FAST_BOOT}" = "false" ]]; then
+    if ! is_fast; then
       info "cli" "Checking network... (hint: '--fast' skips version, network, and nightly checks)"
       local HTTP_STATUS_CODE=$(curl -I -k dockerhub.com -s -o /dev/null --write-out '%{http_code}')
       if [[ ! $HTTP_STATUS_CODE -eq "301" ]]; then
