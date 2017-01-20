@@ -46,6 +46,7 @@ export class CheListHeader {
       onDelete: '&?cheOnDelete',
       filterValues: '=?cheFilterValues',
       onFilterChanged: '=?cheOnFilterChanged',
+      hideAdd: '=?cheHideAdd',
       hideDelete: '=?cheHideDelete',
       hideSearch: '=?cheHideSearch',
       hideHeader:'=?cheHideHeader',
