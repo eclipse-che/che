@@ -12,6 +12,7 @@
 
 const COMPOSE = 'compose';
 const DOCKERFILE = 'dockerfile';
+const DOCKERIMAGE = 'dockerimage';
 
 /**
  * This class is handling the data for stack validation
@@ -174,7 +175,7 @@ export class StackValidationService {
    */
   getMachineValidation(machine: che.IEnvironmentMachine): che.IValidation {
     let mandatoryKeys: Array<string> = ['attributes'];
-    let additionalKeys: Array<string> = ['agents', 'servers'];
+    let additionalKeys: Array<string> = ['agents', 'servers', 'source'];
     let validKeys: Array<string> = mandatoryKeys.concat(additionalKeys);
     let errors: Array<string> = [];
     let isValid: boolean = true;
@@ -207,8 +208,8 @@ export class StackValidationService {
    * @returns {IValidation}
    */
   getRecipeValidation(recipe: che.IRecipe): che.IValidation {
-    let mandatoryKeys: Array<string> = ['content', 'type'];
-    let additionalKeys: Array<string> = ['contentType'];
+    let mandatoryKeys: Array<string> = ['type'];
+    let additionalKeys: Array<string> = ['content', 'location', 'contentType'];
     let validKeys: Array<string> = mandatoryKeys.concat(additionalKeys);
     let errors: Array<string> = [];
     let isValid: boolean = true;
@@ -232,14 +233,34 @@ export class StackValidationService {
       }
     });
     if (DOCKERFILE === recipe.type) {
-      if (!/^FROM\s+\w+/m.test(recipe.content)) {
+      if (!recipe.content || !recipe.contentType || !/^FROM\s+\w+/m.test(recipe.content)) {
         isValid = false;
         errors.push('The dockerfile is invalid.');
+        if (!recipe.content) {
+          errors.push('Unknown recipe content.');
+        }
+        if (!recipe.contentType) {
+          errors.push('Unknown recipe contentType.');
+        }
       }
     } else if (COMPOSE === recipe.type) {
-      if (!/^services:\n/m.test(recipe.content)) {
+      if (!recipe.content || !recipe.contentType || !/^services:\n/m.test(recipe.content)) {
         isValid = false;
         errors.push('The composefile is invalid.');
+        if (!recipe.content) {
+          errors.push('Unknown recipe content.');
+        }
+        if (!recipe.contentType) {
+          errors.push('Unknown recipe contentType.');
+        }
+      }
+    } else if (DOCKERIMAGE === recipe.type) {
+      if (!recipe.location || /^FROM\s+\w+/m.test(recipe.location) || /^services:\n/m.test(recipe.location)) {
+        isValid = false;
+        errors.push('The dockerimage is invalid.');
+        if (!recipe.location) {
+          errors.push('Unknown recipe location.');
+        }
       }
     } else {
       isValid = false;
