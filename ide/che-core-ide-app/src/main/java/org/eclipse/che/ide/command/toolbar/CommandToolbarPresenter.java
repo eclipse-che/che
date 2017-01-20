@@ -73,7 +73,7 @@ public class CommandToolbarPresenter implements Presenter, CommandToolbarView.Ac
 
             @Override
             public void onCommandUpdated(ContextualCommand previousCommand, ContextualCommand command) {
-
+                updateCommands();
             }
 
             @Override
