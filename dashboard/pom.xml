@@ -69,18 +69,6 @@
                                 <exec dir="${basedir}" executable="npm" failonerror="true">
                                     <arg value="install" />
                                 </exec>
-                                <!-- Download Typings dependencies -->
-                                <exec dir="${basedir}" executable="typings" failonerror="true">
-                                    <arg value="install" />
-                                </exec>
-                                <!-- Download Bower dependencies -->
-                                <exec dir="${basedir}" executable="bower" failonerror="true">
-                                    <arg value="install" />
-                                </exec>
-                                <!-- Build the application -->
-                                <exec dir="${basedir}" executable="gulp" failonerror="true">
-                                    <arg value="build" />
-                                </exec>
                                 <!-- Change base HREF of the application that will be hosted on /dashboard -->
                                 <replace file="${basedir}/dist/index.html">
                                     <replacetoken><![CDATA[<base href="/">]]></replacetoken>
