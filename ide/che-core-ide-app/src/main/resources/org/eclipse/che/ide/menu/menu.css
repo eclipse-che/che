@@ -75,12 +75,12 @@
 }
 
 .rightPanel {
-    float: right;
+    float: left;
     height: inherit;
     white-space: nowrap;
 }
 
-.rightPanel .customComponent {
+.customComponent {
     float: right;
 }
 

@@ -147,4 +147,14 @@ public class FontAwesome {
      */
     public static final String PAUSE = "<i class=\"fa fa-pause\"></i>";
 
+    /**
+     * http://fontawesome.io/icon/play/
+     */
+    public static final String PLAY = "<i class=\"fa fa-play\"></i>";
+
+    /**
+     * http://fontawesome.io/icon/bug/
+     */
+    public static final String BUG = "<i class=\"fa fa-bug\"></i>";
+
 }

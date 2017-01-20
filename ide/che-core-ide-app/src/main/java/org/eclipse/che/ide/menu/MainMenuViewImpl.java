@@ -14,13 +14,14 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionGroup;
@@ -32,6 +33,7 @@ import org.eclipse.che.ide.api.action.Presentation;
 import org.eclipse.che.ide.api.action.Separator;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
+import org.eclipse.che.ide.command.toolbar.CommandToolbarPresenter;
 import org.eclipse.che.ide.ui.toolbar.CloseMenuHandler;
 import org.eclipse.che.ide.ui.toolbar.MenuLockLayer;
 import org.eclipse.che.ide.ui.toolbar.PresentationFactory;
@@ -75,7 +77,6 @@ public class MainMenuViewImpl extends Composite implements MainMenuView, CloseMe
 
     private List<Action> leftVisibleActions  = new ArrayList<>();
     private List<Action> menuVisibleActions  = new ArrayList<>();
-    private List<Action> rightVisibleActions = new ArrayList<>();
     private ActionManager   actionManager;
     private KeyBindingAgent keyBindingAgent;
 
@@ -84,7 +85,8 @@ public class MainMenuViewImpl extends Composite implements MainMenuView, CloseMe
     public MainMenuViewImpl(MenuResources resources,
                             ActionManager actionManager,
                             KeyBindingAgent keyBindingAgent,
-                            Provider<PerspectiveManager> managerProvider) {
+                            Provider<PerspectiveManager> managerProvider,
+                            CommandToolbarPresenter toolbarPresenter) {
         this.resources = resources;
         this.actionManager = actionManager;
         this.keyBindingAgent = keyBindingAgent;
@@ -101,6 +103,12 @@ public class MainMenuViewImpl extends Composite implements MainMenuView, CloseMe
         rootPanel.add(table);
         rightPanel.addStyleName(resources.menuCss().rightPanel());
         rootPanel.add(rightPanel);
+        toolbarPresenter.go(new AcceptsOneWidget() {
+            @Override
+            public void setWidget(IsWidget w) {
+                rightPanel.add(w);
+            }
+        });
     }
 
     @Override
@@ -133,15 +141,6 @@ public class MainMenuViewImpl extends Composite implements MainMenuView, CloseMe
                 add(action, presentationFactory);
             }
             menuVisibleActions = newMenuVisibleActions;
-        }
-        List<Action> newRightVisibleActions = new ArrayList<>();
-        expandActionGroup(IdeActions.GROUP_RIGHT_MAIN_MENU, newRightVisibleActions, actionManager);
-        if (!newRightVisibleActions.equals(rightVisibleActions)) {
-            rightPanel.clear();
-            for (Action action : newRightVisibleActions) {
-                addToPanel(rightPanel, action, presentationFactory);
-            }
-            rightVisibleActions = newRightVisibleActions;
         }
         List<Action> newLeftVisibleActions = new ArrayList<>();
         expandActionGroup(IdeActions.GROUP_LEFT_MAIN_MENU, newLeftVisibleActions, actionManager);

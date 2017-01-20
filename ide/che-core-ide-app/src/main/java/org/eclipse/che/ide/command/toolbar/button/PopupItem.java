@@ -8,27 +8,17 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.ui.dropdown;
+package org.eclipse.che.ide.command.toolbar.button;
 
 import javax.validation.constraints.NotNull;
 
 /**
- * The factory for creating drop down list.
  *
- * @author Valeriy Svydenko
  */
-public interface DropDownListFactory {
+public interface PopupItem {
 
-    /**
-     * Create an instance of {@link DropDownWidget} managing action group registered in action manager.
-     *
-     * @param actionGroupId
-     *          identifier of {@link org.eclipse.che.ide.api.action.ActionGroup} registered in action manager
-     *
-     * @return
-     *          an instance of {@link DropDownWidget}
-     */
     @NotNull
-    DropDownWidget createDropDown(@NotNull String actionGroupId);
+    String getName();
 
+    boolean isDisabled();
 }

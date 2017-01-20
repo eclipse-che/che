@@ -44,6 +44,7 @@ public interface IdeActions {
 
     String GROUP_OTHER_MENU                     = "otherMenu";
     String GROUP_LEFT_MAIN_MENU                 = "leftMainMenu";
+    @Deprecated
     String GROUP_RIGHT_MAIN_MENU                = "rightMainMenu";
 
     String GROUP_CENTER_STATUS_PANEL            = "centerStatusPanelGroup";

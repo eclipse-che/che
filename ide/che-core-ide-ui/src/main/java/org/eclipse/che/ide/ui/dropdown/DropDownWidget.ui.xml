@@ -37,7 +37,7 @@
 
     <g:FlowPanel ui:field="listHeader" debugId="dropDownHeader" styleName="{style.widget}">
         <g:FlowPanel ui:field="selectedElement" addStyleNames="{style.container}">
-            <g:Label ui:field="selectedElementName" addStyleNames="{style.selectedElementName}"/>
+            <g:FlowPanel ui:field="selectedElementName" addStyleNames="{style.selectedElementName}"/>
         </g:FlowPanel>
         <g:FlowPanel addStyleNames="{style.imagePanel}">
             <g:FlowPanel ui:field="marker"/>
