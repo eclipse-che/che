@@ -192,6 +192,14 @@ local_repo() {
   fi
 }
 
+local_assembly() {
+  if [ "${CHE_LOCAL_ASSEMBLY}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
 check_docker() {
   if ! has_docker; then
     error "Docker not found. Get it at https://docs.docker.com/engine/installation/."
@@ -285,6 +293,7 @@ check_mounts() {
   INSTANCE_MOUNT=$(get_container_folder ":${CHE_CONTAINER_ROOT}/instance")
   BACKUP_MOUNT=$(get_container_folder ":${CHE_CONTAINER_ROOT}/backup")
   REPO_MOUNT=$(get_container_folder ":/repo")
+  ASSEMBLY_MOUNT=$(get_container_folder ":/assembly")
   SYNC_MOUNT=$(get_container_folder ":/sync")
   UNISON_PROFILE_MOUNT=$(get_container_folder ":/unison")
   CHEDIR_MOUNT=$(get_container_folder ":/chedir")
@@ -354,7 +363,7 @@ check_mounts() {
   ### DEV MODE VARIABLES
   CHE_LOCAL_REPO=false
   if [[ "${REPO_MOUNT}" != "not set" ]]; then
-    info "cli" ":/repo mounted - using binaries from your local repository"
+    info "cli" ":/repo mounted - using assembly and manifests from your local repository"
 
     CHE_LOCAL_REPO=true
     CHE_HOST_DEVELOPMENT_REPO="${REPO_MOUNT}"
@@ -371,7 +380,7 @@ check_mounts() {
       info ""
       info "Please check the path you mounted to verify that is a valid $CHE_FORMAL_PRODUCT_NAME git repository."
       info ""
-      info "Simplest syntax::"
+      info "Simplest syntax:"
       info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock"
       info "                      -v <YOUR_LOCAL_PATH>:${CHE_CONTAINER_ROOT}"
       info "                      -v <YOUR_${CHE_PRODUCT_NAME}_REPO>:/repo"
@@ -387,8 +396,35 @@ check_mounts() {
       info "                         ${CHE_IMAGE_FULLNAME} $*"
       return 2
     fi
+
+    CHE_CONTAINER_ASSEMBLY_FULL_PATH="${CHE_CONTAINER_DEVELOPMENT_REPO}"/"${CHE_ASSEMBLY_IN_REPO}"
   elif debug_server; then
     warning "Debugging activated without ':/repo' mount - using binaries inside Docker image"
+  fi
+
+  CHE_LOCAL_ASSEMBLY=false
+  if [[ "${ASSEMBLY_MOUNT}" != "not set" ]]; then
+    info "cli" ":/assembly mounted - using assembly from local host"
+
+    CHE_LOCAL_ASSEMBLY=true
+    CHE_ASSEMBLY="${CHE_HOST_INSTANCE}/dev/${CHE_MINI_PRODUCT_NAME}-tomcat"
+
+    CHE_CONTAINER_ASSEMBLY="/assembly"
+    if [[ ! -d "${CHE_CONTAINER_ASSEMBLY}" ]]; then
+      info "Welcome to $CHE_FORMAL_PRODUCT_NAME!"
+      info ""
+      info "You volume mounted ':/assembly', but we could not find a valid assembly."
+      info ""
+      info "Please check the path you mounted."
+      info ""
+      info "Syntax:"
+      info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock"
+      info "                      -v <YOUR_LOCAL_PATH>:${CHE_CONTAINER_ROOT}"
+      info "                      -v <YOUR_${CHE_PRODUCT_NAME}_ASSEMBLY>:/assembly"
+      info "                         ${CHE_IMAGE_FULLNAME} $*"
+      return 2
+    fi
+    CHE_CONTAINER_ASSEMBLY_FULL_PATH="${CHE_CONTAINER_ASSEMBLY}"
   fi
 }
 
