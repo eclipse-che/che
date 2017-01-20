@@ -149,13 +149,15 @@ public class CommandToolbarViewImpl implements CommandToolbarView {
             if (lastSelectedItem != null) {
                 return lastSelectedItem;
             }
+
+            // TODO: return MachinePopupItem
             return new CommandPopupItem(commands.iterator().next());
         }
 
         @Override
         public List<PopupItem> getItems() {
             List<PopupItem> result = new ArrayList<>(commands.size());
-            if (lastSelectedItem != null) {
+            if (lastSelectedItem != null && lastSelectedItem instanceof  MachinePopupItem) {
                 result.add(new MachinePopupItem((MachinePopupItem) lastSelectedItem));
             }
             for (ContextualCommand command : commands) {

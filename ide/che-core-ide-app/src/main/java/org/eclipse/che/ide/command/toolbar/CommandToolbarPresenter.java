@@ -20,6 +20,7 @@ import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.command.PredefinedCommandGoalRegistry;
 import org.eclipse.che.ide.api.mvp.Presenter;
 import org.eclipse.che.ide.command.CommandUtils;
+import org.eclipse.che.ide.command.goal.RunGoal;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -39,19 +40,22 @@ public class CommandToolbarPresenter implements Presenter, CommandToolbarView.Ac
     private final CommandUtils commandUtils;
     private final PredefinedCommandGoalRegistry commandGoalRegistry;
     private final Provider<CommandExecutor> commandExecutor;
+    private final RunGoal runGoal;
 
     @Inject
     public CommandToolbarPresenter(final CommandToolbarView view,
                                    final CommandManager commandManager,
                                    final CommandUtils commandUtils,
                                    final PredefinedCommandGoalRegistry commandGoalRegistry,
-                                   final Provider<CommandExecutor> commandExecutor) {
+                                   final Provider<CommandExecutor> commandExecutor,
+                                   final RunGoal runGoal) {
 
         this.view = view;
         this.commandManager = commandManager;
         this.commandUtils = commandUtils;
         this.commandGoalRegistry = commandGoalRegistry;
         this.commandExecutor = commandExecutor;
+        this.runGoal = runGoal;
         view.setDelegate(this);
 
         commandManager.addCommandLoadedListener(new CommandManager.CommandLoadedListener() {
@@ -81,7 +85,7 @@ public class CommandToolbarPresenter implements Presenter, CommandToolbarView.Ac
 
     private void updateCommands() {
         Map<CommandGoal, List<ContextualCommand>> goalListMap = commandUtils.groupCommandsByGoal(commandManager.getCommands());
-        Optional<CommandGoal> run = commandGoalRegistry.getGoalById("run");
+        Optional<CommandGoal> run = commandGoalRegistry.getGoalById(runGoal.getId());
         if (run.isPresent()) {
             List<ContextualCommand> commands = goalListMap.get(run.get());
             view.setRunCommands(commands);
