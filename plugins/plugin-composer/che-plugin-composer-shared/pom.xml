@@ -125,7 +125,7 @@
                             <impl>server</impl>
                         </configuration>
                     </execution>
-                   <execution>
+                    <execution>
                         <id>dto-client</id>
                         <phase>process-sources</phase>
                         <goals>
