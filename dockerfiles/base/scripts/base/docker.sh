@@ -233,12 +233,14 @@ check_docker() {
   # Detect version so that we can provide better error warnings
   DEFAULT_CHE_VERSION=$(cat "/version/latest.ver")
   CHE_IMAGE_FULLNAME=$(docker inspect --format='{{.Config.Image}}' $(get_this_container_id))
-  CHE_IMAGE_NAME=$(echo "${CHE_IMAGE_FULLNAME}" | cut -d : -f1 -s)
+
+  # Note - cut command here fails if there is no colon : in the image
+  CHE_IMAGE_NAME=${CHE_IMAGE_FULLNAME%:*}
   CHE_IMAGE_VERSION=$(echo "${CHE_IMAGE_FULLNAME}" | cut -d : -f2 -s)
   if [[ "${CHE_IMAGE_VERSION}" = "" ]] ||
      [[ "${CHE_IMAGE_VERSION}" = "latest" ]]; then
-     warning "You are using CLI image version 'latest' which is set to '$DEFAULT_CHE_VERSION'."
     CHE_IMAGE_VERSION=$DEFAULT_CHE_VERSION
+    warning "Bound '$CHE_IMAGE_NAME' to '$CHE_IMAGE_NAME:$CHE_IMAGE_VERSION'"
   else
     CHE_IMAGE_VERSION=$CHE_IMAGE_VERSION
   fi

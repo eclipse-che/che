@@ -344,8 +344,16 @@ verify_version_compatibility() {
   ##      - If they don't match and one is nightly, fail
   ##      - If they don't match, then if CLI is older fail with message to get proper CLI
   ##      - If they don't match, then if CLLI is newer fail with message to run upgrade first
-
   CHE_IMAGE_VERSION=$(get_image_version)
+
+  # Only check for newer versions if not in offline mode.
+  if ! is_offline; then
+    NEWER=$(compare_versions $CHE_IMAGE_VERSION)
+
+    if [[ "${NEWER}" != "" ]]; then
+      warning "Newer version '$NEWER' available"
+    fi
+  fi
 
   if is_initialized; then
     COMPARE_CLI_ENV=$(compare_cli_version_to_installed_version)
