@@ -10,14 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.toolbar;
 
-import com.google.common.base.Optional;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.ContextualCommand;
-import org.eclipse.che.ide.api.command.PredefinedCommandGoalRegistry;
 import org.eclipse.che.ide.api.mvp.Presenter;
 import org.eclipse.che.ide.command.CommandUtils;
 import org.eclipse.che.ide.command.goal.RunGoal;
@@ -25,6 +24,7 @@ import org.eclipse.che.ide.command.goal.RunGoal;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -38,7 +38,6 @@ public class CommandToolbarPresenter implements Presenter, CommandToolbarView.Ac
     private CommandToolbarView view;
     private final CommandManager commandManager;
     private final CommandUtils commandUtils;
-    private final PredefinedCommandGoalRegistry commandGoalRegistry;
     private final Provider<CommandExecutor> commandExecutor;
     private final RunGoal runGoal;
 
@@ -46,14 +45,12 @@ public class CommandToolbarPresenter implements Presenter, CommandToolbarView.Ac
     public CommandToolbarPresenter(final CommandToolbarView view,
                                    final CommandManager commandManager,
                                    final CommandUtils commandUtils,
-                                   final PredefinedCommandGoalRegistry commandGoalRegistry,
                                    final Provider<CommandExecutor> commandExecutor,
                                    final RunGoal runGoal) {
 
         this.view = view;
         this.commandManager = commandManager;
         this.commandUtils = commandUtils;
-        this.commandGoalRegistry = commandGoalRegistry;
         this.commandExecutor = commandExecutor;
         this.runGoal = runGoal;
         view.setDelegate(this);
@@ -84,12 +81,10 @@ public class CommandToolbarPresenter implements Presenter, CommandToolbarView.Ac
     }
 
     private void updateCommands() {
-        Map<CommandGoal, List<ContextualCommand>> goalListMap = commandUtils.groupCommandsByGoal(commandManager.getCommands());
-        Optional<CommandGoal> run = commandGoalRegistry.getGoalById(runGoal.getId());
-        if (run.isPresent()) {
-            List<ContextualCommand> commands = goalListMap.get(run.get());
-            view.setRunCommands(commands);
-        }
+        final Map<CommandGoal, List<ContextualCommand>> commandsByGoal = commandUtils.groupCommandsByGoal(commandManager.getCommands());
+        final List<ContextualCommand> runCommands = commandsByGoal.get(runGoal);
+
+        view.setRunCommands(runCommands != null ? runCommands : Collections.<ContextualCommand>emptyList());
     }
 
     @Override
