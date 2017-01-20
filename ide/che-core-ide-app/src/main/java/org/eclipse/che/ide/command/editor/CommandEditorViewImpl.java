@@ -78,8 +78,8 @@ public class CommandEditorViewImpl extends Composite implements CommandEditorVie
         panel.setAnimationEnabled(true);
         panel.setContent(page.asWidget());
 
-        // expand the 2`st panel only
-        if (pagesPanel.getWidgetCount() == 1) {
+        // expand the 2`st and 3`rd panel only
+        if (pagesPanel.getWidgetCount() == 1 || pagesPanel.getWidgetCount() == 2) {
             panel.setOpen(true);
         }
 

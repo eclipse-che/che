@@ -113,8 +113,8 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
 
         pages = new LinkedList<>();
         pages.add(namePage);
-        pages.add(settingsPage);
         pages.add(commandLinePage);
+        pages.add(settingsPage);
         pages.add(previewUrlPage);
     }
 
