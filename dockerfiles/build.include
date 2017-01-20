@@ -5,16 +5,37 @@
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
 
+skip_tests() {
+  for i in "$@" ; do
+    if [ $i = "--skip-tests" ]; then
+      echo "true"
+      exit 0
+    fi
+  done
+  echo "false"
+}
+
+get_tag() {
+  for i in "$@" ; do
+    if [ $i != "--skip-tests" ]; then
+      echo $i
+      exit 0
+    fi
+  done
+}
+
 init() {
   BLUE='\033[1;34m'
   GREEN='\033[0;32m'
   RED='\033[0;31m'
   NC='\033[0m'
-  if [ $# -eq 0 ] ; then
+  
+  tmp=$(get_tag "$@")
+  if [ ! -z "$tmp" ]; then
+    TAG=$tmp
+  else 
     TAG="nightly"
     echo "No tag provided, using nightly as default"
-  else
-    TAG=${1}
   fi
 }
 
