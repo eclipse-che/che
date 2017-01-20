@@ -79,6 +79,11 @@ public abstract class AbstractPageWithTextEditor extends AbstractCommandEditorPa
                     case PROP_INPUT:
                         editor.go(view.getEditorContainer());
 
+                        editor.getEditorWidget().setAnnotationRulerVisible(false);
+                        editor.getEditorWidget().setFoldingRulerVisible(false);
+                        editor.getEditorWidget().setZoomRulerVisible(false);
+                        editor.getEditorWidget().setOverviewRulerVisible(false);
+
                         break;
                     case PROP_DIRTY:
                         updateCommandPropertyValue(editor.getDocument().getContents());

@@ -285,6 +285,26 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
     }
 
     @Override
+    public void setAnnotationRulerVisible(boolean show) {
+        editorOverlay.setAnnotationRulerVisible(show);
+    }
+
+    @Override
+    public void setFoldingRulerVisible(boolean show) {
+        editorOverlay.setFoldingRulerVisible(show);
+    }
+
+    @Override
+    public void setZoomRulerVisible(boolean show) {
+        editorOverlay.setZoomRulerVisible(show);
+    }
+
+    @Override
+    public void setOverviewRulerVisible(boolean show) {
+        editorOverlay.setOverviewRulerVisible(show);
+    }
+
+    @Override
     public boolean isDirty() {
         return this.editorOverlay.isDirty();
     }
