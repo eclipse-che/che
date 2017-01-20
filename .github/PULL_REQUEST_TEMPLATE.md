@@ -9,21 +9,12 @@ Pull Request Policy: https://github.com/eclipse/che/wiki/Development-Workflow#pu
 ### What issues does this PR fix or reference?
 
 
-### Previous behavior
-<!-- Remove this section if not relevant -->
-
-### New behavior
-
-
-### Tests written?
-Yes/No
-
 ### Changelog and Release Note Information
-**Changelog Snippet**:
+**Changelog**:<!-- one line entry to be added to changelog -->
 
-**Release Note Summary**:
+**Release Notes**:<!-- markdown to be included in marketing announcement - N/A for bugs -->
 
 
-### Docs updated?
+### Docs Pull Request
 <!-- Please add a matching PR to [the docs repo](http://github.com/eclipse/che-docs) and link that PR to this issue.
 Both will be merged at the same time. -->
