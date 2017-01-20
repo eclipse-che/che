@@ -367,14 +367,14 @@ cli_init() {
 
   # Do not perform a version compatibility check if running upgrade command.
   # The upgrade command has its own internal checks for version compatibility.
-  if [ $1 != "upgrade" ]; then
-  	if ! is_fast; then
+  if [[ "$@" == *"upgrade"* ]]; then
+    verify_version_upgrade_compatibility
+  else
+    if ! is_fast; then
       verify_version_compatibility
     else
       warning "Skipping version compatibility check..."
     fi
-  else
-    verify_version_upgrade_compatibility
   fi
 }
 
