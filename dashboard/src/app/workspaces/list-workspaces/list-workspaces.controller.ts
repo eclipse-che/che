@@ -23,6 +23,7 @@ import {CheNamespaceRegistry} from '../../../components/api/namespace/che-namesp
 export class ListWorkspacesCtrl {
   $q: ng.IQService;
   $log: ng.ILogService;
+  lodash: any;
   $mdDialog: ng.material.IDialogService;
   cheAPI: CheAPI;
   cheNotification: CheNotification;
@@ -50,11 +51,13 @@ export class ListWorkspacesCtrl {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($log: ng.ILogService, $mdDialog: ng.material.IDialogService, $q: ng.IQService, $rootScope: che.IRootScopeService,
-              cheAPI: CheAPI, cheNotification: CheNotification, cheWorkspace: CheWorkspace, cheNamespaceRegistry: CheNamespaceRegistry) {
+  constructor($log: ng.ILogService, $mdDialog: ng.material.IDialogService, $q: ng.IQService, lodash: any,
+              $rootScope: che.IRootScopeService, cheAPI: CheAPI, cheNotification: CheNotification,
+              cheWorkspace: CheWorkspace, cheNamespaceRegistry: CheNamespaceRegistry) {
     this.cheAPI = cheAPI;
     this.$q = $q;
     this.$log = $log;
+    this.lodash = lodash;
     this.$mdDialog = $mdDialog;
     this.cheNotification = cheNotification;
     this.cheWorkspace = cheWorkspace;
@@ -343,7 +346,7 @@ export class ListWorkspacesCtrl {
    * @returns {Array} array of namespaces
    */
   getNamespaces() {
-    let namespaces = this.cheNamespaceRegistry.getNamespaces();
+    let namespaces = this.lodash.pluck(this.cheNamespaceRegistry.getNamespaces(), 'id');
     if (namespaces.length > 0) {
       return [this.ALL_NAMESPACES].concat(namespaces);
     }
