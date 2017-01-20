@@ -24,6 +24,7 @@ import {ValidatorConfig} from './validator/validator-config';
 import {WidgetConfig} from './widget/widget-config';
 
 import {CheStepsContainer} from './steps-container/steps-container.directive';
+import {CheErrorMessagesConfig} from './error-messages/che-error-messages-config';
 
 export class ComponentsConfig {
 
@@ -39,6 +40,7 @@ export class ComponentsConfig {
     new RoutingConfig(register);
     new ValidatorConfig(register);
     new WidgetConfig(register);
+    new CheErrorMessagesConfig(register);
 
     register.directive('cheStepsContainer', CheStepsContainer);
   }

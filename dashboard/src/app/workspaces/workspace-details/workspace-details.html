@@ -6,7 +6,7 @@
                       che-button-title="Open"
                       href="#/ide/{{workspaceDetailsController.namespace}}/{{workspaceDetailsController.workspaceName}}"></che-button-default>
   <workspace-edit-mode-toolbar-button ng-if="workspaceDetailsController.editMode"
-                                      workspace-edit-mode-message="Changes will be applied and workspace restarted"
+                                      workspace-edit-mode-message="{{workspaceDetailsController.isSaveButtonDisabled() ? '' : 'Changes will be applied and workspace restarted'}}"
                                       workspace-edit-mode-show-message="workspaceDetailsController.showApplyMessage"
                                       workspace-edit-disable-save-button="workspaceDetailsController.isSaveButtonDisabled()"
                                       workspace-edit-mode-on-save="workspaceDetailsController.saveWorkspace()"></workspace-edit-mode-toolbar-button>
@@ -32,7 +32,8 @@
           <!-- Name -->
           <che-label-container che-label-name="Workspace name">
             <div layout="column" class="workspace-details-input">
-              <ng-form flex layout="column" name="workspaceNameForm">
+              <ng-form flex layout="column"
+                       name="workspaceNameForm">
                 <che-input ng-init="workspaceDetailsController.setForm(workspaceDetailsController.tab.Settings, workspaceNameForm)"
                            che-form="workspaceNameForm"
                            che-name="name"
@@ -40,18 +41,21 @@
                            aria-label="Name of the workspace"
                            ng-model="workspaceDetailsController.newName"
                            ng-change="workspaceDetailsController.updateName(workspaceNameForm)"
-                           ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 2000, 'blur': 0 } }"
+                           ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 2000, 'blur': 0 }, allowInvalid: true }"
                            required
                            unique-workspace-name="workspaceDetailsController.workspaceName"
                            ng-minlength="3"
                            ng-maxlength="20"
                            ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
-                  <div ng-message="required">A name is required.</div>
-                  <div ng-message="pattern">The name should not contain special characters like space, dollar, etc.
-                  </div>
-                  <div ng-message="minlength">The name has to be more than 3 characters long.</div>
-                  <div ng-message="maxlength">The name has to be less than 20 characters long.</div>
-                  <div ng-message="uniqueWorkspaceName">This workspace name is already used.</div>
+                  <che-error-messages che-message-scope="workspace-details-settings"
+                                      che-message-name="Workspace name">
+                    <div ng-message="required">A name is required.</div>
+                    <div ng-message="pattern">The name should not contain special characters like space, dollar, etc.
+                    </div>
+                    <div ng-message="minlength">The name has to be more than 3 characters long.</div>
+                    <div ng-message="maxlength">The name has to be less than 20 characters long.</div>
+                    <div ng-message="uniqueWorkspaceName">This workspace name is already used.</div>
+                  </che-error-messages>
                 </che-input>
               </ng-form>
             </div>
@@ -113,25 +117,25 @@
     </md-tab>
 
     <!-- Config tab -->
-    <md-tab ng-disabled="workspaceDetailsController.isTabDisabled(workspaceDetailsController.tab.Config)">
+    <md-tab>
       <md-tab-label>
         <md-icon md-font-icon="fa-file-text-o" class="fa che-tab-label-icon"></md-icon>
         <span class="che-tab-label-title">Workspace Config</span>
       </md-tab-label>
       <md-tab-body>
-        <ng-form name="workspaceConfigForm">
-          <che-label-container che-label-name="Workspace config">
+        <che-label-container che-label-name="Workspace config">
+          <ng-form name="workspaceConfigForm">
             <che-workspace-config-import
               ng-init="workspaceDetailsController.setForm(workspaceDetailsController.tab.Config, workspaceConfigForm)"
               workspace-config="workspaceDetailsController.copyWorkspaceDetails.config"
               workspace-config-on-change="workspaceDetailsController.updateWorkspaceConfigImport(config)"></che-workspace-config-import>
-          </che-label-container>
-        </ng-form>
+          </ng-form>
+        </che-label-container>
       </md-tab-body>
     </md-tab>
 
     <!-- Runtime Tab -->
-    <md-tab ng-disabled="workspaceDetailsController.isTabDisabled(workspaceDetailsController.tab.Runtime)">
+    <md-tab>
       <md-tab-label>
         <md-icon md-font-icon="fa-wrench" class="fa che-tab-label-icon"></md-icon>
         <span class="che-tab-label-title">Runtime</span>
@@ -168,7 +172,7 @@
 </md-content>
 
 <workspace-edit-mode-overlay ng-if="workspaceDetailsController.editMode"
-                             workspace-edit-mode-message="Changes will be applied and workspace restarted"
+                             workspace-edit-mode-message="{{workspaceDetailsController.isSaveButtonDisabled() ? '' : 'Changes will be applied and workspace restarted'}}"
                              workspace-edit-mode-show-message="workspaceDetailsController.showApplyMessage"
                              workspace-edit-disable-save-button="workspaceDetailsController.isSaveButtonDisabled()"
                              workspace-edit-mode-on-save="workspaceDetailsController.saveWorkspace()"

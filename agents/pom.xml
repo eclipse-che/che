@@ -25,15 +25,15 @@
     <packaging>pom</packaging>
     <name>Che Agents Parent</name>
     <modules>
-        <module>exec-agent</module>
-        <module>ssh-agent</module>
-        <module>unison-agent</module>
+        <module>exec</module>
+        <module>ssh</module>
+        <module>unison</module>
         <module>che-core-api-agent-shared</module>
         <module>che-core-api-agent</module>
-        <module>ls-json-agent</module>
-        <module>ls-php-agent</module>
-        <module>ls-python-agent</module>
-        <module>ls-typescript-agent</module>
-        <module>ls-csharp-agent</module>
+        <module>ls-json</module>
+        <module>ls-php</module>
+        <module>ls-python</module>
+        <module>ls-typescript</module>
+        <module>ls-csharp</module>
     </modules>
 </project>

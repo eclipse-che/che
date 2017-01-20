@@ -25,6 +25,13 @@
     <packaging>war</packaging>
     <name>Che Dashboard :: Web App</name>
     <inceptionYear>2015</inceptionYear>
+    <dependencies>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-commons-j2ee</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+    </dependencies>
     <build>
         <finalName>dashboard-war</finalName>
         <plugins>
@@ -108,7 +115,8 @@
                             <directory>dist</directory>
                         </resource>
                     </webResources>
-                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                    <webXml>${basedir}/src/webapp/WEB-INF/web.xml</webXml>
+                    <packagingExcludes>/webapp/</packagingExcludes>
                 </configuration>
             </plugin>
             <plugin>

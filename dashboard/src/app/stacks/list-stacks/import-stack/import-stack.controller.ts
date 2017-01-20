@@ -92,14 +92,13 @@ export class ImportStackController {
    */
   updateImportedStack(): void {
     let stack = angular.copy(this.cheStack.getStackTemplate());
-    let environments: che.IWorkspaceEnvironments = stack.workspaceConfig.environments;
-    let defaultEnv: che.IWorkspaceEnvironment = angular.copy(environments[stack.workspaceConfig.defaultEnv]);
-    let recipe: che.IRecipe = {content: this.recipeScript, type: this.recipeFormat};
-
-    if (this.COMPOSE === this.recipeFormat) {
-      recipe.contentType = 'application/x-yaml';
-    }
-    defaultEnv.recipe = recipe;
+    let environments = stack.workspaceConfig.environments;
+    let defaultEnv = angular.copy(environments[stack.workspaceConfig.defaultEnv]);
+    defaultEnv.recipe = {
+      content: this.recipeScript,
+      contentType: this.COMPOSE === this.recipeFormat ? 'application/x-yaml' : 'text/x-dockerfile',
+      type: this.recipeFormat
+    };
     let environmentManager = this.cheEnvironmentRegistry.getEnvironmentManager(defaultEnv.recipe.type);
     // add ws-agent to default dev-machine for dockerfile recipe format
     defaultEnv.machines = this.DOCKERFILE === this.recipeFormat ? {
