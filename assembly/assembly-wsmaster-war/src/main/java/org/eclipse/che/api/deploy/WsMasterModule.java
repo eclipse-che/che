@@ -14,7 +14,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
-import org.eclipse.che.api.agent.server.launcher.AgentLauncher;
+import org.eclipse.che.api.agent.server.impl.AgentRegistryImpl;
 import org.eclipse.che.api.core.rest.CheJsonProvider;
 import org.eclipse.che.api.core.rest.MessageBodyAdapter;
 import org.eclipse.che.api.core.rest.MessageBodyAdapterInterceptor;
@@ -86,8 +86,9 @@ public class WsMasterModule extends AbstractModule {
         bind(org.eclipse.che.api.core.notification.WSocketEventBusServer.class);
         // additional ports for development of extensions
         Multibinder<org.eclipse.che.api.core.model.machine.ServerConf> machineServers = Multibinder.newSetBinder(binder(),
-                                                                                   org.eclipse.che.api.core.model.machine.ServerConf.class,
-                                                                                   Names.named("machine.docker.dev_machine.machine_servers"));
+                                                                                                                 org.eclipse.che.api.core.model.machine.ServerConf.class,
+                                                                                                                 Names.named(
+                                                                                                                         "machine.docker.dev_machine.machine_servers"));
         machineServers.addBinding().toInstance(
                 new org.eclipse.che.api.machine.server.model.impl.ServerConfImpl(Constants.WSAGENT_DEBUG_REFERENCE, "4403/tcp", "http",
                                                                                  null));
@@ -115,12 +116,7 @@ public class WsMasterModule extends AbstractModule {
         bind(org.eclipse.che.api.workspace.server.event.MachineStateListener.class).asEagerSingleton();
 
         bind(org.eclipse.che.api.agent.server.AgentRegistry.class)
-                .to(org.eclipse.che.api.agent.server.impl.LocalAgentRegistryImpl.class);
-
-        Multibinder<AgentLauncher> agentLaunchers = Multibinder.newSetBinder(binder(), AgentLauncher.class);
-        agentLaunchers.addBinding().to(org.eclipse.che.api.workspace.server.launcher.WsAgentLauncherImpl.class);
-        agentLaunchers.addBinding().to(org.eclipse.che.api.workspace.server.launcher.TerminalAgentLauncherImpl.class);
-        agentLaunchers.addBinding().to(org.eclipse.che.api.workspace.server.launcher.SshAgentLauncherImpl.class);
+                .to(AgentRegistryImpl.class);
 
         bind(org.eclipse.che.api.deploy.WsMasterAnalyticsAddresser.class);
 
