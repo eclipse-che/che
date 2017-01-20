@@ -92,19 +92,18 @@ initiate_offline_or_network_mode(){
     info "init" "Importing ${CHE_MINI_PRODUCT_NAME} Docker images from tars..."
 
     if [ ! -d ${CHE_CONTAINER_OFFLINE_FOLDER} ]; then
-      info "init" "You requested offline image loading, but '${CHE_CONTAINER_OFFLINE_FOLDER}' folder not found"
-      return 2;
+      warning "Skipping offline image loading - '${CHE_CONTAINER_OFFLINE_FOLDER}' not found"
+    else
+      IFS=$'\n'
+      for file in "${CHE_CONTAINER_OFFLINE_FOLDER}"/*.tar
+      do
+        if ! $(docker load < "${CHE_CONTAINER_OFFLINE_FOLDER}"/"${file##*/}" > /dev/null); then
+          error "Failed to restore ${CHE_MINI_PRODUCT_NAME} Docker images"
+          return 2;
+        fi
+        info "init" "Loading ${file##*/}..."
+      done
     fi
-
-    IFS=$'\n'
-    for file in "${CHE_CONTAINER_OFFLINE_FOLDER}"/*.tar
-    do
-      if ! $(docker load < "${CHE_CONTAINER_OFFLINE_FOLDER}"/"${file##*/}" > /dev/null); then
-        error "Failed to restore ${CHE_MINI_PRODUCT_NAME} Docker images"
-        return 2;
-      fi
-      info "init" "Loading ${file##*/}..."
-    done
   else
     # If we are here, then we want to run in networking mode.
     # If we are in networking mode, we have had some issues where users have failed DNS networking.

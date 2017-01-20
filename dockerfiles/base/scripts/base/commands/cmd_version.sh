@@ -21,8 +21,10 @@ cmd_version() {
     text "Your installed version is '<not-installed>'.\n"
   fi
 
+  text "\n"
+
   if is_offline; then
-    text "Offline mode - not able to query new versions on DockerHub"
+    text "Available on DockerHub: offline mode\n"
   else  
     text "Available on DockerHub:\n"
     VERSION_LIST_JSON=$(curl -s https://hub.docker.com/v2/repositories/${CHE_IMAGE_NAME}/tags/)
@@ -42,7 +44,7 @@ cmd_version() {
 
     if [ $NUMBER_OF_VERSIONS -gt $DISPLAY_LIMIT ]; then
       OLDER_VERSION=$(echo $VERSION_LIST_JSON | jq '.next')
-      text "  See older versions at: $OLDER_VERSION"
+      text "  See older versions at: $OLDER_VERSION\n"
     fi
   fi
 }
