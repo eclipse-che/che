@@ -440,6 +440,7 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
     @Deprecated
     public void showHiddenFiles(boolean show) {
         hiddenFilesAreShown = show;
+        settingsProvider.getSettings().setShowHiddenFiles(show);
         view.showHiddenFilesForAllExpandedNodes(show);
     }
 
