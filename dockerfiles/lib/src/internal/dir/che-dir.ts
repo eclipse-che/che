@@ -72,6 +72,7 @@ export class CheDir {
   cheFile : any;
   dotCheFolder : any;
   workspacesFolder : any;
+  cliFolder : any;
   dotCheIdFile : any;
   dotCheSshPrivateKeyFile : any;
   dotCheSshPublicKeyFile : any;
@@ -105,6 +106,7 @@ export class CheDir {
     this.dotCheSshPrivateKeyFile = this.path.resolve(this.dotCheFolder, 'ssh-key.private');
     this.dotCheSshPublicKeyFile = this.path.resolve(this.dotCheFolder, 'ssh-key.public');
     this.workspacesFolder = this.path.resolve(this.dotCheFolder, 'workspaces');
+    this.cliFolder = this.path.resolve(this.dotCheFolder, 'cli');
 
     this.initDefault();
 
@@ -113,11 +115,7 @@ export class CheDir {
     this.authData = new AuthData();
 
     // che launcher image name
-    if (process.env.CHE_LAUNCHER_IMAGE_NAME) {
-      this.cheLauncherImageName = process.env.CHE_LAUNCHER_IMAGE_NAME
-    } else {
-      this.cheLauncherImageName = 'eclipse/che-launcher';
-    }
+    this.cheLauncherImageName = 'eclipse/che';
   }
 
 
@@ -150,8 +148,8 @@ export class CheDir {
       Log.getLogger().debug('Env variable', key, process.env[key]);
     });*/
 
-    if (process.env.CHE_HOST_IP) {
-      this.chefileStruct.server.properties['CHE_HOST_IP'] = process.env.CHE_HOST_IP;
+    if (process.env.CHE_HOST) {
+      this.chefileStruct.server.properties['CHE_HOST'] = process.env.CHE_HOST;
     }
 
 
@@ -943,10 +941,10 @@ setupSSHKeys(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto
       // continue with own properties
       commandLine +=
           ' -v /var/run/docker.sock:/var/run/docker.sock' +
+          ' -v ' + this.cliFolder + ':/data' +
           ' -e CHE_PORT=' + this.chefileStruct.server.port +
           ' -e CHE_DATA=' + this.workspacesFolder +
-          ' -e CHE_SERVER_CONTAINER_NAME=' + this.getCheServerContainerName() +
-          ' ' + this.cheLauncherImageName + ':' + containerVersion + ' start';
+          ' ' + this.cheLauncherImageName + ':' + containerVersion + ' start --fast';
 
       Log.getLogger().debug('Executing command line', commandLine);
 
@@ -994,9 +992,8 @@ setupSSHKeys(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto
 
       var commandLine: string = 'docker run --rm' +
           ' -v /var/run/docker.sock:/var/run/docker.sock' +
+          ' -v ' + this.cliFolder + ':/data' +
           ' -e CHE_PORT=' + this.chefileStruct.server.port +
-          ' -e CHE_DATA=' + this.workspacesFolder +
-          ' -e CHE_SERVER_CONTAINER_NAME=' + this.getCheServerContainerName() +
           ' ' + this.cheLauncherImageName + ':' + containerVersion + ' stop';
 
       Log.getLogger().debug('Executing command line', commandLine);
