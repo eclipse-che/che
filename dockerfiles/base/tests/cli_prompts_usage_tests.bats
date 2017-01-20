@@ -26,7 +26,7 @@ source $BATS_BASE_DIR/tests/test_base.sh
   prompt_substring="-v <YOUR_LOCAL_PATH>:/data"
 
   #WHEN
-  result=$(docker run -v $SCRIPTS_DIR:/scripts/base -v /var/run/docker.sock:/var/run/docker.sock eclipse/che-cli:nightly start || true)
+  result=$(docker run -v $SCRIPTS_DIR:/scripts/base -v /var/run/docker.sock:/var/run/docker.sock $CLI_IMAGE start || true)
 
   #THEN
   [[ $result == *"$prompt_substring"* ]]
@@ -37,7 +37,7 @@ source $BATS_BASE_DIR/tests/test_base.sh
   output=$(usage || true)
 
   #WHEN
-  result=$(docker run -v $SCRIPTS_DIR:/scripts/base -v /var/run/docker.sock:/var/run/docker.sock eclipse/che-cli:nightly || true)
+  result=$(docker run -v $SCRIPTS_DIR:/scripts/base -v /var/run/docker.sock:/var/run/docker.sock $CLI_IMAGE || true)
 
   #THEN
   [[ $result == *$usage* ]]

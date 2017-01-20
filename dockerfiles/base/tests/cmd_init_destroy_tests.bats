@@ -16,7 +16,7 @@ source $BATS_BASE_DIR/tests/test_base.sh
   mkdir -p $tmp_path
 
   #WHEN
-  docker run -v $SCRIPTS_DIR:/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v $tmp_path:/data eclipse/che-cli:nightly init
+  docker run -v $SCRIPTS_DIR:/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v $tmp_path:/data $CLI_IMAGE init
 
   #THEN
   [[ -d $tmp_path/docs ]]
@@ -25,7 +25,7 @@ source $BATS_BASE_DIR/tests/test_base.sh
   [[ -e $tmp_path/cli.log ]]
 
   #WHEN
-  docker run -v $SCRIPTS_DIR:/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v $tmp_path:/data eclipse/che-cli:nightly destroy --quiet
+  docker run -v $SCRIPTS_DIR:/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v $tmp_path:/data $CLI_IMAGE destroy --quiet
   
   #THEN
   [[ ! -d $tmp_path/docs ]]
@@ -39,7 +39,7 @@ source $BATS_BASE_DIR/tests/test_base.sh
   tmp_path=${TESTRUN_DIR}/init-destroy2
  
   #WHEN  
-  docker run -v $SCRIPTS_DIR:/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v $tmp_path:/data eclipse/che-cli:nightly init 1>/dev/null
+  docker run -v $SCRIPTS_DIR:/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v $tmp_path:/data $CLI_IMAGE init 1>/dev/null
 
   #THEN
   [[ -e $tmp_path ]]
@@ -49,7 +49,7 @@ source $BATS_BASE_DIR/tests/test_base.sh
   [[ -e $tmp_path/cli.log ]]
 
   #WHEN
-  docker run -v $SCRIPTS_DIR:/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v $tmp_path:/data eclipse/che-cli:nightly destroy --quiet 1>/dev/null
+  docker run -v $SCRIPTS_DIR:/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v $tmp_path:/data $CLI_IMAGE destroy --quiet 1>/dev/null
   
   #THEN
   [[ ! -d $tmp_path/docs ]]
@@ -64,7 +64,7 @@ source $BATS_BASE_DIR/tests/test_base.sh
   mkdir -p $tmp_path
 
   #WHEN
-  docker run -v $SCRIPTS_DIR:/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v $tmp_path:/data eclipse/che-cli:nightly init 1>/dev/null
+  docker run -v $SCRIPTS_DIR:/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v $tmp_path:/data $CLI_IMAGE init 1>/dev/null
   remove_named_container $CLI_CONTAINER
 
   #THEN
@@ -74,7 +74,7 @@ source $BATS_BASE_DIR/tests/test_base.sh
   [[ -e $tmp_path/cli.log ]]
 
   #WHEN
-  docker run -v $SCRIPTS_DIR:/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v $tmp_path:/data eclipse/che-cli:nightly destroy --quiet --cli 1>/dev/null
+  docker run -v $SCRIPTS_DIR:/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v $tmp_path:/data $CLI_IMAGE destroy --quiet --cli 1>/dev/null
   
   #THEN
   [[ ! -d $tmp_path/docs ]]
@@ -88,7 +88,7 @@ source $BATS_BASE_DIR/tests/test_base.sh
   tmp_path=${TESTRUN_DIR}/init-destroy4
 
   #WHEN
-  docker run -v $SCRIPTS_DIR:/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v $tmp_path:/data eclipse/che-cli:nightly init 1>/dev/null
+  docker run -v $SCRIPTS_DIR:/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v $tmp_path:/data $CLI_IMAGE init 1>/dev/null
 
   #THEN
   [[ -d $tmp_path ]]
@@ -98,7 +98,7 @@ source $BATS_BASE_DIR/tests/test_base.sh
   [[ -e $tmp_path/cli.log ]]
 
   #WHEN
-  docker run -v $SCRIPTS_DIR:/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v $tmp_path:/data eclipse/che-cli:nightly destroy --quiet --cli 1>/dev/null
+  docker run -v $SCRIPTS_DIR:/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v $tmp_path:/data $CLI_IMAGE destroy --quiet --cli 1>/dev/null
   
   #THEN
   [[ ! -d $tmp_path/docs ]]

@@ -14,12 +14,9 @@ BATS_BASE_DIR=$(cd "$(dirname "$0")"; pwd)
 init "$@"
 IMAGE_NAME="eclipse/che-bats:$TAG"
 
-echo "Pulling latest nightly eclipse/che-cli image"
-docker pull eclipse/che-cli:nightly
-
 echo "Running tests in container from image $IMAGE_NAME"
 echo "Running functional bats tests for CLI prompts and usage"
-docker run -v $BATS_BASE_DIR:$BATS_BASE_DIR -e BATS_BASE_DIR=$BATS_BASE_DIR -v /var/run/docker.sock:/var/run/docker.sock $IMAGE_NAME bats $BATS_BASE_DIR/tests/cli_prompts_usage_tests.bats
+docker run -v $BATS_BASE_DIR:$BATS_BASE_DIR -e CLI_IMAGE_TAG=$TAG -e BATS_BASE_DIR=$BATS_BASE_DIR -v /var/run/docker.sock:/var/run/docker.sock $IMAGE_NAME bats $BATS_BASE_DIR/tests/cli_prompts_usage_tests.bats
 echo "Running functional bats tests for init and destroy"
-docker run -v $BATS_BASE_DIR:$BATS_BASE_DIR -e BATS_BASE_DIR=$BATS_BASE_DIR -v /var/run/docker.sock:/var/run/docker.sock $IMAGE_NAME bats $BATS_BASE_DIR/tests/cmd_init_destroy_tests.bats
+docker run -v $BATS_BASE_DIR:$BATS_BASE_DIR -e CLI_IMAGE_TAG=$TAG -e BATS_BASE_DIR=$BATS_BASE_DIR -v /var/run/docker.sock:/var/run/docker.sock $IMAGE_NAME bats $BATS_BASE_DIR/tests/cmd_init_destroy_tests.bats
 

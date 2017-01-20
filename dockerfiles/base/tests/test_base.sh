@@ -8,6 +8,7 @@
 # Contributors:
 #   Marian Labuda - Initial Implementation
 
+export CLI_IMAGE="eclipse/che-cli:"$CLI_IMAGE_TAG
 source $BATS_BASE_DIR/scripts/base/startup_funcs.sh
 export SCRIPTS_DIR=$BATS_BASE_DIR/scripts/base
 export TESTS_DIR=$BATS_BASE_DIR/tests
