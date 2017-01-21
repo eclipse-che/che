@@ -189,13 +189,13 @@ export class StackValidationService {
     mandatoryKeys.forEach((key: string) => {
       if (objectKeys.indexOf(key) === -1) {
         isValid = false;
-        errors.push('The key "' + key + '" is mandatory in machine.');
+        errors.push('The key \'' + key + '\' is mandatory in machine.');
       }
     });
     objectKeys.forEach((key: string) => {
       if (validKeys.indexOf(key) === -1) {
         isValid = false;
-        errors.push('The key "' + key + '" is redundant in machine.');
+        errors.push('The key \'' + key + '\' is redundant in machine.');
       }
     });
 
@@ -223,13 +223,13 @@ export class StackValidationService {
     mandatoryKeys.forEach((key: string) => {
       if (objectKeys.indexOf(key) === -1) {
         isValid = false;
-        errors.push('The key "' + key + '" is mandatory in recipe.');
+        errors.push('The key \'' + key + '\' is mandatory in recipe.');
       }
     });
     objectKeys.forEach((key: string) => {
       if (validKeys.indexOf(key) === -1) {
         isValid = false;
-        errors.push('The key "' + key + '" is redundant in recipe.');
+        errors.push('The key \'' + key + '\' is redundant in recipe.');
       }
     });
     if (DOCKERFILE === recipe.type) {
@@ -255,12 +255,12 @@ export class StackValidationService {
         }
       }
     } else if (DOCKERIMAGE === recipe.type) {
-      if (!recipe.location || /^FROM\s+\w+/m.test(recipe.location) || /^services:\n/m.test(recipe.location)) {
+      if (!recipe.location) {
         isValid = false;
-        errors.push('The dockerimage is invalid.');
-        if (!recipe.location) {
-          errors.push('Unknown recipe location.');
-        }
+        errors.push('Unknown recipe location.');
+      } else if (recipe.location.length > 256) {
+        isValid = false;
+        errors.push('Location length is invalid.');
       }
     } else {
       isValid = false;

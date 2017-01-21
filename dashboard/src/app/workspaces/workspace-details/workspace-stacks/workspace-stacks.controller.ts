@@ -12,7 +12,7 @@
 import {CheWorkspace} from '../../../../components/api/che-workspace.factory';
 import {ComposeEnvironmentManager} from '../../../../components/api/environment/compose-environment-manager';
 import {CheEnvironmentRegistry} from '../../../../components/api/environment/che-environment-registry.factory';
-import {CheStack} from "../../../../components/api/che-stack.factory";
+import {CheStack} from '../../../../components/api/che-stack.factory';
 
 /**
  * @ngdoc controller
