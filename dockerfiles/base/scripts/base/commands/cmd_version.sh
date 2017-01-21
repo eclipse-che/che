@@ -50,36 +50,3 @@ cmd_version() {
   fi
 }
 
-# Compares $1 version to the first 10 versions listed as tags on Docker Hub
-# Returns "" if $1 is newest, otherwise returns the newest version available
-compare_versions() {
-
-  local VERSION_LIST_JSON=$(curl -s https://hub.docker.com/v2/repositories/${CHE_IMAGE_NAME}/tags/)
-  local NUMBER_OF_VERSIONS=$(echo $VERSION_LIST_JSON | jq '.count')
-
-  DISPLAY_LIMIT=10
-  if [ $DISPLAY_LIMIT -gt $NUMBER_OF_VERSIONS ]; then 
-    DISPLAY_LIMIT=$NUMBER_OF_VERSIONS
-  fi
-
-  # Strips off -M#, -latest version information
-  BASE_VERSION=$(echo $1 | cut -f1 -d"-")
-
-  COUNTER=0
-  RETURN_VERSION=""
-  while [ $COUNTER -lt $DISPLAY_LIMIT ]; do
-    TAG=$(echo $VERSION_LIST_JSON | jq ".results[$COUNTER].name")
-    TAG=${TAG//\"}
-
-    if [ "$TAG" != "nightly" ] && [ "$TAG" != "latest" ]; then
-      if less_than $BASE_VERSION $TAG; then
-        RETURN_VERSION=$TAG
-        break;
-      fi
-    fi
-    let COUNTER=COUNTER+1 
-  done
-
-  echo $RETURN_VERSION
-}
-
