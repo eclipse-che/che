@@ -62,8 +62,8 @@ export class CheStack {
    * Gets stack template
    * @returns {stack}
    */
-  getStackTemplate(): any {
-    let stack: any = {
+  getStackTemplate(): che.IStack {
+    let stack = {
       'name': 'New Stack',
       'description': 'New Java Stack',
       'scope': 'general',
@@ -71,11 +71,8 @@ export class CheStack {
         'Java 1.8'
       ],
       'components': [],
-      'source': {
-        'type': 'image',
-        'origin': 'codenvy/ubuntu_jdk8'
-      },
       'workspaceConfig': {
+        'projects': [],
         'environments': {
           'default': {
             'machines': {
@@ -112,6 +109,7 @@ export class CheStack {
         }
       }
     }
+
     return stack;
   }
 

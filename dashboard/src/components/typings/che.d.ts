@@ -59,7 +59,7 @@ declare namespace _che {
     creator?: string;
     scope?: string;
     components?: Array<any>;
-    source: any;
+    source?: any;
     workspaceConfig: IWorkspaceConfig;
   }
 
@@ -87,7 +87,7 @@ declare namespace _che {
     environments: {
       [envName: string]: IWorkspaceEnvironment
     };
-    projects: Array <any>;
+    projects?: Array <any>;
     commands?: Array <any>;
   }
 

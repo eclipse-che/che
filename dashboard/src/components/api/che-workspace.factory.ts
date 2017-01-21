@@ -340,7 +340,6 @@ export class CheWorkspace {
         'name': 'ws-machine',
         'attributes': {'memoryLimitBytes': ram},
         'type': 'docker',
-        'source': source,
         'agents': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
       };
       defaultEnvironment.machines[devMachine.name] = devMachine;
@@ -352,6 +351,8 @@ export class CheWorkspace {
       } else {
         devMachine.attributes = {'memoryLimitBytes': ram};
       }
+    }
+    if (source) {
       devMachine.source = source;
     }
 
