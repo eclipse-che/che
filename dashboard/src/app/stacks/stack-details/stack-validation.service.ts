@@ -12,6 +12,7 @@
 
 const COMPOSE = 'compose';
 const DOCKERFILE = 'dockerfile';
+const DOCKERIMAGE = 'dockerimage';
 
 /**
  * This class is handling the data for stack validation
@@ -174,7 +175,7 @@ export class StackValidationService {
    */
   getMachineValidation(machine: che.IEnvironmentMachine): che.IValidation {
     let mandatoryKeys: Array<string> = ['attributes'];
-    let additionalKeys: Array<string> = ['agents', 'servers'];
+    let additionalKeys: Array<string> = ['agents', 'servers', 'source'];
     let validKeys: Array<string> = mandatoryKeys.concat(additionalKeys);
     let errors: Array<string> = [];
     let isValid: boolean = true;
@@ -188,13 +189,13 @@ export class StackValidationService {
     mandatoryKeys.forEach((key: string) => {
       if (objectKeys.indexOf(key) === -1) {
         isValid = false;
-        errors.push('The key "' + key + '" is mandatory in machine.');
+        errors.push('The key \'' + key + '\' is mandatory in machine.');
       }
     });
     objectKeys.forEach((key: string) => {
       if (validKeys.indexOf(key) === -1) {
         isValid = false;
-        errors.push('The key "' + key + '" is redundant in machine.');
+        errors.push('The key \'' + key + '\' is redundant in machine.');
       }
     });
 
@@ -207,8 +208,8 @@ export class StackValidationService {
    * @returns {IValidation}
    */
   getRecipeValidation(recipe: che.IRecipe): che.IValidation {
-    let mandatoryKeys: Array<string> = ['content', 'type'];
-    let additionalKeys: Array<string> = ['contentType'];
+    let mandatoryKeys: Array<string> = ['type'];
+    let additionalKeys: Array<string> = ['content', 'location', 'contentType'];
     let validKeys: Array<string> = mandatoryKeys.concat(additionalKeys);
     let errors: Array<string> = [];
     let isValid: boolean = true;
@@ -222,24 +223,44 @@ export class StackValidationService {
     mandatoryKeys.forEach((key: string) => {
       if (objectKeys.indexOf(key) === -1) {
         isValid = false;
-        errors.push('The key "' + key + '" is mandatory in recipe.');
+        errors.push('The key \'' + key + '\' is mandatory in recipe.');
       }
     });
     objectKeys.forEach((key: string) => {
       if (validKeys.indexOf(key) === -1) {
         isValid = false;
-        errors.push('The key "' + key + '" is redundant in recipe.');
+        errors.push('The key \'' + key + '\' is redundant in recipe.');
       }
     });
     if (DOCKERFILE === recipe.type) {
-      if (!/^FROM\s+\w+/m.test(recipe.content)) {
+      if (!recipe.content || !recipe.contentType || !/^FROM\s+\w+/m.test(recipe.content)) {
         isValid = false;
         errors.push('The dockerfile is invalid.');
+        if (!recipe.content) {
+          errors.push('Unknown recipe content.');
+        }
+        if (!recipe.contentType) {
+          errors.push('Unknown recipe contentType.');
+        }
       }
     } else if (COMPOSE === recipe.type) {
-      if (!/^services:\n/m.test(recipe.content)) {
+      if (!recipe.content || !recipe.contentType || !/^services:\n/m.test(recipe.content)) {
         isValid = false;
         errors.push('The composefile is invalid.');
+        if (!recipe.content) {
+          errors.push('Unknown recipe content.');
+        }
+        if (!recipe.contentType) {
+          errors.push('Unknown recipe contentType.');
+        }
+      }
+    } else if (DOCKERIMAGE === recipe.type) {
+      if (!recipe.location) {
+        isValid = false;
+        errors.push('Unknown recipe location.');
+      } else if (recipe.location.length > 256) {
+        isValid = false;
+        errors.push('Location length is invalid.');
       }
     } else {
       isValid = false;
