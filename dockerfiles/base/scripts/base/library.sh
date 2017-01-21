@@ -557,3 +557,59 @@ compare_versions() {
 
   echo $RETURN_VERSION
 }
+
+# Input - an array of ports and port descriptions to check
+# Output - true if all ports are open, false if any of them are already bound
+check_all_ports(){
+
+  declare -a PORT_INTERNAL_ARRAY=("${@}")
+
+  DOCKER_PORT_STRING=""
+  HTTPD_PORT_STRING=""
+  for index in "${!PORT_INTERNAL_ARRAY[@]}"; do 
+    PORT=${PORT_INTERNAL_ARRAY[$index]%;*}
+    PORT_STRING=${PORT_INTERNAL_ARRAY[$index]#*;}
+
+    DOCKER_PORT_STRING+=" -p $PORT:$PORT"
+    HTTPD_PORT_STRING+=" -p $PORT"
+  done
+
+  # Need to evaluate a string otherwise the ports will be seen as strings and not parameters
+  EXECUTION_STRING="docker run -d ${DOCKER_PORT_STRING} \
+                      --name fake ${UTILITY_IMAGE_ALPINE} \
+                          httpd -f ${HTTPD_PORT_STRING} -h /etc/ > /dev/null 2>&1"
+
+  eval ${EXECUTION_STRING}
+  NETSTAT_EXIT=$?
+
+  docker rm -f fake > /dev/null 2>&1
+
+  if [[ $NETSTAT_EXIT = 125 ]]; then
+    return 1
+  else
+    return 0
+  fi
+}
+
+print_ports_as_ok() {
+  declare -a PORT_INTERNAL_ARRAY=("${@}")  
+
+  for index in "${!PORT_INTERNAL_ARRAY[@]}"; do 
+    PORT_STRING=${PORT_INTERNAL_ARRAY[$index]#*;}
+    text "         $PORT_STRING ${GREEN}[AVAILABLE]${NC}\n"
+  done
+}
+
+find_and_print_ports_as_notok() {
+  declare -a PORT_INTERNAL_ARRAY=("${@}")  
+
+  for index in "${!PORT_INTERNAL_ARRAY[@]}"; do 
+    PORT=${PORT_INTERNAL_ARRAY[$index]%;*}
+    PORT_STRING=${PORT_INTERNAL_ARRAY[$index]#*;}
+    text   "         ${PORT_STRING} $(port_open ${PORT} && echo "${GREEN}[AVAILABLE]${NC}" || echo "${RED}[ALREADY IN USE]${NC}") \n"
+  done
+
+  echo ""
+  error "Ports required to run $CHE_MINI_PRODUCT_NAME are used by another program."
+  return 2;
+}
