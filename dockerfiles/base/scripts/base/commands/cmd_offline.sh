@@ -10,15 +10,6 @@
 #
 
 cmd_offline() {
-  info "offline" "Grabbing image manifest for version '$CHE_VERSION'"
-  if ! has_version_registry $CHE_VERSION; then
-    version_error $CHE_VERSION
-    return 1;
-  fi
-
-  # Read in core system images
-  IMAGE_LIST=$(cat "$CHE_MANIFEST_DIR"/$CHE_VERSION/images)
-
   # Read in optional stack images
   readarray -t STACK_IMAGE_LIST < /version/$CHE_VERSION/images-stacks
 
@@ -54,17 +45,21 @@ cmd_offline() {
   info "offline" "Saving ${CHE_MINI_PRODUCT_NAME} cli image..."
   save_image ${CHE_IMAGE_FULLNAME}
 
-  info "offline" "Saving utility images..."
-  download_and_save_image "${UTILITY_IMAGE_CHEIP}"
-  download_and_save_image "${UTILITY_IMAGE_ALPINE}"
-  download_and_save_image "${UTILITY_IMAGE_CHEACTION}"
-  download_and_save_image "${UTILITY_IMAGE_CHEDIR}"
-  download_and_save_image "${UTILITY_IMAGE_CHETEST}"
-  download_and_save_image "${UTILITY_IMAGE_CHEMOUNT}"
+  info "offline" "Saving ${CHE_MINI_PRODUCT_NAME} bootstrap images..."
+  IFS=$'\n'
+  for SINGLE_IMAGE in ${BOOTSTRAP_IMAGE_LIST}; do
+    IMAGE_NAME=$(echo $SINGLE_IMAGE | cut -d'=' -f2)
+    save_image $IMAGE_NAME
+  done
 
   info "offline" "Saving ${CHE_MINI_PRODUCT_NAME} system images..."
-  IFS=$'\n'
   for SINGLE_IMAGE in $IMAGE_LIST; do
+    IMAGE_NAME=$(echo $SINGLE_IMAGE | cut -d'=' -f2)
+    save_image $IMAGE_NAME
+  done
+
+  info "offline" "Saving utility images..."
+  for SINGLE_IMAGE in ${UTILITY_IMAGE_LIST}; do
     IMAGE_NAME=$(echo $SINGLE_IMAGE | cut -d'=' -f2)
     save_image $IMAGE_NAME
   done

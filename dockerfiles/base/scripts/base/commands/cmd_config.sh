@@ -27,10 +27,6 @@ cmd_config() {
     cmd_download --pull
   fi
 
-  if [ -z ${IMAGE_PUPPET+x} ]; then
-    get_image_manifest $CHE_VERSION
-  fi
-
   # If using a local repository, then we need to always perform an updated init with those files
   if local_repo; then
     # if user has mounted local repo, use configuration files from the repo.
@@ -54,11 +50,11 @@ cmd_config() {
     # in development mode to avoid permissions issues we copy tomcat assembly to ${CHE_INSTANCE}
     # if ${CHE_FORMAL_PRODUCT_NAME} development tomcat exist we remove it
     if [[ -d "${CHE_CONTAINER_INSTANCE}/dev" ]]; then
-        log "docker_run -v \"${CHE_HOST_INSTANCE}/dev\":/root/dev ${UTILITY_IMAGE_ALPINE} sh -c \"rm -rf /root/dev/*\""
+        log "docker_run -v \"${CHE_HOST_INSTANCE}/dev\":/root/dev ${BOOTSTRAP_IMAGE_ALPINE} sh -c \"rm -rf /root/dev/*\""
 
         # Super weird bug - sometimes, the RM command doesn't wipe everything, so we have to repeat it a couple times
         until config_directory_is_empty; do
-          docker_run -v "${CHE_HOST_INSTANCE}/dev":/root/dev ${UTILITY_IMAGE_ALPINE} sh -c "rm -rf /root/dev/${CHE_MINI_PRODUCT_NAME}-tomcat" > /dev/null 2>&1  || true
+          docker_run -v "${CHE_HOST_INSTANCE}/dev":/root/dev ${BOOTSTRAP_IMAGE_ALPINE} sh -c "rm -rf /root/dev/${CHE_MINI_PRODUCT_NAME}-tomcat" > /dev/null 2>&1  || true
         done
 
         log "rm -rf \"${CHE_HOST_INSTANCE}/dev\" >> \"${LOGS}\""

@@ -43,7 +43,7 @@ get_boot_url() {
 # We then lookup the vlaue of this variable and return it
 get_value_of_var_from_env_file() {
   local LOOKUP_LOCAL=$(docker_run --env-file="${REFERENCE_CONTAINER_ENVIRONMENT_FILE}" \
-                                ${UTILITY_IMAGE_ALPINE} sh -c "echo \$$1")
+                                ${BOOTSTRAP_IMAGE_ALPINE} sh -c "echo \$$1")
   echo $LOOKUP_LOCAL
 
 }
@@ -135,28 +135,25 @@ initiate_offline_or_network_mode(){
 }
 
 grab_initial_images() {
-  # Prep script by getting default image
-  if [ "$(docker images -q ${UTILITY_IMAGE_ALPINE} 2> /dev/null)" = "" ]; then
-    info "cli" "Pulling image ${UTILITY_IMAGE_ALPINE}"
-    log "docker pull ${UTILITY_IMAGE_ALPINE} >> \"${LOGS}\" 2>&1"
-    TEST=""
-    docker pull ${UTILITY_IMAGE_ALPINE} >> "${LOGS}" > /dev/null 2>&1 || TEST=$?
-    if [ "$TEST" = "1" ]; then
-      error "Image ${UTILITY_IMAGE_ALPINE} unavailable. Not on dockerhub or built locally."
-      return 2;
-    fi
-  fi
+  # get list of images
+  get_image_manifest ${CHE_VERSION}
 
-  if [ "$(docker images -q ${UTILITY_IMAGE_CHEIP} 2> /dev/null)" = "" ]; then
-    info "cli" "Pulling image ${UTILITY_IMAGE_CHEIP}"
-    log "docker pull ${UTILITY_IMAGE_CHEIP} >> \"${LOGS}\" 2>&1"
-    TEST=""
-    docker pull ${UTILITY_IMAGE_CHEIP} >> "${LOGS}" > /dev/null 2>&1 || TEST=$?
-    if [ "$TEST" = "1" ]; then
-      error "Image ${UTILITY_IMAGE_CHEIP} unavailable. Not on dockerhub or built locally."
-      return 2;
-    fi
-  fi
+  # grab all bootstrap images
+  IFS=$'\n'
+  for BOOTSTRAP_IMAGE_LINE in ${BOOTSTRAP_IMAGE_LIST}; do
+    local BOOTSTRAP_IMAGE=$(echo ${BOOTSTRAP_IMAGE_LINE} | cut -d'=' -f2)
+    if [ "$(docker images -q ${BOOTSTRAP_IMAGE} 2> /dev/null)" = "" ]; then
+        info "cli" "Pulling image ${BOOTSTRAP_IMAGE}"
+        log "docker pull ${BOOTSTRAP_IMAGE} >> \"${LOGS}\" 2>&1"
+        TEST=""
+        docker pull ${BOOTSTRAP_IMAGE} >> "${LOGS}" > /dev/null 2>&1 || TEST=$?
+        if [ "$TEST" = "1" ]; then
+          error "Image ${BOOTSTRAP_IMAGE} unavailable. Not on dockerhub or built locally."
+          return 2;
+        fi
+      fi
+  done
+
 }
 
 has_env_variables() {
@@ -170,16 +167,27 @@ has_env_variables() {
   fi
 }
 
+
+### check if all utilities images are loaded and update them if not found
+load_utilities_images_if_not_done() {
+  IFS=$'\n'
+  for UTILITY_IMAGE_LINE in ${UTILITY_IMAGE_LIST}; do
+    local UTILITY_IMAGE=$(echo ${UTILITY_IMAGE_LINE} | cut -d'=' -f2)
+    update_image_if_not_found ${UTILITY_IMAGE}
+  done
+
+}
+
 update_image_if_not_found() {
   debug $FUNCNAME
 
-  text "${GREEN}INFO:${NC} (${CHE_MINI_PRODUCT_NAME} download): Checking for image '$1'..."
+  local CHECKING_TEXT="${GREEN}INFO:${NC} (${CHE_MINI_PRODUCT_NAME} download): Checking for image '$1'..."
   CURRENT_IMAGE=$(docker images -q "$1")
   if [ "${CURRENT_IMAGE}" == "" ]; then
-    text "not found\n"
+    text "${CHECKING_TEXT} not found\n"
     update_image $1
   else
-    text "found\n"
+    log "${CHECKING_TEXT} found"
   fi
 }
 
@@ -251,21 +259,35 @@ version_error(){
   text "\nSet CHE_VERSION=<version> and rerun.\n\n"
 }
 
+### define variables for all image name in the given list
+set_variables_images_list() {
+  IFS=$'\n'
+  for SINGLE_IMAGE in $1; do
+    log "eval $SINGLE_IMAGE"
+    eval $SINGLE_IMAGE
+  done
+
+}
+
 ### Returns the list of ${CHE_FORMAL_PRODUCT_NAME} images for a particular version of ${CHE_FORMAL_PRODUCT_NAME}
 ### Sets the images as environment variables after loading from file
 get_image_manifest() {
-  info "cli" "Checking registry for version '$1' images"
+  log "Checking registry for version '$1' images"
   if ! has_version_registry $1; then
     version_error $1
     return 1;
   fi
 
+  # Load images from file
+  BOOTSTRAP_IMAGE_LIST=$(cat ${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}/images/images-bootstrap)
   IMAGE_LIST=$(cat /version/$1/images)
-  IFS=$'\n'
-  for SINGLE_IMAGE in $IMAGE_LIST; do
-    log "eval $SINGLE_IMAGE"
-    eval $SINGLE_IMAGE
-  done
+  UTILITY_IMAGE_LIST=$(cat ${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}/images/images-utilities)
+
+  # set variables
+  set_variables_images_list "${BOOTSTRAP_IMAGE_LIST}"
+  set_variables_images_list "${IMAGE_LIST}"
+  set_variables_images_list "${UTILITY_IMAGE_LIST}"
+
 }
 
 get_installed_version() {
@@ -491,7 +513,7 @@ confirm_operation() {
 port_open() {
   debug $FUNCNAME
 
-  docker run -d -p $1:$1 --name fake ${UTILITY_IMAGE_ALPINE} httpd -f -p $1 -h /etc/ > /dev/null 2>&1
+  docker run -d -p $1:$1 --name fake ${BOOTSTRAP_IMAGE_ALPINE} httpd -f -p $1 -h /etc/ > /dev/null 2>&1
   NETSTAT_EXIT=$?
   docker rm -f fake > /dev/null 2>&1
 

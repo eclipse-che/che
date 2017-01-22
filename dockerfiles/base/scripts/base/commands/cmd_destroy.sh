@@ -42,14 +42,14 @@ cmd_destroy() {
   info "destroy" "Deleting instance and config..."
 
   log "docker_run -v \"${CHE_HOST_CONFIG}\":${CHE_CONTAINER_ROOT} \
-                    ${UTILITY_IMAGE_ALPINE} sh -c \"rm -rf /root${CHE_CONTAINER_ROOT}/docs \
+                    ${BOOTSTRAP_IMAGE_ALPINE} sh -c \"rm -rf /root${CHE_CONTAINER_ROOT}/docs \
                                    && rm -rf /root${CHE_CONTAINER_ROOT}/instance \
                                    && rm -rf /root${CHE_CONTAINER_ROOT}/${CHE_MINI_PRODUCT_NAME}.env\""
   # Super weird bug.  For some reason on windows, this command has to be run 3x for everything
   # to be destroyed properly if you are in dev mode.
   until directory_is_empty; do
     docker_run -v "${CHE_HOST_CONFIG}":/root${CHE_CONTAINER_ROOT} \
-                  ${UTILITY_IMAGE_ALPINE} sh -c "rm -rf /root${CHE_CONTAINER_ROOT}/docs \
+                  ${BOOTSTRAP_IMAGE_ALPINE} sh -c "rm -rf /root${CHE_CONTAINER_ROOT}/docs \
                                  ; rm -rf /root${CHE_CONTAINER_ROOT}/instance \
                                  ; rm -rf /root${CHE_CONTAINER_ROOT}/${CHE_MINI_PRODUCT_NAME}.env" > /dev/null 2>&1  || true
   done
@@ -62,7 +62,7 @@ cmd_destroy() {
   if [[ "${DESTROY_CLI}" = "true" ]]; then
     info "destroy" "Deleting cli.log..."
      docker_run -v "${CHE_HOST_CONFIG}":/root${CHE_CONTAINER_ROOT} \
-     		   ${UTILITY_IMAGE_ALPINE} sh -c "rm -rf /root${CHE_CONTAINER_ROOT}/cli.log" > /dev/null 2>&1 || true
+               ${BOOTSTRAP_IMAGE_ALPINE} sh -c "rm -rf /root${CHE_CONTAINER_ROOT}/cli.log" > /dev/null 2>&1 || true
   fi
 }
 
