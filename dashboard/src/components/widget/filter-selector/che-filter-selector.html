@@ -1,0 +1,16 @@
+<md-menu md-offset="1 35" class="che-filter-selector">
+  <div ng-click="$mdOpenMenu($event)" class="che-filter-selector-button">
+   <div ng-init="cheFilterSelectorController.selectedValue = cheFilterSelectorController.values[0]" layout="row" layout-align="start center">
+     <span>{{cheFilterSelectorController.selectedValue}}</span>
+      <span flex></span>
+     <i class="fa fa-angle-down"></i>
+   </div>
+  </div>
+  <md-menu-content class="che-filter-selector-items">
+    <md-menu-item layout="column" class="che-filter-item"
+                  ng-repeat="value in cheFilterSelectorController.values"
+                  ng-click="cheFilterSelectorController.selectValue(value)">
+        {{value}}
+    </md-menu-item>
+  </md-menu-content>
+</md-menu>

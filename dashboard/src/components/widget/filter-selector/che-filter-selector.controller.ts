@@ -10,29 +10,32 @@
  */
 'use strict';
 
+
 /**
- * Defines a directive for creating label container.
- * @author Florent Benoit
+ * This class is handling the controller for the filter selector.
+ * @author Ann Shumilova
  */
-export class CheLabelContainer {
+export class CheFilterSelectorController {
+
+  private selectedValue: string;
+  private onChange: Function;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor () {
-    this.restrict='E';
-    this.replace = true;
-    this.transclude = true;
-    this.templateUrl = 'components/widget/label-container/che-label-container.html';
-
-    // scope values
-    this.scope = {
-      labelName:'@cheLabelName',
-      labelDescription: '@?cheLabelDescription',
-      alignment:'@cheAlignment'
-    };
-
+  constructor() {
   }
 
+  /**
+   * Performs value selection and calls value changed handler.
+   *
+   * @param value
+   */
+  selectValue(value: string): void {
+    this.selectedValue = value;
+    this.onChange(value);
+  }
 }
+
+

@@ -117,6 +117,7 @@ export class WorkspaceDetailsController {
 
   init(): void {
     let routeParams = this.$route.current.params;
+    this.workspaceNamespace = this.$location.search().namespace || (this.getNamespaces() ? this.getNamespaces()[0].id : undefined);
     if (routeParams && routeParams.namespace && routeParams.workspaceName) {
       this.isCreationFlow = false;
       this.namespace = routeParams.namespace;
@@ -180,7 +181,7 @@ export class WorkspaceDetailsController {
 
   /**
    * Returns the value of workspace auto-snapshot property.
-   * 
+   *
    * @returns {boolean} workspace auto-snapshot property value
    */
   getAutoSnapshot(): boolean {
