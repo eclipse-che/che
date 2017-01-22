@@ -16,11 +16,6 @@
 describe('CheGit', function () {
 
   /**
-   * User Factory for the test
-   */
-  var factory;
-
-  /**
    * API builder.
    */
   var apiBuilder;
@@ -158,15 +153,6 @@ describe('CheGit', function () {
 
       // now, check url
       var urlArray = factory.getRemoteUrlArrayByKey(projectPath);
-      remoteArray.sort(function (a, b) {
-        if (a.name > b.name) {
-          return 1;
-        }
-        if (a.name < b.name) {
-          return -1;
-        }
-        return 0;
-      });
 
       // check
       expect(remoteArray.join()).toEqual(urlArray.join());

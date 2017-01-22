@@ -59,11 +59,7 @@ export class WorkspaceDetailsController {
   editMode: boolean = false;
   showApplyMessage: boolean = false;
   workspaceNamespace: string = undefined;
-  workspaceImportedRecipe: {
-    type: string,
-    content: string,
-    location: string
-  };
+  workspaceImportedRecipe: che.IRecipe;
 
   usedNamesList: any = [];
 
@@ -183,6 +179,15 @@ export class WorkspaceDetailsController {
   }
 
   /**
+   * Returns the value of workspace auto-snapshot property.
+   * 
+   * @returns {boolean} workspace auto-snapshot property value
+   */
+  getAutoSnapshot(): boolean {
+    return this.cheWorkspace.getAutoSnapshotSettings();
+  }
+
+  /**
    * Fetches the workspace details.
    *
    * @returns {Promise}
@@ -218,19 +223,7 @@ export class WorkspaceDetailsController {
     angular.copy(this.workspaceDetails, this.copyWorkspaceDetails);
 
     this.workspaceId = this.workspaceDetails.id;
-    this.newName = this.workspaceDetails.config.name;
-  }
-
-  /**
-   * Returns true if name of workspace is changed.
-   *
-   * @returns {boolean}
-   */
-  isNameChanged(): boolean {
-    if (this.newName && this.workspaceDetails && this.workspaceDetails.config) {
-      return this.workspaceDetails.config.name !== this.newName;
-    }
-    return false;
+    this.newName = (this.workspaceDetails.config && this.workspaceDetails.config.name) ? this.workspaceDetails.config.name : '';
   }
 
   /**
@@ -239,11 +232,8 @@ export class WorkspaceDetailsController {
    * @param form {any}
    */
   updateName(form: any): void {
-    if (form.$invalid) {
-      return;
-    }
-
     this.copyWorkspaceDetails.config.name = this.newName;
+
     this.switchEditMode();
   }
 
@@ -283,9 +273,11 @@ export class WorkspaceDetailsController {
   /**
    * Callback when workspace config has been changed in editor.
    *
-   * @param config {object} workspace config
+   * @param config {che.IWorkspaceConfig} workspace config
    */
-  updateWorkspaceConfigImport(config: any): void {
+  updateWorkspaceConfigImport(config: che.IWorkspaceConfig): void {
+    this.switchEditMode();
+
     if (!config) {
       return;
     }
@@ -294,10 +286,12 @@ export class WorkspaceDetailsController {
       this.newName = config.name;
     }
 
+    if (!config.environments[config.defaultEnv]) {
+      return;
+    }
+
     this.copyWorkspaceDetails.config = config;
     this.workspaceImportedRecipe = config.environments[config.defaultEnv].recipe;
-
-    this.switchEditMode();
   }
 
   /**
@@ -497,7 +491,7 @@ export class WorkspaceDetailsController {
       .targetEvent(event);
     this.$mdDialog.show(confirm).then(() => {
       if (this.getWorkspaceStatus() === 'RUNNING') {
-        this.cheWorkspace.stopWorkspace(this.workspaceId);
+        this.cheWorkspace.stopWorkspace(this.workspaceId, false);
       }
 
       this.cheWorkspace.fetchStatusChange(this.workspaceId, 'STOPPED').then(() => {
@@ -552,7 +546,7 @@ export class WorkspaceDetailsController {
   }
 
   stopWorkspace(): void {
-    let promise = this.cheWorkspace.stopWorkspace(this.workspaceId);
+    let promise = this.cheWorkspace.stopWorkspace(this.workspaceId, this.getAutoSnapshot());
 
     promise.then(() => {}, (error: any) => {
       this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Stop workspace failed.');

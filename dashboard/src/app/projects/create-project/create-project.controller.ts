@@ -688,119 +688,24 @@ export class CreateProjectController {
     return projects;
   }
 
-  resolveProjectType(workspaceId, projectName, projectData, deferredResolve) {
-    let projectDetails = projectData.project;
-    if (!projectDetails.attributes) {
-      projectDetails.source = projectData.source;
-      projectDetails.attributes = {};
+  resolveProjectType(workspaceId: string, projectName: string, projectData: che.IImportProject, deferred: ng.IDeferred<any>): void {
+    let workspaceAgent = this.cheAPI.getWorkspace().getWorkspaceAgent(workspaceId);
+    let copyProjectData = angular.copy(projectData);
+    if (copyProjectData && copyProjectData.project) {
+      copyProjectData.project.name = projectName;
     }
-
-    let projectService = this.cheAPI.getWorkspace().getWorkspaceAgent(workspaceId).getProject();
-    let projectTypeService = this.cheAPI.getWorkspace().getWorkspaceAgent(workspaceId).getProjectType();
-
-    if (projectDetails.type) {
-      let updateProjectPromise = projectService.updateProject(projectName, projectDetails);
-      updateProjectPromise.then(() => {
-        deferredResolve.resolve();
-      }, (error: any) => {
-        deferredResolve.reject(error);
-      });
-      return;
-    }
-
-    let resolvePromise = projectService.fetchResolve(projectName);
-    resolvePromise.then(() => {
-      let resultResolve = projectService.getResolve(projectName);
-      // get project-types
-      let fetchTypePromise = projectTypeService.fetchTypes();
-      fetchTypePromise.then(() => {
-        let projectTypesByCategory = projectTypeService.getProjectTypesIDs();
-
-        let estimatePromises = [];
-        let estimateTypes = [];
-        resultResolve.forEach((sourceResolve: any) => {
-          // add attributes if any
-          if (sourceResolve.attributes && Object.keys(sourceResolve.attributes).length > 0) {
-            for (let attributeKey in sourceResolve.attributes) {
-              if (!sourceResolve.attributes.hasOwnProperty(attributeKey)) {
-                continue;
-              }
-              projectDetails.attributes[attributeKey] = sourceResolve.attributes[attributeKey];
-            }
-          }
-          let projectType = projectTypesByCategory.get(sourceResolve.type);
-          if (projectType.primaryable) {
-            // call estimate
-            let estimatePromise = projectService.fetchEstimate(projectName, sourceResolve.type);
-            estimatePromises.push(estimatePromise);
-            estimateTypes.push(sourceResolve.type);
-          }
-        });
-
-        if (estimateTypes.length > 0) {
-          // wait estimate are all finished
-          let waitEstimate = this.$q.all(estimatePromises);
-          let attributesByMatchingType = new Map();
-
-          waitEstimate.then(() => {
-            let firstMatchingType;
-            estimateTypes.forEach((type: string) => {
-              let resultEstimate = projectService.getEstimate(projectName, type);
-              // add attributes
-              if (Object.keys(resultEstimate.attributes).length > 0) {
-                attributesByMatchingType.set(type, resultEstimate.attributes);
-              }
-            });
-
-            attributesByMatchingType.forEach((attributes: any, type: string) => {
-              if (!firstMatchingType) {
-                let projectType = projectTypesByCategory.get(type);
-                if (projectType && projectType.parents) {
-                  projectType.parents.forEach((parentType: string) => {
-                    if (parentType === 'java') {
-                      let additionalType = 'maven';
-                      if (attributesByMatchingType.get(additionalType)) {
-                        firstMatchingType = additionalType;
-                      }
-                    }
-                    if (!firstMatchingType) {
-                      firstMatchingType = attributesByMatchingType.get(parentType) ? parentType : type;
-                    }
-                  });
-                } else {
-                  firstMatchingType = type;
-                }
-              }
-            });
-
-            if (firstMatchingType) {
-              projectDetails.attributes = attributesByMatchingType.get(firstMatchingType);
-              projectDetails.type = firstMatchingType;
-            let updateProjectPromise = projectService.updateProject(projectName, projectDetails);
-            updateProjectPromise.then(() => {
-              deferredResolve.resolve();
-            }, (error: any) => {
-              this.$log.log('Update project error', projectDetails, error);
-              // a second attempt with type blank
-              projectDetails.attributes = {};
-              projectDetails.type = 'blank';
-              projectService.updateProject(projectName, projectDetails).then(() => {
-                deferredResolve.resolve();
-              }, (error: any) => {
-                deferredResolve.reject(error);
-              });
-            });
-          } else {
-            deferredResolve.resolve();
-          }
-          });
-        } else {
-          deferredResolve.resolve();
-        }
-      });
-
+    workspaceAgent.getProjectTypeResolver().resolveImportProjectType(copyProjectData).then(() => {
+      deferred.resolve();
     }, (error: any) => {
-      deferredResolve.reject(error);
+      // a second attempt with type blank
+      copyProjectData.project.attributes = {};
+      copyProjectData.project.type = 'blank';
+      workspaceAgent.getProjectTypeResolver().resolveImportProjectType(copyProjectData).then(() => {
+        deferred.resolve();
+      }, (error: any) => {
+        deferred.reject(error);
+      });
+      deferred.reject(error);
     });
   }
 

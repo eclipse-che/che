@@ -12,10 +12,6 @@
 cmd_network() {
   debug $FUNCNAME
 
-  if [ -z ${IMAGE_PUPPET+x} ]; then
-    get_image_manifest $CHE_VERSION
-  fi
-
   info ""
   info "---------------------------------------"
   info "--------   CONNECTIVITY TEST   --------"

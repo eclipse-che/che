@@ -38,7 +38,6 @@ import org.eclipse.che.ide.ui.smartTree.handler.GroupingHandlerRegistration;
 import org.eclipse.che.ide.util.loging.Log;
 
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -46,6 +45,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -71,7 +71,14 @@ public class NodeLoader implements LoaderHandler.HasLoaderHandlers {
      *
      * @see NodeInterceptor
      */
-    private List<NodeInterceptor> nodeInterceptors;
+    private TreeSet<NodeInterceptor> nodeInterceptors;
+
+    private final Comparator<NodeInterceptor> priorityComparator = new Comparator<NodeInterceptor>() {
+        @Override
+        public int compare(NodeInterceptor o1, NodeInterceptor o2) {
+            return o1.getPriority() - o2.getPriority();
+        }
+    };
 
     /**
      * When caching is on nodes will be loaded from cache if they exist otherwise nodes will be loaded every time forcibly.
@@ -231,15 +238,9 @@ public class NodeLoader implements LoaderHandler.HasLoaderHandlers {
      *         set of {@link NodeInterceptor}
      */
     public NodeLoader(@Nullable Set<NodeInterceptor> nodeInterceptors) {
-        this.nodeInterceptors = new ArrayList<>();
+        this.nodeInterceptors = new TreeSet<>(priorityComparator);
         if (nodeInterceptors != null) {
             this.nodeInterceptors.addAll(nodeInterceptors);
-            Collections.sort(this.nodeInterceptors, new Comparator<NodeInterceptor>() {
-                @Override
-                public int compare(NodeInterceptor o1, NodeInterceptor o2) {
-                    return o1.getPriority() - o2.getPriority();
-                }
-            });
         }
     }
 
@@ -483,11 +484,11 @@ public class NodeLoader implements LoaderHandler.HasLoaderHandlers {
     }
 
     /**
-     * Return list of node interceptors.
+     * Return set of node interceptors.
      *
      * @return node interceptors list
      */
-    public List<NodeInterceptor> getNodeInterceptors() {
+    public Set<NodeInterceptor> getNodeInterceptors() {
         return nodeInterceptors;
     }
 

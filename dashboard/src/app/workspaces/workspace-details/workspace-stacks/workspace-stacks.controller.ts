@@ -12,6 +12,7 @@
 import {CheWorkspace} from '../../../../components/api/che-workspace.factory';
 import {ComposeEnvironmentManager} from '../../../../components/api/environment/compose-environment-manager';
 import {CheEnvironmentRegistry} from '../../../../components/api/environment/che-environment-registry.factory';
+import {CheStack} from '../../../../components/api/che-stack.factory';
 
 /**
  * @ngdoc controller
@@ -24,6 +25,7 @@ const DEFAULT_WORKSPACE_RAM: number = 2 * Math.pow(1024, 3);
 
 export class WorkspaceStacksController {
   $scope: ng.IScope;
+  cheStack: CheStack;
   cheWorkspace: CheWorkspace;
   composeEnvironmentManager: ComposeEnvironmentManager;
 
@@ -49,8 +51,9 @@ export class WorkspaceStacksController {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($scope: ng.IScope, cheWorkspace: CheWorkspace, cheEnvironmentRegistry: CheEnvironmentRegistry) {
+  constructor($scope: ng.IScope, cheWorkspace: CheWorkspace, cheEnvironmentRegistry: CheEnvironmentRegistry, cheStack: CheStack) {
     this.cheWorkspace = cheWorkspace;
+    this.cheStack = cheStack;
     this.composeEnvironmentManager = cheEnvironmentRegistry.getEnvironmentManager('compose');
 
     $scope.$watch(() => { return this.recipeScript; }, () => {
@@ -85,7 +88,6 @@ export class WorkspaceStacksController {
     if (this.workspaceImportedRecipe.location && type !== 'dockerimage') {
       this.recipeFormat = type;
       this.recipeUrl = this.workspaceImportedRecipe.location;
-      this.tabName = 'stack-import';
       delete this.recipeScript;
     } else {
       if (type === 'dockerimage') {
@@ -95,7 +97,6 @@ export class WorkspaceStacksController {
         this.recipeScript = this.workspaceImportedRecipe.content;
       }
       this.recipeFormat = type;
-      this.tabName = 'stack-authoring';
       delete this.recipeUrl;
     }
   }
@@ -115,8 +116,7 @@ export class WorkspaceStacksController {
     }
     this.stack = stack;
 
-    let source = this.getSource();
-    let config = this.buildWorkspaceConfig(source);
+    let config = this.buildWorkspaceConfig();
 
     this.workspaceStackOnChange({config: config, stackId: this.stack ? this.stack.id : ''});
   }
@@ -124,16 +124,18 @@ export class WorkspaceStacksController {
   /**
    * Builds workspace config.
    *
-   * @param source
    * @returns {config}
    */
-  buildWorkspaceConfig(source: any): any {
+  buildWorkspaceConfig(): any {
     let stackWorkspaceConfig;
     if (this.stack) {
       stackWorkspaceConfig = this.stack.workspaceConfig;
-    } else if (!this.stack && source && source.format === 'compose' && source.content) {
-      let machines    = this.composeEnvironmentManager.getMachines({recipe: source}),
-          environment = this.composeEnvironmentManager.getEnvironment({recipe: source}, machines);
+    } else if (!this.stack) {
+      let stackTemplate  = this.cheStack.getStackTemplate(),
+          defEnvName     = stackTemplate.workspaceConfig.defaultEnv,
+          defEnvironment = stackTemplate.workspaceConfig.environments[defEnvName],
+          machines       = this.composeEnvironmentManager.getMachines(defEnvironment),
+          environment    = this.composeEnvironmentManager.getEnvironment(defEnvironment, machines);
       stackWorkspaceConfig = {
         defaultEnv: this.environmentName,
         environments: {
@@ -143,37 +145,7 @@ export class WorkspaceStacksController {
     }
 
 
-    return this.cheWorkspace.formWorkspaceConfig(stackWorkspaceConfig, this.workspaceName, source, DEFAULT_WORKSPACE_RAM);
-  }
-
-  /**
-   * Returns stack source.
-   *
-   * @returns {object}
-   */
-  getSource(): any {
-    let source: any = {};
-    source.type = 'dockerfile';
-    // user provides recipe URL or recipe's content:
-    if (this.isCustomStack) {
-      this.stack = null;
-      source.type = 'environment';
-      source.format = this.recipeFormat;
-      if (this.recipeUrl && this.recipeUrl.length > 0) {
-        source.location = this.recipeUrl;
-      } else {
-        source.content = this.recipeScript;
-      }
-    } else if (this.stack) {
-      // check predefined recipe location
-      if (this.stack && this.stack.source && this.stack.source.type === 'location') {
-        this.recipeUrl = this.stack.source.origin;
-        source.location = this.recipeUrl;
-      } else {
-        source = this.getSourceFromStack(this.stack);
-      }
-    }
-    return source;
+    return this.cheWorkspace.formWorkspaceConfig(stackWorkspaceConfig, this.workspaceName, null, DEFAULT_WORKSPACE_RAM);
   }
 
   /**

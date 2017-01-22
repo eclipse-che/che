@@ -44,7 +44,7 @@ cmd_backup() {
   docker_run -v "${CHE_HOST_CONFIG}":/root${CHE_CONTAINER_ROOT} \
                -v "${CHE_HOST_BACKUP}":/root/backup \
                $(cmd_backup_extra_args) \
-                 ${UTILITY_IMAGE_ALPINE} sh -c "tar czf /root/backup/${CHE_BACKUP_FILE_NAME} -C /root${CHE_CONTAINER_ROOT} . --exclude='backup' --exclude='instance/dev' --exclude='instance/logs' ${TAR_EXTRA_EXCLUDE}"
+                 ${BOOTSTRAP_IMAGE_ALPINE} sh -c "tar czf /root/backup/${CHE_BACKUP_FILE_NAME} -C /root${CHE_CONTAINER_ROOT} . --exclude='backup' --exclude='instance/dev' --exclude='instance/logs' ${TAR_EXTRA_EXCLUDE}"
   info ""
   info "backup" "Codenvy data saved in ${CHE_HOST_BACKUP}/${CHE_BACKUP_FILE_NAME}"
 }
