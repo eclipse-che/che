@@ -574,15 +574,10 @@ check_all_ports(){
     HTTPD_PORT_STRING+=" -p $PORT"
   done
 
-  # Need to evaluate a string otherwise the ports will be seen as strings and not parameters
-  EXECUTION_STRING="docker run -d ${DOCKER_PORT_STRING} \
-                      --name fake ${UTILITY_IMAGE_ALPINE} \
-                          httpd -f ${HTTPD_PORT_STRING} -h /etc/ > /dev/null 2>&1"
-
+  EXECUTION_STRING="docker run -it --rm ${DOCKER_PORT_STRING} ${UTILITY_IMAGE_ALPINE} \
+                         sh -c \"echo hi\" > /dev/null 2>&1"
   eval ${EXECUTION_STRING}
   NETSTAT_EXIT=$?
-
-  docker rm -f fake > /dev/null 2>&1
 
   if [[ $NETSTAT_EXIT = 125 ]]; then
     return 1
