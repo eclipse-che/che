@@ -19,7 +19,8 @@ OPTIONAL DOCKER PARAMETERS:
   -e CHE_PORT=<YOUR_PORT>              Port where ${CHE_MINI_PRODUCT_NAME} will bind itself to
   -v <LOCAL_PATH>:${CHE_CONTAINER_ROOT}/instance       Where instance, user, log data will be saved
   -v <LOCAL_PATH>:${CHE_CONTAINER_ROOT}/backup         Where backup files will be saved
-  -v <LOCAL_PATH>:/repo                ${CHE_MINI_PRODUCT_NAME} git repo - uses local binaries
+  -v <LOCAL_PATH>:/repo                ${CHE_MINI_PRODUCT_NAME} git repo - uses local binaries and manifests
+  -v <LOCAL_PATH>:/assembly            ${CHE_MINI_PRODUCT_NAME} assembly - uses local binaries 
   -v <LOCAL_PATH>:/sync                Where remote ws files will be copied with sync command
   -v <LOCAL_PATH>:/unison              Where unison profile for optimizing sync command resides
   -v <LOCAL_PATH>:/chedir              Soure repository to convert into workspace with Chedir utility
@@ -48,6 +49,7 @@ COMMANDS:
 
 GLOBAL COMMAND OPTIONS:
   --fast                               Skips networking and version checks (saves 5 secs during bootstrap)
+  --offline                            Runs CLI in offline mode, loading images from disk
   --debug                              Enable debugging of ${CHE_MINI_PRODUCT_NAME} server
 "
 }
