@@ -369,12 +369,10 @@ cli_init() {
   # The upgrade command has its own internal checks for version compatibility.
   if [[ "$@" == *"upgrade"* ]]; then
     verify_version_upgrade_compatibility
+  elif ! is_fast; then
+    verify_version_compatibility
   else
-    if ! is_fast; then
-      verify_version_compatibility
-    else
-      warning "Skipping version compatibility check..."
-    fi
+    warning "Skipping version compatibility check..."
   fi
 }
 
