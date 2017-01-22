@@ -56,3 +56,4 @@ GLOBAL COMMAND OPTIONS:
 
 source /scripts/base/startup.sh
 start "$@"
+
