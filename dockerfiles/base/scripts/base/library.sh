@@ -88,28 +88,27 @@ initiate_offline_or_network_mode(){
   # If you are using ${CHE_FORMAL_PRODUCT_NAME} in offline mode, images must be loaded here
   # This is the point where we know that docker is working, but before we run any utilities
   # that require docker.
-  if [[ "$@" == *"--offline"* ]]; then
+  if is_offline; then
     info "init" "Importing ${CHE_MINI_PRODUCT_NAME} Docker images from tars..."
 
     if [ ! -d ${CHE_CONTAINER_OFFLINE_FOLDER} ]; then
-      info "init" "You requested offline image loading, but '${CHE_CONTAINER_OFFLINE_FOLDER}' folder not found"
-      return 2;
+      warning "Skipping offline image loading - '${CHE_CONTAINER_OFFLINE_FOLDER}' not found"
+    else
+      IFS=$'\n'
+      for file in "${CHE_CONTAINER_OFFLINE_FOLDER}"/*.tar
+      do
+        if ! $(docker load < "${CHE_CONTAINER_OFFLINE_FOLDER}"/"${file##*/}" > /dev/null); then
+          error "Failed to restore ${CHE_MINI_PRODUCT_NAME} Docker images"
+          return 2;
+        fi
+        info "init" "Loading ${file##*/}..."
+      done
     fi
-
-    IFS=$'\n'
-    for file in "${CHE_CONTAINER_OFFLINE_FOLDER}"/*.tar
-    do
-      if ! $(docker load < "${CHE_CONTAINER_OFFLINE_FOLDER}"/"${file##*/}" > /dev/null); then
-        error "Failed to restore ${CHE_MINI_PRODUCT_NAME} Docker images"
-        return 2;
-      fi
-      info "init" "Loading ${file##*/}..."
-    done
   else
     # If we are here, then we want to run in networking mode.
     # If we are in networking mode, we have had some issues where users have failed DNS networking.
     # See: https://github.com/eclipse/che/issues/3266#issuecomment-265464165
-    if [[ "${FAST_BOOT}" = "false" ]]; then
+    if ! is_fast; then
       info "cli" "Checking network... (hint: '--fast' skips version, network, and nightly checks)"
       local HTTP_STATUS_CODE=$(curl -I -k dockerhub.com -s -o /dev/null --write-out '%{http_code}')
       if [[ ! $HTTP_STATUS_CODE -eq "301" ]]; then
@@ -367,8 +366,16 @@ verify_version_compatibility() {
   ##      - If they don't match and one is nightly, fail
   ##      - If they don't match, then if CLI is older fail with message to get proper CLI
   ##      - If they don't match, then if CLLI is newer fail with message to run upgrade first
-
   CHE_IMAGE_VERSION=$(get_image_version)
+
+  # Only check for newer versions if not in offline mode.
+  if ! is_offline; then
+    NEWER=$(compare_versions $CHE_IMAGE_VERSION)
+
+    if [[ "${NEWER}" != "" ]]; then
+      warning "Newer version '$NEWER' available"
+    fi
+  fi
 
   if is_initialized; then
     COMPARE_CLI_ENV=$(compare_cli_version_to_installed_version)
@@ -538,4 +545,88 @@ wait_until_server_is_booted() {
     server_is_booted_extra_check
     ELAPSED=$((ELAPSED+1))
   done
+}
+
+# Compares $1 version to the first 10 versions listed as tags on Docker Hub
+# Returns "" if $1 is newest, otherwise returns the newest version available
+compare_versions() {
+
+  local VERSION_LIST_JSON=$(curl -s https://hub.docker.com/v2/repositories/${CHE_IMAGE_NAME}/tags/)
+  local NUMBER_OF_VERSIONS=$(echo $VERSION_LIST_JSON | jq '.count')
+
+  DISPLAY_LIMIT=10
+  if [ $DISPLAY_LIMIT -gt $NUMBER_OF_VERSIONS ]; then 
+    DISPLAY_LIMIT=$NUMBER_OF_VERSIONS
+  fi
+
+  # Strips off -M#, -latest version information
+  BASE_VERSION=$(echo $1 | cut -f1 -d"-")
+
+  COUNTER=0
+  RETURN_VERSION=""
+  while [ $COUNTER -lt $DISPLAY_LIMIT ]; do
+    TAG=$(echo $VERSION_LIST_JSON | jq ".results[$COUNTER].name")
+    TAG=${TAG//\"}
+
+    if [ "$TAG" != "nightly" ] && [ "$TAG" != "latest" ]; then
+      if less_than $BASE_VERSION $TAG; then
+        RETURN_VERSION=$TAG
+        break;
+      fi
+    fi
+    let COUNTER=COUNTER+1 
+  done
+
+  echo $RETURN_VERSION
+}
+
+# Input - an array of ports and port descriptions to check
+# Output - true if all ports are open, false if any of them are already bound
+check_all_ports(){
+
+  declare -a PORT_INTERNAL_ARRAY=("${@}")
+
+  DOCKER_PORT_STRING=""
+  HTTPD_PORT_STRING=""
+  for index in "${!PORT_INTERNAL_ARRAY[@]}"; do 
+    PORT=${PORT_INTERNAL_ARRAY[$index]%;*}
+    PORT_STRING=${PORT_INTERNAL_ARRAY[$index]#*;}
+
+    DOCKER_PORT_STRING+=" -p $PORT:$PORT"
+    HTTPD_PORT_STRING+=" -p $PORT"
+  done
+
+  EXECUTION_STRING="docker run -it --rm ${DOCKER_PORT_STRING} ${UTILITY_IMAGE_ALPINE} \
+                         sh -c \"echo hi\" > /dev/null 2>&1"
+  eval ${EXECUTION_STRING}
+  NETSTAT_EXIT=$?
+
+  if [[ $NETSTAT_EXIT = 125 ]]; then
+    return 1
+  else
+    return 0
+  fi
+}
+
+print_ports_as_ok() {
+  declare -a PORT_INTERNAL_ARRAY=("${@}")  
+
+  for index in "${!PORT_INTERNAL_ARRAY[@]}"; do 
+    PORT_STRING=${PORT_INTERNAL_ARRAY[$index]#*;}
+    text "         $PORT_STRING ${GREEN}[AVAILABLE]${NC}\n"
+  done
+}
+
+find_and_print_ports_as_notok() {
+  declare -a PORT_INTERNAL_ARRAY=("${@}")  
+
+  for index in "${!PORT_INTERNAL_ARRAY[@]}"; do 
+    PORT=${PORT_INTERNAL_ARRAY[$index]%;*}
+    PORT_STRING=${PORT_INTERNAL_ARRAY[$index]#*;}
+    text   "         ${PORT_STRING} $(port_open ${PORT} && echo "${GREEN}[AVAILABLE]${NC}" || echo "${RED}[ALREADY IN USE]${NC}") \n"
+  done
+
+  echo ""
+  error "Ports required to run $CHE_MINI_PRODUCT_NAME are used by another program."
+  return 2;
 }
