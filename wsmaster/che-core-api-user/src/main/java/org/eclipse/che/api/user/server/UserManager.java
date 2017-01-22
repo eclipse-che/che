@@ -20,17 +20,16 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.Profile;
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
+import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
-import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-
 import java.util.Set;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
@@ -106,7 +105,7 @@ public class UserManager {
                 userDao.remove(user.getId());
                 profileDao.remove(user.getId());
                 preferencesDao.remove(user.getId());
-            } catch (ConflictException | ServerException rollbackEx) {
+            } catch (ServerException rollbackEx) {
                 LOG.error(format("An attempt to clean up resources due to user creation failure was unsuccessful." +
                                  "Now the system may be in inconsistent state. " +
                                  "User with id '%s' must not exist",

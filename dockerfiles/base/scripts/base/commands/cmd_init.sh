@@ -12,7 +12,12 @@
 cmd_init() {
 
   # set an initial value for the flag
-  FORCE_UPDATE="--no-force"
+  if is_nightly && ! is_fast; then 
+    FORCE_UPDATE="--pull"
+  else
+    FORCE_UPDATE="--no-force"
+  fi
+
   AUTO_ACCEPT_LICENSE="false"
   REINIT="false"
 
@@ -47,10 +52,6 @@ cmd_init() {
 
   cmd_download $FORCE_UPDATE
 
-  if [ -z ${IMAGE_INIT+x} ]; then
-    get_image_manifest $CHE_VERSION
-  fi
-
   if require_license; then
     if [[ "${AUTO_ACCEPT_LICENSE}" = "false" ]]; then
       info ""
@@ -81,14 +82,16 @@ cmd_init() {
   fi
 
   # in development mode we use init files from repo otherwise we use it from docker image
+  INIT_RUN_PARAMETERS=""
   if local_repo; then
-    docker_run -v "${CHE_HOST_CONFIG}":/copy \
-               -v "${CHE_HOST_DEVELOPMENT_REPO}"/dockerfiles/init:/files \
-               -v "${CHE_HOST_DEVELOPMENT_REPO}"/dockerfiles/init/manifests/${CHE_MINI_PRODUCT_NAME}.env:/etc/puppet/manifests/${CHE_MINI_PRODUCT_NAME}.env \
-                   $IMAGE_INIT
-  else
-    docker_run -v "${CHE_HOST_CONFIG}":/copy $IMAGE_INIT
+    if [ -d "/repo/dockerfiles/init/manifests" ]; then
+      INIT_RUN_PARAMETERS=" -v \"${CHE_HOST_DEVELOPMENT_REPO}/dockerfiles/init\":/files"
+      INIT_RUN_PARAMETERS+=" -v \"${CHE_HOST_DEVELOPMENT_REPO}/dockerfiles/init/manifests/${CHE_MINI_PRODUCT_NAME}.env\":/etc/puppet/manifests/${CHE_MINI_PRODUCT_NAME}.env"
+    fi
   fi
+  GENERATE_INIT_COMMAND="docker_run -v ${CHE_HOST_CONFIG}:/copy ${INIT_RUN_PARAMETERS} $IMAGE_INIT"
+  log $GENERATE_INIT_COMMAND
+  eval $GENERATE_INIT_COMMAND
 
   # If this is is a reinit, we should not overwrite these core template files.
   # If this is an initial init, then we have to override some values
@@ -115,11 +118,6 @@ cmd_init_reinit_pre_action() {
   
   # One time only, set the value of CHE_HOST within the environment file.
   sed -i'.bak' "s|#${CHE_PRODUCT_NAME}_HOST=.*|${CHE_PRODUCT_NAME}_HOST=${CHE_HOST}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
-
-  # For testing purposes only
-  #HTTP_PROXY=8.8.8.8
-  #HTTPS_PROXY=http://4.4.4.4:9090
-  #NO_PROXY="locahost, *.local, swarm-mode"
 
   if [[ ! ${HTTP_PROXY} = "" ]]; then
     sed -i'.bak' "s|#${CHE_PRODUCT_NAME}_HTTP_PROXY=.*|${CHE_PRODUCT_NAME}_HTTP_PROXY=${HTTP_PROXY}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"

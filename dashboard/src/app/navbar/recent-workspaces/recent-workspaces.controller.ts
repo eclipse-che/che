@@ -54,27 +54,8 @@ export class NavbarRecentWorkspacesController {
     // fetch workspaces when initializing
     this.cheWorkspace.fetchWorkspaces();
 
-    this.dropdownItemTempl = [
-      // running
-      {
-        name: 'Stop',
-        scope: 'RUNNING',
-        icon: 'fa fa-stop',
-        _onclick: (workspaceId: string) => {
-          this.stopRecentWorkspace(workspaceId);
-        }
-      },
-      // stopped
-      {
-        name: 'Run',
-        scope: 'STOPPED',
-        icon: 'fa fa-play',
-        _onclick: (workspaceId: string) => {
-          this.runRecentWorkspace(workspaceId);
-        }
-      }
-    ];
     this.dropdownItems = {};
+    this.dropdownItemTempl = [];
 
     let cleanup = $rootScope.$on('recent-workspace:set', (event: ng.IAngularEvent, workspaceId: string) => {
       this.veryRecentWorkspaceId = workspaceId;
@@ -91,6 +72,61 @@ export class NavbarRecentWorkspacesController {
     }, true);
 
     this.updateRecentWorkspaces();
+    this.fetchWorkspaceSettings();
+  }
+
+  /**
+   * Retrieves workspace settings.
+   */
+  fetchWorkspaceSettings(): void {
+    if (this.cheWorkspace.getWorkspaceSettings()) {
+      this.prepareDropdownItemsTemplate();
+    } else {
+      this.cheWorkspace.fetchWorkspaceSettings().then(() => {
+        this.prepareDropdownItemsTemplate();
+      }, (error: any) => {
+        if (error.status === 304) {
+          this.prepareDropdownItemsTemplate();
+        }
+      });
+    }
+  }
+
+  /**
+   * Forms the dropdown items template, based of workspace settings.
+   */
+  prepareDropdownItemsTemplate(): void {
+    let autoSnapshot = this.cheWorkspace.getAutoSnapshotSettings();
+    let oppositeStopTitle = autoSnapshot ? 'Stop without snapshot' : 'Stop with snapshot';
+
+    this.dropdownItemTempl = [
+      // running
+      {
+        name: 'Stop',
+        scope: 'RUNNING',
+        icon: 'fa fa-stop',
+        _onclick: (workspaceId: string) => {
+          this.stopRecentWorkspace(workspaceId, autoSnapshot);
+        }
+      },
+      {
+        name: oppositeStopTitle,
+        scope: 'RUNNING',
+        icon: 'fa fa-stop',
+        _onclick: (workspaceId: string) => {
+          this.stopRecentWorkspace(workspaceId, !autoSnapshot);
+        }
+      },
+      // stopped
+      {
+        name: 'Run',
+        scope: 'STOPPED',
+        icon: 'fa fa-play',
+        _onclick: (workspaceId: string) => {
+          this.runRecentWorkspace(workspaceId);
+        }
+      }
+    ];
   }
 
   /**
@@ -206,6 +242,10 @@ export class NavbarRecentWorkspacesController {
    * @returns {*}
    */
   getDropdownItems(workspaceId: string): any {
+    if (this.dropdownItemTempl.length === 0) {
+      return this.dropdownItemTempl;
+    }
+
     let workspace = this.cheWorkspace.getWorkspaceById(workspaceId),
       disabled = workspace && (workspace.status === 'STARTING' || workspace.status === 'STOPPING' || workspace.status === 'SNAPSHOTTING'),
       visibleScope = (workspace && (workspace.status === 'RUNNING' || workspace.status === 'STOPPING' || workspace.status === 'SNAPSHOTTING')) ? 'RUNNING' : 'STOPPED';
@@ -230,8 +270,8 @@ export class NavbarRecentWorkspacesController {
    * Stops specified workspace
    * @param workspaceId {String} workspace id
    */
-  stopRecentWorkspace(workspaceId: string): void {
-    this.cheWorkspace.stopWorkspace(workspaceId).then(() => {
+  stopRecentWorkspace(workspaceId: string, createSnapshot: boolean): void {
+    this.cheWorkspace.stopWorkspace(workspaceId, createSnapshot).then(() => {
     }, (error: any) => {
       this.$log.error(error);
     });

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.newresource;
 
-import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
@@ -80,11 +79,11 @@ public class NewFolderAction extends AbstractNewResourceAction {
         Resource resource = appContext.getResource();
 
         if (!(resource instanceof Container)) {
-            final Optional<Container> parent = resource.getParent();
+            final Container parent = resource.getParent();
 
-            checkState(parent.isPresent(), "Parent should be a container");
+            checkState(parent != null, "Parent should be a container");
 
-            resource = parent.get();
+            resource = parent;
         }
 
         ((Container)resource).newFolder(name).then(new Operation<Folder>() {

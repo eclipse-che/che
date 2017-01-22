@@ -12,6 +12,7 @@
 
 const COMPOSE = 'compose';
 const DOCKERFILE = 'dockerfile';
+const DOCKERIMAGE = 'dockerimage';
 
 /**
  * This class is handling the data for stack validation
@@ -51,7 +52,7 @@ export class StackValidationService {
       }
     });
     // add workspace validation
-    let workspaceValidation = this.getWorkspaceConfigValidation(stack.workspaceConfig);
+    let workspaceValidation = this.getWorkspaceConfigValidation( (<che.IStack>stack).workspaceConfig );
     if (!workspaceValidation.isValid) {
       isValid = false;
       errors = errors.concat(workspaceValidation.errors);
@@ -67,7 +68,7 @@ export class StackValidationService {
    */
   getWorkspaceConfigValidation(workspaceConfig: che.IWorkspaceConfig): che.IValidation {
     let mandatoryKeys: Array<string> = ['name', 'environments', 'defaultEnv'];
-    let additionalKeys: Array<string> = ['commands', 'projects', 'description'];
+    let additionalKeys: Array<string> = ['commands', 'projects', 'description', 'links'];
     let validKeys: Array<string> = mandatoryKeys.concat(additionalKeys);
     let errors: Array<string> = [];
     let isValid: boolean = true;
@@ -102,6 +103,10 @@ export class StackValidationService {
           errors = errors.concat(environmentValidation.errors);
         }
       });
+      if (!workspaceEnvironments[workspaceConfig.defaultEnv]) {
+        isValid = false;
+        errors.push('Can\'t find default environment in environments.');
+      }
     }
 
     return {isValid: isValid, errors: errors};
@@ -126,16 +131,33 @@ export class StackValidationService {
     let keys: Array<string> = machines ? Object.keys(machines) : [];
     if (keys.length === 0) {
       isValid = false;
-      errors.push('The machines is empty.');
+      errors.push('The machine is empty.');
     }
     keys.forEach((key: string) => {
-      let machine: che.IMachine = environment.machines[key];
+      let machine: che.IEnvironmentMachine = environment.machines[key];
       let machineValidation: che.IValidation = this.getMachineValidation(machine);
       if (!machineValidation.isValid) {
         isValid = false;
         errors = errors.concat(machineValidation.errors);
       }
     });
+    // add dev machine validation
+    let wsAgent = 'org.eclipse.che.ws-agent';
+    let devMachines: string[] = [];
+    keys.forEach((key: string) => {
+      let machine: che.IEnvironmentMachine = environment.machines[key];
+      if (machine.agents && machine.agents.indexOf(wsAgent) > -1) {
+        devMachines.push(key);
+      }
+    });
+    if (devMachines.length !== 1) {
+      let error = `Exactly one of machines should contain '${wsAgent}' in agent's list.`;
+      if (devMachines.length === 0) {
+        error = 'Can\'t find development machine. ' + error;
+      }
+      isValid = false;
+      errors.push(error);
+    }
     // add recipe validation
     let recipeValidation = this.getRecipeValidation(environment.recipe);
     if (!recipeValidation.isValid) {
@@ -148,12 +170,12 @@ export class StackValidationService {
 
   /**
    * Return result of machine validation.
-   * @param machine {che.IMachine}
+   * @param machine {che.IEnvironmentMachine}
    * @returns {IValidation}
    */
-  getMachineValidation(machine: che.IMachine): che.IValidation {
+  getMachineValidation(machine: che.IEnvironmentMachine): che.IValidation {
     let mandatoryKeys: Array<string> = ['attributes'];
-    let additionalKeys: Array<string> = ['agents', 'servers'];
+    let additionalKeys: Array<string> = ['agents', 'servers', 'source'];
     let validKeys: Array<string> = mandatoryKeys.concat(additionalKeys);
     let errors: Array<string> = [];
     let isValid: boolean = true;
@@ -167,13 +189,13 @@ export class StackValidationService {
     mandatoryKeys.forEach((key: string) => {
       if (objectKeys.indexOf(key) === -1) {
         isValid = false;
-        errors.push('The key "' + key + '" is mandatory in machine.');
+        errors.push('The key \'' + key + '\' is mandatory in machine.');
       }
     });
     objectKeys.forEach((key: string) => {
       if (validKeys.indexOf(key) === -1) {
         isValid = false;
-        errors.push('The key "' + key + '" is redundant in machine.');
+        errors.push('The key \'' + key + '\' is redundant in machine.');
       }
     });
 
@@ -186,13 +208,13 @@ export class StackValidationService {
    * @returns {IValidation}
    */
   getRecipeValidation(recipe: che.IRecipe): che.IValidation {
-    let mandatoryKeys: Array<string> = ['content', 'type'];
-    let additionalKeys: Array<string> = ['contentType'];
+    let mandatoryKeys: Array<string> = ['type'];
+    let additionalKeys: Array<string> = ['content', 'location', 'contentType'];
     let validKeys: Array<string> = mandatoryKeys.concat(additionalKeys);
     let errors: Array<string> = [];
     let isValid: boolean = true;
     // recipe validation
-    if (!recipe || !recipe.type || !recipe.content) {
+    if (!recipe) {
       isValid = false;
       errors.push('The recipe is empty.');
       return {isValid: isValid, errors: errors};
@@ -201,25 +223,48 @@ export class StackValidationService {
     mandatoryKeys.forEach((key: string) => {
       if (objectKeys.indexOf(key) === -1) {
         isValid = false;
-        errors.push('The key "' + key + '" is mandatory in recipe.');
+        errors.push('The key \'' + key + '\' is mandatory in recipe.');
       }
     });
     objectKeys.forEach((key: string) => {
       if (validKeys.indexOf(key) === -1) {
         isValid = false;
-        errors.push('The key "' + key + '" is redundant in recipe.');
+        errors.push('The key \'' + key + '\' is redundant in recipe.');
       }
     });
     if (DOCKERFILE === recipe.type) {
-      if (!/^FROM\s+\w+/m.test(recipe.content)) {
+      if (!recipe.content || !recipe.contentType || !/^FROM\s+\w+/m.test(recipe.content)) {
         isValid = false;
         errors.push('The dockerfile is invalid.');
+        if (!recipe.content) {
+          errors.push('Unknown recipe content.');
+        }
+        if (!recipe.contentType) {
+          errors.push('Unknown recipe contentType.');
+        }
       }
     } else if (COMPOSE === recipe.type) {
-      if (!/^services:\n/m.test(recipe.content)) {
+      if (!recipe.content || !recipe.contentType || !/^services:\n/m.test(recipe.content)) {
         isValid = false;
         errors.push('The composefile is invalid.');
+        if (!recipe.content) {
+          errors.push('Unknown recipe content.');
+        }
+        if (!recipe.contentType) {
+          errors.push('Unknown recipe contentType.');
+        }
       }
+    } else if (DOCKERIMAGE === recipe.type) {
+      if (!recipe.location) {
+        isValid = false;
+        errors.push('Unknown recipe location.');
+      } else if (recipe.location.length > 256) {
+        isValid = false;
+        errors.push('Location length is invalid.');
+      }
+    } else {
+      isValid = false;
+      errors.push('Unknown recipe type.');
     }
 
     return {isValid: isValid, errors: errors};

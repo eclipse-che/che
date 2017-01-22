@@ -12,7 +12,6 @@ package org.eclipse.che.ide.extension.machine.client.inject;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
-import com.google.gwt.inject.client.multibindings.GinMapBinder;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
 import com.google.inject.Singleton;
 import com.google.inject.name.Names;
@@ -25,7 +24,6 @@ import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.machine.MachineManager;
 import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
-import org.eclipse.che.ide.api.parts.Perspective;
 import org.eclipse.che.ide.extension.machine.client.RecipeScriptDownloadServiceClient;
 import org.eclipse.che.ide.extension.machine.client.RecipeScriptDownloadServiceClientImpl;
 import org.eclipse.che.ide.extension.machine.client.command.CommandManagerImpl;
@@ -48,7 +46,6 @@ import org.eclipse.che.ide.extension.machine.client.outputspanel.console.Command
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.DefaultOutputConsole;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.OutputConsoleView;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.OutputConsoleViewImpl;
-import org.eclipse.che.ide.extension.machine.client.perspective.OperationsPerspective;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.recipe.editor.button.EditorButtonWidget;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.recipe.editor.button.EditorButtonWidgetImpl;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.tab.Tab;
@@ -73,8 +70,6 @@ import org.eclipse.che.ide.extension.machine.client.targets.categories.ssh.SshCa
 import org.eclipse.che.ide.extension.machine.client.targets.categories.ssh.SshView;
 import org.eclipse.che.ide.extension.machine.client.targets.categories.ssh.SshViewImpl;
 
-import static org.eclipse.che.ide.extension.machine.client.perspective.OperationsPerspective.OPERATIONS_PERSPECTIVE_ID;
-
 /**
  * GIN module for Machine extension.
  *
@@ -87,10 +82,6 @@ public class MachineGinModule extends AbstractGinModule {
 
     @Override
     protected void configure() {
-        GinMapBinder.newMapBinder(binder(), String.class, Perspective.class)
-                    .addBinding(OPERATIONS_PERSPECTIVE_ID)
-                    .to(OperationsPerspective.class);
-
         bind(CreateMachineView.class).to(CreateMachineViewImpl.class);
         bind(OutputConsoleView.class).to(OutputConsoleViewImpl.class);
         install(new GinFactoryModuleBuilder()

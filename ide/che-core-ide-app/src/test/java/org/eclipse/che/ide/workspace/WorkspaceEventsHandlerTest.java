@@ -296,7 +296,7 @@ public class WorkspaceEventsHandlerTest {
 
         verify(notificationManager).notify(anyString(), eq(StatusNotification.Status.FAIL), eq(FLOAT_MODE));
 
-        verify(loader).setError(eq(LoaderPresenter.Phase.STARTING_WORKSPACE_RUNTIME));
+        verify(startWorkspaceNotification).show(WORKSPACE_ID);
 
         verify(eventBus, times(2)).fireEvent(Matchers.<WorkspaceStoppedEvent>anyObject());
         verify(eventBus, times(2)).fireEvent(Matchers.<WsAgentStateEvent> anyObject());

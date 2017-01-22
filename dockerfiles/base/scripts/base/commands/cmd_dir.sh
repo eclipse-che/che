@@ -17,8 +17,10 @@ cmd_dir() {
 
     warning "':/chedir' not mounted - using ${DATA_MOUNT} as source location"
   fi
- 
+
   # Not loaded as part of the init process to save on download time
-  update_image_if_not_found ${UTILITY_IMAGE_CHEDIR}
+  load_utilities_images_if_not_done
+  docker_run -it ${UTILITY_IMAGE_CHEDIR} "$@"
+
   docker_run -it -v ${HOST_FOLDER_TO_USE}:${HOST_FOLDER_TO_USE} ${UTILITY_IMAGE_CHEDIR} ${HOST_FOLDER_TO_USE} "$@"
 }

@@ -82,5 +82,12 @@ public class LocalDockerModule extends AbstractModule {
                                                                      new TypeLiteral<Set<String>>() {},
                                                                      Names.named("machine.docker.networks"));
         networks.addBinding().toProvider(org.eclipse.che.plugin.docker.machine.CheInContainerNetworkProvider.class);
+
+        Multibinder<Set<String>> extraHosts = Multibinder.newSetBinder(binder(),
+                                                                       new TypeLiteral<Set<String>>() {},
+                                                                       Names.named("che.docker.extra_hosts"))
+                                                         .permitDuplicates();
+        extraHosts.addBinding()
+                  .toProvider(org.eclipse.che.plugin.docker.machine.local.provider.CheDockerExtraHostProvider.class);
     }
 }

@@ -137,7 +137,6 @@ public class WsMasterModule extends AbstractModule {
         install(new org.eclipse.che.api.machine.server.MachineModule());
         install(new org.eclipse.che.api.agent.server.AgentModule());
         install(new org.eclipse.che.plugin.docker.machine.ext.DockerExtServerModule());
-        install(new org.eclipse.che.plugin.docker.machine.ext.DockerTerminalModule());
         install(new org.eclipse.che.swagger.deploy.DocsModule());
         install(new org.eclipse.che.plugin.machine.ssh.SshMachineModule());
         install(new org.eclipse.che.plugin.docker.machine.proxy.DockerProxyModule());

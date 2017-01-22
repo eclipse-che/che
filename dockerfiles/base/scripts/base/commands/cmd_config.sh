@@ -23,10 +23,8 @@ cmd_config() {
   elif [[ "${FORCE_UPDATE}" == "--pull" ]] || \
        [[ "${FORCE_UPDATE}" == "--force" ]]; then
     cmd_download $FORCE_UPDATE
-  fi
-
-  if [ -z ${IMAGE_PUPPET+x} ]; then
-    get_image_manifest $CHE_VERSION
+  elif is_nightly && ! is_fast; then
+    cmd_download --pull
   fi
 
   # If using a local repository, then we need to always perform an updated init with those files
@@ -52,11 +50,11 @@ cmd_config() {
     # in development mode to avoid permissions issues we copy tomcat assembly to ${CHE_INSTANCE}
     # if ${CHE_FORMAL_PRODUCT_NAME} development tomcat exist we remove it
     if [[ -d "${CHE_CONTAINER_INSTANCE}/dev" ]]; then
-        log "docker_run -v \"${CHE_HOST_INSTANCE}/dev\":/root/dev ${UTILITY_IMAGE_ALPINE} sh -c \"rm -rf /root/dev/*\""
+        log "docker_run -v \"${CHE_HOST_INSTANCE}/dev\":/root/dev ${BOOTSTRAP_IMAGE_ALPINE} sh -c \"rm -rf /root/dev/*\""
 
         # Super weird bug - sometimes, the RM command doesn't wipe everything, so we have to repeat it a couple times
         until config_directory_is_empty; do
-          docker_run -v "${CHE_HOST_INSTANCE}/dev":/root/dev ${UTILITY_IMAGE_ALPINE} sh -c "rm -rf /root/dev/${CHE_MINI_PRODUCT_NAME}-tomcat" > /dev/null 2>&1  || true
+          docker_run -v "${CHE_HOST_INSTANCE}/dev":/root/dev ${BOOTSTRAP_IMAGE_ALPINE} sh -c "rm -rf /root/dev/${CHE_MINI_PRODUCT_NAME}-tomcat" > /dev/null 2>&1  || true
         done
 
         log "rm -rf \"${CHE_HOST_INSTANCE}/dev\" >> \"${LOGS}\""
@@ -100,16 +98,26 @@ generate_configuration_with_puppet() {
 
   if local_repo; then
     CHE_REPO="on"
-    WRITE_PARAMETERS="-v \"${CHE_HOST_DEVELOPMENT_REPO}/dockerfiles/init/manifests\":/etc/puppet/manifests:ro \
-                      -v \"${CHE_HOST_DEVELOPMENT_REPO}/dockerfiles/init/modules\":/etc/puppet/modules:ro \
-                      -e \"CHE_ASSEMBLY=${CHE_ASSEMBLY}\""
+    WRITE_PARAMETERS=" -e \"CHE_ASSEMBLY=${CHE_ASSEMBLY}\""
+    # add local mounts only if they are present
+    if [ -d "/repo/dockerfiles/init/manifests" ]; then
+      WRITE_PARAMETERS+=" -v \"${CHE_HOST_DEVELOPMENT_REPO}/dockerfiles/init/manifests\":/etc/puppet/manifests:ro"
+    fi
+    if [ -d "/repo/dockerfiles/init/modules" ]; then
+      WRITE_PARAMETERS+=" -v \"${CHE_HOST_DEVELOPMENT_REPO}/dockerfiles/init/modules\":/etc/puppet/modules:ro"
+    fi
+    # Handle override/addon
+    if [ -d "/repo/dockerfiles/init/addon" ]; then
+      WRITE_PARAMETERS+=" -v \"${CHE_HOST_DEVELOPMENT_REPO}/dockerfiles/init/addon/addon.pp\":/etc/puppet/manifests/addon.pp:ro"
+    fi
+
   else
     CHE_REPO="off"
     WRITE_PARAMETERS=""
   fi
 
   GENERATE_CONFIG_COMMAND="docker_run \
-                 --env-file=\"${REFERENCE_CONTAINER_ENVIRONMENT_FILE}\" \
+                  --env-file=\"${REFERENCE_CONTAINER_ENVIRONMENT_FILE}\" \
                   --env-file=/version/$CHE_VERSION/images \
                   -v \"${CHE_HOST_INSTANCE}\":/opt/${CHE_MINI_PRODUCT_NAME}:rw \
                   ${WRITE_PARAMETERS} \
@@ -123,7 +131,7 @@ generate_configuration_with_puppet() {
                       $IMAGE_INIT \
                           apply --modulepath \
                                 /etc/puppet/modules/ \
-                                /etc/puppet/manifests/${CHE_MINI_PRODUCT_NAME}.pp --show_diff ${WRITE_LOGS}"
+                                /etc/puppet/manifests/ --show_diff ${WRITE_LOGS}"
 
   log ${GENERATE_CONFIG_COMMAND}
   eval ${GENERATE_CONFIG_COMMAND}

@@ -16,6 +16,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
+
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.promises.client.Operation;
@@ -486,10 +487,35 @@ public class AppContextImpl implements AppContext,
     public void onWindowClosed(WindowActionEvent event) {
     }
 
+    @Override
+    public String getMasterEndpoint() {
+        String fromUrl = this.browserQueryFieldRenderer.getParameterFromURLByName("master");
+        if(fromUrl == null || fromUrl.isEmpty())
+            return masterFromIDEConfig();
+        else
+            return fromUrl;
+    }
+
+    @Override
+    public String getDevAgentEndpoint() {
+        String fromUrl = this.browserQueryFieldRenderer.getParameterFromURLByName("agent");
+        if(fromUrl == null || fromUrl.isEmpty())
+            return runtime.getDevMachine().getWsAgentBaseUrl();
+        else
+            return fromUrl;
+    }
 
     @Override
     public ActiveRuntime getActiveRuntime() {
         return runtime;
     }
 
+
+    private static native String masterFromIDEConfig() /*-{
+        if ($wnd.IDE && $wnd.IDE.config) {
+            return $wnd.IDE.config.restContext;
+        } else {
+            return null;
+        }
+    }-*/;
 }

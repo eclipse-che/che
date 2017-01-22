@@ -20,9 +20,9 @@ che:
     - '<%= scope.lookupvar('che::che_assembly') -%>:/assembly'
 <% end -%>
   ports:
-    - '<%= scope.lookupvar('che::che_port') -%>:8080'
+    - '<%= scope.lookupvar('che::che_port') -%>:<%= scope.lookupvar('che::che_port') -%>'
 <% if scope.lookupvar('che::che_env') == 'development' -%>
-    - '<%= scope.lookupvar('che::che_debug_port') -%>:8000'
+    - '<%= scope.lookupvar('che::che_debug_port') -%>:<%= scope.lookupvar('che::che_debug_port') -%>'
 <% end -%>
   restart: always
   container_name: che

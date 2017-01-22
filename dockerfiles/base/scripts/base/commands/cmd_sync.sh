@@ -22,7 +22,9 @@ cmd_sync() {
     return 2;
   fi
 
-  update_image_if_not_found ${UTILITY_IMAGE_CHEMOUNT}
+  # Not loaded as part of the init process to save on download time
+  load_utilities_images_if_not_done
+  docker_run -it ${UTILITY_IMAGE_CHEMOUNT} "$@"
 
   # Determine the mount path to do the mount
   info "mount" "Starting sync process to ${SYNC_MOUNT}"
