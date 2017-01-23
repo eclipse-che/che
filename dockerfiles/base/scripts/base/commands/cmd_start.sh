@@ -62,6 +62,12 @@ cmd_start() {
 
 cmd_start_check_ports() {
 
+  # Develop array of port #, description.
+  # Format of array is "<port>;<port_string>" where the <port_string> is the text to appear in console
+  local PORT_ARRAY=(
+     "${CHE_PORT};port ${CHE_PORT} (http):       "
+    )
+
   # If dev mode is on, then we also need to check the debug port set by the user for availability
   if debug_server; then
     USER_DEBUG_PORT=$(get_value_of_var_from_env_file CHE_DEBUG_PORT)
@@ -73,23 +79,14 @@ cmd_start_check_ports() {
       # Otherwise, this is the value set by the user
       CHE_DEBUG_PORT=$USER_DEBUG_PORT
     fi
+
+    PORT_ARRAY+=("$CHE_DEBUG_PORT;port ${CHE_DEBUG_PORT} (debug):      ")
   fi
 
-  text   "         port ${CHE_PORT} (http):       $(port_open ${CHE_PORT} && echo "${GREEN}[AVAILABLE]${NC}" || echo "${RED}[ALREADY IN USE]${NC}") \n"
-  if debug_server; then
-    text   "         port ${CHE_DEBUG_PORT} (debug):      $(port_open ${CHE_DEBUG_PORT} && echo "${GREEN}[AVAILABLE]${NC}" || echo "${RED}[ALREADY IN USE]${NC}") \n"
-  fi
-  if ! $(port_open ${CHE_PORT}); then
-    echo ""
-    error "Ports required to run $CHE_MINI_PRODUCT_NAME are used by another program."
-    return 1;
-  fi
-  if debug_server; then
-    if ! $(port_open ${CHE_DEBUG_PORT}); then
-      echo ""
-      error "Ports required to run $CHE_MINI_PRODUCT_NAME are used by another program."
-      return 1;
-    fi
+  if check_all_ports "${PORT_ARRAY[@]}"; then
+    print_ports_as_ok "${PORT_ARRAY[@]}"
+  else
+    find_and_print_ports_as_notok "${PORT_ARRAY[@]}"
   fi
 }
 

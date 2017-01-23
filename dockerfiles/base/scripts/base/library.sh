@@ -43,7 +43,7 @@ get_boot_url() {
 # We then lookup the vlaue of this variable and return it
 get_value_of_var_from_env_file() {
   local LOOKUP_LOCAL=$(docker_run --env-file="${REFERENCE_CONTAINER_ENVIRONMENT_FILE}" \
-                                ${UTILITY_IMAGE_ALPINE} sh -c "echo \$$1")
+                                ${BOOTSTRAP_IMAGE_ALPINE} sh -c "echo \$$1")
   echo $LOOKUP_LOCAL
 
 }
@@ -88,28 +88,27 @@ initiate_offline_or_network_mode(){
   # If you are using ${CHE_FORMAL_PRODUCT_NAME} in offline mode, images must be loaded here
   # This is the point where we know that docker is working, but before we run any utilities
   # that require docker.
-  if [[ "$@" == *"--offline"* ]]; then
+  if is_offline; then
     info "init" "Importing ${CHE_MINI_PRODUCT_NAME} Docker images from tars..."
 
     if [ ! -d ${CHE_CONTAINER_OFFLINE_FOLDER} ]; then
-      info "init" "You requested offline image loading, but '${CHE_CONTAINER_OFFLINE_FOLDER}' folder not found"
-      return 2;
+      warning "Skipping offline image loading - '${CHE_CONTAINER_OFFLINE_FOLDER}' not found"
+    else
+      IFS=$'\n'
+      for file in "${CHE_CONTAINER_OFFLINE_FOLDER}"/*.tar
+      do
+        if ! $(docker load < "${CHE_CONTAINER_OFFLINE_FOLDER}"/"${file##*/}" > /dev/null); then
+          error "Failed to restore ${CHE_MINI_PRODUCT_NAME} Docker images"
+          return 2;
+        fi
+        info "init" "Loading ${file##*/}..."
+      done
     fi
-
-    IFS=$'\n'
-    for file in "${CHE_CONTAINER_OFFLINE_FOLDER}"/*.tar
-    do
-      if ! $(docker load < "${CHE_CONTAINER_OFFLINE_FOLDER}"/"${file##*/}" > /dev/null); then
-        error "Failed to restore ${CHE_MINI_PRODUCT_NAME} Docker images"
-        return 2;
-      fi
-      info "init" "Loading ${file##*/}..."
-    done
   else
     # If we are here, then we want to run in networking mode.
     # If we are in networking mode, we have had some issues where users have failed DNS networking.
     # See: https://github.com/eclipse/che/issues/3266#issuecomment-265464165
-    if [[ "${FAST_BOOT}" = "false" ]]; then
+    if ! is_fast; then
       info "cli" "Checking network... (hint: '--fast' skips version, network, and nightly checks)"
       local HTTP_STATUS_CODE=$(curl -I -k dockerhub.com -s -o /dev/null --write-out '%{http_code}')
       if [[ ! $HTTP_STATUS_CODE -eq "301" ]]; then
@@ -135,28 +134,25 @@ initiate_offline_or_network_mode(){
 }
 
 grab_initial_images() {
-  # Prep script by getting default image
-  if [ "$(docker images -q ${UTILITY_IMAGE_ALPINE} 2> /dev/null)" = "" ]; then
-    info "cli" "Pulling image ${UTILITY_IMAGE_ALPINE}"
-    log "docker pull ${UTILITY_IMAGE_ALPINE} >> \"${LOGS}\" 2>&1"
-    TEST=""
-    docker pull ${UTILITY_IMAGE_ALPINE} >> "${LOGS}" > /dev/null 2>&1 || TEST=$?
-    if [ "$TEST" = "1" ]; then
-      error "Image ${UTILITY_IMAGE_ALPINE} unavailable. Not on dockerhub or built locally."
-      return 2;
-    fi
-  fi
+  # get list of images
+  get_image_manifest ${CHE_VERSION}
 
-  if [ "$(docker images -q ${UTILITY_IMAGE_CHEIP} 2> /dev/null)" = "" ]; then
-    info "cli" "Pulling image ${UTILITY_IMAGE_CHEIP}"
-    log "docker pull ${UTILITY_IMAGE_CHEIP} >> \"${LOGS}\" 2>&1"
-    TEST=""
-    docker pull ${UTILITY_IMAGE_CHEIP} >> "${LOGS}" > /dev/null 2>&1 || TEST=$?
-    if [ "$TEST" = "1" ]; then
-      error "Image ${UTILITY_IMAGE_CHEIP} unavailable. Not on dockerhub or built locally."
-      return 2;
-    fi
-  fi
+  # grab all bootstrap images
+  IFS=$'\n'
+  for BOOTSTRAP_IMAGE_LINE in ${BOOTSTRAP_IMAGE_LIST}; do
+    local BOOTSTRAP_IMAGE=$(echo ${BOOTSTRAP_IMAGE_LINE} | cut -d'=' -f2)
+    if [ "$(docker images -q ${BOOTSTRAP_IMAGE} 2> /dev/null)" = "" ]; then
+        info "cli" "Pulling image ${BOOTSTRAP_IMAGE}"
+        log "docker pull ${BOOTSTRAP_IMAGE} >> \"${LOGS}\" 2>&1"
+        TEST=""
+        docker pull ${BOOTSTRAP_IMAGE} >> "${LOGS}" > /dev/null 2>&1 || TEST=$?
+        if [ "$TEST" = "1" ]; then
+          error "Image ${BOOTSTRAP_IMAGE} unavailable. Not on dockerhub or built locally."
+          return 2;
+        fi
+      fi
+  done
+
 }
 
 has_env_variables() {
@@ -170,16 +166,27 @@ has_env_variables() {
   fi
 }
 
+
+### check if all utilities images are loaded and update them if not found
+load_utilities_images_if_not_done() {
+  IFS=$'\n'
+  for UTILITY_IMAGE_LINE in ${UTILITY_IMAGE_LIST}; do
+    local UTILITY_IMAGE=$(echo ${UTILITY_IMAGE_LINE} | cut -d'=' -f2)
+    update_image_if_not_found ${UTILITY_IMAGE}
+  done
+
+}
+
 update_image_if_not_found() {
   debug $FUNCNAME
 
-  text "${GREEN}INFO:${NC} (${CHE_MINI_PRODUCT_NAME} download): Checking for image '$1'..."
+  local CHECKING_TEXT="${GREEN}INFO:${NC} (${CHE_MINI_PRODUCT_NAME} download): Checking for image '$1'..."
   CURRENT_IMAGE=$(docker images -q "$1")
   if [ "${CURRENT_IMAGE}" == "" ]; then
-    text "not found\n"
+    text "${CHECKING_TEXT} not found\n"
     update_image $1
   else
-    text "found\n"
+    log "${CHECKING_TEXT} found"
   fi
 }
 
@@ -251,21 +258,35 @@ version_error(){
   text "\nSet CHE_VERSION=<version> and rerun.\n\n"
 }
 
+### define variables for all image name in the given list
+set_variables_images_list() {
+  IFS=$'\n'
+  for SINGLE_IMAGE in $1; do
+    log "eval $SINGLE_IMAGE"
+    eval $SINGLE_IMAGE
+  done
+
+}
+
 ### Returns the list of ${CHE_FORMAL_PRODUCT_NAME} images for a particular version of ${CHE_FORMAL_PRODUCT_NAME}
 ### Sets the images as environment variables after loading from file
 get_image_manifest() {
-  info "cli" "Checking registry for version '$1' images"
+  log "Checking registry for version '$1' images"
   if ! has_version_registry $1; then
     version_error $1
     return 1;
   fi
 
+  # Load images from file
+  BOOTSTRAP_IMAGE_LIST=$(cat ${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}/images/images-bootstrap)
   IMAGE_LIST=$(cat /version/$1/images)
-  IFS=$'\n'
-  for SINGLE_IMAGE in $IMAGE_LIST; do
-    log "eval $SINGLE_IMAGE"
-    eval $SINGLE_IMAGE
-  done
+  UTILITY_IMAGE_LIST=$(cat ${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}/images/images-utilities)
+
+  # set variables
+  set_variables_images_list "${BOOTSTRAP_IMAGE_LIST}"
+  set_variables_images_list "${IMAGE_LIST}"
+  set_variables_images_list "${UTILITY_IMAGE_LIST}"
+
 }
 
 get_installed_version() {
@@ -345,8 +366,16 @@ verify_version_compatibility() {
   ##      - If they don't match and one is nightly, fail
   ##      - If they don't match, then if CLI is older fail with message to get proper CLI
   ##      - If they don't match, then if CLLI is newer fail with message to run upgrade first
-
   CHE_IMAGE_VERSION=$(get_image_version)
+
+  # Only check for newer versions if not in offline mode.
+  if ! is_offline; then
+    NEWER=$(compare_versions $CHE_IMAGE_VERSION)
+
+    if [[ "${NEWER}" != "" ]]; then
+      warning "Newer version '$NEWER' available"
+    fi
+  fi
 
   if is_initialized; then
     COMPARE_CLI_ENV=$(compare_cli_version_to_installed_version)
@@ -491,7 +520,7 @@ confirm_operation() {
 port_open() {
   debug $FUNCNAME
 
-  docker run -d -p $1:$1 --name fake ${UTILITY_IMAGE_ALPINE} httpd -f -p $1 -h /etc/ > /dev/null 2>&1
+  docker run -d -p $1:$1 --name fake ${BOOTSTRAP_IMAGE_ALPINE} httpd -f -p $1 -h /etc/ > /dev/null 2>&1
   NETSTAT_EXIT=$?
   docker rm -f fake > /dev/null 2>&1
 
@@ -516,4 +545,88 @@ wait_until_server_is_booted() {
     server_is_booted_extra_check
     ELAPSED=$((ELAPSED+1))
   done
+}
+
+# Compares $1 version to the first 10 versions listed as tags on Docker Hub
+# Returns "" if $1 is newest, otherwise returns the newest version available
+compare_versions() {
+
+  local VERSION_LIST_JSON=$(curl -s https://hub.docker.com/v2/repositories/${CHE_IMAGE_NAME}/tags/)
+  local NUMBER_OF_VERSIONS=$(echo $VERSION_LIST_JSON | jq '.count')
+
+  DISPLAY_LIMIT=10
+  if [ $DISPLAY_LIMIT -gt $NUMBER_OF_VERSIONS ]; then 
+    DISPLAY_LIMIT=$NUMBER_OF_VERSIONS
+  fi
+
+  # Strips off -M#, -latest version information
+  BASE_VERSION=$(echo $1 | cut -f1 -d"-")
+
+  COUNTER=0
+  RETURN_VERSION=""
+  while [ $COUNTER -lt $DISPLAY_LIMIT ]; do
+    TAG=$(echo $VERSION_LIST_JSON | jq ".results[$COUNTER].name")
+    TAG=${TAG//\"}
+
+    if [ "$TAG" != "nightly" ] && [ "$TAG" != "latest" ]; then
+      if less_than $BASE_VERSION $TAG; then
+        RETURN_VERSION=$TAG
+        break;
+      fi
+    fi
+    let COUNTER=COUNTER+1 
+  done
+
+  echo $RETURN_VERSION
+}
+
+# Input - an array of ports and port descriptions to check
+# Output - true if all ports are open, false if any of them are already bound
+check_all_ports(){
+
+  declare -a PORT_INTERNAL_ARRAY=("${@}")
+
+  DOCKER_PORT_STRING=""
+  HTTPD_PORT_STRING=""
+  for index in "${!PORT_INTERNAL_ARRAY[@]}"; do 
+    PORT=${PORT_INTERNAL_ARRAY[$index]%;*}
+    PORT_STRING=${PORT_INTERNAL_ARRAY[$index]#*;}
+
+    DOCKER_PORT_STRING+=" -p $PORT:$PORT"
+    HTTPD_PORT_STRING+=" -p $PORT"
+  done
+
+  EXECUTION_STRING="docker run -it --rm ${DOCKER_PORT_STRING} ${UTILITY_IMAGE_ALPINE} \
+                         sh -c \"echo hi\" > /dev/null 2>&1"
+  eval ${EXECUTION_STRING}
+  NETSTAT_EXIT=$?
+
+  if [[ $NETSTAT_EXIT = 125 ]]; then
+    return 1
+  else
+    return 0
+  fi
+}
+
+print_ports_as_ok() {
+  declare -a PORT_INTERNAL_ARRAY=("${@}")  
+
+  for index in "${!PORT_INTERNAL_ARRAY[@]}"; do 
+    PORT_STRING=${PORT_INTERNAL_ARRAY[$index]#*;}
+    text "         $PORT_STRING ${GREEN}[AVAILABLE]${NC}\n"
+  done
+}
+
+find_and_print_ports_as_notok() {
+  declare -a PORT_INTERNAL_ARRAY=("${@}")  
+
+  for index in "${!PORT_INTERNAL_ARRAY[@]}"; do 
+    PORT=${PORT_INTERNAL_ARRAY[$index]%;*}
+    PORT_STRING=${PORT_INTERNAL_ARRAY[$index]#*;}
+    text   "         ${PORT_STRING} $(port_open ${PORT} && echo "${GREEN}[AVAILABLE]${NC}" || echo "${RED}[ALREADY IN USE]${NC}") \n"
+  done
+
+  echo ""
+  error "Ports required to run $CHE_MINI_PRODUCT_NAME are used by another program."
+  return 2;
 }

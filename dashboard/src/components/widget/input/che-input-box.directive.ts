@@ -32,7 +32,9 @@ export class CheInputBox implements ng.IDirective {
     placeHolder: '@chePlaceHolder',
     pattern: '@chePattern',
     myForm: '=cheForm',
-    isChanged: '&ngChange'
+    isChanged: '&ngChange',
+    readonly: '=cheReadonly',
+    disabled: '=cheDisabled'
   };
 
   /**
@@ -62,6 +64,12 @@ export class CheInputBox implements ng.IDirective {
     if (attrs.chePattern) {
       template = template + ' pattern="' + pattern + '"';
     }
+    if (attrs.cheReadonly) {
+      template = template + ' ng-readonly="readonly"';
+    }
+    if (attrs.cheDisabled) {
+      template = template + ' ng-disabled="disabled"';
+    }
 
     template = template + ' ng-trim="false" data-ng-model="valueModel" >'
       + '<!-- display error messages for the form -->'
@@ -76,6 +84,12 @@ export class CheInputBox implements ng.IDirective {
       + '<input type="text" placeholder="' + placeHolder + '" ng-trim="false" name="desk' + inputName + '" style="{{labelName ? \'width: 100%\' : \'\'}}"';
     if (attrs.chePattern) {
       template = template + ' pattern="' + pattern + '"';
+    }
+    if (attrs.cheReadonly) {
+      template = template + ' ng-readonly="readonly"';
+    }
+    if (attrs.cheDisabled) {
+      template = template + ' ng-disabled="disabled"';
     }
     template = template + ' data-ng-model="valueModel">';
 

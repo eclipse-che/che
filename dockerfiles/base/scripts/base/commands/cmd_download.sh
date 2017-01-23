@@ -12,8 +12,6 @@
 cmd_download() {
   FORCE_UPDATE=${1:-"--no-force"}
 
-  get_image_manifest $CHE_VERSION
-
   IFS=$'\n'
   for SINGLE_IMAGE in $IMAGE_LIST; do
     VALUE_IMAGE=$(echo $SINGLE_IMAGE | cut -d'=' -f2)

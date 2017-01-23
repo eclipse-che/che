@@ -12,6 +12,7 @@
 import {CheAPI} from '../../../components/api/che-api.factory';
 import {CheNotification} from '../../../components/notification/che-notification.factory';
 import {CheWorkspace} from '../../../components/api/che-workspace.factory';
+import {CheNamespaceRegistry} from '../../../components/api/namespace/che-namespace-registry.factory';
 
 /**
  * @ngdoc controller
@@ -22,6 +23,7 @@ import {CheWorkspace} from '../../../components/api/che-workspace.factory';
 export class ListWorkspacesCtrl {
   $q: ng.IQService;
   $log: ng.ILogService;
+  lodash: any;
   $mdDialog: ng.material.IDialogService;
   cheAPI: CheAPI;
   cheNotification: CheNotification;
@@ -42,21 +44,30 @@ export class ListWorkspacesCtrl {
   isBulkChecked: boolean;
   isNoSelected: boolean;
 
+  cheNamespaceRegistry: CheNamespaceRegistry;
+  private ALL_NAMESPACES: string = 'All Teams';
+
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($log: ng.ILogService, $mdDialog: ng.material.IDialogService, $q: ng.IQService, $rootScope: che.IRootScopeService, cheAPI: CheAPI, cheNotification: CheNotification, cheWorkspace: CheWorkspace) {
+  constructor($log: ng.ILogService, $mdDialog: ng.material.IDialogService, $q: ng.IQService, lodash: any,
+              $rootScope: che.IRootScopeService, cheAPI: CheAPI, cheNotification: CheNotification,
+              cheWorkspace: CheWorkspace, cheNamespaceRegistry: CheNamespaceRegistry) {
     this.cheAPI = cheAPI;
     this.$q = $q;
     this.$log = $log;
+    this.lodash = lodash;
     this.$mdDialog = $mdDialog;
     this.cheNotification = cheNotification;
     this.cheWorkspace = cheWorkspace;
+    this.cheNamespaceRegistry = cheNamespaceRegistry;
 
     this.state = 'loading';
     this.isInfoLoading = true;
+    this.isExactMatch = false;
     this.workspaceFilter = {config: {name: ''}};
+    this.namespaceFilter = {namespace: ''};
 
     // map of all workspaces with additional info by id:
     this.workspacesById = new Map();
@@ -70,6 +81,13 @@ export class ListWorkspacesCtrl {
     this.isBulkChecked = false;
     this.isNoSelected = true;
     $rootScope.showIDE = false;
+
+    this.namespaces = this.getNamespaces();
+
+    this.onFilterChanged = (value :  string) => {
+      this.namespaceFilter.namespace = (value === this.ALL_NAMESPACES) ? '' : value;
+      this.isExactMatch = (value === this.ALL_NAMESPACES) ? false : true;
+    }
   }
 
   /**
@@ -322,4 +340,16 @@ export class ListWorkspacesCtrl {
     return this.$mdDialog.show(confirm);
   }
 
+  /**
+   * Returns the list of available namespaces.
+   *
+   * @returns {Array} array of namespaces
+   */
+  getNamespaces() {
+    let namespaces = this.lodash.pluck(this.cheNamespaceRegistry.getNamespaces(), 'id');
+    if (namespaces.length > 0) {
+      return [this.ALL_NAMESPACES].concat(namespaces);
+    }
+    return namespaces;
+  }
 }
