@@ -310,7 +310,6 @@ init() {
      SCRIPTS_CONTAINER_SOURCE_DIR="/scripts"
   fi
 
-
   # Primary source directory
   source "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/library.sh
 
@@ -350,18 +349,6 @@ cli_init() {
     return 2;
   fi
 
-  # TODO: Change this to use the current folder or perhaps ~?
-  if is_boot2docker && has_docker_for_windows_client; then
-    if [[ "${CHE_HOST_INSTANCE,,}" != *"${USERPROFILE,,}"* ]]; then
-      CHE_HOST_INSTANCE=$(get_mount_path "${USERPROFILE}/.${CHE_MINI_PRODUCT_NAME}/")
-      warning "Boot2docker for Windows - CHE_INSTANCE set to $CHE_HOST_INSTANCE"
-    fi
-    if [[ "${CHE_HOST_CONFIG,,}" != *"${USERPROFILE,,}"* ]]; then
-      CHE_HOST_CONFIG=$(get_mount_path "${USERPROFILE}/.${CHE_MINI_PRODUCT_NAME}/")
-      warning "Boot2docker for Windows - CHE_CONFIG set to $CHE_HOST_CONFIG"
-    fi
-  fi
-
   # Special function to perform special behaviors if you are running nightly version
   verify_nightly_accuracy
 
@@ -399,7 +386,6 @@ start() {
   
   # Begin product-specific CLI calls
   info "cli" "Loading cli..."
-
 
   # The pre_init method is unique to each assembly. This method must be provided by 
   # a custom CLI assembly in their container and can set global variables which are 
