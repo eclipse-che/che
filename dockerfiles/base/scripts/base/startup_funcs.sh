@@ -17,6 +17,7 @@ init_constants() {
   LOG_INITIALIZED=false
   FAST_BOOT=false
   CHE_DEBUG=false
+  CHE_OFFLINE=false
 
   DEFAULT_CHE_PRODUCT_NAME="CHE"
   CHE_PRODUCT_NAME=${CHE_PRODUCT_NAME:-${DEFAULT_CHE_PRODUCT_NAME}}
@@ -237,6 +238,14 @@ is_fast() {
   fi
 }
 
+is_offline() {
+  if [ "${CHE_OFFLINE}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
 init_logging() {
   # Initialize CLI folder
   CLI_DIR=$CHE_CONTAINER_ROOT
@@ -264,6 +273,10 @@ init() {
 
   if [[ "$@" == *"--debug"* ]]; then
   	CHE_DEBUG=true
+  fi
+
+  if [[ "$@" == *"--offline"* ]]; then
+    CHE_OFFLINE=true
   fi
 
   SCRIPTS_BASE_CONTAINER_SOURCE_DIR="/scripts/base"
@@ -296,7 +309,6 @@ init() {
      # Use the CLI that is inside the container.
      SCRIPTS_CONTAINER_SOURCE_DIR="/scripts"
   fi
-
 
   # Primary source directory
   source "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/library.sh
@@ -337,47 +349,17 @@ cli_init() {
     return 2;
   fi
 
-  # Derived variablea
-  REFERENCE_HOST_ENVIRONMENT_FILE="${CHE_HOST_CONFIG}/${CHE_ENVIRONMENT_FILE}"
-  REFERENCE_HOST_COMPOSE_FILE="${CHE_HOST_INSTANCE}/${CHE_COMPOSE_FILE}"
-  REFERENCE_CONTAINER_ENVIRONMENT_FILE="${CHE_CONTAINER_CONFIG}/${CHE_ENVIRONMENT_FILE}"
-  REFERENCE_CONTAINER_COMPOSE_FILE="${CHE_CONTAINER_INSTANCE}/${CHE_COMPOSE_FILE}"
-  REFERENCE_CONTAINER_COMPOSE_HOST_FILE="${CHE_CONTAINER_INSTANCE}/${CHE_HOST_COMPOSE_FILE}"
-
-  CHE_CONTAINER_OFFLINE_FOLDER="${CHE_CONTAINER_BACKUP}"
-  CHE_HOST_OFFLINE_FOLDER="${CHE_HOST_BACKUP}"
-
-  CHE_HOST_CONFIG_MANIFESTS_FOLDER="${CHE_HOST_INSTANCE}/manifests"
-  CHE_CONTAINER_CONFIG_MANIFESTS_FOLDER="${CHE_CONTAINER_INSTANCE}/manifests"
-
-  CHE_HOST_CONFIG_MODULES_FOLDER="${CHE_HOST_INSTANCE}/modules"
-  CHE_CONTAINER_CONFIG_MODULES_FOLDER="${CHE_CONTAINER_INSTANCE}/modules"
-
-  # TODO: Change this to use the current folder or perhaps ~?
-  if is_boot2docker && has_docker_for_windows_client; then
-    if [[ "${CHE_HOST_INSTANCE,,}" != *"${USERPROFILE,,}"* ]]; then
-      CHE_HOST_INSTANCE=$(get_mount_path "${USERPROFILE}/.${CHE_MINI_PRODUCT_NAME}/")
-      warning "Boot2docker for Windows - CHE_INSTANCE set to $CHE_HOST_INSTANCE"
-    fi
-    if [[ "${CHE_HOST_CONFIG,,}" != *"${USERPROFILE,,}"* ]]; then
-      CHE_HOST_CONFIG=$(get_mount_path "${USERPROFILE}/.${CHE_MINI_PRODUCT_NAME}/")
-      warning "Boot2docker for Windows - CHE_CONFIG set to $CHE_HOST_CONFIG"
-    fi
-  fi
-
   # Special function to perform special behaviors if you are running nightly version
   verify_nightly_accuracy
 
   # Do not perform a version compatibility check if running upgrade command.
   # The upgrade command has its own internal checks for version compatibility.
-  if [ $1 != "upgrade" ]; then
-  	if [[ "${FAST_BOOT}" = "false" ]]; then
-      verify_version_compatibility
-    else
-      warning "Skipping version compatibility check..."
-    fi
-  else
+  if [[ "$@" == *"upgrade"* ]]; then
     verify_version_upgrade_compatibility
+  elif ! is_fast; then
+    verify_version_compatibility
+  else
+    warning "Skipping version compatibility check..."
   fi
 }
 
@@ -397,13 +379,13 @@ start() {
   # Bootstrap networking, docker, logging, and ability to load cli.sh and library.sh
   init "$@"
 
-  # Removes "--fast" and "--debug" from the positional arguments if it is set.
+  # Removes "--fast", "--debug", "--offline" from the positional arguments if it is set.
   set -- "${@/\-\-fast/}"
   set -- "${@/\-\-debug/}"
+  set -- "${@/\-\-offline/}"
   
   # Begin product-specific CLI calls
   info "cli" "Loading cli..."
-
 
   # The pre_init method is unique to each assembly. This method must be provided by 
   # a custom CLI assembly in their container and can set global variables which are 

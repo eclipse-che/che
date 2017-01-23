@@ -46,7 +46,7 @@ cmd_config() {
   info "config" "Customizing docker-compose for running in a container"
 
  
-  if local_repo; then
+  if local_repo || local_assembly; then
     # in development mode to avoid permissions issues we copy tomcat assembly to ${CHE_INSTANCE}
     # if ${CHE_FORMAL_PRODUCT_NAME} development tomcat exist we remove it
     if [[ -d "${CHE_CONTAINER_INSTANCE}/dev" ]]; then
@@ -61,16 +61,17 @@ cmd_config() {
         rm -rf "${CHE_CONTAINER_INSTANCE}/dev"
     fi
 
-    if [[ ! -d $(echo ${CHE_CONTAINER_DEVELOPMENT_REPO}/${CHE_ASSEMBLY_IN_REPO}) ]]; then
-      warning "You volume mounted a valid $CHE_FORMAL_PRODUCT_NAME repo to ':/repo', but we could not find a ${CHE_FORMAL_PRODUCT_NAME} assembly."
-      warning "Have you built ${CHE_ASSEMBLY_IN_REPO_MODULE_NAME} with 'mvn clean install'?"
+    if [[ ! -d $(echo ${CHE_CONTAINER_ASSEMBLY_FULL_PATH}) ]]; then
+      warning "You mounted ':/repo' or ':/assembly', but we did not find an assembly."
+      warning "Have you built the assembly with 'mvn clean install'?"
+      warning "CHE_ASSEMBLY=${CHE_CONTAINER_ASSEMBLY_FULL_PATH}"
       return 2
     fi
 
     # copy ${CHE_FORMAL_PRODUCT_NAME} development tomcat to ${CHE_INSTANCE} folder
     info "config" "Copying local binaries to ${CHE_HOST_INSTANCE}/dev..."
     mkdir -p "${CHE_CONTAINER_INSTANCE}/dev/${CHE_MINI_PRODUCT_NAME}-tomcat"
-    cp -r "$(echo $CHE_CONTAINER_DEVELOPMENT_REPO/$CHE_ASSEMBLY_IN_REPO)/." \
+    cp -r "$(echo ${CHE_CONTAINER_ASSEMBLY_FULL_PATH})/." \
         "${CHE_CONTAINER_INSTANCE}/dev/${CHE_MINI_PRODUCT_NAME}-tomcat/"
   fi
 
@@ -96,9 +97,15 @@ generate_configuration_with_puppet() {
     WRITE_LOGS=">> \"${LOGS}\""
   fi
 
-  if local_repo; then
+  CHE_REPO="off"
+  WRITE_PARAMETERS=""
+
+  if local_repo || local_assembly; then
     CHE_REPO="on"
     WRITE_PARAMETERS=" -e \"CHE_ASSEMBLY=${CHE_ASSEMBLY}\""
+  fi
+
+  if local_repo; then
     # add local mounts only if they are present
     if [ -d "/repo/dockerfiles/init/manifests" ]; then
       WRITE_PARAMETERS+=" -v \"${CHE_HOST_DEVELOPMENT_REPO}/dockerfiles/init/manifests\":/etc/puppet/manifests:ro"
@@ -110,10 +117,6 @@ generate_configuration_with_puppet() {
     if [ -d "/repo/dockerfiles/init/addon" ]; then
       WRITE_PARAMETERS+=" -v \"${CHE_HOST_DEVELOPMENT_REPO}/dockerfiles/init/addon/addon.pp\":/etc/puppet/manifests/addon.pp:ro"
     fi
-
-  else
-    CHE_REPO="off"
-    WRITE_PARAMETERS=""
   fi
 
   GENERATE_CONFIG_COMMAND="docker_run \

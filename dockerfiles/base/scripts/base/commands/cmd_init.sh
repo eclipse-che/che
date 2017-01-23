@@ -105,7 +105,9 @@ cmd_init() {
     info "init" "  ${CHE_PRODUCT_NAME}_CONFIG=${CHE_HOST_CONFIG}"
     info "init" "  ${CHE_PRODUCT_NAME}_INSTANCE=${CHE_HOST_INSTANCE}"
     if local_repo; then
-      info "init" "  ${CHE_PRODUCT_NAME}_DEVELOPMENT_REPO=${CHE_HOST_DEVELOPMENT_REPO}"
+      info "init" "  ${CHE_PRODUCT_NAME}_REPO=${CHE_HOST_DEVELOPMENT_REPO}"
+    fi
+    if local_repo || local_assembly; then
       info "init" "  ${CHE_PRODUCT_NAME}_ASSEMBLY=${CHE_ASSEMBLY}"
     fi
   fi

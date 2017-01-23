@@ -17,7 +17,7 @@
  */
 export class CheNamespaceRegistry {
 
-  namespaces : Array<string>;
+  namespaces : Array<any>;
 
   constructor() {
     this.namespaces = [];
@@ -28,16 +28,16 @@ export class CheNamespaceRegistry {
    *
    * @param namespaces namespace to be added
    */
-  addNamespaces(namespaces : Array<string>) : void {
+  addNamespaces(namespaces : Array<any>) : void {
     this.namespaces = this.namespaces.concat(namespaces);
   }
 
   /**
    * Returns the list of available namespaces.
    *
-   * @returns {Array<string>} namespaces
+   * @returns {Array<any>} namespaces
    */
-  getNamespaces() : Array<string> {
+  getNamespaces() : Array<any> {
     return this.namespaces;
   }
 }
