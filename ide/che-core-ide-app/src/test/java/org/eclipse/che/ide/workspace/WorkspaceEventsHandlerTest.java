@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.workspace;
 
 import com.google.gwt.core.client.Callback;
+import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.inject.Provider;
 import com.google.web.bindery.event.shared.EventBus;
 
@@ -89,7 +90,7 @@ import static org.mockito.Mockito.when;
 /**
  * @author Roman Nikitenko
  */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(GwtMockitoTestRunner.class)
 public class WorkspaceEventsHandlerTest {
     private static final String MACHINE_NAME             = "machineName";
     private static final String WORKSPACE_ID             = "workspaceId";
