@@ -109,7 +109,7 @@ initiate_offline_or_network_mode(){
     # If we are in networking mode, we have had some issues where users have failed DNS networking.
     # See: https://github.com/eclipse/che/issues/3266#issuecomment-265464165
     if ! is_fast; then
-      info "cli" "Checking network... (hint: '--fast' skips version, network, and nightly checks)"
+      info "cli" "Checking network... (hint: '--fast' skips nightly, version, network, and preflight checks)"
       local HTTP_STATUS_CODE=$(curl -I -k dockerhub.com -s -o /dev/null --write-out '%{http_code}')
       if [[ ! $HTTP_STATUS_CODE -eq "301" ]]; then
         info "Welcome to $CHE_FORMAL_PRODUCT_NAME!"

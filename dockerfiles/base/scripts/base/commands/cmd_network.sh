@@ -16,66 +16,92 @@ cmd_network() {
   info "---------------------------------------"
   info "--------   CONNECTIVITY TEST   --------"
   info "---------------------------------------"
-  # Start a fake workspace agent
-  log "docker run -d -p 12345:80 --name fakeagent ${BOOTSTRAP_IMAGE_ALPINE} httpd -f -p 80 -h /etc/ >> \"${LOGS}\""
-  docker run -d -p 12345:80 --name fakeagent ${BOOTSTRAP_IMAGE_ALPINE} httpd -f -p 80 -h /etc/ >> "${LOGS}"
 
-  AGENT_INTERNAL_IP=$(docker inspect --format='{{.NetworkSettings.IPAddress}}' fakeagent)
-  AGENT_INTERNAL_PORT=80
-  AGENT_EXTERNAL_IP=$CHE_HOST
-  AGENT_EXTERNAL_PORT=12345
+  start_test_server
 
+  info "Browser    => Workspace Agent (localhost): Connection $(test1 && echo "succeeded" || echo "failed")"
+  info "Browser    => Workspace Agent ($AGENT_EXTERNAL_IP): Connection $(test2 && echo "succeeded" || echo "failed")"
+  info "Server     => Workspace Agent (External IP): Connection $(test3 && echo "succeeded" || echo "failed")"
+  info "Server     => Workspace Agent (Internal IP): Connection $(test4 && echo "succeeded" || echo "failed")"
 
-  ### TEST 1: Simulate browser ==> workspace agent HTTP connectivity
+  stop_test_server
+}
+
+start_test_server() {
+  export AGENT_INTERNAL_PORT=80
+  export AGENT_EXTERNAL_PORT=12345
+
+  # Start mini httpd server to run simulated tests
+  docker run -d -p $AGENT_EXTERNAL_PORT:$AGENT_INTERNAL_PORT --name fakeagent \
+             ${UTILITY_IMAGE_ALPINE} httpd -f -p $AGENT_INTERNAL_PORT -h /etc/ >> "${LOGS}"
+
+  export AGENT_INTERNAL_IP=$(docker inspect --format='{{.NetworkSettings.IPAddress}}' fakeagent)
+  export AGENT_EXTERNAL_IP=$CHE_HOST
+}
+
+stop_test_server() {
+  # Remove httpd server
+  docker rm -f fakeagent >> "${LOGS}"  
+}
+
+test1() {
   HTTP_CODE=$(curl -I localhost:${AGENT_EXTERNAL_PORT}/alpine-release \
                           -s -o "${LOGS}" --connect-timeout 5 \
                           --write-out '%{http_code}') || echo "28" >> "${LOGS}"
-
-  if [ "${HTTP_CODE}" = "200" ]; then
-      info "Browser    => Workspace Agent (localhost): Connection succeeded"
+  
+  if check_http_code $HTTP_CODE; then
+    return 0
   else
-      info "Browser    => Workspace Agent (localhost): Connection failed"
+    return 1
   fi
+}
 
-  ### TEST 1a: Simulate browser ==> workspace agent HTTP connectivity
+test2() {
   HTTP_CODE=$(curl -I ${AGENT_EXTERNAL_IP}:${AGENT_EXTERNAL_PORT}/alpine-release \
                           -s -o "${LOGS}" --connect-timeout 5 \
                           --write-out '%{http_code}') || echo "28" >> "${LOGS}"
 
-  if [ "${HTTP_CODE}" = "200" ]; then
-      info "Browser    => Workspace Agent ($AGENT_EXTERNAL_IP): Connection succeeded"
+  if check_http_code $HTTP_CODE; then
+    return 0
   else
-      info "Browser    => Workspace Agent ($AGENT_EXTERNAL_IP): Connection failed"
+    return 1
   fi
+}
 
-  ### TEST 2: Simulate Che server ==> workspace agent (external IP) connectivity
-  export HTTP_CODE=$(docker_run --name fakeserver \
+test3() {
+   HTTP_CODE=$(docker_run --name fakeserver \
                                 --entrypoint=curl \
                                 $(eval "echo \${IMAGE_${CHE_PRODUCT_NAME}}") \
                                   -I ${AGENT_EXTERNAL_IP}:${AGENT_EXTERNAL_PORT}/alpine-release \
                                   -s -o "${LOGS}" \
                                   --write-out '%{http_code}')
 
-  if [ "${HTTP_CODE}" = "200" ]; then
-      info "Server     => Workspace Agent (External IP): Connection succeeded"
+  if check_http_code $HTTP_CODE; then
+    return 0
   else
-      info "Server     => Workspace Agent (External IP): Connection failed"
+    return 1
   fi
+}
 
-  ### TEST 3: Simulate Che server ==> workspace agent (internal IP) connectivity
-  export HTTP_CODE=$(docker_run --name fakeserver \
+test4() {
+  HTTP_CODE=$(docker_run --name fakeserver \
                                 --entrypoint=curl \
                                 $(eval "echo \${IMAGE_${CHE_PRODUCT_NAME}}") \
                                   -I ${AGENT_INTERNAL_IP}:${AGENT_INTERNAL_PORT}/alpine-release \
                                   -s -o "${LOGS}" \
-                                  --write-out '%{http_code}')
+                                  --write-out '%{http_code}')  
 
-  if [ "${HTTP_CODE}" = "200" ]; then
-      info "Server     => Workspace Agent (Internal IP): Connection succeeded"
+  if check_http_code $HTTP_CODE; then
+    return 0
   else
-      info "Server     => Workspace Agent (Internal IP): Connection failed"
+    return 1
   fi
+}
 
-  log "docker rm -f fakeagent >> \"${LOGS}\""
-  docker rm -f fakeagent >> "${LOGS}"
+check_http_code() {
+  if [ "${1}" = "200" ]; then
+    return 0
+  else
+    return 1
+  fi
 }
