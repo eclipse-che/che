@@ -22,6 +22,9 @@ cmd_rmi() {
   fi
 
   IMAGE_LIST=$(cat "$CHE_MANIFEST_DIR"/$CHE_VERSION/images)
+  IMAGE_LIST+=$'\n'${BOOTSTRAP_IMAGE_LIST}
+  IMAGE_LIST+=$'\n'${UTILITY_IMAGE_LIST}
+
   IFS=$'\n'
   info "rmi" "Removing ${CHE_MINI_PRODUCT_NAME} Docker images..."
 

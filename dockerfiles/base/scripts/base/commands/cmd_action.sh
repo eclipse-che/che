@@ -13,7 +13,6 @@ cmd_action() {
   debug $FUNCNAME
 
   # Not loaded as part of the init process to save on download time
-  update_image_if_not_found ${UTILITY_IMAGE_CHEACTION}
+  load_utilities_images_if_not_done
   docker_run -it ${UTILITY_IMAGE_CHEACTION} "$@"
-
 }

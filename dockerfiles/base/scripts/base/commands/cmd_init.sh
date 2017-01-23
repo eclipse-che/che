@@ -52,10 +52,6 @@ cmd_init() {
 
   cmd_download $FORCE_UPDATE
 
-  if [ -z ${IMAGE_INIT+x} ]; then
-    get_image_manifest $CHE_VERSION
-  fi
-
   if require_license; then
     if [[ "${AUTO_ACCEPT_LICENSE}" = "false" ]]; then
       info ""
@@ -109,7 +105,9 @@ cmd_init() {
     info "init" "  ${CHE_PRODUCT_NAME}_CONFIG=${CHE_HOST_CONFIG}"
     info "init" "  ${CHE_PRODUCT_NAME}_INSTANCE=${CHE_HOST_INSTANCE}"
     if local_repo; then
-      info "init" "  ${CHE_PRODUCT_NAME}_DEVELOPMENT_REPO=${CHE_HOST_DEVELOPMENT_REPO}"
+      info "init" "  ${CHE_PRODUCT_NAME}_REPO=${CHE_HOST_DEVELOPMENT_REPO}"
+    fi
+    if local_repo || local_assembly; then
       info "init" "  ${CHE_PRODUCT_NAME}_ASSEMBLY=${CHE_ASSEMBLY}"
     fi
   fi

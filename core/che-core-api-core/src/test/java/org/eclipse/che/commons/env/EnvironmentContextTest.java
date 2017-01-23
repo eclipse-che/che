@@ -33,6 +33,23 @@ public class EnvironmentContextTest {
         assertFalse(actualSubject.isTemporary());
     }
 
+    @Test
+    public void shouldReturnAnonymousSubjectWhenThereIsNoSubject() {
+        //given
+        EnvironmentContext expected = EnvironmentContext.getCurrent();
+        expected.setSubject(null);
+
+        //when
+        Subject actualSubject = EnvironmentContext.getCurrent().getSubject();
+
+        //then
+        assertEquals(actualSubject.getUserName(), Subject.ANONYMOUS.getUserName());
+        assertEquals(actualSubject.getUserId(), Subject.ANONYMOUS.getUserId());
+        assertEquals(actualSubject.getToken(), Subject.ANONYMOUS.getToken());
+        assertEquals(actualSubject.isTemporary(), Subject.ANONYMOUS.isTemporary());
+        assertEquals(actualSubject.isAnonymous(), Subject.ANONYMOUS.isAnonymous());
+    }
+
     @Test(enabled = false)
     public void shouldNotBeAbleToSeeContextInOtherThread() {
         //given
