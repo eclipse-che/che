@@ -20,10 +20,10 @@ import org.eclipse.che.inject.DynaModule;
  * @author Anatolii Bazko
  */
 @DynaModule
-public class LSPhpAgentModule extends AbstractModule {
+public class UnisonAgentDescriptorModule extends AbstractModule {
     @Override
     protected void configure() {
         Multibinder<Agent> agents = Multibinder.newSetBinder(binder(), Agent.class);
-        agents.addBinding().to(LSPhpAgent.class);
+        agents.addBinding().to(UnisonAgent.class);
     }
 }

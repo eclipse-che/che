@@ -20,10 +20,10 @@ import org.eclipse.che.inject.DynaModule;
  * @author Anatolii Bazko
  */
 @DynaModule
-public class LSCSharpAgentModule extends AbstractModule {
+public class LSPythonAgentDescriptorModule extends AbstractModule {
     @Override
     protected void configure() {
         Multibinder<Agent> agents = Multibinder.newSetBinder(binder(), Agent.class);
-        agents.addBinding().to(LSCSharpAgent.class);
+        agents.addBinding().to(LSPythonAgent.class);
     }
 }

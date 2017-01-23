@@ -21,14 +21,13 @@ import org.eclipse.che.inject.DynaModule;
  * @author Anatolii Bazko
  */
 @DynaModule
-public class ExecAgentModule extends AbstractModule {
+public class WsAgentDescriptorModule extends AbstractModule {
     @Override
     protected void configure() {
         Multibinder<Agent> agents = Multibinder.newSetBinder(binder(), Agent.class);
-        agents.addBinding().to(ExecAgent.class);
+        agents.addBinding().to(WsAgent.class);
 
         Multibinder<AgentLauncher> launchers = Multibinder.newSetBinder(binder(), AgentLauncher.class);
-        launchers.addBinding().to(org.eclipse.che.api.agent.ExecAgentLauncher.class);
-        launchers.addBinding().to(SshMachineExecAgentLauncher.class);
+        launchers.addBinding().to(org.eclipse.che.api.agent.WsAgentLauncher.class);
     }
 }

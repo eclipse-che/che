@@ -13,6 +13,7 @@ package org.eclipse.che.api.agent;
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 
+import org.eclipse.che.api.agent.server.launcher.AgentLauncher;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.inject.DynaModule;
 
@@ -20,10 +21,13 @@ import org.eclipse.che.inject.DynaModule;
  * @author Anatolii Bazko
  */
 @DynaModule
-public class LSPythonAgentModule extends AbstractModule {
+public class SshAgentDescriptorModule extends AbstractModule {
     @Override
     protected void configure() {
         Multibinder<Agent> agents = Multibinder.newSetBinder(binder(), Agent.class);
-        agents.addBinding().to(LSPythonAgent.class);
+        agents.addBinding().to(SshAgent.class);
+
+        Multibinder<AgentLauncher> launchers = Multibinder.newSetBinder(binder(), AgentLauncher.class);
+        launchers.addBinding().to(org.eclipse.che.api.agent.SshAgentLauncher.class);
     }
 }
