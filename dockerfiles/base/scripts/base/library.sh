@@ -368,7 +368,7 @@ verify_version_compatibility() {
   ##      - If they don't match, then if CLLI is newer fail with message to run upgrade first
   CHE_IMAGE_VERSION=$(get_image_version)
 
-  # Only check for newer versions if not in offline mode.
+  # Only check for newer versions if not in offline mode and not nightly.
   if ! is_offline && ! is_nightly; then
     NEWER=$(compare_versions $CHE_IMAGE_VERSION)
 
