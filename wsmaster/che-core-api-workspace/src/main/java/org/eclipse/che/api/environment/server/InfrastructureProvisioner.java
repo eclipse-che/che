@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.api.environment.server;
 
-import org.eclipse.che.api.core.model.workspace.Environment;
-import org.eclipse.che.api.core.model.workspace.ExtendedMachine;
 import org.eclipse.che.api.environment.server.exception.EnvironmentException;
 import org.eclipse.che.api.environment.server.model.CheServiceImpl;
 import org.eclipse.che.api.environment.server.model.CheServicesEnvironmentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ExtendedMachineImpl;
 
 /**
  * Modifies environment of workspace with everything needed for infrastructure of workspaces in CHE.
@@ -32,7 +32,7 @@ public interface InfrastructureProvisioner {
      * @throws EnvironmentException
      *         if any error occurs
      */
-    void provision(Environment envConfig, CheServicesEnvironmentImpl internalEnv) throws EnvironmentException;
+    void provision(EnvironmentImpl envConfig, CheServicesEnvironmentImpl internalEnv) throws EnvironmentException;
 
     /**
      * Modifies machine config and internal machine representation with everything needed for infrastructure of workspace.
@@ -44,5 +44,5 @@ public interface InfrastructureProvisioner {
      * @throws EnvironmentException
      *         if any error occurs
      */
-    void provision(ExtendedMachine machineConfig, CheServiceImpl internalMachine) throws EnvironmentException;
+    void provision(ExtendedMachineImpl machineConfig, CheServiceImpl internalMachine) throws EnvironmentException;
 }

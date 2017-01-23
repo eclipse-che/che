@@ -58,13 +58,14 @@ import org.eclipse.che.api.machine.server.spi.InstanceProvider;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.machine.server.util.RecipeDownloader;
 import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
-import org.eclipse.che.commons.lang.concurrent.Unlocker;
-import org.eclipse.che.commons.lang.concurrent.StripedLocks;
+import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ExtendedMachineImpl;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.Size;
+import org.eclipse.che.commons.lang.concurrent.StripedLocks;
+import org.eclipse.che.commons.lang.concurrent.Unlocker;
 import org.slf4j.Logger;
 
 import javax.annotation.PostConstruct;
@@ -239,6 +240,8 @@ public class CheEnvironmentEngine {
                                 MachineStartedHandler startedHandler) throws ServerException,
                                                                              EnvironmentException,
                                                                              ConflictException {
+
+        EnvironmentImpl environment = new EnvironmentImpl(env);
         // TODO move to machines provider
         // add random chars to ensure that old environments that weren't removed by some reason won't prevent start
         String networkId = NameGenerator.generate(workspaceId + "_", 16);
@@ -248,11 +251,11 @@ public class CheEnvironmentEngine {
         initializeEnvironment(namespace,
                               workspaceId,
                               envName,
-                              env,
+                              environment,
                               networkId,
                               messageConsumer);
 
-        String devMachineName = getDevMachineName(env);
+        String devMachineName = getDevMachineName(environment);
         if (devMachineName == null) {
             throw new ServerException("Agent 'org.eclipse.che.ws-agent' is not found in any of environment machines");
         }
@@ -553,7 +556,7 @@ public class CheEnvironmentEngine {
     private void initializeEnvironment(String namespace,
                                        String workspaceId,
                                        String envName,
-                                       Environment envConfig,
+                                       EnvironmentImpl envConfig,
                                        String networkId,
                                        MessageConsumer<MachineLogMessage> messageConsumer)
             throws ServerException,
