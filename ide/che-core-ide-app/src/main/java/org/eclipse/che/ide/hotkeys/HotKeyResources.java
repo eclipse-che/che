@@ -18,6 +18,7 @@ import com.google.gwt.resources.client.DataResource;
  * Resources for KeyBindings widget
  *
  * @author Alexander Andrienko
+ * @author <a href="mailto:ak@nuxeo.com">Arnaud Kervern</a>
  */
 public interface HotKeyResources extends ClientBundle {
 
@@ -40,6 +41,14 @@ public interface HotKeyResources extends ClientBundle {
         String categories();
 
         String description();
+
+        String isGlobal();
+
+        String selectionLabel();
+
+        String selectionListBox();
+
+        String selectionPanel();
     }
 
     @DataResource.MimeType("image/svg+xml")
