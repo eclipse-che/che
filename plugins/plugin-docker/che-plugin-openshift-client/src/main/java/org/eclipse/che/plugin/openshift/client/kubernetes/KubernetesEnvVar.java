@@ -23,17 +23,20 @@ import io.fabric8.kubernetes.api.model.EnvVarBuilder;
 /**
  * Provides API for managing Kubernetes {@link EnvVar}
  */
-public class KubernetesEnvVar {
+public final class KubernetesEnvVar {
     private static final Logger LOG = LoggerFactory.getLogger(KubernetesEnvVar.class);
+
+    private KubernetesEnvVar() {
+    }
 
     /**
      * Retrieves list of {@link EnvVar} based on environment variables specified
      * in {@link ContainerConfig}
-     * 
+     *
      * @param envVariables
      * @return list of {@link EnvVar}
      */
-    public List<EnvVar> getEnvFrom(String[] envVariables) {
+    public static List<EnvVar> getEnvFrom(String[] envVariables) {
         LOG.info("Container environment variables:");
         List<EnvVar> env = new ArrayList<>();
         for (String envVariable : envVariables) {

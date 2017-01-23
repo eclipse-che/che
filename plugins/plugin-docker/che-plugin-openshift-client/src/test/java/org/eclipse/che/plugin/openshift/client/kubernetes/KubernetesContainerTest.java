@@ -26,12 +26,6 @@ import org.testng.annotations.Test;
 import io.fabric8.kubernetes.api.model.ContainerPort;
 
 public class KubernetesContainerTest {
-    private KubernetesContainer kubernetesContainer;
-
-    @BeforeClass
-    private void setup() {
-        this.kubernetesContainer = new KubernetesContainer();
-    }
 
     @Test
     public void shouldReturnContainerPortFromExposedPortList() {
@@ -43,7 +37,7 @@ public class KubernetesContainerTest {
         exposedPorts.add("4403/tcp");
 
         // When
-        List<ContainerPort> containerPorts = kubernetesContainer.getContainerPortsFrom(exposedPorts);
+        List<ContainerPort> containerPorts = KubernetesContainer.getContainerPortsFrom(exposedPorts);
 
         // Then
         List<String> portsAndProtocols = containerPorts.stream().
@@ -60,7 +54,7 @@ public class KubernetesContainerTest {
         imageExposedPorts.put("8080/tcp",new ExposedPort());
 
         // When
-        List<ContainerPort> containerPorts = kubernetesContainer.getContainerPortsFrom(imageExposedPorts.keySet());
+        List<ContainerPort> containerPorts = KubernetesContainer.getContainerPortsFrom(imageExposedPorts.keySet());
 
         // Then
         List<String> portsAndProtocols = containerPorts.stream().

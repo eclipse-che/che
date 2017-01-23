@@ -26,12 +26,6 @@ import org.testng.annotations.Test;
 import io.fabric8.kubernetes.api.model.ServicePort;
 
 public class KubernetesServiceTest {
-    private KubernetesService kubernetesService;
-
-    @BeforeClass
-    private void setup() {
-        this.kubernetesService = new KubernetesService();
-    }
 
     @Test
     public void shouldReturnServicePortListFromImageExposedPortList() {
@@ -40,7 +34,7 @@ public class KubernetesServiceTest {
         imageExposedPorts.put("8080/TCP",new ExposedPort());
 
         // When
-        List<ServicePort> servicePorts = kubernetesService.getServicePortsFrom(imageExposedPorts.keySet());
+        List<ServicePort> servicePorts = KubernetesService.getServicePortsFrom(imageExposedPorts.keySet());
 
         // Then
         List<String> portsAndProtocols = servicePorts.stream().
@@ -49,7 +43,7 @@ public class KubernetesServiceTest {
                         p.getProtocol()).collect(Collectors.toList());
         assertTrue(imageExposedPorts.keySet().stream().anyMatch(portsAndProtocols::contains));
     }
-    
+
     @Test
     public void shouldReturnServicePortListFromExposedPortList() {
         // Given
@@ -60,7 +54,7 @@ public class KubernetesServiceTest {
         exposedPorts.put("4403/TCP",null);
 
         // When
-        List<ServicePort> servicePorts = kubernetesService.getServicePortsFrom(exposedPorts.keySet());
+        List<ServicePort> servicePorts = KubernetesService.getServicePortsFrom(exposedPorts.keySet());
 
         // Then
         List<String> portsAndProtocols = servicePorts.stream().
@@ -92,7 +86,7 @@ public class KubernetesServiceTest {
         expectedPortNames.add("codeserver");
 
         // When
-        List<ServicePort> servicePorts = kubernetesService.getServicePortsFrom(exposedPorts.keySet());
+        List<ServicePort> servicePorts = KubernetesService.getServicePortsFrom(exposedPorts.keySet());
         List<String> actualPortNames = servicePorts.stream().
                 map(p -> p.getName()).collect(Collectors.toList());
 
@@ -110,7 +104,7 @@ public class KubernetesServiceTest {
         expectedPortNames.add("55-tcp");
 
         // When
-        List<ServicePort> servicePorts = kubernetesService.getServicePortsFrom(exposedPorts.keySet());
+        List<ServicePort> servicePorts = KubernetesService.getServicePortsFrom(exposedPorts.keySet());
         List<String> actualPortNames = servicePorts.stream().
                 map(p -> p.getName()).collect(Collectors.toList());
 
