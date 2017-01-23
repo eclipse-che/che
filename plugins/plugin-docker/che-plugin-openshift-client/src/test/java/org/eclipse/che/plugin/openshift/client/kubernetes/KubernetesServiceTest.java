@@ -26,21 +26,15 @@ import org.testng.annotations.Test;
 import io.fabric8.kubernetes.api.model.ServicePort;
 
 public class KubernetesServiceTest {
-    private KubernetesService kubernetesService;
-
-    @BeforeClass
-    private void setup() {
-        this.kubernetesService = new KubernetesService();
-    }
 
     @Test
     public void shouldReturnServicePortListFromImageExposedPortList() {
         // Given
         Map<String, ExposedPort> imageExposedPorts = new HashMap<>();
-        imageExposedPorts.put("8080/tcp",new ExposedPort());
+        imageExposedPorts.put("8080/TCP",new ExposedPort());
 
         // When
-        List<ServicePort> servicePorts = kubernetesService.getServicePortsFrom(imageExposedPorts.keySet());
+        List<ServicePort> servicePorts = KubernetesService.getServicePortsFrom(imageExposedPorts.keySet());
 
         // Then
         List<String> portsAndProtocols = servicePorts.stream().
@@ -49,18 +43,18 @@ public class KubernetesServiceTest {
                         p.getProtocol()).collect(Collectors.toList());
         assertTrue(imageExposedPorts.keySet().stream().anyMatch(portsAndProtocols::contains));
     }
-    
+
     @Test
     public void shouldReturnServicePortListFromExposedPortList() {
         // Given
         Map<String, Map<String, String>> exposedPorts = new HashMap<>();
-        exposedPorts.put("8080/tcp",null);
-        exposedPorts.put("22/tcp",null);
-        exposedPorts.put("4401/tcp",null);
-        exposedPorts.put("4403/tcp",null);
+        exposedPorts.put("8080/TCP",null);
+        exposedPorts.put("22/TCP",null);
+        exposedPorts.put("4401/TCP",null);
+        exposedPorts.put("4403/TCP",null);
 
         // When
-        List<ServicePort> servicePorts = kubernetesService.getServicePortsFrom(exposedPorts.keySet());
+        List<ServicePort> servicePorts = KubernetesService.getServicePortsFrom(exposedPorts.keySet());
 
         // Then
         List<String> portsAndProtocols = servicePorts.stream().
@@ -92,7 +86,7 @@ public class KubernetesServiceTest {
         expectedPortNames.add("codeserver");
 
         // When
-        List<ServicePort> servicePorts = kubernetesService.getServicePortsFrom(exposedPorts.keySet());
+        List<ServicePort> servicePorts = KubernetesService.getServicePortsFrom(exposedPorts.keySet());
         List<String> actualPortNames = servicePorts.stream().
                 map(p -> p.getName()).collect(Collectors.toList());
 
@@ -110,7 +104,7 @@ public class KubernetesServiceTest {
         expectedPortNames.add("55-tcp");
 
         // When
-        List<ServicePort> servicePorts = kubernetesService.getServicePortsFrom(exposedPorts.keySet());
+        List<ServicePort> servicePorts = KubernetesService.getServicePortsFrom(exposedPorts.keySet());
         List<String> actualPortNames = servicePorts.stream().
                 map(p -> p.getName()).collect(Collectors.toList());
 

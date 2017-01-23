@@ -26,16 +26,19 @@ import io.fabric8.kubernetes.api.model.ServicePort;
 /**
  * Provides API for managing Kubernetes {@link ServicePort}
  */
-public class KubernetesService {
+public final class KubernetesService {
+
+    private KubernetesService() {
+    }
 
     /**
      * Retrieves list of {@link ServicePort} based on ports defined in
      * {@link ContainerConfig} and {@link ImageConfig}
-     * 
+     *
      * @param exposedPorts
      * @return list of {@link ServicePort}
      */
-    public List<ServicePort> getServicePortsFrom(Set<String> exposedPorts) {
+    public static List<ServicePort> getServicePortsFrom(Set<String> exposedPorts) {
         List<ServicePort> servicePorts = new ArrayList<>(exposedPorts.size());
         for (String exposedPort : exposedPorts) {
             String[] portAndProtocol = exposedPort.split("/", 2);
