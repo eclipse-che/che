@@ -109,7 +109,7 @@ initiate_offline_or_network_mode(){
     # If we are in networking mode, we have had some issues where users have failed DNS networking.
     # See: https://github.com/eclipse/che/issues/3266#issuecomment-265464165
     if ! is_fast; then
-      info "cli" "Checking network... (hint: '--fast' skips version, network, and nightly checks)"
+      info "cli" "Checking network... (hint: '--fast' skips nightly, version, network, and preflight checks)"
       local HTTP_STATUS_CODE=$(curl -I -k dockerhub.com -s -o /dev/null --write-out '%{http_code}')
       if [[ ! $HTTP_STATUS_CODE -eq "301" ]]; then
         info "Welcome to $CHE_FORMAL_PRODUCT_NAME!"
@@ -368,8 +368,8 @@ verify_version_compatibility() {
   ##      - If they don't match, then if CLLI is newer fail with message to run upgrade first
   CHE_IMAGE_VERSION=$(get_image_version)
 
-  # Only check for newer versions if not in offline mode.
-  if ! is_offline; then
+  # Only check for newer versions if not in offline mode and not nightly.
+  if ! is_offline && ! is_nightly; then
     NEWER=$(compare_versions $CHE_IMAGE_VERSION)
 
     if [[ "${NEWER}" != "" ]]; then
@@ -423,7 +423,7 @@ is_nightly() {
   fi
 }
 
-function verify_nightly_accuracy() {
+verify_nightly_accuracy() {
   # Per request of the engineers, check to see if the locally cached nightly version is older
   # than the one stored on DockerHub.
   if is_nightly; then
@@ -549,6 +549,7 @@ wait_until_server_is_booted() {
 
 # Compares $1 version to the first 10 versions listed as tags on Docker Hub
 # Returns "" if $1 is newest, otherwise returns the newest version available
+# Does not work with nightly versions - do not use this to compare nightly to another version
 compare_versions() {
 
   local VERSION_LIST_JSON=$(curl -s https://hub.docker.com/v2/repositories/${CHE_IMAGE_NAME}/tags/)
