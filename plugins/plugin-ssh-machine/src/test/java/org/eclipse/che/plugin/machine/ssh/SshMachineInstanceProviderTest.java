@@ -17,13 +17,11 @@ import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.machine.server.exception.MachineException;
-import org.eclipse.che.api.machine.server.exception.SnapshotException;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
-import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.util.RecipeDownloader;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -67,10 +65,6 @@ public class SshMachineInstanceProviderTest {
     @BeforeMethod
     public void setUp() throws Exception {
         machine = createMachine();
-        SshMachineRecipe sshMachineRecipe = new SshMachineRecipe("localhost",
-                                                                 22,
-                                                                 "user",
-                                                                 "password");
         recipe = new RecipeImpl().withType("ssh-config")
                                  .withScript(RECIPE_SCRIPT);
     }
@@ -83,12 +77,6 @@ public class SshMachineInstanceProviderTest {
     @Test
     public void shouldReturnCorrectRecipeTypes() throws Exception {
         assertEquals(provider.getRecipeTypes(), new HashSet<>(singletonList("ssh-config")));
-    }
-
-    @Test(expectedExceptions = SnapshotException.class,
-          expectedExceptionsMessageRegExp = "Snapshot feature is unsupported for ssh machine implementation")
-    public void shouldThrowSnapshotExceptionOnRemoveSnapshot() throws Exception {
-        provider.removeInstanceSnapshot(null);
     }
 
     @Test(expectedExceptions = MachineException.class,
@@ -114,7 +102,7 @@ public class SshMachineInstanceProviderTest {
         when(sshMachineFactory.createInstance(eq(machine), eq(sshClient), any(LineConsumer.class))).thenReturn(sshMachineInstance);
         when(recipeDownloader.getRecipe(eq(machine.getConfig()))).thenReturn(recipe);
 
-        Instance instance = provider.createInstance(machine, LineConsumer.DEV_NULL);
+        SshMachineInstance instance = provider.createInstance(machine, LineConsumer.DEV_NULL);
 
         assertEquals(instance, sshMachineInstance);
     }

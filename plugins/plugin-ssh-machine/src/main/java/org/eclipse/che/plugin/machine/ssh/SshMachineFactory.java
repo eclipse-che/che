@@ -16,7 +16,6 @@ import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.machine.server.exception.MachineException;
-import org.eclipse.che.api.machine.server.spi.Instance;
 
 import java.util.Map;
 
@@ -39,7 +38,7 @@ public interface SshMachineFactory {
                               @Assisted Map<String, String> envVars);
 
     /**
-     * Creates ssh machine implementation of {@link Instance}.
+     * Creates ssh machine implementation instance.
      *
      * @param machine description of machine
      * @param sshClient ssh client of machine
@@ -51,7 +50,7 @@ public interface SshMachineFactory {
                                       @Assisted LineConsumer outputConsumer) throws MachineException;
 
     /**
-     * Creates ssh machine implementation of {@link org.eclipse.che.api.machine.server.spi.InstanceProcess}.
+     * Creates ssh machine implementation of {@link SshMachineProcess}.
      *
      * @param command command that should be executed on process start
      * @param outputChannel channel where output will be available on process execution

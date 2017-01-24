@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.machine.ssh.jsch;
 
-import com.google.inject.assistedinject.Assisted;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
@@ -25,7 +24,6 @@ import org.eclipse.che.plugin.machine.ssh.SshClient;
 import org.eclipse.che.plugin.machine.ssh.SshMachineRecipe;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -60,10 +58,10 @@ public class JschSshClient implements SshClient {
     private Session session;
 
     @Inject
-    public JschSshClient(@Assisted SshMachineRecipe sshMachineRecipe,
-                         @Assisted Map<String, String> envVars,
+    public JschSshClient(SshMachineRecipe sshMachineRecipe,
+                         Map<String, String> envVars,
                          JSch jsch,
-                         @Named("che.workspace.ssh_connection_timeout_ms") int connectionTimeoutMs) {
+                         int connectionTimeoutMs) {
         this.envVars = envVars;
         this.connectionTimeout = connectionTimeoutMs;
         this.user = JschUserInfoImpl.builder()
@@ -79,12 +77,10 @@ public class JschSshClient implements SshClient {
         this.username = sshMachineRecipe.getUsername();
     }
 
-    @Override
     public String getHost() {
         return host;
     }
 
-    @Override
     public void start() throws MachineException {
         try {
             session = jsch.getSession(username, host, port);
@@ -108,12 +104,10 @@ public class JschSshClient implements SshClient {
 //            envVariableEntry.getValue()));
 //     todo process output
 
-    @Override
     public void stop() throws MachineException {
         session.disconnect();
     }
 
-    @Override
     public JschSshProcess createProcess(String commandLine) throws MachineException {
         try {
             ChannelExec exec = (ChannelExec)session.openChannel("exec");
@@ -130,7 +124,6 @@ public class JschSshClient implements SshClient {
         }
     }
 
-    @Override
     public void copy(String sourcePath, String targetPath) throws MachineException {
         File source = new File(sourcePath);
         if (!source.exists()) {
