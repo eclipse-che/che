@@ -88,15 +88,15 @@ public class NavigateToFilePresenterTest {
     public void testShowDialog() throws Exception {
         presenter.showDialog();
 
-        verify(view).showDialog();
-        verify(view).clearInput();
+        verify(view).showPopup();
     }
 
     @Test
     public void testOnFileSelected() throws Exception {
         presenter.onFileSelected(Path.ROOT);
 
-        verify(view).close();
+        verify(view).hidePopup();
         verify(container).getFile(eq(Path.ROOT));
     }
+
 }
