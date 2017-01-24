@@ -8,10 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.agent;
-
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+package org.eclipse.che.api.agent.shared.model.impl;
 
 import org.eclipse.che.api.agent.shared.dto.AgentDto;
 import org.eclipse.che.api.agent.shared.model.Agent;
@@ -29,22 +26,20 @@ import static java.util.Collections.unmodifiableList;
 import static java.util.Collections.unmodifiableMap;
 
 /**
- * Workspace agent.
+ * Basic implementation of the {@link Agent}.
  *
- * @see Agent
+ * It is supposed that agent descriptor and agent script are located
+ * as resources in the jar.
+ *
+ * If resources aren't found then {@link Agent} won't be initialized.
  *
  * @author Anatolii Bazko
  */
-@Singleton
-public class WsAgent implements Agent {
-    private static final String AGENT_DESCRIPTOR = "org.eclipse.che.ws-agent.json";
-    private static final String AGENT_SCRIPT     = "org.eclipse.che.ws-agent.script.sh";
-
+public abstract class BasicAgent implements Agent {
     private final Agent internal;
 
-    @Inject
-    public WsAgent() throws IOException {
-        internal = readAgentDescriptor();
+    public BasicAgent(String agentDescriptor, String agentScript) throws IOException {
+        internal = readAgentDescriptor(agentDescriptor, agentScript);
     }
 
     @Override
@@ -87,22 +82,23 @@ public class WsAgent implements Agent {
         return unmodifiableMap(internal.getServers());
     }
 
-    private Agent readAgentDescriptor() throws IOException {
-        InputStream inputStream = readResource(AGENT_DESCRIPTOR);
+    private Agent readAgentDescriptor(String agentDescriptor, String agentScript) throws IOException {
+        InputStream inputStream = readResource(agentDescriptor);
         AgentDto agent = DtoFactory.getInstance().createDtoFromJson(inputStream, AgentDto.class);
-        return agent.withScript(readAgentScript());
+        return agent.withScript(readAgentScript(agentScript));
     }
 
-    private String readAgentScript() throws IOException {
-        InputStream inputStream = readResource(AGENT_SCRIPT);
+    private String readAgentScript(String agentScript) throws IOException {
+        InputStream inputStream = readResource(agentScript);
         return IoUtil.readStream(inputStream);
     }
 
-    private InputStream readResource(String name) throws IOException {
-        InputStream inputStream = WsAgent.class.getResourceAsStream("/" + name);
+    private InputStream readResource(String resource) throws IOException {
+        InputStream inputStream = getClass().getResourceAsStream("/" + resource);
         if (inputStream == null) {
-            throw new IOException(format("Can't initialize workspace agent. Resource %s not found", name));
+            throw new IOException(format("Can't initialize agent. Resource %s not found", resource));
         }
         return inputStream;
     }
+
 }

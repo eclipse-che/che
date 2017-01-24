@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.agent.shared.model.impl;
 
+import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.agent.shared.model.AgentKey;
 import org.eclipse.che.commons.annotation.Nullable;
 
@@ -19,16 +20,21 @@ import java.util.Objects;
  * @author Anatolii Bazko
  */
 public class AgentKeyImpl implements AgentKey {
+    private static final String DEFAULT_VERSION = "latest";
     private final String id;
     private final String version;
 
     public AgentKeyImpl(String id, @Nullable String version) {
         this.id = id;
-        this.version = version;
+        this.version = version == null ? DEFAULT_VERSION : version;
     }
 
-    public AgentKeyImpl(String name) {
-        this(name, null);
+    public AgentKeyImpl(String id) {
+        this(id, null);
+    }
+
+    public AgentKeyImpl(Agent agent) {
+        this(agent.getId(), agent.getVersion());
     }
 
     public String getId() {
@@ -50,7 +56,7 @@ public class AgentKeyImpl implements AgentKey {
         String[] parts = agentKey.split(":");
 
         if (parts.length == 1) {
-            return new AgentKeyImpl(parts[0], null);
+            return new AgentKeyImpl(parts[0]);
         } else if (parts.length == 2) {
             return new AgentKeyImpl(parts[0], parts[1]);
         } else {
@@ -79,7 +85,7 @@ public class AgentKeyImpl implements AgentKey {
     @Override
     public String toString() {
         return "AgentImpl{" +
-               "name='" + id + '\'' +
+               "id='" + id + '\'' +
                ", version='" + version + "\'}";
     }
 }

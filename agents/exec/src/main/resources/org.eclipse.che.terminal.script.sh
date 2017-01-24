@@ -159,13 +159,13 @@ else
 fi
 
 
-if curl -o /dev/null --silent --head --fail $(echo ${AGENT_BINARIES_URI} | sed 's/\\${PREFIX}/'${PREFIX}'/g'); then
-    curl -o $(echo ${TARGET_AGENT_BINARIES_URI} | sed 's/\\${PREFIX}/'${PREFIX}'/g' | sed 's/file:\\/\\///g') -s $(echo ${AGENT_BINARIES_URI} | sed 's/\\${PREFIX}/'${PREFIX}'/g')
-elif curl -o /dev/null --silent --head --fail $(echo ${AGENT_BINARIES_URI} | sed 's/-\\${PREFIX}//g'); then
-    curl -o $(echo ${TARGET_AGENT_BINARIES_URI} | sed 's/\\${PREFIX}/'${PREFIX}'/g' | sed 's/file:\\/\\///g') -s $(echo ${AGENT_BINARIES_URI} | sed 's/-\\${PREFIX}//g')
+if curl -o /dev/null --silent --head --fail $(echo ${AGENT_BINARIES_URI} | sed 's/\${PREFIX}/'${PREFIX}'/g'); then
+    curl -o $(echo ${TARGET_AGENT_BINARIES_URI} | sed 's/\${PREFIX}/'${PREFIX}'/g' | sed 's/file:\/\///g') -s $(echo ${AGENT_BINARIES_URI} | sed 's/\${PREFIX}/'${PREFIX}'/g')
+elif curl -o /dev/null --silent --head --fail $(echo ${AGENT_BINARIES_URI} | sed 's/-\${PREFIX}//g'); then
+    curl -o $(echo ${TARGET_AGENT_BINARIES_URI} | sed 's/\${PREFIX}/'${PREFIX}'/g' | sed 's/file:\/\///g') -s $(echo ${AGENT_BINARIES_URI} | sed 's/-\${PREFIX}//g')
 fi
 
-curl -s $(echo ${TARGET_AGENT_BINARIES_URI} | sed 's/\\${PREFIX}/'${PREFIX}'/g') | tar  xzf - -C ${CHE_DIR}
+curl -s $(echo ${TARGET_AGENT_BINARIES_URI} | sed 's/\${PREFIX}/'${PREFIX}'/g') | tar  xzf - -C ${CHE_DIR}
 
 if [ -f /bin/bash ]; then
     SHELL_INTERPRETER="/bin/bash"

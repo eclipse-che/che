@@ -19,19 +19,19 @@ import org.eclipse.che.api.agent.shared.model.impl.BasicAgent;
 import java.io.IOException;
 
 /**
- * Unison agent.
+ * Workspace agent.
  *
  * @see Agent
  *
  * @author Anatolii Bazko
  */
 @Singleton
-public class UnisonAgent extends BasicAgent {
-    private static final String AGENT_DESCRIPTOR = "org.eclipse.che.unison.json";
-    private static final String AGENT_SCRIPT     = "org.eclipse.che.unison.script.sh";
+public class WsAgent extends BasicAgent {
+    private static final String AGENT_DESCRIPTOR = "org.eclipse.che.ws-agent.json";
+    private static final String AGENT_SCRIPT     = "org.eclipse.che.ws-agent.script.sh";
 
     @Inject
-    public UnisonAgent() throws IOException {
+    public WsAgent() throws IOException {
         super(AGENT_DESCRIPTOR, AGENT_SCRIPT);
     }
 }
