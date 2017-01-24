@@ -39,7 +39,7 @@ get_container_host_bind_folder() {
   IFS=$' '
   for SINGLE_BIND in $VALUE2; do
     case $SINGLE_BIND in
-      *$1)
+      *$1*)
         MOUNT="${MOUNT} ${SINGLE_BIND}"
         echo "${MOUNT}" | cut -f1 -d":" | xargs
       ;;
