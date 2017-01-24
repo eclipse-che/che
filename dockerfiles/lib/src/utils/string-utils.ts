@@ -9,8 +9,39 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 
+/**
+ * Handle some operations on strings.
+ * @author Florent Benoit
+ */
 export class StringUtils {
+
+    /**
+     * Check if the given value string i starting with searchString
+     * @param value the original string
+     * @param searchString the value to search
+     * @returns {boolean} true if it starts with
+     */
     static startsWith(value:string, searchString:string):boolean {
         return value.substr(0, searchString.length) === searchString;
     }
+
+    /**
+     * Remove from the given string all the given comments starting by #
+     * @param value
+     * @returns {string}
+     */
+    static removeSharpComments(value : string) : string {
+        return value.replace(/^#.*/gm, '');
+    }
+
+    /**
+     * If string literals es6 def for workspace, use raw strings to keep dockerfile content
+     * @param value
+     * @returns {string}
+     */
+    static keepWorkspaceRawStrings(value : string) : string {
+        return value.replace(/^(workspace.)(.*)=\`(.*)$/gm, '$1$2=String.raw`$3');
+    }
+
 }
+
