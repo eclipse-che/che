@@ -29,7 +29,7 @@ cmd_network() {
 
 start_test_server() {
   export AGENT_INTERNAL_PORT=80
-  export AGENT_EXTERNAL_PORT=12345
+  export AGENT_EXTERNAL_PORT=32768
 
   # Start mini httpd server to run simulated tests
   docker run -d -p $AGENT_EXTERNAL_PORT:$AGENT_INTERNAL_PORT --name fakeagent \
