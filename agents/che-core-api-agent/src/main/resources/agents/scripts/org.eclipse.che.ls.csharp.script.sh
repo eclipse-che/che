@@ -15,7 +15,7 @@ command -v tar >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" tar"; }
 command -v curl >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" curl"; }
 test "$(id -u)" = 0 || SUDO="sudo"
 
-AGENT_BINARIES_URI=https://codenvy.com/update/repository/public/download/org.eclipse.che.ls.csharp.binaries
+AGENT_BINARIES_URI='${WORKSPACE_MASTER_URI}/agent-binaries/org.eclipse.che.ls.csharp.tar.gz'
 CHE_DIR=$HOME/che
 LS_DIR=${CHE_DIR}/ls-csharp
 LS_LAUNCHER=${LS_DIR}/launch.sh
@@ -228,6 +228,12 @@ fi
 #####################
 ### Install C# LS ###
 #####################
+
+# Compute URI of workspace master
+WORKSPACE_MASTER_URI=$(echo $CHE_API | cut -d / -f 1-3)
+
+## Evaluate variables now that prefix is defined
+eval "AGENT_BINARIES_URI=${AGENT_BINARIES_URI}"
 
 curl -s ${AGENT_BINARIES_URI} | tar xzf - -C ${CHE_DIR}
 
