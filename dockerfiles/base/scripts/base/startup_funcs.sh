@@ -380,6 +380,7 @@ start() {
   init "$@"
 
   # Removes "--fast", "--debug", "--offline" from the positional arguments if it is set.
+  ORIGINAL_PARAMETERS=$@
   set -- "${@/\-\-fast/}"
   set -- "${@/\-\-debug/}"
   set -- "${@/\-\-offline/}"

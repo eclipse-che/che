@@ -30,10 +30,10 @@ get_container_host_bind_folder() {
   BINDS=$(docker inspect --format="{{.HostConfig.Binds}}" "${2}" | cut -d '[' -f 2 | cut -d ']' -f 1)
 
   # Remove /var/run/docker.sock:/var/run/docker.sock
-  VALUE=${BINDS/\/var\/run\/docker\.sock\:\/var\/run\/docker\.sock/}
+  #VALUE=${BINDS/\/var\/run\/docker\.sock\:\/var\/run\/docker\.sock/}
 
   # Remove leading and trailing spaces
-  VALUE2=$(echo "${VALUE}" | xargs)
+  VALUE2=$(echo "${BINDS}" | xargs)
 
   MOUNT=""
   IFS=$' '
@@ -285,7 +285,9 @@ check_docker_networking() {
 
 check_interactive() {
   # Detect and verify that the CLI container was started with -it option.
+  TTY_ACTIVATED=true
   if [ ! -t 1 ]; then
+    TTY_ACTIVATED=false
     warning "Did not detect TTY - interactive mode disabled"
   fi
 }
@@ -299,6 +301,7 @@ check_mounts() {
   SYNC_MOUNT=$(get_container_folder ":/sync")
   UNISON_PROFILE_MOUNT=$(get_container_folder ":/unison")
   CHEDIR_MOUNT=$(get_container_folder ":/chedir")
+  DOCKER_MOUNT=$(get_container_folder ":/var/run/docker.sock")
 
   if [[ "${DATA_MOUNT}" = "not set" ]]; then
     info "Welcome to $CHE_FORMAL_PRODUCT_NAME!"
