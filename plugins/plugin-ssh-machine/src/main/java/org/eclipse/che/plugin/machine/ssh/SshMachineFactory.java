@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.machine.ssh;
 
-import com.google.inject.assistedinject.Assisted;
-
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.util.LineConsumer;
@@ -34,8 +32,8 @@ public interface SshMachineFactory {
      * @param envVars
      *         environment variables that should be injected into machine
      */
-    SshClient createSshClient(@Assisted SshMachineRecipe sshMachineRecipe,
-                              @Assisted Map<String, String> envVars);
+    SshClient createSshClient(SshMachineRecipe sshMachineRecipe,
+                              Map<String, String> envVars);
 
     /**
      * Creates ssh machine implementation instance.
@@ -45,9 +43,9 @@ public interface SshMachineFactory {
      * @param outputConsumer consumer of output from container main process
      * @throws MachineException if error occurs on creation of {@code Instance}
      */
-    SshMachineInstance createInstance(@Assisted Machine machine,
-                                      @Assisted SshClient sshClient,
-                                      @Assisted LineConsumer outputConsumer) throws MachineException;
+    SshMachineInstance createInstance(Machine machine,
+                                      SshClient sshClient,
+                                      LineConsumer outputConsumer) throws MachineException;
 
     /**
      * Creates ssh machine implementation of {@link SshMachineProcess}.
@@ -57,8 +55,8 @@ public interface SshMachineFactory {
      * @param pid virtual id of that process
      * @param sshClient client to communicate with machine
      */
-    SshMachineProcess createInstanceProcess(@Assisted Command command,
-                                            @Assisted("outputChannel") String outputChannel,
-                                            @Assisted int pid,
-                                            @Assisted SshClient sshClient);
+    SshMachineProcess createInstanceProcess(Command command,
+                                            String outputChannel,
+                                            int pid,
+                                            SshClient sshClient);
 }

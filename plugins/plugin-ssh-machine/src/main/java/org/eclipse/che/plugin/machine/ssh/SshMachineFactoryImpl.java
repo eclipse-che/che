@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.machine.ssh;
 
-import com.google.inject.assistedinject.Assisted;
 import com.jcraft.jsch.JSch;
 
 import org.eclipse.che.api.core.model.machine.Command;
@@ -30,31 +29,31 @@ import java.util.Set;
  */
 public class SshMachineFactoryImpl implements SshMachineFactory {
 
-    private final int connectionTimeoutMs;
+    private final int             connectionTimeoutMs;
     private final Set<ServerConf> machinesServers;
 
     @Inject
-    public  SshMachineFactoryImpl(@Named("che.workspace.ssh_connection_timeout_ms") int connectionTimeoutMs,
-                                  @Named("machine.ssh.machine_servers") Set<ServerConf> machinesServers) {
+    public SshMachineFactoryImpl(@Named("che.workspace.ssh_connection_timeout_ms") int connectionTimeoutMs,
+                                 @Named("machine.ssh.machine_servers") Set<ServerConf> machinesServers) {
         this.connectionTimeoutMs = connectionTimeoutMs;
         this.machinesServers = machinesServers;
     }
 
 
     @Override
-    public SshClient createSshClient(@Assisted SshMachineRecipe sshMachineRecipe, @Assisted Map<String, String> envVars) {
+    public SshClient createSshClient(SshMachineRecipe sshMachineRecipe, Map<String, String> envVars) {
         return new JschSshClient(sshMachineRecipe, envVars, new JSch(), connectionTimeoutMs);
     }
 
     @Override
-    public SshMachineInstance createInstance(@Assisted Machine machine, @Assisted SshClient sshClient,
-                                             @Assisted LineConsumer outputConsumer) throws MachineException {
+    public SshMachineInstance createInstance(Machine machine, SshClient sshClient,
+                                             LineConsumer outputConsumer) throws MachineException {
         return new SshMachineInstance(machine, sshClient, outputConsumer, this, machinesServers);
     }
 
     @Override
-    public SshMachineProcess createInstanceProcess(@Assisted Command command, @Assisted("outputChannel") String outputChannel,
-                                                   @Assisted int pid, @Assisted SshClient sshClient) {
+    public SshMachineProcess createInstanceProcess(Command command, String outputChannel,
+                                                   int pid, SshClient sshClient) {
         return new SshMachineProcess(command, outputChannel, pid, sshClient);
     }
 }
