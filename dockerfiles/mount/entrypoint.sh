@@ -51,7 +51,9 @@ parse_command_line () {
 
   # See if profile document was provided
   mkdir -p $HOME/.unison
-  cp -rf /profile/default.prf $HOME/.unison/default.prf
+  if [ -f /profile/default.prf ]; then
+    cp -rf /profile/default.prf $HOME/.unison/default.prf
+  fi
 
   WORKSPACE_NAME=$1
   shift
