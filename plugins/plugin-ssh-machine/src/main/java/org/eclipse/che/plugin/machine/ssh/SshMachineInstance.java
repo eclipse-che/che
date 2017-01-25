@@ -47,7 +47,8 @@ import static java.util.Collections.emptyMap;
 public class SshMachineInstance  {
     private static final AtomicInteger pidSequence = new AtomicInteger(1);
 
-    private String        id;
+    private String                 id;
+    private MachineRuntimeInfoImpl machineRuntime;
 
     private final SshClient         sshClient;
     private final LineConsumer      outputConsumer;
@@ -57,7 +58,6 @@ public class SshMachineInstance  {
     private final Set<ServerConf>                               machinesServers;
     private final ConcurrentHashMap<Integer, SshMachineProcess> machineProcesses;
 
-    private MachineRuntimeInfoImpl machineRuntime;
 
     public SshMachineInstance(Machine machine,
                               SshClient sshClient,
@@ -73,7 +73,6 @@ public class SshMachineInstance  {
         this.machinesServers.addAll(machinesServers);
         this.machinesServers.addAll(machine.getConfig().getServers());
         this.machineProcesses = new ConcurrentHashMap<>();
-        this.machineRuntime = machine.getRuntime() != null ? new MachineRuntimeInfoImpl(machine.getRuntime()) : null;
     }
 
     public LineConsumer getLogger() {

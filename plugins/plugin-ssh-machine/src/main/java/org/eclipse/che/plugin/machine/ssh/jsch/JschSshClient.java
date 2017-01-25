@@ -24,6 +24,7 @@ import org.eclipse.che.plugin.machine.ssh.SshClient;
 import org.eclipse.che.plugin.machine.ssh.SshMachineRecipe;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -61,7 +62,7 @@ public class JschSshClient implements SshClient {
     public JschSshClient(SshMachineRecipe sshMachineRecipe,
                          Map<String, String> envVars,
                          JSch jsch,
-                         int connectionTimeoutMs) {
+                         @Named("che.workspace.ssh_connection_timeout_ms") int connectionTimeoutMs) {
         this.envVars = envVars;
         this.connectionTimeout = connectionTimeoutMs;
         this.user = JschUserInfoImpl.builder()
