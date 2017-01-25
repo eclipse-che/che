@@ -363,7 +363,7 @@ cli_init() {
   fi
 
   if is_initialized; then 
-    CHE_HOST_LOCAL=$(get_value_of_var_from_env_file CHE_HOST)
+    CHE_HOST_LOCAL=$(get_value_of_var_from_env_file ${CHE_PRODUCT_NAME}_HOST)
     if [[ "${CHE_HOST}" != "${CHE_HOST_LOCAL}" ]]; then
       warning "${CHE_PRODUCT_NAME}_HOST (${CHE_HOST}) overridden by ${CHE_ENVIRONMENT_FILE} (${CHE_HOST_LOCAL})"
     fi
