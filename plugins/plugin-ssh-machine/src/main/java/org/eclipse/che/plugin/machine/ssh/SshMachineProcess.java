@@ -107,6 +107,22 @@ public class SshMachineProcess  {
         sshProcess.kill();
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public Map<String, String> getAttributes() {
+        return attributes;
+    }
+
+    public String getOutputChannel() {
+        return outputChannel;
+    }
+
     private static class PrefixingLineConsumer implements LineConsumer {
         private final String       prefix;
         private final LineConsumer lineConsumer;
