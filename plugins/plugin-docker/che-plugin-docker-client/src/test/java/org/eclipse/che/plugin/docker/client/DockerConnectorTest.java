@@ -101,6 +101,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -118,6 +119,7 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -165,11 +167,11 @@ public class DockerConnectorTest {
     private static final int CONTAINER_EXIT_CODE = 0;
 
     @Mock
-    private DockerConnectorConfiguration dockerConnectorConfiguration;
+    private DockerConnectorConfiguration       dockerConnectorConfiguration;
     @Mock
-    private DockerConnectionFactory      dockerConnectionFactory;
+    private DockerConnectionFactory            dockerConnectionFactory;
     @Mock
-    private DockerResponse               dockerResponse;
+    private DockerResponse                     dockerResponse;
     @Mock
     private ProgressMonitor                    progressMonitor;
     @Mock
@@ -961,27 +963,146 @@ public class DockerConnectorTest {
         Map<String, AuthConfig> auth = new HashMap<>();
         auth.put("auth", authConfig);
         authConfigs.setConfigs(auth);
-        String imageId = "37a7da3b7edc";
 
-        BuildImageParams getEventsParams = BuildImageParams.create(dockerfile)
+        final String imageId = "37a7da3b7edc";
+
+        BuildImageParams buildImageParams = BuildImageParams.create(dockerfile)
                                                            .withAuthConfigs(authConfigs);
 
         doReturn(new ByteArrayInputStream(("{\"stream\":\"Successfully built " + imageId + "\"}").getBytes()))
                 .when(dockerResponse).getInputStream();
 
         String returnedImageId =
-                dockerConnector.buildImage(getEventsParams, progressMonitor);
+                dockerConnector.buildImage(buildImageParams, progressMonitor);
 
         verify(dockerConnectionFactory).openConnection(any(URI.class));
         verify(dockerConnection).method(REQUEST_METHOD_POST);
         verify(dockerConnection).path("/build");
+
         verify(dockerConnection).header("Content-Type", "application/x-compressed-tar");
         verify(dockerConnection).header(eq("Content-Length"), anyInt());
-        verify(dockerConnection).header(eq("X-Registry-Config"), any(byte[].class));
         verify(dockerConnection).entity(any(InputStream.class));
+        verify(dockerConnection, never()).header(eq("remote"), anyString());
+
+        verify(dockerConnection).header(eq("X-Registry-Config"), any(byte[].class));
         verify(dockerConnection).request();
         verify(dockerResponse).getStatus();
         verify(dockerResponse).getInputStream();
+
+        assertEquals(returnedImageId, imageId);
+    }
+
+    @Test
+    public void shouldBeAbleToBuildImageWithRemoteContext() throws IOException, InterruptedException {
+        AuthConfigs authConfigs = DtoFactory.newDto(AuthConfigs.class);
+        AuthConfig authConfig = DtoFactory.newDto(AuthConfig.class);
+        Map<String, AuthConfig> auth = new HashMap<>();
+        auth.put("auth", authConfig);
+        authConfigs.setConfigs(auth);
+
+        final String imageId = "37a7da3b7edc";
+        final String remote = "https://some.host.com/path/tarball.tar";
+
+        BuildImageParams buildImageParams = BuildImageParams.create(remote)
+                                                            .withAuthConfigs(authConfigs);
+
+        doReturn(new ByteArrayInputStream(("{\"stream\":\"Successfully built " + imageId + "\"}").getBytes()))
+                .when(dockerResponse).getInputStream();
+
+        String returnedImageId =
+                dockerConnector.buildImage(buildImageParams, progressMonitor);
+
+        verify(dockerConnectionFactory).openConnection(any(URI.class));
+        verify(dockerConnection).method(REQUEST_METHOD_POST);
+        verify(dockerConnection).path("/build");
+
+        verify(dockerConnection).query(eq("remote"), eq(remote));
+        verify(dockerConnection, never()).header("Content-Type", "application/x-compressed-tar");
+        verify(dockerConnection, never()).header(eq("Content-Length"), anyInt());
+        verify(dockerConnection, never()).entity(any(InputStream.class));
+
+        verify(dockerConnection).header(eq("X-Registry-Config"), any(byte[].class));
+        verify(dockerConnection).request();
+        verify(dockerResponse).getStatus();
+        verify(dockerResponse).getInputStream();
+
+        assertEquals(returnedImageId, imageId);
+    }
+
+    @Test
+    public void shouldBeAbleToBuildImageWithAdditionalQueryParameters() throws IOException, InterruptedException {
+        AuthConfigs authConfigs = DtoFactory.newDto(AuthConfigs.class);
+        AuthConfig authConfig = DtoFactory.newDto(AuthConfig.class);
+        Map<String, AuthConfig> auth = new HashMap<>();
+        auth.put("auth", authConfig);
+        authConfigs.setConfigs(auth);
+
+        final String imageId = "37a7da3b7edc";
+        final String repository = "repo/name";
+        final String tag = "tag";
+        final boolean rm = true;
+        final boolean forcerm = true;
+        final long memory = 2147483648L;
+        final long memswap = 3221225472L;
+        final boolean pull = true;
+        final String dockerfile = "path/Dockerfile";
+        final boolean nocache = true;
+        final boolean q = true;
+        final String cpusetcpus = "4-5";
+        final long cpuperiod = 10000L;
+        final long cpuquota = 5000L;
+        final Map<String, String> buildargs = new HashMap<>();
+        buildargs.put("constraint:label.com!", "value");
+
+        BuildImageParams buildImageParams = BuildImageParams.create(this.dockerfile)
+                                                            .withAuthConfigs(authConfigs)
+                                                            .withRepository(repository)
+                                                            .withTag(tag)
+                                                            .withRemoveIntermediateContainers(rm)
+                                                            .withForceRemoveIntermediateContainers(forcerm)
+                                                            .withMemoryLimit(memory)
+                                                            .withMemorySwapLimit(memswap)
+                                                            .withDoForcePull(pull)
+                                                            .withDockerfile(dockerfile)
+                                                            .withNoCache(nocache)
+                                                            .withQuiet(q)
+                                                            .withCpusetCpus(cpusetcpus)
+                                                            .withCpuPeriod(cpuperiod)
+                                                            .withCpuQuota(cpuquota)
+                                                            .withBuildArgs(buildargs);
+
+        doReturn(new ByteArrayInputStream(("{\"stream\":\"Successfully built " + imageId + "\"}").getBytes()))
+                .when(dockerResponse).getInputStream();
+
+        String returnedImageId =
+                dockerConnector.buildImage(buildImageParams, progressMonitor);
+
+        verify(dockerConnectionFactory).openConnection(any(URI.class));
+        verify(dockerConnection).method(REQUEST_METHOD_POST);
+        verify(dockerConnection).path("/build");
+
+        verify(dockerConnection).header("Content-Type", "application/x-compressed-tar");
+        verify(dockerConnection).header(eq("Content-Length"), anyInt());
+        verify(dockerConnection).entity(any(InputStream.class));
+
+        verify(dockerConnection).header(eq("X-Registry-Config"), any(byte[].class));
+        verify(dockerConnection).request();
+        verify(dockerResponse).getStatus();
+        verify(dockerResponse).getInputStream();
+
+        verify(dockerConnection).query(eq("rm"), eq(1));
+        verify(dockerConnection).query(eq("forcerm"), eq(1));
+        verify(dockerConnection).query(eq("memory"), eq(memory));
+        verify(dockerConnection).query(eq("memswap"), eq(memswap));
+        verify(dockerConnection).query(eq("pull"), eq(1));
+        verify(dockerConnection).query(eq("dockerfile"), eq(dockerfile));
+        verify(dockerConnection).query(eq("nocache"), eq(1));
+        verify(dockerConnection).query(eq("q"), eq(1));
+        verify(dockerConnection).query(eq("cpusetcpus"), eq(cpusetcpus));
+        verify(dockerConnection).query(eq("cpuperiod"), eq(cpuperiod));
+        verify(dockerConnection).query(eq("cpuquota"), eq(cpuquota));
+        verify(dockerConnection).query(eq("t"), eq(repository + ':' + tag));
+        verify(dockerConnection).query(eq("buildargs"), eq(URLEncoder.encode(GSON.toJson(buildargs), "UTF-8")));
 
         assertEquals(returnedImageId, imageId);
     }

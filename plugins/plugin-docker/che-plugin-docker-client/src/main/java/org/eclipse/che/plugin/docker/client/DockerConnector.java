@@ -775,6 +775,9 @@ public class DockerConnector {
             addQueryParamIfNotNull(connection, "dockerfile", params.getDockerfile());
             addQueryParamIfNotNull(connection, "nocache", params.isNoCache());
             addQueryParamIfNotNull(connection, "q", params.isQuiet());
+            addQueryParamIfNotNull(connection, "cpusetcpus", params.getCpusetCpus());
+            addQueryParamIfNotNull(connection, "cpuperiod", params.getCpuPeriod());
+            addQueryParamIfNotNull(connection, "cpuquota", params.getCpuQuota());
             if (params.getTag() == null) {
                 addQueryParamIfNotNull(connection, "t", repository);
             } else {
