@@ -904,7 +904,7 @@ run_connectivity_tests() {
   AGENT_INTERNAL_IP=$(docker inspect --format='{{.NetworkSettings.IPAddress}}' fakeagent)
   AGENT_INTERNAL_PORT=80
   AGENT_EXTERNAL_IP=$GLOBAL_GET_DOCKER_HOST_IP
-  AGENT_EXTERNAL_PORT=12345
+  AGENT_EXTERNAL_PORT=32768
 
 
   ### TEST 1: Simulate browser ==> workspace agent HTTP connectivity
