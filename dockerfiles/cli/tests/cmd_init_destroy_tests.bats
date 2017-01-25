@@ -8,7 +8,7 @@
 # Contributors:
 #   Marian Labuda - Initial Implementation
 
-source $BATS_BASE_DIR/tests/test_base.sh
+source $BATS_BASE_DIR/cli/tests/test_base.sh
 
 @test "test 'init' and 'destroy --quiet' with existing dir" {
   #GIVEN

@@ -8,8 +8,8 @@
 # Contributors:
 #   Marian Labuda - Initial Implementation
 
-BATS_BASE_DIR=$(cd "$(dirname "$0")"; pwd)
-. $BATS_BASE_DIR/../build.include
+BATS_BASE_DIR=$(cd "$(dirname "$0")"/..; pwd)
+. $BATS_BASE_DIR/build.include
 
 init "$@"
 IMAGE_NAME="eclipse/che-bats:$TAG"
@@ -19,7 +19,7 @@ IMAGE_NAME="eclipse/che-bats:$TAG"
 #   The file has to be placed in tests folder in directory containing this script
 # (Optional) second argument is options for a docker run command.
 run_test_in_docker_container() {
-  docker run $2 -v $BATS_BASE_DIR:$BATS_BASE_DIR -e CLI_IMAGE_TAG=$TAG -e BATS_BASE_DIR=$BATS_BASE_DIR -v /var/run/docker.sock:/var/run/docker.sock $IMAGE_NAME bats $BATS_BASE_DIR/tests/$1
+  docker run $2 -v $BATS_BASE_DIR:$BATS_BASE_DIR -e CLI_IMAGE_TAG=$TAG -e BATS_BASE_DIR=$BATS_BASE_DIR -v /var/run/docker.sock:/var/run/docker.sock $IMAGE_NAME bats $BATS_BASE_DIR/cli/tests/$1
 }
 
 echo "Running tests in container from image $IMAGE_NAME"
