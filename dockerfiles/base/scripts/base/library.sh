@@ -54,7 +54,7 @@ get_display_url() {
   local CHE_HOST_LOCAL=$CHE_HOST
 
   if is_initialized; then 
-    CHE_HOST_LOCAL=$(get_value_of_var_from_env_file CHE_HOST)
+    CHE_HOST_LOCAL=$(get_value_of_var_from_env_file ${CHE_PRODUCT_NAME}_HOST)
   fi
 
   if ! is_docker_for_mac; then
@@ -65,10 +65,16 @@ get_display_url() {
 }
 
 get_debug_display_url() {
+  local CHE_DEBUG_PORT_LOCAL=9000
+
+  if is_initialized; then 
+    CHE_DEBUG_PORT_LOCAL=$(get_value_of_var_from_env_file ${CHE_PRODUCT_NAME}_DEBUG_PORT)
+  fi
+
   if ! is_docker_for_mac; then
-    echo "http://${CHE_HOST}:${CHE_DEBUG_PORT}"
+    echo "http://${CHE_HOST}:${CHE_DEBUG_PORT_LOCAL}"
   else
-    echo "http://localhost:${CHE_DEBUG_PORT}"
+    echo "http://localhost:${CHE_DEBUG_PORT_LOCAL}"
   fi
 }
 

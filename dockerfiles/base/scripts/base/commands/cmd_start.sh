@@ -103,16 +103,16 @@ cmd_start_check_agent_network() {
 
   PREFLIGHT="success"
   if test1 || test2; then
-    text "         conn (browser => ws):   ${GREEN}[OK]${NC}\n"
+    text "         conn (browser => ws):    ${GREEN}[OK]${NC}\n"
   else
-    text "         conn (browser => ws):   ${RED}[NOT OK]${NC}\n"
+    text "         conn (browser => ws):    ${RED}[NOT OK]${NC}\n"
     PREFLIGHT="fail"
   fi
 
   if test3 && test4; then
-    text "         conn (server => ws):    ${GREEN}[OK]${NC}\n"
+    text "         conn (server => ws):     ${GREEN}[OK]${NC}\n"
   else
-    text "         conn (server => ws):    ${RED}[NOT OK]${NC}\n\n"
+    text "         conn (server => ws):     ${RED}[NOT OK]${NC}\n\n"
     PREFLIGHT="fail"
   fi
 
