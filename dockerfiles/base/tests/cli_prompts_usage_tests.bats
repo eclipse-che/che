@@ -15,7 +15,7 @@ source $BATS_BASE_DIR/tests/test_base.sh
   prompt_substring="-v /var/run/docker.sock:/var/run/docker.sock"
 
   #WHEN
-  result=$(docker run eclipse/che-cli:nightly start || true)
+  result=$(docker run $CLI_IMAGE start || true)
 
   #THEN
   [[ $result == *"$prompt_substring"* ]]
