@@ -76,47 +76,43 @@ print_info() {
   fi
   text "\n"
   text "CLI:\n"
-  text " TTY: ${TTY_ACTIVATED}\n"
-  text " Daemon: ${DOCKER_CONNECT}\n"
-  text " Image: ${CHE_IMAGE_FULLNAME}\n"
-  text " Version: ${CHE_IMAGE_VERSION}\n"
-  text " Command: $(echo $COMMAND | cut -f2 -d'_')\n"
-  text " Parameters: ${ORIGINAL_PARAMETERS}\n"
+  text " TTY:            ${TTY_ACTIVATED}\n"
+  text " Daemon:         ${DOCKER_CONNECT}\n"
+  text " Image:          ${CHE_IMAGE_FULLNAME}\n"
+  text " Version:        ${CHE_IMAGE_VERSION}\n"
+  text " Command:        $(echo $COMMAND | cut -f2 -d'_')\n"
+  text " Parameters:     ${ORIGINAL_PARAMETERS}\n"
   text "Mounts:\n"
-  text " $CHE_CONTAINER_ROOT: $DATA_MOUNT\n"
+  text " $CHE_CONTAINER_ROOT:          $DATA_MOUNT\n"
   text " $CHE_CONTAINER_ROOT/instance: $INSTANCE_MOUNT\n"
-  text " $CHE_CONTAINER_ROOT/backup: $BACKUP_MOUNT\n"
-  text " /repo: $REPO_MOUNT\n"
-  text " /assembly: $ASSEMBLY_MOUNT\n"
-  text " /sync: $SYNC_MOUNT\n"
-  text " /unison: $UNISON_PROFILE_MOUNT\n"
-  text " /chedir: $CHEDIR_MOUNT\n"
+  text " $CHE_CONTAINER_ROOT/backup:   $BACKUP_MOUNT\n"
+  text " /repo:          $REPO_MOUNT\n"
+  text " /assembly:      $ASSEMBLY_MOUNT\n"
+  text " /sync:          $SYNC_MOUNT\n"
+  text " /unison:        $UNISON_PROFILE_MOUNT\n"
+  text " /chedir:        $CHEDIR_MOUNT\n"
   text "System:\n"
-  text " Docker: $(get_docker_install_type)\n"
+  text " Docker:         $(get_docker_install_type)\n"
   if [[ ${HTTP_PROXY} = "" ]] &&
      [[ ${HTTPS_PROXY} = "" ]] &&
      [[ ${NO_PROXY} = "" ]]; then
-    text " Proxy: not set\n"
+    text " Proxy:          not set\n"
   else
-    text " Proxy: HTTP_PROXY=${HTTP_PROXY}, HTTPS_PROXY=${HTTPS_PROXY}, NO_PROXY=${NO_PROXY}\n"
+    text " Proxy:          HTTP_PROXY=${HTTP_PROXY}, HTTPS_PROXY=${HTTPS_PROXY}, NO_PROXY=${NO_PROXY}\n"
   fi
   text "Internal:\n"
-  text " ${CHE_PRODUCT_NAME}_VERSION: ${CHE_VERSION}\n"
-  local CHE_HOST_LOCAL=${CHE_HOST}
+  text " ${CHE_PRODUCT_NAME}_VERSION:    ${CHE_VERSION}\n"
+  text " ${CHE_PRODUCT_NAME}_HOST:       ${CHE_HOST}\n"
+  text " ${CHE_PRODUCT_NAME}_INSTANCE:   ${CHE_HOST_INSTANCE}\n"
+  text " ${CHE_PRODUCT_NAME}_CONFIG:     ${CHE_HOST_CONFIG}\n"
+  text " ${CHE_PRODUCT_NAME}_BACKUP:     ${CHE_HOST_BACKUP}\n"
+  text " ${CHE_PRODUCT_NAME}_REGISTRY:   ${CHE_MANIFEST_DIR}\n"
+  text " ${CHE_PRODUCT_NAME}_DEBUG:      ${CHE_DEBUG}\n"
+  text " IP Detection:   $(docker run --net host ${BOOTSTRAP_IMAGE_CHEIP})\n"
   if is_initialized; then
-    CHE_HOST_LOCAL=$(get_value_of_var_from_env_file CHE_HOST)
-  fi
-  text " ${CHE_PRODUCT_NAME}_HOST: ${CHE_HOST_LOCAL}\n"
-  text " ${CHE_PRODUCT_NAME}_INSTANCE: ${CHE_HOST_INSTANCE}\n"
-  text " ${CHE_PRODUCT_NAME}_CONFIG: ${CHE_HOST_CONFIG}\n"
-  text " ${CHE_PRODUCT_NAME}_BACKUP: ${CHE_HOST_BACKUP}\n"
-  text " ${CHE_PRODUCT_NAME}_REGISTRY: ${CHE_MANIFEST_DIR}\n"
-  text " ${CHE_PRODUCT_NAME}_DEBUG: ${CHE_DEBUG}\n"
-  text " IP Detection: $(docker run --net host ${BOOTSTRAP_IMAGE_CHEIP})\n"
-  if is_initialized; then
-    text " Initialized: true\n"
+    text " Initialized:    true\n"
   else
-    text " Initialized: false\n"
+    text " Initialized:    false\n"
   fi    
   if local_repo; then
     text " ${CHE_PRODUCT_NAME}_DEVELOPMENT_REPO: ${CHE_HOST_DEVELOPMENT_REPO}\n"
