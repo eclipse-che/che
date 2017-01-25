@@ -45,7 +45,7 @@ export class CheWorkspace {
   workspaces: Array<che.IWorkspace>;
   subscribedWorkspacesIds: Array<string>;
   workspaceAgents: Map<string, CheWorkspaceAgent>;
-  workspacesByNamespace: Map<string, any>;
+  workspacesByNamespace: Map<string, Array<che.IWorkspace>>;
   workspacesById: Map<string, che.IWorkspace>;
   remoteWorkspaceAPI: ICHELicenseResource<any>;
   lodash: any;
@@ -75,7 +75,7 @@ export class CheWorkspace {
     // per namespace
     this.workspacesByNamespace = new Map();
 
-    //Workspace agents per workspace id:
+    // workspace agents per workspace id:
     this.workspaceAgents = new Map();
 
     // listeners if workspaces are changed/updated
@@ -177,7 +177,7 @@ export class CheWorkspace {
     });
   }
 
-  getWorkspacesByNamespace(namespace) {
+  getWorkspacesByNamespace(namespace: string): Array<che.IWorkspace> {
     return this.workspacesByNamespace.get(namespace);
   }
 
@@ -201,11 +201,6 @@ export class CheWorkspace {
     let updatedPromise = promise.then((data: Array<che.IWorkspace>) => {
       let remoteWorkspaces = [];
       this.workspaces.length = 0;
-      // todo It's a fix used not to loose account ID of the workspace.
-      // can be removed, when API will return accountId in the list of user workspaces response:
-      let copyWorkspaceById = new Map();
-      angular.copy(this.workspacesById, copyWorkspaceById);
-
       this.workspacesById.clear();
       this.workspacesByNamespace.clear();
       // add workspace if not temporary
@@ -226,6 +221,11 @@ export class CheWorkspace {
         this.startUpdateWorkspaceStatus(workspace.id);
       });
       return this.workspaces;
+    }, (error: any) => {
+      if (error.status === 304) {
+        return this.workspaces;
+      }
+      return this.$q.reject(error);
     });
 
     let callbackPromises = updatedPromise.then((data: any) => {
@@ -237,6 +237,8 @@ export class CheWorkspace {
         promises.push(promise);
       });
       return this.$q.all(promises);
+    }, (error: any) => {
+      return this.$q.reject(error);
     });
 
     return callbackPromises;
