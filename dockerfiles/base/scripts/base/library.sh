@@ -20,7 +20,6 @@ cli_execute() {
 }
 
 cli_parse () {
-  debug $FUNCNAME
   COMMAND="cmd_$1"
 
   case $1 in
@@ -156,7 +155,6 @@ grab_initial_images() {
 }
 
 has_env_variables() {
-  debug $FUNCNAME
   PROPERTIES=$(env | grep "${CHE_PRODUCT_NAME}_")
 
   if [ "$PROPERTIES" = "" ]; then
@@ -178,8 +176,6 @@ load_utilities_images_if_not_done() {
 }
 
 update_image_if_not_found() {
-  debug $FUNCNAME
-
   local CHECKING_TEXT="${GREEN}INFO:${NC} (${CHE_MINI_PRODUCT_NAME} download): Checking for image '$1'..."
   CURRENT_IMAGE=$(docker images -q "$1")
   if [ "${CURRENT_IMAGE}" == "" ]; then
@@ -191,8 +187,6 @@ update_image_if_not_found() {
 }
 
 update_image() {
-  debug $FUNCNAME
-
   if [ "${1}" == "--force" ]; then
     shift
     info "download" "Removing image $1"
@@ -217,7 +211,6 @@ update_image() {
 }
 
 is_initialized() {
-  debug $FUNCNAME
   if [[ -d "${CHE_CONTAINER_INSTANCE}" ]] && \
      [[ -f "${CHE_CONTAINER_INSTANCE}"/$CHE_VERSION_FILE ]] && \
      [[ -f "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}" ]]; then
@@ -228,7 +221,6 @@ is_initialized() {
 }
 
 is_configured() {
-  debug $FUNCNAME
   if [[ -d "${CHE_CONTAINER_INSTANCE}/config" ]] && \
      [[ -f "${CHE_CONTAINER_INSTANCE}/${CHE_VERSION_FILE}" ]]; then
     return 0
@@ -499,8 +491,6 @@ verify_version_upgrade_compatibility() {
 # Usage:
 #   confirm_operation <Warning message> [--force|--no-force]
 confirm_operation() {
-  debug $FUNCNAME
-
   FORCE_OPERATION=${2:-"--no-force"}
 
   if [ ! "${FORCE_OPERATION}" == "--quiet" ]; then
@@ -518,8 +508,6 @@ confirm_operation() {
 }
 
 port_open() {
-  debug $FUNCNAME
-
   docker run -d -p $1:$1 --name fake ${BOOTSTRAP_IMAGE_ALPINE} httpd -f -p $1 -h /etc/ > /dev/null 2>&1
   NETSTAT_EXIT=$?
   docker rm -f fake > /dev/null 2>&1

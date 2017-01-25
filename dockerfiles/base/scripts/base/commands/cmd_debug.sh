@@ -40,15 +40,10 @@ cmd_debug() {
   if [[ ${HTTP_PROXY} = "" ]] &&
      [[ ${HTTPS_PROXY} = "" ]] &&
      [[ ${NO_PROXY} = "" ]]; then
-     text " Proxy: not set\n"
+    text " Proxy: not set\n"
   else
     text " Proxy: HTTP_PROXY=${HTTP_PROXY}, HTTPS_PROXY=${HTTPS_PROXY}, NO_PROXY=${NO_PROXY}\n"
   fi
-  if is_initialized; then
-    text " Initialized: true\n"
-  else
-    text " Initialized: false\n"
-  fi    
   text "Internal:\n"
   text " ${CHE_PRODUCT_NAME}_VERSION: ${CHE_VERSION}\n"
   local CHE_HOST_LOCAL=${CHE_HOST}
@@ -61,6 +56,12 @@ cmd_debug() {
   text " ${CHE_PRODUCT_NAME}_BACKUP: ${CHE_HOST_BACKUP}\n"
   text " ${CHE_PRODUCT_NAME}_REGISTRY: ${CHE_MANIFEST_DIR}\n"
   text " ${CHE_PRODUCT_NAME}_DEBUG: ${CHE_DEBUG}\n"
+  text " IP Detection: $(docker run --net host ${BOOTSTRAP_IMAGE_CHEIP})\n"
+  if is_initialized; then
+    text " Initialized: true\n"
+  else
+    text " Initialized: false\n"
+  fi    
   if local_repo; then
     text " ${CHE_PRODUCT_NAME}_DEVELOPMENT_REPO: ${CHE_HOST_DEVELOPMENT_REPO}\n"
   fi
@@ -83,9 +84,9 @@ cmd_debug() {
   #done
 
   if ! is_initialized; then
-    text "Configuration: not initialized\n"
+    text "${CHE_ENVIRONMENT_FILE}: not initialized\n"
   else
-    text "Configuration:\n"
+    text "${CHE_ENVIRONMENT_FILE}:\n"
     # Implement loop of all lines that are uncommented.
     CONFIGURATION_ARRAY=($(grep "^[^#]" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"))
     for SINGLE_CONFIGURATION in "${CONFIGURATION_ARRAY[@]}"; do

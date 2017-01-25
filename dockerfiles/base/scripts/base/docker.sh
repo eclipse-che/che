@@ -59,7 +59,7 @@ get_container_host_bind_folder() {
 }
 
 get_docker_install_type() {
-  debug $FUNCNAME
+#  debug $FUNCNAME
   if is_boot2docker; then
     echo "boot2docker"
   elif is_docker_for_windows; then
@@ -72,7 +72,7 @@ get_docker_install_type() {
 }
 
 has_docker_for_windows_client(){
-  debug $FUNCNAME
+#  debug $FUNCNAME
   if [[ "${GLOBAL_HOST_IP}" = "10.0.75.2" ]]; then
     return 0
   else
@@ -81,7 +81,7 @@ has_docker_for_windows_client(){
 }
 
 is_boot2docker() {
-  debug $FUNCNAME
+#  debug $FUNCNAME
   if uname -r | grep -q 'boot2docker'; then
     return 0
   else
@@ -90,7 +90,7 @@ is_boot2docker() {
 }
 
 is_docker_for_windows() {
-  debug $FUNCNAME
+#  debug $FUNCNAME
   if uname -r | grep -q 'moby' && has_docker_for_windows_client; then
     return 0
   else
@@ -99,7 +99,7 @@ is_docker_for_windows() {
 }
 
 is_docker_for_mac() {
-  debug $FUNCNAME
+#  debug $FUNCNAME
   if uname -r | grep -q 'moby' && ! has_docker_for_windows_client; then
     return 0
   else
@@ -108,7 +108,7 @@ is_docker_for_mac() {
 }
 
 is_native() {
-  debug $FUNCNAME
+#  debug $FUNCNAME
   if [ $(get_docker_install_type) = "native" ]; then
     return 0
   else
@@ -117,7 +117,7 @@ is_native() {
 }
 
 docker_run() {
-  debug $FUNCNAME
+#  debug $FUNCNAME
   # Setup options for connecting to docker host
   if [ -z "${DOCKER_HOST+x}" ]; then
       DOCKER_HOST="/var/run/docker.sock"
@@ -231,6 +231,9 @@ check_docker() {
       return 2;
     fi
   fi
+
+  DOCKER_CLIENT_VERSION=$(docker version --format '{{.Client.Version}}')
+  DOCKER_SERVER_VERSION=$(docker version --format '{{.Server.Version}}')
 
   # Detect version so that we can provide better error warnings
   DEFAULT_CHE_VERSION=$(cat "/version/latest.ver")
@@ -436,7 +439,7 @@ check_mounts() {
 }
 
 docker_compose() {
-  debug $FUNCNAME
+#  debug $FUNCNAME
 
   if has_compose; then
     docker-compose "$@"
