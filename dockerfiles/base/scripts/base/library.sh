@@ -127,8 +127,6 @@ initiate_offline_or_network_mode(){
         info "     a. Try 'curl --head dockerhub.com'"
         return 2;
       fi
-    else
-      warning "Skipping dockerhub network check..."
     fi
   fi
 }
@@ -425,8 +423,6 @@ verify_nightly_accuracy() {
 
     if ! is_fast; then
       update_image $CHE_IMAGE_FULLNAME
-    else
-      warning "Skipping nightly image check..."
     fi 
 
     local NEW_DIGEST=$(docker images -q --no-trunc --digests ${CHE_IMAGE_FULLNAME})

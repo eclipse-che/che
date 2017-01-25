@@ -378,8 +378,6 @@ cli_init() {
     verify_version_upgrade_compatibility
   elif ! is_fast; then
     verify_version_compatibility
-  else
-    warning "Skipping version compatibility check..."
   fi
 }
 
