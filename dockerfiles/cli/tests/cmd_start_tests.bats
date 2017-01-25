@@ -8,7 +8,7 @@
 # Contributors:
 #   Marian Labuda - Initial Implementation
 
-source $BATS_BASE_DIR/tests/test_base.sh
+source $BATS_BASE_DIR/cli/tests/test_base.sh
 
 # Kill running che server instance if there is any to be able to run tests
 setup() {
