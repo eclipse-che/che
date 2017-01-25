@@ -10,6 +10,7 @@
  */
 'use strict';
 import {IEnvironmentManagerMachineServer} from '../../../../../components/api/environment/environment-manager-machine';
+import {ConfirmDialogService} from '../../../../../components/service/confirm-dialog/confirm-dialog.service';
 
 interface IServerListItem extends IEnvironmentManagerMachineServer {
   reference: string;
@@ -39,14 +40,16 @@ export class ListServersController {
   serversList: IServerListItem[];
 
   serversOnChange: Function;
+  private confirmDialogService: ConfirmDialogService;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($mdDialog: ng.material.IDialogService, lodash: _.LoDashStatic) {
+  constructor($mdDialog: ng.material.IDialogService, lodash: _.LoDashStatic, confirmDialogService: ConfirmDialogService) {
     this.$mdDialog = $mdDialog;
     this.lodash = lodash;
+    this.confirmDialogService = confirmDialogService;
 
     this.buildServersList();
   }
@@ -196,20 +199,14 @@ export class ListServersController {
    * @returns {angular.IPromise<any>}
    */
   showDeleteConfirmation(numberToDelete: number): ng.IPromise<any> {
-    let confirmTitle = 'Would you like to delete ';
+    let content = 'Would you like to delete ';
     if (numberToDelete > 1) {
-      confirmTitle += 'these ' + numberToDelete + ' servers?';
+      content += 'these ' + numberToDelete + ' servers?';
     } else {
-      confirmTitle += 'this selected server?';
+      content += 'this selected server?';
     }
-    let confirm = this.$mdDialog.confirm()
-      .title(confirmTitle)
-      .ariaLabel('Remove server')
-      .ok('Delete!')
-      .cancel('Cancel')
-      .clickOutsideToClose(true);
 
-    return this.$mdDialog.show(confirm);
+    return this.confirmDialogService.showConfirmDialog('Remove servers', content, 'Delete');
   }
 
 }
