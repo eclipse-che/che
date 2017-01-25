@@ -41,11 +41,11 @@ import javax.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -71,7 +71,7 @@ public class NodeLoader implements LoaderHandler.HasLoaderHandlers {
      *
      * @see NodeInterceptor
      */
-    private TreeSet<NodeInterceptor> nodeInterceptors;
+    private Set<NodeInterceptor> nodeInterceptors;
 
     private final Comparator<NodeInterceptor> priorityComparator = new Comparator<NodeInterceptor>() {
         @Override
@@ -238,7 +238,7 @@ public class NodeLoader implements LoaderHandler.HasLoaderHandlers {
      *         set of {@link NodeInterceptor}
      */
     public NodeLoader(@Nullable Set<NodeInterceptor> nodeInterceptors) {
-        this.nodeInterceptors = new TreeSet<>(priorityComparator);
+        this.nodeInterceptors = new HashSet<>();
         if (nodeInterceptors != null) {
             this.nodeInterceptors.addAll(nodeInterceptors);
         }
@@ -393,7 +393,10 @@ public class NodeLoader implements LoaderHandler.HasLoaderHandlers {
                     onLoadSuccess(parent, children);
                 }
 
-                iterate(new LinkedList<>(nodeInterceptors), parent, children);
+                LinkedList<NodeInterceptor> sortedByPriorityQueue = new LinkedList<>(nodeInterceptors);
+                Collections.sort(sortedByPriorityQueue, priorityComparator);
+
+                iterate(sortedByPriorityQueue, parent, children);
             }
         };
     }
