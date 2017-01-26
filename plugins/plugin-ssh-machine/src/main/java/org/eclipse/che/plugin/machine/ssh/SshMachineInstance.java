@@ -48,6 +48,7 @@ public class SshMachineInstance  {
     private static final AtomicInteger pidSequence = new AtomicInteger(1);
 
     private String                 id;
+    private String                 workspaceId;
     private MachineRuntimeInfoImpl machineRuntime;
 
     private final SshClient         sshClient;
@@ -65,6 +66,7 @@ public class SshMachineInstance  {
                               SshMachineFactory machineFactory,
                               Set<ServerConf> machinesServers) {
         this.id = machine.getId();
+        this.workspaceId = machine.getWorkspaceId();
         this.sshClient = sshClient;
         this.outputConsumer = outputConsumer;
         this.machineFactory = machineFactory;
@@ -179,4 +181,7 @@ public class SshMachineInstance  {
                               null);
     }
 
+    public String getWorkspaceId() {
+        return workspaceId;
+    }
 }
