@@ -49,7 +49,7 @@ public class WsMasterServletModule extends ServletModule {
         filter("/*").through(CorsFilter.class, corsFilterParams);
 
         filter("/api/*").through(org.eclipse.che.api.local.filters.EnvironmentInitializationFilter.class);
-        serveRegex("/api((?!(/(ws|eventbus)($|/.*)))/.*)").with(GuiceEverrestServlet.class);
+        serveRegex("^/api((?!(/(ws|eventbus)($|/.*)))/.*)").with(GuiceEverrestServlet.class);
         install(new org.eclipse.che.swagger.deploy.BasicSwaggerConfigurationModule());
     }
 }
