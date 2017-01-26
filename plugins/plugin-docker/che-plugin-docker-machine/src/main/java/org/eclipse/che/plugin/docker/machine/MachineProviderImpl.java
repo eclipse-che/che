@@ -523,15 +523,18 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                               .map(entry -> entry.getKey() + "=" + entry.getValue())
                               .toArray(String[]::new));
 
-        // If volume contains colon then it is bind volume, otherwise - pure volume.
-        hostConfig.setBinds(service.getVolumes()
-                                   .stream()
-                                   .filter(v -> v.contains(":"))
-                                   .toArray(String[]::new));
-        config.setVolumes(service.getVolumes()
-                                 .stream()
-                                 .filter(v -> !v.contains(":"))
-                                 .collect(toMap(Function.identity(), value -> new Volume())));
+        List<String> bindMountVolumes = new ArrayList<>();
+        Map<String, Volume> nonBindMountVolumes = new HashMap<>();
+        for (String volume : service.getVolumes()) {
+            // If volume contains colon then it is bind volume, otherwise - non bind-mount volume.
+            if (volume.contains(":")) {
+                bindMountVolumes.add(volume);
+            } else {
+                nonBindMountVolumes.put(volume, new Volume());
+            }
+        }
+        hostConfig.setBinds(bindMountVolumes.toArray(new String[bindMountVolumes.size()]));
+        config.setVolumes(nonBindMountVolumes);
 
         addStaticDockerConfiguration(config);
 
