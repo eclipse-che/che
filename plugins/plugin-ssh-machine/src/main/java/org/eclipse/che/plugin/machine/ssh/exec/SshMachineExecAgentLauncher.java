@@ -12,7 +12,7 @@ package org.eclipse.che.plugin.machine.ssh.exec;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
-import org.eclipse.che.api.agent.server.model.impl.AgentImpl;
+import org.eclipse.che.api.agent.shared.model.impl.AgentImpl;
 import org.eclipse.che.api.agent.server.terminal.WebsocketTerminalFilesPathProvider;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.core.ConflictException;
@@ -25,6 +25,8 @@ import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
+import org.eclipse.che.plugin.machine.ssh.SshMachineInstance;
+import org.eclipse.che.plugin.machine.ssh.SshMachineProcess;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -98,7 +100,7 @@ public class SshMachineExecAgentLauncher  {
                 final long pingStartTimestamp = System.currentTimeMillis();
                 SshProcessLaunchedChecker agentLaunchingChecker = new SshProcessLaunchedChecker("che-websocket-terminal");
                 while (System.currentTimeMillis() - pingStartTimestamp < agentMaxStartTimeMs) {
-                    if (agentLaunchingChecker.isLaunched(agent, process, machine)) {
+                    if (agentLaunchingChecker.isLaunched(agent,machine)) {
                         return;
                     } else {
                         Thread.sleep(agentPingDelayMs);

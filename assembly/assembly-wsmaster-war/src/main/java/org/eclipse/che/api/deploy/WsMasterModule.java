@@ -23,7 +23,6 @@ import org.eclipse.che.api.agent.LSPythonAgent;
 import org.eclipse.che.api.agent.LSTypeScriptAgent;
 import org.eclipse.che.api.agent.SshAgent;
 import org.eclipse.che.api.agent.SshAgentLauncher;
-import org.eclipse.che.api.agent.SshMachineExecAgentLauncher;
 import org.eclipse.che.api.agent.UnisonAgent;
 import org.eclipse.che.api.agent.WsAgent;
 import org.eclipse.che.api.agent.WsAgentLauncher;
@@ -136,7 +135,6 @@ public class WsMasterModule extends AbstractModule {
         Multibinder<AgentLauncher> launchers = Multibinder.newSetBinder(binder(), AgentLauncher.class);
         launchers.addBinding().to(WsAgentLauncher.class);
         launchers.addBinding().to(ExecAgentLauncher.class);
-        launchers.addBinding().to(SshMachineExecAgentLauncher.class);
         launchers.addBinding().to(SshAgentLauncher.class);
 
         bindConstant().annotatedWith(Names.named("machine.ws_agent.run_command"))

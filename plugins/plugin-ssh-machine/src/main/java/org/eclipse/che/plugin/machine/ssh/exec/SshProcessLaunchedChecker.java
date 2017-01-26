@@ -17,6 +17,8 @@ import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.util.ListLineConsumer;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
+import org.eclipse.che.plugin.machine.ssh.SshMachineInstance;
+import org.eclipse.che.plugin.machine.ssh.SshMachineProcess;
 
 import static java.lang.String.format;
 
@@ -36,7 +38,7 @@ public class SshProcessLaunchedChecker {
         this.processNameToWait = processNameToWait;
     }
 
-    public boolean isLaunched(Agent agent, SshMachineProcess process, SshMachineInstance machine) throws MachineException {
+    public boolean isLaunched(Agent agent, SshMachineInstance machine) throws MachineException {
         Command command = new CommandImpl(format("Wait for %s, try %d", agent.getId(), ++counter),
                                           format(CHECK_COMMAND, processNameToWait),
                                           "test");
