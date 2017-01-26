@@ -8,16 +8,32 @@
 # Contains path utilities
 
 check_host_volume_mount() {
-  echo 'test' > ${CHE_CONTAINER_ROOT}/test
+  if is_boot2docker; then
+    warning "Boot2docker detected - ensure :/data is mounted to %userprofile%"
+  fi
 
-  if [[ ! -f ${CHE_CONTAINER_ROOT}/test ]]; then
-    error "Docker installed, but unable to write files to your host."
+  if file_system_writable "${CHE_CONTAINER_ROOT}/test"; then 
+    delete_file_system_test "${CHE_CONTAINER_ROOT}/test"
+  else 
+    error "Unable to write files to your host"
     error "Have you enabled Docker to allow mounting host directories?"
     error "Did you give our CLI rights to create files on your host?"
     return 2;
   fi
+}
 
-  rm -rf ${CHE_CONTAINER_ROOT}/test
+file_system_writable() {
+  echo 'test' > "${1}" 
+
+  if [[ -f "${1}" ]]; then
+    return 0
+  else 
+    return 1
+  fi
+}
+
+delete_file_system_test() {
+  rm -rf $1 > /dev/null 2>&1
 }
 
 get_mount_path() {

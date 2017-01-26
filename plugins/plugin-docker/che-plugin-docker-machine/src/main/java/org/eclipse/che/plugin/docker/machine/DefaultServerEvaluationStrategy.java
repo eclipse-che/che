@@ -8,22 +8,16 @@
  * Contributors:
  *   Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.che.plugin.docker.machine;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
-import org.eclipse.che.plugin.docker.client.json.PortBinding;
 
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
-import static com.google.common.base.Strings.isNullOrEmpty;
-
+import java.util.Map;
 
 /**
  * Represents the default server evaluation strategy. By default, calling
@@ -34,6 +28,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
  * {@code che.docker.ip} and {@code che.docker.ip.external}, respectively.
  *
  * @author Angel Misevski <amisevsk@redhat.com>
+ * @author Alexander Garagatyi
  * @see ServerEvaluationStrategy
  */
 public class DefaultServerEvaluationStrategy extends ServerEvaluationStrategy {
@@ -49,48 +44,29 @@ public class DefaultServerEvaluationStrategy extends ServerEvaluationStrategy {
     protected String externalAddressProperty;
 
     @Inject
-    public DefaultServerEvaluationStrategy (@Nullable @Named("che.docker.ip") String internalAddress,
-                                            @Nullable @Named("che.docker.ip.external") String externalAddress) {
+    public DefaultServerEvaluationStrategy(@Nullable @Named("che.docker.ip") String internalAddress,
+                                           @Nullable @Named("che.docker.ip.external") String externalAddress) {
         this.internalAddressProperty = internalAddress;
         this.externalAddressProperty = externalAddress;
     }
 
     @Override
     protected Map<String, String> getInternalAddressesAndPorts(ContainerInfo containerInfo, String internalHost) {
-        String internalAddressContainer = containerInfo.getNetworkSettings().getGateway();
-
         String internalAddress = internalAddressProperty != null ?
                                  internalAddressProperty :
-                                 !isNullOrEmpty(internalAddressContainer) ?
-                                 internalAddressContainer :
                                  internalHost;
 
-        Map<String, List<PortBinding>> portBindings = containerInfo.getNetworkSettings().getPorts();
-
-        return getAddressesAndPorts(internalAddress, portBindings);
+        return getExposedPortsToAddressPorts(internalAddress, containerInfo.getNetworkSettings().getPorts());
     }
 
     @Override
     protected Map<String, String> getExternalAddressesAndPorts(ContainerInfo containerInfo, String internalHost) {
-        String externalAddressContainer = containerInfo.getNetworkSettings().getGateway();
-
         String externalAddress = externalAddressProperty != null ?
                                  externalAddressProperty :
-                                 !isNullOrEmpty(externalAddressContainer) ?
-                                 externalAddressContainer :
+                                 internalAddressProperty != null ?
+                                 internalAddressProperty :
                                  internalHost;
 
-        Map<String, List<PortBinding>> portBindings = containerInfo.getNetworkSettings().getPorts();
-
-        return getAddressesAndPorts(externalAddress, portBindings);
-    }
-
-    private Map<String, String> getAddressesAndPorts(String address, Map<String, List<PortBinding>> ports) {
-        Map<String, String> addressesAndPorts = new HashMap<>();
-        for (String portKey : ports.keySet()) {
-            String port = ports.get(portKey).get(0).getHostPort();
-            addressesAndPorts.put(portKey, address + ":" + port);
-        }
-        return addressesAndPorts;
+        return super.getExposedPortsToAddressPorts(externalAddress, containerInfo.getNetworkSettings().getPorts());
     }
 }

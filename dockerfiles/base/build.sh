@@ -10,3 +10,4 @@ IMAGE_NAME="eclipse/che-base"
 
 init "$@"
 build
+

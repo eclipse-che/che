@@ -6,7 +6,7 @@
                      che-search-model="dockerRegistryListController.registryFilter.username"
                      che-hide-search="dockerRegistryListController.registries.length === 0"
                      che-add-button-title="Add Registry"
-                     che-on-add="dockerRegistryListController.showAddRegistryDialog($event)"
+                     che-on-add="dockerRegistryListController.showEditRegistryDialog($event, {})"
                      che-delete-button-title="Delete"
                      che-on-delete="dockerRegistryListController.deleteSelectedRegistries()"
                      che-hide-delete="dockerRegistryListController.isNoSelected"

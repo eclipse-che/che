@@ -71,8 +71,7 @@ public class RecipeDownloader {
                                 .host(apiEndpoint.getHost())
                                 .port(apiEndpoint.getPort())
                                 .replacePath(apiEndpoint.getPath() + location);
-                if (EnvironmentContext.getCurrent().getSubject() != null
-                    && EnvironmentContext.getCurrent().getSubject().getToken() != null) {
+                if (EnvironmentContext.getCurrent().getSubject().getToken() != null) {
                     targetUriBuilder.queryParam("token", EnvironmentContext.getCurrent().getSubject().getToken());
                 }
             }
@@ -114,8 +113,7 @@ public class RecipeDownloader {
                                 .host(apiEndpoint.getHost())
                                 .port(apiEndpoint.getPort())
                                 .replacePath(apiEndpoint.getPath() + location);
-                if (EnvironmentContext.getCurrent().getSubject() != null
-                    && EnvironmentContext.getCurrent().getSubject().getToken() != null) {
+                if (EnvironmentContext.getCurrent().getSubject().getToken() != null) {
                     targetUriBuilder.queryParam("token", EnvironmentContext.getCurrent().getSubject().getToken());
                 }
             }

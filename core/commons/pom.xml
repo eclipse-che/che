@@ -30,5 +30,6 @@
         <module>che-core-commons-xml</module>
         <module>che-core-commons-schedule</module>
         <module>che-core-commons-test</module>
+        <module>che-core-commons-j2ee</module>
     </modules>
 </project>

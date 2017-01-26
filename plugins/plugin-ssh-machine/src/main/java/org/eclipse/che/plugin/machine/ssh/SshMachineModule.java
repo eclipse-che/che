@@ -40,9 +40,6 @@ public class SshMachineModule extends AbstractModule {
 
         bindConstant().annotatedWith(Names.named("machine.ssh.server.terminal.location")).to("~/che");
 
-        Multibinder.newSetBinder(binder(), org.eclipse.che.api.agent.server.launcher.AgentLauncher.class)
-                   .addBinding().to(org.eclipse.che.plugin.machine.ssh.SshMachineImplTerminalLauncher.class);
-
         Multibinder<org.eclipse.che.api.core.model.machine.ServerConf> machineServers =
                 Multibinder.newSetBinder(binder(),
                                          org.eclipse.che.api.core.model.machine.ServerConf.class,

@@ -23,8 +23,10 @@
                      che-add-button-href="#/create-workspace"
                      che-delete-button-title="Delete"
                      che-on-delete="listWorkspacesCtrl.deleteSelectedWorkspaces()"
+                     che-filter-values="listWorkspacesCtrl.namespaces"
+                     che-on-filter-changed="listWorkspacesCtrl.onFilterChanged"
                      che-hide-delete="listWorkspacesCtrl.isNoSelected"
-                     che-hide-header="(listWorkspacesCtrl.userWorkspaces | filter:listWorkspacesCtrl.workspaceFilter).length === 0">
+                     che-hide-header="(listWorkspacesCtrl.userWorkspaces | filter:listWorkspacesCtrl.workspaceFilter | filter:listWorkspacesCtrl.namespaceFilter:listWorkspacesCtrl.isExactMatch).length === 0">
       <div flex="100"
            layout="row"
            layout-align="start stretch"
@@ -63,9 +65,9 @@
         </div>
       </div>
     </che-list-header>
-    <che-list ng-show="(listWorkspacesCtrl.userWorkspaces | filter:listWorkspacesCtrl.workspaceFilter).length > 0">
+    <che-list ng-show="(listWorkspacesCtrl.userWorkspaces | filter:listWorkspacesCtrl.workspaceFilter | filter:listWorkspacesCtrl.namespaceFilter:listWorkspacesCtrl.isExactMatch).length > 0">
       <che-workspace-item
-              ng-repeat="workspace in listWorkspacesCtrl.userWorkspaces | orderBy:[listWorkspacesCtrl.workspaceOrderBy, 'config.name'] | filter:listWorkspacesCtrl.workspaceFilter"
+              ng-repeat="workspace in listWorkspacesCtrl.userWorkspaces | orderBy:[listWorkspacesCtrl.workspaceOrderBy, 'config.name'] | filter:listWorkspacesCtrl.workspaceFilter | filter:listWorkspacesCtrl.namespaceFilter:listWorkspacesCtrl.isExactMatch"
               ng-model="listWorkspacesCtrl.workspacesSelectedStatus[workspace.id]"
               che-selectable="true"
               che-display-labels="false"
@@ -73,7 +75,7 @@
               che-workspace-item="workspace"></che-workspace-item>
     </che-list>
     <div class="che-list-empty">
-        <span ng-show="listWorkspacesCtrl.userWorkspaces.length > 0 && (listWorkspacesCtrl.userWorkspaces | filter:listWorkspacesCtrl.workspaceFilter).length === 0">
+        <span ng-show="listWorkspacesCtrl.userWorkspaces.length > 0 && (listWorkspacesCtrl.userWorkspaces | filter:listWorkspacesCtrl.workspaceFilter | filter:listWorkspacesCtrl.namespaceFilter:listWorkspacesCtrl.isExactMatch).length === 0">
           No workspaces found.
         </span>
       <span ng-show="listWorkspacesCtrl.userWorkspaces.length === 0">There are no workspaces.</span>

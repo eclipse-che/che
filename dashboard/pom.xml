@@ -25,6 +25,13 @@
     <packaging>war</packaging>
     <name>Che Dashboard :: Web App</name>
     <inceptionYear>2015</inceptionYear>
+    <dependencies>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-commons-j2ee</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+    </dependencies>
     <build>
         <finalName>dashboard-war</finalName>
         <plugins>
@@ -62,18 +69,6 @@
                                 <exec dir="${basedir}" executable="npm" failonerror="true">
                                     <arg value="install" />
                                 </exec>
-                                <!-- Download Typings dependencies -->
-                                <exec dir="${basedir}" executable="typings" failonerror="true">
-                                    <arg value="install" />
-                                </exec>
-                                <!-- Download Bower dependencies -->
-                                <exec dir="${basedir}" executable="bower" failonerror="true">
-                                    <arg value="install" />
-                                </exec>
-                                <!-- Build the application -->
-                                <exec dir="${basedir}" executable="gulp" failonerror="true">
-                                    <arg value="build" />
-                                </exec>
                                 <!-- Change base HREF of the application that will be hosted on /dashboard -->
                                 <replace file="${basedir}/dist/index.html">
                                     <replacetoken><![CDATA[<base href="/">]]></replacetoken>
@@ -108,7 +103,8 @@
                             <directory>dist</directory>
                         </resource>
                     </webResources>
-                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                    <webXml>${basedir}/src/webapp/WEB-INF/web.xml</webXml>
+                    <packagingExcludes>/webapp/</packagingExcludes>
                 </configuration>
             </plugin>
             <plugin>

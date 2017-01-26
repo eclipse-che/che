@@ -20,16 +20,33 @@ cmd_version() {
   else
     text "Your installed version is '<not-installed>'.\n"
   fi
-  text "Available on DockerHub:\n"
-  VERSION_LIST_JSON=$(curl -s https://hub.docker.com/v2/repositories/${CHE_IMAGE_NAME}/tags/)
-  NUMBER_OF_VERSIONS=$(echo $VERSION_LIST_JSON | jq '.count')
-  COUNTER=0
-  while [  $COUNTER -lt $NUMBER_OF_VERSIONS ]; do
-    TAG=$(echo $VERSION_LIST_JSON | jq ".results[$COUNTER].name")
-#    DATE=$(echo $VERSION_LIST_JSON | jq ".results[$COUNTER].last_updated")
-#   DATE=${DATE:0:10}
-#    text "${DATE//\"}            ${TAG//\"}\n"
-    text "  ${TAG//\"}\n"
-    let COUNTER=COUNTER+1 
-  done
+
+  text "\n"
+
+  if is_offline; then
+    text "Available on DockerHub: offline mode\n"
+  else  
+    text "Available on DockerHub:\n"
+
+    local VERSION_LIST_JSON=$(curl -s https://hub.docker.com/v2/repositories/${CHE_IMAGE_NAME}/tags/)
+    local NUMBER_OF_VERSIONS=$(echo $VERSION_LIST_JSON | jq '.count')
+
+    DISPLAY_LIMIT=10
+    if [ $DISPLAY_LIMIT -gt $NUMBER_OF_VERSIONS ]; then 
+      DISPLAY_LIMIT=$NUMBER_OF_VERSIONS
+    fi
+
+    COUNTER=0
+    while [ $COUNTER -lt $DISPLAY_LIMIT ]; do
+      TAG=$(echo $VERSION_LIST_JSON | jq ".results[$COUNTER].name")
+      text "  ${TAG//\"}\n"
+      let COUNTER=COUNTER+1 
+    done
+
+    if [ $NUMBER_OF_VERSIONS -gt $DISPLAY_LIMIT ]; then
+      OLDER_VERSION=$(echo $VERSION_LIST_JSON | jq '.next')
+      text "  See older versions at: $OLDER_VERSION\n"
+    fi
+  fi
 }
+

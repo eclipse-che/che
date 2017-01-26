@@ -61,17 +61,14 @@
         </che-input>
       </div>
     </che-label-container>
+    <div layout="row" layout-align="end end">
+      <che-button-primary che-button-title="{{editServerDialogController.toEdit ? 'Update' : 'Add'}}"
+                          ng-disabled="editServerForm.$invalid"
+                          ng-click="editServerDialogController.saveServer()"></che-button-primary>
 
-    <che-label-container>
-      <div layout="row">
-        <che-button-primary che-button-title="{{editServerDialogController.toEdit ? 'Update' : 'Add'}}"
-                            ng-disabled="editServerForm.$invalid"
-                            ng-click="editServerDialogController.saveServer()"></che-button-primary>
-
-        <che-button-notice che-button-title="Cancel"
-                           ng-click="editServerDialogController.hide()"
-                           tabindex="0"></che-button-notice>
-      </div>
-    </che-label-container>
+      <che-button-notice che-button-title="Close"
+                         ng-click="editServerDialogController.hide()"
+                         tabindex="0"></che-button-notice>
+    </div>
   </ng-form>
 </che-popup>
