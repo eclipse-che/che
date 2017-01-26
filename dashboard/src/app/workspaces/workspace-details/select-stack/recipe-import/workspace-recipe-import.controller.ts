@@ -18,15 +18,38 @@
  * @author Oleksii Kurinnyi
  */
 export class WorkspaceRecipeImportController {
+  $timeout: ng.ITimeoutService;
+
   recipeUrl: string;
   recipeFormat: string;
+  recipeUrlCopy: string;
+  recipeFormatCopy: string;
+  recipeChange: Function;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor() {
+  constructor($scope: ng.IScope, $timeout: ng.ITimeoutService) {
     this.recipeFormat = this.recipeFormat || 'compose';
+    this.$timeout = $timeout;
+
+    $scope.$watch(() => { return this.recipeFormat; }, () => {
+      this.recipeFormatCopy = this.recipeFormat || 'compose';
+    });
+    $scope.$watch(() => { return this.recipeUrl; }, () => {
+      this.recipeUrlCopy = this.recipeUrl;
+    });
+  }
+
+  onRecipeChange() {
+    this.$timeout(() => {
+      this.recipeChange({
+        recipeUrl: this.recipeUrlCopy,
+        recipeFormat: this.recipeFormatCopy
+      });
+    }, 10)
+
   }
 
 }
