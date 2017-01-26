@@ -41,7 +41,7 @@ export class CheSelect {
   }
 
   template(element: ng.IAugmentedJQuery, attrs: any): string {
-    return `<div class="che-select">
+    return `<div class="che-select desktop-untouched">
       <!-- Mobile version -->
       <md-input-container class="che-select-mobile" hide-gt-xs>
         <label ng-if="labelName">{{value ? labelName : placeHolder}}</label>
@@ -106,6 +106,16 @@ export class CheSelect {
       // set the value of the attribute
       selectElements.attr(attrs.$attr[key], attrs[key] !== '' ? attrs[key] : 'true');
       element.removeAttr(attrs.$attr[key]);
+    });
+  }
+
+  link($scope, $element, attrs) {
+    let deregistrationFn = $scope.$watch('myForm.desk' + attrs.cheName + '.$touched', (isTouched) => {
+      if (isTouched) {
+        $element.removeClass('desktop-untouched');
+        $element.addClass('desktop-touched');
+        deregistrationFn();
+      }
     });
   }
 
