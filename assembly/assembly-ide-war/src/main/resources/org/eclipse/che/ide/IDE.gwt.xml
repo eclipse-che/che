@@ -87,6 +87,7 @@
 
     <inherits name="org.eclipse.che.plugin.svn.Subversion"/>
     <inherits name="org.eclipse.che.ide.ext.java.testing.core.TestExtension"/>
+    <inherits name="org.eclipse.che.orion.CheOrion"/>
 
     <stylesheet src="IDE.css"/>
 
