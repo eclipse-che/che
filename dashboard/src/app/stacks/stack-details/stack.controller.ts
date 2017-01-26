@@ -14,6 +14,7 @@ import {CheNotification} from '../../../components/notification/che-notification
 import {CheUIElementsInjectorService} from '../../../components/injector/che-ui-elements-injector.service';
 import {CheWorkspace} from '../../../components/api/che-workspace.factory';
 import {ImportStackService} from './import-stack.service';
+import {ConfirmDialogService} from '../../../components/service/confirm-dialog/confirm-dialog.service';
 
 const STACK_TEST_POPUP_ID: string = 'stackTestPopup';
 
@@ -57,11 +58,13 @@ export class StackController {
   editorOptions: any;
   machinesViewStatus: any;
 
+  private confirmDialogService: ConfirmDialogService;
+
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($q: ng.IQService, $timeout: ng.ITimeoutService, $route: ng.route.IRoute, $location: ng.ILocationService, $log: ng.ILogService, $filter: ng.IFilterService, cheStack: CheStack, cheWorkspace: CheWorkspace, $mdDialog: ng.material.IDialogService, cheNotification: CheNotification, $document: ng.IDocumentService, cheUIElementsInjectorService: CheUIElementsInjectorService, $scope: ng.IScope, $window: ng.IWindowService, importStackService: ImportStackService) {
+  constructor($q: ng.IQService, $timeout: ng.ITimeoutService, $route: ng.route.IRoute, $location: ng.ILocationService, $log: ng.ILogService, $filter: ng.IFilterService, cheStack: CheStack, cheWorkspace: CheWorkspace, $mdDialog: ng.material.IDialogService, cheNotification: CheNotification, $document: ng.IDocumentService, cheUIElementsInjectorService: CheUIElementsInjectorService, $scope: ng.IScope, $window: ng.IWindowService, importStackService: ImportStackService, confirmDialogService: ConfirmDialogService) {
     this.$q = $q;
     this.$timeout = $timeout;
     this.$location = $location;
@@ -76,6 +79,7 @@ export class StackController {
     this.$document = $document;
     this.cheUIElementsInjectorService = cheUIElementsInjectorService;
     this.importStackService = importStackService;
+    this.confirmDialogService = confirmDialogService;
 
     this.editorOptions = {
       lineWrapping: true,
@@ -509,16 +513,9 @@ export class StackController {
    * Deletes current stack if user confirms.
    */
   deleteStack(): void {
-    let confirmTitle = 'Would you like to delete ' + this.stack.name + '?';
+    let content = 'Would you like to delete \'' + this.stack.name + '\'?';
 
-    let confirm = this.$mdDialog.confirm()
-      .title(confirmTitle)
-      .ariaLabel('Remove stack')
-      .ok('Delete!')
-      .cancel('Cancel')
-      .clickOutsideToClose(true);
-
-    this.$mdDialog.show(confirm).then(() => {
+    this.confirmDialogService.showConfirmDialog('Remove stack', content, 'Delete').then(() => {
       this.loading = true;
       this.cheStack.deleteStack(this.stack.id).then(() => {
         this.cheNotification.showInfo('Stack <b>' + this.stack.name + '</b> has been successfully removed.');

@@ -9,6 +9,7 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {ConfirmDialogService} from '../../../../../components/service/confirm-dialog/confirm-dialog.service';
 
 /**
  * @ngdoc controller
@@ -37,15 +38,18 @@ export class WorkspaceMachineConfigController {
   machineNameOnChange;
   machineOnDelete;
 
+  private confirmDialogService: ConfirmDialogService;
+
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($mdDialog: ng.material.IDialogService, $q: ng.IQService, $scope: ng.IScope, $timeout: ng.ITimeoutService, lodash: _.LoDashStatic) {
+  constructor($mdDialog: ng.material.IDialogService, $q: ng.IQService, $scope: ng.IScope, $timeout: ng.ITimeoutService, lodash: _.LoDashStatic, confirmDialogService: ConfirmDialogService) {
     this.$mdDialog = $mdDialog;
     this.$q = $q;
     this.$timeout = $timeout;
     this.lodash = lodash;
+    this.confirmDialogService = confirmDialogService;
 
     this.timeoutPromise = null;
     $scope.$on('$destroy', () => {
@@ -190,27 +194,12 @@ export class WorkspaceMachineConfigController {
    * Deletes machine
    */
   deleteMachine(): void {
-    this.showDeleteConfirmation().then(() => {
+    let promise = this.confirmDialogService.showConfirmDialog('Remove machine', 'Would you like to delete this machine?', 'Delete');
+    promise.then(() => {
       this.machineOnDelete({
         name: this.machineName
       });
       this.init();
     });
-  }
-
-  /**
-   * Show confirmation popup before machine to delete
-   * @returns {ng.IPromise<any>}
-   */
-  showDeleteConfirmation(): ng.IPromise<any> {
-    let confirmTitle = 'Would you like to delete this machine?';
-    let confirm = this.$mdDialog.confirm()
-      .title(confirmTitle)
-      .ariaLabel('Remove machine')
-      .ok('Delete!')
-      .cancel('Cancel')
-      .clickOutsideToClose(true);
-
-    return this.$mdDialog.show(confirm);
   }
 }

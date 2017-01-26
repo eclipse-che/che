@@ -6,12 +6,8 @@
 # http://www.eclipse.org/legal/epl-v10.html
 
 IMAGE_NAME="eclipse/che-base"
-base_dir=$(cd "$(dirname "$0")"; pwd)
-. $base_dir/../build.include
+. $(cd "$(dirname "$0")"; pwd)/../build.include
 
 init "$@"
 build
 
-if [ $(skip_tests "$@") = false ]; then
-  sh $base_dir/test.sh $TAG
-fi

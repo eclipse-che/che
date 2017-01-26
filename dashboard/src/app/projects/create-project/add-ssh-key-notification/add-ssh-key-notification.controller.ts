@@ -9,50 +9,43 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {CheWorkspace} from '../../../../components/api/che-workspace.factory';
 
 /**
- * This class is handling the controller for the secret key error notification
+ * This class is handling the controller for the add secret key error notification
  * @author Oleksii Orel
  */
-export class AddSecretKeyNotificationCtrl {
+export class AddSecretKeyNotificationController {
+  repoURL: string;
+  workspaceId: string;
+  workspace: che.IWorkspace;
+
+  private $mdDialog: ng.material.IDialogService;
+  private $location: ng.ILocationService;
 
   /**
    * Default constructor.
    * @ngInject for Dependency injection
    */
-  constructor($mdDialog, $location, cheAPI, lodash) {
+  constructor($mdDialog: ng.material.IDialogService, $location: ng.ILocationService, cheWorkspace: CheWorkspace) {
     this.$mdDialog = $mdDialog;
     this.$location = $location;
-    this.cheAPI = cheAPI;
-    this.lodash = lodash;
 
-    this.workspacesById = cheAPI.getWorkspace().getWorkspacesById();
-    this.workspace = this.workspacesById.get(this.workspaceId);
-
-    if (!this.workspace) {
-      cheAPI.getWorkspace().fetchWorkspaces().then(() => {
-        this.workspace = this.workspacesById.get(this.workspaceId);
-      });
-    }
-
+    this.workspace = cheWorkspace.getWorkspacesById().get(this.workspaceId);
   }
 
   /**
    * Redirect to IDE preferences.
    */
-  redirectToConfig() {
-    if (!this.workspace) {
-      return false;
-    }
+  redirectToConfig(): void {
     this.$location.path('ide/' + this.workspace.namespace + '/' + this.workspace.config.name).search({action: 'showPreferences'});
     this.$mdDialog.hide();
-    return true;
   }
 
   /**
    * Callback of the cancel button of the dialog.
    */
-  abort() {
+  hide(): void {
     this.$mdDialog.hide();
   }
 }

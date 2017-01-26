@@ -15,8 +15,8 @@ import com.google.common.base.Strings;
 
 import org.eclipse.che.api.agent.server.AgentRegistry;
 import org.eclipse.che.api.agent.server.exception.AgentException;
-import org.eclipse.che.api.agent.server.model.impl.AgentImpl;
-import org.eclipse.che.api.agent.server.model.impl.AgentKeyImpl;
+import org.eclipse.che.api.agent.shared.model.impl.AgentImpl;
+import org.eclipse.che.api.agent.shared.model.impl.AgentKeyImpl;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
