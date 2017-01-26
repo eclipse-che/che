@@ -1,15 +1,3 @@
-<!--
-
-    Copyright (c) 2015 Codenvy, S.A.
-    All rights reserved. This program and the accompanying materials
-    are made available under the terms of the Eclipse Public License v1.0
-    which accompanies this distribution, and is available at
-    http://www.eclipse.org/legal/epl-v10.html
-
-    Contributors:
-      Codenvy, S.A. - initial API and implementation
-
--->
 <che-popup title="Add a new machine" on-close="addMachineDialogController.hide()">
   <ng-form name="addMachineForm" class="add-machine-form">
     <div class="form-input-fields" flex="100" layout="column">
@@ -65,12 +53,12 @@
         </div>
       </div>
     </div>
+    <che-button-notice che-button-title="Close"
+                       ng-click="addMachineDialogController.hide()">
+    </che-button-notice>
     <che-button-primary che-button-title="Add"
                         ng-click="addMachineDialogController.addMachine()"
                         ng-disabled="addMachineForm.$invalid || !addMachineDialogController.isRecipeValid()">
     </che-button-primary>
-    <che-button-notice che-button-title="Cancel"
-                       ng-click="addMachineDialogController.hide()">
-    </che-button-notice>
   </ng-form>
 </che-popup>

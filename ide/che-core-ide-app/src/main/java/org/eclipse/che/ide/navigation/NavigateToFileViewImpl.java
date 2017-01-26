@@ -10,30 +10,38 @@
  *******************************************************************************/
 package org.eclipse.che.ide.navigation;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
-import com.google.gwt.event.logical.shared.SelectionEvent;
-import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.SuggestBox;
-import com.google.gwt.user.client.ui.SuggestOracle;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import elemental.dom.Element;
+import elemental.html.TableCellElement;
+import elemental.html.TableElement;
+import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.ide.CoreLocalizationConstant;
+import org.eclipse.che.ide.Resources;
+import org.eclipse.che.ide.api.autocomplete.AutoCompleteResources;
 import org.eclipse.che.ide.resource.Path;
-import org.eclipse.che.ide.ui.window.Window;
+import org.eclipse.che.ide.ui.list.SimpleList;
+import org.eclipse.che.ide.util.dom.Elements;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -44,48 +52,49 @@ import java.util.List;
  * @author Vlad Zhukovskyi
  */
 @Singleton
-public class NavigateToFileViewImpl extends Window implements NavigateToFileView {
+public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFileView {
 
     interface NavigateToFileViewImplUiBinder extends UiBinder<Widget, NavigateToFileViewImpl> {
     }
 
     @UiField
-    Label errLabel;
-
-    @UiField(provided = true)
-    SuggestBox files;
+    TextBox fileName;
 
     @UiField(provided = true)
     CoreLocalizationConstant locale;
 
     private ActionDelegate      delegate;
-    private HandlerRegistration handlerRegistration;
+
+    private final AutoCompleteResources.Css css;
+
+    private final Resources resources;
+
+    private SimpleList<ItemReference> list;
+
+    @UiField
+    FlowPanel suggestionsPanel;
+
+    @UiField
+    HTML suggestionsContainer;
+
+    private HandlerRegistration resizeHandler;
 
     @Inject
-    public NavigateToFileViewImpl(CoreLocalizationConstant locale, NavigateToFileViewImplUiBinder uiBinder) {
+    public NavigateToFileViewImpl(CoreLocalizationConstant locale,
+                                  NavigateToFileViewImplUiBinder uiBinder,
+                                  AutoCompleteResources autoCompleteResources,
+                                  Resources resources) {
         this.locale = locale;
-        setTitle(locale.navigateToFileViewTitle());
-        files = new SuggestBox(new MySuggestOracle());
+        this.resources = resources;
 
-        files.getValueBox().addKeyUpHandler(new KeyUpHandler() {
-            @Override
-            public void onKeyUp(KeyUpEvent event) {
-                if (KeyCodes.KEY_ESCAPE == event.getNativeKeyCode()) {
-                    close();
-                }
-            }
-        });
+        css = autoCompleteResources.autocompleteComponentCss();
+        css.ensureInjected();
 
-        files.addSelectionHandler(new SelectionHandler<SuggestOracle.Suggestion>() {
-            @Override
-            public void onSelection(SelectionEvent<SuggestOracle.Suggestion> event) {
-                delegate.onFileSelected(Path.valueOf(event.getSelectedItem().getReplacementString()));
-            }
-        });
-
-        Widget widget = uiBinder.createAndBindUi(this);
-        setWidget(widget);
-        getFooter().setVisible(false);
+        setWidget(uiBinder.createAndBindUi(this));
+        setAutoHideEnabled(true);
+        setAnimationEnabled(true);
+        getElement().getStyle().setProperty("boxShadow", "0 2px 4px 0 rgba(0, 0, 0, 0.50)");
+        getElement().getStyle().setProperty("borderRadius", "0px");
     }
 
     @Override
@@ -94,85 +103,219 @@ public class NavigateToFileViewImpl extends Window implements NavigateToFileView
     }
 
     @Override
-    public void close() {
-        files.setEnabled(false);
-        hide();
-    }
+    public void showPopup() {
+        fileName.getElement().setAttribute("placeholder", locale.navigateToFileSearchIsCaseSensitive());
 
-    @Override
-    public void showDialog() {
-        errLabel.setText("");
-
-        files.setEnabled(true);
-        new Timer() {
+        setPopupPositionAndShow(new PositionCallback() {
             @Override
-            public void run() {
-                String warning = locale.navigateToFileSearchIsCaseSensitive();
-                files.setText(warning);
-                files.getValueBox().selectAll();
-
-                files.setFocus(true);
-            }
-        }.schedule(300);
-
-        handlerRegistration = files.getValueBox().addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent clickEvent) {
-                String value = files.getText();
-                String warning = locale.navigateToFileSearchIsCaseSensitive();
-
-                if (value.equals(warning)) {
-                    files.setText("");
-                }
-                handlerRegistration.removeHandler();
+            public void setPosition(int offsetWidth, int offsetHeight) {
+                setPopupPosition((com.google.gwt.user.client.Window.getClientWidth() / 2) - (offsetWidth / 2),
+                        (com.google.gwt.user.client.Window.getClientHeight() / 4) - (offsetHeight / 2));
+                // Set 'clip' css property to auto when show animation is finished.
+                new Timer() {
+                    @Override
+                    public void run() {
+                        getElement().getStyle().setProperty("clip", "auto");
+                        delegate.onFileNameChanged(fileName.getText());
+                    }
+                }.schedule(300);
             }
         });
-        super.show();
-    }
 
-    @Override
-    public void clearInput() {
-        files.getValueBox().setValue("");
-    }
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                fileName.setFocus(true);
+            }
+        });
 
-    private class MySuggestOracle extends SuggestOracle {
-        @Override
-        public boolean isDisplayStringHTML() {
-            return true;
-        }
-
-        @Override
-        public void requestSuggestions(final Request request, final Callback callback) {
-            delegate.onRequestSuggestions(request.getQuery(), new AsyncCallback<List<Path>>() {
+        // Add window resize handler
+        if (resizeHandler == null) {
+            resizeHandler = Window.addResizeHandler(new ResizeHandler() {
                 @Override
-                public void onSuccess(List<Path> result) {
-                    errLabel.setText("");
-
-                    final List<SuggestOracle.Suggestion> suggestions = new ArrayList<>(result.size());
-                    for (final Path item : result) {
-                        suggestions.add(new SuggestOracle.Suggestion() {
-                            @Override
-                            public String getDisplayString() {
-                                return item.lastSegment() + " (" + item.removeLastSegments(1) + ")";
-                            }
-
-                            @Override
-                            public String getReplacementString() {
-                                return item.toString();
-                            }
-                        });
-                    }
-
-                    callback.onSuggestionsReady(request, new Response(suggestions));
-                }
-
-                @Override
-                public void onFailure(Throwable caught) {
-                    errLabel.setText(caught.getMessage());
-                    // hide previous suggestion list in case any error
-                    callback.onSuggestionsReady(request, new Response(new ArrayList<Suggestion>(0)));
+                public void onResize(ResizeEvent event) {
+                    updatePositionAndSize();
                 }
             });
         }
     }
+
+    private final SimpleList.ListItemRenderer<ItemReference> listItemRenderer =
+            new SimpleList.ListItemRenderer<ItemReference>() {
+                @Override
+                public void render(Element itemElement, ItemReference itemData) {
+                    TableCellElement label = Elements.createTDElement();
+                    TableCellElement path = Elements.createTDElement();
+
+                    Path itemPath = Path.valueOf(itemData.getPath());
+
+                    label.setInnerHTML(itemPath.lastSegment());
+                    path.setInnerHTML("(" + itemPath.parent() + ")");
+
+                    itemElement.appendChild(label);
+                    itemElement.appendChild(path);
+
+                    path.getStyle().setProperty("opacity", "0.6");
+                }
+
+                @Override
+                public Element createElement() {
+                    return Elements.createTRElement();
+                }
+            };
+
+    @Override
+    public void hidePopup() {
+        suggestionsContainer.getElement().setInnerHTML("");
+        suggestionsPanel.setVisible(false);
+
+        suggestionsPanel.getElement().getStyle().setWidth(400, Style.Unit.PX);
+        suggestionsPanel.getElement().getStyle().setHeight(20, Style.Unit.PX);
+
+        if (resizeHandler != null) {
+            resizeHandler.removeHandler();
+            resizeHandler = null;
+        }
+
+        super.hide();
+    }
+
+    @Override
+    public void showItems(List<ItemReference> items) {
+        // Hide popup if it is nothing to show
+        if (items.isEmpty()) {
+            suggestionsContainer.getElement().setInnerHTML("");
+            suggestionsPanel.setVisible(false);
+
+            suggestionsPanel.getElement().getStyle().setWidth(400, Style.Unit.PX);
+            suggestionsPanel.getElement().getStyle().setHeight(20, Style.Unit.PX);
+
+            return;
+        }
+
+        // Show popup
+        suggestionsPanel.setVisible(true);
+        suggestionsContainer.getElement().setInnerHTML("");
+
+        // Create and show list of items
+        final TableElement itemHolder = Elements.createTableElement();
+        suggestionsContainer.getElement().appendChild(((com.google.gwt.dom.client.Element) itemHolder));
+        list = SimpleList.create((SimpleList.View) suggestionsContainer.getElement().cast(),
+                (Element)suggestionsContainer.getElement(),
+                itemHolder,
+                resources.defaultSimpleListCss(),
+                listItemRenderer,
+                eventDelegate);
+        list.render(items);
+        list.getSelectionModel().setSelectedItem(0);
+
+        // Update popup position
+        updatePositionAndSize();
+    }
+
+    private void updatePositionAndSize() {
+        // Update position
+        setPopupPosition((com.google.gwt.user.client.Window.getClientWidth() / 2) - (getOffsetWidth() / 2),
+                (com.google.gwt.user.client.Window.getClientHeight() / 4) - (getOffsetHeight() / 2));
+
+        // Exit if suggestions is not shown
+        if (!suggestionsPanel.isVisible()) {
+            return;
+        }
+
+        // Update popup width
+        int width = suggestionsContainer.getElement().getFirstChildElement().getOffsetWidth();
+        int newWidth = Window.getClientWidth() - getElement().getAbsoluteLeft() - 50;
+        if (width < newWidth) {
+            newWidth = width;
+        }
+        suggestionsPanel.getElement().getStyle().setWidth(newWidth, Style.Unit.PX);
+
+        // Update popup height
+        int height = suggestionsContainer.getElement().getFirstChildElement().getOffsetHeight();
+        int newHeight = height > 300 ? 300 : height;
+        int bottom = getElement().getAbsoluteTop() + getElement().getOffsetHeight();
+
+        if (bottom + newHeight > Window.getClientHeight() - 10) {
+            newHeight = Window.getClientHeight() - 10 - bottom;
+        }
+
+        if (newHeight < 50) {
+            newHeight = 50;
+        }
+
+        suggestionsPanel.getElement().getStyle().setHeight(newHeight, Style.Unit.PX);
+    }
+
+    private final SimpleList.ListEventDelegate<ItemReference> eventDelegate = new SimpleList.ListEventDelegate<ItemReference>() {
+        @Override
+        public void onListItemClicked(Element listItemBase, ItemReference itemData) {
+            list.getSelectionModel().setSelectedItem(itemData);
+        }
+
+        @Override
+        public void onListItemDoubleClicked(Element listItemBase, ItemReference itemData) {
+            delegate.onFileSelected(Path.valueOf(itemData.getPath()));;
+        }
+    };
+
+    @UiHandler("fileName")
+    void handleKeyDown(KeyDownEvent event) {
+        switch (event.getNativeKeyCode()) {
+            case KeyCodes.KEY_UP:
+                event.stopPropagation();
+                event.preventDefault();
+                if (list != null) {
+                    list.getSelectionModel().selectPrevious();
+                }
+                return;
+
+            case KeyCodes.KEY_DOWN:
+                event.stopPropagation();
+                event.preventDefault();
+                if (list != null) {
+                    list.getSelectionModel().selectNext();
+                }
+                return;
+
+            case KeyCodes.KEY_PAGEUP:
+                event.stopPropagation();
+                event.preventDefault();
+                if (list != null) {
+                    list.getSelectionModel().selectPreviousPage();
+                }
+                return;
+
+            case KeyCodes.KEY_PAGEDOWN:
+                event.stopPropagation();
+                event.preventDefault();
+                if (list != null) {
+                    list.getSelectionModel().selectNextPage();
+                }
+                return;
+
+            case KeyCodes.KEY_ENTER:
+                event.stopPropagation();
+                event.preventDefault();
+                ItemReference selectedItem = list.getSelectionModel().getSelectedItem();
+                if (selectedItem != null) {
+                    delegate.onFileSelected(Path.valueOf(selectedItem.getPath()));;
+                }
+                return;
+
+            case KeyCodes.KEY_ESCAPE:
+                event.stopPropagation();
+                event.preventDefault();
+                hidePopup();
+                return;
+        }
+
+        Scheduler.get().scheduleDeferred(new Command() {
+            @Override
+            public void execute() {
+                delegate.onFileNameChanged(fileName.getText());
+            }
+        });
+    }
+
 }

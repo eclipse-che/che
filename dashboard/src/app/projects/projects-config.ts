@@ -17,7 +17,7 @@ import {CreateProjectGithubController} from './create-project/github/create-proj
 import {CreateProjectGit} from './create-project/git/create-project-git.directive';
 import {CreateProjectGitController} from './create-project/git/create-project-git.controller';
 import {CreateProjectGithub} from './create-project/github/create-project-github.directive';
-import {AddSecretKeyNotificationCtrl} from './create-project/add-ssh-key-notification/add-ssh-key-notification.controller';
+import {AddSecretKeyNotificationController} from './create-project/add-ssh-key-notification/add-ssh-key-notification.controller';
 import {NoGithubOauthDialogController} from './create-project/github/oauth-dialog/no-github-oauth-dialog.controller';
 import {CreateProjectSamplesController} from './create-project/samples/create-project-samples.controller';
 import {CreateProjectSamples} from './create-project/samples/create-project-samples.directive';
@@ -32,6 +32,7 @@ import {ProjectDetailsController} from './project-details/project-details.contro
 import {ProjectRepositoryConfig} from './project-details/repository/project-repository-config';
 import {CheProjectItem} from './list-projects/project-item/project-item.directive';
 import {ProjectItemCtrl} from './list-projects/project-item/project-item.controller';
+import {ProjectErrorNotificationController} from './create-project/project-error-notification/project-error-notification.controller';
 
 export class ProjectsConfig {
 
@@ -49,7 +50,9 @@ export class ProjectsConfig {
 
     register.controller('NoGithubOauthDialogController', NoGithubOauthDialogController);
 
-    register.controller('AddSecretKeyNotificationCtrl', AddSecretKeyNotificationCtrl);
+    register.controller('AddSecretKeyNotificationController', AddSecretKeyNotificationController);
+
+    register.controller('ProjectErrorNotificationController', ProjectErrorNotificationController);
 
     register.controller('CreateProjectSamplesController', CreateProjectSamplesController);
     register.directive('createProjectSamples', CreateProjectSamples);

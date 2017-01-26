@@ -43,6 +43,16 @@ Usage on Mac or Windows:
  COMMAND_EXTRA_ARGS=
 }
 
+is_verbose() {
+  for i in "$@" ; do
+    if [ $i = "--unison-verbose" ]; then
+      echo "true"
+      exit 0
+    fi
+  done
+  echo "false"
+}
+
 parse_command_line () {
   if [ $# -eq 0 ]; then
     usage
@@ -51,7 +61,9 @@ parse_command_line () {
 
   # See if profile document was provided
   mkdir -p $HOME/.unison
-  cp -rf /profile/default.prf $HOME/.unison/default.prf
+  if [ -f /profile/default.prf ]; then
+    cp -rf /profile/default.prf $HOME/.unison/default.prf
+  fi
 
   WORKSPACE_NAME=$1
   shift
@@ -123,7 +135,20 @@ if [ $status -ne 0 ]; then
 fi
 info "INFO: (che mount): Successfully mounted ${SSH_USER}@${SSH_IP}:/projects (${SSH_PORT})"
 info "INFO: (che mount): Initial sync...Please wait."
-unison /mntssh /mnthost -batch -fat -silent -auto -prefer=newer -log=false > /dev/null 2>&1
+
+local UNISON_ARGS="";
+if [ $(is_verbose "$@") = true ]; then
+  UNISON_ARGS="-batch -auto -prefer=newer"
+  info "using verbose mode"
+else
+  UNISON_ARGS="-silent -auto -prefer=newer -log=false > /dev/null 2>&1"
+fi
+
+UNISON_COMMAND="unison /mntssh /mnthost ${UNISON_ARGS}"
+debug "Using command ${UNISON_COMMAND}"
+
+eval "${UNISON_COMMAND}"
+
 status=$?
 if [ $status -ne 0 ]; then
     error "ERROR: Fatal error occurred ($status)"
