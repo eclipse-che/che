@@ -255,6 +255,20 @@ public class AppContextImpl implements AppContext,
         }
 
         if (delta.getKind() == ADDED) {
+
+            if (projects != null) {
+                for (int i = 0; i < projects.length; i++) {
+
+                    //this scenario may occurred when we received from the server that root project was created, and if it already exists
+                    //then we update existed record
+
+                    if (projects[i].getLocation().equals(resource.getLocation()) && resource.isProject()) {
+                        projects[i] = resource.asProject();
+                        return;
+                    }
+                }
+            }
+
             Project[] newProjects = copyOf(projects, projects.length + 1);
             newProjects[projects.length] = (Project)resource;
             projects = newProjects;
