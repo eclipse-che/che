@@ -950,13 +950,20 @@ export class CreateProjectController {
    */
   checkExistingWorkspaceState(workspace: any): void {
     if (workspace.status === 'RUNNING') {
-      let websocketUrl = this.cheAPI.getWorkspace().getWebsocketUrl(workspace.id);
-      // get bus
-      let websocketStream = this.$websocket(websocketUrl);
-      // on success, create project
-      websocketStream.onOpen(() => {
-        let bus = this.cheAPI.getWebsocket().getExistingBus(websocketStream);
-        this.createProjectInWorkspace(workspace.id, this.projectName, this.importProjectData, bus);
+      this.cheAPI.getWorkspace().fetchWorkspaceDetails(workspace.id).finally(() => {
+        let websocketUrl = this.cheAPI.getWorkspace().getWebsocketUrl(workspace.id);
+        if (!websocketUrl) {
+          this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
+          this.$log.error('Unable to create project in workspace. Error when trying to get websocket URL.');
+          return;
+        }
+        // get bus
+        let websocketStream = this.$websocket(websocketUrl);
+        // on success, create project
+        websocketStream.onOpen(() => {
+          let bus = this.cheAPI.getWebsocket().getExistingBus(websocketStream);
+          this.createProjectInWorkspace(workspace.id, this.projectName, this.importProjectData, bus);
+        });
       });
     } else {
       this.subscribeStatusChannel(workspace);
