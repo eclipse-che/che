@@ -26,10 +26,6 @@
     </properties>
     <dependencies>
         <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
         </dependency>
@@ -37,10 +33,6 @@
             <groupId>org.eclipse.birt.runtime</groupId>
             <artifactId>org.eclipse.core.jobs</artifactId>
         </dependency>
-        <!--<dependency>-->
-        <!--<groupId>org.eclipse.che.plugin</groupId>-->
-        <!--<artifactId>org.eclipse.core.resources</artifactId>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>org.eclipse.birt.runtime</groupId>
             <artifactId>org.eclipse.core.runtime</artifactId>
