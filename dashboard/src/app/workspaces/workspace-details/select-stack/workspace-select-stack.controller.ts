@@ -10,6 +10,7 @@
  */
 'use strict';
 import {CheStack} from '../../../../components/api/che-stack.factory';
+import {CheEnvironmentRegistry} from '../../../../components/api/environment/che-environment-registry.factory';
 
 /**
  * @ngdoc controller
@@ -18,11 +19,13 @@ import {CheStack} from '../../../../components/api/che-stack.factory';
  * @author Oleksii Orel
  */
 export class WorkspaceSelectStackController {
+  $log: ng.ILogService;
   $timeout: ng.ITimeoutService;
   $scope: ng.IScope;
   lodash: any;
+  cheStack: CheStack;
+  cheEnvironmentRegistry: CheEnvironmentRegistry;
 
-  stack: any;
   stacks: any[];
   readyToGoStack: any;
   stackLibraryUser: any;
@@ -31,9 +34,16 @@ export class WorkspaceSelectStackController {
 
   recipeUrl: string;
   recipeScript: string;
+  recipeFormat: string;
 
-  onTabChange: Function;
-  onStackChange: Function;
+  workspaceStackOnChange: Function;
+  environmentName: string;
+  workspaceName: string;
+  workspaceImportedRecipe: {
+    type: string,
+    content: string,
+    location: string
+  };
 
   tabs: string[];
 
@@ -41,10 +51,13 @@ export class WorkspaceSelectStackController {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($timeout: ng.ITimeoutService, $scope: ng.IScope, lodash: any, cheStack: CheStack) {
+  constructor($log: ng.ILogService, $timeout: ng.ITimeoutService, $scope: ng.IScope, lodash: any, cheStack: CheStack, cheEnvironmentRegistry: CheEnvironmentRegistry) {
+    this.$log = $log;
     this.$timeout = $timeout;
     this.$scope = $scope;
     this.lodash = lodash;
+    this.cheStack = cheStack;
+    this.cheEnvironmentRegistry = cheEnvironmentRegistry;
 
     this.tabs = ['ready-to-go', 'stack-library', 'stack-import', 'stack-authoring'];
     this.setSelectedTab();
@@ -70,7 +83,7 @@ export class WorkspaceSelectStackController {
           this.stackLibraryUser = findStack;
         }
         if (this.tabName === data.tabName) {
-          this.onStackSelect(findStack);
+          this.selectStack(findStack);
         }
       }
     });
@@ -81,6 +94,37 @@ export class WorkspaceSelectStackController {
       }
       this.setSelectedTab();
     });
+
+    $scope.$watch(() => { return this.workspaceImportedRecipe; }, () => {
+      if (!this.workspaceImportedRecipe) {
+        return;
+      }
+      this.initStackSelecter();
+    }, true);
+  }
+
+  /**
+   * Initialize stack selector widget.
+   */
+  initStackSelecter(): void {
+    if (!this.workspaceImportedRecipe) {
+      return;
+    }
+
+    let type = this.workspaceImportedRecipe.type || 'compose';
+    if (type === 'dockerimage') {
+      type = 'dockerfile';
+      this.recipeScript = 'FROM ' + this.workspaceImportedRecipe.location;
+      this.tabName = 'stack-authoring';
+    } else  if (angular.isDefined(this.workspaceImportedRecipe.location)) {
+      this.tabName = 'stack-import';
+      this.recipeUrl = this.workspaceImportedRecipe.location;
+    } else if (angular.isDefined(this.workspaceImportedRecipe.content)) {
+      this.tabName = 'stack-authoring';
+      this.recipeScript = this.workspaceImportedRecipe.content;
+    }
+    this.recipeFormat = type;
+
   }
 
   setSelectedTab(): void {
@@ -95,40 +139,86 @@ export class WorkspaceSelectStackController {
    */
   setStackTab(tabName: string): void {
     this.tabName = tabName;
-    this.onTabChange({tabName: tabName});
 
     if (tabName === 'ready-to-go') {
-      this.onStackSelect(this.readyToGoStack);
-      this.recipeScript = null;
-      this.recipeUrl = null;
-      return;
+      this.selectStack(this.readyToGoStack);
+      this.recipeScript = '';
+      this.recipeUrl = '';
     } else if (tabName === 'stack-library') {
-      this.onStackSelect(this.stackLibraryUser);
-      this.recipeScript = null;
-      this.recipeUrl = null;
-      return;
+      this.selectStack(this.stackLibraryUser);
+      this.recipeScript = '';
+      this.recipeUrl = '';
     } else {
       if (tabName === 'stack-import') {
-        if (this.recipeUrl) {
-          return;
-        }
-        this.recipeScript = null;
+        this.recipeScript = '';
       } else if (tabName === 'stack-authoring') {
-        if (this.recipeScript) {
-          return;
-        }
-        this.recipeUrl = null;
+        this.recipeUrl = '';
       }
     }
-    this.onStackSelect(null);
   }
 
   /**
-   * Callback when stack has been select
-   * @param stack
+   * Set current stack as selected
+   * @param {che.IStack} stack
    */
-  onStackSelect(stack: any): void {
-    this.stack = angular.copy(stack);
-    this.onStackChange({stack: this.stack});
+  selectStack(stack: che.IStack): void {
+    if (!stack) {
+      return;
+    }
+    let workspaceConfig = angular.copy(stack.workspaceConfig);
+
+    if (this.environmentName && this.environmentName !== workspaceConfig.defaultEnv) {
+      workspaceConfig.environments[this.environmentName] = workspaceConfig.environments[workspaceConfig.defaultEnv];
+      delete workspaceConfig.environments[workspaceConfig.defaultEnv];
+      workspaceConfig.defaultEnv = this.environmentName;
+    }
+    if (this.workspaceName && this.workspaceName !== workspaceConfig.name) {
+      workspaceConfig.name = this.workspaceName;
+    }
+
+    this.workspaceStackOnChange({config: workspaceConfig, stackId: stack ? stack.id : ''});
   }
+
+  /**
+   * Callback when stack import URL is changed or recipe content is changed.
+   *
+   * @param {string} tabName
+   * @param {string} recipeFormat
+   * @param {string} recipeUrl
+   * @param {string} recipeScript
+   */
+  onRecipeChange(tabName: string, recipeFormat: string, recipeUrl: string, recipeScript: string): void {
+    let stackTemplate  = this.cheStack.getStackTemplate(),
+        defEnvName     = stackTemplate.workspaceConfig.defaultEnv,
+        defEnvironment = stackTemplate.workspaceConfig.environments[defEnvName],
+        recipe         = defEnvironment.recipe;
+
+    if (tabName === 'stack-import') {
+      if (this.recipeFormat === recipeFormat && this.recipeUrl === recipeUrl) {
+        return;
+      }
+      recipe.location = recipeUrl;
+      delete recipe.content;
+    } else {
+      if (this.recipeFormat === recipeFormat && this.recipeScript === recipeScript) {
+        return;
+      }
+      recipe.content = recipeScript;
+      delete recipe.location;
+
+      // clean machines list in config
+      defEnvironment.machines = {};
+    }
+    recipe.type = recipeFormat;
+    recipe.contentType = recipeFormat === 'compose' ? 'application/x-yaml' : 'text/x-dockerfile';
+
+    let environmentManager = this.cheEnvironmentRegistry.getEnvironmentManager(recipe.type);
+
+    let machines    = environmentManager.getMachines(defEnvironment),
+        environment = environmentManager.getEnvironment(defEnvironment, machines);
+    stackTemplate.workspaceConfig.environments[defEnvName] = environment;
+
+    this.selectStack(stackTemplate);
+  }
+
 }

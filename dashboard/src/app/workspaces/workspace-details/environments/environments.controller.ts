@@ -246,6 +246,10 @@ export class WorkspaceEnvironmentsController {
     // for compose recipe
     // check if there are machines without memory limit
     let environment = this.workspaceConfig.environments[this.environmentName];
+    if (!environment) {
+      return;
+    }
+
     if (environment.recipe && environment.recipe.type === 'compose') {
       let recipeType = environment.recipe.type,
         environmentManager = this.cheEnvironmentRegistry.getEnvironmentManager(recipeType);

@@ -55,9 +55,9 @@ export class CheErrorMessagesService {
     this.publishMessages(namespace);
   }
 
-  removeMessages(namespace: string, messageName: string): void {
-    if (this.messages[namespace] && this.messages[namespace][messageName]) {
-      this.messages[namespace][messageName] = [];
+  removeMessages(namespace: string): void {
+    if (this.messages[namespace]) {
+      this.messages[namespace] = {};
     }
 
     this.publishMessages(namespace);

@@ -28,7 +28,8 @@
       <md-tab-body>
         <che-workspace-recipe-import ng-if="workspaceSelectStackCtrl.tabName==='stack-import'"
                                      che-recipe-url="workspaceSelectStackCtrl.recipeUrl"
-                                     che-recipe-format="workspaceSelectStackCtrl.recipeFormat"></che-workspace-recipe-import>
+                                     che-recipe-format="workspaceSelectStackCtrl.recipeFormat"
+                                     che-recipe-change="workspaceSelectStackCtrl.onRecipeChange('stack-import', recipeFormat, recipeUrl, recipeScript)"></che-workspace-recipe-import>
       </md-tab-body>
     </md-tab>
     <md-tab md-on-select="workspaceSelectStackCtrl.setStackTab('stack-authoring')">
@@ -39,7 +40,8 @@
       <md-tab-body>
         <che-workspace-recipe-authoring ng-if="workspaceSelectStackCtrl.tabName==='stack-authoring'"
                                         che-recipe-script="workspaceSelectStackCtrl.recipeScript"
-                                        che-recipe-format="workspaceSelectStackCtrl.recipeFormat"></che-workspace-recipe-authoring>
+                                        che-recipe-format="workspaceSelectStackCtrl.recipeFormat"
+                                        che-recipe-change="workspaceSelectStackCtrl.onRecipeChange('stack-authoring', recipeFormat, recipeUrl, recipeScript)"></che-workspace-recipe-authoring>
       </md-tab-body>
     </md-tab>
   </md-tabs>

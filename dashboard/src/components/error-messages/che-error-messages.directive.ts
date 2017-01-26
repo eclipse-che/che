@@ -69,7 +69,7 @@ export class CheErrorMessages {
   link($scope: IErrorMessagesScope, $element: ng.IAugmentedJQuery) {
     $scope.$watch(() => { return $element.find('[ng-message]').length; }, (messagesNumber: number) => {
       if (angular.isDefined(messagesNumber)) {
-        this.cheErrorMessagesService.removeMessages($scope.messageScope, $scope.messageName);
+        this.cheErrorMessagesService.removeMessages($scope.messageScope);
         angular.element($element.find('[ng-message]')).each((index: number, el: Element) => {
           this.cheErrorMessagesService.addMessage($scope.messageScope, $scope.messageName, angular.element(el).text());
         });
