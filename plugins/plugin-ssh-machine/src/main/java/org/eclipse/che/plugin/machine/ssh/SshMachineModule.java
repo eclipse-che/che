@@ -24,7 +24,7 @@ public class SshMachineModule extends AbstractModule {
     protected void configure() {
         bind(SshMachineInstanceProvider.class);
 
-        bind(SshMachineFactory.class).to(SshMachineFactory.class);
+        bind(SshMachineFactory.class);
 
         bindConstant().annotatedWith(Names.named("machine.ssh.server.terminal.location")).to("~/che");
 
