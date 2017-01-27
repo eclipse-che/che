@@ -14,6 +14,7 @@ package org.eclipse.che.plugin.machine.ssh;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.model.machine.ServerConf;
 import org.eclipse.che.api.core.util.LineConsumer;
@@ -47,9 +48,13 @@ import static java.util.Collections.emptyMap;
 public class SshMachineInstance  {
     private static final AtomicInteger pidSequence = new AtomicInteger(1);
 
-    private String                 id;
-    private String                 workspaceId;
-    private MachineRuntimeInfoImpl machineRuntime;
+    private       String                 id;
+    private       String                 workspaceId;
+    private final String                 envName;
+    private final String                 owner;
+    private       MachineRuntimeInfoImpl machineRuntime;
+    private final MachineConfig          machineConfig;
+
 
     private final SshClient         sshClient;
     private final LineConsumer      outputConsumer;
@@ -67,9 +72,12 @@ public class SshMachineInstance  {
                               Set<ServerConf> machinesServers) {
         this.id = machine.getId();
         this.workspaceId = machine.getWorkspaceId();
+        this.envName = machine.getEnvName();
+        this.owner = machine.getOwner();
         this.sshClient = sshClient;
         this.outputConsumer = outputConsumer;
         this.machineFactory = machineFactory;
+        this.machineConfig = machine.getConfig();
         this.status = machine.getStatus();
         this.machinesServers = new HashSet<>(machinesServers.size() + machine.getConfig().getServers().size());
         this.machinesServers.addAll(machinesServers);
@@ -183,5 +191,17 @@ public class SshMachineInstance  {
 
     public String getWorkspaceId() {
         return workspaceId;
+    }
+
+    public MachineConfig getMachineConfig() {
+        return machineConfig;
+    }
+
+    public String getEnvName() {
+        return envName;
+    }
+
+    public String getOwner() {
+        return owner;
     }
 }

@@ -33,11 +33,13 @@ import static java.lang.String.format;
 public class SshMachineProcess  {
     private final SshClient           sshClient;
     private final String              name;
+
     private final String              commandLine;
     private final String              type;
     private final Map<String, String> attributes;
-    private final int                 pid;
-    private final String              outputChannel;
+
+    private final int    pid;
+    private final String outputChannel;
 
     private volatile boolean started;
 
@@ -114,6 +116,15 @@ public class SshMachineProcess  {
     public String getType() {
         return type;
     }
+
+    public int getPid() {
+        return pid;
+    }
+
+    public String getCommandLine() {
+        return commandLine;
+    }
+
 
     public Map<String, String> getAttributes() {
         return attributes;
