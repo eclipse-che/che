@@ -11,10 +11,21 @@
 package org.eclipse.che.ide.command.toolbar.processes;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.google.web.bindery.event.shared.EventBus;
+
+import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessesResponseDto;
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
+import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
+import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.mvp.Presenter;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.List;
 
 /**
  *
@@ -22,11 +33,33 @@ import javax.inject.Singleton;
 @Singleton
 public class ProcessesListPresenter implements Presenter {
 
-    private ProcessesListView view;
+    private final ProcessesListView       view;
 
     @Inject
-    public ProcessesListPresenter(ProcessesListView view) {
+    public ProcessesListPresenter(final ProcessesListView view,
+                                  EventBus eventBus,
+                                  final ExecAgentCommandManager execAgentCommandManager,
+                                  final AppContext appContext) {
         this.view = view;
+
+        eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
+            @Override
+            public void onWsAgentStarted(WsAgentStateEvent event) {
+                for (Machine machine : appContext.getWorkspace().getRuntime().getMachines()) {
+                    execAgentCommandManager.getProcesses(machine.getId(), true).then(new Operation<List<GetProcessesResponseDto>>() {
+                        @Override
+                        public void apply(List<GetProcessesResponseDto> arg) throws OperationException {
+                            view.setProcesses(arg);
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onWsAgentStopped(WsAgentStateEvent event) {
+
+            }
+        });
     }
 
     @Override

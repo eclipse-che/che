@@ -32,7 +32,7 @@ public class MachinePopupItem implements PopupItem {
     public MachinePopupItem(MachinePopupItem item) {
         this.command = item.command;
         this.machine = item.machine;
-        this.name = command.getName() + " in " + machine.getConfig().getName();
+        this.name = command.getName() + " on " + machine.getConfig().getName();
     }
 
     @Override

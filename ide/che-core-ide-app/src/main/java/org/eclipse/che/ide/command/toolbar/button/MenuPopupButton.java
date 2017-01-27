@@ -54,6 +54,7 @@ public class MenuPopupButton extends ButtonBase {
     private final PopupItemDataProvider dataProvider;
     private final PopupActionHandler actionHandler;
     private final DropDownWidget.Resources dropResources;
+
     private PopupItemList popupItemList;
 
     public MenuPopupButton(final SafeHtml content,
@@ -95,6 +96,7 @@ public class MenuPopupButton extends ButtonBase {
                 }
             }
         }, MouseDownEvent.getType());
+
         addDomHandler(new MouseUpHandler() {
             @Override
             public void onMouseUp(MouseUpEvent event) {
@@ -108,7 +110,8 @@ public class MenuPopupButton extends ButtonBase {
                 if (popupItemList != null && popupItemList.isShowing()) {
                     return;
                 }
-                PopupItem defaultItem = dataProvider.getDefaultItem();
+
+                final PopupItem defaultItem = dataProvider.getDefaultItem();
                 if (defaultItem != null) {
                     actionHandler.onItemSelected(defaultItem);
                 } else {

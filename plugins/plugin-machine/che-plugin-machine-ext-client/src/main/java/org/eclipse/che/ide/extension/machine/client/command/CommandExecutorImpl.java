@@ -70,8 +70,7 @@ public class CommandExecutorImpl implements CommandExecutor {
         macroProcessor.expandMacros(commandLine).then(new Operation<String>() {
             @Override
             public void apply(String expandedCommandLine) throws OperationException {
-                CommandImpl expandedCommand = new CommandImpl(name, expandedCommandLine, type, attributes);
-
+                final CommandImpl expandedCommand = new CommandImpl(name, expandedCommandLine, type, attributes);
                 final CommandOutputConsole console = commandConsoleFactory.create(expandedCommand, machine);
                 final String machineId = machine.getId();
 

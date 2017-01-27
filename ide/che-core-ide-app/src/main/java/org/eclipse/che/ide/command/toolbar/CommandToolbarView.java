@@ -28,6 +28,7 @@ public interface CommandToolbarView extends View<CommandToolbarView.ActionDelega
 
     interface ActionDelegate {
 
-        void runCommand(ContextualCommand command, Machine machine);
+        /** Called when running a command is requested. */
+        void onCommandRun(ContextualCommand command, Machine machine);
     }
 }

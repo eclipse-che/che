@@ -17,7 +17,7 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
- * Data provided for {@link MenuPopupButton}
+ * Data provider for {@link MenuPopupButton}
  */
 public interface PopupItemDataProvider {
 

@@ -53,6 +53,7 @@ public class CommandToolbarPresenter implements Presenter, CommandToolbarView.Ac
         this.commandUtils = commandUtils;
         this.commandExecutor = commandExecutor;
         this.runGoal = runGoal;
+
         view.setDelegate(this);
 
         commandManager.addCommandLoadedListener(new CommandManager.CommandLoadedListener() {
@@ -93,7 +94,7 @@ public class CommandToolbarPresenter implements Presenter, CommandToolbarView.Ac
     }
 
     @Override
-    public void runCommand(ContextualCommand command, Machine machine) {
+    public void onCommandRun(ContextualCommand command, Machine machine) {
         commandExecutor.get().executeCommand(command, machine);
     }
 }

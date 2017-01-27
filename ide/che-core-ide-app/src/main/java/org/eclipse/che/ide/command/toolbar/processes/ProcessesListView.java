@@ -12,13 +12,19 @@ package org.eclipse.che.ide.command.toolbar.processes;
 
 
 import com.google.inject.ImplementedBy;
+
+import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessesResponseDto;
 import org.eclipse.che.ide.api.mvp.View;
+
+import java.util.List;
 
 /**
  *
  */
 @ImplementedBy(ProcessesListViewImpl.class)
 public interface ProcessesListView extends View<ProcessesListView.ActionDelegate> {
+
+    void setProcesses(List<GetProcessesResponseDto> processes);
 
     interface ActionDelegate {
 

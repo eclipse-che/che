@@ -10,14 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.toolbar.button;
 
-import javax.validation.constraints.NotNull;
-
 /**
  *
  */
 public interface PopupItem {
 
-    @NotNull
     String getName();
 
     boolean isDisabled();
