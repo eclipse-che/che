@@ -116,6 +116,7 @@ generate_configuration_with_puppet() {
     # Handle override/addon
     if [ -d "/repo/dockerfiles/init/addon" ]; then
       WRITE_PARAMETERS+=" -v \"${CHE_HOST_DEVELOPMENT_REPO}/dockerfiles/init/addon/addon.pp\":/etc/puppet/manifests/addon.pp:ro"
+      WRITE_PARAMETERS+=" -v \"${CHE_HOST_DEVELOPMENT_REPO}/dockerfiles/init/addon/modules/\":/etc/puppet/modules/:ro"
     fi
   fi
 
@@ -133,7 +134,7 @@ generate_configuration_with_puppet() {
                   --entrypoint=/usr/bin/puppet \
                       $IMAGE_INIT \
                           apply --modulepath \
-                                /etc/puppet/modules/ \
+                                /etc/puppet/modules/:/etc/puppet/addon/ \
                                 /etc/puppet/manifests/ --show_diff ${WRITE_LOGS}"
 
   log ${GENERATE_CONFIG_COMMAND}
