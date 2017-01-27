@@ -179,5 +179,12 @@ public class WsMasterModule extends AbstractModule {
                 .to(org.eclipse.che.plugin.docker.machine.cleaner.LocalWorkspaceFilesCleaner.class);
         bind(org.eclipse.che.api.environment.server.InfrastructureProvisioner.class)
                 .to(org.eclipse.che.plugin.docker.machine.local.LocalCheInfrastructureProvisioner.class);
+        configureDefaultReadmeInjector();
+    }
+
+    private void configureDefaultReadmeInjector() {
+        Multibinder.newSetBinder(binder(), String.class, Names.named("machine.docker.machine_volumes"))
+                   .addBinding()
+                   .toProvider(org.eclipse.che.api.project.server.template.ReadmeVolumeProvider.class);
     }
 }

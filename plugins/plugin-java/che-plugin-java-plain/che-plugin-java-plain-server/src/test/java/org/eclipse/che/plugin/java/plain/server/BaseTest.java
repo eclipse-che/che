@@ -20,6 +20,7 @@ import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.ProjectCreatedEvent;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.ProjectRegistry;
+import org.eclipse.che.api.project.server.ReadmeInjectionHandler;
 import org.eclipse.che.api.project.server.WorkspaceProjectsSyncer;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
 import org.eclipse.che.api.project.server.importer.ProjectImporterRegistry;
@@ -41,6 +42,7 @@ import org.eclipse.che.plugin.java.server.projecttype.JavaValueProviderFactory;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.mockito.Mockito;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 
@@ -115,7 +117,8 @@ public abstract class BaseTest {
                                             fileWatcherNotificationHandler,
                                             fileTreeWatcher,
                                             new TestWorkspaceHolder(new ArrayList<>()),
-                                            mock(FileWatcherManager.class));
+                                            mock(FileWatcherManager.class),
+                                            Mockito.mock(ReadmeInjectionHandler.class));
 
         ResourcesPlugin plugin = new ResourcesPlugin("target/index", wsPath, () -> projectRegistry, () -> projectManager);
 

@@ -22,6 +22,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
 
 import org.eclipse.che.ide.actions.ActionApiModule;
+import org.eclipse.che.ide.actions.OpenReadmeAction;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
@@ -134,6 +135,8 @@ public class CoreGinModule extends AbstractGinModule {
 
         install(new GinFactoryModuleBuilder().build(FindResultNodeFactory.class));
 
+        configureActions();
+
         // clients for the REST services
         bind(GitServiceClient.class).to(GitServiceClientImpl.class).in(Singleton.class);
         bind(SshServiceClient.class).to(SshServiceClientImpl.class).in(Singleton.class);
@@ -149,6 +152,10 @@ public class CoreGinModule extends AbstractGinModule {
         bind(ExecAgentCommandManager.class).to(JsonRpcExecAgentCommandManager.class);
         bind(ExecAgentEventManager.class).to(JsonRpcExecAgentEventManager.class);
         bind(ConnectedEventHandler.class).asEagerSingleton();
+    }
+
+    private void configureActions() {
+        bind(OpenReadmeAction.class).asEagerSingleton();
     }
 
     @Provides

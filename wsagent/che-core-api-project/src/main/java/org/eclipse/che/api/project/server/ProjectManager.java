@@ -85,6 +85,7 @@ public class ProjectManager {
     private final ExecutorService                executor;
     private final WorkspaceProjectsSyncer        workspaceProjectsHolder;
     private final FileWatcherManager             fileWatcherManager;
+    private final ReadmeInjectionHandler         readmeInjectionHandler;
 
     @Inject
     public ProjectManager(VirtualFileSystemProvider vfsProvider,
@@ -96,7 +97,8 @@ public class ProjectManager {
                           FileWatcherNotificationHandler fileWatcherNotificationHandler,
                           FileTreeWatcher fileTreeWatcher,
                           WorkspaceProjectsSyncer workspaceProjectsHolder,
-                          FileWatcherManager fileWatcherManager) throws ServerException {
+                          FileWatcherManager fileWatcherManager,
+                          ReadmeInjectionHandler readmeInjectionHandler) throws ServerException {
         this.vfs = vfsProvider.getVirtualFileSystem();
         this.projectTypeRegistry = projectTypeRegistry;
         this.projectRegistry = projectRegistry;
@@ -106,6 +108,7 @@ public class ProjectManager {
         this.fileWatcher = fileTreeWatcher;
         this.workspaceProjectsHolder = workspaceProjectsHolder;
         this.fileWatcherManager = fileWatcherManager;
+        this.readmeInjectionHandler = readmeInjectionHandler;
 
         executor = Executors.newFixedThreadPool(1 + Runtime.getRuntime().availableProcessors(),
                                                 new ThreadFactoryBuilder().setNameFormat("ProjectService-IndexingThread-")
@@ -267,6 +270,7 @@ public class ProjectManager {
         final RegisteredProject project = projectRegistry.putProject(projectConfig, projectFolder, true, false);
         workspaceProjectsHolder.sync(projectRegistry);
         projectRegistry.fireInitHandlers(project);
+        readmeInjectionHandler.handleReadmeInjection(projectFolder);
 
         return project;
     }
@@ -499,6 +503,7 @@ public class ProjectManager {
             throw e;
         }
 
+        readmeInjectionHandler.handleReadmeInjection(folder);
         final String name = folder.getPath().getName();
         for (ProjectConfig project : workspaceProjectsHolder.getProjects()) {
             if (normalizePath.equals(project.getPath())) {
