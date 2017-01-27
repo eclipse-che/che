@@ -105,7 +105,7 @@ log() {
 }
 
 usage() {
-  debug $FUNCNAME
+ # debug $FUNCNAME
   init_usage
   printf "%s" "${USAGE}"
   return 1;
@@ -246,6 +246,14 @@ is_offline() {
   fi
 }
 
+is_trace() {
+  if [ "${CHE_TRACE}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
 init_logging() {
   # Initialize CLI folder
   CLI_DIR=$CHE_CONTAINER_ROOT
@@ -277,6 +285,11 @@ init() {
 
   if [[ "$@" == *"--offline"* ]]; then
     CHE_OFFLINE=true
+  fi
+
+  if [[ "$@" == *"--trace"* ]]; then
+    CHE_TRACE=true
+    set -x
   fi
 
   SCRIPTS_BASE_CONTAINER_SOURCE_DIR="/scripts/base"
@@ -349,6 +362,13 @@ cli_init() {
     return 2;
   fi
 
+  if is_initialized; then 
+    CHE_HOST_LOCAL=$(get_value_of_var_from_env_file ${CHE_PRODUCT_NAME}_HOST)
+    if [[ "${CHE_HOST}" != "${CHE_HOST_LOCAL}" ]]; then
+      warning "${CHE_PRODUCT_NAME}_HOST (${CHE_HOST}) overridden by ${CHE_ENVIRONMENT_FILE} (${CHE_HOST_LOCAL})"
+    fi
+  fi
+
   # Special function to perform special behaviors if you are running nightly version
   verify_nightly_accuracy
 
@@ -358,8 +378,6 @@ cli_init() {
     verify_version_upgrade_compatibility
   elif ! is_fast; then
     verify_version_compatibility
-  else
-    warning "Skipping version compatibility check..."
   fi
 }
 
@@ -380,18 +398,20 @@ start() {
   init "$@"
 
   # Removes "--fast", "--debug", "--offline" from the positional arguments if it is set.
+  ORIGINAL_PARAMETERS=$@
   set -- "${@/\-\-fast/}"
   set -- "${@/\-\-debug/}"
   set -- "${@/\-\-offline/}"
+  set -- "${@/\-\-trace/}"
   
-  # Begin product-specific CLI calls
-  info "cli" "Loading cli..."
-
-  # The pre_init method is unique to each assembly. This method must be provided by 
+    # The pre_init method is unique to each assembly. This method must be provided by 
   # a custom CLI assembly in their container and can set global variables which are 
   # specific to that implementation of the CLI. This method must be called after
   # networking has been established and initial images downloaded.
   cli_pre_init
+  
+  # Begin product-specific CLI calls
+  info "cli" "$CHE_VERSION - using docker ${DOCKER_SERVER_VERSION} / $(get_docker_install_type)"
 
   cli_init "$@"
   cli_parse "$@"
