@@ -94,13 +94,13 @@ public class SshMachineExecAgentLauncher  {
             agentCopy.setScript(agent.getScript() + "\n" + terminalRunCommand);
 
             try {
-                final SshMachineProcess process = start(machine, agent);
-                LOG.debug("Waiting for agent {} is launched. Workspace ID:{}", agent.getId(), machine.getWorkspaceId());
+                final SshMachineProcess process = start(machine, agentCopy);
+                LOG.debug("Waiting for agent {} is launched. Workspace ID:{}", agentCopy.getId(), machine.getWorkspaceId());
 
                 final long pingStartTimestamp = System.currentTimeMillis();
                 SshProcessLaunchedChecker agentLaunchingChecker = new SshProcessLaunchedChecker("che-websocket-terminal");
                 while (System.currentTimeMillis() - pingStartTimestamp < agentMaxStartTimeMs) {
-                    if (agentLaunchingChecker.isLaunched(agent,machine)) {
+                    if (agentLaunchingChecker.isLaunched(agentCopy,machine)) {
                         return;
                     } else {
                         Thread.sleep(agentPingDelayMs);
