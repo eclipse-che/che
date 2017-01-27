@@ -11,7 +11,7 @@
 
 unset SUDO
 unset PACKAGES
-test "$(id -u)" = 0 || SUDO="sudo"
+test "$(id -u)" = 0 || SUDO="sudo -E"
 
 if [ -f /etc/centos-release ]; then
     FILE="/etc/centos-release"
