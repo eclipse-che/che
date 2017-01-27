@@ -10,12 +10,20 @@
  */
 'use strict';
 
+interface ISection {
+  title: string;
+  content: string;
+  icon: string;
+  index: number;
+}
+
 /**
  * This class is handling the data for workspace details sections (tabs)
  *
  * @author Ann Shumilova
  */
 export class WorkspaceDetailsService {
+  sections: ISection[];
 
     /**
      * Default constructor that is using resource
@@ -33,12 +41,13 @@ export class WorkspaceDetailsService {
    * @param icon section icon
    * @param index optional section index (order)
    */
-    addSection(title, content, icon, index) {
-      let section = {};
-      section.title = title;
-      section.content = content;
-      section.icon = icon;
-      section.index = index || this.sections.length;
+    addSection(title: string, content: string, icon: string, index: number): void {
+      let section: ISection = {
+        title: title,
+        content: content,
+        icon: icon,
+        index: index || this.sections.length
+      };
       this.sections.push(section);
     }
 
@@ -47,7 +56,7 @@ export class WorkspaceDetailsService {
    *
    * @returns {Array} array of sections
    */
-    getSections() {
+    getSections(): ISection[] {
       return this.sections;
     }
 }

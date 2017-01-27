@@ -9,6 +9,7 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {ConfirmDialogService} from '../../../../components/service/confirm-dialog/confirm-dialog.service';
 
 /**
  * @ngdoc controller
@@ -18,16 +19,19 @@
  */
 export class DockerRegistryListController {
 
+  private confirmDialogService: ConfirmDialogService;
+
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($q, $mdDialog, $document, chePreferences, cheNotification) {
+  constructor($q, $mdDialog, $document, chePreferences, cheNotification, confirmDialogService: ConfirmDialogService) {
     this.$q = $q;
     this.$mdDialog = $mdDialog;
     this.$document = $document;
     this.chePreferences = chePreferences;
     this.cheNotification = cheNotification;
+    this.confirmDialogService = confirmDialogService;
 
     this.registries = chePreferences.getRegistries();
     this.isLoading = true;
@@ -173,39 +177,16 @@ export class DockerRegistryListController {
   /**
    * Show confirmation popup before delete registries
    * @param numberToDelete
-   * @returns {*}
+   * @returns {ng.IPromise<any>}
    */
-  showDeleteRegistriesConfirmation(numberToDelete) {
-    let confirmTitle = 'Would you like to delete ';
+  showDeleteRegistriesConfirmation(numberToDelete: number): ng.IPromise<any> {
+    let content = 'Would you like to delete ';
     if (numberToDelete > 1) {
-      confirmTitle += 'these ' + numberToDelete + ' registries?';
+      content += 'these ' + numberToDelete + ' registries?';
     } else {
-      confirmTitle += 'this selected registry?';
+      content += 'this selected registry?';
     }
-    let confirm = this.$mdDialog.confirm()
-      .title(confirmTitle)
-      .ariaLabel('Remove registries')
-      .ok('Delete!')
-      .cancel('Cancel')
-      .clickOutsideToClose(true);
-
-    return this.$mdDialog.show(confirm);
-  }
-
-  /**
-   * Add docker registry. Show the dialog
-   * @param  event - the $event
-   */
-  showAddRegistryDialog(event) {
-    this.$mdDialog.show({
-      targetEvent: event,
-      bindToController: true,
-      clickOutsideToClose: true,
-      controller: 'AddRegistryController',
-      controllerAs: 'addRegistryController',
-      parent: angular.element(this.$document.body),
-      templateUrl: 'app/administration/docker-registry/docker-registry-list/add-registry/add-registry.html'
-    });
+    return this.confirmDialogService.showConfirmDialog('Remove registries', content, 'Delete');
   }
 
   /**
@@ -220,7 +201,6 @@ export class DockerRegistryListController {
       clickOutsideToClose: true,
       controller: 'EditRegistryController',
       controllerAs: 'editRegistryController',
-      parent: angular.element(this.$document.body),
       locals: {registry: registry},
       templateUrl: 'app/administration/docker-registry/docker-registry-list/edit-registry/edit-registry.html'
     });

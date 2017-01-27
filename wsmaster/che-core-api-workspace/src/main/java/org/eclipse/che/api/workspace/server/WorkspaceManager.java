@@ -798,8 +798,8 @@ public class WorkspaceManager {
     }
 
     private String sessionUserNameOr(String nameIfNoUser) {
-        final Subject subject;
-        if (EnvironmentContext.getCurrent() != null && (subject = EnvironmentContext.getCurrent().getSubject()) != null) {
+        final Subject subject = EnvironmentContext.getCurrent().getSubject();
+        if (!subject.isAnonymous()) {
             return subject.getUserName();
         }
         return nameIfNoUser;

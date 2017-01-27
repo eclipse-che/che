@@ -161,7 +161,14 @@ public class DockerAbandonedResourcesCleaner implements Runnable {
     @VisibleForTesting
     void cleanNetworks() {
         try {
-            for (Network network : dockerConnector.getNetworks(GET_NETWORKS_PARAMS)) {
+            List<Network> customNetworks = dockerConnector.getNetworks(GET_NETWORKS_PARAMS);
+            // This workaround is added because of docker bug which returns null instead of empty list
+            // See https://github.com/docker/docker/issues/29946
+            if (customNetworks == null) {
+                return;
+            }
+
+            for (Network network : customNetworks) {
                 Matcher cheNetworkMatcher = CHE_NETWORK_PATTERN.matcher(network.getName());
                 if (cheNetworkMatcher.matches() && network.getContainers().isEmpty() && !additionalNetworks.contains(network.getName()) &&
                     !runtimes.hasRuntime(cheNetworkMatcher.group(WORKSPACE_ID_REGEX_GROUP))) {

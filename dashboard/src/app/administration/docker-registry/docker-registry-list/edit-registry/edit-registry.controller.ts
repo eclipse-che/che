@@ -9,57 +9,62 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {ChePreferences} from '../../../../../components/api/che-preferences.factory';
+import {CheNotification} from '../../../../../components/notification/che-notification.factory';
 
 /**
- * This class is handling the controller for the edit registry
+ * This class is handling the edit registry controller.
  * @author Oleksii Orel
  */
 export class EditRegistryController {
+  registry: {
+    url: string,
+    username: string,
+    password: string;
+  };
+  private $mdDialog: ng.material.IDialogService;
+  private cheNotification: CheNotification;
+  private chePreferences: ChePreferences;
+  private originRegistryUrl: string;
 
   /**
    * Default constructor.
    * @ngInject for Dependency injection
    */
-  constructor($mdDialog, chePreferences, cheNotification) {
+  constructor($mdDialog: ng.material.IDialogService, chePreferences: ChePreferences, cheNotification: CheNotification) {
     this.$mdDialog = $mdDialog;
     this.chePreferences = chePreferences;
     this.cheNotification = cheNotification;
 
-    this.originRegistryUrl = angular.copy(this.registry.url);
+    if (this.registry) {
+      this.originRegistryUrl = angular.copy(this.registry.url);
+    }
   }
 
   /**
-   * Callback of the cancel button of the dialog.
+   * It will hide the dialog box.
    */
-  abort() {
+  hide(): void {
     this.$mdDialog.hide();
   }
 
   /**
-   * Callback of the edit button.
+   * Callback for add/update registry.
    */
-  editRegistry() {
-    if(!this.registry) {
-      return;
-    }
-
-    let promise = this.chePreferences.addRegistry(this.registry.url, this.registry.username, this.registry.password);
-
-    promise.then(() => {
-      this.$mdDialog.hide();
-      if(this.originRegistryUrl !== this.registry.url) {
+  update(): void {
+    let defaultErrorMessage =  this.originRegistryUrl ? 'Edit registry error.' : 'Add registry error.';
+    this.chePreferences.addRegistry(this.registry.url, this.registry.username, this.registry.password).then(() => {
+      if (this.originRegistryUrl !== this.registry.url) {
         this.chePreferences.removeRegistry(this.originRegistryUrl).then(() => {
-
-          this.cheNotification.showInfo('Registry successfully edited.');
-        }, (error) => {
-          this.cheNotification.showError(error.data && error.data.message ? error.data.message : 'Edit registry error.');
+          this.$mdDialog.hide();
+        }, (error: any) => {
+          this.cheNotification.showError(error.data && error.data.message ? error.data.message : defaultErrorMessage);
         });
       } else {
-        this.cheNotification.showInfo('Registry successfully edited.');
+        this.$mdDialog.hide();
       }
-    }, (error) => {
-      this.cheNotification.showError(error.data && error.data.message ? error.data.message : 'Edit registry error.');
+    }, (error: any) => {
+      this.cheNotification.showError(error.data && error.data.message ? error.data.message : defaultErrorMessage);
     });
   }
-
 }

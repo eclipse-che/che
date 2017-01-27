@@ -2,10 +2,12 @@
   <div class="che-list-header-additional">
     <che-button-primary class="che-list-add-button"
                         ng-if="onAdd"
+                        ng-show="!hideAdd"
                         che-button-title="{{addButtonTitle}}"
                         ng-click="onAdd()"></che-button-primary>
     <che-button-primary class="che-list-add-button"
                         ng-if="addButtonHref"
+                        ng-show="!hideAdd"
                         che-button-title="{{addButtonTitle}}"
                         ng-href="{{addButtonHref}}"></che-button-primary>
     <che-button-primary class="che-list-import-button"
@@ -22,6 +24,9 @@
         <div flex="10" class="header-close-icon" ng-click="inputValue=''" ng-show="inputValue"><i class="fa fa-close"></i></div>
       </div>
     </div>
+    <che-filter-selector che-values="filterValues"
+                         ng-if="filterValues && filterValues.length > 0 && !hideFilter"
+                         che-on-change="onFilterChanged" class="che-list-filter"></che-filter-selector>
     <che-button-primary class="che-list-delete-button"
                         ng-show="deleteButtonTitle && !hideDelete"
                         che-button-title="{{deleteButtonTitle}}"

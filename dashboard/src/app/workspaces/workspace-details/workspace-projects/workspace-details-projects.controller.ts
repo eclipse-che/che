@@ -9,6 +9,10 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {ConfirmDialogService} from '../../../../components/service/confirm-dialog/confirm-dialog.service';
+import {CheAPI} from '../../../../components/api/che-api.factory';
+import {CheNotification} from '../../../../components/notification/che-notification.factory';
+import {CheWorkspace} from '../../../../components/api/che-workspace.factory';
 
 /**
  * @ngdoc controller
@@ -19,20 +23,41 @@
  */
 export class WorkspaceDetailsProjectsCtrl {
 
+  namespace: string;
+  workspaceId: string;
+  workspaceKey: string;
+  workspaceName: string;
+  projectFilter: any;
+  profileCreationDate: any;
+  projectsSelectedStatus: any;
+  isNoSelected: boolean;
+  isAllSelected: boolean;
+  isBulkChecked: boolean;
+  workspace: che.IWorkspace;
+  projects: Array<che.IProject>;
+
+  private $q: ng.IQService;
+  private $log: ng.ILogService;
+  private cheWorkspace: CheWorkspace;
+  private cheNotification: CheNotification;
+  private $mdDialog: ng.material.IDialogService;
+  private confirmDialogService: ConfirmDialogService;
+
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($route, cheAPI, cheNotification, $mdDialog, $log, $q) {
+  constructor($route: ng.route.IRouteService, cheAPI: CheAPI, cheNotification: CheNotification, $mdDialog: ng.material.IDialogService, $log: ng.ILogService, $q: ng.IQService, confirmDialogService: ConfirmDialogService) {
     this.cheWorkspace = cheAPI.getWorkspace();
     this.cheNotification = cheNotification;
     this.$mdDialog = $mdDialog;
     this.$log = $log;
     this.$q = $q;
+    this.confirmDialogService = confirmDialogService;
 
     this.namespace = $route.current.params.namespace;
     this.workspaceName = $route.current.params.workspaceName;
-    this.workspaceKey = this.namespace + ":" + this.workspaceName;
+    this.workspaceKey = this.namespace + ':' + this.workspaceName;
 
     let preferences = cheAPI.getPreferences().getPreferences();
 
@@ -47,7 +72,7 @@ export class WorkspaceDetailsProjectsCtrl {
       let promise = this.cheWorkspace.fetchWorkspaceDetails(this.workspaceKey);
       promise.then(() => {
         this.updateProjectsData();
-      }, (error) => {
+      }, (error: any) => {
         if (error.status === 304) {
           this.updateProjectsData();
         }
@@ -57,12 +82,12 @@ export class WorkspaceDetailsProjectsCtrl {
     }
   }
 
-  updateProjectsData() {
+  updateProjectsData(): void {
     this.workspace = this.cheWorkspace.getWorkspaceByName(this.namespace, this.workspaceName);
     this.projects = [];
 
     // filter only root projects (do not show sub-projects of multi-project item):
-    this.workspace.config.projects.forEach((project : any) => {
+    this.workspace.config.projects.forEach((project: any) => {
       let path = project.path.replace('/', '');
       if (path === project.name) {
         this.projects.push(project);
@@ -74,8 +99,8 @@ export class WorkspaceDetailsProjectsCtrl {
   /**
    * Check all projects in list
    */
-  selectAllProjects() {
-    this.projects.forEach((project) => {
+  selectAllProjects(): void {
+    this.projects.forEach((project: che.IProject) => {
       this.projectsSelectedStatus[project.name] = true;
     });
   }
@@ -83,8 +108,8 @@ export class WorkspaceDetailsProjectsCtrl {
   /**
    * Uncheck all projects in list
    */
-  deselectAllProjects() {
-    this.projects.forEach((project) => {
+  deselectAllProjects(): void {
+    this.projects.forEach((project: che.IProject) => {
       this.projectsSelectedStatus[project.name] = false;
     });
   }
@@ -92,7 +117,7 @@ export class WorkspaceDetailsProjectsCtrl {
   /**
    * Change bulk selection value
    */
-  changeBulkSelection() {
+  changeBulkSelection(): void {
     if (this.isBulkChecked) {
       this.deselectAllProjects();
       this.isBulkChecked = false;
@@ -106,7 +131,7 @@ export class WorkspaceDetailsProjectsCtrl {
   /**
    * Update project selected status
    */
-  updateSelectedStatus() {
+  updateSelectedStatus(): void {
     this.isNoSelected = true;
     this.isAllSelected = true;
 
@@ -131,7 +156,7 @@ export class WorkspaceDetailsProjectsCtrl {
   /**
    * Delete all selected projects
    */
-  deleteSelectedProjects() {
+  deleteSelectedProjects(): void {
     let projectsSelectedStatusKeys = Object.keys(this.projectsSelectedStatus);
     let checkedProjectsKeys = [];
 
@@ -159,16 +184,22 @@ export class WorkspaceDetailsProjectsCtrl {
       let deleteProjectPromises = [];
       let currentProjectName;
 
-      let projectService = this.cheWorkspace.getWorkspaceAgent(this.workspace.id).getProject();
+      let workspaceAgent = this.cheWorkspace.getWorkspaceAgent(this.workspace.id);
 
-      checkedProjectsKeys.forEach((projectName) => {
-        currentProjectName = projectName
+      if (!workspaceAgent) {
+        this.cheNotification.showError('Workspace isn\'t run. Cannot delete any project.');
+        return;
+      }
+      let projectService = workspaceAgent.getProject();
+
+      checkedProjectsKeys.forEach((projectName: string) => {
+        currentProjectName = projectName;
         this.projectsSelectedStatus[projectName] = false;
 
         let promise = projectService.remove(projectName);
         promise.then(() => {
           queueLength--;
-        }, (error) => {
+        }, (error: any) => {
           isError = true;
           this.$log.error('Cannot delete project: ', error);
         });
@@ -179,7 +210,7 @@ export class WorkspaceDetailsProjectsCtrl {
         this.cheWorkspace.fetchWorkspaceDetails(this.workspaceKey).then(() => {
           this.updateProjectsData();
           this.updateSelectedStatus();
-        }, (error) => {
+        }, (error: any) => {
           if (error.status === 304) {
             this.updateProjectsData();
           } else {
@@ -188,12 +219,10 @@ export class WorkspaceDetailsProjectsCtrl {
         });
         if (isError) {
           this.cheNotification.showError('Delete failed.');
-        }
-        else {
+        } else {
           if (numberToDelete === 1) {
             this.cheNotification.showInfo(currentProjectName + ' has been removed.');
-          }
-          else {
+          } else {
             this.cheNotification.showInfo('Selected projects have been removed.');
           }
         }
@@ -203,24 +232,17 @@ export class WorkspaceDetailsProjectsCtrl {
 
   /**
    * Show confirmation popup before projects to delete
-   * @param numberToDelete
-   * @returns {*}
+   * @param numberToDelete{number}
+   * @returns {ng.IPromise<any>}
    */
-  showDeleteProjectsConfirmation(numberToDelete) {
-    let confirmTitle = 'Would you like to delete ';
+  showDeleteProjectsConfirmation(numberToDelete: number): ng.IPromise<any> {
+    let content = 'Would you like to delete ';
     if (numberToDelete > 1) {
-      confirmTitle += 'these ' + numberToDelete + ' projects?';
+      content += 'these ' + numberToDelete + ' projects?';
+    } else {
+      content += 'this selected project?';
     }
-    else {
-      confirmTitle += 'this selected project?';
-    }
-    let confirm = this.$mdDialog.confirm()
-      .title(confirmTitle)
-      .ariaLabel('Remove projects')
-      .ok('Delete!')
-      .cancel('Cancel')
-      .clickOutsideToClose(true);
 
-    return this.$mdDialog.show(confirm);
+    return this.confirmDialogService.showConfirmDialog('Remove projects', content, 'Delete');
   }
 }

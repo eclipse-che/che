@@ -9,6 +9,7 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {ConfirmDialogService} from '../../../../components/service/confirm-dialog/confirm-dialog.service';
 
 /**
  * @ngdoc controller
@@ -28,12 +29,15 @@ export class ListCommandsController {
 
   commandsOnChange: Function;
 
+  private confirmDialogService: ConfirmDialogService;
+
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($mdDialog: ng.material.IDialogService) {
+  constructor($mdDialog: ng.material.IDialogService, confirmDialogService: ConfirmDialogService) {
     this.$mdDialog = $mdDialog;
+    this.confirmDialogService = confirmDialogService;
 
     this.isNoSelected = true;
     this.isBulkChecked = false;
@@ -189,19 +193,13 @@ export class ListCommandsController {
    * @returns {ng.IPromise<any>}
    */
   showDeleteConfirmation(numberToDelete: number): ng.IPromise<any> {
-    let confirmTitle = 'Would you like to delete ';
+    let content = 'Would you like to delete ';
     if (numberToDelete > 1) {
-      confirmTitle += 'these ' + numberToDelete + ' commands?';
+      content += 'these ' + numberToDelete + ' commands?';
     } else {
-      confirmTitle += 'this selected command?';
+      content += 'this selected command?';
     }
-    let confirm = this.$mdDialog.confirm()
-      .title(confirmTitle)
-      .ariaLabel('Remove command')
-      .ok('Delete!')
-      .cancel('Cancel')
-      .clickOutsideToClose(true);
 
-    return this.$mdDialog.show(confirm);
+    return this.confirmDialogService.showConfirmDialog('Remove commands', content, 'Delete');
   }
 }
