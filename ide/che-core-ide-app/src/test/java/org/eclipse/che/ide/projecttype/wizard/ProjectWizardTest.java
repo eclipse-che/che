@@ -178,6 +178,7 @@ public class ProjectWizardTest {
         prepareWizard(IMPORT);
 
         when(workspaceRoot.importProject()).thenReturn(createProjectRequest);
+        when(workspaceRoot.newProject()).thenReturn(createProjectRequest);
         when(createProjectRequest.withBody(any(ProjectConfig.class))).thenReturn(createProjectRequest);
         when(createProjectRequest.send()).thenReturn(createProjectPromise);
         when(createProjectPromise.then(any(Operation.class))).thenReturn(createProjectPromise);
