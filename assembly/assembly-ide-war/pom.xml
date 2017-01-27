@@ -458,6 +458,7 @@
                 <artifactId>maven-war-plugin</artifactId>
                 <configuration>
                     <packagingExcludes>%regex[WEB-INF\/lib\/(?!.*j2ee).*.jar]</packagingExcludes>
+                    <attachClasses>true</attachClasses>
                 </configuration>
             </plugin>
             <plugin>
