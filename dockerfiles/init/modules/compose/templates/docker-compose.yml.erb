@@ -25,4 +25,4 @@ che:
     - '<%= scope.lookupvar('che::che_debug_port') -%>:<%= scope.lookupvar('che::che_debug_port') -%>'
 <% end -%>
   restart: always
-  container_name: che
+  container_name: <%= ENV["CHE_CONTAINER_NAME"] %>

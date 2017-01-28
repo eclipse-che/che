@@ -13,13 +13,13 @@ cmd_start() {
   debug $FUNCNAME
 
   # If ${CHE_FORMAL_PRODUCT_NAME} is already started or booted, then terminate early.
-  if container_exist_by_name $CHE_SERVER_CONTAINER_NAME; then
+  if container_exist_by_name $CHE_CONTAINER_NAME; then
     DISPLAY_URL=$(get_display_url)
-    CURRENT_CHE_SERVER_CONTAINER_ID=$(get_server_container_id $CHE_SERVER_CONTAINER_NAME)
+    CURRENT_CHE_SERVER_CONTAINER_ID=$(get_server_container_id $CHE_CONTAINER_NAME)
     if container_is_running ${CURRENT_CHE_SERVER_CONTAINER_ID} && \
        server_is_booted ${CURRENT_CHE_SERVER_CONTAINER_ID}; then
        info "start" "${CHE_FORMAL_PRODUCT_NAME} is already running"
-       info "start" "Server logs at \"docker logs -f ${CHE_SERVER_CONTAINER_NAME}\""
+       info "start" "Server logs at \"docker logs -f ${CHE_CONTAINER_NAME}\""
        info "start" "Ver: $(get_installed_version)"
        info "start" "Use: ${DISPLAY_URL}"
        info "start" "API: ${DISPLAY_URL}/swagger"
@@ -42,8 +42,6 @@ cmd_start() {
     cmd_start_check_ports
     cmd_start_check_agent_network
     text "\n"
-  else
-    warning "Skipping preflight checks..."
   fi
 
   # Start ${CHE_FORMAL_PRODUCT_NAME}
@@ -155,7 +153,7 @@ cmd_restart() {
 }
 
 check_if_booted() {
-  CURRENT_CHE_SERVER_CONTAINER_ID=$(get_server_container_id $CHE_SERVER_CONTAINER_NAME)
+  CURRENT_CHE_SERVER_CONTAINER_ID=$(get_server_container_id $CHE_CONTAINER_NAME)
   wait_until_container_is_running 20 ${CURRENT_CHE_SERVER_CONTAINER_ID}
   if ! container_is_running ${CURRENT_CHE_SERVER_CONTAINER_ID}; then
     error "(${CHE_MINI_PRODUCT_NAME} start): Timeout waiting for ${CHE_MINI_PRODUCT_NAME} container to start."
@@ -167,10 +165,10 @@ check_if_booted() {
   # CHE-3546 - if in development mode, then display the che server logs to STDOUT
   #            automatically kill the streaming of the log output when the server is booted
   if debug_server; then
-    docker logs -f ${CHE_SERVER_CONTAINER_NAME} &
+    docker logs -f ${CHE_CONTAINER_NAME} &
     LOG_PID=$!
   else
-    info "start" "Server logs at \"docker logs -f ${CHE_SERVER_CONTAINER_NAME}\""
+    info "start" "Server logs at \"docker logs -f ${CHE_CONTAINER_NAME}\""
   fi
 
   check_containers_are_running
@@ -193,7 +191,7 @@ check_if_booted() {
       info "start" "Debug: ${DISPLAY_DEBUG_URL}"
     fi
   else
-    error "(${CHE_MINI_PRODUCT_NAME} start): Timeout waiting for server. Run \"docker logs ${CHE_SERVER_CONTAINER_NAME}\" to inspect the issue."
+    error "(${CHE_MINI_PRODUCT_NAME} start): Timeout waiting for server. Run \"docker logs ${CHE_CONTAINER_NAME}\" to inspect the issue."
     return 2
   fi
 }

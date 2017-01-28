@@ -134,6 +134,8 @@ initiate_offline_or_network_mode(){
         info "     a. Docker for Windows & Mac have GUIs to set proxies."
         info "  3. Verify that you have access to DockerHub."
         info "     a. Try 'curl --head dockerhub.com'"
+        info "  4. Skip networking checks."
+        info "     a. Add '--fast' to any command"
         return 2;
       fi
     fi

@@ -17,6 +17,7 @@ MANDATORY DOCKER PARAMETERS:
 OPTIONAL DOCKER PARAMETERS:
   -e CHE_HOST=<YOUR_HOST>              IP address or hostname where ${CHE_MINI_PRODUCT_NAME} will serve its users
   -e CHE_PORT=<YOUR_PORT>              Port where ${CHE_MINI_PRODUCT_NAME} will bind itself to
+  -e CHE_CONTAINER=<YOUR_NAME>         Name to assign to ${CHE_MINI_PRODUCT_NAME} container 
   -v <LOCAL_PATH>:${CHE_CONTAINER_ROOT}/instance       Where instance, user, log data will be saved
   -v <LOCAL_PATH>:${CHE_CONTAINER_ROOT}/backup         Where backup files will be saved
   -v <LOCAL_PATH>:/repo                ${CHE_MINI_PRODUCT_NAME} git repo - uses local binaries and manifests

@@ -126,6 +126,7 @@ generate_configuration_with_puppet() {
                   ${WRITE_PARAMETERS} \
                   -e \"CHE_ENV_FILE=${CHE_ENV_FILE}\" \
                   -e \"CHE_CONTAINER_ROOT=${CHE_CONTAINER_ROOT}\" \
+                  -e \"CHE_CONTAINER_NAME=${CHE_CONTAINER_NAME}\" \
                   -e \"CHE_ENVIRONMENT=${CHE_ENVIRONMENT}\" \
                   -e \"CHE_CONFIG=${CHE_HOST_INSTANCE}\" \
                   -e \"CHE_INSTANCE=${CHE_HOST_INSTANCE}\" \
