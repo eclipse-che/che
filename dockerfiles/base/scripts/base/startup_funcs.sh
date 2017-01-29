@@ -307,6 +307,22 @@ is_trace() {
   fi
 }
 
+skip_preflight() {
+  if [ "${CHE_SKIP_PREFLIGHT}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+skip_nightly() {
+  if [ "${CHE_SKIP_NIGHTLY}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
 init_logging() {
   # Initialize CLI folder
   CLI_DIR=$CHE_CONTAINER_ROOT
@@ -343,6 +359,14 @@ init() {
   if [[ "$@" == *"--trace"* ]]; then
     CHE_TRACE=true
     set -x
+  fi
+
+  if [[ "$@" == *"--skip:preflight"* ]]; then
+    CHE_SKIP_PREFLIGHT=true
+  fi
+
+  if [[ "$@" == *"--skip:nightly"* ]]; then
+    CHE_SKIP_NIGHTLY=true
   fi
 
   SCRIPTS_BASE_CONTAINER_SOURCE_DIR="/scripts/base"
@@ -462,6 +486,8 @@ start() {
   set -- "${@/\-\-debug/}"
   set -- "${@/\-\-offline/}"
   set -- "${@/\-\-trace/}"
+  set -- "${@/\-\-skip\:preflight/}"
+  set -- "${@/\-\-skip\:nightly/}"
   
   # The cli_post_init method is unique to each assembly. This method must be provided by 
   # a custom CLI assembly in their container and can set global variables which are 

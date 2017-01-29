@@ -37,8 +37,9 @@ cmd_start() {
   # Preflight checks
   #   a) Check for open ports
   #   b) Test simulated connections for failures
-  if ! is_fast; then
+  if ! is_fast && ! skip_preflight; then
     info "start" "Preflight checks"
+    cmd_start_check_host_resources
     cmd_start_check_ports
     cmd_start_check_agent_network
     text "\n"
@@ -64,9 +65,26 @@ cmd_start() {
   check_if_booted
 }
 
+cmd_start_check_host_resources() {
+  HOST_RAM=$(docker info | grep "Total Memory:")
+  HOST_RAM=$(echo ${HOST_RAM#*:} | xargs)
+  HOST_RAM=${HOST_RAM% *}
+
+  if $(less_than "$HOST_RAM" "$CHE_MIN_RAM"); then
+    text "         mem ($CHE_MIN_RAM GiB):           ${RED}[NOT OK]${NC}\n"
+  else
+    text "         mem ($CHE_MIN_RAM GiB):           ${GREEN}[OK]${NC}\n"
+  fi
+
+  HOST_DISK=$(df "${CHE_CONTAINER_ROOT}" | grep "${CHE_CONTAINER_ROOT}" | cut -d " " -f 6)
+  if $(less_than "$HOST_DISK" "$CHE_MIN_DISK"000000); then
+    text "         disk ($CHE_MIN_DISK MB):             ${RED}[NOT OK]${NC}\n"
+  else
+    text "         disk ($CHE_MIN_DISK MB):             ${GREEN}[OK]${NC}\n"
+  fi
+}
 
 cmd_start_check_ports() {
-
   # Develop array of port #, description.
   # Format of array is "<port>;<port_string>" where the <port_string> is the text to appear in console
   local PORT_ARRAY=(
@@ -219,3 +237,4 @@ check_containers_are_running() {
     fi
   done <<< "${LIST_OF_COMPOSE_CONTAINERS}"
 }
+
