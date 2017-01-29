@@ -51,7 +51,7 @@ get_display_url() {
 
   # If the user has modified che.env with a custom CHE_HOST, we need to detect that here
   # and not use the in-memory one which is always set with eclipse/che-ip.
-  local CHE_HOST_LOCAL=$CHE_HOST
+  local CHE_HOST_LOCAL=$${CHE_PRODUCT_NAME}_HOST
 
   if is_initialized; then 
     CHE_HOST_LOCAL=$(get_value_of_var_from_env_file ${CHE_PRODUCT_NAME}_HOST)
