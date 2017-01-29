@@ -12,4 +12,8 @@ cli_pre_init() {
   CHE_HOST=${CHE_HOST:-${DEFAULT_CHE_HOST}}
   DEFAULT_CHE_PORT=8080
   CHE_PORT=${CHE_PORT:-${DEFAULT_CHE_PORT}}
+
+  if [[ "${CHE_PORT}" != "${DEFAULT_CHE_PORT}" ]]; then
+  	CHE_CONTAINER_NAME+="-${CHE_PORT}"
+  fi
 }
