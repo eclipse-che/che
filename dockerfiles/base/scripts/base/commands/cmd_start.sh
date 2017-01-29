@@ -70,8 +70,10 @@ cmd_start_check_host_resources() {
   HOST_RAM=$(echo ${HOST_RAM#*:} | xargs)
   HOST_RAM=${HOST_RAM% *}
 
+  PREFLIGHT=""
   if $(less_than "$HOST_RAM" "$CHE_MIN_RAM"); then
     text "         mem ($CHE_MIN_RAM GiB):           ${RED}[NOT OK]${NC}\n"
+    PREFLIGHT="fail"
   else
     text "         mem ($CHE_MIN_RAM GiB):           ${GREEN}[OK]${NC}\n"
   fi
@@ -79,9 +81,17 @@ cmd_start_check_host_resources() {
   HOST_DISK=$(df "${CHE_CONTAINER_ROOT}" | grep "${CHE_CONTAINER_ROOT}" | cut -d " " -f 6)
   if $(less_than "$HOST_DISK" "$CHE_MIN_DISK"000000); then
     text "         disk ($CHE_MIN_DISK MB):             ${RED}[NOT OK]${NC}\n"
+    PREFLIGHT="fail"
   else
     text "         disk ($CHE_MIN_DISK MB):             ${GREEN}[OK]${NC}\n"
   fi
+
+  if [[ "${PREFLIGHT}" = "fail" ]]; then
+    text "\n"
+    error "${CHE_MINI_PRODUCT_NAME} requires more RAM or disk to guarantee workspaces can start.\n"
+    return 2;
+  fi
+
 }
 
 cmd_start_check_ports() {
