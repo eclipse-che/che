@@ -5,6 +5,52 @@
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
 
+init_usage() {
+  USAGE="
+USAGE: 
+  docker run -it --rm <DOCKER_PARAMETERS> ${CHE_IMAGE_FULLNAME} [COMMAND]
+
+MANDATORY DOCKER PARAMETERS:
+  -v <LOCAL_PATH>:${CHE_CONTAINER_ROOT}                Where user, instance, and log data saved${ADDITIONAL_MANDATORY_PARAMETERS}  
+
+OPTIONAL DOCKER PARAMETERS:${ADDITIONAL_OPTIONAL_DOCKER_PARAMETERS}  
+  -v <LOCAL_PATH>:${CHE_CONTAINER_ROOT}/instance       Where instance, user, log data will be saved
+  -v <LOCAL_PATH>:${CHE_CONTAINER_ROOT}/backup         Where backup files will be saved
+  -v <LOCAL_PATH>:/repo                ${CHE_MINI_PRODUCT_NAME} git repo - uses local binaries and manifests
+  -v <LOCAL_PATH>:/assembly            ${CHE_MINI_PRODUCT_NAME} assembly - uses local binaries 
+  -v <LOCAL_PATH>:/sync                Where remote ws files will be copied with sync command
+  -v <LOCAL_PATH>:/unison              Where unison profile for optimizing sync command resides
+  -v <LOCAL_PATH>:/chedir              Soure repository to convert into workspace with Chedir utility${ADDITIONAL_OPTIONAL_DOCKER_MOUNTS}  
+    
+COMMANDS:
+  action <action-name>                 Start action on ${CHE_MINI_PRODUCT_NAME} instance
+  backup                               Backups ${CHE_MINI_PRODUCT_NAME} configuration and data to ${CHE_CONTAINER_ROOT}/backup volume mount
+  config                               Generates a ${CHE_MINI_PRODUCT_NAME} config from vars; run on any start / restart
+  destroy                              Stops services, and deletes ${CHE_MINI_PRODUCT_NAME} instance data
+  dir <command>                        Use Chedir and Chefile in the directory mounted to :/chedir
+  download                             Pulls Docker images for the current ${CHE_MINI_PRODUCT_NAME} version
+  help                                 This message
+  info                                 Displays info about ${CHE_MINI_PRODUCT_NAME} and the CLI
+  init                                 Initializes a directory with a ${CHE_MINI_PRODUCT_NAME} install
+  offline                              Saves ${CHE_MINI_PRODUCT_NAME} Docker images into TAR files for offline install
+  restart                              Restart ${CHE_MINI_PRODUCT_NAME} services
+  restore                              Restores ${CHE_MINI_PRODUCT_NAME} configuration and data from ${CHE_CONTAINER_ROOT}/backup mount
+  rmi                                  Removes the Docker images for <version>, forcing a repull
+  ssh <wksp-name> [machine-name]       SSH to a workspace if SSH agent enabled
+  start                                Starts ${CHE_MINI_PRODUCT_NAME} services
+  stop                                 Stops ${CHE_MINI_PRODUCT_NAME} services
+  sync <wksp-name>                     Synchronize workspace with local directory mounted to :/sync
+  test <test-name>                     Start test on ${CHE_MINI_PRODUCT_NAME} instance
+  upgrade                              Upgrades ${CHE_MINI_PRODUCT_NAME} from one version to another with migrations and backups
+  version                              Installed version and upgrade paths${ADDITIONAL_COMMANDS}
+
+GLOBAL COMMAND OPTIONS:
+  --fast                               Skips networking, version, nightly and preflight checks
+  --offline                            Runs CLI in offline mode, loading images from disk
+  --debug                              Enable debugging of ${CHE_MINI_PRODUCT_NAME} server
+  --trace                              Activates trace output for debugging CLI${ADDITIONAL_GLOBAL_OPTIONS}  
+"
+}
 
 init_constants() {
   BLUE='\033[1;34m'
@@ -77,6 +123,9 @@ init_constants() {
  
   DEFAULT_CHE_CONTAINER_NAME="${CHE_SERVER_CONTAINER_NAME}"
   CHE_CONTAINER_NAME="${CHE_CONTAINER:-${DEFAULT_CHE_CONTAINER_NAME}}"
+
+  DEFAULT_CHE_CONTAINER_PREFIX="${CHE_SERVER_CONTAINER_NAME}"
+  CHE_CONTAINER_PREFIX="${CHE_CONTAINER_PREFIX:-${DEFAULT_CHE_CONTAINER_PREFIX}}"
 
   CHE_BACKUP_FILE_NAME="${CHE_MINI_PRODUCT_NAME}_backup.tar.gz"
   CHE_COMPOSE_STOP_TIMEOUT="180"
@@ -336,6 +385,7 @@ init() {
     source "${BASECOMMAND_FILE}"
   done
 
+  # sources post_init functions that can only be loaded after other libraries
   source "${SCRIPTS_CONTAINER_SOURCE_DIR}"/cli.sh
 
   # If offline mode, then load dependent images from disk and populate the local Docker cache.
@@ -398,6 +448,11 @@ cleanup() {
 }
 
 start() {
+
+  # cli_pre_init is unique to each CLI assembly. This can be called before
+  # networking is established.
+  cli_pre_init
+
   # Bootstrap networking, docker, logging, and ability to load cli.sh and library.sh
   init "$@"
 
@@ -408,11 +463,11 @@ start() {
   set -- "${@/\-\-offline/}"
   set -- "${@/\-\-trace/}"
   
-    # The pre_init method is unique to each assembly. This method must be provided by 
+  # The cli_post_init method is unique to each assembly. This method must be provided by 
   # a custom CLI assembly in their container and can set global variables which are 
   # specific to that implementation of the CLI. This method must be called after
   # networking has been established and initial images downloaded.
-  cli_pre_init
+  cli_post_init
   
   # Begin product-specific CLI calls
   info "cli" "$CHE_VERSION - using docker ${DOCKER_SERVER_VERSION} / $(get_docker_install_type)"
