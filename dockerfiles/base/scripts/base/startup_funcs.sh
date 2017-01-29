@@ -66,6 +66,7 @@ init_constants() {
   CHE_OFFLINE=false
   CHE_SKIP_PREFLIGHT=false
   CHE_SKIP_NIGHTLY=false
+  CHE_SKIP_NETWORK=false
 
   DEFAULT_CHE_PRODUCT_NAME="CHE"
   CHE_PRODUCT_NAME=${CHE_PRODUCT_NAME:-${DEFAULT_CHE_PRODUCT_NAME}}
@@ -325,6 +326,14 @@ skip_nightly() {
   fi
 }
 
+skip_network() {
+  if [ "${CHE_SKIP_NETWORK}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
 init_logging() {
   # Initialize CLI folder
   CLI_DIR=$CHE_CONTAINER_ROOT
@@ -369,6 +378,10 @@ init() {
 
   if [[ "$@" == *"--skip:nightly"* ]]; then
     CHE_SKIP_NIGHTLY=true
+  fi
+
+  if [[ "$@" == *"--skip:network"* ]]; then
+    CHE_SKIP_NETWORK=true
   fi
 
   SCRIPTS_BASE_CONTAINER_SOURCE_DIR="/scripts/base"
@@ -490,6 +503,7 @@ start() {
   set -- "${@/\-\-trace/}"
   set -- "${@/\-\-skip\:preflight/}"
   set -- "${@/\-\-skip\:nightly/}"
+  set -- "${@/\-\-skip\:network/}"
   
   # The cli_post_init method is unique to each assembly. This method must be provided by 
   # a custom CLI assembly in their container and can set global variables which are 

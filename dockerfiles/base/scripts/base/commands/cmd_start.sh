@@ -88,7 +88,7 @@ cmd_start_check_host_resources() {
 
   if [[ "${PREFLIGHT}" = "fail" ]]; then
     text "\n"
-    error "${CHE_MINI_PRODUCT_NAME} requires more RAM or disk to guarantee workspaces can start.\n"
+    error "${CHE_MINI_PRODUCT_NAME} requires more RAM or disk to guarantee workspaces can start."
     return 2;
   fi
 

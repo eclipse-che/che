@@ -116,7 +116,7 @@ initiate_offline_or_network_mode(){
     # If we are here, then we want to run in networking mode.
     # If we are in networking mode, we have had some issues where users have failed DNS networking.
     # See: https://github.com/eclipse/che/issues/3266#issuecomment-265464165
-    if ! is_fast; then
+    if ! is_fast && ! skip_network; then
       # Removing this info line as it was appearing before initial CLI output
 #      info "cli" "Checking network... (hint: '--fast' skips nightly, version, network, and preflight checks)"
       local HTTP_STATUS_CODE=$(curl -I -k dockerhub.com -s -o /dev/null --write-out '%{http_code}')
