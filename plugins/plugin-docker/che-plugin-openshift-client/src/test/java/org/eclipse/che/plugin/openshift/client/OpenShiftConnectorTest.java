@@ -41,6 +41,8 @@ public class OpenShiftConnectorTest {
     private static final String   OPENSHIFT_API_ENDPOINT_MINISHIFT = "https://192.168.64.2:8443/";
     private static final String   OPENSHIFT_DEFAULT_USER_NAME = "openshift-dev";
     private static final String   OPENSHIFT_DEFAULT_USER_PASSWORD = "devel";
+    private static final int      OPENSHIFT_LIVENESS_PROBE_DELAY = 300;
+    private static final int      OPENSHIFT_LIVENESS_PROBE_TIMEOUT = 1;
 
     @Mock
     private DockerConnectorConfiguration       dockerConnectorConfiguration;
@@ -77,7 +79,9 @@ public class OpenShiftConnectorTest {
                                                         OPENSHIFT_DEFAULT_USER_NAME,
                                                         OPENSHIFT_DEFAULT_USER_PASSWORD,
                                                         CHE_DEFAULT_OPENSHIFT_PROJECT_NAME,
-                                                        CHE_DEFAULT_OPENSHIFT_SERVICEACCOUNT));
+                                                        CHE_DEFAULT_OPENSHIFT_SERVICEACCOUNT,
+                                                        OPENSHIFT_LIVENESS_PROBE_DELAY,
+                                                        OPENSHIFT_LIVENESS_PROBE_TIMEOUT));
     }
 
     @Test
