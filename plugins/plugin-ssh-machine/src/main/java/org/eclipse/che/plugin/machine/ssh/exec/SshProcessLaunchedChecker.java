@@ -23,7 +23,7 @@ import org.eclipse.che.plugin.machine.ssh.SshMachineProcess;
 import static java.lang.String.format;
 
 /**
- *  Verifies if a specific process is started on machine,
+ * Verifies if a specific process is started on machine.
  *
  * @author Max Shaposhnik (mshaposhnik@codenvy.com)
  */

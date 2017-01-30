@@ -12,9 +12,9 @@ package org.eclipse.che.plugin.machine.ssh.exec;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
-import org.eclipse.che.api.agent.shared.model.impl.AgentImpl;
 import org.eclipse.che.api.agent.server.terminal.WebsocketTerminalFilesPathProvider;
 import org.eclipse.che.api.agent.shared.model.Agent;
+import org.eclipse.che.api.agent.shared.model.impl.AgentImpl;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.Command;
@@ -84,40 +84,38 @@ public class SshMachineExecAgentLauncher  {
     }
 
     public void launch(SshMachineInstance machine, Agent agent) throws ServerException {
+        if (isNullOrEmpty(agent.getScript())) {
+            return;
+        }
         try {
-            if (isNullOrEmpty(agent.getScript())) {
-                return;
-            }
             String architecture = detectArchitecture(machine);
             machine.copy(archivePathProvider.getPath(architecture), terminalLocation);
             final AgentImpl agentCopy = new AgentImpl(agent);
             agentCopy.setScript(agent.getScript() + "\n" + terminalRunCommand);
 
-            try {
-                final SshMachineProcess process = start(machine, agentCopy);
-                LOG.debug("Waiting for agent {} is launched. Workspace ID:{}", agentCopy.getId(), machine.getWorkspaceId());
+            final SshMachineProcess process = start(machine, agentCopy);
+            LOG.debug("Waiting for agent {} is launched. Workspace ID:{}", agentCopy.getId(), machine.getWorkspaceId());
 
-                final long pingStartTimestamp = System.currentTimeMillis();
-                SshProcessLaunchedChecker agentLaunchingChecker = new SshProcessLaunchedChecker("che-websocket-terminal");
-                while (System.currentTimeMillis() - pingStartTimestamp < agentMaxStartTimeMs) {
-                    if (agentLaunchingChecker.isLaunched(agentCopy,machine)) {
-                        return;
-                    } else {
-                        Thread.sleep(agentPingDelayMs);
-                    }
+            final long pingStartTimestamp = System.currentTimeMillis();
+            SshProcessLaunchedChecker agentLaunchingChecker = new SshProcessLaunchedChecker("che-websocket-terminal");
+            while (System.currentTimeMillis() - pingStartTimestamp < agentMaxStartTimeMs) {
+                if (agentLaunchingChecker.isLaunched(agentCopy, machine)) {
+                    return;
+                } else {
+                    Thread.sleep(agentPingDelayMs);
                 }
-
-                process.kill();
-            } catch (MachineException e) {
-                throw new ServerException(e.getServiceError());
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new ServerException(format("Launching agent %s is interrupted", agent.getName()));
             }
+
+            process.kill();
 
             final String errMsg = format("Fail launching agent %s. Workspace ID:%s", agent.getName(), machine.getWorkspaceId());
             LOG.error(errMsg);
             throw new ServerException(errMsg);
+        } catch (MachineException e) {
+            throw new ServerException(e.getServiceError());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new ServerException(format("Launching agent %s is interrupted", agent.getName()));
         } catch (ConflictException e) {
             // should never happen
             throw new ServerException("Internal server error occurs on terminal launching.");

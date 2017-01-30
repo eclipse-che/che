@@ -42,6 +42,7 @@ import static java.util.Collections.emptyMap;
  * Implementation of machine that represents ssh machine.
  *
  * @author Alexander Garagatyi
+ * @author Max Shaposhnik
  * @see SshMachineInstanceProvider
  */
 // todo try to avoid map of processes
