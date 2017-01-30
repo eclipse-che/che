@@ -23,7 +23,7 @@ cmd_config() {
   elif [[ "${FORCE_UPDATE}" == "--pull" ]] || \
        [[ "${FORCE_UPDATE}" == "--force" ]]; then
     cmd_download $FORCE_UPDATE
-  elif is_nightly && ! is_fast; then
+  elif is_nightly && ! is_fast && ! skip_pull; then
     cmd_download --pull
   fi
 

@@ -65,8 +65,10 @@ init_constants() {
   CHE_DEBUG=false
   CHE_OFFLINE=false
   CHE_SKIP_PREFLIGHT=false
+  CHE_SKIP_POSTFLIGHT=false
   CHE_SKIP_NIGHTLY=false
   CHE_SKIP_NETWORK=false
+  CHE_SKIP_PULL=false
 
   DEFAULT_CHE_PRODUCT_NAME="CHE"
   CHE_PRODUCT_NAME=${CHE_PRODUCT_NAME:-${DEFAULT_CHE_PRODUCT_NAME}}
@@ -318,6 +320,14 @@ skip_preflight() {
   fi
 }
 
+skip_postflight() {
+  if [ "${CHE_SKIP_POSTFLIGHT}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
 skip_nightly() {
   if [ "${CHE_SKIP_NIGHTLY}" = "true" ]; then
     return 0
@@ -328,6 +338,14 @@ skip_nightly() {
 
 skip_network() {
   if [ "${CHE_SKIP_NETWORK}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+skip_pull() {
+  if [ "${CHE_SKIP_PULL}" = "true" ]; then
     return 0
   else
     return 1
@@ -376,12 +394,20 @@ init() {
     CHE_SKIP_PREFLIGHT=true
   fi
 
+  if [[ "$@" == *"--skip:postflight"* ]]; then
+    CHE_SKIP_POSTFLIGHT=true
+  fi
+
   if [[ "$@" == *"--skip:nightly"* ]]; then
     CHE_SKIP_NIGHTLY=true
   fi
 
   if [[ "$@" == *"--skip:network"* ]]; then
     CHE_SKIP_NETWORK=true
+  fi
+
+  if [[ "$@" == *"--skip:pull"* ]]; then
+    CHE_SKIP_PULL=true
   fi
 
   SCRIPTS_BASE_CONTAINER_SOURCE_DIR="/scripts/base"
@@ -502,8 +528,10 @@ start() {
   set -- "${@/\-\-offline/}"
   set -- "${@/\-\-trace/}"
   set -- "${@/\-\-skip\:preflight/}"
+  set -- "${@/\-\-skip\:postflight/}"
   set -- "${@/\-\-skip\:nightly/}"
   set -- "${@/\-\-skip\:network/}"
+  set -- "${@/\-\-skip\:pull/}"
   
   # The cli_post_init method is unique to each assembly. This method must be provided by 
   # a custom CLI assembly in their container and can set global variables which are 
