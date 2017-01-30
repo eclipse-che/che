@@ -49,7 +49,7 @@ public class KubernetesService {
             int targetPortNumber = portNumber;
             ServicePort servicePort = new ServicePort();
             servicePort.setName(portName);
-            servicePort.setProtocol(protocol);
+            servicePort.setProtocol(protocol.toUpperCase());
             servicePort.setPort(portNumber);
             servicePort.setTargetPort(new IntOrString(targetPortNumber));
             servicePorts.add(servicePort);
