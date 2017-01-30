@@ -17,12 +17,14 @@ cmd_network() {
   info "--------   CONNECTIVITY TEST   --------"
   info "---------------------------------------"
 
+  info "network" "eclipse/che-ip: ${GLOBAL_HOST_IP}"
+
   start_test_server
 
-  info "Browser    => Workspace Agent (localhost): Connection $(test1 && echo "succeeded" || echo "failed")"
-  info "Browser    => Workspace Agent ($AGENT_EXTERNAL_IP): Connection $(test2 && echo "succeeded" || echo "failed")"
-  info "Server     => Workspace Agent (External IP): Connection $(test3 && echo "succeeded" || echo "failed")"
-  info "Server     => Workspace Agent (Internal IP): Connection $(test4 && echo "succeeded" || echo "failed")"
+  info "network" "Browser => Workspace Agent (localhost): Connection $(test1 && echo "succeeded" || echo "failed")"
+  info "network" "Browser => Workspace Agent ($AGENT_EXTERNAL_IP): Connection $(test2 && echo "succeeded" || echo "failed")"
+  info "network" "Server  => Workspace Agent (External IP): Connection $(test3 && echo "succeeded" || echo "failed")"
+  info "network" "Server  => Workspace Agent (Internal IP): Connection $(test4 && echo "succeeded" || echo "failed")"
 
   stop_test_server
 }

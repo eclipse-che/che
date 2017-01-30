@@ -16,6 +16,7 @@ import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
+import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
 import org.eclipse.che.plugin.docker.client.json.ContainerListEntry;
 import org.eclipse.che.plugin.docker.client.json.network.ContainerInNetwork;
 import org.eclipse.che.plugin.docker.client.json.network.Network;
@@ -89,6 +90,8 @@ public class DockerAbandonedResourcesCleanerTest {
     @Mock
     private CheEnvironmentEngine         environmentEngine;
     @Mock
+    private DockerConnectorProvider      dockerConnectorProvider;
+    @Mock
     private DockerConnector              dockerConnector;
     @Mock
     private DockerContainerNameGenerator nameGenerator;
@@ -142,8 +145,9 @@ public class DockerAbandonedResourcesCleanerTest {
         abandonedNetworkContainers = new HashMap<>();
         usedNetworkContainers = new HashMap<>();
 
+        when(dockerConnectorProvider.get()).thenReturn(dockerConnector);
         cleaner = spy(new DockerAbandonedResourcesCleaner(environmentEngine,
-                                                          dockerConnector,
+                                                          dockerConnectorProvider,
                                                           nameGenerator,
                                                           workspaceRuntimes,
                                                           additionalNetworks));
@@ -340,7 +344,7 @@ public class DockerAbandonedResourcesCleanerTest {
         // given
         additionalNetworks.add(userNetworks);
         cleaner = spy(new DockerAbandonedResourcesCleaner(environmentEngine,
-                                                          dockerConnector,
+                                                          dockerConnectorProvider,
                                                           nameGenerator,
                                                           workspaceRuntimes,
                                                           additionalNetworks));
@@ -360,7 +364,7 @@ public class DockerAbandonedResourcesCleanerTest {
         userNetworks = new HashSet<>(Arrays.asList(additionalNetworkName));
         additionalNetworks.add(userNetworks);
         cleaner = spy(new DockerAbandonedResourcesCleaner(environmentEngine,
-                                                          dockerConnector,
+                                                          dockerConnectorProvider,
                                                           nameGenerator,
                                                           workspaceRuntimes,
                                                           additionalNetworks));

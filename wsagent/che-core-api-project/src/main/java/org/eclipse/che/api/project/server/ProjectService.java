@@ -30,7 +30,6 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.annotations.Description;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
-import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.project.server.importer.ProjectImportOutputWSLineConsumer;
 import org.eclipse.che.api.project.server.notification.ProjectItemModifiedEvent;
 import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
@@ -71,7 +70,6 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import java.io.IOException;
 import java.io.InputStream;
@@ -85,21 +83,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static javax.ws.rs.HttpMethod.DELETE;
-import static javax.ws.rs.HttpMethod.GET;
-import static javax.ws.rs.HttpMethod.PUT;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static org.eclipse.che.api.core.util.LinksHelper.createLink;
 import static org.eclipse.che.api.project.server.DtoConverter.asDto;
-import static org.eclipse.che.api.project.shared.Constants.LINK_REL_CHILDREN;
 import static org.eclipse.che.api.project.shared.Constants.LINK_REL_CREATE_BATCH_PROJECTS;
 import static org.eclipse.che.api.project.shared.Constants.LINK_REL_CREATE_PROJECT;
-import static org.eclipse.che.api.project.shared.Constants.LINK_REL_DELETE;
-import static org.eclipse.che.api.project.shared.Constants.LINK_REL_GET_CONTENT;
 import static org.eclipse.che.api.project.shared.Constants.LINK_REL_GET_PROJECTS;
-import static org.eclipse.che.api.project.shared.Constants.LINK_REL_TREE;
-import static org.eclipse.che.api.project.shared.Constants.LINK_REL_UPDATE_CONTENT;
-import static org.eclipse.che.api.project.shared.Constants.LINK_REL_UPDATE_PROJECT;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
@@ -118,14 +105,18 @@ public class ProjectService extends Service {
     private static final Logger LOG  = LoggerFactory.getLogger(ProjectService.class);
     private static final Tika   TIKA = new Tika();
 
-    private final ProjectManager projectManager;
-    private final EventService   eventService;
-    private final String         workspace;
+    private final ProjectManager              projectManager;
+    private final EventService                eventService;
+    private final ProjectServiceLinksInjector projectServiceLinksInjector;
+    private final String                      workspace;
 
     @Inject
-    public ProjectService(ProjectManager projectManager, EventService eventService) {
+    public ProjectService(ProjectManager projectManager,
+                          EventService eventService,
+                          ProjectServiceLinksInjector projectServiceLinksInjector) {
         this.projectManager = projectManager;
         this.eventService = eventService;
+        this.projectServiceLinksInjector = projectServiceLinksInjector;
         this.workspace = WorkspaceIdProvider.getWorkspaceId();
     }
 
@@ -1066,98 +1057,14 @@ public class ProjectService extends Service {
     }
 
     private ItemReference injectFileLinks(ItemReference itemReference) {
-        final UriBuilder uriBuilder = getServiceContext().getServiceUriBuilder();
-        final List<Link> links = new ArrayList<>();
-        final String relPath = itemReference.getPath().substring(1);
-
-        links.add(createLink(GET,
-                             uriBuilder.clone()
-                                       .path(ProjectService.class, "getFile")
-                                       .build(new String[]{relPath}, false)
-                                       .toString(),
-                             APPLICATION_JSON,
-                             LINK_REL_GET_CONTENT));
-        links.add(createLink(PUT,
-                             uriBuilder.clone()
-                                       .path(ProjectService.class, "updateFile")
-                                       .build(new String[]{relPath}, false)
-                                       .toString(),
-                             MediaType.WILDCARD,
-                             null,
-                             LINK_REL_UPDATE_CONTENT));
-        links.add(createLink(DELETE,
-                             uriBuilder.clone()
-                                       .path(ProjectService.class, "delete")
-                                       .build(new String[]{relPath}, false)
-                                       .toString(),
-                             LINK_REL_DELETE));
-
-        return itemReference.withLinks(links);
+        return projectServiceLinksInjector.injectFileLinks(itemReference, getServiceContext());
     }
 
     private ItemReference injectFolderLinks(ItemReference itemReference) {
-        final UriBuilder uriBuilder = getServiceContext().getServiceUriBuilder();
-        final List<Link> links = new ArrayList<>();
-        final String relPath = itemReference.getPath().substring(1);
-
-        links.add(createLink(GET,
-                             uriBuilder.clone()
-                                       .path(ProjectService.class, "getChildren")
-                                       .build(new String[]{relPath}, false)
-                                       .toString(),
-                             APPLICATION_JSON,
-                             LINK_REL_CHILDREN));
-        links.add(createLink(GET,
-                             uriBuilder.clone()
-                                       .path(ProjectService.class, "getTree")
-                                       .build(new String[]{relPath}, false)
-                                       .toString(),
-                             APPLICATION_JSON,
-                             LINK_REL_TREE));
-        links.add(createLink(DELETE,
-                             uriBuilder.clone()
-                                       .path(ProjectService.class, "delete")
-                                       .build(new String[]{relPath}, false)
-                                       .toString(),
-                             LINK_REL_DELETE));
-
-        return itemReference.withLinks(links);
+        return projectServiceLinksInjector.injectFolderLinks(itemReference, getServiceContext());
     }
 
     private ProjectConfigDto injectProjectLinks(ProjectConfigDto projectConfig) {
-        final UriBuilder uriBuilder = getServiceContext().getServiceUriBuilder();
-        final List<Link> links = new ArrayList<>();
-        final String relPath = projectConfig.getPath().substring(1);
-
-        links.add(createLink(PUT,
-                             uriBuilder.clone()
-                                       .path(ProjectService.class, "updateProject")
-                                       .build(new String[]{relPath}, false)
-                                       .toString(),
-                             APPLICATION_JSON,
-                             APPLICATION_JSON,
-                             LINK_REL_UPDATE_PROJECT));
-        links.add(createLink(GET,
-                             uriBuilder.clone()
-                                       .path(ProjectService.class, "getChildren")
-                                       .build(new String[]{relPath}, false)
-                                       .toString(),
-                             APPLICATION_JSON,
-                             LINK_REL_CHILDREN));
-        links.add(createLink(GET,
-                             uriBuilder.clone()
-                                       .path(ProjectService.class, "getTree")
-                                       .build(new String[]{relPath}, false)
-                                       .toString(),
-                             APPLICATION_JSON,
-                             LINK_REL_TREE));
-        links.add(createLink(DELETE,
-                             uriBuilder.clone()
-                                       .path(ProjectService.class, "delete")
-                                       .build(new String[]{relPath}, false)
-                                       .toString(),
-                             LINK_REL_DELETE));
-
-        return projectConfig.withLinks(links);
+        return projectServiceLinksInjector.injectProjectLinks(projectConfig, getServiceContext());
     }
 }

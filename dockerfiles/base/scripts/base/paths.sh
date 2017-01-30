@@ -37,7 +37,7 @@ delete_file_system_test() {
 }
 
 get_mount_path() {
-  debug $FUNCNAME
+#  debug $FUNCNAME
   FULL_PATH=$(get_full_path "${1}")
   POSIX_PATH=$(convert_windows_to_posix "${FULL_PATH}")
   CLEAN_PATH=$(get_clean_path "${POSIX_PATH}")
@@ -45,18 +45,18 @@ get_mount_path() {
 }
 
 get_full_path() {
-  debug $FUNCNAME
+#  debug $FUNCNAME
   # create full directory path
   echo "$(cd "$(dirname "${1}")"; pwd)/$(basename "$1")"
 }
 
 convert_windows_to_posix() {
-  debug $FUNCNAME
+#  debug $FUNCNAME
   echo "/"$(echo "$1" | sed 's/\\/\//g' | sed 's/://')
 }
 
 convert_posix_to_windows() {
-  debug $FUNCNAME
+#  debug $FUNCNAME
   # Remove leading slash
   VALUE="${1:1}"
 
@@ -71,7 +71,7 @@ convert_posix_to_windows() {
 }
 
 get_clean_path() {
-  debug $FUNCNAME
+#  debug $FUNCNAME
   INPUT_PATH=$1
   # \some\path => /some/path
   OUTPUT_PATH=$(echo ${INPUT_PATH} | tr '\\' '/')
