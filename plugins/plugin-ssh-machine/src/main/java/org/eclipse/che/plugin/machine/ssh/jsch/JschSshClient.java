@@ -78,10 +78,12 @@ public class JschSshClient implements SshClient {
         this.username = sshMachineRecipe.getUsername();
     }
 
+    @Override
     public String getHost() {
         return host;
     }
 
+    @Override
     public void start() throws MachineException {
         try {
             session = jsch.getSession(username, host, port);
@@ -105,10 +107,12 @@ public class JschSshClient implements SshClient {
 //            envVariableEntry.getValue()));
 //     todo process output
 
+    @Override
     public void stop() throws MachineException {
         session.disconnect();
     }
 
+    @Override
     public JschSshProcess createProcess(String commandLine) throws MachineException {
         try {
             ChannelExec exec = (ChannelExec)session.openChannel("exec");
@@ -125,6 +129,7 @@ public class JschSshClient implements SshClient {
         }
     }
 
+    @Override
     public void copy(String sourcePath, String targetPath) throws MachineException {
         File source = new File(sourcePath);
         if (!source.exists()) {

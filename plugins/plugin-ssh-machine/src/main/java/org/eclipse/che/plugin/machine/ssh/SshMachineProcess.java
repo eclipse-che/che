@@ -31,15 +31,14 @@ import static java.lang.String.format;
  * @author Alexander Garagatyi
  */
 public class SshMachineProcess  {
+
     private final SshClient           sshClient;
     private final String              name;
-
     private final String              commandLine;
     private final String              type;
     private final Map<String, String> attributes;
-
-    private final int    pid;
-    private final String outputChannel;
+    private final int                 pid;
+    private final String              outputChannel;
 
     private volatile boolean started;
 

@@ -4,9 +4,9 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
+ * <p>
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ * Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.plugin.machine.ssh;
 
@@ -30,7 +30,7 @@ import java.util.Set;
  * @author Alexander Garagatyi
  * @author Max Shaposhnik
  */
-public class SshMachineFactory  {
+public class SshMachineFactory {
 
     private final int             connectionTimeoutMs;
     private final Set<ServerConf> machinesServers;
@@ -58,26 +58,32 @@ public class SshMachineFactory  {
     /**
      * Creates ssh machine implementation instance.
      *
-     * @param machine description of machine
-     * @param sshClient ssh client of machine
-     * @param outputConsumer consumer of output from container main process
-     * @throws MachineException if error occurs on creation of {@code Instance}
+     * @param machine
+     *         description of machine
+     * @param sshClient
+     *         ssh client of machine
+     * @param outputConsumer
+     *         consumer of output from container main process
+     * @throws MachineException
+     *         if error occurs on creation of {@code Instance}
      */
-    public SshMachineInstance createInstance(Machine machine, SshClient sshClient,
-                                             LineConsumer outputConsumer) throws MachineException {
+    public SshMachineInstance createInstance(Machine machine, SshClient sshClient, LineConsumer outputConsumer) throws MachineException {
         return new SshMachineInstance(machine, sshClient, outputConsumer, this, machinesServers);
     }
 
     /**
      * Creates ssh machine implementation of {@link SshMachineProcess}.
      *
-     * @param command command that should be executed on process start
-     * @param outputChannel channel where output will be available on process execution
-     * @param pid virtual id of that process
-     * @param sshClient client to communicate with machine
+     * @param command
+     *         command that should be executed on process start
+     * @param outputChannel
+     *         channel where output will be available on process execution
+     * @param pid
+     *         virtual id of that process
+     * @param sshClient
+     *         client to communicate with machine
      */
-    public SshMachineProcess createInstanceProcess(Command command, String outputChannel,
-                                                   int pid, SshClient sshClient) {
+    public SshMachineProcess createInstanceProcess(Command command, String outputChannel, int pid, SshClient sshClient) {
         return new SshMachineProcess(command, outputChannel, pid, sshClient);
     }
 }
