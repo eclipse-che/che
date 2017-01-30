@@ -77,17 +77,17 @@ cmd_start_check_ports() {
 
   # If dev mode is on, then we also need to check the debug port set by the user for availability
   if debug_server; then
-    USER_DEBUG_PORT=$(get_value_of_var_from_env_file CHE_DEBUG_PORT)
+    USER_DEBUG_PORT=$(get_value_of_var_from_env_file ${CHE_PRODUCT_NAME}_DEBUG_PORT)
 
     if [[ "$USER_DEBUG_PORT" = "" ]]; then
       # If the user has not set a debug port, then use the default
-      CHE_DEBUG_PORT=8000
+      CHE_LOCAL_DEBUG_PORT=8000
     else 
       # Otherwise, this is the value set by the user
-      CHE_DEBUG_PORT=$USER_DEBUG_PORT
+      CHE_LOCAL_DEBUG_PORT=$USER_DEBUG_PORT
     fi
 
-    PORT_ARRAY+=("$CHE_DEBUG_PORT;port ${CHE_DEBUG_PORT} (debug):      ")
+    PORT_ARRAY+=("$CHE_LOCAL_DEBUG_PORT;port ${CHE_LOCAL_DEBUG_PORT} (debug):      ")
   fi
 
   if check_all_ports "${PORT_ARRAY[@]}"; then
@@ -103,16 +103,16 @@ cmd_start_check_agent_network() {
 
   PREFLIGHT="success"
   if test1 || test2; then
-    text "         conn (browser => ws):   ${GREEN}[OK]${NC}\n"
+    text "         conn (browser => ws):    ${GREEN}[OK]${NC}\n"
   else
-    text "         conn (browser => ws):   ${RED}[NOT OK]${NC}\n"
+    text "         conn (browser => ws):    ${RED}[NOT OK]${NC}\n"
     PREFLIGHT="fail"
   fi
 
   if test3 && test4; then
-    text "         conn (server => ws):    ${GREEN}[OK]${NC}\n"
+    text "         conn (server => ws):     ${GREEN}[OK]${NC}\n"
   else
-    text "         conn (server => ws):    ${RED}[NOT OK]${NC}\n\n"
+    text "         conn (server => ws):     ${RED}[NOT OK]${NC}\n\n"
     PREFLIGHT="fail"
   fi
 

@@ -335,6 +335,9 @@ export class CheDir {
     // work on a copy
     let che : CheFileStruct =  JSON.parse(JSON.stringify(this.chefileStruct));
 
+    // Do not write default server values
+    delete che.server;
+
     // make flat the che object
     let flatChe = this.flatJson('che', che);
     flatChe.forEach((value, key) => {
