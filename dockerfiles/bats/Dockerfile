@@ -8,7 +8,8 @@
 #   Marian Labuda
 FROM docker:1.11.2
 
-RUN apk add --no-cache bash
+# ncurses is used to use --pretty option of bats
+RUN apk add --no-cache bash ncurses
 
 RUN curl -o /tmp/v0.4.0.tar.gz -L https://github.com/sstephenson/bats/archive/v0.4.0.tar.gz \
 	&& tar -x -z -f /tmp/v0.4.0.tar.gz -C /tmp \
