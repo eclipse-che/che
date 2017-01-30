@@ -101,7 +101,6 @@ public class OpenShiftConnector extends DockerConnector {
     private static final String DOCKER_PREFIX                            = "docker://";
     private static final String DOCKER_PROTOCOL_PORT_DELIMITER           = "/";
     private static final String OPENSHIFT_SERVICE_TYPE_NODE_PORT         = "NodePort";
-    private static final int OPENSHIFT_LIVENESS_PROBE_DELAY              = 120;
     private static final int OPENSHIFT_LIVENESS_PROBE_TIMEOUT            = 1;
     private static final int OPENSHIFT_WAIT_POD_DELAY                    = 1000;
     private static final int OPENSHIFT_WAIT_POD_TIMEOUT                  = 120;
@@ -118,6 +117,7 @@ public class OpenShiftConnector extends DockerConnector {
     private final KubernetesService        kubernetesService;
     private final String                   openShiftCheProjectName;
     private final String                   openShiftCheServiceAccount;
+    private final int                      openShiftLivenessProbeDelay;
 
     @Inject
     public OpenShiftConnector(DockerConnectorConfiguration connectorConfiguration,
@@ -132,7 +132,8 @@ public class OpenShiftConnector extends DockerConnector {
                               @Named("che.openshift.username") String openShiftUserName,
                               @Named("che.openshift.password") String openShiftUserPassword,
                               @Named("che.openshift.project") String openShiftCheProjectName,
-                              @Named("che.openshift.serviceaccountname") String openShiftCheServiceAccount) {
+                              @Named("che.openshift.serviceaccountname") String openShiftCheServiceAccount,
+                              @Named("che.openshift.liveness.probe.delay") Integer openShiftLivenessProbeDelay) {
         super(connectorConfiguration, connectionFactory, authResolver, dockerApiVersionPathPrefixProvider);
         this.openShiftCheProjectName = openShiftCheProjectName;
         this.openShiftCheServiceAccount = openShiftCheServiceAccount;
@@ -140,6 +141,7 @@ public class OpenShiftConnector extends DockerConnector {
         this.kubernetesEnvVar = kubernetesEnvVar;
         this.kubernetesContainer = kubernetesContainer;
         this.kubernetesService = kubernetesService;
+        this.openShiftLivenessProbeDelay = openShiftLivenessProbeDelay;
 
         Config config = new ConfigBuilder().withMasterUrl(openShiftApiEndpoint)
                 .withUsername(openShiftUserName)
@@ -671,7 +673,7 @@ public class OpenShiftConnector extends DockerConnector {
                             .withNewTcpSocket()
                             .withNewPort(port)
                             .endTcpSocket()
-                            .withInitialDelaySeconds(OPENSHIFT_LIVENESS_PROBE_DELAY)
+                            .withInitialDelaySeconds(this.openShiftLivenessProbeDelay)
                             .withTimeoutSeconds(OPENSHIFT_LIVENESS_PROBE_TIMEOUT)
                             .build();
         }
