@@ -1,16 +1,16 @@
-# Copyright (c) 2016 Codenvy, S.A.
+#!/bin/sh
+# Copyright (c) 2016-2017 Codenvy, S.A., Red Hat, Inc
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
 #
-# build:
-#   docker build -t eclipse/che-ip .
+# Contributors:
+#   Florent Benoit - Initial Implementation
 #
-# use:
-#    docker run --rm --net=host eclipse/che-ip
 
-FROM alpine:3.4
+# Load library
+. /ip/library.sh
 
-COPY /src/ /ip/
-ENTRYPOINT ["/ip/entrypoint.sh"]
+# print ip computed
+get_ip_of_docker
