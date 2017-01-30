@@ -15,6 +15,7 @@ import {CheWorkspace} from '../../../components/api/che-workspace.factory';
 import IdeSvc from '../../ide/ide.service';
 import {WorkspaceDetailsService} from './workspace-details.service';
 import {CheNamespaceRegistry} from '../../../components/api/namespace/che-namespace-registry.factory';
+import {ConfirmDialogService} from '../../../components/service/confirm-dialog/confirm-dialog.service';
 
 /**
  * @ngdoc controller
@@ -66,6 +67,8 @@ export class WorkspaceDetailsController {
   forms: Map<number, any> = new Map();
   tab: Object = Tab;
 
+  private confirmDialogService: ConfirmDialogService;
+
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
@@ -73,7 +76,8 @@ export class WorkspaceDetailsController {
   constructor($location: ng.ILocationService, $log: ng.ILogService, $mdDialog: ng.material.IDialogService, $q: ng.IQService,
               $route: ng.route.IRouteService, $rootScope: ng.IRootScopeService, $scope: ng.IScope, $timeout: ng.ITimeoutService,
               cheEnvironmentRegistry: CheEnvironmentRegistry, cheNotification: CheNotification, cheWorkspace: CheWorkspace,
-              ideSvc: IdeSvc, workspaceDetailsService: WorkspaceDetailsService, cheNamespaceRegistry: CheNamespaceRegistry) {
+              ideSvc: IdeSvc, workspaceDetailsService: WorkspaceDetailsService, cheNamespaceRegistry: CheNamespaceRegistry,
+              confirmDialogService: ConfirmDialogService) {
     this.$log = $log;
     this.$location = $location;
     this.$mdDialog = $mdDialog;
@@ -88,6 +92,7 @@ export class WorkspaceDetailsController {
     this.cheNamespaceRegistry = cheNamespaceRegistry;
     this.ideSvc = ideSvc;
     this.workspaceDetailsService = workspaceDetailsService;
+    this.confirmDialogService = confirmDialogService;
 
     cheWorkspace.fetchWorkspaces().then(() => {
       let workspaces: any[] = cheWorkspace.getWorkspaces();
@@ -483,14 +488,8 @@ export class WorkspaceDetailsController {
 
   // perform workspace deletion.
   deleteWorkspace(event: MouseEvent): void {
-    let confirm = this.$mdDialog.confirm()
-      .title('Would you like to delete workspace \'' + this.workspaceDetails.config.name + '\'?')
-      .ariaLabel('Delete workspace')
-      .ok('Delete it!')
-      .cancel('Cancel')
-      .clickOutsideToClose(true)
-      .targetEvent(event);
-    this.$mdDialog.show(confirm).then(() => {
+    let content = 'Would you like to delete workspace \'' + this.workspaceDetails.config.name + '\'?';
+    this.confirmDialogService.showConfirmDialog('Delete workspace', content, 'Delete').then(() => {
       if (this.getWorkspaceStatus() === 'RUNNING') {
         this.cheWorkspace.stopWorkspace(this.workspaceId, false);
       }

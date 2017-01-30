@@ -34,10 +34,17 @@ cmd_start() {
   # If the current directory is not configured with an .env file, it will initialize
   cmd_config $FORCE_UPDATE
 
-  # Begin tests of open ports that we require
-  info "start" "Preflight checks"
-  cmd_start_check_ports
-  text "\n"
+  # Preflight checks
+  #   a) Check for open ports
+  #   b) Test simulated connections for failures
+  if ! is_fast; then
+    info "start" "Preflight checks"
+    cmd_start_check_ports
+    cmd_start_check_agent_network
+    text "\n"
+  else
+    warning "Skipping preflight checks..."
+  fi
 
   # Start ${CHE_FORMAL_PRODUCT_NAME}
   # Note bug in docker requires relative path, not absolute path to compose file
@@ -70,23 +77,51 @@ cmd_start_check_ports() {
 
   # If dev mode is on, then we also need to check the debug port set by the user for availability
   if debug_server; then
-    USER_DEBUG_PORT=$(get_value_of_var_from_env_file CHE_DEBUG_PORT)
+    USER_DEBUG_PORT=$(get_value_of_var_from_env_file ${CHE_PRODUCT_NAME}_DEBUG_PORT)
 
     if [[ "$USER_DEBUG_PORT" = "" ]]; then
       # If the user has not set a debug port, then use the default
-      CHE_DEBUG_PORT=8000
+      CHE_LOCAL_DEBUG_PORT=8000
     else 
       # Otherwise, this is the value set by the user
-      CHE_DEBUG_PORT=$USER_DEBUG_PORT
+      CHE_LOCAL_DEBUG_PORT=$USER_DEBUG_PORT
     fi
 
-    PORT_ARRAY+=("$CHE_DEBUG_PORT;port ${CHE_DEBUG_PORT} (debug):      ")
+    PORT_ARRAY+=("$CHE_LOCAL_DEBUG_PORT;port ${CHE_LOCAL_DEBUG_PORT} (debug):      ")
   fi
 
   if check_all_ports "${PORT_ARRAY[@]}"; then
     print_ports_as_ok "${PORT_ARRAY[@]}"
   else
     find_and_print_ports_as_notok "${PORT_ARRAY[@]}"
+  fi
+}
+
+# See cmd_network.sh for utilities for unning these tests
+cmd_start_check_agent_network() {
+  start_test_server
+
+  PREFLIGHT="success"
+  if test1 || test2; then
+    text "         conn (browser => ws):    ${GREEN}[OK]${NC}\n"
+  else
+    text "         conn (browser => ws):    ${RED}[NOT OK]${NC}\n"
+    PREFLIGHT="fail"
+  fi
+
+  if test3 && test4; then
+    text "         conn (server => ws):     ${GREEN}[OK]${NC}\n"
+  else
+    text "         conn (server => ws):     ${RED}[NOT OK]${NC}\n\n"
+    PREFLIGHT="fail"
+  fi
+
+  stop_test_server
+
+  if [[ "${PREFLIGHT}" = "fail" ]]; then
+    text "\n"
+    error "Try 'docker run <options> ${CHE_IMAGE_FULLNAME} info --network' for more tests."
+    return 2;
   fi
 }
 

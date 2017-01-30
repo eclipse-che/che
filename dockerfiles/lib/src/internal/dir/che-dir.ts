@@ -38,6 +38,7 @@ import {Parameter} from "../../spi/decorator/parameter";
 import {ProductName} from "../../utils/product-name";
 import {SSHGenerator} from "../../spi/docker/ssh-generator";
 import {CheFileStructWorkspaceProject} from "./chefile-struct/che-file-struct";
+import {StringUtils} from "../../utils/string-utils";
 
 /**
  * Entrypoint for the Chefile handling in a directory.
@@ -207,10 +208,13 @@ export class CheDir {
     }
 
     // load the chefile script if defined
-    var script_code = this.fs.readFileSync(this.cheFile).toString();
+    var script_code : string = this.fs.readFileSync(this.cheFile).toString();
 
     // strip the lines that are beginning with # as it may be comments
-    script_code = script_code.replace(/#[^\n]*/g, '');
+    script_code = StringUtils.removeSharpComments(script_code);
+
+    // replace multiline content for workspace by raw strings
+    script_code  = StringUtils.keepWorkspaceRawStrings(script_code);
 
     // create sandboxed object
     var sandbox = { "che": this.chefileStruct,  "workspace": this.chefileStructWorkspace, "console": console};
@@ -330,6 +334,9 @@ export class CheDir {
 
     // work on a copy
     let che : CheFileStruct =  JSON.parse(JSON.stringify(this.chefileStruct));
+
+    // Do not write default server values
+    delete che.server;
 
     // make flat the che object
     let flatChe = this.flatJson('che', che);

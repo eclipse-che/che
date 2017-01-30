@@ -35,7 +35,6 @@ import org.eclipse.che.api.vfs.impl.file.event.detectors.ProjectTreeTrackingOper
 import org.eclipse.che.api.vfs.search.MediaTypeFilter;
 import org.eclipse.che.api.vfs.search.SearcherProvider;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.FileSystems;

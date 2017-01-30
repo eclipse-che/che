@@ -1,0 +1,18 @@
+{
+  "id": "org.eclipse.che.ws-agent",
+  "name": "Workspace API",
+  "description": "Workspace API support",
+  "dependencies": [
+    "org.eclipse.che.terminal"
+  ],
+  "properties": {},
+  "servers": {
+    "wsagent": {
+      "port": "4401/tcp",
+      "protocol": "http",
+      "properties": {
+        "path": "/api"
+      }
+    }
+  }
+}

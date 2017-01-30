@@ -15,6 +15,7 @@ import com.google.common.annotations.Beta;
 import org.eclipse.che.api.core.model.project.NewProjectConfig;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.model.project.SourceStorage;
+import org.eclipse.che.api.machine.shared.dto.CommandDto;
 
 import java.util.List;
 import java.util.Map;
@@ -37,6 +38,7 @@ public class MutableProjectConfig implements ProjectConfig {
     private MutableSourceStorage      sourceStorage;
     private Map<String, String>       options;
     private List<NewProjectConfig>    projects;
+    private List<CommandDto>          commands;
 
     public MutableProjectConfig(ProjectConfig source) {
         name = source.getName();
@@ -135,6 +137,17 @@ public class MutableProjectConfig implements ProjectConfig {
 
     public void setOptions(Map<String, String> options) {
         this.options = options;
+    }
+    
+    public List<CommandDto> getCommands() {
+        if (commands == null) {
+            commands = newArrayList();
+        }
+        return commands;
+    }
+    
+    public void setCommands(List<CommandDto> commands) {
+        this.commands = commands;
     }
 
     /**
