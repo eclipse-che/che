@@ -20,7 +20,6 @@ cli_execute() {
 }
 
 cli_parse () {
-  debug $FUNCNAME
   COMMAND="cmd_$1"
 
   case $1 in
@@ -55,7 +54,7 @@ get_display_url() {
   local CHE_HOST_LOCAL=$CHE_HOST
 
   if is_initialized; then 
-    CHE_HOST_LOCAL=$(get_value_of_var_from_env_file CHE_HOST)
+    CHE_HOST_LOCAL=$(get_value_of_var_from_env_file ${CHE_PRODUCT_NAME}_HOST)
   fi
 
   if ! is_docker_for_mac; then
@@ -66,10 +65,19 @@ get_display_url() {
 }
 
 get_debug_display_url() {
+  local CHE_DEBUG_PORT_LOCAL=9000
+
+  if is_initialized; then 
+    DEBUG_PORT_FROM_CONFIG=$(get_value_of_var_from_env_file ${CHE_PRODUCT_NAME}_DEBUG_PORT)
+    if [[ "${DEBUG_PORT_FROM_CONFIG}" != "" ]]; then
+      CHE_DEBUG_PORT_LOCAL=$DEBUG_PORT_FROM_CONFIG
+    fi
+  fi
+
   if ! is_docker_for_mac; then
-    echo "http://${CHE_HOST}:${CHE_DEBUG_PORT}"
+    echo "http://${CHE_HOST}:${CHE_DEBUG_PORT_LOCAL}"
   else
-    echo "http://localhost:${CHE_DEBUG_PORT}"
+    echo "http://localhost:${CHE_DEBUG_PORT_LOCAL}"
   fi
 }
 
@@ -109,7 +117,8 @@ initiate_offline_or_network_mode(){
     # If we are in networking mode, we have had some issues where users have failed DNS networking.
     # See: https://github.com/eclipse/che/issues/3266#issuecomment-265464165
     if ! is_fast; then
-      info "cli" "Checking network... (hint: '--fast' skips nightly, version, network, and preflight checks)"
+      # Removing this info line as it was appearing before initial CLI output
+#      info "cli" "Checking network... (hint: '--fast' skips nightly, version, network, and preflight checks)"
       local HTTP_STATUS_CODE=$(curl -I -k dockerhub.com -s -o /dev/null --write-out '%{http_code}')
       if [[ ! $HTTP_STATUS_CODE -eq "301" ]]; then
         info "Welcome to $CHE_FORMAL_PRODUCT_NAME!"
@@ -127,8 +136,6 @@ initiate_offline_or_network_mode(){
         info "     a. Try 'curl --head dockerhub.com'"
         return 2;
       fi
-    else
-      warning "Skipping dockerhub network check..."
     fi
   fi
 }
@@ -156,7 +163,6 @@ grab_initial_images() {
 }
 
 has_env_variables() {
-  debug $FUNCNAME
   PROPERTIES=$(env | grep "${CHE_PRODUCT_NAME}_")
 
   if [ "$PROPERTIES" = "" ]; then
@@ -178,8 +184,6 @@ load_utilities_images_if_not_done() {
 }
 
 update_image_if_not_found() {
-  debug $FUNCNAME
-
   local CHECKING_TEXT="${GREEN}INFO:${NC} (${CHE_MINI_PRODUCT_NAME} download): Checking for image '$1'..."
   CURRENT_IMAGE=$(docker images -q "$1")
   if [ "${CURRENT_IMAGE}" == "" ]; then
@@ -191,8 +195,6 @@ update_image_if_not_found() {
 }
 
 update_image() {
-  debug $FUNCNAME
-
   if [ "${1}" == "--force" ]; then
     shift
     info "download" "Removing image $1"
@@ -217,7 +219,6 @@ update_image() {
 }
 
 is_initialized() {
-  debug $FUNCNAME
   if [[ -d "${CHE_CONTAINER_INSTANCE}" ]] && \
      [[ -f "${CHE_CONTAINER_INSTANCE}"/$CHE_VERSION_FILE ]] && \
      [[ -f "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}" ]]; then
@@ -228,7 +229,6 @@ is_initialized() {
 }
 
 is_configured() {
-  debug $FUNCNAME
   if [[ -d "${CHE_CONTAINER_INSTANCE}/config" ]] && \
      [[ -f "${CHE_CONTAINER_INSTANCE}/${CHE_VERSION_FILE}" ]]; then
     return 0
@@ -432,8 +432,6 @@ verify_nightly_accuracy() {
 
     if ! is_fast; then
       update_image $CHE_IMAGE_FULLNAME
-    else
-      warning "Skipping nightly image check..."
     fi 
 
     local NEW_DIGEST=$(docker images -q --no-trunc --digests ${CHE_IMAGE_FULLNAME})
@@ -499,8 +497,6 @@ verify_version_upgrade_compatibility() {
 # Usage:
 #   confirm_operation <Warning message> [--force|--no-force]
 confirm_operation() {
-  debug $FUNCNAME
-
   FORCE_OPERATION=${2:-"--no-force"}
 
   if [ ! "${FORCE_OPERATION}" == "--quiet" ]; then
@@ -518,8 +514,6 @@ confirm_operation() {
 }
 
 port_open() {
-  debug $FUNCNAME
-
   docker run -d -p $1:$1 --name fake ${BOOTSTRAP_IMAGE_ALPINE} httpd -f -p $1 -h /etc/ > /dev/null 2>&1
   NETSTAT_EXIT=$?
   docker rm -f fake > /dev/null 2>&1

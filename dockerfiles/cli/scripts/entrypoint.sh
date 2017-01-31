@@ -51,6 +51,7 @@ GLOBAL COMMAND OPTIONS:
   --fast                               Skips networking, version, nightly and preflight checks
   --offline                            Runs CLI in offline mode, loading images from disk
   --debug                              Enable debugging of ${CHE_MINI_PRODUCT_NAME} server
+  --trace                              Activates trace output for debugging CLI
 "
 }
 

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.primitives.Ints;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
@@ -21,10 +20,10 @@ import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -94,38 +93,37 @@ public class WorkspaceSharedPool {
     }
 
     /**
-     * Terminates this pool, may be called multiple times,
-     * waits until pool is terminated or timeout is reached.
+     * Asynchronously runs the given task wrapping it with {@link ThreadLocalPropagateContext#wrap(Runnable)}
      *
-     * <p>Note that the method is not designed to be used from
-     * different threads, but the other components may use it in their
-     * post construct methods to ensure that all the tasks finished their execution.
-     *
-     * @return true if executor successfully terminated and false if not
-     * terminated(either await termination timeout is reached or thread was interrupted)
+     * @param runnable
+     *         task to run
+     * @return completable future bounded to the task
      */
-    @PostConstruct
-    public boolean terminateAndWait() {
-        if (executor.isShutdown()) {
-            return true;
-        }
-        Logger logger = LoggerFactory.getLogger(getClass());
-        executor.shutdown();
-        try {
-            logger.info("Shutdown workspace threads pool, wait 30s to stop normally");
-            if (!executor.awaitTermination(30, TimeUnit.SECONDS)) {
-                executor.shutdownNow();
-                logger.info("Interrupt workspace threads pool, wait 60s to stop");
-                if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
-                    logger.error("Couldn't terminate workspace threads pool");
-                    return false;
+    public CompletableFuture<Void> runAsync(Runnable runnable) {
+        return CompletableFuture.runAsync(ThreadLocalPropagateContext.wrap(runnable), executor);
+    }
+
+    /**
+     * Terminates this pool if it's not terminated yet.
+     */
+    void shutdown() {
+        if (!executor.isShutdown()) {
+            Logger logger = LoggerFactory.getLogger(getClass());
+            executor.shutdown();
+            try {
+                logger.info("Shutdown workspace threads pool, wait 30s to stop normally");
+                if (!executor.awaitTermination(30, TimeUnit.SECONDS)) {
+                    executor.shutdownNow();
+                    logger.info("Interrupt workspace threads pool, wait 60s to stop");
+                    if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
+                        logger.error("Couldn't shutdown workspace threads pool");
+                    }
                 }
+            } catch (InterruptedException x) {
+                executor.shutdownNow();
+                Thread.currentThread().interrupt();
             }
-        } catch (InterruptedException x) {
-            executor.shutdownNow();
-            Thread.currentThread().interrupt();
-            return false;
+            logger.info("Workspace threads pool is terminated");
         }
-        return true;
     }
 }

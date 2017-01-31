@@ -30,16 +30,18 @@ get_container_host_bind_folder() {
   BINDS=$(docker inspect --format="{{.HostConfig.Binds}}" "${2}" | cut -d '[' -f 2 | cut -d ']' -f 1)
 
   # Remove /var/run/docker.sock:/var/run/docker.sock
-  VALUE=${BINDS/\/var\/run\/docker\.sock\:\/var\/run\/docker\.sock/}
+  #VALUE=${BINDS/\/var\/run\/docker\.sock\:\/var\/run\/docker\.sock/}
 
   # Remove leading and trailing spaces
-  VALUE2=$(echo "${VALUE}" | xargs)
+  VALUE2=$(echo "${BINDS}" | xargs)
 
   MOUNT=""
   IFS=$' '
   for SINGLE_BIND in $VALUE2; do
     case $SINGLE_BIND in
-      *$1)
+
+      # Fix for CHE-3863 - in case there is :Z after the mount for SELinux, add *
+      *$1*)
         MOUNT="${MOUNT} ${SINGLE_BIND}"
         echo "${MOUNT}" | cut -f1 -d":" | xargs
       ;;
@@ -57,7 +59,7 @@ get_container_host_bind_folder() {
 }
 
 get_docker_install_type() {
-  debug $FUNCNAME
+#  debug $FUNCNAME
   if is_boot2docker; then
     echo "boot2docker"
   elif is_docker_for_windows; then
@@ -70,7 +72,7 @@ get_docker_install_type() {
 }
 
 has_docker_for_windows_client(){
-  debug $FUNCNAME
+#  debug $FUNCNAME
   if [[ "${GLOBAL_HOST_IP}" = "10.0.75.2" ]]; then
     return 0
   else
@@ -79,7 +81,7 @@ has_docker_for_windows_client(){
 }
 
 is_boot2docker() {
-  debug $FUNCNAME
+#  debug $FUNCNAME
   if uname -r | grep -q 'boot2docker'; then
     return 0
   else
@@ -88,7 +90,7 @@ is_boot2docker() {
 }
 
 is_docker_for_windows() {
-  debug $FUNCNAME
+#  debug $FUNCNAME
   if uname -r | grep -q 'moby' && has_docker_for_windows_client; then
     return 0
   else
@@ -97,7 +99,7 @@ is_docker_for_windows() {
 }
 
 is_docker_for_mac() {
-  debug $FUNCNAME
+#  debug $FUNCNAME
   if uname -r | grep -q 'moby' && ! has_docker_for_windows_client; then
     return 0
   else
@@ -106,7 +108,7 @@ is_docker_for_mac() {
 }
 
 is_native() {
-  debug $FUNCNAME
+#  debug $FUNCNAME
   if [ $(get_docker_install_type) = "native" ]; then
     return 0
   else
@@ -115,7 +117,7 @@ is_native() {
 }
 
 docker_run() {
-  debug $FUNCNAME
+#  debug $FUNCNAME
   # Setup options for connecting to docker host
   if [ -z "${DOCKER_HOST+x}" ]; then
       DOCKER_HOST="/var/run/docker.sock"
@@ -230,6 +232,9 @@ check_docker() {
     fi
   fi
 
+  DOCKER_CLIENT_VERSION=$(docker version --format '{{.Client.Version}}')
+  DOCKER_SERVER_VERSION=$(docker version --format '{{.Server.Version}}')
+
   # Detect version so that we can provide better error warnings
   DEFAULT_CHE_VERSION=$(cat "/version/latest.ver")
   CHE_IMAGE_FULLNAME=$(docker inspect --format='{{.Config.Image}}' $(get_this_container_id))
@@ -285,7 +290,9 @@ check_docker_networking() {
 
 check_interactive() {
   # Detect and verify that the CLI container was started with -it option.
+  TTY_ACTIVATED=true
   if [ ! -t 1 ]; then
+    TTY_ACTIVATED=false
     warning "Did not detect TTY - interactive mode disabled"
   fi
 }
@@ -299,6 +306,7 @@ check_mounts() {
   SYNC_MOUNT=$(get_container_folder ":/sync")
   UNISON_PROFILE_MOUNT=$(get_container_folder ":/unison")
   CHEDIR_MOUNT=$(get_container_folder ":/chedir")
+  DOCKER_MOUNT=$(get_container_folder ":/var/run/docker.sock")
 
   if [[ "${DATA_MOUNT}" = "not set" ]]; then
     info "Welcome to $CHE_FORMAL_PRODUCT_NAME!"
@@ -431,7 +439,7 @@ check_mounts() {
 }
 
 docker_compose() {
-  debug $FUNCNAME
+#  debug $FUNCNAME
 
   if has_compose; then
     docker-compose "$@"

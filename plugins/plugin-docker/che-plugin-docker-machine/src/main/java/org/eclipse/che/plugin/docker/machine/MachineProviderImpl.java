@@ -13,7 +13,6 @@ package org.eclipse.che.plugin.docker.machine;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
@@ -36,6 +35,7 @@ import org.eclipse.che.commons.lang.Size;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
+import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
 import org.eclipse.che.plugin.docker.client.ProgressLineFormatterImpl;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
 import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredentialsProvider;
@@ -131,7 +131,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
     private final WindowsPathEscaper                            windowsPathEscaper;
 
     @Inject
-    public MachineProviderImpl(DockerConnector docker,
+    public MachineProviderImpl(DockerConnectorProvider dockerProvider,
                                UserSpecificDockerRegistryCredentialsProvider dockerCredentials,
                                DockerMachineFactory dockerMachineFactory,
                                DockerInstanceStopDetector dockerInstanceStopDetector,
@@ -155,7 +155,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                WindowsPathEscaper windowsPathEscaper,
                                @Named("che.docker.extra_hosts") Set<Set<String>> additionalHosts)
             throws IOException {
-        this.docker = docker;
+        this.docker = dockerProvider.get();
         this.dockerCredentials = dockerCredentials;
         this.dockerMachineFactory = dockerMachineFactory;
         this.dockerInstanceStopDetector = dockerInstanceStopDetector;
