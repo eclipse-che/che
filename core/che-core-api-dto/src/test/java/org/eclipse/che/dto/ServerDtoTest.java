@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.dto;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -22,6 +23,7 @@ import org.eclipse.che.dto.definitions.DtoWithAny;
 import org.eclipse.che.dto.definitions.DtoWithDelegate;
 import org.eclipse.che.dto.definitions.DtoWithFieldNames;
 import org.eclipse.che.dto.definitions.SimpleDto;
+import org.eclipse.che.dto.definitions.DTOHierarchy.GrandchildDto;
 import org.eclipse.che.dto.definitions.model.Model;
 import org.eclipse.che.dto.definitions.model.ModelComponentDto;
 import org.eclipse.che.dto.definitions.model.ModelDto;
@@ -142,16 +144,16 @@ public class ServerDtoTest {
     public void testDeserializerWithAny() throws Exception {
         JsonObject json = new JsonObject();
         json.add("stuff", createTestValueForAny());
-        JsonArray jsonArray = new JsonArray();
-        for (Object object : createListTestValueForAny()) {
-            jsonArray.add((JsonElement)object);
-        }
+        JsonArray jsonArray = createElementListTestValueForAny();
         json.add("objects", jsonArray);
 
         DtoWithAny dto = dtoFactory.createDtoFromJson(json.toString(), DtoWithAny.class);
 
-        Assert.assertEquals(dto.getStuff(), createTestValueForAny());
-        Assert.assertEquals(dto.getObjects(), createListTestValueForAny());
+        Gson gson = new Gson();
+        Object stuffValue = gson.fromJson(createTestValueForAny(), Object.class);
+        Assert.assertEquals(dto.getStuff(), stuffValue);
+        Object objectsValue = gson.fromJson(createElementListTestValueForAny(), Object.class);
+        Assert.assertEquals(dto.getObjects(), objectsValue);
     }
 
     @Test
@@ -166,6 +168,12 @@ public class ServerDtoTest {
         assertEquals(expJson, json);
     }
 
+    @Test
+    public void testShadowedFields() throws Exception {
+        GrandchildDto dto1 = dtoFactory.createDto(GrandchildDto.class);
+        dtoFactory.toJson(dto1);
+    }
+
     /** Intentionally call several times to ensure non-reference equality */
     private static JsonElement createTestValueForAny() {
         return new JsonParser().parse("{a:100,b:{c:'blah'}}");
@@ -177,6 +185,14 @@ public class ServerDtoTest {
         objects.add(new JsonParser().parse("{x:1}"));
         objects.add(new JsonParser().parse("{b:120}"));
         return objects;
+    }
+
+    private JsonArray createElementListTestValueForAny() {
+        JsonArray jsonArray = new JsonArray();
+        for (Object object : createListTestValueForAny()) {
+            jsonArray.add((JsonElement)object);
+        }
+        return jsonArray;
     }
 
     @Test

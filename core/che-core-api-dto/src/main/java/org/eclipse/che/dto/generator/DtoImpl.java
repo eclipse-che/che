@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /** Abstract base class for the source generating template for a single DTO. */
 abstract class DtoImpl {
@@ -174,6 +175,19 @@ abstract class DtoImpl {
             addSuperGetters(dto, getters);
         }
         return new ArrayList<>(getters.values());
+    }
+
+    /**
+     * Get the names of all the getters in the super DTO interface and upper ancestors.
+     */
+    protected Set<String> getSuperGetterNames(Class<?> dto) {
+        final Map<String, Method> getters = new HashMap<>();
+        Class<?> superDto = getSuperDtoInterface(dto);
+        if (superDto != null) {
+            addDtoGetters(superDto, getters);
+            addSuperGetters(superDto, getters);
+        }
+        return getters.keySet();
     }
 
     /**

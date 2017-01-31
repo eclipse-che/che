@@ -11,6 +11,7 @@
 package org.eclipse.che.plugin.openshift.client;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -35,6 +36,7 @@ import org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver;
 import org.eclipse.che.plugin.docker.client.connection.DockerConnectionFactory;
 import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
+import org.eclipse.che.plugin.docker.client.json.ContainerListEntry;
 import org.eclipse.che.plugin.docker.client.json.ImageConfig;
 import org.eclipse.che.plugin.docker.client.json.NetworkCreated;
 import org.eclipse.che.plugin.docker.client.json.PortBinding;
@@ -43,9 +45,13 @@ import org.eclipse.che.plugin.docker.client.json.network.Ipam;
 import org.eclipse.che.plugin.docker.client.json.network.IpamConfig;
 import org.eclipse.che.plugin.docker.client.json.network.Network;
 import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
+import org.eclipse.che.plugin.docker.client.params.GetResourceParams;
+import org.eclipse.che.plugin.docker.client.params.KillContainerParams;
+import org.eclipse.che.plugin.docker.client.params.PutResourceParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveNetworkParams;
 import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
+import org.eclipse.che.plugin.docker.client.params.StopContainerParams;
 import org.eclipse.che.plugin.docker.client.params.network.ConnectContainerToNetworkParams;
 import org.eclipse.che.plugin.docker.client.params.network.CreateNetworkParams;
 import org.eclipse.che.plugin.docker.client.params.network.DisconnectContainerFromNetworkParams;
@@ -101,8 +107,6 @@ public class OpenShiftConnector extends DockerConnector {
     private static final String DOCKER_PREFIX                            = "docker://";
     private static final String DOCKER_PROTOCOL_PORT_DELIMITER           = "/";
     private static final String OPENSHIFT_SERVICE_TYPE_NODE_PORT         = "NodePort";
-    private static final int OPENSHIFT_LIVENESS_PROBE_DELAY              = 120;
-    private static final int OPENSHIFT_LIVENESS_PROBE_TIMEOUT            = 1;
     private static final int OPENSHIFT_WAIT_POD_DELAY                    = 1000;
     private static final int OPENSHIFT_WAIT_POD_TIMEOUT                  = 120;
     private static final String OPENSHIFT_POD_STATUS_RUNNING             = "Running";
@@ -118,6 +122,8 @@ public class OpenShiftConnector extends DockerConnector {
     private final KubernetesService        kubernetesService;
     private final String                   openShiftCheProjectName;
     private final String                   openShiftCheServiceAccount;
+    private final int                      openShiftLivenessProbeDelay;
+    private final int                      openShiftLivenessProbeTimeout;
 
     @Inject
     public OpenShiftConnector(DockerConnectorConfiguration connectorConfiguration,
@@ -132,7 +138,10 @@ public class OpenShiftConnector extends DockerConnector {
                               @Named("che.openshift.username") String openShiftUserName,
                               @Named("che.openshift.password") String openShiftUserPassword,
                               @Named("che.openshift.project") String openShiftCheProjectName,
-                              @Named("che.openshift.serviceaccountname") String openShiftCheServiceAccount) {
+                              @Named("che.openshift.serviceaccountname") String openShiftCheServiceAccount,
+                              @Named("che.openshift.liveness.probe.delay") int openShiftLivenessProbeDelay,
+                              @Named("che.openshift.liveness.probe.timeout") int openShiftLivenessProbeTimeout) {
+
         super(connectorConfiguration, connectionFactory, authResolver, dockerApiVersionPathPrefixProvider);
         this.openShiftCheProjectName = openShiftCheProjectName;
         this.openShiftCheServiceAccount = openShiftCheServiceAccount;
@@ -140,6 +149,8 @@ public class OpenShiftConnector extends DockerConnector {
         this.kubernetesEnvVar = kubernetesEnvVar;
         this.kubernetesContainer = kubernetesContainer;
         this.kubernetesService = kubernetesService;
+        this.openShiftLivenessProbeDelay = openShiftLivenessProbeDelay;
+        this.openShiftLivenessProbeTimeout = openShiftLivenessProbeTimeout;
 
         Config config = new ConfigBuilder().withMasterUrl(openShiftApiEndpoint)
                 .withUsername(openShiftUserName)
@@ -190,6 +201,38 @@ public class OpenShiftConnector extends DockerConnector {
     @Override
     public void startContainer(final StartContainerParams params) throws IOException {
         // Not used in OpenShift
+    }
+
+    @Override
+    public void stopContainer(StopContainerParams params) throws IOException {
+        // Not used in OpenShift
+    }
+
+    @Override
+    public int waitContainer(String container) throws IOException {
+        // Not used in OpenShift
+        return 0;
+    }
+
+    @Override
+    public void killContainer(KillContainerParams params) throws IOException {
+        // Not used in OpenShift
+    }
+
+    @Override
+    public List<ContainerListEntry> listContainers() throws IOException {
+        // Implement once 'Service Provider Interface' is defined
+        return Collections.emptyList();
+    }
+
+    @Override
+    public InputStream getResource(GetResourceParams params) throws IOException {
+        throw new UnsupportedOperationException("'getResource' is currently not supported by OpenShift");
+    }
+
+    @Override
+    public void putResource(PutResourceParams params) throws IOException {
+        throw new UnsupportedOperationException("'putResource' is currently not supported by OpenShift");
     }
 
     /**
@@ -487,12 +530,12 @@ public class OpenShiftConnector extends DockerConnector {
                                              String[] volumes,
                                              boolean runContainerAsRoot) {
 
-        String dName = CHE_OPENSHIFT_RESOURCES_PREFIX + workspaceID;
-        LOG.info("Creating OpenShift deployment {}", dName);
+        String deploymentName = CHE_OPENSHIFT_RESOURCES_PREFIX + workspaceID;
+        LOG.info("Creating OpenShift deployment {}", deploymentName);
 
-        Map<String, String> selector = Collections.singletonMap(OPENSHIFT_DEPLOYMENT_LABEL, CHE_OPENSHIFT_RESOURCES_PREFIX + workspaceID);
+        Map<String, String> selector = Collections.singletonMap(OPENSHIFT_DEPLOYMENT_LABEL, deploymentName);
 
-        LOG.info("Adding container {} to OpenShift deployment {}", sanitizedContainerName, dName);
+        LOG.info("Adding container {} to OpenShift deployment {}", sanitizedContainerName, deploymentName);
         Long UID = runContainerAsRoot ? UID_ROOT : UID_USER;
         Container container = new ContainerBuilder()
                                     .withName(sanitizedContainerName)
@@ -516,7 +559,7 @@ public class OpenShiftConnector extends DockerConnector {
 
         Deployment deployment = new DeploymentBuilder()
                 .withNewMetadata()
-                    .withName(dName)
+                    .withName(deploymentName)
                     .withNamespace(this.openShiftCheProjectName)
                 .endMetadata()
                 .withNewSpec()
@@ -538,7 +581,7 @@ public class OpenShiftConnector extends DockerConnector {
                                     .inNamespace(this.openShiftCheProjectName)
                                     .create(deployment);
 
-        LOG.info("OpenShift deployment {} created", dName);
+        LOG.info("OpenShift deployment {} created", deploymentName);
         return deployment.getMetadata().getName();
     }
 
@@ -671,8 +714,8 @@ public class OpenShiftConnector extends DockerConnector {
                             .withNewTcpSocket()
                             .withNewPort(port)
                             .endTcpSocket()
-                            .withInitialDelaySeconds(OPENSHIFT_LIVENESS_PROBE_DELAY)
-                            .withTimeoutSeconds(OPENSHIFT_LIVENESS_PROBE_TIMEOUT)
+                            .withInitialDelaySeconds(openShiftLivenessProbeDelay)
+                            .withTimeoutSeconds(openShiftLivenessProbeTimeout)
                             .build();
         }
 

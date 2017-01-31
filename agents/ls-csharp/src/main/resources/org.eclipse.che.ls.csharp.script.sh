@@ -13,7 +13,7 @@ unset PACKAGES
 unset SUDO
 command -v tar >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" tar"; }
 command -v curl >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" curl"; }
-test "$(id -u)" = 0 || SUDO="sudo"
+test "$(id -u)" = 0 || SUDO="sudo -E"
 
 AGENT_BINARIES_URI=https://codenvy.com/update/repository/public/download/org.eclipse.che.ls.csharp.binaries
 CHE_DIR=$HOME/che
@@ -108,11 +108,7 @@ elif echo ${LINUX_TYPE} | grep -qi "ubuntu"; then
 
     command -v nodejs >/dev/null 2>&1 || {
         {
-            if test "${SUDO}" = ""; then
-                curl -sL https://deb.nodesource.com/setup_6.x | bash -;
-            else
-                curl -sL https://deb.nodesource.com/setup_6.x | ${SUDO} -E bash -;
-            fi
+            curl -sL https://deb.nodesource.com/setup_6.x | ${SUDO} bash -;
         };
 
         ${SUDO} apt-get update;
@@ -140,11 +136,7 @@ elif echo ${LINUX_TYPE} | grep -qi "debian"; then
 
     command -v nodejs >/dev/null 2>&1 || {
         {
-            if test "${SUDO}" = ""; then
-                curl -sL https://deb.nodesource.com/setup_6.x | bash -;
-            else
-                curl -sL https://deb.nodesource.com/setup_6.x | ${SUDO} -E bash -;
-            fi
+            curl -sL https://deb.nodesource.com/setup_6.x | ${SUDO} bash -;
         };
 
         ${SUDO} apt-get update;

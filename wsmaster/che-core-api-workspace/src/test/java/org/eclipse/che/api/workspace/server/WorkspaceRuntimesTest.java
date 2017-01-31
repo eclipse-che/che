@@ -572,13 +572,20 @@ public class WorkspaceRuntimesTest {
     }
 
     @Test
-    public void cleanup() throws Exception {
+    public void shutdown() throws Exception {
         setRuntime("workspace", WorkspaceStatus.RUNNING, "env-name");
 
-        runtimes.cleanup();
+        runtimes.shutdown();
 
         assertFalse(runtimes.hasRuntime("workspace"));
         verify(envEngine).stop("workspace");
+    }
+
+    @Test(expectedExceptions = IllegalStateException.class,
+          expectedExceptionsMessageRegExp = "Workspace runtimes service shutdown has been already called")
+    public void throwsExceptionWhenShutdownCalledTwice() throws Exception {
+        runtimes.shutdown();
+        runtimes.shutdown();
     }
 
     @Test
@@ -795,11 +802,31 @@ public class WorkspaceRuntimesTest {
                                                                 "workspace4"));
     }
 
+    @Test
+    public void isAnyRunningReturnsFalseIfThereIsNoSingleRuntime() {
+        assertFalse(runtimes.isAnyRunning());
+    }
+
+    @Test
+    public void isAnyRunningReturnsTrueIfThereIsAtLeastOneRunningWorkspace() {
+        setRuntime("workspace1", WorkspaceStatus.STARTING);
+
+        assertTrue(runtimes.isAnyRunning());
+    }
+
+    @Test(expectedExceptions = ConflictException.class,
+          expectedExceptionsMessageRegExp = "Start of the workspace 'test-workspace' is rejected by the system, " +
+                                            "no more workspaces are allowed to start")
+    public void doesNotAllowToStartWorkspaceIfStartIsRefused() throws Exception {
+        runtimes.refuseWorkspacesStart();
+
+        runtimes.startAsync(newWorkspace("workspace1", "env-name"), "env-name", false);
+    }
+
     private void captureAsyncTaskAndExecuteSynchronously() throws Exception {
         verify(sharedPool).submit(taskCaptor.capture());
         taskCaptor.getValue().call();
     }
-
 
     private void captureAndVerifyRuntimeStateAfterInterruption(Workspace workspace,
                                                                CompletableFuture<WorkspaceRuntimeImpl> cmpFuture) throws Exception {

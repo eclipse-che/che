@@ -24,6 +24,9 @@ export class WorkspaceRecipeAuthoringController {
 
   recipeFormat: string;
   recipeScript: string;
+  recipeFormatCopy: string;
+  recipeScriptCopy: string;
+  recipeChange: Function;
 
   editorOptions: {
     lineWrapping: boolean,
@@ -37,7 +40,7 @@ export class WorkspaceRecipeAuthoringController {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($timeout: ng.ITimeoutService) {
+  constructor($scope: ng.IScope, $timeout: ng.ITimeoutService) {
     this.$timeout = $timeout;
 
     this.editorOptions = {
@@ -49,40 +52,59 @@ export class WorkspaceRecipeAuthoringController {
         this.setEditor(editor);
       }
     };
+
+    $scope.$watch(() => { return this.recipeScript; }, () => {
+      this.recipeScriptCopy = this.recipeScript;
+    });
+    $scope.$watch(() => { return this.recipeFormat; }, () => {
+      this.recipeFormatCopy = this.recipeFormat || 'compose';
+    });
+
+    this.onRecipeChange();
   }
 
   setEditor(editor: any): void {
     editor.on('paste', () => {
-      this.detectFormat(editor);
+      let content = editor.getValue();
+      this.detectFormat(content);
     });
     editor.on('change', () => {
-      this.trackChangesInProgress(editor);
+      let content = editor.getValue();
+      this.trackChangesInProgress(content);
     });
   }
 
-  trackChangesInProgress(editor: any): void {
+  trackChangesInProgress(content: string): void {
     if (this.editingTimeoutPromise) {
       this.$timeout.cancel(this.editingTimeoutPromise);
     }
 
     this.editingTimeoutPromise = this.$timeout(() => {
-      this.detectFormat(editor);
-    }, 1000);
+      this.detectFormat(content);
+    }, 100);
   }
 
-  detectFormat(editor: any): void {
-    let content = editor.getValue();
-
+  detectFormat(content: string): void {
     // compose format detection:
     if (content.match(/^services:\n/m)) {
-      this.recipeFormat = 'compose';
+      this.recipeFormatCopy = 'compose';
       this.editorOptions.mode = 'text/x-yaml';
     }
 
     // docker file format detection
     if (content.match(/^FROM\s+\w+/m)) {
-      this.recipeFormat = 'dockerfile';
+      this.recipeFormatCopy = 'dockerfile';
       this.editorOptions.mode = 'text/x-dockerfile';
     }
+  }
+
+  onRecipeChange() {
+    this.$timeout(() => {
+      this.detectFormat(this.recipeScriptCopy);
+      this.recipeChange({
+        recipeFormat: this.recipeFormatCopy,
+        recipeScript: this.recipeScriptCopy
+      });
+    }, 10);
   }
 }

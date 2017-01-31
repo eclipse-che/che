@@ -14,6 +14,7 @@
 package org.eclipse.che.dto.server;
 
 import java.io.Serializable;
+import java.io.Writer;
 
 import com.google.gson.JsonElement;
 
@@ -22,6 +23,9 @@ public interface JsonSerializable extends Serializable {
 
     /** Serializes DTO to JSON format. */
     String toJson();
+
+    /** Serialize the DTO to JSON text through the given Writer. */
+    void toJson(Writer w);
 
     /** Serializes DTO to JSON object. */
     JsonElement toJsonElement();
