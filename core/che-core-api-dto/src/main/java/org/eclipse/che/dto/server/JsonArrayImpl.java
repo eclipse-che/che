@@ -15,6 +15,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 
+import java.io.Writer;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -152,6 +153,11 @@ public class JsonArrayImpl<T> implements JsonArray<T> {
     @Override
     public String toJson() {
         return gson.toJson(this);
+    }
+
+    @Override
+    public void toJson(Writer w) {
+        gson.toJson(this, w);
     }
 
     @Override
