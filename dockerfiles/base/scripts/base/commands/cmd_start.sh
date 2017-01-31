@@ -12,19 +12,11 @@
 cmd_start() {
   debug $FUNCNAME
 
-  # If ${CHE_FORMAL_PRODUCT_NAME} is already started or booted, then terminate early.
-  if container_exist_by_name $CHE_SERVER_CONTAINER_NAME; then
-    DISPLAY_URL=$(get_display_url)
-    CURRENT_CHE_SERVER_CONTAINER_ID=$(get_server_container_id $CHE_SERVER_CONTAINER_NAME)
-    if container_is_running ${CURRENT_CHE_SERVER_CONTAINER_ID} && \
-       server_is_booted ${CURRENT_CHE_SERVER_CONTAINER_ID}; then
-       info "start" "${CHE_FORMAL_PRODUCT_NAME} is already running"
-       info "start" "Server logs at \"docker logs -f ${CHE_SERVER_CONTAINER_NAME}\""
-       info "start" "Ver: $(get_installed_version)"
-       info "start" "Use: ${DISPLAY_URL}"
-       info "start" "API: ${DISPLAY_URL}/swagger"
-       return
-    fi
+  # If already running, just display output again
+  check_if_booted
+
+  if server_is_booted $(get_server_container_id $CHE_CONTAINER_NAME); then 
+    return 1
   fi
 
   # To protect users from accidentally updating their ${CHE_FORMAL_PRODUCT_NAME} servers when they didn't mean
@@ -37,13 +29,10 @@ cmd_start() {
   # Preflight checks
   #   a) Check for open ports
   #   b) Test simulated connections for failures
-  if ! is_fast; then
+  if ! is_fast && ! skip_preflight; then
     info "start" "Preflight checks"
-    cmd_start_check_ports
-    cmd_start_check_agent_network
+    cmd_start_check_preflight
     text "\n"
-  else
-    warning "Skipping preflight checks..."
   fi
 
   # Start ${CHE_FORMAL_PRODUCT_NAME}
@@ -63,12 +52,50 @@ cmd_start() {
   log ${COMPOSE_UP_COMMAND}
   eval ${COMPOSE_UP_COMMAND} || (error "Error during 'compose up' - printing 30 line tail of ${CHE_HOST_CONFIG}/cli.log:" && tail -30 ${LOGS} && return 2)
 
+  wait_until_booted
+
+  if ! server_is_booted $(get_server_container_id $CHE_CONTAINER_NAME); then 
+    error "(${CHE_MINI_PRODUCT_NAME} start): Timeout waiting for server. Run \"docker logs ${CHE_CONTAINER_NAME}\" to inspect."
+    return 2
+  fi
+
+  if ! is_fast && ! skip_postflight; then
+    cmd_start_check_postflight
+  fi
+
   check_if_booted
 }
 
+cmd_start_check_host_resources() {
+  HOST_RAM=$(docker info | grep "Total Memory:")
+  HOST_RAM=$(echo ${HOST_RAM#*:} | xargs)
+  HOST_RAM=${HOST_RAM% *}
+
+  PREFLIGHT=""
+  if $(less_than "$HOST_RAM" "$CHE_MIN_RAM"); then
+    text "         mem ($CHE_MIN_RAM GiB):           ${RED}[NOT OK]${NC}\n"
+    PREFLIGHT="fail"
+  else
+    text "         mem ($CHE_MIN_RAM GiB):           ${GREEN}[OK]${NC}\n"
+  fi
+
+  HOST_DISK=$(df "${CHE_CONTAINER_ROOT}" | grep "${CHE_CONTAINER_ROOT}" | cut -d " " -f 6)
+  if $(less_than "$HOST_DISK" "$CHE_MIN_DISK"000000); then
+    text "         disk ($CHE_MIN_DISK MB):           ${RED}[NOT OK]${NC}\n"
+    PREFLIGHT="fail"
+  else
+    text "         disk ($CHE_MIN_DISK MB):           ${GREEN}[OK]${NC}\n"
+  fi
+
+  if [[ "${PREFLIGHT}" = "fail" ]]; then
+    text "\n"
+    error "${CHE_MINI_PRODUCT_NAME} requires more RAM or disk to guarantee workspaces can start."
+    return 2;
+  fi
+
+}
 
 cmd_start_check_ports() {
-
   # Develop array of port #, description.
   # Format of array is "<port>;<port_string>" where the <port_string> is the text to appear in console
   local PORT_ARRAY=(
@@ -125,19 +152,14 @@ cmd_start_check_agent_network() {
   fi
 }
 
-# stop containers booted by docker compose and remove them
-stop_containers() {
-  info "stop" "Stopping containers..."
-  if is_initialized; then
-    log "docker_compose --file=\"${REFERENCE_CONTAINER_COMPOSE_FILE}\" -p=$CHE_MINI_PRODUCT_NAME stop -t ${CHE_COMPOSE_STOP_TIMEOUT} >> \"${LOGS}\" 2>&1 || true"
-    docker_compose --file="${REFERENCE_CONTAINER_COMPOSE_FILE}" \
-                   -p=$CHE_MINI_PRODUCT_NAME stop -t ${CHE_COMPOSE_STOP_TIMEOUT} >> "${LOGS}" 2>&1 || true
-    info "stop" "Removing containers..."
-    log "docker_compose --file=\"${REFERENCE_CONTAINER_COMPOSE_FILE}\" -p=$CHE_MINI_PRODUCT_NAME rm >> \"${LOGS}\" 2>&1 || true"
-    docker_compose --file="${REFERENCE_CONTAINER_COMPOSE_FILE}" \
-                   -p=$CHE_MINI_PRODUCT_NAME rm --force >> "${LOGS}" 2>&1 || true
-  fi
+cmd_start_check_preflight() {
+  cmd_start_check_host_resources
+  cmd_start_check_ports
+  cmd_start_check_agent_network
+}
 
+cmd_start_check_postflight() {
+  true
 }
 
 cmd_stop() {
@@ -154,7 +176,20 @@ cmd_stop() {
 
   # stop containers booted by docker compose
   stop_containers
+}
 
+# stop containers booted by docker compose and remove them
+stop_containers() {
+  info "stop" "Stopping containers..."
+  if is_initialized; then
+    log "docker_compose --file=\"${REFERENCE_CONTAINER_COMPOSE_FILE}\" -p=$CHE_MINI_PRODUCT_NAME stop -t ${CHE_COMPOSE_STOP_TIMEOUT} >> \"${LOGS}\" 2>&1 || true"
+    docker_compose --file="${REFERENCE_CONTAINER_COMPOSE_FILE}" \
+                   -p=$CHE_MINI_PRODUCT_NAME stop -t ${CHE_COMPOSE_STOP_TIMEOUT} >> "${LOGS}" 2>&1 || true
+    info "stop" "Removing containers..."
+    log "docker_compose --file=\"${REFERENCE_CONTAINER_COMPOSE_FILE}\" -p=$CHE_MINI_PRODUCT_NAME rm >> \"${LOGS}\" 2>&1 || true"
+    docker_compose --file="${REFERENCE_CONTAINER_COMPOSE_FILE}" \
+                   -p=$CHE_MINI_PRODUCT_NAME rm --force >> "${LOGS}" 2>&1 || true
+  fi
 }
 
 cmd_restart() {
@@ -166,8 +201,8 @@ cmd_restart() {
   cmd_start ${FORCE_UPDATE}
 }
 
-check_if_booted() {
-  CURRENT_CHE_SERVER_CONTAINER_ID=$(get_server_container_id $CHE_SERVER_CONTAINER_NAME)
+wait_until_booted() {
+  CURRENT_CHE_SERVER_CONTAINER_ID=$(get_server_container_id $CHE_CONTAINER_NAME)
   wait_until_container_is_running 20 ${CURRENT_CHE_SERVER_CONTAINER_ID}
   if ! container_is_running ${CURRENT_CHE_SERVER_CONTAINER_ID}; then
     error "(${CHE_MINI_PRODUCT_NAME} start): Timeout waiting for ${CHE_MINI_PRODUCT_NAME} container to start."
@@ -179,10 +214,10 @@ check_if_booted() {
   # CHE-3546 - if in development mode, then display the che server logs to STDOUT
   #            automatically kill the streaming of the log output when the server is booted
   if debug_server; then
-    docker logs -f ${CHE_SERVER_CONTAINER_NAME} &
+    docker logs -f ${CHE_CONTAINER_NAME} &
     LOG_PID=$!
   else
-    info "start" "Server logs at \"docker logs -f ${CHE_SERVER_CONTAINER_NAME}\""
+    info "start" "Server logs at \"docker logs -f ${CHE_CONTAINER_NAME}\""
   fi
 
   check_containers_are_running
@@ -193,20 +228,22 @@ check_if_booted() {
     kill $LOG_PID > /dev/null 2>&1
     info ""
   fi
+}
 
-  if server_is_booted ${CURRENT_CHE_SERVER_CONTAINER_ID}; then
-    DISPLAY_URL=$(get_display_url)
-    info "start" "Booted and reachable"
-    info "start" "Ver: $(get_installed_version)"
-    info "start" "Use: ${DISPLAY_URL}"
-    info "start" "API: ${DISPLAY_URL}/swagger"
-    if debug_server; then
-      DISPLAY_DEBUG_URL=$(get_debug_display_url)
-      info "start" "Debug: ${DISPLAY_DEBUG_URL}"
+check_if_booted() {
+  if container_exist_by_name $CHE_CONTAINER_NAME; then
+    local CURRENT_CHE_SERVER_CONTAINER_ID=$(get_server_container_id $CHE_CONTAINER_NAME)
+    if server_is_booted $CURRENT_CHE_SERVER_CONTAINER_ID; then 
+      DISPLAY_URL=$(get_display_url)
+      info "start" "Booted and reachable"
+      info "start" "Ver: $(get_installed_version)"
+      info "start" "Use: ${DISPLAY_URL}"
+      info "start" "API: ${DISPLAY_URL}/swagger"
+      if debug_server; then
+        DISPLAY_DEBUG_URL=$(get_debug_display_url)
+        info "start" "Debug: ${DISPLAY_DEBUG_URL}"
+      fi
     fi
-  else
-    error "(${CHE_MINI_PRODUCT_NAME} start): Timeout waiting for server. Run \"docker logs ${CHE_SERVER_CONTAINER_NAME}\" to inspect the issue."
-    return 2
   fi
 }
 
@@ -233,3 +270,4 @@ check_containers_are_running() {
     fi
   done <<< "${LIST_OF_COMPOSE_CONTAINERS}"
 }
+
