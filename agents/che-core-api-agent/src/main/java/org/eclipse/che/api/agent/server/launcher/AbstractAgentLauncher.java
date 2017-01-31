@@ -68,20 +68,32 @@ public abstract class AbstractAgentLauncher implements AgentLauncher {
         this.agentLaunchingChecker = agentLaunchingChecker;
     }
 
+    /**
+     * Launches agent script in machine and waits until agent starts.
+     * The machine should be started.
+     * Retrieves agent's logs if its start fails.
+     *
+     * @param machine
+     *         the machine instance in which agent will be started. The machine should be started.
+     * @param agent
+     *         the agent to start
+     * @throws ServerException
+     *         if script execution failed
+     */
     @Override
     public void launch(Instance machine, Agent agent) throws ServerException {
         if (isNullOrEmpty(agent.getScript())) {
             return;
         }
         ListLineConsumer agentLogger = new ListLineConsumer();
+        LineConsumer lineConsumer = new AbstractLineConsumer() {
+            @Override
+            public void writeLine(String line) throws IOException {
+                machine.getLogger().writeLine(line);
+                agentLogger.writeLine(line);
+            }
+        };
         try {
-            LineConsumer lineConsumer = new AbstractLineConsumer() {
-                @Override
-                public void writeLine(String line) throws IOException {
-                    machine.getLogger().writeLine(line);
-                    agentLogger.writeLine(line);
-                }
-            };
             final InstanceProcess process = start(machine, agent, lineConsumer);
             LOG.debug("Waiting for agent {} is launched. Workspace ID:{}", agent.getId(), machine.getWorkspaceId());
 
@@ -102,6 +114,10 @@ public abstract class AbstractAgentLauncher implements AgentLauncher {
             Thread.currentThread().interrupt();
             throw new ServerException(format("Launching agent %s is interrupted", agent.getName()));
         } finally {
+            try {
+                lineConsumer.close();
+            } catch (IOException ignored) {
+            }
             agentLogger.close();
         }
 
@@ -123,11 +139,6 @@ public abstract class AbstractAgentLauncher implements AgentLauncher {
                     machine.getLogger().writeLine(format("[ERROR] %s", e.getMessage()));
                 } catch (IOException ignored) {
                 }
-            } finally {
-                try {
-                    lineConsumer.close();
-                } catch (IOException ignored) {
-                }
             }
         }));
         try {
@@ -142,9 +153,13 @@ public abstract class AbstractAgentLauncher implements AgentLauncher {
 
     @VisibleForTesting
     void logAsErrorAgentStartLogs(String agentName, String logs) {
-        LOG.error("An error occurs while starting '{}' agent. Detailed log:\n{}",
-                  agentName,
-                  logs);
+        if (!logs.isEmpty()) {
+            LOG.error("An error occurs while starting '{}' agent. Detailed log:\n{}",
+                      agentName,
+                      logs);
+        } else {
+            LOG.error("An error occurs while starting '{}' agent. The agent didn't produce any logs.", agentName);
+        }
     }
 
 }
