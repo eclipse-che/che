@@ -37,7 +37,7 @@ cmd_destroy() {
     return;
   fi
 
-  cmd_stop
+  cmd_stop --force
 
   info "destroy" "Deleting instance and config..."
 
