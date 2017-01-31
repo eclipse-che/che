@@ -72,6 +72,10 @@ check_ip_result() {
   check_ip_result "windows10-docker-for-windows"
 }
 
+@test "Get ip based on ip a show interface (windows10/boot2docker)" {
+  check_ip_result "windows10-boot2docker"
+}
+
 @test "Get ip based on ip a show interface (ubuntu/only docker network)" {
   check_ip_result "ubuntu-only-docker"
 }
