@@ -19,6 +19,7 @@ import {ListWorkspacesAction} from "./impl/list-workspaces-action";
 import {ProductName} from "../../utils/product-name";
 import {WorkspaceSshAction} from "./impl/workspace-ssh-action";
 import {GetSshDataAction} from "./impl/get-ssh-action";
+import {GracefulStopAction} from "./impl/graceful-stop-action";
 /**
  * Entrypoint for the Actions.
  * @author Florent Benoit
@@ -60,6 +61,7 @@ export class CheAction {
         actionMap.set('list-workspaces', ListWorkspacesAction);
         actionMap.set('workspace-ssh', WorkspaceSshAction);
         actionMap.set('get-ssh-data', GetSshDataAction);
+        actionMap.set('graceful-stop', GracefulStopAction);
 
         return actionMap;
     }

@@ -125,14 +125,8 @@ cmd_start_check_agent_network() {
   fi
 }
 
-cmd_stop() {
-  debug $FUNCNAME
-
-  if [ $# -gt 0 ]; then
-    error "${CHE_MINI_PRODUCT_NAME} stop: You passed unknown options. Aborting."
-    return
-  fi
-
+# stop containers booted by docker compose and remove them
+stop_containers() {
   info "stop" "Stopping containers..."
   if is_initialized; then
     log "docker_compose --file=\"${REFERENCE_CONTAINER_COMPOSE_FILE}\" -p=$CHE_MINI_PRODUCT_NAME stop -t ${CHE_COMPOSE_STOP_TIMEOUT} >> \"${LOGS}\" 2>&1 || true"
@@ -143,6 +137,24 @@ cmd_stop() {
     docker_compose --file="${REFERENCE_CONTAINER_COMPOSE_FILE}" \
                    -p=$CHE_MINI_PRODUCT_NAME rm --force >> "${LOGS}" 2>&1 || true
   fi
+
+}
+
+cmd_stop() {
+  debug $FUNCNAME
+  FORCE_STOP=false
+  if [[ "$@" == *"--force"* ]]; then
+  	FORCE_STOP=true
+  fi
+
+  if [[ ${FORCE_STOP} = "false" ]]; then
+    info "Waiting for graceful stop of services..."
+    cmd_action "graceful-stop" "$@"
+  fi
+
+  # stop containers booted by docker compose
+  stop_containers
+
 }
 
 cmd_restart() {
