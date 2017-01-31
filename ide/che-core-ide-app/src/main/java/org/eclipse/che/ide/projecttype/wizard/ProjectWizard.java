@@ -22,8 +22,9 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
+import org.eclipse.che.ide.api.command.ContextualCommand;
+import org.eclipse.che.ide.api.command.ContextualCommand.ApplicableContext;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode;
 import org.eclipse.che.ide.api.resources.Container;
@@ -125,14 +126,14 @@ public class ProjectWizard extends AbstractWizard<MutableProjectConfig> {
         return new Operation<Project>() {
             @Override
             public void apply(final Project project) throws OperationException {
-                Promise<CommandImpl> chain = null;
+                Promise<ContextualCommand> chain = null;
                 for (final CommandDto command : dataObject.getCommands()) {
                     if (chain == null) {
                         chain = addCommand(project, command);
                     } else {
-                        chain = chain.thenPromise(new Function<CommandImpl, Promise<CommandImpl>>() {
+                        chain = chain.thenPromise(new Function<ContextualCommand, Promise<ContextualCommand>>() {
                             @Override
-                            public Promise<CommandImpl> apply(CommandImpl ignored) throws FunctionException {
+                            public Promise<ContextualCommand> apply(ContextualCommand ignored) throws FunctionException {
                                 return addCommand(project, command);
                             }
                         });
@@ -142,9 +143,9 @@ public class ProjectWizard extends AbstractWizard<MutableProjectConfig> {
                 if (chain == null) {
                     callback.onCompleted();
                 } else {
-                    chain.then(new Operation<CommandImpl>() {
+                    chain.then(new Operation<ContextualCommand>() {
                         @Override
-                        public void apply(CommandImpl ignored) throws OperationException {
+                        public void apply(ContextualCommand ignored) throws OperationException {
                             callback.onCompleted();
                         }
                     }).catchError(onFailure(callback));
@@ -153,11 +154,20 @@ public class ProjectWizard extends AbstractWizard<MutableProjectConfig> {
         };
     }
 
-    private Promise<CommandImpl> addCommand(Project project, CommandDto command) {
+    private Promise<ContextualCommand> addCommand(Project project, CommandDto command) {
         String name = project.getName() + ": " + command.getName();
         String projectPath = appContext.getProjectsRoot().append(project.getPath()).toString();
         String commandLine = command.getCommandLine().replaceAll(PROJECT_PATH_MACRO_REGEX, projectPath);
-        return commandManager.create(name, commandLine, command.getType(), command.getAttributes());
+
+        final ApplicableContext applicableContext = new ApplicableContext();
+        applicableContext.addProject(projectPath);
+        final ContextualCommand contextualCommand = new ContextualCommand(name,
+                                                                          commandLine,
+                                                                          command.getType(),
+                                                                          command.getAttributes(),
+                                                                          applicableContext);
+
+        return commandManager.createCommand(contextualCommand);
     }
 
     private Operation<Project> onComplete(final CompleteCallback callback) {
