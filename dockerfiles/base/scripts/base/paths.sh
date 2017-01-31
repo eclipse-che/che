@@ -8,20 +8,36 @@
 # Contains path utilities
 
 check_host_volume_mount() {
-  echo 'test' > ${CHE_CONTAINER_ROOT}/test
+  if is_boot2docker; then
+    warning "Boot2docker detected - ensure :/data is mounted to %userprofile%"
+  fi
 
-  if [[ ! -f ${CHE_CONTAINER_ROOT}/test ]]; then
-    error "Docker installed, but unable to write files to your host."
+  if file_system_writable "${CHE_CONTAINER_ROOT}/test"; then 
+    delete_file_system_test "${CHE_CONTAINER_ROOT}/test"
+  else 
+    error "Unable to write files to your host"
     error "Have you enabled Docker to allow mounting host directories?"
     error "Did you give our CLI rights to create files on your host?"
     return 2;
   fi
+}
 
-  rm -rf ${CHE_CONTAINER_ROOT}/test
+file_system_writable() {
+  echo 'test' > "${1}" 
+
+  if [[ -f "${1}" ]]; then
+    return 0
+  else 
+    return 1
+  fi
+}
+
+delete_file_system_test() {
+  rm -rf $1 > /dev/null 2>&1
 }
 
 get_mount_path() {
-  debug $FUNCNAME
+#  debug $FUNCNAME
   FULL_PATH=$(get_full_path "${1}")
   POSIX_PATH=$(convert_windows_to_posix "${FULL_PATH}")
   CLEAN_PATH=$(get_clean_path "${POSIX_PATH}")
@@ -29,18 +45,18 @@ get_mount_path() {
 }
 
 get_full_path() {
-  debug $FUNCNAME
+#  debug $FUNCNAME
   # create full directory path
   echo "$(cd "$(dirname "${1}")"; pwd)/$(basename "$1")"
 }
 
 convert_windows_to_posix() {
-  debug $FUNCNAME
+#  debug $FUNCNAME
   echo "/"$(echo "$1" | sed 's/\\/\//g' | sed 's/://')
 }
 
 convert_posix_to_windows() {
-  debug $FUNCNAME
+#  debug $FUNCNAME
   # Remove leading slash
   VALUE="${1:1}"
 
@@ -55,7 +71,7 @@ convert_posix_to_windows() {
 }
 
 get_clean_path() {
-  debug $FUNCNAME
+#  debug $FUNCNAME
   INPUT_PATH=$1
   # \some\path => /some/path
   OUTPUT_PATH=$(echo ${INPUT_PATH} | tr '\\' '/')

@@ -12,6 +12,7 @@
 import {CheStack} from '../../../components/api/che-stack.factory';
 import {CheNotification} from '../../../components/notification/che-notification.factory';
 import {CheProfile} from '../../../components/api/che-profile.factory';
+import {ConfirmDialogService} from '../../../components/service/confirm-dialog/confirm-dialog.service';
 
 /**
  * @ngdoc controller
@@ -37,17 +38,20 @@ export class ListStacksController {
   profile: any;
   lodash: any;
 
+  private confirmDialogService: ConfirmDialogService;
+
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheStack: CheStack, cheProfile: CheProfile, $log: ng.ILogService, $mdDialog: ng.material.IDialogService, cheNotification: CheNotification, $rootScope: ng.IRootScopeService, lodash: any, $q: ng.IQService) {
+  constructor(cheStack: CheStack, cheProfile: CheProfile, $log: ng.ILogService, $mdDialog: ng.material.IDialogService, cheNotification: CheNotification, $rootScope: ng.IRootScopeService, lodash: _.LoDashStatic, $q: ng.IQService, confirmDialogService: ConfirmDialogService) {
     this.cheStack = cheStack;
     this.$log = $log;
     this.$mdDialog = $mdDialog;
     this.cheNotification = cheNotification;
     this.lodash = lodash;
     this.$q = $q;
+    this.confirmDialogService = confirmDialogService;
 
     ($rootScope as any).showIDE = false;
 
@@ -291,25 +295,19 @@ export class ListStacksController {
   /**
    * Show confirm dialog for stacks deletion.
    *
-   * @param numberToDelete number of stacks to be deleted
-   * @param stackName name of stack to confirm (can be null)
-   * @returns {*}
+   * @param numberToDelete{number} number of stacks to be deleted
+   * @param stackName{string} name of stack to confirm (can be null)
+   * @returns {ng.IPromise<any>}
    */
   confirmStacksDeletion(numberToDelete: number, stackName: string): ng.IPromise<any> {
-    let confirmTitle = 'Would you like to delete ';
+    let content = 'Would you like to delete ';
     if (numberToDelete > 1) {
-      confirmTitle += 'these ' + numberToDelete + ' stacks?';
+      content += 'these ' + numberToDelete + ' stacks?';
     } else {
-      confirmTitle += stackName ? stackName + '?' : 'this selected stack?';
+      content += stackName ? stackName + '?' : 'this selected stack?';
     }
-    let confirm = this.$mdDialog.confirm()
-      .title(confirmTitle)
-      .ariaLabel('Remove stacks')
-      .ok('Delete!')
-      .cancel('Cancel')
-      .clickOutsideToClose(true);
 
-    return this.$mdDialog.show(confirm);
+    return this.confirmDialogService.showConfirmDialog('Remove stacks', content, 'Delete');
   }
 
 }

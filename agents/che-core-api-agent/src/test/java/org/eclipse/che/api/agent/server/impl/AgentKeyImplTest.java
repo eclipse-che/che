@@ -10,10 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.api.agent.server.impl;
 
-import org.eclipse.che.api.agent.server.model.impl.AgentKeyImpl;
+import org.eclipse.che.api.agent.shared.model.impl.AgentKeyImpl;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.assertNull;
 import static org.testng.AssertJUnit.assertEquals;
 
 /**
@@ -34,7 +33,7 @@ public class AgentKeyImplTest {
         AgentKeyImpl agentKey = AgentKeyImpl.parse("id");
 
         assertEquals(agentKey.getId(), "id");
-        assertNull(agentKey.getVersion());
+        assertEquals(agentKey.getVersion(), "latest");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)

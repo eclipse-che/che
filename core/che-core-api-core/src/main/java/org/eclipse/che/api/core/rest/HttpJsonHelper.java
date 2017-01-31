@@ -400,14 +400,6 @@ public class HttpJsonHelper {
             return null;
         }
 
-        private String getAuthenticationToken() {
-            Subject subject = EnvironmentContext.getCurrent().getSubject();
-            if (subject != null) {
-                return subject.getToken();
-            }
-            return null;
-        }
-
         public String requestString(String url,
                                     String method,
                                     Object body,
@@ -422,7 +414,7 @@ public class HttpJsonHelper {
                                     Object body,
                                     Pair<String, ?>... parameters)
                 throws IOException, ServerException, ForbiddenException, NotFoundException, UnauthorizedException, ConflictException {
-            final String authToken = getAuthenticationToken();
+            final String authToken = EnvironmentContext.getCurrent().getSubject().getToken();
             if ((parameters != null && parameters.length > 0) || authToken != null) {
                 final UriBuilder ub = UriBuilder.fromUri(url);
                 //remove sensitive information from url.

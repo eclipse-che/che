@@ -105,7 +105,7 @@ log() {
 }
 
 usage() {
-  debug $FUNCNAME
+ # debug $FUNCNAME
   init_usage
   printf "%s" "${USAGE}"
   return 1;
@@ -246,6 +246,14 @@ is_offline() {
   fi
 }
 
+is_trace() {
+  if [ "${CHE_TRACE}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
 init_logging() {
   # Initialize CLI folder
   CLI_DIR=$CHE_CONTAINER_ROOT
@@ -279,6 +287,11 @@ init() {
     CHE_OFFLINE=true
   fi
 
+  if [[ "$@" == *"--trace"* ]]; then
+    CHE_TRACE=true
+    set -x
+  fi
+
   SCRIPTS_BASE_CONTAINER_SOURCE_DIR="/scripts/base"
   # add helper scripts
   for HELPER_FILE in "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/*.sh
@@ -309,7 +322,6 @@ init() {
      # Use the CLI that is inside the container.
      SCRIPTS_CONTAINER_SOURCE_DIR="/scripts"
   fi
-
 
   # Primary source directory
   source "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/library.sh
@@ -350,15 +362,10 @@ cli_init() {
     return 2;
   fi
 
-  # TODO: Change this to use the current folder or perhaps ~?
-  if is_boot2docker && has_docker_for_windows_client; then
-    if [[ "${CHE_HOST_INSTANCE,,}" != *"${USERPROFILE,,}"* ]]; then
-      CHE_HOST_INSTANCE=$(get_mount_path "${USERPROFILE}/.${CHE_MINI_PRODUCT_NAME}/")
-      warning "Boot2docker for Windows - CHE_INSTANCE set to $CHE_HOST_INSTANCE"
-    fi
-    if [[ "${CHE_HOST_CONFIG,,}" != *"${USERPROFILE,,}"* ]]; then
-      CHE_HOST_CONFIG=$(get_mount_path "${USERPROFILE}/.${CHE_MINI_PRODUCT_NAME}/")
-      warning "Boot2docker for Windows - CHE_CONFIG set to $CHE_HOST_CONFIG"
+  if is_initialized; then 
+    CHE_HOST_LOCAL=$(get_value_of_var_from_env_file ${CHE_PRODUCT_NAME}_HOST)
+    if [[ "${CHE_HOST}" != "${CHE_HOST_LOCAL}" ]]; then
+      warning "${CHE_PRODUCT_NAME}_HOST (${CHE_HOST}) overridden by ${CHE_ENVIRONMENT_FILE} (${CHE_HOST_LOCAL})"
     fi
   fi
 
@@ -371,8 +378,6 @@ cli_init() {
     verify_version_upgrade_compatibility
   elif ! is_fast; then
     verify_version_compatibility
-  else
-    warning "Skipping version compatibility check..."
   fi
 }
 
@@ -393,19 +398,20 @@ start() {
   init "$@"
 
   # Removes "--fast", "--debug", "--offline" from the positional arguments if it is set.
+  ORIGINAL_PARAMETERS=$@
   set -- "${@/\-\-fast/}"
   set -- "${@/\-\-debug/}"
   set -- "${@/\-\-offline/}"
+  set -- "${@/\-\-trace/}"
   
-  # Begin product-specific CLI calls
-  info "cli" "Loading cli..."
-
-
-  # The pre_init method is unique to each assembly. This method must be provided by 
+    # The pre_init method is unique to each assembly. This method must be provided by 
   # a custom CLI assembly in their container and can set global variables which are 
   # specific to that implementation of the CLI. This method must be called after
   # networking has been established and initial images downloaded.
   cli_pre_init
+  
+  # Begin product-specific CLI calls
+  info "cli" "$CHE_VERSION - using docker ${DOCKER_SERVER_VERSION} / $(get_docker_install_type)"
 
   cli_init "$@"
   cli_parse "$@"

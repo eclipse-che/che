@@ -721,7 +721,6 @@ a {
     animation-fill-mode: both;
 }
 
-
 .createWsTagsPopup {
     /*the same index as in Window*/
     z-index: 20000;

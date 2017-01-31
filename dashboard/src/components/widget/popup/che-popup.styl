@@ -1,3 +1,6 @@
+che-popup
+  display inline-block
+
 .che-popup
   background-color inherit
 
@@ -25,4 +28,15 @@
         color rgba($label-secondary-color, 0.8)
 
   .che-popup-body
+    min-width 500px
     margin 5px 24px 24px 24px
+
+    che-button-default,
+    che-button-primary,
+    che-button-notice
+      float right
+
+    .che-button
+      float none
+      margin-right 0
+      margin-bottom 0
