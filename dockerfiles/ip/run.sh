@@ -1,17 +1,19 @@
 #!/bin/sh
-# Copyright (c) 2016-2017 Codenvy, S.A.
+# Copyright (c) 2017 Codenvy, S.A.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
+#
+# Contributors:
+#   Florent Benoit - Initial Implementation
+#
 
 IMAGE_NAME="eclipse/che-ip"
-base_dir=$(cd "$(dirname "$0")"; pwd)
-. $base_dir/../build.include
+. $(cd "$(dirname "$0")"; pwd)/../build.include
 
 init "$@"
-build
 
-if [ $(skip_tests "$@") = false ]; then
-  sh $base_dir/test.sh $TAG
-fi
+# use -x to display run command
+set -x
+docker run --rm --net host ${IMAGE_NAME}:${TAG}
