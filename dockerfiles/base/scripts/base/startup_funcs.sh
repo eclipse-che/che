@@ -543,7 +543,7 @@ start() {
   # Bootstrap networking, docker, logging, and ability to load cli.sh and library.sh
   init "$@"
 
-  # Removes "--fast", "--debug", "--offline" from the positional arguments if it is set.
+  # Removes global parameters from the positional arguments
   ORIGINAL_PARAMETERS=$@
   set -- "${@/\-\-fast/}"
   set -- "${@/\-\-debug/}"
@@ -555,10 +555,10 @@ start() {
   set -- "${@/\-\-skip\:network/}"
   set -- "${@/\-\-skip\:pull/}"
   
-  # The cli_post_init method is unique to each assembly. This method must be provided by 
+  # The post_init method is unique to each assembly. This method must be provided by 
   # a custom CLI assembly in their container and can set global variables which are 
-  # specific to that implementation of the CLI. This method must be called after
-  # networking has been established and initial images downloaded.
+  # specific to that implementation of the CLI. Place initialization functions that
+  # require networking here.
   post_init
   
   # Begin product-specific CLI calls
