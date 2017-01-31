@@ -11,6 +11,8 @@
 package org.eclipse.che.ide.command.toolbar.ddw;
 
 import elemental.dom.Element;
+import elemental.html.DivElement;
+import elemental.html.SpanElement;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -19,11 +21,13 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
 
+import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.ui.dropdown.DropDownWidget;
+import org.eclipse.che.ide.ui.list.SimpleList;
+import org.eclipse.che.ide.util.dom.Elements;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,10 +39,14 @@ public class DropDownListBox<T> extends Composite {
 
     private static final DropDownListBoxUiBinder  UI_BINDER = GWT.create(DropDownListBoxUiBinder.class);
     private static final DropDownWidget.Resources resources = GWT.create(DropDownWidget.Resources.class);
+    private static final Resources                res       = GWT.create(Resources.class);
 
-    private final List<T>     items;
-    private final Renderer<T> renderer;
-    private final PopupPanel  panel;
+    private final List<T>                         items;
+    private final Renderer<T>                     renderer;
+    private final PopupPanel                      panel;
+    private final SimpleList<T>                   list;
+    private final SimpleList.ListItemRenderer<T>  itemRenderer;
+    private final SimpleList.ListEventDelegate<T> eventDelegate;
 
     @UiField
     FlowPanel listHeader;
@@ -50,7 +58,7 @@ public class DropDownListBox<T> extends Composite {
 
         items = new ArrayList<>();
 
-        panel = new PopupPanel();
+        panel = new PopupPanel(true);
         panel.setAnimationEnabled(true);
         panel.setAnimationType(PopupPanel.AnimationType.ROLL_DOWN);
 
@@ -61,16 +69,48 @@ public class DropDownListBox<T> extends Composite {
         marker.getElement().appendChild(resources.expansionImage().getSvg().getElement());
         marker.addStyleName(resources.dropdownListCss().expandedImage());
 
-        marker.addHandler(new ClickHandler() {
+        marker.addDomHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                panel.add(new Label("test"));
+                panel.showRelativeTo(DropDownListBox.this);
                 panel.show();
-                panel.center();
-                panel.setWidth("100px");
+                panel.setWidth("294px");
                 panel.setHeight("100px");
             }
         }, ClickEvent.getType());
+
+        itemRenderer = new SimpleList.ListItemRenderer<T>() {
+            @Override
+            public void render(Element listItemBase, T itemData) {
+                final SpanElement element = Elements.createSpanElement();
+                element.setInnerText("test");
+
+                listItemBase.appendChild(element);
+            }
+        };
+        eventDelegate = new SimpleList.ListEventDelegate<T>() {
+            @Override
+            public void onListItemClicked(Element listItemBase, T itemData) {
+
+            }
+
+            @Override
+            public void onListItemDoubleClicked(Element listItemBase, T itemData) {
+
+            }
+        };
+
+        DivElement listView = Elements.createDivElement();
+        panel.getElement().appendChild(((com.google.gwt.dom.client.Element)listView));
+
+        list = SimpleList.create((SimpleList.View)panel.getElement().cast(),
+                                 (Element)panel.getElement(),
+                                 listView,
+                                 res.defaultSimpleListCss(),
+                                 itemRenderer,
+                                 eventDelegate);
+
+//        panel.add(list);
     }
 
     public void addItem(T item) {
