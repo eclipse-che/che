@@ -365,6 +365,20 @@ init_logging() {
   log "$(date)"
 }
 
+# Check pre/post functions are there or not
+declare -f pre_init > /dev/null
+if [ "$?" == "1" ]; then
+  pre_init() {
+    :
+  }
+fi
+declare -f post_init > /dev/null
+if [ "$?" == "1" ]; then
+  post_init() {
+    :
+  }
+fi
+
 init() {
   init_constants
 
@@ -463,6 +477,14 @@ init() {
   grab_initial_images
 }
 
+cli_pre_init() {
+  :
+}
+
+cli_post_init() {
+  :
+}
+
 cli_init() {
   CHE_HOST=$(eval "echo \$${CHE_PRODUCT_NAME}_HOST")
   CHE_PORT=$(eval "echo \$${CHE_PRODUCT_NAME}_PORT")
@@ -514,9 +536,9 @@ cleanup() {
 
 start() {
 
-  # cli_pre_init is unique to each CLI assembly. This can be called before
+  # pre_init is unique to each CLI assembly. This can be called before
   # networking is established.
-  cli_pre_init
+  pre_init
 
   # Bootstrap networking, docker, logging, and ability to load cli.sh and library.sh
   init "$@"
@@ -537,12 +559,14 @@ start() {
   # a custom CLI assembly in their container and can set global variables which are 
   # specific to that implementation of the CLI. This method must be called after
   # networking has been established and initial images downloaded.
-  cli_post_init
+  post_init
   
   # Begin product-specific CLI calls
   info "cli" "$CHE_VERSION - using docker ${DOCKER_SERVER_VERSION} / $(get_docker_install_type)"
 
+  cli_pre_init
   cli_init "$@"
+  cli_post_init
   cli_parse "$@"
   cli_execute "$@"
 }

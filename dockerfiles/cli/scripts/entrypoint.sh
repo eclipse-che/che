@@ -6,7 +6,7 @@
 # http://www.eclipse.org/legal/epl-v10.html
 #
 
-cli_pre_init() {
+pre_init() {
   ADDITIONAL_MANDATORY_PARAMETERS=""
   ADDITIONAL_OPTIONAL_DOCKER_PARAMETERS="
   -e CHE_HOST=<YOUR_HOST>              IP address or hostname where che will serve its users
