@@ -13,7 +13,7 @@ unset PACKAGES
 unset SUDO
 command -v tar >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" tar"; }
 command -v curl >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" curl"; }
-test "$(id -u)" = 0 || SUDO="sudo"
+test "$(id -u)" = 0 || SUDO="sudo -E"
 
 LOCAL_AGENT_BINARIES_URI="/mnt/che/ws-agent.tar.gz"
 DOWNLOAD_AGENT_BINARIES_URI='${WORKSPACE_MASTER_URI}/agent-binaries/ws-agent.tar.gz'

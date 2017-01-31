@@ -3,14 +3,18 @@
 
     <div layout="column" class="recipe-editor">
       <ui-codemirror ui-codemirror="workspaceRecipeAuthoringController.editorOptions"
-                     ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 1000, 'blur': 0 } }"
-                     ng-model="workspaceRecipeAuthoringController.recipeScript"></ui-codemirror>
+                     ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 1000, 'blur': 0 }, allowInvalid: true }"
+                     ng-model="workspaceRecipeAuthoringController.recipeScriptCopy"
+                     ng-change="workspaceRecipeAuthoringController.onRecipeChange()"></ui-codemirror>
       <che-input che-form="workspaceRecipeAuthoringForm"
                  che-name="recipe"
                  type="hidden"
-                 ng-model="workspaceRecipeAuthoringController.recipeScript"
+                 ng-model="workspaceRecipeAuthoringController.recipeScriptCopy"
                  ng-required>
-        <div ng-message="required">The recipe is required.</div>
+        <che-error-messages che-message-scope="workspace-details-environment"
+                            che-message-name="Recipe content">
+          <div ng-message="required">The recipe is required.</div>
+        </che-error-messages>
       </che-input>
       <div class="recipe-docs-link">
         <a href="https://www.eclipse.org/che/docs/workspace/stacks/index.html#stack-administration" target="_blank">Custom stack documentation</a>

@@ -29,13 +29,4 @@ Therefore:
 
 Contributing Improvements
 -------------------------
-If you are interested in fixing issues and contributing directly to the code base, please the document [How to Contribute](https://github.com/eclipse/che/wiki/How-To-Contribute).
-
-
-Dependency Repositories
--------------------------
-Eclipse Che is dependent on the following external repositories to build:
-
-[https://github.com/codenvy/che-docs](https://github.com/codenvy/che-docs)
-
-Run `mvn clean install` for the repositories above to create required artifacts before building Che.
+If you are interested in fixing issues and contributing directly to the code base, [please see our wiki](https://github.com/eclipse/che/wiki/How-To-Contribute).

@@ -164,12 +164,22 @@ cmd_start_check_postflight() {
 
 cmd_stop() {
   debug $FUNCNAME
-
-  if [ $# -gt 0 ]; then
-    error "${CHE_MINI_PRODUCT_NAME} stop: You passed unknown options. Aborting."
-    return
+  FORCE_STOP=false
+  if [[ "$@" == *"--force"* ]]; then
+  	FORCE_STOP=true
   fi
 
+  if [[ ${FORCE_STOP} = "false" ]]; then
+    info "Waiting for graceful stop of services..."
+    cmd_action "graceful-stop" "$@"
+  fi
+
+  # stop containers booted by docker compose
+  stop_containers
+}
+
+# stop containers booted by docker compose and remove them
+stop_containers() {
   info "stop" "Stopping containers..."
   if is_initialized; then
     log "docker_compose --file=\"${REFERENCE_CONTAINER_COMPOSE_FILE}\" -p=$CHE_MINI_PRODUCT_NAME stop -t ${CHE_COMPOSE_STOP_TIMEOUT} >> \"${LOGS}\" 2>&1 || true"
