@@ -60,6 +60,7 @@ import java.util.stream.Collectors;
  */
 @Api(value = "/machine", description = "Machine REST API")
 @Path("/workspace/{workspaceId}/machine")
+@Deprecated
 public class MachineService extends Service {
     private final MachineProcessManager       machineProcessManager;
     private final MachineServiceLinksInjector linksInjector;
@@ -142,6 +143,7 @@ public class MachineService extends Service {
                                                       "(e.g. The machine with such name already exists)." +
                                                       "Workspace is not in RUNNING state"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
+    @Deprecated
     public void startMachine(@ApiParam("The workspace id")
                              @PathParam("workspaceId")
                              String workspaceId,
@@ -175,6 +177,7 @@ public class MachineService extends Service {
     @ApiResponses({@ApiResponse(code = 204, message = "Machine was successfully stopped"),
                    @ApiResponse(code = 404, message = "Machine with specified id does not exist"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
+    @Deprecated
     public void stopMachine(@ApiParam(value = "Workspace ID")
                             @PathParam("workspaceId") String workspaceId,
                             @ApiParam(value = "Machine ID")
@@ -193,6 +196,7 @@ public class MachineService extends Service {
                    @ApiResponse(code = 400, message = "Command entity is invalid"),
                    @ApiResponse(code = 404, message = "Machine with specified ID does not exist"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
+    @Deprecated
     public MachineProcessDto executeCommandInMachine(@ApiParam(value = "Workspace ID")
                                                      @PathParam("workspaceId")
                                                      String workspaceId,
@@ -229,6 +233,7 @@ public class MachineService extends Service {
     @ApiResponses({@ApiResponse(code = 200, message = "The response contains machine process entities"),
                    @ApiResponse(code = 404, message = "Machine with specified ID does not exist"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
+    @Deprecated
     public List<MachineProcessDto> getProcesses(@ApiParam(value = "Workspace ID")
                                                 @PathParam("workspaceId")
                                                 String workspaceId,
@@ -255,6 +260,7 @@ public class MachineService extends Service {
     @ApiResponses({@ApiResponse(code = 204, message = "Process was successfully stopped"),
                    @ApiResponse(code = 404, message = "Machine with specified ID does not exist"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
+    @Deprecated
     public void stopProcess(@ApiParam(value = "Workspace ID")
                             @PathParam("workspaceId")
                             String workspaceId,
@@ -278,6 +284,7 @@ public class MachineService extends Service {
     @ApiResponses({@ApiResponse(code = 200, message = "The response contains logs"),
                    @ApiResponse(code = 404, message = "Machine or process with specified ID does not exist"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
+    @Deprecated
     public void getProcessLogs(@ApiParam(value = "Workspace ID")
                                @PathParam("workspaceId")
                                String workspaceId,
