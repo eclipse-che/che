@@ -197,8 +197,8 @@ cmd_restart() {
 
   FORCE_UPDATE=${1:-"--no-force"}
   info "restart" "Restarting..."
-  cmd_stop
-  cmd_start ${FORCE_UPDATE}
+  cmd_stop ${@}
+  cmd_start ${FORCE_UPDATE} ${@}
 }
 
 wait_until_booted() {
