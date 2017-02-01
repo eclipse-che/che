@@ -59,8 +59,8 @@ DIR=$(cd "$(dirname "$0")"; pwd)
 echo "Building Docker Image ${IMAGE_NAME} from $DIR directory with tag $TAG"
 cd "${DIR}" && docker build -t ${IMAGE_NAME}:${TAG} .
 if [ $? -eq 0 ]; then
-  echo -e "${GREEN}Script run successfully: ${BLUE}${IMAGE_NAME}:${TAG}${NC}"
+  printf "${GREEN}Script run successfully: ${BLUE}${IMAGE_NAME}:${TAG}${NC}\n"
 else
-  echo -e "${RED}Failure when building docker image ${IMAGE_NAME}:${TAG}${NC}"
+  printf "${RED}Failure when building docker image ${IMAGE_NAME}:${TAG}${NC}\n"
   exit 1
 fi
