@@ -19,11 +19,5 @@ init "$@"
 
 echo "Launching unit tests of $BASE_DIR/ip with docker image ${IMAGE_NAME}:${TAG}"
 
-DOCKER_RUN_OPTIONS=""
-# run bats with terminal mode (pretty print) if supported by current shell
-if [ -t 1 ]; then
-  DOCKER_RUN_OPTIONS="-t"
-fi
-
 set -x
-docker run --rm ${DOCKER_RUN_OPTIONS} -v /var/run/docker.sock:/var/run/docker.sock -v $BASE_DIR/ip:/ip $IMAGE_NAME:${TAG} bats --pretty /ip/tests/library_tests.bats
+docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $BASE_DIR/ip:/ip $IMAGE_NAME:${TAG} bats /ip/tests/library_tests.bats
