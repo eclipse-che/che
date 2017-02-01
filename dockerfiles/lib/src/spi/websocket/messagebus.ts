@@ -12,6 +12,7 @@ import {MessageBuilder} from './messagebuilder';
 import {MessageBusSubscriber} from './messagebus-subscriber';
 import {Log} from "../log/log";
 import {Websocket} from "./websocket";
+import {ResolveSubscribePromiseSubscriber} from "./resolve-subscribe-promise-subscriber";
 
 
 /**
@@ -88,6 +89,8 @@ export class MessageBus {
         this.heartbeatPeriod = 3000;//1000 * 50; //ping each 50 seconds
 
         this.subscribersByChannel = new Map<string, Array<MessageBusSubscriber>>();
+        let subscribersChannels : Array<MessageBusSubscriber> = new Array<MessageBusSubscriber>();
+        this.subscribersByChannel.set("subscribe-channel", subscribersChannels)
 
     }
 
@@ -155,7 +158,41 @@ export class MessageBus {
         }
     }
 
+    /**
+     * Asynchronous subscribe method that is returning  promise that will be resolved when subscribe callback has been sent from the remote side
+     * @param channel the channel on which we want to subscribe
+     * @param callback the callback subscriber
+     * @returns {any} promise
+     */
+    subscribeAsync(channel, callback) : Promise<string> {
+        // already subscribed ?
+        var existingSubscribers = this.subscribersByChannel.get(channel);
+        if (!existingSubscribers) {
+            // register callback
 
+            var subscribers = [];
+            subscribers.push(callback);
+            this.subscribersByChannel.set(channel, subscribers);
+
+
+            // handle this subscribe
+            let resolveSubscribePromiseSubscriber : ResolveSubscribePromiseSubscriber = new ResolveSubscribePromiseSubscriber(channel);
+            this.subscribersByChannel.get("subscribe-channel").push(resolveSubscribePromiseSubscriber);
+            var subscribeOrder = new MessageBuilder().subscribe(channel).build();
+
+            // send subscribe order
+            if (!this.websocketConnection) {
+                this.delaySend.push(subscribeOrder);
+            } else {
+                this.send(subscribeOrder);
+            }
+            return resolveSubscribePromiseSubscriber.promise;
+        } else {
+            // existing there, add only callback
+            existingSubscribers.push(callback);
+            return Promise.resolve("true");
+        }
+    }
 
     /**
      * Unsubscribes a previously subscribed handler listening on the specified channel.
@@ -185,7 +222,6 @@ export class MessageBus {
     }
 
 
-
     send(message) {
         var stringified = JSON.stringify(message);
         this.websocketConnection.sendUTF(stringified);
@@ -201,38 +237,54 @@ export class MessageBus {
         // get headers
         var headers = jsonMessage.headers;
 
-        var channelHeader;
+        var channelHeaderMessageType;
+        var channelHeaderChannel;
         // found channel headers
         for(let i = 0; i < headers.length; i++) {
             let header = headers[i];
+            if ('x-everrest-websocket-message-type' === header.name) {
+                channelHeaderMessageType = header;
+                continue;
+            }
             if ('x-everrest-websocket-channel' === header.name) {
-                channelHeader = header;
+                channelHeaderChannel = header;
                 continue;
             }
         }
 
-
-        if (channelHeader) {
-            // message for a channel, look at current subscribers
-            var subscribers : Array<MessageBusSubscriber> = this.subscribersByChannel.get(channelHeader.value);
-            if (subscribers) {
-                subscribers.forEach((subscriber : MessageBusSubscriber) => {
-
-                    // Convert to JSON object if it's a JSON body
-                    var data;
-                    try {
-                        data = JSON.parse(jsonMessage.body);
-                    } catch (error) {
-                        // keep raw data
-                        data = jsonMessage.body;
-                    }
-                    subscriber.handleMessage(data);
-                });
-            }
+        // process messages
+        if (channelHeaderMessageType && channelHeaderMessageType.value && channelHeaderMessageType.value != 'none') {
+            this.processMessage(jsonMessage, channelHeaderMessageType);
+        }
+        if (channelHeaderChannel && channelHeaderChannel.value) {
+            this.processMessage(jsonMessage, channelHeaderChannel);
         }
 
         // restart ping after received message
         this.restartPing();
+    }
+
+    /**
+     * Process the JSON given message by using the given channelHeader value
+     * @param jsonMessage the message to parse and then send to subscribers
+     * @param channelHeader the header containing the value to extrace
+     */
+    processMessage(jsonMessage : any, channelHeader : any) {
+        // message for a channel, look at current subscribers
+        var subscribers : Array<MessageBusSubscriber> = this.subscribersByChannel.get(channelHeader.value);
+        if (subscribers) {
+            subscribers.forEach((subscriber : MessageBusSubscriber) => {
+                // Convert to JSON object if it's a JSON body
+                var data;
+                try {
+                    data = JSON.parse(jsonMessage.body);
+                } catch (error) {
+                    // keep raw data
+                    data = jsonMessage.body;
+                }
+                subscriber.handleMessage(data);
+            });
+        }
     }
 
 }

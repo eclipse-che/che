@@ -52,8 +52,10 @@ public class DtoImplServerTemplate extends DtoImpl {
         final String dtoInterfaceName = dtoInterface.getCanonicalName();
         emitPreamble(dtoInterface, builder);
         List<Method> getters = getDtoGetters(dtoInterface);
+        // A set of the super getters
+        Set<String> superGetterNames = getSuperGetterNames(dtoInterface);
         // Enumerate the getters and emit field names and getters + setters.
-        emitFields(getters, builder);
+        emitFields(getters, builder, superGetterNames);
         emitGettersAndSetters(getters, builder);
         List<Method> inheritedGetters = getInheritedDtoGetters(dtoInterface);
         List<Method> methods = new ArrayList<>();
@@ -180,9 +182,16 @@ public class DtoImplServerTemplate extends DtoImpl {
         builder.append("();\n    }\n\n");
     }
 
-    private void emitFields(List<Method> getters, StringBuilder builder) {
+    private void emitFields(List<Method> getters, StringBuilder builder, Set<String> superGetterNames) {
         for (Method getter : getters) {
+            if (superGetterNames.contains(getter.getName())) {
+                continue;
+            }
             String fieldName = getJavaFieldName(getter.getName());
+            String jsonFieldName = getJsonFieldName(getter);
+            if (!fieldName.equals(jsonFieldName)) {
+                builder.append("    @com.google.gson.annotations.SerializedName(\"").append(jsonFieldName).append("\")\n");
+            }
             builder.append("    ");
             builder.append(getFieldTypeAndAssignment(getter, fieldName));
         }
@@ -208,9 +217,9 @@ public class DtoImplServerTemplate extends DtoImpl {
             builder.append(getEnsureName(fieldName));
             builder.append("();\n");
         }
-        builder.append("      return ");
+        builder.append("      return (").append(returnType).append(")(");
         emitReturn(getter, fieldName, builder);
-        builder.append(";\n    }\n\n");
+        builder.append(");\n    }\n\n");
     }
 
     private void emitGettersAndSetters(List<Method> getters, StringBuilder builder) {
@@ -281,28 +290,15 @@ public class DtoImplServerTemplate extends DtoImpl {
     private void emitSerializer(List<Method> getters, StringBuilder builder) {
         builder.append("    @Override\n");
         builder.append("    public JsonElement toJsonElement() {\n");
-        // The default toJsonElement() returns JSONs for unsafe use thus 'any' properties should be copied
-        builder.append("      return toJsonElementInt(true);\n");
+        builder.append("        return gson.toJsonTree(this);\n");
         builder.append("    }\n");
-        builder.append("    public JsonElement toJsonElementInt(boolean ").append(COPY_JSONS_PARAM).append(") {\n");
-        if (isCompactJson()) {
-            builder.append("      JsonArray result = new JsonArray();\n");
-            for (Method method : getters) {
-                emitSerializeFieldForMethodCompact(method, builder);
-            }
-        } else {
-            builder.append("      JsonObject result = new JsonObject();\n");
-            for (Method getter : getters) {
-                emitSerializeFieldForMethod(getter, builder);
-            }
-        }
-        builder.append("      return result;\n");
+        builder.append("    @Override\n");
+        builder.append("    public void toJson(java.io.Writer w) {\n");
+        builder.append("        gson.toJson(this, w);\n");
         builder.append("    }\n");
-        builder.append("\n");
         builder.append("    @Override\n");
         builder.append("    public String toJson() {\n");
-        // The default toJson() creates its own JSON for internal printing, thus keeping JSONs values is safe
-        builder.append("      return gson.toJson(toJsonElementInt(false));\n");
+        builder.append("      return gson.toJson(this);\n");
         builder.append("    }\n");
         builder.append("\n");
         builder.append("    @Override\n");
@@ -311,309 +307,20 @@ public class DtoImplServerTemplate extends DtoImpl {
         builder.append("    }\n\n");
     }
 
-    private void emitSerializeFieldForMethod(Method getter, final StringBuilder builder) {
-        final String fieldName = getFieldNameFromGetterName(getter.getName());
-        final String jsonFieldName = getJsonFieldName(getter);
-        final String fieldNameOut = fieldName + "Out";
-        final String baseIndentation = "      ";
-        builder.append("\n");
-        List<Type> expandedTypes = expandType(getter.getGenericReturnType());
-        emitSerializerImpl(expandedTypes, 0, builder, getJavaFieldName(getter.getName()), fieldNameOut, baseIndentation);
-        builder.append("      result.add(");
-        builder.append(quoteStringLiteral(jsonFieldName));
-        builder.append(", ");
-        builder.append(fieldNameOut);
-        builder.append(");\n");
-    }
-
-    private void emitSerializeFieldForMethodCompact(Method getter, StringBuilder builder) {
-        if (getter == null) {
-            builder.append("      result.add(JsonNull.INSTANCE);\n");
-            return;
-        }
-        final String jsonFieldName = getJsonFieldName(getter);
-        final String fieldNameOut = jsonFieldName + "Out";
-        final String baseIndentation = "      ";
-        builder.append("\n");
-        List<Type> expandedTypes = expandType(getter.getGenericReturnType());
-        emitSerializerImpl(expandedTypes, 0, builder, getJavaFieldName(getter.getName()), fieldNameOut, baseIndentation);
-        if (isLastMethod(getter)) {
-            if (isList(getRawClass(expandedTypes.get(0)))) {
-                builder.append("      if (").append(fieldNameOut).append(".size() != 0) {\n");
-                builder.append("        result.add(").append(fieldNameOut).append(");\n");
-                builder.append("      }\n");
-                return;
-            }
-        }
-        builder.append("      result.add(").append(fieldNameOut).append(");\n");
-    }
-
-    /**
-     * Produces code to serialize the type with the given variable names.
-     *
-     * @param expandedTypes
-     *         the type and its generic (and its generic (..))
-     *         expanded into a list, @see {@link #expandType(java.lang.reflect.Type)}
-     * @param depth
-     *         the depth (in the generics) for this recursive call. This can
-     *         be used to index into {@code expandedTypes}
-     * @param inVar
-     *         the java type that will be the input for serialization
-     * @param outVar
-     *         the JsonElement subtype that will be the output for
-     *         serialization
-     * @param i
-     *         indentation string
-     */
-    private void emitSerializerImpl(List<Type> expandedTypes, int depth, StringBuilder builder, String inVar, String outVar, String i) {
-        Type type = expandedTypes.get(depth);
-        String childInVar = inVar + "_";
-        String childOutVar = outVar + "_";
-        String entryVar = "entry" + depth;
-        Class<?> rawClass = getRawClass(type);
-        if (isList(rawClass)) {
-            String childInTypeName = getImplName(expandedTypes.get(depth + 1), false);
-            builder.append(i).append("JsonArray ").append(outVar).append(" = new JsonArray();\n");
-            if (depth == 0) {
-                builder.append(i).append("this.").append(getEnsureName(inVar)).append("();\n");
-            }
-            builder.append(i).append("for (").append(childInTypeName).append(" ").append(childInVar).append(" : ").append(
-                    depth == 0 ? "this." + inVar : inVar).append(") {\n");
-
-        } else if (isMap(rawClass)) {
-            String childInTypeName = getImplName(expandedTypes.get(depth + 1), false);
-            builder.append(i).append("JsonObject ").append(outVar).append(" = new JsonObject();\n");
-            if (depth == 0) {
-                builder.append(i).append("this.").append(getEnsureName(inVar)).append("();\n");
-            }
-            builder.append(i).append("for (java.util.Map.Entry<String, ").append(childInTypeName).append("> ").append(
-                    entryVar).append(" : ").append(depth == 0 ? "this." + inVar : inVar).append(".entrySet()) {\n");
-            builder.append(i).append("  ").append(childInTypeName).append(" ").append(childInVar).append(" = ").append(
-                    entryVar).append(".getValue();\n");
-        } else if (rawClass.isEnum()) {
-            builder.append(i).append("JsonElement ").append(outVar).append(" = (").append(depth == 0 ? "this." + inVar : inVar).append(
-                    " == null) ? JsonNull.INSTANCE : new JsonPrimitive(").append(depth == 0 ? "this." + inVar : inVar)
-                   .append(".name());\n");
-        } else if (getEnclosingTemplate().isDtoInterface(rawClass)) {
-            builder.append(i).append("JsonElement ").append(outVar).append(" = ").append(depth == 0 ? "this." + inVar : inVar).append(
-                    " == null ? JsonNull.INSTANCE : ((").append(getImplNameForDto((Class<?>)expandedTypes.get(depth))).append(")")
-                   .append(depth == 0 ? "this." + inVar : inVar).append(").toJsonElementInt(").append(COPY_JSONS_PARAM).append(");\n");
-        } else if (rawClass.equals(String.class)) {
-            builder.append(i).append("JsonElement ").append(outVar).append(" = (").append(depth == 0 ? "this." + inVar : inVar).append(
-                    " == null) ? JsonNull.INSTANCE : new JsonPrimitive(").append(depth == 0 ? "this." + inVar : inVar).append(");\n");
-        } else if (rawClass == boolean.class
-                   || rawClass == int.class
-                   || rawClass == long.class
-                   || rawClass == double.class
-                   || rawClass == float.class
-                   || rawClass == short.class
-                   || rawClass == byte.class) {
-            builder.append(i).append("JsonPrimitive ").append(outVar).append(" = new JsonPrimitive(")
-                   .append(depth == 0 ? "this." + inVar : inVar).append(");\n");
-        } else if (rawClass == Boolean.class
-                   || rawClass == Integer.class
-                   || rawClass == Long.class
-                   || rawClass == Double.class
-                   || rawClass == Float.class
-                   || rawClass == Short.class
-                   || rawClass == Byte.class) {
-            builder.append(i).append("JsonElement ").append(outVar).append(" = ").append(depth == 0 ? " this." + inVar : inVar).append(
-                    " == null ? JsonNull.INSTANCE : new JsonPrimitive(").append(depth == 0 ? "this." + inVar : inVar).append(");\n");
-        } else if (isAny(rawClass)) {
-            // TODO JsonElement.deepCopy() is package-protected, JSONs are serialized to strings then parsed for copying them
-            // outVar = inVar == null ? JsonNull.INSTNACE : (copyJsons ? new JsonParser().parse(inVar) : inVar);
-            builder.append(i).append("JsonElement ").append(outVar).append(" = ").append(depth == 0 ? " this." + inVar : inVar)
-                    .append(" == null || !(").append(inVar).append(" instanceof JsonElement) ? JsonNull.INSTANCE : (");
-            appendCopyJsonExpression(inVar, builder).append(");\n");
-        } else {
-            final Class<?> dtoImplementation = getEnclosingTemplate().getDtoImplementation(rawClass);
-            if (dtoImplementation != null) {
-                builder.append(i).append("JsonElement ").append(outVar).append(" = ").append(depth == 0 ? "this." + inVar : inVar).append(
-                        " == null ? JsonNull.INSTANCE : ((").append(dtoImplementation.getCanonicalName()).append(")")
-                       .append(depth == 0 ? "this." + inVar : inVar).append(").toJsonElementInt(").append(COPY_JSONS_PARAM).append(");\n");
-            } else {
-                throw new IllegalArgumentException("Unable to generate server implementation for DTO interface " +
-                                                   getDtoInterface().getCanonicalName() + ". Type " + rawClass +
-                                                   " is not allowed to use in DTO interface.");
-            }
-        }
-
-        if (depth + 1 < expandedTypes.size()) {
-            emitSerializerImpl(expandedTypes, depth + 1, builder, childInVar, childOutVar, i + "  ");
-        }
-        if (isList(rawClass)) {
-            builder.append(i).append("  ").append(outVar).append(".add(").append(childOutVar).append(");\n");
-            builder.append(i).append("}\n");
-        } else if (isMap(rawClass)) {
-            builder.append(i).append("  ").append(outVar).append(".add(").append(entryVar).append(".getKey(), ").append(
-                    childOutVar).append(");\n");
-            builder.append(i).append("}\n");
-        }
-    }
-
     /** Generates a static factory method that creates a new instance based on a JsonElement. */
     private void emitDeserializer(List<Method> getters, StringBuilder builder) {
         // The default fromJsonElement(json) works in unsafe mode and clones the JSON's for 'any' properties
         builder.append("    public static ").append(getImplClassName()).append(" fromJsonElement(JsonElement jsonElem) {\n");
-        builder.append("      return fromJsonElement(jsonElem, true);\n");
+        builder.append("      return gson.fromJson(jsonElem, ").append(getImplClassName()).append(".class);\n");
         builder.append("    }\n");
-        builder.append("    public static ").append(getImplClassName()).append(" fromJsonElement(JsonElement jsonElem, boolean ").append(COPY_JSONS_PARAM).append(") {\n");
-        builder.append("      if (jsonElem == null || jsonElem.isJsonNull()) {\n");
-        builder.append("        return null;\n");
-        builder.append("      }\n\n");
-        builder.append("      ").append(getImplClassName()).append(" dto = new ").append(getImplClassName()).append("();\n");
-        if (isCompactJson()) {
-            builder.append("      JsonArray json = jsonElem.getAsJsonArray();\n");
-            for (Method method : getters) {
-                emitDeserializeFieldForMethodCompact(method, builder);
-            }
-        } else {
-            builder.append("      JsonObject json = jsonElem.getAsJsonObject();\n");
-            for (Method getter : getters) {
-                emitDeserializeFieldForMethod(getter, builder);
-            }
-        }
-        builder.append("\n      return dto;\n");
-        builder.append("    }\n\n");
     }
 
     private void emitDeserializerShortcut(StringBuilder builder) {
         builder.append("    public static ");
         builder.append(getImplClassName());
         builder.append(" fromJsonString(String jsonString) {\n");
-        builder.append("      if (jsonString == null) {\n");
-        builder.append("        return null;\n");
-        builder.append("      }\n\n");
-        // The default fromJsonElement(json) creates its own JSON thus keeping parts of its as value is OK
-        builder.append("      return fromJsonElement(new JsonParser().parse(jsonString), false);\n");
+        builder.append("      return gson.fromJson(jsonString, ").append(getImplClassName()).append(".class);\n");
         builder.append("    }\n\n");
-    }
-
-    private void emitDeserializeFieldForMethod(Method method, StringBuilder builder) {
-        final String fieldName = getFieldNameFromGetterName(method.getName());
-        final String fieldNameIn = fieldName + "In";
-        final String fieldNameOut = fieldName + "Out";
-        final String baseIndentation = "        ";
-        
-        final String jsonFieldName = getJsonFieldName(method);
-
-        builder.append("\n");
-        builder.append("      if (json.has(").append(quoteStringLiteral(jsonFieldName)).append(")) {\n");
-        List<Type> expandedTypes = expandType(method.getGenericReturnType());
-        builder.append("        JsonElement ").append(fieldNameIn).append(" = json.get(").append(quoteStringLiteral(jsonFieldName)).append(");\n");
-        emitDeserializerImpl(expandedTypes, 0, builder, fieldNameIn, fieldNameOut, baseIndentation);
-        builder.append("        dto.").append(getSetterName(fieldName)).append("(").append(fieldNameOut).append(");\n");
-        builder.append("      }\n");
-    }
-
-    private void emitDeserializeFieldForMethodCompact(Method method, final StringBuilder builder) {
-        final String fieldName = getJsonFieldName(method);
-        final String fieldNameIn = fieldName + "In";
-        final String fieldNameOut = fieldName + "Out";
-        final String baseIndentation = "        ";
-        SerializationIndex serializationIndex = Preconditions.checkNotNull(method.getAnnotation(SerializationIndex.class));
-        int index = serializationIndex.value() - 1;
-        builder.append("\n");
-        builder.append("      if (").append(index).append(" < json.size()) {\n");
-        List<Type> expandedTypes = expandType(method.getGenericReturnType());
-        builder.append("        JsonElement ").append(fieldNameIn).append(" = json.get(").append(index).append(");\n");
-        emitDeserializerImpl(expandedTypes, 0, builder, fieldNameIn, fieldNameOut, baseIndentation);
-        builder.append("        dto.").append(getSetterName(fieldName)).append("(").append(fieldNameOut).append(");\n");
-        builder.append("      }\n");
-    }
-
-    /**
-     * Produces code to deserialize the type with the given variable names.
-     *
-     * @param expandedTypes
-     *         the type and its generic (and its generic (..)) expanded into a list, @see {@link #expandType(java.lang.reflect.Type)}
-     * @param depth
-     *         the depth (in the generics) for this recursive call. This can be used to index into {@code expandedTypes}
-     * @param inVar
-     *         the java type that will be the input for serialization
-     * @param outVar
-     *         the JsonElement subtype that will be the output for serialization
-     * @param i
-     *         indentation string
-     */
-    private void emitDeserializerImpl(List<Type> expandedTypes, int depth, StringBuilder builder, String inVar,
-                                      String outVar, String i) {
-        Type type = expandedTypes.get(depth);
-        String childInVar = inVar + "_";
-        String childOutVar = outVar + "_";
-        Class<?> rawClass = getRawClass(type);
-
-        if (isList(rawClass)) {
-            String inVarIterator = inVar + "Iterator";
-            builder.append(i).append(getImplName(type, false)).append(" ").append(outVar).append(" = null;\n");
-            builder.append(i).append("if (").append(inVar).append(" != null && !").append(inVar).append(".isJsonNull()) {\n");
-            builder.append(i).append("  ").append(outVar).append(" = new ").append(getImplName(type, true)).append("();\n");
-            builder.append(i).append("  ").append(getImplName(Iterator.class, false)).append("<JsonElement> ")
-                   .append(inVarIterator).append(" = ").append(inVar).append(".getAsJsonArray().iterator();\n");
-            builder.append(i).append("  while (").append(inVarIterator).append(".hasNext()) {\n");
-            builder.append(i).append("    JsonElement ").append(childInVar).append(" = ").append(inVarIterator).append(".next();\n");
-
-            emitDeserializerImpl(expandedTypes, depth + 1, builder, childInVar, childOutVar, i + "    ");
-
-            builder.append(i).append("    ").append(outVar).append(".add(").append(childOutVar).append(");\n");
-            builder.append(i).append("  }\n");
-            builder.append(i).append("}\n");
-        } else if (isMap(rawClass)) {
-            // TODO: Handle type
-            String entryVar = "entry" + depth;
-            String entriesVar = "entries" + depth;
-            builder.append(i).append(getImplName(type, false)).append(" ").append(outVar).append(" = null;\n");
-            builder.append(i).append("if (").append(inVar).append(" != null && !").append(inVar).append(".isJsonNull()) {\n");
-            builder.append(i).append("  ").append(outVar).append(" = new ").append(getImplName(type, true)).append("();\n");
-            builder.append(i).append("  java.util.Set<java.util.Map.Entry<String, JsonElement>> ").append(entriesVar).append(
-                    " = ").append(inVar).append(".getAsJsonObject().entrySet();\n");
-            builder.append(i).append("  for (java.util.Map.Entry<String, JsonElement> ").append(entryVar).append(" : ").append(entriesVar)
-                   .append(") {\n");
-            builder.append(i).append("    JsonElement ").append(childInVar).append(" = ").append(entryVar).append(".getValue();\n");
-            emitDeserializerImpl(expandedTypes, depth + 1, builder, childInVar, childOutVar, i + "    ");
-
-            builder.append(i).append("    ").append(outVar).append(".put(").append(entryVar).append(".getKey(), ").append(
-                    childOutVar).append(");\n");
-            builder.append(i).append("  }\n");
-            builder.append(i).append("}\n");
-        } else if (getEnclosingTemplate().isDtoInterface(rawClass)) {
-            String className = getImplName(rawClass, false);
-            builder.append(i).append(className).append(" ").append(outVar).append(" = ").append(getImplNameForDto(rawClass))
-                   .append(".fromJsonElement(").append(inVar).append(", ").append(COPY_JSONS_PARAM).append(");\n");
-        } else if (rawClass.isPrimitive()) {
-            String primitiveName = rawClass.getSimpleName();
-            String primitiveNameCap = primitiveName.substring(0, 1).toUpperCase() + primitiveName.substring(1);
-            builder.append(i).append(primitiveName).append(" ").append(outVar).append(" = ").append(inVar).append(
-                    ".getAs").append(primitiveNameCap).append("();\n");
-        } else if (isAny(rawClass)) {
-            // TODO JsonElement.deepCopy() is package-protected, JSONs are serialized to strings then parsed for copying them
-            // outVar = copyJsons ? new JsonParser().parse(inVar) : inVar;
-            builder.append(i).append("JsonElement ").append(outVar).append(" = ");
-            appendCopyJsonExpression(inVar, builder).append(";\n");
-        } else {
-            final Class<?> dtoImplementation = getEnclosingTemplate().getDtoImplementation(rawClass);
-            if (dtoImplementation != null) {
-                String className = getImplName(rawClass, false);
-                builder.append(i).append(className).append(" ").append(outVar).append(" = ")
-                       .append(dtoImplementation.getCanonicalName()).append(".fromJsonElement(").append(inVar).append(", ").append(COPY_JSONS_PARAM).append(");\n");
-            } else {
-                // Use gson to handle all other types.
-                String rawClassName = rawClass.getName().replace('$', '.');
-                builder.append(i).append(rawClassName).append(" ").append(outVar).append(" = gson.fromJson(").append(
-                        inVar).append(", ").append(rawClassName).append(".class);\n");
-            }
-        }
-    }
-    
-    /**
-     * Append the expression that clones the given JsonElement variable into a new value. If the copyJons run-time
-     * parameter is set to false, then the expression won't perform a clone but instead will reuse the variable by
-     * reference.
-     */
-    private static StringBuilder appendCopyJsonExpression(String inVar, StringBuilder builder) {
-        builder.append(COPY_JSONS_PARAM).append(" ? ");
-        appendNaiveCopyJsonExpression(inVar, builder).append(" : (JsonElement)(").append(inVar).append(")");
-        return builder;
     }
     private static StringBuilder appendNaiveCopyJsonExpression(String inValue, StringBuilder builder) {
         builder.append("((");

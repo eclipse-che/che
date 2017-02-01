@@ -51,7 +51,7 @@ get_display_url() {
 
   # If the user has modified che.env with a custom CHE_HOST, we need to detect that here
   # and not use the in-memory one which is always set with eclipse/che-ip.
-  local CHE_HOST_LOCAL=$CHE_HOST
+  local CHE_HOST_LOCAL=$${CHE_PRODUCT_NAME}_HOST
 
   if is_initialized; then 
     CHE_HOST_LOCAL=$(get_value_of_var_from_env_file ${CHE_PRODUCT_NAME}_HOST)
@@ -116,7 +116,7 @@ initiate_offline_or_network_mode(){
     # If we are here, then we want to run in networking mode.
     # If we are in networking mode, we have had some issues where users have failed DNS networking.
     # See: https://github.com/eclipse/che/issues/3266#issuecomment-265464165
-    if ! is_fast; then
+    if ! is_fast && ! skip_network; then
       # Removing this info line as it was appearing before initial CLI output
 #      info "cli" "Checking network... (hint: '--fast' skips nightly, version, network, and preflight checks)"
       local HTTP_STATUS_CODE=$(curl -I -k dockerhub.com -s -o /dev/null --write-out '%{http_code}')
@@ -134,6 +134,8 @@ initiate_offline_or_network_mode(){
         info "     a. Docker for Windows & Mac have GUIs to set proxies."
         info "  3. Verify that you have access to DockerHub."
         info "     a. Try 'curl --head dockerhub.com'"
+        info "  4. Skip networking checks."
+        info "     a. Add '--fast' to any command"
         return 2;
       fi
     fi
@@ -428,18 +430,18 @@ verify_nightly_accuracy() {
   # than the one stored on DockerHub.
   if is_nightly; then
 
-    local CURRENT_DIGEST=$(docker images -q --no-trunc --digests ${CHE_IMAGE_FULLNAME})
+    if ! is_fast && ! skip_nightly; then
+      local CURRENT_DIGEST=$(docker images -q --no-trunc --digests ${CHE_IMAGE_FULLNAME})
 
-    if ! is_fast; then
       update_image $CHE_IMAGE_FULLNAME
+
+      local NEW_DIGEST=$(docker images -q --no-trunc --digests ${CHE_IMAGE_FULLNAME})
+
+      if [[ "${CURRENT_DIGEST}" != "${NEW_DIGEST}" ]]; then
+        warning "Pulled new 'nightly' image - please rerun CLI"
+        return 2;
+      fi
     fi 
-
-    local NEW_DIGEST=$(docker images -q --no-trunc --digests ${CHE_IMAGE_FULLNAME})
-
-    if [[ "${CURRENT_DIGEST}" != "${NEW_DIGEST}" ]]; then
-      warning "Pulled new 'nightly' image - please rerun CLI"
-      return 2;
-    fi
   fi
 }
 
