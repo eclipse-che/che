@@ -11,6 +11,7 @@
 package org.eclipse.che.plugin.openshift.client;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -35,6 +36,7 @@ import org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver;
 import org.eclipse.che.plugin.docker.client.connection.DockerConnectionFactory;
 import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
+import org.eclipse.che.plugin.docker.client.json.ContainerListEntry;
 import org.eclipse.che.plugin.docker.client.json.ImageConfig;
 import org.eclipse.che.plugin.docker.client.json.NetworkCreated;
 import org.eclipse.che.plugin.docker.client.json.PortBinding;
@@ -43,9 +45,13 @@ import org.eclipse.che.plugin.docker.client.json.network.Ipam;
 import org.eclipse.che.plugin.docker.client.json.network.IpamConfig;
 import org.eclipse.che.plugin.docker.client.json.network.Network;
 import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
+import org.eclipse.che.plugin.docker.client.params.GetResourceParams;
+import org.eclipse.che.plugin.docker.client.params.KillContainerParams;
+import org.eclipse.che.plugin.docker.client.params.PutResourceParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveNetworkParams;
 import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
+import org.eclipse.che.plugin.docker.client.params.StopContainerParams;
 import org.eclipse.che.plugin.docker.client.params.network.ConnectContainerToNetworkParams;
 import org.eclipse.che.plugin.docker.client.params.network.CreateNetworkParams;
 import org.eclipse.che.plugin.docker.client.params.network.DisconnectContainerFromNetworkParams;
@@ -195,6 +201,38 @@ public class OpenShiftConnector extends DockerConnector {
     @Override
     public void startContainer(final StartContainerParams params) throws IOException {
         // Not used in OpenShift
+    }
+
+    @Override
+    public void stopContainer(StopContainerParams params) throws IOException {
+        // Not used in OpenShift
+    }
+
+    @Override
+    public int waitContainer(String container) throws IOException {
+        // Not used in OpenShift
+        return 0;
+    }
+
+    @Override
+    public void killContainer(KillContainerParams params) throws IOException {
+        // Not used in OpenShift
+    }
+
+    @Override
+    public List<ContainerListEntry> listContainers() throws IOException {
+        // Implement once 'Service Provider Interface' is defined
+        return Collections.emptyList();
+    }
+
+    @Override
+    public InputStream getResource(GetResourceParams params) throws IOException {
+        throw new UnsupportedOperationException("'getResource' is currently not supported by OpenShift");
+    }
+
+    @Override
+    public void putResource(PutResourceParams params) throws IOException {
+        throw new UnsupportedOperationException("'putResource' is currently not supported by OpenShift");
     }
 
     /**
@@ -492,12 +530,12 @@ public class OpenShiftConnector extends DockerConnector {
                                              String[] volumes,
                                              boolean runContainerAsRoot) {
 
-        String dName = CHE_OPENSHIFT_RESOURCES_PREFIX + workspaceID;
-        LOG.info("Creating OpenShift deployment {}", dName);
+        String deploymentName = CHE_OPENSHIFT_RESOURCES_PREFIX + workspaceID;
+        LOG.info("Creating OpenShift deployment {}", deploymentName);
 
-        Map<String, String> selector = Collections.singletonMap(OPENSHIFT_DEPLOYMENT_LABEL, CHE_OPENSHIFT_RESOURCES_PREFIX + workspaceID);
+        Map<String, String> selector = Collections.singletonMap(OPENSHIFT_DEPLOYMENT_LABEL, deploymentName);
 
-        LOG.info("Adding container {} to OpenShift deployment {}", sanitizedContainerName, dName);
+        LOG.info("Adding container {} to OpenShift deployment {}", sanitizedContainerName, deploymentName);
         Long UID = runContainerAsRoot ? UID_ROOT : UID_USER;
         Container container = new ContainerBuilder()
                                     .withName(sanitizedContainerName)
@@ -521,7 +559,7 @@ public class OpenShiftConnector extends DockerConnector {
 
         Deployment deployment = new DeploymentBuilder()
                 .withNewMetadata()
-                    .withName(dName)
+                    .withName(deploymentName)
                     .withNamespace(this.openShiftCheProjectName)
                 .endMetadata()
                 .withNewSpec()
@@ -543,7 +581,7 @@ public class OpenShiftConnector extends DockerConnector {
                                     .inNamespace(this.openShiftCheProjectName)
                                     .create(deployment);
 
-        LOG.info("OpenShift deployment {} created", dName);
+        LOG.info("OpenShift deployment {} created", deploymentName);
         return deployment.getMetadata().getName();
     }
 

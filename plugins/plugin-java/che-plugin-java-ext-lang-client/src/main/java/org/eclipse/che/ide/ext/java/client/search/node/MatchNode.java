@@ -13,6 +13,7 @@ package org.eclipse.che.ide.ext.java.client.search.node;
 import elemental.html.SpanElement;
 
 import com.google.common.base.Optional;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
@@ -135,10 +136,15 @@ public class MatchNode extends AbstractPresentationNode implements HasAction {
     @Override
     public void actionPerformed() {
         if (compilationUnit != null) {
-            EditorPartPresenter editorPartPresenter = editorAgent.getOpenedEditor(Path.valueOf(compilationUnit.getPath()));
+            final EditorPartPresenter editorPartPresenter = editorAgent.getOpenedEditor(Path.valueOf(compilationUnit.getPath()));
             if (editorPartPresenter != null) {
-                editorAgent.activateEditor(editorPartPresenter);
-                fileOpened(editorPartPresenter);
+                selectRange(editorPartPresenter);
+                Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+                    @Override
+                    public void execute() {
+                        editorAgent.activateEditor(editorPartPresenter);
+                    }
+                });
                 return;
             }
 
@@ -149,7 +155,7 @@ public class MatchNode extends AbstractPresentationNode implements HasAction {
                         editorAgent.openEditor(file.get(), new OpenEditorCallbackImpl() {
                             @Override
                             public void onEditorOpened(EditorPartPresenter editor) {
-                                fileOpened(editor);
+                                selectRange(editor);
                             }
                         });
                     }
@@ -175,7 +181,7 @@ public class MatchNode extends AbstractPresentationNode implements HasAction {
                            editorAgent.openEditor(file, new OpenEditorCallbackImpl() {
                                @Override
                                public void onEditorOpened(EditorPartPresenter editor) {
-                                   fileOpened(editor);
+                                   selectRange(editor);
                                }
                            });
                        }
@@ -183,7 +189,7 @@ public class MatchNode extends AbstractPresentationNode implements HasAction {
         }
     }
 
-    private void fileOpened(EditorPartPresenter editor) {
+    private void selectRange(EditorPartPresenter editor) {
         if (editor instanceof TextEditor) {
             ((TextEditor)editor).getDocument().setSelectedRange(
                     LinearRange.createWithStart(match.getFileMatchRegion().getOffset()).andLength(match.getFileMatchRegion().getLength()),

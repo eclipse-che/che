@@ -74,7 +74,9 @@ export class WorkspaceConfigImportController {
         angular.extend(editedWorkspaceConfig, this.workspaceConfig);
 
         this.importWorkspaceJson = angular.toJson(editedWorkspaceConfig, true);
-        this.onChange();
+
+        let validateOnly = true;
+        this.onChange(validateOnly);
       } catch (e) {
         this.$log.error(e);
       }
@@ -95,7 +97,7 @@ export class WorkspaceConfigImportController {
   /**
    * Callback when editor content is changed.
    */
-  onChange(): void {
+  onChange(validateOnly?: boolean): void {
     if (!this.importWorkspaceJson) {
       this.configValidationMessages = ['The config is required.'];
       return;
@@ -105,15 +107,11 @@ export class WorkspaceConfigImportController {
       let config = angular.fromJson(this.importWorkspaceJson);
       let validationResult = this.validationService.getWorkspaceConfigValidation(config);
 
-      if (validationResult.errors.length) {
-        this.configValidationMessages = angular.copy(validationResult.errors);
-      } else {
-        // avoid flickering messages from other tabs
-        // while model is applying
-        this.$timeout(() => {
-          this.configValidationMessages.length = 0;
-          this.configErrorsNumber = this.configValidationMessages.length;
-        }, 500);
+      this.configValidationMessages = angular.copy(validationResult.errors);
+      this.configErrorsNumber = this.configValidationMessages.length;
+
+      if (validateOnly) {
+        return;
       }
 
       // immediately apply config on IU

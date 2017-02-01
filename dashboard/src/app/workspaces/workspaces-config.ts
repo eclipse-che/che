@@ -15,8 +15,6 @@ import {CheWorkspaceItem} from './list-workspaces/workspace-item/workspace-item.
 import {CheWorkspaceStatus} from './list-workspaces/workspace-status-action/workspace-status.directive';
 import {WorkspaceStatusController} from './list-workspaces/workspace-status-action/workspace-status.controller';
 import {WorkspaceDetailsController} from './workspace-details/workspace-details.controller';
-import {WorkspaceStacksController} from './workspace-details/workspace-stacks/workspace-stacks.controller';
-import {WorkspaceStacks} from './workspace-details/workspace-stacks/workspace-stacks.directive';
 import {UsageChart} from './list-workspaces/workspace-item/usage-chart.directive';
 import {WorkspaceItemCtrl} from './list-workspaces/workspace-item/workspace-item.controller';
 import {WorkspaceEditModeOverlay} from './workspace-edit-mode/workspace-edit-mode-overlay.directive';
@@ -92,8 +90,6 @@ export class WorkspacesConfig {
 
     register.controller('ListWorkspacesCtrl', ListWorkspacesCtrl);
     register.controller('WorkspaceDetailsController', WorkspaceDetailsController);
-    register.controller('WorkspaceStacksController', WorkspaceStacksController);
-    register.directive('workspaceStacks', WorkspaceStacks);
 
     register.directive('cheWorkspaceItem', CheWorkspaceItem);
     register.controller('WorkspaceItemCtrl', WorkspaceItemCtrl);
@@ -137,7 +133,7 @@ export class WorkspacesConfig {
     register.directive('cheStackLibrarySelecter', CheStackLibrarySelecter);
 
     register.controller('WorkspaceSelectStackController', WorkspaceSelectStackController);
-    register.directive('cheWorkspaceSelectStack', WorkspaceSelectStack);
+    register.directive('workspaceSelectStack', WorkspaceSelectStack);
 
     register.controller('CheStackLibraryFilterController', CheStackLibraryFilterController);
     register.directive('cheStackLibraryFilter', CheStackLibraryFilter);

@@ -5,6 +5,52 @@
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
 
+init_usage() {
+  USAGE="
+USAGE: 
+  docker run -it --rm <DOCKER_PARAMETERS> ${CHE_IMAGE_FULLNAME} [COMMAND]
+
+MANDATORY DOCKER PARAMETERS:
+  -v <LOCAL_PATH>:${CHE_CONTAINER_ROOT}                Where user, instance, and log data saved${ADDITIONAL_MANDATORY_PARAMETERS}  
+
+OPTIONAL DOCKER PARAMETERS:${ADDITIONAL_OPTIONAL_DOCKER_PARAMETERS}  
+  -v <LOCAL_PATH>:${CHE_CONTAINER_ROOT}/instance       Where instance, user, log data will be saved
+  -v <LOCAL_PATH>:${CHE_CONTAINER_ROOT}/backup         Where backup files will be saved
+  -v <LOCAL_PATH>:/repo                ${CHE_MINI_PRODUCT_NAME} git repo - uses local binaries and manifests
+  -v <LOCAL_PATH>:/assembly            ${CHE_MINI_PRODUCT_NAME} assembly - uses local binaries 
+  -v <LOCAL_PATH>:/sync                Where remote ws files will be copied with sync command
+  -v <LOCAL_PATH>:/unison              Where unison profile for optimizing sync command resides
+  -v <LOCAL_PATH>:/chedir              Soure repository to convert into workspace with Chedir utility${ADDITIONAL_OPTIONAL_DOCKER_MOUNTS}  
+    
+COMMANDS:
+  action <action-name>                 Start action on ${CHE_MINI_PRODUCT_NAME} instance
+  backup                               Backups ${CHE_MINI_PRODUCT_NAME} configuration and data to ${CHE_CONTAINER_ROOT}/backup volume mount
+  config                               Generates a ${CHE_MINI_PRODUCT_NAME} config from vars; run on any start / restart
+  destroy                              Stops services, and deletes ${CHE_MINI_PRODUCT_NAME} instance data
+  dir <command>                        Use Chedir and Chefile in the directory mounted to :/chedir
+  download                             Pulls Docker images for the current ${CHE_MINI_PRODUCT_NAME} version
+  help                                 This message
+  info                                 Displays info about ${CHE_MINI_PRODUCT_NAME} and the CLI
+  init                                 Initializes a directory with a ${CHE_MINI_PRODUCT_NAME} install
+  offline                              Saves ${CHE_MINI_PRODUCT_NAME} Docker images into TAR files for offline install
+  restart                              Restart ${CHE_MINI_PRODUCT_NAME} services
+  restore                              Restores ${CHE_MINI_PRODUCT_NAME} configuration and data from ${CHE_CONTAINER_ROOT}/backup mount
+  rmi                                  Removes the Docker images for <version>, forcing a repull
+  ssh <wksp-name> [machine-name]       SSH to a workspace if SSH agent enabled
+  start                                Starts ${CHE_MINI_PRODUCT_NAME} services
+  stop                                 Stops ${CHE_MINI_PRODUCT_NAME} services
+  sync <wksp-name>                     Synchronize workspace with local directory mounted to :/sync
+  test <test-name>                     Start test on ${CHE_MINI_PRODUCT_NAME} instance
+  upgrade                              Upgrades ${CHE_MINI_PRODUCT_NAME} from one version to another with migrations and backups
+  version                              Installed version and upgrade paths${ADDITIONAL_COMMANDS}
+
+GLOBAL COMMAND OPTIONS:
+  --fast                               Skips networking, version, nightly and preflight checks
+  --offline                            Runs CLI in offline mode, loading images from disk
+  --debug                              Enable debugging of ${CHE_MINI_PRODUCT_NAME} server
+  --trace                              Activates trace output for debugging CLI${ADDITIONAL_GLOBAL_OPTIONS}  
+"
+}
 
 init_constants() {
   BLUE='\033[1;34m'
@@ -18,6 +64,11 @@ init_constants() {
   FAST_BOOT=false
   CHE_DEBUG=false
   CHE_OFFLINE=false
+  CHE_SKIP_PREFLIGHT=false
+  CHE_SKIP_POSTFLIGHT=false
+  CHE_SKIP_NIGHTLY=false
+  CHE_SKIP_NETWORK=false
+  CHE_SKIP_PULL=false
 
   DEFAULT_CHE_PRODUCT_NAME="CHE"
   CHE_PRODUCT_NAME=${CHE_PRODUCT_NAME:-${DEFAULT_CHE_PRODUCT_NAME}}
@@ -71,8 +122,15 @@ init_constants() {
   CHE_COMPOSE_FILE="docker-compose-container.yml"
   CHE_HOST_COMPOSE_FILE="docker-compose.yml"
 
+  # Keep for backwards compatibility
   DEFAULT_CHE_SERVER_CONTAINER_NAME="${CHE_MINI_PRODUCT_NAME}"
   CHE_SERVER_CONTAINER_NAME="${CHE_SERVER_CONTAINER_NAME:-${DEFAULT_CHE_SERVER_CONTAINER_NAME}}"
+ 
+  DEFAULT_CHE_CONTAINER_NAME="${CHE_SERVER_CONTAINER_NAME}"
+  CHE_CONTAINER_NAME="${CHE_CONTAINER:-${DEFAULT_CHE_CONTAINER_NAME}}"
+
+  DEFAULT_CHE_CONTAINER_PREFIX="${CHE_SERVER_CONTAINER_NAME}"
+  CHE_CONTAINER_PREFIX="${CHE_CONTAINER_PREFIX:-${DEFAULT_CHE_CONTAINER_PREFIX}}"
 
   CHE_BACKUP_FILE_NAME="${CHE_MINI_PRODUCT_NAME}_backup.tar.gz"
   CHE_COMPOSE_STOP_TIMEOUT="180"
@@ -254,6 +312,46 @@ is_trace() {
   fi
 }
 
+skip_preflight() {
+  if [ "${CHE_SKIP_PREFLIGHT}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+skip_postflight() {
+  if [ "${CHE_SKIP_POSTFLIGHT}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+skip_nightly() {
+  if [ "${CHE_SKIP_NIGHTLY}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+skip_network() {
+  if [ "${CHE_SKIP_NETWORK}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+skip_pull() {
+  if [ "${CHE_SKIP_PULL}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
 init_logging() {
   # Initialize CLI folder
   CLI_DIR=$CHE_CONTAINER_ROOT
@@ -266,6 +364,20 @@ init_logging() {
   # Log date of CLI execution
   log "$(date)"
 }
+
+# Check pre/post functions are there or not
+declare -f pre_init > /dev/null
+if [ "$?" == "1" ]; then
+  pre_init() {
+    :
+  }
+fi
+declare -f post_init > /dev/null
+if [ "$?" == "1" ]; then
+  post_init() {
+    :
+  }
+fi
 
 init() {
   init_constants
@@ -290,6 +402,26 @@ init() {
   if [[ "$@" == *"--trace"* ]]; then
     CHE_TRACE=true
     set -x
+  fi
+
+  if [[ "$@" == *"--skip:preflight"* ]]; then
+    CHE_SKIP_PREFLIGHT=true
+  fi
+
+  if [[ "$@" == *"--skip:postflight"* ]]; then
+    CHE_SKIP_POSTFLIGHT=true
+  fi
+
+  if [[ "$@" == *"--skip:nightly"* ]]; then
+    CHE_SKIP_NIGHTLY=true
+  fi
+
+  if [[ "$@" == *"--skip:network"* ]]; then
+    CHE_SKIP_NETWORK=true
+  fi
+
+  if [[ "$@" == *"--skip:pull"* ]]; then
+    CHE_SKIP_PULL=true
   fi
 
   SCRIPTS_BASE_CONTAINER_SOURCE_DIR="/scripts/base"
@@ -332,6 +464,7 @@ init() {
     source "${BASECOMMAND_FILE}"
   done
 
+  # sources post_init functions that can only be loaded after other libraries
   source "${SCRIPTS_CONTAINER_SOURCE_DIR}"/cli.sh
 
   # If offline mode, then load dependent images from disk and populate the local Docker cache.
@@ -342,6 +475,14 @@ init() {
   # Pull the list of images that are necessary. If in offline mode, verifies that the images
   # are properly loaded into the cache.
   grab_initial_images
+}
+
+cli_pre_init() {
+  :
+}
+
+cli_post_init() {
+  :
 }
 
 cli_init() {
@@ -394,26 +535,38 @@ cleanup() {
 }
 
 start() {
+
+  # pre_init is unique to each CLI assembly. This can be called before
+  # networking is established.
+  pre_init
+
   # Bootstrap networking, docker, logging, and ability to load cli.sh and library.sh
   init "$@"
 
-  # Removes "--fast", "--debug", "--offline" from the positional arguments if it is set.
+  # Removes global parameters from the positional arguments
   ORIGINAL_PARAMETERS=$@
   set -- "${@/\-\-fast/}"
   set -- "${@/\-\-debug/}"
   set -- "${@/\-\-offline/}"
   set -- "${@/\-\-trace/}"
+  set -- "${@/\-\-skip\:preflight/}"
+  set -- "${@/\-\-skip\:postflight/}"
+  set -- "${@/\-\-skip\:nightly/}"
+  set -- "${@/\-\-skip\:network/}"
+  set -- "${@/\-\-skip\:pull/}"
   
-    # The pre_init method is unique to each assembly. This method must be provided by 
+  # The post_init method is unique to each assembly. This method must be provided by 
   # a custom CLI assembly in their container and can set global variables which are 
-  # specific to that implementation of the CLI. This method must be called after
-  # networking has been established and initial images downloaded.
-  cli_pre_init
+  # specific to that implementation of the CLI. Place initialization functions that
+  # require networking here.
+  post_init
   
   # Begin product-specific CLI calls
   info "cli" "$CHE_VERSION - using docker ${DOCKER_SERVER_VERSION} / $(get_docker_install_type)"
 
+  cli_pre_init
   cli_init "$@"
+  cli_post_init
   cli_parse "$@"
   cli_execute "$@"
 }

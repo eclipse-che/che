@@ -164,7 +164,7 @@ container_exist_by_name(){
 
 get_server_container_id() {
   log "docker inspect -f '{{.Id}}' ${1}"
-  docker inspect -f '{{.Id}}' ${1}
+  docker inspect -f '{{.Id}}' ${1} 2>&1 || true
 }
 
 container_is_running() {
