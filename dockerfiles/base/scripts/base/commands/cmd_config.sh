@@ -23,7 +23,7 @@ cmd_config() {
   elif [[ "${FORCE_UPDATE}" == "--pull" ]] || \
        [[ "${FORCE_UPDATE}" == "--force" ]]; then
     cmd_download $FORCE_UPDATE
-  elif is_nightly && ! is_fast; then
+  elif is_nightly && ! is_fast && ! skip_pull; then
     cmd_download --pull
   fi
 
@@ -129,6 +129,7 @@ generate_configuration_with_puppet() {
                   ${WRITE_PARAMETERS} \
                   -e \"CHE_ENV_FILE=${CHE_ENV_FILE}\" \
                   -e \"CHE_CONTAINER_ROOT=${CHE_CONTAINER_ROOT}\" \
+                  -e \"CHE_CONTAINER_NAME=${CHE_CONTAINER_NAME}\" \
                   -e \"CHE_ENVIRONMENT=${CHE_ENVIRONMENT}\" \
                   -e \"CHE_CONFIG=${CHE_HOST_INSTANCE}\" \
                   -e \"CHE_INSTANCE=${CHE_HOST_INSTANCE}\" \

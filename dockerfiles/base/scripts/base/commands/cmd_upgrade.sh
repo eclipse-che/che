@@ -43,11 +43,8 @@ cmd_upgrade() {
   info "upgrade" "Downloading done."
 
   if get_server_container_id "${CHE_SERVER_CONTAINER_NAME}" >> "${LOGS}" 2>&1; then
-    info "upgrade" "Stopping currently running instance..."
-    CURRENT_CHE_SERVER_CONTAINER_ID=$(get_server_container_id ${CHE_SERVER_CONTAINER_NAME})
-    if server_is_booted ${CURRENT_CHE_SERVER_CONTAINER_ID}; then
-      cmd_stop
-    fi
+    error "$CHE_MINI_PRODUCT_NAME is running. Stop before performing an upgrade."
+    return 2;
   fi
 
   if [[ "${DO_BACKUP}" == "true" ]]; then
