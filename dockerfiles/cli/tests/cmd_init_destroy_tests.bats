@@ -13,7 +13,7 @@ source /dockerfiles/cli/tests/test_base.sh
 @test "test 'init' and 'destroy --quiet' with existing dir" {
 
   #GIVEN
-  tmp_path=${TESTRUN_DIR}/init-destroy1
+  tmp_path="${TESTRUN_DIR}"/init-destroy1
   container_tmp_path=${CONTAINER_TESTRUN_DIR}/init-destroy1
   mkdir -p $tmp_path
 
@@ -40,7 +40,7 @@ source /dockerfiles/cli/tests/test_base.sh
 @test "test 'init' and 'destroy --quiet' with non-existing dir" {
 
   #GIVEN
-  tmp_path=${TESTRUN_DIR}/init-destroy2
+  tmp_path="${TESTRUN_DIR}"/init-destroy2
   container_tmp_path=${CONTAINER_TESTRUN_DIR}/init-destroy2
  
   #WHEN  
@@ -67,7 +67,7 @@ source /dockerfiles/cli/tests/test_base.sh
 
 @test "test 'init' and 'destroy --quiet --cli' with existing dir" {
   #GIVEN
-  tmp_path=${TESTRUN_DIR}/init-destroy3
+  tmp_path="${TESTRUN_DIR}"/init-destroy3
   container_tmp_path=${CONTAINER_TESTRUN_DIR}/init-destroy3
 
   mkdir -p $tmp_path
@@ -97,7 +97,7 @@ source /dockerfiles/cli/tests/test_base.sh
 @test "test 'init' and 'destroy --quiet --cli' with non-existing dir" {
 
   #GIVEN
-  tmp_path=${TESTRUN_DIR}/init-destroy4
+  tmp_path="${TESTRUN_DIR}"/init-destroy4
   container_tmp_path=${CONTAINER_TESTRUN_DIR}/init-destroy4
 
   #WHEN

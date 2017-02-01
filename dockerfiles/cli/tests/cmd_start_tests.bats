@@ -16,42 +16,40 @@ setup() {
   remove_named_container che
 }
 
+teardown() {
+  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data -e CHE_CONTAINER=chetest $CLI_IMAGE stop --skip:nightly
+  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data -e CHE_CONTAINER=chetest $CLI_IMAGE destroy --quiet --skip:nightly
+}
+
 @test "test cli 'start' with default settings" {
   #GIVEN
   if [ ! port_is_free 8080 ]; then
     [ "$status" -eq 1 ]
     [ "$output" = "Default port 8080 for che server is used. Cannot run this test on default che server port" ]
   fi
-  tmp_path=${TESTRUN_DIR}/start1
+  tmp_path="${TESTRUN_DIR}"/start1
+  echo $tmp_path
+  mkdir -p "${tmp_path}"
 
   #WHEN
-  docker run --rm -v $SCRIPTS_DIR:/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v $tmp_path:/data $CLI_IMAGE start --skip:nightly
+  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data -e CHE_CONTAINER=chetest $CLI_IMAGE start --skip:nightly
 
   #THEN
-  [[ $(docker inspect --format="{{.State.Running}}" che) -eq "true" ]]
-  ip_address=$(docker inspect -f {{.NetworkSettings.Networks.bridge.IPAddress}} che)
+  [[ $(docker inspect --format="{{.State.Running}}" chetest) -eq "true" ]]
+  ip_address=$(docker inspect -f {{.NetworkSettings.Networks.bridge.IPAddress}} chetest)
   curl -fsS http://${ip_address}:8080  > /dev/null
-
-  # CLEANUP
-  docker run --rm -v $SCRIPTS_DIR:/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v $tmp_path:/data $CLI_IMAGE stop --force --skip:nightly
-
 }
 
 @test "test cli 'start' with custom port" {
   #GIVEN
   tmp_path=${TESTRUN_DIR}/start2
   free_port=$(get_free_port)
-  
+
   #WHEN
-  docker run --rm -e CHE_PORT=$free_port -v $SCRIPTS_DIR:/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v $tmp_path:/data $CLI_IMAGE start --skip:nightly
+  docker run --rm -e CHE_PORT=$free_port -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data -e CHE_CONTAINER=chetest $CLI_IMAGE start --skip:nightly
 
   #THEN
-  [[ $(docker inspect --format="{{.State.Running}}" che) -eq "true" ]]
-  ip_address=$(docker inspect -f {{.NetworkSettings.Networks.bridge.IPAddress}} che-${free_port})
+  [[ $(docker inspect --format="{{.State.Running}}" chetest) -eq "true" ]]
+  ip_address=$(docker inspect -f {{.NetworkSettings.Networks.bridge.IPAddress}} chetest)
   curl -fsS http://${ip_address}:${free_port}  > /dev/null
-
-  # CLEANUP
-  docker run --rm -e CHE_PORT=$free_port -v $SCRIPTS_DIR:/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v $tmp_path:/data $CLI_IMAGE stop --force --skip:nightly
-
 }
-
