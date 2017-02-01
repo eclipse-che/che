@@ -68,18 +68,6 @@ public abstract class AbstractAgentLauncher implements AgentLauncher {
         this.agentLaunchingChecker = agentLaunchingChecker;
     }
 
-    /**
-     * Launches agent script in machine and waits until agent starts.
-     * The machine should be started.
-     * Retrieves agent's logs if its start fails.
-     *
-     * @param machine
-     *         the machine instance in which agent will be started. The machine should be started.
-     * @param agent
-     *         the agent to start
-     * @throws ServerException
-     *         if script execution failed
-     */
     @Override
     public void launch(Instance machine, Agent agent) throws ServerException {
         if (isNullOrEmpty(agent.getScript())) {
