@@ -20,7 +20,6 @@ import com.google.inject.servlet.ServletModule;
 import com.google.inject.util.Modules;
 import com.google.inject.util.Providers;
 
-import org.eclipse.che.inject.lifecycle.DestroyErrorHandler;
 import org.eclipse.che.inject.lifecycle.DestroyModule;
 import org.eclipse.che.inject.lifecycle.Destroyer;
 import org.eclipse.che.inject.lifecycle.InitModule;
@@ -49,9 +48,10 @@ import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
+import static org.eclipse.che.inject.lifecycle.DestroyErrorHandler.LOG_HANDLER;
 
 /**
  * CheBootstrap is entry point of Che application implemented as ServletContextListener.
@@ -126,7 +126,7 @@ public class CheBootstrap extends EverrestGuiceContextListener {
     protected List<Module> getModules() {
         // based on logic that getServletModule() is called BEFORE getModules() in the EverrestGuiceContextListener
         modules.add(new InitModule(PostConstruct.class));
-        modules.add(new DestroyModule(PreDestroy.class, DestroyErrorHandler.DUMMY));
+        modules.add(new DestroyModule(PreDestroy.class, LOG_HANDLER));
         modules.add(new URIConverter());
         modules.add(new URLConverter());
         modules.add(new FileConverter());
@@ -137,8 +137,10 @@ public class CheBootstrap extends EverrestGuiceContextListener {
         modules.addAll(ModuleScanner.findModules());
         Map<String, Set<String>> aliases = readConfigurationAliases();
         Module firstConfigurationPermutation = Modules.override(new WebInfConfiguration(aliases)).with(new ExtConfiguration(aliases));
-        Module secondConfigurationPermutation = Modules.override(firstConfigurationPermutation).with(new CheSystemPropertiesConfigurationModule(aliases));
-        Module lastConfigurationPermutation = Modules.override(secondConfigurationPermutation).with(new CheEnvironmentVariablesConfigurationModule(aliases));
+        Module secondConfigurationPermutation = Modules.override(firstConfigurationPermutation)
+                                                       .with(new CheSystemPropertiesConfigurationModule(aliases));
+        Module lastConfigurationPermutation = Modules.override(secondConfigurationPermutation)
+                                                     .with(new CheEnvironmentVariablesConfigurationModule(aliases));
         modules.add(lastConfigurationPermutation);
         return modules;
     }
@@ -152,7 +154,7 @@ public class CheBootstrap extends EverrestGuiceContextListener {
             try (Reader reader = Files.newReader(aliasesFile, Charset.forName("UTF-8"))) {
                 properties.load(reader);
             } catch (IOException e) {
-                throw new IllegalStateException(String.format("Unable to read configuration aliases from file %s", aliasesFile), e);
+                throw new IllegalStateException(format("Unable to read configuration aliases from file %s", aliasesFile), e);
             }
             for (Map.Entry<Object, Object> entry : properties.entrySet()) {
                 String value = (String)entry.getValue();
@@ -268,7 +270,8 @@ public class CheBootstrap extends EverrestGuiceContextListener {
         }
     }
 
-    static class EnvironmentVariableToSystemPropertyFormatNameConverter implements Function<Map.Entry<String, String>, Map.Entry<String, String>> {
+    static class EnvironmentVariableToSystemPropertyFormatNameConverter
+            implements Function<Map.Entry<String, String>, Map.Entry<String, String>> {
         @Override
         public Map.Entry<String, String> apply(Map.Entry<String, String> entry) {
             String name = entry.getKey();
@@ -303,7 +306,7 @@ public class CheBootstrap extends EverrestGuiceContextListener {
                             try (Reader reader = Files.newReader(file, Charset.forName("UTF-8"))) {
                                 properties.load(reader);
                             } catch (IOException e) {
-                                throw new IllegalStateException(String.format("Unable to read configuration file %s", file), e);
+                                throw new IllegalStateException(format("Unable to read configuration file %s", file), e);
                             }
                             bindProperties(properties);
                         }
@@ -353,10 +356,11 @@ public class CheBootstrap extends EverrestGuiceContextListener {
                                 buf.append(resolvedPlaceholder);
                             } else if (skipUnresolved) {
                                 buf.append(placeholder);
-                                LOG.warn("Placeholder {} cannot be resolved neither from environment variable nor from system property, leaving as is.", placeholderName);
+                                LOG.warn("Placeholder {} cannot be resolved neither from environment variable nor from system property," +
+                                         "leaving as is.", placeholderName);
                             } else {
-                                throw new ConfigurationException(
-                                        String.format("Property %s is not found as system property or environment variable.", placeholderName));
+                                throw new ConfigurationException(format("Property %s is not found as system property or " +
+                                                                        "environment variable.", placeholderName));
                             }
 
                             start = matcher.end();
@@ -376,7 +380,8 @@ public class CheBootstrap extends EverrestGuiceContextListener {
                 bind(String.class).annotatedWith(Names.named(key)).toProvider(Providers.<String>of(null));
                 if (aliasesForName != null) {
                     for (String alias : aliasesForName) {
-                        bind(String.class).annotatedWith(Names.named(prefix == null ? alias : prefix + alias)).toProvider(Providers.<String>of(null));
+                        bind(String.class).annotatedWith(Names.named(prefix == null ? alias : prefix + alias))
+                                          .toProvider(Providers.<String>of(null));
                     }
                 }
             } else {
