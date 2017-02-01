@@ -22,9 +22,11 @@ import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.mvp.Presenter;
+import org.eclipse.che.ide.dto.DtoFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -39,7 +41,8 @@ public class ProcessesListPresenter implements Presenter {
     public ProcessesListPresenter(final ProcessesListView view,
                                   EventBus eventBus,
                                   final ExecAgentCommandManager execAgentCommandManager,
-                                  final AppContext appContext) {
+                                  final AppContext appContext,
+                                  final DtoFactory dtoFactory) {
         this.view = view;
 
         eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
@@ -49,7 +52,13 @@ public class ProcessesListPresenter implements Presenter {
                     execAgentCommandManager.getProcesses(machine.getId(), true).then(new Operation<List<GetProcessesResponseDto>>() {
                         @Override
                         public void apply(List<GetProcessesResponseDto> arg) throws OperationException {
-                            view.setProcesses(arg);
+                            List<GetProcessesResponseDto> arg1 = new ArrayList<>();
+                            arg1.add(dtoFactory.createDto(GetProcessesResponseDto.class));
+                            arg1.add(dtoFactory.createDto(GetProcessesResponseDto.class));
+                            arg1.add(dtoFactory.createDto(GetProcessesResponseDto.class));
+                            arg1.add(dtoFactory.createDto(GetProcessesResponseDto.class));
+
+                            view.setProcesses(arg1);
                         }
                     });
                 }

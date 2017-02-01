@@ -88,5 +88,7 @@ public class ProcessesListViewImpl implements ProcessesListView {
         processesList.addAll(processes);
 
         dropDownWidget.setData(processesList);
+
+        dropDownListBox.addItems(processes);
     }
 }
