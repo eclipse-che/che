@@ -43,12 +43,14 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -71,6 +73,7 @@ import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
@@ -117,6 +120,7 @@ public class WorkspaceManagerTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
         workspaceManager = new WorkspaceManager(workspaceDao,
                                                 runtimes,
                                                 eventService,
@@ -463,7 +467,7 @@ public class WorkspaceManagerTest {
         workspaceManager.stopWorkspace(workspace.getId());
 
         // then
-        captureAsyncTaskAndExecuteSynchronously();
+        captureRunAsyncCallsAndRunSynchronously();
 
         verify(runtimes).stop(workspace.getId());
 
@@ -479,7 +483,7 @@ public class WorkspaceManagerTest {
 
         workspaceManager.stopWorkspace(workspace.getId(), true);
 
-        captureAsyncTaskAndExecuteSynchronously();
+        captureRunAsyncCallsAndRunSynchronously();
         verify(runtimes).snapshot(workspace.getId());
     }
 
@@ -501,7 +505,7 @@ public class WorkspaceManagerTest {
 
         workspaceManager.stopWorkspace(workspace.getId(), true);
 
-        captureAsyncTaskAndExecuteSynchronously();
+        captureRunAsyncCallsAndRunSynchronously();
         verify(runtimes).stop(any());
     }
 
@@ -513,7 +517,7 @@ public class WorkspaceManagerTest {
 
         workspaceManager.stopWorkspace(workspace.getId());
 
-        captureAsyncTaskAndExecuteSynchronously();
+        captureRunAsyncCallsAndRunSynchronously();
         verify(workspaceDao).remove(workspace.getId());
     }
 
@@ -526,7 +530,7 @@ public class WorkspaceManagerTest {
 
         workspaceManager.stopWorkspace(workspace.getId());
 
-        captureAsyncTaskAndExecuteSynchronously();
+        captureRunAsyncCallsAndRunSynchronously();
         verify(workspaceDao).remove(workspace.getId());
     }
 
@@ -562,7 +566,7 @@ public class WorkspaceManagerTest {
 
         workspaceManager.stopWorkspace(workspace.getId());
 
-        captureAsyncTaskAndExecuteSynchronously();
+        captureRunAsyncCallsAndRunSynchronously();
         verify(runtimes, never()).snapshot(workspace.getId());
         verify(runtimes).stop(workspace.getId());
     }
@@ -582,7 +586,7 @@ public class WorkspaceManagerTest {
 
         workspaceManager.stopWorkspace(workspace.getId());
 
-        captureAsyncTaskAndExecuteSynchronously();
+        captureRunAsyncCallsAndRunSynchronously();
         verify(runtimes, never()).snapshot(workspace.getId());
         verify(runtimes).stop(workspace.getId());
     }
@@ -612,7 +616,7 @@ public class WorkspaceManagerTest {
         workspaceManager.stopWorkspace(workspace.getId());
 
         // then
-        captureAsyncTaskAndExecuteSynchronously();
+        captureRunAsyncCallsAndRunSynchronously();
         verify(runtimes).snapshot(workspace.getId());
         verify(runtimes).stop(workspace.getId());
     }
@@ -678,7 +682,7 @@ public class WorkspaceManagerTest {
         workspaceManager.removeSnapshots(testWsId);
 
         // then
-        captureAsyncTaskAndExecuteSynchronously();
+        captureExecuteCallsAndRunSynchronously();
         verify(runtimes).removeBinaries(asList(snapshot1, snapshot2));
         InOrder snapshotDaoInOrder = inOrder(snapshotDao);
         snapshotDaoInOrder.verify(snapshotDao).removeSnapshot(snapshot1.getId());
@@ -713,7 +717,7 @@ public class WorkspaceManagerTest {
         workspaceManager.removeSnapshots(testWsId);
 
         // then
-        captureAsyncTaskAndExecuteSynchronously();
+        captureExecuteCallsAndRunSynchronously();
         verify(runtimes).removeBinaries(singletonList(snapshot2));
         verify(snapshotDao).removeSnapshot(snapshot1.getId());
         verify(snapshotDao).removeSnapshot(snapshot2.getId());
@@ -732,7 +736,7 @@ public class WorkspaceManagerTest {
         workspaceManager.startMachine(machineConfig, workspace.getId());
 
         // then
-        captureAsyncTaskAndExecuteSynchronously();
+        captureExecuteCallsAndRunSynchronously();
         verify(runtimes).startMachine(workspace.getId(), machineConfig);
     }
 
@@ -824,7 +828,7 @@ public class WorkspaceManagerTest {
 
         workspaceManager.stopWorkspace(workspace.getId(), false);
 
-        captureAsyncTaskAndExecuteSynchronously();
+        captureRunAsyncCallsAndRunSynchronously();
         verify(runtimes, never()).snapshot(workspace.getId());
     }
 
@@ -836,7 +840,7 @@ public class WorkspaceManagerTest {
 
         workspaceManager.stopWorkspace(workspace.getId(), null);
 
-        captureAsyncTaskAndExecuteSynchronously();
+        captureRunAsyncCallsAndRunSynchronously();
         verify(runtimes).snapshot(workspace.getId());
     }
 
@@ -848,13 +852,48 @@ public class WorkspaceManagerTest {
 
         workspaceManager.stopWorkspace(workspace.getId(), false);
 
-        captureAsyncTaskAndExecuteSynchronously();
+        captureRunAsyncCallsAndRunSynchronously();
         verify(runtimes, never()).snapshot(workspace.getId());
     }
 
-    private void captureAsyncTaskAndExecuteSynchronously() {
-        verify(sharedPool).execute(taskCaptor.capture());
-        taskCaptor.getValue().run();
+    @Test
+    public void stopsRunningWorkspacesOnShutdown() throws Exception {
+        when(runtimes.refuseWorkspacesStart()).thenReturn(true);
+
+        WorkspaceImpl stopped = createAndMockWorkspace();
+        mockRuntime(stopped, STOPPED);
+
+        WorkspaceImpl starting = createAndMockWorkspace();
+        mockRuntime(starting, STARTING);
+
+        WorkspaceImpl running = createAndMockWorkspace();
+        mockRuntime(running, RUNNING);
+
+        when(runtimes.getRuntimesIds()).thenReturn(new HashSet<>(asList(running.getId(), starting.getId())));
+
+        // action
+        workspaceManager.shutdown();
+
+        captureRunAsyncCallsAndRunSynchronously();
+        verify(runtimes).stop(running.getId());
+        verify(runtimes).stop(starting.getId());
+        verify(runtimes, never()).stop(stopped.getId());
+        verify(runtimes).shutdown();
+        verify(sharedPool).shutdown();
+    }
+
+    private void captureRunAsyncCallsAndRunSynchronously() {
+        verify(sharedPool, atLeastOnce()).runAsync(taskCaptor.capture());
+        for (Runnable runnable : taskCaptor.getAllValues()) {
+            runnable.run();
+        }
+    }
+
+    private void captureExecuteCallsAndRunSynchronously() {
+        verify(sharedPool, atLeastOnce()).execute(taskCaptor.capture());
+        for (Runnable runnable : taskCaptor.getAllValues()) {
+            runnable.run();
+        }
     }
 
     private WorkspaceRuntimeImpl mockRuntime(WorkspaceImpl workspace, WorkspaceStatus status) {
@@ -870,6 +909,7 @@ public class WorkspaceManagerTest {
             workspace.setRuntime(runtime);
             return null;
         }).when(runtimes).injectRuntime(workspace);
+        when(runtimes.isAnyRunning()).thenReturn(true);
         return runtime;
     }
 

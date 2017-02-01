@@ -232,27 +232,45 @@ export class StackValidationService {
         errors.push('The key \'' + key + '\' is redundant in recipe.');
       }
     });
+
+    if (angular.isUndefined(recipe.location) && angular.isUndefined(recipe.content)) {
+      isValid = false;
+      errors.push('The recipe should have one of \'location\' or \'content\'.');
+    }
+
     if (DOCKERFILE === recipe.type) {
-      if (!recipe.content || !recipe.contentType || !/^FROM\s+\w+/m.test(recipe.content)) {
+      if (angular.isDefined(recipe.location) && !recipe.location) {
         isValid = false;
-        errors.push('The dockerfile is invalid.');
+        errors.push('Unknown recipe location.');
+      }
+      if (angular.isDefined(recipe.content)) {
         if (!recipe.content) {
+          isValid = false;
           errors.push('Unknown recipe content.');
-        }
-        if (!recipe.contentType) {
-          errors.push('Unknown recipe contentType.');
+        } else if (!/^FROM\s+\w+/m.test(recipe.content)) {
+          isValid = false;
+          errors.push('The dockerfile is invalid.');
         }
       }
+      if (!recipe.contentType) {
+        errors.push('Unknown recipe contentType.');
+      }
     } else if (COMPOSE === recipe.type) {
-      if (!recipe.content || !recipe.contentType || !/^services:\n/m.test(recipe.content)) {
+      if (angular.isDefined(recipe.location) && !recipe.location) {
         isValid = false;
-        errors.push('The composefile is invalid.');
+        errors.push('Unknown recipe location.');
+      }
+      if (angular.isDefined(recipe.content)) {
         if (!recipe.content) {
+          isValid = false;
           errors.push('Unknown recipe content.');
+        } else if (!/^services:\n/m.test(recipe.content)) {
+          isValid = false;
+          errors.push('The composefile is invalid.');
         }
-        if (!recipe.contentType) {
-          errors.push('Unknown recipe contentType.');
-        }
+      }
+      if (!recipe.contentType) {
+        errors.push('Unknown recipe contentType.');
       }
     } else if (DOCKERIMAGE === recipe.type) {
       if (!recipe.location) {

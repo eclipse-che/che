@@ -20,11 +20,13 @@ import com.google.inject.name.Names;
 import org.eclipse.che.api.environment.server.MachineService;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceProcess;
+import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.machine.DockerInstance;
 import org.eclipse.che.plugin.docker.machine.DockerInstanceRuntimeInfo;
 import org.eclipse.che.plugin.docker.machine.DockerProcess;
 import org.eclipse.che.plugin.docker.machine.ServerEvaluationStrategy;
 import org.eclipse.che.plugin.docker.machine.node.DockerNode;
+import org.eclipse.che.plugin.openshift.client.OpenShiftConnector;
 
 import java.util.Set;
 
@@ -63,6 +65,10 @@ public class LocalDockerModule extends AbstractModule {
         bind(org.eclipse.che.plugin.docker.client.DockerRegistryDynamicAuthResolver.class)
                 .to(org.eclipse.che.plugin.docker.client.NoOpDockerRegistryDynamicAuthResolverImpl.class);
         bind(org.eclipse.che.plugin.docker.client.DockerRegistryChecker.class).asEagerSingleton();
+
+        MapBinder<String, DockerConnector> dockerConnectors = MapBinder.newMapBinder(binder(), String.class, DockerConnector.class);
+        dockerConnectors.addBinding("default").to(DockerConnector.class);
+        dockerConnectors.addBinding("openshift").to(OpenShiftConnector.class);
 
         Multibinder<String> devMachineEnvVars = Multibinder.newSetBinder(binder(),
                                                                          String.class,

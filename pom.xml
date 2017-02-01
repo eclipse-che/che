@@ -61,6 +61,12 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
+                <artifactId>assembly-ide-war</artifactId>
+                <version>${che.version}</version>
+                <classifier>classes</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che</groupId>
                 <artifactId>assembly-main</artifactId>
                 <version>${che.version}</version>
             </dependency>
@@ -289,6 +295,16 @@
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-ssh-shared</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-api-system</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-api-system-shared</artifactId>
                 <version>${che.version}</version>
             </dependency>
             <dependency>
@@ -755,6 +771,11 @@
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-nodejs-lang-shared</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-openshift-client</artifactId>
                 <version>${che.version}</version>
             </dependency>
             <dependency>

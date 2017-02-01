@@ -33,13 +33,10 @@ export class WorkspaceSelectStack {
   constructor() {
     // scope values
     this.scope = {
-      tabName: '=cheTabName',
-      onTabChange: '&cheOnTabChange',
-      stack: '=cheStack',
-      onStackChange: '&cheStackChange',
-      recipeScript: '=cheRecipeScript',
-      recipeUrl: '=cheRecipeUrl',
-      recipeFormat: '=cheRecipeFormat'
+      environmentName: '=',
+      workspaceName: '=',
+      workspaceImportedRecipe: '=',
+      workspaceStackOnChange: '&'
     };
 
   }
