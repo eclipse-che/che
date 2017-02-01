@@ -8,7 +8,7 @@
 # Contributors:
 #   Marian Labuda - Initial Implementation
 
-source $BATS_BASE_DIR/cli/tests/test_base.sh
+source /dockerfiles/cli/tests/test_base.sh
 
 # Kill running che server instance if there is any to be able to run tests
 setup() {
@@ -25,12 +25,16 @@ setup() {
   tmp_path=${TESTRUN_DIR}/start1
 
   #WHEN
-  docker run -v $SCRIPTS_DIR:/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v $tmp_path:/data $CLI_IMAGE start
+  docker run --rm -v $SCRIPTS_DIR:/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v $tmp_path:/data $CLI_IMAGE start --skip:nightly
 
   #THEN
   [[ $(docker inspect --format="{{.State.Running}}" che) -eq "true" ]]
   ip_address=$(docker inspect -f {{.NetworkSettings.Networks.bridge.IPAddress}} che)
   curl -fsS http://${ip_address}:8080  > /dev/null
+
+  # CLEANUP
+  docker run --rm -v $SCRIPTS_DIR:/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v $tmp_path:/data $CLI_IMAGE stop --force --skip:nightly
+
 }
 
 @test "test cli 'start' with custom port" {
@@ -39,11 +43,15 @@ setup() {
   free_port=$(get_free_port)
   
   #WHEN
-  docker run -e CHE_PORT=$free_port -v $SCRIPTS_DIR:/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v $tmp_path:/data $CLI_IMAGE start
+  docker run --rm -e CHE_PORT=$free_port -v $SCRIPTS_DIR:/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v $tmp_path:/data $CLI_IMAGE start --skip:nightly
 
   #THEN
   [[ $(docker inspect --format="{{.State.Running}}" che) -eq "true" ]]
-  ip_address=$(docker inspect -f {{.NetworkSettings.Networks.bridge.IPAddress}} che)
+  ip_address=$(docker inspect -f {{.NetworkSettings.Networks.bridge.IPAddress}} che-${free_port})
   curl -fsS http://${ip_address}:${free_port}  > /dev/null
+
+  # CLEANUP
+  docker run --rm -e CHE_PORT=$free_port -v $SCRIPTS_DIR:/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v $tmp_path:/data $CLI_IMAGE stop --force --skip:nightly
+
 }
 
