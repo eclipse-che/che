@@ -162,14 +162,14 @@
           <!-- radio-button: from stack -->
           <md-radio-button value="from-stack">Create new workspace from stack</md-radio-button>
           <div ng-if="createProjectCtrl.workspaceResource === 'from-stack'">
-            <che-workspace-select-stack id="create-project-source-stack"
+            <workspace-select-stack id="create-project-source-stack"
                                         che-tab-name="tabName"
                                         che-on-tab-change="createProjectCtrl.setStackTab(tabName)"
                                         che-stack="stack"
                                         che-stack-change="createProjectCtrl.cheStackLibrarySelecter(stack)"
                                         che-recipe-script="createProjectCtrl.recipeScript"
                                         che-recipe-url="createProjectCtrl.recipeUrl"
-                                        che-recipe-format="createProjectCtrl.recipeFormat"></che-workspace-select-stack>
+                                        che-recipe-format="createProjectCtrl.recipeFormat"></workspace-select-stack>
           </div>
         </md-radio-group>
       </ng-form>

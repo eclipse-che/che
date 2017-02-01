@@ -12,7 +12,7 @@
 cmd_init() {
 
   # set an initial value for the flag
-  if is_nightly && ! is_fast; then 
+  if is_nightly && ! is_fast && ! skip_pull; then 
     FORCE_UPDATE="--pull"
   else
     FORCE_UPDATE="--no-force"

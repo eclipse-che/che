@@ -37,7 +37,8 @@ export class WorkspaceRecipeImport {
     // scope values
     this.scope = {
       recipeUrl: '=cheRecipeUrl',
-      recipeFormat: '=cheRecipeFormat'
+      recipeFormat: '=cheRecipeFormat',
+      recipeChange: '&cheRecipeChange'
     };
 
   }
