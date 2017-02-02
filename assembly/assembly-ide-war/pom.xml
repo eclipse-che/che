@@ -425,6 +425,7 @@
                     </dependency>
                 </dependencies>
                 <configuration>
+                    <gwtSdkFirstInClasspath>true</gwtSdkFirstInClasspath>
                     <extraJvmArgs>${gwt.compiler.extraJvmArgs}</extraJvmArgs>
                     <modules>
                         <module>org.eclipse.che.ide.IDE</module>
