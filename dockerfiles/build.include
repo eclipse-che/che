@@ -44,11 +44,27 @@ build() {
   echo "Building Docker Image ${IMAGE_NAME} from $DIR directory with tag $TAG"
   cd "${DIR}" && docker build -t ${IMAGE_NAME}:${TAG} .
   if [ $? -eq 0 ]; then
+    printf "Build of ${BLUE}${IMAGE_NAME}:${TAG} ${GREEN}[OK]${NC}\n"
+    if [ ! -z "${IMAGE_ALIASES}" ]; then
+      for TMP_IMAGE_NAME in ${IMAGE_ALIASES}
+      do
+        docker tag ${IMAGE_NAME}:${TAG} ${TMP_IMAGE_NAME}:${TAG}
+        if [ $? -eq 0 ]; then
+          printf "  /alias ${BLUE}${TMP_IMAGE_NAME}:${TAG}${NC} ${GREEN}[OK]${NC}\n"
+        else
+          printf "${RED}Failure when building docker image ${IMAGE_NAME}:${TAG}${NC}\n"
+          exit 1
+        fi
+
+      done
+    fi
     printf "${GREEN}Script run successfully: ${BLUE}${IMAGE_NAME}:${TAG}${NC}\n"
-    else
-      printf "${RED}Failure when building docker image ${IMAGE_NAME}:${TAG}${NC}\n"
-      exit 1
+  else
+    printf "${RED}Failure when building docker image ${IMAGE_NAME}:${TAG}${NC}\n"
+    exit 1
   fi
+
+
 }
 
 check_docker() {
