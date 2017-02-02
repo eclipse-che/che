@@ -12,8 +12,8 @@ source /dockerfiles/cli/tests/test_base.sh
 
 # Kill running che server instance if there is any to be able to run tests
 setup() {
-  kill_running_named_container che
-  remove_named_container che
+  kill_running_named_container chetest
+  remove_named_container chetest
 }
 
 teardown() {

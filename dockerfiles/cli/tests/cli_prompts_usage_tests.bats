@@ -30,7 +30,7 @@ source /dockerfiles/cli/tests/test_base.sh
   prompt_substring="-v <YOUR_LOCAL_PATH>:/data"
 
   #WHEN
-  run docker run --rm -v $SCRIPTS_DIR:/scripts/base -v /var/run/docker.sock:/var/run/docker.sock $CLI_IMAGE start
+  run docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock $CLI_IMAGE start
 
   #THEN
   assert_failure
@@ -42,7 +42,7 @@ source /dockerfiles/cli/tests/test_base.sh
   expected_output="USAGE:"
 
   #WHEN
-  result=$(docker run --rm -v $SCRIPTS_DIR:/scripts/base -v /var/run/docker.sock:/var/run/docker.sock $CLI_IMAGE || true)
+  result=$(docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock $CLI_IMAGE || true)
 
   #THEN
   [[ $result == *${expected_output}* ]]
