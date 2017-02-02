@@ -13,8 +13,8 @@ import {CheAPI} from '../../../components/api/che-api.factory';
 import {CheStack} from '../../../components/api/che-stack.factory';
 import {CreateProjectSvc} from './create-project.service';
 import {CheNotification} from '../../../components/notification/che-notification.factory';
-import {RouteHistory} from '../../../components/routing/route-history.service';
 import {CheEnvironmentRegistry} from '../../../components/api/environment/che-environment-registry.factory';
+import {IEnvironmentManagerMachine} from '../../../components/api/environment/environment-manager-machine';
 
 /**
  * This class is handling the controller for the projects
@@ -40,7 +40,6 @@ export class CreateProjectController {
 
   stackMachines: any;
   importProjectData: che.IImportProject;
-  stackTab: string;
   enableWizardProject: boolean;
   currentStackTags: any;
   stacksInitialized: boolean;
@@ -50,9 +49,6 @@ export class CreateProjectController {
   workspaceRam: number;
   websocketReconnect: number;
   messageBus: any;
-  recipeUrl: string;
-  recipeFormat: string;
-  recipeScript: string;
   selectedTabIndex: number;
   currentTab: string;
   state: string;
@@ -70,11 +66,8 @@ export class CreateProjectController {
   defaultWorkspaceName: string;
   workspaceResource: any;
   workspaceSelected: any;
-  isWorkspaceConfig: boolean;
   workspaceConfig: any;
   stack: any;
-  readyToGoStack: any;
-  stackLibraryUser: any;
   isCustomStack: boolean;
   isHandleClose: boolean;
   connectionClosed: Function;
@@ -82,6 +75,9 @@ export class CreateProjectController {
   workspaceResourceForm: ng.IFormController;
   workspaceInformationForm: ng.IFormController;
   projectInformationForm: ng.IFormController;
+
+  private stackId: string;
+  private stacks: Array<che.IStack>;
 
   /**
    * Default constructor that is using resource
@@ -92,7 +88,7 @@ export class CreateProjectController {
               $routeParams: che.route.IRouteParamsService, $q: ng.IQService, $scope: ng.IScope,
               $timeout: ng.ITimeoutService, $websocket: ng.websocket.IWebSocketProvider, $window: ng.IWindowService,
               lodash: any, cheAPI: CheAPI, cheStack: CheStack, createProjectSvc: CreateProjectSvc,
-              cheNotification: CheNotification, routeHistory: RouteHistory, cheEnvironmentRegistry: CheEnvironmentRegistry) {
+              cheNotification: CheNotification, cheEnvironmentRegistry: CheEnvironmentRegistry) {
     this.$log = $log;
     this.cheAPI = cheAPI;
     this.cheStack = cheStack;
@@ -113,10 +109,8 @@ export class CreateProjectController {
 
     this.resetCreateProgress();
 
-    // JSON used for import data
+    // jSON used for import data
     this.importProjectData = this.getDefaultProjectJson();
-
-    this.stackTab = 'ready-to-go';
 
     this.enableWizardProject = true;
 
@@ -140,8 +134,6 @@ export class CreateProjectController {
     this.generateWorkspaceName();
 
     this.messageBus = null;
-    this.recipeUrl = null;
-    this.recipeFormat = null;
 
     // search the selected tab
     let routeParams = $routeParams.tabName;
@@ -227,7 +219,7 @@ export class CreateProjectController {
     this.projectDescription = null;
     this.defaultWorkspaceName = null;
 
-    cheAPI.cheWorkspace.getWorkspaces();
+    cheAPI.getWorkspace().getWorkspaces();
 
     $rootScope.showIDE = false;
 
@@ -244,6 +236,11 @@ export class CreateProjectController {
           .ariaLabel('Workspace start')
           .ok('OK')
       );
+    };
+
+    this.stacks = cheStack.getStacks();
+    if (!this.stacks || !this.stacks.length) {
+      cheStack.fetchStacks();
     }
   }
 
@@ -445,7 +442,7 @@ export class CreateProjectController {
     return this.currentTab;
   }
 
-  startWorkspace(bus: any, workspace: any): ng.IPromise<any> {
+  startWorkspace(bus: any, workspace: che.IWorkspace): ng.IPromise<any> {
     // then we've to start workspace
     this.createProjectSvc.setCurrentProgressStep(1);
 
@@ -580,13 +577,13 @@ export class CreateProjectController {
 
     this.createProjectSvc.setCurrentProgressStep(3);
 
-    var promise;
+    let promise;
     let channel: string = null;
     // select mode (create or import)
     if (this.selectSourceOption === 'select-source-new' && this.templatesChoice === 'templates-wizard') {
 
       // we do not create project as it will be done through wizard
-      var deferred = this.$q.defer();
+      let deferred = this.$q.defer();
       promise = deferred.promise;
       deferred.resolve(true);
 
@@ -679,7 +676,7 @@ export class CreateProjectController {
     project.path = currentPath;
     project.source = projectData.source;
 
-    //Update path of sub-projects:
+    // update path of sub-projects:
     projects.forEach((project : any) => {
       let index = project.path.indexOf('/' + project.name);
       project.path = currentPath + project.path.substr(index);
@@ -833,38 +830,6 @@ export class CreateProjectController {
   }
 
   /**
-   * User has selected a stack. needs to find or add recipe for that stack
-   */
-  computeRecipeForStack(stack: any): ng.IPromise<any> {
-    // look at recipe
-    let recipeSource = stack.source;
-
-    let promise;
-
-    // what is type of source ?
-    if ('image' === recipeSource.type) {
-      // needs to add recipe for that script
-      promise = this.submitRecipe('generated-' + stack.name, 'FROM ' + recipeSource.origin);
-    } else if ('dockerfile' === recipeSource.type.toLowerCase()) {
-      promise = this.submitRecipe('generated-' + stack.name, recipeSource.origin);
-    } else {
-      throw 'Not implemented';
-    }
-
-    return promise;
-  }
-
-  submitRecipe(recipeName: string, recipeScript: string): ng.IPromise<any> {
-    let recipe = {
-      type: 'docker',
-      name: recipeName,
-      script: recipeScript
-    };
-
-    return this.cheAPI.getRecipe().create(recipe);
-  }
-
-  /**
    * Call the create operation that may create or import a project
    */
   create(): void {
@@ -880,75 +845,31 @@ export class CreateProjectController {
     this.resetCreateProgress();
     this.setCreateProjectInProgress();
 
-    let source: any = {};
-    source.type = 'dockerfile';
-    // logic to decide if we create workspace based on a stack or reuse existing workspace
     if (this.workspaceResource === 'existing-workspace') {
       // reuse existing workspace
-      this.recipeUrl = null;
-      this.stack = null;
       this.createProjectSvc.setWorkspaceOfProject(this.workspaceSelected.config.name);
       this.createProjectSvc.setWorkspaceNamespace(this.workspaceSelected.namespace);
       this.checkExistingWorkspaceState(this.workspaceSelected);
     } else if (this.workspaceResource === 'from-stack') {
-      // create workspace based on a stack
-      switch (this.stackTab) {
-        case 'ready-to-go':
-          source = this.getSourceFromStack(this.readyToGoStack);
-          break;
-        case 'stack-library':
-          source = this.getSourceFromStack(this.stackLibraryUser);
-          break;
-        case 'stack-import':
-          source.type = 'environment';
-          source.format = this.recipeFormat;
-          if (this.recipeUrl && this.recipeUrl.length > 0) {
-            source.location = this.recipeUrl;
-          }
-          break;
-        case 'stack-authoring':
-          source.type = 'environment';
-          source.format = this.recipeFormat;
-          source.content = this.recipeScript;
-          break;
-      }
-      this.createWorkspaceFromStack(source);
+      // create workspace based on a workspaceConfig
+      this.createProjectSvc.setWorkspaceOfProject(this.workspaceName);
+      let attributes = this.stack && this.stack.id ? {stackId: this.stack.id} : {};
+      this.setEnvironment(this.workspaceConfig);
+      let workspaceConfig = this.cheAPI.getWorkspace().formWorkspaceConfig(this.workspaceConfig, this.workspaceName, null, this.workspaceRam);
+      this.createWorkspace(workspaceConfig, attributes);
+
     } else {
       // create workspace based on config
-      this.createWorkspace(this.stack.workspaceConfig);
+      this.createWorkspace(this.workspaceConfig);
     }
-  }
-
-  /**
-   * Detects machine source from pointed stack.
-   *
-   * @param stack to retrieve described source
-   * @returns {source} machine source config
-   */
-  getSourceFromStack(stack: any): any {
-    let source: any = {};
-    source.type = 'dockerfile';
-
-    switch (stack.source.type.toLowerCase()) {
-      case 'image':
-        source.content = 'FROM ' + stack.source.origin;
-        break;
-      case 'dockerfile':
-        source.content = stack.source.origin;
-        break;
-      default:
-        throw 'Not implemented';
-    }
-
-    return source;
   }
 
   /**
    * Check whether existing workspace in running (runtime should be present)
    *
-   * @param workspace existing workspace
+   * @param workspace {che.IWorkspace} existing workspace
    */
-  checkExistingWorkspaceState(workspace: any): void {
+  checkExistingWorkspaceState(workspace: che.IWorkspace): void {
     if (workspace.status === 'RUNNING') {
       this.cheAPI.getWorkspace().fetchWorkspaceDetails(workspace.id).finally(() => {
         let websocketUrl = this.cheAPI.getWorkspace().getWebsocketUrl(workspace.id);
@@ -1007,28 +928,13 @@ export class CreateProjectController {
   }
 
   /**
-   * Create new workspace with provided machine source.
-   *
-   * @param source machine source
-   */
-  createWorkspaceFromStack(source: any): void {
-    this.createProjectSvc.setWorkspaceOfProject(this.workspaceName);
-
-    let attributes = this.stack ? {stackId: this.stack.id} : {};
-    let stackWorkspaceConfig = this.stack ? this.stack.workspaceConfig : {};
-    this.setEnvironment(stackWorkspaceConfig);
-    let workspaceConfig = this.cheAPI.getWorkspace().formWorkspaceConfig(stackWorkspaceConfig, this.workspaceName, source, this.workspaceRam);
-
-    this.createWorkspace(workspaceConfig, attributes);
-  }
-
-  /**
    * Create new workspace with workspace config
    *
-   * @param workspaceConfig
+   * @param workspaceConfig {che.IWorkspaceConfig}
+   * @param attributes {any}
    */
-  createWorkspace(workspaceConfig: any, attributes?: any): void {
-    // TODO: no account in che ? it's null when testing on localhost
+  createWorkspace(workspaceConfig: che.IWorkspaceConfig, attributes?: any): void {
+    // tODO: no account in che ? it's null when testing on localhost
     let creationPromise = this.cheAPI.getWorkspace().createWorkspaceFromConfig(null, workspaceConfig, attributes);
     creationPromise.then((workspace: any) => {
       this.createProjectSvc.setWorkspaceNamespace(workspace.namespace);
@@ -1067,14 +973,14 @@ export class CreateProjectController {
       // generate a name
 
       // starts with project
-      var name = 'project';
+      let name = 'project';
 
       // type selected
       if (this.importProjectData.project.type) {
         name = this.importProjectData.project.type.replace(/\s/g, '_');
       }
 
-      name = name + '-' + (('0000' + (Math.random() * Math.pow(36, 4) << 0).toString(36)).slice(-4)); // jshint ignore:line
+      name = name + '-' + this.generateRandomStr();
 
       this.setProjectName(name);
     }
@@ -1086,9 +992,17 @@ export class CreateProjectController {
    */
   generateWorkspaceName(): void {
     // starts with wksp
-    let name = 'wksp';
-    name += '-' + (('0000' + (Math.random() * Math.pow(36, 4) << 0).toString(36)).slice(-4)); // jshint ignore:line
+    let name = 'wksp-' + this.generateRandomStr();
     this.setWorkspaceName(name);
+  }
+
+  /**
+   * Generates a random string
+   *
+   * @returns {string}
+   */
+  generateRandomStr(): string {
+    return (('0000' + (Math.random() * Math.pow(36, 4) << 0).toString(36)).slice(-4));
   }
 
   isImporting(): boolean {
@@ -1097,15 +1011,7 @@ export class CreateProjectController {
 
   isReadyToCreate(): boolean {
     let isCreateProjectInProgress = this.isCreateProjectInProgress();
-
-    if (!this.isCustomStack) {
-      return !isCreateProjectInProgress && this.isReady;
-    }
-
-    let isRecipeUrl = this.recipeUrl && this.recipeUrl.length > 0;
-    let isRecipeScript = this.recipeScript && this.recipeScript.length > 0;
-
-    return !isCreateProjectInProgress && this.isReady && (isRecipeUrl || isRecipeScript);
+    return !isCreateProjectInProgress && this.isReady;
   }
 
   resetCreateProgress(): void {
@@ -1158,11 +1064,6 @@ export class CreateProjectController {
     return currentCreationStep.hasError && currentCreationStep.logs.indexOf('You can stop other workspaces') >= 0;
   }
 
-  setStackTab(stackTab: string): void {
-    this.isCustomStack = (stackTab === 'stack-import' || stackTab === 'stack-authoring');
-    this.stackTab = stackTab;
-  }
-
   /**
    * Update data for selected workspace
    */
@@ -1171,16 +1072,7 @@ export class CreateProjectController {
       return;
     }
     this.setWorkspaceName(this.workspaceSelected.config.name);
-    let stack = null;
-    if (this.workspaceSelected.attributes && this.workspaceSelected.attributes.stackId) {
-      stack = this.cheStack.getStackById(this.workspaceSelected.attributes.stackId);
-    }
-    this.updateCurrentStack(stack);
-    let defaultEnvironment = this.workspaceSelected.config.defaultEnv;
-    let environment = this.workspaceSelected.config.environments[defaultEnvironment];
-   /* TODO not implemented yet if (environment) {
-      this.workspaceRam = environment.machines[0].limits.ram;
-    }*/
+    this.updateCurrentStack(this.workspaceSelected.attributes.stackId);
     this.updateWorkspaceStatus(true);
   }
 
@@ -1210,20 +1102,18 @@ export class CreateProjectController {
     }
   }
 
+
   /**
    * Use of an existing stack
-   * @param stack the stack to use
+   * @param config {che.IWorkspaceConfig}
+   * @param stackId {string}
    */
-  cheStackLibrarySelecter(stack: any): void {
+  changeWorkspaceStack(config: che.IWorkspaceConfig, stackId: string) {
     if (this.workspaceResource === 'existing-workspace') {
       return;
     }
-    if (this.stackTab === 'ready-to-go') {
-      this.readyToGoStack = angular.copy(stack);
-    } else if (this.stackTab === 'stack-library') {
-      this.stackLibraryUser = angular.copy(stack);
-    }
-    this.updateCurrentStack(stack);
+    this.workspaceConfig = config;
+    this.updateCurrentStack(stackId);
   }
 
   /**
@@ -1232,15 +1122,14 @@ export class CreateProjectController {
    * @param config {Object} workspace config
    */
   updateWorkspaceConfigImport(config: any): void {
-    this.isWorkspaceConfig = true;
     this.workspaceConfig = angular.copy(config);
+    this.stackId = 'config-import-' + this.generateRandomStr();
     this.stack = {
-      id: 'config-import',
       workspaceConfig: this.workspaceConfig
     };
     this.workspaceName = this.workspaceConfig.name;
 
-    delete this.stackMachines[this.stack.id];
+    delete this.stackMachines[this.stackId];
   }
 
   /**
@@ -1249,7 +1138,7 @@ export class CreateProjectController {
    * @param form {Object}
    */
   workspaceNameChange(form: ng.IFormController): void {
-    if (!this.isWorkspaceConfig || form.$invalid || !this.workspaceConfig) {
+    if (form.$invalid || !this.workspaceConfig) {
       return;
     }
 
@@ -1263,7 +1152,7 @@ export class CreateProjectController {
    * @param machineRam {number}
    */
   workspaceRamChange(machineName: string, machineRam: number): void {
-    if (!this.isWorkspaceConfig || !this.workspaceConfig) {
+    if (!this.workspaceConfig) {
       return;
     }
 
@@ -1299,9 +1188,18 @@ export class CreateProjectController {
 
   /**
    * Update current stack
-   * @param stack the stack to use
+   * @param {string} stackId
    */
-  updateCurrentStack(stack: any): void {
+  updateCurrentStack(stackId: string): void {
+    let stack: che.IStack = null;
+    if (stackId) {
+      stack = this.stacks.find((stack: che.IStack) => {
+        return stack.id === stackId;
+      });
+    }
+    this.isCustomStack = !stack;
+    this.stackId = stack && stack.id ? stack.id : 'custom-stack';
+    delete this.stackMachines[this.stackId];
     this.stack = stack;
     this.currentStackTags = stack && stack.tags ? angular.copy(stack.tags) : null;
     if (!stack) {
@@ -1400,11 +1298,19 @@ export class CreateProjectController {
   getStackMachines(environment: any): any {
     let recipeType = environment.recipe.type;
     let environmentManager = this.cheEnvironmentRegistry.getEnvironmentManager(recipeType);
-    if (!this.stackMachines[this.stack.id]) {
-      this.stackMachines[this.stack.id] = environmentManager.getMachines(environment);
+
+    if (!this.stackMachines[this.stackId] || !this.stackMachines[this.stackId].length) {
+      let machines = environmentManager.getMachines(environment);
+      machines.forEach((machine: IEnvironmentManagerMachine) => {
+        let memoryLimit = environmentManager.getMemoryLimit(machine);
+          if (!memoryLimit || memoryLimit === -1) {
+            environmentManager.setMemoryLimit(machine, this.workspaceRam);
+          }
+      });
+      this.stackMachines[this.stackId] = machines;
     }
 
-    return this.stackMachines[this.stack.id];
+    return this.stackMachines[this.stackId];
   }
 
   /**
@@ -1425,7 +1331,14 @@ export class CreateProjectController {
 
     let recipeType = environment.recipe.type;
     let environmentManager = this.cheEnvironmentRegistry.getEnvironmentManager(recipeType);
-    workspace.environments[workspace.defaultEnv] = environmentManager.getEnvironment(environment, this.getStackMachines(environment));
+    let machines = this.getStackMachines(environment);
+    let hasDevMachine = machines.some((machine: IEnvironmentManagerMachine) => {
+      return environmentManager.isDev(machine);
+    });
+    if (!hasDevMachine) {
+      environmentManager.setDev(machines[0], true);
+    }
+    workspace.environments[workspace.defaultEnv] = environmentManager.getEnvironment(environment, machines);
   }
 
 }
