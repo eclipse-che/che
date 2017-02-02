@@ -33,6 +33,7 @@ import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.ide.CoreLocalizationConstant;
+import org.eclipse.che.ide.DelayedTask;
 import org.eclipse.che.ide.actions.WorkspaceSnapshotCreator;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
@@ -370,6 +371,9 @@ public class WorkspaceEventsHandler {
 
     @VisibleForTesting
     protected class WorkspaceStatusSubscriptionHandler extends SubscriptionHandler<WorkspaceStatusEvent> {
+
+        private DelayedTask wsStartedNotification;
+
         private final WorkspaceDto workspace;
 
         public WorkspaceStatusSubscriptionHandler(final WorkspaceDto workspace) {
@@ -401,6 +405,12 @@ public class WorkspaceEventsHandler {
 
                 case STOPPING:
                     loader.show(LoaderPresenter.Phase.STOPPING_WORKSPACE);
+
+                    if (wsStartedNotification != null) {
+                        wsStartedNotification.cancel();
+                        wsStartedNotification = null;
+                    }
+
                     break;
 
                 case STOPPED:
@@ -417,6 +427,22 @@ public class WorkspaceEventsHandler {
                 case SNAPSHOT_CREATED:
                     loader.setSuccess(LoaderPresenter.Phase.CREATING_WORKSPACE_SNAPSHOT);
                     snapshotCreator.successfullyCreated();
+
+                    wsStartedNotification = new DelayedTask() {
+                        @Override
+                        public void onExecute() {
+
+                            /*
+                              Workaround. When ws is in snapshotting state we can get only running state after. But we know that stopping
+                              state may occur after running, so when user is entering ide when the last one is stopping we haven't init
+                              ide then.
+                             */
+
+                            onWorkspaceStarted(workspaceId);
+                        }
+                    };
+                    wsStartedNotification.delay(500);
+
                     break;
 
                 case SNAPSHOT_CREATION_ERROR:
