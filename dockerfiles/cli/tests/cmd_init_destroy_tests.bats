@@ -8,102 +8,117 @@
 # Contributors:
 #   Marian Labuda - Initial Implementation
 
-source $BATS_BASE_DIR/cli/tests/test_base.sh
+source /dockerfiles/cli/tests/test_base.sh
 
 @test "test 'init' and 'destroy --quiet' with existing dir" {
+
   #GIVEN
-  tmp_path=${TESTRUN_DIR}/init-destroy1
-  mkdir -p $tmp_path
+  tmp_path="${TESTRUN_DIR}"/init-destroy1
+  container_tmp_path=""${CONTAINER_TESTRUN_DIR}""/init-destroy1
+  mkdir -p "${tmp_path}"
 
   #WHEN
-  docker run -v $SCRIPTS_DIR:/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v $tmp_path:/data $CLI_IMAGE init
+  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE init --skip:nightly
 
   #THEN
-  [[ -d $tmp_path/docs ]]
-  [[ -d $tmp_path/instance ]]
-  [[ -e $tmp_path/che.env ]] 
-  [[ -e $tmp_path/cli.log ]]
+  [[ -d "${container_tmp_path}"/docs ]]
+  [[ -d "${container_tmp_path}"/instance ]]
+  [[ -e "${container_tmp_path}"/che.env ]]
+  [[ -e "${container_tmp_path}"/cli.log ]]
 
   #WHEN
-  docker run -v $SCRIPTS_DIR:/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v $tmp_path:/data $CLI_IMAGE destroy --quiet
+  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE destroy --quiet --skip:nightly
   
   #THEN
-  [[ ! -d $tmp_path/docs ]]
-  [[ ! -d $tmp_path/instance ]]
-  [[ ! -e $tmp_path/che.env ]] 
-  [[ -e $tmp_path/cli.log ]]
+  [[ ! -d "${container_tmp_path}"/docs ]]
+  [[ ! -d "${container_tmp_path}"/instance ]]
+  [[ ! -e "${container_tmp_path}"/che.env ]]
+  [[ -e "${container_tmp_path}"/cli.log ]]
+  rm -rf "${container_tmp_path}"
 }
 
 @test "test 'init' and 'destroy --quiet' with non-existing dir" {
+
   #GIVEN
-  tmp_path=${TESTRUN_DIR}/init-destroy2
+  tmp_path="${TESTRUN_DIR}"/init-destroy2
+  container_tmp_path="${CONTAINER_TESTRUN_DIR}"/init-destroy2
  
   #WHEN  
-  docker run -v $SCRIPTS_DIR:/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v $tmp_path:/data $CLI_IMAGE init 1>/dev/null
+  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE init --skip:nightly 1>/dev/null
 
   #THEN
-  [[ -e $tmp_path ]]
-  [[ -d $tmp_path/docs ]]
-  [[ -d $tmp_path/instance ]]
-  [[ -e $tmp_path/che.env ]]
-  [[ -e $tmp_path/cli.log ]]
+  [[ -e "${container_tmp_path}" ]]
+  [[ -d "${container_tmp_path}"/docs ]]
+  [[ -d "${container_tmp_path}"/instance ]]
+  [[ -e "${container_tmp_path}"/che.env ]]
+  [[ -e "${container_tmp_path}"/cli.log ]]
 
   #WHEN
-  docker run -v $SCRIPTS_DIR:/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v $tmp_path:/data $CLI_IMAGE destroy --quiet 1>/dev/null
+  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE destroy --skip:nightly --quiet 1>/dev/null
   
   #THEN
-  [[ ! -d $tmp_path/docs ]]
-  [[ ! -d $tmp_path/instance ]]
-  [[ ! -e $tmp_path/che.env ]]
-  [[ -e $tmp_path/cli.log ]]
+  [[ ! -d "${container_tmp_path}"/docs ]]
+  [[ ! -d "${container_tmp_path}"/instance ]]
+  [[ ! -e "${container_tmp_path}"/che.env ]]
+  [[ -e "${container_tmp_path}"/cli.log ]]
+  rm -rf "${container_tmp_path}"
+
 }
 
 @test "test 'init' and 'destroy --quiet --cli' with existing dir" {
   #GIVEN
-  tmp_path=${TESTRUN_DIR}/init-destroy3
-  mkdir -p $tmp_path
+  tmp_path="${TESTRUN_DIR}"/init-destroy3
+  container_tmp_path="${CONTAINER_TESTRUN_DIR}"/init-destroy3
+
+  mkdir -p "${tmp_path}"
 
   #WHEN
-  docker run -v $SCRIPTS_DIR:/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v $tmp_path:/data $CLI_IMAGE init 1>/dev/null
+  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE init --skip:nightly 1>/dev/null
   remove_named_container $CLI_CONTAINER
 
   #THEN
-  [[ -d $tmp_path/docs ]]
-  [[ -d $tmp_path/instance ]]
-  [[ -e $tmp_path/che.env ]]
-  [[ -e $tmp_path/cli.log ]]
+  [[ -d "${container_tmp_path}"/docs ]]
+  [[ -d "${container_tmp_path}"/instance ]]
+  [[ -e "${container_tmp_path}"/che.env ]]
+  [[ -e "${container_tmp_path}"/cli.log ]]
 
   #WHEN
-  docker run -v $SCRIPTS_DIR:/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v $tmp_path:/data $CLI_IMAGE destroy --quiet --cli 1>/dev/null
+  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE destroy --skip:nightly --quiet --cli 1>/dev/null
   
   #THEN
-  [[ ! -d $tmp_path/docs ]]
-  [[ ! -d $tmp_path/instance ]]
-  [[ ! -e $tmp_path/che.env ]]
-  [[ ! -e $tmp_path/cli.log ]]
+  [[ ! -d "${container_tmp_path}"/docs ]]
+  [[ ! -d "${container_tmp_path}"/instance ]]
+  [[ ! -e "${container_tmp_path}"/che.env ]]
+  [[ ! -e "${container_tmp_path}"/cli.log ]]
+  rm -rf "${container_tmp_path}"
+
 }
 
 @test "test 'init' and 'destroy --quiet --cli' with non-existing dir" {
+
   #GIVEN
-  tmp_path=${TESTRUN_DIR}/init-destroy4
+  tmp_path="${TESTRUN_DIR}"/init-destroy4
+  container_tmp_path="${CONTAINER_TESTRUN_DIR}"/init-destroy4
 
   #WHEN
-  docker run -v $SCRIPTS_DIR:/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v $tmp_path:/data $CLI_IMAGE init 1>/dev/null
+  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE init --skip:nightly 1>/dev/null
 
   #THEN
-  [[ -d $tmp_path ]]
-  [[ -d $tmp_path/docs ]]
-  [[ -d $tmp_path/instance ]]
-  [[ -e $tmp_path/che.env ]]
-  [[ -e $tmp_path/cli.log ]]
+  [[ -d "${container_tmp_path}" ]]
+  [[ -d "${container_tmp_path}"/docs ]]
+  [[ -d "${container_tmp_path}"/instance ]]
+  [[ -e "${container_tmp_path}"/che.env ]]
+  [[ -e "${container_tmp_path}"/cli.log ]]
 
   #WHEN
-  docker run -v $SCRIPTS_DIR:/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v $tmp_path:/data $CLI_IMAGE destroy --quiet --cli 1>/dev/null
+  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE destroy --skip:nightly --quiet --cli 1>/dev/null
   
   #THEN
-  [[ ! -d $tmp_path/docs ]]
-  [[ ! -d $tmp_path/instance ]]
-  [[ ! -e $tmp_path/che.env ]]
-  [[ ! -e $tmp_path/cli.log ]]
+  [[ ! -d "${container_tmp_path}"/docs ]]
+  [[ ! -d "${container_tmp_path}"/instance ]]
+  [[ ! -e "${container_tmp_path}"/che.env ]]
+  [[ ! -e "${container_tmp_path}"/cli.log ]]
+  rm -rf "${container_tmp_path}"
+
 }
 
