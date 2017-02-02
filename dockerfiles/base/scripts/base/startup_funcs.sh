@@ -140,14 +140,6 @@ init_constants() {
 
   DEFAULT_CHE_LICENSE=false
   CHE_LICENSE=${CHE_LICENSE:-${DEFAULT_CHE_LICENSE}}
-
-  # Replace all of these with digests
-  UTILITY_IMAGE_ALPINE="alpine:3.4"
-  UTILITY_IMAGE_CHEIP="eclipse/che-ip:nightly"
-  UTILITY_IMAGE_CHEACTION="eclipse/che-action:nightly"
-  UTILITY_IMAGE_CHEDIR="eclipse/che-dir:nightly"
-  UTILITY_IMAGE_CHETEST="eclipse/che-test:nightly"
-  UTILITY_IMAGE_CHEMOUNT="eclipse/che-mount:nightly"
 }
 
 
@@ -541,7 +533,7 @@ start() {
   set -- "${@/\-\-skip\:nightly/}"
   set -- "${@/\-\-skip\:network/}"
   set -- "${@/\-\-skip\:pull/}"
-  
+
   # The post_init method is unique to each assembly. This method must be provided by 
   # a custom CLI assembly in their container and can set global variables which are 
   # specific to that implementation of the CLI. Place initialization functions that

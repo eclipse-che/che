@@ -379,6 +379,16 @@ check_mounts() {
     CHE_HOST_DEVELOPMENT_REPO="${REPO_MOUNT}"
     CHE_CONTAINER_DEVELOPMENT_REPO="/repo"
 
+    # When we build eclipse/che-base, we insert the version of the repo it was built from into the image
+    CHE_BASE_VERSION=$(cat /version/ver.che_base)
+
+    # Get the version of the pom.xml of the Che repo mounted
+    CHE_REPO_VERSION=$(cat /repo/pom.xml | grep "<version>.*</version>$" | awk -F'[><]' 'NR==1{print $3}')
+
+    if [[ $CHE_BASE_VERSION != $CHE_REPO_VERSION ]]; then
+      warning "The CLI image ($CHE_BASE_VERSION) does not match your repo ($CHE_REPO_VERSION)"
+    fi
+
     CHE_ASSEMBLY="${CHE_HOST_INSTANCE}/dev/${CHE_MINI_PRODUCT_NAME}-tomcat"
 
     if [[ ! -d "${CHE_CONTAINER_DEVELOPMENT_REPO}"  ]] || [[ ! -d "${CHE_CONTAINER_DEVELOPMENT_REPO}/assembly" ]]; then
