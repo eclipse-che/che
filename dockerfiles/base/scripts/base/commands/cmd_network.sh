@@ -35,7 +35,7 @@ start_test_server() {
 
   # Start mini httpd server to run simulated tests
   docker run -d -p $AGENT_EXTERNAL_PORT:$AGENT_INTERNAL_PORT --name fakeagent \
-             ${UTILITY_IMAGE_ALPINE} httpd -f -p $AGENT_INTERNAL_PORT -h /etc/ >> "${LOGS}"
+             ${BOOTSTRAP_IMAGE_ALPINE} httpd -f -p $AGENT_INTERNAL_PORT -h /etc/ >> "${LOGS}"
 
   export AGENT_INTERNAL_IP=$(docker inspect --format='{{.NetworkSettings.IPAddress}}' fakeagent)
   export AGENT_EXTERNAL_IP=$CHE_HOST

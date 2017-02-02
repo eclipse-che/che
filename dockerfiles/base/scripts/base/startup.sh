@@ -13,6 +13,7 @@ if [ "$?" == "1" ]; then
     :
   }
 fi
+
 declare -f post_init > /dev/null
 if [ "$?" == "1" ]; then
   post_init() {
@@ -20,7 +21,7 @@ if [ "$?" == "1" ]; then
   }
 fi
 
-source /scripts/base/startup_funcs.sh
+source /scripts/base/startup_01_init.sh
 
 # See: https://sipb.mit.edu/doc/safe-shell/
 set -e

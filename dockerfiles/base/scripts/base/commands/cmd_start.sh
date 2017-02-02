@@ -271,3 +271,17 @@ check_containers_are_running() {
   done <<< "${LIST_OF_COMPOSE_CONTAINERS}"
 }
 
+has_compose() {
+  hash docker-compose 2>/dev/null && return 0 || return 1
+}
+
+docker_compose() {
+#  debug $FUNCNAME
+
+  if has_compose; then
+    docker-compose "$@"
+  else
+    docker_run -v "${CHE_HOST_INSTANCE}":"${CHE_CONTAINER_INSTANCE}" \
+                  $IMAGE_COMPOSE "$@"
+  fi
+}
