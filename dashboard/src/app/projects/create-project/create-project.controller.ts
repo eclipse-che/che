@@ -1300,7 +1300,14 @@ export class CreateProjectController {
     let environmentManager = this.cheEnvironmentRegistry.getEnvironmentManager(recipeType);
 
     if (!this.stackMachines[this.stackId] || !this.stackMachines[this.stackId].length) {
-      this.stackMachines[this.stackId] = environmentManager.getMachines(environment);
+      let machines = environmentManager.getMachines(environment);
+      machines.forEach((machine: IEnvironmentManagerMachine) => {
+        let memoryLimit = environmentManager.getMemoryLimit(machine);
+          if (!memoryLimit || memoryLimit === -1) {
+            environmentManager.setMemoryLimit(machine, this.workspaceRam);
+          }
+      });
+      this.stackMachines[this.stackId] = machines;
     }
 
     return this.stackMachines[this.stackId];
