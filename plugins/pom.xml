@@ -54,7 +54,7 @@
         <module>plugin-json</module>
         <module>plugin-composer</module>
         <module>plugin-zend-debugger</module>
-		<module>plugin-testing</module>
-		<module>plugin-testing-java</module>
+        <module>plugin-testing</module>
+        <module>plugin-testing-java</module>
     </modules>
 </project>
