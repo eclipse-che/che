@@ -19,6 +19,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.MachineLogMessage;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
+import org.eclipse.che.api.core.model.workspace.ExtendedMachine;
 import org.eclipse.che.api.core.model.workspace.ServerConf2;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.util.LineConsumer;
@@ -252,7 +253,7 @@ public class CheEnvironmentEngineTest {
         // then
         assertEquals(machines, expectedMachines);
         for (Instance expectedMachine : expectedMachines) {
-            verify(startedHandler).started(expectedMachine);
+            verify(startedHandler).started(eq(expectedMachine), any(ExtendedMachine.class));
         }
     }
 
