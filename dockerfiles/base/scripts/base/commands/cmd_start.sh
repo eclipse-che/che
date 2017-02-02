@@ -72,7 +72,7 @@ cmd_start_check_host_resources() {
   HOST_RAM=${HOST_RAM% *}
 
   PREFLIGHT=""
-  if $(less_than "$HOST_RAM" "$CHE_MIN_RAM"); then
+  if $(less_than "31.37" "1.5"); then
     text "         mem ($CHE_MIN_RAM GiB):           ${RED}[NOT OK]${NC}\n"
     PREFLIGHT="fail"
   else
@@ -197,8 +197,8 @@ cmd_restart() {
 
   FORCE_UPDATE=${1:-"--no-force"}
   info "restart" "Restarting..."
-  cmd_stop
-  cmd_start ${FORCE_UPDATE}
+  cmd_stop ${@}
+  cmd_start ${FORCE_UPDATE} ${@}
 }
 
 wait_until_booted() {

@@ -51,6 +51,7 @@ import org.eclipse.che.ide.workspace.start.StartWorkspacePresenter;
 import java.util.List;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
+import static org.eclipse.che.ide.ui.loaders.LoaderPresenter.Phase.CREATING_WORKSPACE_SNAPSHOT;
 import static org.eclipse.che.ide.ui.loaders.LoaderPresenter.Phase.STARTING_WORKSPACE_RUNTIME;
 
 /**
@@ -189,6 +190,9 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
 
                 final WorkspaceStatus workspaceStatus = workspace.getStatus();
                 switch (workspaceStatus) {
+                    case SNAPSHOTTING:
+                        loader.show(CREATING_WORKSPACE_SNAPSHOT);
+                        break;
                     case STARTING:
                         eventBus.fireEvent(new WorkspaceStartingEvent(workspace));
                         break;
