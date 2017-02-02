@@ -365,19 +365,6 @@ init_logging() {
   log "$(date)"
 }
 
-# Check pre/post functions are there or not
-declare -f pre_init > /dev/null
-if [ "$?" == "1" ]; then
-  pre_init() {
-    :
-  }
-fi
-declare -f post_init > /dev/null
-if [ "$?" == "1" ]; then
-  post_init() {
-    :
-  }
-fi
 
 init() {
   init_constants
