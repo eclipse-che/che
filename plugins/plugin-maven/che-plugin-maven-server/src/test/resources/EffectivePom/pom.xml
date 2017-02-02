@@ -113,9 +113,6 @@
         <maven.compiler.optimize>true</maven.compiler.optimize>
         <maven.compiler.showDeprecation>true</maven.compiler.showDeprecation>
         <maven.compiler.showWarnings>true</maven.compiler.showWarnings>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <!-- maven-compiler-plugin -->
-        <maven.compiler.target>1.8</maven.compiler.target>
         <!-- maven-enforcer-plugin -->
         <maven.min.version>3.1.1</maven.min.version>
         <maven.private.repo.url>https://maven.codenvycorp.com/content/groups/codenvy-public-group/</maven.private.repo.url>
