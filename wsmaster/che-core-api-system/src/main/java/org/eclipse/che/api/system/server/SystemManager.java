@@ -17,7 +17,6 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.system.shared.SystemStatus;
 import org.eclipse.che.api.system.shared.event.SystemStatusChangedEvent;
-import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
 import org.slf4j.Logger;
@@ -46,14 +45,14 @@ public class SystemManager {
     private static final Logger LOG = LoggerFactory.getLogger(SystemManager.class);
 
     private final AtomicReference<SystemStatus> statusRef;
-    private final WorkspaceManager              workspaceManager;
     private final EventService                  eventService;
+    private final ServiceTerminator             terminator;
 
     private final CountDownLatch shutdownLatch = new CountDownLatch(1);
 
     @Inject
-    public SystemManager(WorkspaceManager workspaceManager, EventService eventService) {
-        this.workspaceManager = workspaceManager;
+    public SystemManager(ServiceTerminator terminator, EventService eventService) {
+        this.terminator = terminator;
         this.eventService = eventService;
         this.statusRef = new AtomicReference<>(RUNNING);
     }
@@ -93,7 +92,7 @@ public class SystemManager {
         LOG.info("Preparing system to shutdown");
         eventService.publish(new SystemStatusChangedEvent(RUNNING, PREPARING_TO_SHUTDOWN));
         try {
-            workspaceManager.shutdown();
+            terminator.terminateAll();
             statusRef.set(READY_TO_SHUTDOWN);
             eventService.publish(new SystemStatusChangedEvent(PREPARING_TO_SHUTDOWN, READY_TO_SHUTDOWN));
             LOG.info("System is ready to shutdown");

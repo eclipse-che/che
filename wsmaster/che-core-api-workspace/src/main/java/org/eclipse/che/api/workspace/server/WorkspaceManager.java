@@ -678,11 +678,16 @@ public class WorkspaceManager {
         if (!runtimes.refuseWorkspacesStart()) {
             throw new IllegalStateException("Workspace service shutdown has been already called");
         }
-        LOG.info("Shutting down workspace service");
         stopRunningWorkspacesNormally();
         runtimes.shutdown();
         sharedPool.shutdown();
-        LOG.info("Workspace service stopped");
+    }
+
+    /**
+     * Returns set of workspace ids that are not {@link WorkspaceStatus#STOPPED}.
+     */
+    public Set<String> getRunningWorkspacesIds() {
+        return runtimes.getRuntimesIds();
     }
 
     /**
