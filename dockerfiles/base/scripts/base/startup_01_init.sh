@@ -60,6 +60,14 @@ init_constants() {
   BOLD='\033[1m'
   UNDERLINE='\033[4m'
   NC='\033[0m'
+
+  # CLI DEVELOPERS - ONLY INCREMENT THIS CHANGE IF MODIFYING SECTIONS THAT AFFECT LOADING
+  #                  BEFORE :/REPO IS VOLUME MOUNTED.  CLI ASSEMBLIES WILL FAIL UNTIL THEY
+  #                  ARE RECOMPILED WITH MATCHING VERSION.
+  CHE_BASE_API_VERSION=1
+}
+
+init_global_vars() {
   LOG_INITIALIZED=false
   FAST_BOOT=false
   CHE_DEBUG=false
@@ -69,9 +77,7 @@ init_constants() {
   CHE_SKIP_NIGHTLY=false
   CHE_SKIP_NETWORK=false
   CHE_SKIP_PULL=false
-}
 
-init_global_vars() {
   DEFAULT_CHE_PRODUCT_NAME="CHE"
   CHE_PRODUCT_NAME=${CHE_PRODUCT_NAME:-${DEFAULT_CHE_PRODUCT_NAME}}
 
@@ -154,6 +160,14 @@ usage() {
   return 1;
 }
 
+init_cli_version_check() {
+  if [[ $CHE_BASE_API_VERSION != $CHE_CLI_API_VERSION ]]; then
+    printf "CLI base ($CHE_BASE_API_VERSION) does not match CLI ($CHE_CLI_API_VERSION) version.\n"
+    printf "Recompile the CLI with the latest version of the CLI base.\n"
+    return 1;
+  fi
+}
+
 init_usage_check() {
   # If there are no parameters, immediately display usage
 
@@ -202,6 +216,7 @@ init_usage_check() {
 init() {
   init_constants
   init_global_vars
+  init_cli_version_check
   init_usage_check "$@"
 
   source "${CHE_BASE_SCRIPTS_CONTAINER_SOURCE_DIR}"/startup_02_pre_docker.sh
@@ -267,6 +282,10 @@ start() {
 
   # pre_init is unique to each CLI assembly. This can be called before
   # networking is established.
+
+  # Each CLI assembly must provide this cli.sh - loads overridden functions and variables for the CLI
+  # Hard code this location
+  source "/scripts/pre_init.sh"
   pre_init
 
   # Bootstrap networking, docker, logging, and ability to load cli.sh and library.sh
@@ -285,7 +304,7 @@ start() {
   set -- "${@/\-\-skip\:pull/}"
 
   # Each CLI assembly must provide this cli.sh - loads overridden functions and variables for the CLI
-  source "${SCRIPTS_CONTAINER_SOURCE_DIR}"/cli.sh
+  source "${SCRIPTS_CONTAINER_SOURCE_DIR}"/post_init.sh
 
   # The post_init method is unique to each assembly. This method must be provided by 
   # a custom CLI assembly in their container and can set global variables which are 
@@ -305,5 +324,7 @@ start() {
   source "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/startup_05_pre_exec.sh
 
   cli_parse "$@"
+
+  # Loads library.sh and remaining commands from cmd_*.sh and executes command
   cli_execute "$@"
 }

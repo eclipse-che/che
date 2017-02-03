@@ -165,13 +165,13 @@ cmd_start_check_postflight() {
 cmd_stop() {
   debug $FUNCNAME
   FORCE_STOP=false
-  if [[ "$@" == *"--force"* ]]; then
+  if [[ "$@" == *"--skip:graceful"* ]]; then
   	FORCE_STOP=true
   fi
 
   if [[ ${FORCE_STOP} = "false" ]]; then
-    info "Waiting for graceful stop of services..."
-    cmd_action "graceful-stop" "$@"
+    info "stop" "Stopping workspaces..."
+    cmd_action "graceful-stop" "$@" >> "${LOGS}" 2>&1 || true
   fi
 
   # stop containers booted by docker compose

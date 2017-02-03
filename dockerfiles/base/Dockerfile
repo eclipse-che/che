@@ -34,5 +34,3 @@ RUN mkdir -p /version \
     && docker -v
 
 COPY scripts/base /scripts/base/
-COPY ver.che_base /version
-

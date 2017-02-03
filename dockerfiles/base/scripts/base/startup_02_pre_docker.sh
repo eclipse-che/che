@@ -443,13 +443,12 @@ check_mounts() {
     CHE_CONTAINER_DEVELOPMENT_REPO="/repo"
 
     # When we build eclipse/che-base, we insert the version of the repo it was built from into the image
-    CHE_BASE_VERSION=$(cat /version/ver.che_base)
+    CHE_REPO_BASE_VERSION=$(grep -hn CHE_BASE_API_VERSION= /repo/dockerfiles/base/scripts/base/startup_01_init.sh)
+    CHE_REPO_BASE_VERSION=${CHE_REPO_BASE_VERSION#*=}
 
-    # Get the version of the pom.xml of the Che repo mounted
-    CHE_REPO_VERSION=$(cat /repo/pom.xml | grep "<version>.*</version>$" | awk -F'[><]' 'NR==1{print $3}')
-
-    if [[ $CHE_BASE_VERSION != $CHE_REPO_VERSION ]]; then
-      warning "The CLI image ($CHE_BASE_VERSION) does not match your repo ($CHE_REPO_VERSION)"
+    if [[ $CHE_BASE_API_VERSION != $CHE_REPO_BASE_VERSION ]]; then
+      warning "The CLI base image version ($CHE_BASE_API_VERSION) does not match your repo ($CHE_REPO_BASE_VERSION)"
+      warning "You have mounted :/repo and your repo branch does not match with the image."
     fi
 
     CHE_ASSEMBLY="${CHE_HOST_INSTANCE}/dev/${CHE_MINI_PRODUCT_NAME}-tomcat"
