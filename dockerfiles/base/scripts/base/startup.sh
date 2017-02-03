@@ -5,7 +5,6 @@
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
 
-
 # Check pre/post functions are there or not
 declare -f pre_init > /dev/null
 if [ "$?" == "1" ]; then
