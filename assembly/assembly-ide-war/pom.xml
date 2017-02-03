@@ -58,6 +58,14 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-testing</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-testing-shared</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-commons-gwt</artifactId>
         </dependency>
         <dependency>
@@ -83,26 +91,6 @@
         <dependency>
             <groupId>org.eclipse.che.lib</groupId>
             <artifactId>che-swagger-module</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-java-testing-core-ide</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-java-testing-core-shared</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-java-testing-junit-ide</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-java-testing-junit-shared</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-java-testing-testng-ide</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
@@ -271,6 +259,18 @@
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-svn-ext-ide</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-testing-ide</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-testing-junit-ide</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-testing-testng-ide</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
