@@ -67,7 +67,7 @@ public class ProcessesListViewImpl implements ProcessesListView {
     }
 
     @Override
-    public void clearProcesses() {
+    public void clearList() {
         dropDownList.clear();
     }
 
@@ -82,18 +82,18 @@ public class ProcessesListViewImpl implements ProcessesListView {
             public Widget render(ListItem item) {
                 final String labelText = machine.getConfig().getName() + ": <b>" + process.getName() + "</b>";
                 final Label nameLabel = new InlineHTML(labelText);
+                nameLabel.setWidth("230px");
                 nameLabel.getElement().getStyle().setFloat(LEFT);
                 nameLabel.setTitle(process.getCommandLine());
 
                 final Label pidLabel = new Label('#' + Integer.toString(process.getNativePid()));
                 pidLabel.getElement().getStyle().setFloat(RIGHT);
 
-                final Button runButton = new Button(process.isAlive() ? "stop" : "re-run");
-                runButton.getElement().getStyle().setFloat(RIGHT);
+                final Button runButton = new StopRunButton(process, machine);
                 runButton.addDomHandler(new ClickHandler() {
                     @Override
                     public void onClick(ClickEvent event) {
-                        delegate.onRunProcess(process, machine);
+                        delegate.onReRunProcess(process, machine);
                     }
                 }, ClickEvent.getType());
 

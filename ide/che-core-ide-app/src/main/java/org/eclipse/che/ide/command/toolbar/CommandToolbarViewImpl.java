@@ -41,16 +41,15 @@ import java.util.List;
 @Singleton
 public class CommandToolbarViewImpl implements CommandToolbarView {
 
-    private final MenuPopupButton runCommands;
-    private final MenuPopupButton debugCommands;
+    private final AppContext appContext;
 
-    private final RunPopupItemDataProvider runPopupItemDataProvider;
-    private final AppContext               appContext;
-
-    private FlowPanel               rootPanel;
-    private ActionDelegate          delegate;
-    private List<ContextualCommand> commands;
-    private PopupItem               lastSelectedItem;
+    private MenuPopupButton          runCommandsButton;
+    private RunPopupItemDataProvider runPopupItemDataProvider;
+    private MenuPopupButton          debugCommandsButton;
+    private ActionDelegate           delegate;
+    private List<ContextualCommand>  commands;
+    private PopupItem                lastSelectedItem;
+    private FlowPanel                rootPanel;
 
     @Inject
     public CommandToolbarViewImpl(ProcessesListPresenter processesListPresenter,
@@ -61,6 +60,10 @@ public class CommandToolbarViewImpl implements CommandToolbarView {
 
         rootPanel = new FlowPanel();
         rootPanel.getElement().getStyle().setFloat(Style.Float.LEFT);
+
+        setUpRunButton(dropResources, resources);
+        setUpDebugButton(dropResources, resources);
+
         processesListPresenter.go(new AcceptsOneWidget() {
             @Override
             public void setWidget(IsWidget w) {
@@ -68,12 +71,15 @@ public class CommandToolbarViewImpl implements CommandToolbarView {
                 w.asWidget().getElement().getStyle().setFloat(Style.Float.LEFT);
             }
         });
+    }
 
+    private void setUpRunButton(DropDownWidget.Resources dropResources, ToolbarResources resources) {
         runPopupItemDataProvider = new RunPopupItemDataProvider();
 
         final SafeHtmlBuilder playIcon = new SafeHtmlBuilder();
         playIcon.appendHtmlConstant(FontAwesome.PLAY);
-        runCommands = new MenuPopupButton(playIcon.toSafeHtml(), runPopupItemDataProvider, new PopupActionHandler() {
+
+        runCommandsButton = new MenuPopupButton(playIcon.toSafeHtml(), runPopupItemDataProvider, new PopupActionHandler() {
             @Override
             public void onItemSelected(PopupItem item) {
                 if (item instanceof CommandPopupItem) {
@@ -87,14 +93,17 @@ public class CommandToolbarViewImpl implements CommandToolbarView {
 
             }
         }, dropResources);
-        runCommands.asWidget().addStyleName(resources.css().commandButton());
-        runCommands.asWidget().addStyleName(resources.css().runButton());
+        runCommandsButton.asWidget().addStyleName(resources.css().commandButton());
+        runCommandsButton.asWidget().addStyleName(resources.css().runButton());
 
-        rootPanel.add(runCommands);
+        rootPanel.add(runCommandsButton);
+    }
 
+    private void setUpDebugButton(DropDownWidget.Resources dropResources, ToolbarResources resources) {
         final SafeHtmlBuilder debugIcon = new SafeHtmlBuilder();
         debugIcon.appendHtmlConstant(FontAwesome.BUG);
-        debugCommands = new MenuPopupButton(debugIcon.toSafeHtml(), new PopupItemDataProvider() {
+
+        debugCommandsButton = new MenuPopupButton(debugIcon.toSafeHtml(), new PopupItemDataProvider() {
             private ItemDataChangeHandler handler;
 
             @Override
@@ -127,10 +136,11 @@ public class CommandToolbarViewImpl implements CommandToolbarView {
 
             }
         }, dropResources);
-        debugCommands.asWidget().addStyleName(resources.css().commandButton());
-        debugCommands.asWidget().addStyleName(resources.css().debugButton());
 
-        rootPanel.add(debugCommands);
+        debugCommandsButton.asWidget().addStyleName(resources.css().commandButton());
+        debugCommandsButton.asWidget().addStyleName(resources.css().debugButton());
+
+        rootPanel.add(debugCommandsButton);
     }
 
     @Override

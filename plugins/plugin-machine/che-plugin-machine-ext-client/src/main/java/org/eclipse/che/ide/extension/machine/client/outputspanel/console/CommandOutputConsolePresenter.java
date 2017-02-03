@@ -30,7 +30,7 @@ import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
-import org.eclipse.che.ide.extension.machine.client.processes.ProcessFinishedEvent;
+import org.eclipse.che.ide.api.machine.events.ProcessFinishedEvent;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import java.util.ArrayList;

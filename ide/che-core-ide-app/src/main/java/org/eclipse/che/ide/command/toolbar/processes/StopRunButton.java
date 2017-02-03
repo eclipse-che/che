@@ -10,32 +10,36 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.toolbar.processes;
 
-
-import com.google.inject.ImplementedBy;
+import com.google.gwt.user.client.ui.Button;
 
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessesResponseDto;
-import org.eclipse.che.ide.api.mvp.View;
 
-import java.util.List;
+import static com.google.gwt.dom.client.Style.Float.RIGHT;
 
 /**
- *
+ * Button for stopping or rerunning process.
  */
-@ImplementedBy(ProcessesListViewImpl.class)
-public interface ProcessesListView extends View<ProcessesListView.ActionDelegate> {
+public class StopRunButton extends Button {
 
-    void addProcess(GetProcessesResponseDto process, Machine machine);
+    private final GetProcessesResponseDto process;
+    private final Machine                 machine;
 
-    void clearList();
+    public StopRunButton(GetProcessesResponseDto process, Machine machine) {
+        super();
 
-    interface ActionDelegate {
+        this.process = process;
+        this.machine = machine;
 
-        /** Called when process has been chosen. */
-        void onProcessChosen();
+        getElement().getStyle().setFloat(RIGHT);
 
-        void onReRunProcess(GetProcessesResponseDto process, Machine machine);
+        updateCaption();
 
-        void onStopProcess(GetProcessesResponseDto process, Machine machine);
+        // TODO: subscribe on process state changing
+//        execAgentCommandManager.subscribe
+    }
+
+    private void updateCaption() {
+        setHTML(process.isAlive() ? "stop" : "re-run");
     }
 }

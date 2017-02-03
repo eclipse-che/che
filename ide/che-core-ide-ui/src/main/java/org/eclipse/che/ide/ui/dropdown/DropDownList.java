@@ -74,16 +74,11 @@ public class DropDownList extends Composite {
         dropButton.addDomHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                if (itemsWidgets.size() > 0) {
-                    showDropDownList();
-                }
+//                if (itemsWidgets.size() > 0) {
+                    dropDownPanel.showRelativeTo(DropDownList.this);
+//                }
             }
         }, ClickEvent.getType());
-    }
-
-    private void showDropDownList() {
-        dropDownPanel.showRelativeTo(this);
-        dropDownPanel.show();
     }
 
     /** Add item with the appropriate renderer. */
@@ -107,6 +102,7 @@ public class DropDownList extends Composite {
     }
 
     public void clear() {
+        selectedElementName.clear();
         itemsWidgets.clear();
         contentPanel.clear();
     }
