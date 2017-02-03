@@ -22,6 +22,7 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.command.ContextualCommand;
+import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.command.node.CommandGoalNode;
 import org.eclipse.che.ide.command.node.ExecutableCommandNode;
 import org.eclipse.che.ide.command.node.NodeFactory;
@@ -33,6 +34,11 @@ import org.eclipse.che.ide.ui.window.Window;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static com.google.gwt.event.dom.client.KeyCodes.KEY_DOWN;
+import static com.google.gwt.event.dom.client.KeyCodes.KEY_ENTER;
+import static com.google.gwt.event.dom.client.KeyCodes.KEY_UP;
+import static org.eclipse.che.ide.ui.smartTree.SelectionModel.Mode.SINGLE;
 
 /**
  * Implementation of {@link CommandPaletteView}.
@@ -59,6 +65,7 @@ public class CommandPaletteViewImpl extends Window implements CommandPaletteView
         this.nodeFactory = nodeFactory;
 
         tree = new Tree(new NodeStorage(), new NodeLoader());
+        tree.getSelectionModel().setSelectionMode(SINGLE);
 
         setWidget(UI_BINDER.createAndBindUi(this));
 
@@ -75,7 +82,6 @@ public class CommandPaletteViewImpl extends Window implements CommandPaletteView
         super.show();
 
         filterField.setValue("");
-
         filterField.setFocus(true);
     }
 
@@ -95,6 +101,7 @@ public class CommandPaletteViewImpl extends Window implements CommandPaletteView
 
         for (Map.Entry<CommandGoal, List<ContextualCommand>> entry : commands.entrySet()) {
             List<ExecutableCommandNode> commandNodes = new ArrayList<>(entry.getValue().size());
+
             for (final ContextualCommand command : entry.getValue()) {
                 commandNodes.add(nodeFactory.newExecutableCommandNode(command, new ExecutableCommandNode.ActionDelegate() {
                     @Override
@@ -117,8 +124,28 @@ public class CommandPaletteViewImpl extends Window implements CommandPaletteView
     }
 
     @UiHandler({"filterField"})
-    void onFilterChanged(@SuppressWarnings("UnusedParameters") KeyUpEvent event) {
-        delegate.onFilterChanged(filterField.getValue());
+    void onFilterChanged(KeyUpEvent event) {
+        switch (event.getNativeKeyCode()) {
+            case KEY_UP:
+                tree.getSelectionModel().selectPrevious();
+                break;
+            case KEY_DOWN:
+                tree.getSelectionModel().selectNext();
+                break;
+            case KEY_ENTER:
+                final List<Node> selectedNodes = tree.getSelectionModel().getSelectedNodes();
+
+                if (!selectedNodes.isEmpty()) {
+                    final Node node = selectedNodes.get(0);
+
+                    if (node instanceof ExecutableCommandNode) {
+                        delegate.onCommandExecute(((ExecutableCommandNode)node).getData());
+                    }
+                }
+                break;
+            default:
+                delegate.onFilterChanged(filterField.getValue());
+        }
     }
 
     interface CommandPaletteViewImplUiBinder extends UiBinder<Widget, CommandPaletteViewImpl> {
