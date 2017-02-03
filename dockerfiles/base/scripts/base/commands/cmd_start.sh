@@ -171,7 +171,9 @@ cmd_stop() {
 
   if [[ ${FORCE_STOP} = "false" ]]; then
     info "stop" "Stopping workspaces..."
-    cmd_action "graceful-stop" "$@" >> "${LOGS}" 2>&1 || true
+    if ! $(cmd_action "graceful-stop" "$@" >> "${LOGS}" 2>&1 || false); then
+      error "We encountered an error -- see cli.log"
+    fi
   fi
 
   # stop containers booted by docker compose
