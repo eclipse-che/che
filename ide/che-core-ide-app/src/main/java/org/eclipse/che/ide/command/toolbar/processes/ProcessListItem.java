@@ -10,30 +10,28 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.toolbar.processes;
 
-
-import com.google.inject.ImplementedBy;
-
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessesResponseDto;
-import org.eclipse.che.ide.api.mvp.View;
-
-import java.util.List;
+import org.eclipse.che.ide.ui.dropdown.ListItem;
 
 /**
  *
  */
-@ImplementedBy(ProcessesListViewImpl.class)
-public interface ProcessesListView extends View<ProcessesListView.ActionDelegate> {
+public class ProcessListItem implements ListItem {
 
-    void addProcess(GetProcessesResponseDto process, Machine machine);
+    private final GetProcessesResponseDto process;
+    private final Machine                 machine;
 
-    void clearProcesses();
+    public ProcessListItem(GetProcessesResponseDto process, Machine machine) {
+        this.process = process;
+        this.machine = machine;
+    }
 
-    interface ActionDelegate {
+    public GetProcessesResponseDto getProcess() {
+        return process;
+    }
 
-        /** Called when process has been chosen. */
-        void onProcessChosen();
-
-        void onRunProcess(GetProcessesResponseDto process, Machine machine);
+    public Machine getMachine() {
+        return machine;
     }
 }

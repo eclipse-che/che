@@ -26,7 +26,7 @@ import org.eclipse.che.ide.command.toolbar.button.PopupActionHandler;
 import org.eclipse.che.ide.command.toolbar.button.PopupItem;
 import org.eclipse.che.ide.command.toolbar.button.PopupItemDataProvider;
 import org.eclipse.che.ide.command.toolbar.processes.ProcessesListPresenter;
-import org.eclipse.che.ide.ui.dropdown.DropDownWidget;
+import org.eclipse.che.ide.ui.dropdown.old.DropDownWidget;
 import org.eclipse.che.ide.util.Pair;
 import org.eclipse.che.ide.util.loging.Log;
 

@@ -10,23 +10,27 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.toolbar.processes;
 
-import elemental.dom.Element;
-import elemental.html.DivElement;
-
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
+import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessesResponseDto;
 import org.eclipse.che.ide.command.toolbar.ToolbarResources;
-import org.eclipse.che.ide.command.toolbar.ddw.DropDownListBox;
-import org.eclipse.che.ide.ui.dropdown.DropDownWidget;
-import org.eclipse.che.ide.util.dom.Elements;
+import org.eclipse.che.ide.ui.dropdown.DropDownList;
+import org.eclipse.che.ide.ui.dropdown.ItemRenderer;
+import org.eclipse.che.ide.ui.dropdown.ListItem;
+import org.eclipse.che.ide.ui.dropdown.old.DropDownWidget;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.ArrayList;
-import java.util.List;
+
+import static com.google.gwt.dom.client.Style.Float.LEFT;
+import static com.google.gwt.dom.client.Style.Float.RIGHT;
 
 /**
  *
@@ -34,43 +38,22 @@ import java.util.List;
 @Singleton
 public class ProcessesListViewImpl implements ProcessesListView {
 
-    private final FlowPanel                                rootPanel;
-    private final Label                                    label;
-    private final DropDownWidget<GetProcessesResponseDto>  dropDownWidget;
-    private final DropDownListBox<GetProcessesResponseDto> dropDownListBox;
+    private final FlowPanel    rootPanel;
+    private final DropDownList dropDownList;
 
     private ActionDelegate delegate;
-    private ArrayList<GetProcessesResponseDto> processesList;
 
     @Inject
     public ProcessesListViewImpl(DropDownWidget.Resources resources, ToolbarResources toolbarResources) {
-        rootPanel = new FlowPanel();
-        label = new Label("EXEC:");
+        final Label label = new Label("EXEC:");
         label.addStyleName(toolbarResources.css().commandListLabel());
 
-        dropDownWidget = new DropDownWidget<>(resources, new DropDownWidget.ItemRenderer<GetProcessesResponseDto>() {
-            @Override
-            public Element render(GetProcessesResponseDto item) {
-                final DivElement divElement = Elements.createDivElement();
-                divElement.setInnerText(item.getName());
-                return divElement;
-            }
-        }, new DropDownWidget.ItemSelectionHandler<GetProcessesResponseDto>() {
-            @Override
-            public void onItemSelected(GetProcessesResponseDto item) {
+        dropDownList = new DropDownList();
+        dropDownList.addStyleName(toolbarResources.css().commandList());
 
-            }
-        });
-
-        dropDownListBox = new DropDownListBox<>(null);
-        dropDownListBox.addStyleName(toolbarResources.css().commandList());
-
-        dropDownWidget.addStyleName(toolbarResources.css().commandList());
-
+        rootPanel = new FlowPanel();
         rootPanel.add(label);
-        rootPanel.add(dropDownListBox);
-
-        processesList = new ArrayList<>();
+        rootPanel.add(dropDownList);
     }
 
     @Override
@@ -84,11 +67,44 @@ public class ProcessesListViewImpl implements ProcessesListView {
     }
 
     @Override
-    public void setProcesses(List<GetProcessesResponseDto> processes) {
-        processesList.addAll(processes);
+    public void clearProcesses() {
+        dropDownList.clear();
+    }
 
-        dropDownWidget.setData(processesList);
+    @Override
+    public void addProcess(GetProcessesResponseDto process, Machine machine) {
+        dropDownList.addItem(new ProcessListItem(process, machine), getRenderer(process, machine));
+    }
 
-        dropDownListBox.addItems(processes);
+    private ItemRenderer getRenderer(final GetProcessesResponseDto process, final Machine machine) {
+        return new ItemRenderer() {
+            @Override
+            public Widget render(ListItem item) {
+                final String labelText = machine.getConfig().getName() + ": <b>" + process.getName() + "</b>";
+                final Label nameLabel = new InlineHTML(labelText);
+                nameLabel.getElement().getStyle().setFloat(LEFT);
+                nameLabel.setTitle(process.getCommandLine());
+
+                final Label pidLabel = new Label('#' + Integer.toString(process.getNativePid()));
+                pidLabel.getElement().getStyle().setFloat(RIGHT);
+
+                final Button runButton = new Button(process.isAlive() ? "stop" : "re-run");
+                runButton.getElement().getStyle().setFloat(RIGHT);
+                runButton.addDomHandler(new ClickHandler() {
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        delegate.onRunProcess(process, machine);
+                    }
+                }, ClickEvent.getType());
+
+                final FlowPanel panel = new FlowPanel();
+                panel.setHeight("25px");
+                panel.add(nameLabel);
+                panel.add(runButton);
+                panel.add(pidLabel);
+
+                return panel;
+            }
+        };
     }
 }

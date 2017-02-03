@@ -29,7 +29,7 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.ButtonBase;
 import com.google.gwt.user.client.ui.FlowPanel;
-import org.eclipse.che.ide.ui.dropdown.DropDownWidget;
+import org.eclipse.che.ide.ui.dropdown.old.DropDownWidget;
 
 /**
  * Button, on long click (~1 sec) open popup menu
