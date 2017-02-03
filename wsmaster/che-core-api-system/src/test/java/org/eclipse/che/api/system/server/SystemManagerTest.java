@@ -13,7 +13,6 @@ package org.eclipse.che.api.system.server;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.system.shared.event.SystemStatusChangedEvent;
-import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -42,7 +41,7 @@ import static org.testng.Assert.assertEquals;
 public class SystemManagerTest {
 
     @Mock
-    private WorkspaceManager wsManager;
+    private ServiceTerminator terminator;
 
     @Mock
     private EventService eventService;
@@ -55,7 +54,7 @@ public class SystemManagerTest {
     @BeforeMethod
     public void init() {
         MockitoAnnotations.initMocks(this);
-        systemManager = new SystemManager(wsManager, eventService);
+        systemManager = new SystemManager(terminator, eventService);
     }
 
     @Test
@@ -92,7 +91,7 @@ public class SystemManagerTest {
     }
 
     private void verifyShutdownCompleted() throws InterruptedException {
-        verify(wsManager, timeout(2000)).shutdown();
+        verify(terminator, timeout(2000)).terminateAll();
         verify(eventService, times(2)).publish(eventsCaptor.capture());
         Iterator<SystemStatusChangedEvent> eventsIt = eventsCaptor.getAllValues().iterator();
         assertEquals(eventsIt.next(), new SystemStatusChangedEvent(RUNNING, PREPARING_TO_SHUTDOWN));

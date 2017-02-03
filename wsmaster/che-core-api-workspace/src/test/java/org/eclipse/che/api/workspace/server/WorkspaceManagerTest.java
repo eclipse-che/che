@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server;
 
+import com.google.common.collect.ImmutableSet;
+
 import org.eclipse.che.account.api.AccountManager;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.ConflictException;
@@ -880,6 +882,14 @@ public class WorkspaceManagerTest {
         verify(runtimes, never()).stop(stopped.getId());
         verify(runtimes).shutdown();
         verify(sharedPool).shutdown();
+    }
+
+    @Test
+    public void getsRunningWorkspacesIds() {
+        ImmutableSet<String> ids = ImmutableSet.of("id1", "id2", "id3");
+        when(runtimes.getRuntimesIds()).thenReturn(ids);
+
+        assertEquals(workspaceManager.getRunningWorkspacesIds(), ids);
     }
 
     private void captureRunAsyncCallsAndRunSynchronously() {
