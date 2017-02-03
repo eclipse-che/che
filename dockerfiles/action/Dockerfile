@@ -10,6 +10,6 @@
 # use:
 #    docker run -v /var/run/docker.sock:/var/run/docker.sock eclipse/che-action [command]
 
-FROM eclipse/che-lib:5.2.1
+FROM eclipse/che-lib:5.2.2
 
 ENTRYPOINT ["node", "/che-lib/index.js", "che-action"]
