@@ -162,14 +162,10 @@
           <!-- radio-button: from stack -->
           <md-radio-button value="from-stack">Create new workspace from stack</md-radio-button>
           <div ng-if="createProjectCtrl.workspaceResource === 'from-stack'">
-            <workspace-select-stack id="create-project-source-stack"
-                                        che-tab-name="tabName"
-                                        che-on-tab-change="createProjectCtrl.setStackTab(tabName)"
-                                        che-stack="stack"
-                                        che-stack-change="createProjectCtrl.cheStackLibrarySelecter(stack)"
-                                        che-recipe-script="createProjectCtrl.recipeScript"
-                                        che-recipe-url="createProjectCtrl.recipeUrl"
-                                        che-recipe-format="createProjectCtrl.recipeFormat"></workspace-select-stack>
+            <workspace-select-stack workspace-stack-on-change="createProjectCtrl.changeWorkspaceStack(config, stackId)"
+                                    workspace-name="createProjectCtrl.workspaceName"
+                                    environment-name=""
+                                    workspace-imported-recipe=""></workspace-select-stack>
           </div>
         </md-radio-group>
       </ng-form>
@@ -209,9 +205,8 @@
             </div>
           </che-label-container>
           <che-label-container che-label-name="RAM">
-            <div ng-hide="createProjectCtrl.isCustomStack"
-                 data-ng-repeat="(environmentKey, environmentValue) in createProjectCtrl.stack.workspaceConfig.environments">
-              <span ng-if="createProjectCtrl.getObjectKeys(createProjectCtrl.stack.workspaceConfig.environments).length > 1"
+            <div data-ng-repeat="(environmentKey, environmentValue) in createProjectCtrl.workspaceConfig.environments">
+              <span ng-if="createProjectCtrl.getObjectKeys(createProjectCtrl.workspaceConfig.environments).length > 1"
                     class="workspace-environment-name">ENVIRONMENT: {{environmentKey}}</span>
 
               <div>
@@ -225,8 +220,6 @@
                 </div>
               </div>
             </div>
-            <che-workspace-ram-allocation-slider ng-show="createProjectCtrl.isCustomStack"
-                                                 ng-model="createProjectCtrl.workspaceRam"></che-workspace-ram-allocation-slider>
           </che-label-container>
         </div>
       </ng-form>

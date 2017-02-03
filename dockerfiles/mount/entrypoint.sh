@@ -145,7 +145,9 @@ else
 fi
 
 UNISON_COMMAND="unison /mntssh /mnthost ${UNISON_ARGS}"
-debug "Using command ${UNISON_COMMAND}"
+if [ $(is_verbose "$@") = true ]; then
+  debug "Using command ${UNISON_COMMAND}"
+fi
 
 eval "${UNISON_COMMAND}"
 
@@ -158,5 +160,17 @@ info "INFO: (che mount): Background sync continues every ${UNISON_REPEAT_DELAY_I
 info "INFO: (che mount): This terminal will block while the synchronization continues."
 info "INFO: (che mount): To stop, issue a SIGTERM or SIGINT, usually CTRL-C."
 
+if [ $(is_verbose "$@") = true ]; then
+  info "Background sync unison verbose mode"
+  UNISON_ARGS="-batch -retry 10 -fat -copyonconflict -auto -prefer=newer -repeat=${UNISON_REPEAT_DELAY_IN_SEC}"
+else
+  UNISON_ARGS="-batch -retry 10 -fat -silent -copyonconflict -auto -prefer=newer -repeat=${UNISON_REPEAT_DELAY_IN_SEC} -log=false > /dev/null 2>&1"
+fi
+
+UNISON_COMMAND="unison /mntssh /mnthost ${UNISON_ARGS}"
+if [ $(is_verbose "$@") = true ]; then
+  debug "Using command ${UNISON_COMMAND}"
+fi
+
 # run application
-unison /mntssh /mnthost -batch -retry 10 -fat -silent -copyonconflict -auto -prefer=newer -repeat=${UNISON_REPEAT_DELAY_IN_SEC} -log=false > /dev/null 2>&1
+eval "${UNISON_COMMAND}"

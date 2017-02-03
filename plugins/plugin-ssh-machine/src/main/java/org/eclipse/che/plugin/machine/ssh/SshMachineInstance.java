@@ -10,24 +10,19 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.machine.ssh;
 
-import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.api.core.model.machine.MachineSource;
+import org.eclipse.che.api.core.model.machine.MachineConfig;
+import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.model.machine.ServerConf;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
-import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceNode;
-import org.eclipse.che.api.machine.server.spi.InstanceProcess;
-import org.eclipse.che.api.machine.server.spi.impl.AbstractInstance;
 
-import javax.inject.Inject;
-import javax.inject.Named;
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.net.URI;
@@ -44,46 +39,57 @@ import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 
 /**
- * Implementation of {@link Instance} that uses represents ssh machine.
+ * Implementation of machine that represents ssh machine.
  *
  * @author Alexander Garagatyi
+ * @author Max Shaposhnik
  * @see SshMachineInstanceProvider
  */
 // todo try to avoid map of processes
-public class SshMachineInstance extends AbstractInstance {
+public class SshMachineInstance  {
     private static final AtomicInteger pidSequence = new AtomicInteger(1);
 
-    private final SshClient                                   sshClient;
-    private final LineConsumer                                outputConsumer;
-    private final SshMachineFactory                           machineFactory;
+    private       String                 id;
+    private       String                 workspaceId;
+    private final String                 envName;
+    private final String                 owner;
+    private       MachineRuntimeInfoImpl machineRuntime;
+    private final MachineConfig          machineConfig;
 
-    private final Set<ServerConf>                             machinesServers;
-    private final ConcurrentHashMap<Integer, InstanceProcess> machineProcesses;
 
-    private MachineRuntimeInfoImpl machineRuntime;
+    private final SshClient         sshClient;
+    private final LineConsumer      outputConsumer;
+    private final SshMachineFactory machineFactory;
+    private       MachineStatus     status;
 
-    @Inject
-    public SshMachineInstance(@Assisted Machine machine,
-                              @Assisted SshClient sshClient,
-                              @Assisted LineConsumer outputConsumer,
+    private final Set<ServerConf>                               machinesServers;
+    private final ConcurrentHashMap<Integer, SshMachineProcess> machineProcesses;
+
+
+    public SshMachineInstance(Machine machine,
+                              SshClient sshClient,
+                              LineConsumer outputConsumer,
                               SshMachineFactory machineFactory,
-                              @Named("machine.ssh.machine_servers") Set<ServerConf> machinesServers) {
-        super(machine);
+                              Set<ServerConf> machinesServers) {
+        this.id = machine.getId();
+        this.workspaceId = machine.getWorkspaceId();
+        this.envName = machine.getEnvName();
+        this.owner = machine.getOwner();
         this.sshClient = sshClient;
         this.outputConsumer = outputConsumer;
         this.machineFactory = machineFactory;
+        this.machineConfig = machine.getConfig();
+        this.status = machine.getStatus();
         this.machinesServers = new HashSet<>(machinesServers.size() + machine.getConfig().getServers().size());
         this.machinesServers.addAll(machinesServers);
         this.machinesServers.addAll(machine.getConfig().getServers());
         this.machineProcesses = new ConcurrentHashMap<>();
     }
 
-    @Override
     public LineConsumer getLogger() {
         return outputConsumer;
     }
 
-    @Override
     public MachineRuntimeInfoImpl getRuntime() {
         // lazy initialization
         if (machineRuntime == null) {
@@ -103,9 +109,8 @@ public class SshMachineInstance extends AbstractInstance {
         return machineRuntime;
     }
 
-    @Override
-    public InstanceProcess getProcess(final int pid) throws NotFoundException, MachineException {
-        final InstanceProcess machineProcess = machineProcesses.get(pid);
+    public SshMachineProcess getProcess(final int pid) throws NotFoundException, MachineException {
+        final SshMachineProcess machineProcess = machineProcesses.get(pid);
         if (machineProcess == null) {
             throw new NotFoundException(format("Process with pid %s not found", pid));
         }
@@ -118,38 +123,26 @@ public class SshMachineInstance extends AbstractInstance {
         }
     }
 
-    @Override
-    public List<InstanceProcess> getProcesses() throws MachineException {
+    public List<SshMachineProcess> getProcesses() throws MachineException {
         // todo get children of session process
         return machineProcesses.values()
                                .stream()
-                               .filter(InstanceProcess::isAlive)
+                               .filter(SshMachineProcess::isAlive)
                                .collect(Collectors.toList());
 
     }
 
-    @Override
-    public InstanceProcess createProcess(Command command, String outputChannel) throws MachineException {
+    public SshMachineProcess createProcess(Command command, String outputChannel) throws MachineException {
         final Integer pid = pidSequence.getAndIncrement();
 
-        SshMachineProcess instanceProcess = machineFactory.createInstanceProcess(command, outputChannel, pid, sshClient);
+        SshMachineProcess machineProcess = machineFactory.createInstanceProcess(command, outputChannel, pid, sshClient);
 
-        machineProcesses.put(pid, instanceProcess);
+        machineProcesses.put(pid, machineProcess);
 
-        return instanceProcess;
+        return machineProcess;
     }
 
-    /**
-     * Not implemented.<p/>
-     *
-     * {@inheritDoc}
-     */
-    @Override
-    public MachineSource saveToSnapshot() throws MachineException {
-        throw new MachineException("Snapshot feature is unsupported for ssh machine implementation");
-    }
 
-    @Override
     public void destroy() throws MachineException {
         try {
             outputConsumer.close();
@@ -161,34 +154,23 @@ public class SshMachineInstance extends AbstractInstance {
         sshClient.stop();
     }
 
-    @Override
     public InstanceNode getNode() {
         return null;// todo
     }
 
-    /**
-     * Not implemented.<p/>
-     *
-     * {@inheritDoc}
-     */
-    @Override
-    public String readFileContent(String filePath, int startFrom, int limit) throws MachineException {
-        // todo
-        throw new MachineException("File content reading is not implemented in ssh machine implementation");
+    public MachineStatus getStatus() {
+        return status;
     }
 
-    /**
-     * Not implemented.<p/>
-     *
-     * {@inheritDoc}
-     */
-    @Override
-    public void copy(Instance sourceMachine, String sourcePath, String targetPath, boolean overwrite) throws MachineException {
-        //todo
-        throw new MachineException("Copying is not implemented in ssh machine implementation");
+    public void setStatus(MachineStatus status) {
+        this.status = status;
     }
 
-    @Override
+
+    public String getId() {
+        return id;
+    }
+
     public void copy(String sourcePath, String targetPath) throws MachineException {
         sshClient.copy(sourcePath, targetPath);
     }
@@ -208,4 +190,19 @@ public class SshMachineInstance extends AbstractInstance {
                               null);
     }
 
+    public String getWorkspaceId() {
+        return workspaceId;
+    }
+
+    public MachineConfig getMachineConfig() {
+        return machineConfig;
+    }
+
+    public String getEnvName() {
+        return envName;
+    }
+
+    public String getOwner() {
+        return owner;
+    }
 }
