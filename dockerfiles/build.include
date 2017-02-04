@@ -63,8 +63,6 @@ build() {
     printf "${RED}Failure when building docker image ${IMAGE_NAME}:${TAG}${NC}\n"
     exit 1
   fi
-
-
 }
 
 check_docker() {
