@@ -6,6 +6,24 @@
 # http://www.eclipse.org/legal/epl-v10.html
 
 
+cli_load() {
+
+  # Library contains reusable functions
+  source "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/library.sh
+
+  # add base commands
+  for BASECOMMAND_FILE in "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/commands/*.sh
+  do
+    source "${BASECOMMAND_FILE}"
+  done
+
+  # Need to load all files in advance so commands can invoke other commands.
+  for COMMAND_FILE in "${SCRIPTS_CONTAINER_SOURCE_DIR}"/cmd_*.sh
+  do
+    source "${COMMAND_FILE}"
+  done
+}
+
 cli_parse () {
   COMMAND="cmd_$1"
 
@@ -22,22 +40,6 @@ cli_parse () {
 
 cli_execute() {
   COMMAND="cmd_$1"
-
-  # Library contains reusable functions
-  source "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/library.sh
-
-  # add base commands
-  for BASECOMMAND_FILE in "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/commands/*.sh
-  do
-    source "${BASECOMMAND_FILE}"
-  done
-
-  # Need to load all files in advance so commands can invoke other commands.
-  for COMMAND_FILE in "${SCRIPTS_CONTAINER_SOURCE_DIR}"/cmd_*.sh
-  do
-    source "${COMMAND_FILE}"
-  done
-
   shift
   eval $COMMAND "$@"
 }

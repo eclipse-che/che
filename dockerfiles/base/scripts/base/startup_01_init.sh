@@ -334,6 +334,7 @@ start() {
 
   source "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/startup_05_pre_exec.sh
 
+  cli_load "$@"
   cli_parse "$@"
 
   # Loads library.sh and remaining commands from cmd_*.sh and executes command
