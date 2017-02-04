@@ -38,7 +38,7 @@ cmd_start() {
   # Start ${CHE_FORMAL_PRODUCT_NAME}
   # Note bug in docker requires relative path, not absolute path to compose file
   info "start" "Starting containers..."
-  COMPOSE_UP_COMMAND="docker_compose --file=\"${REFERENCE_CONTAINER_COMPOSE_FILE}\" -p=\"${CHE_CONTAINER_NAME}\" up -d"
+  COMPOSE_UP_COMMAND="docker_compose --file=\"${REFERENCE_CONTAINER_COMPOSE_FILE}\" -p=\"${CHE_COMPOSE_PROJECT_NAME}\" up -d"
 
   ## validate the compose file (quiet mode)
   if local_repo; then
@@ -187,13 +187,13 @@ cmd_stop() {
 stop_containers() {
   info "stop" "Stopping containers..."
   if is_initialized; then
-    log "docker_compose --file=\"${REFERENCE_CONTAINER_COMPOSE_FILE}\" -p=$CHE_CONTAINER_NAME stop -t ${CHE_COMPOSE_STOP_TIMEOUT} >> \"${LOGS}\" 2>&1 || true"
+    log "docker_compose --file=\"${REFERENCE_CONTAINER_COMPOSE_FILE}\" -p=$CHE_COMPOSE_PROJECT_NAME stop -t ${CHE_COMPOSE_STOP_TIMEOUT} >> \"${LOGS}\" 2>&1 || true"
     docker_compose --file="${REFERENCE_CONTAINER_COMPOSE_FILE}" \
-                   -p=$CHE_CONTAINER_NAME stop -t ${CHE_COMPOSE_STOP_TIMEOUT} >> "${LOGS}" 2>&1 || true
+                   -p=$CHE_COMPOSE_PROJECT_NAME stop -t ${CHE_COMPOSE_STOP_TIMEOUT} >> "${LOGS}" 2>&1 || true
     info "stop" "Removing containers..."
-    log "docker_compose --file=\"${REFERENCE_CONTAINER_COMPOSE_FILE}\" -p=$CHE_CONTAINER_NAME rm >> \"${LOGS}\" 2>&1 || true"
+    log "docker_compose --file=\"${REFERENCE_CONTAINER_COMPOSE_FILE}\" -p=$CHE_COMPOSE_PROJECT_NAME rm >> \"${LOGS}\" 2>&1 || true"
     docker_compose --file="${REFERENCE_CONTAINER_COMPOSE_FILE}" \
-                   -p=$CHE_CONTAINER_NAME rm --force >> "${LOGS}" 2>&1 || true
+                   -p=$CHE_COMPOSE_PROJECT_NAME rm --force >> "${LOGS}" 2>&1 || true
   fi
 }
 
@@ -208,6 +208,7 @@ cmd_restart() {
 
 wait_until_booted() {
   CURRENT_CHE_SERVER_CONTAINER_ID=$(get_server_container_id $CHE_CONTAINER_NAME)
+
   wait_until_container_is_running 20 ${CURRENT_CHE_SERVER_CONTAINER_ID}
   if ! container_is_running ${CURRENT_CHE_SERVER_CONTAINER_ID}; then
     error "(${CHE_MINI_PRODUCT_NAME} start): Timeout waiting for ${CHE_MINI_PRODUCT_NAME} container to start."
@@ -255,7 +256,7 @@ check_if_booted() {
 check_containers_are_running() {
 
   # get list of docker compose services started by this docker compose
-  local LIST_OF_COMPOSE_CONTAINERS=$(docker_compose --file=${REFERENCE_CONTAINER_COMPOSE_FILE} -p=$CHE_CONTAINER_NAME config --services)
+  local LIST_OF_COMPOSE_CONTAINERS=$(docker_compose --file=${REFERENCE_CONTAINER_COMPOSE_FILE} -p=$CHE_COMPOSE_PROJECT_NAME config --services)
 
   # For each service of docker-compose file, get container and then check it is running
   while IFS= read -r DOCKER_COMPOSE_SERVICE_NAME ; do
