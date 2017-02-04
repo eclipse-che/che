@@ -143,9 +143,6 @@ init_global_vars() {
   DEFAULT_CHE_CONTAINER_PREFIX="${CHE_SERVER_CONTAINER_NAME}"
   CHE_CONTAINER_PREFIX="${CHE_CONTAINER_PREFIX:-${DEFAULT_CHE_CONTAINER_PREFIX}}"
 
-  DEFAULT_CHE_COMPOSE_PROJECT_NAME="${CHE_MINI_PRODUCT_NAME}"
-  CHE_COMPOSE_PROJECT_NAME="${DEFAULT_CHE_COMPOSE_PROJECT_NAME:-${DEFAULT_CHE_COMPOSE_PROJECT_NAME}}"
-
   CHE_BACKUP_FILE_NAME="${CHE_MINI_PRODUCT_NAME}_backup.tar.gz"
   CHE_COMPOSE_STOP_TIMEOUT="180"
 
@@ -154,6 +151,17 @@ init_global_vars() {
 
   DEFAULT_CHE_LICENSE=false
   CHE_LICENSE=${CHE_LICENSE:-${DEFAULT_CHE_LICENSE}}
+
+  if [[ "${CHE_CONTAINER_NAME}" = "${CHE_MINI_PRODUCT_NAME}" ]]; then   
+    if [[ "${CHE_PORT}" != "${DEFAULT_CHE_PORT}" ]]; then
+      CHE_CONTAINER_NAME="${CHE_CONTAINER_PREFIX}-${CHE_PORT}"
+    else 
+      CHE_CONTAINER_NAME="${CHE_CONTAINER_PREFIX}"
+    fi
+  fi
+
+  DEFAULT_CHE_COMPOSE_PROJECT_NAME="${CHE_CONTAINER_NAME}"
+  CHE_COMPOSE_PROJECT_NAME="${CHE_COMPOSE_PROJECT_NAME:-${DEFAULT_CHE_COMPOSE_PROJECT_NAME}}"
 }
 
 usage() {
@@ -314,7 +322,8 @@ start() {
   # specific to that implementation of the CLI. Place initialization functions that
   # require networking here.
   post_init
-  
+echo $CHE_CONTAINER_NAME
+echo $CHE_COMPOSE_PROJECT_NAME  
   # Begin product-specific CLI calls
   info "cli" "$CHE_VERSION - using docker ${DOCKER_SERVER_VERSION} / $(get_docker_install_type)"
 

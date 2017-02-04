@@ -18,5 +18,10 @@ pre_init() {
  
   # This must be incremented when BASE is incremented by an API developer
   CHE_CLI_API_VERSION=1
+
+  DEFAULT_CHE_PORT=8080
+  CHE_PORT=${CHE_PORT:-${DEFAULT_CHE_PORT}}
+  CHE_MIN_RAM=1.5
+  CHE_MIN_DISK=100
 }
 
