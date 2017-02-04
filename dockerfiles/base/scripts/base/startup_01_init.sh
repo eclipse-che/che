@@ -322,8 +322,7 @@ start() {
   # specific to that implementation of the CLI. Place initialization functions that
   # require networking here.
   post_init
-echo $CHE_CONTAINER_NAME
-echo $CHE_COMPOSE_PROJECT_NAME  
+
   # Begin product-specific CLI calls
   info "cli" "$CHE_VERSION - using docker ${DOCKER_SERVER_VERSION} / $(get_docker_install_type)"
 
