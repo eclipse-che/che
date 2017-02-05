@@ -10,17 +10,9 @@ cli_load() {
   # Library contains reusable functions
   source "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/library.sh
 
-  # add base commands
-#  for BASECOMMAND_FILE in "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/commands/*.sh
-#  do
-#    source "${BASECOMMAND_FILE}"
-#  done
-
-  # Need to load all files in advance so commands can invoke other commands.
-#  for COMMAND_FILE in "${SCRIPTS_CONTAINER_SOURCE_DIR}"/cmd_*.sh
-#  do
-#    source "${COMMAND_FILE}"
-#  done
+  if [ -f "${SCRIPTS_CONTAINER_SOURCE_DIR}"/library.sh ]; then
+    source "${SCRIPTS_CONTAINER_SOURCE_DIR}"/library.sh
+  fi
 }
 
 cli_parse () {
@@ -40,10 +32,6 @@ cli_parse () {
 
 cli_execute() {
   cmd_lifecycle "$@"
-
-#  COMMAND="cmd_$1"
-#  shift
-#  eval $COMMAND "$@"
 }
 
 cmd_lifecycle() {
