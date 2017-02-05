@@ -9,9 +9,18 @@
 #   Tyler Jewell - Initial Implementation
 #
 
-cmd_version() {
-  debug $FUNCNAME
+pre_cmd_version() {
+  if get_command_help; then
+    text "\n"
+    text "USAGE: ${CHE_IMAGE_FULLNAME} version\n"
+    text "\n"
+    text "List installed and available versions of ${CHE_MINI_PRODUCT_NAME}"
+    text "\n"
+    return 2
+  fi
+}
 
+cmd_version() {
   # Do not perform any logging in this method as it is runnable before the system is bootstrap
   echo ""
   text "Your CLI version is '%s'.\n" $(get_image_version)

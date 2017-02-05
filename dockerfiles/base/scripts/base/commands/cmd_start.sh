@@ -9,9 +9,24 @@
 #   Tyler Jewell - Initial Implementation
 #
 
-cmd_start() {
-  debug $FUNCNAME
+pre_cmd_start() {
+  if get_command_help; then
+    text "\n"
+    text "USAGE: ${CHE_IMAGE_FULLNAME} start [PARAMETERS]\n"
+    text "\n"
+    text "Starts ${CHE_MINI_PRODUCT_NAME} and verifies its operation\n"
+    text "\n"
+    text "PARAMETERS:\n"
+    text "  --force                           Uses 'docker rmi' and 'docker pull' to forcibly retrieve latest images\n"
+    text "  --no-force                        Updates images if matching tag not found in local cache\n"
+    text "  --pull                            Uses 'docker pull' to check for new remote versions of images\n"
+    text "  --skip:preflight                  Skip preflight checks\n"
+    text "\n"
+    return 2
+  fi
+}
 
+cmd_start() {
   # If already running, just display output again
   check_if_booted
 
@@ -24,7 +39,7 @@ cmd_start() {
   FORCE_UPDATE=${1:-"--no-force"}
   # Always regenerate puppet configuration from environment variable source, whether changed or not.
   # If the current directory is not configured with an .env file, it will initialize
-  cmd_config $FORCE_UPDATE
+  cmd_lifecycle config $FORCE_UPDATE
 
   # Preflight checks
   #   a) Check for open ports
@@ -162,50 +177,6 @@ cmd_start_check_postflight() {
   true
 }
 
-cmd_stop() {
-  debug $FUNCNAME
-  FORCE_STOP=false
-  if [[ "$@" == *"--skip:graceful"* ]]; then
-  	FORCE_STOP=true
-  fi
-
-  if server_is_booted $(get_server_container_id $CHE_CONTAINER_NAME); then 
-    if [[ ${FORCE_STOP} = "false" ]]; then
-      info "stop" "Stopping workspaces..."
-      if ! $(cmd_action "graceful-stop" "$@" >> "${LOGS}" 2>&1 || false); then
-        error "We encountered an error -- see cli.log"
-      fi
-    fi
-    # stop containers booted by docker compose
-    stop_containers
-  else
-    info "stop" "Server $CHE_CONTAINER_NAME on port $CHE_PORT not running..."
-  fi
-}
-
-# stop containers booted by docker compose and remove them
-stop_containers() {
-  info "stop" "Stopping containers..."
-  if is_initialized; then
-    log "docker_compose --file=\"${REFERENCE_CONTAINER_COMPOSE_FILE}\" -p=$CHE_COMPOSE_PROJECT_NAME stop -t ${CHE_COMPOSE_STOP_TIMEOUT} >> \"${LOGS}\" 2>&1 || true"
-    docker_compose --file="${REFERENCE_CONTAINER_COMPOSE_FILE}" \
-                   -p=$CHE_COMPOSE_PROJECT_NAME stop -t ${CHE_COMPOSE_STOP_TIMEOUT} >> "${LOGS}" 2>&1 || true
-    info "stop" "Removing containers..."
-    log "docker_compose --file=\"${REFERENCE_CONTAINER_COMPOSE_FILE}\" -p=$CHE_COMPOSE_PROJECT_NAME rm >> \"${LOGS}\" 2>&1 || true"
-    docker_compose --file="${REFERENCE_CONTAINER_COMPOSE_FILE}" \
-                   -p=$CHE_COMPOSE_PROJECT_NAME rm --force >> "${LOGS}" 2>&1 || true
-  fi
-}
-
-cmd_restart() {
-  debug $FUNCNAME
-
-  FORCE_UPDATE=${1:-"--no-force"}
-  info "restart" "Restarting..."
-  cmd_stop ${@}
-  cmd_start ${FORCE_UPDATE} ${@}
-}
-
 wait_until_booted() {
   CURRENT_CHE_SERVER_CONTAINER_ID=$(get_server_container_id $CHE_CONTAINER_NAME)
 
@@ -254,7 +225,6 @@ check_if_booted() {
 }
 
 check_containers_are_running() {
-
   # get list of docker compose services started by this docker compose
   local LIST_OF_COMPOSE_CONTAINERS=$(docker_compose --file=${REFERENCE_CONTAINER_COMPOSE_FILE} -p=$CHE_COMPOSE_PROJECT_NAME config --services)
 
@@ -278,19 +248,4 @@ check_containers_are_running() {
       fi
     done <<< "${CONTAINER_ID_MATCHING_SERVICE_NAMES}"
   done <<< "${LIST_OF_COMPOSE_CONTAINERS}"
-}
-
-has_compose() {
-  hash docker-compose 2>/dev/null && return 0 || return 1
-}
-
-docker_compose() {
-#  debug $FUNCNAME
-
-  if has_compose; then
-    docker-compose "$@"
-  else
-    docker_run -v "${CHE_HOST_INSTANCE}":"${CHE_CONTAINER_INSTANCE}" \
-                  $IMAGE_COMPOSE "$@"
-  fi
 }

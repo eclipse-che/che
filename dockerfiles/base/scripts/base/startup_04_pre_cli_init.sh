@@ -159,7 +159,7 @@ verify_version_upgrade_compatibility() {
         error "Your CLI version '${CHE_IMAGE_FULLNAME}' is identical to your installed version '$CONFIGURED_VERSION'."
         error ""
         error "Run '${CHE_IMAGE_NAME}:<version> upgrade' with a newer version to upgrade."
-        error "View available versions with '$CHE_FORMAL_PRODUCT_NAME version'."
+        error "View available versions with '${CHE_IMAGE_FULLNAME} version'."
         return 2
       ;;
       "nightly")
@@ -179,7 +179,7 @@ verify_version_upgrade_compatibility() {
         error "You cannot use '${CHE_IMAGE_NAME} upgrade' to downgrade versions."
         error ""
         error "Run '${CHE_IMAGE_NAME}:<version> upgrade' with a newer version to upgrade."
-        error "View available versions with '${CHE_IMAGE_NAME} version'."
+        error "View available versions with '${CHE_IMAGE_FULLNAME} version'."
         return 2
       ;;
     esac
@@ -265,6 +265,15 @@ is_initialized() {
   fi
 }
 
+is_configured() {
+  if [[ -d "${CHE_CONTAINER_INSTANCE}/config" ]] && \
+     [[ -f "${CHE_CONTAINER_INSTANCE}/${CHE_VERSION_FILE}" ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
 update_image() {
   if [ "${1}" == "--force" ]; then
     shift
@@ -297,3 +306,4 @@ get_value_of_var_from_env_file() {
   echo $LOOKUP_LOCAL
 
 }
+

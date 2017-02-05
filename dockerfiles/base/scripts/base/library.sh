@@ -178,16 +178,6 @@ update_image_if_not_found() {
   fi
 }
 
-is_configured() {
-  if [[ -d "${CHE_CONTAINER_INSTANCE}/config" ]] && \
-     [[ -f "${CHE_CONTAINER_INSTANCE}/${CHE_VERSION_FILE}" ]]; then
-    return 0
-  else
-    return 1
-  fi
-}
-
-
 list_versions(){
   # List all subdirectories and then print only the file name
   for version in /version/* ; do
@@ -379,4 +369,98 @@ wait_until_container_is_running() {
     sleep 1
     ELAPSED=$((ELAPSED+1))
   done
+}
+
+has_compose() {
+  hash docker-compose 2>/dev/null && return 0 || return 1
+}
+
+docker_compose() {
+#  debug $FUNCNAME
+
+  if has_compose; then
+    docker-compose "$@"
+  else
+    docker_run -v "${CHE_HOST_INSTANCE}":"${CHE_CONTAINER_INSTANCE}" \
+                  $IMAGE_COMPOSE "$@"
+  fi
+}
+
+start_test_server() {
+  export AGENT_INTERNAL_PORT=80
+  export AGENT_EXTERNAL_PORT=32768
+
+  # Start mini httpd server to run simulated tests
+  docker run -d -p $AGENT_EXTERNAL_PORT:$AGENT_INTERNAL_PORT --name fakeagent \
+             ${BOOTSTRAP_IMAGE_ALPINE} httpd -f -p $AGENT_INTERNAL_PORT -h /etc/ >> "${LOGS}"
+
+  export AGENT_INTERNAL_IP=$(docker inspect --format='{{.NetworkSettings.IPAddress}}' fakeagent)
+  export AGENT_EXTERNAL_IP=$CHE_HOST
+}
+
+stop_test_server() {
+  # Remove httpd server
+  docker rm -f fakeagent >> "${LOGS}"  
+}
+
+test1() {
+  HTTP_CODE=$(curl -I localhost:${AGENT_EXTERNAL_PORT}/alpine-release \
+                          -s -o "${LOGS}" --connect-timeout 5 \
+                          --write-out '%{http_code}') || echo "28" >> "${LOGS}"
+  
+  if check_http_code $HTTP_CODE; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+test2() {
+  HTTP_CODE=$(curl -I ${AGENT_EXTERNAL_IP}:${AGENT_EXTERNAL_PORT}/alpine-release \
+                          -s -o "${LOGS}" --connect-timeout 5 \
+                          --write-out '%{http_code}') || echo "28" >> "${LOGS}"
+
+  if check_http_code $HTTP_CODE; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+test3() {
+   HTTP_CODE=$(docker_run --name fakeserver \
+                                --entrypoint=curl \
+                                $(eval "echo \${IMAGE_${CHE_PRODUCT_NAME}}") \
+                                  -I ${AGENT_EXTERNAL_IP}:${AGENT_EXTERNAL_PORT}/alpine-release \
+                                  -s -o "${LOGS}" \
+                                  --write-out '%{http_code}')
+
+  if check_http_code $HTTP_CODE; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+test4() {
+  HTTP_CODE=$(docker_run --name fakeserver \
+                                --entrypoint=curl \
+                                $(eval "echo \${IMAGE_${CHE_PRODUCT_NAME}}") \
+                                  -I ${AGENT_INTERNAL_IP}:${AGENT_INTERNAL_PORT}/alpine-release \
+                                  -s -o "${LOGS}" \
+                                  --write-out '%{http_code}')  
+
+  if check_http_code $HTTP_CODE; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+check_http_code() {
+  if [ "${1}" = "200" ]; then
+    return 0
+  else
+    return 1
+  fi
 }

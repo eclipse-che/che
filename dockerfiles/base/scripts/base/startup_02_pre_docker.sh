@@ -215,6 +215,14 @@ local_assembly() {
   fi
 }
 
+get_command_help() {
+  if [ "${CHE_COMMAND_HELP}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
 init_logging() {
   # Initialize CLI folder
   CLI_DIR=$CHE_CONTAINER_ROOT

@@ -10,9 +10,31 @@
 #
 
 cmd_action() {
-  debug $FUNCNAME
+  docker_run -it ${UTILITY_IMAGE_CHEACTION} "$@"
+}
+
+pre_cmd_action() {
+  if get_command_help; then
+  	text "\n"
+    text "USAGE: ${CHE_IMAGE_FULLNAME} action <ACTION_NAME> [ACTION_PARAMETERS]\n"
+    text "\n"
+    text "Executes a REST action against ${CHE_MINI_PRODUCT_NAME} server or workspace.\n"
+    text "\n"
+    text "ACTIONS:\n"
+    text "  create-start-workspace\n"
+    text "  add-user\n"
+    text "  remove-user\n"
+    text "  execute-command\n"
+    text "  list-workspaces\n"
+    text "  workspace-ssh\n"
+    text "  get-ssh-data\n"
+    text "  graceful-stop\n"
+    text "\n"
+    text "Run '${CHE_IMAGE_FULLNAME} action' for action parameters"
+    text "\n"
+    return 2
+  fi
 
   # Not loaded as part of the init process to save on download time
   load_utilities_images_if_not_done
-  docker_run -it ${UTILITY_IMAGE_CHEACTION} "$@"
 }

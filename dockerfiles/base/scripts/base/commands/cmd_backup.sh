@@ -9,9 +9,21 @@
 #   Tyler Jewell - Initial Implementation
 #
 
-cmd_backup() {
-  debug $FUNCNAME
+pre_cmd_backup() {
+  if get_command_help; then
+    text "\n"
+    text "USAGE: ${CHE_IMAGE_FULLNAME} backup [PARAMETERS]\n"
+    text "\n"
+    text "Backup ${CHE_MINI_PRODUCT_NAME} configuration and user data\n"
+    text "\n"
+    text "PARAMETERS:\n"
+    text "  --no-skip-data                           Excludes user data in /instance/data\n"
+    text "\n"
+    return 2
+  fi
+}
 
+cmd_backup() {
   # possibility to skip ${CHE_FORMAL_PRODUCT_NAME} projects backup
   SKIP_BACKUP_CHE_DATA=${1:-"--no-skip-data"}
   if [[ "${SKIP_BACKUP_CHE_DATA}" == "--skip-data" ]]; then
@@ -46,7 +58,7 @@ cmd_backup() {
                $(cmd_backup_extra_args) \
                  ${BOOTSTRAP_IMAGE_ALPINE} sh -c "tar czf /root/backup/${CHE_BACKUP_FILE_NAME} -C /root${CHE_CONTAINER_ROOT} . --exclude='backup' --exclude='instance/dev' --exclude='instance/logs' ${TAR_EXTRA_EXCLUDE}"
   info ""
-  info "backup" "Codenvy data saved in ${CHE_HOST_BACKUP}/${CHE_BACKUP_FILE_NAME}"
+  info "backup" "${CHE_MINI_PRODUCT_NAME} data saved in ${CHE_HOST_BACKUP}/${CHE_BACKUP_FILE_NAME}"
 }
 
 cmd_backup_extra_args() {

@@ -48,7 +48,8 @@ GLOBAL COMMAND OPTIONS:
   --fast                               Skips networking, version, nightly and preflight checks
   --offline                            Runs CLI in offline mode, loading images from disk
   --debug                              Enable debugging of ${CHE_MINI_PRODUCT_NAME} server
-  --trace                              Activates trace output for debugging CLI${ADDITIONAL_GLOBAL_OPTIONS}  
+  --trace                              Activates trace output for debugging CLI${ADDITIONAL_GLOBAL_OPTIONS}
+  --help                               Get help for a command  
 "
 }
 
@@ -77,6 +78,7 @@ init_global_vars() {
   CHE_SKIP_NIGHTLY=false
   CHE_SKIP_NETWORK=false
   CHE_SKIP_PULL=false
+  CHE_COMMAND_HELP=false
 
   DEFAULT_CHE_PRODUCT_NAME="CHE"
   CHE_PRODUCT_NAME=${CHE_PRODUCT_NAME:-${DEFAULT_CHE_PRODUCT_NAME}}
@@ -168,7 +170,6 @@ usage() {
  # debug $FUNCNAME
   init_usage
   printf "%s" "${USAGE}"
-  return 1;
 }
 
 init_cli_version_check() {
@@ -183,7 +184,8 @@ init_usage_check() {
   # If there are no parameters, immediately display usage
 
   if [[ $# == 0 ]]; then
-    usage;
+    usage
+    return 1
   fi
 
   if [[ "$@" == *"--fast"* ]]; then
@@ -221,6 +223,10 @@ init_usage_check() {
 
   if [[ "$@" == *"--skip:pull"* ]]; then
     CHE_SKIP_PULL=true
+  fi
+
+  if [[ "$@" == *"--help"* ]]; then
+    CHE_COMMAND_HELP=true
   fi
 }
 
@@ -313,6 +319,7 @@ start() {
   set -- "${@/\-\-skip\:nightly/}"
   set -- "${@/\-\-skip\:network/}"
   set -- "${@/\-\-skip\:pull/}"
+  set -- "${@/\-\-help/}"
 
   # Each CLI assembly must provide this cli.sh - loads overridden functions and variables for the CLI
   source "${SCRIPTS_CONTAINER_SOURCE_DIR}"/post_init.sh
@@ -334,9 +341,12 @@ start() {
 
   source "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/startup_05_pre_exec.sh
 
+  # Loads the library and associated dependencies
   cli_load "$@"
+
+  # Parses the command list for validity
   cli_parse "$@"
 
-  # Loads library.sh and remaining commands from cmd_*.sh and executes command
+  # Executes command lifecycle
   cli_execute "$@"
 }

@@ -9,6 +9,17 @@
 #   Tyler Jewell - Initial Implementation
 #
 
+pre_cmd_restore() {
+  if get_command_help; then
+    text "\n"
+    text "USAGE: ${CHE_IMAGE_FULLNAME} restore\n"
+    text "\n"
+    text "Restores user data and recovers a ${CHE_MINI_PRODUCT_NAME} configuration\n"
+    text "\n"
+    return 2
+  fi
+}
+
 cmd_restore_pre_action() {
   true
 }
@@ -28,7 +39,7 @@ cmd_restore() {
   fi
 
   if get_server_container_id "${CHE_SERVER_CONTAINER_NAME}" >> "${LOGS}" 2>&1; then
-    error "${CHE_FORMAL_PRODUCT_NAME} is running. Stop before performing a restore. Aborting"
+    error "${CHE_FORMAL_PRODUCT_NAME} is running. Stop before performing a restore."
     return;
   fi
 
