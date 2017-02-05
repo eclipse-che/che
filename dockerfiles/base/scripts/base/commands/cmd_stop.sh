@@ -19,7 +19,7 @@ cmd_stop() {
   if server_is_booted $(get_server_container_id $CHE_CONTAINER_NAME); then 
     if [[ ${FORCE_STOP} = "false" ]]; then
       info "stop" "Stopping workspaces..."
-      if ! $(cmd_action "graceful-stop" "$@" >> "${LOGS}" 2>&1 || false); then
+      if ! $(cmd_lifecycle action "graceful-stop" "$@" >> "${LOGS}" 2>&1 || false); then
         error "We encountered an error -- see cli.log"
       fi
     fi
