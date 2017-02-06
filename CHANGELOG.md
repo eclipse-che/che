@@ -1,5 +1,11 @@
 # Change Log
 
+## [5.2.1](https://github.com/eclipse/che/tree/5.2.1) (2017-02-03)
+[Full Changelog](https://github.com/eclipse/che/compare/5.2.0...5.2.1)
+
+**Pull requests merged:**
+- Fixes workspace with project creation bug on user dashboard, ram indicator, stacks and samples relations. [4004](https://github.com/eclipse/che/pull/4004)
+
 ## [5.2.0](https://github.com/eclipse/che/tree/5.2.0) (2017-02-01)
 [Full Changelog](https://github.com/eclipse/che/compare/5.1.2...5.2.0)
 
