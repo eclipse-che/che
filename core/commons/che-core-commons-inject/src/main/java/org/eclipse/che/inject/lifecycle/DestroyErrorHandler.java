@@ -23,8 +23,7 @@ public interface DestroyErrorHandler {
     void onError(Object instance, Method method, Throwable error);
 
     /**
-     * Implementation of DestroyErrorHandler that log errors, e.g. such behaviour is required for annotation {@link
-     * javax.annotation.PreDestroy}.
+     * Implementation of DestroyErrorHandler that log errors.
      */
     DestroyErrorHandler LOG_HANDLER = (instance, method, error) -> getLogger(instance.getClass()).error(error.getMessage(), error);
 }
