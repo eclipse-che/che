@@ -451,8 +451,12 @@ check_mounts() {
     CHE_CONTAINER_DEVELOPMENT_REPO="/repo"
 
     # When we build eclipse/che-base, we insert the version of the repo it was built from into the image
-    CHE_REPO_BASE_VERSION=$(grep -hn CHE_BASE_API_VERSION= /repo/dockerfiles/base/scripts/base/startup_01_init.sh)
-    CHE_REPO_BASE_VERSION=${CHE_REPO_BASE_VERSION#*=}
+    if [[ -f "/repo/dockerfiles/base/scripts/base/startup_01_init.sh" ]]; then
+      CHE_REPO_BASE_VERSION=$(grep -hn CHE_BASE_API_VERSION= /repo/dockerfiles/base/scripts/base/startup_01_init.sh)
+      CHE_REPO_BASE_VERSION=${CHE_REPO_BASE_VERSION#*=}
+    else 
+      CHE_REPO_BASE_VERSION=$CHE_BASE_API_VERSION
+    fi
 
     if [[ $CHE_BASE_API_VERSION != $CHE_REPO_BASE_VERSION ]]; then
       warning "The CLI base image version ($CHE_BASE_API_VERSION) does not match your repo ($CHE_REPO_BASE_VERSION)"
