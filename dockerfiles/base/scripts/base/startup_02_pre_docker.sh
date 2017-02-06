@@ -5,185 +5,198 @@
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
 
-# Contains docker scripts
-
-has_docker() {
-  hash docker 2>/dev/null && return 0 || return 1
-}
-
-has_compose() {
-  hash docker-compose 2>/dev/null && return 0 || return 1
-}
-
-get_container_folder() {
-  THIS_CONTAINER_ID=$(get_this_container_id)
-  FOLDER=$(get_container_host_bind_folder "$1" $THIS_CONTAINER_ID)
-  echo "${FOLDER:=not set}"
-}
-
-get_this_container_id() {
-  hostname
-}
-
-get_container_host_bind_folder() {
-  # BINDS in the format of var/run/docker.sock:/var/run/docker.sock <path>:${CHE_CONTAINER_ROOT}
-  BINDS=$(docker inspect --format="{{.HostConfig.Binds}}" "${2}" | cut -d '[' -f 2 | cut -d ']' -f 1)
-
-  # Remove /var/run/docker.sock:/var/run/docker.sock
-  #VALUE=${BINDS/\/var\/run\/docker\.sock\:\/var\/run\/docker\.sock/}
-
-  # Remove leading and trailing spaces
-  VALUE2=$(echo "${BINDS}" | xargs)
-
-  MOUNT=""
-  IFS=$' '
-  for SINGLE_BIND in $VALUE2; do
-    case $SINGLE_BIND in
-
-      # Fix for CHE-3863 - in case there is :Z after the mount for SELinux, add *
-      *$1*)
-        MOUNT="${MOUNT} ${SINGLE_BIND}"
-        echo "${MOUNT}" | cut -f1 -d":" | xargs
-      ;;
-      *)
-        # Super ugly - since we parse by space, if the next parameter is not a colon, then
-        # we know that next parameter is second part of a directory with a space in it.
-        if [[ ${SINGLE_BIND} != *":"* ]]; then
-          MOUNT="${MOUNT} ${SINGLE_BIND}"
-        else
-          MOUNT=""
-        fi
-      ;;
-    esac
-  done
-}
-
-get_docker_install_type() {
-#  debug $FUNCNAME
-  if is_boot2docker; then
-    echo "boot2docker"
-  elif is_docker_for_windows; then
-    echo "docker4windows"
-  elif is_docker_for_mac; then
-    echo "docker4mac"
-  else
-    echo "native"
-  fi
-}
-
-has_docker_for_windows_client(){
-#  debug $FUNCNAME
-  if [[ "${GLOBAL_HOST_IP}" = "10.0.75.2" ]]; then
-    return 0
-  else
-    return 1
-  fi
-}
-
-is_boot2docker() {
-#  debug $FUNCNAME
-  if uname -r | grep -q 'boot2docker'; then
-    return 0
-  else
-    return 1
-  fi
-}
-
-is_docker_for_windows() {
-#  debug $FUNCNAME
-  if uname -r | grep -q 'moby' && has_docker_for_windows_client; then
-    return 0
-  else
-    return 1
-  fi
-}
-
-is_docker_for_mac() {
-#  debug $FUNCNAME
-  if uname -r | grep -q 'moby' && ! has_docker_for_windows_client; then
-    return 0
-  else
-    return 1
-  fi
-}
-
-is_native() {
-#  debug $FUNCNAME
-  if [ $(get_docker_install_type) = "native" ]; then
-    return 0
-  else
-    return 1
-  fi
-}
-
-docker_run() {
-#  debug $FUNCNAME
-  # Setup options for connecting to docker host
-  if [ -z "${DOCKER_HOST+x}" ]; then
-      DOCKER_HOST="/var/run/docker.sock"
-  fi
-
-  echo "" > /tmp/docker_run_vars
-  # Add environment variables for CHE
-  while IFS='=' read -r -d '' key value; do
-    if [[ ${key} == "CHE_"* ]]; then
-      echo ${key}=${value} >> /tmp/docker_run_vars
+# Sends arguments as a text to CLI log file
+# Usage:
+#   log <argument> [other arguments]
+log() {
+  if [[ "$LOG_INITIALIZED"  = "true" ]]; then
+    if is_log; then
+      echo "$@" >> "${LOGS}"
     fi
-  done < <(env -0)
-
-  # Add scripts global variables for CHE
-  while read key; do
-    if [[ ${key} == "CHE_"* ]]; then
-      local ENV_VAL="${!key}"
-      echo ${key}=${ENV_VAL} >> /tmp/docker_run_vars
-    fi
-  done < <(compgen -v)
-
-
-  if [ -S "$DOCKER_HOST" ]; then
-    docker run --rm --env-file /tmp/docker_run_vars \
-                    -v $DOCKER_HOST:$DOCKER_HOST \
-                    -v $HOME:$HOME \
-                    -w "$(pwd)" "$@"
-  else
-    docker run --rm --env-file /tmp/docker_run_vars \
-                    -e DOCKER_HOST -e DOCKER_TLS_VERIFY -e DOCKER_CERT_PATH \
-                    -v $HOME:$HOME \
-                    -w "$(pwd)" "$@"
   fi
 }
 
-container_exist_by_name(){
-  docker inspect ${1} > /dev/null 2>&1
-  if [ "$?" == "0" ]; then
+warning() {
+  if is_warning; then
+    printf  "${YELLOW}WARN:${NC} %s\n" "${1}"
+  fi
+  log $(printf "WARN: %s\n" "${1}")
+}
+
+info() {
+  if [ -z ${2+x} ]; then
+    PRINT_COMMAND=""
+    PRINT_STATEMENT=$1
+  else
+    PRINT_COMMAND="($CHE_MINI_PRODUCT_NAME $1): "
+    PRINT_STATEMENT=$2
+  fi
+  if is_info; then
+    printf "${GREEN}INFO:${NC} %b%b\n" \
+              "${PRINT_COMMAND}" \
+              "${PRINT_STATEMENT}"
+  fi
+  log $(printf "INFO: %b %b\n" \
+        "${PRINT_COMMAND}" \
+        "${PRINT_STATEMENT}")
+}
+
+debug() {
+  if is_debug; then
+    printf  "\n${BLUE}DEBUG:${NC} %s" "${1}"
+  fi
+  log $(printf "\nDEBUG: %s" "${1}")
+}
+
+error() {
+  printf  "${RED}ERROR:${NC} %s\n" "${1}"
+  log $(printf  "ERROR: %s\n" "${1}")
+}
+
+# Prints message without changes
+# Usage: has the same syntax as printf command
+text() {
+  printf "$@"
+  log $(printf "$@")
+}
+
+## TODO use that for all native calls to improve logging for support purposes
+# Executes command with 'eval' command.
+# Also logs what is being executed and stdout/stderr
+# Usage:
+#   cli_eval <command to execute>
+# Examples:
+#   cli_eval "$(which curl) http://localhost:80/api/"
+cli_eval() {
+  log "$@"
+  tmpfile=$(mktemp)
+  if eval "$@" &>"${tmpfile}"; then
+    # Execution succeeded
+    cat "${tmpfile}" >> "${LOGS}"
+    cat "${tmpfile}"
+    rm "${tmpfile}"
+  else
+    # Execution failed
+    cat "${tmpfile}" >> "${LOGS}"
+    cat "${tmpfile}"
+    rm "${tmpfile}"
+    fail
+  fi
+}
+
+# Executes command with 'eval' command and suppress stdout/stderr.
+# Also logs what is being executed and stdout+stderr
+# Usage:
+#   cli_silent_eval <command to execute>
+# Examples:
+#   cli_silent_eval "$(which curl) http://localhost:80/api/"
+cli_silent_eval() {
+  log "$@"
+  eval "$@" >> "${LOGS}" 2>&1
+}
+
+is_log() {
+  if [ "${CHE_CLI_LOG}" = "true" ]; then
     return 0
   else
     return 1
   fi
 }
 
-get_server_container_id() {
-  log "docker inspect -f '{{.Id}}' ${1}"
-  docker inspect -f '{{.Id}}' ${1} 2>&1 || false
-}
-
-container_is_running() {
-  if [ "$(docker ps -qa -f "status=running" -f "id=${1}" | wc -l)" -eq 0 ]; then
-    return 1
-  else
+is_warning() {
+  if [ "${CHE_CLI_WARN}" = "true" ]; then
     return 0
+  else
+    return 1
   fi
 }
 
-wait_until_container_is_running() {
-  CONTAINER_START_TIMEOUT=${1}
+is_info() {
+  if [ "${CHE_CLI_INFO}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
 
-  ELAPSED=0
-  until container_is_running ${2} || [ ${ELAPSED} -eq "${CONTAINER_START_TIMEOUT}" ]; do
-    log "sleep 1"
-    sleep 1
-    ELAPSED=$((ELAPSED+1))
-  done
+is_debug() {
+  if [ "${CHE_CLI_DEBUG}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+debug_server() {
+  if [ "${CHE_DEBUG}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+is_fast() {
+  if [ "${FAST_BOOT}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+is_offline() {
+  if [ "${CHE_OFFLINE}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+is_trace() {
+  if [ "${CHE_TRACE}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+skip_preflight() {
+  if [ "${CHE_SKIP_PREFLIGHT}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+skip_postflight() {
+  if [ "${CHE_SKIP_POSTFLIGHT}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+skip_nightly() {
+  if [ "${CHE_SKIP_NIGHTLY}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+skip_network() {
+  if [ "${CHE_SKIP_NETWORK}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+skip_pull() {
+  if [ "${CHE_SKIP_PULL}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
 }
 
 local_repo() {
@@ -199,6 +212,64 @@ local_assembly() {
     return 0
   else
     return 1
+  fi
+}
+
+get_command_help() {
+  if [ "${CHE_COMMAND_HELP}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+init_logging() {
+  # Initialize CLI folder
+  CLI_DIR=$CHE_CONTAINER_ROOT
+  test -d "${CLI_DIR}" || mkdir -p "${CLI_DIR}"
+
+  # Ensure logs folder exists
+  LOGS="${CLI_DIR}/cli.log"
+  LOG_INITIALIZED=true
+
+  # Log date of CLI execution
+  log "$(date)"
+}
+
+cli_init() {
+  CHE_HOST=$(eval "echo \$${CHE_PRODUCT_NAME}_HOST")
+  CHE_PORT=$(eval "echo \$${CHE_PRODUCT_NAME}_PORT")
+
+  if [[ "$(eval "echo \$${CHE_PRODUCT_NAME}_HOST")" = "" ]]; then
+    info "Welcome to $CHE_FORMAL_PRODUCT_NAME!"
+    info ""
+    info "We did not auto-detect a valid HOST or IP address."
+    info "Pass ${CHE_PRODUCT_NAME}_HOST with your hostname or IP address."
+    info ""
+    info "Rerun the CLI:"
+    info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock"
+    info "                      -v <local-path>:${CHE_CONTAINER_ROOT}"
+    info "                      -e ${CHE_PRODUCT_NAME}_HOST=<your-ip-or-host>"
+    info "                         $CHE_IMAGE_FULLNAME $*"
+    return 2;
+  fi
+
+  if is_initialized; then 
+    CHE_HOST_LOCAL=$(get_value_of_var_from_env_file ${CHE_PRODUCT_NAME}_HOST)
+    if [[ "${CHE_HOST}" != "${CHE_HOST_LOCAL}" ]]; then
+      warning "${CHE_PRODUCT_NAME}_HOST (${CHE_HOST}) overridden by ${CHE_ENVIRONMENT_FILE} (${CHE_HOST_LOCAL})"
+    fi
+  fi
+
+  # Special function to perform special behaviors if you are running nightly version
+  verify_nightly_accuracy
+
+  # Do not perform a version compatibility check if running upgrade command.
+  # The upgrade command has its own internal checks for version compatibility.
+  if [[ "$@" == *"upgrade"* ]]; then
+    verify_version_upgrade_compatibility
+  elif ! is_fast; then
+    verify_version_compatibility
   fi
 }
 
@@ -379,6 +450,19 @@ check_mounts() {
     CHE_HOST_DEVELOPMENT_REPO="${REPO_MOUNT}"
     CHE_CONTAINER_DEVELOPMENT_REPO="/repo"
 
+    # When we build eclipse/che-base, we insert the version of the repo it was built from into the image
+    if [[ -f "/repo/dockerfiles/base/scripts/base/startup_01_init.sh" ]]; then
+      CHE_REPO_BASE_VERSION=$(grep -hn CHE_BASE_API_VERSION= /repo/dockerfiles/base/scripts/base/startup_01_init.sh)
+      CHE_REPO_BASE_VERSION=${CHE_REPO_BASE_VERSION#*=}
+    else 
+      CHE_REPO_BASE_VERSION=$CHE_BASE_API_VERSION
+    fi
+
+    if [[ $CHE_BASE_API_VERSION != $CHE_REPO_BASE_VERSION ]]; then
+      warning "The CLI base image version ($CHE_BASE_API_VERSION) does not match your repo ($CHE_REPO_BASE_VERSION)"
+      warning "You have mounted :/repo and your repo branch does not match with the image."
+    fi
+
     CHE_ASSEMBLY="${CHE_HOST_INSTANCE}/dev/${CHE_MINI_PRODUCT_NAME}-tomcat"
 
     if [[ ! -d "${CHE_CONTAINER_DEVELOPMENT_REPO}"  ]] || [[ ! -d "${CHE_CONTAINER_DEVELOPMENT_REPO}/assembly" ]]; then
@@ -438,14 +522,87 @@ check_mounts() {
   fi
 }
 
-docker_compose() {
-#  debug $FUNCNAME
+has_docker() {
+  hash docker 2>/dev/null && return 0 || return 1
+}
 
-  if has_compose; then
-    docker-compose "$@"
-  else
-    docker_run -v "${CHE_HOST_INSTANCE}":"${CHE_CONTAINER_INSTANCE}" \
-                  docker/compose:1.8.1 "$@"
+get_container_folder() {
+  THIS_CONTAINER_ID=$(get_this_container_id)
+  FOLDER=$(get_container_host_bind_folder "$1" $THIS_CONTAINER_ID)
+  echo "${FOLDER:=not set}"
+}
+
+get_this_container_id() {
+  hostname
+}
+
+get_container_host_bind_folder() {
+  # BINDS in the format of var/run/docker.sock:/var/run/docker.sock <path>:${CHE_CONTAINER_ROOT}
+  BINDS=$(docker inspect --format="{{.HostConfig.Binds}}" "${2}" | cut -d '[' -f 2 | cut -d ']' -f 1)
+
+  # Remove /var/run/docker.sock:/var/run/docker.sock
+  #VALUE=${BINDS/\/var\/run\/docker\.sock\:\/var\/run\/docker\.sock/}
+
+  # Remove leading and trailing spaces
+  VALUE2=$(echo "${BINDS}" | xargs)
+
+  MOUNT=""
+  IFS=$' '
+  for SINGLE_BIND in $VALUE2; do
+    case $SINGLE_BIND in
+
+      # Fix for CHE-3863 - in case there is :Z after the mount for SELinux, add *
+      *$1*)
+        MOUNT="${MOUNT} ${SINGLE_BIND}"
+        echo "${MOUNT}" | cut -f1 -d":" | xargs
+      ;;
+      *)
+        # Super ugly - since we parse by space, if the next parameter is not a colon, then
+        # we know that next parameter is second part of a directory with a space in it.
+        if [[ ${SINGLE_BIND} != *":"* ]]; then
+          MOUNT="${MOUNT} ${SINGLE_BIND}"
+        else
+          MOUNT=""
+        fi
+      ;;
+    esac
+  done
+}
+
+check_host_volume_mount() {
+  if is_boot2docker; then
+    warning "Boot2docker detected - ensure :/data is mounted to %userprofile%"
+  fi
+
+  if file_system_writable "${CHE_CONTAINER_ROOT}/test"; then 
+    delete_file_system_test "${CHE_CONTAINER_ROOT}/test"
+  else 
+    error "Unable to write files to your host"
+    error "Have you enabled Docker to allow mounting host directories?"
+    error "Did you give our CLI rights to create files on your host?"
+    return 2;
   fi
 }
 
+file_system_writable() {
+  echo 'test' > "${1}" 
+
+  if [[ -f "${1}" ]]; then
+    return 0
+  else 
+    return 1
+  fi
+}
+
+delete_file_system_test() {
+  rm -rf $1 > /dev/null 2>&1
+}
+
+is_boot2docker() {
+#  debug $FUNCNAME
+  if uname -r | grep -q 'boot2docker'; then
+    return 0
+  else
+    return 1
+  fi
+}

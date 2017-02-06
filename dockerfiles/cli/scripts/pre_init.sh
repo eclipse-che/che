@@ -15,8 +15,13 @@ pre_init() {
   ADDITIONAL_OPTIONAL_DOCKER_MOUNTS=""
   ADDITIONAL_COMMANDS=""
   ADDITIONAL_GLOBAL_OPTIONS=""
-}
+ 
+  # This must be incremented when BASE is incremented by an API developer
+  CHE_CLI_API_VERSION=1
 
-source /scripts/base/startup.sh
-start "$@"
+  DEFAULT_CHE_PORT=8080
+  CHE_PORT=${CHE_PORT:-${DEFAULT_CHE_PORT}}
+  CHE_MIN_RAM=1.5
+  CHE_MIN_DISK=100
+}
 

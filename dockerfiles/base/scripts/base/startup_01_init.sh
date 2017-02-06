@@ -48,7 +48,8 @@ GLOBAL COMMAND OPTIONS:
   --fast                               Skips networking, version, nightly and preflight checks
   --offline                            Runs CLI in offline mode, loading images from disk
   --debug                              Enable debugging of ${CHE_MINI_PRODUCT_NAME} server
-  --trace                              Activates trace output for debugging CLI${ADDITIONAL_GLOBAL_OPTIONS}  
+  --trace                              Activates trace output for debugging CLI${ADDITIONAL_GLOBAL_OPTIONS}
+  --help                               Get help for a command  
 "
 }
 
@@ -60,6 +61,14 @@ init_constants() {
   BOLD='\033[1m'
   UNDERLINE='\033[4m'
   NC='\033[0m'
+
+  # CLI DEVELOPERS - ONLY INCREMENT THIS CHANGE IF MODIFYING SECTIONS THAT AFFECT LOADING
+  #                  BEFORE :/REPO IS VOLUME MOUNTED.  CLI ASSEMBLIES WILL FAIL UNTIL THEY
+  #                  ARE RECOMPILED WITH MATCHING VERSION.
+  CHE_BASE_API_VERSION=1
+}
+
+init_global_vars() {
   LOG_INITIALIZED=false
   FAST_BOOT=false
   CHE_DEBUG=false
@@ -69,6 +78,7 @@ init_constants() {
   CHE_SKIP_NIGHTLY=false
   CHE_SKIP_NETWORK=false
   CHE_SKIP_PULL=false
+  CHE_COMMAND_HELP=false
 
   DEFAULT_CHE_PRODUCT_NAME="CHE"
   CHE_PRODUCT_NAME=${CHE_PRODUCT_NAME:-${DEFAULT_CHE_PRODUCT_NAME}}
@@ -109,6 +119,9 @@ init_constants() {
   DEFAULT_CHE_SCRIPTS_CONTAINER_SOURCE_DIR="/repo/dockerfiles/cli/scripts"
   CHE_SCRIPTS_CONTAINER_SOURCE_DIR=${CHE_SCRIPTS_CONTAINER_SOURCE_DIR:-${DEFAULT_CHE_SCRIPTS_CONTAINER_SOURCE_DIR}}
 
+  DEFAULT_CHE_BASE_SCRIPTS_CONTAINER_SOURCE_DIR="/scripts/base"
+  CHE_BASE_SCRIPTS_CONTAINER_SOURCE_DIR=${CHE_BASE_SCRIPTS_CONTAINER_SOURCE_DIR:-${DEFAULT_CHE_BASE_SCRIPTS_CONTAINER_SOURCE_DIR}}
+
   DEFAULT_CHE_LICENSE_URL="https://www.eclipse.org/legal/epl-v10.html"
   CHE_LICENSE_URL=${CHE_LICENSE_URL:-${DEFAULT_CHE_LICENSE_URL}}
 
@@ -141,245 +154,46 @@ init_constants() {
   DEFAULT_CHE_LICENSE=false
   CHE_LICENSE=${CHE_LICENSE:-${DEFAULT_CHE_LICENSE}}
 
-  # Replace all of these with digests
-  UTILITY_IMAGE_ALPINE="alpine:3.4"
-  UTILITY_IMAGE_CHEIP="eclipse/che-ip:nightly"
-  UTILITY_IMAGE_CHEACTION="eclipse/che-action:nightly"
-  UTILITY_IMAGE_CHEDIR="eclipse/che-dir:nightly"
-  UTILITY_IMAGE_CHETEST="eclipse/che-test:nightly"
-  UTILITY_IMAGE_CHEMOUNT="eclipse/che-mount:nightly"
-}
-
-
-# Sends arguments as a text to CLI log file
-# Usage:
-#   log <argument> [other arguments]
-log() {
-  if [[ "$LOG_INITIALIZED"  = "true" ]]; then
-    if is_log; then
-      echo "$@" >> "${LOGS}"
+  if [[ "${CHE_CONTAINER_NAME}" = "${CHE_MINI_PRODUCT_NAME}" ]]; then   
+    if [[ "${CHE_PORT}" != "${DEFAULT_CHE_PORT}" ]]; then
+      CHE_CONTAINER_NAME="${CHE_CONTAINER_PREFIX}-${CHE_PORT}"
+    else 
+      CHE_CONTAINER_NAME="${CHE_CONTAINER_PREFIX}"
     fi
   fi
+
+  DEFAULT_CHE_COMPOSE_PROJECT_NAME="${CHE_CONTAINER_NAME}"
+  CHE_COMPOSE_PROJECT_NAME="${CHE_COMPOSE_PROJECT_NAME:-${DEFAULT_CHE_COMPOSE_PROJECT_NAME}}"
 }
 
 usage() {
  # debug $FUNCNAME
   init_usage
   printf "%s" "${USAGE}"
-  return 1;
 }
 
-warning() {
-  if is_warning; then
-    printf  "${YELLOW}WARN:${NC} %s\n" "${1}"
-  fi
-  log $(printf "WARN: %s\n" "${1}")
-}
-
-info() {
-  if [ -z ${2+x} ]; then
-    PRINT_COMMAND=""
-    PRINT_STATEMENT=$1
-  else
-    PRINT_COMMAND="($CHE_MINI_PRODUCT_NAME $1): "
-    PRINT_STATEMENT=$2
-  fi
-  if is_info; then
-    printf "${GREEN}INFO:${NC} %b%b\n" \
-              "${PRINT_COMMAND}" \
-              "${PRINT_STATEMENT}"
-  fi
-  log $(printf "INFO: %b %b\n" \
-        "${PRINT_COMMAND}" \
-        "${PRINT_STATEMENT}")
-}
-
-debug() {
-  if is_debug; then
-    printf  "\n${BLUE}DEBUG:${NC} %s" "${1}"
-  fi
-  log $(printf "\nDEBUG: %s" "${1}")
-}
-
-error() {
-  printf  "${RED}ERROR:${NC} %s\n" "${1}"
-  log $(printf  "ERROR: %s\n" "${1}")
-}
-
-# Prints message without changes
-# Usage: has the same syntax as printf command
-text() {
-  printf "$@"
-  log $(printf "$@")
-}
-
-## TODO use that for all native calls to improve logging for support purposes
-# Executes command with 'eval' command.
-# Also logs what is being executed and stdout/stderr
-# Usage:
-#   cli_eval <command to execute>
-# Examples:
-#   cli_eval "$(which curl) http://localhost:80/api/"
-cli_eval() {
-  log "$@"
-  tmpfile=$(mktemp)
-  if eval "$@" &>"${tmpfile}"; then
-    # Execution succeeded
-    cat "${tmpfile}" >> "${LOGS}"
-    cat "${tmpfile}"
-    rm "${tmpfile}"
-  else
-    # Execution failed
-    cat "${tmpfile}" >> "${LOGS}"
-    cat "${tmpfile}"
-    rm "${tmpfile}"
-    fail
+init_cli_version_check() {
+  if [[ $CHE_BASE_API_VERSION != $CHE_CLI_API_VERSION ]]; then
+    printf "CLI base ($CHE_BASE_API_VERSION) does not match CLI ($CHE_CLI_API_VERSION) version.\n"
+    printf "Recompile the CLI with the latest version of the CLI base.\n"
+    return 1;
   fi
 }
 
-# Executes command with 'eval' command and suppress stdout/stderr.
-# Also logs what is being executed and stdout+stderr
-# Usage:
-#   cli_silent_eval <command to execute>
-# Examples:
-#   cli_silent_eval "$(which curl) http://localhost:80/api/"
-cli_silent_eval() {
-  log "$@"
-  eval "$@" >> "${LOGS}" 2>&1
-}
-
-is_log() {
-  if [ "${CHE_CLI_LOG}" = "true" ]; then
-    return 0
-  else
-    return 1
-  fi
-}
-
-is_warning() {
-  if [ "${CHE_CLI_WARN}" = "true" ]; then
-    return 0
-  else
-    return 1
-  fi
-}
-
-is_info() {
-  if [ "${CHE_CLI_INFO}" = "true" ]; then
-    return 0
-  else
-    return 1
-  fi
-}
-
-is_debug() {
-  if [ "${CHE_CLI_DEBUG}" = "true" ]; then
-    return 0
-  else
-    return 1
-  fi
-}
-
-debug_server() {
-  if [ "${CHE_DEBUG}" = "true" ]; then
-    return 0
-  else
-    return 1
-  fi
-}
-
-is_fast() {
-  if [ "${FAST_BOOT}" = "true" ]; then
-    return 0
-  else
-    return 1
-  fi
-}
-
-is_offline() {
-  if [ "${CHE_OFFLINE}" = "true" ]; then
-    return 0
-  else
-    return 1
-  fi
-}
-
-is_trace() {
-  if [ "${CHE_TRACE}" = "true" ]; then
-    return 0
-  else
-    return 1
-  fi
-}
-
-skip_preflight() {
-  if [ "${CHE_SKIP_PREFLIGHT}" = "true" ]; then
-    return 0
-  else
-    return 1
-  fi
-}
-
-skip_postflight() {
-  if [ "${CHE_SKIP_POSTFLIGHT}" = "true" ]; then
-    return 0
-  else
-    return 1
-  fi
-}
-
-skip_nightly() {
-  if [ "${CHE_SKIP_NIGHTLY}" = "true" ]; then
-    return 0
-  else
-    return 1
-  fi
-}
-
-skip_network() {
-  if [ "${CHE_SKIP_NETWORK}" = "true" ]; then
-    return 0
-  else
-    return 1
-  fi
-}
-
-skip_pull() {
-  if [ "${CHE_SKIP_PULL}" = "true" ]; then
-    return 0
-  else
-    return 1
-  fi
-}
-
-init_logging() {
-  # Initialize CLI folder
-  CLI_DIR=$CHE_CONTAINER_ROOT
-  test -d "${CLI_DIR}" || mkdir -p "${CLI_DIR}"
-
-  # Ensure logs folder exists
-  LOGS="${CLI_DIR}/cli.log"
-  LOG_INITIALIZED=true
-
-  # Log date of CLI execution
-  log "$(date)"
-}
-
-
-init() {
-  init_constants
-
+init_usage_check() {
   # If there are no parameters, immediately display usage
+
   if [[ $# == 0 ]]; then
-    usage;
+    usage
+    return 1
   fi
 
   if [[ "$@" == *"--fast"* ]]; then
-  	FAST_BOOT=true
+    FAST_BOOT=true
   fi
 
   if [[ "$@" == *"--debug"* ]]; then
-  	CHE_DEBUG=true
+    CHE_DEBUG=true
   fi
 
   if [[ "$@" == *"--offline"* ]]; then
@@ -411,12 +225,18 @@ init() {
     CHE_SKIP_PULL=true
   fi
 
-  SCRIPTS_BASE_CONTAINER_SOURCE_DIR="/scripts/base"
-  # add helper scripts
-  for HELPER_FILE in "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/*.sh
-  do
-    source "${HELPER_FILE}"
-  done
+  if [[ "$@" == *"--help"* ]]; then
+    CHE_COMMAND_HELP=true
+  fi
+}
+
+init() {
+  init_constants
+  init_global_vars
+  init_cli_version_check
+  init_usage_check "$@"
+
+  source "${CHE_BASE_SCRIPTS_CONTAINER_SOURCE_DIR}"/startup_02_pre_docker.sh
 
   # Make sure Docker is working and we have /var/run/docker.sock mounted or valid DOCKER_HOST
   check_docker "$@"
@@ -434,25 +254,24 @@ init() {
   init_logging "$@"
 
   SCRIPTS_CONTAINER_SOURCE_DIR=""
-  if $CHE_LOCAL_REPO; then
+  SCRIPTS_BASE_CONTAINER_SOURCE_DIR=""
+  if local_repo; then
      # Use the CLI that is inside the repository.
      SCRIPTS_CONTAINER_SOURCE_DIR=${CHE_SCRIPTS_CONTAINER_SOURCE_DIR}
+
+     if [[ -d "/repo/dockerfiles/base/scripts/base" ]]; then
+       SCRIPTS_BASE_CONTAINER_SOURCE_DIR="/repo/dockerfiles/base/scripts/base"
+     else
+       SCRIPTS_BASE_CONTAINER_SOURCE_DIR=${CHE_BASE_SCRIPTS_CONTAINER_SOURCE_DIR}
+     fi
+
   else
      # Use the CLI that is inside the container.
      SCRIPTS_CONTAINER_SOURCE_DIR="/scripts"
+     SCRIPTS_BASE_CONTAINER_SOURCE_DIR=${CHE_BASE_SCRIPTS_CONTAINER_SOURCE_DIR}
   fi
 
-  # Primary source directory
-  source "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/library.sh
-
-  # add base commands
-  for BASECOMMAND_FILE in "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/commands/*.sh
-  do
-    source "${BASECOMMAND_FILE}"
-  done
-
-  # sources post_init functions that can only be loaded after other libraries
-  source "${SCRIPTS_CONTAINER_SOURCE_DIR}"/cli.sh
+  source "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/startup_03_pre_networking.sh
 
   # If offline mode, then load dependent images from disk and populate the local Docker cache.
   # If not in offline mode, verify that we have access to DockerHub.
@@ -462,51 +281,6 @@ init() {
   # Pull the list of images that are necessary. If in offline mode, verifies that the images
   # are properly loaded into the cache.
   grab_initial_images
-}
-
-cli_pre_init() {
-  :
-}
-
-cli_post_init() {
-  :
-}
-
-cli_init() {
-  CHE_HOST=$(eval "echo \$${CHE_PRODUCT_NAME}_HOST")
-  CHE_PORT=$(eval "echo \$${CHE_PRODUCT_NAME}_PORT")
-
-  if [[ "$(eval "echo \$${CHE_PRODUCT_NAME}_HOST")" = "" ]]; then
-    info "Welcome to $CHE_FORMAL_PRODUCT_NAME!"
-    info ""
-    info "We did not auto-detect a valid HOST or IP address."
-    info "Pass ${CHE_PRODUCT_NAME}_HOST with your hostname or IP address."
-    info ""
-    info "Rerun the CLI:"
-    info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock"
-    info "                      -v <local-path>:${CHE_CONTAINER_ROOT}"
-    info "                      -e ${CHE_PRODUCT_NAME}_HOST=<your-ip-or-host>"
-    info "                         $CHE_IMAGE_FULLNAME $*"
-    return 2;
-  fi
-
-  if is_initialized; then 
-    CHE_HOST_LOCAL=$(get_value_of_var_from_env_file ${CHE_PRODUCT_NAME}_HOST)
-    if [[ "${CHE_HOST}" != "${CHE_HOST_LOCAL}" ]]; then
-      warning "${CHE_PRODUCT_NAME}_HOST (${CHE_HOST}) overridden by ${CHE_ENVIRONMENT_FILE} (${CHE_HOST_LOCAL})"
-    fi
-  fi
-
-  # Special function to perform special behaviors if you are running nightly version
-  verify_nightly_accuracy
-
-  # Do not perform a version compatibility check if running upgrade command.
-  # The upgrade command has its own internal checks for version compatibility.
-  if [[ "$@" == *"upgrade"* ]]; then
-    verify_version_upgrade_compatibility
-  elif ! is_fast; then
-    verify_version_compatibility
-  fi
 }
 
 cleanup() {
@@ -525,6 +299,10 @@ start() {
 
   # pre_init is unique to each CLI assembly. This can be called before
   # networking is established.
+
+  # Each CLI assembly must provide this cli.sh - loads overridden functions and variables for the CLI
+  # Hard code this location
+  source "/scripts/pre_init.sh"
   pre_init
 
   # Bootstrap networking, docker, logging, and ability to load cli.sh and library.sh
@@ -541,19 +319,34 @@ start() {
   set -- "${@/\-\-skip\:nightly/}"
   set -- "${@/\-\-skip\:network/}"
   set -- "${@/\-\-skip\:pull/}"
-  
+  set -- "${@/\-\-help/}"
+
+  # Each CLI assembly must provide this cli.sh - loads overridden functions and variables for the CLI
+  source "${SCRIPTS_CONTAINER_SOURCE_DIR}"/post_init.sh
+
   # The post_init method is unique to each assembly. This method must be provided by 
   # a custom CLI assembly in their container and can set global variables which are 
   # specific to that implementation of the CLI. Place initialization functions that
   # require networking here.
   post_init
-  
+
   # Begin product-specific CLI calls
   info "cli" "$CHE_VERSION - using docker ${DOCKER_SERVER_VERSION} / $(get_docker_install_type)"
 
+  source "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/startup_04_pre_cli_init.sh
+  
   cli_pre_init
   cli_init "$@"
   cli_post_init
+
+  source "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/startup_05_pre_exec.sh
+
+  # Loads the library and associated dependencies
+  cli_load "$@"
+
+  # Parses the command list for validity
   cli_parse "$@"
+
+  # Executes command lifecycle
   cli_execute "$@"
 }

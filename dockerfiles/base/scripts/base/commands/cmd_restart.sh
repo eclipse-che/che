@@ -9,35 +9,32 @@
 #   Tyler Jewell - Initial Implementation
 #
 
-help_cmd_download() {
+help_cmd_restart() {
   text "\n"
-  text "USAGE: ${CHE_IMAGE_FULLNAME} download [PARAMETERS]\n"
+  text "USAGE: ${CHE_IMAGE_FULLNAME} restart [PARAMETERS]\n"
   text "\n"
-  text "Downloads Docker images required to execute ${CHE_MINI_PRODUCT_NAME}\n"
+  text "Stops ${CHE_MINI_PRODUCT_NAME} and starts again\n"
   text "\n"
   text "PARAMETERS:\n"
   text "  --force                           Uses 'docker rmi' and 'docker pull' to forcibly retrieve latest images\n"
   text "  --no-force                        Updates images if matching tag not found in local cache\n"
   text "  --pull                            Uses 'docker pull' to check for new remote versions of images\n"
+  text "  --skip:graceful                   Do not wait for confirmation that workspaces have stopped\n"
+  text "  --skip:preflight                  Skip preflight checks\n"
   text "\n"
 }
 
-pre_cmd_download() {
+pre_cmd_restart() {
   true
 }
 
-cmd_download() {
-  FORCE_UPDATE=${1:-"--no-force"}
+cmd_restart() {
 
-  IFS=$'\n'
-  for SINGLE_IMAGE in $IMAGE_LIST; do
-    VALUE_IMAGE=$(echo $SINGLE_IMAGE | cut -d'=' -f2)
-    if [[ $FORCE_UPDATE == "--force" ]] ||
-       [[ $FORCE_UPDATE == "--pull" ]]; then
-      update_image $FORCE_UPDATE $VALUE_IMAGE
-    else
-      update_image_if_not_found $VALUE_IMAGE
-    fi
-  done
+  info "restart" "Restarting..."
+  cmd_lifecycle stop ${@}
+
+  # Need to remove any stop parameters from the command line otherwise the start will fail
+  set -- "${@/\-\-skip\:graceful/}"
+
+  cmd_lifecycle start "${@}"
 }
-

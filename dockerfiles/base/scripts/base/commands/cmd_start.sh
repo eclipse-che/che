@@ -9,9 +9,25 @@
 #   Tyler Jewell - Initial Implementation
 #
 
-cmd_start() {
-  debug $FUNCNAME
+help_cmd_start() {
+  text "\n"
+  text "USAGE: ${CHE_IMAGE_FULLNAME} start [PARAMETERS]\n"
+  text "\n"
+  text "Starts ${CHE_MINI_PRODUCT_NAME} and verifies its operation\n"
+  text "\n"
+  text "PARAMETERS:\n"
+  text "  --force                           Uses 'docker rmi' and 'docker pull' to forcibly retrieve latest images\n"
+  text "  --no-force                        Updates images if matching tag not found in local cache\n"
+  text "  --pull                            Uses 'docker pull' to check for new remote versions of images\n"
+  text "  --skip:preflight                  Skip preflight checks\n"
+  text "\n"  
+}
 
+pre_cmd_start() {
+  true
+}
+
+cmd_start() {
   # If already running, just display output again
   check_if_booted
 
@@ -24,7 +40,7 @@ cmd_start() {
   FORCE_UPDATE=${1:-"--no-force"}
   # Always regenerate puppet configuration from environment variable source, whether changed or not.
   # If the current directory is not configured with an .env file, it will initialize
-  cmd_config $FORCE_UPDATE
+  cmd_lifecycle config $FORCE_UPDATE
 
   # Preflight checks
   #   a) Check for open ports
@@ -38,7 +54,7 @@ cmd_start() {
   # Start ${CHE_FORMAL_PRODUCT_NAME}
   # Note bug in docker requires relative path, not absolute path to compose file
   info "start" "Starting containers..."
-  COMPOSE_UP_COMMAND="docker_compose --file=\"${REFERENCE_CONTAINER_COMPOSE_FILE}\" -p=\"${CHE_MINI_PRODUCT_NAME}\" up -d"
+  COMPOSE_UP_COMMAND="docker_compose --file=\"${REFERENCE_CONTAINER_COMPOSE_FILE}\" -p=\"${CHE_COMPOSE_PROJECT_NAME}\" up -d"
 
   ## validate the compose file (quiet mode)
   if local_repo; then
@@ -162,47 +178,9 @@ cmd_start_check_postflight() {
   true
 }
 
-cmd_stop() {
-  debug $FUNCNAME
-  FORCE_STOP=false
-  if [[ "$@" == *"--force"* ]]; then
-  	FORCE_STOP=true
-  fi
-
-  if [[ ${FORCE_STOP} = "false" ]]; then
-    info "Waiting for graceful stop of services..."
-    cmd_action "graceful-stop" "$@"
-  fi
-
-  # stop containers booted by docker compose
-  stop_containers
-}
-
-# stop containers booted by docker compose and remove them
-stop_containers() {
-  info "stop" "Stopping containers..."
-  if is_initialized; then
-    log "docker_compose --file=\"${REFERENCE_CONTAINER_COMPOSE_FILE}\" -p=$CHE_MINI_PRODUCT_NAME stop -t ${CHE_COMPOSE_STOP_TIMEOUT} >> \"${LOGS}\" 2>&1 || true"
-    docker_compose --file="${REFERENCE_CONTAINER_COMPOSE_FILE}" \
-                   -p=$CHE_MINI_PRODUCT_NAME stop -t ${CHE_COMPOSE_STOP_TIMEOUT} >> "${LOGS}" 2>&1 || true
-    info "stop" "Removing containers..."
-    log "docker_compose --file=\"${REFERENCE_CONTAINER_COMPOSE_FILE}\" -p=$CHE_MINI_PRODUCT_NAME rm >> \"${LOGS}\" 2>&1 || true"
-    docker_compose --file="${REFERENCE_CONTAINER_COMPOSE_FILE}" \
-                   -p=$CHE_MINI_PRODUCT_NAME rm --force >> "${LOGS}" 2>&1 || true
-  fi
-}
-
-cmd_restart() {
-  debug $FUNCNAME
-
-  FORCE_UPDATE=${1:-"--no-force"}
-  info "restart" "Restarting..."
-  cmd_stop ${@}
-  cmd_start ${FORCE_UPDATE} ${@}
-}
-
 wait_until_booted() {
   CURRENT_CHE_SERVER_CONTAINER_ID=$(get_server_container_id $CHE_CONTAINER_NAME)
+
   wait_until_container_is_running 20 ${CURRENT_CHE_SERVER_CONTAINER_ID}
   if ! container_is_running ${CURRENT_CHE_SERVER_CONTAINER_ID}; then
     error "(${CHE_MINI_PRODUCT_NAME} start): Timeout waiting for ${CHE_MINI_PRODUCT_NAME} container to start."
@@ -248,26 +226,27 @@ check_if_booted() {
 }
 
 check_containers_are_running() {
-
   # get list of docker compose services started by this docker compose
-  local LIST_OF_COMPOSE_CONTAINERS=$(docker_compose --file=${REFERENCE_CONTAINER_COMPOSE_FILE} config --services)
+  local LIST_OF_COMPOSE_CONTAINERS=$(docker_compose --file=${REFERENCE_CONTAINER_COMPOSE_FILE} -p=$CHE_COMPOSE_PROJECT_NAME config --services)
 
   # For each service of docker-compose file, get container and then check it is running
   while IFS= read -r DOCKER_COMPOSE_SERVICE_NAME ; do
-    local CONTAINER_ID_MATCHING_SERVICE_NAME=$(docker ps -q --filter label=com.docker.compose.service=${DOCKER_COMPOSE_SERVICE_NAME})
-    if [[ -z "${CONTAINER_ID_MATCHING_SERVICE_NAME}" ]]; then
+    local CONTAINER_ID_MATCHING_SERVICE_NAMES=$(docker ps -q --filter label=com.docker.compose.service=${DOCKER_COMPOSE_SERVICE_NAME})
+    if [[ -z "${CONTAINER_ID_MATCHING_SERVICE_NAMES}" ]]; then
       error "Unable to find a matching container for the docker compose service named ${DOCKER_COMPOSE_SERVICE_NAME}. Check logs at ${CHE_HOST_CONFIG}/cli.log"
       return 2
     fi
-    debug "Container with id ${CONTAINER_ID_MATCHING_SERVICE_NAME} is matching ${DOCKER_COMPOSE_SERVICE_NAME} service"
-    local IS_RUNNING_CONTAINER=$(docker inspect -f {{.State.Running}} ${CONTAINER_ID_MATCHING_SERVICE_NAME})
-    debug "Running state of container ${CONTAINER_ID_MATCHING_SERVICE_NAME} is ${IS_RUNNING_CONTAINER}"
 
-    if [[ ${IS_RUNNING_CONTAINER} != "true" ]]; then
-      error "The container with ID ${CONTAINER_ID_MATCHING_SERVICE_NAME} of docker-compose service ${DOCKER_COMPOSE_SERVICE_NAME} is not running, aborting."
-      docker inspect ${CONTAINER_ID_MATCHING_SERVICE_NAME}
-      return 2
-    fi
+    while IFS='\n' read -r CONTAINER_ID_MATCHING_SERVICE_NAME ; do
+      debug "Container with id ${CONTAINER_ID_MATCHING_SERVICE_NAME} is matching ${DOCKER_COMPOSE_SERVICE_NAME} service"
+      local IS_RUNNING_CONTAINER=$(docker inspect -f {{.State.Running}} ${CONTAINER_ID_MATCHING_SERVICE_NAME})
+      debug "Running state of container ${CONTAINER_ID_MATCHING_SERVICE_NAME} is ${IS_RUNNING_CONTAINER}"
+
+      if [[ ${IS_RUNNING_CONTAINER} != "true" ]]; then
+        error "The container with ID ${CONTAINER_ID_MATCHING_SERVICE_NAME} of docker-compose service ${DOCKER_COMPOSE_SERVICE_NAME} is not running, aborting."
+        docker inspect ${CONTAINER_ID_MATCHING_SERVICE_NAME}
+        return 2
+      fi
+    done <<< "${CONTAINER_ID_MATCHING_SERVICE_NAMES}"
   done <<< "${LIST_OF_COMPOSE_CONTAINERS}"
 }
-

@@ -9,6 +9,22 @@
 #   Tyler Jewell - Initial Implementation
 #
 
+help_cmd_destroy() {
+  text "\n"
+  text "USAGE: ${CHE_IMAGE_FULLNAME} destroy [PARAMETERS]\n"
+  text "\n"
+  text "Deletes a ${CHE_MINI_PRODUCT_NAME} installation\n"
+  text "\n"
+  text "PARAMETERS:\n"
+  text "  --quiet                           Do not ask user for confirmation\n"
+  text "  --cli                             Removes the 'cli.log'\n"
+  text "\n"
+}
+
+
+pre_cmd_destroy() {
+  true
+}
 
 cmd_destroy_post_action() {
  true
@@ -32,12 +48,12 @@ cmd_destroy() {
     esac
   done
 
-  WARNING="${RED}!!!${NC} Stopping services and ${RED}!!!${NC} deleting data ${RED}!!!${NC} this is unrecoverable ${RED}!!!${NC}"
+  WARNING="${YELLOW}!!!${RED} Stopping services and ${YELLOW}!!!${RED} deleting data ${YELLOW}!!!${RED} this is unrecoverable ${YELLOW}!!!${NC}"
   if ! confirm_operation "${WARNING}" "${QUIET}"; then
     return;
   fi
 
-  cmd_stop --force
+  cmd_lifecycle stop --skip:graceful
 
   info "destroy" "Deleting instance and config..."
 
