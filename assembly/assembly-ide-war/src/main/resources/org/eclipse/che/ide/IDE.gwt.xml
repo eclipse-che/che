@@ -82,11 +82,14 @@
     <inherits name='org.eclipse.che.api.factory.Factory'/>
     <inherits name="org.eclipse.che.api.workspace.Workspace"/>
     <inherits name="org.eclipse.che.api.debug.Debug"/>
+    <inherits name="org.eclipse.che.api.testing.Testing"/>
     <inherits name="org.eclipse.che.api.ssh.Ssh"/>
     <inherits name="org.eclipse.che.api.languageserver.LanguageServer"/>
 
     <inherits name="org.eclipse.che.plugin.svn.Subversion"/>
-    <inherits name="org.eclipse.che.ide.ext.java.testing.core.TestExtension"/>
+    <inherits name="org.eclipse.che.plugin.testing.TestingExtension"/>
+    <inherits name="org.eclipse.che.plugin.testing.junit.JUnit"/>
+    <inherits name="org.eclipse.che.plugin.testing.testng.TestNG"/>
 
     <stylesheet src="IDE.css"/>
 
