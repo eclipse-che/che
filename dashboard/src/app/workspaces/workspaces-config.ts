@@ -175,8 +175,8 @@ export class WorkspacesConfig {
         controller: 'ListWorkspacesCtrl',
         controllerAs: 'listWorkspacesCtrl'
       })
-      .accessWhen('/workspace/:namespace/:workspaceName', locationProvider)
-      .accessWhen('/workspace/:namespace/:workspaceName/:page', locationProvider)
+      .accessWhen('/workspace/:namespace*/:workspaceName', locationProvider)
+      .accessWhen('/workspace/:namespace*/:workspaceName/:page', locationProvider)
       .accessWhen('/create-workspace', {
         title: 'New Workspace',
         templateUrl: 'app/workspaces/workspace-details/workspace-details.html',
