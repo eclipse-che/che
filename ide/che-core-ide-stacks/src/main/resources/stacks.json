@@ -2064,5 +2064,76 @@
       "name": "type-python.svg",
       "mediaType": "image/svg+xml"
     }
-  }
+  },
+  {
+    "id": "vert.x",
+    "creator": "Clement Escoffier",
+    "name": "Eclipse Vert.x",
+    "description": "Eclipse Vert.x Stack on CentOS.",
+    "scope": "advanced",
+    "tags": [
+        "Java",
+        "JDK",
+        "Maven",
+        "Vert.x",
+        "CentOS",
+        "Git"
+    ],
+    "components": [{
+        "name": "CentOS",
+        "version": "---"
+    }, {
+        "name": "JDK",
+        "version": "1.8.0_45"
+    }, {
+        "name": "Maven",
+        "version": "3.2.2"
+    }],
+    "source": {
+        "type": "image",
+        "origin": "registry.centos.org/che-stacks/vertx"
+    },
+    "workspaceConfig": {
+        "environments": {
+            "default": {
+                "machines": {
+                    "dev-machine": {
+                        "agents": [
+                            "org.eclipse.che.terminal",
+                            "org.eclipse.che.ws-agent",
+                            "org.eclipse.che.ssh"
+                        ],
+                        "servers": {},
+                        "attributes": {
+                            "memoryLimitBytes": "2147483648"
+                        }
+                    }
+                },
+                "recipe": {
+                    "location": "registry.centos.org/che-stacks/vertx",
+                    "type": "dockerimage"
+                }
+            }
+        },
+        "name": "default",
+        "defaultEnv": "default",
+        "description": null,
+        "commands": [{
+            "commandLine": "scl enable rh-maven33 'mvn clean install -f ${current.project.path}'",
+            "name": "build",
+            "type": "mvn"
+        }, {
+            "commandLine": "cd ${current.project.path} && scl enable rh-maven33 'java -jar target/*-fat.jar'",
+            "name": "run",
+            "type": "custom",
+            "attributes": {
+                "previewUrl": "http://${server.port.8080}"
+            }
+        }]
+    },
+    "stackIcon": {
+        "name": "type-java.svg",
+        "mediaType": "image/svg+xml"
+    }
+  } 
 ]
