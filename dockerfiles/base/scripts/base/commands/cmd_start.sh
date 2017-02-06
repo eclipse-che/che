@@ -86,11 +86,9 @@ cmd_start_check_host_resources() {
   HOST_RAM=$(docker info | grep "Total Memory:")
   HOST_RAM=$(echo ${HOST_RAM#*:} | xargs)
   HOST_RAM=${HOST_RAM% *}
-
-  COMPARE=$(echo "$HOST_RAM<$CHE_MIN_RAM" | bc -l)
-
+  
   PREFLIGHT=""
-  if [[ "$COMPARE" = "0" ]]; then
+  if less_than_numerically $CHE_MIN_RAM $HOST_RAM; then
     text "         mem ($CHE_MIN_RAM GiB):           ${GREEN}[OK]${NC}\n"
   else
     text "         mem ($CHE_MIN_RAM GiB):           ${RED}[NOT OK]${NC}\n"
@@ -98,8 +96,8 @@ cmd_start_check_host_resources() {
   fi
 
   HOST_DISK=$(df "${CHE_CONTAINER_ROOT}" | grep "${CHE_CONTAINER_ROOT}" | cut -d " " -f 6)
-  COMPARE=$(echo "$HOST_DISK<$CHE_MIN_DISK"000 | bc -l)
-  if [[ "$COMPARE" = "0" ]]; then
+
+  if less_than_numerically "$CHE_MIN_DISK"000 $HOST_DISK; then
     text "         disk ($CHE_MIN_DISK MB):           ${GREEN}[OK]${NC}\n"
   else
     text "         disk ($CHE_MIN_DISK MB):           ${RED}[NOT OK]${NC}\n"
