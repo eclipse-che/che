@@ -1,5 +1,11 @@
 # Change Log
 
+## [5.2.2](https://github.com/eclipse/che/tree/5.2.2) (2017-02-04)
+[Full Changelog](https://github.com/eclipse/che/compare/5.2.1..5.2.2)
+
+**Pull requests merged:**
+- Change command how to install openJDK on Debian [4017](https://github.com/eclipse/che/pull/4017)
+
 ## [5.2.1](https://github.com/eclipse/che/tree/5.2.1) (2017-02-03)
 [Full Changelog](https://github.com/eclipse/che/compare/5.2.0...5.2.1)
 
