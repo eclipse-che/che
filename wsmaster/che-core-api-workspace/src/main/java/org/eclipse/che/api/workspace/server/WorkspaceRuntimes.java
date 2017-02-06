@@ -47,6 +47,7 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceRuntimeImpl;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.EventType;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.concurrent.StripedLocks;
 import org.eclipse.che.commons.lang.concurrent.Unlocker;
 import org.eclipse.che.dto.server.DtoFactory;
@@ -116,8 +117,9 @@ public class WorkspaceRuntimes {
     private final SnapshotDao                         snapshotDao;
     private final WorkspaceSharedPool                 sharedPool;
 
-    private final AtomicBoolean isShutdown     = new AtomicBoolean(false);
-    private final AtomicBoolean isStartRefused = new AtomicBoolean(false);
+    private final AtomicBoolean         isShutdown            = new AtomicBoolean(false);
+    private final AtomicBoolean         isStartRefused        = new AtomicBoolean(false);
+    private final MachineAgentsLauncher machineAgentsLauncher = new MachineAgentsLauncher();
 
     @Inject
     public WorkspaceRuntimes(EventService eventsService,
@@ -714,7 +716,7 @@ public class WorkspaceRuntimes {
                             environment,
                             recover,
                             new WebsocketMessageConsumer<>(format(ENVIRONMENT_OUTPUT_CHANNEL_TEMPLATE, workspaceId)),
-                            new MachineAgentsLauncher(environment.getMachines()));
+                            machineAgentsLauncher);
         } catch (EnvironmentStartInterruptedException x) {
             // environment start was interrupted, it's either shutdown or direct stop
             // in the case of shutdown make sure the status is correct,
@@ -1040,21 +1042,12 @@ public class WorkspaceRuntimes {
     }
 
     private class MachineAgentsLauncher implements MachineStartedHandler {
-
-        private final Map<String, ? extends ExtendedMachine> nameToMachine;
-
-        private MachineAgentsLauncher(Map<String, ? extends ExtendedMachine> nameToMachine) {
-            this.nameToMachine = nameToMachine;
-        }
-
         @Override
-        public void started(Instance machine) throws ServerException {
-            ExtendedMachine extMachine = nameToMachine.get(machine.getConfig().getName());
-            if (extMachine != null) {
-                launchAgents(machine, extMachine.getAgents());
+        public void started(Instance machine, @Nullable ExtendedMachine extendedMachine) throws ServerException {
+            if (extendedMachine != null) {
+                launchAgents(machine, extendedMachine.getAgents());
             }
         }
-
     }
 
     private static EnvironmentImpl copyEnv(Workspace workspace, String envName) {
