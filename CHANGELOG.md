@@ -62,6 +62,7 @@
 - Remove native launch scripts of Eclipse Che (replaced now by Docker CLI) [3780](https://github.com/eclipse/che/pull/3780)
 - Rename exec-agent directory to exec [3775](https://github.com/eclipse/che/pull/3775)
 - Add filters for force or disable caching on the given resources paths. [3771](https://github.com/eclipse/che/pull/3771)
+- Removes redundant in-memory JSON trees for faster DTO parsing performance. [3103] (https://github.com/eclipse/che/pull/3103)
 - Add commands to workspace when importing project samples [2976](https://github.com/eclipse/che/pull/2976)
 
 ## [5.1.2](https://github.com/eclipse/che/tree/5.1.2) (2017-01-24)
