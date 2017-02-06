@@ -49,6 +49,11 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>com.google.code.findbugs</groupId>
+                <artifactId>jsr305</artifactId>
+                <version>${version.jsr305.plugin}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>assembly-ide-war</artifactId>
                 <version>${che.version}</version>
