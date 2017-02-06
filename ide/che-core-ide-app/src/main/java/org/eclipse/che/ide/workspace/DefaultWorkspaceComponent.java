@@ -28,7 +28,7 @@ import org.eclipse.che.ide.api.machine.MachineManager;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
-import org.eclipse.che.ide.context.BrowserQueryFieldRenderer;
+import org.eclipse.che.ide.context.BrowserAddress;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
@@ -41,10 +41,9 @@ import org.eclipse.che.ide.workspace.start.StartWorkspacePresenter;
  * Used when no {@code factory} specified.
  *
  * @author Max Shaposhnik (mshaposhnik@codenvy.com)
- *
  */
 @Singleton
-public class DefaultWorkspaceComponent extends WorkspaceComponent  {
+public class DefaultWorkspaceComponent extends WorkspaceComponent {
 
     @Inject
     public DefaultWorkspaceComponent(WorkspaceServiceClient workspaceServiceClient,
@@ -57,7 +56,7 @@ public class DefaultWorkspaceComponent extends WorkspaceComponent  {
                                      Provider<MachineManager> machineManagerProvider,
                                      NotificationManager notificationManager,
                                      MessageBusProvider messageBusProvider,
-                                     BrowserQueryFieldRenderer browserQueryFieldRenderer,
+                                     BrowserAddress browserAddress,
                                      DialogFactory dialogFactory,
                                      PreferencesManager preferencesManager,
                                      DtoFactory dtoFactory,
@@ -73,7 +72,7 @@ public class DefaultWorkspaceComponent extends WorkspaceComponent  {
               machineManagerProvider,
               notificationManager,
               messageBusProvider,
-              browserQueryFieldRenderer,
+              browserAddress,
               dialogFactory,
               preferencesManager,
               dtoFactory,
@@ -85,7 +84,7 @@ public class DefaultWorkspaceComponent extends WorkspaceComponent  {
     @Override
     public void start(final Callback<Component, Exception> callback) {
         this.callback = callback;
-        workspaceServiceClient.getWorkspace(browserQueryFieldRenderer.getNamespace(), browserQueryFieldRenderer.getWorkspaceName()).then(
+        workspaceServiceClient.getWorkspace(browserAddress.getWorkspaceKey()).then(
                 new Operation<WorkspaceDto>() {
                     @Override
                     public void apply(WorkspaceDto workspaceDto) throws OperationException {

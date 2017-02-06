@@ -14,7 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.context.BrowserQueryFieldRenderer;
+import org.eclipse.che.ide.context.QueryParameters;
 
 /**
  * Provides an appropriate implementation of {@link WorkspaceComponent} depending on URL parameters.
@@ -27,20 +27,20 @@ public class WorkspaceComponentProvider implements Provider<WorkspaceComponent> 
 
     private final Provider<DefaultWorkspaceComponent> workspaceComponentProvider;
     private final Provider<FactoryWorkspaceComponent> factoryComponentProvider;
-    private final BrowserQueryFieldRenderer           browserQueryFieldRenderer;
+    private final QueryParameters                     queryParameters;
 
     @Inject
     public WorkspaceComponentProvider(Provider<DefaultWorkspaceComponent> workspaceComponentProvider,
                                       Provider<FactoryWorkspaceComponent> factoryComponentProvider,
-                                      BrowserQueryFieldRenderer browserQueryFieldRenderer) {
+                                      QueryParameters queryParameters) {
         this.workspaceComponentProvider = workspaceComponentProvider;
         this.factoryComponentProvider = factoryComponentProvider;
-        this.browserQueryFieldRenderer = browserQueryFieldRenderer;
+        this.queryParameters = queryParameters;
     }
 
     @Override
     public WorkspaceComponent get() {
-        final String factoryParams = browserQueryFieldRenderer.getParameterFromURLByName("factory");
+        final String factoryParams = queryParameters.getByName("factory");
         return factoryParams.isEmpty() ? workspaceComponentProvider.get() : factoryComponentProvider.get();
     }
 }
