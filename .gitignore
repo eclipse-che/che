@@ -69,3 +69,4 @@ docs/_site
 docs/.sass-cache
 docs/.jekyll-metadata
 docs/assets/imgs
+!assembly/assembly-main/src/assembly/bin/

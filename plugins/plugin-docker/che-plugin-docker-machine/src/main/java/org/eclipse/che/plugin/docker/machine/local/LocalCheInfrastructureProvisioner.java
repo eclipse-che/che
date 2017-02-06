@@ -12,14 +12,14 @@ package org.eclipse.che.plugin.docker.machine.local;
 
 import com.google.common.base.Strings;
 
-import org.eclipse.che.api.core.model.workspace.Environment;
-import org.eclipse.che.api.core.model.workspace.ExtendedMachine;
 import org.eclipse.che.api.core.util.SystemInfo;
 import org.eclipse.che.api.environment.server.AgentConfigApplier;
 import org.eclipse.che.api.environment.server.DefaultInfrastructureProvisioner;
 import org.eclipse.che.api.environment.server.exception.EnvironmentException;
 import org.eclipse.che.api.environment.server.model.CheServiceImpl;
 import org.eclipse.che.api.environment.server.model.CheServicesEnvironmentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ExtendedMachineImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
 import org.eclipse.che.inject.CheBootstrap;
@@ -31,6 +31,8 @@ import org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static java.lang.String.format;
@@ -74,14 +76,20 @@ public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProv
     }
 
     @Override
-    public void provision(Environment envConfig, CheServicesEnvironmentImpl internalEnv) throws EnvironmentException {
+    public void provision(EnvironmentImpl envConfig, CheServicesEnvironmentImpl internalEnv)
+            throws EnvironmentException {
         String devMachineName = getDevMachineName(envConfig);
         if (devMachineName == null) {
             throw new EnvironmentException("ws-machine is not found on agents applying");
         }
 
         CheServiceImpl devMachine = internalEnv.getServices().get(devMachineName);
-        List<String> devMachineVolumes = devMachine.getVolumes();
+
+        for (CheServiceImpl machine : internalEnv.getServices().values()) {
+            ArrayList<String> volumes = new ArrayList<>(machine.getVolumes());
+            volumes.add(terminalVolumeProvider.get());
+            machine.setVolumes(volumes);
+        }
 
         // add bind-mount volume for projects in a workspace
         String projectFolderVolume;
@@ -93,6 +101,7 @@ public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProv
             throw new EnvironmentException("Error occurred on resolving path to files of workspace " +
                                            internalEnv.getWorkspaceId());
         }
+        List<String> devMachineVolumes = devMachine.getVolumes();
         devMachineVolumes.add(SystemInfo.isWindows() ? pathEscaper.escapePath(projectFolderVolume)
                                                      : projectFolderVolume);
         // add volume with ws-agent archive
@@ -102,19 +111,17 @@ public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProv
         if (dockerExtConfVolume != null) {
             devMachineVolumes.add(dockerExtConfVolume);
         }
-        devMachine.getEnvironment().put(CheBootstrap.CHE_LOCAL_CONF_DIR,
-                                        DockerExtConfBindingProvider.EXT_CHE_LOCAL_CONF_DIR);
-
-        for (CheServiceImpl machine : internalEnv.getServices().values()) {
-            machine.getVolumes().add(terminalVolumeProvider.get());
-        }
+        HashMap<String, String> environmentVars = new HashMap<>(devMachine.getEnvironment());
+        environmentVars.put(CheBootstrap.CHE_LOCAL_CONF_DIR, DockerExtConfBindingProvider.EXT_CHE_LOCAL_CONF_DIR);
+        devMachine.setEnvironment(environmentVars);
 
         // apply basic infra (e.g. agents)
         super.provision(envConfig, internalEnv);
     }
 
     @Override
-    public void provision(ExtendedMachine machineConfig, CheServiceImpl internalMachine) throws EnvironmentException {
+    public void provision(ExtendedMachineImpl machineConfig, CheServiceImpl internalMachine)
+            throws EnvironmentException {
         internalMachine.getVolumes().add(terminalVolumeProvider.get());
 
         super.provision(machineConfig, internalMachine);

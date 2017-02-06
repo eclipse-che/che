@@ -9,7 +9,27 @@
 #   Tyler Jewell - Initial Implementation
 #
 
+help_cmd_ssh() {
+  text "\n"
+  text "USAGE: ${CHE_IMAGE_FULLNAME} ssh WORKSPACE [MACHINE] [PARAMETERS]\n"
+  text "\n"
+  text "Connect to a workspace in ${CHE_MINI_PRODUCT_NAME} over SSH\n"
+  text "\n"
+  text "WORKSPACE:             Accepts workspace name, ID, or namespace:ws-name\n"
+  text "                       List all workspaces with 'action list-workspaces'\n"
+  text "\n"
+  text "MACHINE:               Choose machine (default is dev machine) if workspace as multiple containers\n"
+  text "\n"
+  text "PARAMETERS:\n"
+  text "  --url                Location of ${CHE_MINI_PRODUCT_NAME}\n"
+  text "  --user               User name of ${CHE_MINI_PRODUCT_NAME} if accessing authenticated system\n"
+  text "  --password           Password of ${CHE_MINI_PRODUCT_NAME} if accessing authenticated system\n"
+}
+
+pre_cmd_ssh() {
+  true
+}
+
 cmd_ssh() {
-  debug $FUNCNAME
-  cmd_action "workspace-ssh" "$@"  
+  cmd_lifecycle action "workspace-ssh" "$@"  
 }

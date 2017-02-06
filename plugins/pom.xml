@@ -16,12 +16,12 @@
     <parent>
         <artifactId>che-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>5.2.0-SNAPSHOT</version>
+        <version>5.3.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <groupId>org.eclipse.che.plugin</groupId>
     <artifactId>che-plugin-parent</artifactId>
-    <version>5.2.0-SNAPSHOT</version>
+    <version>5.3.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Che Plugin :: Parent</name>
     <modules>
@@ -33,7 +33,6 @@
         <module>plugin-debugger</module>
         <module>plugin-java</module>
         <module>plugin-java-debugger</module>
-        <module>plugin-java-test-runner</module>
         <module>plugin-maven</module>
         <module>plugin-gdb</module>
         <module>plugin-sdk</module>
@@ -55,5 +54,7 @@
         <module>plugin-json</module>
         <module>plugin-composer</module>
         <module>plugin-zend-debugger</module>
+        <module>plugin-testing</module>
+        <module>plugin-testing-java</module>
     </modules>
 </project>

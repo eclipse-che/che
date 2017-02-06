@@ -8,17 +8,21 @@
 # Contributors:
 #   Marian Labuda - Initial Implementation
 
-source $BATS_BASE_DIR/cli/tests/test_base.sh
+load '/bats-support/load.bash'
+load '/bats-assert/load.bash'
+source /dockerfiles/cli/tests/test_base.sh
 
 @test "test CLI prompt to provide volume for docker sock" {
   #GIVEN
   prompt_substring="-v /var/run/docker.sock:/var/run/docker.sock"
 
   #WHEN
-  result=$(docker run $CLI_IMAGE start || true)
+  run docker run --rm $CLI_IMAGE start
 
   #THEN
-  [[ $result == *"$prompt_substring"* ]]
+  assert_failure
+  assert_output --partial ${prompt_substring}
+
 }
 
 @test "test CLI prompt to provide directory for user data" {
@@ -26,21 +30,22 @@ source $BATS_BASE_DIR/cli/tests/test_base.sh
   prompt_substring="-v <YOUR_LOCAL_PATH>:/data"
 
   #WHEN
-  result=$(docker run -v $SCRIPTS_DIR:/scripts/base -v /var/run/docker.sock:/var/run/docker.sock $CLI_IMAGE start || true)
+  run docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock $CLI_IMAGE start
 
   #THEN
-  [[ $result == *"$prompt_substring"* ]]
+  assert_failure
+  assert_output --partial ${prompt_substring}
 }
 
 @test "test CLI 'usage' when running container without command" {
   #GIVEN
-  output=$(usage || true)
+  expected_output="USAGE:"
 
   #WHEN
-  result=$(docker run -v $SCRIPTS_DIR:/scripts/base -v /var/run/docker.sock:/var/run/docker.sock $CLI_IMAGE || true)
+  result=$(docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock $CLI_IMAGE || true)
 
   #THEN
-  [[ $result == *$usage* ]]
+  [[ $result == *${expected_output}* ]]
 }
 
 

@@ -728,8 +728,8 @@ public class WorkspaceTest extends BaseTest {
                           "  <version>1.0</version>\n" +
                           "  <name>SpringDemo</name>\n" +
                           "  <properties>\n" +
-                          "    <maven.compiler.source>1.6</maven.compiler.source>\n" +
-                          "    <maven.compiler.target>1.6</maven.compiler.target>\n" +
+                          "    <maven.compiler.source>1.8</maven.compiler.source>\n" +
+                          "    <maven.compiler.target>1.8</maven.compiler.target>\n" +
                           "  </properties>\n" +
                           "  <dependencies>\n" +
                           "      <dependency>\n" +

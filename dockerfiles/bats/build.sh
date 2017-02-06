@@ -8,7 +8,7 @@
 
 IMAGE_NAME="eclipse/che-bats"
 base_dir=$(cd "$(dirname "$0")"; pwd)
-. $base_dir/../build.include
+. "${base_dir}"/../build.include
 
 init "$@"
 build

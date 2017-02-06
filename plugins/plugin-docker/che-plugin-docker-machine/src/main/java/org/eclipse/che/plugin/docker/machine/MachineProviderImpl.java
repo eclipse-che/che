@@ -45,6 +45,7 @@ import org.eclipse.che.plugin.docker.client.exception.NetworkNotFoundException;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.HostConfig;
 import org.eclipse.che.plugin.docker.client.json.PortBinding;
+import org.eclipse.che.plugin.docker.client.json.Volume;
 import org.eclipse.che.plugin.docker.client.json.container.NetworkingConfig;
 import org.eclipse.che.plugin.docker.client.json.network.ConnectContainer;
 import org.eclipse.che.plugin.docker.client.json.network.EndpointConfig;
@@ -496,15 +497,13 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                                                                                     endpointConfig));
 
         HostConfig hostConfig = new HostConfig();
-        hostConfig.withBinds(toArrayIfNotNull(service.getVolumes()))
-                  .withMemorySwap(machineMemorySwap)
+        hostConfig.withMemorySwap(machineMemorySwap)
                   .withMemory(service.getMemLimit())
                   .withNetworkMode(networkName)
                   .withLinks(toArrayIfNotNull(service.getLinks()))
                   .withPortBindings(service.getPorts()
                                            .stream()
-                                           .collect(toMap(Function.identity(),
-                                                          value -> new PortBinding[0])))
+                                           .collect(toMap(Function.identity(), value -> new PortBinding[0])))
                   .withVolumesFrom(toArrayIfNotNull(service.getVolumesFrom()));
 
         ContainerConfig config = new ContainerConfig();
@@ -523,6 +522,19 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                               .stream()
                               .map(entry -> entry.getKey() + "=" + entry.getValue())
                               .toArray(String[]::new));
+
+        List<String> bindMountVolumes = new ArrayList<>();
+        Map<String, Volume> nonBindMountVolumes = new HashMap<>();
+        for (String volume : service.getVolumes()) {
+            // If volume contains colon then it is bind volume, otherwise - non bind-mount volume.
+            if (volume.contains(":")) {
+                bindMountVolumes.add(volume);
+            } else {
+                nonBindMountVolumes.put(volume, new Volume());
+            }
+        }
+        hostConfig.setBinds(bindMountVolumes.toArray(new String[bindMountVolumes.size()]));
+        config.setVolumes(nonBindMountVolumes);
 
         addStaticDockerConfiguration(config);
 

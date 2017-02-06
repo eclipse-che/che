@@ -11,7 +11,6 @@
 package org.eclipse.che.plugin.machine.ssh;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
@@ -23,20 +22,9 @@ import com.google.inject.name.Names;
 public class SshMachineModule extends AbstractModule {
     @Override
     protected void configure() {
-        Multibinder<org.eclipse.che.api.machine.server.spi.InstanceProvider> machineProviderMultibinder =
-                Multibinder.newSetBinder(binder(),
-                                         org.eclipse.che.api.machine.server.spi.InstanceProvider.class);
-        machineProviderMultibinder.addBinding()
-                                  .to(SshMachineInstanceProvider.class);
+        bind(SshMachineInstanceProvider.class);
 
-        install(new FactoryModuleBuilder()
-                        .implement(org.eclipse.che.api.machine.server.spi.Instance.class,
-                                   org.eclipse.che.plugin.machine.ssh.SshMachineInstance.class)
-                        .implement(org.eclipse.che.api.machine.server.spi.InstanceProcess.class,
-                                   org.eclipse.che.plugin.machine.ssh.SshMachineProcess.class)
-                        .implement(org.eclipse.che.plugin.machine.ssh.SshClient.class,
-                                   org.eclipse.che.plugin.machine.ssh.jsch.JschSshClient.class)
-                        .build(SshMachineFactory.class));
+        bind(SshMachineFactory.class);
 
         bindConstant().annotatedWith(Names.named("machine.ssh.server.terminal.location")).to("~/che");
 
