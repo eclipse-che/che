@@ -9,18 +9,19 @@
 #   Tyler Jewell - Initial Implementation
 #
 
+help_cmd_backup() {
+  text "\n"
+  text "USAGE: ${CHE_IMAGE_FULLNAME} backup [PARAMETERS]\n"
+  text "\n"
+  text "Backup ${CHE_MINI_PRODUCT_NAME} configuration and user data\n"
+  text "\n"
+  text "PARAMETERS:\n"
+  text "  --no-skip-data                           Excludes user data in /instance/data\n"
+  text "\n"
+}
+
 pre_cmd_backup() {
-  if get_command_help; then
-    text "\n"
-    text "USAGE: ${CHE_IMAGE_FULLNAME} backup [PARAMETERS]\n"
-    text "\n"
-    text "Backup ${CHE_MINI_PRODUCT_NAME} configuration and user data\n"
-    text "\n"
-    text "PARAMETERS:\n"
-    text "  --no-skip-data                           Excludes user data in /instance/data\n"
-    text "\n"
-    return 2
-  fi
+  true
 }
 
 cmd_backup() {

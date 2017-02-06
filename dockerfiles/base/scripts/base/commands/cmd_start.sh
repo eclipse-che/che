@@ -9,21 +9,22 @@
 #   Tyler Jewell - Initial Implementation
 #
 
+help_cmd_start() {
+  text "\n"
+  text "USAGE: ${CHE_IMAGE_FULLNAME} start [PARAMETERS]\n"
+  text "\n"
+  text "Starts ${CHE_MINI_PRODUCT_NAME} and verifies its operation\n"
+  text "\n"
+  text "PARAMETERS:\n"
+  text "  --force                           Uses 'docker rmi' and 'docker pull' to forcibly retrieve latest images\n"
+  text "  --no-force                        Updates images if matching tag not found in local cache\n"
+  text "  --pull                            Uses 'docker pull' to check for new remote versions of images\n"
+  text "  --skip:preflight                  Skip preflight checks\n"
+  text "\n"  
+}
+
 pre_cmd_start() {
-  if get_command_help; then
-    text "\n"
-    text "USAGE: ${CHE_IMAGE_FULLNAME} start [PARAMETERS]\n"
-    text "\n"
-    text "Starts ${CHE_MINI_PRODUCT_NAME} and verifies its operation\n"
-    text "\n"
-    text "PARAMETERS:\n"
-    text "  --force                           Uses 'docker rmi' and 'docker pull' to forcibly retrieve latest images\n"
-    text "  --no-force                        Updates images if matching tag not found in local cache\n"
-    text "  --pull                            Uses 'docker pull' to check for new remote versions of images\n"
-    text "  --skip:preflight                  Skip preflight checks\n"
-    text "\n"
-    return 2
-  fi
+  true
 }
 
 cmd_start() {

@@ -9,15 +9,16 @@
 #   Tyler Jewell - Initial Implementation
 #
 
+help_cmd_restore() {
+  text "\n"
+  text "USAGE: ${CHE_IMAGE_FULLNAME} restore\n"
+  text "\n"
+  text "Restores user data and recovers a ${CHE_MINI_PRODUCT_NAME} configuration\n"
+  text "\n"
+}
+
 pre_cmd_restore() {
-  if get_command_help; then
-    text "\n"
-    text "USAGE: ${CHE_IMAGE_FULLNAME} restore\n"
-    text "\n"
-    text "Restores user data and recovers a ${CHE_MINI_PRODUCT_NAME} configuration\n"
-    text "\n"
-    return 2
-  fi
+  true
 }
 
 cmd_restore_pre_action() {

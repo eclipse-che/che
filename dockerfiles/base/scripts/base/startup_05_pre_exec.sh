@@ -37,6 +37,7 @@ cli_execute() {
 cmd_lifecycle() {
   PRE_COMMAND="pre_cmd_$1"
   POST_COMMAND="post_cmd_$1"
+  HELP_COMMAND="help_cmd_$1"
   COMMAND="cmd_$1"
 
   if [ -f "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/commands/cmd_$1.sh ]; then
@@ -48,6 +49,15 @@ cmd_lifecycle() {
   fi
 
   shift
+
+  if get_command_help; then
+    if [ -n "$(type -t $HELP_COMMAND)" ] && [ "$(type -t $HELP_COMMAND)" = function ]; then
+      eval $HELP_COMMAND "$@"
+      return 2
+    else 
+      error "No help function found for $1"
+    fi
+  fi
 
   if [ -n "$(type -t $PRE_COMMAND)" ] && [ "$(type -t $PRE_COMMAND)" = function ]; then
     eval $PRE_COMMAND "$@"

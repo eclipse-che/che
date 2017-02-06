@@ -9,15 +9,16 @@
 #   Tyler Jewell - Initial Implementation
 #
 
+help_cmd_help() {
+  text "\n"
+  text "Usage: ${CHE_IMAGE_FULLNAME} help"
+  text "\n"
+}
+
 cmd_help() {
   usage
 }
 
 pre_cmd_help() {
-  if get_command_help; then
-  	text "\n"
-    text "Usage: ${CHE_IMAGE_FULLNAME} help"
-    text "\n"
-    return 2
-  fi
+  true
 }

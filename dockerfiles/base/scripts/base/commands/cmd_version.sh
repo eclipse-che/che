@@ -9,15 +9,16 @@
 #   Tyler Jewell - Initial Implementation
 #
 
+help_cmd_version() {
+  text "\n"
+  text "USAGE: ${CHE_IMAGE_FULLNAME} version\n"
+  text "\n"
+  text "List installed and available versions of ${CHE_MINI_PRODUCT_NAME}"
+  text "\n"
+}
+
 pre_cmd_version() {
-  if get_command_help; then
-    text "\n"
-    text "USAGE: ${CHE_IMAGE_FULLNAME} version\n"
-    text "\n"
-    text "List installed and available versions of ${CHE_MINI_PRODUCT_NAME}"
-    text "\n"
-    return 2
-  fi
+  true
 }
 
 cmd_version() {

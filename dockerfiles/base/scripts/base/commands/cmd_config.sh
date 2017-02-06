@@ -9,26 +9,27 @@
 #   Tyler Jewell - Initial Implementation
 #
 
-pre_cmd_config() {
-  if get_command_help; then
-    text "\n"
-    text "USAGE: ${CHE_IMAGE_FULLNAME} config [PARAMETERS]\n"
-    text "\n"
-    text "Generate a ${CHE_MINI_PRODUCT_NAME} runtime configuration into /instance. The configurator uses 
+help_cmd_config() {
+  text "\n"
+  text "USAGE: ${CHE_IMAGE_FULLNAME} config [PARAMETERS]\n"
+  text "\n"
+  text "Generate a ${CHE_MINI_PRODUCT_NAME} runtime configuration into /instance. The configurator uses 
 values from your host, ${CHE_MINI_PRODUCT_NAME}.env, and optionally your local repository to generate
 a runtime configuration used to start and stop ${CHE_MINI_PRODUCT_NAME}. A configuration is generated 
 before every execution of ${CHE_MINI_PRODUCT_NAME}. The configuration phase will download all Docker
 images required to start or stop ${CHE_MINI_PRODUCT_NAME} to guarantee that the right images are cached
 before execution. If you have mounted a local repository or assembly, the ${CHE_MINI_PRODUCT_NAME} Docker
 images will use those binaries instead of their embedded ones.\n"
-    text "\n"
-    text "PARAMETERS:\n"
-    text "  --no-force                        Updates images if matching tag not found in local cache\n"
-    text "  --pull                            Uses 'docker pull' to check for new remote versions of images\n"
-    text "  --force                           Uses 'docker rmi' and 'docker pull' to forcibly retrieve latest images\n"
-    text "\n"
-    return 2
-  fi
+  text "\n"
+  text "PARAMETERS:\n"
+  text "  --no-force                        Updates images if matching tag not found in local cache\n"
+  text "  --pull                            Uses 'docker pull' to check for new remote versions of images\n"
+  text "  --force                           Uses 'docker rmi' and 'docker pull' to forcibly retrieve latest images\n"
+  text "\n"
+}
+
+pre_cmd_config() {
+  true
 }
 
 cmd_config() {

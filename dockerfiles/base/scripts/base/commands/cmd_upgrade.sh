@@ -9,17 +9,18 @@
 #   Tyler Jewell - Initial Implementation
 #
 
+help_cmd_upgrade() {
+  text "\n"
+  text "USAGE: ${CHE_IMAGE_FULLNAME} upgrade [PARAMETERS]\n"
+  text "\n"
+  text "Upgrades ${CHE_MINI_PRODUCT_NAME} from one version to another while protecting user workspace data"
+  text "\n"
+  text "PARAMETERS:\n"
+  text "  --skip-backup        Skip backup of user data before performing upgrade\n"
+}
+
 pre_cmd_upgrade() {
-  if get_command_help; then
-    text "\n"
-    text "USAGE: ${CHE_IMAGE_FULLNAME} upgrade [PARAMETERS]\n"
-    text "\n"
-    text "Upgrades ${CHE_MINI_PRODUCT_NAME} from one version to another while protecting user workspace data"
-    text "\n"
-    text "PARAMETERS:\n"
-    text "  --skip-backup        Skip backup of user data before performing upgrade\n"
-    return 2
-  fi
+  true
 }
 
 cmd_upgrade() {

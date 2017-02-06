@@ -9,6 +9,21 @@
 #   Tyler Jewell - Initial Implementation
 #
 
+help_cmd_stop() {
+  text "\n"
+  text "USAGE: ${CHE_IMAGE_FULLNAME} restart [PARAMETERS]\n"
+  text "\n"
+  text "Stops ${CHE_MINI_PRODUCT_NAME} workspaces gracefully and then the server\n"
+  text "\n"
+  text "PARAMETERS:\n"
+  text "  --skip:graceful                   Do not wait for confirmation that workspaces have stopped\n"
+  text "\n"
+}
+
+pre_cmd_stop() {
+  true
+}
+
 cmd_stop() {
   debug $FUNCNAME
   FORCE_STOP=false
@@ -41,19 +56,5 @@ stop_containers() {
     log "docker_compose --file=\"${REFERENCE_CONTAINER_COMPOSE_FILE}\" -p=$CHE_COMPOSE_PROJECT_NAME rm >> \"${LOGS}\" 2>&1 || true"
     docker_compose --file="${REFERENCE_CONTAINER_COMPOSE_FILE}" \
                    -p=$CHE_COMPOSE_PROJECT_NAME rm --force >> "${LOGS}" 2>&1 || true
-  fi
-}
-
-pre_cmd_stop() {
-  if get_command_help; then
-    text "\n"
-    text "USAGE: ${CHE_IMAGE_FULLNAME} restart [PARAMETERS]\n"
-    text "\n"
-    text "Stops ${CHE_MINI_PRODUCT_NAME} workspaces gracefully and then the server\n"
-    text "\n"
-    text "PARAMETERS:\n"
-    text "  --skip:graceful                   Do not wait for confirmation that workspaces have stopped\n"
-    text "\n"
-    return 2
   fi
 }

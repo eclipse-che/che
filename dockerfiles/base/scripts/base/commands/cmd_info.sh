@@ -9,21 +9,23 @@
 #   Tyler Jewell - Initial Implementation
 #
 
+help_cmd_info() {
+  text "\n"
+  text "USAGE: ${CHE_IMAGE_FULLNAME} info [PARAMETERS]\n"
+  text "\n"
+  text "Status, information, and support diagnostic bundles for ${CHE_MINI_PRODUCT_NAME}\n"
+  text "\n"
+  text "PARAMETERS:\n"
+  text "  --all                             Prints info, runs networking tests, ad prepares diagnostic bundle\n"
+  text "  --bundle                          Prepares diagnostic bundle for ${CHE_MINI_PRODUCT_NAME} and Docker\n"
+  text "  --network                         Runs simulated network diagnostic to confirm network routing\n"
+  text "  --print                           Default - displays status and configuration of ${CHE_MINI_PRODUCT_NAME}\n"
+  text "\n"
+}
+
+
 pre_cmd_info() {
-  if get_command_help; then
-    text "\n"
-    text "USAGE: ${CHE_IMAGE_FULLNAME} info [PARAMETERS]\n"
-    text "\n"
-    text "Status, information, and support diagnostic bundles for ${CHE_MINI_PRODUCT_NAME}\n"
-    text "\n"
-    text "PARAMETERS:\n"
-    text "  --all                             Prints info, runs networking tests, ad prepares diagnostic bundle\n"
-    text "  --bundle                          Prepares diagnostic bundle for ${CHE_MINI_PRODUCT_NAME} and Docker\n"
-    text "  --network                         Runs simulated network diagnostic to confirm network routing\n"
-    text "  --print                           Default - displays status and configuration of ${CHE_MINI_PRODUCT_NAME}\n"
-    text "\n"
-    return 2
-  fi
+  true
 }
 
 cmd_info() {
@@ -149,12 +151,6 @@ print_info() {
     text " $SINGLE_IMAGE\n"
   done
 
-  # This seems like overkill for the output
-  #readarray STACK_IMAGE_LIST < /version/$CHE_VERSION/images-stacks
-  #for SINGLE_IMAGE in "${STACK_IMAGE_LIST[@]}"; do
-    #text " $SINGLE_IMAGE"
-  #done
-
   if ! is_initialized; then
     text "${CHE_ENVIRONMENT_FILE}: not initialized\n"
   else
@@ -173,7 +169,7 @@ cmd_network() {
   info "--------   CONNECTIVITY TEST   --------"
   info "---------------------------------------"
 
-  info "network" "eclipse/che-ip: ${GLOBAL_HOST_IP}"
+  info "network" "${BOOTSTRAP_IMAGE_CHEIP}: ${CHE_HOST}"
 
   start_test_server
 

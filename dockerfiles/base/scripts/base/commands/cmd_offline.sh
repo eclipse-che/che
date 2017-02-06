@@ -9,24 +9,26 @@
 #   Tyler Jewell - Initial Implementation
 #
 
-pre_cmd_offline() {
-  if get_command_help; then
-    text "\n"
-    text "USAGE: ${CHE_IMAGE_FULLNAME} offline [PARAMETERS]\n"
-    text "\n"
-    text "Downloads and saves Docker images required to run ${CHE_MINI_PRODUCT_NAME} offline. Add the 
+help_cmd_offline() {
+  text "\n"
+  text "USAGE: ${CHE_IMAGE_FULLNAME} offline [PARAMETERS]\n"
+  text "\n"
+  text "Downloads and saves Docker images required to run ${CHE_MINI_PRODUCT_NAME} offline. Add the 
 '--offline' global parameter command to execute ${CHE_MINI_PRODUCT_NAME} in offline mode. You can optionally 
 download stack images used to start workspaces. Stack images are heavy and often larger than 1GB. You 
 can save them all or selectively choose stacks.\n"
-    text "\n"
-    text "PARAMETERS:\n"
-    text "  --all-stacks                      Saves all stack images\n"
-    text "  --list                            Lists all images that will be downloaded and saved\n"
-    text "  --image:<name>                    Downloads specific stack image\n"
-    text "  --no-stacks                       Do not save any stack images\n"
-    text "\n"
-    return 2
-  fi
+  text "\n"
+  text "PARAMETERS:\n"
+  text "  --all-stacks                      Saves all stack images\n"
+  text "  --list                            Lists all images that will be downloaded and saved\n"
+  text "  --image:<name>                    Downloads specific stack image\n"
+  text "  --no-stacks                       Do not save any stack images\n"
+  text "\n"
+}
+
+
+pre_cmd_offline() {
+  true
 }
 
 cmd_offline() {

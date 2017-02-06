@@ -9,6 +9,22 @@
 #   Tyler Jewell - Initial Implementation
 #
 
+help_cmd_destroy() {
+  text "\n"
+  text "USAGE: ${CHE_IMAGE_FULLNAME} destroy [PARAMETERS]\n"
+  text "\n"
+  text "Deletes a ${CHE_MINI_PRODUCT_NAME} installation\n"
+  text "\n"
+  text "PARAMETERS:\n"
+  text "  --quiet                           Do not ask user for confirmation\n"
+  text "  --cli                             Removes the 'cli.log'\n"
+  text "\n"
+}
+
+
+pre_cmd_destroy() {
+  true
+}
 
 cmd_destroy_post_action() {
  true
@@ -73,20 +89,5 @@ directory_is_empty() {
     return 1
   else
     return 0
-  fi
-}
-
-pre_cmd_destroy() {
-  if get_command_help; then
-    text "\n"
-    text "USAGE: ${CHE_IMAGE_FULLNAME} destroy [PARAMETERS]\n"
-    text "\n"
-    text "Deletes a ${CHE_MINI_PRODUCT_NAME} installation\n"
-    text "\n"
-    text "PARAMETERS:\n"
-    text "  --quiet                           Do not ask user for confirmation\n"
-    text "  --cli                             Removes the 'cli.log'\n"
-    text "\n"
-    return 2
   fi
 }

@@ -9,20 +9,21 @@
 #   Tyler Jewell - Initial Implementation
 #
 
+help_cmd_download() {
+  text "\n"
+  text "USAGE: ${CHE_IMAGE_FULLNAME} download [PARAMETERS]\n"
+  text "\n"
+  text "Downloads Docker images required to execute ${CHE_MINI_PRODUCT_NAME}\n"
+  text "\n"
+  text "PARAMETERS:\n"
+  text "  --force                           Uses 'docker rmi' and 'docker pull' to forcibly retrieve latest images\n"
+  text "  --no-force                        Updates images if matching tag not found in local cache\n"
+  text "  --pull                            Uses 'docker pull' to check for new remote versions of images\n"
+  text "\n"
+}
+
 pre_cmd_download() {
-  if get_command_help; then
-    text "\n"
-    text "USAGE: ${CHE_IMAGE_FULLNAME} download [PARAMETERS]\n"
-    text "\n"
-    text "Downloads Docker images required to execute ${CHE_MINI_PRODUCT_NAME}\n"
-    text "\n"
-    text "PARAMETERS:\n"
-    text "  --force                           Uses 'docker rmi' and 'docker pull' to forcibly retrieve latest images\n"
-    text "  --no-force                        Updates images if matching tag not found in local cache\n"
-    text "  --pull                            Uses 'docker pull' to check for new remote versions of images\n"
-    text "\n"
-    return 2
-  fi
+  true
 }
 
 cmd_download() {

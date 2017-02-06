@@ -9,6 +9,25 @@
 #   Tyler Jewell - Initial Implementation
 #
 
+help_cmd_init() {
+  text "\n"
+  text "USAGE: ${CHE_IMAGE_FULLNAME} init [PARAMETERS]\n"
+  text "\n"
+  text "Initializes a directory with a new ${CHE_MINI_PRODUCT_NAME} installation\n"
+  text "\n"
+  text "PARAMETERS:\n"
+  text "  --accept-license                  If license acceptance required, auto accepts during installation\n"
+  text "  --force                           Uses 'docker rmi' and 'docker pull' to forcibly retrieve latest images\n"
+  text "  --no-force                        Updates images if matching tag not found in local cache\n"
+  text "  --pull                            Uses 'docker pull' to check for new remote versions of images\n"
+  text "  --reinit                          Reinitialize an existing installation overwriting defaults\n"
+  text "\n"
+}
+
+pre_cmd_init() {
+  true
+}
+
 cmd_init() {
 
   # set an initial value for the flag
@@ -141,23 +160,5 @@ require_license() {
     return 0
   else
     return 1
-  fi
-}
-
-pre_cmd_init() {
-  if get_command_help; then
-    text "\n"
-    text "USAGE: ${CHE_IMAGE_FULLNAME} init [PARAMETERS]\n"
-    text "\n"
-    text "Initializes a directory with a new ${CHE_MINI_PRODUCT_NAME} installation\n"
-    text "\n"
-    text "PARAMETERS:\n"
-    text "  --accept-license                  If license acceptance required, auto accepts during installation\n"
-    text "  --force                           Uses 'docker rmi' and 'docker pull' to forcibly retrieve latest images\n"
-    text "  --no-force                        Updates images if matching tag not found in local cache\n"
-    text "  --pull                            Uses 'docker pull' to check for new remote versions of images\n"
-    text "  --reinit                          Reinitialize an existing installation overwriting defaults\n"
-    text "\n"
-    return 2
   fi
 }
