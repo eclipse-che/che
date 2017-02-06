@@ -199,16 +199,7 @@ public class WorkspaceManagerTest {
     public void shouldBeAbleToGetWorkspaceByKey() throws Exception {
         WorkspaceImpl workspace = createAndMockWorkspace();
 
-        WorkspaceImpl result = workspaceManager.getWorkspace(workspace.getNamespace() + ":" + workspace.getConfig().getName());
-
-        assertEquals(result, workspace);
-    }
-
-    @Test
-    public void shouldBeAbleToGetWorkspaceByKeyWithoutOwner() throws Exception {
-        WorkspaceImpl workspace = createAndMockWorkspace();
-
-        WorkspaceImpl result = workspaceManager.getWorkspace(":" + workspace.getConfig().getName());
+        WorkspaceImpl result = workspaceManager.getWorkspace(workspace.getNamespace() + "/" + workspace.getConfig().getName());
 
         assertEquals(result, workspace);
     }
@@ -490,7 +481,7 @@ public class WorkspaceManagerTest {
     }
 
     @Test(expectedExceptions = ConflictException.class,
-          expectedExceptionsMessageRegExp = "Could not stop the workspace 'test-namespace:dev-workspace' because its " +
+          expectedExceptionsMessageRegExp = "Could not stop the workspace 'namespace/test/dev-workspace' because its " +
                                             "status is 'STOPPING'. Workspace must be either 'STARTING' or 'RUNNING'")
     public void failsToStopNotRunningWorkspace() throws Exception {
         WorkspaceImpl workspace = createAndMockWorkspace();
@@ -924,7 +915,7 @@ public class WorkspaceManagerTest {
     }
 
     private WorkspaceImpl createAndMockWorkspace() throws NotFoundException, ServerException {
-        return createAndMockWorkspace(createConfig(), "test-namespace");
+        return createAndMockWorkspace(createConfig(), "namespace/test");
     }
 
     private WorkspaceImpl createAndMockWorkspace(WorkspaceConfig cfg, String namespace) throws NotFoundException, ServerException {
