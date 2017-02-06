@@ -21,7 +21,7 @@ ENV DOCKER_SHA256 8c2e0c35e3cda11706f54b2d46c2521a6e9026a7b13c7d4b8ae1f3a706fc55
 RUN mkdir -p /version \
     && mkdir -p /cli \
     && mkdir /scripts/ \
-    && apk add --no-cache ca-certificates coreutils curl openssl jq \
+    && apk add --no-cache ca-certificates coreutils curl openssl jq bc \
     && apk add --update bash \
     && rm -rf /var/cache/apk/* \
     && set -x \
