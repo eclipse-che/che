@@ -36,6 +36,6 @@ cmd_dir() {
     warning "':/chedir' not mounted - using ${DATA_MOUNT} as source location"
   fi
 
-  docker_run -it -v ${HOST_FOLDER_TO_USE}:${HOST_FOLDER_TO_USE} \
+  docker_run $(get_docker_run_terminal_options) -v ${HOST_FOLDER_TO_USE}:${HOST_FOLDER_TO_USE} \
             ${UTILITY_IMAGE_CHEDIR} ${HOST_FOLDER_TO_USE} "$@"
 }

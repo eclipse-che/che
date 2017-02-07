@@ -362,10 +362,23 @@ check_docker_networking() {
 check_interactive() {
   # Detect and verify that the CLI container was started with -it option.
   TTY_ACTIVATED=true
+  CHE_CLI_IS_INTERACTIVE=true
+
+  # check if no terminal
   if [ ! -t 1 ]; then
     TTY_ACTIVATED=false
+    CHE_CLI_IS_INTERACTIVE=false
     warning "Did not detect TTY - interactive mode disabled"
+  else
+    # There is a terminal, check if it's in interactive mode
+    CHE_CLI_IS_INTERACTIVE=$(docker inspect --format='{{.Config.AttachStdin}}' $(get_this_container_id))
+    if [[ ${CHE_CLI_IS_INTERACTIVE} == "false" ]]; then
+      CHE_CLI_IS_INTERACTIVE=false
+      warning "Did detect TTY but not in interactive mode"
+    fi
+
   fi
+
 }
 
 check_mounts() {
