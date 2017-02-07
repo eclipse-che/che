@@ -255,6 +255,9 @@ init() {
   # Only verify mounts after Docker is confirmed to be working.
   check_mounts "$@"
 
+  # Check to see if --user uid:gid is passed on the command line
+  check_user
+  
   # Only initialize after mounts have been established so we can write cli.log out to a mount folder
   init_logging "$@"
 

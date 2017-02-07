@@ -160,6 +160,7 @@ generate_configuration_with_puppet() {
                   -e \"CHE_CONTAINER_NAME=${CHE_CONTAINER_NAME}\" \
                   -e \"CHE_ENVIRONMENT=${CHE_ENVIRONMENT}\" \
                   -e \"CHE_CONFIG=${CHE_HOST_INSTANCE}\" \
+                  -e \"CHE_USER=${CHE_USER}\" \
                   -e \"CHE_INSTANCE=${CHE_HOST_INSTANCE}\" \
                   -e \"CHE_REPO=${CHE_REPO}\" \
                   --entrypoint=/usr/bin/puppet \
