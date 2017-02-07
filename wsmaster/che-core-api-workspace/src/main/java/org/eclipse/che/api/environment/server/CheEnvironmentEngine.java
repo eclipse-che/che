@@ -28,6 +28,7 @@ import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.model.machine.ServerConf;
 import org.eclipse.che.api.core.model.workspace.Environment;
+import org.eclipse.che.api.core.model.workspace.ExtendedMachine;
 import org.eclipse.che.api.core.model.workspace.ServerConf2;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
@@ -58,13 +59,15 @@ import org.eclipse.che.api.machine.server.spi.InstanceProvider;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.machine.server.util.RecipeDownloader;
 import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
-import org.eclipse.che.commons.lang.concurrent.Unlocker;
-import org.eclipse.che.commons.lang.concurrent.StripedLocks;
+import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ExtendedMachineImpl;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.Size;
+import org.eclipse.che.commons.lang.concurrent.StripedLocks;
+import org.eclipse.che.commons.lang.concurrent.Unlocker;
 import org.slf4j.Logger;
 
 import javax.annotation.PostConstruct;
@@ -239,6 +242,8 @@ public class CheEnvironmentEngine {
                                 MachineStartedHandler startedHandler) throws ServerException,
                                                                              EnvironmentException,
                                                                              ConflictException {
+
+        EnvironmentImpl environment = new EnvironmentImpl(env);
         // TODO move to machines provider
         // add random chars to ensure that old environments that weren't removed by some reason won't prevent start
         String networkId = NameGenerator.generate(workspaceId + "_", 16);
@@ -248,11 +253,11 @@ public class CheEnvironmentEngine {
         initializeEnvironment(namespace,
                               workspaceId,
                               envName,
-                              env,
+                              environment,
                               networkId,
                               messageConsumer);
 
-        String devMachineName = getDevMachineName(env);
+        String devMachineName = getDevMachineName(environment);
         if (devMachineName == null) {
             throw new ServerException("Agent 'org.eclipse.che.ws-agent' is not found in any of environment machines");
         }
@@ -553,7 +558,7 @@ public class CheEnvironmentEngine {
     private void initializeEnvironment(String namespace,
                                        String workspaceId,
                                        String envName,
-                                       Environment envConfig,
+                                       EnvironmentImpl envConfig,
                                        String networkId,
                                        MessageConsumer<MachineLogMessage> messageConsumer)
             throws ServerException,
@@ -576,6 +581,7 @@ public class CheEnvironmentEngine {
 
         EnvironmentHolder environmentHolder = new EnvironmentHolder(servicesOrder,
                                                                     internalEnv,
+                                                                    envConfig,
                                                                     messageConsumer,
                                                                     EnvStatus.STARTING,
                                                                     envName,
@@ -728,6 +734,7 @@ public class CheEnvironmentEngine {
         // Config will be null only if there are no machines left in the queue
         String envName;
         MessageConsumer<MachineLogMessage> envLogger;
+        String creator = EnvironmentContext.getCurrent().getSubject().getUserId();
         try (@SuppressWarnings("unused") Unlocker u = stripedLocks.readLock(workspaceId)) {
             EnvironmentHolder environmentHolder = environments.get(workspaceId);
             if (environmentHolder == null) {
@@ -746,15 +753,16 @@ public class CheEnvironmentEngine {
                 // Environment start is failed when any machine start is failed, so if any error
                 // occurs during machine creation then environment start fail is reported and
                 // start resources such as queue and descriptor must be cleaned up
-                String creator = EnvironmentContext.getCurrent().getSubject().getUserId();
 
                 CheServiceImpl service;
+                @Nullable ExtendedMachine extendedMachine;
                 try (@SuppressWarnings("unused") Unlocker u = stripedLocks.readLock(workspaceId)) {
                     EnvironmentHolder environmentHolder = environments.get(workspaceId);
                     if (environmentHolder == null) {
                         throw new ServerException("Environment start is interrupted.");
                     }
                     service = environmentHolder.environment.getServices().get(machineName);
+                    extendedMachine = environmentHolder.environmentConfig.getMachines().get(machineName);
                 }
                 // should not happen
                 if (service == null) {
@@ -803,7 +811,7 @@ public class CheEnvironmentEngine {
                                                   machineStarter);
                 checkInterruption(workspaceId, envName);
 
-                startedHandler.started(instance);
+                startedHandler.started(instance, extendedMachine);
                 checkInterruption(workspaceId, envName);
 
                 // Machine destroying is an expensive operation which must be
@@ -1283,12 +1291,14 @@ public class CheEnvironmentEngine {
         final MessageConsumer<MachineLogMessage> logger;
         final String                             name;
         final String                             networkId;
+        final Environment                        environmentConfig;
 
         List<Instance> machines;
         EnvStatus      status;
 
         EnvironmentHolder(List<String> startQueue,
                           CheServicesEnvironmentImpl environment,
+                          Environment environmentConfig,
                           MessageConsumer<MachineLogMessage> envLogger,
                           EnvStatus envStatus,
                           String name,
@@ -1300,6 +1310,7 @@ public class CheEnvironmentEngine {
             this.name = name;
             this.environment = environment;
             this.networkId = networkId;
+            this.environmentConfig = environmentConfig;
         }
 
         @Override
@@ -1311,12 +1322,14 @@ public class CheEnvironmentEngine {
                    Objects.equals(machines, that.machines) &&
                    status == that.status &&
                    Objects.equals(logger, that.logger) &&
-                   Objects.equals(name, that.name);
+                   Objects.equals(name, that.name) &&
+                   Objects.equals(environment, that.environment) &&
+                   Objects.equals(environmentConfig, that.environmentConfig);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(startQueue, machines, status, logger, name);
+            return Objects.hash(startQueue, machines, status, logger, name, environmentConfig, environment);
         }
     }
 
@@ -1363,6 +1376,6 @@ public class CheEnvironmentEngine {
 
     private static class NoOpStartedHandler implements MachineStartedHandler {
         @Override
-        public void started(Instance machine) throws ServerException {}
+        public void started(Instance machine, ExtendedMachine extendedMachine) throws ServerException {}
     }
 }

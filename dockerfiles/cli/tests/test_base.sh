@@ -9,7 +9,7 @@
 #   Marian Labuda - Initial Implementation
 
 export CLI_IMAGE="eclipse/che-cli:"$CLI_IMAGE_TAG
-source /dockerfiles/base/scripts/base/startup_funcs.sh
+source /dockerfiles/base/scripts/base/*.sh
 export SCRIPTS_DIR="${BATS_BASE_DIR}"/base/scripts/base
 export TESTS_DIR="${BATS_BASE_DIR}"/cli/tests
 export TESTRUN_DIR="${TESTS_DIR}"/testrun

@@ -253,7 +253,7 @@ public class CheEnvironmentEngineTest {
         // then
         assertEquals(machines, expectedMachines);
         for (Instance expectedMachine : expectedMachines) {
-            verify(startedHandler).started(expectedMachine);
+            verify(startedHandler).started(eq(expectedMachine), any(ExtendedMachine.class));
         }
     }
 
@@ -787,7 +787,7 @@ public class CheEnvironmentEngineTest {
         engine.startMachine(workspaceId, config, agents);
 
         // then
-        verify(infrastructureProvisioner).provision(any(ExtendedMachine.class), any(CheServiceImpl.class));
+        verify(infrastructureProvisioner).provision(any(ExtendedMachineImpl.class), any(CheServiceImpl.class));
     }
 
     @Test
