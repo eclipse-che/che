@@ -26,3 +26,6 @@ che:
 <% end -%>
   restart: always
   container_name: <%= ENV["CHE_CONTAINER_NAME"] %>
+<% if scope.lookupvar('che::che_user') != 'root' -%>
+  user: <%= scope.lookupvar('che::che_user') -%>
+<% end -%>

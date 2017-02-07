@@ -223,6 +223,14 @@ get_command_help() {
   fi
 }
 
+custom_user() {
+  if [ "${CHE_USER}" = "" ]; then
+    return 1
+  else
+    return 0
+  fi
+}
+
 init_logging() {
   # Initialize CLI folder
   CLI_DIR=$CHE_CONTAINER_ROOT
@@ -292,13 +300,18 @@ check_docker() {
       info ""
       info "You are missing a mandatory parameter:"
       info "   1. Mount 'docker.sock' for accessing Docker with unix sockets."
-      info "   2. Or, set DOCKER_HOST to Docker's daemon location (unix or tcp)."
+      info "   2. Or, set DOCKER_HOST to Docker's location (unix or tcp)."
       info ""
       info "Mount Syntax:"
       info "   Start with 'docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock' ..."
       info ""
       info "DOCKER_HOST Syntax:"
       info "   Start with 'docker run -it --rm -e DOCKER_HOST=<daemon-location> ...'"
+      info ""
+      info "Possible root causes:"
+      info "   1. Your admin has not granted permissions to /var/run/docker.sock."
+      info "   2. You passed '--user uid:gid' with bad values."
+      info "   3. Your firewall is blocking TCP ports for accessing Docker daemon."
       return 2;
     fi
   fi
@@ -376,9 +389,17 @@ check_interactive() {
       CHE_CLI_IS_INTERACTIVE=false
       warning "Did detect TTY but not in interactive mode"
     fi
-
   fi
+}
 
+# Add check to see if --user uid:gid passed in.
+check_user() {
+  CHE_USER=""
+  CHE_USER=$(docker inspect --format='{{.Config.User}}' $(get_this_container_id))
+  if custom_user; then
+    # Add checks / warnings if a custom user is set
+    CHE_USER="root"
+  fi
 }
 
 check_mounts() {
