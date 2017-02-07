@@ -11,11 +11,11 @@
 package org.eclipse.che.plugin.languageserver.ide.quickopen;
 
 
-import org.eclipse.che.plugin.languageserver.ide.filters.Match;
-import org.vectomatic.dom.svg.ui.SVGResource;
-
 import java.util.Collections;
 import java.util.List;
+
+import org.eclipse.che.plugin.languageserver.ide.filters.Match;
+import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
  * Base data class for all Quick open entries.

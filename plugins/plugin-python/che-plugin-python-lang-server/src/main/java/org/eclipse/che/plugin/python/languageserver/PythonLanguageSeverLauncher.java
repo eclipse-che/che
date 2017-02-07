@@ -10,21 +10,22 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.python.languageserver;
 
-import io.typefox.lsapi.services.LanguageServer;
-import io.typefox.lsapi.services.json.JsonBasedLanguageServer;
-import org.eclipse.che.api.languageserver.exception.LanguageServerException;
-import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncherTemplate;
-import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
-import org.eclipse.che.api.languageserver.shared.model.impl.LanguageDescriptionImpl;
-import org.eclipse.che.plugin.python.shared.ProjectAttributes;
+import static java.util.Arrays.asList;
 
-import javax.inject.Singleton;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 
-import static java.util.Arrays.asList;
+import javax.inject.Singleton;
+
+import org.eclipse.che.api.languageserver.exception.LanguageServerException;
+import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncherTemplate;
+import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
+import org.eclipse.che.plugin.python.shared.ProjectAttributes;
+import org.eclipse.lsp4j.jsonrpc.Launcher;
+import org.eclipse.lsp4j.services.LanguageClient;
+import org.eclipse.lsp4j.services.LanguageServer;
 
 /**
  * Launches language server for Python
@@ -32,50 +33,51 @@ import static java.util.Arrays.asList;
 @Singleton
 public class PythonLanguageSeverLauncher extends LanguageServerLauncherTemplate {
 
-    private static final String[] EXTENSIONS  = new String[] {ProjectAttributes.PYTHON_EXT};
-    private static final String[] MIME_TYPES  = new String[] {"text/x-python"};
-    private static final LanguageDescriptionImpl description;
+	private static final String[] EXTENSIONS = new String[] { ProjectAttributes.PYTHON_EXT };
+	private static final String[] MIME_TYPES = new String[] { "text/x-python" };
+	private static final LanguageDescription description;
 
-    private final Path launchScript;
+	private final Path launchScript;
 
-    static {
-        description = new LanguageDescriptionImpl();
-        description.setFileExtensions(asList(EXTENSIONS));
-        description.setLanguageId(ProjectAttributes.PYTHON_ID);
-        description.setMimeTypes(Arrays.asList(MIME_TYPES));
-    }
+	static {
+		description = new LanguageDescription();
+		description.setFileExtensions(asList(EXTENSIONS));
+		description.setLanguageId(ProjectAttributes.PYTHON_ID);
+		description.setMimeTypes(Arrays.asList(MIME_TYPES));
+	}
 
-    public PythonLanguageSeverLauncher() {
-        launchScript = Paths.get(System.getenv("HOME"), "che/ls-python/launch.sh");
-    }
+	public PythonLanguageSeverLauncher() {
+		launchScript = Paths.get(System.getenv("HOME"), "che/ls-python/launch.sh");
+	}
 
-    @Override
-    public LanguageDescription getLanguageDescription() {
-        return description;
-    }
+	@Override
+	public LanguageDescription getLanguageDescription() {
+		return description;
+	}
 
-    @Override
-    public boolean isAbleToLaunch() {
-        return launchScript.toFile().exists();
-    }
+	@Override
+	public boolean isAbleToLaunch() {
+		return launchScript.toFile().exists();
+	}
 
-    @Override
-    protected Process startLanguageServerProcess(String projectPath) throws LanguageServerException {
-        ProcessBuilder processBuilder = new ProcessBuilder(launchScript.toString());
-        processBuilder.redirectInput(ProcessBuilder.Redirect.PIPE);
-        processBuilder.redirectOutput(ProcessBuilder.Redirect.PIPE);
+	@Override
+	protected Process startLanguageServerProcess(String projectPath) throws LanguageServerException {
+		ProcessBuilder processBuilder = new ProcessBuilder(launchScript.toString());
+		processBuilder.redirectInput(ProcessBuilder.Redirect.PIPE);
+		processBuilder.redirectOutput(ProcessBuilder.Redirect.PIPE);
 
-        try {
-            return processBuilder.start();
-        } catch (IOException e) {
-            throw new LanguageServerException("Can't start CSharp language server", e);
-        }
-    }
+		try {
+			return processBuilder.start();
+		} catch (IOException e) {
+			throw new LanguageServerException("Can't start CSharp language server", e);
+		}
+	}
 
-    @Override
-    protected LanguageServer connectToLanguageServer(Process languageServerProcess) throws LanguageServerException {
-        JsonBasedLanguageServer languageServer = new JsonBasedLanguageServer();
-        languageServer.connect(languageServerProcess.getInputStream(), languageServerProcess.getOutputStream());
-        return languageServer;
-    }
+	@Override
+	protected LanguageServer connectToLanguageServer(final Process languageServerProcess, LanguageClient client) {
+		Launcher<LanguageServer> launcher = Launcher.createLauncher(client, LanguageServer.class,
+				languageServerProcess.getInputStream(), languageServerProcess.getOutputStream());
+		launcher.startListening();
+		return launcher.getRemoteProxy();
+	}
 }

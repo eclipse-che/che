@@ -10,23 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.registry;
 
-import io.typefox.lsapi.InitializeParams;
-import io.typefox.lsapi.InitializeResult;
-import io.typefox.lsapi.ServerCapabilities;
-import io.typefox.lsapi.services.LanguageServer;
-
-import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
-import org.eclipse.che.api.languageserver.messager.PublishDiagnosticsParamsMessenger;
-import org.eclipse.che.api.languageserver.messager.ShowMessageMessenger;
-import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
-import org.mockito.Mock;
-import org.mockito.testng.MockitoTestNGListener;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Listeners;
-import org.testng.annotations.Test;
-
-import java.util.concurrent.CompletableFuture;
-
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -36,6 +19,22 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+
+import java.util.concurrent.CompletableFuture;
+
+import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
+import org.eclipse.che.api.languageserver.messager.PublishDiagnosticsParamsMessenger;
+import org.eclipse.che.api.languageserver.messager.ShowMessageMessenger;
+import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
+import org.eclipse.lsp4j.InitializeParams;
+import org.eclipse.lsp4j.InitializeResult;
+import org.eclipse.lsp4j.ServerCapabilities;
+import org.eclipse.lsp4j.services.LanguageServer;
+import org.mockito.Mock;
+import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Listeners;
+import org.testng.annotations.Test;
 
 /**
  * @author Anatoliy Bazko
@@ -72,7 +71,7 @@ public class ServerInitializerImplTest {
         when(completableFuture.get()).thenReturn(mock(InitializeResult.class));
 
         when(launcher.getLanguageDescription()).thenReturn(languageDescription);
-        when(launcher.launch(anyString())).thenReturn(server);
+        when(launcher.launch(anyString(), any())).thenReturn(server);
         doNothing().when(initializer).registerCallbacks(server);
 
         initializer.addObserver(observer);

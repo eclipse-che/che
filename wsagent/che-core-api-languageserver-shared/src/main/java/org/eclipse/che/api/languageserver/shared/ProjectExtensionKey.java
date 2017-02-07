@@ -18,21 +18,32 @@ import java.util.Objects;
 public class ProjectExtensionKey {
     public static final String ALL_PROJECT_MARKER = "*";
 
-    private final String project;
-    private final String extension;
+    private String project;
+    private String extension;
 
     private ProjectExtensionKey(String project, String extension) {
         this.project = project;
         this.extension = extension;
     }
+    
+    public ProjectExtensionKey() {
+	}
 
     public String getProject() {
         return project;
     }
+    
+    public void setProject(String project) {
+		this.project = project;
+	}
 
     public String getExtension() {
         return extension;
     }
+    
+    public void setExtension(String extension) {
+		this.extension = extension;
+	}
 
     public static ProjectExtensionKey createProjectKey(String project, String extension) {
         return new ProjectExtensionKey(project, extension);

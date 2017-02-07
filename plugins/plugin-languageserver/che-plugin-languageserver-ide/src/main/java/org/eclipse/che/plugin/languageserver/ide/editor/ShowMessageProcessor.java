@@ -15,11 +15,10 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMod
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.util.loging.Log;
+import org.eclipse.lsp4j.MessageParams;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
-import io.typefox.lsapi.MessageParams;
 
 /**
  * A processor for incoming <code>window/showMessage</code> notifications sent

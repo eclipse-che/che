@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.quickopen;
 
-import com.google.inject.ImplementedBy;
-
 import org.eclipse.che.ide.api.mvp.View;
+
+import com.google.inject.ImplementedBy;
 
 /**
  * @author Evgen Vidolob

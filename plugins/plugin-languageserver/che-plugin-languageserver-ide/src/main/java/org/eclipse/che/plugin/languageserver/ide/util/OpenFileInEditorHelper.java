@@ -10,12 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.util;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Strings;
-import com.google.gwt.core.client.Scheduler;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.data.tree.Node;
@@ -29,6 +23,12 @@ import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.resource.Path;
+
+import com.google.common.base.Optional;
+import com.google.common.base.Strings;
+import com.google.gwt.core.client.Scheduler;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 /**
  * Util class, helps to open file by path in editor

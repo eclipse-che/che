@@ -10,19 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.editor;
 
-import io.typefox.lsapi.ServerCapabilities;
+import java.util.Collections;
+import java.util.List;
 
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
-
-import org.eclipse.che.api.languageserver.shared.lsapi.DocumentFormattingParamsDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.DocumentOnTypeFormattingParamsDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.DocumentRangeFormattingParamsDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.FormattingOptionsDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.PositionDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.RangeDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentIdentifierDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.TextEditDTO;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -42,9 +32,18 @@ import org.eclipse.che.ide.editor.preferences.editorproperties.EditorProperties;
 import org.eclipse.che.ide.editor.preferences.editorproperties.EditorPropertiesManager;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
+import org.eclipse.lsp4j.DocumentFormattingParams;
+import org.eclipse.lsp4j.DocumentOnTypeFormattingParams;
+import org.eclipse.lsp4j.DocumentRangeFormattingParams;
+import org.eclipse.lsp4j.FormattingOptions;
+import org.eclipse.lsp4j.Position;
+import org.eclipse.lsp4j.Range;
+import org.eclipse.lsp4j.ServerCapabilities;
+import org.eclipse.lsp4j.TextDocumentIdentifier;
+import org.eclipse.lsp4j.TextEdit;
 
-import java.util.Collections;
-import java.util.List;
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 
 /**
  * @author Evgen Vidolob
@@ -54,7 +53,7 @@ public class LanguageServerFormatter implements ContentFormatter {
     private final TextDocumentServiceClient client;
     private final DtoFactory                dtoFactory;
     private final NotificationManager       manager;
-    private final ServerCapabilities        capabilities;
+    private final ServerCapabilities        capabilities; 
     private final EditorPropertiesManager   editorPropertiesManager;
     private       TextEditor                editor;
 
@@ -64,22 +63,22 @@ public class LanguageServerFormatter implements ContentFormatter {
                                    NotificationManager manager,
                                    @Assisted ServerCapabilities capabilities,
                                    EditorPropertiesManager editorPropertiesManager) {
-        this.client = client;
+        this.client = client; 
         this.dtoFactory = dtoFactory;
         this.manager = manager;
         this.capabilities = capabilities;
         this.editorPropertiesManager = editorPropertiesManager;
     }
 
-    @Override
+    @Override 
     public void format(Document document) {
 
         TextRange selectedRange = document.getSelectedTextRange();
         if (selectedRange != null && !selectedRange.getFrom().equals(selectedRange.getTo()) &&
-            capabilities.isDocumentRangeFormattingProvider()) {
+            capabilities.getDocumentRangeFormattingProvider()) {
             //selection formatting
             formatRange(selectedRange, document);
-        } else if (capabilities.isDocumentFormattingProvider()) {
+        } else if (capabilities.getDocumentFormattingProvider()) {
             //full document formatting
             formatFullDocument(document);
         }
@@ -98,8 +97,8 @@ public class LanguageServerFormatter implements ContentFormatter {
                     if (capabilities.getDocumentOnTypeFormattingProvider().getFirstTriggerCharacter().equals(event.getText())) {
                         Document document = event.getDocument().getDocument();
 
-                        DocumentOnTypeFormattingParamsDTO params = dtoFactory.createDto(DocumentOnTypeFormattingParamsDTO.class);
-                        TextDocumentIdentifierDTO identifier = dtoFactory.createDto(TextDocumentIdentifierDTO.class);
+                        DocumentOnTypeFormattingParams params = dtoFactory.createDto(DocumentOnTypeFormattingParams.class);
+                        TextDocumentIdentifier identifier = dtoFactory.createDto(TextDocumentIdentifier.class);
                         identifier.setUri(document.getFile().getLocation().toString());
                         params.setTextDocument(identifier);
                         params.setOptions(getFormattingOptions());
@@ -107,12 +106,12 @@ public class LanguageServerFormatter implements ContentFormatter {
 
                         TextPosition position = document.getPositionFromIndex(event.getOffset());
 
-                        PositionDTO start = dtoFactory.createDto(PositionDTO.class);
+                        Position start = dtoFactory.createDto(Position.class);
                         start.setLine(position.getLine());
                         start.setCharacter(position.getCharacter());
                         params.setPosition(start);
 
-                        Promise<List<TextEditDTO>> promise = client.onTypeFormatting(params);
+                        Promise<List<TextEdit>> promise = client.onTypeFormatting(params);
                         handleFormatting(promise, document);
 
                     }
@@ -122,21 +121,21 @@ public class LanguageServerFormatter implements ContentFormatter {
     }
 
     private void formatFullDocument(Document document) {
-        DocumentFormattingParamsDTO params = dtoFactory.createDto(DocumentFormattingParamsDTO.class);
+    	DocumentFormattingParams params = dtoFactory.createDto(DocumentFormattingParams.class);
 
-        TextDocumentIdentifierDTO identifier = dtoFactory.createDto(TextDocumentIdentifierDTO.class);
+        TextDocumentIdentifier identifier = dtoFactory.createDto(TextDocumentIdentifier.class);
         identifier.setUri(document.getFile().getLocation().toString());
 
         params.setTextDocument(identifier);
         params.setOptions(getFormattingOptions());
-        Promise<List<TextEditDTO>> promise = client.formatting(params);
+        Promise<List<TextEdit>> promise = client.formatting(params);
         handleFormatting(promise, document);
     }
 
-    private void handleFormatting(Promise<List<TextEditDTO>> promise, final Document document) {
-        promise.then(new Operation<List<TextEditDTO>>() {
+    private void handleFormatting(Promise<List<TextEdit>> promise, final Document document) {
+        promise.then(new Operation<List<TextEdit>>() {
             @Override
-            public void apply(List<TextEditDTO> arg) throws OperationException {
+            public void apply(List<TextEdit> arg) throws OperationException {
                 applyEdits(arg, document);
             }
         }).catchError(new Operation<PromiseError>() {
@@ -147,7 +146,7 @@ public class LanguageServerFormatter implements ContentFormatter {
         });
     }
 
-    private void applyEdits(List<TextEditDTO> edits, Document document) {
+    private void applyEdits(List<TextEdit> edits, Document document) {
         HandlesUndoRedo undoRedo = null;
 
         if (editor instanceof UndoableEditor) {
@@ -160,8 +159,8 @@ public class LanguageServerFormatter implements ContentFormatter {
             
             // #2437: apply the text edits from last to first to avoid messing up the document
             Collections.reverse(edits);
-            for (TextEditDTO change : edits) {
-                RangeDTO range = change.getRange();
+            for (TextEdit change : edits) {
+                Range range = change.getRange();
                 document.replace(range.getStart().getLine(), range.getStart().getCharacter(),
                                  range.getEnd().getLine(), range.getEnd().getCharacter(), change.getNewText());
             }
@@ -174,8 +173,8 @@ public class LanguageServerFormatter implements ContentFormatter {
         }
     }
 
-    private FormattingOptionsDTO getFormattingOptions() {
-        FormattingOptionsDTO options = dtoFactory.createDto(FormattingOptionsDTO.class);
+    private FormattingOptions getFormattingOptions() {
+        FormattingOptions options = dtoFactory.createDto(FormattingOptions.class);
         options.setInsertSpaces(Boolean.parseBoolean(getEditorProperty(EditorProperties.EXPAND_TAB)));
         options.setTabSize(Integer.parseInt(getEditorProperty(EditorProperties.TAB_SIZE)));
         return options;
@@ -186,17 +185,17 @@ public class LanguageServerFormatter implements ContentFormatter {
     }
 
     private void formatRange(TextRange selectedRange, Document document) {
-        DocumentRangeFormattingParamsDTO params = dtoFactory.createDto(DocumentRangeFormattingParamsDTO.class);
+        DocumentRangeFormattingParams params = dtoFactory.createDto(DocumentRangeFormattingParams.class);
 
-        TextDocumentIdentifierDTO identifier = dtoFactory.createDto(TextDocumentIdentifierDTO.class);
+        TextDocumentIdentifier identifier = dtoFactory.createDto(TextDocumentIdentifier.class);
         identifier.setUri(document.getFile().getLocation().toString());
 
         params.setTextDocument(identifier);
         params.setOptions(getFormattingOptions());
 
-        RangeDTO range = dtoFactory.createDto(RangeDTO.class);
-        PositionDTO start = dtoFactory.createDto(PositionDTO.class);
-        PositionDTO end = dtoFactory.createDto(PositionDTO.class);
+        Range range = dtoFactory.createDto(Range.class);
+        Position start = dtoFactory.createDto(Position.class);
+        Position end = dtoFactory.createDto(Position.class);
 
         start.setLine(selectedRange.getFrom().getLine());
         start.setCharacter(selectedRange.getFrom().getCharacter());
@@ -209,7 +208,7 @@ public class LanguageServerFormatter implements ContentFormatter {
 
         params.setRange(range);
 
-        Promise<List<TextEditDTO>> promise = client.rangeFormatting(params);
+        Promise<List<TextEdit>> promise = client.rangeFormatting(params);
         handleFormatting(promise, document);
     }
 

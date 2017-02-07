@@ -241,6 +241,14 @@
             <artifactId>che-plugin-zend-debugger-server</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.lsp4j</groupId>
+            <artifactId>org.eclipse.lsp4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.xtext</groupId>
+            <artifactId>org.eclipse.xtext.xbase.lib</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.everrest</groupId>
             <artifactId>everrest-core</artifactId>
         </dependency>
@@ -280,11 +288,9 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
                 <configuration>
-                    <packagingExcludes>
-                        WEB-INF/lib/*gwt*.jar,
+                    <packagingExcludes>WEB-INF/lib/*gwt*.jar,
                         WEB-INF/lib/gin-*.jar,
-                        WEB-INF/lib/jsr305*.jar
-                    </packagingExcludes>
+                        WEB-INF/lib/jsr305*.jar</packagingExcludes>
                 </configuration>
             </plugin>
         </plugins>

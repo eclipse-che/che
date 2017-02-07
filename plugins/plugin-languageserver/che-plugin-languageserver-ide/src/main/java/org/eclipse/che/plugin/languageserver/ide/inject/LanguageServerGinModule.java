@@ -10,10 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.inject;
 
-import com.google.gwt.inject.client.AbstractGinModule;
-import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
-import com.google.gwt.inject.client.multibindings.GinMapBinder;
-
 import org.eclipse.che.ide.api.component.WsAgentComponent;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerFileTypeRegister;
@@ -25,6 +21,10 @@ import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerReconcileS
 import org.eclipse.che.plugin.languageserver.ide.editor.signature.LanguageServerSignatureHelpFactory;
 import org.eclipse.che.plugin.languageserver.ide.location.OpenLocationPresenterFactory;
 import org.eclipse.che.plugin.languageserver.ide.registry.LanguageServerRegistry;
+
+import com.google.gwt.inject.client.AbstractGinModule;
+import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
+import com.google.gwt.inject.client.multibindings.GinMapBinder;
 
 /**
  * @author Anatolii Bazko

@@ -10,19 +10,19 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.service;
 
-import com.google.inject.Inject;
+import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
+import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
 
-import org.eclipse.che.api.languageserver.shared.lsapi.InitializeResultDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.LanguageDescriptionDTO;
+import java.util.List;
+
+import org.eclipse.che.api.languageserver.shared.model.ExtendedInitializeResult;
+import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 
-import java.util.List;
-
-import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
-import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
+import com.google.inject.Inject;
 
 /**
  * @author Sven Efftinge
@@ -48,21 +48,21 @@ public class LanguageServerRegistryServiceClient {
     /**
      * @return all supported languages
      */
-    public Promise<List<LanguageDescriptionDTO>> getSupportedLanguages() {
+    public Promise<List<LanguageDescription>> getSupportedLanguages() {
         String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + BASE_URI + "/supported";
         return asyncRequestFactory.createGetRequest(requestUrl)
                                   .header(ACCEPT, APPLICATION_JSON)
-                                  .send(unmarshallerFactory.newListUnmarshaller(LanguageDescriptionDTO.class));
+                                  .send(unmarshallerFactory.newListUnmarshaller(LanguageDescription.class));
     }
 
     /**
      * @return all registered languages
      */
-    public Promise<List<InitializeResultDTO>> getRegisteredLanguages() {
+    public Promise<List<ExtendedInitializeResult>> getRegisteredLanguages() {
         String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + BASE_URI + "/registered";
         return asyncRequestFactory.createGetRequest(requestUrl)
                                   .header(ACCEPT, APPLICATION_JSON)
-                                  .send(unmarshallerFactory.newListUnmarshaller(InitializeResultDTO.class));
+                                  .send(unmarshallerFactory.newListUnmarshaller(ExtendedInitializeResult.class));
     }
 
     public void initializeServer(String path) {
