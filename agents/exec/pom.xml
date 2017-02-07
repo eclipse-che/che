@@ -161,6 +161,7 @@
                                             <argument>${project.build.directory}/${item}/che-websocket-terminal</argument>
                                         </arguments>
                                         <environmentVariables>
+                                            <CGO_ENABLED>0</CGO_ENABLED>
                                             <GOPATH>${project.build.directory}/${go.workspace.name}</GOPATH>
                                             <GOOS>${terminal.target.os}</GOOS>
                                             <GOARCH>${terminal.target.architecture}</GOARCH>
