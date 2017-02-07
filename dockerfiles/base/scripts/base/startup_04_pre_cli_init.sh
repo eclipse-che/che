@@ -198,6 +198,19 @@ get_image_version() {
   echo "$CHE_IMAGE_VERSION"
 }
 
+less_than() {
+  for (( i=0; i<${#1}; i++ )); do
+    if [[ ${1:$i:1} != ${2:$i:1} ]]; then
+      if [ ${1:$i:1} -lt ${2:$i:1} ]; then
+        return 0
+      else
+        return 1
+      fi
+    fi
+  done
+  return 1
+}
+
 # Check if a version is < than another version (provide like for example : version_lt 5.0 5.1)
 version_lt() {
  test "$(printf '%s\n' "$@" | sort -V | head -n 1)" == "$1";
