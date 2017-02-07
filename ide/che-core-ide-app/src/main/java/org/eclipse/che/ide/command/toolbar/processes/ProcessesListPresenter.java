@@ -19,19 +19,23 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceRuntime;
 import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessesResponseDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.machine.events.ProcessFinishedEvent;
+import org.eclipse.che.ide.api.machine.events.ProcessStartedEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.mvp.Presenter;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Presenter for processes list.
@@ -44,6 +48,9 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
     private final AppContext                appContext;
     private final CommandManager            commandManager;
     private final Provider<CommandExecutor> commandExecutorProvider;
+
+    private final Map<Integer, RunningProcess> runningProcesses;
+    private final Map<String, StoppedProcess>  stoppedProcesses;
 
     @Inject
     public ProcessesListPresenter(final ProcessesListView view,
@@ -60,6 +67,9 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
 
         view.setDelegate(this);
 
+        runningProcesses = new HashMap<>();
+        stoppedProcesses = new HashMap<>();
+
         eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
             @Override
             public void onWsAgentStarted(WsAgentStateEvent event) {
@@ -74,16 +84,27 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
             }
         });
 
-        eventBus.addHandler(ProcessFinishedEvent.TYPE, new ProcessFinishedEvent.Handler() {
-            @Override
-            public void onProcessFinished(ProcessFinishedEvent event) {
-//                view.removeProcess(event.getProcessID());
-                // TODO: remove process from the view
-            }
+        eventBus.addHandler(ProcessStartedEvent.TYPE, event -> {
+            updateView();
+        });
+
+        eventBus.addHandler(ProcessFinishedEvent.TYPE, event -> {
+//            final RunningProcess process = runningProcesses.remove(event.getProcessID());
+
+//            if (process != null) {
+//                view.removeProcess(process);
+//            }
+
+            updateView();
         });
     }
 
-    private void updateView() {
+    private void updateViewOld() {
+        runningProcesses.clear();
+        stoppedProcesses.clear();
+
+        view.clearList();
+
         final WorkspaceRuntime runtime = appContext.getWorkspace().getRuntime();
 
         if (runtime != null) {
@@ -93,18 +114,100 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
                     public void apply(List<GetProcessesResponseDto> arg) throws OperationException {
                         for (GetProcessesResponseDto process : arg) {
                             if (process.isAlive()) {
-                                view.addProcess(new RunningProcess(process.getName(),
-                                                                   process.getCommandLine(),
-                                                                   process.getNativePid(),
-                                                                   machine));
+                                final RunningProcess runningProcess = new RunningProcess(process.getName(),
+                                                                                         process.getCommandLine(),
+                                                                                         process.getNativePid(),
+                                                                                         machine);
+                                runningProcesses.put(runningProcess.getNativePid(), runningProcess);
+
+                                view.addProcess(runningProcess);
+
+                                // TODO: subscribe to running process in order to be notified when it will be stopped
                             } else {
-                                view.addProcess(new StoppedProcess(process.getName(), process.getCommandLine(), machine));
+                                if (!stoppedProcesses.containsKey(process.getName())) {
+                                    final StoppedProcess stoppedProcess = new StoppedProcess(process.getName(),
+                                                                                             process.getCommandLine(),
+                                                                                             machine);
+                                    stoppedProcesses.put(stoppedProcess.getName(), stoppedProcess);
+
+//                                    view.addProcess(stoppedProcess);
+                                }
                             }
                         }
                     }
                 });
             }
         }
+    }
+
+    private void updateView() {
+        view.clearList();
+
+        final WorkspaceRuntime runtime = appContext.getWorkspace().getRuntime();
+
+        if (runtime != null) {
+            for (final Machine machine : runtime.getMachines()) {
+                updateViewWithRunningProcesses(machine).then(new Operation<List<GetProcessesResponseDto>>() {
+                    @Override
+                    public void apply(List<GetProcessesResponseDto> arg) throws OperationException {
+                        updateViewWithStoppedProcesses(machine);
+                    }
+                });
+            }
+        }
+    }
+
+    private Promise<List<GetProcessesResponseDto>> updateViewWithRunningProcesses(Machine machine) {
+        runningProcesses.clear();
+
+        return execAgentCommandManager.getProcesses(machine.getId(), false).then(new Operation<List<GetProcessesResponseDto>>() {
+            @Override
+            public void apply(List<GetProcessesResponseDto> arg) throws OperationException {
+                for (GetProcessesResponseDto process : arg) {
+                    final RunningProcess runningProcess = new RunningProcess(process.getName(),
+                                                                             process.getCommandLine(),
+                                                                             process.getNativePid(),
+                                                                             machine);
+                    runningProcesses.put(runningProcess.getNativePid(), runningProcess);
+
+                    view.addProcess(runningProcess);
+
+                    // TODO: subscribe to running process in order to be notified when it will be stopped
+                }
+            }
+        });
+    }
+
+    private void updateViewWithStoppedProcesses(Machine machine) {
+        stoppedProcesses.clear();
+
+        execAgentCommandManager.getProcesses(machine.getId(), true).then(new Operation<List<GetProcessesResponseDto>>() {
+            @Override
+            public void apply(List<GetProcessesResponseDto> arg) throws OperationException {
+                for (GetProcessesResponseDto process : arg) {
+                    if (!process.isAlive()) {
+                        if (!isCommandRunning(process.getName()) && (!stoppedProcesses.containsKey(process.getName()))) {
+                            final StoppedProcess stoppedProcess = new StoppedProcess(process.getName(),
+                                                                                     process.getCommandLine(),
+                                                                                     machine);
+                            stoppedProcesses.put(stoppedProcess.getName(), stoppedProcess);
+
+                            view.addProcess(stoppedProcess);
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    private boolean isCommandRunning(String commandName) {
+        for (RunningProcess process : runningProcesses.values()) {
+            if (commandName.equals(process.getName())) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Override

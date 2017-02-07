@@ -28,6 +28,7 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
+import org.eclipse.che.ide.api.machine.events.ProcessStartedEvent;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
 import org.eclipse.che.ide.api.machine.events.ProcessFinishedEvent;
@@ -171,6 +172,8 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
                 view.toggleScrollToEndButton(true);
 
                 pid = event.getPid();
+
+                eventBus.fireEvent(new ProcessStartedEvent(pid));
             }
         };
     }

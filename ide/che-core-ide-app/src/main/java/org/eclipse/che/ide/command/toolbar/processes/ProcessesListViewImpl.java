@@ -65,24 +65,18 @@ public class ProcessesListViewImpl implements ProcessesListView {
     @Override
     public void addProcess(Process process) {
         if (process instanceof StoppedProcess) {
-            dropDownList.addItem((StoppedProcess)process, new StoppedProcessRenderer(new StoppedProcessRenderer.ReRunProcessHandler() {
-                @Override
-                public void onReRunProcess(StoppedProcess process) {
-                    delegate.onReRunProcess(process);
-                }
-            }));
+            dropDownList.addItem((StoppedProcess)process, new StoppedProcessRenderer(p -> delegate.onReRunProcess(p)));
         } else if (process instanceof RunningProcess) {
-            dropDownList.addItem((RunningProcess)process, new RunningProcessRenderer(new RunningProcessRenderer.StopProcessHandler() {
-                @Override
-                public void onStopProcess(RunningProcess process) {
-                    delegate.onStopProcess(process);
-                }
-            }));
+            dropDownList.addItem((RunningProcess)process, new RunningProcessRenderer(p -> delegate.onStopProcess(p)));
         }
     }
 
     @Override
     public void removeProcess(Process process) {
-
+        if (process instanceof StoppedProcess) {
+            dropDownList.removeItem((StoppedProcess)process);
+        } else if (process instanceof RunningProcess) {
+            dropDownList.removeItem((RunningProcess)process);
+        }
     }
 }
