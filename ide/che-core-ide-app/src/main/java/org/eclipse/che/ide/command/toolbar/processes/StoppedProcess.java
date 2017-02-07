@@ -11,27 +11,14 @@
 package org.eclipse.che.ide.command.toolbar.processes;
 
 import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessesResponseDto;
-import org.eclipse.che.ide.ui.dropdown.ListItem;
+import org.eclipse.che.ide.ui.dropdown.DropDownListItem;
 
 /**
  *
  */
-public class ProcessListItem implements ListItem {
+class StoppedProcess extends AbstractProcess implements DropDownListItem {
 
-    private final GetProcessesResponseDto process;
-    private final Machine                 machine;
-
-    public ProcessListItem(GetProcessesResponseDto process, Machine machine) {
-        this.process = process;
-        this.machine = machine;
-    }
-
-    public GetProcessesResponseDto getProcess() {
-        return process;
-    }
-
-    public Machine getMachine() {
-        return machine;
+    public StoppedProcess(String commandName, String commandLine, Machine machine) {
+        super(commandName, commandLine, machine);
     }
 }

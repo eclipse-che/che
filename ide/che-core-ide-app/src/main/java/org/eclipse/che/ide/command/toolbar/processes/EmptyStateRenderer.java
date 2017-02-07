@@ -8,13 +8,20 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.ui.dropdown;
+package org.eclipse.che.ide.command.toolbar.processes;
 
 import com.google.gwt.user.client.ui.Widget;
 
+import org.eclipse.che.ide.ui.dropdown.DropDownListItem;
+import org.eclipse.che.ide.ui.dropdown.DropDownListItemRenderer;
+
 /**
- *
+ * Renders widget for representing empty {@link org.eclipse.che.ide.ui.dropdown.DropDownList}.
  */
-public interface ItemRenderer {
-    Widget render(ListItem item);
+class EmptyStateRenderer implements DropDownListItemRenderer {
+
+    @Override
+    public Widget render(DropDownListItem item) {
+        return null;
+    }
 }

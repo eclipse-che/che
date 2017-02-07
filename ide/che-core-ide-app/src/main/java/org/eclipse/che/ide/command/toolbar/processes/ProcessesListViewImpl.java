@@ -10,30 +10,19 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.toolbar.processes;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
-import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessesResponseDto;
 import org.eclipse.che.ide.command.toolbar.ToolbarResources;
 import org.eclipse.che.ide.ui.dropdown.DropDownList;
-import org.eclipse.che.ide.ui.dropdown.ItemRenderer;
-import org.eclipse.che.ide.ui.dropdown.ListItem;
 import org.eclipse.che.ide.ui.dropdown.old.DropDownWidget;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import static com.google.gwt.dom.client.Style.Float.LEFT;
-import static com.google.gwt.dom.client.Style.Float.RIGHT;
-
 /**
- *
+ * Implementation of {@link ProcessesListView} that displays processes in a drop down list.
  */
 @Singleton
 public class ProcessesListViewImpl implements ProcessesListView {
@@ -69,42 +58,31 @@ public class ProcessesListViewImpl implements ProcessesListView {
     @Override
     public void clearList() {
         dropDownList.clear();
+
+        // TODO: set `empty list widget` to the dropdown list's header
     }
 
     @Override
-    public void addProcess(GetProcessesResponseDto process, Machine machine) {
-        dropDownList.addItem(new ProcessListItem(process, machine), getRenderer(process, machine));
+    public void addProcess(Process process) {
+        if (process instanceof StoppedProcess) {
+            dropDownList.addItem((StoppedProcess)process, new StoppedProcessRenderer(new StoppedProcessRenderer.ReRunProcessHandler() {
+                @Override
+                public void onReRunProcess(StoppedProcess process) {
+                    delegate.onReRunProcess(process);
+                }
+            }));
+        } else if (process instanceof RunningProcess) {
+            dropDownList.addItem((RunningProcess)process, new RunningProcessRenderer(new RunningProcessRenderer.StopProcessHandler() {
+                @Override
+                public void onStopProcess(RunningProcess process) {
+                    delegate.onStopProcess(process);
+                }
+            }));
+        }
     }
 
-    private ItemRenderer getRenderer(final GetProcessesResponseDto process, final Machine machine) {
-        return new ItemRenderer() {
-            @Override
-            public Widget render(ListItem item) {
-                final String labelText = machine.getConfig().getName() + ": <b>" + process.getName() + "</b>";
-                final Label nameLabel = new InlineHTML(labelText);
-                nameLabel.setWidth("230px");
-                nameLabel.getElement().getStyle().setFloat(LEFT);
-                nameLabel.setTitle(process.getCommandLine());
+    @Override
+    public void removeProcess(Process process) {
 
-                final Label pidLabel = new Label('#' + Integer.toString(process.getNativePid()));
-                pidLabel.getElement().getStyle().setFloat(RIGHT);
-
-                final Button runButton = new StopRunButton(process, machine);
-                runButton.addDomHandler(new ClickHandler() {
-                    @Override
-                    public void onClick(ClickEvent event) {
-                        delegate.onReRunProcess(process, machine);
-                    }
-                }, ClickEvent.getType());
-
-                final FlowPanel panel = new FlowPanel();
-                panel.setHeight("25px");
-                panel.add(nameLabel);
-                panel.add(runButton);
-                panel.add(pidLabel);
-
-                return panel;
-            }
-        };
     }
 }

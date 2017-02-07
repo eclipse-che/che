@@ -36,9 +36,9 @@ public class DropDownList extends Composite {
     private static final DropDownListUiBinder     UI_BINDER = GWT.create(DropDownListUiBinder.class);
     private static final DropDownWidget.Resources resources = GWT.create(DropDownWidget.Resources.class);
 
-    private final FlowPanel             contentPanel;
-    private final PopupPanel            dropDownPanel;
-    private final Map<ListItem, Widget> itemsWidgets;
+    private final FlowPanel                     contentPanel;
+    private final PopupPanel                    dropDownPanel;
+    private final Map<DropDownListItem, Widget> itemsWidgets;
 
     @UiField
     FlowPanel listHeader;
@@ -82,7 +82,7 @@ public class DropDownList extends Composite {
     }
 
     /** Add item with the appropriate renderer. */
-    public void addItem(final ListItem item, final ItemRenderer renderer) {
+    public void addItem(final DropDownListItem item, final DropDownListItemRenderer renderer) {
         final Widget widget = renderer.render(item);
 
         itemsWidgets.put(item, widget);
@@ -101,6 +101,18 @@ public class DropDownList extends Composite {
         contentPanel.add(widget);
     }
 
+    /** Remove item from the list. */
+    public void removeItem(DropDownListItem item) {
+        final Widget widget = itemsWidgets.remove(item);
+
+        if (widget != null) {
+            contentPanel.remove(widget);
+        }
+
+        // TODO: check necessity of changing header's widget
+    }
+
+    /** Clear the list. */
     public void clear() {
         selectedElementName.clear();
         itemsWidgets.clear();

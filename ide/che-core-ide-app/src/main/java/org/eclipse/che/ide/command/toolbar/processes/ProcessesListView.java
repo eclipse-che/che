@@ -13,20 +13,20 @@ package org.eclipse.che.ide.command.toolbar.processes;
 
 import com.google.inject.ImplementedBy;
 
-import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessesResponseDto;
 import org.eclipse.che.ide.api.mvp.View;
 
-import java.util.List;
-
 /**
- *
+ * View for processes list.
  */
 @ImplementedBy(ProcessesListViewImpl.class)
 public interface ProcessesListView extends View<ProcessesListView.ActionDelegate> {
 
-    void addProcess(GetProcessesResponseDto process, Machine machine);
+    /** Add process to the list. */
+    void addProcess(Process process);
 
+    void removeProcess(Process process);
+
+    /** Clear processes list. */
     void clearList();
 
     interface ActionDelegate {
@@ -34,8 +34,10 @@ public interface ProcessesListView extends View<ProcessesListView.ActionDelegate
         /** Called when process has been chosen. */
         void onProcessChosen();
 
-        void onReRunProcess(GetProcessesResponseDto process, Machine machine);
+        /** Called when rerunning process is requested. */
+        void onReRunProcess(StoppedProcess process);
 
-        void onStopProcess(GetProcessesResponseDto process, Machine machine);
+        /** Called when stopping process is requested. */
+        void onStopProcess(RunningProcess process);
     }
 }

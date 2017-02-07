@@ -10,6 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ui.dropdown;
 
-/** Marker interface for the list item. */
-public interface ListItem {
+import com.google.gwt.user.client.ui.Widget;
+
+/**
+ *
+ */
+public interface DropDownListItemRenderer<T extends DropDownListItem> {
+
+    Widget render(T item);
 }

@@ -34,7 +34,7 @@ import javax.inject.Singleton;
 import java.util.List;
 
 /**
- *
+ * Presenter for processes list.
  */
 @Singleton
 public class ProcessesListPresenter implements Presenter, ProcessesListView.ActionDelegate {
@@ -60,12 +60,12 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
 
         view.setDelegate(this);
 
-        // TODO: listen for running/killing the processes and refresh processes list
-
         eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
             @Override
             public void onWsAgentStarted(WsAgentStateEvent event) {
                 updateView();
+
+                // TODO: listen for running/killing the processes and refresh processes list
             }
 
             @Override
@@ -77,6 +77,7 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
         eventBus.addHandler(ProcessFinishedEvent.TYPE, new ProcessFinishedEvent.Handler() {
             @Override
             public void onProcessFinished(ProcessFinishedEvent event) {
+//                view.removeProcess(event.getProcessID());
                 // TODO: remove process from the view
             }
         });
@@ -91,7 +92,14 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
                     @Override
                     public void apply(List<GetProcessesResponseDto> arg) throws OperationException {
                         for (GetProcessesResponseDto process : arg) {
-                            view.addProcess(process, machine);
+                            if (process.isAlive()) {
+                                view.addProcess(new RunningProcess(process.getName(),
+                                                                   process.getCommandLine(),
+                                                                   process.getNativePid(),
+                                                                   machine));
+                            } else {
+                                view.addProcess(new StoppedProcess(process.getName(), process.getCommandLine(), machine));
+                            }
                         }
                     }
                 });
@@ -110,16 +118,16 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
     }
 
     @Override
-    public void onReRunProcess(GetProcessesResponseDto process, Machine machine) {
+    public void onReRunProcess(StoppedProcess process) {
         final ContextualCommand command = commandManager.getCommand(process.getName());
 
         if (command != null) {
-            commandExecutorProvider.get().executeCommand(command, machine);
+            commandExecutorProvider.get().executeCommand(command, process.getMachine());
         }
     }
 
     @Override
-    public void onStopProcess(GetProcessesResponseDto process, Machine machine) {
-        execAgentCommandManager.killProcess(machine.getId(), process.getNativePid());
+    public void onStopProcess(RunningProcess process) {
+        execAgentCommandManager.killProcess(process.getMachine().getId(), process.getNativePid());
     }
 }
