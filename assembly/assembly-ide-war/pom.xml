@@ -88,6 +88,10 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.lib</groupId>
+            <artifactId>che-orion-editor</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.lib</groupId>
             <artifactId>che-swagger-module</artifactId>
         </dependency>
         <dependency>

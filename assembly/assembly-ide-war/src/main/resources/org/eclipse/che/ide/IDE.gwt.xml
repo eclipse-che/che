@@ -34,6 +34,7 @@
     <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
 
     <!-- Core module inherits                                       -->
+    <inherits name="org.eclipse.che.orion.CheOrion"/>
     <inherits name='org.eclipse.che.ide.Api'/>
     <inherits name='org.eclipse.che.api.core.model.Model'/>
     <inherits name="org.eclipse.che.ide.Core"/>
