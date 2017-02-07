@@ -207,7 +207,9 @@ export class WorkspaceSelectStackController {
       delete recipe.location;
 
       // clean machines list in config
-      defEnvironment.machines = {};
+      if (recipeFormat === 'compose') {
+        defEnvironment.machines = {};
+      }
     }
     recipe.type = recipeFormat;
     recipe.contentType = recipeFormat === 'compose' ? 'application/x-yaml' : 'text/x-dockerfile';

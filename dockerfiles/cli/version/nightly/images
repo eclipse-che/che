@@ -1,2 +1,3 @@
 IMAGE_INIT=eclipse/che-init:nightly
 IMAGE_CHE=eclipse/che-server:nightly
+IMAGE_COMPOSE=docker/compose:1.8.1

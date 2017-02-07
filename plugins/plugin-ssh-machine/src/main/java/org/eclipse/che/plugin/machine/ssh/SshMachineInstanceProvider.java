@@ -21,10 +21,7 @@ import org.eclipse.che.api.core.model.machine.Recipe;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.machine.server.exception.InvalidRecipeException;
 import org.eclipse.che.api.machine.server.exception.MachineException;
-import org.eclipse.che.api.machine.server.exception.SnapshotException;
 import org.eclipse.che.api.machine.server.exception.UnsupportedRecipeException;
-import org.eclipse.che.api.machine.server.spi.Instance;
-import org.eclipse.che.api.machine.server.spi.InstanceProvider;
 import org.eclipse.che.api.machine.server.util.RecipeDownloader;
 
 import javax.inject.Inject;
@@ -35,7 +32,7 @@ import java.util.Set;
 import static java.util.Objects.requireNonNull;
 
 /**
- * Implementation of {@link InstanceProvider} based on communication with machine over ssh protocol.
+ * Instance provider based on communication with machine over ssh protocol.
  *
  * <p>Ssh machine can't be actually created and exists somewhere outside of the control.<br>
  * So this implementation just performs command execution in such machines.<br>
@@ -44,7 +41,7 @@ import static java.util.Objects.requireNonNull;
  * @author Alexander Garagatyi
  */
 // todo tests
-public class SshMachineInstanceProvider implements InstanceProvider {
+public class SshMachineInstanceProvider  {
     private static final Gson GSON = new Gson();
 
     private final Set<String>       supportedRecipeTypes;
@@ -58,12 +55,10 @@ public class SshMachineInstanceProvider implements InstanceProvider {
         this.supportedRecipeTypes = Collections.singleton("ssh-config");
     }
 
-    @Override
     public String getType() {
         return "ssh";
     }
 
-    @Override
     public Set<String> getRecipeTypes() {
         return supportedRecipeTypes;
     }
@@ -76,7 +71,7 @@ public class SshMachineInstanceProvider implements InstanceProvider {
      *         machine description
      * @param lineConsumer
      *         output for instance creation logs
-     * @return newly created {@link Instance}
+     * @return newly created {@link SshMachineInstance}
      * @throws UnsupportedRecipeException
      *         if specified {@code recipe} is not supported
      * @throws InvalidRecipeException
@@ -86,9 +81,7 @@ public class SshMachineInstanceProvider implements InstanceProvider {
      * @throws MachineException
      *         if other error occurs
      */
-    @Override
-    public Instance createInstance(Machine machine, LineConsumer lineConsumer)
-            throws UnsupportedRecipeException, InvalidRecipeException, NotFoundException, MachineException {
+    public SshMachineInstance createInstance(Machine machine, LineConsumer lineConsumer) throws NotFoundException, MachineException {
         requireNonNull(machine, "Non null machine required");
         requireNonNull(lineConsumer, "Non null logs consumer required");
         requireNonNull(machine.getConfig().getSource().getLocation(), "Location in machine source is required");
@@ -111,18 +104,4 @@ public class SshMachineInstanceProvider implements InstanceProvider {
         instance.setStatus(MachineStatus.RUNNING);
         return instance;
     }
-
-    /**
-     * Removes snapshot of the instance in implementation specific way.
-     *
-     * @param machineSource
-     *         contains implementation specific key of the snapshot of the instance that should be removed
-     * @throws SnapshotException
-     *         if exception occurs on instance snapshot removal
-     */
-    @Override
-    public void removeInstanceSnapshot(MachineSource machineSource) throws SnapshotException {
-        throw new SnapshotException("Snapshot feature is unsupported for ssh machine implementation");
-    }
-
 }

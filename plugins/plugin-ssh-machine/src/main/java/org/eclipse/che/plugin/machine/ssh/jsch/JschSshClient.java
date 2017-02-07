@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.machine.ssh.jsch;
 
-import com.google.inject.assistedinject.Assisted;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
@@ -60,8 +59,8 @@ public class JschSshClient implements SshClient {
     private Session session;
 
     @Inject
-    public JschSshClient(@Assisted SshMachineRecipe sshMachineRecipe,
-                         @Assisted Map<String, String> envVars,
+    public JschSshClient(SshMachineRecipe sshMachineRecipe,
+                         Map<String, String> envVars,
                          JSch jsch,
                          @Named("che.workspace.ssh_connection_timeout_ms") int connectionTimeoutMs) {
         this.envVars = envVars;

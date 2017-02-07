@@ -9,6 +9,18 @@
 #   Tyler Jewell - Initial Implementation
 #
 
+help_cmd_rmi() {
+  text "\n"
+  text "USAGE: ${CHE_IMAGE_FULLNAME} rmi\n"
+  text "\n"
+  text "Removes bootstrap, utility, and system Docker images used to run ${CHE_MINI_PRODUCT_NAME}\n"
+  text "\n"
+}
+
+pre_cmd_rmi() {
+  true
+}
+
 cmd_rmi() {
   info "rmi" "Checking registry for version '$CHE_VERSION' images"
   if ! has_version_registry $CHE_VERSION; then

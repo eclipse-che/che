@@ -9,8 +9,27 @@
 #   Tyler Jewell - Initial Implementation
 #
 
-cmd_config_post_action() {
- true
+help_cmd_config() {
+  text "\n"
+  text "USAGE: ${CHE_IMAGE_FULLNAME} config [PARAMETERS]\n"
+  text "\n"
+  text "Generate a ${CHE_MINI_PRODUCT_NAME} runtime configuration into /instance. The configurator uses 
+values from your host, ${CHE_MINI_PRODUCT_NAME}.env, and optionally your local repository to generate
+a runtime configuration used to start and stop ${CHE_MINI_PRODUCT_NAME}. A configuration is generated 
+before every execution of ${CHE_MINI_PRODUCT_NAME}. The configuration phase will download all Docker
+images required to start or stop ${CHE_MINI_PRODUCT_NAME} to guarantee that the right images are cached
+before execution. If you have mounted a local repository or assembly, the ${CHE_MINI_PRODUCT_NAME} Docker
+images will use those binaries instead of their embedded ones.\n"
+  text "\n"
+  text "PARAMETERS:\n"
+  text "  --no-force                        Updates images if matching tag not found in local cache\n"
+  text "  --pull                            Uses 'docker pull' to check for new remote versions of images\n"
+  text "  --force                           Uses 'docker rmi' and 'docker pull' to forcibly retrieve latest images\n"
+  text "\n"
+}
+
+pre_cmd_config() {
+  true
 }
 
 cmd_config() {
@@ -19,12 +38,12 @@ cmd_config() {
   # If the system is already initialized, but a user wants to update images, then re-download.
   FORCE_UPDATE=${1:-"--no-force"}
   if ! is_initialized; then
-    cmd_init $FORCE_UPDATE
+    cmd_lifecycle init $FORCE_UPDATE
   elif [[ "${FORCE_UPDATE}" == "--pull" ]] || \
        [[ "${FORCE_UPDATE}" == "--force" ]]; then
-    cmd_download $FORCE_UPDATE
+    cmd_lifecycle download $FORCE_UPDATE
   elif is_nightly && ! is_fast && ! skip_pull; then
-    cmd_download --pull
+    cmd_lifecycle download --pull
   fi
 
   # If using a local repository, then we need to always perform an updated init with those files
@@ -44,7 +63,6 @@ cmd_config() {
 
   # Replace certain environment file lines with their container counterparts
   info "config" "Customizing docker-compose for running in a container"
-
  
   if local_repo || local_assembly; then
     # in development mode to avoid permissions issues we copy tomcat assembly to ${CHE_INSTANCE}
@@ -74,8 +92,6 @@ cmd_config() {
     cp -r "$(echo ${CHE_CONTAINER_ASSEMBLY_FULL_PATH})/." \
         "${CHE_CONTAINER_INSTANCE}/dev/${CHE_MINI_PRODUCT_NAME}-tomcat/"
   fi
-
-  cmd_config_post_action
 }
 
 
@@ -151,3 +167,12 @@ config_directory_is_empty() {
     return 0
   fi
 }
+
+post_cmd_config() {
+  cmd_config_post_action
+}
+
+cmd_config_post_action() {
+ true
+}
+

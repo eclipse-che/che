@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-agents-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>5.2.0-SNAPSHOT</version>
+        <version>5.3.0-SNAPSHOT</version>
     </parent>
     <artifactId>exec-agent</artifactId>
     <name>Exec Agent</name>
@@ -47,14 +47,6 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-machine</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-workspace</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
         </dependency>
     </dependencies>
     <build>
@@ -169,6 +161,7 @@
                                             <argument>${project.build.directory}/${item}/che-websocket-terminal</argument>
                                         </arguments>
                                         <environmentVariables>
+                                            <CGO_ENABLED>0</CGO_ENABLED>
                                             <GOPATH>${project.build.directory}/${go.workspace.name}</GOPATH>
                                             <GOOS>${terminal.target.os}</GOOS>
                                             <GOARCH>${terminal.target.architecture}</GOARCH>

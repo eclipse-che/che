@@ -82,7 +82,6 @@
         <gmaven-plugin.providerSelection>2.0</gmaven-plugin.providerSelection>
         <!-- maven-gpg-plugin -->
         <gpg.useagent>true</gpg.useagent>
-        <gwt.compiler.enableClosureCompiler>true</gwt.compiler.enableClosureCompiler>
         <gwt.compiler.extraJvmArgs>-Xss512m -Xmx2048m</gwt.compiler.extraJvmArgs>
         <gwt.compiler.logLevel>INFO</gwt.compiler.logLevel>
         <!-- The system property jacoco.outputDir needs to be override on the command line

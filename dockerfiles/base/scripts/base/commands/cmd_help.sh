@@ -9,7 +9,16 @@
 #   Tyler Jewell - Initial Implementation
 #
 
-cmd_help() {
-	usage
+help_cmd_help() {
+  text "\n"
+  text "Usage: ${CHE_IMAGE_FULLNAME} help"
+  text "\n"
 }
 
+cmd_help() {
+  usage
+}
+
+pre_cmd_help() {
+  true
+}

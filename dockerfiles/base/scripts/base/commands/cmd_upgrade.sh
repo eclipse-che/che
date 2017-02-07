@@ -9,9 +9,21 @@
 #   Tyler Jewell - Initial Implementation
 #
 
-cmd_upgrade() {
-  debug $FUNCNAME
+help_cmd_upgrade() {
+  text "\n"
+  text "USAGE: ${CHE_IMAGE_FULLNAME} upgrade [PARAMETERS]\n"
+  text "\n"
+  text "Upgrades ${CHE_MINI_PRODUCT_NAME} from one version to another while protecting user workspace data"
+  text "\n"
+  text "PARAMETERS:\n"
+  text "  --skip-backup        Skip backup of user data before performing upgrade\n"
+}
 
+pre_cmd_upgrade() {
+  true
+}
+
+cmd_upgrade() {
   CHE_IMAGE_VERSION=$(get_image_version)
   DO_BACKUP="true"
 
@@ -49,13 +61,13 @@ cmd_upgrade() {
 
   if [[ "${DO_BACKUP}" == "true" ]]; then
     info "upgrade" "Preparing backup..."
-    cmd_backup
+    cmd_lifecycle backup
   else
-    info "upgrade" "Skipping backup."
+    info "upgrade" "Skipping backup"
   fi
 
   info "upgrade" "Reinitializing the system with your configuration..."
-  cmd_init --accept-license --reinit
+  cmd_lifecycle init --accept-license --reinit
 
-  cmd_start
+  cmd_lifecycle start
 }

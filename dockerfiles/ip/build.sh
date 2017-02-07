@@ -7,11 +7,11 @@
 
 IMAGE_NAME="eclipse/che-ip"
 base_dir=$(cd "$(dirname "$0")"; pwd)
-. $base_dir/../build.include
+. "${base_dir}"/../build.include
 
 init "$@"
 build
 
 if [ $(skip_tests "$@") = false ]; then
-  sh $base_dir/test.sh $TAG
+  sh "${base_dir}"/test.sh $TAG
 fi

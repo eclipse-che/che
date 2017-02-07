@@ -6,7 +6,8 @@
 # http://www.eclipse.org/legal/epl-v10.html
 
 IMAGE_NAME="eclipse/che-dev"
-. $(cd "$(dirname "$0")"; pwd)/../build.include
+base_dir=$(cd "$(dirname "$0")"; pwd)
+. "${base_dir}"/../build.include
 
 init "$@"
 build

@@ -9,6 +9,25 @@
 #   Tyler Jewell - Initial Implementation
 #
 
+help_cmd_init() {
+  text "\n"
+  text "USAGE: ${CHE_IMAGE_FULLNAME} init [PARAMETERS]\n"
+  text "\n"
+  text "Initializes a directory with a new ${CHE_MINI_PRODUCT_NAME} installation\n"
+  text "\n"
+  text "PARAMETERS:\n"
+  text "  --accept-license                  If license acceptance required, auto accepts during installation\n"
+  text "  --force                           Uses 'docker rmi' and 'docker pull' to forcibly retrieve latest images\n"
+  text "  --no-force                        Updates images if matching tag not found in local cache\n"
+  text "  --pull                            Uses 'docker pull' to check for new remote versions of images\n"
+  text "  --reinit                          Reinitialize an existing installation overwriting defaults\n"
+  text "\n"
+}
+
+pre_cmd_init() {
+  true
+}
+
 cmd_init() {
 
   # set an initial value for the flag
@@ -50,7 +69,7 @@ cmd_init() {
     warning "($CHE_MINI_PRODUCT_NAME init): 'nightly' installations cannot be upgraded to non-nightly versions"
   fi
 
-  cmd_download $FORCE_UPDATE
+  cmd_lifecycle download $FORCE_UPDATE
 
   if require_license; then
     if [[ "${AUTO_ACCEPT_LICENSE}" = "false" ]]; then
@@ -89,7 +108,7 @@ cmd_init() {
       INIT_RUN_PARAMETERS+=" -v \"${CHE_HOST_DEVELOPMENT_REPO}/dockerfiles/init/manifests/${CHE_MINI_PRODUCT_NAME}.env\":/etc/puppet/manifests/${CHE_MINI_PRODUCT_NAME}.env"
     fi
   fi
-  GENERATE_INIT_COMMAND="docker_run -v ${CHE_HOST_CONFIG}:/copy ${INIT_RUN_PARAMETERS} $IMAGE_INIT"
+  GENERATE_INIT_COMMAND="docker_run -v \"${CHE_HOST_CONFIG}\":/copy ${INIT_RUN_PARAMETERS} $IMAGE_INIT"
   log $GENERATE_INIT_COMMAND
   eval $GENERATE_INIT_COMMAND
 
