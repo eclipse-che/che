@@ -253,6 +253,25 @@ wait_until_server_is_booted() {
   done
 }
 
+less_than_numerically() {
+  COMPARE=$(awk "BEGIN { print ($1 < $2) ? 0 : 1}")
+  return $COMPARE
+}
+
+# This will compare two same length strings, such as versions
+less_than() {
+  for (( i=0; i<${#1}; i++ )); do
+    if [[ ${1:$i:1} != ${2:$i:1} ]]; then
+      if [ ${1:$i:1} -lt ${2:$i:1} ]; then
+        return 0
+      else
+        return 1
+      fi
+    fi
+  done
+  return 1
+}
+
 # Compares $1 version to the first 10 versions listed as tags on Docker Hub
 # Returns "" if $1 is newest, otherwise returns the newest version available
 # Does not work with nightly versions - do not use this to compare nightly to another version
