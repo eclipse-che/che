@@ -95,7 +95,7 @@ cmd_start_check_host_resources() {
     PREFLIGHT="fail"
   fi
 
-  HOST_DISK=$(df "${CHE_CONTAINER_ROOT}" | grep "${CHE_CONTAINER_ROOT}" | cut -d " " -f 6)
+  HOST_DISK=$(df "${CHE_CONTAINER_ROOT}" | grep "${CHE_CONTAINER_ROOT}" | awk '{ print $4}')
 
   if less_than_numerically "$CHE_MIN_DISK"000 $HOST_DISK; then
     text "         disk ($CHE_MIN_DISK MB):           ${GREEN}[OK]${NC}\n"
