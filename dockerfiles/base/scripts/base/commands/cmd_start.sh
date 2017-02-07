@@ -86,7 +86,7 @@ cmd_start_check_host_resources() {
   HOST_RAM=$(docker info | grep "Total Memory:")
   HOST_RAM=$(echo ${HOST_RAM#*:} | xargs)
   HOST_RAM=${HOST_RAM% *}
-  
+
   PREFLIGHT=""
   if less_than_numerically $CHE_MIN_RAM $HOST_RAM; then
     text "         mem ($CHE_MIN_RAM GiB):           ${GREEN}[OK]${NC}\n"
