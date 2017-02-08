@@ -37,7 +37,7 @@ public class KubernetesServiceTest {
     public void shouldReturnServicePortListFromImageExposedPortList() {
         // Given
         Map<String, ExposedPort> imageExposedPorts = new HashMap<>();
-        imageExposedPorts.put("8080/tcp",new ExposedPort());
+        imageExposedPorts.put("8080/TCP",new ExposedPort());
 
         // When
         List<ServicePort> servicePorts = kubernetesService.getServicePortsFrom(imageExposedPorts.keySet());
@@ -54,10 +54,10 @@ public class KubernetesServiceTest {
     public void shouldReturnServicePortListFromExposedPortList() {
         // Given
         Map<String, Map<String, String>> exposedPorts = new HashMap<>();
-        exposedPorts.put("8080/tcp",null);
-        exposedPorts.put("22/tcp",null);
-        exposedPorts.put("4401/tcp",null);
-        exposedPorts.put("4403/tcp",null);
+        exposedPorts.put("8080/TCP",null);
+        exposedPorts.put("22/TCP",null);
+        exposedPorts.put("4401/TCP",null);
+        exposedPorts.put("4403/TCP",null);
 
         // When
         List<ServicePort> servicePorts = kubernetesService.getServicePortsFrom(exposedPorts.keySet());
