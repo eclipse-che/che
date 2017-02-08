@@ -442,7 +442,7 @@ public class HistoryPresenter extends BasePresenter implements HistoryView.Actio
     /** {@inheritDoc} */
     @Override
     public int getSize() {
-        return 450;
+        return 550;
     }
 
     protected enum DiffWith {

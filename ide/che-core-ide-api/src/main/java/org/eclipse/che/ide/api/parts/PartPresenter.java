@@ -35,6 +35,12 @@ public interface PartPresenter extends Presenter {
     /** The property id for <code>getSelection</code>. */
     int SELECTION_PROPERTY = 0x002;
 
+    /** The default size for the part. */
+    final int DEFAULT_PART_SIZE = 260;
+
+    /** The minimum allowable size for the part. */
+    final int MIN_PART_SIZE = 100;
+
     /** Store part state before changing perspective. */
     void storeState();
 
