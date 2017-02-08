@@ -35,5 +35,5 @@ pre_cmd_action() {
 }
 
 cmd_action() {
-  docker_run -it ${UTILITY_IMAGE_CHEACTION} "$@"
+  docker_run $(get_docker_run_terminal_options) ${UTILITY_IMAGE_CHEACTION} "$@"
 }

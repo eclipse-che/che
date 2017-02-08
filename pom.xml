@@ -478,6 +478,11 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.lib</groupId>
+                <artifactId>che-orion-editor</artifactId>
+                <version>${che.lib.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.lib</groupId>
                 <artifactId>che-swagger-module</artifactId>
                 <version>${che.lib.version}</version>
             </dependency>
