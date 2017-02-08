@@ -30,7 +30,9 @@ import java.util.List;
  * @author Sergii Leschenko
  */
 public class SshServiceClientImpl implements SshServiceClient {
-    private final DtoFactory             dtoFactory;
+    private static final String FIND = "/find";
+
+    private final DtoFactory dtoFactory;
     private final AsyncRequestFactory    asyncRequestFactory;
     private final DtoUnmarshallerFactory unmarshallerFactory;
     private final String                 sshApi;
@@ -53,7 +55,7 @@ public class SshServiceClientImpl implements SshServiceClient {
      */
     @Override
     public Promise<SshPairDto> getPair(String service, String name) {
-        return asyncRequestFactory.createGetRequest(sshApi + "/" + service + "/" + name)
+        return asyncRequestFactory.createGetRequest(sshApi + "/" + service + FIND + "?name=" + name)
                                   .header(HTTPHeader.ACCEPT, MimeType.APPLICATION_JSON)
                                   .send(unmarshallerFactory.newUnmarshaller(SshPairDto.class));
     }
