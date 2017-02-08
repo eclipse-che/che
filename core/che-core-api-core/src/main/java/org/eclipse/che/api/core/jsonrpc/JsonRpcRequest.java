@@ -30,12 +30,8 @@ public class JsonRpcRequest {
     private final String        method;
     private final JsonRpcParams params;
 
-    private final JsonParser jsonParser;
-
     @AssistedInject
     public JsonRpcRequest(@Assisted("message") String message, JsonParser jsonParser, JsonRpcFactory jsonRpcFactory) {
-        this.jsonParser = jsonParser;
-
         checkNotNull(message, "Message must not be null");
         checkArgument(!message.isEmpty(), "Message must not be empty");
 
@@ -59,7 +55,6 @@ public class JsonRpcRequest {
     @AssistedInject
     public JsonRpcRequest(@Assisted("id") String id, @Assisted("method") String method, @Assisted("params") JsonRpcParams params,
                           JsonParser jsonParser) {
-        this.jsonParser = jsonParser;
 
         checkNotNull(method, "Method name must not be null");
         checkArgument(!method.isEmpty(), "Method name must not be empty");

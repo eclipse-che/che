@@ -33,7 +33,7 @@ public class JsonRpcResponse {
     private final JsonRpcError  error;
 
     @AssistedInject
-    public JsonRpcResponse(@Assisted("message") String message, JsonParser jsonParser, DtoFactory dtoFactory) {
+    public JsonRpcResponse(@Assisted("message") String message, JsonParser jsonParser) {
         checkNotNull(message, "Message must not be null");
         checkArgument(!message.isEmpty(), "Message must not be empty");
 
@@ -44,7 +44,7 @@ public class JsonRpcResponse {
                   : null;
 
         this.result = response.has("result")
-                      ? new JsonRpcResult(response.get("result").toString(), jsonParser, dtoFactory)
+                      ? new JsonRpcResult(response.get("result").toString(), jsonParser)
                       : null;
 
         this.error = response.has("error")

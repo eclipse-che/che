@@ -33,13 +33,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * {@link JsonRpcFactory#createList(List)}} to get an instance.
  */
 public class JsonRpcList {
-    private final DtoFactory        dtoFactory;
     private final List<JsonElement> jsonElementList;
 
     @AssistedInject
-    public JsonRpcList(@Assisted("message") String message, JsonParser jsonParser, DtoFactory dtoFactory) {
-        this.dtoFactory = dtoFactory;
-
+    public JsonRpcList(@Assisted("message") String message, JsonParser jsonParser) {
         checkNotNull(message, "Message must not be null");
         checkArgument(!message.isEmpty(), "Message must not be empty");
 
@@ -49,9 +46,7 @@ public class JsonRpcList {
     }
 
     @AssistedInject
-    public JsonRpcList(@Assisted("dtoObjectList") List<?> dtoObjectList, JsonParser jsonParser, DtoFactory dtoFactory) {
-        this.dtoFactory = dtoFactory;
-
+    public JsonRpcList(@Assisted("dtoObjectList") List<?> dtoObjectList, JsonParser jsonParser) {
         checkNotNull(dtoObjectList, "List must not be null");
         checkArgument(!dtoObjectList.isEmpty(), "List must not be empty");
 
@@ -73,13 +68,13 @@ public class JsonRpcList {
         checkNotNull(type, "Item type must not be null");
         checkArgument(i >= 0, "Index must not be negative");
 
-        return JsonRpcUtils.getAs(jsonElementList.get(i), type, dtoFactory);
+        return JsonRpcUtils.getAs(jsonElementList.get(i), type);
     }
 
     public <T> List<T> toList(Class<T> type) {
         checkNotNull(type, "List Item type must not be null");
 
-        return JsonRpcUtils.getAsListOf(jsonElementList, type, dtoFactory);
+        return JsonRpcUtils.getAsListOf(jsonElementList, type);
     }
 
     public List<String> toStringifiedList() {

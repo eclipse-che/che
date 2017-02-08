@@ -39,8 +39,7 @@ public class JsonRpcResultTest {
 
     JsonParser jsonParser = new JsonParser();
 
-    @Mock
-    DtoFactory dtoFactory;
+    DtoFactory dtoFactory = DtoFactory.getInstance();
     @Mock
     Dto        dto;
 
@@ -55,13 +54,11 @@ public class JsonRpcResultTest {
 
         when(dto.getParameters()).thenReturn("value");
         when(dto.toString()).thenReturn("{\"parameter\":\"value\"}");
-
-        when(dtoFactory.createDtoFromJson(dto.toString(), Dto.class)).thenReturn(dto);
     }
 
     @Test
     public void shouldBeEmptyOrAbsentWhenParsingStringWithEmptyResult() throws Exception {
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(result.toString(), jsonParser, dtoFactory);
+        JsonRpcResult jsonRpcResult = new JsonRpcResult(result.toString(), jsonParser);
 
         assertTrue(jsonRpcResult.isEmptyOrAbsent());
     }
@@ -70,14 +67,14 @@ public class JsonRpcResultTest {
     public void shouldNotBeEmptyOrAbsentWhenParsingStringWithNotEmptyResult() throws Exception {
         result.addProperty("key", "value");
 
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(result.toString(), jsonParser, dtoFactory);
+        JsonRpcResult jsonRpcResult = new JsonRpcResult(result.toString(), jsonParser);
 
         assertFalse(jsonRpcResult.isEmptyOrAbsent());
     }
 
     @Test
     public void shouldBeEmptyOrAbsentWhenParsingStringWithEmptyResultList() throws Exception {
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(resultList.toString(), jsonParser, dtoFactory);
+        JsonRpcResult jsonRpcResult = new JsonRpcResult(resultList.toString(), jsonParser);
 
         assertTrue(jsonRpcResult.isEmptyOrAbsent());
     }
@@ -86,21 +83,21 @@ public class JsonRpcResultTest {
     public void shouldNotBeEmptyOrAbsentWhenParsingStringWithNotEmptyResultList() throws Exception {
         resultList.add(new JsonObject());
 
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(resultList.toString(), jsonParser, dtoFactory);
+        JsonRpcResult jsonRpcResult = new JsonRpcResult(resultList.toString(), jsonParser);
 
         assertFalse(jsonRpcResult.isEmptyOrAbsent());
     }
 
     @Test
     public void shouldBeAnArrayWhenParsingStringWithResultList() throws Exception {
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(resultList.toString(), jsonParser, dtoFactory);
+        JsonRpcResult jsonRpcResult = new JsonRpcResult(resultList.toString(), jsonParser);
 
         assertTrue(jsonRpcResult.isArray());
     }
 
     @Test
     public void shouldNotBeAnArrayWhenParsingStringWithSingleResult() throws Exception {
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(result.toString(), jsonParser, dtoFactory);
+        JsonRpcResult jsonRpcResult = new JsonRpcResult(result.toString(), jsonParser);
 
         assertFalse(jsonRpcResult.isArray());
     }
@@ -110,7 +107,7 @@ public class JsonRpcResultTest {
         JsonPrimitive primitive = new JsonPrimitive("a");
         String expected = primitive.getAsString();
 
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(primitive.toString(), jsonParser, dtoFactory);
+        JsonRpcResult jsonRpcResult = new JsonRpcResult(primitive.toString(), jsonParser);
         String actual = jsonRpcResult.getAs(String.class);
 
         assertEquals(expected, actual);
@@ -123,7 +120,7 @@ public class JsonRpcResultTest {
         JsonArray array = new JsonArray();
         array.add(primitive);
 
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(array.toString(), jsonParser, dtoFactory);
+        JsonRpcResult jsonRpcResult = new JsonRpcResult(array.toString(), jsonParser);
         List<String> actual = jsonRpcResult.getAsListOf(String.class);
 
         assertEquals(expected, actual.iterator().next());
@@ -134,7 +131,7 @@ public class JsonRpcResultTest {
         JsonPrimitive primitive = new JsonPrimitive("a");
         String expected = primitive.toString();
 
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(primitive.toString(), jsonParser, dtoFactory);
+        JsonRpcResult jsonRpcResult = new JsonRpcResult(primitive.toString(), jsonParser);
         String actual = jsonRpcResult.toString();
 
         assertEquals(expected, actual);
@@ -147,7 +144,7 @@ public class JsonRpcResultTest {
         array.add(primitive);
         String expected = array.toString();
 
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(array.toString(), jsonParser, dtoFactory);
+        JsonRpcResult jsonRpcResult = new JsonRpcResult(array.toString(), jsonParser);
         String actual = jsonRpcResult.toString();
 
         assertEquals(expected, actual);
@@ -157,7 +154,7 @@ public class JsonRpcResultTest {
     public void shouldToJsonValueWhenParsingStringWithResultAsASingleString() throws Exception {
         JsonPrimitive expected = new JsonPrimitive("a");
 
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(expected.toString(), jsonParser, dtoFactory);
+        JsonRpcResult jsonRpcResult = new JsonRpcResult(expected.toString(), jsonParser);
         JsonElement actual = jsonRpcResult.toJsonElement();
 
         assertEquals(expected, actual);
@@ -169,7 +166,7 @@ public class JsonRpcResultTest {
         JsonArray expected = new JsonArray();
         expected.add(primitive);
 
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(expected.toString(), jsonParser, dtoFactory);
+        JsonRpcResult jsonRpcResult = new JsonRpcResult(expected.toString(), jsonParser);
         JsonElement actual = jsonRpcResult.toJsonElement();
 
         assertEquals(expected, actual);
@@ -180,7 +177,7 @@ public class JsonRpcResultTest {
         JsonPrimitive value = new JsonPrimitive(0D);
         Double expected = value.getAsDouble();
 
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(value.toString(), jsonParser, dtoFactory);
+        JsonRpcResult jsonRpcResult = new JsonRpcResult(value.toString(), jsonParser);
         Double actual = jsonRpcResult.getAs(Double.class);
 
         assertEquals(expected, actual);
@@ -193,7 +190,7 @@ public class JsonRpcResultTest {
         JsonArray array = new JsonArray();
         array.add(primitive);
 
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(array.toString(), jsonParser, dtoFactory);
+        JsonRpcResult jsonRpcResult = new JsonRpcResult(array.toString(), jsonParser);
         List<Double> actual = jsonRpcResult.getAsListOf(Double.class);
 
         assertEquals(expected, actual.iterator().next());
@@ -204,7 +201,7 @@ public class JsonRpcResultTest {
         Double expected = 0D;
         JsonPrimitive primitive = new JsonPrimitive(expected);
 
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(primitive.toString(), jsonParser, dtoFactory);
+        JsonRpcResult jsonRpcResult = new JsonRpcResult(primitive.toString(), jsonParser);
         String actual = jsonRpcResult.toString();
 
         assertEquals(expected, Double.valueOf(actual));
@@ -217,7 +214,7 @@ public class JsonRpcResultTest {
         array.add(primitive);
         String expected = array.toString();
 
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(array.toString(), jsonParser, dtoFactory);
+        JsonRpcResult jsonRpcResult = new JsonRpcResult(array.toString(), jsonParser);
         String actual = jsonRpcResult.toString();
 
         assertEquals(expected, actual);
@@ -227,7 +224,7 @@ public class JsonRpcResultTest {
     public void shouldToJsonValueWhenParsingStringWithResultAsASingleNumber() throws Exception {
         JsonPrimitive expected = new JsonPrimitive(0D);
 
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(expected.toString(), jsonParser, dtoFactory);
+        JsonRpcResult jsonRpcResult = new JsonRpcResult(expected.toString(), jsonParser);
         JsonElement actual = jsonRpcResult.toJsonElement();
 
         assertEquals(expected, actual);
@@ -240,7 +237,7 @@ public class JsonRpcResultTest {
         JsonArray expected = new JsonArray();
         expected.add(primitive);
 
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(expected.toString(), jsonParser, dtoFactory);
+        JsonRpcResult jsonRpcResult = new JsonRpcResult(expected.toString(), jsonParser);
         JsonElement actual = jsonRpcResult.toJsonElement();
 
         assertEquals(expected, actual);
@@ -253,7 +250,7 @@ public class JsonRpcResultTest {
         JsonObject value = new JsonObject();
         Void expected = null;
 
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(value.toString(), jsonParser, dtoFactory);
+        JsonRpcResult jsonRpcResult = new JsonRpcResult(value.toString(), jsonParser);
         Void actual = jsonRpcResult.getAs(Void.class);
 
         assertEquals(expected, actual);
@@ -264,7 +261,7 @@ public class JsonRpcResultTest {
         JsonObject value = new JsonObject();
         String expected = value.toString();
 
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(value.toString(), jsonParser, dtoFactory);
+        JsonRpcResult jsonRpcResult = new JsonRpcResult(value.toString(), jsonParser);
         String actual = jsonRpcResult.toString();
 
         assertEquals(expected, actual);
@@ -274,39 +271,8 @@ public class JsonRpcResultTest {
     public void shouldToJsonValueWhenParsingStringWithResultAsASingleVoid() throws Exception {
         JsonObject expected = new JsonObject();
 
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(expected.toString(), jsonParser, dtoFactory);
+        JsonRpcResult jsonRpcResult = new JsonRpcResult(expected.toString(), jsonParser);
         JsonElement actual = jsonRpcResult.toJsonElement();
-
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    public void shouldGetAsDtoWhenParsingStringWithResultAsDto() throws Exception {
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(dto.toString(), jsonParser, dtoFactory);
-        Dto actual = jsonRpcResult.getAs(Dto.class);
-
-        assertEquals(dto, actual);
-    }
-
-    @Test
-    public void shouldGetAsListOfDtoWhenParsingStringWithResultAsListOfDto() throws Exception {
-        JsonArray array = new JsonArray();
-        JsonObject value = jsonParser.parse(dto.toString()).getAsJsonObject();
-        array.add(value);
-        List<Dto> expected = singletonList(dto);
-
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(array.toString(), jsonParser, dtoFactory);
-        List<Dto> actual = jsonRpcResult.getAsListOf(Dto.class);
-
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    public void shouldToStringWhenParsingStringWithResultAsASingleDto() throws Exception {
-        String expected = dto.toString();
-
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(dto.toString(), jsonParser, dtoFactory);
-        String actual = jsonRpcResult.toString();
 
         assertEquals(expected, actual);
     }
@@ -318,7 +284,7 @@ public class JsonRpcResultTest {
         array.add(value);
         String expected = array.toString();
 
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(array.toString(), jsonParser, dtoFactory);
+        JsonRpcResult jsonRpcResult = new JsonRpcResult(array.toString(), jsonParser);
         String actual = jsonRpcResult.toString();
 
         assertEquals(expected, actual);
@@ -328,7 +294,7 @@ public class JsonRpcResultTest {
     public void shouldToJsonValueWhenParsingStringWithResultAsASingleDto() throws Exception {
         JsonObject value = jsonParser.parse(dto.toString()).getAsJsonObject();
 
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(dto.toString(), jsonParser, dtoFactory);
+        JsonRpcResult jsonRpcResult = new JsonRpcResult(dto.toString(), jsonParser);
         JsonElement actual = jsonRpcResult.toJsonElement();
 
         assertEquals(value, actual);
@@ -340,7 +306,7 @@ public class JsonRpcResultTest {
         JsonObject value = jsonParser.parse(dto.toString()).getAsJsonObject();
         expected.add(value);
 
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(expected.toString(), jsonParser, dtoFactory);
+        JsonRpcResult jsonRpcResult = new JsonRpcResult(expected.toString(), jsonParser);
         JsonElement actual = jsonRpcResult.toJsonElement();
 
         assertEquals(expected, actual);
@@ -350,7 +316,7 @@ public class JsonRpcResultTest {
     public void shouldGetAsStringWhenPassingParametersWithResultAsString() throws Exception {
         String expected = "a";
 
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(expected, jsonParser, dtoFactory);
+        JsonRpcResult jsonRpcResult = new JsonRpcResult(expected, jsonParser);
         String actual = jsonRpcResult.getAs(String.class);
 
         assertEquals(expected, actual);
@@ -360,7 +326,7 @@ public class JsonRpcResultTest {
     public void shouldGetAsListOfStringWhenPassingParametersWithResultAsString() throws Exception {
         List<String> expected = singletonList("a");
 
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(expected, jsonParser, dtoFactory);
+        JsonRpcResult jsonRpcResult = new JsonRpcResult(expected, jsonParser);
         List<String> actual = jsonRpcResult.getAsListOf(String.class);
 
         assertEquals(expected, actual);
@@ -371,7 +337,7 @@ public class JsonRpcResultTest {
         String value = "a";
         String expected = jsonParser.parse(value).toString();
 
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(value, dtoFactory, jsonParser);
+        JsonRpcResult jsonRpcResult = new JsonRpcResult(value, jsonParser);
         String actual = jsonRpcResult.toString();
 
         assertEquals(expected, actual);
@@ -384,7 +350,7 @@ public class JsonRpcResultTest {
         array.add(new JsonPrimitive(value));
         String expected = array.toString();
 
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(singletonList(value), dtoFactory, jsonParser);
+        JsonRpcResult jsonRpcResult = new JsonRpcResult(singletonList(value), jsonParser);
         String actual = jsonRpcResult.toString();
 
         assertEquals(expected, actual);
@@ -395,7 +361,7 @@ public class JsonRpcResultTest {
         String value = "a";
         JsonPrimitive expected = new JsonPrimitive(value);
 
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(value, dtoFactory, jsonParser);
+        JsonRpcResult jsonRpcResult = new JsonRpcResult(value, jsonParser);
         JsonElement actual = jsonRpcResult.toJsonElement();
 
         assertEquals(expected, actual);
@@ -407,7 +373,7 @@ public class JsonRpcResultTest {
         JsonArray expected = new JsonArray();
         expected.add(new JsonPrimitive(value));
 
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(singletonList(value), dtoFactory, jsonParser);
+        JsonRpcResult jsonRpcResult = new JsonRpcResult(singletonList(value), jsonParser);
         JsonElement actual = jsonRpcResult.toJsonElement();
 
         assertEquals(expected, actual);
@@ -417,7 +383,7 @@ public class JsonRpcResultTest {
     public void shouldGetAsNumberWhenPassingParametersWithResultAsNumber() throws Exception {
         Double expected = 0D;
 
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(expected, dtoFactory, jsonParser);
+        JsonRpcResult jsonRpcResult = new JsonRpcResult(expected, jsonParser);
         Double actual = jsonRpcResult.getAs(Double.class);
 
         assertEquals(expected, actual);
@@ -430,7 +396,7 @@ public class JsonRpcResultTest {
         JsonArray array = new JsonArray();
         array.add(primitive);
 
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(singletonList(expected), jsonParser, dtoFactory);
+        JsonRpcResult jsonRpcResult = new JsonRpcResult(singletonList(expected), jsonParser);
         List<Double> actual = jsonRpcResult.getAsListOf(Double.class);
 
         assertEquals(expected, actual.iterator().next());
@@ -440,7 +406,7 @@ public class JsonRpcResultTest {
     public void shouldToStringWhenPassingParametersWithResultAsASingleNumber() throws Exception {
         Double expected = 0D;
 
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(expected, dtoFactory, jsonParser);
+        JsonRpcResult jsonRpcResult = new JsonRpcResult(expected, jsonParser);
         String actual = jsonRpcResult.toString();
 
         assertEquals(expected, Double.valueOf(actual));
@@ -454,7 +420,7 @@ public class JsonRpcResultTest {
         array.add(primitive);
         String expected = array.toString();
 
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(singletonList(value), dtoFactory, jsonParser);
+        JsonRpcResult jsonRpcResult = new JsonRpcResult(singletonList(value), jsonParser);
         String actual = jsonRpcResult.toString();
 
         assertEquals(expected, actual);
@@ -466,7 +432,7 @@ public class JsonRpcResultTest {
         JsonPrimitive expected = new JsonPrimitive(value);
 
 
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(value, dtoFactory, jsonParser);
+        JsonRpcResult jsonRpcResult = new JsonRpcResult(value, jsonParser);
         JsonElement actual = jsonRpcResult.toJsonElement();
 
         assertEquals(expected, actual);
@@ -479,67 +445,17 @@ public class JsonRpcResultTest {
         JsonArray expected = new JsonArray();
         expected.add(primitive);
 
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(singletonList(value), dtoFactory, jsonParser);
+        JsonRpcResult jsonRpcResult = new JsonRpcResult(singletonList(value), jsonParser);
         JsonElement actual = jsonRpcResult.toJsonElement();
 
         assertEquals(expected, (actual));
     }
 
     @Test
-    public void shouldGetAsVoidWhenPassingParametersWithResultAsVoid() throws Exception {
-        Void expected = null;
-
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(null, dtoFactory, jsonParser);
-        Void actual = jsonRpcResult.getAs(Void.class);
-
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    public void shouldToStringWhenPassingParametersWithResultAsASingleVoid() throws Exception {
-        JsonObject value = new JsonObject();
-        String expected = value.toString();
-
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(null, dtoFactory, jsonParser);
-        String actual = jsonRpcResult.toString();
-
-        assertEquals(expected, actual);
-    }
-
-
-    @Test
-    public void shouldToJsonValueWhenPassingParametersWithResultAsASingleVoid() throws Exception {
-        JsonObject expected = new JsonObject();
-
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(null, dtoFactory, jsonParser);
-        JsonElement actual = jsonRpcResult.toJsonElement();
-
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    public void shouldGetAsDtoWhenPassingParametersWithResultAsDto() throws Exception {
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(dto, dtoFactory, jsonParser);
-        Dto actual = jsonRpcResult.getAs(Dto.class);
-
-        assertEquals(dto, actual);
-    }
-
-    @Test
-    public void shouldGetAsListOfDtoWhenPassingParametersWithResultAsListOfDto() throws Exception {
-        List<Dto> expected = singletonList(dto);
-
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(expected, jsonParser, dtoFactory);
-        List<Dto> actual = jsonRpcResult.getAsListOf(Dto.class);
-
-        assertEquals(expected, actual);
-    }
-
-    @Test
     public void shouldToStringWhenPassingParametersWithResultAsASingleDto() throws Exception {
         String expected = dto.toString();
 
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(dto, dtoFactory, jsonParser);
+        JsonRpcResult jsonRpcResult = new JsonRpcResult(dto, jsonParser);
         String actual = jsonRpcResult.toString();
 
         assertEquals(expected, actual);
@@ -552,7 +468,7 @@ public class JsonRpcResultTest {
         array.add(value);
         String expected = array.toString();
 
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(singletonList(dto), dtoFactory, jsonParser);
+        JsonRpcResult jsonRpcResult = new JsonRpcResult(singletonList(dto), jsonParser);
         String actual = jsonRpcResult.toString();
 
         assertEquals(expected, actual);
@@ -562,7 +478,7 @@ public class JsonRpcResultTest {
     public void shouldToJsonValueWhenPassingParametersWithResultAsASingleDto() throws Exception {
         JsonObject expected = jsonParser.parse(dto.toString()).getAsJsonObject();
 
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(dto, dtoFactory, jsonParser);
+        JsonRpcResult jsonRpcResult = new JsonRpcResult(dto, jsonParser);
         JsonElement actual = jsonRpcResult.toJsonElement();
 
         assertEquals(expected, actual);
@@ -574,7 +490,7 @@ public class JsonRpcResultTest {
         JsonObject value = jsonParser.parse(dto.toString()).getAsJsonObject();
         expected.add(value);
 
-        JsonRpcResult jsonRpcResult = new JsonRpcResult(singletonList(dto), dtoFactory, jsonParser);
+        JsonRpcResult jsonRpcResult = new JsonRpcResult(singletonList(dto), jsonParser);
         JsonElement actual = jsonRpcResult.toJsonElement();
 
         assertEquals(expected, actual);

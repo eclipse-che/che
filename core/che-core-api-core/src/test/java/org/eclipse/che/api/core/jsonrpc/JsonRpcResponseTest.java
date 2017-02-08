@@ -34,9 +34,8 @@ import static org.testng.AssertJUnit.assertTrue;
 @Listeners(MockitoTestNGListener.class)
 public class JsonRpcResponseTest {
     public static final String ID = "0";
+
     JsonParser jsonParser = new JsonParser();
-    @Mock
-    DtoFactory dtoFactory;
 
     @Mock
     JsonRpcResult result;
@@ -69,7 +68,7 @@ public class JsonRpcResponseTest {
     public void shouldHaveErrorWhenParsingStringWithError() throws Exception {
         response.remove("result");
 
-        JsonRpcResponse jsonRpcResponse = new JsonRpcResponse(response.toString(), jsonParser, dtoFactory);
+        JsonRpcResponse jsonRpcResponse = new JsonRpcResponse(response.toString(), jsonParser);
 
         assertTrue(jsonRpcResponse.hasError());
         assertFalse(jsonRpcResponse.hasResult());
@@ -80,7 +79,7 @@ public class JsonRpcResponseTest {
     public void shouldHaveResultWhenParsingStringWithResult() throws Exception {
         response.remove("error");
 
-        JsonRpcResponse jsonRpcResponse = new JsonRpcResponse(response.toString(), jsonParser, dtoFactory);
+        JsonRpcResponse jsonRpcResponse = new JsonRpcResponse(response.toString(), jsonParser);
 
         assertTrue(jsonRpcResponse.hasResult());
         assertFalse(jsonRpcResponse.hasError());
@@ -91,7 +90,7 @@ public class JsonRpcResponseTest {
         JsonObject expected = response;
         expected.remove("error");
 
-        JsonRpcResponse jsonRpcResponse = new JsonRpcResponse(expected.toString(), jsonParser, dtoFactory);
+        JsonRpcResponse jsonRpcResponse = new JsonRpcResponse(expected.toString(), jsonParser);
         JsonObject actual = jsonRpcResponse.toJsonObject();
 
         assertEquals(expected, actual);
@@ -102,7 +101,7 @@ public class JsonRpcResponseTest {
         JsonObject expected = response;
         expected.remove("result");
 
-        JsonRpcResponse jsonRpcResponse = new JsonRpcResponse(expected.toString(), jsonParser, dtoFactory);
+        JsonRpcResponse jsonRpcResponse = new JsonRpcResponse(expected.toString(), jsonParser);
         JsonObject actual = jsonRpcResponse.toJsonObject();
 
         assertEquals(expected, actual);
@@ -114,7 +113,7 @@ public class JsonRpcResponseTest {
         JsonObject expected = response;
         expected.remove("error");
 
-        JsonRpcResponse jsonRpcResponse = new JsonRpcResponse(expected.toString(), jsonParser, dtoFactory);
+        JsonRpcResponse jsonRpcResponse = new JsonRpcResponse(expected.toString(), jsonParser);
         JsonElement actual = jsonParser.parse(jsonRpcResponse.toString());
 
         assertEquals(expected, actual);
@@ -126,7 +125,7 @@ public class JsonRpcResponseTest {
         JsonObject expected = response;
         expected.remove("result");
 
-        JsonRpcResponse jsonRpcResponse = new JsonRpcResponse(expected.toString(), jsonParser, dtoFactory);
+        JsonRpcResponse jsonRpcResponse = new JsonRpcResponse(expected.toString(), jsonParser);
         JsonElement actual = jsonParser.parse(jsonRpcResponse.toString());
 
         assertEquals(expected, actual);

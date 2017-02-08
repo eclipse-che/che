@@ -24,10 +24,10 @@ class JsonRpcUtils {
 
     @SuppressWarnings("unchecked")
     static <T> T cast(Object object) {
-        return (T)object;
+        return (T) object;
     }
 
-    static <T> T getAs(JsonElement element, Class<T> type, DtoFactory dtoFactory) {
+    static <T> T getAs(JsonElement element, Class<T> type) {
         if (type.equals(String.class)) {
             return cast(element.getAsString());
         } else if (type.equals(Double.class)) {
@@ -37,11 +37,11 @@ class JsonRpcUtils {
         } else if (type.equals(Void.class)) {
             return null;
         } else {
-            return dtoFactory.createDtoFromJson(element.toString(), type);
+            return DtoFactory.getInstance().createDtoFromJson(element.toString(), type);
         }
     }
 
-    static <T> List<T> getAsListOf(List<JsonElement> elements, Class<T> type, DtoFactory dtoFactory) {
-        return elements.stream().map(it -> getAs(it, type, dtoFactory)).collect(Collectors.toList());
+    static <T> List<T> getAsListOf(List<JsonElement> elements, Class<T> type) {
+        return elements.stream().map(it -> getAs(it, type)).collect(Collectors.toList());
     }
 }

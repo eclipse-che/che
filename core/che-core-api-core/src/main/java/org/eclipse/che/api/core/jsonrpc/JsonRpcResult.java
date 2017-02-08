@@ -38,15 +38,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class JsonRpcResult {
     private final static JsonObject EMPTY_OBJECT = new JsonObject();
 
-    private final DtoFactory dtoFactory;
-
     private List<JsonElement> resultList;
     private JsonElement       result;
 
     @AssistedInject
-    public JsonRpcResult(@Assisted("message") String message, JsonParser jsonParser, DtoFactory dtoFactory) {
-        this.dtoFactory = dtoFactory;
-
+    public JsonRpcResult(@Assisted("message") String message, JsonParser jsonParser) {
         checkNotNull(message, "Message must not be null");
         checkArgument(!message.isEmpty(), "Message must not be empty");
 
@@ -61,16 +57,12 @@ public class JsonRpcResult {
     }
 
     @AssistedInject
-    public JsonRpcResult(@Assisted("result") Object result, DtoFactory dtoFactory, JsonParser jsonParser) {
-        this.dtoFactory = dtoFactory;
-
+    public JsonRpcResult(@Assisted("result") Object result, JsonParser jsonParser) {
         this.result = result == null ? EMPTY_OBJECT : jsonParser.parse(result.toString());
     }
 
     @AssistedInject
-    public JsonRpcResult(@Assisted("result") List<?> result, JsonParser jsonParser, DtoFactory dtoFactory) {
-        this.dtoFactory = dtoFactory;
-
+    public JsonRpcResult(@Assisted("result") List<?> result, JsonParser jsonParser) {
         if (result == null || result.isEmpty()) {
             this.resultList = Collections.emptyList();
         } else {
@@ -98,11 +90,11 @@ public class JsonRpcResult {
     }
 
     public <T> T getAs(Class<T> type) {
-        return JsonRpcUtils.getAs(result, type, dtoFactory);
+        return JsonRpcUtils.getAs(result, type);
     }
 
     public <T> List<T> getAsListOf(Class<T> type) {
-        return JsonRpcUtils.getAsListOf(resultList, type, dtoFactory);
+        return JsonRpcUtils.getAsListOf(resultList, type);
     }
 
     @Override

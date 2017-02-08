@@ -16,6 +16,7 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 
 import org.eclipse.che.dto.server.DtoFactory;
+import org.eclipse.che.dto.shared.DTO;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
@@ -41,8 +42,7 @@ public class JsonRpcListTest {
     static final String NOT_ARRAY = "{}";
     static final String DTO       = "{\"parameter\":\"value\"}";
 
-    @Mock
-    DtoFactory dtoFactory;
+    DtoFactory dtoFactory = DtoFactory.getInstance();
 
     JsonParser jsonParser = new JsonParser();
 
@@ -64,7 +64,7 @@ public class JsonRpcListTest {
         array.add(new JsonPrimitive(expected));
         String message = array.toString();
 
-        JsonRpcList jsonRpcList = new JsonRpcList(message, jsonParser, dtoFactory);
+        JsonRpcList jsonRpcList = new JsonRpcList(message, jsonParser);
         String actual = jsonRpcList.get(0, String.class);
 
         assertEquals(expected, actual);
@@ -77,7 +77,7 @@ public class JsonRpcListTest {
         array.add(new JsonPrimitive(expected));
         String message = array.toString();
 
-        JsonRpcList jsonRpcList = new JsonRpcList(message, jsonParser, dtoFactory);
+        JsonRpcList jsonRpcList = new JsonRpcList(message, jsonParser);
         List<String> actual = jsonRpcList.toList(String.class);
 
         assertEquals(singletonList(expected), actual);
@@ -90,7 +90,7 @@ public class JsonRpcListTest {
         array.add(new JsonPrimitive(expected));
         String message = array.toString();
 
-        JsonRpcList jsonRpcList = new JsonRpcList(message, jsonParser, dtoFactory);
+        JsonRpcList jsonRpcList = new JsonRpcList(message, jsonParser);
         List<String> actual = jsonRpcList.toStringifiedList();
 
         assertEquals("\"a\"", actual.get(0));
@@ -102,7 +102,7 @@ public class JsonRpcListTest {
         expected.add(new JsonPrimitive("a"));
         String message = expected.toString();
 
-        JsonRpcList jsonRpcList = new JsonRpcList(message, jsonParser, dtoFactory);
+        JsonRpcList jsonRpcList = new JsonRpcList(message, jsonParser);
         JsonArray actual = jsonRpcList.toJsonArray();
 
         assertEquals(expected, actual);
@@ -115,7 +115,7 @@ public class JsonRpcListTest {
         array.add(new JsonPrimitive(expected));
         String message = array.toString();
 
-        JsonRpcList jsonRpcList = new JsonRpcList(message, jsonParser, dtoFactory);
+        JsonRpcList jsonRpcList = new JsonRpcList(message, jsonParser);
         String actual = jsonRpcList.toString();
 
         assertEquals(message, actual);
@@ -128,7 +128,7 @@ public class JsonRpcListTest {
         array.add(new JsonPrimitive(expected));
         String message = array.toString();
 
-        JsonRpcList jsonRpcList = new JsonRpcList(message, jsonParser, dtoFactory);
+        JsonRpcList jsonRpcList = new JsonRpcList(message, jsonParser);
         Double actual = jsonRpcList.get(0, Double.class);
 
         assertEquals(expected, actual);
@@ -141,7 +141,7 @@ public class JsonRpcListTest {
         array.add(new JsonPrimitive(expected));
         String message = array.toString();
 
-        JsonRpcList jsonRpcList = new JsonRpcList(message, jsonParser, dtoFactory);
+        JsonRpcList jsonRpcList = new JsonRpcList(message, jsonParser);
         List<Double> actual = jsonRpcList.toList(Double.class);
 
         assertEquals(singletonList(expected), actual);
@@ -154,7 +154,7 @@ public class JsonRpcListTest {
         array.add(new JsonPrimitive(expected));
         String message = array.toString();
 
-        JsonRpcList jsonRpcList = new JsonRpcList(message, jsonParser, dtoFactory);
+        JsonRpcList jsonRpcList = new JsonRpcList(message, jsonParser);
         List<String> actual = jsonRpcList.toStringifiedList();
 
         assertEquals(expected, Double.valueOf(actual.iterator().next()));
@@ -166,7 +166,7 @@ public class JsonRpcListTest {
         expected.add(new JsonPrimitive(0D));
         String message = expected.toString();
 
-        JsonRpcList jsonRpcList = new JsonRpcList(message, jsonParser, dtoFactory);
+        JsonRpcList jsonRpcList = new JsonRpcList(message, jsonParser);
         JsonArray actual = jsonRpcList.toJsonArray();
 
         assertEquals(expected, actual);
@@ -179,7 +179,7 @@ public class JsonRpcListTest {
         array.add(new JsonPrimitive(expected));
         String message = array.toString();
 
-        JsonRpcList jsonRpcList = new JsonRpcList(message, jsonParser, dtoFactory);
+        JsonRpcList jsonRpcList = new JsonRpcList(message, jsonParser);
         String actual = jsonRpcList.toString();
 
         assertEquals(message, actual);
@@ -191,7 +191,7 @@ public class JsonRpcListTest {
         array.add(new JsonPrimitive(false));
         String message = array.toString();
 
-        JsonRpcList jsonRpcList = new JsonRpcList(message, jsonParser, dtoFactory);
+        JsonRpcList jsonRpcList = new JsonRpcList(message, jsonParser);
         Boolean actual = jsonRpcList.get(0, Boolean.class);
 
         assertFalse(actual);
@@ -203,7 +203,7 @@ public class JsonRpcListTest {
         array.add(new JsonPrimitive(false));
         String message = array.toString();
 
-        JsonRpcList jsonRpcList = new JsonRpcList(message, jsonParser, dtoFactory);
+        JsonRpcList jsonRpcList = new JsonRpcList(message, jsonParser);
         List<Boolean> actual = jsonRpcList.toList(Boolean.class);
 
         assertEquals(singletonList(false), actual);
@@ -216,7 +216,7 @@ public class JsonRpcListTest {
         array.add(new JsonPrimitive(expected));
         String message = array.toString();
 
-        JsonRpcList jsonRpcList = new JsonRpcList(message, jsonParser, dtoFactory);
+        JsonRpcList jsonRpcList = new JsonRpcList(message, jsonParser);
         List<String> actual = jsonRpcList.toStringifiedList();
 
         assertEquals(expected, Boolean.valueOf(actual.iterator().next()));
@@ -229,7 +229,7 @@ public class JsonRpcListTest {
         array.add(new JsonPrimitive(expected));
         String message = array.toString();
 
-        JsonRpcList jsonRpcList = new JsonRpcList(message, jsonParser, dtoFactory);
+        JsonRpcList jsonRpcList = new JsonRpcList(message, jsonParser);
         JsonArray actual = jsonRpcList.toJsonArray();
 
         assertEquals(array, actual);
@@ -242,102 +242,7 @@ public class JsonRpcListTest {
         array.add(new JsonPrimitive(expected));
         String message = array.toString();
 
-        JsonRpcList jsonRpcList = new JsonRpcList(message, jsonParser, dtoFactory);
-        String actual = jsonRpcList.toString();
-
-        assertEquals(message, actual);
-    }
-
-    @Test
-    public void shouldParseDtoArray() throws Exception {
-        Dto expected = mock(Dto.class);
-        when(expected.toString()).thenReturn(DTO);
-        when(expected.getParameter()).thenReturn("value");
-
-        when(dtoFactory.createDtoFromJson(DTO, Dto.class)).thenReturn(expected);
-
-        JsonElement element = jsonParser.parse(DTO);
-        JsonArray array = new JsonArray();
-        array.add(element);
-        String message = array.toString();
-
-        JsonRpcList jsonRpcList = new JsonRpcList(message, jsonParser, dtoFactory);
-        Dto actual = jsonRpcList.get(0, Dto.class);
-
-        assertEquals(expected.getParameter(), actual.getParameter());
-    }
-
-    @Test
-    public void shouldToListParsedDtoArray() throws Exception {
-        Dto expected = mock(Dto.class);
-        when(expected.toString()).thenReturn(DTO);
-        when(expected.getParameter()).thenReturn("value");
-
-        when(dtoFactory.createDtoFromJson(DTO, Dto.class)).thenReturn(expected);
-
-        JsonElement element = jsonParser.parse(DTO);
-        JsonArray array = new JsonArray();
-        array.add(element);
-        String message = array.toString();
-
-        JsonRpcList jsonRpcList = new JsonRpcList(message, jsonParser, dtoFactory);
-        List<Dto> actual = jsonRpcList.toList(Dto.class);
-
-        assertEquals(singletonList(expected), actual);
-    }
-
-    @Test
-    public void shouldToStringifiedListParsedDtoArray() throws Exception {
-        Dto expected = mock(Dto.class);
-        when(expected.toString()).thenReturn(DTO);
-        when(expected.getParameter()).thenReturn("value");
-
-        when(dtoFactory.createDtoFromJson(DTO, Dto.class)).thenReturn(expected);
-
-        JsonElement element = jsonParser.parse(DTO);
-        JsonArray array = new JsonArray();
-        array.add(element);
-        String message = array.toString();
-
-        JsonRpcList jsonRpcList = new JsonRpcList(message, jsonParser, dtoFactory);
-        List<String> actual = jsonRpcList.toStringifiedList();
-
-        assertEquals(expected.toString(), actual.iterator().next());
-    }
-
-    @Test
-    public void shouldToJsonArrayParsedDtoArray() throws Exception {
-        Dto expected = mock(Dto.class);
-        when(expected.toString()).thenReturn(DTO);
-        when(expected.getParameter()).thenReturn("value");
-
-        when(dtoFactory.createDtoFromJson(DTO, Dto.class)).thenReturn(expected);
-
-        JsonElement element = jsonParser.parse(DTO);
-        JsonArray array = new JsonArray();
-        array.add(element);
-        String message = array.toString();
-
-        JsonRpcList jsonRpcList = new JsonRpcList(message, jsonParser, dtoFactory);
-        JsonArray actual = jsonRpcList.toJsonArray();
-
-        assertEquals(array, actual);
-    }
-
-    @Test
-    public void shouldToStringArrayParsedDtoArray() throws Exception {
-        Dto expected = mock(Dto.class);
-        when(expected.toString()).thenReturn(DTO);
-        when(expected.getParameter()).thenReturn("value");
-
-        when(dtoFactory.createDtoFromJson(DTO, Dto.class)).thenReturn(expected);
-
-        JsonElement element = jsonParser.parse(DTO);
-        JsonArray array = new JsonArray();
-        array.add(element);
-        String message = array.toString();
-
-        JsonRpcList jsonRpcList = new JsonRpcList(message, jsonParser, dtoFactory);
+        JsonRpcList jsonRpcList = new JsonRpcList(message, jsonParser);
         String actual = jsonRpcList.toString();
 
         assertEquals(message, actual);
@@ -347,7 +252,7 @@ public class JsonRpcListTest {
     public void shouldCreateStringArray() throws Exception {
         String expected = "a";
 
-        JsonRpcList jsonRpcList = new JsonRpcList(singletonList(expected), jsonParser, dtoFactory);
+        JsonRpcList jsonRpcList = new JsonRpcList(singletonList(expected), jsonParser);
         String actual = jsonRpcList.get(0, String.class);
 
         assertEquals(expected, actual);
@@ -357,20 +262,10 @@ public class JsonRpcListTest {
     public void shouldToListCreatedStringArray() throws Exception {
         String expected = "a";
 
-        JsonRpcList jsonRpcList = new JsonRpcList(singletonList(expected), jsonParser, dtoFactory);
+        JsonRpcList jsonRpcList = new JsonRpcList(singletonList(expected), jsonParser);
         List<String> actual = jsonRpcList.toList(String.class);
 
         assertEquals(singletonList(expected), actual);
-    }
-
-    @Test
-    public void shouldToStringifiedListCreatedStringArray() throws Exception {
-        String expected = "a";
-
-        JsonRpcList jsonRpcList = new JsonRpcList(singletonList(expected), jsonParser, dtoFactory);
-        List<String> actual = jsonRpcList.toStringifiedList();
-
-        assertEquals("\"a\"", actual.iterator().next());
     }
 
     @Test
@@ -378,7 +273,7 @@ public class JsonRpcListTest {
         JsonArray expected = new JsonArray();
         expected.add(new JsonPrimitive("a"));
 
-        JsonRpcList jsonRpcList = new JsonRpcList(singletonList("a"), jsonParser, dtoFactory);
+        JsonRpcList jsonRpcList = new JsonRpcList(singletonList("a"), jsonParser);
         JsonArray actual = jsonRpcList.toJsonArray();
 
         assertEquals(expected, actual);
@@ -390,7 +285,7 @@ public class JsonRpcListTest {
         array.add(new JsonPrimitive("a"));
         String expected = array.toString();
 
-        JsonRpcList jsonRpcList = new JsonRpcList(singletonList("a"), jsonParser, dtoFactory);
+        JsonRpcList jsonRpcList = new JsonRpcList(singletonList("a"), jsonParser);
         String actual = jsonRpcList.toString();
 
         assertEquals(expected, actual);
@@ -400,7 +295,7 @@ public class JsonRpcListTest {
     public void shouldCreateDoubleArray() throws Exception {
         Double expected = 0D;
 
-        JsonRpcList jsonRpcList = new JsonRpcList(singletonList(expected), jsonParser, dtoFactory);
+        JsonRpcList jsonRpcList = new JsonRpcList(singletonList(expected), jsonParser);
         Double actual = jsonRpcList.get(0, Double.class);
 
         assertEquals(expected, actual);
@@ -410,7 +305,7 @@ public class JsonRpcListTest {
     public void shouldToListCreatedDoubleArray() throws Exception {
         Double expected = 0D;
 
-        JsonRpcList jsonRpcList = new JsonRpcList(singletonList(expected), jsonParser, dtoFactory);
+        JsonRpcList jsonRpcList = new JsonRpcList(singletonList(expected), jsonParser);
         List<Double> actual = jsonRpcList.toList(Double.class);
 
         assertEquals(singletonList(expected), actual);
@@ -420,7 +315,7 @@ public class JsonRpcListTest {
     public void shouldToStringifiedListCreatedDoubleArray() throws Exception {
         Double expected = 0D;
 
-        JsonRpcList jsonRpcList = new JsonRpcList(singletonList(expected), jsonParser, dtoFactory);
+        JsonRpcList jsonRpcList = new JsonRpcList(singletonList(expected), jsonParser);
         List<String> actual = jsonRpcList.toStringifiedList();
 
         assertEquals(expected, Double.valueOf(actual.iterator().next()));
@@ -431,7 +326,7 @@ public class JsonRpcListTest {
         JsonArray expected = new JsonArray();
         expected.add(new JsonPrimitive(0D));
 
-        JsonRpcList jsonRpcList = new JsonRpcList(singletonList(0D), jsonParser, dtoFactory);
+        JsonRpcList jsonRpcList = new JsonRpcList(singletonList(0D), jsonParser);
         JsonArray actual = jsonRpcList.toJsonArray();
 
         assertEquals(expected, actual);
@@ -443,7 +338,7 @@ public class JsonRpcListTest {
         array.add(new JsonPrimitive(0D));
         String expected = array.toString();
 
-        JsonRpcList jsonRpcList = new JsonRpcList(singletonList(0D), jsonParser, dtoFactory);
+        JsonRpcList jsonRpcList = new JsonRpcList(singletonList(0D), jsonParser);
         String actual = jsonRpcList.toString();
 
         assertEquals(expected, actual);
@@ -453,7 +348,7 @@ public class JsonRpcListTest {
     public void shouldCreateBooleanArray() throws Exception {
         Boolean expected = false;
 
-        JsonRpcList jsonRpcList = new JsonRpcList(singletonList(expected), jsonParser, dtoFactory);
+        JsonRpcList jsonRpcList = new JsonRpcList(singletonList(expected), jsonParser);
         Boolean actual = jsonRpcList.get(0, Boolean.class);
 
         assertEquals(expected, actual);
@@ -463,7 +358,7 @@ public class JsonRpcListTest {
     public void shouldToListCreatedBooleanArray() throws Exception {
         Boolean expected = false;
 
-        JsonRpcList jsonRpcList = new JsonRpcList(singletonList(expected), jsonParser, dtoFactory);
+        JsonRpcList jsonRpcList = new JsonRpcList(singletonList(expected), jsonParser);
         List<Boolean> actual = jsonRpcList.toList(Boolean.class);
 
         assertEquals(singletonList(expected), actual);
@@ -473,7 +368,7 @@ public class JsonRpcListTest {
     public void shouldToStringifiedListCreatedBooleanArray() throws Exception {
         Boolean expected = false;
 
-        JsonRpcList jsonRpcList = new JsonRpcList(singletonList(expected), jsonParser, dtoFactory);
+        JsonRpcList jsonRpcList = new JsonRpcList(singletonList(expected), jsonParser);
         List<String> actual = jsonRpcList.toStringifiedList();
 
         assertEquals(expected, Boolean.valueOf(actual.iterator().next()));
@@ -484,7 +379,7 @@ public class JsonRpcListTest {
         JsonArray expected = new JsonArray();
         expected.add(new JsonPrimitive(false));
 
-        JsonRpcList jsonRpcList = new JsonRpcList(singletonList(false), jsonParser, dtoFactory);
+        JsonRpcList jsonRpcList = new JsonRpcList(singletonList(false), jsonParser);
         JsonArray actual = jsonRpcList.toJsonArray();
 
         assertEquals(expected, actual);
@@ -496,93 +391,9 @@ public class JsonRpcListTest {
         array.add(new JsonPrimitive(false));
         String expected = array.toString();
 
-        JsonRpcList jsonRpcList = new JsonRpcList(singletonList(false), jsonParser, dtoFactory);
+        JsonRpcList jsonRpcList = new JsonRpcList(singletonList(false), jsonParser);
         String actual = jsonRpcList.toString();
 
         assertEquals(expected, actual);
-    }
-
-
-    @Test
-    public void shouldCreateDtoArray() throws Exception {
-        Dto expected = mock(Dto.class);
-        when(expected.toString()).thenReturn(DTO);
-        when(expected.getParameter()).thenReturn("value");
-
-        when(dtoFactory.createDtoFromJson(DTO, Dto.class)).thenReturn(expected);
-
-        JsonRpcList jsonRpcList = new JsonRpcList(singletonList(expected), jsonParser, dtoFactory);
-        Dto actual = jsonRpcList.get(0, Dto.class);
-
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    public void shouldToListCreatedDtoArray() throws Exception {
-        Dto expected = mock(Dto.class);
-        when(expected.toString()).thenReturn(DTO);
-        when(expected.getParameter()).thenReturn("value");
-
-        when(dtoFactory.createDtoFromJson(DTO, Dto.class)).thenReturn(expected);
-
-        JsonRpcList jsonRpcList = new JsonRpcList(singletonList(expected), jsonParser, dtoFactory);
-        List<Dto> actual = jsonRpcList.toList(Dto.class);
-
-        assertEquals(singletonList(expected), actual);
-    }
-
-    @Test
-    public void shouldToStringifiedListCreatedDtoArray() throws Exception {
-        Dto expected = mock(Dto.class);
-        when(expected.toString()).thenReturn(DTO);
-        when(expected.getParameter()).thenReturn("value");
-
-        when(dtoFactory.createDtoFromJson(DTO, Dto.class)).thenReturn(expected);
-
-        JsonRpcList jsonRpcList = new JsonRpcList(singletonList(expected), jsonParser, dtoFactory);
-        List<String> actual = jsonRpcList.toStringifiedList();
-
-        assertEquals(expected.toString(), actual.iterator().next());
-    }
-
-    @Test
-    public void shouldToJsonArrayCreatedDtoArray() throws Exception {
-        Dto dto = mock(Dto.class);
-        when(dto.toString()).thenReturn(DTO);
-        when(dto.getParameter()).thenReturn("value");
-
-        when(dtoFactory.createDtoFromJson(DTO, Dto.class)).thenReturn(dto);
-
-        JsonArray expected = new JsonArray();
-        JsonElement element = jsonParser.parse(dto.toString());
-        expected.add(element);
-
-        JsonRpcList jsonRpcList = new JsonRpcList(singletonList(dto), jsonParser, dtoFactory);
-        JsonArray actual = jsonRpcList.toJsonArray();
-
-        assertEquals(expected, (actual));
-    }
-
-    @Test
-    public void shouldToStringCreatedDtoArray() throws Exception {
-        Dto dto = mock(Dto.class);
-        when(dto.toString()).thenReturn(DTO);
-        when(dto.getParameter()).thenReturn("value");
-
-        when(dtoFactory.createDtoFromJson(DTO, Dto.class)).thenReturn(dto);
-
-        JsonArray array = new JsonArray();
-        JsonElement element = jsonParser.parse(dto.toString());
-        array.add(element);
-        String expected = array.toString();
-
-        JsonRpcList jsonRpcList = new JsonRpcList(singletonList(dto), jsonParser, dtoFactory);
-
-        String actual = jsonRpcList.toString();
-        assertEquals(expected, actual);
-    }
-
-    interface Dto {
-        String getParameter();
     }
 }
