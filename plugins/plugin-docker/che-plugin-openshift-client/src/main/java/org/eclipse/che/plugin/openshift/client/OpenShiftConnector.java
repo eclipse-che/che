@@ -29,6 +29,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.apache.commons.lang.RandomStringUtils;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.docker.client.DockerApiVersionPathPrefixProvider;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
@@ -97,6 +98,8 @@ import io.fabric8.openshift.api.model.ImageStreamTag;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 /**
  * Client for OpenShift API.
  *
@@ -137,9 +140,9 @@ public class OpenShiftConnector extends DockerConnector {
                               DockerRegistryAuthResolver authResolver,
                               DockerApiVersionPathPrefixProvider dockerApiVersionPathPrefixProvider,
                               @Named("che.openshift.endpoint") String openShiftApiEndpoint,
-                              @Named("che.openshift.token") String openShiftToken,
-                              @Named("che.openshift.username") String openShiftUserName,
-                              @Named("che.openshift.password") String openShiftUserPassword,
+                              @Nullable @Named("che.openshift.token") String openShiftToken,
+                              @Nullable @Named("che.openshift.username") String openShiftUserName,
+                              @Nullable @Named("che.openshift.password") String openShiftUserPassword,
                               @Named("che.openshift.project") String openShiftCheProjectName,
                               @Named("che.openshift.serviceaccountname") String openShiftCheServiceAccount,
                               @Named("che.openshift.liveness.probe.delay") int openShiftLivenessProbeDelay,
@@ -151,17 +154,28 @@ public class OpenShiftConnector extends DockerConnector {
         this.openShiftLivenessProbeDelay = openShiftLivenessProbeDelay;
         this.openShiftLivenessProbeTimeout = openShiftLivenessProbeTimeout;
 
-        Config config;
-        if (StringUtils.isNotBlank(openShiftToken)) {
-            config = configBuilder.withMasterUrl(openShiftApiEndpoint)
-                    .withOauthToken(openShiftToken)
-                    .build();
-        } else {
-            config = configBuilder.withMasterUrl(openShiftApiEndpoint)
+        Config config = getOpenShiftConfig(configBuilder,
+                                           openShiftApiEndpoint,
+                                           openShiftToken,
+                                           openShiftUserName,
+                                           openShiftUserPassword);
+        this.openShiftClient = new DefaultOpenShiftClient(config);
+    }
+
+    private Config getOpenShiftConfig(ConfigBuilder configBuilder,
+                                      String openShiftApiEndpoint,
+                                      String openShiftToken,
+                                      String openShiftUserName,
+                                      String openShiftUserPassword) {
+        if (isNullOrEmpty(openShiftToken)) {
+            return configBuilder.withMasterUrl(openShiftApiEndpoint)
                     .withUsername(openShiftUserName)
                     .withPassword(openShiftUserPassword).build();
+        } else {
+            return configBuilder.withMasterUrl(openShiftApiEndpoint)
+                    .withOauthToken(openShiftToken)
+                    .build();
         }
-        this.openShiftClient = new DefaultOpenShiftClient(config);
     }
 
     /**
