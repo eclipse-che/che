@@ -48,7 +48,7 @@ public abstract class JavaEditorAction extends ProjectAction {
             EditorInput input = editorAgent.getActiveEditor().getEditorInput();
             VirtualFile file = input.getFile();
             final String fileExtension = fileTypeRegistry.getFileTypeByFile(file).getExtension();
-            if (fileExtension.equals("java") || fileExtension.equals("class")) {
+            if ("java".equals(fileExtension) || "class".equals(fileExtension)) {
                 e.getPresentation().setEnabledAndVisible(true);
                 return;
             }
