@@ -44,10 +44,13 @@ public interface HotKeyResources extends ClientBundle {
 
         String isGlobal();
 
+        /** Returns the CSS class name for scheme selection text label in 'Key Bindings' form. */
         String selectionLabel();
 
+        /** Returns the CSS class name for scheme selection list box in 'Key Bindings' form. */
         String selectionListBox();
 
+        /** Returns the CSS class name for scheme selection panel in 'Key Bindings' form. */
         String selectionPanel();
     }
 
