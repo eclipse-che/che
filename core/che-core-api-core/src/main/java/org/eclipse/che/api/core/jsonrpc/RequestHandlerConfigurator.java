@@ -10,9 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.jsonrpc;
 
+
+import org.eclipse.che.api.core.jsonrpc.reception.MethodNameConfigurator;
+
 /**
- * Handler corresponding to processing JSON RPC requests.
+ * Factory to provide facilities for dynamic configuring request handlers.
  */
-public interface RequestHandler {
-    JsonRpcResult handle(String endpointId, JsonRpcParams params) throws JsonRpcException;
+public interface RequestHandlerConfigurator {
+    MethodNameConfigurator newConfiguration();
 }
