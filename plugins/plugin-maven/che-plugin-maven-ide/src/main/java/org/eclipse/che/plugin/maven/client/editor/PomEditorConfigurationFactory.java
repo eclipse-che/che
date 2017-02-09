@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.maven.client.editor;
 
-import org.eclipse.che.ide.editor.orion.client.OrionEditorPresenter;
+
+import org.eclipse.che.plugin.orion.editor.ide.OrionEditorPresenter;
 
 /**
  * @author Evgen Vidolob

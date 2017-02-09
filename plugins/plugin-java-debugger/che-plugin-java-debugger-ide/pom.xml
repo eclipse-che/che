@@ -64,11 +64,11 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-java-ext-lang-client</artifactId>
+            <artifactId>che-plugin-java-lang-ide</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-java-ext-lang-shared</artifactId>
+            <artifactId>che-plugin-java-lang-shared</artifactId>
         </dependency>
         <dependency>
             <groupId>org.vectomatic</groupId>

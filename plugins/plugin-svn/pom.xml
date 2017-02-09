@@ -23,8 +23,8 @@
     <packaging>pom</packaging>
     <name>Che Plugin :: SVN :: Parent</name>
     <modules>
-        <module>che-plugin-svn-ext-shared</module>
-        <module>che-plugin-svn-ext-server</module>
-        <module>che-plugin-svn-ext-ide</module>
+        <module>che-plugin-svn-shared</module>
+        <module>che-plugin-svn-server</module>
+        <module>che-plugin-svn-ide</module>
     </modules>
 </project>

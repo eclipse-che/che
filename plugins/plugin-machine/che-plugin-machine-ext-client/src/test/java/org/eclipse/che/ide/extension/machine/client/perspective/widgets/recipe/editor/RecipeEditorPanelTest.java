@@ -18,7 +18,7 @@ import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.resources.VirtualFile;
-import org.eclipse.che.ide.editor.orion.client.OrionEditorPresenter;
+import org.eclipse.che.plugin.orion.editor.ide.OrionEditorPresenter;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

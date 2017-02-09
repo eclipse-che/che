@@ -10,9 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.ide.view.navigation.nodes;
 
-import java.util.List;
-
-import javax.validation.constraints.NotNull;
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
@@ -22,8 +21,8 @@ import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ui.smartTree.presentation.HasPresentation;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
 
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
+import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * Tree (root) node for display the failing tests.
@@ -32,9 +31,9 @@ import com.google.inject.assistedinject.Assisted;
  */
 public class TestResultClassNode extends AbstractTreeNode implements HasPresentation {
 
-    private String className;
-    private final JavaResources javaResources;
-    private NodePresentation nodePresentation;
+    private       String           className;
+    private final JavaResources    javaResources;
+    private       NodePresentation nodePresentation;
 
     @Inject
     public TestResultClassNode(JavaResources javaResources, @Assisted String className) {

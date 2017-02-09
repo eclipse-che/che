@@ -158,7 +158,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-java-ext-lang-server</artifactId>
+            <artifactId>che-plugin-java-lang-server</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
@@ -214,7 +214,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-svn-ext-server</artifactId>
+            <artifactId>che-plugin-svn-server</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
@@ -234,11 +234,11 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-web-ext-server</artifactId>
+            <artifactId>che-plugin-web-server</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-web-ext-shared</artifactId>
+            <artifactId>che-plugin-web-shared</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
@@ -284,11 +284,9 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
                 <configuration>
-                    <packagingExcludes>
-                        WEB-INF/lib/*gwt*.jar,
+                    <packagingExcludes>WEB-INF/lib/*gwt*.jar,
                         WEB-INF/lib/gin-*.jar,
-                        WEB-INF/lib/jsr305*.jar
-                    </packagingExcludes>
+                        WEB-INF/lib/jsr305*.jar</packagingExcludes>
                 </configuration>
             </plugin>
         </plugins>

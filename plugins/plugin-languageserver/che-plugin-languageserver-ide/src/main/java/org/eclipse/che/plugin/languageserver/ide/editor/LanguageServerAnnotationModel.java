@@ -22,7 +22,7 @@ import org.eclipse.che.ide.api.editor.partition.DocumentPositionMap;
 import org.eclipse.che.ide.api.editor.text.Position;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.texteditor.EditorResources;
-import org.eclipse.che.ide.editor.orion.client.OrionAnnotationSeverityProvider;
+import org.eclipse.che.plugin.orion.editor.ide.OrionAnnotationSeverityProvider;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerResources;
 
 import java.util.ArrayList;

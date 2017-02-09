@@ -23,6 +23,6 @@
     <packaging>pom</packaging>
     <name>Che Plugin :: Help :: Parent</name>
     <modules>
-        <module>che-plugin-help-ext-client</module>
+        <module>che-plugin-help-ide</module>
     </modules>
 </project>
