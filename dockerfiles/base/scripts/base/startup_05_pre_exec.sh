@@ -35,23 +35,26 @@ cli_execute() {
 }
 
 cmd_lifecycle() {
-  PRE_COMMAND="pre_cmd_$1"
-  POST_COMMAND="post_cmd_$1"
-  HELP_COMMAND="help_cmd_$1"
-  COMMAND="cmd_$1"
+  local PRE_COMMAND="pre_cmd_$1"
+  local POST_COMMAND="post_cmd_$1"
+  local HELP_COMMAND="help_cmd_$1"
+  local COMMAND="cmd_$1"
 
   if [ -f "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/commands/cmd_$1.sh ]; then
+    echo "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/commands/cmd_$1.sh
     source "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/commands/cmd_$1.sh
   fi
 
   if [ -f "${SCRIPTS_CONTAINER_SOURCE_DIR}"/cmd_$1.sh ]; then
+    echo "${SCRIPTS_CONTAINER_SOURCE_DIR}"/cmd_$1.sh
     source "${SCRIPTS_CONTAINER_SOURCE_DIR}"/cmd_$1.sh
   fi
 
   shift
 
   if get_command_help; then
-    if [ -n "$(type -t $HELP_COMMAND)" ] && [ "$(type -t $HELP_COMMAND)" = function ]; then
+    ANSWER=$(declare -f $HELP_COMMAND > /dev/null)
+    if [ $? = "0" ]; then
       eval $HELP_COMMAND "$@"
       return 2
     else 
@@ -59,13 +62,15 @@ cmd_lifecycle() {
     fi
   fi
 
-  if [ -n "$(type -t $PRE_COMMAND)" ] && [ "$(type -t $PRE_COMMAND)" = function ]; then
+  ANSWER=$(declare -f $PRE_COMMAND ) # > /dev/null)
+  if [ $? = "0" ]; then
     eval $PRE_COMMAND "$@"
   fi
 
   eval $COMMAND "$@"
 
-  if [ -n "$(type -t $POST_COMMAND)" ] && [ "$(type -t $POST_COMMAND)" = function ]; then
-    eval $POST_COMMAND "$@"
+  ANSWER=$(declare -f $POST_COMMAND > /dev/null)
+  if [ $? = "0" ]; then
+    eval "${POST_COMMAND}" "$@"
   fi
 }

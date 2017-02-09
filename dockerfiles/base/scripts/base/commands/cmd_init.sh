@@ -25,7 +25,11 @@ help_cmd_init() {
 }
 
 pre_cmd_init() {
-  true
+  :
+}
+
+post_cmd_init() {
+  :
 }
 
 cmd_init() {

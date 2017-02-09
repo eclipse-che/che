@@ -18,7 +18,11 @@ help_cmd_version() {
 }
 
 pre_cmd_version() {
-  true
+  :
+}
+
+post_cmd_version() {
+  :
 }
 
 cmd_version() {

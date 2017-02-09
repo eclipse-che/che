@@ -30,6 +30,10 @@ pre_cmd_sync() {
   load_utilities_images_if_not_done
 }
 
+post_cmd_sync() {
+  :
+}
+
 cmd_sync() {
   if [[ "${SYNC_MOUNT}" = "not set" ]]; then
     info "Welcome to $CHE_FORMAL_PRODUCT_NAME!"
@@ -53,5 +57,4 @@ cmd_sync() {
 
   # Docker doesn't seem to normally clean up this container
   docker rm -f che-mount
-
 }

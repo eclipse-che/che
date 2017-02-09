@@ -23,7 +23,11 @@ help_cmd_destroy() {
 
 
 pre_cmd_destroy() {
-  true
+  :
+}
+
+post_cmd_destroy() {
+  :
 }
 
 cmd_destroy_post_action() {
