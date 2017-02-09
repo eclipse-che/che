@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.openshift.client.exception;
 
-public class OpenShiftException extends RuntimeException {
+import java.io.IOException;
+
+public class OpenShiftException extends IOException {
 
     public OpenShiftException(String message) {
         super(message);

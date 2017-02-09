@@ -135,7 +135,7 @@ public class RunClassContextTestAction extends AbstractPerspectiveAction {
         }
         final Object possibleNode = selection.getHeadElement();
         boolean enable = possibleNode instanceof FileNode
-                && ((FileNode) possibleNode).getData().getExtension().equals("java");
+                && "java".equals(((FileNode) possibleNode).getData().getExtension());
 
         e.getPresentation().setEnabled(enable);
     }

@@ -16,12 +16,9 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.plugin.git.ide.GitLocalizationConstant;
-import org.eclipse.che.plugin.git.ide.history.HistoryPresenter;
 import org.eclipse.che.ide.FontAwesome;
-
-import static com.google.common.base.Preconditions.checkState;
+import org.eclipse.che.plugin.git.ide.history.HistoryPresenter;
 
 /**
  * @author Andrey Plotnikov
@@ -42,10 +39,6 @@ public class HistoryAction extends GitAction {
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        final Project project = appContext.getRootProject();
-
-        checkState(project != null, "Null project occurred");
-
-        presenterProvider.get().showDialog(project);
+        presenterProvider.get().show();
     }
 }

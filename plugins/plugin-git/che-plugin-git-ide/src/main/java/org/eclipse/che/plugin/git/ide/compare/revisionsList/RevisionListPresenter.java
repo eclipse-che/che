@@ -29,7 +29,6 @@ import org.eclipse.che.plugin.git.ide.GitLocalizationConstant;
 import org.eclipse.che.plugin.git.ide.compare.ComparePresenter;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.resource.Path;
-import org.eclipse.che.plugin.git.ide.compare.FileStatus;
 
 import javax.validation.constraints.NotNull;
 
@@ -38,6 +37,7 @@ import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.git.shared.DiffType.NAME_STATUS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.plugin.git.ide.compare.FileStatus.defineStatus;
 import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 
 /**
@@ -168,7 +168,7 @@ public class RevisionListPresenter implements RevisionListView.ActionDelegate {
                                @Override
                                public void apply(Optional<File> file) throws OperationException {
                                    if (file.isPresent()) {
-                                       comparePresenter.show(file.get(), FileStatus.defineStatus(diff.substring(0, 1)), selectedRevision.getId());
+                                       comparePresenter.showCompareWithLatest(file.get(), defineStatus(diff.substring(0, 1)), selectedRevision.getId());
                                    }
                                }
                            });

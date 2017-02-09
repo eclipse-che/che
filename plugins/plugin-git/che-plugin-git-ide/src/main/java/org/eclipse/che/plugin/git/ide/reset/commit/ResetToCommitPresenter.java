@@ -25,11 +25,10 @@ import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.plugin.git.ide.GitLocalizationConstant;
 import org.eclipse.che.plugin.git.ide.outputconsole.GitOutputConsole;
 import org.eclipse.che.plugin.git.ide.outputconsole.GitOutputConsoleFactory;
-import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
-import org.eclipse.che.plugin.git.ide.history.HistoryPresenter;
 
 import javax.validation.constraints.NotNull;
 
@@ -46,6 +45,7 @@ import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 @Singleton
 public class ResetToCommitPresenter implements ResetToCommitView.ActionDelegate {
     public static final String RESET_COMMAND_NAME = "Git reset to commit";
+    public static final String LOG_COMMAND_NAME   = "Git log";
 
     private final ResetToCommitView       view;
     private final GitOutputConsoleFactory gitOutputConsoleFactory;
@@ -102,7 +102,7 @@ public class ResetToCommitPresenter implements ResetToCommitView.ActionDelegate 
                     return;
                 }
                 String errorMessage = (error.getMessage() != null) ? error.getMessage() : constant.logFailed();
-                GitOutputConsole console = gitOutputConsoleFactory.create(HistoryPresenter.LOG_COMMAND_NAME);
+                GitOutputConsole console = gitOutputConsoleFactory.create(LOG_COMMAND_NAME);
                 console.printError(errorMessage);
                 consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                 notificationManager.notify(constant.logFailed(), FAIL, FLOAT_MODE);

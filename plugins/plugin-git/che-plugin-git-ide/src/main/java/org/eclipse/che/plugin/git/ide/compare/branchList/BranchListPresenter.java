@@ -25,13 +25,13 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.plugin.git.ide.GitLocalizationConstant;
 import org.eclipse.che.plugin.git.ide.compare.ComparePresenter;
+import org.eclipse.che.plugin.git.ide.compare.FileStatus;
 import org.eclipse.che.plugin.git.ide.compare.changedList.ChangedListPresenter;
 import org.eclipse.che.plugin.git.ide.outputconsole.GitOutputConsole;
 import org.eclipse.che.plugin.git.ide.outputconsole.GitOutputConsoleFactory;
-import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
-import org.eclipse.che.plugin.git.ide.compare.FileStatus;
 
 import javax.validation.constraints.NotNull;
 import java.util.HashMap;
@@ -44,6 +44,7 @@ import static org.eclipse.che.api.git.shared.BranchListMode.LIST_ALL;
 import static org.eclipse.che.api.git.shared.DiffType.NAME_STATUS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.plugin.git.ide.compare.FileStatus.defineStatus;
 
 /**
  * Presenter for displaying list of branches for comparing selected with local changes.
@@ -54,16 +55,16 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
 public class BranchListPresenter implements BranchListView.ActionDelegate {
     public static final String BRANCH_LIST_COMMAND_NAME = "Git list of branches";
 
-    private final ComparePresenter        comparePresenter;
-    private final ChangedListPresenter    changedListPresenter;
-    private final GitOutputConsoleFactory gitOutputConsoleFactory;
-    private final ProcessesPanelPresenter consolesPanelPresenter;
-    private final BranchListView          view;
-    private final DialogFactory           dialogFactory;
-    private final GitServiceClient        service;
-    private final GitLocalizationConstant locale;
-    private final AppContext              appContext;
-    private final NotificationManager     notificationManager;
+    private final org.eclipse.che.plugin.git.ide.compare.ComparePresenter comparePresenter;
+    private final ChangedListPresenter                                        changedListPresenter;
+    private final GitOutputConsoleFactory                                     gitOutputConsoleFactory;
+    private final ProcessesPanelPresenter                                     consolesPanelPresenter;
+    private final BranchListView                                              view;
+    private final DialogFactory                                               dialogFactory;
+    private final GitServiceClient                                            service;
+    private final GitLocalizationConstant                                     locale;
+    private final AppContext                                                  appContext;
+    private final NotificationManager                                         notificationManager;
 
     private Branch   selectedBranch;
     private Project  project;
@@ -140,18 +141,18 @@ public class BranchListPresenter implements BranchListView.ActionDelegate {
                                    @Override
                                    public void apply(Optional<File> file) throws OperationException {
                                        if (file.isPresent()) {
-                                           comparePresenter.show(file.get(),
-                                                                 FileStatus.defineStatus(changedFiles[0].substring(0, 1)),
-                                                                 selectedBranch.getName());
+                                           comparePresenter.showCompareWithLatest(file.get(),
+                                                                                  defineStatus(changedFiles[0].substring(0, 1)),
+                                                                                  selectedBranch.getName());
                                        }
                                    }
                                });
                            } else {
                                Map<String, FileStatus.Status> items = new HashMap<>();
                                for (String item : changedFiles) {
-                                   items.put(item.substring(2, item.length()), FileStatus.defineStatus(item.substring(0, 1)));
+                                   items.put(item.substring(2, item.length()), defineStatus(item.substring(0, 1)));
                                }
-                               changedListPresenter.show(items, selectedBranch.getName(), project);
+                               changedListPresenter.show(items, selectedBranch.getName(), null, project);
                            }
                        }
                    }

@@ -26,9 +26,9 @@ import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.plugin.git.ide.GitLocalizationConstant;
 import org.eclipse.che.plugin.git.ide.compare.ComparePresenter;
+import org.eclipse.che.plugin.git.ide.compare.FileStatus.Status;
 import org.eclipse.che.plugin.git.ide.compare.changedList.ChangedListPresenter;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.plugin.git.ide.compare.FileStatus;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,6 +38,7 @@ import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.git.shared.DiffType.NAME_STATUS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.plugin.git.ide.compare.FileStatus.defineStatus;
 
 /**
  * Action for comparing with latest repository version
@@ -105,16 +106,18 @@ public class CompareWithLatestAction extends GitAction {
                                    @Override
                                    public void apply(Optional<File> file) throws OperationException {
                                        if (file.isPresent()) {
-                                           comparePresenter.show(file.get(), FileStatus.defineStatus(changedFiles[0].substring(0, 1)), REVISION);
+                                           comparePresenter.showCompareWithLatest(file.get(),
+                                                                                  defineStatus(changedFiles[0].substring(0, 1)),
+                                                                                  REVISION);
                                        }
                                    }
                                });
                            } else {
-                               Map<String, FileStatus.Status> items = new HashMap<>();
+                               Map<String, Status> items = new HashMap<>();
                                for (String item : changedFiles) {
-                                   items.put(item.substring(2, item.length()), FileStatus.defineStatus(item.substring(0, 1)));
+                                   items.put(item.substring(2, item.length()), defineStatus(item.substring(0, 1)));
                                }
-                               changedListPresenter.show(items, REVISION, project);
+                               changedListPresenter.show(items, REVISION, null, project);
                            }
                        }
                    }
