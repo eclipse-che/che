@@ -41,12 +41,10 @@ cmd_lifecycle() {
   local COMMAND="cmd_$1"
 
   if [ -f "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/commands/cmd_$1.sh ]; then
-    echo "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/commands/cmd_$1.sh
     source "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/commands/cmd_$1.sh
   fi
 
   if [ -f "${SCRIPTS_CONTAINER_SOURCE_DIR}"/cmd_$1.sh ]; then
-    echo "${SCRIPTS_CONTAINER_SOURCE_DIR}"/cmd_$1.sh
     source "${SCRIPTS_CONTAINER_SOURCE_DIR}"/cmd_$1.sh
   fi
 
