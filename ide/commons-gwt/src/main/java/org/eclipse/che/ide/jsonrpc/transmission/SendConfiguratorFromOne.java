@@ -56,7 +56,7 @@ public class SendConfiguratorFromOne<P> {
         Log.debug(getClass(), "Transmitting request: " +
                               "endpoint ID: " + endpointId + ", " +
                               "method: " + method + ", " +
-                              "params object class: " + pValue.getClass() + ", " +
+                              (pValue != null ? "params object class: " + pValue.getClass() + ", " : "") +
                               "params list value" + pValue);
 
         transmitNotification();

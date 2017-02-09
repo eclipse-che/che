@@ -23,10 +23,6 @@ import org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver;
 import org.eclipse.che.plugin.docker.client.connection.DockerConnectionFactory;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
-import org.eclipse.che.plugin.openshift.client.kubernetes.KubernetesContainer;
-import org.eclipse.che.plugin.openshift.client.kubernetes.KubernetesEnvVar;
-import org.eclipse.che.plugin.openshift.client.kubernetes.KubernetesLabelConverter;
-import org.eclipse.che.plugin.openshift.client.kubernetes.KubernetesService;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeClass;
@@ -54,14 +50,6 @@ public class OpenShiftConnectorTest {
     private DockerApiVersionPathPrefixProvider dockerApiVersionPathPrefixProvider;
     @Mock
     private CreateContainerParams              createContainerParams;
-    @Mock
-    private KubernetesLabelConverter           kubernetesLabelConverter;
-    @Mock
-    private KubernetesEnvVar                   kubernetesEnvVar;
-    @Mock
-    private KubernetesContainer                kubernetesContainer;
-    @Mock
-    private KubernetesService                  kubernetesService;
 
     private OpenShiftConnector                 openShiftConnector;
 
@@ -70,10 +58,6 @@ public class OpenShiftConnectorTest {
         openShiftConnector = spy(new OpenShiftConnector(dockerConnectorConfiguration,
                                                         dockerConnectionFactory,
                                                         authManager,
-                                                        kubernetesLabelConverter,
-                                                        kubernetesEnvVar,
-                                                        kubernetesContainer,
-                                                        kubernetesService,
                                                         dockerApiVersionPathPrefixProvider,
                                                         OPENSHIFT_API_ENDPOINT_MINISHIFT,
                                                         OPENSHIFT_DEFAULT_USER_NAME,

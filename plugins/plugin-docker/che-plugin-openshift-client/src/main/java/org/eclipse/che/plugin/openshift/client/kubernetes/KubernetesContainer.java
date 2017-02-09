@@ -26,16 +26,19 @@ import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
 /**
  * Provides API for managing Kubernetes {@link ContainerPort}
  */
-public class KubernetesContainer {
+public final class KubernetesContainer {
+
+    private KubernetesContainer() {
+    }
 
     /**
      * Retrieves list of ({@link ContainerPort} based on ports defined in
      * {@link ContainerConfig} and {@link ImageConfig}
-     * 
+     *
      * @param exposedPorts
      * @return list of {@link ContainerPort}
      */
-    public List<ContainerPort> getContainerPortsFrom(Set<String> exposedPorts) {
+    public static List<ContainerPort> getContainerPortsFrom(Set<String> exposedPorts) {
         List<ContainerPort> containerPorts = new ArrayList<>(exposedPorts.size());
         for (String exposedPort : exposedPorts) {
             String[] portAndProtocol = exposedPort.split("/", 2);
