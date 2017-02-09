@@ -33,7 +33,7 @@ pre_cmd_config() {
 }
 
 post_cmd_config() {
-  echo "stupid"
+  :
 }
 
 cmd_config() {

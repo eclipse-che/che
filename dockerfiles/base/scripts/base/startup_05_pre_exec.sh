@@ -32,6 +32,7 @@ cli_parse () {
 
 cli_execute() {
   cmd_lifecycle "$@"
+    echo "!!!!!!!!!!!!!!!!!!!!!!!" 
 }
 
 cmd_lifecycle() {
@@ -69,6 +70,6 @@ cmd_lifecycle() {
 
   ANSWER=$(declare -f $POST_COMMAND > /dev/null)
   if [ $? = "0" ]; then
-    eval "${POST_COMMAND}" "$@"
+    eval $POST_COMMAND "$@"
   fi
 }
