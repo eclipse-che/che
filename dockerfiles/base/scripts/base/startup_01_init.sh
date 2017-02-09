@@ -255,21 +255,9 @@ init() {
 
   SCRIPTS_CONTAINER_SOURCE_DIR=""
   SCRIPTS_BASE_CONTAINER_SOURCE_DIR=""
-  if local_repo; then
-     # Use the CLI that is inside the repository.
-     SCRIPTS_CONTAINER_SOURCE_DIR=${CHE_SCRIPTS_CONTAINER_SOURCE_DIR}
-
-     if [[ -d "/repo/dockerfiles/base/scripts/base" ]]; then
-       SCRIPTS_BASE_CONTAINER_SOURCE_DIR="/repo/dockerfiles/base/scripts/base"
-     else
-       SCRIPTS_BASE_CONTAINER_SOURCE_DIR=${CHE_BASE_SCRIPTS_CONTAINER_SOURCE_DIR}
-     fi
-
-  else
-     # Use the CLI that is inside the container.
-     SCRIPTS_CONTAINER_SOURCE_DIR="/scripts"
-     SCRIPTS_BASE_CONTAINER_SOURCE_DIR=${CHE_BASE_SCRIPTS_CONTAINER_SOURCE_DIR}
-  fi
+  # Use the CLI that is inside the container.
+  SCRIPTS_CONTAINER_SOURCE_DIR="/scripts"
+  SCRIPTS_BASE_CONTAINER_SOURCE_DIR=${CHE_BASE_SCRIPTS_CONTAINER_SOURCE_DIR}
 
   source "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/startup_03_pre_networking.sh
 
