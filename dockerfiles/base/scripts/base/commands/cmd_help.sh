@@ -20,5 +20,9 @@ cmd_help() {
 }
 
 pre_cmd_help() {
-  true
+  :
+}
+
+post_cmd_help() {
+  :
 }

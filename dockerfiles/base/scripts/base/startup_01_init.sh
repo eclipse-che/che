@@ -79,6 +79,7 @@ init_global_vars() {
   CHE_SKIP_NETWORK=false
   CHE_SKIP_PULL=false
   CHE_COMMAND_HELP=false
+  CHE_SKIP_SCRIPTS=false
 
   DEFAULT_CHE_PRODUCT_NAME="CHE"
   CHE_PRODUCT_NAME=${CHE_PRODUCT_NAME:-${DEFAULT_CHE_PRODUCT_NAME}}
@@ -228,6 +229,10 @@ init_usage_check() {
   if [[ "$@" == *"--help"* ]]; then
     CHE_COMMAND_HELP=true
   fi
+
+  if [[ "$@" == *"--skip:scripts"* ]]; then
+    CHE_SKIP_SCRIPTS=true
+  fi
 }
 
 init() {
@@ -240,7 +245,7 @@ init() {
 
   # Make sure Docker is working and we have /var/run/docker.sock mounted or valid DOCKER_HOST
   check_docker "$@"
-  
+
   # Check to see if Docker is configured with a proxy and pull values
   check_docker_networking
 
@@ -255,9 +260,20 @@ init() {
 
   SCRIPTS_CONTAINER_SOURCE_DIR=""
   SCRIPTS_BASE_CONTAINER_SOURCE_DIR=""
-  # Use the CLI that is inside the container.
-  SCRIPTS_CONTAINER_SOURCE_DIR="/scripts"
-  SCRIPTS_BASE_CONTAINER_SOURCE_DIR=${CHE_BASE_SCRIPTS_CONTAINER_SOURCE_DIR}
+  if local_repo && ! skip_scripts; then
+     # Use the CLI that is inside the repository.
+     SCRIPTS_CONTAINER_SOURCE_DIR=${CHE_SCRIPTS_CONTAINER_SOURCE_DIR}
+
+    if [[ -d "/repo/dockerfiles/base/scripts/base" ]]; then
+       SCRIPTS_BASE_CONTAINER_SOURCE_DIR="/repo/dockerfiles/base/scripts/base"
+     else
+       SCRIPTS_BASE_CONTAINER_SOURCE_DIR=${CHE_BASE_SCRIPTS_CONTAINER_SOURCE_DIR}
+     fi
+  else
+     # Use the CLI that is inside the container.
+     SCRIPTS_CONTAINER_SOURCE_DIR="/scripts"
+     SCRIPTS_BASE_CONTAINER_SOURCE_DIR=${CHE_BASE_SCRIPTS_CONTAINER_SOURCE_DIR}
+  fi
 
   source "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/startup_03_pre_networking.sh
 
@@ -308,6 +324,7 @@ start() {
   set -- "${@/\-\-skip\:network/}"
   set -- "${@/\-\-skip\:pull/}"
   set -- "${@/\-\-help/}"
+  set -- "${@/\-\-skip\:scripts/}"
 
   # Each CLI assembly must provide this cli.sh - loads overridden functions and variables for the CLI
   source "${SCRIPTS_CONTAINER_SOURCE_DIR}"/post_init.sh

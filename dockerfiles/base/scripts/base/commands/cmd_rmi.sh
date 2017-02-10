@@ -18,7 +18,11 @@ help_cmd_rmi() {
 }
 
 pre_cmd_rmi() {
-  true
+  :
+}
+
+post_cmd_rmi() {
+  :
 }
 
 cmd_rmi() {
