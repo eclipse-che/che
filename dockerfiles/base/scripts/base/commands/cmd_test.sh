@@ -27,6 +27,11 @@ pre_cmd_test() {
   load_utilities_images_if_not_done
 }
 
+post_cmd_test() {
+  :
+}
+
+
 cmd_test() {
   docker_run $(get_docker_run_terminal_options) ${UTILITY_IMAGE_CHETEST} "$@"
 }

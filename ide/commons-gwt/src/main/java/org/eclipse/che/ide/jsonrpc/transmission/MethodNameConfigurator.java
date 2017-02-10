@@ -50,6 +50,4 @@ public class MethodNameConfigurator {
 
         return new ParamsConfigurator(responseDispatcher, transmitter, jsonRpcFactory, name, endpointId);
     }
-
-
 }

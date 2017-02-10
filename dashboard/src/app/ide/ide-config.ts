@@ -45,7 +45,7 @@ export class IdeConfig {
     // config routes
     register.app.config(function ($routeProvider) {
       $routeProvider.accessWhen('/ide', ideProvider)
-        .accessWhen('/ide/:namespace/:workspaceName', ideProvider);
+        .accessWhen('/ide/:namespace*/:workspaceName', ideProvider);
 
     });
   }

@@ -46,19 +46,19 @@ public interface WorkspaceServiceClient {
     /**
      * Gets users workspace by key.
      *
-     * @param wsId
-     *         workspace ID
+     * @param key
+     *         composite key can be just workspace ID or in the namespace/workspace_name form
      * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
      * @see WorkspaceService#getByKey(String)
      */
-    Promise<WorkspaceDto> getWorkspace(String wsId);
+    Promise<WorkspaceDto> getWorkspace(String key);
 
     /**
      * Gets workspace by namespace and name
      *
      * @param namespace
      *         namespace
-     * @param  workspaceName
+     * @param workspaceName
      *         workspace name
      * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
      * @see WorkspaceService#getByKey(String)

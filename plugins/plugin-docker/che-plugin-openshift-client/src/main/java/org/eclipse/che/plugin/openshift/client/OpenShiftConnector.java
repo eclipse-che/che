@@ -29,6 +29,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.apache.commons.lang.RandomStringUtils;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.docker.client.DockerApiVersionPathPrefixProvider;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
@@ -97,6 +98,8 @@ import io.fabric8.openshift.api.model.ImageStreamTag;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 /**
  * Client for OpenShift API.
  *
@@ -131,13 +134,15 @@ public class OpenShiftConnector extends DockerConnector {
     private final int             openShiftLivenessProbeTimeout;
 
     @Inject
-    public OpenShiftConnector(DockerConnectorConfiguration connectorConfiguration,
+    public OpenShiftConnector(ConfigBuilder configBuilder,
+                              DockerConnectorConfiguration connectorConfiguration,
                               DockerConnectionFactory connectionFactory,
                               DockerRegistryAuthResolver authResolver,
                               DockerApiVersionPathPrefixProvider dockerApiVersionPathPrefixProvider,
                               @Named("che.openshift.endpoint") String openShiftApiEndpoint,
-                              @Named("che.openshift.username") String openShiftUserName,
-                              @Named("che.openshift.password") String openShiftUserPassword,
+                              @Nullable @Named("che.openshift.token") String openShiftToken,
+                              @Nullable @Named("che.openshift.username") String openShiftUserName,
+                              @Nullable @Named("che.openshift.password") String openShiftUserPassword,
                               @Named("che.openshift.project") String openShiftCheProjectName,
                               @Named("che.openshift.serviceaccountname") String openShiftCheServiceAccount,
                               @Named("che.openshift.liveness.probe.delay") int openShiftLivenessProbeDelay,
@@ -149,10 +154,28 @@ public class OpenShiftConnector extends DockerConnector {
         this.openShiftLivenessProbeDelay = openShiftLivenessProbeDelay;
         this.openShiftLivenessProbeTimeout = openShiftLivenessProbeTimeout;
 
-        Config config = new ConfigBuilder().withMasterUrl(openShiftApiEndpoint)
-                .withUsername(openShiftUserName)
-                .withPassword(openShiftUserPassword).build();
+        Config config = getOpenShiftConfig(configBuilder,
+                                           openShiftApiEndpoint,
+                                           openShiftToken,
+                                           openShiftUserName,
+                                           openShiftUserPassword);
         this.openShiftClient = new DefaultOpenShiftClient(config);
+    }
+
+    private Config getOpenShiftConfig(ConfigBuilder configBuilder,
+                                      String openShiftApiEndpoint,
+                                      String openShiftToken,
+                                      String openShiftUserName,
+                                      String openShiftUserPassword) {
+        if (isNullOrEmpty(openShiftToken)) {
+            return configBuilder.withMasterUrl(openShiftApiEndpoint)
+                    .withUsername(openShiftUserName)
+                    .withPassword(openShiftUserPassword).build();
+        } else {
+            return configBuilder.withMasterUrl(openShiftApiEndpoint)
+                    .withOauthToken(openShiftToken)
+                    .build();
+        }
     }
 
     /**
@@ -265,7 +288,6 @@ public class OpenShiftConnector extends DockerConnector {
     }
 
     /**
-     * @param docker
      * @param container
      * @return
      * @throws IOException
@@ -982,7 +1004,6 @@ public class OpenShiftConnector extends DockerConnector {
      * When container is expected to be run as root, user field from {@link ImageConfig} is empty.
      * For non-root user it contains "user" value
      *
-     * @param dockerConnector
      * @param imageName
      * @return true if user property from Image config is empty string, false otherwise
      * @throws IOException

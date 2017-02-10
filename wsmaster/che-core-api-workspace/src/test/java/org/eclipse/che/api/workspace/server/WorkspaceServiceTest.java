@@ -127,7 +127,7 @@ public class WorkspaceServiceTest {
 
     @SuppressWarnings("unused")
     private static final ApiExceptionMapper MAPPER       = new ApiExceptionMapper();
-    private static final String             NAMESPACE    = "user";
+    private static final String             NAMESPACE    = "namespace_part1/namespace_part_2";
     private static final String             USER_ID      = "user123";
     private static final String             API_ENDPOINT = "http://localhost:8080/api";
     private static final Account            TEST_ACCOUNT = new AccountImpl("anyId", NAMESPACE, "test");
@@ -302,6 +302,21 @@ public class WorkspaceServiceTest {
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
                                          .when()
                                          .get(SECURE_PATH + "/workspace/" + workspace.getId());
+
+        assertEquals(response.getStatusCode(), 200);
+        assertEquals(new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class), TEST_ACCOUNT), workspace);
+    }
+
+    @Test
+    public void shouldGetWorkspaceByKey() throws Exception {
+        final WorkspaceImpl workspace = createWorkspace(createConfigDto());
+        when(wsManager.getWorkspace(workspace.getNamespace() + "/" + workspace.getConfig().getName())).thenReturn(workspace);
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .when()
+                                         .get(SECURE_PATH + "/workspace/" + workspace.getNamespace() + "/" +
+                                              workspace.getConfig().getName());
 
         assertEquals(response.getStatusCode(), 200);
         assertEquals(new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class), TEST_ACCOUNT), workspace);
