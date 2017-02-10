@@ -29,15 +29,18 @@ public interface ProcessesListView extends View<ProcessesListView.ActionDelegate
     /** Clear processes list. */
     void clearList();
 
+    /** Mark the specified process in the list as stopped. */
+    void setProcessStopped(Process process);
+
     interface ActionDelegate {
 
         /** Called when process has been chosen. */
         void onProcessChosen();
 
         /** Called when rerunning process is requested. */
-        void onReRunProcess(StoppedProcess process);
+        void onReRunProcess(Process process);
 
         /** Called when stopping process is requested. */
-        void onStopProcess(RunningProcess process);
+        void onStopProcess(Process process);
     }
 }

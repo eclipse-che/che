@@ -11,21 +11,41 @@
 package org.eclipse.che.ide.command.toolbar.processes;
 
 import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.ide.ui.dropdown.DropDownListItem;
 
 /**
  *
  */
-class RunningProcess extends AbstractProcess implements DropDownListItem {
+public class ProcessImpl implements Process {
 
-    private final int pid;
+    private final String  commandName;
+    private final String  commandLine;
+    private final int     pid;
+    private final Machine machine;
 
-    public RunningProcess(String commandName, String commandLine, int pid, Machine machine) {
-        super(commandName, commandLine, machine);
+    public ProcessImpl(String commandName, String commandLine, int pid, Machine machine) {
+        this.commandName = commandName;
+        this.commandLine = commandLine;
         this.pid = pid;
+        this.machine = machine;
     }
 
-    public int getNativePid() {
+    @Override
+    public String getName() {
+        return commandName;
+    }
+
+    @Override
+    public String getCommandLine() {
+        return commandLine;
+    }
+
+    @Override
+    public int getPid() {
         return pid;
+    }
+
+    @Override
+    public Machine getMachine() {
+        return machine;
     }
 }

@@ -21,5 +21,7 @@ public interface Process {
 
     String getCommandLine();
 
+    int getPid();
+
     Machine getMachine();
 }

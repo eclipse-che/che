@@ -82,7 +82,7 @@ public class DropDownList extends Composite {
     }
 
     /** Add item with the appropriate renderer. */
-    public void addItem(final DropDownListItem item, final DropDownListItemRenderer renderer) {
+    public <T extends DropDownListItem> void addItem(final T item, final DropDownListItemRenderer<T> renderer) {
         final Widget widget = renderer.render(item);
 
         itemsWidgets.put(item, widget);

@@ -173,7 +173,7 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
 
                 pid = event.getPid();
 
-                eventBus.fireEvent(new ProcessStartedEvent(pid));
+                eventBus.fireEvent(new ProcessStartedEvent(pid, machine));
             }
         };
     }

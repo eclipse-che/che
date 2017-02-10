@@ -20,6 +20,8 @@ import org.eclipse.che.ide.ui.dropdown.old.DropDownWidget;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Implementation of {@link ProcessesListView} that displays processes in a drop down list.
@@ -30,10 +32,16 @@ public class ProcessesListViewImpl implements ProcessesListView {
     private final FlowPanel    rootPanel;
     private final DropDownList dropDownList;
 
+    private final Map<Process, ProcessListItem> listItems;
+    private final Map<Process, ProcessRenderer> renderers;
+
     private ActionDelegate delegate;
 
     @Inject
     public ProcessesListViewImpl(DropDownWidget.Resources resources, ToolbarResources toolbarResources) {
+        listItems = new HashMap<>();
+        renderers = new HashMap<>();
+
         final Label label = new Label("EXEC:");
         label.addStyleName(toolbarResources.css().commandListLabel());
 
@@ -63,20 +71,35 @@ public class ProcessesListViewImpl implements ProcessesListView {
     }
 
     @Override
-    public void addProcess(Process process) {
-        if (process instanceof StoppedProcess) {
-            dropDownList.addItem((StoppedProcess)process, new StoppedProcessRenderer(p -> delegate.onReRunProcess(p)));
-        } else if (process instanceof RunningProcess) {
-            dropDownList.addItem((RunningProcess)process, new RunningProcessRenderer(p -> delegate.onStopProcess(p)));
+    public void setProcessStopped(Process process) {
+        final ProcessRenderer renderer = renderers.get(process);
+
+        if (renderer != null) {
+            renderer.setStopped();
         }
     }
 
     @Override
+    public void addProcess(Process process) {
+        final ProcessListItem listItem = new ProcessListItem(process);
+        final ProcessRenderer renderer = new ProcessRenderer(p -> delegate.onStopProcess(p),
+                                                             p -> delegate.onReRunProcess(p));
+
+        listItems.put(process, listItem);
+        renderers.put(process, renderer);
+
+        dropDownList.addItem(listItem, renderer);
+    }
+
+    @Override
     public void removeProcess(Process process) {
-        if (process instanceof StoppedProcess) {
-            dropDownList.removeItem((StoppedProcess)process);
-        } else if (process instanceof RunningProcess) {
-            dropDownList.removeItem((RunningProcess)process);
+        final ProcessListItem listItem = listItems.get(process);
+
+        if (listItem != null) {
+            listItems.remove(process);
+            renderers.remove(process);
+
+            dropDownList.removeItem(listItem);
         }
     }
 }

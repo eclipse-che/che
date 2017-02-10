@@ -10,15 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.toolbar.processes;
 
-import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.ide.ui.dropdown.DropDownListItem;
 
 /**
  *
  */
-class StoppedProcess extends AbstractProcess implements DropDownListItem {
+class ProcessListItem extends ProcessImpl implements DropDownListItem {
 
-    public StoppedProcess(String commandName, String commandLine, Machine machine) {
-        super(commandName, commandLine, machine);
+    ProcessListItem(Process process) {
+        super(process.getName(), process.getCommandLine(), process.getPid(), process.getMachine());
     }
 }

@@ -17,5 +17,6 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public interface DropDownListItemRenderer<T extends DropDownListItem> {
 
+    /** Produces a new instance of the widget for representing the given {@code item}. */
     Widget render(T item);
 }
