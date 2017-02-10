@@ -32,7 +32,6 @@ cli_parse () {
 
 cli_execute() {
   cmd_lifecycle "$@"
-    echo "!!!!!!!!!!!!!!!!!!!!!!!" 
 }
 
 cmd_lifecycle() {
