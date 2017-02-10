@@ -94,7 +94,7 @@ public class RecipeRetrieverTest {
      */
     @Test
     public void checkWithLocation() throws MachineException {
-        String LOCATION = "http://eclipse.org/my-che.recipe";
+        String LOCATION = "https://eclipse.org/my-che.recipe";
         when(machineSource.getLocation()).thenReturn(LOCATION);
         recipeRetriever.getRecipe(machineConfig);
         verify(recipeDownloader).getRecipe(machineConfig);
