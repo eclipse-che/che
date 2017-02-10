@@ -23,6 +23,6 @@
     <packaging>pom</packaging>
     <name>Che Plugin :: GWT :: Parent</name>
     <modules>
-        <module>che-plugin-gwt-ext-gwt</module>
+        <module>che-plugin-gwt-ide</module>
     </modules>
 </project>

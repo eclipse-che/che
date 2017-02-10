@@ -23,7 +23,7 @@
     <packaging>pom</packaging>
     <name>Che Plugin :: Git :: Parent</name>
     <modules>
-        <module>che-plugin-git-ext-git</module>
+        <module>che-plugin-git-ide</module>
     </modules>
     <!-- skip tests on Windows -->
     <profiles>

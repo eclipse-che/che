@@ -28,7 +28,7 @@ import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PropertyListener;
 import org.eclipse.che.ide.api.resources.VirtualFile;
-import org.eclipse.che.ide.editor.orion.client.OrionEditorPresenter;
+import org.eclipse.che.plugin.orion.editor.ide.OrionEditorPresenter;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.tab.content.TabPresenter;
 
 import javax.validation.constraints.NotNull;

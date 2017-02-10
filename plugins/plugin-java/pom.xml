@@ -24,9 +24,9 @@
     <name>Che Plugin :: Java :: Parent</name>
     <modules>
         <module>che-plugin-java-ext-jdt</module>
-        <module>che-plugin-java-ext-lang-shared</module>
-        <module>che-plugin-java-ext-lang-server</module>
-        <module>che-plugin-java-ext-lang-client</module>
+        <module>che-plugin-java-lang-shared</module>
+        <module>che-plugin-java-lang-server</module>
+        <module>che-plugin-java-lang-ide</module>
         <module>che-plugin-java-plain</module>
     </modules>
     <build>

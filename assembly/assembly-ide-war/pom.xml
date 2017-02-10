@@ -120,6 +120,10 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-dashboard-ide</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-debugger-ide</artifactId>
         </dependency>
         <dependency>
@@ -128,15 +132,11 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-ext-dashboard-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-gdb-ide</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-git-ext-git</artifactId>
+            <artifactId>che-plugin-git-ide</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
@@ -152,11 +152,11 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-gwt-ext-gwt</artifactId>
+            <artifactId>che-plugin-gwt-ide</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-help-ext-client</artifactId>
+            <artifactId>che-plugin-help-ide</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
@@ -164,11 +164,11 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-java-ext-lang-client</artifactId>
+            <artifactId>che-plugin-java-lang-ide</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-java-ext-lang-shared</artifactId>
+            <artifactId>che-plugin-java-lang-shared</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
@@ -248,7 +248,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-sdk-ext-plugins</artifactId>
+            <artifactId>che-plugin-sdk-ide</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
@@ -260,7 +260,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-svn-ext-ide</artifactId>
+            <artifactId>che-plugin-svn-ide</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
@@ -276,7 +276,11 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-web-ext-web</artifactId>
+            <artifactId>che-plugin-web-ide</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-web-shared</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>

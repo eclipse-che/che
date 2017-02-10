@@ -1,0 +1,77 @@
+/*******************************************************************************
+ * Copyright (c) 2012-2017 Codenvy, S.A.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Codenvy, S.A. - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.che.plugin.git.ide.action;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
+import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.plugin.git.ide.GitLocalizationConstant;
+import org.eclipse.che.plugin.git.ide.GitResources;
+import org.eclipse.che.plugin.git.ide.GitUtil;
+import org.eclipse.che.plugin.git.ide.init.InitRepositoryPresenter;
+import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
+
+import javax.validation.constraints.NotNull;
+
+import static com.google.common.base.Preconditions.checkState;
+
+/**
+ * @author Andrey Plotnikov
+ * @author Vlad Zhukovskyi
+ */
+@Singleton
+public class InitRepositoryAction extends GitAction {
+    private final InitRepositoryPresenter presenter;
+    private final DialogFactory           dialogFactory;
+    private       GitLocalizationConstant constant;
+
+    @Inject
+    public InitRepositoryAction(InitRepositoryPresenter presenter,
+                                GitResources resources,
+                                GitLocalizationConstant constant,
+                                AppContext appContext,
+                                DialogFactory dialogFactory) {
+        super(constant.initControlTitle(), constant.initControlPrompt(), resources.initRepo(), appContext);
+        this.presenter = presenter;
+        this.constant = constant;
+        this.dialogFactory = dialogFactory;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        final Project project = appContext.getRootProject();
+
+        checkState(project != null, "Null project occurred");
+
+        dialogFactory.createConfirmDialog(constant.createTitle(),
+                                          constant.messagesInitRepoQuestion(project.getName()),
+                                          new ConfirmCallback() {
+                                              @Override
+                                              public void accepted() {
+                                                  presenter.initRepository(project);
+                                              }
+                                          }, null).show();
+    }
+
+    @Override
+    public void updateInPerspective(@NotNull ActionEvent event) {
+        super.updateInPerspective(event);
+
+        final Project project = appContext.getRootProject();
+
+        event.getPresentation().setEnabled(project != null && !GitUtil.isUnderGit(project));
+    }
+}

@@ -23,6 +23,6 @@
     <packaging>pom</packaging>
     <name>Che Plugin :: Dashboard :: Parent</name>
     <modules>
-        <module>che-plugin-ext-dashboard</module>
+        <module>che-plugin-dashboard-ide</module>
     </modules>
 </project>

@@ -18,8 +18,8 @@ import org.eclipse.che.ide.api.editor.annotation.AnnotationModel;
 import org.eclipse.che.ide.api.editor.editorconfig.AutoSaveTextEditorConfiguration;
 import org.eclipse.che.ide.api.editor.partition.DocumentPositionMap;
 import org.eclipse.che.ide.api.editor.reconciler.Reconciler;
-import org.eclipse.che.ide.editor.orion.client.OrionEditorPresenter;
 import org.eclipse.che.ide.ext.java.client.editor.JavaAnnotationModelFactory;
+import org.eclipse.che.plugin.orion.editor.ide.OrionEditorPresenter;
 
 import javax.validation.constraints.NotNull;
 

@@ -1,8 +1,0 @@
-<project default="copy-resources">
-  <target name="init"/>
-  <target name="copy-resources" depends="init">
-    <copy todir="target/classes/META-INF" filtering="false">
-      <fileset dir="target/generated-sources/dto/META-INF" includes="" excludes="**/*.java"/>
-    </copy>
-  </target>
-</project>

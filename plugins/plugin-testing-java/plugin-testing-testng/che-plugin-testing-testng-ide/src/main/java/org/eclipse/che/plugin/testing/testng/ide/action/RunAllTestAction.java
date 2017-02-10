@@ -10,13 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.testng.ide.action;
 
-import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
-
-import java.util.HashMap;
-import java.util.Map;
+import com.google.inject.Inject;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -35,7 +29,13 @@ import org.eclipse.che.plugin.testing.ide.view.TestResultPresenter;
 import org.eclipse.che.plugin.testing.testng.ide.TestNGLocalizationConstant;
 import org.eclipse.che.plugin.testing.testng.ide.TestNGResources;
 
-import com.google.inject.Inject;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 
 /**
  *
