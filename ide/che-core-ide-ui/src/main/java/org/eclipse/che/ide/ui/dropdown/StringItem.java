@@ -10,16 +10,18 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ui.dropdown;
 
-import com.google.gwt.user.client.ui.Widget;
-
 /**
- * Renderer of the items for {@link DropDownList}.
+ *
  */
-public interface DropDownListItemRenderer {
+public class StringItem implements DropDownListItem {
 
-    /** Returns a new instance of the widget for representing the {@link DropDownListItem} in the list. */
-    Widget renderListWidget();
+    private String value;
 
-    /** Returns a new instance of the widget for representing the {@link DropDownListItem} that has been chosen. */
-    Widget renderHeaderWidget();
+    public StringItem(String value) {
+        this.value = value;
+    }
+
+    public String getValue() {
+        return value;
+    }
 }

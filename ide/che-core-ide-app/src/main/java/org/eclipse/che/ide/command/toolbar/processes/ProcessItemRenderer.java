@@ -17,7 +17,8 @@ import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
-import org.eclipse.che.ide.ui.dropdown.DropDownListItemRenderer;
+import org.eclipse.che.ide.ui.dropdown.AbstractListItemRenderer;
+import org.eclipse.che.ide.ui.dropdown.BaseListItem;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -28,17 +29,21 @@ import static com.google.gwt.dom.client.Style.Float.RIGHT;
 /**
  * Renders widgets for representing a {@link Process}.
  */
-class ProcessItemRenderer implements DropDownListItemRenderer<ProcessListItem> {
+class ProcessItemRenderer extends AbstractListItemRenderer<BaseListItem<Process>> {
 
     /** List of all rendered widgets. */
     private final List<ProcessWidget> widgets;
-    private final StopProcessHandler  stopProcessHandler;
-    private final RerunProcessHandler rerunProcessHandler;
+    private final StopProcessHandler  stopHandler;
+    private final RerunProcessHandler reRunHandler;
 
-    ProcessItemRenderer(StopProcessHandler stopProcessHandler, RerunProcessHandler rerunProcessHandler) {
+    ProcessItemRenderer(BaseListItem<Process> listItem,
+                        StopProcessHandler stopProcessHandler,
+                        RerunProcessHandler reRunProcessHandler) {
+        super(listItem);
+
         widgets = new LinkedList<>();
-        this.stopProcessHandler = stopProcessHandler;
-        this.rerunProcessHandler = rerunProcessHandler;
+        stopHandler = stopProcessHandler;
+        reRunHandler = reRunProcessHandler;
     }
 
     /**
@@ -46,8 +51,8 @@ class ProcessItemRenderer implements DropDownListItemRenderer<ProcessListItem> {
      * <p>Rendered widget depends on the given {@code process}'s aliveness state.
      */
     @Override
-    public Widget render(ProcessListItem processItem) {
-        final ProcessWidget widget = new ProcessWidget(processItem, stopProcessHandler, rerunProcessHandler);
+    public Widget getWidget() {
+        final ProcessWidget widget = new ProcessWidget(item, stopHandler, reRunHandler);
         widgets.add(widget);
 
         return widget;
@@ -75,12 +80,12 @@ class ProcessItemRenderer implements DropDownListItemRenderer<ProcessListItem> {
 
         private boolean stopped;
 
-        ProcessWidget(ProcessListItem processItem, StopProcessHandler stopProcessHandler, RerunProcessHandler rerunProcessHandler) {
+        ProcessWidget(BaseListItem<Process> item, StopProcessHandler stopProcessHandler, RerunProcessHandler rerunProcessHandler) {
             super();
 
             setHeight("25px");
 
-            final Process process = processItem.getProcess();
+            final Process process = item.getValue();
 
             stopped = !process.isAlive();
 

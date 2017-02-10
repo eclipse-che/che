@@ -8,20 +8,28 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.toolbar.processes;
+package org.eclipse.che.ide.ui.dropdown;
 
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
-import org.eclipse.che.ide.ui.dropdown.DropDownListItem;
-import org.eclipse.che.ide.ui.dropdown.DropDownListItemRenderer;
-
 /**
- * Renders widget for representing empty {@link org.eclipse.che.ide.ui.dropdown.DropDownList}.
+ * Renderer that uses {@link Label} widget for rendering {@link StringItem}.
  */
-class EmptyStateRenderer implements DropDownListItemRenderer {
+public class StringItemRenderer extends AbstractListItemRenderer<StringItem> {
+
+    private Label label;
+
+    public StringItemRenderer(StringItem item) {
+        super(item);
+    }
 
     @Override
-    public Widget render(DropDownListItem item) {
-        return null;
+    protected Widget getWidget() {
+        if (label == null) {
+            label = new Label(item.getValue());
+        }
+
+        return label;
     }
 }

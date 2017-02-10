@@ -11,12 +11,13 @@
 package org.eclipse.che.ide.command.toolbar.processes;
 
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
 import org.eclipse.che.ide.command.toolbar.ToolbarResources;
+import org.eclipse.che.ide.ui.dropdown.BaseListItem;
 import org.eclipse.che.ide.ui.dropdown.DropDownList;
-import org.eclipse.che.ide.ui.dropdown.old.DropDownWidget;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -32,20 +33,20 @@ public class ProcessesListViewImpl implements ProcessesListView {
     private final FlowPanel    rootPanel;
     private final DropDownList dropDownList;
 
-    private final Map<Process, ProcessListItem>     listItems;
-    private final Map<Process, ProcessItemRenderer> renderers;
+    private final Map<Process, BaseListItem<Process>> listItems;
+    private final Map<Process, ProcessItemRenderer>   renderers;
 
     private ActionDelegate delegate;
 
     @Inject
-    public ProcessesListViewImpl(DropDownWidget.Resources resources, ToolbarResources toolbarResources) {
+    public ProcessesListViewImpl(ToolbarResources toolbarResources) {
         listItems = new HashMap<>();
         renderers = new HashMap<>();
 
         final Label label = new Label("EXEC:");
         label.addStyleName(toolbarResources.css().commandListLabel());
 
-        dropDownList = new DropDownList();
+        dropDownList = new DropDownList(new InlineHTML("<b>Ready</b> - start command"));
         dropDownList.addStyleName(toolbarResources.css().commandList());
 
         rootPanel = new FlowPanel();
@@ -81,8 +82,9 @@ public class ProcessesListViewImpl implements ProcessesListView {
 
     @Override
     public void addProcess(Process process) {
-        final ProcessListItem listItem = new ProcessListItem(process);
-        final ProcessItemRenderer renderer = new ProcessItemRenderer(p -> delegate.onStopProcess(p),
+        final BaseListItem<Process> listItem = new BaseListItem<>(process);
+        final ProcessItemRenderer renderer = new ProcessItemRenderer(listItem,
+                                                                     p -> delegate.onStopProcess(p),
                                                                      p -> delegate.onReRunProcess(p));
 
         listItems.put(process, listItem);
@@ -93,7 +95,7 @@ public class ProcessesListViewImpl implements ProcessesListView {
 
     @Override
     public void removeProcess(Process process) {
-        final ProcessListItem listItem = listItems.get(process);
+        final BaseListItem<Process> listItem = listItems.get(process);
 
         if (listItem != null) {
             listItems.remove(process);

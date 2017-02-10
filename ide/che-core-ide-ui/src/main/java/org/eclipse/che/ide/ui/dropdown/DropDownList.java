@@ -12,11 +12,11 @@ package org.eclipse.che.ide.ui.dropdown;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -38,6 +38,7 @@ public class DropDownList extends Composite {
 
     private final FlowPanel                     contentPanel;
     private final PopupPanel                    dropDownPanel;
+    private final Widget                        emptyStateWidget;
     private final Map<DropDownListItem, Widget> itemsWidgets;
 
     @UiField
@@ -49,6 +50,15 @@ public class DropDownList extends Composite {
 
     /** Create new drop down widget. */
     public DropDownList() {
+        this(new Label("---"));
+    }
+
+    /**
+     * Create new drop down widget.
+     * Uses the given {@code emptyStateWidget} to display as the empty list's header.
+     */
+    public DropDownList(Widget emptyStateWidget) {
+        this.emptyStateWidget = emptyStateWidget;
         itemsWidgets = new HashMap<>();
 
         initWidget(UI_BINDER.createAndBindUi(this));
@@ -71,35 +81,47 @@ public class DropDownList extends Composite {
     }
 
     private void attachEventHandlers() {
-        dropButton.addDomHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-//                if (itemsWidgets.size() > 0) {
-                dropDownPanel.showRelativeTo(DropDownList.this);
-//                }
-            }
-        }, ClickEvent.getType());
+        emptyStateWidget.addDomHandler(event -> dropDownPanel.showRelativeTo(DropDownList.this), ClickEvent.getType());
+        dropButton.addDomHandler(event -> dropDownPanel.showRelativeTo(DropDownList.this), ClickEvent.getType());
     }
 
-    /**
-     * Add the given {@code item} with it's renderer to the list.
-     * List may need to get more than one widget instance for the same item
-     * that is why method requires {@code renderer} instead of widget.
-     */
-    public <T extends DropDownListItem> void addItem(T item, DropDownListItemRenderer<T> renderer) {
-        final Widget widget = renderer.render(item);
+    private void checkListEmpty() {
+        if (contentPanel.getWidgetCount() == 0) {
+            setHeaderWidget(emptyStateWidget);
+        }
+    }
 
-        widget.addDomHandler(event -> {
-            // set the chosen item to the header
-            selectedElementName.clear();
-            selectedElementName.add(renderer.render(item));
+    /** Set the specified widget to the list's header. */
+    private void setHeaderWidget(Widget widget) {
+        selectedElementName.clear();
+        selectedElementName.add(widget);
+    }
+
+    /** Add the given {@code item} with it's renderer to the list. */
+    public void addItem(DropDownListItem item, DropDownListItemRenderer renderer) {
+        final Widget headerWidget = renderer.renderHeaderWidget();
+        final Widget listWidget = renderer.renderListWidget();
+
+        headerWidget.addDomHandler(event -> dropDownPanel.showRelativeTo(DropDownList.this), ClickEvent.getType());
+        setHeaderWidget(headerWidget);
+
+        listWidget.addDomHandler(event -> {
+            setHeaderWidget(headerWidget);
 
             dropDownPanel.hide();
+            dropDownPanel.showRelativeTo(DropDownList.this);
         }, ClickEvent.getType());
 
-        itemsWidgets.put(item, widget);
+        itemsWidgets.put(item, listWidget);
 
-        contentPanel.add(widget);
+        contentPanel.add(listWidget);
+    }
+
+    public void addItem(String value) {
+        final StringItem item = new StringItem(value);
+        final StringItemRenderer renderer = new StringItemRenderer(item);
+
+        addItem(item, renderer);
     }
 
     /** Remove item from the list. */
@@ -110,14 +132,17 @@ public class DropDownList extends Composite {
             contentPanel.remove(widget);
         }
 
-        // TODO: check necessity of changing header's widget
+        // TODO: check whether another item should be set to header
+
+        checkListEmpty();
     }
 
     /** Clear the list. */
     public void clear() {
-        selectedElementName.clear();
         itemsWidgets.clear();
         contentPanel.clear();
+
+        checkListEmpty();
     }
 
     interface DropDownListUiBinder extends UiBinder<Widget, DropDownList> {
