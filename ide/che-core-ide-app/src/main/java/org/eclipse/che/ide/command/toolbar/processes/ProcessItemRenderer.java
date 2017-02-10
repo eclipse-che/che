@@ -76,7 +76,7 @@ class ProcessItemRenderer extends AbstractListItemRenderer<BaseListItem<Process>
     private static class ProcessWidget extends FlowPanel {
 
         private final Label        pidLabel;
-        private final ActionButton button;
+        private final ActionButton actionButton;
 
         private boolean stopped;
 
@@ -98,8 +98,8 @@ class ProcessItemRenderer extends AbstractListItemRenderer<BaseListItem<Process>
             pidLabel = new Label('#' + Integer.toString(process.getPid()));
             pidLabel.getElement().getStyle().setFloat(RIGHT);
 
-            button = new ActionButton();
-            button.addDomHandler(event -> {
+            actionButton = new ActionButton();
+            actionButton.addDomHandler(event -> {
                 if (stopped) {
                     rerunProcessHandler.onRerunProcess(process);
                 } else {
@@ -108,7 +108,7 @@ class ProcessItemRenderer extends AbstractListItemRenderer<BaseListItem<Process>
             }, ClickEvent.getType());
 
             add(nameLabel);
-            add(button);
+            add(actionButton);
             add(pidLabel);
         }
 
@@ -120,7 +120,7 @@ class ProcessItemRenderer extends AbstractListItemRenderer<BaseListItem<Process>
             if (!stopped) {
                 stopped = true;
                 pidLabel.removeFromParent();
-                button.setHTML("re-run");
+                actionButton.setHTML("re-run");
             }
         }
 
