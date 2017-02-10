@@ -168,19 +168,19 @@ public class WorkspaceService extends Service {
     }
 
     @GET
-    @Path("/{key}")
+    @Path("/{key:.*}")
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Get the workspace by the composite key",
                   notes = "Composite key can be just workspace ID or in the " +
-                          "namespace:workspace_name form, where namespace is optional (e.g :workspace_name is valid key too.")
+                          "namespace/workspace_name form, where namespace can contain '/' character.")
     @ApiResponses({@ApiResponse(code = 200, message = "The response contains requested workspace entity"),
                    @ApiResponse(code = 404, message = "The workspace with specified id does not exist"),
                    @ApiResponse(code = 403, message = "The user is not workspace owner"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
     public WorkspaceDto getByKey(@ApiParam(value = "Composite key",
                                            examples = @Example({@ExampleProperty("workspace12345678"),
-                                                                @ExampleProperty("namespace:workspace_name"),
-                                                                @ExampleProperty(":workspace_name")}))
+                                                                @ExampleProperty("namespace/workspace_name"),
+                                                                @ExampleProperty("namespace_part_1/namespace_part_2/workspace_name")}))
                                  @PathParam("key") String key) throws NotFoundException,
                                                                       ServerException,
                                                                       ForbiddenException,
@@ -219,7 +219,7 @@ public class WorkspaceService extends Service {
     }
 
     @GET
-    @Path("/namespace/{namespace}")
+    @Path("/namespace/{namespace:.*}")
     @Produces(APPLICATION_JSON)
     @GenerateLink(rel = LINK_REL_GET_BY_NAMESPACE)
     @ApiOperation(value = "Get workspaces by given namespace",
@@ -693,8 +693,8 @@ public class WorkspaceService extends Service {
                    @ApiResponse(code = 404, message = "The workspace with specified id does not exist"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
     public WsAgentHealthStateDto checkAgentHealth(@ApiParam(value = "Workspace id")
-                                                  @PathParam("id") String key) throws NotFoundException, ServerException {
-        final WorkspaceImpl workspace = workspaceManager.getWorkspace(key);
+                                                  @PathParam("id") String id) throws NotFoundException, ServerException {
+        final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
         if (WorkspaceStatus.RUNNING != workspace.getStatus()) {
             return newDto(WsAgentHealthStateDto.class).withWorkspaceStatus(workspace.getStatus());
         }
