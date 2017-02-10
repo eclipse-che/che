@@ -34,7 +34,6 @@ import javax.validation.constraints.NotNull;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.ext.git.client.history.HistoryPresenter.LOG_COMMAND_NAME;
 import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 
 /**
@@ -46,6 +45,7 @@ import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 @Singleton
 public class ResetToCommitPresenter implements ResetToCommitView.ActionDelegate {
     public static final String RESET_COMMAND_NAME = "Git reset to commit";
+    public static final String LOG_COMMAND_NAME   = "Git log";
 
     private final ResetToCommitView       view;
     private final GitOutputConsoleFactory gitOutputConsoleFactory;

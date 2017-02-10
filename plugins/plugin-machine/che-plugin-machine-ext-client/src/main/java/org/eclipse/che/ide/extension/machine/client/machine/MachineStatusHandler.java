@@ -15,9 +15,6 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceRuntimeDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.MachineEntity;
@@ -28,11 +25,11 @@ import org.eclipse.che.ide.api.workspace.event.MachineStatusChangedEvent;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
 
-import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.che.ide.api.machine.events.MachineStateEvent.MachineAction.CREATING;
 import static org.eclipse.che.ide.api.machine.events.MachineStateEvent.MachineAction.RUNNING;
-import org.eclipse.che.ide.util.loging.Log;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 /**
  * Notifies about changing machine state.
@@ -72,29 +69,33 @@ public class MachineStatusHandler implements MachineStatusChangedEvent.Handler {
         final String machineId = event.getMachineId();
         final String workspaceId = event.getWorkspaceId();
 
-        workspaceServiceClient.getWorkspace(workspaceId).then(new Operation<WorkspaceDto>() {
-            @Override
-            public void apply(WorkspaceDto workspace) throws OperationException {
-                WorkspaceRuntimeDto workspaceRuntime = workspace.getRuntime();
-                if (workspaceRuntime == null) {
-                    return;
-                }
+        workspaceServiceClient.getWorkspace(workspaceId).then(workspace -> {
+            WorkspaceRuntimeDto workspaceRuntime = workspace.getRuntime();
+            if (workspaceRuntime == null) {
+                return;
+            }
 
-                appContext.setWorkspace(workspace);
+            appContext.setWorkspace(workspace);
 
-                switch (event.getEventType()) {
-                    case CREATING:
-                        handleMachineCreating(machineId, workspaceRuntime);
-                        break;
-                    case RUNNING:
-                        handleMachineRunning(machineId, workspaceRuntime);
-                        break;
-                    case ERROR:
-                        notificationManager.notify(event.getErrorMessage(), FAIL, EMERGE_MODE);
-                        break;
-                }
+            switch (event.getEventType()) {
+                case CREATING:
+                    handleMachineCreating(machineId, workspaceRuntime);
+                    break;
+                case RUNNING:
+                    handleMachineRunning(machineId, workspaceRuntime);
+                    break;
+                case ERROR:
+                    handleMachineError(event);
+                    break;
             }
         });
+    }
+
+    private void handleMachineError(MachineStatusChangedEvent event) {
+        if (isNullOrEmpty(event.getErrorMessage())) {
+            return;
+        }
+        notificationManager.notify(event.getErrorMessage(), FAIL, EMERGE_MODE);
     }
 
     private MachineEntity getMachine(String machineId, WorkspaceRuntimeDto workspaceRuntime) {

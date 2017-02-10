@@ -64,7 +64,6 @@ export class System {
                 websocketLink = stateLink.getHref();
             }
         });
-
         return this.websocket.getMessageBus(websocketLink + '?token=' + this.authData.getToken());
     }
 
@@ -73,34 +72,63 @@ export class System {
      * Stop the server and return a promise that will wait for the ready to shutdown event
      */
     gracefulStop():Promise<org.eclipse.che.api.system.shared.dto.SystemStateDto> {
-
-        let currentSystemStateDto : org.eclipse.che.api.system.shared.dto.SystemStateDto;
-        let callbackSubscriber : SystemStopEventPromiseMessageBusSubscriber;
-
         // get workspace DTO
         return this.getState().then((systemStateDto: org.eclipse.che.api.system.shared.dto.SystemStateDto) => {
-            currentSystemStateDto = systemStateDto;
-            return this.getMessageBus(systemStateDto);
-        }).then((messageBus: MessageBus) => {
+            if ('READY_TO_SHUTDOWN' === systemStateDto.getStatus()) {
+                return this.readyTobeShutdown(systemStateDto);
+            } else if ('RUNNING' === systemStateDto.getStatus()) {
+                // call stop and wait
+                return this.shutdown(systemStateDto, true);
+            } else {
+                // only wait as stop has been called
+                return this.shutdown(systemStateDto, false);
+            }
+        });
+    }
+
+
+
+    /**
+     * In that case, system is already in a state ready to be shutdown so we do nothing
+     * @returns {Promise<string>}
+     */
+    readyTobeShutdown(currentSystemStateDto: org.eclipse.che.api.system.shared.dto.SystemStateDto) : Promise<org.eclipse.che.api.system.shared.dto.SystemStateDto> {
+        return Promise.resolve(currentSystemStateDto);
+    }
+
+    /**
+     * We want or we're already in a shutdown process so we need to wait the end of the action
+     * @param systemStateDto the current state
+     * @param callStop if true, we need to call the stop action, else we only listen to the stop process event
+     * @returns {Promise<string>}
+     */
+    shutdown(systemStateDto: org.eclipse.che.api.system.shared.dto.SystemStateDto, callStop: boolean) : Promise<org.eclipse.che.api.system.shared.dto.SystemStateDto> {
+        let callbackSubscriber : SystemStopEventPromiseMessageBusSubscriber;
+        return this.getMessageBus(systemStateDto).then((messageBus: MessageBus) => {
             callbackSubscriber = new SystemStopEventPromiseMessageBusSubscriber(messageBus);
             let channelToListen : string;
-            currentSystemStateDto.getLinks().forEach(stateLink => {
+            systemStateDto.getLinks().forEach(stateLink => {
                 if ('system.state.channel' === stateLink.getRel()) {
                     channelToListen = stateLink.getParameters()[0].getDefaultValue();
                 }
             });
             return messageBus.subscribeAsync(channelToListen, callbackSubscriber);
         }).then((subscribed: string) => {
-            var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/system/stop', 204).setMethod('POST');
-            return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
-                return;
-            }).then(() => {
-                return callbackSubscriber.promise;
-            }).then(() => {
-                return this.getState();
-            });
+            if (callStop) {
+                var jsonRequest: HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/system/stop', 204).setMethod('POST');
+                return jsonRequest.request().then((jsonResponse: HttpJsonResponse) => {
+                    return;
+                }).then(() => {
+                    return callbackSubscriber.promise;
+                }).then(() => {
+                    return this.getState();
+                });
+            } else {
+                return callbackSubscriber.promise.then(() => {
+                    return this.getState();
+                });
+            }
         });
-
-
     }
+
 }

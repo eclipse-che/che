@@ -57,6 +57,12 @@ public class JsonRpcWebSocketAgentEventListener implements WsAgentStateHandler {
 
     @Override
     public void onWsAgentStarted(WsAgentStateEvent event) {
+        initializeJsonRpc();
+        initializeTreeExplorerFileWatcher();
+        initializeGitCheckoutWatcher();
+    }
+
+    private void initializeJsonRpc() {
         Log.debug(JsonRpcWebSocketAgentEventListener.class, "Web socket agent started event caught.");
         try {
             internalInitialize();
@@ -69,8 +75,6 @@ public class JsonRpcWebSocketAgentEventListener implements WsAgentStateHandler {
                 }
             }.schedule(1_000);
         }
-
-        initializeTreeExplorerFileWatcher();
     }
 
     private void internalInitialize() {
@@ -97,6 +101,10 @@ public class JsonRpcWebSocketAgentEventListener implements WsAgentStateHandler {
                                                            .withType(START);
 
         requestTransmitter.transmitOneToNone("ws-agent", "track:project-tree", params);
+    }
+
+    private void initializeGitCheckoutWatcher() {
+        requestTransmitter.transmitNoneToNone("ws-agent", "track:git-checkout");
     }
 
     @Override

@@ -12,13 +12,10 @@ package org.eclipse.che.api.system.server;
 
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
-import org.eclipse.che.api.system.shared.dto.SystemEventDto;
-import org.eclipse.che.api.system.shared.dto.SystemStatusChangedEventDto;
+import org.eclipse.che.api.core.util.LineConsumer;
+import org.eclipse.che.api.core.util.WebsocketLineConsumer;
 import org.eclipse.che.api.system.shared.event.SystemEvent;
-import org.eclipse.che.api.system.shared.event.SystemStatusChangedEvent;
 import org.eclipse.che.dto.server.DtoFactory;
-import org.everrest.websockets.WSConnectionContext;
-import org.everrest.websockets.message.ChannelBroadcastMessage;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
@@ -34,6 +31,16 @@ public class SystemEventsWebsocketBroadcaster implements EventSubscriber<SystemE
 
     public static final String SYSTEM_STATE_CHANNEL_NAME = "system:state";
 
+    private final LineConsumer messageConsumer;
+
+    public SystemEventsWebsocketBroadcaster() {
+        this(new WebsocketLineConsumer(SYSTEM_STATE_CHANNEL_NAME));
+    }
+
+    public SystemEventsWebsocketBroadcaster(WebsocketLineConsumer messageConsumer) {
+        this.messageConsumer = messageConsumer;
+    }
+
     @Inject
     public void subscribe(EventService eventService) {
         eventService.subscribe(this);
@@ -41,26 +48,10 @@ public class SystemEventsWebsocketBroadcaster implements EventSubscriber<SystemE
 
     @Override
     public void onEvent(SystemEvent event) {
-        ChannelBroadcastMessage message = new ChannelBroadcastMessage();
-        message.setBody(DtoFactory.getInstance().toJson(asDto(event)));
-        message.setChannel(SYSTEM_STATE_CHANNEL_NAME);
         try {
-            WSConnectionContext.sendMessage(message);
+            messageConsumer.writeLine(DtoFactory.getInstance().toJson(DtoConverter.asDto(event)));
         } catch (Exception x) {
             LoggerFactory.getLogger(getClass()).error(x.getMessage(), x);
-        }
-    }
-
-    private static SystemEventDto asDto(SystemEvent event) {
-        switch (event.getType()) {
-            case STATUS_CHANGED:
-                SystemStatusChangedEvent statusChanged = (SystemStatusChangedEvent)event;
-                return DtoFactory.newDto(SystemStatusChangedEventDto.class)
-                                 .withStatus(statusChanged.getStatus())
-                                 .withPrevStatus(statusChanged.getPrevStatus())
-                                 .withType(statusChanged.getType());
-            default:
-                throw new IllegalArgumentException("Can't convert event of type '" + event.getType() + "' to DTO");
         }
     }
 }

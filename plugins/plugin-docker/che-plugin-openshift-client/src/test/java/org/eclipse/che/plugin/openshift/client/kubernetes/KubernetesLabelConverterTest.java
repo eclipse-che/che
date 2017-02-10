@@ -20,17 +20,11 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class KubernetesLabelConverterTest {
-    private KubernetesLabelConverter kubernetesLabelConverter;
-
-    @BeforeClass
-    private void setup() {
-        this.kubernetesLabelConverter = new KubernetesLabelConverter();
-    }
 
     @Test
     public void shouldConvertLabelsToValidKubernetesLabelNames() {
         String validLabelRegex = "([A-Za-z0-9][-A-Za-z0-9_\\.]*)?[A-Za-z0-9]";
-        String prefix = kubernetesLabelConverter.getCheServerLabelPrefix();
+        String prefix = KubernetesLabelConverter.getCheServerLabelPrefix();
 
         // Given
         Map<String, String> labels = new HashMap<>();
@@ -38,7 +32,7 @@ public class KubernetesLabelConverterTest {
         labels.put(prefix + "8000/tcp:ref:", "tomcat-debug");
 
         // When
-        Map<String, String> converted = kubernetesLabelConverter.labelsToNames(labels);
+        Map<String, String> converted = KubernetesLabelConverter.labelsToNames(labels);
 
         // Then
         for (Map.Entry<String, String> entry : converted.entrySet()) {
@@ -52,14 +46,14 @@ public class KubernetesLabelConverterTest {
     @Test
     public void shouldBeAbleToRecoverOriginalLabelsAfterConversion() {
         // Given
-        String prefix = kubernetesLabelConverter.getCheServerLabelPrefix();
+        String prefix = KubernetesLabelConverter.getCheServerLabelPrefix();
         Map<String, String> originalLabels = new HashMap<>();
         originalLabels.put(prefix + "4401/tcp:path:", "/api");
         originalLabels.put(prefix + "8000/tcp:ref:", "tomcat-debug");
 
         // When
-        Map<String, String> converted = kubernetesLabelConverter.labelsToNames(originalLabels);
-        Map<String, String> unconverted = kubernetesLabelConverter.namesToLabels(converted);
+        Map<String, String> converted = KubernetesLabelConverter.labelsToNames(originalLabels);
+        Map<String, String> unconverted = KubernetesLabelConverter.namesToLabels(converted);
 
         // Then
         assertEquals(originalLabels, unconverted);

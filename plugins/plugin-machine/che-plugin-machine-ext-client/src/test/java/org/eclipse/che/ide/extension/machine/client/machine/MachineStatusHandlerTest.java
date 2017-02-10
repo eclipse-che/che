@@ -22,7 +22,6 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.machine.events.MachineStateEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.api.workspace.event.MachineStatusChangedEvent;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
@@ -41,8 +40,8 @@ import java.util.Collections;
 import static org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent.EventType.CREATING;
 import static org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent.EventType.ERROR;
 import static org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent.EventType.RUNNING;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -116,7 +115,7 @@ public class MachineStatusHandlerTest {
         workspaceCaptor.getValue().apply(workspace);
 
         verify(appContext).setWorkspace(workspace);
-        verify(handler).onMachineCreating(Matchers.<MachineStateEvent>anyObject());
+        verify(handler).onMachineCreating(Matchers.anyObject());
     }
 
     @Test
@@ -130,7 +129,7 @@ public class MachineStatusHandlerTest {
         workspaceCaptor.getValue().apply(workspace);
 
         verify(appContext).setWorkspace(workspace);
-        verify(handler).onMachineCreating(Matchers.<MachineStateEvent>anyObject());
+        verify(handler).onMachineCreating(Matchers.anyObject());
     }
 
     @Test
@@ -144,7 +143,7 @@ public class MachineStatusHandlerTest {
         workspaceCaptor.getValue().apply(workspace);
 
         verify(appContext).setWorkspace(workspace);
-        verify(handler).onMachineRunning(Matchers.<MachineStateEvent>anyObject());
+        verify(handler).onMachineRunning(Matchers.anyObject());
     }
 
     @Test
@@ -158,19 +157,19 @@ public class MachineStatusHandlerTest {
         workspaceCaptor.getValue().apply(workspace);
 
         verify(appContext).setWorkspace(workspace);
-        verify(handler).onMachineRunning(Matchers.<MachineStateEvent>anyObject());
+        verify(handler).onMachineRunning(Matchers.anyObject());
     }
 
     @Test
     public void shouldNotifyWhenMachineStateIsError() throws Exception {
         when(machineStatusChangedEvent.getEventType()).thenReturn(ERROR);
+        when(machineStatusChangedEvent.getErrorMessage()).thenReturn("error");
         statusNotifier.onMachineStatusChanged(machineStatusChangedEvent);
 
         verify(workspaceServiceClient.getWorkspace(WORKSPACE_ID)).then(workspaceCaptor.capture());
         workspaceCaptor.getValue().apply(workspace);
 
         verify(appContext).setWorkspace(workspace);
-        verify(machineStatusChangedEvent).getErrorMessage();
-        verify(notificationManager).notify(anyString(), (StatusNotification.Status)anyObject(), anyObject());
+        verify(notificationManager).notify("error", FAIL, EMERGE_MODE);
     }
 }
