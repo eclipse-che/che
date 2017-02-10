@@ -17,50 +17,50 @@ import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
-import org.eclipse.che.ide.ui.dropdown.AbstractListItemRenderer;
 import org.eclipse.che.ide.ui.dropdown.BaseListItem;
-
-import java.util.LinkedList;
-import java.util.List;
+import org.eclipse.che.ide.ui.dropdown.DropDownListItemRenderer;
 
 import static com.google.gwt.dom.client.Style.Float.LEFT;
 import static com.google.gwt.dom.client.Style.Float.RIGHT;
 
-/**
- * Renders widgets for representing a {@link Process}.
- */
-class ProcessItemRenderer extends AbstractListItemRenderer<BaseListItem<Process>> {
+/** Renders widgets for representing a {@link Process}. */
+class ProcessItemRenderer implements DropDownListItemRenderer {
 
-    /** List of all rendered widgets. */
-    private final List<ProcessWidget> widgets;
-    private final StopProcessHandler  stopHandler;
-    private final RerunProcessHandler reRunHandler;
+    private final BaseListItem<Process> item;
+    private final StopProcessHandler    stopHandler;
+    private final RerunProcessHandler   reRunHandler;
 
-    ProcessItemRenderer(BaseListItem<Process> listItem,
-                        StopProcessHandler stopProcessHandler,
-                        RerunProcessHandler reRunProcessHandler) {
-        super(listItem);
+    private ProcessWidget headerWidget;
+    private ProcessWidget listWidget;
 
-        widgets = new LinkedList<>();
+    ProcessItemRenderer(BaseListItem<Process> listItem, StopProcessHandler stopProcessHandler, RerunProcessHandler reRunProcessHandler) {
+        item = listItem;
         stopHandler = stopProcessHandler;
         reRunHandler = reRunProcessHandler;
     }
 
-    /**
-     * {@inheritDoc}
-     * <p>Rendered widget depends on the given {@code process}'s aliveness state.
-     */
     @Override
-    public Widget getWidget() {
-        final ProcessWidget widget = new ProcessWidget(item, stopHandler, reRunHandler);
-        widgets.add(widget);
+    public Widget renderHeaderWidget() {
+        if (headerWidget == null) {
+            headerWidget = new ProcessWidget(item, stopHandler, reRunHandler);
+        }
 
-        return widget;
+        return headerWidget;
     }
 
-    /** Informs all rendered widgets that related process has been stopped. */
+    @Override
+    public Widget renderListWidget() {
+        if (listWidget == null) {
+            listWidget = new ProcessWidget(item, stopHandler, reRunHandler);
+        }
+
+        return listWidget;
+    }
+
+    /** Informs rendered widgets that related process has been stopped. */
     void notifyProcessStopped() {
-        widgets.forEach(ProcessWidget::setStopped);
+        headerWidget.setStopped();
+        listWidget.setStopped();
     }
 
     interface StopProcessHandler {

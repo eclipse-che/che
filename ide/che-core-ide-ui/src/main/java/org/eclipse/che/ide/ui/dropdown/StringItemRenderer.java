@@ -16,20 +16,32 @@ import com.google.gwt.user.client.ui.Widget;
 /**
  * Renderer that uses {@link Label} widget for rendering {@link StringItem}.
  */
-public class StringItemRenderer extends AbstractListItemRenderer<StringItem> {
+public class StringItemRenderer implements DropDownListItemRenderer {
 
-    private Label label;
+    private final StringItem item;
+
+    private Widget headerWidget;
+    private Widget listWidget;
 
     public StringItemRenderer(StringItem item) {
-        super(item);
+        this.item = item;
     }
 
     @Override
-    protected Widget getWidget() {
-        if (label == null) {
-            label = new Label(item.getValue());
+    public Widget renderHeaderWidget() {
+        if (headerWidget == null) {
+            headerWidget = new Label(item.getValue());
         }
 
-        return label;
+        return headerWidget;
+    }
+
+    @Override
+    public Widget renderListWidget() {
+        if (listWidget == null) {
+            listWidget = new Label(item.getValue());
+        }
+
+        return listWidget;
     }
 }

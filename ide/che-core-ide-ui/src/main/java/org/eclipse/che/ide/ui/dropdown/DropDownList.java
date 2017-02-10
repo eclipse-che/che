@@ -21,6 +21,7 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.ui.dropdown.old.DropDownWidget;
 
 import java.util.HashMap;
@@ -47,6 +48,8 @@ public class DropDownList extends Composite {
     FlowPanel selectedElementName;
     @UiField
     FlowPanel dropButton;
+
+    private DropDownListItem selectedItem;
 
     /** Create new drop down widget. */
     public DropDownList() {
@@ -97,6 +100,12 @@ public class DropDownList extends Composite {
         selectedElementName.add(widget);
     }
 
+    /** Returns the currently selected item or {@code null} if none. */
+    @Nullable
+    public DropDownListItem getSelectedItem() {
+        return selectedItem;
+    }
+
     /** Add the given {@code item} with it's renderer to the list. */
     public void addItem(DropDownListItem item, DropDownListItemRenderer renderer) {
         final Widget headerWidget = renderer.renderHeaderWidget();
@@ -106,10 +115,9 @@ public class DropDownList extends Composite {
         setHeaderWidget(headerWidget);
 
         listWidget.addDomHandler(event -> {
+            selectedItem = item;
             setHeaderWidget(headerWidget);
-
             dropDownPanel.hide();
-            dropDownPanel.showRelativeTo(DropDownList.this);
         }, ClickEvent.getType());
 
         itemsWidgets.put(item, listWidget);

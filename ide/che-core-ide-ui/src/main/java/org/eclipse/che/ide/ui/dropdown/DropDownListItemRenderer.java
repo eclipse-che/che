@@ -14,12 +14,13 @@ import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Renderer of the items for {@link DropDownList}.
+ * <p><b>Important:</b> {@link #renderHeaderWidget()} and {@link #renderListWidget()} mustn't return the same instance.
  */
 public interface DropDownListItemRenderer {
 
-    /** Returns a new instance of the widget for representing the {@link DropDownListItem} in the list. */
-    Widget renderListWidget();
-
-    /** Returns a new instance of the widget for representing the {@link DropDownListItem} that has been chosen. */
+    /** Returns widget for representing the {@link DropDownListItem} in the list's header (chosen item). */
     Widget renderHeaderWidget();
+
+    /** Returns widget for representing the {@link DropDownListItem} in the list. */
+    Widget renderListWidget();
 }
