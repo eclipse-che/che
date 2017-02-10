@@ -32,8 +32,8 @@ public class ProcessesListViewImpl implements ProcessesListView {
     private final FlowPanel    rootPanel;
     private final DropDownList dropDownList;
 
-    private final Map<Process, ProcessListItem> listItems;
-    private final Map<Process, ProcessRenderer> renderers;
+    private final Map<Process, ProcessListItem>     listItems;
+    private final Map<Process, ProcessItemRenderer> renderers;
 
     private ActionDelegate delegate;
 
@@ -71,19 +71,19 @@ public class ProcessesListViewImpl implements ProcessesListView {
     }
 
     @Override
-    public void setProcessStopped(Process process) {
-        final ProcessRenderer renderer = renderers.get(process);
+    public void notifyProcessStopped(Process process) {
+        final ProcessItemRenderer renderer = renderers.get(process);
 
         if (renderer != null) {
-            renderer.setStopped();
+            renderer.notifyProcessStopped();
         }
     }
 
     @Override
     public void addProcess(Process process) {
         final ProcessListItem listItem = new ProcessListItem(process);
-        final ProcessRenderer renderer = new ProcessRenderer(p -> delegate.onStopProcess(p),
-                                                             p -> delegate.onReRunProcess(p));
+        final ProcessItemRenderer renderer = new ProcessItemRenderer(p -> delegate.onStopProcess(p),
+                                                                     p -> delegate.onReRunProcess(p));
 
         listItems.put(process, listItem);
         renderers.put(process, renderer);

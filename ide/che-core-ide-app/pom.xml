@@ -280,27 +280,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <!--<plugin>-->
-            <!--<groupId>org.eclipse.che.core</groupId>-->
-            <!--<artifactId>che-core-api-dto-maven-plugin</artifactId>-->
-            <!--<version>${project.version}</version>-->
-            <!--<executions>-->
-            <!--<execution>-->
-            <!--<phase>process-sources</phase>-->
-            <!--<goals>-->
-            <!--<goal>generate</goal>-->
-            <!--</goals>-->
-            <!--</execution>-->
-            <!--</executions>-->
-            <!--<configuration>-->
-            <!--<dtoPackages>-->
-            <!--<package>org.eclipse.che.ide.statepersistance.dto</package>-->
-            <!--</dtoPackages>-->
-            <!--<outputDirectory>${dto-generator-out-directory}</outputDirectory>-->
-            <!--<genClassName>org.eclipse.che.ide.statepersistance.dto.DtoClientImpls</genClassName>-->
-            <!--<impl>client</impl>-->
-            <!--</configuration>-->
-            <!--</plugin>-->
             <plugin>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-dyna-provider-generator-maven-plugin</artifactId>
@@ -326,14 +305,6 @@
                         <exclude>**/*.gif</exclude>
                         <exclude>**/*.jpg</exclude>
                     </excludes>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
                 </configuration>
             </plugin>
         </plugins>

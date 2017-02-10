@@ -23,5 +23,7 @@ public interface Process {
 
     int getPid();
 
+    boolean isAlive();
+
     Machine getMachine();
 }

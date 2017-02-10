@@ -20,12 +20,14 @@ public class ProcessImpl implements Process {
     private final String  commandName;
     private final String  commandLine;
     private final int     pid;
+    private final boolean alive;
     private final Machine machine;
 
-    public ProcessImpl(String commandName, String commandLine, int pid, Machine machine) {
+    public ProcessImpl(String commandName, String commandLine, int pid, boolean alive, Machine machine) {
         this.commandName = commandName;
         this.commandLine = commandLine;
         this.pid = pid;
+        this.alive = alive;
         this.machine = machine;
     }
 
@@ -42,6 +44,11 @@ public class ProcessImpl implements Process {
     @Override
     public int getPid() {
         return pid;
+    }
+
+    @Override
+    public boolean isAlive() {
+        return alive;
     }
 
     @Override

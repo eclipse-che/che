@@ -75,28 +75,29 @@ public class DropDownList extends Composite {
             @Override
             public void onClick(ClickEvent event) {
 //                if (itemsWidgets.size() > 0) {
-                    dropDownPanel.showRelativeTo(DropDownList.this);
+                dropDownPanel.showRelativeTo(DropDownList.this);
 //                }
             }
         }, ClickEvent.getType());
     }
 
-    /** Add item with the appropriate renderer. */
-    public <T extends DropDownListItem> void addItem(final T item, final DropDownListItemRenderer<T> renderer) {
+    /**
+     * Add the given {@code item} with it's renderer to the list.
+     * List may need to get more than one widget instance for the same item
+     * that is why method requires {@code renderer} instead of widget.
+     */
+    public <T extends DropDownListItem> void addItem(T item, DropDownListItemRenderer<T> renderer) {
         final Widget widget = renderer.render(item);
 
-        itemsWidgets.put(item, widget);
+        widget.addDomHandler(event -> {
+            // set the chosen item to the header
+            selectedElementName.clear();
+            selectedElementName.add(renderer.render(item));
 
-        widget.addDomHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                // set the chosen item to the header
-                selectedElementName.clear();
-                selectedElementName.add(renderer.render(item));
-
-                dropDownPanel.hide();
-            }
+            dropDownPanel.hide();
         }, ClickEvent.getType());
+
+        itemsWidgets.put(item, widget);
 
         contentPanel.add(widget);
     }

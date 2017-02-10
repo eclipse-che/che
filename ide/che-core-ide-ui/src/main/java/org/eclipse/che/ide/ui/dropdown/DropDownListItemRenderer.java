@@ -13,7 +13,8 @@ package org.eclipse.che.ide.ui.dropdown;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- *
+ * @param <T>
+ *         type of the item for which need to render widgets
  */
 public interface DropDownListItemRenderer<T extends DropDownListItem> {
 

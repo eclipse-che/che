@@ -77,24 +77,14 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
             }
         });
 
-        // TODO: get info about only one process
         eventBus.addHandler(ProcessStartedEvent.TYPE, event -> addProcessToList(event.getProcessID(), event.getMachine()));
 
         eventBus.addHandler(ProcessFinishedEvent.TYPE, event -> {
             final Process process = runningProcesses.get(event.getProcessID());
 
             if (process != null) {
-                view.setProcessStopped(process);
+                view.notifyProcessStopped(process);
             }
-        });
-    }
-
-    private void addProcessToList(int pid, Machine machine) {
-        execAgentCommandManager.getProcess(machine.getId(), pid).then(arg -> {
-            final Process process = new ProcessImpl(arg.getName(), arg.getCommandLine(), arg.getPid(), machine);
-            runningProcesses.put(process.getPid(), process);
-
-            view.addProcess(process);
         });
     }
 
@@ -105,10 +95,10 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
         final WorkspaceRuntime runtime = appContext.getWorkspace().getRuntime();
 
         if (runtime != null) {
-            for (final Machine machine : runtime.getMachines()) {
+            for (Machine machine : runtime.getMachines()) {
                 execAgentCommandManager.getProcesses(machine.getId(), false).then(arg -> {
                     for (GetProcessesResponseDto p : arg) {
-                        final Process process = new ProcessImpl(p.getName(), p.getCommandLine(), p.getPid(), machine);
+                        final Process process = new ProcessImpl(p.getName(), p.getCommandLine(), p.getPid(), p.isAlive(), machine);
                         runningProcesses.put(process.getPid(), process);
 
                         view.addProcess(process);
@@ -116,6 +106,15 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
                 });
             }
         }
+    }
+
+    private void addProcessToList(int pid, Machine machine) {
+        execAgentCommandManager.getProcess(machine.getId(), pid).then(arg -> {
+            final Process process = new ProcessImpl(arg.getName(), arg.getCommandLine(), arg.getPid(), arg.isAlive(), machine);
+            runningProcesses.put(process.getPid(), process);
+
+            view.addProcess(process);
+        });
     }
 
     @Override
@@ -133,8 +132,8 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
         final ContextualCommand command = commandManager.getCommand(process.getName());
 
         if (command != null) {
-            commandExecutorProvider.get().executeCommand(command, process.getMachine());
             view.removeProcess(process);
+            commandExecutorProvider.get().executeCommand(command, process.getMachine());
         }
     }
 

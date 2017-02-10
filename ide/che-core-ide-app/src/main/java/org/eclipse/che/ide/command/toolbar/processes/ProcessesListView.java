@@ -29,8 +29,8 @@ public interface ProcessesListView extends View<ProcessesListView.ActionDelegate
     /** Clear processes list. */
     void clearList();
 
-    /** Mark the specified process in the list as stopped. */
-    void setProcessStopped(Process process);
+    /** Informs view that the specified {@code process} has been stopped. */
+    void notifyProcessStopped(Process process);
 
     interface ActionDelegate {
 

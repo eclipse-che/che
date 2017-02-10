@@ -26,30 +26,36 @@ import static com.google.gwt.dom.client.Style.Float.LEFT;
 import static com.google.gwt.dom.client.Style.Float.RIGHT;
 
 /**
- * Renders widget for representing {@link Process}.
+ * Renders widgets for representing a {@link Process}.
  */
-class ProcessRenderer implements DropDownListItemRenderer<ProcessListItem> {
+class ProcessItemRenderer implements DropDownListItemRenderer<ProcessListItem> {
 
-    private final List<ProcessWidget> renderedWidgets;
+    /** List of all rendered widgets. */
+    private final List<ProcessWidget> widgets;
     private final StopProcessHandler  stopProcessHandler;
     private final RerunProcessHandler rerunProcessHandler;
 
-    ProcessRenderer(StopProcessHandler stopProcessHandler, RerunProcessHandler rerunProcessHandler) {
-        renderedWidgets = new LinkedList<>();
+    ProcessItemRenderer(StopProcessHandler stopProcessHandler, RerunProcessHandler rerunProcessHandler) {
+        widgets = new LinkedList<>();
         this.stopProcessHandler = stopProcessHandler;
         this.rerunProcessHandler = rerunProcessHandler;
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>Rendered widget depends on the given {@code process}'s aliveness state.
+     */
     @Override
-    public Widget render(ProcessListItem process) {
-        final ProcessWidget widget = new ProcessWidget(process, stopProcessHandler, rerunProcessHandler);
-        renderedWidgets.add(widget);
+    public Widget render(ProcessListItem processItem) {
+        final ProcessWidget widget = new ProcessWidget(processItem, stopProcessHandler, rerunProcessHandler);
+        widgets.add(widget);
 
         return widget;
     }
 
-    void setStopped() {
-        renderedWidgets.forEach(ProcessWidget::setStopped);
+    /** Informs all rendered widgets that related process has been stopped. */
+    void notifyProcessStopped() {
+        widgets.forEach(ProcessWidget::setStopped);
     }
 
     interface StopProcessHandler {
@@ -69,10 +75,14 @@ class ProcessRenderer implements DropDownListItemRenderer<ProcessListItem> {
 
         private boolean stopped;
 
-        ProcessWidget(Process process, StopProcessHandler stopProcessHandler, RerunProcessHandler rerunProcessHandler) {
+        ProcessWidget(ProcessListItem processItem, StopProcessHandler stopProcessHandler, RerunProcessHandler rerunProcessHandler) {
             super();
 
             setHeight("25px");
+
+            final Process process = processItem.getProcess();
+
+            stopped = !process.isAlive();
 
             final String labelText = process.getMachine().getConfig().getName() + ": <b>" + process.getName() + "</b>";
             final Label nameLabel = new InlineHTML(labelText);
@@ -97,18 +107,21 @@ class ProcessRenderer implements DropDownListItemRenderer<ProcessListItem> {
             add(pidLabel);
         }
 
+        /**
+         * Changes widget for representing process as stopped.
+         * Does nothing in case widget is already represents stopped process.
+         */
         void setStopped() {
-            stopped = true;
-
-            pidLabel.removeFromParent();
-            button.setHTML("re-run");
+            if (!stopped) {
+                stopped = true;
+                pidLabel.removeFromParent();
+                button.setHTML("re-run");
+            }
         }
 
         private static class ActionButton extends Button {
-
             ActionButton() {
                 super();
-
                 getElement().getStyle().setFloat(RIGHT);
                 setHTML("stop");
             }
