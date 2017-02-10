@@ -21,6 +21,7 @@ import java.util.List;
  *
  * @author Evgen Vidolob
  * @author Artem Zatsarynnyi
+ * @author <a href="mailto:ak@nuxeo.com">Arnaud Kervern</a>
  */
 public interface Scheme {
 
@@ -71,4 +72,9 @@ public interface Scheme {
      */
     @Nullable
     CharCodeWithModifiers getKeyBinding(@NotNull String actionId);
+
+    /**
+     * @return a boolean to check if the action is handled by this scheme
+     */
+    boolean contains(@NotNull String actionId);
 }
