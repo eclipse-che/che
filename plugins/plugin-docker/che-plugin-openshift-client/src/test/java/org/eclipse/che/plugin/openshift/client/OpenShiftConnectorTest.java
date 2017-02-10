@@ -28,7 +28,6 @@ import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -96,10 +95,6 @@ public class OpenShiftConnectorTest {
                 dockerConnectorConfiguration,
                 dockerConnectionFactory,
                 authManager,
-                kubernetesLabelConverter,
-                kubernetesEnvVar,
-                kubernetesContainer,
-                kubernetesService,
                 dockerApiVersionPathPrefixProvider,
                 OPENSHIFT_API_ENDPOINT_MINISHIFT,
                 OPENSHIFT_DEFAULT_TOKEN,
@@ -125,10 +120,6 @@ public class OpenShiftConnectorTest {
                 dockerConnectorConfiguration,
                 dockerConnectionFactory,
                 authManager,
-                kubernetesLabelConverter,
-                kubernetesEnvVar,
-                kubernetesContainer,
-                kubernetesService,
                 dockerApiVersionPathPrefixProvider,
                 OPENSHIFT_API_ENDPOINT_MINISHIFT,
                 "",
