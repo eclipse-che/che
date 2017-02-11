@@ -11,6 +11,7 @@
 
 package org.eclipse.che.plugin.openshift.client.kubernetes;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 
 public final class KubernetesStringUtils {
@@ -31,7 +32,7 @@ public final class KubernetesStringUtils {
      * @return the normalized string.
      */
     public static String getNormalizedString(String input) {
-        int end = Math.min(input.length(), MAX_CHARS);
+        int end = Math.min(input.length(), MAX_CHARS - 1);
         return input.substring(0, end);
     }
 
@@ -52,12 +53,22 @@ public final class KubernetesStringUtils {
     }
 
     /**
+     * Che workspace id is used as OpenShift service / deployment config name
+     * and must match the regex [a-z]([-a-z0-9]*[a-z0-9]) e.g. "q5iuhkwjvw1w9emg"
+     *
+     * @return randomly generated workspace id
+     */
+    public static String generateWorkspaceID() {
+        return RandomStringUtils.random(16, true, true).toLowerCase();
+    }
+
+    /**
      * Converts a String into a suitable name for an openshift container.
      * Kubernetes names are limited to 63 chars and must match the regex
      * {@code [a-z0-9]([-a-z0-9]*[a-z0-9])?}
      * @param input the string to convert
      */
-    public static String getContainerName(String input) {
+    public static String convertToContainerName(String input) {
         if (input.startsWith("workspace")) {
             input = input.replaceFirst("workspace", "");
         }
@@ -72,7 +83,8 @@ public final class KubernetesStringUtils {
      * @param repository the original docker repository String.
      * @return
      */
-    public static String getImageStreamName(String repository) {
+    public static String convertPullSpecToImageStreamName(String repository) {
+        repository = stripTagFromPullSpec(repository);
         return getNormalizedString(repository.replaceAll("/", "_"));
     }
 
@@ -81,16 +93,18 @@ public final class KubernetesStringUtils {
      * In OpenShift, tagging functionality is limited, so while in Docker we may want to
      * <p>{@code docker tag eclipse/ubuntu_jdk8 eclipse-che/<workspace-id>},<p> this is not
      * possible in OpenShift. This method returns a trimmed version of {@code <workspace-id>}
-     * @param repo the target repository spec in a {@code docker tag} command.
+     * @param repository the target repository spec in a {@code docker tag} command.
      * @return an appropriate tag name
      */
-    public static String getTagNameFromRepoString(String repo) {
+    public static String convertPullSpecToTagName(String repository) {
         String name;
-        if (repo.contains("/")) {
-            name = repo.split("/")[1];
+        if (repository.contains("/")) {
+            String[] nameSegments = repository.split("/");
+            name = nameSegments[nameSegments.length - 1];
         } else {
-            name = repo;
+            name = repository;
         }
+        name = stripTagFromPullSpec(name);
         name = name.replaceAll("workspace", "")
                    .replaceAll("machine", "")
                    .replaceAll("che_.*", "")
@@ -102,8 +116,8 @@ public final class KubernetesStringUtils {
 
     /**
      * Gets an ImageStreamTag name from docker pull specs by converting repository strings
-     * to suit the convention used in {@link KubernetesStringUtils#getImageStreamName(String)}
-     * and {@link KubernetesStringUtils#getTagNameFromRepoString(String)}.
+     * to suit the convention used in {@link KubernetesStringUtils#convertPullSpecToImageStreamName(String)}
+     * and {@link KubernetesStringUtils#convertPullSpecToTagName(String)}.
      *
      * <p> e.g. will convert {@code eclipse/ubuntu_jdk8} and {@code eclipse-che/<workspace-id>}
      * into {@code eclipse_ubuntu_jdk8:<workspace-id>}
@@ -114,9 +128,47 @@ public final class KubernetesStringUtils {
      *          The docker repository that has been tagged to follow oldRepository
      * @return A string that can be used to refer to the ImageStreamTag formed from these repositories.
      */
-    public static String getImageStreamTagName(String oldRepository, String newRepository) {
-        String tag = getTagNameFromRepoString(newRepository);
-        String repo = getImageStreamName(oldRepository);
+    public static String createImageStreamTagName(String oldRepository, String newRepository) {
+        String tag = convertPullSpecToTagName(newRepository);
+        String repo = convertPullSpecToImageStreamName(oldRepository);
         return getNormalizedString(String.format("%s:%s", repo, tag));
+    }
+
+    /**
+     * Gets the ImageStreamName fromm a docker pull spec. For example, provided
+     * {@code [<registry>]/[<organization>]/<image>:[<tag>]}, will return just {@code <image>}
+     *
+     * In the case where the pull spec does not contain optional components, this method simply
+     * returns the pull spec provided.
+     *
+     * @param pullSpec
+     * @return
+     */
+    public static String getImageStreamNameFromPullSpec(String pullSpec) {
+        return pullSpec.replaceAll(".*/", "").replaceAll(":.*", "");
+    }
+
+    /**
+     * Remove the tag from a pull spec, if applicable. If pull spec does not include a tag,
+     * returns the pull spec unchanged.
+     * @param pullSpec
+     * @return
+     */
+    public static String stripTagFromPullSpec(String pullSpec) {
+        return pullSpec.replaceAll(":.*", "");
+    }
+
+    /**
+     * Gets the tag fromm a docker pull spec. For example, provided
+     * {@code [<registry>]/[<organization>]/<image>:[<tag>]}, will return just {@code <tag>}
+     *
+     * @param pullSpec
+     * @return the tag on the pull spec, or null if pull spec does not contain a tag
+     */
+    public static String getTagNameFromPullSpec(String pullSpec) {
+        if (!pullSpec.contains(":")) {
+            return null;
+        }
+        return pullSpec.replaceAll(".*:", "");
     }
 }
