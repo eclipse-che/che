@@ -56,7 +56,9 @@ cli_init() {
 
     CHE_PORT_LOCAL=$(get_value_of_var_from_env_file ${CHE_PRODUCT_NAME}_PORT)
     CHE_PORT_ENV=$(get_value_of_var_from_env ${CHE_PRODUCT_NAME}_PORT)
-    if [[ "${CHE_PORT_ENV}" != "" ]] && 
+    
+    if [[ "${CHE_PORT_ENV}" != "" ]] &&
+       [[ "${CHE_PORT_LOCAL}" != "" ]] && 
        [[ "${CHE_PORT_ENV}" != "${CHE_PORT_LOCAL}" ]]; then
       warning "cli" "'${CHE_PRODUCT_NAME}_PORT=${CHE_PORT_ENV}' from command line overriding '${CHE_PRODUCT_NAME}_PORT=${CHE_PORT_LOCAL}' from ${CHE_ENVIRONMENT_FILE}"
       CHE_PORT=$CHE_PORT_ENV
