@@ -145,6 +145,8 @@ generate_configuration_with_puppet() {
                   -v \"${CHE_HOST_INSTANCE}\":/opt/${CHE_MINI_PRODUCT_NAME}:rw \
                   ${WRITE_PARAMETERS} \
                   -e \"CHE_ENV_FILE=${CHE_ENV_FILE}\" \
+                  -e \"CHE_HOST=${CHE_HOST}\" \
+                  -e \"CHE_PORT=${CHE_PORT}\" \
                   -e \"CHE_CONTAINER_ROOT=${CHE_CONTAINER_ROOT}\" \
                   -e \"CHE_CONTAINER_NAME=${CHE_CONTAINER_NAME}\" \
                   -e \"CHE_ENVIRONMENT=${CHE_ENVIRONMENT}\" \

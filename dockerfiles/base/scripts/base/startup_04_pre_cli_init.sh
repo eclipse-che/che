@@ -33,8 +33,13 @@ cli_init() {
 
   if is_initialized; then 
     CHE_HOST_LOCAL=$(get_value_of_var_from_env_file ${CHE_PRODUCT_NAME}_HOST)
-    if [[ "${CHE_HOST}" != "${CHE_HOST_LOCAL}" ]]; then
-      warning "${CHE_PRODUCT_NAME}_HOST (${CHE_HOST}) overridden by ${CHE_ENVIRONMENT_FILE} (${CHE_HOST_LOCAL})"
+    if [[ "${CHE_HOST}" != "${CHE_HOST_LOCAL}" ]] && 
+       [[ "${CHE_HOST_SET_ON_COMMAND_LINE}" = "true" ]]; then
+      warning "Command line '-e ${CHE_PRODUCT_NAME}_HOST=${CHE_HOST}' \
+overriding '${CHE_PRODUCT_NAME}_HOST=${CHE_HOST_LOCAL}' in ${CHE_ENVIRONMENT_FILE}"
+    elif [[ "${CHE_HOST_LOCAL}" != "${GLOBAL_HOST_IP}" ]]; then
+      warning "${CHE_PRODUCT_NAME}_HOST=${CHE_HOST_LOCAL} is different from discovered IP \
+(${GLOBAL_HOST_IP})"
     fi
   fi
 
@@ -291,6 +296,4 @@ get_value_of_var_from_env_file() {
   local LOOKUP_LOCAL=$(docker_run --env-file="${REFERENCE_CONTAINER_ENVIRONMENT_FILE}" \
                                 ${BOOTSTRAP_IMAGE_ALPINE} sh -c "echo \$$1")
   echo $LOOKUP_LOCAL
-
 }
-
