@@ -56,6 +56,9 @@ public interface CommandResources extends ClientBundle {
     @Source({"palette/styles.css", "org/eclipse/che/ide/api/ui/style.css"})
     PaletteCSS commandsPaletteCss();
 
+    @Source("toolbar/processes/styles.css")
+    ProcessesListCSS processesListCss();
+
     interface ExplorerCSS extends CssResource {
         String commandGoalNode();
 
@@ -68,5 +71,9 @@ public interface CommandResources extends ClientBundle {
 
     interface PaletteCSS extends CssResource {
         String filterField();
+    }
+
+    interface ProcessesListCSS extends CssResource {
+        String actionButton();
     }
 }

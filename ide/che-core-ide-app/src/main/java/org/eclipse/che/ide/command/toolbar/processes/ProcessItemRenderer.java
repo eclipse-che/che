@@ -10,13 +10,19 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.toolbar.processes;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.ui.ButtonBase;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
+import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.ide.FontAwesome;
+import org.eclipse.che.ide.command.CommandResources;
 import org.eclipse.che.ide.ui.dropdown.BaseListItem;
 import org.eclipse.che.ide.ui.dropdown.DropDownListItemRenderer;
 
@@ -59,8 +65,8 @@ class ProcessItemRenderer implements DropDownListItemRenderer {
 
     /** Informs rendered widgets that related process has been stopped. */
     void notifyProcessStopped() {
-        headerWidget.setStopped();
-        listWidget.setStopped();
+        headerWidget.toggleStopped();
+        listWidget.toggleStopped();
     }
 
     interface StopProcessHandler {
@@ -73,23 +79,27 @@ class ProcessItemRenderer implements DropDownListItemRenderer {
         void onRerunProcess(Process process);
     }
 
+    /**
+     * Widget for representing a {@link Process}.
+     * Has different states for representing stopped and running processes.
+     */
     private static class ProcessWidget extends FlowPanel {
 
         private final Label        pidLabel;
-        private final ActionButton actionButton;
+        private final ActionButton stopButton;
+        private final ActionButton reRunButton;
 
+        /** Stores true if widget displays stopped process and false for running process. */
         private boolean stopped;
 
         ProcessWidget(BaseListItem<Process> item, StopProcessHandler stopProcessHandler, RerunProcessHandler rerunProcessHandler) {
             super();
 
-            setHeight("25px");
-
             final Process process = item.getValue();
-
+            final Machine targetMachine = process.getMachine();
             stopped = !process.isAlive();
 
-            final String labelText = process.getMachine().getConfig().getName() + ": <b>" + process.getName() + "</b>";
+            final String labelText = targetMachine.getConfig().getName() + ": <b>" + process.getName() + "</b>";
             final Label nameLabel = new InlineHTML(labelText);
             nameLabel.setWidth("230px");
             nameLabel.getElement().getStyle().setFloat(LEFT);
@@ -98,37 +108,46 @@ class ProcessItemRenderer implements DropDownListItemRenderer {
             pidLabel = new Label('#' + Integer.toString(process.getPid()));
             pidLabel.getElement().getStyle().setFloat(RIGHT);
 
-            actionButton = new ActionButton();
-            actionButton.addDomHandler(event -> {
-                if (stopped) {
-                    rerunProcessHandler.onRerunProcess(process);
-                } else {
-                    stopProcessHandler.onStopProcess(process);
-                }
-            }, ClickEvent.getType());
+            final SafeHtmlBuilder safeHtmlBuilder1 = new SafeHtmlBuilder();
+            safeHtmlBuilder1.appendHtmlConstant(FontAwesome.STOP);
+            stopButton = new ActionButton(safeHtmlBuilder1.toSafeHtml());
+            stopButton.addClickHandler(event -> stopProcessHandler.onStopProcess(process));
 
+            final SafeHtmlBuilder safeHtmlBuilder2 = new SafeHtmlBuilder();
+            safeHtmlBuilder2.appendHtmlConstant(FontAwesome.PLAY);
+            reRunButton = new ActionButton(safeHtmlBuilder2.toSafeHtml());
+            reRunButton.addClickHandler(event -> rerunProcessHandler.onRerunProcess(process));
+
+            checkStopped();
+            setHeight("25px");
             add(nameLabel);
-            add(actionButton);
+            add(stopButton);
+            add(reRunButton);
             add(pidLabel);
         }
 
-        /**
-         * Changes widget for representing process as stopped.
-         * Does nothing in case widget is already represents stopped process.
-         */
-        void setStopped() {
-            if (!stopped) {
-                stopped = true;
-                pidLabel.removeFromParent();
-                actionButton.setHTML("re-run");
-            }
+        /** Toggle widget's state for displaying running or stopped process. */
+        void toggleStopped() {
+            stopped = !stopped;
+            checkStopped();
         }
 
-        private static class ActionButton extends Button {
-            ActionButton() {
-                super();
+        /** Check whether widget displays stopped or running process and changes widget's state if it's required. */
+        private void checkStopped() {
+            pidLabel.setVisible(!stopped);
+            reRunButton.setVisible(stopped);
+            stopButton.setVisible(!stopped);
+        }
+
+        private class ActionButton extends ButtonBase {
+            private final CommandResources resources = GWT.create(CommandResources.class);
+
+            ActionButton(SafeHtml content) {
+                super(Document.get().createDivElement());
+
                 getElement().getStyle().setFloat(RIGHT);
-                setHTML("stop");
+                getElement().setInnerSafeHtml(content);
+                asWidget().addStyleName(resources.processesListCss().actionButton());
             }
         }
     }

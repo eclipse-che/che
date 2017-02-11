@@ -153,6 +153,11 @@ public class FontAwesome {
     public static final String PLAY = "<i class=\"fa fa-play\"></i>";
 
     /**
+     * http://fontawesome.io/icon/stop/
+     */
+    public static final String STOP = "<i class=\"fa fa-stop\"></i>";
+
+    /**
      * http://fontawesome.io/icon/bug/
      */
     public static final String BUG = "<i class=\"fa fa-bug\"></i>";

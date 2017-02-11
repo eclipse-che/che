@@ -106,7 +106,14 @@ public class DropDownList extends Composite {
         return selectedItem;
     }
 
-    /** Add the given {@code item} with it's renderer to the list. */
+    /**
+     * Add the given {@code item} to the top of the list.
+     *
+     * @param item
+     *         item to add to the list
+     * @param renderer
+     *         renderer provides widgets for representing the given {@code item} in the list
+     */
     public void addItem(DropDownListItem item, DropDownListItemRenderer renderer) {
         final Widget headerWidget = renderer.renderHeaderWidget();
         final Widget listWidget = renderer.renderListWidget();
@@ -122,14 +129,23 @@ public class DropDownList extends Composite {
 
         itemsWidgets.put(item, listWidget);
 
-        contentPanel.add(listWidget);
+        contentPanel.insert(listWidget, 0);
     }
 
-    public void addItem(String value) {
-        final StringItem item = new StringItem(value);
+    /**
+     * Shorthand for quick adding text value to the list.
+     *
+     * @param value
+     *         text value to add to the list
+     * @return added item which wraps the given {@code value}
+     */
+    public BaseListItem<String> addItem(String value) {
+        final BaseListItem<String> item = new BaseListItem<>(value);
         final StringItemRenderer renderer = new StringItemRenderer(item);
 
         addItem(item, renderer);
+
+        return item;
     }
 
     /** Remove item from the list. */

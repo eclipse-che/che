@@ -14,16 +14,16 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * Renderer that uses {@link Label} widget for rendering {@link StringItem}.
+ * Renderer that uses {@link Label} widget for rendering text value in the {@link DropDownList}.
  */
 public class StringItemRenderer implements DropDownListItemRenderer {
 
-    private final StringItem item;
+    private final BaseListItem<String> item;
 
     private Widget headerWidget;
     private Widget listWidget;
 
-    public StringItemRenderer(StringItem item) {
+    public StringItemRenderer(BaseListItem<String> item) {
         this.item = item;
     }
 
