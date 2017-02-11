@@ -38,6 +38,7 @@ cli_init() {
       warning "Command line '-e ${CHE_PRODUCT_NAME}_HOST=${CHE_HOST}' \
 overriding '${CHE_PRODUCT_NAME}_HOST=${CHE_HOST_LOCAL}' in ${CHE_ENVIRONMENT_FILE}"
     elif [[ "${CHE_HOST_LOCAL}" != "${GLOBAL_HOST_IP}" ]]; then
+      CHE_HOST=${CHE_HOST_LOCAL}
       warning "${CHE_PRODUCT_NAME}_HOST=${CHE_HOST_LOCAL} is different from discovered IP \
 (${GLOBAL_HOST_IP})"
     fi
