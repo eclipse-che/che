@@ -20,6 +20,13 @@ pre_init() {
   CHE_CLI_API_VERSION=1
 
   DEFAULT_CHE_PORT=8080
+
+  if [ -z ${CHE_PORT+x} ]; then
+    CHE_PORT_SET_ON_COMMAND_LINE=false
+  else
+    CHE_PORT_SET_ON_COMMAND_LINE=true
+  fi
+
   CHE_PORT=${CHE_PORT:-${DEFAULT_CHE_PORT}}
   CHE_MIN_RAM=1.5
   CHE_MIN_DISK=100

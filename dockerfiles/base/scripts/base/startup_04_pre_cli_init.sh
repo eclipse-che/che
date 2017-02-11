@@ -38,9 +38,20 @@ cli_init() {
       warning "Command line '-e ${CHE_PRODUCT_NAME}_HOST=${CHE_HOST}' \
 overriding '${CHE_PRODUCT_NAME}_HOST=${CHE_HOST_LOCAL}' in ${CHE_ENVIRONMENT_FILE}"
     elif [[ "${CHE_HOST_LOCAL}" != "${GLOBAL_HOST_IP}" ]]; then
-      CHE_HOST=${CHE_HOST_LOCAL}
       warning "${CHE_PRODUCT_NAME}_HOST=${CHE_HOST_LOCAL} is different from discovered IP \
 (${GLOBAL_HOST_IP})"
+      CHE_HOST=${CHE_HOST_LOCAL}
+    fi
+
+    CHE_PORT_LOCAL=$(get_value_of_var_from_env_file ${CHE_PRODUCT_NAME}_PORT)
+    if [[ "${CHE_PORT}" != "${CHE_PORT_LOCAL}" ]] && 
+       [[ "${CHE_PORT_SET_ON_COMMAND_LINE}" = "true" ]]; then
+      warning "Command line '-e ${CHE_PRODUCT_NAME}_PORT=${CHE_PORT}' \
+overriding '${CHE_PRODUCT_NAME}_PORT=${CHE_PORT_LOCAL}' in ${CHE_ENVIRONMENT_FILE}"
+    elif [[ "${CHE_PORT_LOCAL}" != "${DEFAULT_CHE_PORT}" ]]; then
+      warning "${CHE_PRODUCT_NAME}_PORT=${CHE_PORT_LOCAL} is different from default port \
+(${DEFAULT_CHE_PORT})"
+      CHE_PORT=${CHE_PORT_LOCAL}
     fi
   fi
 
