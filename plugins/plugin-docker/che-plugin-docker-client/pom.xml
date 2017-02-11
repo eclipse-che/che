@@ -34,10 +34,6 @@
             <artifactId>guava</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.google.gwt</groupId>
-            <artifactId>gwt-user</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
         </dependency>
@@ -84,10 +80,6 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-commons-annotations</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-commons-gwt</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -154,21 +146,6 @@
                 <artifactId>che-core-api-dto-maven-plugin</artifactId>
                 <version>${project.version}</version>
                 <executions>
-                    <execution>
-                        <id>client</id>
-                        <phase>process-sources</phase>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <dtoPackages>
-                                <package>org.eclipse.che.plugin.docker.client.dto</package>
-                            </dtoPackages>
-                            <outputDirectory>${dto-generator-out-directory}</outputDirectory>
-                            <genClassName>org.eclipse.che.plugin.docker.client.dto.DtoClientImpls</genClassName>
-                            <impl>client</impl>
-                        </configuration>
-                    </execution>
                     <execution>
                         <id>server</id>
                         <phase>process-sources</phase>

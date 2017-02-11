@@ -29,6 +29,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
+import org.eclipse.jgit.treewalk.EmptyTreeIterator;
 import org.eclipse.jgit.treewalk.FileTreeIterator;
 import org.eclipse.jgit.treewalk.filter.AndTreeFilter;
 import org.eclipse.jgit.treewalk.filter.PathFilterGroup;
@@ -42,6 +43,7 @@ import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.System.lineSeparator;
 
 /**
@@ -78,6 +80,8 @@ class JGitDiffPage extends DiffPage {
                 diff = indexToWorkingTree(formatter);
             } else if (commitA != null && commitB == null && !cached) {
                 diff = commitToWorkingTree(commitA, formatter);
+            } else if (commitA == null && commitB != null) {
+                diff = emptyToCommit(commitB, formatter);
             } else if (commitB == null) {
                 diff = commitToIndex(commitA, formatter);
             } else {
@@ -96,6 +100,34 @@ class JGitDiffPage extends DiffPage {
             formatter.close();
             repository.close();
         }
+    }
+
+    /**
+     * Show changes between specified revision and empty tree.
+     *
+     * @param commitId
+     *            id of commit
+     * @param formatter
+     *            diff formatter
+     * @return list of diff entries
+     * @throws IOException
+     *             if any i/o errors occurs
+     */
+    private List<DiffEntry> emptyToCommit(String commitId, DiffFormatter formatter) throws IOException {
+        ObjectId commit = repository.resolve(commitId);
+        checkArgument(commit != null, "Invalid commit id " + commitId);
+        RevTree tree;
+        try (RevWalk revWalkA = new RevWalk(repository)) {
+            tree = revWalkA.parseTree(commit);
+        }
+
+        List<DiffEntry> diff;
+        try (ObjectReader reader = repository.newObjectReader()) {
+            CanonicalTreeParser iterator = new CanonicalTreeParser();
+            iterator.reset(reader, tree);
+            diff = formatter.scan(new EmptyTreeIterator(), iterator);
+        }
+        return diff;
     }
 
     /**

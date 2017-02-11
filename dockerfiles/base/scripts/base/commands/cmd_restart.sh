@@ -25,7 +25,11 @@ help_cmd_restart() {
 }
 
 pre_cmd_restart() {
-  true
+  :
+}
+
+post_cmd_restart() {
+  :
 }
 
 cmd_restart() {

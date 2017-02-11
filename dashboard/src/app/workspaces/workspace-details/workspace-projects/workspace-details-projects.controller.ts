@@ -57,7 +57,7 @@ export class WorkspaceDetailsProjectsCtrl {
 
     this.namespace = $route.current.params.namespace;
     this.workspaceName = $route.current.params.workspaceName;
-    this.workspaceKey = this.namespace + ':' + this.workspaceName;
+    this.workspaceKey = this.namespace + '/' + this.workspaceName;
 
     let preferences = cheAPI.getPreferences().getPreferences();
 

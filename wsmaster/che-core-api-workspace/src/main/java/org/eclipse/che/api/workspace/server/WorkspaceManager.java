@@ -48,7 +48,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
-import java.util.stream.Collectors;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Throwables.getCausalChain;
@@ -180,14 +179,14 @@ public class WorkspaceManager {
      *
      * <p> Key rules:
      * <ul>
-     * <li>If it doesn't contain <b>:</b> character then that key is id(e.g. workspace123456)
-     * <li>If it contains <b>:</b> character then that key is combination of user name and workspace name
-     * <li><b></>:workspace_name</b> is valid abstract key and user will be detected from Environment.
-     * <li><b>user_name:</b> is not valid abstract key
+     * <li>If it doesn't contain <b>/</b> character then that key is id(e.g. workspace123456)
+     * <li>If it contains <b>/</b> character then that key is combination of namespace and workspace name
      * </ul>
      *
+     * Note that namespace can contain <b>/</b> character.
+     *
      * @param key
-     *         composite key(e.g. workspace 'id' or 'namespace:name')
+     *         composite key(e.g. workspace 'id' or 'namespace/name')
      * @return the workspace instance
      * @throws NullPointerException
      *         when {@code key} is null
@@ -524,7 +523,7 @@ public class WorkspaceManager {
         final WorkspaceImpl workspace = workspaceDao.get(workspaceId);
         workspace.setStatus(runtimes.getStatus(workspaceId));
         if (workspace.getStatus() != WorkspaceStatus.RUNNING && workspace.getStatus() != WorkspaceStatus.STARTING) {
-            throw new ConflictException(format("Could not stop the workspace '%s:%s' because its status is '%s'. " +
+            throw new ConflictException(format("Could not stop the workspace '%s/%s' because its status is '%s'. " +
                                                "Workspace must be either 'STARTING' or 'RUNNING'",
                                                workspace.getNamespace(),
                                                workspace.getConfig().getName(),
@@ -741,7 +740,7 @@ public class WorkspaceManager {
                                                     NotFoundException,
                                                     ServerException {
         if (envName != null && !workspace.getConfig().getEnvironments().containsKey(envName)) {
-            throw new NotFoundException(format("Workspace '%s:%s' doesn't contain environment '%s'",
+            throw new NotFoundException(format("Workspace '%s/%s' doesn't contain environment '%s'",
                                                workspace.getNamespace(),
                                                workspace.getConfig().getName(),
                                                envName));
@@ -753,7 +752,7 @@ public class WorkspaceManager {
         runtimes.startAsync(workspace, env, recover)
                 .whenComplete((runtime, ex) -> {
                     if (ex == null) {
-                        LOG.info("Workspace '{}:{}' with id '{}' started by user '{}'",
+                        LOG.info("Workspace '{}/{}' with id '{}' started by user '{}'",
                                  workspace.getNamespace(),
                                  workspace.getConfig().getName(),
                                  workspace.getId(),
@@ -771,7 +770,7 @@ public class WorkspaceManager {
                             throw ex;
                         } catch (EnvironmentException envEx) {
                             // it's okay, e.g. recipe is invalid | start interrupted
-                            LOG.info("Workspace '{}:{}' can't be started because: {}",
+                            LOG.info("Workspace '{}/{}' can't be started because: {}",
                                      workspace.getNamespace(),
                                      workspace.getConfig().getName(),
                                      envEx.getMessage());
@@ -785,7 +784,7 @@ public class WorkspaceManager {
     private CompletableFuture<Void> stopAsync(WorkspaceImpl workspace, @Nullable Boolean createSnapshot) throws ConflictException {
         return sharedPool.runAsync(() -> {
             final String stoppedBy = sessionUserNameOr(workspace.getAttributes().get(WORKSPACE_STOPPED_BY));
-            LOG.info("Workspace '{}:{}' with id '{}' is being stopped by user '{}'",
+            LOG.info("Workspace '{}/{}' with id '{}' is being stopped by user '{}'",
                      workspace.getNamespace(),
                      workspace.getConfig().getName(),
                      workspace.getId(),
@@ -806,7 +805,7 @@ public class WorkspaceManager {
                 try {
                     runtimes.snapshot(workspace.getId());
                 } catch (ConflictException | NotFoundException | ServerException x) {
-                    LOG.warn("Could not create a snapshot of the workspace '{}:{}' " +
+                    LOG.warn("Could not create a snapshot of the workspace '{}/{}' " +
                              "with workspace id '{}'. The workspace will be stopped",
                              workspace.getNamespace(),
                              workspace.getConfig().getName(),
@@ -820,7 +819,7 @@ public class WorkspaceManager {
                     workspace.getAttributes().put(UPDATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
                     workspaceDao.update(workspace);
                 }
-                LOG.info("Workspace '{}:{}' with id '{}' stopped by user '{}'",
+                LOG.info("Workspace '{}/{}' with id '{}' stopped by user '{}'",
                          workspace.getNamespace(),
                          workspace.getConfig().getName(),
                          workspace.getId(),
@@ -847,7 +846,7 @@ public class WorkspaceManager {
 
     private void checkWorkspaceIsRunning(WorkspaceImpl workspace, String operation) throws ConflictException {
         if (workspace.getStatus() != RUNNING) {
-            throw new ConflictException(format("Could not %s the workspace '%s:%s' because its status is '%s'.",
+            throw new ConflictException(format("Could not %s the workspace '%s/%s' because its status is '%s'.",
                                                operation,
                                                workspace.getNamespace(),
                                                workspace.getConfig().getName(),
@@ -861,10 +860,6 @@ public class WorkspaceManager {
         } catch (ServerException x) {
             LOG.error("Unable to remove temporary workspace '{}'", workspace.getId());
         }
-    }
-
-    private Subject sessionUser() {
-        return EnvironmentContext.getCurrent().getSubject();
     }
 
     private String sessionUserNameOr(String nameIfNoUser) {
@@ -890,7 +885,7 @@ public class WorkspaceManager {
                                                      .build();
         workspace.getAttributes().put(CREATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
         workspaceDao.create(workspace);
-        LOG.info("Workspace '{}:{}' with id '{}' created by user '{}'",
+        LOG.info("Workspace '{}/{}' with id '{}' created by user '{}'",
                  account.getName(),
                  workspace.getConfig().getName(),
                  workspace.getId(),
@@ -899,18 +894,14 @@ public class WorkspaceManager {
         return workspace;
     }
 
-    /*
-    * Get workspace using composite key.
-    *
-    */
     private WorkspaceImpl getByKey(String key) throws NotFoundException, ServerException {
-        String[] parts = key.split(":", -1); // -1 is to prevent skipping trailing part
-        if (parts.length == 1) {
+        int lastSlashIndex = key.lastIndexOf("/");
+        if (lastSlashIndex == -1) {
+            // key is id
             return workspaceDao.get(key);
         }
-        final String nsPart = parts[0];
-        final String wsName = parts[1];
-        final String namespace = nsPart.isEmpty() ? sessionUser().getUserName() : nsPart;
+        final String namespace = key.substring(0, lastSlashIndex);
+        final String wsName = key.substring(lastSlashIndex + 1);
         return workspaceDao.get(wsName, namespace);
     }
 

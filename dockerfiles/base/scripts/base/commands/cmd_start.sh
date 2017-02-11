@@ -24,8 +24,13 @@ help_cmd_start() {
 }
 
 pre_cmd_start() {
-  true
+  :
 }
+
+post_cmd_start() {
+  :
+}
+
 
 cmd_start() {
   # If already running, just display output again

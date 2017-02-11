@@ -20,7 +20,11 @@ help_cmd_upgrade() {
 }
 
 pre_cmd_upgrade() {
-  true
+  :
+}
+
+post_cmd_upgrade() {
+  :
 }
 
 cmd_upgrade() {

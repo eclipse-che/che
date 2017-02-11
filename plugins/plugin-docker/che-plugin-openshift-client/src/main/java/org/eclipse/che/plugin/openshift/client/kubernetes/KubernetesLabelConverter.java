@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
  * Converter of labels defined in {@link ContainerConfig} for matching to Kubernetes
  * annotation requirements
  */
-public class KubernetesLabelConverter {
+public final class KubernetesLabelConverter {
     private static final Logger LOG = LoggerFactory.getLogger(KubernetesLabelConverter.class);
     /** Prefix used for che server labels */
     private static final String CHE_SERVER_LABEL_PREFIX  = "che:server";
@@ -34,10 +34,13 @@ public class KubernetesLabelConverter {
     private static final Pattern CHE_SERVER_LABEL_KEY    = Pattern.compile("^0(.*)0$");
     private static final String KUBERNETES_ANNOTATION_REGEX = "([A-Za-z0-9][-A-Za-z0-9_\\.]*)?[A-Za-z0-9]";
 
+    private KubernetesLabelConverter() {
+    }
+
     /**
      * @return prefix that is used for Che server labels
      */
-    public String getCheServerLabelPrefix() {
+    public static String getCheServerLabelPrefix() {
         return CHE_SERVER_LABEL_PREFIX;
     }
 
@@ -59,7 +62,7 @@ public class KubernetesLabelConverter {
      * @param labels Map of labels to convert
      * @return Map of labels converted to DNS Names
      */
-    public Map<String, String> labelsToNames(Map<String, String> labels) {
+    public static Map<String, String> labelsToNames(Map<String, String> labels) {
         Map<String, String> names = new HashMap<>();
         for (Map.Entry<String, String> label : labels.entrySet()) {
 
@@ -98,7 +101,7 @@ public class KubernetesLabelConverter {
      * @param labels Map of DNS names
      * @return Map of unconverted labels
      */
-    public Map<String, String> namesToLabels(Map<String, String> names) {
+    public static Map<String, String> namesToLabels(Map<String, String> names) {
         Map<String, String> labels = new HashMap<>();
         for (Map.Entry<String, String> entry: names.entrySet()){
             String key = entry.getKey();
@@ -126,9 +129,9 @@ public class KubernetesLabelConverter {
     /**
      * Checks if there are any potential problems coupled with label conversion
      * @param label
-     * @return true if label has no conversion issues, false otherwise 
+     * @return true if label has no conversion issues, false otherwise
      */
-    private boolean hasConversionProblems(final Map.Entry<String, String> label) {
+    private static boolean hasConversionProblems(final Map.Entry<String, String> label) {
         boolean hasProblems = false;
         String key = label.getKey();
         String value = label.getValue();
@@ -149,7 +152,7 @@ public class KubernetesLabelConverter {
     /**
      * Convert keys: e.g. "che:server:4401/tcp:ref" -> "che.server.4401-tcp.ref"
      */
-    private String convertLabelKey(final String key) {
+    private static String convertLabelKey(final String key) {
         return key.replaceAll(":", ".").replaceAll("/", "_");
     }
 
@@ -157,7 +160,7 @@ public class KubernetesLabelConverter {
      * Convert values: e.g. "/api" -> ".api" Note: values may include '-' e.g.
      * "tomcat-debug"
      */
-    private String convertLabelValue(final String value) {
+    private static String convertLabelValue(final String value) {
         return value.replaceAll("/", "_");
     }
 
@@ -165,11 +168,11 @@ public class KubernetesLabelConverter {
      * Adds padding since DNS names must start and end with alphanumeric
      * characters
      */
-    private String addPadding(final String label) {
+    private static String addPadding(final String label) {
         return String.format(CHE_SERVER_LABEL_PADDING, label);
     }
 
-    private boolean matchesKubernetesLabelRegex(final String label) {
+    private static boolean matchesKubernetesLabelRegex(final String label) {
         return label.matches(KUBERNETES_ANNOTATION_REGEX);
     }
 }

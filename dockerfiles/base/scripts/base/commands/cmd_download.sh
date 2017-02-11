@@ -23,8 +23,13 @@ help_cmd_download() {
 }
 
 pre_cmd_download() {
-  true
+  :
 }
+
+post_cmd_download() {
+  :
+}
+
 
 cmd_download() {
   FORCE_UPDATE=${1:-"--no-force"}

@@ -231,6 +231,14 @@ custom_user() {
   fi
 }
 
+skip_scripts() {
+  if [ "${CHE_SKIP_SCRIPTS}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
 init_logging() {
   # Initialize CLI folder
   CLI_DIR=$CHE_CONTAINER_ROOT
@@ -478,7 +486,7 @@ check_mounts() {
   ### DEV MODE VARIABLES
   CHE_LOCAL_REPO=false
   if [[ "${REPO_MOUNT}" != "not set" ]]; then
-    info "cli" ":/repo mounted - using assembly and manifests from your local repository"
+    info "cli" "/repo mounted - using assembly and manifests from your local repository"
 
     CHE_LOCAL_REPO=true
     CHE_HOST_DEVELOPMENT_REPO="${REPO_MOUNT}"

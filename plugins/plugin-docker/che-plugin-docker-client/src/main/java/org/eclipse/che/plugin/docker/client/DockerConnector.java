@@ -127,7 +127,7 @@ import static org.eclipse.che.commons.lang.IoUtil.readAndCloseQuietly;
 public class DockerConnector {
     private static final Logger LOG  = LoggerFactory.getLogger(DockerConnector.class);
     // Docker uses uppercase in first letter in names of json objects, e.g. {"Id":"123"} instead of {"id":"123"}
-    private static final Gson   GSON = new GsonBuilder().disableHtmlEscaping()
+    protected static final Gson GSON = new GsonBuilder().disableHtmlEscaping()
                                                         .setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
                                                         .create();
 

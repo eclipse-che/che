@@ -21,7 +21,11 @@ help_cmd_backup() {
 }
 
 pre_cmd_backup() {
-  true
+  :
+}
+
+post_cmd_backup() {
+  :
 }
 
 cmd_backup() {
