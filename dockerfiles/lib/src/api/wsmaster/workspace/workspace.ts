@@ -153,13 +153,6 @@ export class Workspace {
     searchWorkspace(key:string):Promise<org.eclipse.che.api.workspace.shared.dto.WorkspaceDto> {
         Log.getLogger().debug('search workspace with key', key);
 
-        // if workspace key is too short it's a workspace name
-        if (key && key.length < 21) {
-            if (key.indexOf(":") < 0) {
-                key = ":" + key;
-            }
-        }
-
         var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/workspace/' + key, 200);
         return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
             Log.getLogger().debug('got workspace with key', key, 'result: ', jsonResponse.getData());

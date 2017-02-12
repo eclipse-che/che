@@ -27,7 +27,7 @@ import {Ssh} from "../../../api/wsmaster/ssh/ssh";
  */
 export class WorkspaceSshAction {
 
-    @Argument({description: "Defines the workspace to be used. use workspaceId, workspaceName or namespace:workspaceName as argument"})
+    @Argument({description: "Defines the workspace to be used. use workspaceId or namespace/workspaceName as argument"})
     workspaceName : string;
 
 
