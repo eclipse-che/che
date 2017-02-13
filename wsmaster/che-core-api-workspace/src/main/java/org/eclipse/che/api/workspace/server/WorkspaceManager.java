@@ -895,13 +895,27 @@ public class WorkspaceManager {
     }
 
     private WorkspaceImpl getByKey(String key) throws NotFoundException, ServerException {
+
+        int lastColonIndex = key.indexOf(":");
         int lastSlashIndex = key.lastIndexOf("/");
-        if (lastSlashIndex == -1) {
+        if (lastSlashIndex == -1 && lastColonIndex == -1) {
             // key is id
             return workspaceDao.get(key);
         }
-        final String namespace = key.substring(0, lastSlashIndex);
-        final String wsName = key.substring(lastSlashIndex + 1);
+
+        final String namespace;
+        final String wsName;
+        if (lastColonIndex == 0) {
+            // no namespace, use current user namespace
+            namespace = EnvironmentContext.getCurrent().getSubject().getUserName();
+            wsName = key.substring(1);
+        } else if (lastColonIndex > 0) {
+            wsName = key.substring(lastColonIndex + 1);
+            namespace = key.substring(0, lastColonIndex);
+        } else {
+            namespace = key.substring(0, lastSlashIndex);
+            wsName = key.substring(lastSlashIndex + 1);
+        }
         return workspaceDao.get(wsName, namespace);
     }
 
