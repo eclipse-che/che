@@ -33,7 +33,7 @@ cmd_stop() {
   FORCE_STOP=false
   if [[ "$@" == *"--skip:graceful"* ]]; then
   	FORCE_STOP=true
-  elif local_repo; then
+  elif local_repo || local_assembly; then
     warning "Development mode [skip graceful stop]"
     FORCE_STOP=true
   fi
@@ -48,7 +48,7 @@ cmd_stop() {
         error "Authentication failed on the system. Please provide --user and -password values or user --skip:graceful to bypass graceful stop."
         return 2;
       elif [[ ${GRACEFUL_STATUS_RESULT} -ne 0 ]]; then
-        error "We encountered an error -- see $CHE_HOST_CONFIG/cli.log. Graceful stop can be skipped with --skip:graceful"
+        error "We encountered an error during graceful stop - see $CHE_HOST_CONFIG/cli.log. (hint: --skip:graceful does not wait for workspace stop)"
         return 2;
       fi
     fi
