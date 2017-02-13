@@ -45,7 +45,7 @@ cmd_stop() {
       cmd_lifecycle action "graceful-stop" "$@" >> "${LOGS}" 2>&1 || GRACEFUL_STATUS_RESULT=$?
       # error on authentication (401 modulo 256 = 145)
       if [[ ${GRACEFUL_STATUS_RESULT} -eq 145 ]]; then
-        error "Authentication failed on the system. Please provide --user and -password values or user --skip:graceful to bypass graceful stop."
+        error "Authentication failed on the system. (hint: --user/--password for auth parameters, --skip:graceful does not wait for workspace stop)"
         return 2;
       elif [[ ${GRACEFUL_STATUS_RESULT} -ne 0 ]]; then
         error "We encountered an error during graceful stop - see $CHE_HOST_CONFIG/cli.log. (hint: --skip:graceful does not wait for workspace stop)"
