@@ -21,7 +21,11 @@ help_cmd_stop() {
 }
 
 pre_cmd_stop() {
-  true
+  :
+}
+
+post_cmd_stop() {
+  :
 }
 
 cmd_stop() {

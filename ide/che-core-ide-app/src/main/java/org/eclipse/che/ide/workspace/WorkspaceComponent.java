@@ -38,7 +38,7 @@ import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
-import org.eclipse.che.ide.context.BrowserQueryFieldRenderer;
+import org.eclipse.che.ide.context.BrowserAddress;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
@@ -61,17 +61,17 @@ import static org.eclipse.che.ide.ui.loaders.LoaderPresenter.Phase.STARTING_WORK
  */
 public abstract class WorkspaceComponent implements Component, WsAgentStateHandler, WorkspaceStoppedEvent.Handler {
 
-    protected final WorkspaceServiceClient    workspaceServiceClient;
-    protected final CoreLocalizationConstant  locale;
-    protected final CreateWorkspacePresenter  createWorkspacePresenter;
-    protected final DtoUnmarshallerFactory    dtoUnmarshallerFactory;
-    protected final AppContext                appContext;
-    protected final BrowserQueryFieldRenderer browserQueryFieldRenderer;
-    protected final DialogFactory             dialogFactory;
-    protected final PreferencesManager        preferencesManager;
-    protected final DtoFactory                dtoFactory;
-    protected final NotificationManager       notificationManager;
-    protected final StartWorkspacePresenter   startWorkspacePresenter;
+    protected final WorkspaceServiceClient   workspaceServiceClient;
+    protected final CoreLocalizationConstant locale;
+    protected final CreateWorkspacePresenter createWorkspacePresenter;
+    protected final DtoUnmarshallerFactory   dtoUnmarshallerFactory;
+    protected final AppContext               appContext;
+    protected final BrowserAddress           browserAddress;
+    protected final DialogFactory            dialogFactory;
+    protected final PreferencesManager       preferencesManager;
+    protected final DtoFactory               dtoFactory;
+    protected final NotificationManager      notificationManager;
+    protected final StartWorkspacePresenter  startWorkspacePresenter;
 
     private final EventBus                 eventBus;
     private final Provider<MachineManager> machineManagerProvider;
@@ -93,7 +93,7 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
                               Provider<MachineManager> machineManagerProvider,
                               NotificationManager notificationManager,
                               MessageBusProvider messageBusProvider,
-                              BrowserQueryFieldRenderer browserQueryFieldRenderer,
+                              BrowserAddress browserAddress,
                               DialogFactory dialogFactory,
                               PreferencesManager preferencesManager,
                               DtoFactory dtoFactory,
@@ -109,7 +109,7 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
         this.machineManagerProvider = machineManagerProvider;
         this.notificationManager = notificationManager;
         this.messageBusProvider = messageBusProvider;
-        this.browserQueryFieldRenderer = browserQueryFieldRenderer;
+        this.browserAddress = browserAddress;
         this.dialogFactory = dialogFactory;
         this.preferencesManager = preferencesManager;
         this.dtoFactory = dtoFactory;
@@ -154,7 +154,7 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
         }
 
         if (workspace != null) {
-            browserQueryFieldRenderer.setQueryField(workspace.getNamespace(), workspace.getConfig().getName(), "");
+            browserAddress.setAddress(workspace.getNamespace(), workspace.getConfig().getName());
         }
     }
 

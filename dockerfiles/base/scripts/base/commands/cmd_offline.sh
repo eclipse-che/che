@@ -28,7 +28,11 @@ can save them all or selectively choose stacks.\n"
 
 
 pre_cmd_offline() {
-  true
+  :
+}
+
+post_cmd_offline() {
+  :
 }
 
 cmd_offline() {

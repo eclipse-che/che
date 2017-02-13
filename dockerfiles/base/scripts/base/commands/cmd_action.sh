@@ -34,6 +34,10 @@ pre_cmd_action() {
   load_utilities_images_if_not_done
 }
 
+post_cmd_action() {
+  :
+}
+
 cmd_action() {
   docker_run $(get_docker_run_terminal_options) ${UTILITY_IMAGE_CHEACTION} "$@"
 }

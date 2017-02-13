@@ -27,7 +27,11 @@ help_cmd_ssh() {
 }
 
 pre_cmd_ssh() {
-  true
+  :
+}
+
+post_cmd_ssh() {
+  :
 }
 
 cmd_ssh() {

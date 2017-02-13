@@ -281,6 +281,7 @@ public class DockerInstance extends AbstractInstance {
         try {
             docker.removeImage(RemoveImageParams.create(image).withForce(false));
         } catch (IOException ignore) {
+            LOG.error("IOException during destroy(). Ignoring.");
         }
     }
 
