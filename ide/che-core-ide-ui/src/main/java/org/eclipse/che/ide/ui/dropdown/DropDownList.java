@@ -49,6 +49,7 @@ public class DropDownList extends Composite {
     @UiField
     FlowPanel dropButton;
 
+    private SelectionHandler selectionHandler;
     private DropDownListItem selectedItem;
 
     /** Create new drop down widget. */
@@ -88,16 +89,34 @@ public class DropDownList extends Composite {
         dropButton.addDomHandler(event -> dropDownPanel.showRelativeTo(DropDownList.this), ClickEvent.getType());
     }
 
-    private void checkListEmpty() {
+    private void checkListEmptiness() {
         if (contentPanel.getWidgetCount() == 0) {
-            setHeaderWidget(emptyStateWidget);
+            setHeader(null);
         }
     }
 
-    /** Set the specified widget to the list's header. */
-    private void setHeaderWidget(Widget widget) {
+    /** Set the specified item to the list's header. */
+    private void setHeader(@Nullable DropDownListItem item) {
+        final Widget headerWidget;
+
+        if (item != null) {
+            headerWidget = itemsWidgets.get(item);
+        } else {
+            headerWidget = emptyStateWidget;
+        }
+
+        selectedItem = item;
         selectedElementName.clear();
-        selectedElementName.add(widget);
+        selectedElementName.add(headerWidget);
+
+        if (item != null && selectionHandler != null) {
+            selectionHandler.onItemSelected(item);
+        }
+    }
+
+    /** Sets the given {@code handler} to notify it about changing selected item. */
+    public void setSelectionHandler(SelectionHandler handler) {
+        selectionHandler = handler;
     }
 
     /** Returns the currently selected item or {@code null} if none. */
@@ -115,19 +134,19 @@ public class DropDownList extends Composite {
      *         renderer provides widgets for representing the given {@code item} in the list
      */
     public void addItem(DropDownListItem item, DropDownListItemRenderer renderer) {
-        final Widget headerWidget = renderer.renderHeaderWidget();
         final Widget listWidget = renderer.renderListWidget();
 
+        itemsWidgets.put(item, listWidget);
+
+        final Widget headerWidget = renderer.renderHeaderWidget();
         headerWidget.addDomHandler(event -> dropDownPanel.showRelativeTo(DropDownList.this), ClickEvent.getType());
-        setHeaderWidget(headerWidget);
+
+        setHeader(item);
 
         listWidget.addDomHandler(event -> {
-            selectedItem = item;
-            setHeaderWidget(headerWidget);
+            setHeader(item);
             dropDownPanel.hide();
         }, ClickEvent.getType());
-
-        itemsWidgets.put(item, listWidget);
 
         contentPanel.insert(listWidget, 0);
     }
@@ -158,7 +177,7 @@ public class DropDownList extends Composite {
 
         // TODO: check whether another item should be set to header
 
-        checkListEmpty();
+        checkListEmptiness();
     }
 
     /** Clear the list. */
@@ -166,9 +185,19 @@ public class DropDownList extends Composite {
         itemsWidgets.clear();
         contentPanel.clear();
 
-        checkListEmpty();
+        checkListEmptiness();
     }
 
     interface DropDownListUiBinder extends UiBinder<Widget, DropDownList> {
+    }
+
+    public interface SelectionHandler {
+        /**
+         * Called when currently selected item has been changed.
+         *
+         * @param item
+         *         currently selected item
+         */
+        void onItemSelected(DropDownListItem item);
     }
 }

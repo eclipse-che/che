@@ -44,6 +44,7 @@ import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.machine.events.MachineStateEvent;
+import org.eclipse.che.ide.api.machine.events.ProcessFinishedEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
@@ -59,6 +60,7 @@ import org.eclipse.che.ide.api.ssh.SshServiceClient;
 import org.eclipse.che.ide.api.workspace.event.EnvironmentOutputEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
+import org.eclipse.che.ide.command.toolbar.processes.ActivateProcessOutputEvent;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
@@ -70,7 +72,6 @@ import org.eclipse.che.ide.extension.machine.client.outputspanel.console.Command
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandOutputConsolePresenter;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.DefaultOutputConsole;
 import org.eclipse.che.ide.extension.machine.client.perspective.terminal.TerminalPresenter;
-import org.eclipse.che.ide.api.machine.events.ProcessFinishedEvent;
 import org.eclipse.che.ide.extension.machine.client.processes.ProcessTreeNode;
 import org.eclipse.che.ide.extension.machine.client.processes.ProcessTreeNodeSelectedEvent;
 import org.eclipse.che.ide.extension.machine.client.processes.actions.ConsoleTreeContextMenu;
@@ -206,6 +207,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         eventBus.addHandler(EnvironmentOutputEvent.TYPE, this);
         eventBus.addHandler(DownloadWorkspaceOutputEvent.TYPE, this);
         eventBus.addHandler(PartStackStateChangedEvent.TYPE, this);
+        eventBus.addHandler(ActivateProcessOutputEvent.TYPE, event -> setActiveProcessOutput(event.getPid()));
 
         final PartStack partStack = checkNotNull(workspaceAgent.getPartStack(PartStackType.INFORMATION),
                                                  "Information part stack should not be a null");
@@ -400,6 +402,26 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         }
     }
 
+    /** Set active output of the process with the given PID. */
+    private void setActiveProcessOutput(int pid) {
+        ProcessTreeNode processNode = null;
+
+        for (Map.Entry<String, OutputConsole> entry : consoles.entrySet()) {
+            final OutputConsole console = entry.getValue();
+            if (console instanceof CommandOutputConsole) {
+                final int consolePid = ((CommandOutputConsole)console).getPid();
+                if (pid == consolePid) {
+                    final String commandId = consoleCommands.get(console);
+                    processNode = findTreeNodeById(commandId);
+                }
+            }
+        }
+
+        if (processNode != null) {
+            view.selectNode(processNode);
+        }
+    }
+
     /**
      * Adds new terminal to the processes panel
      *
@@ -452,7 +474,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
     @Override
     public void onPreviewSsh(String machineId) {
-        ProcessTreeNode machineTreeNode = findProcessTreeNodeById(machineId);
+        ProcessTreeNode machineTreeNode = findTreeNodeById(machineId);
         if (machineTreeNode == null) {
             return;
         }
@@ -553,7 +575,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
      *         the console for command output
      */
     public void addCommandOutput(String machineId, OutputConsole outputConsole) {
-        ProcessTreeNode machineTreeNode = findProcessTreeNodeById(machineId);
+        ProcessTreeNode machineTreeNode = findTreeNodeById(machineId);
         if (machineTreeNode == null) {
             notificationManager.notify(localizationConstant.failedToExecuteCommand(), localizationConstant.machineNotFound(machineId),
                                        FAIL, FLOAT_MODE);
@@ -760,12 +782,23 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         view.setProcessesData(rootNode);
     }
 
-    private ProcessTreeNode findProcessTreeNodeById(String id) {
-        for (ProcessTreeNode processTreeNode : rootNode.getChildren()) {
-            if (id.equals(processTreeNode.getId())) {
-                return processTreeNode;
+    @Nullable
+    private ProcessTreeNode findTreeNodeById(String nodeId) {
+        for (ProcessTreeNode machineTreeNode : rootNode.getChildren()) {
+            if (nodeId.equals(machineTreeNode.getId())) {
+                return machineTreeNode;
+            } else {
+                final Collection<ProcessTreeNode> machineProcesses = machineTreeNode.getChildren();
+                if (machineProcesses != null) {
+                    for (ProcessTreeNode processTreeNode : machineProcesses) {
+                        if (nodeId.equals(processTreeNode.getId())) {
+                            return processTreeNode;
+                        }
+                    }
+                }
             }
         }
+
         return null;
     }
 
@@ -839,7 +872,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
      */
     private ProcessTreeNode provideMachineNode(@NotNull MachineEntity machine, boolean replace) {
         final String machineId = machine.getId();
-        final ProcessTreeNode existedMachineNode = findProcessTreeNodeById(machineId);
+        final ProcessTreeNode existedMachineNode = findTreeNodeById(machineId);
         if (!replace && existedMachineNode != null) {
             return existedMachineNode;
         }

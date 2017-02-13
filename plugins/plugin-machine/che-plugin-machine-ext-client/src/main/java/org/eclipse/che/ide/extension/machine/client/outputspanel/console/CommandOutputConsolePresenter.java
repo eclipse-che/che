@@ -25,6 +25,7 @@ import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStdErrEvent
 import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStdOutEventDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
@@ -108,6 +109,12 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
     @Override
     public CommandImpl getCommand() {
         return command;
+    }
+
+    @Nullable
+    @Override
+    public int getPid() {
+        return pid;
     }
 
     @Override

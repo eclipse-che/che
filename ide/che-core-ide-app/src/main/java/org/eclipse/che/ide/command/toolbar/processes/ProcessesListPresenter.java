@@ -40,6 +40,7 @@ import java.util.Map;
 public class ProcessesListPresenter implements Presenter, ProcessesListView.ActionDelegate {
 
     private final ProcessesListView         view;
+    private final EventBus                  eventBus;
     private final ExecAgentCommandManager   execAgentCommandManager;
     private final AppContext                appContext;
     private final CommandManager            commandManager;
@@ -55,6 +56,7 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
                                   CommandManager commandManager,
                                   Provider<CommandExecutor> commandExecutorProvider) {
         this.view = view;
+        this.eventBus = eventBus;
         this.execAgentCommandManager = execAgentCommandManager;
         this.appContext = appContext;
         this.commandManager = commandManager;
@@ -123,8 +125,8 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
     }
 
     @Override
-    public void onProcessChosen() {
-        // TODO: open processes output
+    public void onProcessChosen(Process process) {
+        eventBus.fireEvent(new ActivateProcessOutputEvent(process.getPid()));
     }
 
     @Override

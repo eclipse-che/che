@@ -35,7 +35,7 @@ public interface ProcessesListView extends View<ProcessesListView.ActionDelegate
     interface ActionDelegate {
 
         /** Called when process has been chosen. */
-        void onProcessChosen();
+        void onProcessChosen(Process process);
 
         /** Called when rerunning process is requested. */
         void onReRunProcess(Process process);

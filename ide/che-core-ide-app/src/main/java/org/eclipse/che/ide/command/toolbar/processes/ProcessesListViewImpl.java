@@ -48,6 +48,13 @@ public class ProcessesListViewImpl implements ProcessesListView {
 
         dropDownList = new DropDownList(new InlineHTML("<b>Ready</b> - start command"));
         dropDownList.addStyleName(toolbarResources.css().commandList());
+        dropDownList.setSelectionHandler(item -> {
+            for (Map.Entry<Process, BaseListItem<Process>> entry : listItems.entrySet()) {
+                if (item.equals(entry.getValue())) {
+                    delegate.onProcessChosen(entry.getKey());
+                }
+            }
+        });
 
         rootPanel = new FlowPanel();
         rootPanel.add(label);
