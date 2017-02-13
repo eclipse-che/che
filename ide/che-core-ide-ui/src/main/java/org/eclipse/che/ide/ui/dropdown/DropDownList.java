@@ -37,10 +37,12 @@ public class DropDownList extends Composite {
     private static final DropDownListUiBinder     UI_BINDER = GWT.create(DropDownListUiBinder.class);
     private static final DropDownWidget.Resources resources = GWT.create(DropDownWidget.Resources.class);
 
-    private final FlowPanel                     contentPanel;
-    private final PopupPanel                    dropDownPanel;
-    private final Widget                        emptyStateWidget;
-    private final Map<DropDownListItem, Widget> itemsWidgets;
+    private final FlowPanel  contentPanel;
+    private final PopupPanel dropDownPanel;
+    private final Widget     emptyStateWidget;
+
+    private final Map<DropDownListItem, Widget>                   itemsWidgets;
+    private final Map<DropDownListItem, DropDownListItemRenderer> itemsRenderers;
 
     @UiField
     FlowPanel listHeader;
@@ -64,6 +66,7 @@ public class DropDownList extends Composite {
     public DropDownList(Widget emptyStateWidget) {
         this.emptyStateWidget = emptyStateWidget;
         itemsWidgets = new HashMap<>();
+        itemsRenderers = new HashMap<>();
 
         initWidget(UI_BINDER.createAndBindUi(this));
 
@@ -82,6 +85,7 @@ public class DropDownList extends Composite {
         dropDownPanel.add(new ScrollPanel(contentPanel));
 
         attachEventHandlers();
+        setHeader(null);
     }
 
     private void attachEventHandlers() {
@@ -100,7 +104,8 @@ public class DropDownList extends Composite {
         final Widget headerWidget;
 
         if (item != null) {
-            headerWidget = itemsWidgets.get(item);
+            headerWidget = itemsRenderers.get(item).renderHeaderWidget();
+            headerWidget.addDomHandler(event -> dropDownPanel.showRelativeTo(DropDownList.this), ClickEvent.getType());
         } else {
             headerWidget = emptyStateWidget;
         }
@@ -137,11 +142,7 @@ public class DropDownList extends Composite {
         final Widget listWidget = renderer.renderListWidget();
 
         itemsWidgets.put(item, listWidget);
-
-        final Widget headerWidget = renderer.renderHeaderWidget();
-        headerWidget.addDomHandler(event -> dropDownPanel.showRelativeTo(DropDownList.this), ClickEvent.getType());
-
-        setHeader(item);
+        itemsRenderers.put(item, renderer);
 
         listWidget.addDomHandler(event -> {
             setHeader(item);
@@ -149,6 +150,7 @@ public class DropDownList extends Composite {
         }, ClickEvent.getType());
 
         contentPanel.insert(listWidget, 0);
+        setHeader(item);
     }
 
     /**
@@ -170,10 +172,11 @@ public class DropDownList extends Composite {
     /** Remove item from the list. */
     public void removeItem(DropDownListItem item) {
         final Widget widget = itemsWidgets.remove(item);
-
         if (widget != null) {
             contentPanel.remove(widget);
         }
+
+        itemsRenderers.remove(item);
 
         // TODO: check whether another item should be set to header
 
@@ -183,6 +186,7 @@ public class DropDownList extends Composite {
     /** Clear the list. */
     public void clear() {
         itemsWidgets.clear();
+        itemsRenderers.clear();
         contentPanel.clear();
 
         checkListEmptiness();
