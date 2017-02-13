@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.machine.cleaner;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.workspace.server.WorkspaceFilesCleaner;
@@ -29,8 +31,14 @@ import static org.eclipse.che.commons.lang.IoUtil.deleteRecursive;
 @Singleton
 public class LocalWorkspaceFilesCleaner implements WorkspaceFilesCleaner {
 
+    @Inject(optional = true)
+    @Named("host.projects.root")
+    private String hostProjectsFolder;
+
     @Override
     public void clear(Workspace workspace) throws IOException {
-        deleteRecursive(new File("/data/workspaces/" + workspace.getConfig().getName()));
+        if (hostProjectsFolder == null) {
+            deleteRecursive(new File("/data/workspaces/" + workspace.getConfig().getName()));
+        }
     }
 }
