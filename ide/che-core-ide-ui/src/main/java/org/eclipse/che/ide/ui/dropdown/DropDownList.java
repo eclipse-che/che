@@ -35,7 +35,12 @@ import static com.google.gwt.user.client.ui.PopupPanel.AnimationType.ROLL_DOWN;
 public class DropDownList extends Composite {
 
     private static final DropDownListUiBinder     UI_BINDER = GWT.create(DropDownListUiBinder.class);
-    private static final DropDownWidget.Resources resources = GWT.create(DropDownWidget.Resources.class);
+    private static final DropDownWidget.Resources RESOURCES = GWT.create(DropDownWidget.Resources.class);
+
+    /** Maximum amount of items that should visible in drop down list without scrolling. */
+    private static final int MAX_VISIBLE_ITEMS  = 7;
+    /** Amount of pixels reserved for displaying one item in the drop down list. */
+    private static final int ITEM_WIDGET_HEIGHT = 25;
 
     private final FlowPanel  contentPanel;
     private final PopupPanel dropDownPanel;
@@ -70,22 +75,29 @@ public class DropDownList extends Composite {
 
         initWidget(UI_BINDER.createAndBindUi(this));
 
-        listHeader.setStyleName(resources.dropdownListCss().menuElement());
+        listHeader.setStyleName(RESOURCES.dropdownListCss().menuElement());
 
-        dropButton.getElement().appendChild(resources.expansionImage().getSvg().getElement());
-        dropButton.addStyleName(resources.dropdownListCss().expandedImage());
+        dropButton.getElement().appendChild(RESOURCES.expansionImage().getSvg().getElement());
+        dropButton.addStyleName(RESOURCES.dropdownListCss().expandedImage());
 
         dropDownPanel = new PopupPanel(true);
         dropDownPanel.setAnimationEnabled(true);
         dropDownPanel.setAnimationType(ROLL_DOWN);
         dropDownPanel.setWidth("350px");
-        dropDownPanel.setHeight("150px");
 
         contentPanel = new FlowPanel();
         dropDownPanel.add(new ScrollPanel(contentPanel));
 
         attachEventHandlers();
         setHeader(null);
+    }
+
+    /** Adapt drop down panel's height depending on the amount of items. */
+    private void adaptDropDownPanelHeight() {
+        final int visibleRowsCount = Math.min(MAX_VISIBLE_ITEMS, contentPanel.getWidgetCount());
+        final int dropDownPanelHeight = ITEM_WIDGET_HEIGHT * visibleRowsCount;
+
+        dropDownPanel.setHeight(dropDownPanelHeight + "px");
     }
 
     private void attachEventHandlers() {
@@ -150,6 +162,7 @@ public class DropDownList extends Composite {
         }, ClickEvent.getType());
 
         contentPanel.insert(listWidget, 0);
+        adaptDropDownPanelHeight();
         setHeader(item);
     }
 
@@ -178,8 +191,9 @@ public class DropDownList extends Composite {
 
         itemsRenderers.remove(item);
 
-        // TODO: check whether another item should be set to header
+        // TODO: check whether another item should be set to the list's header
 
+        adaptDropDownPanelHeight();
         checkListEmptiness();
     }
 
@@ -189,6 +203,7 @@ public class DropDownList extends Composite {
         itemsRenderers.clear();
         contentPanel.clear();
 
+        adaptDropDownPanelHeight();
         checkListEmptiness();
     }
 
