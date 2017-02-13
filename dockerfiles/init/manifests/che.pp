@@ -46,6 +46,10 @@ node default {
   # please leave this as it is if you don't need no_proxy configuration
   $no_proxy_for_che_workspaces = getValue("CHE_WORKSPACE_NO__PROXY","")
 
+  ################################
+  # DNS resolver configuration
+    $dns_resolvers = getValue("CHE_DNS__RESOLVERS","NULL")
+
   ###############################
   # Include base module
   include base
