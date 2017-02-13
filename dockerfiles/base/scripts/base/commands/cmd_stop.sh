@@ -33,13 +33,22 @@ cmd_stop() {
   FORCE_STOP=false
   if [[ "$@" == *"--skip:graceful"* ]]; then
   	FORCE_STOP=true
+  elif local_repo || local_assembly; then
+    FORCE_STOP=true
   fi
 
   if server_is_booted $(get_server_container_id $CHE_CONTAINER_NAME); then 
     if [[ ${FORCE_STOP} = "false" ]]; then
       info "stop" "Stopping workspaces..."
-      if ! $(cmd_lifecycle action "graceful-stop" "$@" >> "${LOGS}" 2>&1 || false); then
-        error "We encountered an error -- see cli.log"
+      local GRACEFUL_STATUS_RESULT=0
+      cmd_lifecycle action "graceful-stop" "$@" >> "${LOGS}" 2>&1 || GRACEFUL_STATUS_RESULT=$?
+      # error on authentication (401 modulo 256 = 145)
+      if [[ ${GRACEFUL_STATUS_RESULT} -eq 145 ]]; then
+        error "Authentication failed (hint: --user/--password for auth, --skip:graceful bypasses workspace stop)"
+        return 2;
+      elif [[ ${GRACEFUL_STATUS_RESULT} -ne 0 ]]; then
+        error "Error during graceful stop - see $CHE_HOST_CONFIG/cli.log. (hint: --skip:graceful bypasses workspace stop)"
+        return 2;
       fi
     fi
     # stop containers booted by docker compose
