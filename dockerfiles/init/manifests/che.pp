@@ -47,6 +47,11 @@ node default {
   $no_proxy_for_che_workspaces = getValue("CHE_WORKSPACE_NO__PROXY","")
 
   ###############################
+  # Workspace configuration
+  #
+  $workspace_java_options = getValue("CHE_WORKSPACE_JAVA_OPTIONS", "-Xms256m -Xmx2048m -Djava.security.egd=file:/dev/./urandom")
+
+  ###############################
   # Include base module
   include base
 }
