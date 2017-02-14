@@ -118,6 +118,13 @@ public class LocalWorkspaceFolderPathProvider implements WorkspaceFolderPathProv
         }
     }
 
+    public String getPathByName(String workspaceName) throws IOException {
+        if (!isWindows && hostProjectsFolder != null) {
+            return hostProjectsFolder;
+        }
+        return doGetPathByName(workspaceName);
+    }
+
     private String doGetPathByName(String workspaceName) throws IOException {
         final String workspaceFolderPath = Paths.get(workspacesMountPoint).resolve(workspaceName).toString();
         ensureExist(workspaceFolderPath, null);
