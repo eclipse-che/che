@@ -84,7 +84,11 @@ public interface CommandResources extends ClientBundle {
 
         String processesList();
 
+        String processesListItemText();
+
         String processesListItemNameLabel();
+
+        String processesListItemPidLabel();
 
         String processesListItemActionButton();
     }

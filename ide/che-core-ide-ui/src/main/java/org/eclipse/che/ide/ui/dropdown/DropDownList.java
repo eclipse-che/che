@@ -27,7 +27,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.google.gwt.dom.client.Style.Cursor.POINTER;
-import static com.google.gwt.dom.client.Style.Unit.PX;
 import static com.google.gwt.user.client.ui.PopupPanel.AnimationType.ROLL_DOWN;
 
 /**
@@ -85,8 +84,7 @@ public class DropDownList extends Composite {
         dropDownPanel.setWidth("394px");
 
         contentPanel = new FlowPanel();
-        contentPanel.getElement().getStyle().setMarginLeft(10, PX);
-        contentPanel.getElement().getStyle().setMarginRight(27, PX);
+        contentPanel.addStyleName(RESOURCES.dropdownListCss().listItemPanel());
         dropDownPanel.add(new ScrollPanel(contentPanel));
 
         attachEventHandlers();
@@ -157,6 +155,7 @@ public class DropDownList extends Composite {
         itemsWidgets.put(item, listWidget);
         itemsRenderers.put(item, renderer);
 
+        listWidget.addStyleName(RESOURCES.dropdownListCss().menuElement());
         listWidget.getElement().getStyle().setCursor(POINTER);
         listWidget.addDomHandler(event -> {
             setHeader(item);

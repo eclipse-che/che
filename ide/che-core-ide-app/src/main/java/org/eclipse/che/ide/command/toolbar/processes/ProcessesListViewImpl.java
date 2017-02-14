@@ -46,7 +46,10 @@ public class ProcessesListViewImpl implements ProcessesListView {
         final Label label = new Label("EXEC:");
         label.addStyleName(toolbarResources.commandToolbarCss().processesListLabel());
 
-        dropDownList = new DropDownList(new InlineHTML("<b>Ready</b> - start command"));
+        final InlineHTML emptyListWidget = new InlineHTML("<b>Ready</b> - start command");
+        emptyListWidget.addStyleName(toolbarResources.commandToolbarCss().processesListItemText());
+
+        dropDownList = new DropDownList(emptyListWidget);
         dropDownList.addStyleName(toolbarResources.commandToolbarCss().processesList());
         dropDownList.setSelectionHandler(item -> {
             for (Map.Entry<Process, BaseListItem<Process>> entry : listItems.entrySet()) {

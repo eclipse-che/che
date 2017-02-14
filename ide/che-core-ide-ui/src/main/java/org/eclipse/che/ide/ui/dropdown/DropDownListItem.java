@@ -10,6 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ui.dropdown;
 
-/** Marker interface for the list item. */
+/**
+ * Marker interface for the list item.
+ *
+ * @see BaseListItem
+ */
 public interface DropDownListItem {
 }

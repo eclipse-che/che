@@ -27,7 +27,6 @@ import org.eclipse.che.ide.command.toolbar.button.PopupActionHandler;
 import org.eclipse.che.ide.command.toolbar.button.PopupItem;
 import org.eclipse.che.ide.command.toolbar.button.PopupItemDataProvider;
 import org.eclipse.che.ide.command.toolbar.processes.ProcessesListPresenter;
-import org.eclipse.che.ide.ui.dropdown.old.DropDownWidget;
 import org.eclipse.che.ide.util.Pair;
 import org.eclipse.che.ide.util.loging.Log;
 
@@ -55,15 +54,14 @@ public class CommandToolbarViewImpl implements CommandToolbarView {
     @Inject
     public CommandToolbarViewImpl(ProcessesListPresenter processesListPresenter,
                                   CommandResources resources,
-                                  DropDownWidget.Resources dropResources,
                                   AppContext appContext) {
         this.appContext = appContext;
 
         rootPanel = new FlowPanel();
         rootPanel.getElement().getStyle().setFloat(Style.Float.LEFT);
 
-        setUpRunButton(dropResources, resources);
-        setUpDebugButton(dropResources, resources);
+        setUpRunButton(resources);
+        setUpDebugButton(resources);
 
         processesListPresenter.go(new AcceptsOneWidget() {
             @Override
@@ -74,7 +72,7 @@ public class CommandToolbarViewImpl implements CommandToolbarView {
         });
     }
 
-    private void setUpRunButton(DropDownWidget.Resources dropResources, CommandResources resources) {
+    private void setUpRunButton(CommandResources resources) {
         runPopupItemDataProvider = new RunPopupItemDataProvider();
 
         final SafeHtmlBuilder playIcon = new SafeHtmlBuilder();
@@ -93,14 +91,14 @@ public class CommandToolbarViewImpl implements CommandToolbarView {
                 lastSelectedItem = item;
 
             }
-        }, dropResources);
+        });
         runCommandsButton.asWidget().addStyleName(resources.commandToolbarCss().toolbarButton());
         runCommandsButton.asWidget().addStyleName(resources.commandToolbarCss().runButton());
 
         rootPanel.add(runCommandsButton);
     }
 
-    private void setUpDebugButton(DropDownWidget.Resources dropResources, CommandResources resources) {
+    private void setUpDebugButton(CommandResources resources) {
         final SafeHtmlBuilder debugIcon = new SafeHtmlBuilder();
         debugIcon.appendHtmlConstant(FontAwesome.BUG);
 
@@ -136,7 +134,7 @@ public class CommandToolbarViewImpl implements CommandToolbarView {
             public void onItemSelected(PopupItem item) {
 
             }
-        }, dropResources);
+        });
 
         debugCommandsButton.asWidget().addStyleName(resources.commandToolbarCss().toolbarButton());
         debugCommandsButton.asWidget().addStyleName(resources.commandToolbarCss().debugButton());

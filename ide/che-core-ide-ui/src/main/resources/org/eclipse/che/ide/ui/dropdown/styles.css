@@ -24,45 +24,10 @@
     fill: selectCommandActionHoverColor;
 }
 
-.menuElement {
-    height: 100%;
-    color: selectCommandActionColor;
-}
-
 .menuElement:hover {
-    color: selectCommandActionHoverColor;
-}
-
-.menuElement:focus {
-    color: selectCommandActionHoverColor;
     background-color: hoverBackgroundColor;
 }
 
-.dropDownListMenu {
-    max-height: 300px;
-    overflow-x: hidden;
-    overflow-y: auto;
-    transition: opacity 0.2s;
-}
-
-.dropDownListMenu > table {
-    min-width: 25px;
-    width: inherit;
-}
-
-.dropDownListMenu > table > tbody > tr > td {
-    padding: 0;
-}
-
-.dropDownListMenu > table > tbody > tr > td > div {
-    margin-left: 10px;
-    text-transform: uppercase;
-}
-
-.dropDownListMenu > table > tbody > tr > td:first-child {
-    width: 16px;
-}
-
-.dropDownListMenu > table > tbody > tr > td:last-child {
-    width: 0;
+.listItemPanel {
+    margin: 0 27px 0 10px;
 }

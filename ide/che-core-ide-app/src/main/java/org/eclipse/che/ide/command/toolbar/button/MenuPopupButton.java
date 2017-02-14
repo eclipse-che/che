@@ -22,14 +22,14 @@ import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.event.dom.client.MouseUpEvent;
-import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.ButtonBase;
 import com.google.gwt.user.client.ui.FlowPanel;
-import org.eclipse.che.ide.ui.dropdown.old.DropDownWidget;
+
+import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
  * Button, on long click (~1 sec) open popup menu
@@ -38,12 +38,11 @@ public class MenuPopupButton extends ButtonBase {
 
     private static final Resources resources;
 
-    static {
-        resources = GWT.create(Resources.class);
-        resources.css().ensureInjected();
-    }
+    private final PopupItemDataProvider dataProvider;
+    private final PopupActionHandler    actionHandler;
 
     private FlowPanel marker = new FlowPanel();
+    private PopupItemList popupItemList;
 
     private final Timer timer = new Timer() {
         @Override
@@ -51,20 +50,13 @@ public class MenuPopupButton extends ButtonBase {
             longClick();
         }
     };
-    private final PopupItemDataProvider dataProvider;
-    private final PopupActionHandler actionHandler;
-    private final DropDownWidget.Resources dropResources;
-
-    private PopupItemList popupItemList;
 
     public MenuPopupButton(final SafeHtml content,
                            final PopupItemDataProvider dataProvider,
-                           final PopupActionHandler actionHandler,
-                           DropDownWidget.Resources dropResources) {
+                           final PopupActionHandler actionHandler) {
         super(Document.get().createDivElement());
         this.dataProvider = dataProvider;
         this.actionHandler = actionHandler;
-        this.dropResources = dropResources;
 
         setSize("32px", "20px");
         getElement().setInnerSafeHtml(content);
@@ -97,12 +89,7 @@ public class MenuPopupButton extends ButtonBase {
             }
         }, MouseDownEvent.getType());
 
-        addDomHandler(new MouseUpHandler() {
-            @Override
-            public void onMouseUp(MouseUpEvent event) {
-                timer.cancel();
-            }
-        }, MouseUpEvent.getType());
+        addDomHandler(event -> timer.cancel(), MouseUpEvent.getType());
 
         addClickHandler(new ClickHandler() {
             @Override
@@ -120,12 +107,7 @@ public class MenuPopupButton extends ButtonBase {
             }
         });
 
-        dataProvider.setItemDataChangedHandler(new PopupItemDataProvider.ItemDataChangeHandler() {
-            @Override
-            public void onItemDataChanged() {
-                updateButton();
-            }
-        });
+        dataProvider.setItemDataChangedHandler(this::updateButton);
     }
 
     private void updateButton() {
@@ -133,7 +115,7 @@ public class MenuPopupButton extends ButtonBase {
             marker.removeFromParent();
         } else {
             marker = new FlowPanel();
-            marker.getElement().appendChild(dropResources.expansionImage().getSvg().getElement());
+            marker.getElement().appendChild(resources.expansionImage().getSvg().getElement());
             marker.addStyleName(resources.css().expandedImage());
             getElement().appendChild(marker.getElement());
         }
@@ -146,6 +128,9 @@ public class MenuPopupButton extends ButtonBase {
     }
 
     public interface Resources extends ClientBundle {
+        @Source("expansionIcon.svg")
+        SVGResource expansionImage();
+
         @Source({"button.css", "org/eclipse/che/ide/api/ui/style.css"})
         Css css();
     }
@@ -166,6 +151,10 @@ public class MenuPopupButton extends ButtonBase {
         String arrow();
 
         String label();
+    }
 
+    static {
+        resources = GWT.create(Resources.class);
+        resources.css().ensureInjected();
     }
 }

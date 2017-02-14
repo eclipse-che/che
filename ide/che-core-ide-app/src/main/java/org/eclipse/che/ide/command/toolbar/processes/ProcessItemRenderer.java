@@ -27,7 +27,6 @@ import org.eclipse.che.ide.ui.dropdown.BaseListItem;
 import org.eclipse.che.ide.ui.dropdown.DropDownListItemRenderer;
 
 import static com.google.gwt.dom.client.Style.Float.RIGHT;
-import static com.google.gwt.dom.client.Style.Unit.PX;
 
 /** Renders widgets for representing a {@link Process}. */
 class ProcessItemRenderer implements DropDownListItemRenderer {
@@ -103,14 +102,13 @@ class ProcessItemRenderer implements DropDownListItemRenderer {
 
             final String labelText = targetMachine.getConfig().getName() + ": <b>" + process.getName() + "</b>";
             final Label nameLabel = new InlineHTML(labelText);
-//            nameLabel.setWidth("230px");
-//            nameLabel.getElement().getStyle().setFloat(LEFT);
             nameLabel.setTitle(process.getCommandLine());
+            nameLabel.addStyleName(RESOURCES.commandToolbarCss().processesListItemText());
             nameLabel.addStyleName(RESOURCES.commandToolbarCss().processesListItemNameLabel());
 
             pidLabel = new Label('#' + Integer.toString(process.getPid()));
-            pidLabel.getElement().getStyle().setFloat(RIGHT);
-            pidLabel.getElement().getStyle().setMarginRight(10, PX);
+            pidLabel.addStyleName(RESOURCES.commandToolbarCss().processesListItemText());
+            pidLabel.addStyleName(RESOURCES.commandToolbarCss().processesListItemPidLabel());
 
             final SafeHtmlBuilder safeHtmlBuilder1 = new SafeHtmlBuilder();
             safeHtmlBuilder1.appendHtmlConstant(FontAwesome.STOP);

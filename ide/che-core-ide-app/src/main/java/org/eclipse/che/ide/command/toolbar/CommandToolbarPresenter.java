@@ -34,12 +34,11 @@ import java.util.Map;
 @Singleton
 public class CommandToolbarPresenter implements Presenter, CommandToolbarView.ActionDelegate {
 
-
-    private CommandToolbarView view;
-    private final CommandManager commandManager;
-    private final CommandUtils commandUtils;
+    private final CommandManager            commandManager;
+    private final CommandUtils              commandUtils;
     private final Provider<CommandExecutor> commandExecutor;
-    private final RunGoal runGoal;
+    private final RunGoal                   runGoal;
+    private       CommandToolbarView        view;
 
     @Inject
     public CommandToolbarPresenter(final CommandToolbarView view,
@@ -47,7 +46,6 @@ public class CommandToolbarPresenter implements Presenter, CommandToolbarView.Ac
                                    final CommandUtils commandUtils,
                                    final Provider<CommandExecutor> commandExecutor,
                                    final RunGoal runGoal) {
-
         this.view = view;
         this.commandManager = commandManager;
         this.commandUtils = commandUtils;
@@ -56,12 +54,7 @@ public class CommandToolbarPresenter implements Presenter, CommandToolbarView.Ac
 
         view.setDelegate(this);
 
-        commandManager.addCommandLoadedListener(new CommandManager.CommandLoadedListener() {
-            @Override
-            public void onCommandsLoaded() {
-                updateCommands();
-            }
-        });
+        commandManager.addCommandLoadedListener(this::updateCommands);
 
         commandManager.addCommandChangedListener(new CommandManager.CommandChangedListener() {
             @Override
@@ -85,7 +78,7 @@ public class CommandToolbarPresenter implements Presenter, CommandToolbarView.Ac
         final Map<CommandGoal, List<ContextualCommand>> commandsByGoal = commandUtils.groupCommandsByGoal(commandManager.getCommands());
         final List<ContextualCommand> runCommands = commandsByGoal.get(runGoal);
 
-        view.setRunCommands(runCommands != null ? runCommands : Collections.<ContextualCommand>emptyList());
+        view.setRunCommands(runCommands != null ? runCommands : Collections.emptyList());
     }
 
     @Override

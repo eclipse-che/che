@@ -57,12 +57,20 @@
     margin-top: 1px;
 }
 
-.processesListItemNameLabel {
-    float: left;
-    width: 230px;
+.processesListItemText {
     font-family: mainFontFamily;
     font-size: fontSize;
     color: selectCommandActionColor;
+}
+
+.processesListItemNameLabel {
+    float: left;
+    width: 230px;
+}
+
+.processesListItemPidLabel {
+    float: right;
+    margin-right: 10px;
 }
 
 .processesListItemActionButton {
