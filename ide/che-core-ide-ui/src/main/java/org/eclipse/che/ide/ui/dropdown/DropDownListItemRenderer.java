@@ -15,6 +15,8 @@ import com.google.gwt.user.client.ui.Widget;
 /**
  * Renderer of the items for {@link DropDownList}.
  * <p><b>Important:</b> {@link #renderHeaderWidget()} and {@link #renderListWidget()} mustn't return the same instance.
+ *
+ * @see StringItemRenderer
  */
 public interface DropDownListItemRenderer {
 
