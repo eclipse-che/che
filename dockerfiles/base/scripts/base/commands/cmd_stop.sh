@@ -66,8 +66,8 @@ stop_containers() {
     docker_compose --file="${REFERENCE_CONTAINER_COMPOSE_FILE}" \
                    -p=$CHE_COMPOSE_PROJECT_NAME stop -t ${CHE_COMPOSE_STOP_TIMEOUT} >> "${LOGS}" 2>&1 || true
     info "stop" "Removing containers..."
-    log "docker_compose --file=\"${REFERENCE_CONTAINER_COMPOSE_FILE}\" -p=$CHE_COMPOSE_PROJECT_NAME rm >> \"${LOGS}\" 2>&1 || true"
+    log "docker_compose --file=\"${REFERENCE_CONTAINER_COMPOSE_FILE}\" -p=$CHE_COMPOSE_PROJECT_NAME rm -v --force >> \"${LOGS}\" 2>&1 || true"
     docker_compose --file="${REFERENCE_CONTAINER_COMPOSE_FILE}" \
-                   -p=$CHE_COMPOSE_PROJECT_NAME rm --force >> "${LOGS}" 2>&1 || true
+                   -p=$CHE_COMPOSE_PROJECT_NAME rm -v --force >> "${LOGS}" 2>&1 || true
   fi
 }
