@@ -29,7 +29,7 @@ public class DnsResolversProvider implements Provider<String[]> {
     private final String[] dnsResolvers;
 
     @Inject
-    public DnsResolversProvider(@Nullable @Named("che.dns_resolvers") String[] dnsResolvers) {
+    public DnsResolversProvider(@Nullable @Named("che.dns.resolvers") String[] dnsResolvers) {
         if (dnsResolvers == null ||
             dnsResolvers.length == 0 ||
             (dnsResolvers.length == 1 && isNullOrEmpty(dnsResolvers[0]))) {

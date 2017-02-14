@@ -48,7 +48,7 @@ node default {
 
   ################################
   # DNS resolver configuration
-    $dns_resolvers = getValue("CHE_DNS__RESOLVERS","NULL")
+    $dns_resolvers = getValue("CHE_DNS_RESOLVERS","NULL")
 
   ###############################
   # Include base module
