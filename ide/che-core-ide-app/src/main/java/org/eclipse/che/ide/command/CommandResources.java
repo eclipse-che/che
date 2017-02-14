@@ -18,7 +18,7 @@ import com.google.gwt.resources.client.ImageResource;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
- * Client bundle for command related resources.
+ * Client bundle for Command related resources.
  *
  * @author Artem Zatsarynnyi
  */
@@ -56,8 +56,8 @@ public interface CommandResources extends ClientBundle {
     @Source({"palette/styles.css", "org/eclipse/che/ide/api/ui/style.css"})
     PaletteCSS commandsPaletteCss();
 
-    @Source("toolbar/processes/styles.css")
-    ProcessesListCSS processesListCss();
+    @Source({"toolbar/processes/styles.css", "org/eclipse/che/ide/api/ui/style.css"})
+    ToolbarCSS commandToolbarCss();
 
     interface ExplorerCSS extends CssResource {
         String commandGoalNode();
@@ -73,7 +73,19 @@ public interface CommandResources extends ClientBundle {
         String filterField();
     }
 
-    interface ProcessesListCSS extends CssResource {
-        String actionButton();
+    interface ToolbarCSS extends CssResource {
+        String toolbarButton();
+
+        String runButton();
+
+        String debugButton();
+
+        String processesListLabel();
+
+        String processesList();
+
+        String processesListItemNameLabel();
+
+        String processesListItemActionButton();
     }
 }

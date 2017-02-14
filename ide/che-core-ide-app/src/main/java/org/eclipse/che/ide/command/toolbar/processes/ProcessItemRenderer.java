@@ -26,11 +26,13 @@ import org.eclipse.che.ide.command.CommandResources;
 import org.eclipse.che.ide.ui.dropdown.BaseListItem;
 import org.eclipse.che.ide.ui.dropdown.DropDownListItemRenderer;
 
-import static com.google.gwt.dom.client.Style.Float.LEFT;
 import static com.google.gwt.dom.client.Style.Float.RIGHT;
+import static com.google.gwt.dom.client.Style.Unit.PX;
 
 /** Renders widgets for representing a {@link Process}. */
 class ProcessItemRenderer implements DropDownListItemRenderer {
+
+    private static final CommandResources RESOURCES = GWT.create(CommandResources.class);
 
     private final BaseListItem<Process> item;
     private final StopProcessHandler    stopHandler;
@@ -101,12 +103,14 @@ class ProcessItemRenderer implements DropDownListItemRenderer {
 
             final String labelText = targetMachine.getConfig().getName() + ": <b>" + process.getName() + "</b>";
             final Label nameLabel = new InlineHTML(labelText);
-            nameLabel.setWidth("230px");
-            nameLabel.getElement().getStyle().setFloat(LEFT);
+//            nameLabel.setWidth("230px");
+//            nameLabel.getElement().getStyle().setFloat(LEFT);
             nameLabel.setTitle(process.getCommandLine());
+            nameLabel.addStyleName(RESOURCES.commandToolbarCss().processesListItemNameLabel());
 
             pidLabel = new Label('#' + Integer.toString(process.getPid()));
             pidLabel.getElement().getStyle().setFloat(RIGHT);
+            pidLabel.getElement().getStyle().setMarginRight(10, PX);
 
             final SafeHtmlBuilder safeHtmlBuilder1 = new SafeHtmlBuilder();
             safeHtmlBuilder1.appendHtmlConstant(FontAwesome.STOP);
@@ -140,14 +144,12 @@ class ProcessItemRenderer implements DropDownListItemRenderer {
         }
 
         private class ActionButton extends ButtonBase {
-            private final CommandResources resources = GWT.create(CommandResources.class);
-
             ActionButton(SafeHtml content) {
                 super(Document.get().createDivElement());
 
                 getElement().getStyle().setFloat(RIGHT);
                 getElement().setInnerSafeHtml(content);
-                asWidget().addStyleName(resources.processesListCss().actionButton());
+                asWidget().addStyleName(RESOURCES.commandToolbarCss().processesListItemActionButton());
             }
         }
     }

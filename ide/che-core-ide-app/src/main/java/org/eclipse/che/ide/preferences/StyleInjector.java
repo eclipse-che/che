@@ -41,6 +41,6 @@ public class StyleInjector {
 
         resources.commandsExplorerCss().ensureInjected();
         resources.commandsPaletteCss().ensureInjected();
-        resources.processesListCss().ensureInjected();
+        resources.commandToolbarCss().ensureInjected();
     }
 }

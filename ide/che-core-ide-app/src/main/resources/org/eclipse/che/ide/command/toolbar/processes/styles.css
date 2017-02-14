@@ -9,6 +9,62 @@
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
 
-.actionButton {
+.toolbarButton {
+    float: left;
+    line-height: 20px;
+    margin-top: 1px;
+}
+
+.runButton {
+    margin-left: 70px;
+}
+
+.debugButton {
+    margin-left: 20px;
+}
+
+.debugButton i {
+    -webkit-transform: rotate(-270deg);
+    transform: rotate(-270deg);
+}
+
+.processesListLabel {
+    float: left;
+    background-color: #1d1d1d;
+    border-left: solid 0.5px #898989;
+    border-top: solid 0.5px #898989;
+    border-bottom: solid 0.5px #898989;
+    border-right: 0;
+    font-family: mainFontFamily;
+    font-size: 9px;
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    text-align: center;
+    color: #4eabff;
+    width: 44px;
+    height: 20px;
+    margin: 1px 0 0 80px;
+    line-height: 20px;
+}
+
+.processesList {
+    float: left;
+    width: 400px;
+    background-color: #33373b;
+    border: solid 0.6px #898989;
+    height: 20px;
+    margin-top: 1px;
+}
+
+.processesListItemNameLabel {
+    float: left;
+    width: 230px;
+    font-family: mainFontFamily;
+    font-size: fontSize;
+    color: selectCommandActionColor;
+}
+
+.processesListItemActionButton {
     color: #4eabff;
 }

@@ -14,8 +14,40 @@ import com.google.gwt.resources.client.ClientBundle;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+
 import org.eclipse.che.ide.Resources;
-import org.eclipse.che.ide.actions.*;
+import org.eclipse.che.ide.actions.CloseActiveEditorAction;
+import org.eclipse.che.ide.actions.CollapseAllAction;
+import org.eclipse.che.ide.actions.CompleteAction;
+import org.eclipse.che.ide.actions.ConvertFolderToProjectAction;
+import org.eclipse.che.ide.actions.CreateProjectAction;
+import org.eclipse.che.ide.actions.DeleteResourceAction;
+import org.eclipse.che.ide.actions.DownloadProjectAction;
+import org.eclipse.che.ide.actions.DownloadResourceAction;
+import org.eclipse.che.ide.actions.DownloadWsAction;
+import org.eclipse.che.ide.actions.EditFileAction;
+import org.eclipse.che.ide.actions.ExpandEditorAction;
+import org.eclipse.che.ide.actions.FormatterAction;
+import org.eclipse.che.ide.actions.FullTextSearchAction;
+import org.eclipse.che.ide.actions.GoIntoAction;
+import org.eclipse.che.ide.actions.HotKeysListAction;
+import org.eclipse.che.ide.actions.ImportProjectAction;
+import org.eclipse.che.ide.actions.LinkWithEditorAction;
+import org.eclipse.che.ide.actions.NavigateToFileAction;
+import org.eclipse.che.ide.actions.OpenFileAction;
+import org.eclipse.che.ide.actions.ProjectConfigurationAction;
+import org.eclipse.che.ide.actions.RedoAction;
+import org.eclipse.che.ide.actions.RefreshPathAction;
+import org.eclipse.che.ide.actions.RenameItemAction;
+import org.eclipse.che.ide.actions.SaveAction;
+import org.eclipse.che.ide.actions.SaveAllAction;
+import org.eclipse.che.ide.actions.ShowHiddenFilesAction;
+import org.eclipse.che.ide.actions.ShowPreferencesAction;
+import org.eclipse.che.ide.actions.ShowReferenceAction;
+import org.eclipse.che.ide.actions.SignatureHelpAction;
+import org.eclipse.che.ide.actions.UndoAction;
+import org.eclipse.che.ide.actions.UploadFileAction;
+import org.eclipse.che.ide.actions.UploadFolderAction;
 import org.eclipse.che.ide.actions.common.MaximizePartAction;
 import org.eclipse.che.ide.actions.common.MinimizePartAction;
 import org.eclipse.che.ide.actions.common.RestorePartAction;
@@ -369,10 +401,6 @@ public class StandardComponentInitializer {
     @Inject
     private ServerPortMacro serverPortMacro;
 
-    @Inject
-    private org.eclipse.che.ide.command.toolbar.ToolbarResources toolbarResources;
-
-
     /** Instantiates {@link StandardComponentInitializer} an creates standard content. */
     @Inject
     public StandardComponentInitializer(IconRegistry iconRegistry,
@@ -384,7 +412,6 @@ public class StandardComponentInitializer {
         messageLoaderResources.Css().ensureInjected();
         editorResources.editorCss().ensureInjected();
         popupResources.popupStyle().ensureInjected();
-        toolbarResources.css().ensureInjected();
 
         fileTypeRegistry.registerFileType(xmlFile);
 

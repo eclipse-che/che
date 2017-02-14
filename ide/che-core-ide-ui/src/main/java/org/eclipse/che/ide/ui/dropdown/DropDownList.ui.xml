@@ -16,11 +16,13 @@
     <ui:style>
         .widget {
             display: inline-block;
+            cursor: pointer;
         }
 
         .container {
             float: left;
-            width: 353px;
+            width: 360px;
+            margin: 0 10px 0 10px;
         }
 
         .selectedElementName {
@@ -30,17 +32,16 @@
             text-overflow: ellipsis;
         }
 
-        .imagePanel {
+        .dropButton {
             float: right;
+            margin-right: 4px;
         }
     </ui:style>
 
     <g:FlowPanel ui:field="listHeader" debugId="dropDownHeader" styleName="{style.widget}">
-        <g:FlowPanel ui:field="selectedElement" addStyleNames="{style.container}">
+        <g:FlowPanel addStyleNames="{style.container}">
             <g:FlowPanel ui:field="selectedElementName" addStyleNames="{style.selectedElementName}"/>
         </g:FlowPanel>
-        <g:FlowPanel addStyleNames="{style.imagePanel}">
-            <g:FlowPanel ui:field="dropButton"/>
-        </g:FlowPanel>
+        <g:FlowPanel ui:field="dropButton" addStyleNames="{style.dropButton}"/>
     </g:FlowPanel>
 </ui:UiBinder>

@@ -15,7 +15,7 @@ import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
-import org.eclipse.che.ide.command.toolbar.ToolbarResources;
+import org.eclipse.che.ide.command.CommandResources;
 import org.eclipse.che.ide.ui.dropdown.BaseListItem;
 import org.eclipse.che.ide.ui.dropdown.DropDownList;
 
@@ -39,15 +39,15 @@ public class ProcessesListViewImpl implements ProcessesListView {
     private ActionDelegate delegate;
 
     @Inject
-    public ProcessesListViewImpl(ToolbarResources toolbarResources) {
+    public ProcessesListViewImpl(CommandResources toolbarResources) {
         listItems = new HashMap<>();
         renderers = new HashMap<>();
 
         final Label label = new Label("EXEC:");
-        label.addStyleName(toolbarResources.css().commandListLabel());
+        label.addStyleName(toolbarResources.commandToolbarCss().processesListLabel());
 
         dropDownList = new DropDownList(new InlineHTML("<b>Ready</b> - start command"));
-        dropDownList.addStyleName(toolbarResources.css().commandList());
+        dropDownList.addStyleName(toolbarResources.commandToolbarCss().processesList());
         dropDownList.setSelectionHandler(item -> {
             for (Map.Entry<Process, BaseListItem<Process>> entry : listItems.entrySet()) {
                 if (item.equals(entry.getValue())) {

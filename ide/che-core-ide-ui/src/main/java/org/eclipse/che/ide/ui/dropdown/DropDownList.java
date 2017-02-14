@@ -22,11 +22,12 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.ide.ui.dropdown.old.DropDownWidget;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.google.gwt.dom.client.Style.Cursor.POINTER;
+import static com.google.gwt.dom.client.Style.Unit.PX;
 import static com.google.gwt.user.client.ui.PopupPanel.AnimationType.ROLL_DOWN;
 
 /**
@@ -34,8 +35,8 @@ import static com.google.gwt.user.client.ui.PopupPanel.AnimationType.ROLL_DOWN;
  */
 public class DropDownList extends Composite {
 
-    private static final DropDownListUiBinder     UI_BINDER = GWT.create(DropDownListUiBinder.class);
-    private static final DropDownWidget.Resources RESOURCES = GWT.create(DropDownWidget.Resources.class);
+    private static final DropDownListUiBinder  UI_BINDER = GWT.create(DropDownListUiBinder.class);
+    private static final DropDownListResources RESOURCES = GWT.create(DropDownListResources.class);
 
     /** Maximum amount of items that should visible in drop down list without scrolling. */
     private static final int MAX_VISIBLE_ITEMS  = 7;
@@ -75,17 +76,17 @@ public class DropDownList extends Composite {
 
         initWidget(UI_BINDER.createAndBindUi(this));
 
-        listHeader.setStyleName(RESOURCES.dropdownListCss().menuElement());
-
         dropButton.getElement().appendChild(RESOURCES.expansionImage().getSvg().getElement());
         dropButton.addStyleName(RESOURCES.dropdownListCss().expandedImage());
 
         dropDownPanel = new PopupPanel(true);
         dropDownPanel.setAnimationEnabled(true);
         dropDownPanel.setAnimationType(ROLL_DOWN);
-        dropDownPanel.setWidth("350px");
+        dropDownPanel.setWidth("394px");
 
         contentPanel = new FlowPanel();
+        contentPanel.getElement().getStyle().setMarginLeft(10, PX);
+        contentPanel.getElement().getStyle().setMarginRight(27, PX);
         dropDownPanel.add(new ScrollPanel(contentPanel));
 
         attachEventHandlers();
@@ -156,6 +157,7 @@ public class DropDownList extends Composite {
         itemsWidgets.put(item, listWidget);
         itemsRenderers.put(item, renderer);
 
+        listWidget.getElement().getStyle().setCursor(POINTER);
         listWidget.addDomHandler(event -> {
             setHeader(item);
             dropDownPanel.hide();
@@ -218,5 +220,9 @@ public class DropDownList extends Composite {
          *         currently selected item
          */
         void onItemSelected(DropDownListItem item);
+    }
+
+    static {
+        RESOURCES.dropdownListCss().ensureInjected();
     }
 }

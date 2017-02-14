@@ -8,30 +8,32 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.toolbar;
+package org.eclipse.che.ide.ui.dropdown;
 
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 
+import org.vectomatic.dom.svg.ui.SVGResource;
+
 /**
  *
  */
-public interface ToolbarResources extends ClientBundle {
+public interface DropDownListResources extends ClientBundle {
 
-    @Source({"CommandToolbar.css", "org/eclipse/che/ide/api/ui/style.css"})
-    Css css();
+    @Source({"DropDownList.css", "org/eclipse/che/ide/api/ui/style.css"})
+    DropdownCss dropdownListCss();
 
-    interface Css extends CssResource {
+    @Source("expansionIcon.svg")
+    SVGResource expansionImage();
 
-        String commandList();
+    /**
+     * Item style selectors for a categories list item.
+     */
+    interface DropdownCss extends CssResource {
+        String expandedImage();
 
-        String commandListLabel();
+        String menuElement();
 
-
-        String commandButton();
-
-        String debugButton();
-
-        String runButton();
+        String dropDownListMenu();
     }
 }

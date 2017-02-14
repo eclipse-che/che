@@ -33,8 +33,8 @@ public class CommandPopupItem implements PopupItem {
     @Override
     public boolean isDisabled() {
         return command.getApplicableContext().isProjectApplicable()
-                || command.getApplicableContext().isWorkspaceApplicable()
-                || command.getApplicableContext().isFileApplicable();
+               || command.getApplicableContext().isWorkspaceApplicable()
+               || command.getApplicableContext().isFileApplicable();
     }
 
     public ContextualCommand getCommand() {

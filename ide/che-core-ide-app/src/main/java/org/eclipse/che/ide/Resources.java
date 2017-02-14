@@ -13,6 +13,7 @@ package org.eclipse.che.ide;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.CssResource.NotStrict;
 import com.google.gwt.resources.client.TextResource;
+
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.command.CommandResources;
 import org.eclipse.che.ide.menu.MenuResources;
@@ -178,9 +179,6 @@ public interface Resources extends Tree.Resources,
 
     @Source("part/che-logo.svg")
     SVGResource cheLogo();
-
-    @Source("command/explorer/remove-command-button.svg")
-    SVGResource removeCommand();
 
     /** Interface for css resources. */
     interface CoreCss extends CssResource {
