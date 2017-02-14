@@ -25,7 +25,7 @@ describe('Simper dockerfile parser', () => {
   });
 
   describe('method _parseArgument()', () => {
-    it('should parse ENV argument with single environment variable', () => {
+    it('should parse ENV argument with single environment variable #1', () => {
       let instruction = 'ENV',
           argument = 'name environment variable value';
 
@@ -34,6 +34,19 @@ describe('Simper dockerfile parser', () => {
       let expectedResult = [{
         instruction: 'ENV',
         argument: ['name', 'environment variable value']
+      }];
+      expect(result).toEqual(expectedResult);
+    });
+
+    it('should parse ENV argument with single environment variable #2', () => {
+      let instruction = 'ENV',
+          argument = 'SBT_OPTS \'-Dhttp.proxyHost=proxy.wdf.sap.corp -Dhttp.proxyPort=8080 -Dhttps.proxyHost=proxy.wdf.sap.corp -Dhttps.proxyPort=8080 -Dhttp.nonProxyHosts=nexus.wdf.sap.corp\'';
+
+      let result = parser._parseArgument(instruction, argument);
+
+      let expectedResult = [{
+        instruction: 'ENV',
+        argument: ['SBT_OPTS', '\'-Dhttp.proxyHost=proxy.wdf.sap.corp -Dhttp.proxyPort=8080 -Dhttps.proxyHost=proxy.wdf.sap.corp -Dhttps.proxyPort=8080 -Dhttp.nonProxyHosts=nexus.wdf.sap.corp\'']
       }];
       expect(result).toEqual(expectedResult);
     });
@@ -56,6 +69,7 @@ describe('Simper dockerfile parser', () => {
       }];
       expect(result).toEqual(expectedResult);
     });
+
   });
 
   it('should parse a dockerfile', () => {
