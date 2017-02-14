@@ -82,12 +82,18 @@ import org.slf4j.LoggerFactory;
 
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaimBuilder;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaimList;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaimVolumeSource;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaimVolumeSourceBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodList;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.PodSpecBuilder;
 import io.fabric8.kubernetes.api.model.Probe;
 import io.fabric8.kubernetes.api.model.ProbeBuilder;
+import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceList;
 import io.fabric8.kubernetes.api.model.ServicePort;
@@ -137,6 +143,7 @@ public class OpenShiftConnector extends DockerConnector {
     private final String          openShiftCheServiceAccount;
     private final int             openShiftLivenessProbeDelay;
     private final int             openShiftLivenessProbeTimeout;
+    private final String          persistentVolumeClaim;
 
     @Inject
     public OpenShiftConnector(DockerConnectorConfiguration connectorConfiguration,
@@ -146,13 +153,15 @@ public class OpenShiftConnector extends DockerConnector {
                               @Named("che.openshift.project") String openShiftCheProjectName,
                               @Named("che.openshift.serviceaccountname") String openShiftCheServiceAccount,
                               @Named("che.openshift.liveness.probe.delay") int openShiftLivenessProbeDelay,
-                              @Named("che.openshift.liveness.probe.timeout") int openShiftLivenessProbeTimeout) {
+                              @Named("che.openshift.liveness.probe.timeout") int openShiftLivenessProbeTimeout,
+                              @Named("che.openshift.persistent.volume.claim") String persistentVolumeClaim) {
 
         super(connectorConfiguration, connectionFactory, authResolver, dockerApiVersionPathPrefixProvider);
         this.openShiftCheProjectName = openShiftCheProjectName;
         this.openShiftCheServiceAccount = openShiftCheServiceAccount;
         this.openShiftLivenessProbeDelay = openShiftLivenessProbeDelay;
         this.openShiftLivenessProbeTimeout = openShiftLivenessProbeTimeout;
+        this.persistentVolumeClaim = persistentVolumeClaim;
 
         this.openShiftClient = new DefaultOpenShiftClient();
     }
@@ -977,32 +986,75 @@ public class OpenShiftConnector extends DockerConnector {
 
     private List<VolumeMount> getVolumeMountsFrom(String[] volumes, String workspaceID) {
         List<VolumeMount> vms = new ArrayList<>();
-        for (String volume : volumes) {
-            String mountPath = volume.split(":",3)[1];
-            String volumeName = getVolumeName(volume);
-
+        PersistentVolumeClaim pvc = getClaimCheWorkspace();
+        if (pvc != null) {
             VolumeMount vm = new VolumeMountBuilder()
+                .withMountPath("/data")
+                .withName(persistentVolumeClaim)
+                .build();
+            vms.add(vm);
+        } else {
+            for (String volume : volumes) {
+                String mountPath = volume.split(":",3)[1];
+                String volumeName = getVolumeName(volume);
+                VolumeMount vm = new VolumeMountBuilder()
                     .withMountPath(mountPath)
                     .withName("ws-" + workspaceID + "-" + volumeName)
                     .build();
-            vms.add(vm);
+                vms.add(vm);
+            }
         }
         return vms;
     }
 
     private List<Volume> getVolumesFrom(String[] volumes, String workspaceID) {
         List<Volume> vs = new ArrayList<>();
-        for (String volume : volumes) {
-            String hostPath = volume.split(":",3)[0];
-            String volumeName = getVolumeName(volume);
-
+        PersistentVolumeClaim pvc = getClaimCheWorkspace();
+        if (pvc != null) {
+            PersistentVolumeClaimVolumeSource pvcs = new PersistentVolumeClaimVolumeSourceBuilder()
+                  .withClaimName(persistentVolumeClaim)
+                  .build();
             Volume v = new VolumeBuilder()
+                  .withPersistentVolumeClaim(pvcs)
+                  .withName(persistentVolumeClaim)
+                  .build();
+                vs.add(v);
+        } else {
+            for (String volume : volumes) {
+                String hostPath = volume.split(":",3)[0];
+                String volumeName = getVolumeName(volume);
+
+                Volume v = new VolumeBuilder()
                     .withNewHostPath(hostPath)
                     .withName("ws-" + workspaceID + "-" + volumeName)
                     .build();
-            vs.add(v);
+                vs.add(v);
+            }
         }
         return vs;
+    }
+
+    private PersistentVolumeClaim getClaimCheWorkspace() {
+        PersistentVolumeClaimList pvcList = openShiftClient.persistentVolumeClaims().list();
+        for(PersistentVolumeClaim pvc:pvcList.getItems()) {
+            if (persistentVolumeClaim.equals(pvc.getMetadata().getName())) {
+                return pvc;
+            }
+        }
+        Map<String, Quantity> requests = new HashMap<>();
+        requests.put("storage", new Quantity("10Gi"));
+        PersistentVolumeClaim pvc = new PersistentVolumeClaimBuilder()
+            .withNewMetadata()
+                .withName(persistentVolumeClaim)
+            .endMetadata()
+            .withNewSpec()
+                .withAccessModes("ReadWriteOnce")
+                .withNewResources()
+                    .withRequests(requests)
+                .endResources()
+            .endSpec()
+            .build();
+        return pvc;
     }
 
     private String getVolumeName(String volume) {
