@@ -8,28 +8,33 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.docker.machine.ext.provider;
+package org.eclipse.che.plugin.maven;
 
-import org.eclipse.che.plugin.docker.machine.DockerInstanceRuntimeInfo;
+import org.eclipse.che.commons.annotation.Nullable;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
-import javax.inject.Singleton;
 
 /**
- * Add env variable to docker dev-machine with java opts
+ * Provides MAVEN_OPTS environment variable with a value set to either maven options
+ * from configuration or java options if maven options are not set.
  *
- * @author Roman Iuvshyn
+ * @author Yevhenii Voevodin
  */
-@Singleton
-public class JavaOptsEnvVariableProvider implements Provider<String> {
+public class MavenOptsEnvVariableProvider implements Provider<String> {
+
     @Inject
     @Named("che.workspace.java.options")
     private String javaOpts;
 
+    @Inject
+    @Named("che.workspace.maven.options")
+    @Nullable
+    private String mavenOpts;
+
     @Override
     public String get() {
-        return DockerInstanceRuntimeInfo.JAVA_OPTS_VARIABLE + '=' + javaOpts;
+        return "MAVEN_OPTS=" + (mavenOpts == null ? javaOpts : mavenOpts);
     }
 }

@@ -188,6 +188,10 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-maven-wsmaster</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-openshift-client</artifactId>
         </dependency>
         <dependency>
