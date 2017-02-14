@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,8 +15,6 @@ import {CheWorkspaceItem} from './list-workspaces/workspace-item/workspace-item.
 import {CheWorkspaceStatus} from './list-workspaces/workspace-status-action/workspace-status.directive';
 import {WorkspaceStatusController} from './list-workspaces/workspace-status-action/workspace-status.controller';
 import {WorkspaceDetailsController} from './workspace-details/workspace-details.controller';
-import {WorkspaceStacksController} from './workspace-details/workspace-stacks/workspace-stacks.controller';
-import {WorkspaceStacks} from './workspace-details/workspace-stacks/workspace-stacks.directive';
 import {UsageChart} from './list-workspaces/workspace-item/usage-chart.directive';
 import {WorkspaceItemCtrl} from './list-workspaces/workspace-item/workspace-item.controller';
 import {WorkspaceEditModeOverlay} from './workspace-edit-mode/workspace-edit-mode-overlay.directive';
@@ -60,13 +58,11 @@ import {EditMachineNameDialogController} from  './workspace-details/environments
 
 import {ListEnvVariablesController} from './workspace-details/environments/list-env-variables/list-env-variables.controller';
 import {ListEnvVariables} from './workspace-details/environments/list-env-variables/list-env-variables.directive';
-import {AddVariableDialogController} from  './workspace-details/environments/list-env-variables/add-variable-dialog/add-variable-dialog.controller';
 import {EditVariableDialogController} from  './workspace-details/environments/list-env-variables/edit-variable-dialog/edit-variable-dialog.controller';
 
-import {ListPortsController} from './workspace-details/environments/list-ports/list-ports.controller';
-import {ListPorts} from './workspace-details/environments/list-ports/list-ports.directive';
-import {AddPortDialogController} from  './workspace-details/environments/list-ports/add-port-dialog/add-port-dialog.controller';
-import {EditPortDialogController} from  './workspace-details/environments/list-ports/edit-port-dialog/edit-port-dialog.controller';
+import {ListServersController} from './workspace-details/environments/list-servers/list-servers.controller';
+import {ListServers} from './workspace-details/environments/list-servers/list-servers.directive';
+import {EditServerDialogController} from  './workspace-details/environments/list-servers/edit-server-dialog/edit-server-dialog.controller';
 
 import {ListCommandsController} from './workspace-details/list-commands/list-commands.controller';
 import {ListCommands} from './workspace-details/list-commands/list-commands.directive';
@@ -94,8 +90,6 @@ export class WorkspacesConfig {
 
     register.controller('ListWorkspacesCtrl', ListWorkspacesCtrl);
     register.controller('WorkspaceDetailsController', WorkspaceDetailsController);
-    register.controller('WorkspaceStacksController', WorkspaceStacksController);
-    register.directive('workspaceStacks', WorkspaceStacks);
 
     register.directive('cheWorkspaceItem', CheWorkspaceItem);
     register.controller('WorkspaceItemCtrl', WorkspaceItemCtrl);
@@ -139,7 +133,7 @@ export class WorkspacesConfig {
     register.directive('cheStackLibrarySelecter', CheStackLibrarySelecter);
 
     register.controller('WorkspaceSelectStackController', WorkspaceSelectStackController);
-    register.directive('cheWorkspaceSelectStack', WorkspaceSelectStack);
+    register.directive('workspaceSelectStack', WorkspaceSelectStack);
 
     register.controller('CheStackLibraryFilterController', CheStackLibraryFilterController);
     register.directive('cheStackLibraryFilter', CheStackLibraryFilter);
@@ -152,13 +146,11 @@ export class WorkspacesConfig {
 
     register.controller('ListEnvVariablesController', ListEnvVariablesController);
     register.directive('listEnvVariables', ListEnvVariables);
-    register.controller('AddVariableDialogController', AddVariableDialogController);
     register.controller('EditVariableDialogController', EditVariableDialogController);
 
-    register.controller('ListPortsController', ListPortsController);
-    register.directive('listPorts', ListPorts);
-    register.controller('AddPortDialogController', AddPortDialogController);
-    register.controller('EditPortDialogController', EditPortDialogController);
+    register.controller('ListServersController', ListServersController);
+    register.directive('listServers', ListServers);
+    register.controller('EditServerDialogController', EditServerDialogController);
 
     register.controller('ListCommandsController', ListCommandsController);
     register.directive('listCommands', ListCommands);
@@ -183,8 +175,8 @@ export class WorkspacesConfig {
         controller: 'ListWorkspacesCtrl',
         controllerAs: 'listWorkspacesCtrl'
       })
-      .accessWhen('/workspace/:namespace/:workspaceName', locationProvider)
-      .accessWhen('/workspace/:namespace/:workspaceName/:page', locationProvider)
+      .accessWhen('/workspace/:namespace*/:workspaceName', locationProvider)
+      .accessWhen('/workspace/:namespace*/:workspaceName/:page', locationProvider)
       .accessWhen('/create-workspace', {
         title: 'New Workspace',
         templateUrl: 'app/workspaces/workspace-details/workspace-details.html',

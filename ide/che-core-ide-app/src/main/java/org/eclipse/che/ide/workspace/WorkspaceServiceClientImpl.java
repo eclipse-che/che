@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,10 +27,10 @@ import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.WsAgentHealthStateDto;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.ide.rest.RestContext;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 
 import javax.validation.constraints.NotNull;
@@ -61,14 +61,14 @@ public class WorkspaceServiceClientImpl implements WorkspaceServiceClient {
     private final String                 baseHttpUrl;
 
     @Inject
-    private WorkspaceServiceClientImpl(@RestContext String restContext,
+    private WorkspaceServiceClientImpl(AppContext appContext,
                                        DtoUnmarshallerFactory dtoUnmarshallerFactory,
                                        AsyncRequestFactory asyncRequestFactory,
                                        LoaderFactory loaderFactory) {
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.asyncRequestFactory = asyncRequestFactory;
         this.loaderFactory = loaderFactory;
-        this.baseHttpUrl = restContext + "/workspace";
+        this.baseHttpUrl = appContext.getMasterEndpoint() + "/workspace";
     }
 
     @Override
@@ -96,16 +96,16 @@ public class WorkspaceServiceClientImpl implements WorkspaceServiceClient {
     }
 
     @Override
-    public Promise<WorkspaceDto> getWorkspace(final String wsId) {
+    public Promise<WorkspaceDto> getWorkspace(final String key) {
         return newPromise(new RequestCall<WorkspaceDto>() {
             @Override
             public void makeCall(AsyncCallback<WorkspaceDto> callback) {
-                getUsersWorkspace(wsId, callback);
+                getWorkspace(key, callback);
             }
         });
     }
 
-    private void getUsersWorkspace(@NotNull String wsId, @NotNull AsyncCallback<WorkspaceDto> callback) {
+    private void getWorkspace(@NotNull String wsId, @NotNull AsyncCallback<WorkspaceDto> callback) {
         final String url = baseHttpUrl + '/' + wsId;
         asyncRequestFactory.createGetRequest(url)
                            .header(ACCEPT, APPLICATION_JSON)
@@ -118,7 +118,7 @@ public class WorkspaceServiceClientImpl implements WorkspaceServiceClient {
         return newPromise(new RequestCall<WorkspaceDto>() {
             @Override
             public void makeCall(AsyncCallback<WorkspaceDto> callback) {
-                final String url = baseHttpUrl + '/' + namespace + ":" + workspaceName;
+                final String url = baseHttpUrl + '/' + namespace + "/" + workspaceName;
                 asyncRequestFactory.createGetRequest(url)
                                    .header(ACCEPT, APPLICATION_JSON)
                                    .loader(loaderFactory.newLoader("Getting info about workspace..."))

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,11 @@ package org.eclipse.che.ide.ext.git.client;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.git.shared.Branch;
+import org.eclipse.che.api.git.shared.LogResponse;
 import org.eclipse.che.api.git.shared.MergeResult;
 import org.eclipse.che.api.git.shared.Remote;
 import org.eclipse.che.api.git.shared.Revision;
+import org.eclipse.che.api.git.shared.ShowFileContentResponse;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
@@ -164,6 +166,16 @@ public abstract class BaseTest {
     protected Promise<String>                   stringPromise;
     @Captor
     protected ArgumentCaptor<Operation<String>> stringCaptor;
+
+    @Mock
+    protected Promise<LogResponse>                   logPromise;
+    @Captor
+    protected ArgumentCaptor<Operation<LogResponse>> logCaptor;
+
+    @Mock
+    protected Promise<ShowFileContentResponse>                   showPromise;
+    @Captor
+    protected ArgumentCaptor<Operation<ShowFileContentResponse>> showCaptor;
 
     @Before
     public void disarm() {

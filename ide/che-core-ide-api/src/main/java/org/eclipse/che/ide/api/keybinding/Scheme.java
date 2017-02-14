@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,7 @@ import java.util.List;
  *
  * @author Evgen Vidolob
  * @author Artem Zatsarynnyi
+ * @author <a href="mailto:ak@nuxeo.com">Arnaud Kervern</a>
  */
 public interface Scheme {
 
@@ -71,4 +72,9 @@ public interface Scheme {
      */
     @Nullable
     CharCodeWithModifiers getKeyBinding(@NotNull String actionId);
+
+    /**
+     * @return a boolean to check if the action is handled by this scheme
+     */
+    boolean contains(@NotNull String actionId);
 }

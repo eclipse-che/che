@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,7 +30,7 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.annotations.Description;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
-import org.eclipse.che.api.core.rest.shared.dto.Link;
+import org.eclipse.che.api.project.server.importer.ProjectImportOutputWSLineConsumer;
 import org.eclipse.che.api.project.server.notification.ProjectItemModifiedEvent;
 import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
 import org.eclipse.che.api.project.shared.dto.CopyOptions;
@@ -43,6 +43,7 @@ import org.eclipse.che.api.vfs.search.QueryExpression;
 import org.eclipse.che.api.vfs.search.SearchResult;
 import org.eclipse.che.api.vfs.search.SearchResultEntry;
 import org.eclipse.che.api.vfs.search.Searcher;
+import org.eclipse.che.api.workspace.shared.dto.NewProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -69,7 +70,6 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import java.io.IOException;
 import java.io.InputStream;
@@ -83,20 +83,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static javax.ws.rs.HttpMethod.DELETE;
-import static javax.ws.rs.HttpMethod.GET;
-import static javax.ws.rs.HttpMethod.PUT;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static org.eclipse.che.api.core.util.LinksHelper.createLink;
 import static org.eclipse.che.api.project.server.DtoConverter.asDto;
-import static org.eclipse.che.api.project.shared.Constants.LINK_REL_CHILDREN;
+import static org.eclipse.che.api.project.shared.Constants.LINK_REL_CREATE_BATCH_PROJECTS;
 import static org.eclipse.che.api.project.shared.Constants.LINK_REL_CREATE_PROJECT;
-import static org.eclipse.che.api.project.shared.Constants.LINK_REL_DELETE;
-import static org.eclipse.che.api.project.shared.Constants.LINK_REL_GET_CONTENT;
 import static org.eclipse.che.api.project.shared.Constants.LINK_REL_GET_PROJECTS;
-import static org.eclipse.che.api.project.shared.Constants.LINK_REL_TREE;
-import static org.eclipse.che.api.project.shared.Constants.LINK_REL_UPDATE_CONTENT;
-import static org.eclipse.che.api.project.shared.Constants.LINK_REL_UPDATE_PROJECT;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
@@ -115,14 +105,18 @@ public class ProjectService extends Service {
     private static final Logger LOG  = LoggerFactory.getLogger(ProjectService.class);
     private static final Tika   TIKA = new Tika();
 
-    private final ProjectManager projectManager;
-    private final EventService   eventService;
-    private final String         workspace;
+    private final ProjectManager              projectManager;
+    private final EventService                eventService;
+    private final ProjectServiceLinksInjector projectServiceLinksInjector;
+    private final String                      workspace;
 
     @Inject
-    public ProjectService(ProjectManager projectManager, EventService eventService) {
+    public ProjectService(ProjectManager projectManager,
+                          EventService eventService,
+                          ProjectServiceLinksInjector projectServiceLinksInjector) {
         this.projectManager = projectManager;
         this.eventService = eventService;
+        this.projectServiceLinksInjector = projectServiceLinksInjector;
         this.workspace = WorkspaceIdProvider.getWorkspaceId();
     }
 
@@ -206,6 +200,40 @@ public class ProjectService extends Service {
         return injectProjectLinks(configDto);
     }
 
+    @POST
+    @Path("/batch")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Creates batch of projects according to their configurations",
+                  notes = "A project will be created by importing when project configuration contains source object. " +
+                          "For creating a project by generator options should be specified.",
+                  response = ProjectConfigDto.class)
+    @ApiResponses({@ApiResponse(code = 200, message = "OK"),
+                   @ApiResponse(code = 400, message = "Path for new project should be defined"),
+                   @ApiResponse(code = 403, message = "Operation is forbidden"),
+                   @ApiResponse(code = 409, message = "Project with specified name already exist in workspace"),
+                   @ApiResponse(code = 500, message = "Server error")})
+    @GenerateLink(rel = LINK_REL_CREATE_BATCH_PROJECTS)
+    public List<ProjectConfigDto> createBatchProjects(
+            @Description("list of descriptors for projects") List<NewProjectConfigDto> projectConfigList,
+            @ApiParam(value = "Force rewrite existing project", allowableValues = "true,false")
+            @QueryParam("force") boolean rewrite)
+            throws ConflictException, ForbiddenException, ServerException, NotFoundException, IOException, UnauthorizedException,
+                   BadRequestException {
+
+        List<ProjectConfigDto> result = new ArrayList<>(projectConfigList.size());
+        final ProjectOutputLineConsumerFactory outputOutputConsumerFactory = new ProjectOutputLineConsumerFactory(workspace, 300);
+
+        for (RegisteredProject registeredProject : projectManager.createBatchProjects(projectConfigList, rewrite, outputOutputConsumerFactory)) {
+
+            ProjectConfigDto projectConfig = injectProjectLinks(asDto(registeredProject));
+            result.add(projectConfig);
+
+            eventService.publish(new ProjectCreatedEvent(workspace, registeredProject.getPath()));
+        }
+        return result;
+    }
+
     @PUT
     @Path("/{path:.*}")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -271,6 +299,7 @@ public class ProjectService extends Service {
         return DtoFactory.newDto(SourceEstimation.class)
                          .withType(projectType)
                          .withMatched(resolution.matched())
+                         .withResolution(resolution.getResolution())
                          .withAttributes(attributes);
     }
 
@@ -322,7 +351,8 @@ public class ProjectService extends Service {
                                                                      ServerException,
                                                                      NotFoundException,
                                                                      BadRequestException {
-        projectManager.importProject(path, sourceStorage, force);
+        projectManager.importProject(path, sourceStorage, force,
+                                     () -> new ProjectImportOutputWSLineConsumer(path, workspace, 300));
     }
 
     @POST
@@ -1027,98 +1057,14 @@ public class ProjectService extends Service {
     }
 
     private ItemReference injectFileLinks(ItemReference itemReference) {
-        final UriBuilder uriBuilder = getServiceContext().getServiceUriBuilder();
-        final List<Link> links = new ArrayList<>();
-        final String relPath = itemReference.getPath().substring(1);
-
-        links.add(createLink(GET,
-                             uriBuilder.clone()
-                                       .path(ProjectService.class, "getFile")
-                                       .build(new String[]{relPath}, false)
-                                       .toString(),
-                             APPLICATION_JSON,
-                             LINK_REL_GET_CONTENT));
-        links.add(createLink(PUT,
-                             uriBuilder.clone()
-                                       .path(ProjectService.class, "updateFile")
-                                       .build(new String[]{relPath}, false)
-                                       .toString(),
-                             MediaType.WILDCARD,
-                             null,
-                             LINK_REL_UPDATE_CONTENT));
-        links.add(createLink(DELETE,
-                             uriBuilder.clone()
-                                       .path(ProjectService.class, "delete")
-                                       .build(new String[]{relPath}, false)
-                                       .toString(),
-                             LINK_REL_DELETE));
-
-        return itemReference.withLinks(links);
+        return projectServiceLinksInjector.injectFileLinks(itemReference, getServiceContext());
     }
 
     private ItemReference injectFolderLinks(ItemReference itemReference) {
-        final UriBuilder uriBuilder = getServiceContext().getServiceUriBuilder();
-        final List<Link> links = new ArrayList<>();
-        final String relPath = itemReference.getPath().substring(1);
-
-        links.add(createLink(GET,
-                             uriBuilder.clone()
-                                       .path(ProjectService.class, "getChildren")
-                                       .build(new String[]{relPath}, false)
-                                       .toString(),
-                             APPLICATION_JSON,
-                             LINK_REL_CHILDREN));
-        links.add(createLink(GET,
-                             uriBuilder.clone()
-                                       .path(ProjectService.class, "getTree")
-                                       .build(new String[]{relPath}, false)
-                                       .toString(),
-                             APPLICATION_JSON,
-                             LINK_REL_TREE));
-        links.add(createLink(DELETE,
-                             uriBuilder.clone()
-                                       .path(ProjectService.class, "delete")
-                                       .build(new String[]{relPath}, false)
-                                       .toString(),
-                             LINK_REL_DELETE));
-
-        return itemReference.withLinks(links);
+        return projectServiceLinksInjector.injectFolderLinks(itemReference, getServiceContext());
     }
 
     private ProjectConfigDto injectProjectLinks(ProjectConfigDto projectConfig) {
-        final UriBuilder uriBuilder = getServiceContext().getServiceUriBuilder();
-        final List<Link> links = new ArrayList<>();
-        final String relPath = projectConfig.getPath().substring(1);
-
-        links.add(createLink(PUT,
-                             uriBuilder.clone()
-                                       .path(ProjectService.class, "updateProject")
-                                       .build(new String[]{relPath}, false)
-                                       .toString(),
-                             APPLICATION_JSON,
-                             APPLICATION_JSON,
-                             LINK_REL_UPDATE_PROJECT));
-        links.add(createLink(GET,
-                             uriBuilder.clone()
-                                       .path(ProjectService.class, "getChildren")
-                                       .build(new String[]{relPath}, false)
-                                       .toString(),
-                             APPLICATION_JSON,
-                             LINK_REL_CHILDREN));
-        links.add(createLink(GET,
-                             uriBuilder.clone()
-                                       .path(ProjectService.class, "getTree")
-                                       .build(new String[]{relPath}, false)
-                                       .toString(),
-                             APPLICATION_JSON,
-                             LINK_REL_TREE));
-        links.add(createLink(DELETE,
-                             uriBuilder.clone()
-                                       .path(ProjectService.class, "delete")
-                                       .build(new String[]{relPath}, false)
-                                       .toString(),
-                             LINK_REL_DELETE));
-
-        return projectConfig.withLinks(links);
+        return projectServiceLinksInjector.injectProjectLinks(projectConfig, getServiceContext());
     }
 }

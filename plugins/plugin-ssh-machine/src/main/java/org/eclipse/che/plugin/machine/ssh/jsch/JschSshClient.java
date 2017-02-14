@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.machine.ssh.jsch;
 
-import com.google.inject.assistedinject.Assisted;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
@@ -60,8 +59,8 @@ public class JschSshClient implements SshClient {
     private Session session;
 
     @Inject
-    public JschSshClient(@Assisted SshMachineRecipe sshMachineRecipe,
-                         @Assisted Map<String, String> envVars,
+    public JschSshClient(SshMachineRecipe sshMachineRecipe,
+                         Map<String, String> envVars,
                          JSch jsch,
                          @Named("che.workspace.ssh_connection_timeout_ms") int connectionTimeoutMs) {
         this.envVars = envVars;
@@ -118,6 +117,7 @@ public class JschSshClient implements SshClient {
         try {
             ChannelExec exec = (ChannelExec)session.openChannel("exec");
             exec.setCommand(commandLine);
+            exec.setPty(true);
             envVars.entrySet()
                    .stream()
                    .forEach(envVariableEntry -> exec.setEnv(envVariableEntry.getKey(),

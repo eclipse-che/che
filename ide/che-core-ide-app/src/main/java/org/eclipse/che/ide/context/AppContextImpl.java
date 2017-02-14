@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.context;
 
 import com.google.common.collect.Sets;
+import com.google.gwt.core.client.Callback;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -20,6 +21,7 @@ import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentUser;
 import org.eclipse.che.ide.api.app.StartUpAction;
@@ -30,6 +32,7 @@ import org.eclipse.che.ide.api.event.SelectionChangedEvent;
 import org.eclipse.che.ide.api.event.SelectionChangedHandler;
 import org.eclipse.che.ide.api.event.WindowActionEvent;
 import org.eclipse.che.ide.api.event.WindowActionHandler;
+import org.eclipse.che.ide.api.machine.ActiveRuntime;
 import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Project;
@@ -45,6 +48,7 @@ import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.project.node.SyntheticNode;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.resources.ResourceManagerInitializer;
 import org.eclipse.che.ide.resources.impl.ResourceDeltaImpl;
 import org.eclipse.che.ide.resources.impl.ResourceManager;
 import org.eclipse.che.ide.statepersistance.AppStateManager;
@@ -54,7 +58,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Arrays.binarySearch;
 import static java.util.Arrays.copyOf;
@@ -79,16 +82,19 @@ public class AppContextImpl implements AppContext,
                                        ResourceChangedHandler,
                                        WindowActionHandler,
                                        WorkspaceStartedEvent.Handler,
-                                       WorkspaceStoppedEvent.Handler {
+                                       WorkspaceStoppedEvent.Handler,
+                                       ResourceManagerInitializer {
 
-    private final BrowserQueryFieldRenderer browserQueryFieldRenderer;
-    private final List<String>              projectsInImport;
+    private static final Project[] NO_PROJECTS = {};
+
+    private final QueryParameters queryParameters;
+    private final List<String>    projectsInImport;
 
     private Workspace           usersWorkspace;
     private CurrentUser         currentUser;
     private FactoryDto          factory;
-    private DevMachine          devMachine;
     private Path                projectsRoot;
+    private ActiveRuntime       runtime;
     /**
      * List of actions with parameters which comes from startup URL.
      * Can be processed after IDE initialization as usual after starting ws-agent.
@@ -100,12 +106,12 @@ public class AppContextImpl implements AppContext,
 
     @Inject
     public AppContextImpl(EventBus eventBus,
-                          BrowserQueryFieldRenderer browserQueryFieldRenderer,
+                          QueryParameters queryParameters,
                           ResourceManager.ResourceManagerFactory resourceManagerFactory,
                           Provider<EditorAgent> editorAgentProvider,
                           Provider<AppStateManager> appStateManager) {
         this.eventBus = eventBus;
-        this.browserQueryFieldRenderer = browserQueryFieldRenderer;
+        this.queryParameters = queryParameters;
         this.resourceManagerFactory = resourceManagerFactory;
         this.editorAgentProvider = editorAgentProvider;
         this.appStateManager = appStateManager;
@@ -125,7 +131,13 @@ public class AppContextImpl implements AppContext,
 
     @Override
     public void setWorkspace(Workspace workspace) {
-        this.usersWorkspace = workspace;
+        if (workspace != null) {
+            usersWorkspace = workspace;
+            runtime = new ActiveRuntime(workspace.getRuntime());
+        } else {
+            usersWorkspace = null;
+            runtime = null;
+        }
     }
 
     @Override
@@ -183,17 +195,16 @@ public class AppContextImpl implements AppContext,
 
     @Override
     public DevMachine getDevMachine() {
-        return devMachine;
+        return runtime.getDevMachine();
     }
 
-    public void setDevMachine(DevMachine devMachine) {
-        checkState(devMachine != null);
 
-        if (this.devMachine != null && this.devMachine.getId().equals(devMachine.getId())) {
-            return;
+    @Override
+    public void initResourceManager(final Callback<ResourceManager, Exception> callback) {
+        if (runtime.getDevMachine() == null) {
+            //should never happened, but anyway
+            callback.onFailure(new NullPointerException("Dev machine is not initialized"));
         }
-
-        browserQueryFieldRenderer.setProjectName("");
 
         if (projects != null) {
             for (Project project : projects) {
@@ -202,15 +213,19 @@ public class AppContextImpl implements AppContext,
             projects = null;
         }
 
-        this.devMachine = devMachine;
-
-        resourceManager = resourceManagerFactory.newResourceManager(devMachine);
+        resourceManager = resourceManagerFactory.newResourceManager(runtime.getDevMachine());
         resourceManager.getWorkspaceProjects().then(new Operation<Project[]>() {
             @Override
             public void apply(Project[] projects) throws OperationException {
                 AppContextImpl.this.projects = projects;
                 java.util.Arrays.sort(AppContextImpl.this.projects, ResourcePathComparator.getInstance());
+                callback.onSuccess(resourceManager);
                 eventBus.fireEvent(new WorkspaceReadyEvent(projects));
+            }
+        }).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError error) throws OperationException {
+                callback.onFailure((Exception)error.getCause());
             }
         });
     }
@@ -308,8 +323,6 @@ public class AppContextImpl implements AppContext,
             return;
         }
 
-        browserQueryFieldRenderer.setProjectName("");
-
         currentResource = null;
         currentResources = null;
 
@@ -357,7 +370,7 @@ public class AppContextImpl implements AppContext,
 
     @Override
     public Project[] getProjects() {
-        return checkNotNull(projects, "Projects is not initialized");
+        return projects == null ? new Project[0] : projects;
     }
 
     @Override
@@ -379,6 +392,10 @@ public class AppContextImpl implements AppContext,
 
     @Override
     public Project getRootProject() {
+        if (projects == null) {
+            return null;
+        }
+
         if (currentResource == null || currentResources == null) {
 
             EditorAgent editorAgent = editorAgentProvider.get();
@@ -443,20 +460,57 @@ public class AppContextImpl implements AppContext,
         appStateManager.get().persistWorkspaceState(getWorkspaceId()).then(new Operation<Void>() {
             @Override
             public void apply(Void arg) throws OperationException {
-                browserQueryFieldRenderer.setProjectName("");
                 for (Project project : projects) {
                     eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(project, REMOVED)));
                 }
 
-                projects = null;
+                projects = NO_PROJECTS; //avoid NPE
                 resourceManager = null;
             }
         });
 
-        devMachine = null;
+        //goto close all editors
+        final EditorAgent editorAgent = editorAgentProvider.get();
+        final List<EditorPartPresenter> openedEditors = editorAgent.getOpenedEditors();
+        for (EditorPartPresenter editor : openedEditors) {
+            editorAgent.closeEditor(editor);
+        }
+        runtime = null;
     }
 
     @Override
     public void onWindowClosed(WindowActionEvent event) {
     }
+
+    @Override
+    public String getMasterEndpoint() {
+        String fromUrl = queryParameters.getByName("master");
+        if(fromUrl == null || fromUrl.isEmpty())
+            return masterFromIDEConfig();
+        else
+            return fromUrl;
+    }
+
+    @Override
+    public String getDevAgentEndpoint() {
+        String fromUrl = queryParameters.getByName("agent");
+        if(fromUrl == null || fromUrl.isEmpty())
+            return runtime.getDevMachine().getWsAgentBaseUrl();
+        else
+            return fromUrl;
+    }
+
+    @Override
+    public ActiveRuntime getActiveRuntime() {
+        return runtime;
+    }
+
+
+    private static native String masterFromIDEConfig() /*-{
+        if ($wnd.IDE && $wnd.IDE.config) {
+            return $wnd.IDE.config.restContext;
+        } else {
+            return null;
+        }
+    }-*/;
 }

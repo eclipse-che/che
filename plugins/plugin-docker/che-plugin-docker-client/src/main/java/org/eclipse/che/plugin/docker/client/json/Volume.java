@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,5 +29,16 @@ It seems struct{} is reserved for future but it isn't in use for now.
 public class Volume {
     public String toString() {
         return "{}";
+    }
+
+    @Override
+    public int hashCode() {
+        return 19;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        return o instanceof Volume;
     }
 }

@@ -63,6 +63,7 @@ public class TokenImpl implements Token {
     /*
      * @see IToken#getData()
      */
+    @Override
     public Object getData() {
         return fData;
     }
@@ -82,6 +83,7 @@ public class TokenImpl implements Token {
     /*
      * @see IToken#isOther()
      */
+    @Override
     public boolean isOther() {
         return (fType == T_OTHER);
     }
@@ -89,6 +91,7 @@ public class TokenImpl implements Token {
     /*
      * @see IToken#isEOF()
      */
+    @Override
     public boolean isEOF() {
         return (fType == T_EOF);
     }
@@ -96,6 +99,7 @@ public class TokenImpl implements Token {
     /*
      * @see IToken#isWhitespace()
      */
+    @Override
     public boolean isWhitespace() {
         return (fType == T_WHITESPACE);
     }
@@ -103,6 +107,7 @@ public class TokenImpl implements Token {
     /*
      * @see IToken#isUndefined()
      */
+    @Override
     public boolean isUndefined() {
         return (fType == T_UNDEFINED);
     }

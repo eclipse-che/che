@@ -1,0 +1,6 @@
+lib
+node_modules
+npm-debug.log
+src/api/dto/che-dto.ts
+src/typings
+coverage

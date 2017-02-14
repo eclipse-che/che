@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,6 +33,7 @@ import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.event.FileEvent.FileEventHandler;
 import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
+import org.eclipse.che.ide.resource.Path;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
@@ -173,12 +174,6 @@ public class ImageViewer extends AbstractEditorPresenter implements FileEventHan
 
     /** {@inheritDoc} */
     @Override
-    public void setVisible(boolean visible) {
-        editorView.setVisible(visible);
-    }
-
-    /** {@inheritDoc} */
-    @Override
     public IsWidget getView() {
         return editorView;
     }
@@ -190,10 +185,11 @@ public class ImageViewer extends AbstractEditorPresenter implements FileEventHan
             return;
         }
 
-        final String eventFilePath = event.getFile().getPath();
-        final String filePath = input.getFile().getPath();
+        final Path eventFilePath = event.getFile().getLocation();
+        final Path filePath = input.getFile().getLocation();
         if (filePath.equals(eventFilePath)) {
             workspaceAgent.removePart(this);
         }
     }
+
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,16 +13,20 @@ package org.eclipse.che.plugin.docker.machine.local;
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
+import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
 import org.eclipse.che.api.environment.server.MachineService;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceProcess;
+import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.machine.DockerInstance;
 import org.eclipse.che.plugin.docker.machine.DockerInstanceRuntimeInfo;
 import org.eclipse.che.plugin.docker.machine.DockerProcess;
+import org.eclipse.che.plugin.docker.machine.ServerEvaluationStrategy;
 import org.eclipse.che.plugin.docker.machine.node.DockerNode;
+import org.eclipse.che.plugin.openshift.client.OpenShiftConnector;
 
 import java.util.Set;
 
@@ -44,10 +48,16 @@ public class LocalDockerModule extends AbstractModule {
                         .implement(Instance.class, DockerInstance.class)
                         .implement(InstanceProcess.class, DockerProcess.class)
                         .implement(DockerNode.class, LocalDockerNode.class)
-                        .implement(DockerInstanceRuntimeInfo.class,
-                                   org.eclipse.che.plugin.docker.machine.local.LocalDockerInstanceRuntimeInfo.class)
+                        .implement(DockerInstanceRuntimeInfo.class, DockerInstanceRuntimeInfo.class)
                         .build(org.eclipse.che.plugin.docker.machine.DockerMachineFactory.class));
 
+        MapBinder<String, ServerEvaluationStrategy> strategies = MapBinder.newMapBinder(binder(),
+                                                                                        String.class,
+                                                                                        ServerEvaluationStrategy.class);
+        strategies.addBinding("default")
+                  .to(org.eclipse.che.plugin.docker.machine.DefaultServerEvaluationStrategy.class);
+        strategies.addBinding("docker-local")
+                  .to(org.eclipse.che.plugin.docker.machine.LocalDockerServerEvaluationStrategy.class);
 
         bind(org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider.class)
                 .to(org.eclipse.che.plugin.docker.machine.local.node.provider.LocalWorkspaceFolderPathProvider.class);
@@ -55,6 +65,10 @@ public class LocalDockerModule extends AbstractModule {
         bind(org.eclipse.che.plugin.docker.client.DockerRegistryDynamicAuthResolver.class)
                 .to(org.eclipse.che.plugin.docker.client.NoOpDockerRegistryDynamicAuthResolverImpl.class);
         bind(org.eclipse.che.plugin.docker.client.DockerRegistryChecker.class).asEagerSingleton();
+
+        MapBinder<String, DockerConnector> dockerConnectors = MapBinder.newMapBinder(binder(), String.class, DockerConnector.class);
+        dockerConnectors.addBinding("default").to(DockerConnector.class);
+        dockerConnectors.addBinding("openshift").to(OpenShiftConnector.class);
 
         Multibinder<String> devMachineEnvVars = Multibinder.newSetBinder(binder(),
                                                                          String.class,
@@ -74,5 +88,12 @@ public class LocalDockerModule extends AbstractModule {
                                                                      new TypeLiteral<Set<String>>() {},
                                                                      Names.named("machine.docker.networks"));
         networks.addBinding().toProvider(org.eclipse.che.plugin.docker.machine.CheInContainerNetworkProvider.class);
+
+        Multibinder<Set<String>> extraHosts = Multibinder.newSetBinder(binder(),
+                                                                       new TypeLiteral<Set<String>>() {},
+                                                                       Names.named("che.docker.extra_hosts"))
+                                                         .permitDuplicates();
+        extraHosts.addBinding()
+                  .toProvider(org.eclipse.che.plugin.docker.machine.local.provider.CheDockerExtraHostProvider.class);
     }
 }

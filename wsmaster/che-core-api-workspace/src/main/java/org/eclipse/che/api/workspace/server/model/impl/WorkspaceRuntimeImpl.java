@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,8 +34,22 @@ public class WorkspaceRuntimeImpl implements WorkspaceRuntime {
     private MachineImpl       devMachine;
     private List<MachineImpl> machines;
 
-    public WorkspaceRuntimeImpl(String activeEnv) {
+    public WorkspaceRuntimeImpl(String activeEnv, Collection<? extends Machine> machines) {
         this.activeEnv = activeEnv;
+        if (machines != null) {
+            this.machines = new ArrayList<>(machines.size());
+            for (Machine machine : machines) {
+                if (machine.getConfig().isDev()) {
+                    if (machine.getRuntime() != null) {
+                        rootFolder = machine.getRuntime().projectsRoot();
+                    }
+                    devMachine = new MachineImpl(machine);
+                    this.machines.add(devMachine);
+                } else {
+                    this.machines.add(new MachineImpl(machine));
+                }
+            }
+        }
     }
 
     public WorkspaceRuntimeImpl(String activeEnv,
@@ -47,9 +61,11 @@ public class WorkspaceRuntimeImpl implements WorkspaceRuntime {
         if (devMachine != null) {
             this.devMachine = new MachineImpl(devMachine);
         }
-        this.machines = machines.stream()
-                                .map(MachineImpl::new)
-                                .collect(toList());
+        if (machines != null) {
+            this.machines = machines.stream()
+                                    .map(MachineImpl::new)
+                                    .collect(toList());
+        }
     }
 
     public WorkspaceRuntimeImpl(WorkspaceRuntime runtime) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,11 +14,6 @@
  * Test of the CheGit
  */
 describe('CheGit', function () {
-
-  /**
-   * User Factory for the test
-   */
-  var factory;
 
   /**
    * API builder.
@@ -158,15 +153,6 @@ describe('CheGit', function () {
 
       // now, check url
       var urlArray = factory.getRemoteUrlArrayByKey(projectPath);
-      remoteArray.sort(function (a, b) {
-        if (a.name > b.name) {
-          return 1;
-        }
-        if (a.name < b.name) {
-          return -1;
-        }
-        return 0;
-      });
 
       // check
       expect(remoteArray.join()).toEqual(urlArray.join());

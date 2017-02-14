@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,11 +16,11 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.ssh.shared.dto.GenerateSshPairRequest;
 import org.eclipse.che.api.ssh.shared.dto.SshPairDto;
 import org.eclipse.che.ide.MimeType;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.HTTPHeader;
-import org.eclipse.che.ide.rest.RestContext;
 
 import java.util.List;
 
@@ -30,20 +30,22 @@ import java.util.List;
  * @author Sergii Leschenko
  */
 public class SshServiceClientImpl implements SshServiceClient {
-    private final DtoFactory             dtoFactory;
+    private static final String FIND = "/find";
+
+    private final DtoFactory dtoFactory;
     private final AsyncRequestFactory    asyncRequestFactory;
     private final DtoUnmarshallerFactory unmarshallerFactory;
     private final String                 sshApi;
 
     @Inject
-    protected SshServiceClientImpl(@RestContext String baseUrl,
+    protected SshServiceClientImpl(AppContext appContext,
                                    DtoFactory dtoFactory,
                                    AsyncRequestFactory asyncRequestFactory,
                                    DtoUnmarshallerFactory unmarshallerFactory) {
         this.dtoFactory = dtoFactory;
         this.asyncRequestFactory = asyncRequestFactory;
         this.unmarshallerFactory = unmarshallerFactory;
-        this.sshApi = baseUrl + "/ssh";
+        this.sshApi = appContext.getMasterEndpoint() + "/ssh";
     }
 
     /**
@@ -53,7 +55,7 @@ public class SshServiceClientImpl implements SshServiceClient {
      */
     @Override
     public Promise<SshPairDto> getPair(String service, String name) {
-        return asyncRequestFactory.createGetRequest(sshApi + "/" + service + "/" + name)
+        return asyncRequestFactory.createGetRequest(sshApi + "/" + service + FIND + "?name=" + name)
                                   .header(HTTPHeader.ACCEPT, MimeType.APPLICATION_JSON)
                                   .send(unmarshallerFactory.newUnmarshaller(SshPairDto.class));
     }

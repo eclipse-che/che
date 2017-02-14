@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,13 +25,13 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class ClientServerEventService {
-    private final RequestTransmitter transmitter;
     private final DtoFactory         dtoFactory;
+    private final RequestTransmitter requestTransmitter;
 
     @Inject
-    public ClientServerEventService(RequestTransmitter transmitter, EventBus eventBus, DtoFactory dtoFactory) {
-        this.transmitter = transmitter;
+    public ClientServerEventService(EventBus eventBus, DtoFactory dtoFactory, RequestTransmitter requestTransmitter) {
         this.dtoFactory = dtoFactory;
+        this.requestTransmitter = requestTransmitter;
 
         Log.debug(getClass(), "Adding file event listener");
         eventBus.addHandler(FileTrackingEvent.TYPE, new FileTrackingEvent.FileTrackingEventHandler() {
@@ -54,6 +54,7 @@ public class ClientServerEventService {
                                                        .withType(type)
                                                        .withOldPath(oldPath);
 
-        transmitter.transmitNotification(endpointId, method, dto);
+
+        requestTransmitter.transmitOneToNone(endpointId, method, dto);
     }
 }

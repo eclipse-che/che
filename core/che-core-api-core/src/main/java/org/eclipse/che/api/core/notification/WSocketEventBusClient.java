@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.notification;
 
-import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
-import org.eclipse.che.commons.lang.Pair;
-
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
+import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.commons.lang.Pair;
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.everrest.websockets.client.BaseClientMessageListener;
 import org.everrest.websockets.client.WSClient;
 import org.everrest.websockets.message.JsonMessageConverter;
@@ -22,7 +22,6 @@ import org.everrest.websockets.message.RestOutputMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.eclipse.che.commons.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,23 +27,27 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
 import org.eclipse.che.ide.api.action.Action;
+import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.collections.Jso;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
-import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.tab.content.TabPresenter;
 import org.eclipse.che.ide.extension.machine.client.processes.AddTerminalClickHandler;
+
 import org.eclipse.che.ide.websocket.WebSocket;
+import org.eclipse.che.ide.websocket.events.ConnectionClosedHandler;
 import org.eclipse.che.ide.websocket.events.ConnectionErrorHandler;
 import org.eclipse.che.ide.websocket.events.ConnectionOpenedHandler;
 import org.eclipse.che.ide.websocket.events.MessageReceivedEvent;
 import org.eclipse.che.ide.websocket.events.MessageReceivedHandler;
+import org.eclipse.che.ide.websocket.events.WebSocketClosedEvent;
 
 import javax.validation.constraints.NotNull;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.websocket.events.WebSocketClosedEvent.CLOSE_NORMAL;
 
 /**
  * The class defines methods which contains business logic to control machine's terminal.
@@ -54,7 +58,6 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
 
     //event which is performed when user input data into terminal
     private static final String DATA_EVENT_NAME          = "data";
-    private static final String EXIT_COMMAND             = "\nexit";
     private static final int    TIME_BETWEEN_CONNECTIONS = 2_000;
 
     private final TerminalView                view;
@@ -69,6 +72,8 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
     private int                   countRetry;
     private TerminalJso           terminal;
     private TerminalStateListener terminalStateListener;
+    private int                   width;
+    private int                   height;
 
     /**
      * Indicates javascript term.js is injected in the page.
@@ -162,6 +167,22 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
 
         socket = WebSocket.create(wsUrl);
 
+        socket.setOnMessageHandler(new MessageReceivedHandler() {
+            @Override
+            public void onMessageReceived(MessageReceivedEvent event) {
+                terminal.write(event.getMessage());
+            }
+        });
+
+        socket.setOnCloseHandler(new ConnectionClosedHandler() {
+            @Override
+            public void onClose(WebSocketClosedEvent event) {
+                if (CLOSE_NORMAL == event.getCode()) {
+                    terminalStateListener.onExit();
+                }
+            }
+        });
+
         socket.setOnOpenHandler(new ConnectionOpenedHandler() {
             @Override
             public void onOpen() {
@@ -184,18 +205,6 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
                         socket.send(jso.serialize());
                     }
                 });
-                socket.setOnMessageHandler(new MessageReceivedHandler() {
-                    @Override
-                    public void onMessageReceived(MessageReceivedEvent event) {
-                        String message = event.getMessage();
-
-                        terminal.write(message);
-
-                        if (message.contains(EXIT_COMMAND) && terminalStateListener != null) {
-                            terminalStateListener.onExit();
-                        }
-                    }
-                });
             }
         });
 
@@ -215,13 +224,12 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
     }
 
     /**
-     * Sends 'exit' command on server side to stop terminal.
+     * Sends 'close' message on server side to stop terminal.
      */
     public void stopTerminal() {
         if (connected) {
             Jso jso = Jso.create();
-            jso.addField("type", "data");
-            jso.addField("data", "exit\n");
+            jso.addField("type", "close");
             socket.send(jso.serialize());
         }
     }
@@ -251,7 +259,17 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
             return;
         }
 
+        if (width == x && height == y) {
+            return;
+        } else if (width > 0 && height > 0) {
+            //if it's not first initialization
+            setFocus(true);
+        }
+
         terminal.resize(x, y);
+        width = x;
+        height = y;
+
         Jso jso = Jso.create();
         JsArrayInteger arr = Jso.createArray().cast();
         arr.set(0, x);

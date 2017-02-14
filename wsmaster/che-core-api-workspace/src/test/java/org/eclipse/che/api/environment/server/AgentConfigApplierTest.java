@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,8 +15,8 @@ import com.google.common.collect.ImmutableMap;
 import org.eclipse.che.api.agent.server.AgentRegistry;
 import org.eclipse.che.api.agent.server.impl.AgentSorter;
 import org.eclipse.che.api.agent.server.launcher.AgentLauncherFactory;
-import org.eclipse.che.api.agent.server.model.impl.AgentImpl;
-import org.eclipse.che.api.agent.server.model.impl.AgentKeyImpl;
+import org.eclipse.che.api.agent.shared.model.impl.AgentImpl;
+import org.eclipse.che.api.agent.shared.model.impl.AgentKeyImpl;
 import org.eclipse.che.api.core.model.workspace.ServerConf2;
 import org.eclipse.che.api.environment.server.model.CheServiceImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;

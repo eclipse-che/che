@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.part;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.constraints.Constraints;
@@ -20,6 +21,7 @@ import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStackView;
 import org.eclipse.che.ide.api.parts.PropertyListener;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
+import org.eclipse.che.ide.menu.PartMenu;
 import org.eclipse.che.ide.part.widgets.TabItemFactory;
 import org.eclipse.che.ide.part.PartStackPresenter.PartStackEventHandler;
 import org.eclipse.che.ide.part.widgets.partbutton.PartButton;
@@ -31,7 +33,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Matchers;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import java.util.List;
@@ -40,8 +41,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.anyDouble;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -51,7 +50,7 @@ import static org.mockito.Mockito.when;
  * @author Roman Nikitenko
  * @author Dmitry Shnurenko
  */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(GwtMockitoTestRunner.class)
 public class PartStackPresenterTest {
 
     private static final String SOME_TEXT = "someText";
@@ -60,6 +59,8 @@ public class PartStackPresenterTest {
     //constructor mocks
     @Mock
     private EventBus                eventBus;
+    @Mock
+    private PartMenu                partMenu;
     @Mock
     private WorkBenchPartController workBenchPartController;
     @Mock
@@ -108,7 +109,7 @@ public class PartStackPresenterTest {
         when(partButton.setTooltip(SOME_TEXT)).thenReturn(partButton);
         when(partButton.setIcon(resource)).thenReturn(partButton);
 
-        presenter = new PartStackPresenter(eventBus, partStackHandler, tabItemFactory, partsComparator, view, workBenchPartController);
+        presenter = new PartStackPresenter(eventBus, partMenu, partStackHandler, tabItemFactory, partsComparator, view, workBenchPartController);
     }
 
     @Test
@@ -156,17 +157,13 @@ public class PartStackPresenterTest {
     }
 
     @Test
-    public void partShouldNotBeAddedWhenItAlreadyExist() {
+    public void partShouldBeSelectedIfItIsAddedTwice() {
         presenter.addPart(partPresenter);
         reset(view);
 
         presenter.addPart(partPresenter);
 
-        verify(workBenchPartController).setHidden(true);
-
-        verify(partButton).unSelect();
-
-        verify(view, never()).addTab(partButton, partPresenter);
+        verify(view).selectTab(partPresenter);
     }
 
     @Test
@@ -205,9 +202,7 @@ public class PartStackPresenterTest {
     public void partShouldBeHidden() {
         presenter.addPart(partPresenter);
 
-        presenter.hidePart(partPresenter);
-
-        verify(partButton).unSelect();
+        presenter.minimize();
 
         verify(workBenchPartController).getSize();
         verify(workBenchPartController).setSize(0);
@@ -256,7 +251,6 @@ public class PartStackPresenterTest {
 
         presenter.onTabClicked(partButton);
 
-        verify(workBenchPartController).setSize(anyDouble());
         verify(workBenchPartController).setHidden(false);
 
         verify(view).selectTab(partPresenter);
@@ -270,7 +264,6 @@ public class PartStackPresenterTest {
 
         presenter.onTabClicked(partButton);
 
-        verify(workBenchPartController).setSize(eq(presenter.currentSize));
         verify(workBenchPartController).setHidden(false);
 
         verify(view).selectTab(partPresenter);
@@ -284,9 +277,9 @@ public class PartStackPresenterTest {
 
         presenter.onTabClicked(partButton);
 
-        verify(workBenchPartController).setSize(eq(PART_SIZE));
         verify(workBenchPartController).setHidden(false);
 
         verify(view).selectTab(partPresenter);
     }
+
 }

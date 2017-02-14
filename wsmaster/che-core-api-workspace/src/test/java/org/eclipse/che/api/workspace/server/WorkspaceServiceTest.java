@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,8 @@ package org.eclipse.che.api.workspace.server;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.jayway.restassured.response.Response;
 
 import org.eclipse.che.account.shared.model.Account;
@@ -125,7 +127,7 @@ public class WorkspaceServiceTest {
 
     @SuppressWarnings("unused")
     private static final ApiExceptionMapper MAPPER       = new ApiExceptionMapper();
-    private static final String             NAMESPACE    = "user";
+    private static final String             NAMESPACE    = "namespace_part1/namespace_part_2";
     private static final String             USER_ID      = "user123";
     private static final String             API_ENDPOINT = "http://localhost:8080/api";
     private static final Account            TEST_ACCOUNT = new AccountImpl("anyId", NAMESPACE, "test");
@@ -149,7 +151,9 @@ public class WorkspaceServiceTest {
                                        wsManager,
                                        validator,
                                        wsAgentHealthChecker,
-                                       new WorkspaceServiceLinksInjector(new MachineServiceLinksInjector()));
+                                       new WorkspaceServiceLinksInjector(new MachineServiceLinksInjector()),
+                                       true,
+                                       false);
     }
 
     @Test
@@ -304,10 +308,25 @@ public class WorkspaceServiceTest {
     }
 
     @Test
+    public void shouldGetWorkspaceByKey() throws Exception {
+        final WorkspaceImpl workspace = createWorkspace(createConfigDto());
+        when(wsManager.getWorkspace(workspace.getNamespace() + "/" + workspace.getConfig().getName())).thenReturn(workspace);
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .when()
+                                         .get(SECURE_PATH + "/workspace/" + workspace.getNamespace() + "/" +
+                                              workspace.getConfig().getName());
+
+        assertEquals(response.getStatusCode(), 200);
+        assertEquals(new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class), TEST_ACCOUNT), workspace);
+    }
+
+    @Test
     public void shouldGetWorkspaces() throws Exception {
         final WorkspaceImpl workspace1 = createWorkspace(createConfigDto());
         final WorkspaceImpl workspace2 = createWorkspace(createConfigDto(), STARTING);
-        when(wsManager.getWorkspaces(USER_ID)).thenReturn(asList(workspace1, workspace2));
+        when(wsManager.getWorkspaces(USER_ID, false)).thenReturn(asList(workspace1, workspace2));
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -325,7 +344,7 @@ public class WorkspaceServiceTest {
     public void shouldGetWorkspacesByNamespace() throws Exception {
         final WorkspaceImpl workspace1 = createWorkspace(createConfigDto());
         final WorkspaceImpl workspace2 = createWorkspace(createConfigDto(), STARTING);
-        when(wsManager.getByNamespace(NAMESPACE)).thenReturn(asList(workspace1, workspace2));
+        when(wsManager.getByNamespace(NAMESPACE, false)).thenReturn(asList(workspace1, workspace2));
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -343,7 +362,7 @@ public class WorkspaceServiceTest {
     public void shouldGetWorkspacesByStatus() throws Exception {
         final WorkspaceImpl workspace1 = createWorkspace(createConfigDto());
         final WorkspaceImpl workspace2 = createWorkspace(createConfigDto(), STARTING);
-        when(wsManager.getWorkspaces(USER_ID)).thenReturn(asList(workspace1, workspace2));
+        when(wsManager.getWorkspaces(USER_ID, false)).thenReturn(asList(workspace1, workspace2));
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -794,7 +813,7 @@ public class WorkspaceServiceTest {
                                                .get(workspace.getConfig().getDefaultEnv());
         assertNotNull(environment);
 
-        final WorkspaceRuntimeImpl runtime = new WorkspaceRuntimeImpl(workspace.getConfig().getDefaultEnv());
+        final WorkspaceRuntimeImpl runtime = new WorkspaceRuntimeImpl(workspace.getConfig().getDefaultEnv(), null);
         MachineConfigImpl devMachineConfig = MachineConfigImpl.builder()
                                                               .setDev(true)
                                                               .setEnvVariables(emptyMap())
@@ -957,6 +976,20 @@ public class WorkspaceServiceTest {
         List<SnapshotDto> snapshotDtos = unwrapDtoList(response, SnapshotDto.class);
         assertTrue(snapshotDtos.isEmpty());
         verify(wsManager).getSnapshot(workspaceId);
+    }
+
+    @Test
+    public void shouldBeAbleToGetSettings() throws Exception {
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .when()
+                                         .get(SECURE_PATH + "/workspace/settings");
+
+        assertEquals(response.getStatusCode(), 200);
+        final Map<String, String> settings = new Gson().fromJson(response.print(),
+                                                                 new TypeToken<Map<String, String>>() {}.getType());
+        assertEquals(settings, ImmutableMap.of("che.workspace.auto_snapshot", "true",
+                                               "che.workspace.auto_restore", "false"));
     }
 
     private static String unwrapError(Response response) {

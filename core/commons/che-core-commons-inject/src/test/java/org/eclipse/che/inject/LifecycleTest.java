@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.inject;
 
-import org.eclipse.che.inject.lifecycle.DestroyErrorHandler;
 import org.eclipse.che.inject.lifecycle.DestroyModule;
 import org.eclipse.che.inject.lifecycle.Destroyer;
 import org.eclipse.che.inject.lifecycle.InitModule;
@@ -28,6 +27,8 @@ import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import static org.eclipse.che.inject.lifecycle.DestroyErrorHandler.LOG_HANDLER;
+
 /** @author andrew00x */
 public class LifecycleTest {
     Injector injector;
@@ -35,7 +36,7 @@ public class LifecycleTest {
     @BeforeTest
     public void init() {
         injector = Guice.createInjector(new InitModule(PostConstruct.class),
-                                        new DestroyModule(PreDestroy.class, DestroyErrorHandler.DUMMY),
+                                        new DestroyModule(PreDestroy.class, LOG_HANDLER),
                                         new MyModule());
     }
 

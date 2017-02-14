@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -342,8 +342,10 @@ public class PushToRemotePresenter implements PushToRemoteView.ActionDelegate {
     void handleError(@NotNull Throwable throwable, StatusNotification notification, GitOutputConsole console) {
         notification.setStatus(FAIL);
         if (throwable instanceof UnauthorizedException) {
-            console.printError(constant.messagesNotAuthorized());
-            notification.setTitle(constant.messagesNotAuthorized());
+            console.printError(constant.messagesNotAuthorizedTitle());
+            console.print(constant.messagesNotAuthorizedContent());
+            notification.setTitle(constant.messagesNotAuthorizedTitle());
+            notification.setContent(constant.messagesNotAuthorizedContent());
             return;
         }
 

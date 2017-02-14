@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,6 +37,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -80,8 +81,8 @@ public class CheJsonProvider<T> implements MessageBodyReader<T>, MessageBodyWrit
         // Add Cache-Control before start write body.
         httpHeaders.putSingle(HttpHeaders.CACHE_CONTROL, "public, no-cache, no-store, no-transform");
         if (t instanceof JsonSerializable) {
-            try (Writer w = new OutputStreamWriter(entityStream, Charset.forName("UTF-8"))) {
-                w.write(((JsonSerializable)t).toJson());
+            try (Writer w = new OutputStreamWriter(entityStream, StandardCharsets.UTF_8)) {
+                ((JsonSerializable)t).toJson(w);
             }
         } else {
             delegate.writeTo(t, type, genericType, annotations, mediaType, httpHeaders, entityStream);

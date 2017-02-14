@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 
 import javax.validation.constraints.NotNull;
@@ -27,7 +28,7 @@ import javax.validation.constraints.NotNull;
  *
  * @author Dmitry Shnurenko
  */
-final class TerminalViewImpl extends Composite implements TerminalView, Focusable {
+final class TerminalViewImpl extends Composite implements TerminalView, Focusable, RequiresResize {
 
     interface TerminalViewImplUiBinder extends UiBinder<Widget, TerminalViewImpl> {
     }
@@ -60,7 +61,6 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
         terminalPanel.getElement().getStyle().setProperty("opacity", "0");
 
         terminal.open(terminalPanel.getElement());
-        resizeTerminal();
 
         terminalPanel.getElement().getFirstChildElement().getStyle().clearProperty("backgroundColor");
         terminalPanel.getElement().getFirstChildElement().getStyle().clearProperty("color");
@@ -74,6 +74,12 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
         unavailableLabel.setVisible(true);
 
         terminalPanel.setVisible(false);
+    }
+
+    @Override
+    public void onResize() {
+        resizeTimer.cancel();
+        resizeTimer.schedule(200);
     }
 
     private Timer resizeTimer = new Timer() {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,8 +25,11 @@ import org.eclipse.che.ide.api.mvp.Presenter;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStack;
 import org.eclipse.che.ide.api.parts.PartStackType;
+import static org.eclipse.che.ide.api.parts.PartStackType.EDITING;
 import org.eclipse.che.ide.api.parts.PartStackView;
 import org.eclipse.che.ide.api.parts.Perspective;
+import org.eclipse.che.ide.api.parts.PerspectiveView;
+import org.eclipse.che.ide.api.parts.base.MaximizePartEvent;
 import org.eclipse.che.ide.workspace.PartStackPresenterFactory;
 import org.eclipse.che.ide.workspace.PartStackViewFactory;
 import org.eclipse.che.ide.workspace.WorkBenchControllerFactory;
@@ -34,7 +37,6 @@ import org.eclipse.che.ide.workspace.WorkBenchPartController;
 import org.eclipse.che.providers.DynaProvider;
 
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,33 +54,30 @@ import static org.eclipse.che.ide.api.parts.PartStackView.TabPosition.RIGHT;
  * @author Dmitry Shnurenko
  */
 //TODO need rewrite this, remove direct dependency on PerspectiveViewImpl and other GWT Widgets
-public abstract class AbstractPerspective implements Presenter, Perspective, ActivePartChangedHandler {
+public abstract class AbstractPerspective implements Presenter, Perspective,
+        ActivePartChangedHandler, MaximizePartEvent.Handler,
+        PerspectiveView.ActionDelegate, PartStack.ActionDelegate {
 
-    private enum State {
-        NORMAL,
-        MAXIMIZED_LEFT_PART,
-        MAXIMIZED_RIGHT_PART,
-        MAXIMIZED_BOTTOM_PART,
-        MAXIMIZED_CENTRAL_PART
-    }
+    /** The default size for the part. */
+    private static final double DEFAULT_PART_SIZE = 260;
+
+    /** The minimum allowable size for the part. */
+    private static final int MIN_PART_SIZE = 100;
 
     protected final Map<PartStackType, PartStack> partStacks;
     protected final PerspectiveViewImpl           view;
 
     private final String                  perspectiveId;
     private final DynaProvider            dynaProvider;
+
     private final WorkBenchPartController leftPartController;
     private final WorkBenchPartController rightPartController;
     private final WorkBenchPartController belowPartController;
 
-    private double        leftPartSize;
-    private double        rightPartSize;
-    private double        belowPartSize;
-
-    private State         layoutState = State.NORMAL;
-
     private PartPresenter activePart;
     private PartPresenter activePartBeforeChangePerspective;
+
+    private PartStack maximizedPartStack;
 
     protected AbstractPerspective(@NotNull String perspectiveId,
                                   @NotNull PerspectiveViewImpl view,
@@ -92,25 +91,28 @@ public abstract class AbstractPerspective implements Presenter, Perspective, Act
         this.dynaProvider = dynaProvider;
         this.partStacks = new HashMap<>();
 
-        PartStackView navigationView = partViewFactory.create(LEFT, view.getLeftPanel());
+        view.setDelegate(this);
 
+        PartStackView navigationView = partViewFactory.create(LEFT, view.getLeftPanel());
         leftPartController = controllerFactory.createController(view.getSplitPanel(), view.getNavigationPanel());
         PartStack navigationPartStack = stackPresenterFactory.create(navigationView, leftPartController);
+        navigationPartStack.setDelegate(this);
         partStacks.put(NAVIGATION, navigationPartStack);
 
         PartStackView informationView = partViewFactory.create(BELOW, view.getBottomPanel());
-
         belowPartController = controllerFactory.createController(view.getSplitPanel(), view.getInformationPanel());
         PartStack informationStack = stackPresenterFactory.create(informationView, belowPartController);
+        informationStack.setDelegate(this);
         partStacks.put(INFORMATION, informationStack);
 
         PartStackView toolingView = partViewFactory.create(RIGHT, view.getRightPanel());
-
         rightPartController = controllerFactory.createController(view.getSplitPanel(), view.getToolPanel());
         PartStack toolingPartStack = stackPresenterFactory.create(toolingView, rightPartController);
+        toolingPartStack.setDelegate(this);
         partStacks.put(TOOLING, toolingPartStack);
 
         eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
+        eventBus.addHandler(MaximizePartEvent.TYPE, this);
     }
 
     /**
@@ -160,58 +162,82 @@ public abstract class AbstractPerspective implements Presenter, Perspective, Act
     public void hidePart(@NotNull PartPresenter part) {
         PartStack destPartStack = findPartStackByPart(part);
         if (destPartStack != null) {
-            destPartStack.hidePart(part);
+            destPartStack.minimize();
         }
     }
 
     /** {@inheritDoc} */
     @Override
-    public void maximizeCentralPart() {
-        if (layoutState == State.MAXIMIZED_CENTRAL_PART) {
-            return;
-        }
-
-        leftPartSize = leftPartController.getSize();
-        rightPartSize = rightPartController.getSize();
-        belowPartSize = belowPartController.getSize();
-
-        leftPartController.setHidden(true);
-        rightPartController.setHidden(true);
-        belowPartController.setHidden(true);
-
-        layoutState = State.MAXIMIZED_CENTRAL_PART;
+    public void maximizeCentralPartStack() {
+        onMaximize(partStacks.get(EDITING));
     }
 
     /** {@inheritDoc} */
     @Override
-    public void maximizeBottomPart() {
-        if (layoutState == State.MAXIMIZED_BOTTOM_PART) {
-            return;
-        }
-
-        leftPartSize = leftPartController.getSize();
-        rightPartSize = rightPartController.getSize();
-        belowPartSize = belowPartController.getSize();
-
-        leftPartController.setHidden(true);
-        rightPartController.setHidden(true);
-        belowPartController.maximize();
-
-        layoutState = State.MAXIMIZED_BOTTOM_PART;
+    public void maximizeLeftPartStack() {
+        onMaximize(partStacks.get(NAVIGATION));
     }
 
     /** {@inheritDoc} */
     @Override
-    public void restoreParts() {
-        if (layoutState == State.NORMAL) {
+    public void maximizeRightPartStack() {
+        onMaximize(partStacks.get(TOOLING));
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void maximizeBottomPartStack() {
+        onMaximize(partStacks.get(INFORMATION));
+    }
+
+    @Override
+    public void onMaximizePart(MaximizePartEvent event) {
+        PartStack partStack = findPartStackByPart(event.getPart());
+        if (partStack == null) {
             return;
         }
 
-        leftPartController.setSize(leftPartSize);
-        rightPartController.setSize(rightPartSize);
-        belowPartController.setSize(belowPartSize);
+        if (partStack.getPartStackState() == PartStack.State.MAXIMIZED) {
+            onRestore(partStack);
+        } else {
+            onMaximize(partStack);
+        }
+    }
 
-        layoutState = State.NORMAL;
+    @Override
+    public void onMaximize(PartStack partStack) {
+        if (partStack == null) {
+            return;
+        }
+
+        if (partStack.equals(maximizedPartStack)) {
+            return;
+        }
+
+        maximizedPartStack = partStack;
+
+        for (PartStack ps : partStacks.values()) {
+            if (!ps.equals(partStack)) {
+                ps.collapse();
+            }
+        }
+
+        partStack.maximize();
+    }
+
+    @Override
+    public void onRestore(PartStack partStack) {
+        for (PartStack ps : partStacks.values()) {
+            ps.restore();
+        }
+
+        maximizedPartStack = null;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void restore() {
+        onRestore(null);
     }
 
     /** {@inheritDoc} */
@@ -239,12 +265,10 @@ public abstract class AbstractPerspective implements Presenter, Perspective, Act
      */
     public PartStack findPartStackByPart(@NotNull PartPresenter part) {
         for (PartStackType partStackType : PartStackType.values()) {
-
             if (partStacks.get(partStackType).containsPart(part)) {
                 return partStacks.get(partStackType);
             }
         }
-
         return null;
     }
 
@@ -260,15 +284,16 @@ public abstract class AbstractPerspective implements Presenter, Perspective, Act
         PartStack destPartStack = partStacks.get(type);
 
         List<String> rules = part.getRules();
-
-        if (rules.isEmpty() && !destPartStack.containsPart(part)) {
+        if (rules.isEmpty() || rules.contains(perspectiveId)) {
             destPartStack.addPart(part, constraint);
-
             return;
         }
+    }
 
-        if (rules.contains(perspectiveId)) {
-            destPartStack.addPart(part, constraint);
+    @Override
+    public void onResize(int width, int height) {
+        if (maximizedPartStack != null) {
+            maximizedPartStack.maximize();
         }
     }
 
@@ -285,7 +310,6 @@ public abstract class AbstractPerspective implements Presenter, Perspective, Act
         JsonObject partStacks = Json.createObject();
         state.put("ACTIVE_PART", activePart.getClass().getName());
         state.put("PART_STACKS", partStacks);
-
 
         partStacks.put(PartStackType.INFORMATION.name(), getPartStackState(this.partStacks.get(INFORMATION), belowPartController));
         partStacks.put(PartStackType.NAVIGATION.name(), getPartStackState(this.partStacks.get(NAVIGATION), leftPartController));
@@ -320,25 +344,22 @@ public abstract class AbstractPerspective implements Presenter, Perspective, Act
     public void loadState(@NotNull JsonObject state) {
         if (state.hasKey("PART_STACKS")) {
             JsonObject part_stacks = state.getObject("PART_STACKS");
-            List<PartPresenter> activeParts = new ArrayList<>();
             for (String partStackType : part_stacks.keys()) {
                 JsonObject partStack = part_stacks.getObject(partStackType);
                 switch (PartStackType.valueOf(partStackType)) {
                     case INFORMATION:
-                        belowPartSize = restorePartController(partStacks.get(INFORMATION), belowPartController, partStack, activeParts);
+                        restorePartController(partStacks.get(INFORMATION), belowPartController, partStack);
                         break;
                     case NAVIGATION:
-                        leftPartSize = restorePartController(partStacks.get(NAVIGATION), leftPartController, partStack, activeParts);
+                        restorePartController(partStacks.get(NAVIGATION), leftPartController, partStack);
                         break;
                     case TOOLING:
-                        rightPartSize = restorePartController(partStacks.get(TOOLING), rightPartController, partStack, activeParts);
+                        restorePartController(partStacks.get(TOOLING), rightPartController, partStack);
                         break;
                 }
             }
-            for (PartPresenter part : activeParts) {
-                setActivePart(part);
-            }
         }
+
         if (state.hasKey("ACTIVE_PART")) {
             String activePart = state.getString("ACTIVE_PART");
             Provider<PartPresenter> provider = dynaProvider.getProvider(activePart);
@@ -346,23 +367,11 @@ public abstract class AbstractPerspective implements Presenter, Perspective, Act
                 setActivePart(provider.get());
             }
         }
-
     }
 
-    private double restorePartController(PartStack stack, WorkBenchPartController controller, JsonObject partStack,
-                                         List<PartPresenter> activeParts) {
-        double size = 0;
-        if (partStack.hasKey("SIZE")) {
-            size = partStack.getNumber("SIZE");
-            controller.setSize(size);
-        }
-
-        if (partStack.hasKey("HIDDEN")) {
-            controller.setHidden(partStack.getBoolean("HIDDEN"));
-        }
-
-        if (partStack.hasKey("PARTS")) {
-            JsonArray parts = partStack.get("PARTS");
+    private void restorePartController(PartStack partStack, WorkBenchPartController controller, JsonObject partStackJSON) {
+        if (partStackJSON.hasKey("PARTS")) {
+            JsonArray parts = partStackJSON.get("PARTS");
             for (int i = 0; i < parts.length(); i++) {
                 JsonObject value = parts.get(i);
                 if (value.hasKey("CLASS")) {
@@ -370,26 +379,35 @@ public abstract class AbstractPerspective implements Presenter, Perspective, Act
                     Provider<PartPresenter> provider = dynaProvider.getProvider(className);
                     if (provider != null) {
                         PartPresenter partPresenter = provider.get();
-                        if (!stack.containsPart(partPresenter)) {
-                            stack.addPart(partPresenter);
+                        if (!partStack.containsPart(partPresenter)) {
+                            partStack.addPart(partPresenter);
                         }
                     }
                 }
             }
         }
 
-        //hide part stack if we cannot restore opened parts
-        if (stack.getParts().isEmpty()) {
+        //hide part stack if it has no parts
+        if (partStack.getParts().isEmpty()) {
             controller.setHidden(true);
+            return;
         }
 
-        if (partStack.hasKey("ACTIVE_PART")) {
-            String className = partStack.getString("ACTIVE_PART");
-            Provider<PartPresenter> provider = dynaProvider.getProvider(className);
-            if (provider != null) {
-                activeParts.add(provider.get());
-            }
+        if (partStackJSON.hasKey("HIDDEN") && partStackJSON.getBoolean("HIDDEN")) {
+            partStack.minimize();
+            return;
         }
-        return size;
+
+        if (partStackJSON.hasKey("SIZE")) {
+            double size = partStackJSON.getNumber("SIZE");
+
+            // Size of the part must not be less 100 pixels.
+            if (size < MIN_PART_SIZE) {
+                size = DEFAULT_PART_SIZE;
+            }
+
+            controller.setSize(size);
+        }
     }
+
 }

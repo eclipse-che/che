@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,23 +9,37 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {CheService} from '../api/che-service.factory';
 
 /**
  * This class is handling the branding data in Che
  * @author Florent Benoit
  */
 export class CheBranding {
+  $q: ng.IQService;
+  $rootScope: che.IRootScopeService;
+  $http: ng.IHttpService;
+  cheService: CheService;
 
     /**
      * Default constructor that is using resource
      * @ngInject for Dependency injection
      */
-    constructor($http, $rootScope, $q) {
+    constructor($http: ng.IHttpService, $rootScope: che.IRootScopeService, $q: ng.IQService, cheService: CheService) {
         this.$http = $http;
         this.$rootScope = $rootScope;
         this.deferred = $q.defer();
         this.promise = this.deferred.promise;
+        this.cheService = cheService;
         this.updateData();
+        this.getVersion();
+    }
+
+    getVersion() {
+      this.cheService.fetchServicesInfo().then(() => {
+        let info = this.cheService.getServicesInfo();
+        this.$rootScope.productVersion = (info && info.implementationVersion) ? info.implementationVersion : '';
+      });
     }
 
     updateData() {

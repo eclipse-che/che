@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,6 +23,7 @@ import org.eclipse.che.ide.editor.orion.client.ContentAssistWidgetFactory;
 import org.eclipse.che.ide.editor.orion.client.OrionEditorBuilder;
 import org.eclipse.che.ide.editor.orion.client.OrionEditorWidget;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionCodeEditWidgetOverlay;
+import org.eclipse.che.ide.editor.orion.client.jso.OrionEditorOptionsOverlay;
 import org.eclipse.che.ide.requirejs.ModuleHolder;
 
 @ExtensionGinModule
@@ -37,6 +38,7 @@ public class OrionEditorGinModule extends AbstractGinModule {
         install(new GinFactoryModuleBuilder().build(new TypeLiteral<EditorWidgetFactory<OrionEditorWidget>>() {}));
 
         bind(OrionCodeEditWidgetOverlay.class).toProvider(OrionCodeEditWidgetProvider.class);
+        bind(OrionEditorOptionsOverlay.class).toProvider(OrionEditorOptionsOverlayProvider.class);
 
         install(new GinFactoryModuleBuilder().build(ContentAssistWidgetFactory.class));
 

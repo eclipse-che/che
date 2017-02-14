@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,6 +25,9 @@ import java.util.Map;
  * @author Anatoliy Bazko
  */
 public interface Debugger extends DebuggerObservable {
+
+    /** Returns debugger type */
+    String getDebuggerType();
 
     /**
      * Adds new breakpoint.
@@ -84,6 +87,11 @@ public interface Debugger extends DebuggerObservable {
      * Resumes application.
      */
     void resume();
+
+    /**
+     * Suspends application.
+     */
+    void suspend();
 
     /**
      * Evaluates the given expression

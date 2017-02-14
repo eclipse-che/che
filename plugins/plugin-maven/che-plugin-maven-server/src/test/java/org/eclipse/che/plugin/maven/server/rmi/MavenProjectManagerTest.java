@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.maven.server.rmi;
 
+import org.eclipse.che.maven.data.MavenConstants;
+import org.eclipse.che.maven.data.MavenKey;
 import org.eclipse.che.plugin.maven.server.MavenServerManager;
 import org.eclipse.che.plugin.maven.server.MavenWrapperManager;
 import org.eclipse.che.plugin.maven.server.core.EclipseWorkspaceProvider;
@@ -18,8 +20,6 @@ import org.eclipse.che.plugin.maven.server.core.MavenProjectManager;
 import org.eclipse.che.plugin.maven.server.core.MavenTerminalImpl;
 import org.eclipse.che.plugin.maven.server.core.project.MavenProject;
 import org.eclipse.che.plugin.maven.server.core.project.MavenProjectModifications;
-import org.eclipse.che.maven.data.MavenConstants;
-import org.eclipse.che.maven.data.MavenKey;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
@@ -150,6 +150,7 @@ public class MavenProjectManagerTest {
         IFile testPom = mock(IFile.class);
         IProject subModuleProject = mock(IProject.class);
         IFile subPom = mock(IFile.class);
+        IFile testFile = mock(IFile.class);
 
         when(project.getFile(MavenConstants.POM_FILE_NAME)).thenReturn(pom);
         when(pom.getLocation()).thenReturn(new Path(MavenProjectManagerTest.class.getResource("/multimoduleProject/pom.xml").getFile()));
@@ -171,6 +172,8 @@ public class MavenProjectManagerTest {
                 .thenReturn(new Path(MavenProjectManagerTest.class.getResource("/multimoduleProject/subModule/pom.xml").getFile()));
         when(workspaceRoot.getProject("/multimoduleProject/test")).thenReturn(testProject);
         when(workspaceRoot.getProject("/multimoduleProject/subModule")).thenReturn(subModuleProject);
+        when(workspaceRoot.getFile(any())).thenReturn(testFile);
+        when(testFile.exists()).thenReturn(false);
 
 
         projectManager.addListener(listener);

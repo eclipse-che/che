@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,19 +12,28 @@ package org.eclipse.che.ide.api.hotkeys;
 
 /**
  * Representation hotKey which performs some action
+ *
  * @author Alexander Andrienko
+ * @author <a href="mailto:ak@nuxeo.com">Arnaud Kervern</a>
  */
 public class HotKeyItem {
-    private String actionDescription;
-    private String hotKey;
+    private String  actionDescription;
+    private String  hotKey;
+    private boolean isGlobal;
 
     public HotKeyItem(String actionDescription, String hotKey) {
+        this(actionDescription, hotKey, false);
+    }
+
+    public HotKeyItem(String actionDescription, String hotKey, boolean isGlobal) {
         this.actionDescription = actionDescription;
         this.hotKey = hotKey;
+        this.isGlobal = isGlobal;
     }
 
     /**
      * Get action description
+     *
      * @return action description
      */
     public String getActionDescription() {
@@ -33,9 +42,15 @@ public class HotKeyItem {
 
     /**
      * Get hotKey
+     *
      * @return readable hotKey line
      */
     public String getHotKey() {
         return hotKey;
+    }
+
+    /** Return a boolean to know if the hot key is handled globally or by the selected schema */
+    public boolean isGlobal() {
+        return isGlobal;
     }
 }

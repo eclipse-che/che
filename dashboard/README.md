@@ -8,15 +8,8 @@ Che Dashboard
 - Python `v2.7.x`(`v3.x.x`currently not supported)
 - Node.js `v4.x.x` (`v5.x.x` / `v6.x.x` are currently not supported)
 - npm
-- Bower
-- gulp
-- typings
 
-Installation instructions for Node.js and npm can be found on the following [link](https://docs.npmjs.com/getting-started/installing-node). Bower and gulp are CLI utilities which are installed via npm:
-
-```sh
-$ npm install --global bower gulp typings
-```
+Installation instructions for Node.js and npm can be found on the following [link](https://docs.npmjs.com/getting-started/installing-node). 
 
 #Quick start
 

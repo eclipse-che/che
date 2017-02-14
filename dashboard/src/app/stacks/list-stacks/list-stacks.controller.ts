@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,9 +9,10 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
-import {CheStack} from "../../../components/api/che-stack.factory";
-import {CheNotification} from "../../../components/notification/che-notification.factory";
-import {CheProfile} from "../../../components/api/che-profile.factory";
+import {CheStack} from '../../../components/api/che-stack.factory';
+import {CheNotification} from '../../../components/notification/che-notification.factory';
+import {CheProfile} from '../../../components/api/che-profile.factory';
+import {ConfirmDialogService} from '../../../components/service/confirm-dialog/confirm-dialog.service';
 
 /**
  * @ngdoc controller
@@ -37,17 +38,20 @@ export class ListStacksController {
   profile: any;
   lodash: any;
 
+  private confirmDialogService: ConfirmDialogService;
+
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheStack: CheStack, cheProfile: CheProfile, $log: ng.ILogService, $mdDialog: ng.material.IDialogService, cheNotification: CheNotification, $rootScope: ng.IRootScopeService, lodash: any, $q: ng.IQService) {
+  constructor(cheStack: CheStack, cheProfile: CheProfile, $log: ng.ILogService, $mdDialog: ng.material.IDialogService, cheNotification: CheNotification, $rootScope: ng.IRootScopeService, lodash: _.LoDashStatic, $q: ng.IQService, confirmDialogService: ConfirmDialogService) {
     this.cheStack = cheStack;
     this.$log = $log;
     this.$mdDialog = $mdDialog;
     this.cheNotification = cheNotification;
     this.lodash = lodash;
     this.$q = $q;
+    this.confirmDialogService = confirmDialogService;
 
     ($rootScope as any).showIDE = false;
 
@@ -86,13 +90,31 @@ export class ListStacksController {
         this.loading = false;
         this.stacks = this.cheStack.getStacks();
       },
-      (error) => {
+      (error: any) => {
         if (error.status === 304) {
           this.stacks = this.cheStack.getStacks();
         }
         this.state = 'error';
         this.loading = false;
       });
+  }
+
+  /**
+   * Show dialog for imported stack.
+   * @param $event {MouseEvent}
+   */
+  showSelectStackRecipeDialog($event: MouseEvent): void {
+    this.$mdDialog.show({
+      targetEvent: $event,
+      controller: 'ImportStackController',
+      controllerAs: 'importStackController',
+      bindToController: true,
+      clickOutsideToClose: true,
+      locals: {
+        callbackController: this
+      },
+      templateUrl: 'app/stacks/list-stacks/import-stack/import-stack.html'
+    });
   }
 
   /**
@@ -108,9 +130,9 @@ export class ListStacksController {
         delete this.stackSelectionState[stack.id];
         this.cheNotification.showInfo('Stack ' + stack.name + ' has been successfully removed.');
         this.getStacks();
-      }, (error) => {
+      }, (error: any) => {
         this.loading = false;
-        let message = 'Failed to delete ' + stack.name + 'stack.' + (error && error.message) ? error.message : "";
+        let message = 'Failed to delete ' + stack.name + 'stack.' + (error && error.message) ? error.message : '';
         this.cheNotification.showError(message);
       });
     });
@@ -131,9 +153,9 @@ export class ListStacksController {
     this.loading = true;
     this.cheStack.createStack(newStack).then(() => {
       this.getStacks();
-    }, (error) => {
+    }, (error: any) => {
       this.loading = false;
-      let message = 'Failed to create ' + newStack.name + 'stack.' + (error && error.message) ? error.message : "";
+      let message = 'Failed to create ' + newStack.name + 'stack.' + (error && error.message) ? error.message : '';
       this.cheNotification.showError(message);
     });
   }
@@ -185,7 +207,7 @@ export class ListStacksController {
    */
   selectAllStacks(): void {
     this.stackSelectionState = {};
-    this.stacks.forEach((stack) => {
+    this.stacks.forEach((stack: che.IStack) => {
       if (stack.creator === this.userId) {
         this.stackSelectionState[stack.id] = true;
       }
@@ -196,7 +218,7 @@ export class ListStacksController {
    * Make all stacks deselected.
    */
   deselectAllStacks(): void {
-    this.stacks.forEach((stack) => {
+    this.stacks.forEach((stack: che.IStack) => {
       if (this.stackSelectionState[stack.id]) {
         this.stackSelectionState[stack.id] = false;
       }
@@ -222,7 +244,7 @@ export class ListStacksController {
     this.isNoSelected = true;
     let keys: Array<string> = Object.keys(this.stackSelectionState);
     this.isAllSelected = keys.length > 0;
-    keys.forEach((key) => {
+    keys.forEach((key: string) => {
       if (this.stackSelectionState[key]) {
         this.isNoSelected = false;
       } else {
@@ -238,7 +260,7 @@ export class ListStacksController {
     let selectedStackIds: Array<any> = [];
 
 
-    Object.keys(this.stackSelectionState).forEach((key) => {
+    Object.keys(this.stackSelectionState).forEach((key: string) => {
       if (this.stackSelectionState[key]) {
         selectedStackIds.push(key);
       }
@@ -253,7 +275,7 @@ export class ListStacksController {
     confirmationPromise.then(() => {
       let deleteStackPromises = [];
 
-      selectedStackIds.forEach((stackId) => {
+      selectedStackIds.forEach((stackId: string) => {
         this.stackSelectionState[stackId] = false;
         deleteStackPromises.push(this.cheStack.deleteStack(stackId));
       });
@@ -273,25 +295,19 @@ export class ListStacksController {
   /**
    * Show confirm dialog for stacks deletion.
    *
-   * @param numberToDelete number of stacks to be deleted
-   * @param stackName name of stack to confirm (can be null)
-   * @returns {*}
+   * @param numberToDelete{number} number of stacks to be deleted
+   * @param stackName{string} name of stack to confirm (can be null)
+   * @returns {ng.IPromise<any>}
    */
   confirmStacksDeletion(numberToDelete: number, stackName: string): ng.IPromise<any> {
-    let confirmTitle = 'Would you like to delete ';
+    let content = 'Would you like to delete ';
     if (numberToDelete > 1) {
-      confirmTitle += 'these ' + numberToDelete + ' stacks?';
+      content += 'these ' + numberToDelete + ' stacks?';
     } else {
-      confirmTitle += stackName ? stackName + '?' : 'this selected stack?';
+      content += stackName ? stackName + '?' : 'this selected stack?';
     }
-    let confirm = this.$mdDialog.confirm()
-      .title(confirmTitle)
-      .ariaLabel('Remove stacks')
-      .ok('Delete!')
-      .cancel('Cancel')
-      .clickOutsideToClose(true);
 
-    return this.$mdDialog.show(confirm);
+    return this.confirmDialogService.showConfirmDialog('Remove stacks', content, 'Delete');
   }
 
 }

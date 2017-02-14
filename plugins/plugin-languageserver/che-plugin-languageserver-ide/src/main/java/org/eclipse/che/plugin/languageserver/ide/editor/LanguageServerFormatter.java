@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -125,7 +125,7 @@ public class LanguageServerFormatter implements ContentFormatter {
         DocumentFormattingParamsDTO params = dtoFactory.createDto(DocumentFormattingParamsDTO.class);
 
         TextDocumentIdentifierDTO identifier = dtoFactory.createDto(TextDocumentIdentifierDTO.class);
-        identifier.setUri(document.getFile().getPath());
+        identifier.setUri(document.getFile().getLocation().toString());
 
         params.setTextDocument(identifier);
         params.setOptions(getFormattingOptions());
@@ -189,7 +189,7 @@ public class LanguageServerFormatter implements ContentFormatter {
         DocumentRangeFormattingParamsDTO params = dtoFactory.createDto(DocumentRangeFormattingParamsDTO.class);
 
         TextDocumentIdentifierDTO identifier = dtoFactory.createDto(TextDocumentIdentifierDTO.class);
-        identifier.setUri(document.getFile().getPath());
+        identifier.setUri(document.getFile().getLocation().toString());
 
         params.setTextDocument(identifier);
         params.setOptions(getFormattingOptions());

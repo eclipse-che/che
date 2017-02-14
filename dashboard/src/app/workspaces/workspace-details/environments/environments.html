@@ -26,13 +26,16 @@
                    custom-validator="workspaceEnvironmentsController.isUnique($value)"
                    required
                    ng-maxlength="128"
-                   ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
-          <div ng-message="required">A name is required.</div>
-          <div ng-message="pattern">The name should not contain special characters like space, dollar, etc.
-          </div>
-          <div ng-message="maxlength">The name has to be less than 128 characters long.</div>
-          <div ng-message="md-maxlength">The name has to be less than 128 characters long.</div>
-          <div ng-message="customValidator">This environment name is already used.</div>
+                   ng-pattern="/^[A-Za-z0-9_\-\.]+$/"
+                   che-readonly="workspaceEnvironmentsController.workspaceCreationFlow===false">
+          <che-error-messages che-message-scope="workspace-details-environment"
+                              che-message-name="Runtime name">
+            <div ng-message="required">A name is required.</div>
+            <div ng-message="pattern">The name should not contain special characters like space, dollar, etc.</div>
+            <div ng-message="maxlength">The name has to be less than 128 characters long.</div>
+            <div ng-message="md-maxlength">The name has to be less than 128 characters long.</div>
+            <div ng-message="customValidator">This environment name is already used.</div>
+          </che-error-messages>
         </che-input>
       </div>
     </ng-form>
@@ -43,10 +46,10 @@
                        che-label-name="Select Stack"
                        che-label-description="Stacks are recipes or images used to define your environment runtime. Workspace environments are used to build and run your project.">
     <ng-form name="workspaceStackForm">
-      <workspace-stacks workspace-stack-on-change="workspaceEnvironmentsController.changeWorkspaceStack(config, stackId)"
-                        workspace-name="workspaceEnvironmentsController.workspaceName"
-                        environment-name="workspaceEnvironmentsController.environmentName"
-                        workspace-imported-recipe="workspaceEnvironmentsController.workspaceImportedRecipe"></workspace-stacks>
+      <workspace-select-stack workspace-stack-on-change="workspaceEnvironmentsController.changeWorkspaceStack(config, stackId)"
+                              workspace-name="workspaceEnvironmentsController.workspaceName"
+                              environment-name="workspaceEnvironmentsController.environmentName"
+                              workspace-imported-recipe="workspaceEnvironmentsController.workspaceImportedRecipe"></workspace-select-stack>
     </ng-form>
   </che-label-container>
 
@@ -61,9 +64,10 @@
                    type="hidden"
                    ng-model="workspaceEnvironmentsController.devMachineName"
                    ng-required>
-          <div ng-message="required">The environment should contain exactly one dev machine. Switch on Dev property to
-            have terminal, SSH and IDE tooling injected to the machine.
-          </div>
+          <che-error-messages che-message-scope="workspace-details-environment"
+                              che-message-name="Dev machine">
+            <div ng-message="required">The environment should contain exactly one dev machine. Switch on Dev property to have terminal, SSH and IDE tooling injected to the machine.</div>
+          </che-error-messages>
         </che-input>
       </div>
     </ng-form>

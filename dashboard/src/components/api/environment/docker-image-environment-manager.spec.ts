@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,13 +20,25 @@ import {DockerImageEnvironmentManager} from './docker-image-environment-manager'
 describe('DockerImageEnvironmentManager', () => {
   let envManager, environment, machines;
 
-  beforeEach(() => {
-    envManager = new DockerImageEnvironmentManager();
+  beforeEach(inject(($log: ng.ILogService) => {
+    envManager = new DockerImageEnvironmentManager($log);
 
-    environment = {'machines':{'dev-machine':{'servers':{'10240/tcp':{'properties':{},'protocol':'http','port':'10240'}},'agents':['ws-agent','org.eclipse.che.ws-agent'],'attributes':{'memoryLimitBytes':'16642998272'}}},'recipe':{'location':'codenvy/ubuntu_jdk8','type':'dockerimage'}};
+    environment = {
+      'machines': {
+        'dev-machine': {
+          'servers': {
+            '10240/tcp': {
+              'properties': {},
+              'protocol': 'http',
+              'port': '10240'
+            }
+          }, 'agents': ['ws-agent', 'org.eclipse.che.ws-agent'], 'attributes': {'memoryLimitBytes': '16642998272'}
+        }
+      }, 'recipe': {'location': 'codenvy/ubuntu_jdk8', 'type': 'dockerimage'}
+    };
 
     machines = envManager.getMachines(environment);
-  });
+  }));
 
   it('cannot rename machine', () => {
     let canRenameMachine = envManager.canRenameMachine(machines[0]);
@@ -57,6 +69,10 @@ describe('DockerImageEnvironmentManager', () => {
     let servers = envManager.getServers(machines[0]);
 
     let expectedServers = environment.machines['dev-machine'].servers;
+    Object.keys(expectedServers).forEach((serverRef: string) => {
+      expectedServers[serverRef].userScope = true;
+    });
+
     expect(servers).toEqual(expectedServers);
   });
 
@@ -71,6 +87,6 @@ describe('DockerImageEnvironmentManager', () => {
     let isDev = envManager.isDev(machines[0]);
 
     expect(isDev).toBe(true);
-  })
+  });
 });
 

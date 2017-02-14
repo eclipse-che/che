@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,7 +9,12 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
-import {ListComponentsController} from "../list-components.controller";
+import {ListComponentsController} from '../list-components.controller';
+
+interface IComponent {
+  name: string;
+  version: string;
+}
 
 /**
  * @ngdoc controller
@@ -21,10 +26,9 @@ export class EditComponentDialogController {
   $mdDialog: ng.material.IDialogService;
 
   index: number;
-  popupTitle: string;
   name: string;
   version: string;
-  components: Array<any>;
+  components: Array<IComponent>;
   usedComponentsName: Array<string>;
   callbackController: ListComponentsController;
 
@@ -35,24 +39,22 @@ export class EditComponentDialogController {
   constructor($mdDialog: ng.material.IDialogService) {
     this.$mdDialog = $mdDialog;
 
-    let isAddMode: boolean = (this.index === -1);
-    let component: any = isAddMode ? {name: '', version: ''} : this.components[this.index];
+    let isAddMode = (this.index === -1);
+    let component = isAddMode ? {name: '', version: ''} : this.components[this.index];
     this.name = component.name;
     this.version = component.version;
 
     this.usedComponentsName = [];
-    this.components.forEach((component) => {
+    this.components.forEach((component: IComponent) => {
       if (this.name !== component.name) {
         this.usedComponentsName.push(component.name);
       }
     });
-
-    this.popupTitle = isAddMode ? 'Add a new component' : 'Edit the component';
   }
 
   /**
    * Check if the name is unique.
-   * @param name
+   * @param name {string}
    * @returns {boolean}
    */
   isUnique(name: string): boolean {

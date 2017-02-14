@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -65,6 +65,7 @@ import static org.eclipse.che.ide.extension.machine.client.processes.ProcessTree
  */
 public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDelegate> implements ProcessesPanelView,
                                                                                                    SubPanel.FocusListener,
+                                                                                                   SubPanel.DoubleClickListener,
                                                                                                    RequiresResize {
 
     @UiField(provided = true)
@@ -90,6 +91,8 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
     private String activeProcessId = "";
 
     private Focusable lastFosuced;
+
+    private boolean navigationPanelVisible;
 
     @Inject
     public ProcessesPanelViewImpl(PartStackUIResources partStackUIResources,
@@ -195,11 +198,13 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
         final SubPanel subPanel = subPanelFactory.newPanel();
         subPanel.setFocusListener(this);
+        subPanel.setDoubleClickListener(this);
         splitLayoutPanel.add(subPanel.getView());
         focusedSubPanel = subPanel;
 
         tuneSplitter();
         splitLayoutPanel.setWidgetHidden(navigationPanel, true);
+        navigationPanelVisible = false;
     }
 
     /**
@@ -387,6 +392,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
     @Override
     public void setProcessesData(ProcessTreeNode root) {
         splitLayoutPanel.setWidgetHidden(navigationPanel, false);
+        navigationPanelVisible = true;
 
         processTree.asWidget().setVisible(true);
         processTree.getModel().setRoot(root);
@@ -490,6 +496,11 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
     }
 
     @Override
+    public void onDoubleClicked(final SubPanel panel, final IsWidget widget) {
+        delegate.onToggleMaximizeConsole();
+    }
+
+    @Override
     public void onResize() {
         for (WidgetToShow widgetToShow : widget2Panels.keySet()) {
             final IsWidget widget = widgetToShow.getWidget();
@@ -497,6 +508,17 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
                 ((RequiresResize)widget).onResize();
             }
         }
+    }
+
+    @Override
+    public void setProcessesTreeVisible(boolean visible) {
+        splitLayoutPanel.setWidgetHidden(navigationPanel, !visible);
+        navigationPanelVisible = visible;
+    }
+
+    @Override
+    public boolean isProcessesTreeVisible() {
+        return navigationPanelVisible;
     }
 
     interface ProcessesPartViewImplUiBinder extends UiBinder<Widget, ProcessesPanelViewImpl> {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,6 +47,11 @@ public interface Subject {
         }
 
         @Override
+        public boolean isAnonymous() {
+            return true;
+        }
+
+        @Override
         public boolean isTemporary() {
             return false;
         }
@@ -85,6 +90,13 @@ public interface Subject {
      * @return subject auth token to be able to execute request as subject
      */
     String getToken();
+
+    /**
+     * Return {@code true} if subject is anonymous, {@code false} if this is a real authenticated subject.
+     */
+    default boolean isAnonymous() {
+        return false;
+    }
 
     /**
      * @return - true if subject is temporary, false if this is a real persistent subject.

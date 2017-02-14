@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -126,6 +126,14 @@
 
 .ide-PartStack-Content div[role="part"][focused] div[role="toolbar"] div[role="toolbar-header"] {
     border-bottom-color: tabUnderlineColor;
+}
+
+div[maximized="true"] div[name="maximizePart"] i {
+    color: blueIconColor;
+}
+
+div[maximized="true"] svg[name="workBenchIconMaximize"] {
+    fill: blueIconColor;
 }
 
 .ide-Base-Part-Title-Label {

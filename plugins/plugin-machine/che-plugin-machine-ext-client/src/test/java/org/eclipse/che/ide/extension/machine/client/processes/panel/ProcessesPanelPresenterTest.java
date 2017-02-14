@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,7 @@ import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
+import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessesResponseDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
@@ -30,11 +31,13 @@ import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.dialogs.ConfirmDialog;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.machine.DevMachine;
+import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.machine.MachineManager;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.machine.events.MachineStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
+import org.eclipse.che.ide.api.macro.MacroProcessor;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode;
@@ -43,6 +46,7 @@ import org.eclipse.che.ide.api.parts.PartStack;
 import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.ssh.SshServiceClient;
+import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
@@ -114,8 +118,6 @@ public class ProcessesPanelPresenterTest {
     @Mock
     private AppContext                    appContext;
     @Mock
-    private MachineServiceClient          machineService;
-    @Mock
     private SshServiceClient              sshService;
     @Mock
     private EventBus                      eventBus;
@@ -131,9 +133,17 @@ public class ProcessesPanelPresenterTest {
     private WorkspaceRuntimeDto           workspaceRuntime;
     @Mock
     private PartStack                     partStack;
+    @Mock
+    private ExecAgentCommandManager       execAgentCommandManager;
+    @Mock
+    private MacroProcessor                macroProcessor;
+    @Mock
+    private DtoFactory                    dtoFactory;
 
     @Mock
     private Promise<List<MachineProcessDto>> processesPromise;
+    @Mock
+    private Promise<List<GetProcessesResponseDto>> promise;
 
     @Captor
     private ArgumentCaptor<AcceptsOneWidget>                   acceptsOneWidgetCaptor;
@@ -154,18 +164,19 @@ public class ProcessesPanelPresenterTest {
         when(appContext.getWorkspace()).thenReturn(workspace);
         when(workspace.getRuntime()).thenReturn(workspaceRuntime);
 
-        when(machineService.getProcesses(anyString(), anyString())).thenReturn(processesPromise);
         when(processesPromise.then(Matchers.<Operation<List<MachineProcessDto>>>anyObject())).thenReturn(processesPromise);
         when(commandConsoleFactory.create(anyString())).thenReturn(mock(OutputConsole.class));
 
         when(appContext.getWorkspaceId()).thenReturn(WORKSPACE_ID);
         when(workspaceAgent.getPartStack(eq(PartStackType.INFORMATION))).thenReturn(partStack);
 
+        when(execAgentCommandManager.getProcesses(anyString(), anyBoolean())).thenReturn(promise);
+        when(promise.then(any(Operation.class))).thenReturn(promise);
+
         presenter = new ProcessesPanelPresenter(view,
                                                 localizationConstant,
                                                 resources,
                                                 eventBus,
-                                                machineService,
                                                 workspaceAgent,
                                                 appContext,
                                                 notificationManager,
@@ -175,7 +186,10 @@ public class ProcessesPanelPresenterTest {
                                                 dialogFactory,
                                                 consoleTreeContextMenuFactory,
                                                 commandTypeRegistry,
-                                                sshService);
+                                                sshService,
+                                                execAgentCommandManager,
+                                                macroProcessor,
+                                                dtoFactory);
     }
 
     @Test
@@ -190,7 +204,7 @@ public class ProcessesPanelPresenterTest {
 
         MachineStateEvent machineStateEvent = mock(MachineStateEvent.class);
         when(machineStateEvent.getMachine()).thenReturn(machine);
-        verify(eventBus, times(7)).addHandler(anyObject(), machineStateHandlerCaptor.capture());
+        verify(eventBus, times(8)).addHandler(anyObject(), machineStateHandlerCaptor.capture());
         MachineStateEvent.Handler machineStateHandler = machineStateHandlerCaptor.getAllValues().get(0);
         machineStateHandler.onMachineCreating(machineStateEvent);
 
@@ -398,6 +412,7 @@ public class ProcessesPanelPresenterTest {
         presenter.onAddTerminal(MACHINE_ID, presenter);
 
         verify(terminalFactory).create(eq(machine), eq(presenter));
+        verify(workspaceAgent).setActivePart(presenter);
         verify(terminal).getView();
         verify(view, times(2)).setProcessesData(anyObject());
         verify(view).selectNode(anyObject());
@@ -614,12 +629,6 @@ public class ProcessesPanelPresenterTest {
                                           any(org.eclipse.che.api.core.model.machine.Machine.class))).thenReturn(outputConsole);
 
         presenter.onWsAgentStarted(event);
-
-        verify(machineService.getProcesses(WORKSPACE_ID, MACHINE_ID)).then(processesCaptor.capture());
-        processesCaptor.getValue().apply(processes);
-
-        verify(outputConsole).listenToOutput(eq(OUTPUT_CHANNEL));
-        verify(outputConsole).attachToProcess(machineProcessDto);
     }
 
 }

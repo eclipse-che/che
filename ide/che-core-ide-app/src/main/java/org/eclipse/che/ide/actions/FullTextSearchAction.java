@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.actions;
 
-import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -77,8 +76,8 @@ public class FullTextSearchAction extends AbstractPerspectiveAction {
             if (resources[0] instanceof Container) {
                 searchPath = resources[0].getLocation();
             } else {
-                final Optional<Container> optionalParent = resources[0].getParent();
-                searchPath = optionalParent.isPresent() ? optionalParent.get().getLocation() : Path.ROOT;
+                final Container parent = resources[0].getParent();
+                searchPath = parent != null ? parent.getLocation() : Path.ROOT;
             }
         }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,6 +38,7 @@ export class WorkspaceEnvironmentsController {
   };
 
   stackId: string;
+  workspaceRuntime: any;
   workspaceConfig: che.IWorkspaceConfig;
   environment: any;
   environmentName: string;
@@ -99,7 +100,7 @@ export class WorkspaceEnvironmentsController {
 
     this.editorOptions.mode = this.environmentManager.editorMode;
 
-    this.machines = this.environmentManager.getMachines(this.environment);
+    this.machines = this.environmentManager.getMachines(this.environment, this.workspaceRuntime);
     this.devMachineName = this.getDevMachineName();
 
     if (!this.machinesViewStatus[this.environmentName]) {
@@ -202,8 +203,6 @@ export class WorkspaceEnvironmentsController {
    * Callback which is called in order to rename specified machine
    * @param oldName
    * @param newName
-   *
-   * @returns {ng.IPromise<any>}
    */
   updateMachineName(oldName: string, newName: string): void {
     let newEnvironment = this.environmentManager.renameMachine(this.environment, oldName, newName);
@@ -247,6 +246,10 @@ export class WorkspaceEnvironmentsController {
     // for compose recipe
     // check if there are machines without memory limit
     let environment = this.workspaceConfig.environments[this.environmentName];
+    if (!environment) {
+      return;
+    }
+
     if (environment.recipe && environment.recipe.type === 'compose') {
       let recipeType = environment.recipe.type,
         environmentManager = this.cheEnvironmentRegistry.getEnvironmentManager(recipeType);

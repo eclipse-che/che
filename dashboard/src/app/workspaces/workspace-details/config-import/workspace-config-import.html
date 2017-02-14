@@ -6,21 +6,36 @@
                      ng-change="workspaceConfigImportController.onChange()"
                      ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 500, 'blur': 0 } }"
       ></ui-codemirror>
+      <che-input che-form="workspaceConfigImportForm"
+                 che-name="configValidation"
+                 type="hidden"
+                 ng-model="workspaceConfigImportController.configErrorsNumber"
+                 custom-validator="workspaceConfigImportController.configValid()">
+      </che-input>
     </div>
-    <div layout="row">
-      <div flex>
-        <che-input che-form="workspaceConfigImportForm"
-                   che-name="configValidation"
-                   type="hidden"
-                   ng-model="workspaceConfigImportController.validationError"
-                   custom-validator="workspaceConfigImportController.configValid()">
-          <div ng-message="customValidator">{{workspaceConfigImportController.validationError}}</div>
-        </che-input>
+    <div layout="column">
+      <div class="error-message"
+           ng-repeat="configValidationMessage in workspaceConfigImportController.configValidationMessages">
+        {{configValidationMessage}}
       </div>
-      <div>
-        <che-button-default che-button-title="Apply"
-                            ng-disabled="workspaceConfigImportForm.$invalid || !workspaceConfigImportController.configChanged()"
-                            ng-click="workspaceConfigImportController.applyChanges()"></che-button-default>
+      <!-- Other errors -->
+      <div ng-if="workspaceConfigImportController.configValidationMessages.length===0">
+        <!-- Settings tab errors -->
+        <div ng-if="workspaceConfigImportController.otherValidationMessages[workspaceConfigImportController.errorsScopeSettings].length>0">
+          <div>Settings tab contains error(s):</div>
+          <div class="error-message"
+               ng-repeat="settingsValidationMessage in workspaceConfigImportController.otherValidationMessages[workspaceConfigImportController.errorsScopeSettings]">
+            {{settingsValidationMessage}}
+          </div>
+        </div>
+        <!-- Runtime tab errors -->
+        <div ng-if="workspaceConfigImportController.otherValidationMessages[workspaceConfigImportController.errorsScopeEnvironment].length>0">
+          <div>Runtime tab contains error(s):</div>
+          <div class="error-message"
+               ng-repeat="envValidationMessage in workspaceConfigImportController.otherValidationMessages[workspaceConfigImportController.errorsScopeEnvironment]">
+            {{envValidationMessage}}
+          </div>
+        </div>
       </div>
     </div>
   </ng-form>

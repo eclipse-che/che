@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -206,7 +206,7 @@ public class DefaultHttpJsonRequest implements HttpJsonRequest {
                                                                               UnauthorizedException,
                                                                               ConflictException,
                                                                               BadRequestException {
-        final String authToken = getAuthenticationToken();
+        final String authToken = EnvironmentContext.getCurrent().getSubject().getToken();
         final boolean hasQueryParams = parameters != null && !parameters.isEmpty();
         if (hasQueryParams || authToken != null) {
             final UriBuilder ub = UriBuilder.fromUri(url);
@@ -291,14 +291,6 @@ public class DefaultHttpJsonRequest implements HttpJsonRequest {
         } finally {
             conn.disconnect();
         }
-    }
-
-    private String getAuthenticationToken() {
-        final Subject subject = EnvironmentContext.getCurrent().getSubject();
-        if (subject != null) {
-            return subject.getToken();
-        }
-        return null;
     }
 
     @Override

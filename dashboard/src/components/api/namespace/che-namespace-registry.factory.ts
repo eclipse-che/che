@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,7 +17,7 @@
  */
 export class CheNamespaceRegistry {
 
-  namespaces : Array<string>;
+  namespaces : Array<any>;
 
   constructor() {
     this.namespaces = [];
@@ -28,16 +28,16 @@ export class CheNamespaceRegistry {
    *
    * @param namespaces namespace to be added
    */
-  addNamespaces(namespaces : Array<string>) : void {
+  addNamespaces(namespaces : Array<any>) : void {
     this.namespaces = this.namespaces.concat(namespaces);
   }
 
   /**
    * Returns the list of available namespaces.
    *
-   * @returns {Array<string>} namespaces
+   * @returns {Array<any>} namespaces
    */
-  getNamespaces() : Array<string> {
+  getNamespaces() : Array<any> {
     return this.namespaces;
   }
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,7 @@ import io.typefox.lsapi.services.LanguageServer;
 
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.messager.PublishDiagnosticsParamsMessenger;
+import org.eclipse.che.api.languageserver.messager.ShowMessageMessenger;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -47,6 +48,8 @@ public class ServerInitializerImplTest {
     @Mock
     private PublishDiagnosticsParamsMessenger   publishDiagnosticsParamsMessenger;
     @Mock
+    private ShowMessageMessenger          showMessageParamsMessenger;
+    @Mock
     private LanguageDescription                 languageDescription;
     @Mock
     private LanguageServerLauncher              launcher;
@@ -59,7 +62,7 @@ public class ServerInitializerImplTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
-        initializer = spy(new ServerInitializerImpl(publishDiagnosticsParamsMessenger));
+        initializer = spy(new ServerInitializerImpl(publishDiagnosticsParamsMessenger, showMessageParamsMessenger));
     }
 
     @Test

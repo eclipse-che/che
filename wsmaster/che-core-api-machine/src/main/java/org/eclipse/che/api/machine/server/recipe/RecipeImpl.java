@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,14 +11,12 @@
 package org.eclipse.che.api.machine.server.recipe;
 
 import org.eclipse.che.api.core.model.machine.Recipe;
-import org.eclipse.che.api.machine.server.jpa.RecipeEntityListener;
 import org.eclipse.che.api.machine.shared.ManagedRecipe;
 
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.Table;
@@ -34,7 +32,6 @@ import java.util.Objects;
  */
 @Entity(name = "Recipe")
 @Table(name = "recipe")
-@EntityListeners(RecipeEntityListener.class)
 public class RecipeImpl implements ManagedRecipe {
 
     @Id

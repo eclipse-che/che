@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,6 +40,7 @@ public class Constants {
     public static final String ENVIRONMENT_STATUS_CHANNEL_TEMPLATE = "workspace:%s:machines_statuses";
 
     public static final String TERMINAL_REFERENCE = "terminal";
+    public static final String EXEC_AGENT_REFERENCE = "exec-agent";
 
     public static final String WS_AGENT_PORT = "4401/tcp";
 

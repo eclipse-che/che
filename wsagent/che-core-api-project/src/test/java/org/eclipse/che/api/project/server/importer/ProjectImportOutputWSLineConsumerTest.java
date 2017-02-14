@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,7 +34,7 @@ public class ProjectImportOutputWSLineConsumerTest {
 
         //then
         verify(consumer).sendMessageToWS(argumentCaptor.capture());
-        assertEquals(argumentCaptor.getValue().getChannel(), "importProject:output:workspace:project");
-        assertEquals(argumentCaptor.getValue().getBody(), "{\"num\":1, \"line\":\"message\"}");
+        assertEquals(argumentCaptor.getValue().getChannel(), "importProject:output");
+        assertEquals(argumentCaptor.getValue().getBody(), "{\"num\":1,\"line\":\"message\",\"project\":\"project\"}");
     }
 }

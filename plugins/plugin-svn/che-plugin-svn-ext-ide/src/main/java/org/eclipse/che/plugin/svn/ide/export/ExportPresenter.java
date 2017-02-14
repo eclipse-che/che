@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -170,18 +170,6 @@ public class ExportPresenter extends SubversionActionPresenter implements Export
         Window.open(url.toString(), "_self", "");
         notification.setTitle(constants.exportSuccessful(exportPath.toString()));
         notification.setStatus(SUCCESS);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void minimize() {
-
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void activatePart() {
-
     }
 
 }

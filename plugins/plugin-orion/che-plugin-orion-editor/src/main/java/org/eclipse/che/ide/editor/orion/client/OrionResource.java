@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,4 +22,12 @@ public interface OrionResource extends ClientBundle {
 
     @Source({"orion-codenvy-theme.css", "org/eclipse/che/ide/api/ui/style.css"})
     CssResource editorStyle();
+
+    @Source({"incremental-find-container.css", "org/eclipse/che/ide/api/ui/style.css"})
+    IncrementalFindResources getIncrementalFindStyle();
+
+    interface IncrementalFindResources extends CssResource {
+        String incrementalFindContainer();
+        String incrementalFindError();
+    }
 }

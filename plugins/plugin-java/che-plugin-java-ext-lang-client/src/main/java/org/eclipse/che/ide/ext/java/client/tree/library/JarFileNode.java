@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -109,16 +109,9 @@ public class JarFileNode extends SyntheticNode<JarEntry> implements VirtualFile,
         return true;
     }
 
-    /** {@inheritDoc} */
-    @NotNull
-    @Override
-    public String getPath() {
-        return getData().getPath();
-    }
-
     @Override
     public Path getLocation() {
-        return Path.valueOf(getPath());
+        return Path.valueOf(getData().getPath());
     }
 
     /** {@inheritDoc} */
@@ -181,11 +174,6 @@ public class JarFileNode extends SyntheticNode<JarEntry> implements VirtualFile,
 
     public boolean isContentGenerated() {
         return contentGenerated;
-    }
-
-    @Override
-    public String getMediaType() {
-        return null;
     }
 
     @Override

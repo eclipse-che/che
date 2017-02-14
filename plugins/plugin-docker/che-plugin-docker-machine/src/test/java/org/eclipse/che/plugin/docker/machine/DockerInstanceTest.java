@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,7 @@ import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
+import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
 import org.eclipse.che.plugin.docker.client.Exec;
 import org.eclipse.che.plugin.docker.client.LogMessage;
 import org.eclipse.che.plugin.docker.client.MessageProcessor;
@@ -78,6 +79,8 @@ public class DockerInstanceTest {
     @Mock
     private DockerConnector            dockerConnectorMock;
     @Mock
+    private DockerConnectorProvider    dockerConnectorProviderMock;
+    @Mock
     private DockerInstanceStopDetector dockerInstanceStopDetectorMock;
     @Mock
     private LineConsumer               outputConsumer;
@@ -85,7 +88,8 @@ public class DockerInstanceTest {
     private DockerInstance dockerInstance;
 
     @BeforeMethod
-    public void setUp() throws IOException {
+    public void setUp() throws IOException, MachineException {
+        when(dockerConnectorProviderMock.get()).thenReturn(dockerConnectorMock);
         dockerInstance = getDockerInstance();
         when(dockerConnectorMock.createExec(any(CreateExecParams.class))).thenReturn(execMock);
         when(execMock.getId()).thenReturn(EXEC_ID);
@@ -198,7 +202,7 @@ public class DockerInstanceTest {
         dockerInstance.saveToSnapshot();
     }
 
-    private DockerInstance getDockerInstance() {
+    private DockerInstance getDockerInstance() throws MachineException {
         return getDockerInstance(getMachine(), REGISTRY, CONTAINER, IMAGE, false);
     }
 
@@ -206,11 +210,13 @@ public class DockerInstanceTest {
                                              String registry,
                                              String container,
                                              String image,
-                                             boolean snapshotUseRegistry) {
-        return new DockerInstance(dockerConnectorMock,
+                                             boolean snapshotUseRegistry) throws MachineException {
+        DockerMachineFactory machineFactory = mock(DockerMachineFactory.class);
+        when(machineFactory.createMetadata(any(), any(), any())).thenReturn(mock(DockerInstanceRuntimeInfo.class));
+        return new DockerInstance(dockerConnectorProviderMock,
                                   registry,
                                   USERNAME,
-                                  mock(DockerMachineFactory.class),
+                                  machineFactory,
                                   machine,
                                   container,
                                   image,

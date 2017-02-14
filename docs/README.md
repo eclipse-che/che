@@ -1,0 +1,1 @@
+Docs are located at [https://github.com/codenvy/che-docs](https://github.com/codenvy/che-docs).

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,25 +32,24 @@ import org.eclipse.che.ide.resource.Path;
 @Beta
 public interface File extends Resource, VirtualFile, ModificationTracker {
 
-    /** @see VirtualFile#getPath() */
-    String getPath();
-
     /** @see VirtualFile#getDisplayName() */
+    @Override
     String getDisplayName();
 
-    /** @see VirtualFile#getMediaType() */
-    String getMediaType();
-
     /** @see VirtualFile#isReadOnly() */
+    @Override
     boolean isReadOnly();
 
     /** @see VirtualFile#getContentUrl() */
+    @Override
     String getContentUrl();
 
     /** @see VirtualFile#getContent() */
+    @Override
     Promise<String> getContent();
 
     /** @see VirtualFile#updateContent(String) */
+    @Override
     Promise<Void> updateContent(String content);
 
     /**

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,20 +33,8 @@ public interface VirtualFile {
      * Path should always be non-null or non-empty.
      *
      * @return non-null unique path.
-     * @deprecated use {@link #getLocation()}
-     */
-    @Deprecated
-    String getPath();
-
-    /**
-     * Returns path for the virtual file. Path may in various representation based on implementation.
-     * Usually it something like physical file or folder path, e.g. `/path/to/som/file`.
-     * Path should always be non-null or non-empty.
-     *
-     * @return non-null unique path.
      * @since 4.4.0
      */
-    @Beta
     Path getLocation();
 
     /**
@@ -65,14 +53,6 @@ public interface VirtualFile {
      * @return non-null display name.
      */
     String getDisplayName();
-
-    /**
-     * Returns media type for the virtual file. Media type may be a {@code null} for folders or for those files that
-     * don't have media type.
-     *
-     * @return media type or null.
-     */
-    String getMediaType();
 
     /**
      * Returns {@code true} in case if virtual file doesn't have ability to be updated.

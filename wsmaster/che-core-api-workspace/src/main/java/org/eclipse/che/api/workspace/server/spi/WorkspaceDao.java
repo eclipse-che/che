@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2016 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -79,12 +79,10 @@ public interface WorkspaceDao {
      *         workspace identifier
      * @throws NullPointerException
      *         when {@code id} is null
-     * @throws ConflictException
-     *         when any conflict occurs during cascade removing of related to workspace data
      * @throws ServerException
      *         when any other error occurs during workspace removing
      */
-    void remove(String id) throws ConflictException, ServerException;
+    void remove(String id) throws ServerException;
 
     /**
      * Gets workspace by identifier.
@@ -142,4 +140,23 @@ public interface WorkspaceDao {
      *         when any other error occurs during workspaces fetching
      */
     List<WorkspaceImpl> getWorkspaces(String userId) throws ServerException;
+
+
+    /**
+     * Gets workspaces by temporary attribute.
+     *
+     * @param isTemporary
+     *         When {@code true}, only temporary workspaces should be retrieved.
+     *         When {@code false}, only non-temporary workspaces should be retrieved.
+     * @param skipCount
+     *         the number of workspaces to skip
+     * @param maxItems
+     *         the maximum number of workspaces to return
+     * @return list of workspaces or empty list if no workspaces were found
+     * @throws ServerException
+     *         when any other error occurs during workspaces fetching
+     * @throws IllegalArgumentException
+     *         when {@code maxItems} or {@code skipCount} is negative
+     */
+    List<WorkspaceImpl> getWorkspaces(boolean isTemporary, int skipCount, int maxItems) throws ServerException;
 }

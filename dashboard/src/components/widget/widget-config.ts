@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,6 +27,8 @@ import {CheDescription} from './description/che-description.directive';
 import {CheDropZoneCtrl} from './dropzone/che-dropzone.controller';
 import {CheDropZone} from './dropzone/che-dropzone.directive';
 import {CheEmptyState} from './empty-state/che-empty-state.directive';
+import {CheFilterSelector} from './filter-selector/che-filter-selector.directive';
+import {CheFilterSelectorController} from './filter-selector/che-filter-selector.controller';
 import {CheFrame} from './frame/che-frame.directive';
 import {CheFooter} from './footer/che-footer.directive';
 import {CheHtmlSource} from './html-source/che-html-source.directive';
@@ -66,6 +68,7 @@ import {CheInfoNotification} from './notification/che-info-notification.directiv
 import {ChePopup} from './popup/che-popup.directive';
 import {CheModalPopup} from './popup/che-modal-popup.directive';
 import {CheShowArea} from './show-area/che-show-area.directive';
+import {DemoSourceRender} from './html-source/demo-source-render.directive';
 
 
 export class WidgetConfig {
@@ -95,9 +98,12 @@ export class WidgetConfig {
       .controller('CheDropZoneCtrl', CheDropZoneCtrl)
       .directive('cheDropzone', CheDropZone)
       .directive('cheEmptyState', CheEmptyState)
+      .directive('cheFilterSelector', CheFilterSelector)
+      .controller('CheFilterSelectorController', CheFilterSelectorController)
       .directive('cheFrame', CheFrame)
       .directive('cheFooter', CheFooter)
       .directive('cheHtmlSource', CheHtmlSource)
+      .directive('demoSourceRender', DemoSourceRender)
       .directive('cheInput', CheInput)
       .directive('cheInputBox', CheInputBox)
       .directive('cheTextarea', CheTextarea)
