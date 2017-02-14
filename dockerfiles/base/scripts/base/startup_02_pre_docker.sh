@@ -17,19 +17,31 @@ log() {
 }
 
 warning() {
-  if is_warning; then
-    printf  "${YELLOW}WARN:${NC} %s\n" "${1}"
+  if [ -z ${2+x} ]; then
+    local PRINT_COMMAND=""
+    local PRINT_STATEMENT=$1
+  else
+    local PRINT_COMMAND="($CHE_MINI_PRODUCT_NAME $1): "
+    local PRINT_STATEMENT=$2
   fi
-  log $(printf "WARN: %s\n" "${1}")
+
+  if is_warning; then
+    printf "${YELLOW}WARN:${NC} %b%b\n" \
+              "${PRINT_COMMAND}" \
+              "${PRINT_STATEMENT}"
+  fi
+  log $(printf "INFO: %b %b\n" \
+        "${PRINT_COMMAND}" \
+        "${PRINT_STATEMENT}")
 }
 
 info() {
   if [ -z ${2+x} ]; then
-    PRINT_COMMAND=""
-    PRINT_STATEMENT=$1
+    local PRINT_COMMAND=""
+    local PRINT_STATEMENT=$1
   else
-    PRINT_COMMAND="($CHE_MINI_PRODUCT_NAME $1): "
-    PRINT_STATEMENT=$2
+    local PRINT_COMMAND="($CHE_MINI_PRODUCT_NAME $1): "
+    local PRINT_STATEMENT=$2
   fi
   if is_info; then
     printf "${GREEN}INFO:${NC} %b%b\n" \
