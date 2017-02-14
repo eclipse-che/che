@@ -29,11 +29,14 @@ images will use those binaries instead of their embedded ones.\n"
 }
 
 pre_cmd_config() {
-  true
+  :
+}
+
+post_cmd_config() {
+  :
 }
 
 cmd_config() {
-
   # If the system is not initialized, initalize it.
   # If the system is already initialized, but a user wants to update images, then re-download.
   FORCE_UPDATE=${1:-"--no-force"}
@@ -97,8 +100,6 @@ cmd_config() {
 
 # Runs puppet image to generate che configuration
 generate_configuration_with_puppet() {
-  debug $FUNCNAME
-
   if is_docker_for_windows; then
     CHE_ENV_FILE=$(convert_posix_to_windows "${CHE_HOST_INSTANCE}/config/$CHE_MINI_PRODUCT_NAME.env")
   else
@@ -167,12 +168,3 @@ config_directory_is_empty() {
     return 0
   fi
 }
-
-post_cmd_config() {
-  cmd_config_post_action
-}
-
-cmd_config_post_action() {
- true
-}
-

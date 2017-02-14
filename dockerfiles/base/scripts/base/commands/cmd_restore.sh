@@ -18,7 +18,11 @@ help_cmd_restore() {
 }
 
 pre_cmd_restore() {
-  true
+  :
+}
+
+post_cmd_restore() {
+  :
 }
 
 cmd_restore_pre_action() {

@@ -25,7 +25,11 @@ help_cmd_info() {
 
 
 pre_cmd_info() {
-  true
+  :
+}
+
+post_cmd_info() {
+  :
 }
 
 cmd_info() {
