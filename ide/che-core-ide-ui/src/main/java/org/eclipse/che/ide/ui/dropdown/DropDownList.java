@@ -155,7 +155,7 @@ public class DropDownList extends Composite {
         itemsWidgets.put(item, listWidget);
         itemsRenderers.put(item, renderer);
 
-        listWidget.addStyleName(RESOURCES.dropdownListCss().menuElement());
+//        listWidget.addStyleName(RESOURCES.dropdownListCss().menuElement());
         listWidget.getElement().getStyle().setCursor(POINTER);
         listWidget.addDomHandler(event -> {
             setHeader(item);
