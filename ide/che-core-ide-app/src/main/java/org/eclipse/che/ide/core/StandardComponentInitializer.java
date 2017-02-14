@@ -121,6 +121,25 @@ import static org.eclipse.che.ide.projecttype.BlankProjectWizardRegistrar.BLANK_
 @Singleton
 public class StandardComponentInitializer {
 
+    public static final String NAVIGATE_TO_FILE    = "navigateToFile";
+    public static final String FULL_TEXT_SEARCH    = "fullTextSearch";
+    public static final String FIND_ACTION         = "findActionAction";
+    public static final String FORMAT              = "format";
+    public static final String COPY                = "copy";
+    public static final String CUT                 = "cut";
+    public static final String PASTE               = "paste";
+    public static final String SWITCH_LEFT_TAB     = "switchLeftTab";
+    public static final String SWITCH_RIGHT_TAB    = "switchRightTab";
+    public static final String OPEN_RECENT_FILES   = "openRecentFiles";
+    public static final String DELETE_ITEM         = "deleteItem";
+    public static final String NEW_FILE            = "newFile";
+    public static final String CREATE_PROJECT      = "createProject";
+    public static final String IMPORT_PROJECT      = "importProject";
+    public static final String CLOSE_ACTIVE_EDITOR = "closeActiveEditor";
+    public static final String SIGNATURE_HELP      = "signatureHelp";
+    public static final String RENAME              = "renameResource";
+    public static final String SHOW_REFERENCE      = "showReference";
+
     public interface ParserResource extends ClientBundle {
         @Source("org/eclipse/che/ide/blank.svg")
         SVGResource samplesCategoryBlank();
@@ -437,10 +456,10 @@ public class StandardComponentInitializer {
         // Workspace (New Menu)
         DefaultActionGroup workspaceGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_WORKSPACE);
 
-        actionManager.registerAction("importProject", importProjectAction);
+        actionManager.registerAction(IMPORT_PROJECT, importProjectAction);
         workspaceGroup.add(importProjectAction);
 
-        actionManager.registerAction("createProject", createProjectAction);
+        actionManager.registerAction(CREATE_PROJECT, createProjectAction);
         workspaceGroup.add(createProjectAction);
 
         actionManager.registerAction("downloadWsAsZipAction", downloadWsAction);
@@ -459,7 +478,7 @@ public class StandardComponentInitializer {
 
         newGroup.addSeparator();
 
-        actionManager.registerAction("newFile", newFileAction);
+        actionManager.registerAction(NEW_FILE, newFileAction);
         newGroup.addAction(newFileAction);
 
         actionManager.registerAction("newFolder", newFolderAction);
@@ -499,15 +518,15 @@ public class StandardComponentInitializer {
         recentGroup.addSeparator();
         recentGroup.add(clearRecentFilesAction, LAST);
         editGroup.add(recentGroup);
-        actionManager.registerAction("openRecentFiles", openRecentFilesAction);
+        actionManager.registerAction(OPEN_RECENT_FILES, openRecentFilesAction);
         editGroup.add(openRecentFilesAction);
 
         editGroup.addSeparator();
 
-        actionManager.registerAction("closeActiveEditor", closeActiveEditorAction);
+        actionManager.registerAction(CLOSE_ACTIVE_EDITOR, closeActiveEditorAction);
         editGroup.add(closeActiveEditorAction);
 
-        actionManager.registerAction("format", formatterAction);
+        actionManager.registerAction(FORMAT, formatterAction);
         editGroup.add(formatterAction);
 
         actionManager.registerAction("undo", undoAction);
@@ -516,22 +535,22 @@ public class StandardComponentInitializer {
         actionManager.registerAction("redo", redoAction);
         editGroup.add(redoAction);
 
-        actionManager.registerAction("cut", cutResourceAction);
+        actionManager.registerAction(CUT, cutResourceAction);
         editGroup.add(cutResourceAction);
 
-        actionManager.registerAction("copy", copyResourceAction);
+        actionManager.registerAction(COPY, copyResourceAction);
         editGroup.add(copyResourceAction);
 
-        actionManager.registerAction("paste", pasteResourceAction);
+        actionManager.registerAction(PASTE, pasteResourceAction);
         editGroup.add(pasteResourceAction);
 
-        actionManager.registerAction("renameResource", renameItemAction);
+        actionManager.registerAction(RENAME, renameItemAction);
         editGroup.add(renameItemAction);
 
-        actionManager.registerAction("deleteItem", deleteResourceAction);
+        actionManager.registerAction(DELETE_ITEM, deleteResourceAction);
         editGroup.add(deleteResourceAction);
 
-        actionManager.registerAction("fullTextSearch", fullTextSearchAction);
+        actionManager.registerAction(FULL_TEXT_SEARCH, fullTextSearchAction);
         editGroup.add(fullTextSearchAction);
 
         editGroup.addSeparator();
@@ -544,7 +563,7 @@ public class StandardComponentInitializer {
         // Assistant (New Menu)
         DefaultActionGroup assistantGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_ASSISTANT);
 
-        actionManager.registerAction("findActionAction", findActionAction);
+        actionManager.registerAction(FIND_ACTION, findActionAction);
         assistantGroup.add(findActionAction);
 
         actionManager.registerAction("hotKeysList", hotKeysListAction);
@@ -556,7 +575,7 @@ public class StandardComponentInitializer {
         assistantGroup.add(completeAction);
 
         actionManager.registerAction("downloadItemAction", downloadResourceAction);
-        actionManager.registerAction("navigateToFile", navigateToFileAction);
+        actionManager.registerAction(NAVIGATE_TO_FILE, navigateToFileAction);
         assistantGroup.add(navigateToFileAction);
 
         // Compose Save group
@@ -620,13 +639,13 @@ public class StandardComponentInitializer {
         actionManager.registerAction("changeResourceGroup", changeResourceGroup);
         actionManager.registerAction("editFile", editFileAction);
         actionManager.registerAction("goInto", goIntoAction);
-        actionManager.registerAction("showReference", showReferenceAction);
+        actionManager.registerAction(SHOW_REFERENCE, showReferenceAction);
 
         actionManager.registerAction("collapseAll", collapseAllAction);
 
         actionManager.registerAction("openFile", openFileAction);
-        actionManager.registerAction("switchLeftTab", switchPreviousEditorAction);
-        actionManager.registerAction("switchRightTab", switchNextEditorAction);
+        actionManager.registerAction(SWITCH_LEFT_TAB, switchPreviousEditorAction);
+        actionManager.registerAction(SWITCH_RIGHT_TAB, switchNextEditorAction);
         actionManager.registerAction("scrollFromSource", revealResourceAction);
 
         changeResourceGroup.add(cutResourceAction);
@@ -666,7 +685,7 @@ public class StandardComponentInitializer {
         editorTabContextMenu.add(splitHorizontallyAction);
         actionManager.registerAction(SPLIT_VERTICALLY, splitVerticallyAction);
         editorTabContextMenu.add(splitVerticallyAction);
-        actionManager.registerAction("signatureHelp", signatureHelpAction);
+        actionManager.registerAction(SIGNATURE_HELP, signatureHelpAction);
 
         DefaultActionGroup editorContextMenuGroup = new DefaultActionGroup(actionManager);
         actionManager.registerAction(IdeActions.GROUP_EDITOR_CONTEXT_MENU, editorContextMenuGroup);
@@ -681,28 +700,30 @@ public class StandardComponentInitializer {
         editorContextMenuGroup.add(closeActiveEditorAction);
 
         // Define hot-keys
-        keyBinding.getGlobal().addKey(new KeyBuilder().action().alt().charCode('n').build(), "navigateToFile");
-        keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('F').build(), "fullTextSearch");
-        keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('A').build(), "findActionAction");
-        keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode('L').build(), "format");
-        keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('c').build(), "copy");
-        keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('x').build(), "cut");
-        keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('v').build(), "paste");
-        keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode(KeyCodeMap.ARROW_LEFT).build(), "switchLeftTab");
-        keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode(KeyCodeMap.ARROW_RIGHT).build(), "switchRightTab");
-        keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('e').build(), "openRecentFiles");
-        keyBinding.getGlobal().addKey(new KeyBuilder().charCode(KeyCodeMap.DELETE).build(), "deleteItem");
+        keyBinding.getGlobal().addKey(new KeyBuilder().action().alt().charCode('n').build(), NAVIGATE_TO_FILE);
+        keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('F').build(), FULL_TEXT_SEARCH);
+        keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('A').build(), FIND_ACTION);
+        keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode('L').build(), FORMAT);
+        keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('c').build(), COPY);
+        keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('x').build(), CUT);
+        keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('v').build(), PASTE);
+        keyBinding.getGlobal().addKey(new KeyBuilder().shift().charCode(KeyCodeMap.F6).build(), RENAME);
+        keyBinding.getGlobal().addKey(new KeyBuilder().shift().charCode(KeyCodeMap.F7).build(), SHOW_REFERENCE);
+        keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode(KeyCodeMap.ARROW_LEFT).build(), SWITCH_LEFT_TAB);
+        keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode(KeyCodeMap.ARROW_RIGHT).build(), SWITCH_RIGHT_TAB);
+        keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('e').build(), OPEN_RECENT_FILES);
+        keyBinding.getGlobal().addKey(new KeyBuilder().charCode(KeyCodeMap.DELETE).build(), DELETE_ITEM);
 
-        keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode('N').build(), "newFile");
-        keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode('x').build(), "createProject");
-        keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode('A').build(), "importProject");
+        keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode('N').build(), NEW_FILE);
+        keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode('x').build(), CREATE_PROJECT);
+        keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode('A').build(), IMPORT_PROJECT);
 
         if (UserAgent.isMac()) {
-            keyBinding.getGlobal().addKey(new KeyBuilder().control().charCode('w').build(), "closeActiveEditor");
-            keyBinding.getGlobal().addKey(new KeyBuilder().control().charCode('p').build(), "signatureHelp");
+            keyBinding.getGlobal().addKey(new KeyBuilder().control().charCode('w').build(), CLOSE_ACTIVE_EDITOR);
+            keyBinding.getGlobal().addKey(new KeyBuilder().control().charCode('p').build(), SIGNATURE_HELP);
         } else {
-            keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode('w').build(), "closeActiveEditor");
-            keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('p').build(), "signatureHelp");
+            keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode('w').build(), CLOSE_ACTIVE_EDITOR);
+            keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('p').build(), SIGNATURE_HELP);
         }
     }
 
