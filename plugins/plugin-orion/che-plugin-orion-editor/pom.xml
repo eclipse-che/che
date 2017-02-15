@@ -86,6 +86,10 @@
             <artifactId>che-core-ide-ui</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-requirejs</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.vectomatic</groupId>
             <artifactId>lib-gwt-svg</artifactId>
         </dependency>

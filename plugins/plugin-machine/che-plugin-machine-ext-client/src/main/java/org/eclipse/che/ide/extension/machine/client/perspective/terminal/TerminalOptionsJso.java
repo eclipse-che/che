@@ -23,10 +23,12 @@ class TerminalOptionsJso extends Jso{
         return {
             cols: 80,
             rows: 24,
-            useStyle: true,
             screenKeys: true,
-            useFocus: false,
-            useMouse: true
+            focusOnOpen: false
         }
+    }-*/;
+
+    public final native TerminalOptionsJso withFocusOnOpen(boolean focusOnOpen) /*-{
+        this.focusOnOpen = focusOnOpen;
     }-*/;
 }

@@ -23,8 +23,11 @@
     <inherits name="org.eclipse.che.ide.Core"/>
     <inherits name="org.eclipse.che.ide.Commons"/>
     <inherits name="org.eclipse.che.ide.editor.orion.OrionEditor"/>
+    <inherits name="org.eclipse.che.ide.terminal.Terminal"/>
+    <inherits name="org.eclipse.che.plugin.requirejs.RequireJS"/>
     <inherits name="org.eclipse.che.ide.ui.CodenvyUI"/>
 
     <source path="client"/>
+    <source path="public"/>
     <source path=""/>
 </module>

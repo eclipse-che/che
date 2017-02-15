@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es5",
+    "rootDir": "src",
+    "allowJs": true,
+    "outDir": "lib",
+    "sourceMap": true
+  },
+  "exclude": [
+    "addons",
+    "build",
+    "demo",
+    "dist",
+    "out",
+    "test",
+    "node_modules",
+    "typings",
+    "target",
+    "./gulpfile.js"
+  ]
+}
