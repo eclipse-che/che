@@ -251,14 +251,6 @@ skip_scripts() {
   fi
 }
 
-custom_user() {
-  if [ "${CHE_USER}" = "" ]; then
-    return 1
-  else
-    return 0
-  fi
-}
-
 init_logging() {
   # Initialize CLI folder
   CLI_DIR=$CHE_CONTAINER_ROOT
@@ -424,7 +416,7 @@ check_interactive() {
 check_user() {
   CHE_USER=""
   CHE_USER=$(docker inspect --format='{{.Config.User}}' $(get_this_container_id))
-  if custom_user; then
+  if ! custom_user; then
     # Add checks / warnings if a custom user is set
     CHE_USER="root"
   fi

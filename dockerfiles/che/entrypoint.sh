@@ -237,9 +237,10 @@ init() {
       echo "!!!"
       exit 1
     fi
-    export CHE_USER_ID=`id -u ${CHE_USER}`:`getent group docker | cut -d: -f3`
-    sudo chown -R ${CHE_USER}:docker ${CHE_DATA}
-    sudo chown -R ${CHE_USER}:docker ${CHE_HOME}
+    export CHE_USER_ID=${CHE_USER}
+    sudo chown -R ${CHE_USER} ${CHE_DATA}
+    sudo chown -R ${CHE_USER} ${CHE_HOME}
+    sudo chown -R ${CHE_USER} ${CHE_LOGS_DIR}
   fi
   ### Are we going to use the embedded che.properties or one provided by user?`
   ### CHE_LOCAL_CONF_DIR is internal Che variable that sets where to load
@@ -247,7 +248,7 @@ init() {
     echo "Found custom che.properties..."
     export CHE_LOCAL_CONF_DIR="/conf"
     if [ "$CHE_USER" != "root" ]; then
-      sudo chown -R ${CHE_USER}:docker ${CHE_LOCAL_CONF_DIR}
+      sudo chown -R ${CHE_USER} ${CHE_LOCAL_CONF_DIR}
     fi
   else
     echo "Using embedded che.properties... Copying template to ${CHE_DATA_HOST}/conf."
