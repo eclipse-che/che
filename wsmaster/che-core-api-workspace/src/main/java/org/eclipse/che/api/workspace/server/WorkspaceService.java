@@ -172,6 +172,7 @@ public class WorkspaceService extends Service {
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Get the workspace by the composite key",
                   notes = "Composite key can be just workspace ID or in the " +
+                          "namespace:workspace_name form, where namespace is optional (e.g :workspace_name is valid key too." +
                           "namespace/workspace_name form, where namespace can contain '/' character.")
     @ApiResponses({@ApiResponse(code = 200, message = "The response contains requested workspace entity"),
                    @ApiResponse(code = 404, message = "The workspace with specified id does not exist"),
