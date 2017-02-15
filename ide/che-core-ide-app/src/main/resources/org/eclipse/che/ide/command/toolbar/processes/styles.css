@@ -12,15 +12,14 @@
 .toolbarButton {
     float: left;
     line-height: 20px;
-    margin-top: 1px;
 }
 
 .runButton {
-    margin-left: 70px;
+    margin: 5px 0 0 60px;
 }
 
 .debugButton {
-    margin-left: 20px;
+    margin: 5px 0 0 20px;
 }
 
 .debugButton i {
@@ -43,9 +42,9 @@
     text-align: center;
     color: #4eabff;
     width: 44px;
-    height: 20px;
-    margin: 1px 0 0 80px;
-    line-height: 20px;
+    height: 22px;
+    margin: 5px 0 0 60px;
+    line-height: 22px;
 }
 
 .processesList {
@@ -53,8 +52,8 @@
     width: 400px;
     background-color: #33373b;
     border: solid 0.6px #898989;
-    height: 20px;
-    margin-top: 1px;
+    height: 22px;
+    margin-top: 5px;
 }
 
 .processesListItemText {
@@ -65,7 +64,6 @@
 
 .processesListItemNameLabel {
     float: left;
-    width: 230px;
 }
 
 .processesListItemPidLabel {

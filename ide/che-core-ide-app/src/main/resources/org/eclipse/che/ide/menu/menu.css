@@ -8,10 +8,6 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-/**********************************************************************************************
-   MENU BAR
- ***********************************************************************************************/
-
 .menuBarTable {
     float: left;
     border: 0;
@@ -22,7 +18,7 @@
 .menuBarItemOver,
 .menuBarItemSelected,
 .menuBarItemDisabled {
-    height: 24px;
+    height: 33px;
     box-sizing: border-box;
 }
 
@@ -34,7 +30,7 @@
     cursor: default;
     font-family: mainFontFamily;
     font-size: fontMenuSize;
-    font-weight: normal;
+    font-weight: bold;
     font-style: normal;
     vertical-align: middle;
 }

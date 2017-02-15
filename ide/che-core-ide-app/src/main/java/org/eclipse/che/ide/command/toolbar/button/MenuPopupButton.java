@@ -58,7 +58,7 @@ public class MenuPopupButton extends ButtonBase {
         this.dataProvider = dataProvider;
         this.actionHandler = actionHandler;
 
-        setSize("32px", "20px");
+        setSize("32px", "22px");
         getElement().setInnerSafeHtml(content);
         addStyleName(resources.css().button());
 
