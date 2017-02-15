@@ -26,3 +26,6 @@ che:
 <% end -%>
   restart: always
   container_name: <%= ENV["CHE_CONTAINER_NAME"] %>
+<% if ! @dns_resolvers.empty? -%>
+<%= "  dns:" + "\n" + @dns_resolvers.split(",").map { |val| "    - #{val}" }.join("\n") %>
+<% end -%>
