@@ -236,10 +236,10 @@ get_command_help() {
 }
 
 custom_user() {
-  if [ "${CHE_USER}" = "" ]; then
-    return 1
-  else
+  if [ "${CHE_USER}" != "${DEFAULT_CHE_USER}" ]; then
     return 0
+  else
+    return 1
   fi
 }
 
@@ -414,11 +414,13 @@ check_interactive() {
 
 # Add check to see if --user uid:gid passed in.
 check_user() {
-  CHE_USER=""
-  CHE_USER=$(docker inspect --format='{{.Config.User}}' $(get_this_container_id))
-  if ! custom_user; then
-    # Add checks / warnings if a custom user is set
-    CHE_USER="root"
+  DOCKER_CHE_USER=$(docker inspect --format='{{.Config.User}}' $(get_this_container_id))
+  if [[ "${DOCKER_CHE_USER}" != "" ]]; then
+    CHE_USER=$DOCKER_CHE_USER
+  fi
+
+  if custom_user; then
+    true
   fi
 }
 
