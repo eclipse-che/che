@@ -11,12 +11,12 @@
 package org.eclipse.che.ide.extension.machine.client.perspective.terminal;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
@@ -28,7 +28,7 @@ import javax.validation.constraints.NotNull;
  *
  * @author Dmitry Shnurenko
  */
-final class TerminalViewImpl extends Composite implements TerminalView, Focusable, RequiresResize {
+final class TerminalViewImpl extends Composite implements TerminalView, RequiresResize {
 
     interface TerminalViewImplUiBinder extends UiBinder<Widget, TerminalViewImpl> {
     }
@@ -42,6 +42,9 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
     Label     unavailableLabel;
 
     private ActionDelegate delegate;
+
+    private TerminalJso terminal;
+    private Element terminalElement;
 
     public TerminalViewImpl() {
         initWidget(UI_BINDER.createAndBindUi(this));
@@ -57,14 +60,16 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
     public void openTerminal(@NotNull final TerminalJso terminal) {
         unavailableLabel.setVisible(false);
 
+        this.terminal = terminal;
+        terminalElement = terminalPanel.getElement();
         terminalPanel.setVisible(true);
-        terminalPanel.getElement().getStyle().setProperty("opacity", "0");
+        terminalElement.getStyle().setProperty("opacity", "0");
 
         terminal.open(terminalPanel.getElement());
 
-        terminalPanel.getElement().getFirstChildElement().getStyle().clearProperty("backgroundColor");
-        terminalPanel.getElement().getFirstChildElement().getStyle().clearProperty("color");
-        terminalPanel.getElement().getStyle().clearProperty("opacity");
+        terminalElement.getFirstChildElement().getStyle().clearProperty("backgroundColor");
+        terminalElement.getFirstChildElement().getStyle().clearProperty("color");
+        terminalElement.getStyle().clearProperty("opacity");
     }
 
     /** {@inheritDoc} */
@@ -76,10 +81,20 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
         terminalPanel.setVisible(false);
     }
 
+    /**
+     * Resize {@link TerminalJso} to current widget size.
+     * To improve performance we should resize only visible terminals,
+     * because "resize terminal" is quite expensive operation. When you
+     * click on the tab to activate hidden terminal this method will be
+     * executed too, so terminal will be resized anyway.
+     */
     @Override
     public void onResize() {
         resizeTimer.cancel();
-        resizeTimer.schedule(200);
+
+        if (terminalElement != null && isVisible()) {
+            resizeTimer.schedule(200);
+        }
     }
 
     private Timer resizeTimer = new Timer() {
@@ -90,36 +105,15 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
     };
 
     private void resizeTerminal() {
-        int offsetWidth = terminalPanel.getOffsetWidth();
-        int offsetHeight = terminalPanel.getOffsetHeight();
-        if (offsetWidth <= 0 || offsetHeight <= 0) {
+        TerminalGeometryJso geometryJso = terminal.proposeGeometry();
+        int x = geometryJso.getCols();
+        int y = geometryJso.getRows();
+        if (x <= 0 || y <= 0) {
             resizeTimer.cancel();
             resizeTimer.schedule(500);
             return;
         }
 
-        int x = (int)(Math.floor(offsetWidth / 6.6221374));
-        int y = (int)Math.floor(offsetHeight / 13);
         delegate.setTerminalSize(x, y);
-    }
-
-    @Override
-    public int getTabIndex() {
-        return 0;
-    }
-
-    @Override
-    public void setAccessKey(char key) {
-
-    }
-
-    @Override
-    public void setFocus(boolean focused) {
-        delegate.setFocus(focused);
-    }
-
-    @Override
-    public void setTabIndex(int index) {
-
     }
 }

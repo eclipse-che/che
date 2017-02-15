@@ -50,12 +50,6 @@
             <artifactId>validation-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che</groupId>
-            <artifactId>exec-agent</artifactId>
-            <type>tar.gz</type>
-            <classifier>linux_amd64</classifier>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-core</artifactId>
         </dependency>
@@ -102,6 +96,14 @@
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-orion-editor</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-requirejs</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>plugin-terminal-ui</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.gwt</groupId>
@@ -180,14 +182,6 @@
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>analyze</id>
-                        <configuration>
-                            <ignoredDependencies>
-                                <ignoredDependency>org.eclipse.che:exec-agent:tar.gz</ignoredDependency>
-                            </ignoredDependencies>
-                        </configuration>
-                    </execution>
-                    <execution>
                         <id>unpack-terminal</id>
                         <phase>process-resources</phase>
                         <goals>
@@ -196,31 +190,15 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>org.eclipse.che</groupId>
-                                    <artifactId>exec-agent</artifactId>
+                                    <groupId>org.eclipse.che.plugin</groupId>
+                                    <artifactId>plugin-terminal-ui</artifactId>
                                     <version>${project.version}</version>
-                                    <classifier>linux_amd64</classifier>
-                                    <type>tar.gz</type>
+                                    <type>jar</type>
                                     <overWrite>false</overWrite>
+                                    <outputDirectory>${project.build.outputDirectory}/org/eclipse/che/ide/extension/machine/public/term</outputDirectory>
+                                    <excludes>org/**,META-INF/**</excludes>
                                 </artifactItem>
                             </artifactItems>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy-resources</id>
-                        <phase>process-classes</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>
-                                <copy file="${project.build.directory}/dependency/terminal/term.js" todir="${project.build.outputDirectory}/org/eclipse/che/ide/extension/machine/public/term/" />
-                            </target>
                         </configuration>
                     </execution>
                 </executions>
