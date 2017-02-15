@@ -137,13 +137,15 @@ public class OpenShiftConnector extends DockerConnector {
     private static final String OPENSHIFT_IMAGE_PULL_POLICY_IFNOTPRESENT = "IfNotPresent";
     private static final Long UID_ROOT                                   = Long.valueOf(0);
     private static final Long UID_USER                                   = Long.valueOf(1000);
+    private static final String WORKSPACE_DATA                           = "/data";
 
     private final OpenShiftClient openShiftClient;
     private final String          openShiftCheProjectName;
     private final String          openShiftCheServiceAccount;
     private final int             openShiftLivenessProbeDelay;
     private final int             openShiftLivenessProbeTimeout;
-    private final String          persistentVolumeClaim;
+    private final String          workspacesPersistentVolumeClaim;
+    private final String          workspacesPvcQuantity;
 
     @Inject
     public OpenShiftConnector(DockerConnectorConfiguration connectorConfiguration,
@@ -154,14 +156,16 @@ public class OpenShiftConnector extends DockerConnector {
                               @Named("che.openshift.serviceaccountname") String openShiftCheServiceAccount,
                               @Named("che.openshift.liveness.probe.delay") int openShiftLivenessProbeDelay,
                               @Named("che.openshift.liveness.probe.timeout") int openShiftLivenessProbeTimeout,
-                              @Named("che.openshift.persistent.volume.claim") String persistentVolumeClaim) {
+                              @Named("che.openshift.workspaces.pvc.name") String workspacesPersistentVolumeClaim,
+                              @Named("che.openshift.workspaces.pvc.quantity") String workspacesPvcQuantity) {
 
         super(connectorConfiguration, connectionFactory, authResolver, dockerApiVersionPathPrefixProvider);
         this.openShiftCheProjectName = openShiftCheProjectName;
         this.openShiftCheServiceAccount = openShiftCheServiceAccount;
         this.openShiftLivenessProbeDelay = openShiftLivenessProbeDelay;
         this.openShiftLivenessProbeTimeout = openShiftLivenessProbeTimeout;
-        this.persistentVolumeClaim = persistentVolumeClaim;
+        this.workspacesPersistentVolumeClaim = workspacesPersistentVolumeClaim;
+        this.workspacesPvcQuantity = workspacesPvcQuantity;
 
         this.openShiftClient = new DefaultOpenShiftClient();
     }
@@ -989,8 +993,8 @@ public class OpenShiftConnector extends DockerConnector {
         PersistentVolumeClaim pvc = getClaimCheWorkspace();
         if (pvc != null) {
             VolumeMount vm = new VolumeMountBuilder()
-                .withMountPath("/data")
-                .withName(persistentVolumeClaim)
+                .withMountPath(WORKSPACE_DATA)
+                .withName(workspacesPersistentVolumeClaim)
                 .build();
             vms.add(vm);
         } else {
@@ -1012,11 +1016,11 @@ public class OpenShiftConnector extends DockerConnector {
         PersistentVolumeClaim pvc = getClaimCheWorkspace();
         if (pvc != null) {
             PersistentVolumeClaimVolumeSource pvcs = new PersistentVolumeClaimVolumeSourceBuilder()
-                  .withClaimName(persistentVolumeClaim)
+                  .withClaimName(workspacesPersistentVolumeClaim)
                   .build();
             Volume v = new VolumeBuilder()
                   .withPersistentVolumeClaim(pvcs)
-                  .withName(persistentVolumeClaim)
+                  .withName(workspacesPersistentVolumeClaim)
                   .build();
                 vs.add(v);
         } else {
@@ -1037,15 +1041,15 @@ public class OpenShiftConnector extends DockerConnector {
     private PersistentVolumeClaim getClaimCheWorkspace() {
         PersistentVolumeClaimList pvcList = openShiftClient.persistentVolumeClaims().list();
         for(PersistentVolumeClaim pvc:pvcList.getItems()) {
-            if (persistentVolumeClaim.equals(pvc.getMetadata().getName())) {
+            if (workspacesPersistentVolumeClaim.equals(pvc.getMetadata().getName())) {
                 return pvc;
             }
         }
         Map<String, Quantity> requests = new HashMap<>();
-        requests.put("storage", new Quantity("10Gi"));
+        requests.put("storage", new Quantity(workspacesPvcQuantity));
         PersistentVolumeClaim pvc = new PersistentVolumeClaimBuilder()
             .withNewMetadata()
-                .withName(persistentVolumeClaim)
+                .withName(workspacesPersistentVolumeClaim)
             .endMetadata()
             .withNewSpec()
                 .withAccessModes("ReadWriteOnce")
@@ -1054,6 +1058,8 @@ public class OpenShiftConnector extends DockerConnector {
                 .endResources()
             .endSpec()
             .build();
+        pvc = openShiftClient.persistentVolumeClaims().inNamespace(openShiftCheProjectName).create(pvc);
+        LOG.info("Creating OpenShift PVC {}", pvc.getMetadata().getName());
         return pvc;
     }
 
