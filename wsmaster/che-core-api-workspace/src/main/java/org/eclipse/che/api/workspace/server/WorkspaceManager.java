@@ -180,7 +180,7 @@ public class WorkspaceManager {
      * <p> Key rules:
      * <ul>
      * <li>@Deprecated : If it contains <b>:</b> character then that key is combination of namespace and workspace name
-     * <li>@Deprecated : <b></>:workspace_name</b> is valid abstract key and user will be detected from Environment.
+     * <li>@Deprecated : <b></>:workspace_name</b> is valid abstract key and current user name will be used as namespace
      * <li>If it doesn't contain <b>/</b> character then that key is id(e.g. workspace123456)
      * <li>If it contains <b>/</b> character then that key is combination of namespace and workspace name
      * </ul>
