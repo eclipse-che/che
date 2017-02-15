@@ -235,6 +235,14 @@ get_command_help() {
   fi
 }
 
+custom_user() {
+  if [ "${CHE_USER}" = "" ]; then
+    return 1
+  else
+    return 0
+  fi
+}
+
 skip_scripts() {
   if [ "${CHE_SKIP_SCRIPTS}" = "true" ]; then
     return 0
