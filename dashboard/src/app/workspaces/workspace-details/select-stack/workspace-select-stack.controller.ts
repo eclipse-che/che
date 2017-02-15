@@ -139,7 +139,6 @@ export class WorkspaceSelectStackController {
    */
   setStackTab(tabName: string): void {
     this.tabName = tabName;
-
     if (tabName === 'ready-to-go') {
       this.selectStack(this.readyToGoStack);
       this.recipeScript = '';
@@ -155,6 +154,7 @@ export class WorkspaceSelectStackController {
         this.recipeUrl = '';
       }
     }
+    this.recipeFormat = '';
   }
 
   /**

@@ -48,7 +48,7 @@ export class WorkspaceRecipeImportController {
         recipeUrl: this.recipeUrlCopy,
         recipeFormat: this.recipeFormatCopy
       });
-    }, 10)
+    }, 10);
 
   }
 
