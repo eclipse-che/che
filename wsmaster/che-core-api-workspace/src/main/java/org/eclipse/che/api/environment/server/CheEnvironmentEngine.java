@@ -1358,6 +1358,7 @@ public class CheEnvironmentEngine {
         }
     }
 
+    // cleanup machine if event about instance failure comes
     private class MachineCleaner implements EventSubscriber<InstanceStateEvent> {
         @Override
         public void onEvent(InstanceStateEvent event) {
