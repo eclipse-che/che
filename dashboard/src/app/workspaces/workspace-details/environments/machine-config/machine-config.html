@@ -26,7 +26,6 @@
     <div layout="row" layout-align="center center"
          class="config-title-action-edit"
          tooltip="Edit"
-         ng-if="workspaceMachineConfigController.machineConfig.canRenameMachine"
          ng-click="workspaceMachineConfigController.showEditDialog($event)">
       <i class="config-title-action-edit fa fa-pencil" aria-hidden="true"></i>
     </div>
@@ -45,12 +44,17 @@
 
     <!-- Source -->
     <che-label-container che-label-name="Source"
-                         ng-if="workspaceMachineConfigController.machineConfig.source">
-      <div class="config-paragraph">
-        <p ng-repeat="(key, val) in workspaceMachineConfigController.machineConfig.source">
-          <span class="recipe-item-name">{{key}}:</span>{{val}}
-        </p>
-      </div>
+                         ng-if="workspaceMachineConfigController.machineConfig.source.image">
+      <ng-form flex name="workspaceMachineConfigForm" class="config-machine-source">
+        <che-input-box ng-model="workspaceMachineConfigController.newImage"
+                       ng-change="workspaceMachineConfigController.changeSource()"
+                       che-name="source"
+                       che-place-holder="Image"
+                       che-form="workspaceMachineConfigForm"
+                       required>
+          <div ng-message="required">An image is required.</div>
+        </che-input-box>
+      </ng-form>
     </che-label-container>
 
     <!-- RAM -->

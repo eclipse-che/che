@@ -9,6 +9,7 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {WorkspaceMachineConfigController} from '../machine-config.controller';
 
 /**
  * @ngdoc controller
@@ -17,16 +18,25 @@
  * @author Oleksii Kurinnyi
  */
 export class EditMachineNameDialogController {
+  private name: string;
+  private origName: string;
+  private machinesNames: string[];
+  private callbackController: WorkspaceMachineConfigController;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($mdDialog) {
+  constructor(private $mdDialog: ng.material.IDialogService) {
     this.$mdDialog = $mdDialog;
+
+    this.origName = this.name;
   }
 
   isUnique(name) {
+    if (name === this.origName) {
+      return true;
+    }
     return this.machinesNames.indexOf(name) < 0;
   }
 

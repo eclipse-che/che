@@ -10,6 +10,12 @@
  */
 'use strict';
 import {ConfirmDialogService} from '../../../../../components/service/confirm-dialog/confirm-dialog.service';
+import {EnvironmentManager} from '../../../../../components/api/environment/environment-manager';
+import {IEnvironmentManagerMachine} from '../../../../../components/api/environment/environment-manager-machine';
+
+interface IMachinesListItem extends che.IWorkspaceRuntimeMachine {
+  name: string;
+}
 
 /**
  * @ngdoc controller
@@ -25,20 +31,22 @@ export class WorkspaceMachineConfigController {
 
   timeoutPromise;
 
-  environmentManager;
-  machine;
-  machineConfig;
-  machinesList: any[];
+  environmentManager: EnvironmentManager;
+  machine: IEnvironmentManagerMachine;
+  machineConfig: any;
+  machinesList: IMachinesListItem[];
   machineName: string;
   newDev: boolean;
   newRam: number;
 
-  machineDevOnChange;
-  machineConfigOnChange;
-  machineNameOnChange;
-  machineOnDelete;
+  machineDevOnChange: Function;
+  machineConfigOnChange: Function;
+  machineNameOnChange: Function;
+  machineOnDelete: Function;
+  machineSourceOnChange: Function;
 
   private confirmDialogService: ConfirmDialogService;
+  private newImage: string;
 
   /**
    * Default constructor that is using resource injection
@@ -77,13 +85,14 @@ export class WorkspaceMachineConfigController {
       agents: this.environmentManager.getAgents(this.machine),
       canEditEnvVariables: this.environmentManager.canEditEnvVariables(this.machine),
       envVariables: this.environmentManager.getEnvVariables(this.machine),
-      canRenameMachine: this.environmentManager.canRenameMachine(this.machine),
       canDeleteMachine: this.environmentManager.canDeleteMachine(this.machine)
     };
 
     this.newDev = this.machineConfig.isDev;
 
     this.newRam = this.machineConfig.memoryLimitBytes;
+
+    this.newImage = this.machineConfig.source && this.machineConfig.source.image ? this.machineConfig.source.image : null;
   }
 
   /**
@@ -156,7 +165,9 @@ export class WorkspaceMachineConfigController {
    * @param $event {MouseEvent}
    */
   showEditDialog($event: MouseEvent): void {
-    let machinesNames = Object.keys(this.machinesList);
+    let machinesNames = this.machinesList.map((machine: IMachinesListItem) => {
+      return machine.name;
+    });
 
     this.$mdDialog.show({
       targetEvent: $event,
@@ -202,4 +213,13 @@ export class WorkspaceMachineConfigController {
       this.init();
     });
   }
+
+  /**
+   * Change machine's source image
+   */
+  changeSource(): void {
+    this.environmentManager.setSource(this.machine, this.newImage);
+    this.doUpdateConfig();
+  }
+
 }
