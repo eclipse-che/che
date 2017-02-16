@@ -783,7 +783,14 @@ public class WorkspaceManager {
                 });
     }
 
-    private CompletableFuture<Void> stopAsync(WorkspaceImpl workspace, @Nullable Boolean createSnapshot) throws ConflictException {
+    private CompletableFuture<Void> stopAsync(WorkspaceImpl workspace,
+                                              @Nullable Boolean createSnapshot) throws ConflictException,
+                                                                                       NotFoundException,
+                                                                                       ServerException {
+        if (!workspace.isTemporary()) {
+            workspace.getAttributes().put(UPDATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
+            workspaceDao.update(workspace);
+        }
         return sharedPool.runAsync(() -> {
             final String stoppedBy = sessionUserNameOr(workspace.getAttributes().get(WORKSPACE_STOPPED_BY));
             LOG.info("Workspace '{}/{}' with id '{}' is being stopped by user '{}'",
@@ -817,10 +824,6 @@ public class WorkspaceManager {
 
             try {
                 runtimes.stop(workspace.getId());
-                if (!workspace.isTemporary()) {
-                    workspace.getAttributes().put(UPDATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
-                    workspaceDao.update(workspace);
-                }
                 LOG.info("Workspace '{}/{}' with id '{}' stopped by user '{}'",
                          workspace.getNamespace(),
                          workspace.getConfig().getName(),
