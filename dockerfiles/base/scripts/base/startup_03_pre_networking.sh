@@ -31,8 +31,8 @@ initiate_offline_or_network_mode(){
     if ! is_fast && ! skip_network; then
       # Removing this info line as it was appearing before initial CLI output
 #      info "cli" "Checking network... (hint: '--fast' skips nightly, version, network, and preflight checks)"
-      local HTTP_STATUS_CODE=$(curl -I -k dockerhub.com -s -o /dev/null --write-out '%{http_code}')
-      if [[ ! $HTTP_STATUS_CODE -eq "301" ]]; then
+      local HTTP_STATUS_CODE=$(curl -I -k hub.docker.com -s -o /dev/null --write-out '%{http_code}')
+      if [[ ! $HTTP_STATUS_CODE -eq "301" ]] || [[ ! $HTTP_STATUS_CODE -eq "200" ]]; then
         info "Welcome to $CHE_FORMAL_PRODUCT_NAME!"
         info ""
         info "We could not resolve DockerHub using DNS."
@@ -45,7 +45,7 @@ initiate_offline_or_network_mode(){
         info "  2. Does your network require Docker to use a proxy?"
         info "     a. Docker for Windows & Mac have GUIs to set proxies."
         info "  3. Verify that you have access to DockerHub."
-        info "     a. Try 'curl --head dockerhub.com'"
+        info "     a. Try 'curl --head hub.docker.com'"
         info "  4. Skip networking checks."
         info "     a. Add '--fast' to any command"
         return 2;
