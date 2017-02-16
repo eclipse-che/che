@@ -145,7 +145,7 @@ public class CheEnvironmentEngineTest {
     public void setUp() throws Exception {
         engine = spy(new CheEnvironmentEngine(snapshotDao,
                                               machineInstanceProviders,
-                                              "/tmp",
+                                              System.getProperty("java.io.tmpdir"),
                                               DEFAULT_MACHINE_MEM_LIMIT_MB,
                                               eventService,
                                               environmentParser,
@@ -1224,7 +1224,8 @@ public class CheEnvironmentEngineTest {
         String workspaceId = instance.getWorkspaceId();
 
         when(instance.getLogger()).thenReturn(LineConsumer.DEV_NULL);
-        verify(eventService).subscribe(eventServiceSubscriberCaptor.capture(), eq(InstanceStateEvent.class));
+        engine.init();
+        verify(eventService).subscribe(eventServiceSubscriberCaptor.capture());
         EventSubscriber<InstanceStateEvent> subscriber = eventServiceSubscriberCaptor.getValue();
         ArgumentCaptor<Runnable> runnableArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
 
@@ -1259,7 +1260,8 @@ public class CheEnvironmentEngineTest {
         String workspaceId = instance.getWorkspaceId();
 
         when(instance.getLogger()).thenReturn(LineConsumer.DEV_NULL);
-        verify(eventService).subscribe(eventServiceSubscriberCaptor.capture(), eq(InstanceStateEvent.class));
+        engine.init();
+        verify(eventService).subscribe(eventServiceSubscriberCaptor.capture());
         EventSubscriber<InstanceStateEvent> subscriber = eventServiceSubscriberCaptor.getValue();
         ArgumentCaptor<Runnable> runnableArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
 

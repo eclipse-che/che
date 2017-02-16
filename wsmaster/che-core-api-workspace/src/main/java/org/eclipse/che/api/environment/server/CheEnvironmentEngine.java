@@ -11,7 +11,6 @@
 package org.eclipse.che.api.environment.server;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Strings;
 
 import org.eclipse.che.api.agent.server.AgentRegistry;
 import org.eclipse.che.api.agent.server.exception.AgentException;
@@ -31,6 +30,7 @@ import org.eclipse.che.api.core.model.workspace.Environment;
 import org.eclipse.che.api.core.model.workspace.ExtendedMachine;
 import org.eclipse.che.api.core.model.workspace.ServerConf2;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.core.util.AbstractLineConsumer;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.MessageConsumer;
@@ -123,6 +123,7 @@ public class CheEnvironmentEngine {
     private final Pattern                        recipeApiPattern;
     private final ContainerNameGenerator         containerNameGenerator;
     private final AgentRegistry                  agentRegistry;
+    private final WorkspaceSharedPool            sharedPool;
 
     private volatile boolean isPreDestroyInvoked;
 
@@ -149,6 +150,7 @@ public class CheEnvironmentEngine {
         this.infrastructureProvisioner = infrastructureProvisioner;
         this.recipeDownloader = recipeDownloader;
         this.agentRegistry = agentRegistry;
+        this.sharedPool = sharedPool;
         this.environments = new ConcurrentHashMap<>();
         this.machineInstanceProviders = machineInstanceProviders;
         this.machineLogsDir = new File(machineLogsDir);
@@ -159,13 +161,6 @@ public class CheEnvironmentEngine {
                                                 apiEndpoint.substring(apiEndpoint.indexOf(":")) +
                                                 "/recipe/.*$)|(^/recipe/.*$)");
         this.containerNameGenerator = containerNameGenerator;
-
-        eventService.subscribe(event -> {
-            // cleanup machine if event about instance failure comes
-            if ((event.getType() == OOM) || (event.getType() == DIE)) {
-                sharedPool.execute(() -> cleanupMachine(event.getWorkspaceId(), event.getMachineId(), event.getType()));
-            }
-        }, InstanceStateEvent.class);
     }
 
     /**
@@ -1187,11 +1182,14 @@ public class CheEnvironmentEngine {
     }
 
     @SuppressWarnings("unused")
+    @VisibleForTesting
     @PostConstruct
-    private void createLogsDir() {
+    void init() {
         if (!(machineLogsDir.exists() || machineLogsDir.mkdirs())) {
             throw new IllegalStateException("Unable create directory " + machineLogsDir.getAbsolutePath());
         }
+
+        eventService.subscribe(new MachineCleaner());
     }
 
     /**
@@ -1286,45 +1284,6 @@ public class CheEnvironmentEngine {
         return service;
     }
 
-    // removes failed for some reason machine and sends event
-    private void cleanupMachine(String workspaceId, String machineId, InstanceStateEvent.Type eventType) {
-        Instance instance = removeMachineFromEnvironment(workspaceId, machineId);
-        if (instance == null) {
-            // should not happen
-            return;
-        }
-
-        String message = "Machine is destroyed";
-        if (eventType == OOM) {
-            message = message +
-                      ". The processes in this machine need more RAM. This machine started with " +
-                      instance.getConfig().getLimits().getRam() +
-                      "MB. Create a new machine configuration that allocates additional RAM or increase " +
-                      "the workspace RAM limit in the user dashboard.";
-        }
-        MachineStatusEvent destroyedEvent = newDto(MachineStatusEvent.class)
-                .withEventType(MachineStatusEvent.EventType.DESTROYED)
-                .withDev(instance.getConfig().isDev())
-                .withMachineId(machineId)
-                .withWorkspaceId(workspaceId)
-                .withMachineName(instance.getConfig().getName())
-                .withError(message);
-
-        try {
-            if (!Strings.isNullOrEmpty(message)) {
-                instance.getLogger().writeLine(message);
-            }
-        } catch (IOException ignore) {}
-
-        try {
-            instance.destroy();
-        } catch (MachineException e) {
-            LOG.warn("Destroying of machine {} in workspace {} where container was unexpectedly stopped failed. Error: {}, {}",
-                      machineId, workspaceId, e.getLocalizedMessage());
-        }
-        eventService.publish(destroyedEvent);
-    }
-
     // Removes machine from environment but doesn't stop it.
     @VisibleForTesting
     @Nullable
@@ -1396,6 +1355,53 @@ public class CheEnvironmentEngine {
         @Override
         public int hashCode() {
             return Objects.hash(startQueue, machines, status, logger, name, environmentConfig, environment);
+        }
+    }
+
+    private class MachineCleaner implements EventSubscriber<InstanceStateEvent> {
+        @Override
+        public void onEvent(InstanceStateEvent event) {
+            String machineId = event.getMachineId();
+            String workspaceId = event.getWorkspaceId();
+            InstanceStateEvent.Type eventType = event.getType();
+            // cleanup machine if event about instance failure comes
+            if ((eventType == OOM) || (eventType == DIE)) {
+                sharedPool.execute(() -> {
+                    Instance instance = removeMachineFromEnvironment(workspaceId, machineId);
+                    if (instance == null) {
+                        // should not happen
+                        return;
+                    }
+
+                    String message = "Machine is destroyed";
+                    if (eventType == OOM) {
+                        message = message +
+                                  ". The processes in this machine need more RAM. This machine started with " +
+                                  instance.getConfig().getLimits().getRam() +
+                                  "MB. Create a new machine configuration that allocates additional RAM or increase " +
+                                  "the workspace RAM limit in the user dashboard.";
+                    }
+                    MachineStatusEvent destroyedEvent = newDto(MachineStatusEvent.class)
+                            .withEventType(MachineStatusEvent.EventType.DESTROYED)
+                            .withDev(instance.getConfig().isDev())
+                            .withMachineId(machineId)
+                            .withWorkspaceId(workspaceId)
+                            .withMachineName(instance.getConfig().getName())
+                            .withError(message);
+
+                    try {
+                        instance.getLogger().writeLine(message);
+                    } catch (IOException ignore) {}
+
+                    try {
+                        instance.destroy();
+                    } catch (MachineException e) {
+                        LOG.warn("Destroying of machine {} in workspace {} where container was unexpectedly stopped failed. Error: {}, {}",
+                                 machineId, workspaceId, e.getLocalizedMessage());
+                    }
+                    eventService.publish(destroyedEvent);
+                });
+            }
         }
     }
 
