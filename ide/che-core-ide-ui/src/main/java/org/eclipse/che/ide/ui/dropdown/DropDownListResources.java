@@ -24,7 +24,7 @@ public interface DropDownListResources extends ClientBundle {
     SVGResource expansionImage();
 
     interface DropdownCss extends CssResource {
-        String expandedImage();
+        String dropButton();
 
         String listItemPanel();
 

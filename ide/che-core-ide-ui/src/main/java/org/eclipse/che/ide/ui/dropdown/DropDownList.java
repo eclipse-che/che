@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import org.eclipse.che.commons.annotation.Nullable;
@@ -50,11 +51,9 @@ public class DropDownList extends Composite {
     private final Map<DropDownListItem, DropDownListItemRenderer> itemsRenderers;
 
     @UiField
-    FlowPanel listHeader;
+    SimplePanel selectedItemPanel;
     @UiField
-    FlowPanel selectedElementName;
-    @UiField
-    FlowPanel dropButton;
+    SimplePanel dropButtonPanel;
 
     private SelectionHandler selectionHandler;
     private DropDownListItem selectedItem;
@@ -75,8 +74,8 @@ public class DropDownList extends Composite {
 
         initWidget(UI_BINDER.createAndBindUi(this));
 
-        dropButton.getElement().appendChild(RESOURCES.expansionImage().getSvg().getElement());
-        dropButton.addStyleName(RESOURCES.dropdownListCss().expandedImage());
+        dropButtonPanel.getElement().appendChild(RESOURCES.expansionImage().getSvg().getElement());
+        dropButtonPanel.addStyleName(RESOURCES.dropdownListCss().dropButton());
 
         dropDownPanel = new PopupPanel(true);
         dropDownPanel.setAnimationEnabled(true);
@@ -101,7 +100,7 @@ public class DropDownList extends Composite {
 
     private void attachEventHandlers() {
         emptyStateWidget.addDomHandler(event -> dropDownPanel.showRelativeTo(DropDownList.this), ClickEvent.getType());
-        dropButton.addDomHandler(event -> dropDownPanel.showRelativeTo(DropDownList.this), ClickEvent.getType());
+        dropButtonPanel.addDomHandler(event -> dropDownPanel.showRelativeTo(DropDownList.this), ClickEvent.getType());
     }
 
     private void checkListEmptiness() {
@@ -133,8 +132,7 @@ public class DropDownList extends Composite {
         }
 
         selectedItem = item;
-        selectedElementName.clear();
-        selectedElementName.add(headerWidget);
+        selectedItemPanel.setWidget(headerWidget);
 
         if (item != null && selectionHandler != null) {
             selectionHandler.onItemSelected(item);

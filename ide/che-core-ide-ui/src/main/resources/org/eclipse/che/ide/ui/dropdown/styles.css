@@ -8,19 +8,19 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-.expandedImage {
+.dropButton {
     transform: scaleY(0.5) rotate(90deg);
     margin-left: 3px;
     margin-top: 1px;
 }
 
-.expandedImage svg {
+.dropButton svg {
     width: 12px;
     height: 12px;
     fill: selectCommandActionColor;
 }
 
-.expandedImage:hover svg {
+.dropButton:hover svg {
     fill: selectCommandActionHoverColor;
 }
 
