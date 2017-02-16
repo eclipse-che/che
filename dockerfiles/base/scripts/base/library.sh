@@ -47,7 +47,7 @@ get_display_url() {
 }
 
 get_debug_display_url() {
-  local CHE_DEBUG_PORT_LOCAL=9000
+  local CHE_DEBUG_PORT_LOCAL=8000
 
   if is_initialized; then 
     DEBUG_PORT_FROM_CONFIG=$(get_value_of_var_from_env_file ${CHE_PRODUCT_NAME}_DEBUG_PORT)
