@@ -61,6 +61,7 @@ import org.eclipse.che.ide.api.workspace.event.EnvironmentOutputEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.command.toolbar.processes.ActivateProcessOutputEvent;
+import org.eclipse.che.ide.command.toolbar.processes.ProcessOutputClosedEvent;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
@@ -699,6 +700,10 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
             removeCallback.remove();
 
+            if (console instanceof CommandOutputConsole) {
+                eventBus.fireEvent(new ProcessOutputClosedEvent(((CommandOutputConsole)console).getPid()));
+            }
+
             return;
         }
 
@@ -722,6 +727,10 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                 consoleCommands.remove(console);
 
                 removeCallback.remove();
+
+                if (console instanceof CommandOutputConsole) {
+                    eventBus.fireEvent(new ProcessOutputClosedEvent(((CommandOutputConsole)console).getPid()));
+                }
             }
         };
     }

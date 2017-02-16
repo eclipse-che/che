@@ -10,10 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.toolbar.processes;
 
+import com.google.gwt.core.client.Duration;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.ButtonBase;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.InlineHTML;
@@ -87,8 +89,10 @@ class ProcessItemRenderer implements DropDownListItemRenderer {
     private static class ProcessWidget extends FlowPanel {
 
         private final Label        pidLabel;
+        private final Label        durationLabel;
         private final ActionButton stopButton;
         private final ActionButton reRunButton;
+        private final Timer        updateDurationTimer;
 
         /** Stores true if widget displays stopped process and false for running process. */
         private boolean stopped;
@@ -105,6 +109,32 @@ class ProcessItemRenderer implements DropDownListItemRenderer {
             nameLabel.setTitle(process.getCommandLine());
             nameLabel.addStyleName(RESOURCES.commandToolbarCss().processesListItemText());
             nameLabel.addStyleName(RESOURCES.commandToolbarCss().processesListItemNameLabel());
+
+            durationLabel = new Label();
+            durationLabel.addStyleName(RESOURCES.commandToolbarCss().processesListItemText());
+            durationLabel.addStyleName(RESOURCES.commandToolbarCss().processesListItemPidLabel());
+
+            updateDurationTimer = new Timer() {
+                final Duration duration = new Duration();
+
+                @Override
+                public void run() {
+                    final int elapsedSec = duration.elapsedMillis() / 1000;
+                    final int minutesPart = elapsedSec / 60;
+                    final int secondsPart = elapsedSec - minutesPart * 60;
+
+                    durationLabel.setText((minutesPart < 10 ? "0" + minutesPart : minutesPart) + ":" +
+                                          (secondsPart < 10 ? "0" + secondsPart : secondsPart));
+                }
+
+                @Override
+                public void cancel() {
+                    super.cancel();
+
+                    durationLabel.setVisible(false);
+                }
+            };
+            updateDurationTimer.scheduleRepeating(1000);
 
             pidLabel = new Label('#' + Integer.toString(process.getPid()));
             pidLabel.addStyleName(RESOURCES.commandToolbarCss().processesListItemText());
@@ -125,6 +155,7 @@ class ProcessItemRenderer implements DropDownListItemRenderer {
             add(nameLabel);
             add(stopButton);
             add(reRunButton);
+            add(durationLabel);
             add(pidLabel);
         }
 
@@ -132,6 +163,8 @@ class ProcessItemRenderer implements DropDownListItemRenderer {
         void toggleStopped() {
             stopped = !stopped;
             checkStopped();
+
+            updateDurationTimer.cancel();
         }
 
         /** Check whether widget displays stopped or running process and changes widget's state if it's required. */

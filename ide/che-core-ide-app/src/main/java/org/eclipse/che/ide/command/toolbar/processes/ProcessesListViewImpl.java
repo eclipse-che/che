@@ -77,8 +77,6 @@ public class ProcessesListViewImpl implements ProcessesListView {
     @Override
     public void clearList() {
         dropDownList.clear();
-
-        // TODO: set `empty list widget` to the dropdown list's header
     }
 
     @Override

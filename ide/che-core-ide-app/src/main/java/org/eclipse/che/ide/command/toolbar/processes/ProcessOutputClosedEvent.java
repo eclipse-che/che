@@ -13,35 +13,36 @@ package org.eclipse.che.ide.command.toolbar.processes;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
-/** Event should be fired for activating particular process's output panel. */
-public class ActivateProcessOutputEvent extends GwtEvent<ActivateProcessOutputEvent.Handler> {
+/** Event fired when process's output panel has been closed. */
+public class ProcessOutputClosedEvent extends GwtEvent<ProcessOutputClosedEvent.Handler> {
 
-    public static final Type<ActivateProcessOutputEvent.Handler> TYPE = new Type<>();
+    public static final Type<ProcessOutputClosedEvent.Handler> TYPE = new Type<>();
 
     private final int pid;
 
     /** Creates new event with the given PID. */
-    public ActivateProcessOutputEvent(int pid) {
+    public ProcessOutputClosedEvent(int pid) {
         this.pid = pid;
     }
 
+    /** PID of the associated process. */
     public int getPid() {
         return pid;
     }
 
     @Override
-    public Type<ActivateProcessOutputEvent.Handler> getAssociatedType() {
+    public Type<ProcessOutputClosedEvent.Handler> getAssociatedType() {
         return TYPE;
     }
 
     @Override
     protected void dispatch(Handler handler) {
-        handler.onActivateProcessOutput(this);
+        handler.onProcessOutputClosed(this);
     }
 
     public interface Handler extends EventHandler {
 
-        /** Called when activating process's output is requested. */
-        void onActivateProcessOutput(ActivateProcessOutputEvent event);
+        /** Called when process's output panel has been closed. */
+        void onProcessOutputClosed(ProcessOutputClosedEvent event);
     }
 }

@@ -88,6 +88,14 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
                 view.notifyProcessStopped(process);
             }
         });
+
+        eventBus.addHandler(ProcessOutputClosedEvent.TYPE, event -> {
+            final Process process = runningProcesses.get(event.getPid());
+
+            if (process != null) {
+                view.removeProcess(process);
+            }
+        });
     }
 
     private void updateView() {

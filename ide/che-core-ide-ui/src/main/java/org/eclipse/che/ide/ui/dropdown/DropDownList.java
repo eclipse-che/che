@@ -88,7 +88,7 @@ public class DropDownList extends Composite {
         dropDownPanel.add(new ScrollPanel(contentPanel));
 
         attachEventHandlers();
-        setHeader(null);
+        setSelectedItem(null);
     }
 
     /** Adapt drop down panel's height depending on the amount of items. */
@@ -106,12 +106,23 @@ public class DropDownList extends Composite {
 
     private void checkListEmptiness() {
         if (contentPanel.getWidgetCount() == 0) {
-            setHeader(null);
+            setSelectedItem(null);
         }
     }
 
-    /** Set the specified item to the list's header. */
-    private void setHeader(@Nullable DropDownListItem item) {
+    /** Sets the given {@code handler} to notify it about changing selected item. */
+    public void setSelectionHandler(SelectionHandler handler) {
+        selectionHandler = handler;
+    }
+
+    /** Returns the currently selected item or {@code null} if none. */
+    @Nullable
+    public DropDownListItem getSelectedItem() {
+        return selectedItem;
+    }
+
+    /** Set the given item as currently selected. Sets empty state widget if {@code null} were provided. */
+    private void setSelectedItem(@Nullable DropDownListItem item) {
         final Widget headerWidget;
 
         if (item != null) {
@@ -128,17 +139,6 @@ public class DropDownList extends Composite {
         if (item != null && selectionHandler != null) {
             selectionHandler.onItemSelected(item);
         }
-    }
-
-    /** Sets the given {@code handler} to notify it about changing selected item. */
-    public void setSelectionHandler(SelectionHandler handler) {
-        selectionHandler = handler;
-    }
-
-    /** Returns the currently selected item or {@code null} if none. */
-    @Nullable
-    public DropDownListItem getSelectedItem() {
-        return selectedItem;
     }
 
     /**
@@ -158,13 +158,13 @@ public class DropDownList extends Composite {
 //        listWidget.addStyleName(RESOURCES.dropdownListCss().menuElement());
         listWidget.getElement().getStyle().setCursor(POINTER);
         listWidget.addDomHandler(event -> {
-            setHeader(item);
+            setSelectedItem(item);
             dropDownPanel.hide();
         }, ClickEvent.getType());
 
         contentPanel.insert(listWidget, 0);
         adaptDropDownPanelHeight();
-        setHeader(item);
+        setSelectedItem(item);
     }
 
     /**
@@ -186,16 +186,21 @@ public class DropDownList extends Composite {
     /** Remove item from the list. */
     public void removeItem(DropDownListItem item) {
         final Widget widget = itemsWidgets.remove(item);
+
         if (widget != null) {
             contentPanel.remove(widget);
         }
 
         itemsRenderers.remove(item);
 
-        // TODO: check whether another item should be set to the list's header
+        if (!itemsWidgets.isEmpty()) {
+            // set any available item as currently selected
+            setSelectedItem(itemsWidgets.entrySet().iterator().next().getKey());
+        } else {
+            checkListEmptiness();
+        }
 
         adaptDropDownPanelHeight();
-        checkListEmptiness();
     }
 
     /** Clear the list. */
