@@ -2709,6 +2709,7 @@ Terminal.prototype.evaluateKeyEscapeSequence = function(ev) {
         } else if (ev.keyCode === 56) {
           // delete
           result.key = String.fromCharCode(127);
+          result.cancel = true;
         } else if (ev.keyCode === 219) {
           // ^[ - Control Sequence Introducer (CSI)
           result.key = String.fromCharCode(27);
