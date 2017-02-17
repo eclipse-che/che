@@ -52,21 +52,26 @@
     margin-top: 5px;
 }
 
-.processesListItemText {
+.processWidget {
+    height: 22px;
+    line-height: 22px;
+}
+
+.processWidgetText {
     font-family: mainFontFamily;
     font-size: fontSize;
     color: selectCommandActionColor;
 }
 
-.processesListItemNameLabel {
+.processWidgetNameLabel {
     float: left;
 }
 
-.processesListItemPidLabel {
+.processWidgetPidLabel {
     float: right;
     margin-right: 10px;
 }
 
-.processesListItemActionButton {
+.processWidgetActionButton {
     color: #4eabff;
 }

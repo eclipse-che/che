@@ -47,7 +47,7 @@ public class ProcessesListViewImpl implements ProcessesListView {
         label.addStyleName(resources.commandToolbarCss().processesListLabel());
 
         final InlineHTML emptyListWidget = new InlineHTML("<b>Ready</b> - start command");
-        emptyListWidget.addStyleName(resources.commandToolbarCss().processesListItemText());
+        emptyListWidget.addStyleName(resources.commandToolbarCss().processWidgetText());
 
         dropDownList = new DropDownList(emptyListWidget);
         dropDownList.setWidth("400px");

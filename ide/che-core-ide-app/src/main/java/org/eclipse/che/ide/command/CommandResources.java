@@ -84,12 +84,14 @@ public interface CommandResources extends ClientBundle {
 
         String processesList();
 
-        String processesListItemText();
+        String processWidget();
 
-        String processesListItemNameLabel();
+        String processWidgetText();
 
-        String processesListItemPidLabel();
+        String processWidgetNameLabel();
 
-        String processesListItemActionButton();
+        String processWidgetPidLabel();
+
+        String processWidgetActionButton();
     }
 }

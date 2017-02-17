@@ -102,6 +102,8 @@ class ProcessItemRenderer implements DropDownListItemRenderer {
         ProcessWidget(BaseListItem<Process> item, StopProcessHandler stopProcessHandler, RerunProcessHandler rerunProcessHandler) {
             super();
 
+            addStyleName(RESOURCES.commandToolbarCss().processWidget());
+
             final Process process = item.getValue();
             final Machine targetMachine = process.getMachine();
             stopped = !process.isAlive();
@@ -109,12 +111,12 @@ class ProcessItemRenderer implements DropDownListItemRenderer {
             final String labelText = targetMachine.getConfig().getName() + ": <b>" + process.getName() + "</b>";
             final Label nameLabel = new InlineHTML(labelText);
             nameLabel.setTitle(process.getCommandLine());
-            nameLabel.addStyleName(RESOURCES.commandToolbarCss().processesListItemText());
-            nameLabel.addStyleName(RESOURCES.commandToolbarCss().processesListItemNameLabel());
+            nameLabel.addStyleName(RESOURCES.commandToolbarCss().processWidgetText());
+            nameLabel.addStyleName(RESOURCES.commandToolbarCss().processWidgetNameLabel());
 
             durationLabel = new Label();
-            durationLabel.addStyleName(RESOURCES.commandToolbarCss().processesListItemText());
-            durationLabel.addStyleName(RESOURCES.commandToolbarCss().processesListItemPidLabel());
+            durationLabel.addStyleName(RESOURCES.commandToolbarCss().processWidgetText());
+            durationLabel.addStyleName(RESOURCES.commandToolbarCss().processWidgetPidLabel());
 
             updateDurationTimer = new Timer() {
                 final Duration duration = new Duration();
@@ -139,8 +141,8 @@ class ProcessItemRenderer implements DropDownListItemRenderer {
             updateDurationTimer.scheduleRepeating(1000);
 
             pidLabel = new Label('#' + Integer.toString(process.getPid()));
-            pidLabel.addStyleName(RESOURCES.commandToolbarCss().processesListItemText());
-            pidLabel.addStyleName(RESOURCES.commandToolbarCss().processesListItemPidLabel());
+            pidLabel.addStyleName(RESOURCES.commandToolbarCss().processWidgetText());
+            pidLabel.addStyleName(RESOURCES.commandToolbarCss().processWidgetPidLabel());
 
             final SafeHtmlBuilder safeHtmlBuilder1 = new SafeHtmlBuilder();
             safeHtmlBuilder1.appendHtmlConstant(FontAwesome.STOP);
@@ -153,7 +155,6 @@ class ProcessItemRenderer implements DropDownListItemRenderer {
             reRunButton.addClickHandler(event -> rerunProcessHandler.onRerunProcess(process));
 
             checkStopped();
-            setHeight("22px");
             add(nameLabel);
             add(stopButton);
             add(reRunButton);
@@ -182,7 +183,7 @@ class ProcessItemRenderer implements DropDownListItemRenderer {
 
                 getElement().getStyle().setFloat(RIGHT);
                 getElement().setInnerSafeHtml(content);
-                asWidget().addStyleName(RESOURCES.commandToolbarCss().processesListItemActionButton());
+                asWidget().addStyleName(RESOURCES.commandToolbarCss().processWidgetActionButton());
             }
         }
     }
