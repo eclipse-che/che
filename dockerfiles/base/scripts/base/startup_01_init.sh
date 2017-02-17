@@ -328,9 +328,20 @@ start() {
   info "cli" "$CHE_VERSION - using docker ${DOCKER_SERVER_VERSION} / $(get_docker_install_type)"
 
   source "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/startup_04_pre_cli_init.sh
-  
+
+  # Allow CLI assemblies to load variables assuming networking, logging, docker activated  
   cli_pre_init
+
+  # Set CHE_HOST, CHE_PORT, and apply any CLI-specific command-line overrides to variables  
   cli_init "$@"
+
+  # Additional checks for nightly version
+  verify_nightly_accuracy
+
+  # Additional checks to verify image matches version installed on disk & upgrade suitability
+  verify_version_compatibility
+
+  # Allow CLI assemblies to load variables assuming CLI is finished bootstrapping
   cli_post_init
 
   source "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/startup_05_pre_exec.sh

@@ -73,17 +73,6 @@ cli_init() {
       fi
     fi
   fi
-
-  # Special function to perform special behaviors if you are running nightly version
-  verify_nightly_accuracy
-
-  # Do not perform a version compatibility check if running upgrade command.
-  # The upgrade command has its own internal checks for version compatibility.
-  if [[ "$@" == *"upgrade"* ]]; then
-    verify_version_upgrade_compatibility
-  elif ! is_fast; then
-    verify_version_compatibility
-  fi
 }
 
 verify_nightly_accuracy() {
@@ -106,6 +95,16 @@ verify_nightly_accuracy() {
   fi
 }
 
+verify_version_compatibility() {
+  # Do not perform a version compatibility check if running upgrade command.
+  # The upgrade command has its own internal checks for version compatibility.
+  if [[ "$@" == *"upgrade"* ]]; then
+    verify_upgrade
+  elif ! is_fast; then
+    verify_version
+  fi
+}
+
 is_nightly() {
   if [[ $(get_image_version) = "nightly" ]]; then
     return 0
@@ -114,7 +113,7 @@ is_nightly() {
   fi
 }
 
-verify_version_compatibility() {
+verify_version() {
 
   ## If ! is_initialized, then the system hasn't been installed
   ## First, compare the CLI image version to what version was initialized in /config/*.ver.donotmodify
@@ -171,7 +170,7 @@ verify_version_compatibility() {
   fi
 }
 
-verify_version_upgrade_compatibility() {
+verify_upgrade() {
   ## Two levels of checks
   ## First, compare the CLI image version to what the admin has configured in /config/.env file
   ##      - If they match, nothing to upgrade
