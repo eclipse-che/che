@@ -42,7 +42,9 @@ class ProcessItemRenderer implements DropDownListItemRenderer {
     private ProcessWidget headerWidget;
     private ProcessWidget listWidget;
 
-    ProcessItemRenderer(BaseListItem<Process> listItem, StopProcessHandler stopProcessHandler, RerunProcessHandler reRunProcessHandler) {
+    ProcessItemRenderer(BaseListItem<Process> listItem,
+                        StopProcessHandler stopProcessHandler,
+                        RerunProcessHandler reRunProcessHandler) {
         item = listItem;
         stopHandler = stopProcessHandler;
         reRunHandler = reRunProcessHandler;
@@ -151,7 +153,7 @@ class ProcessItemRenderer implements DropDownListItemRenderer {
             reRunButton.addClickHandler(event -> rerunProcessHandler.onRerunProcess(process));
 
             checkStopped();
-            setHeight("25px");
+            setHeight("22px");
             add(nameLabel);
             add(stopButton);
             add(reRunButton);

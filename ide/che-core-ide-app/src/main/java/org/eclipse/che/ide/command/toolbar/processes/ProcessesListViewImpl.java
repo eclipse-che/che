@@ -50,6 +50,7 @@ public class ProcessesListViewImpl implements ProcessesListView {
         emptyListWidget.addStyleName(resources.commandToolbarCss().processesListItemText());
 
         dropDownList = new DropDownList(emptyListWidget);
+        dropDownList.setWidth("400px");
         dropDownList.addStyleName(resources.commandToolbarCss().processesList());
         dropDownList.setSelectionHandler(item -> {
             for (Map.Entry<Process, BaseListItem<Process>> entry : listItems.entrySet()) {

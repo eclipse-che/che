@@ -24,10 +24,19 @@
     fill: selectCommandActionHoverColor;
 }
 
-.menuElement:hover {
-    background-color: hoverBackgroundColor;
+.itemsPanel {
+    background-color: openedFilesDropdownListBackgroundColor;
+    border: 1px solid openedFilesDropdownListBorderColor;
+    box-shadow: 0 2px 2px 0 openedFilesDropdownListShadowColor;
+    border-radius: 0 0 3px 3px;
 }
 
-.listItemPanel {
-    margin: 0 27px 0 10px;
+.listItem {
+    width: literal("calc(100% - 40px)");
+    cursor: pointer;
+    padding: 0 27px 0 10px;
+}
+
+.listItem:hover {
+    background-color: hoverBackgroundColor;
 }

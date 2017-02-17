@@ -48,10 +48,6 @@
 }
 
 .processesList {
-    float: left;
-    width: 400px;
-    background-color: #33373b;
-    border: solid 0.6px #898989;
     height: 22px;
     margin-top: 5px;
 }

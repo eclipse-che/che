@@ -15,19 +15,21 @@ import com.google.gwt.resources.client.CssResource;
 
 import org.vectomatic.dom.svg.ui.SVGResource;
 
+/** Client bundle for {@link DropDownList}. */
 public interface DropDownListResources extends ClientBundle {
 
     @Source({"styles.css", "org/eclipse/che/ide/api/ui/style.css"})
-    DropdownCss dropdownListCss();
+    DropDownCss dropDownListCss();
 
     @Source("expansionIcon.svg")
     SVGResource expansionImage();
 
-    interface DropdownCss extends CssResource {
+    interface DropDownCss extends CssResource {
+
         String dropButton();
 
-        String listItemPanel();
+        String itemsPanel();
 
-        String menuElement();
+        String listItem();
     }
 }
