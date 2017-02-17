@@ -15,6 +15,7 @@
 
     <ui:style>
         .widget {
+            height: 22px;
             display: inline-block;
             cursor: pointer;
             background-color: #33373b;

@@ -30,9 +30,7 @@ import java.util.Map;
 
 import static com.google.gwt.user.client.ui.PopupPanel.AnimationType.ROLL_DOWN;
 
-/**
- * Drop down list widget.
- */
+/** Drop down list widget. */
 public class DropDownList extends Composite {
 
     private static final DropDownListUiBinder  UI_BINDER = GWT.create(DropDownListUiBinder.class);
@@ -43,7 +41,7 @@ public class DropDownList extends Composite {
     /** Amount of pixels reserved for displaying one item in the drop down list. */
     private static final int ITEM_WIDGET_HEIGHT = 22;
 
-    private static final int DEFAULT_WIDGET_WIDTH_PX = 250;
+    private static final int DEFAULT_WIDGET_WIDTH_PX = 200;
 
     private final PopupPanel        dropDownPanel;
     private final SimpleLayoutPanel itemsPanel;
@@ -61,14 +59,22 @@ public class DropDownList extends Composite {
     private SelectionHandler selectionHandler;
     private DropDownListItem selectedItem;
 
-    /** Create new drop down widget. */
+    /** Creates new drop down widget. */
     public DropDownList() {
         this(new Label("---"));
     }
 
     /**
-     * Create new drop down widget.
-     * Uses the given {@code emptyStateWidget} to display as the empty list's header.
+     * Creates new drop down widget.
+     * Uses the given {@code emptyStateText} for displaying an empty list's state.
+     */
+    public DropDownList(String emptyStateText) {
+        this(new Label(emptyStateText));
+    }
+
+    /**
+     * Creates new drop down widget.
+     * Uses the given {@code emptyStateWidget} for displaying an empty list's state.
      */
     public DropDownList(Widget emptyStateWidget) {
         this.emptyStateWidget = emptyStateWidget;

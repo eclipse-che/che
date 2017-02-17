@@ -20,6 +20,8 @@ import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.mvp.Presenter;
 import org.eclipse.che.ide.command.CommandUtils;
 import org.eclipse.che.ide.command.goal.RunGoal;
+import org.eclipse.che.ide.command.toolbar.previewurl.PreviewUrlListPresenter;
+import org.eclipse.che.ide.command.toolbar.processes.ProcessesListPresenter;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -34,19 +36,25 @@ import java.util.Map;
 @Singleton
 public class CommandToolbarPresenter implements Presenter, CommandToolbarView.ActionDelegate {
 
+    private final ProcessesListPresenter    processesListPresenter;
+    private final PreviewUrlListPresenter   previewUrlListPresenter;
     private final CommandManager            commandManager;
     private final CommandUtils              commandUtils;
     private final Provider<CommandExecutor> commandExecutor;
     private final RunGoal                   runGoal;
-    private       CommandToolbarView        view;
+    private final CommandToolbarView        view;
 
     @Inject
-    public CommandToolbarPresenter(final CommandToolbarView view,
-                                   final CommandManager commandManager,
-                                   final CommandUtils commandUtils,
-                                   final Provider<CommandExecutor> commandExecutor,
-                                   final RunGoal runGoal) {
+    public CommandToolbarPresenter(CommandToolbarView view,
+                                   ProcessesListPresenter processesListPresenter,
+                                   PreviewUrlListPresenter previewUrlListPresenter,
+                                   CommandManager commandManager,
+                                   CommandUtils commandUtils,
+                                   Provider<CommandExecutor> commandExecutor,
+                                   RunGoal runGoal) {
         this.view = view;
+        this.processesListPresenter = processesListPresenter;
+        this.previewUrlListPresenter = previewUrlListPresenter;
         this.commandManager = commandManager;
         this.commandUtils = commandUtils;
         this.commandExecutor = commandExecutor;
@@ -84,6 +92,9 @@ public class CommandToolbarPresenter implements Presenter, CommandToolbarView.Ac
     @Override
     public void go(AcceptsOneWidget container) {
         container.setWidget(view);
+
+        processesListPresenter.go(view.getProcessesListContainer());
+        previewUrlListPresenter.go(view.getPreviewUrlsListContainer());
     }
 
     @Override

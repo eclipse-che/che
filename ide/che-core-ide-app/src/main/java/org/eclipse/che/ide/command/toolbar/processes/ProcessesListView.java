@@ -11,19 +11,17 @@
 package org.eclipse.che.ide.command.toolbar.processes;
 
 
-import com.google.inject.ImplementedBy;
-
 import org.eclipse.che.ide.api.mvp.View;
 
 /**
  * View for processes list.
  */
-@ImplementedBy(ProcessesListViewImpl.class)
 public interface ProcessesListView extends View<ProcessesListView.ActionDelegate> {
 
     /** Add process to the list. */
     void addProcess(Process process);
 
+    /** Remove process from the list. */
     void removeProcess(Process process);
 
     /** Clear processes list. */

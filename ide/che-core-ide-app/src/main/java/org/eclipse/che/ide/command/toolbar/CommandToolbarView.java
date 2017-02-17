@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.toolbar;
 
+import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.ImplementedBy;
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.ide.api.command.ContextualCommand;
@@ -23,8 +24,11 @@ import java.util.List;
 @ImplementedBy(CommandToolbarViewImpl.class)
 public interface CommandToolbarView extends View<CommandToolbarView.ActionDelegate> {
 
-
     void setRunCommands(List<ContextualCommand> commands);
+
+    AcceptsOneWidget getProcessesListContainer();
+
+    AcceptsOneWidget getPreviewUrlsListContainer();
 
     interface ActionDelegate {
 

@@ -194,7 +194,7 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
                 view.enableStopButton(false);
                 view.toggleScrollToEndButton(false);
 
-                eventBus.fireEvent(new ProcessFinishedEvent(pid));
+                eventBus.fireEvent(new ProcessFinishedEvent(pid, machine));
             }
         };
     }

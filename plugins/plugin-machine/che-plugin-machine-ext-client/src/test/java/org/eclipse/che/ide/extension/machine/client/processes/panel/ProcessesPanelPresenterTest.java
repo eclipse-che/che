@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
@@ -466,7 +467,7 @@ public class ProcessesPanelPresenterTest {
         when(outputConsole.isFinished()).thenReturn(true);
         presenter.consoles.put(PROCESS_ID, outputConsole);
 
-        presenter.onProcessFinished(new ProcessFinishedEvent(PID));
+        presenter.onProcessFinished(new ProcessFinishedEvent(PID, mock(Machine.class)));
 
         verify(view).setStopButtonVisibility(PROCESS_ID, false);
     }

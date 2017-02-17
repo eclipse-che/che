@@ -26,7 +26,6 @@ import org.eclipse.che.ide.command.toolbar.button.MenuPopupButton;
 import org.eclipse.che.ide.command.toolbar.button.PopupActionHandler;
 import org.eclipse.che.ide.command.toolbar.button.PopupItem;
 import org.eclipse.che.ide.command.toolbar.button.PopupItemDataProvider;
-import org.eclipse.che.ide.command.toolbar.processes.ProcessesListPresenter;
 import org.eclipse.che.ide.util.Pair;
 import org.eclipse.che.ide.util.loging.Log;
 
@@ -52,9 +51,7 @@ public class CommandToolbarViewImpl implements CommandToolbarView {
     private FlowPanel                rootPanel;
 
     @Inject
-    public CommandToolbarViewImpl(ProcessesListPresenter processesListPresenter,
-                                  CommandResources resources,
-                                  AppContext appContext) {
+    public CommandToolbarViewImpl(CommandResources resources, AppContext appContext) {
         this.appContext = appContext;
 
         rootPanel = new FlowPanel();
@@ -62,14 +59,6 @@ public class CommandToolbarViewImpl implements CommandToolbarView {
 
         setUpRunButton(resources);
         setUpDebugButton(resources);
-
-        processesListPresenter.go(new AcceptsOneWidget() {
-            @Override
-            public void setWidget(IsWidget w) {
-                rootPanel.add(w);
-                w.asWidget().getElement().getStyle().setFloat(Style.Float.LEFT);
-            }
-        });
     }
 
     private void setUpRunButton(CommandResources resources) {
@@ -156,6 +145,27 @@ public class CommandToolbarViewImpl implements CommandToolbarView {
     public void setRunCommands(List<ContextualCommand> commands) {
         this.commands = commands;
         runPopupItemDataProvider.handler.onItemDataChanged();
+    }
+
+    @Override
+    public AcceptsOneWidget getProcessesListContainer() {
+        return new AcceptsOneWidget() {
+            @Override
+            public void setWidget(IsWidget w) {
+                rootPanel.add(w);
+                w.asWidget().getElement().getStyle().setFloat(Style.Float.LEFT);
+            }
+        };
+    }
+
+    @Override
+    public AcceptsOneWidget getPreviewUrlsListContainer() {
+        return new AcceptsOneWidget() {
+            @Override
+            public void setWidget(IsWidget w) {
+                rootPanel.add(w);
+            }
+        };
     }
 
     private class RunPopupItemDataProvider implements PopupItemDataProvider {

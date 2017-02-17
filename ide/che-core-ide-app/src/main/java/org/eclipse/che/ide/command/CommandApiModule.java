@@ -52,6 +52,10 @@ import org.eclipse.che.ide.command.palette.CommandPaletteView;
 import org.eclipse.che.ide.command.palette.CommandPaletteViewImpl;
 import org.eclipse.che.ide.command.producer.CommandProducerActionFactory;
 import org.eclipse.che.ide.command.producer.CommandProducerActionManager;
+import org.eclipse.che.ide.command.toolbar.previewurl.PreviewUrlListView;
+import org.eclipse.che.ide.command.toolbar.previewurl.PreviewUrlListViewImpl;
+import org.eclipse.che.ide.command.toolbar.processes.ProcessesListView;
+import org.eclipse.che.ide.command.toolbar.processes.ProcessesListViewImpl;
 import org.eclipse.che.ide.command.type.CommandTypeChooserView;
 import org.eclipse.che.ide.command.type.CommandTypeChooserViewImpl;
 import org.eclipse.che.ide.command.type.CommandTypeRegistryImpl;
@@ -102,6 +106,10 @@ public class CommandApiModule extends AbstractGinModule {
         bind(NamePageView.class).to(NamePageViewImpl.class);
         bind(SettingsPageView.class).to(SettingsPageViewImpl.class);
         bind(PageWithTextEditorView.class).to(PageWithTextEditorViewImpl.class);
+
+        // toolbar
+        bind(ProcessesListView.class).to(ProcessesListViewImpl.class).in(Singleton.class);
+        bind(PreviewUrlListView.class).to(PreviewUrlListViewImpl.class).in(Singleton.class);
     }
 
     @Provides

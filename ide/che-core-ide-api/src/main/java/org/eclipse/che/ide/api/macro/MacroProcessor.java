@@ -10,17 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.macro;
 
-import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.ide.api.command.CommandExecutor;
-import org.eclipse.che.ide.api.command.CommandImpl;
 
 /**
  * Expands all {@link Macro}s in the given string.
  *
  * @author Artem Zatsarynnyi
  * @see Macro
- * @see CommandExecutor#executeCommand(CommandImpl, Machine)
  */
 public interface MacroProcessor {
 

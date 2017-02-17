@@ -13,6 +13,8 @@ package org.eclipse.che.ide.api.machine.events;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
+import org.eclipse.che.api.core.model.machine.Machine;
+
 /**
  * @author Dmitry Shnurenko
  */
@@ -27,14 +29,20 @@ public class ProcessFinishedEvent extends GwtEvent<ProcessFinishedEvent.Handler>
 
     public static final Type<ProcessFinishedEvent.Handler> TYPE = new Type<>();
 
-    private final int processID;
+    private final int     processID;
+    private final Machine machine;
 
-    public ProcessFinishedEvent(int processID) {
+    public ProcessFinishedEvent(int processID, Machine machine) {
         this.processID = processID;
+        this.machine = machine;
     }
 
     public int getProcessID() {
         return processID;
+    }
+
+    public Machine getMachine() {
+        return machine;
     }
 
     @Override

@@ -20,14 +20,10 @@ import org.eclipse.che.ide.ui.dropdown.BaseListItem;
 import org.eclipse.che.ide.ui.dropdown.DropDownList;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Implementation of {@link ProcessesListView} that displays processes in a drop down list.
- */
-@Singleton
+/** Implementation of {@link ProcessesListView} that displays processes in a drop down list. */
 public class ProcessesListViewImpl implements ProcessesListView {
 
     private final FlowPanel    rootPanel;
