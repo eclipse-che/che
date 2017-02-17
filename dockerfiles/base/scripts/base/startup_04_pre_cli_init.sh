@@ -251,6 +251,40 @@ is_intermediate_version() {
   return 1
 }
 
+# Compares $1 version to the first 10 versions listed as tags on Docker Hub
+# Returns "" if $1 is newest, otherwise returns the newest version available
+# Does not work with nightly versions - do not use this to compare nightly to another version
+compare_versions() {
+
+  local VERSION_LIST_JSON=$(curl -s https://hub.docker.com/v2/repositories/${CHE_IMAGE_NAME}/tags/)
+  local NUMBER_OF_VERSIONS=$(echo $VERSION_LIST_JSON | jq '.count')
+
+  DISPLAY_LIMIT=10
+  if [ $DISPLAY_LIMIT -gt $NUMBER_OF_VERSIONS ]; then 
+    DISPLAY_LIMIT=$NUMBER_OF_VERSIONS
+  fi
+
+  # Strips off -M#, -latest version information
+  BASE_VERSION=$(echo $1 | cut -f1 -d"-")
+
+  COUNTER=0
+  RETURN_VERSION=""
+  while [ $COUNTER -lt $DISPLAY_LIMIT ]; do
+    TAG=$(echo $VERSION_LIST_JSON | jq ".results[$COUNTER].name")
+    TAG=${TAG//\"}
+
+    if [ "$TAG" != "nightly" ] && [ "$TAG" != "latest" ]; then
+      if less_than $BASE_VERSION $TAG; then
+        RETURN_VERSION=$TAG
+        break;
+      fi
+    fi
+    let COUNTER=COUNTER+1 
+  done
+
+  echo $RETURN_VERSION
+}
+
 compare_cli_version_to_installed_version() {
   IMAGE_VERSION=$(get_image_version)
   INSTALLED_VERSION=$(get_installed_version)
@@ -341,4 +375,18 @@ get_value_of_var_from_env() {
     fi
   done
   echo ""
+}
+
+# This will compare two same length strings, such as versions
+less_than() {
+  for (( i=0; i<${#1}; i++ )); do
+    if [[ ${1:$i:1} != ${2:$i:1} ]]; then
+      if [ ${1:$i:1} -lt ${2:$i:1} ]; then
+        return 0
+      else
+        return 1
+      fi
+    fi
+  done
+  return 1
 }

@@ -110,6 +110,13 @@ version_error(){
   text "\nSet CHE_VERSION=<version> and rerun.\n\n"
 }
 
+list_versions(){
+  # List all subdirectories and then print only the file name
+  for version in /version/* ; do
+    text " ${version##*/}\n"
+  done
+}
+
 ### define variables for all image name in the given list
 set_variables_images_list() {
   IFS=$'\n'
