@@ -4,7 +4,7 @@
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
-initiate_offline_or_network_mode(){
+init_offline_or_network_mode(){
   # If you are using ${CHE_FORMAL_PRODUCT_NAME} in offline mode, images must be loaded here
   # This is the point where we know that docker is working, but before we run any utilities
   # that require docker.
@@ -54,7 +54,7 @@ initiate_offline_or_network_mode(){
   fi
 }
 
-grab_initial_images() {
+init_initial_images() {
   # get list of images
   get_image_manifest ${CHE_VERSION}
 
