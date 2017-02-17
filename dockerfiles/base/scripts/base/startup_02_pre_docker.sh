@@ -562,10 +562,19 @@ init_scripts() {
      SCRIPTS_CONTAINER_SOURCE_DIR=${CHE_SCRIPTS_CONTAINER_SOURCE_DIR}
 
     if [[ -d "/repo/dockerfiles/base/scripts/base" ]]; then
-       SCRIPTS_BASE_CONTAINER_SOURCE_DIR="/repo/dockerfiles/base/scripts/base"
-     else
-       SCRIPTS_BASE_CONTAINER_SOURCE_DIR=${CHE_BASE_SCRIPTS_CONTAINER_SOURCE_DIR}
-     fi
+      SCRIPTS_BASE_CONTAINER_SOURCE_DIR="/repo/dockerfiles/base/scripts/base"
+    else
+      SCRIPTS_BASE_CONTAINER_SOURCE_DIR=${CHE_BASE_SCRIPTS_CONTAINER_SOURCE_DIR}
+    fi
+
+    # Compare scripts inside of the Docker image with those on the repository
+    # Fail if they do not match
+    DIFF_NUM=$(diff -r "/scripts/base" "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}" | wc -l)
+    if [ $DIFF_NUM -gt 0 ]; then 
+      error "The scripts in ${CHE_IMAGE_FULLNAME} do not match those in :/repo."
+      error "Is your repo branch compatible with this image version?"
+      error "Add '--skip:scripts' to skip this check."
+    fi
   else
      # Use the CLI that is inside the container.
      SCRIPTS_CONTAINER_SOURCE_DIR="/scripts"
