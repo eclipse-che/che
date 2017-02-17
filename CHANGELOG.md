@@ -46,7 +46,7 @@
 - CLI - if `:/repo` mounted, check `CHE_BASE_API_VERSION` in repo to match version in image [4006](https://github.com/eclipse/che/pull/4006)
 - Exclude `assembly/assembly-main/src/assembly/bin/` source folder from gitignore [4003](https://github.com/eclipse/che/pull/4003)
 - - verbose output in background cli sync job when `--unison-verbose` flag is enabled [4001](https://github.com/eclipse/che/pull/4001)
-- Decoupling of testing framework core API from Java specific testing frameworks implementation. ### Release Notes: N/A refactoring of existing code. ### Docs PR: None : same behavior than before [3999](https://github.com/eclipse/che/pull/3999)
+- Decoupling of testing framework core API from Java specific testing frameworks implementation. [3999](https://github.com/eclipse/che/pull/3999)
 - Use `/dockerfiles` path inside CLI container for launch [3991](https://github.com/eclipse/che/pull/3991)
 - Errors that might happen on application server stopping, will be logged. [3990](https://github.com/eclipse/che/pull/3990)
 - Upgraded GWT to version 2.8 including new `guava` and `lib-gwt-svg`. [3984](https://github.com/eclipse/che/pull/3984)
