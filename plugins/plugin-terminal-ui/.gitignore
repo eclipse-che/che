@@ -1,15 +1,5 @@
 node_modules/
-*.swp
-.lock-wscript
-Makefile.gyp
-*.Makefile
-*.target.gyp.mk
-*.node
-example/*.log
-docs/
-npm-debug.log
 /.idea/
-.env
 build/
 target/
 .idea/
