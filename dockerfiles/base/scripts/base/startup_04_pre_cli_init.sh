@@ -124,7 +124,7 @@ verify_version() {
   CHE_IMAGE_VERSION=$(get_image_version)
 
   # Only check for newer versions if not in offline mode and not nightly.
-  if ! is_offline && ! is_nightly; then
+  if ! is_offline && ! is_nightly && ! is_fast && ! skip_network; then
     NEWER=$(compare_versions $CHE_IMAGE_VERSION)
 
     if [[ "${NEWER}" != "" ]]; then
@@ -257,6 +257,12 @@ compare_versions() {
 
   local VERSION_LIST_JSON=$(curl -s https://hub.docker.com/v2/repositories/${CHE_IMAGE_NAME}/tags/)
   local NUMBER_OF_VERSIONS=$(echo $VERSION_LIST_JSON | jq '.count')
+
+  if [[ "${NUMBER_OF_VERSIONS}" = "" ]]; then
+    error "Unable to retrieve version list with 'curl -s https://hub.docker.com/v2/repositories/${CHE_IMAGE_NAME}/tags/'."
+    error "You can add '--skip:network' to ignore this check"
+    return 2
+  fi
 
   DISPLAY_LIMIT=10
   if [ $DISPLAY_LIMIT -gt $NUMBER_OF_VERSIONS ]; then 

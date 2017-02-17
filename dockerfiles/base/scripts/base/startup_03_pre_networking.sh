@@ -30,7 +30,7 @@ init_offline_or_network_mode(){
     # See: https://github.com/eclipse/che/issues/3266#issuecomment-265464165
     if ! is_fast && ! skip_network; then
       # Removing this info line as it was appearing before initial CLI output
-#      info "cli" "Checking network... (hint: '--fast' skips nightly, version, network, and preflight checks)"
+
       local HTTP_STATUS_CODE=$(curl -I -k hub.docker.com -s -o /dev/null --write-out '%{http_code}')
       if [[ ! $HTTP_STATUS_CODE -eq "301" ]] && [[ ! $HTTP_STATUS_CODE -eq "200" ]]; then
         info "Welcome to $CHE_FORMAL_PRODUCT_NAME!"

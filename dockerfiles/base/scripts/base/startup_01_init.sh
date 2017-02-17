@@ -251,9 +251,6 @@ start() {
 
   # pre_init is unique to each CLI assembly. This can be called before
   # networking is established.
-
-  # Each CLI assembly must provide this cli.sh - loads overridden functions and variables for the CLI
-  # Hard code this location
   source "/scripts/pre_init.sh"
   pre_init
 
