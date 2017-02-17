@@ -4,7 +4,7 @@
 [Full Changelog](https://github.com/eclipse/che/compare/5.2.2...5.3.0)
 
 **Pull requests merged:**
- fix cli test [4164](https://github.com/eclipse/che/pull/4164)
+- fix cli test [4164](https://github.com/eclipse/che/pull/4164)
 - Workspace _updated_ attribute is updated before real stop is called [4158](https://github.com/eclipse/che/pull/4158)
 - [cli] default debug port is 8000 when user do not specify it [4157](https://github.com/eclipse/che/pull/4157)
 - Prevent external event for another widgets on key DELETE for terminal UI. [4156](https://github.com/eclipse/che/pull/4156)
