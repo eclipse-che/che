@@ -31,7 +31,7 @@ init_offline_or_network_mode(){
     if ! is_fast && ! skip_network; then
       # Removing this info line as it was appearing before initial CLI output
 
-      local HTTP_STATUS_CODE=$(curl -I -k hub.docker.com -s -o /dev/null --write-out '%{http_code}')
+      local HTTP_STATUS_CODE=$(curl -I -k https://hub.docker.com -s -o /dev/null --write-out '%{http_code}')
       if [[ ! $HTTP_STATUS_CODE -eq "301" ]] && [[ ! $HTTP_STATUS_CODE -eq "200" ]]; then
         info "Welcome to $CHE_FORMAL_PRODUCT_NAME!"
         info ""
