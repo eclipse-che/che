@@ -136,10 +136,9 @@ export class WorkspaceDetailsController {
       });
 
       // search the selected page
-      let page = this.$route.current.params.page;
-      if (!page) {
-        this.$location.path('/workspace/' + this.namespace + '/' + this.workspaceName);
-      } else {
+      let page = this.$location.search().page;
+
+      if (page) {
         let selectedTabIndex = Tab.Settings;
         switch (page) {
           case 'info' || 'Settings':
@@ -238,7 +237,9 @@ export class WorkspaceDetailsController {
    * @param form {any}
    */
   updateName(form: any): void {
-    this.copyWorkspaceDetails.config.name = this.newName;
+    if (this.copyWorkspaceDetails && this.copyWorkspaceDetails.config) {
+      this.copyWorkspaceDetails.config.name = this.newName;
+    }
 
     this.switchEditMode();
   }

@@ -26,14 +26,6 @@ interface TerminalView extends View<TerminalView.ActionDelegate> {
 
     interface ActionDelegate {
         void setTerminalSize(int x, int y);
-
-        /**
-         * Set focus on the terminal panel.
-         *
-         * @param focused
-         *         {@code true} if terminal should be in focus
-         */
-        void setFocus(boolean focused);
     }
 
     /**

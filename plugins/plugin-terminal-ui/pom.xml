@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2012-2017 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>che-plugin-parent</artifactId>
+        <groupId>org.eclipse.che.plugin</groupId>
+        <version>5.3.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <artifactId>plugin-terminal-ui</artifactId>
+    <version>5.3.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    <name>Terminal UI</name>
+    <dependencies>
+        <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-user</artifactId>
+        </dependency>
+    </dependencies>
+    <build>
+        <sourceDirectory>src/main/java</sourceDirectory>
+        <outputDirectory>target/classes</outputDirectory>
+        <resources>
+            <resource>
+                <directory>src/main/java</directory>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <configuration>
+                    <useDefaultExcludes>false</useDefaultExcludes>
+                    <excludes>
+                      <exclude>**/src/addons/**</exclude>
+                      <exclude>**/src/handlers/**</exclude>
+                      <exclude>**/src/main/resources/org/eclipse/che/ide/terminal/client/xterm.css</exclude>
+                      <exclude>**/utils/**</exclude>
+                      <exclude>**/src/Viewport.ts</exclude>
+                      <exclude>**/src/CompositionHelper.ts</exclude>
+                      <exclude>**/src/EventEmitter.js</exclude>
+                      <exclude>**/src/xterm.js</exclude>
+                      <exclude>**/src/Interfaces.ts</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <!--clean-up build folders-->
+                        <id>clean-up</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <delete dir="${basedir}/node_modules" />
+                                <delete dir="${basedir}/build" />
+                            </tasks>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <!--compilation sources-->
+                        <id>compilation</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                Download NPM dependencies
+                                <exec dir="${basedir}" executable="npm" failonerror="true">
+                                    <arg value="install" />
+                                </exec>
+                                <exec dir="${basedir}" executable="npm" failonerror="true">
+                                    <arg value="run-script" />
+                                    <arg value="build" />
+                                </exec>
+                            </target>
+                        </configuration>
+                    </execution>
+                    <execution>
+                      <!--copy compiled terminal script to output directory-->
+                      <id>copy-xterm.js</id>
+                      <phase>process-classes</phase>
+                      <goals>
+                          <goal>run</goal>
+                      </goals>
+                      <configuration>
+                        <target name="copy xterm.js">
+                          <copy todir="${project.build.outputDirectory}">
+                              <fileset dir="${basedir}/build"/>
+                          </copy>
+                        </target>
+                      </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

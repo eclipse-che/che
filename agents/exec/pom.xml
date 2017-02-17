@@ -60,7 +60,6 @@
                         <exclude>src/docs/**</exclude>
                         <exclude>src/vendor/**</exclude>
                         <exclude>src/Godeps/**</exclude>
-                        <exclude>src/static/term.js</exclude>
                         <exclude>src/.idea/**</exclude>
                         <exclude>src/exec</exclude>
                         <exclude>src/*.iml</exclude>

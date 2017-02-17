@@ -33,3 +33,7 @@ che:
 <% if scope.lookupvar('che::che_user') != 'root' -%>
   user: <%= scope.lookupvar('che::che_user') -%>
 <% end -%>
+
+<% if ! @dns_resolvers.empty? -%>
+<%= "  dns:" + "\n" + @dns_resolvers.split(",").map { |val| "    - #{val}" }.join("\n") %>
+<% end -%>
