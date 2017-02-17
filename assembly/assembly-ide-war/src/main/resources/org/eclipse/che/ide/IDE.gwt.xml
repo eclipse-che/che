@@ -38,6 +38,7 @@
     <inherits name='org.eclipse.che.ide.Api'/>
     <inherits name='org.eclipse.che.api.core.model.Model'/>
     <inherits name="org.eclipse.che.ide.Core"/>
+    <inherits name='org.eclipse.che.api.factory.Factory'/>
     <inherits name="org.eclipse.che.ide.ui.CodenvyUI"/>
 
     <!-- Extensions                                                 -->
@@ -66,6 +67,7 @@
     <inherits name='org.eclipse.che.plugin.product.info.ProductInfo'/>
     <inherits name='org.eclipse.che.plugin.cpp.Cpp'/>
     <inherits name='org.eclipse.che.plugin.csharp.CSharp'/>
+    <inherits name='org.eclipse.che.plugin.factory.Factory'/>
     <inherits name='org.eclipse.che.plugin.php.Php'/>
     <inherits name='org.eclipse.che.plugin.composer.Composer'/>
     <inherits name='org.eclipse.che.plugin.python.Python'/>

@@ -59,20 +59,12 @@ public class ImportFromConfigViewImpl extends Window implements ImportFromConfig
         this.setTitle(locale.importFromConfigurationTitle());
         setWidget(importFromConfigViewBinder.createAndBindUi(this));
 
-        Button btnCancel = createButton(locale.cancelButton(), "import-from-config-btn-cancel", new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                delegate.onCancelClicked();
-            }
-        });
+        Button btnCancel = createButton(locale.cancelButton(), "import-from-config-btn-cancel",
+                                        (ClickHandler)event -> delegate.onCancelClicked());
         addButtonToFooter(btnCancel);
 
-        buttonImport = createButton(locale.importButton(), "import-from-config-btn-import", new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                delegate.onImportClicked();
-            }
-        });
+        buttonImport = createButton(locale.importButton(), "import-from-config-btn-import",
+                                    (ClickHandler)event -> delegate.onImportClicked());
         addButtonToFooter(buttonImport);
     }
 
@@ -88,12 +80,7 @@ public class ImportFromConfigViewImpl extends Window implements ImportFromConfig
         fileUpload.ensureDebugId("import-from-config-ChooseFile");
         addHandler(fileUpload.getElement());
 
-        fileUpload.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                buttonImport.setEnabled(fileUpload.getFilename() != null);
-            }
-        });
+        fileUpload.addChangeHandler((ChangeHandler)event -> buttonImport.setEnabled(fileUpload.getFilename() != null));
 
         uploadForm.add(fileUpload);
 
@@ -136,18 +123,18 @@ public class ImportFromConfigViewImpl extends Window implements ImportFromConfig
         function readFileContent(evt) {
             // Check for the various File API support.
             if (!window.File || !window.FileReader || !window.FileList || !window.Blob) {
-                instance.@com.codenvy.ide.factory.client.json.ImportFromConfigViewImpl::onError(Ljava/lang/String;)
+                instance.@org.eclipse.che.plugin.factory.ide.json.ImportFromConfigViewImpl::onError(Ljava/lang/String;)
                 ('The File APIs are not fully supported in this browser.');
                 return;
             }
 
             var selectedFile = evt.target.files[0];
 
-            var max_size = @com.codenvy.ide.factory.client.json.ImportFromConfigViewImpl::MAX_FILE_SIZE;
+            var max_size = @org.eclipse.che.plugin.factory.ide.json.ImportFromConfigViewImpl::MAX_FILE_SIZE;
 
             if (selectedFile.size > max_size * 100000) {
                 instance.@org.eclipse.che.plugin.factory.ide.json.ImportFromConfigViewImpl::resetUploadFileField()();
-                instance.@com.codenvy.ide.factory.client.json.ImportFromConfigViewImpl::setErrorMessageOnForm(Ljava/lang/String;)
+                instance.@org.eclipse.che.plugin.factory.ide.json.ImportFromConfigViewImpl::setErrorMessageOnForm(Ljava/lang/String;)
                 ('File size exceeds the limit ' + max_size + 'mb');
                 return;
             }
@@ -155,13 +142,13 @@ public class ImportFromConfigViewImpl extends Window implements ImportFromConfig
             var reader = new FileReader();
             reader.onload = function () {
                 //reseting error message
-                instance.@com.codenvy.ide.factory.client.json.ImportFromConfigViewImpl::setErrorMessageOnForm(Ljava/lang/String;)('');
+                instance.@org.eclipse.che.plugin.factory.ide.json.ImportFromConfigViewImpl::setErrorMessageOnForm(Ljava/lang/String;)('');
                 //getting file's content
-                instance.@com.codenvy.ide.factory.client.json.ImportFromConfigViewImpl::fileContent = reader.result;
+                instance.@org.eclipse.che.plugin.factory.ide.json.ImportFromConfigViewImpl::fileContent = reader.result;
             };
 
             reader.onerror = function (event) {
-                instance.@com.codenvy.ide.factory.client.json.ImportFromConfigViewImpl::onError(Ljava/lang/String;)
+                instance.@org.eclipse.che.plugin.factory.ide.json.ImportFromConfigViewImpl::onError(Ljava/lang/String;)
                 ('Error reading config file ' + event.target.error.code);
             };
 

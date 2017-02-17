@@ -13,7 +13,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
-    <ui:with field='locale' type='com.codenvy.ide.factory.client.FactoryLocalizationConstant'/>
+    <ui:with field='locale' type='org.eclipse.che.plugin.factory.ide.FactoryLocalizationConstant'/>
     <ui:style>
         .emptyBorder {
             margin: 6px;
