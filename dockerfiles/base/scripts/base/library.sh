@@ -30,7 +30,6 @@ get_boot_url() {
 }
 
 get_display_url() {
-
   # If the user has modified che.env with a custom CHE_HOST, we need to detect that here
   # and not use the in-memory one which is always set with eclipse/che-ip.
   local CHE_HOST_LOCAL=$${CHE_PRODUCT_NAME}_HOST
@@ -106,34 +105,6 @@ update_image_if_not_found() {
   fi
 }
 
-list_versions(){
-  # List all subdirectories and then print only the file name
-  for version in /version/* ; do
-    text " ${version##*/}\n"
-  done
-}
-
-### Returns the list of ${CHE_FORMAL_PRODUCT_NAME} images for a particular version of ${CHE_FORMAL_PRODUCT_NAME}
-### Sets the images as environment variables after loading from file
-get_image_manifest() {
-  log "Checking registry for version '$1' images"
-  if ! has_version_registry $1; then
-    version_error $1
-    return 1;
-  fi
-
-  # Load images from file
-  BOOTSTRAP_IMAGE_LIST=$(cat ${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}/images/images-bootstrap)
-  IMAGE_LIST=$(cat /version/$1/images)
-  UTILITY_IMAGE_LIST=$(cat ${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}/images/images-utilities)
-
-  # set variables
-  set_variables_images_list "${BOOTSTRAP_IMAGE_LIST}"
-  set_variables_images_list "${IMAGE_LIST}"
-  set_variables_images_list "${UTILITY_IMAGE_LIST}"
-
-}
-
 # Usage:
 #   confirm_operation <Warning message> [--force|--no-force]
 confirm_operation() {
@@ -184,54 +155,6 @@ wait_until_server_is_booted() {
 less_than_numerically() {
   COMPARE=$(awk "BEGIN { print ($1 < $2) ? 0 : 1}")
   return $COMPARE
-}
-
-# This will compare two same length strings, such as versions
-less_than() {
-  for (( i=0; i<${#1}; i++ )); do
-    if [[ ${1:$i:1} != ${2:$i:1} ]]; then
-      if [ ${1:$i:1} -lt ${2:$i:1} ]; then
-        return 0
-      else
-        return 1
-      fi
-    fi
-  done
-  return 1
-}
-
-# Compares $1 version to the first 10 versions listed as tags on Docker Hub
-# Returns "" if $1 is newest, otherwise returns the newest version available
-# Does not work with nightly versions - do not use this to compare nightly to another version
-compare_versions() {
-
-  local VERSION_LIST_JSON=$(curl -s https://hub.docker.com/v2/repositories/${CHE_IMAGE_NAME}/tags/)
-  local NUMBER_OF_VERSIONS=$(echo $VERSION_LIST_JSON | jq '.count')
-
-  DISPLAY_LIMIT=10
-  if [ $DISPLAY_LIMIT -gt $NUMBER_OF_VERSIONS ]; then 
-    DISPLAY_LIMIT=$NUMBER_OF_VERSIONS
-  fi
-
-  # Strips off -M#, -latest version information
-  BASE_VERSION=$(echo $1 | cut -f1 -d"-")
-
-  COUNTER=0
-  RETURN_VERSION=""
-  while [ $COUNTER -lt $DISPLAY_LIMIT ]; do
-    TAG=$(echo $VERSION_LIST_JSON | jq ".results[$COUNTER].name")
-    TAG=${TAG//\"}
-
-    if [ "$TAG" != "nightly" ] && [ "$TAG" != "latest" ]; then
-      if less_than $BASE_VERSION $TAG; then
-        RETURN_VERSION=$TAG
-        break;
-      fi
-    fi
-    let COUNTER=COUNTER+1 
-  done
-
-  echo $RETURN_VERSION
 }
 
 # Input - an array of ports and port descriptions to check
