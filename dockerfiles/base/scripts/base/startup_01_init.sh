@@ -248,7 +248,6 @@ cleanup() {
 }
 
 start() {
-
   # pre_init is unique to each CLI assembly. This can be called before
   # networking is established.
   source "/scripts/pre_init.sh"
@@ -333,10 +332,10 @@ start() {
   cli_init "$@"
 
   # Additional checks for nightly version
-  verify_nightly_accuracy
+  cli_verify_nightly
 
   # Additional checks to verify image matches version installed on disk & upgrade suitability
-  verify_version_compatibility
+  cli_verify_version
 
   # Allow CLI assemblies to load variables assuming CLI is finished bootstrapping
   cli_post_init

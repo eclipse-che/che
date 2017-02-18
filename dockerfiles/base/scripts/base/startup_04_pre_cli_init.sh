@@ -75,7 +75,7 @@ cli_init() {
   fi
 }
 
-verify_nightly_accuracy() {
+cli_verify_nightly() {
   # Per request of the engineers, check to see if the locally cached nightly version is older
   # than the one stored on DockerHub.
   if is_nightly; then
@@ -95,7 +95,7 @@ verify_nightly_accuracy() {
   fi
 }
 
-verify_version_compatibility() {
+cli_verify_version() {
   # Do not perform a version compatibility check if running upgrade command.
   # The upgrade command has its own internal checks for version compatibility.
   if [[ "$@" == *"upgrade"* ]]; then
