@@ -309,7 +309,7 @@ start() {
 
   # Pull the list of images that are necessary. If in offline mode, verifies that the images
   # are properly loaded into the cache.
-  init_initial_images
+  init_initial_images "$@"
 
   # Each CLI assembly must provide this cli.sh - loads overridden functions and variables for the CLI
   source "${SCRIPTS_CONTAINER_SOURCE_DIR}"/post_init.sh
@@ -332,10 +332,10 @@ start() {
   cli_init "$@"
 
   # Additional checks for nightly version
-  cli_verify_nightly
+  cli_verify_nightly "$@"
 
   # Additional checks to verify image matches version installed on disk & upgrade suitability
-  cli_verify_version
+  cli_verify_version "$@"
 
   # Allow CLI assemblies to load variables assuming CLI is finished bootstrapping
   cli_post_init
