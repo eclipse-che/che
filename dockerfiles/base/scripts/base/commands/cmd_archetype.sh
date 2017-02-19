@@ -58,9 +58,12 @@ help_cmd_archetype() {
 
 pre_cmd_archetype() {
   # Not loaded as part of the init process to save on download time
+
+  UTILITY_IMAGE_DEV="eclipse/che-dev"
+
   if ! is_fast && ! skip_pull; then
     load_utilities_images_if_not_done
-    update_image "eclipse/che-dev"
+    update_image $UTILITY_IMAGE_DEV
   fi
 
   if [ $# -eq 0 ]; then 
@@ -149,65 +152,91 @@ cmd_archetype() {
   cd /archetype
   case $ARCHETYPE_ACTION in
     generate)
-
-      if ! $SKIP_INTERACTIVE; then 
-        PS3="Please enter your choice: "
-        options=("che-agent-archetype                 - Assembly with sample agent" \
-                 "che-plugin-ide-menu-archetype       - Assembly with IDE extension to customize menu" \
-                 "che-plugin-ide-wizard-archetype     - Assembly with custom C project type extension" \
-                 "codenvy-plugin-ide-wizard-archetype - Assembly with Codenvy packaging")
-        select opt in "${options[@]}"
-        do
-          case $opt in
-            "che-agent-archetype                 - Assembly with sample agent")
-              ARCHETYPE_ID="che-agent-archetype"
-              break
-              ;;
-            "che-plugin-ide-menu-archetype       - Assembly with IDE extension to customize menu")
-              ARCHETYPE_ID="che-plugin-ide-menu-archetype"
-              break
-              ;;
-            "che-plugin-ide-wizard-archetype     - Assembly with custom C project type extension")
-              ARCHETYPE_ID="che-plugin-ide-wizard-archetype"
-              break
-              ;;
-            "codenvy-plugin-ide-wizard-archetype - Assembly with Codenvy packaging")
-              ARCHETYPE_ID="codenvy-plugin-ide-wizard-archetype"
-              break
-              ;;
-            *) echo invalid option;;
-          esac
-        done
-        text "\n"
-      fi
-
-      docker run -it --rm --name generate-che              \
-           -v /var/run/docker.sock:/var/run/docker.sock \
-           -v "${M2_MOUNT}":/home/user/.m2         \
-           -v "${ARCHETYPE_MOUNT}":/home/user/che-build         \
-           -w /home/user/che-build                              \
-           eclipse/che-dev                          \
-               mvn archetype:generate               \
-                  -DarchetypeRepository=http://maven.codenvycorp.com/content/groups/public/ \
-                  -DarchetypeGroupId=org.eclipse.che.archetype \
-                  -DarchetypeArtifactId=$ARCHETYPE_ID \
-                  -DarchetypeVersion=$ARCHETYPE_VERSION \
-                  -DgroupId=$ASSEMBLY_GROUP \
-                  -DartifactId=$ASSEMBLY_ID \
-                  -Dversion=$ARCHETYPE_VERSION \
-                  -DinteractiveMode=false
+      archetype_generate
     ;;
     build)
-      cd /archetype/$ASSEMBLY_ID
-      docker run -it --rm --name build-che \
-           -v /var/run/docker.sock:/var/run/docker.sock \
-           -v "${M2_MOUNT}"/repository:/home/user/.m2/repository \
-           -v "${ARCHETYPE_MOUNT}/${ASSEMBLY_ID}":/home/user/che-build \
-           -w /home/user/che-build \
-             eclipse/che-dev mvn clean install
+      archetype_build
     ;;
     run)
-echo "build"
+      archetype_run
     ;;
   esac
+}
+
+archetype_generate() {
+  if ! $SKIP_INTERACTIVE; then 
+    info "archetype" "Welcome to $CHE_FORMAL_PRODUCT_NAME custom assembly generator!"
+    info "archetype" ""
+    info "archetype" "You can skip this message with '--no:interactive'."
+    info "archetype" ""
+    info "archetype" "This generator requires:"
+    info "archetype" "  1. Maven 3.3+ to be installed on your host."
+    info "archetype" "  2. Your Maven M2 repo mounted to ':/m2'."
+    info "archetype" "  3. A local path for us to place the assembly mounted to ':/archetype'."
+    info ""
+    
+    PS3="Please enter your choice: "
+    options=("che-agent-archetype                 - Assembly with sample agent" \
+             "che-plugin-ide-menu-archetype       - Assembly with IDE extension to customize menu" \
+             "che-plugin-ide-wizard-archetype     - Assembly with custom C project type extension" \
+             "codenvy-plugin-ide-wizard-archetype - Assembly with Codenvy packaging")
+    select opt in "${options[@]}"
+    do
+      case $opt in
+        "che-agent-archetype                 - Assembly with sample agent")
+          ARCHETYPE_ID="che-agent-archetype"
+          break
+          ;;
+        "che-plugin-ide-menu-archetype       - Assembly with IDE extension to customize menu")
+          ARCHETYPE_ID="che-plugin-ide-menu-archetype"
+          break
+          ;;
+        "che-plugin-ide-wizard-archetype     - Assembly with custom C project type extension")
+          ARCHETYPE_ID="che-plugin-ide-wizard-archetype"
+          break
+          ;;
+        "codenvy-plugin-ide-wizard-archetype - Assembly with Codenvy packaging")
+          ARCHETYPE_ID="codenvy-plugin-ide-wizard-archetype"
+          break
+          ;;
+        *) echo invalid option;;
+      esac
+    done
+    text "\n"
+  fi
+
+  docker run -it --rm --name generate-che              \
+       -v /var/run/docker.sock:/var/run/docker.sock \
+       -v "${M2_MOUNT}":/home/user/.m2         \
+       -v "${ARCHETYPE_MOUNT}":/home/user/che-build         \
+       -w /home/user/che-build                              \
+         ${UTILITY_IMAGE_DEV}                          \
+           mvn archetype:generate               \
+              -DarchetypeRepository=http://maven.codenvycorp.com/content/groups/public/ \
+              -DarchetypeGroupId=org.eclipse.che.archetype \
+              -DarchetypeArtifactId=$ARCHETYPE_ID \
+              -DarchetypeVersion=$ARCHETYPE_VERSION \
+              -DgroupId=$ASSEMBLY_GROUP \
+              -DartifactId=$ASSEMBLY_ID \
+              -Dversion=$ARCHETYPE_VERSION \
+              -DinteractiveMode=false
+}
+
+archetype_build() {
+  cd /archetype/$ASSEMBLY_ID
+  docker run -it --rm --name build-che \
+       -v /var/run/docker.sock:/var/run/docker.sock \
+       -v "${M2_MOUNT}"/repository:/home/user/.m2/repository \
+       -v "${ARCHETYPE_MOUNT}/${ASSEMBLY_ID}":/home/user/che-build \
+       -w /home/user/che-build \
+          ${UTILITY_IMAGE_DEV} mvn clean install
+}
+
+archetype_run() {
+  cd /archetype/$ASSEMBLY_ID
+  docker run -it --rm --name run-che \
+       -v /var/run/docker.sock:/var/run/docker.sock \
+       -v "${DATA_MOUNT}":"${CHE_CONTAINER_ROOT}" \
+       -v "${ARCHETYPE_MOUNT}"/$ASSEMBLY_ID/assembly-main/target/eclipse-che-$ARCHETYPE_VERSION/eclipse-che-$ARCHETYPE_VERSION:/assembly \
+         ${CHE_IMAGE_FULLNAME} start --skip:nightly
 }
