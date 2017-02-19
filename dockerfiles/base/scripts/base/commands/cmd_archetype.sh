@@ -239,4 +239,5 @@ archetype_run() {
        -v "${DATA_MOUNT}":"${CHE_CONTAINER_ROOT}" \
        -v "${ARCHETYPE_MOUNT}"/$ASSEMBLY_ID/assembly-main/target/eclipse-che-$ARCHETYPE_VERSION/eclipse-che-$ARCHETYPE_VERSION:/assembly \
          ${CHE_IMAGE_FULLNAME} start --skip:nightly
+         echo 'hi'
 }
