@@ -397,7 +397,7 @@ init_check_mounts() {
   UNISON_PROFILE_MOUNT=$(get_container_folder ":/unison")
   CHEDIR_MOUNT=$(get_container_folder ":/chedir")
   DOCKER_MOUNT=$(get_container_folder ":/var/run/docker.sock")
-
+ 
   if [[ "${DATA_MOUNT}" = "not set" ]]; then
     info "Welcome to $CHE_FORMAL_PRODUCT_NAME!"
     info ""

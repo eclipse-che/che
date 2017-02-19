@@ -248,8 +248,7 @@ cleanup() {
 }
 
 start() {
-  # pre_init is unique to each CLI assembly. This can be called before
-  # networking is established.
+  # pre_init is unique to each CLI assembly. This can be called before networking is established.
   source "/scripts/pre_init.sh"
   pre_init
 
