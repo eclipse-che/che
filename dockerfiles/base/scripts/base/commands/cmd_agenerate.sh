@@ -28,10 +28,16 @@ cmd_agenerate() {
     info "archetype" ""
     info "archetype" "This generator requires:"
     info "archetype" "  1. Maven 3.3+ to be installed on your host."
-    info "archetype" "  2. Your Maven M2 repo mounted to ':/m2'."
+    info "archetype" "  2. Your host Maven M2 repo mounted to ':/m2'."
     info "archetype" "  3. A local path for us to place the assembly mounted to ':/archetype'."
-    info ""
-    
+
+    text "\n"
+    read -p "      Ready? [Y/n] " -n 1 -r
+    text "\n"
+    if [[ $REPLY =~ ^[Nn]$ ]]; then
+      return 2
+    fi
+
     PS3="Please enter your choice: "
     options=("che-agent-archetype                 - Assembly with sample agent" \
              "che-plugin-ide-menu-archetype       - Assembly with IDE extension to customize menu" \
