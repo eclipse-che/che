@@ -1,20 +1,20 @@
 ## Description
 
-The **JSON Example** is a providing a plugin sample which is use as a continuous example in the plugin documentation. You can learn more about it at: https://eclipse-che.readme.io/docs/introduction-1#section-the-json-example
+The **JSON Example** is a providing a plugin sample which is use as a continuous example in the plugin documentation. You can learn more about it at: https://www.eclipse.org/che/docs/plugins/introduction/index.html#the-json-example
 
 This sample demonstrate how to extend the Eclipse Che in various ways:
-- How to register a new file type and add code completion (Read the tutorial at: https://eclipse-che.readme.io/docs/code-editors#section-code-completion)  
+- How to register a new file type and add code completion (Read the tutorial at:https://www.eclipse.org/che/docs/plugins/code-editors/index.html#code-completion)  
 
-- How to define a custom project type with project creation wizard and register project-specific actions (Read the tutorial at: https://eclipse-che.readme.io/docs/project-types)
+- How to define a custom project type with project creation wizard and register project-specific actions (Read the tutorial at: https://www.eclipse.org/che/docs/plugins/project-types/index.html)
 
 
 ## How to build sample-plugin-json plugin
 
 ### 1- Link to IDE assembly
 
-The plugin-json extension has a client-side (IDE) part and an server part. It also includes some code shared between the IDE and the server. You have to introduce the extension as a dependency in `/che/assembly/assembly-ide-war/pom.xml`. 
+The plugin-json extension has a client-side (IDE) part and an server part. It also includes some code shared between the IDE and the server. You have to introduce the extension as a dependency in `/che/assembly/assembly-ide-war/pom.xml`.
 
-Add: 
+Add:
 ```XML
 ...
 <dependency>
@@ -33,9 +33,9 @@ You can insert the dependency anywhere in the list. After you have inserted it, 
 
 ### 2- Link to WS-Agent assembly
 
-Introduce the server part of the extension as a dependency in `/che/assembly/assembly-wsagent-war`. 
+Introduce the server part of the extension as a dependency in `/che/assembly/assembly-wsagent-war`.
 
-Add: 
+Add:
 ```XML
 ...
 <dependency>
@@ -90,14 +90,18 @@ mvn clean install
 
 ```Shell
 # Start Che using the CLI with your new assembly
-# Replace <version> with the actual directory name
-export CHE_ASSEMBLY=path_to_che_sources/assembly/assembly-main/target/eclipse-che-<version>/eclipse-che-<version>
-che start
+# Replace <local-repo> with the path to your Che repository, to use local binaries in your local image
+# Replace <version> with the actual version you are working on
+docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock \
+                    -v <local-path>:/data \
+                    -v <local-repo>:/repo \
+                       eclipse/che:<version> start --debug
+
 ```
 
 
 ### Documentation resources
 
-- IDE Setup: https://eclipse-che.readme.io/v5.0/docs/setup-che-workspace  
-- Building Extensions: https://eclipse-che.readme.io/v5.0/docs/create-and-build-extensions
-- Run local Eclipse Che binaries: https://eclipse-che.readme.io/v5.0/docs/usage-docker#local-eclipse-che-binaries
+- IDE Setup: https://www.eclipse.org/che/docs/plugins/setup-che-workspace/index.html
+- Building Extensions: https://www.eclipse.org/che/docs/plugins/create-and-build-extensions/index.html
+- Run local Eclipse Che binaries: https://www.eclipse.org/che/docs/setup/configuration/index.html#development-mode
