@@ -66,6 +66,8 @@ prepare_bundle() {
   info "info" "Preparing diagnostic bundle..."
   docker run --net host ${BOOTSTRAP_IMAGE_ALPINE} ip a show >> "${CLI_DIR}/ip.output"
   docker run --net host ${BOOTSTRAP_IMAGE_ALPINE} route >> "${CLI_DIR}/route.output"
+  curl -s https://hub.docker.com/v2/repositories/${CHE_IMAGE_NAME}/tags/ >> "${CLI_DIR}/curlversion.output"
+  curl -I -k https://hub.docker.com >> "${CLI_DIR}/curldockerhub.output"
   df "${CHE_CONTAINER_ROOT}" >> "${CLI_DIR}/df.output"
   cmd_network >> "${CLI_DIR}/cli-network.output"
   print_info >> "${CLI_DIR}/cli-info.output"
@@ -73,6 +75,8 @@ prepare_bundle() {
   tar -cf "${CLI_DIR}"/${CHE_MINI_PRODUCT_NAME}-diagnostic-bundle.tar \
     "${CLI_DIR}/ip.output" \
     "${CLI_DIR}/route.output" \
+    "${CLI_DIR}/curlversion.output" \
+    "${CLI_DIR}/curldockerhub.output" \
     "${CLI_DIR}/df.output" \
     "${CLI_DIR}/cli.log" \
     "${CLI_DIR}/cli-network.output" \
@@ -87,6 +91,8 @@ prepare_bundle() {
                   ${BOOTSTRAP_IMAGE_ALPINE} \
                       sh -c "rm -rf /root${CHE_CONTAINER_ROOT}/ip.output \
                            ; rm -rf /root${CHE_CONTAINER_ROOT}/route.output \
+                           ; rm -rf /root${CHE_CONTAINER_ROOT}/curlversion.output \
+                           ; rm -rf /root${CHE_CONTAINER_ROOT}/curldockerhub.output \
                            ; rm -rf /root${CHE_CONTAINER_ROOT}/df.output \
                            ; rm -rf /root${CHE_CONTAINER_ROOT}/cli-info.output \
                            ; rm -rf /root${CHE_CONTAINER_ROOT}/cli-network.output" > /dev/null 2>&1 || true
