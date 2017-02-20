@@ -33,9 +33,7 @@ import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Presenter for processes list.
- */
+/** Drives the UI for displaying list of running and stopped processes. */
 @Singleton
 public class ProcessesListPresenter implements Presenter, ProcessesListView.ActionDelegate {
 
@@ -119,6 +117,14 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
         }
     }
 
+    /**
+     * Adds process to the view.
+     *
+     * @param pid
+     *         PID of the process to add to the view
+     * @param machine
+     *         machine where process were run or currently running
+     */
     private void addProcessToList(int pid, Machine machine) {
         execAgentCommandManager.getProcess(machine.getId(), pid).then(arg -> {
             final Process process = new ProcessImpl(arg.getName(), arg.getCommandLine(), arg.getPid(), arg.isAlive(), machine);

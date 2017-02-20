@@ -37,7 +37,7 @@ import org.eclipse.che.ide.api.mvp.Presenter;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_PREVIEW_URL_ATTRIBUTE_NAME;
 
-/** Drives the UI of running processes's preview URLs list. */
+/** Drives the UI for displaying list of preview URLs of running processes. */
 @Singleton
 public class PreviewUrlListPresenter implements Presenter, PreviewUrlListView.ActionDelegate {
 

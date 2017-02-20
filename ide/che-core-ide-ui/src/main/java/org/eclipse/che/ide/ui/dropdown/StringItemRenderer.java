@@ -13,9 +13,7 @@ package org.eclipse.che.ide.ui.dropdown;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
-/**
- * Renderer that uses {@link Label} widget for rendering text value in the {@link DropDownList}.
- */
+/** Renderer that uses {@link Label} widget for rendering text value in the {@link DropDownList}. */
 public class StringItemRenderer implements DropDownListItemRenderer {
 
     private final BaseListItem<String> item;

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.toolbar.previewurl;
 
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -20,14 +19,15 @@ import org.eclipse.che.ide.ui.dropdown.DropDownList;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 /** Implementation of {@link PreviewUrlListView} that displays preview URLs in a drop down list. */
 @Singleton
 public class PreviewUrlListViewImpl implements PreviewUrlListView {
 
+    /** Mapping of URL to list item. */
     private final Map<String, BaseListItem<String>> listItems;
     private final DropDownList                      dropDownList;
-    private final SimplePanel                       rootPanel;
 
     private ActionDelegate delegate;
 
@@ -35,18 +35,16 @@ public class PreviewUrlListViewImpl implements PreviewUrlListView {
     public PreviewUrlListViewImpl() {
         listItems = new HashMap<>();
 
-        dropDownList = new DropDownList("Preview");
-        dropDownList.setWidth("100px");
+        dropDownList = new DropDownList(PreviewUrlItemRenderer.HEADER_WIDGET);
+        dropDownList.setWidth("90px");
         dropDownList.setSelectionHandler(item -> {
-            for (Map.Entry<String, BaseListItem<String>> entry : listItems.entrySet()) {
+            for (Entry<String, BaseListItem<String>> entry : listItems.entrySet()) {
                 if (item.equals(entry.getValue())) {
                     delegate.onUrlChosen(entry.getKey());
                     return;
                 }
             }
         });
-
-        rootPanel = new SimplePanel(dropDownList);
     }
 
     @Override
@@ -56,17 +54,21 @@ public class PreviewUrlListViewImpl implements PreviewUrlListView {
 
     @Override
     public Widget asWidget() {
-        return rootPanel;
+        return dropDownList;
     }
 
     @Override
     public void addUrl(String url) {
-        listItems.put(url, dropDownList.addItem(url));
+        final BaseListItem<String> listItem = new BaseListItem<>(url);
+        final PreviewUrlItemRenderer renderer = new PreviewUrlItemRenderer(listItem);
+
+        listItems.put(url, listItem);
+        dropDownList.addItem(listItem, renderer);
     }
 
     @Override
     public void removeUrl(String url) {
-        final BaseListItem<String> listItem = listItems.get(url);
+        final BaseListItem<String> listItem = listItems.remove(url);
 
         if (listItem != null) {
             dropDownList.removeItem(listItem);
