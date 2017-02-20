@@ -10,12 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.perspective.terminal;
 
-import com.google.gwt.core.client.Callback;
-import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayInteger;
-import com.google.gwt.core.client.ScriptInjector;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
@@ -23,9 +20,7 @@ import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -33,7 +28,7 @@ import org.eclipse.che.ide.collections.Jso;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.tab.content.TabPresenter;
 import org.eclipse.che.ide.extension.machine.client.processes.AddTerminalClickHandler;
-
+import org.eclipse.che.plugin.requirejs.ide.ModuleHolder;
 import org.eclipse.che.ide.websocket.WebSocket;
 import org.eclipse.che.ide.websocket.events.ConnectionClosedHandler;
 import org.eclipse.che.ide.websocket.events.ConnectionErrorHandler;
@@ -60,13 +55,14 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
     private static final String DATA_EVENT_NAME          = "data";
     private static final int    TIME_BETWEEN_CONNECTIONS = 2_000;
 
-    private final TerminalView                view;
-    private final Object                      source;
-    private final NotificationManager         notificationManager;
-    private final MachineLocalizationConstant locale;
-    private final MachineEntity               machine;
+    private final TerminalView                    view;
+    private final Object                          source;
+    private final NotificationManager             notificationManager;
+    private final MachineLocalizationConstant     locale;
+    private final MachineEntity                   machine;
+    private final TerminalInitializePromiseHolder terminalHolder;
+    private final ModuleHolder                    moduleHolder;
 
-    private Promise<Boolean>      promise;
     private WebSocket             socket;
     private boolean               connected;
     private int                   countRetry;
@@ -75,17 +71,14 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
     private int                   width;
     private int                   height;
 
-    /**
-     * Indicates javascript term.js is injected in the page.
-     */
-    private static boolean scriptInjected;
-
     @Inject
     public TerminalPresenter(TerminalView view,
                              NotificationManager notificationManager,
                              MachineLocalizationConstant locale,
                              @Assisted MachineEntity machine,
-                             @Assisted Object source) {
+                             @Assisted Object source,
+                             final TerminalInitializePromiseHolder terminalHolder,
+                             final ModuleHolder moduleHolder) {
         this.view = view;
         this.source = source;
         view.setDelegate(this);
@@ -95,31 +88,8 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
 
         connected = false;
         countRetry = 2;
-
-        promise = AsyncPromiseHelper.createFromAsyncRequest(new AsyncPromiseHelper.RequestCall<Boolean>() {
-            @Override
-            public void makeCall(final AsyncCallback<Boolean> callback) {
-                if (scriptInjected) {
-                    callback.onSuccess(true);
-                    return;
-                }
-
-                ScriptInjector.fromUrl(GWT.getModuleBaseURL() + "term/term.js")
-                              .setWindow(ScriptInjector.TOP_WINDOW)
-                              .setCallback(new Callback<Void, Exception>() {
-                                  @Override
-                                  public void onFailure(Exception reason) {
-                                      callback.onFailure(reason);
-                                  }
-
-                                  @Override
-                                  public void onSuccess(Void result) {
-                                      scriptInjected = true;
-                                      callback.onSuccess(true);
-                                  }
-                              }).inject();
-            }
-        });
+        this.terminalHolder = terminalHolder;
+        this.moduleHolder = moduleHolder;
     }
 
     /**
@@ -132,16 +102,18 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
         }
 
         if (!connected) {
-            promise.then(new Operation<Boolean>() {
+            terminalHolder.getInitializerPromise().then(new Operation<Void>() {
                 @Override
-                public void apply(Boolean arg) throws OperationException {
+                public void apply(Void arg) throws OperationException {
                     connectToTerminalWebSocket(machine.getTerminalUrl());
                 }
             }).catchError(new Operation<PromiseError>() {
                 @Override
                 public void apply(PromiseError arg) throws OperationException {
-                    notificationManager
-                            .notify(locale.failedToConnectTheTerminal(), locale.terminalCanNotLoadScript(), FAIL, NOT_EMERGE_MODE);
+                    notificationManager.notify(locale.failedToConnectTheTerminal(),
+                                               locale.terminalCanNotLoadScript(),
+                                               FAIL,
+                                               NOT_EMERGE_MODE);
                     reconnect();
                 }
             });
@@ -178,6 +150,7 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
             @Override
             public void onClose(WebSocketClosedEvent event) {
                 if (CLOSE_NORMAL == event.getCode()) {
+                    connected = false;
                     terminalStateListener.onExit();
                 }
             }
@@ -186,15 +159,16 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
         socket.setOnOpenHandler(new ConnectionOpenedHandler() {
             @Override
             public void onOpen() {
-                terminal = TerminalJso.create(TerminalOptionsJso.createDefault());
+                JavaScriptObject terminalJso = moduleHolder.getModule("Xterm");
+                // if terminal was created programmatically then we don't set focus on it
+                TerminalOptionsJso terminalOptionsJso = TerminalOptionsJso.createDefault();
+                if (source instanceof AddTerminalClickHandler || source instanceof Action) {
+                    terminalOptionsJso.withFocusOnOpen(true);
+                }
+                terminal = TerminalJso.create(terminalJso, terminalOptionsJso);
                 connected = true;
 
                 view.openTerminal(terminal);
-
-                // if terminal was created programmatically then we don't set focus on it
-                if (source instanceof AddTerminalClickHandler || source instanceof Action) {
-                    setFocus(true);
-                }
 
                 terminal.on(DATA_EVENT_NAME, new Operation<String>() {
                     @Override
@@ -261,9 +235,6 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
 
         if (width == x && height == y) {
             return;
-        } else if (width > 0 && height > 0) {
-            //if it's not first initialization
-            setFocus(true);
         }
 
         terminal.resize(x, y);
@@ -277,17 +248,6 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
         jso.addField("type", "resize");
         jso.addField("data", arr);
         socket.send(jso.serialize());
-    }
-
-    @Override
-    public void setFocus(boolean focused) {
-        if (connected) {
-            if (focused) {
-                terminal.focus();
-            } else {
-                terminal.blur();
-            }
-        }
     }
 
     /**

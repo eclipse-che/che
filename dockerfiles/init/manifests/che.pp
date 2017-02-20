@@ -12,6 +12,7 @@ node default {
   $che_debug_suspend = getValue("CHE_DEBUG_SUSPEND","false")
   $docker_ip = getValue("CHE_DOCKER_IP","172.17.0.1")
   $docker_host = getValue("DOCKER_HOST","tcp://localhost:2375")
+  $che_user = getValue("CHE_USER","root")
 
   ###############################
   # oAuth configurations
@@ -45,6 +46,15 @@ node default {
   # provide dns which proxy should not be used for.
   # please leave this as it is if you don't need no_proxy configuration
   $no_proxy_for_che_workspaces = getValue("CHE_WORKSPACE_NO__PROXY","")
+
+  ################################
+  # DNS resolver configuration
+    $dns_resolvers = getValue("CHE_DNS_RESOLVERS","")
+
+  ###############################
+  # Workspace configuration
+  #
+  $workspace_java_options = getValue("CHE_WORKSPACE_JAVA_OPTIONS", "-Xms256m -Xmx2048m -Djava.security.egd=file:/dev/./urandom")
 
   ###############################
   # Include base module

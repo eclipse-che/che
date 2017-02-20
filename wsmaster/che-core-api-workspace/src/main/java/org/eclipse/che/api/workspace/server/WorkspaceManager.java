@@ -179,6 +179,8 @@ public class WorkspaceManager {
      *
      * <p> Key rules:
      * <ul>
+     * <li>@Deprecated : If it contains <b>:</b> character then that key is combination of namespace and workspace name
+     * <li>@Deprecated : <b></>:workspace_name</b> is valid abstract key and current user name will be used as namespace
      * <li>If it doesn't contain <b>/</b> character then that key is id(e.g. workspace123456)
      * <li>If it contains <b>/</b> character then that key is combination of namespace and workspace name
      * </ul>
@@ -781,7 +783,14 @@ public class WorkspaceManager {
                 });
     }
 
-    private CompletableFuture<Void> stopAsync(WorkspaceImpl workspace, @Nullable Boolean createSnapshot) throws ConflictException {
+    private CompletableFuture<Void> stopAsync(WorkspaceImpl workspace,
+                                              @Nullable Boolean createSnapshot) throws ConflictException,
+                                                                                       NotFoundException,
+                                                                                       ServerException {
+        if (!workspace.isTemporary()) {
+            workspace.getAttributes().put(UPDATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
+            workspaceDao.update(workspace);
+        }
         return sharedPool.runAsync(() -> {
             final String stoppedBy = sessionUserNameOr(workspace.getAttributes().get(WORKSPACE_STOPPED_BY));
             LOG.info("Workspace '{}/{}' with id '{}' is being stopped by user '{}'",
@@ -815,10 +824,6 @@ public class WorkspaceManager {
 
             try {
                 runtimes.stop(workspace.getId());
-                if (!workspace.isTemporary()) {
-                    workspace.getAttributes().put(UPDATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
-                    workspaceDao.update(workspace);
-                }
                 LOG.info("Workspace '{}/{}' with id '{}' stopped by user '{}'",
                          workspace.getNamespace(),
                          workspace.getConfig().getName(),
@@ -895,13 +900,27 @@ public class WorkspaceManager {
     }
 
     private WorkspaceImpl getByKey(String key) throws NotFoundException, ServerException {
+
+        int lastColonIndex = key.indexOf(":");
         int lastSlashIndex = key.lastIndexOf("/");
-        if (lastSlashIndex == -1) {
+        if (lastSlashIndex == -1 && lastColonIndex == -1) {
             // key is id
             return workspaceDao.get(key);
         }
-        final String namespace = key.substring(0, lastSlashIndex);
-        final String wsName = key.substring(lastSlashIndex + 1);
+
+        final String namespace;
+        final String wsName;
+        if (lastColonIndex == 0) {
+            // no namespace, use current user namespace
+            namespace = EnvironmentContext.getCurrent().getSubject().getUserName();
+            wsName = key.substring(1);
+        } else if (lastColonIndex > 0) {
+            wsName = key.substring(lastColonIndex + 1);
+            namespace = key.substring(0, lastColonIndex);
+        } else {
+            namespace = key.substring(0, lastSlashIndex);
+            wsName = key.substring(lastSlashIndex + 1);
+        }
         return workspaceDao.get(wsName, namespace);
     }
 

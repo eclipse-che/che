@@ -204,6 +204,30 @@ public class WorkspaceManagerTest {
         assertEquals(result, workspace);
     }
 
+
+    @Test
+    public void shouldBeAbleToGetWorkspaceByKeyPreviousFormat() throws Exception {
+        WorkspaceImpl workspace = createAndMockWorkspace();
+        WorkspaceImpl result = workspaceManager.getWorkspace(workspace.getNamespace() + ":" + workspace.getConfig().getName());
+        assertEquals(result, workspace);
+    }
+
+    @Test
+    public void shouldBeAbleToGetWorkspaceByKeyNamespaceOptionalPreviousFormat() throws Exception {
+        WorkspaceImpl workspace = createAndMockWorkspace();
+        WorkspaceImpl result = workspaceManager.getWorkspace(":" + workspace.getConfig().getName());
+        assertEquals(result, workspace);
+    }
+
+    @Test
+    public void shouldBeAbleToGetWorkspaceByKeyWithoutOwner() throws Exception {
+        WorkspaceImpl workspace = createAndMockWorkspace();
+        WorkspaceImpl result = workspaceManager.getWorkspace(":" + workspace.getConfig().getName());
+        assertEquals(result, workspace);
+    }
+
+
+
     @Test
     public void shouldBeAbleToGetWorkspacesAvailableForUser() throws Exception {
         // given

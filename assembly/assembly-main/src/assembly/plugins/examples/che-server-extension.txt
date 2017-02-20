@@ -17,7 +17,7 @@
 ###
 ###################################################
 
-DOCS:     https://eclipse-che.readme.io/docs/developing-extensions
+DOCS:     https://www.eclipse.org/che/docs/plugins/introduction/index.html
 SOURCE:   http://github.com/che-samples/che-server-extension.git
 PRE-REQS: Java 1.8, Maven, Git, and a clone of Che's assembly repo @ http://github.com/codenvy/che.
 

@@ -821,7 +821,7 @@ export class CreateProjectController {
             ' not configured properly. If your browser is connecting to workspaces running remotely, then you must start Che with the ' +
             '--remote:<ip-address> flag where the <ip-address> is the IP address of the node that is running your Docker workspaces.' +
             'Please restart Che with this flag. You can read about what this flag does and why it is essential at: ' +
-            'https://eclipse-che.readme.io/docs/configuration#envrionment-variables')
+            '/docs/setup/configuration/index.html')
             .ariaLabel('Project creation')
             .ok('OK')
         );

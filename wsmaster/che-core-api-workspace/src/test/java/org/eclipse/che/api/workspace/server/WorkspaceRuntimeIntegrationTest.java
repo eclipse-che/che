@@ -121,7 +121,8 @@ public class WorkspaceRuntimeIntegrationTest {
                                                                           "http://localhost:8080/api",
                                                                           recipeDownloader,
                                                                           containerNameGenerator,
-                                                                          agentRegistry);
+                                                                          agentRegistry,
+                                                                          sharedPool);
 
         runtimes = new WorkspaceRuntimes(eventService,
                                          environmentEngine,

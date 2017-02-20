@@ -17,19 +17,31 @@ log() {
 }
 
 warning() {
-  if is_warning; then
-    printf  "${YELLOW}WARN:${NC} %s\n" "${1}"
+  if [ -z ${2+x} ]; then
+    local PRINT_COMMAND=""
+    local PRINT_STATEMENT=$1
+  else
+    local PRINT_COMMAND="($CHE_MINI_PRODUCT_NAME $1): "
+    local PRINT_STATEMENT=$2
   fi
-  log $(printf "WARN: %s\n" "${1}")
+
+  if is_warning; then
+    printf "${YELLOW}WARN:${NC} %b%b\n" \
+              "${PRINT_COMMAND}" \
+              "${PRINT_STATEMENT}"
+  fi
+  log $(printf "INFO: %b %b\n" \
+        "${PRINT_COMMAND}" \
+        "${PRINT_STATEMENT}")
 }
 
 info() {
   if [ -z ${2+x} ]; then
-    PRINT_COMMAND=""
-    PRINT_STATEMENT=$1
+    local PRINT_COMMAND=""
+    local PRINT_STATEMENT=$1
   else
-    PRINT_COMMAND="($CHE_MINI_PRODUCT_NAME $1): "
-    PRINT_STATEMENT=$2
+    local PRINT_COMMAND="($CHE_MINI_PRODUCT_NAME $1): "
+    local PRINT_STATEMENT=$2
   fi
   if is_info; then
     printf "${GREEN}INFO:${NC} %b%b\n" \
@@ -223,25 +235,20 @@ get_command_help() {
   fi
 }
 
-skip_scripts() {
-  if [ "${CHE_SKIP_SCRIPTS}" = "true" ]; then
+custom_user() {
+  if [ "${CHE_USER}" != "${DEFAULT_CHE_USER}" ]; then
     return 0
   else
     return 1
   fi
 }
 
-init_logging() {
-  # Initialize CLI folder
-  CLI_DIR=$CHE_CONTAINER_ROOT
-  test -d "${CLI_DIR}" || mkdir -p "${CLI_DIR}"
-
-  # Ensure logs folder exists
-  LOGS="${CLI_DIR}/cli.log"
-  LOG_INITIALIZED=true
-
-  # Log date of CLI execution
-  log "$(date)"
+skip_scripts() {
+  if [ "${CHE_SKIP_SCRIPTS}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
 }
 
 cli_init() {
@@ -281,7 +288,7 @@ cli_init() {
   fi
 }
 
-check_docker() {
+init_check_docker() {
   if ! has_docker; then
     error "Docker not found. Get it at https://docs.docker.com/engine/installation/."
     return 1;
@@ -300,13 +307,18 @@ check_docker() {
       info ""
       info "You are missing a mandatory parameter:"
       info "   1. Mount 'docker.sock' for accessing Docker with unix sockets."
-      info "   2. Or, set DOCKER_HOST to Docker's daemon location (unix or tcp)."
+      info "   2. Or, set DOCKER_HOST to Docker's location (unix or tcp)."
       info ""
       info "Mount Syntax:"
       info "   Start with 'docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock' ..."
       info ""
       info "DOCKER_HOST Syntax:"
       info "   Start with 'docker run -it --rm -e DOCKER_HOST=<daemon-location> ...'"
+      info ""
+      info "Possible root causes:"
+      info "   1. Your admin has not granted permissions to /var/run/docker.sock."
+      info "   2. You passed '--user uid:gid' with bad values."
+      info "   3. Your firewall is blocking TCP ports for accessing Docker daemon."
       return 2;
     fi
   fi
@@ -332,7 +344,7 @@ check_docker() {
   CHE_VERSION=$CHE_IMAGE_VERSION
 }
 
-check_docker_networking() {
+init_check_docker_networking() {
   # Check to see if HTTP_PROXY, HTTPS_PROXY, and NO_PROXY is set within the Docker daemon.
   OUTPUT=$(docker info)
   HTTP_PROXY=$(grep "Http Proxy" <<< "$OUTPUT" || true) 
@@ -367,7 +379,7 @@ check_docker_networking() {
   export no_proxy=$NO_PROXY
 }
 
-check_interactive() {
+init_check_interactive() {
   # Detect and verify that the CLI container was started with -it option.
   TTY_ACTIVATED=true
   CHE_CLI_IS_INTERACTIVE=true
@@ -384,12 +396,22 @@ check_interactive() {
       CHE_CLI_IS_INTERACTIVE=false
       warning "Did detect TTY but not in interactive mode"
     fi
-
   fi
-
 }
 
-check_mounts() {
+# Add check to see if --user uid:gid passed in.
+check_user() {
+  DOCKER_CHE_USER=$(docker inspect --format='{{.Config.User}}' $(get_this_container_id))
+  if [[ "${DOCKER_CHE_USER}" != "" ]]; then
+    CHE_USER=$DOCKER_CHE_USER
+  fi
+
+  if custom_user; then
+    true
+  fi
+}
+
+init_check_mounts() {
   DATA_MOUNT=$(get_container_folder ":${CHE_CONTAINER_ROOT}")
   INSTANCE_MOUNT=$(get_container_folder ":${CHE_CONTAINER_ROOT}/instance")
   BACKUP_MOUNT=$(get_container_folder ":${CHE_CONTAINER_ROOT}/backup")
@@ -540,6 +562,47 @@ check_mounts() {
       return 2
     fi
     CHE_CONTAINER_ASSEMBLY_FULL_PATH="${CHE_CONTAINER_ASSEMBLY}"
+  fi
+}
+
+init_logging() {
+  # Initialize CLI folder
+  CLI_DIR=$CHE_CONTAINER_ROOT
+  test -d "${CLI_DIR}" || mkdir -p "${CLI_DIR}"
+
+  # Ensure logs folder exists
+  LOGS="${CLI_DIR}/cli.log"
+  LOG_INITIALIZED=true
+
+  # Log date of CLI execution
+  log "$(date)"
+}
+
+init_scripts() {
+  SCRIPTS_CONTAINER_SOURCE_DIR=""
+  SCRIPTS_BASE_CONTAINER_SOURCE_DIR=""
+  if local_repo && ! skip_scripts; then
+     # Use the CLI that is inside the repository.
+     SCRIPTS_CONTAINER_SOURCE_DIR=${CHE_SCRIPTS_CONTAINER_SOURCE_DIR}
+
+    if [[ -d "/repo/dockerfiles/base/scripts/base" ]]; then
+      SCRIPTS_BASE_CONTAINER_SOURCE_DIR="/repo/dockerfiles/base/scripts/base"
+    else
+      SCRIPTS_BASE_CONTAINER_SOURCE_DIR=${CHE_BASE_SCRIPTS_CONTAINER_SOURCE_DIR}
+    fi
+
+    # Compare scripts inside of the Docker image with those on the repository
+    # Fail if they do not match
+    DIFF_NUM=$(diff -r "/scripts/base" "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}" | wc -l)
+    if [ $DIFF_NUM -gt 0 ]; then 
+      error "The scripts in ${CHE_IMAGE_FULLNAME} do not match those in :/repo."
+      error "Is your repo branch compatible with this image version?"
+      error "Add '--skip:scripts' to skip this check."
+    fi
+  else
+     # Use the CLI that is inside the container.
+     SCRIPTS_CONTAINER_SOURCE_DIR="/scripts"
+     SCRIPTS_BASE_CONTAINER_SOURCE_DIR=${CHE_BASE_SCRIPTS_CONTAINER_SOURCE_DIR}
   fi
 }
 
