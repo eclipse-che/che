@@ -37,6 +37,8 @@ public class OpenShiftConnectorTest {
     private static final String   OPENSHIFT_DEFAULT_TOKEN = "91XMfu-FuNDkGjcIh6b0y1EtCvztGeSsSqRrWhBfyL8";
     private static final String   OPENSHIFT_DEFAULT_WORKSPACE_PERSISTENT_VOLUME_CLAIM = "che_claim_data";
     private static final String   OPENSHIFT_DEFAULT_WORKSPACE_QUANTITY = "10Gi";
+    private static final String   OPENSHIFT_DEFAULT_WORKSPACE_STORAGE = "/data/workspaces";
+    private static final String   OPENSHIFT_DEFAULT_WORKSPACE_PROJECTS_STORAGE = "/projects";
     @Mock
     private DockerConnectorConfiguration       dockerConnectorConfiguration;
     @Mock
@@ -60,80 +62,21 @@ public class OpenShiftConnectorTest {
         when(containerConfig.getEnv()).thenReturn(CONTAINER_ENV_VARIABLES);
 
         //When
-        openShiftConnector = new OpenShiftConnector(new ConfigBuilder(),
-                dockerConnectorConfiguration,
-                dockerConnectionFactory,
-                authManager,
-                dockerApiVersionPathPrefixProvider,
-                OPENSHIFT_API_ENDPOINT_MINISHIFT,
-                OPENSHIFT_DEFAULT_TOKEN,
-                OPENSHIFT_DEFAULT_USER_NAME,
-                OPENSHIFT_DEFAULT_USER_PASSWORD,
-                CHE_DEFAULT_OPENSHIFT_PROJECT_NAME,
-                CHE_DEFAULT_OPENSHIFT_SERVICEACCOUNT,
-                OPENSHIFT_LIVENESS_PROBE_DELAY,
-                OPENSHIFT_LIVENESS_PROBE_TIMEOUT,
-                OPENSHIFT_DEFAULT_WORKSPACE_PERSISTENT_VOLUME_CLAIM,
-                OPENSHIFT_DEFAULT_WORKSPACE_QUANTITY);
+        openShiftConnector = new OpenShiftConnector(dockerConnectorConfiguration,
+                                                    dockerConnectionFactory,
+                                                    authManager,
+                                                    dockerApiVersionPathPrefixProvider,
+                                                    CHE_DEFAULT_OPENSHIFT_PROJECT_NAME,
+                                                    CHE_DEFAULT_OPENSHIFT_SERVICEACCOUNT,
+                                                    OPENSHIFT_LIVENESS_PROBE_DELAY,
+                                                    OPENSHIFT_LIVENESS_PROBE_TIMEOUT,
+                                                    OPENSHIFT_DEFAULT_WORKSPACE_PERSISTENT_VOLUME_CLAIM,
+                                                    OPENSHIFT_DEFAULT_WORKSPACE_QUANTITY,
+                                                    OPENSHIFT_DEFAULT_WORKSPACE_STORAGE,
+                                                    OPENSHIFT_DEFAULT_WORKSPACE_PROJECTS_STORAGE);
         String workspaceID = openShiftConnector.getCheWorkspaceId(createContainerParams);
 
         //Then
         assertEquals(workspaceID, expectedWorkspaceID);
     }
-
-    @Test
-    public void shouldUseTokenWhenProvided() {
-        // Given
-        ConfigBuilder configBuilder = spy(new ConfigBuilder());
-
-        // When
-        openShiftConnector = new OpenShiftConnector(configBuilder,
-                dockerConnectorConfiguration,
-                dockerConnectionFactory,
-                authManager,
-                dockerApiVersionPathPrefixProvider,
-                OPENSHIFT_API_ENDPOINT_MINISHIFT,
-                OPENSHIFT_DEFAULT_TOKEN,
-                OPENSHIFT_DEFAULT_USER_NAME,
-                OPENSHIFT_DEFAULT_USER_PASSWORD,
-                CHE_DEFAULT_OPENSHIFT_PROJECT_NAME,
-                CHE_DEFAULT_OPENSHIFT_SERVICEACCOUNT,
-                OPENSHIFT_LIVENESS_PROBE_DELAY,
-                OPENSHIFT_LIVENESS_PROBE_TIMEOUT,
-                OPENSHIFT_DEFAULT_WORKSPACE_PERSISTENT_VOLUME_CLAIM,
-                OPENSHIFT_DEFAULT_WORKSPACE_QUANTITY);
-
-        // Then
-        verify(configBuilder,times(1)).withOauthToken(OPENSHIFT_DEFAULT_TOKEN);
-        verify(configBuilder,times(0)).withUsername(OPENSHIFT_DEFAULT_USER_NAME);
-    }
-
-    @Test
-    public void shouldUsePasswordWhenTokenIsNotProvided() {
-        // Given
-        ConfigBuilder configBuilder = spy(new ConfigBuilder());
-
-        // When
-        openShiftConnector = new OpenShiftConnector(configBuilder,
-                dockerConnectorConfiguration,
-                dockerConnectionFactory,
-                authManager,
-                dockerApiVersionPathPrefixProvider,
-                OPENSHIFT_API_ENDPOINT_MINISHIFT,
-                "",
-                OPENSHIFT_DEFAULT_USER_NAME,
-                OPENSHIFT_DEFAULT_USER_PASSWORD,
-                CHE_DEFAULT_OPENSHIFT_PROJECT_NAME,
-                CHE_DEFAULT_OPENSHIFT_SERVICEACCOUNT,
-                OPENSHIFT_LIVENESS_PROBE_DELAY,
-                OPENSHIFT_LIVENESS_PROBE_TIMEOUT,
-                OPENSHIFT_DEFAULT_WORKSPACE_PERSISTENT_VOLUME_CLAIM,
-                OPENSHIFT_DEFAULT_WORKSPACE_QUANTITY);
-
-        // Then
-        verify(configBuilder,times(0)).withOauthToken(OPENSHIFT_DEFAULT_TOKEN);
-        verify(configBuilder,times(1)).withUsername(OPENSHIFT_DEFAULT_USER_NAME);
-    }
-
->>>>>>> CHE-4141 - Use Persistent Volumes Claims when creating workspaces
 }
