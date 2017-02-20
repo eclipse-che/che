@@ -17,7 +17,7 @@ pre_init() {
   ADDITIONAL_GLOBAL_OPTIONS=""
  
   # This must be incremented when BASE is incremented by an API developer
-  CHE_CLI_API_VERSION=1
+  CHE_CLI_API_VERSION=2
 
   DEFAULT_CHE_PORT=8080
   CHE_PORT=${CHE_PORT:-${DEFAULT_CHE_PORT}}

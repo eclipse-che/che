@@ -73,20 +73,9 @@ cli_init() {
       fi
     fi
   fi
-
-  # Special function to perform special behaviors if you are running nightly version
-  verify_nightly_accuracy
-
-  # Do not perform a version compatibility check if running upgrade command.
-  # The upgrade command has its own internal checks for version compatibility.
-  if [[ "$@" == *"upgrade"* ]]; then
-    verify_version_upgrade_compatibility
-  elif ! is_fast; then
-    verify_version_compatibility
-  fi
 }
 
-verify_nightly_accuracy() {
+cli_verify_nightly() {
   # Per request of the engineers, check to see if the locally cached nightly version is older
   # than the one stored on DockerHub.
   if is_nightly; then
@@ -106,6 +95,16 @@ verify_nightly_accuracy() {
   fi
 }
 
+cli_verify_version() {
+  # Do not perform a version compatibility check if running upgrade command.
+  # The upgrade command has its own internal checks for version compatibility.
+  if [[ "$@" == *"upgrade"* ]]; then
+    verify_upgrade
+  elif ! is_fast; then
+    verify_version
+  fi
+}
+
 is_nightly() {
   if [[ $(get_image_version) = "nightly" ]]; then
     return 0
@@ -114,7 +113,7 @@ is_nightly() {
   fi
 }
 
-verify_version_compatibility() {
+verify_version() {
 
   ## If ! is_initialized, then the system hasn't been installed
   ## First, compare the CLI image version to what version was initialized in /config/*.ver.donotmodify
@@ -124,8 +123,8 @@ verify_version_compatibility() {
   ##      - If they don't match, then if CLLI is newer fail with message to run upgrade first
   CHE_IMAGE_VERSION=$(get_image_version)
 
-  # Only check for newer versions if not in offline mode and not nightly.
-  if ! is_offline && ! is_nightly; then
+  # Only check for newer versions if not: skip network, offline, nightly.
+  if ! is_offline && ! is_nightly && ! is_fast && ! skip_network; then
     NEWER=$(compare_versions $CHE_IMAGE_VERSION)
 
     if [[ "${NEWER}" != "" ]]; then
@@ -171,7 +170,7 @@ verify_version_compatibility() {
   fi
 }
 
-verify_version_upgrade_compatibility() {
+verify_upgrade() {
   ## Two levels of checks
   ## First, compare the CLI image version to what the admin has configured in /config/.env file
   ##      - If they match, nothing to upgrade
@@ -258,6 +257,13 @@ compare_versions() {
 
   local VERSION_LIST_JSON=$(curl -s https://hub.docker.com/v2/repositories/${CHE_IMAGE_NAME}/tags/)
   local NUMBER_OF_VERSIONS=$(echo $VERSION_LIST_JSON | jq '.count')
+
+  if [[ "${NUMBER_OF_VERSIONS}" = "" ]]; then
+    error "Unable to retrieve version list from public Docker Hub."
+    error "Diagnose with 'docker run -it appropriate/curl -s https://hub.docker.com/v2/repositories/${CHE_IMAGE_NAME}/tags/'."
+    error "Use '--skip:network' to ignore this check."
+    return 2
+  fi
 
   DISPLAY_LIMIT=10
   if [ $DISPLAY_LIMIT -gt $NUMBER_OF_VERSIONS ]; then 

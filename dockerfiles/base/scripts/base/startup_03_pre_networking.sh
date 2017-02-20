@@ -4,7 +4,7 @@
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
-initiate_offline_or_network_mode(){
+init_offline_or_network_mode(){
   # If you are using ${CHE_FORMAL_PRODUCT_NAME} in offline mode, images must be loaded here
   # This is the point where we know that docker is working, but before we run any utilities
   # that require docker.
@@ -30,8 +30,8 @@ initiate_offline_or_network_mode(){
     # See: https://github.com/eclipse/che/issues/3266#issuecomment-265464165
     if ! is_fast && ! skip_network; then
       # Removing this info line as it was appearing before initial CLI output
-#      info "cli" "Checking network... (hint: '--fast' skips nightly, version, network, and preflight checks)"
-      local HTTP_STATUS_CODE=$(curl -I -k hub.docker.com -s -o /dev/null --write-out '%{http_code}')
+
+      local HTTP_STATUS_CODE=$(curl -I -k https://hub.docker.com -s -o /dev/null --write-out '%{http_code}')
       if [[ ! $HTTP_STATUS_CODE -eq "301" ]] && [[ ! $HTTP_STATUS_CODE -eq "200" ]]; then
         info "Welcome to $CHE_FORMAL_PRODUCT_NAME!"
         info ""
@@ -54,7 +54,7 @@ initiate_offline_or_network_mode(){
   fi
 }
 
-grab_initial_images() {
+init_initial_images() {
   # get list of images
   get_image_manifest ${CHE_VERSION}
 

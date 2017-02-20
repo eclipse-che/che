@@ -65,7 +65,7 @@ init_constants() {
   # CLI DEVELOPERS - ONLY INCREMENT THIS CHANGE IF MODIFYING SECTIONS THAT AFFECT LOADING
   #                  BEFORE :/REPO IS VOLUME MOUNTED.  CLI ASSEMBLIES WILL FAIL UNTIL THEY
   #                  ARE RECOMPILED WITH MATCHING VERSION.
-  CHE_BASE_API_VERSION=1
+  CHE_BASE_API_VERSION=2
 }
 
 init_global_vars() {
@@ -235,58 +235,6 @@ init_usage_check() {
   fi
 }
 
-init() {
-  init_constants
-  init_global_vars
-  init_cli_version_check
-  init_usage_check "$@"
-
-  source "${CHE_BASE_SCRIPTS_CONTAINER_SOURCE_DIR}"/startup_02_pre_docker.sh
-
-  # Make sure Docker is working and we have /var/run/docker.sock mounted or valid DOCKER_HOST
-  check_docker "$@"
-
-  # Check to see if Docker is configured with a proxy and pull values
-  check_docker_networking
-
-  # Verify that -i is passed on the command line
-  check_interactive "$@"
-
-  # Only verify mounts after Docker is confirmed to be working.
-  check_mounts "$@"
-
-  # Only initialize after mounts have been established so we can write cli.log out to a mount folder
-  init_logging "$@"
-
-  SCRIPTS_CONTAINER_SOURCE_DIR=""
-  SCRIPTS_BASE_CONTAINER_SOURCE_DIR=""
-  if local_repo && ! skip_scripts; then
-     # Use the CLI that is inside the repository.
-     SCRIPTS_CONTAINER_SOURCE_DIR=${CHE_SCRIPTS_CONTAINER_SOURCE_DIR}
-
-    if [[ -d "/repo/dockerfiles/base/scripts/base" ]]; then
-       SCRIPTS_BASE_CONTAINER_SOURCE_DIR="/repo/dockerfiles/base/scripts/base"
-     else
-       SCRIPTS_BASE_CONTAINER_SOURCE_DIR=${CHE_BASE_SCRIPTS_CONTAINER_SOURCE_DIR}
-     fi
-  else
-     # Use the CLI that is inside the container.
-     SCRIPTS_CONTAINER_SOURCE_DIR="/scripts"
-     SCRIPTS_BASE_CONTAINER_SOURCE_DIR=${CHE_BASE_SCRIPTS_CONTAINER_SOURCE_DIR}
-  fi
-
-  source "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/startup_03_pre_networking.sh
-
-  # If offline mode, then load dependent images from disk and populate the local Docker cache.
-  # If not in offline mode, verify that we have access to DockerHub.
-  # This is also the first usage of curl
-  initiate_offline_or_network_mode "$@"
-
-  # Pull the list of images that are necessary. If in offline mode, verifies that the images
-  # are properly loaded into the cache.
-  grab_initial_images
-}
-
 cleanup() {
   RETURN_CODE=$?
 
@@ -300,17 +248,22 @@ cleanup() {
 }
 
 start() {
-
   # pre_init is unique to each CLI assembly. This can be called before
   # networking is established.
-
-  # Each CLI assembly must provide this cli.sh - loads overridden functions and variables for the CLI
-  # Hard code this location
   source "/scripts/pre_init.sh"
   pre_init
 
-  # Bootstrap networking, docker, logging, and ability to load cli.sh and library.sh
-  init "$@"
+  # Yo, constants
+  init_constants
+
+  # Variables used throughout
+  init_global_vars
+
+  # Check to make sure CLI assembly matches base
+  init_cli_version_check
+
+  # Checks for global parameters
+  init_usage_check "$@"
 
   # Removes global parameters from the positional arguments
   ORIGINAL_PARAMETERS=$@
@@ -326,6 +279,38 @@ start() {
   set -- "${@/\-\-help/}"
   set -- "${@/\-\-skip\:scripts/}"
 
+  source "${CHE_BASE_SCRIPTS_CONTAINER_SOURCE_DIR}"/startup_02_pre_docker.sh
+
+  # Make sure Docker is working and we have /var/run/docker.sock mounted or valid DOCKER_HOST
+  init_check_docker "$@"
+
+  # Check to see if Docker is configured with a proxy and pull values
+  init_check_docker_networking
+
+  # Verify that -i is passed on the command line
+  init_check_interactive "$@"
+
+  # Only verify mounts after Docker is confirmed to be working.
+  init_check_mounts "$@"
+
+  # Only initialize after mounts have been established so we can write cli.log out to a mount folder
+  init_logging "$@"
+
+  # Determine where the remaining scripts will be sourced from (inside image, or repo?)
+  init_scripts "$@"
+
+  # We now know enough to load scripts from different locations - so source from proper source
+  source "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/startup_03_pre_networking.sh
+
+  # If offline mode, then load dependent images from disk and populate the local Docker cache.
+  # If not in offline mode, verify that we have access to DockerHub.
+  # This is also the first usage of curl
+  init_offline_or_network_mode "$@"
+
+  # Pull the list of images that are necessary. If in offline mode, verifies that the images
+  # are properly loaded into the cache.
+  init_initial_images "$@"
+
   # Each CLI assembly must provide this cli.sh - loads overridden functions and variables for the CLI
   source "${SCRIPTS_CONTAINER_SOURCE_DIR}"/post_init.sh
 
@@ -339,9 +324,20 @@ start() {
   info "cli" "$CHE_VERSION - using docker ${DOCKER_SERVER_VERSION} / $(get_docker_install_type)"
 
   source "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/startup_04_pre_cli_init.sh
-  
+
+  # Allow CLI assemblies to load variables assuming networking, logging, docker activated  
   cli_pre_init
+
+  # Set CHE_HOST, CHE_PORT, and apply any CLI-specific command-line overrides to variables  
   cli_init "$@"
+
+  # Additional checks for nightly version
+  cli_verify_nightly "$@"
+
+  # Additional checks to verify image matches version installed on disk & upgrade suitability
+  cli_verify_version "$@"
+
+  # Allow CLI assemblies to load variables assuming CLI is finished bootstrapping
   cli_post_init
 
   source "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/startup_05_pre_exec.sh

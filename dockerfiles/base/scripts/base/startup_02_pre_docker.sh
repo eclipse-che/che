@@ -243,19 +243,6 @@ skip_scripts() {
   fi
 }
 
-init_logging() {
-  # Initialize CLI folder
-  CLI_DIR=$CHE_CONTAINER_ROOT
-  test -d "${CLI_DIR}" || mkdir -p "${CLI_DIR}"
-
-  # Ensure logs folder exists
-  LOGS="${CLI_DIR}/cli.log"
-  LOG_INITIALIZED=true
-
-  # Log date of CLI execution
-  log "$(date)"
-}
-
 cli_init() {
   CHE_HOST=$(eval "echo \$${CHE_PRODUCT_NAME}_HOST")
   CHE_PORT=$(eval "echo \$${CHE_PRODUCT_NAME}_PORT")
@@ -293,7 +280,7 @@ cli_init() {
   fi
 }
 
-check_docker() {
+init_check_docker() {
   if ! has_docker; then
     error "Docker not found. Get it at https://docs.docker.com/engine/installation/."
     return 1;
@@ -344,7 +331,7 @@ check_docker() {
   CHE_VERSION=$CHE_IMAGE_VERSION
 }
 
-check_docker_networking() {
+init_check_docker_networking() {
   # Check to see if HTTP_PROXY, HTTPS_PROXY, and NO_PROXY is set within the Docker daemon.
   OUTPUT=$(docker info)
   HTTP_PROXY=$(grep "Http Proxy" <<< "$OUTPUT" || true) 
@@ -379,7 +366,7 @@ check_docker_networking() {
   export no_proxy=$NO_PROXY
 }
 
-check_interactive() {
+init_check_interactive() {
   # Detect and verify that the CLI container was started with -it option.
   TTY_ACTIVATED=true
   CHE_CLI_IS_INTERACTIVE=true
@@ -398,10 +385,9 @@ check_interactive() {
     fi
 
   fi
-
 }
 
-check_mounts() {
+init_check_mounts() {
   DATA_MOUNT=$(get_container_folder ":${CHE_CONTAINER_ROOT}")
   INSTANCE_MOUNT=$(get_container_folder ":${CHE_CONTAINER_ROOT}/instance")
   BACKUP_MOUNT=$(get_container_folder ":${CHE_CONTAINER_ROOT}/backup")
@@ -552,6 +538,47 @@ check_mounts() {
       return 2
     fi
     CHE_CONTAINER_ASSEMBLY_FULL_PATH="${CHE_CONTAINER_ASSEMBLY}"
+  fi
+}
+
+init_logging() {
+  # Initialize CLI folder
+  CLI_DIR=$CHE_CONTAINER_ROOT
+  test -d "${CLI_DIR}" || mkdir -p "${CLI_DIR}"
+
+  # Ensure logs folder exists
+  LOGS="${CLI_DIR}/cli.log"
+  LOG_INITIALIZED=true
+
+  # Log date of CLI execution
+  log "$(date)"
+}
+
+init_scripts() {
+  SCRIPTS_CONTAINER_SOURCE_DIR=""
+  SCRIPTS_BASE_CONTAINER_SOURCE_DIR=""
+  if local_repo && ! skip_scripts; then
+     # Use the CLI that is inside the repository.
+     SCRIPTS_CONTAINER_SOURCE_DIR=${CHE_SCRIPTS_CONTAINER_SOURCE_DIR}
+
+    if [[ -d "/repo/dockerfiles/base/scripts/base" ]]; then
+      SCRIPTS_BASE_CONTAINER_SOURCE_DIR="/repo/dockerfiles/base/scripts/base"
+    else
+      SCRIPTS_BASE_CONTAINER_SOURCE_DIR=${CHE_BASE_SCRIPTS_CONTAINER_SOURCE_DIR}
+    fi
+
+    # Compare scripts inside of the Docker image with those on the repository
+    # Fail if they do not match
+    DIFF_NUM=$(diff -r "/scripts/base" "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}" | wc -l)
+    if [ $DIFF_NUM -gt 0 ]; then 
+      error "The scripts in ${CHE_IMAGE_FULLNAME} do not match those in :/repo."
+      error "Is your repo branch compatible with this image version?"
+      error "Add '--skip:scripts' to skip this check."
+    fi
+  else
+     # Use the CLI that is inside the container.
+     SCRIPTS_CONTAINER_SOURCE_DIR="/scripts"
+     SCRIPTS_BASE_CONTAINER_SOURCE_DIR=${CHE_BASE_SCRIPTS_CONTAINER_SOURCE_DIR}
   fi
 }
 
