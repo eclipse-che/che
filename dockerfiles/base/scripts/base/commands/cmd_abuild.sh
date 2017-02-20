@@ -16,14 +16,30 @@ pre_cmd_abuild() {
     load_utilities_images_if_not_done
     update_image $UTILITY_IMAGE_DEV
   fi
+
+  if [ ! -d /archetype/$ASSEMBLY_ID ]; then
+    error "Assembly at ${ARCHETYPE_MOUNT}/$ASSEMBLY_ID not found."
+    return 2
+  fi  
 }
 
 cmd_abuild() {
   cd /archetype/$ASSEMBLY_ID
-  docker run -it --rm --name build-che \
-       -v /var/run/docker.sock:/var/run/docker.sock \
-       -v "${M2_MOUNT}"/repository:/home/user/.m2/repository \
-       -v "${ARCHETYPE_MOUNT}/${ASSEMBLY_ID}":/home/user/che-build \
-       -w /home/user/che-build \
-          ${UTILITY_IMAGE_DEV} mvn clean install
+
+  WRITE_PARAMETERS=""
+  if is_docker_for_mac || is_native; then
+    WRITE_PARAMETERS+="-v /etc/group:/etc/group:ro "
+    WRITE_PARAMETERS+="-v /etc/passwd:/etc/passwd:ro "
+    WRITE_PARAMETERS+="--user $CHE_USER "
+  fi
+
+  GENERATE_COMMAND="docker run -it --rm --name build-che ${WRITE_PARAMETERS} \
+                   -v /var/run/docker.sock:/var/run/docker.sock \
+                   -v \"${M2_MOUNT}\":/home/user/.m2/repository \
+                   -v \"${ARCHETYPE_MOUNT}/${ASSEMBLY_ID}\":/home/user/che-build \
+                   -w /home/user/che-build \
+                      ${UTILITY_IMAGE_DEV} \
+                          mvn clean install"
+  log ${GENERATE_COMMAND}
+  eval ${GENERATE_COMMAND}
 }
