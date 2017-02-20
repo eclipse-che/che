@@ -39,7 +39,7 @@ public class ClientDtoGenerator extends DtoGenerator {
 		out.println("import org.eclipse.che.ide.dto.DtoFactoryVisitor;");
 		out.println("import org.eclipse.che.ide.dto.DtoFactory;"); 
 		out.println("import org.eclipse.che.ide.dto.DtoProvider;");
-		out.println("import org.eclipse.che.ide.dto.JsonSerializable;");
+		out.println("import org.eclipse.che.api.languageserver.util.JsonSerializable;");
 		
 		out.println("import com.google.inject.Singleton;");
 	}

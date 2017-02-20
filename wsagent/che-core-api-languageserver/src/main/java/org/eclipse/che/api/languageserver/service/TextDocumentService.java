@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.service;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -99,7 +100,11 @@ public class TextDocumentService {
                      .completion(textDocumentPositionParams).get();
         if (result.isLeft()) {
         	CompletionListDto ret= new CompletionListDto();
-        	ret.setItems(result.getLeft());
+        	List<CompletionItem> items= new ArrayList<>();
+        	for (CompletionItem item : result.getLeft()) {
+				items.add(new CompletionItemDto(item));
+			}
+        	ret.setItems(items);
         	return ret;
         } else {
            	return new CompletionListDto(result.getRight());

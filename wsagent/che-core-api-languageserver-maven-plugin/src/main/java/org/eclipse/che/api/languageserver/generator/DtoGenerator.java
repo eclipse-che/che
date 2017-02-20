@@ -110,6 +110,7 @@ public abstract class DtoGenerator {
 			out.println("import java.util.HashMap;");
 			out.println("import org.eclipse.lsp4j.jsonrpc.messages.Either;");
 			out.println("import org.eclipse.che.api.languageserver.util.EitherUtil;");
+			out.println("import org.eclipse.che.api.languageserver.util.JsonUtil;");
 			out.println("import org.eclipse.che.api.languageserver.shared.util.JsonDecision;");
 			
 

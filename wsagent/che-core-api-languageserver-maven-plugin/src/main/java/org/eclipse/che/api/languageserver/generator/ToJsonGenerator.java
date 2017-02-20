@@ -145,7 +145,7 @@ public class ToJsonGenerator extends ConversionGenerator {
 		} else if (isSimpleNumberType(t)) {
 			return String.format("new %1$s(%2$s)", json.number(), value);
 		} else if (t == Object.class) {
-			return String.format("(%1$s)%2$s", json.object(), value);
+			return String.format("JsonUtil.convertToJson(%1$s)", value);
 		} else {
 			return String.format("((%2$s)%1$s).toJsonElement()", value, dtoName(t));
 		}
