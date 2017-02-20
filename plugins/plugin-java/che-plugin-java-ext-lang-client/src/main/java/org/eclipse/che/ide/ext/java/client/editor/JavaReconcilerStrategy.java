@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.ext.java.client.editor;
 
 import com.google.common.base.Optional;
+import com.google.gwt.user.client.Timer;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
@@ -50,6 +51,7 @@ public class JavaReconcilerStrategy implements ReconcilingStrategy, ResolvingPro
     private final ResolvingProjectStateHolderRegistry resolvingProjectStateHolderRegistry;
     private final JavaLocalizationConstant            localizationConstant;
     private final JavaReconcileClient                 client;
+    private final Timer                               reconcileTimer;
 
     private EditorWithErrors            editorWithErrors;
     private ResolvingProjectStateHolder resolvingProjectStateHolder;
@@ -72,6 +74,15 @@ public class JavaReconcilerStrategy implements ReconcilingStrategy, ResolvingPro
         if (editor instanceof EditorWithErrors) {
             this.editorWithErrors = ((EditorWithErrors)editor);
         }
+        //Timer allow prevent tons of request for reconcile current file at the short time period
+        //for now we set timer to 1 second, all calling fro reconcile with periods less then 1 second will be skip.
+        reconcileTimer = new Timer() {
+            @Override
+            public void run() {
+               //nothing todo
+            }
+        };
+
     }
 
     @Override
@@ -100,7 +111,10 @@ public class JavaReconcilerStrategy implements ReconcilingStrategy, ResolvingPro
 
     @Override
     public void reconcile(final DirtyRegion dirtyRegion, final Region subRegion) {
-        parse();
+        if (!reconcileTimer.isRunning()) {
+            parse();
+            reconcileTimer.schedule(1_000);
+        }
     }
 
     void parse() {
@@ -141,7 +155,10 @@ public class JavaReconcilerStrategy implements ReconcilingStrategy, ResolvingPro
 
     @Override
     public void reconcile(final Region partition) {
-        parse();
+        if (!reconcileTimer.isRunning()) {
+            parse();
+            reconcileTimer.schedule(1_000);
+        }
     }
 
     public VirtualFile getFile() {

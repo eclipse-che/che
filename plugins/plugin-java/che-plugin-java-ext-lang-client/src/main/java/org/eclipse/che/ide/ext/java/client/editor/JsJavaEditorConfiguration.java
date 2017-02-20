@@ -13,6 +13,7 @@ package org.eclipse.che.ide.ext.java.client.editor;
 import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+
 import org.eclipse.che.ide.api.editor.annotation.AnnotationModel;
 import org.eclipse.che.ide.api.editor.changeintercept.ChangeInterceptorProvider;
 import org.eclipse.che.ide.api.editor.codeassist.CodeAssistProcessor;
@@ -24,13 +25,13 @@ import org.eclipse.che.ide.api.editor.quickfix.QuickAssistProcessor;
 import org.eclipse.che.ide.api.editor.reconciler.Reconciler;
 import org.eclipse.che.ide.api.editor.reconciler.ReconcilerFactory;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
-import org.eclipse.che.ide.ext.java.jdt.JavaPartitions;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.eclipse.che.ide.api.editor.partition.DefaultPartitioner.DEFAULT_PARTITIONING;
 import static org.eclipse.che.ide.api.editor.partition.DocumentPartitioner.DEFAULT_CONTENT_TYPE;
+import static org.eclipse.che.ide.ext.java.jdt.JavaPartitions.JAVA_PARTITIONING;
 
 /**
  * Text editor configuration for java files.
@@ -60,7 +61,7 @@ public class JsJavaEditorConfiguration extends DefaultTextEditorConfiguration {
 
         final JavaCodeAssistProcessor codeAssistProcessor = codeAssistProcessorFactory.create(editor);
         this.codeAssistProcessors = new HashMap<>();
-        this.codeAssistProcessors.put(JavaPartitions.JAVA_PARTITIONING, codeAssistProcessor);
+        this.codeAssistProcessors.put(JAVA_PARTITIONING, codeAssistProcessor);
         this.quickAssistProcessors = quickAssistProcessorFactory.create(editor);
 
         this.documentPositionMap = docPositionMapProvider.get();
@@ -115,6 +116,7 @@ public class JsJavaEditorConfiguration extends DefaultTextEditorConfiguration {
                                       final JavaReconcilerStrategy javaReconcilerStrategy) {
         final Reconciler reconciler = reconcilerFactory.create(DEFAULT_PARTITIONING, getPartitioner());
         reconciler.addReconcilingStrategy(DEFAULT_CONTENT_TYPE, javaReconcilerStrategy);
+        reconciler.addReconcilingStrategy(JAVA_PARTITIONING, javaReconcilerStrategy);
         return reconciler;
     }
 
