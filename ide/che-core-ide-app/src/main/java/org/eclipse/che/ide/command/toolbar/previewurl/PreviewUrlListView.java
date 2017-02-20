@@ -12,9 +12,7 @@ package org.eclipse.che.ide.command.toolbar.previewurl;
 
 import org.eclipse.che.ide.api.mvp.View;
 
-/**
- *
- */
+/** View for preview URLs list. */
 public interface PreviewUrlListView extends View<PreviewUrlListView.ActionDelegate> {
 
     /** Add preview URL to the list. */

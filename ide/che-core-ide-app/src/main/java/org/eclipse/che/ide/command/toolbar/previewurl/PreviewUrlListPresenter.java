@@ -20,9 +20,9 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.workspace.WorkspaceRuntime;
 import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessResponseDto;
-import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessesResponseDto;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.ContextualCommand;
@@ -34,11 +34,10 @@ import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
 import org.eclipse.che.ide.api.mvp.Presenter;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_PREVIEW_URL_ATTRIBUTE_NAME;
 
-/**
- *
- */
+/** Drives the UI of running processes's preview URLs list. */
 @Singleton
 public class PreviewUrlListPresenter implements Presenter, PreviewUrlListView.ActionDelegate {
 
@@ -47,6 +46,7 @@ public class PreviewUrlListPresenter implements Presenter, PreviewUrlListView.Ac
     private final CommandManager           commandManager;
     private final AppContext               appContext;
     private final Provider<MacroProcessor> macroProcessorProvider;
+    private final PromiseProvider          promiseProvider;
 
     @Inject
     public PreviewUrlListPresenter(PreviewUrlListView view,
@@ -54,12 +54,14 @@ public class PreviewUrlListPresenter implements Presenter, PreviewUrlListView.Ac
                                    CommandManager commandManager,
                                    AppContext appContext,
                                    EventBus eventBus,
-                                   Provider<MacroProcessor> macroProcessorProvider) {
+                                   Provider<MacroProcessor> macroProcessorProvider,
+                                   PromiseProvider promiseProvider) {
         this.view = view;
         this.execAgentCommandManager = execAgentCommandManager;
         this.commandManager = commandManager;
         this.appContext = appContext;
         this.macroProcessorProvider = macroProcessorProvider;
+        this.promiseProvider = promiseProvider;
 
         view.setDelegate(this);
 
@@ -82,6 +84,7 @@ public class PreviewUrlListPresenter implements Presenter, PreviewUrlListView.Ac
                             event -> getPreviewUrl(event.getProcessID(), event.getMachine()).then(view::removeUrl));
     }
 
+    /** Updates view with preview URLs of all running processes. */
     private void updateView() {
         view.clearList();
 
@@ -89,23 +92,32 @@ public class PreviewUrlListPresenter implements Presenter, PreviewUrlListView.Ac
 
         if (runtime != null) {
             for (Machine machine : runtime.getMachines()) {
-                execAgentCommandManager.getProcesses(machine.getId(), false).then(arg -> {
-                    for (GetProcessesResponseDto p : arg) {
-                        getPreviewUrl(p.getPid(), machine).then(previewURL -> {
-                            macroProcessorProvider.get().expandMacros(previewURL).then(view::addUrl);
-                        });
-                    }
+                execAgentCommandManager.getProcesses(machine.getId(), false).then(processes -> {
+                    processes.forEach(process -> getPreviewUrl(process.getPid(), machine).then(view::addUrl));
                 });
             }
         }
     }
 
-    /** Returns preview URL of the command which launched the process with the given {@code pid} on the specified {@code machine}. */
+    /**
+     * Returns promise that resolves preview URL of the command which has launched
+     * the process with the given {@code pid} on the specified {@code machine}.
+     * Returns promise that rejects with an error if preview URL isn't available.
+     */
     private Promise<String> getPreviewUrl(int pid, Machine machine) {
         return execAgentCommandManager.getProcess(machine.getId(), pid).then((Function<GetProcessResponseDto, String>)arg -> {
             final ContextualCommand command = commandManager.getCommand(arg.getName());
+            if (command == null) {
+                return null;
+            }
 
             return command.getAttributes().get(COMMAND_PREVIEW_URL_ATTRIBUTE_NAME);
+        }).thenPromise(previewUrl -> {
+            if (isNullOrEmpty(previewUrl)) {
+                return promiseProvider.reject(new Exception("Preview URL is not available."));
+            }
+
+            return macroProcessorProvider.get().expandMacros(previewUrl);
         });
     }
 

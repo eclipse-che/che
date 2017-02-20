@@ -74,15 +74,12 @@ public interface CommandResources extends ClientBundle {
     }
 
     interface ToolbarCSS extends CssResource {
-        String toolbarButton();
 
-        String runButton();
+        String toolbarButton();
 
         String debugButton();
 
         String processesListLabel();
-
-        String processesList();
 
         String processWidget();
 

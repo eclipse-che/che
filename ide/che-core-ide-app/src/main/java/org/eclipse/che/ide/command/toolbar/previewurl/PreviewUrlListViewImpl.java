@@ -13,6 +13,7 @@ package org.eclipse.che.ide.command.toolbar.previewurl;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.ui.dropdown.BaseListItem;
 import org.eclipse.che.ide.ui.dropdown.DropDownList;
@@ -20,9 +21,8 @@ import org.eclipse.che.ide.ui.dropdown.DropDownList;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- *
- */
+/** Implementation of {@link PreviewUrlListView} that displays preview URLs in a drop down list. */
+@Singleton
 public class PreviewUrlListViewImpl implements PreviewUrlListView {
 
     private final Map<String, BaseListItem<String>> listItems;

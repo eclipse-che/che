@@ -12,14 +12,7 @@
 .toolbarButton {
     float: left;
     line-height: 20px;
-}
-
-.runButton {
-    margin: 5px 0 0 60px;
-}
-
-.debugButton {
-    margin: 5px 0 0 20px;
+    margin-left: 20px;
 }
 
 .debugButton i {
@@ -43,12 +36,7 @@
     color: #4eabff;
     width: 44px;
     height: 22px;
-    margin: 5px 0 0 60px;
     line-height: 22px;
-}
-
-.processesList {
-    margin-top: 5px;
 }
 
 .processWidget {

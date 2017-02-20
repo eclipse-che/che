@@ -98,6 +98,7 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
         });
     }
 
+    /** Updates view with all running processes. */
     private void updateView() {
         view.clearList();
         runningProcesses.clear();

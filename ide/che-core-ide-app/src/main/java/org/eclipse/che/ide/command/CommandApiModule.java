@@ -42,6 +42,7 @@ import org.eclipse.che.ide.command.explorer.CommandsExplorerView;
 import org.eclipse.che.ide.command.explorer.CommandsExplorerViewImpl;
 import org.eclipse.che.ide.command.goal.BuildGoal;
 import org.eclipse.che.ide.command.goal.CommonGoal;
+import org.eclipse.che.ide.command.goal.DebugGoal;
 import org.eclipse.che.ide.command.goal.DeployGoal;
 import org.eclipse.che.ide.command.goal.PredefinedCommandGoalRegistryImpl;
 import org.eclipse.che.ide.command.goal.RunGoal;
@@ -52,6 +53,8 @@ import org.eclipse.che.ide.command.palette.CommandPaletteView;
 import org.eclipse.che.ide.command.palette.CommandPaletteViewImpl;
 import org.eclipse.che.ide.command.producer.CommandProducerActionFactory;
 import org.eclipse.che.ide.command.producer.CommandProducerActionManager;
+import org.eclipse.che.ide.command.toolbar.CommandToolbarView;
+import org.eclipse.che.ide.command.toolbar.CommandToolbarViewImpl;
 import org.eclipse.che.ide.command.toolbar.previewurl.PreviewUrlListView;
 import org.eclipse.che.ide.command.toolbar.previewurl.PreviewUrlListViewImpl;
 import org.eclipse.che.ide.command.toolbar.processes.ProcessesListView;
@@ -80,6 +83,7 @@ public class CommandApiModule extends AbstractGinModule {
         goalBinder.addBinding().to(BuildGoal.class);
         goalBinder.addBinding().to(RunGoal.class);
         goalBinder.addBinding().to(DeployGoal.class);
+        goalBinder.addBinding().to(DebugGoal.class);
 
         bind(CommandTypeRegistry.class).to(CommandTypeRegistryImpl.class).in(Singleton.class);
         bind(PredefinedCommandGoalRegistry.class).to(PredefinedCommandGoalRegistryImpl.class).in(Singleton.class);
@@ -108,6 +112,7 @@ public class CommandApiModule extends AbstractGinModule {
         bind(PageWithTextEditorView.class).to(PageWithTextEditorViewImpl.class);
 
         // toolbar
+        bind(CommandToolbarView.class).to(CommandToolbarViewImpl.class).in(Singleton.class);
         bind(ProcessesListView.class).to(ProcessesListViewImpl.class).in(Singleton.class);
         bind(PreviewUrlListView.class).to(PreviewUrlListViewImpl.class).in(Singleton.class);
     }

@@ -10,11 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.toolbar;
 
-import com.google.gwt.dom.client.Style;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import org.eclipse.che.api.core.model.machine.Machine;
@@ -34,13 +36,22 @@ import javax.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- *
- */
+/** Implementation of {@link CommandToolbarView}. */
 @Singleton
 public class CommandToolbarViewImpl implements CommandToolbarView {
 
+    private static final CommandToolbarViewImplUiBinder UI_BINDER = GWT.create(CommandToolbarViewImplUiBinder.class);
+
     private final AppContext appContext;
+
+    @UiField
+    FlowPanel   rootPanel;
+    @UiField
+    FlowPanel   buttonsPanel;
+    @UiField
+    SimplePanel processesListPanel;
+    @UiField
+    SimplePanel previewUrlListPanel;
 
     private MenuPopupButton          runCommandsButton;
     private RunPopupItemDataProvider runPopupItemDataProvider;
@@ -48,14 +59,12 @@ public class CommandToolbarViewImpl implements CommandToolbarView {
     private ActionDelegate           delegate;
     private List<ContextualCommand>  commands;
     private PopupItem                lastSelectedItem;
-    private FlowPanel                rootPanel;
 
     @Inject
     public CommandToolbarViewImpl(CommandResources resources, AppContext appContext) {
         this.appContext = appContext;
 
-        rootPanel = new FlowPanel();
-        rootPanel.getElement().getStyle().setFloat(Style.Float.LEFT);
+        UI_BINDER.createAndBindUi(this);
 
         setUpRunButton(resources);
         setUpDebugButton(resources);
@@ -82,9 +91,8 @@ public class CommandToolbarViewImpl implements CommandToolbarView {
             }
         });
         runCommandsButton.asWidget().addStyleName(resources.commandToolbarCss().toolbarButton());
-        runCommandsButton.asWidget().addStyleName(resources.commandToolbarCss().runButton());
 
-        rootPanel.add(runCommandsButton);
+        buttonsPanel.add(runCommandsButton);
     }
 
     private void setUpDebugButton(CommandResources resources) {
@@ -128,7 +136,7 @@ public class CommandToolbarViewImpl implements CommandToolbarView {
         debugCommandsButton.asWidget().addStyleName(resources.commandToolbarCss().toolbarButton());
         debugCommandsButton.asWidget().addStyleName(resources.commandToolbarCss().debugButton());
 
-        rootPanel.add(debugCommandsButton);
+        buttonsPanel.add(debugCommandsButton);
     }
 
     @Override
@@ -149,23 +157,15 @@ public class CommandToolbarViewImpl implements CommandToolbarView {
 
     @Override
     public AcceptsOneWidget getProcessesListContainer() {
-        return new AcceptsOneWidget() {
-            @Override
-            public void setWidget(IsWidget w) {
-                rootPanel.add(w);
-                w.asWidget().getElement().getStyle().setFloat(Style.Float.LEFT);
-            }
-        };
+        return processesListPanel;
     }
 
     @Override
     public AcceptsOneWidget getPreviewUrlsListContainer() {
-        return new AcceptsOneWidget() {
-            @Override
-            public void setWidget(IsWidget w) {
-                rootPanel.add(w);
-            }
-        };
+        return previewUrlListPanel;
+    }
+
+    interface CommandToolbarViewImplUiBinder extends UiBinder<Widget, CommandToolbarViewImpl> {
     }
 
     private class RunPopupItemDataProvider implements PopupItemDataProvider {

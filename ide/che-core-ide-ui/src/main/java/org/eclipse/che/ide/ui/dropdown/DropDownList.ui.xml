@@ -39,7 +39,7 @@
         }
     </ui:style>
 
-    <g:FlowPanel debugId="dropDownList" styleName="{style.widget}">
+    <g:FlowPanel styleName="{style.widget}">
         <g:SimplePanel ui:field="selectedItemPanel" addStyleNames="{style.selectedItemPanel}"/>
         <g:SimplePanel ui:field="dropButtonPanel" addStyleNames="{style.dropButton}"/>
     </g:FlowPanel>

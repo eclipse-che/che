@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.command.CommandResources;
 import org.eclipse.che.ide.ui.dropdown.BaseListItem;
@@ -24,6 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /** Implementation of {@link ProcessesListView} that displays processes in a drop down list. */
+@Singleton
 public class ProcessesListViewImpl implements ProcessesListView {
 
     private final FlowPanel    rootPanel;
@@ -47,7 +49,6 @@ public class ProcessesListViewImpl implements ProcessesListView {
 
         dropDownList = new DropDownList(emptyListWidget);
         dropDownList.setWidth("400px");
-        dropDownList.addStyleName(resources.commandToolbarCss().processesList());
         dropDownList.setSelectionHandler(item -> {
             for (Map.Entry<Process, BaseListItem<Process>> entry : listItems.entrySet()) {
                 if (item.equals(entry.getValue())) {
