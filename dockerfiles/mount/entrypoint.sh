@@ -138,10 +138,10 @@ info "INFO: (che mount): Initial sync...Please wait."
 
 local UNISON_ARGS="";
 if [ $(is_verbose "$@") = true ]; then
-  UNISON_ARGS="-batch -auto -prefer=newer"
+  UNISON_ARGS="-batch -fat -auto -prefer=newer"
   info "using verbose mode"
 else
-  UNISON_ARGS="-silent -auto -prefer=newer -log=false > /dev/null 2>&1"
+  UNISON_ARGS="-silent -fat -auto -prefer=newer -log=false > /dev/null 2>&1"
 fi
 
 UNISON_COMMAND="unison /mntssh /mnthost ${UNISON_ARGS}"
