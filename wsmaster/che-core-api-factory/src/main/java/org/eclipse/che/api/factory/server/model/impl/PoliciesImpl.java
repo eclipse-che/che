@@ -25,7 +25,7 @@ import java.util.Objects;
 @Embeddable
 public class PoliciesImpl implements Policies {
 
-    @Column(name = "referer")
+    @Column(name = "referrer")
     private String referer;
 
     @Column(name = "match_reopen")
