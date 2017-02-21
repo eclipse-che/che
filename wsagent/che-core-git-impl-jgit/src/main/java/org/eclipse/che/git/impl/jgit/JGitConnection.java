@@ -283,7 +283,7 @@ class JGitConnection implements GitConnection {
         }
     }
 
-    // to add deleted files in index it is required to perform git rm on them
+    /** To add deleted files in index it is required to perform git rm on them */
     private void addDeletedFilesToIndex(List<String> filePatterns) throws GitAPIException {
         Set<String> deletedFiles = getGit().status().call().getMissing();
         if (!deletedFiles.isEmpty()) {
