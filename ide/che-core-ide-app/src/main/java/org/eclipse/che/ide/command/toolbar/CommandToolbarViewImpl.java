@@ -90,6 +90,7 @@ public class CommandToolbarViewImpl implements CommandToolbarView {
 
             }
         });
+
         runCommandsButton.asWidget().addStyleName(resources.commandToolbarCss().toolbarButton());
 
         buttonsPanel.add(runCommandsButton);

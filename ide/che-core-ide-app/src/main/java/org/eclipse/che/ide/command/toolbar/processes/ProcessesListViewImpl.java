@@ -49,6 +49,7 @@ public class ProcessesListViewImpl implements ProcessesListView {
 
         dropDownList = new DropDownList(emptyListWidget);
         dropDownList.setWidth("400px");
+        dropDownList.setDropdownPanelWidth("400px");
         dropDownList.setSelectionHandler(item -> {
             for (Map.Entry<Process, BaseListItem<Process>> entry : listItems.entrySet()) {
                 if (item.equals(entry.getValue())) {
