@@ -59,6 +59,10 @@ public class PreviewUrlListViewImpl implements PreviewUrlListView {
 
     @Override
     public void addUrl(String url) {
+        if (listItems.containsKey(url)) {
+            return; // no sense to add the equals URLs even if it belong to different commands
+        }
+
         final BaseListItem<String> listItem = new BaseListItem<>(url);
         final PreviewUrlItemRenderer renderer = new PreviewUrlItemRenderer(listItem);
 

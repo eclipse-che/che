@@ -77,11 +77,8 @@ public class PreviewUrlListPresenter implements Presenter, PreviewUrlListView.Ac
             }
         });
 
-        eventBus.addHandler(ProcessStartedEvent.TYPE,
-                            event -> getPreviewUrl(event.getProcessID(), event.getMachine()).then(view::addUrl));
-
-        eventBus.addHandler(ProcessFinishedEvent.TYPE,
-                            event -> getPreviewUrl(event.getProcessID(), event.getMachine()).then(view::removeUrl));
+        eventBus.addHandler(ProcessStartedEvent.TYPE, event -> updateView());
+        eventBus.addHandler(ProcessFinishedEvent.TYPE, event -> updateView());
     }
 
     /** Updates view with preview URLs of all running processes. */
