@@ -1,0 +1,47 @@
+'use strict';
+
+exports.listStacksTheeEntries = function () {
+
+  angular.module('userDashboardMock', ['userDashboard', 'ngMockE2E'])
+    .run(['$httpBackend', 'cheAPIBuilder', 'cheHttpBackendProvider', ($httpBackend, cheAPIBuilder, cheHttpBackendProvider) => {
+
+      let cheBackend = cheHttpBackendProvider.buildBackend($httpBackend, cheAPIBuilder);
+
+      let stacks = [];
+
+      // let it be the same for all stacks
+      let workspaceConfig = {
+            'environments': {
+              'default': {
+                'machines': {
+                  'dev-machine': {
+                    'servers': {},
+                    'agents': ['org.eclipse.che.terminal', 'org.eclipse.che.ws-agent', 'org.eclipse.che.ssh'],
+                    'attributes': {'memoryLimitBytes': '2147483648'}
+                  }
+                }, 'recipe': {'location': 'codenvy/node', 'type': 'dockerimage'}
+              }
+            }, 'commands': [], 'projects': [], 'defaultEnv': 'default', 'name': 'default', 'links': []
+          };
+
+      let name1 = 'testStack1',
+          id1 = 'testStackId1',
+          stack1 = cheAPIBuilder.getStackBuilder().withId(id1).withName(name1).withWorkspaceConfig(workspaceConfig).build();
+      stacks.push(stack1);
+
+      let name2 = 'testStack2',
+          id2 = 'testStackId2',
+          stack2 = cheAPIBuilder.getStackBuilder().withId(id2).withName(name2).withWorkspaceConfig(workspaceConfig).build();
+      stacks.push(stack2);
+
+      let name3 = 'testStack3',
+          id3 = 'testStackId3',
+          stack3 = cheAPIBuilder.getStackBuilder().withId(id3).withName(name3).withWorkspaceConfig(workspaceConfig).build();
+      stacks.push(stack3);
+
+      cheBackend.addStacks(stacks);
+      cheBackend.setup();
+
+    }]);
+
+};

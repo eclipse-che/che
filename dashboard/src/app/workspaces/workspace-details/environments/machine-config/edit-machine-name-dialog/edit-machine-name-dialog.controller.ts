@@ -33,24 +33,27 @@ export class EditMachineNameDialogController {
     this.origName = this.name;
   }
 
-  isUnique(name) {
+  isUnique(name: string): boolean {
     if (name === this.origName) {
       return true;
     }
-    return this.machinesNames.indexOf(name) < 0;
+    let nameRE = new RegExp('^' + name + '$', 'i');
+    return this.machinesNames.some((_name: string) => {
+      return nameRE.test(_name);
+    }) === false;
   }
 
   /**
    * It will hide the dialog box.
    */
-  hide() {
+  hide(): void {
     this.$mdDialog.hide();
   }
 
   /**
    * Update machine name
    */
-  updateMachineName() {
+  updateMachineName(): void {
     this.callbackController.updateMachineName(this.name);
     this.hide();
   }
