@@ -11,4 +11,3 @@ base_dir=$(cd "$(dirname "$0")"; pwd)
 
 init "$@"
 build
-

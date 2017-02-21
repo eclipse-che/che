@@ -168,7 +168,7 @@ public class RevisionListPresenter implements RevisionListView.ActionDelegate {
                                @Override
                                public void apply(Optional<File> file) throws OperationException {
                                    if (file.isPresent()) {
-                                       comparePresenter.show(file.get(), defineStatus(diff.substring(0, 1)), selectedRevision.getId());
+                                       comparePresenter.showCompareWithLatest(file.get(), defineStatus(diff.substring(0, 1)), selectedRevision.getId());
                                    }
                                }
                            });

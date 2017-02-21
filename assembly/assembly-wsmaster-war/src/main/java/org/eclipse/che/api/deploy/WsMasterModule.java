@@ -181,5 +181,7 @@ public class WsMasterModule extends AbstractModule {
         // system components
         bind(org.eclipse.che.api.system.server.SystemService.class);
         bind(org.eclipse.che.api.system.server.SystemEventsWebsocketBroadcaster.class).asEagerSingleton();
+
+        install(new org.eclipse.che.plugin.docker.machine.dns.DnsResolversModule());
     }
 }

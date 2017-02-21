@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server;
 
+import com.google.common.collect.ImmutableSet;
+
 import org.eclipse.che.account.api.AccountManager;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.ConflictException;
@@ -197,19 +199,34 @@ public class WorkspaceManagerTest {
     public void shouldBeAbleToGetWorkspaceByKey() throws Exception {
         WorkspaceImpl workspace = createAndMockWorkspace();
 
-        WorkspaceImpl result = workspaceManager.getWorkspace(workspace.getNamespace() + ":" + workspace.getConfig().getName());
+        WorkspaceImpl result = workspaceManager.getWorkspace(workspace.getNamespace() + "/" + workspace.getConfig().getName());
 
+        assertEquals(result, workspace);
+    }
+
+
+    @Test
+    public void shouldBeAbleToGetWorkspaceByKeyPreviousFormat() throws Exception {
+        WorkspaceImpl workspace = createAndMockWorkspace();
+        WorkspaceImpl result = workspaceManager.getWorkspace(workspace.getNamespace() + ":" + workspace.getConfig().getName());
+        assertEquals(result, workspace);
+    }
+
+    @Test
+    public void shouldBeAbleToGetWorkspaceByKeyNamespaceOptionalPreviousFormat() throws Exception {
+        WorkspaceImpl workspace = createAndMockWorkspace();
+        WorkspaceImpl result = workspaceManager.getWorkspace(":" + workspace.getConfig().getName());
         assertEquals(result, workspace);
     }
 
     @Test
     public void shouldBeAbleToGetWorkspaceByKeyWithoutOwner() throws Exception {
         WorkspaceImpl workspace = createAndMockWorkspace();
-
         WorkspaceImpl result = workspaceManager.getWorkspace(":" + workspace.getConfig().getName());
-
         assertEquals(result, workspace);
     }
+
+
 
     @Test
     public void shouldBeAbleToGetWorkspacesAvailableForUser() throws Exception {
@@ -488,7 +505,7 @@ public class WorkspaceManagerTest {
     }
 
     @Test(expectedExceptions = ConflictException.class,
-          expectedExceptionsMessageRegExp = "Could not stop the workspace 'test-namespace:dev-workspace' because its " +
+          expectedExceptionsMessageRegExp = "Could not stop the workspace 'namespace/test/dev-workspace' because its " +
                                             "status is 'STOPPING'. Workspace must be either 'STARTING' or 'RUNNING'")
     public void failsToStopNotRunningWorkspace() throws Exception {
         WorkspaceImpl workspace = createAndMockWorkspace();
@@ -882,6 +899,14 @@ public class WorkspaceManagerTest {
         verify(sharedPool).shutdown();
     }
 
+    @Test
+    public void getsRunningWorkspacesIds() {
+        ImmutableSet<String> ids = ImmutableSet.of("id1", "id2", "id3");
+        when(runtimes.getRuntimesIds()).thenReturn(ids);
+
+        assertEquals(workspaceManager.getRunningWorkspacesIds(), ids);
+    }
+
     private void captureRunAsyncCallsAndRunSynchronously() {
         verify(sharedPool, atLeastOnce()).runAsync(taskCaptor.capture());
         for (Runnable runnable : taskCaptor.getAllValues()) {
@@ -914,7 +939,7 @@ public class WorkspaceManagerTest {
     }
 
     private WorkspaceImpl createAndMockWorkspace() throws NotFoundException, ServerException {
-        return createAndMockWorkspace(createConfig(), "test-namespace");
+        return createAndMockWorkspace(createConfig(), "namespace/test");
     }
 
     private WorkspaceImpl createAndMockWorkspace(WorkspaceConfig cfg, String namespace) throws NotFoundException, ServerException {

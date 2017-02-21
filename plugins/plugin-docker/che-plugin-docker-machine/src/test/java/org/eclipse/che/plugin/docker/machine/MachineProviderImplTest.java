@@ -361,16 +361,37 @@ public class MachineProviderImplTest {
         assertEquals(((long)argumentCaptor.getValue().getContainerConfig().getHostConfig().getCpuPeriod()), 200);
     }
 
-    @Test
-    public void shouldBeAbleToCreateContainerWithCpuQuota() throws Exception {
-        provider = spy(new MachineProviderBuilder().setCpuQuota(200)
+    @Test(dataProvider = "dnsResolverTestProvider")
+    public void shouldSetDnsResolversOnContainerCreation(String[] dnsResolvers) throws Exception {
+        provider = spy(new MachineProviderBuilder().setDnsResolvers(dnsResolvers)
                                                    .build());
 
         createInstanceFromRecipe();
 
         ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
         verify(dockerConnector).createContainer(argumentCaptor.capture());
-        assertEquals(((long)argumentCaptor.getValue().getContainerConfig().getHostConfig().getCpuQuota()), 200);
+        assertEqualsNoOrder(argumentCaptor.getValue().getContainerConfig().getHostConfig().getDns(), dnsResolvers);
+    }
+
+    @DataProvider(name = "dnsResolverTestProvider")
+    public static Object[][] dnsResolverTestProvider() {
+        return new Object[][] {
+                {new String[]{}},
+                {new String[]{"8.8.8.8", "7.7.7.7", "9.9.9.9"}},
+                {new String[]{"9.9.9.9"}},
+                {null},
+        };
+    }
+
+    @Test
+    public void shouldSetNullDnsResolversOnContainerCreationByDefault() throws Exception {
+        provider = spy(new MachineProviderBuilder().build());
+
+        createInstanceFromRecipe();
+
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        assertEqualsNoOrder(argumentCaptor.getValue().getContainerConfig().getHostConfig().getDns(), null);
     }
 
     @Test
@@ -1302,6 +1323,18 @@ public class MachineProviderImplTest {
         assertEquals(containerConfig.getNetworkingConfig().getEndpointsConfig().get(NETWORK_NAME).getLinks(), links);
     }
 
+    @Test
+    public void shouldBeAbleToCreateContainerWithCpuQuota() throws Exception {
+        provider = spy(new MachineProviderBuilder().setCpuQuota(200)
+                                                   .build());
+
+        createInstanceFromRecipe();
+
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        assertEquals(((long)argumentCaptor.getValue().getContainerConfig().getHostConfig().getCpuQuota()), 200);
+    }
+
     private CheServiceImpl createInstanceFromRecipe() throws Exception {
         CheServiceImpl service = createService();
         createInstanceFromRecipe(service);
@@ -1432,6 +1465,7 @@ public class MachineProviderImplTest {
         private String           cpuSet;
         private long             cpuPeriod;
         private long             cpuQuota;
+        private String[]         dnsResolvers;
 
         public MachineProviderBuilder() {
             devMachineEnvVars = emptySet();
@@ -1529,6 +1563,12 @@ public class MachineProviderImplTest {
             return this;
         }
 
+        public MachineProviderBuilder setDnsResolvers(String[] dnsResolvers) {
+            this.dnsResolvers = dnsResolvers;
+            return this;
+        }
+
+
         MachineProviderImpl build() throws IOException {
             return new MachineProviderImpl(new MockConnectorProvider(),
                                            credentialsReader,
@@ -1552,7 +1592,8 @@ public class MachineProviderImplTest {
                                            cpuPeriod,
                                            cpuQuota,
                                            pathEscaper,
-                                           extraHosts);
+                                           extraHosts,
+                                           dnsResolvers);
         }
     }
 }

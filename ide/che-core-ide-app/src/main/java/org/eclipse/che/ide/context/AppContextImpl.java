@@ -87,8 +87,8 @@ public class AppContextImpl implements AppContext,
 
     private static final Project[] NO_PROJECTS = {};
 
-    private final BrowserQueryFieldRenderer browserQueryFieldRenderer;
-    private final List<String>              projectsInImport;
+    private final QueryParameters queryParameters;
+    private final List<String>    projectsInImport;
 
     private Workspace           usersWorkspace;
     private CurrentUser         currentUser;
@@ -106,12 +106,12 @@ public class AppContextImpl implements AppContext,
 
     @Inject
     public AppContextImpl(EventBus eventBus,
-                          BrowserQueryFieldRenderer browserQueryFieldRenderer,
+                          QueryParameters queryParameters,
                           ResourceManager.ResourceManagerFactory resourceManagerFactory,
                           Provider<EditorAgent> editorAgentProvider,
                           Provider<AppStateManager> appStateManager) {
         this.eventBus = eventBus;
-        this.browserQueryFieldRenderer = browserQueryFieldRenderer;
+        this.queryParameters = queryParameters;
         this.resourceManagerFactory = resourceManagerFactory;
         this.editorAgentProvider = editorAgentProvider;
         this.appStateManager = appStateManager;
@@ -205,8 +205,6 @@ public class AppContextImpl implements AppContext,
             //should never happened, but anyway
             callback.onFailure(new NullPointerException("Dev machine is not initialized"));
         }
-
-        browserQueryFieldRenderer.setProjectName("");
 
         if (projects != null) {
             for (Project project : projects) {
@@ -324,8 +322,6 @@ public class AppContextImpl implements AppContext,
         if (selection instanceof Selection.NoSelectionProvided) {
             return;
         }
-
-        browserQueryFieldRenderer.setProjectName("");
 
         currentResource = null;
         currentResources = null;
@@ -464,7 +460,6 @@ public class AppContextImpl implements AppContext,
         appStateManager.get().persistWorkspaceState(getWorkspaceId()).then(new Operation<Void>() {
             @Override
             public void apply(Void arg) throws OperationException {
-                browserQueryFieldRenderer.setProjectName("");
                 for (Project project : projects) {
                     eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(project, REMOVED)));
                 }
@@ -489,7 +484,7 @@ public class AppContextImpl implements AppContext,
 
     @Override
     public String getMasterEndpoint() {
-        String fromUrl = this.browserQueryFieldRenderer.getParameterFromURLByName("master");
+        String fromUrl = queryParameters.getByName("master");
         if(fromUrl == null || fromUrl.isEmpty())
             return masterFromIDEConfig();
         else
@@ -498,7 +493,7 @@ public class AppContextImpl implements AppContext,
 
     @Override
     public String getDevAgentEndpoint() {
-        String fromUrl = this.browserQueryFieldRenderer.getParameterFromURLByName("agent");
+        String fromUrl = queryParameters.getByName("agent");
         if(fromUrl == null || fromUrl.isEmpty())
             return runtime.getDevMachine().getWsAgentBaseUrl();
         else

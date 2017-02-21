@@ -97,8 +97,7 @@ public class ResponseDispatcher {
                 Log.debug(getClass(), "Reject function is found, applying");
 
                 rejectFunction.apply(JsPromiseError.create(error.toString()));
-            }
-            {
+            } else {
                 Log.debug(getClass(), "Reject function is not found, skipping");
             }
         } else {

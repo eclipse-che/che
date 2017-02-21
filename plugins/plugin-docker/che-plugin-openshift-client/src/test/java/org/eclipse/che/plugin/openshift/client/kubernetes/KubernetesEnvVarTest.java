@@ -22,12 +22,6 @@ import org.testng.annotations.Test;
 import io.fabric8.kubernetes.api.model.EnvVar;
 
 public class KubernetesEnvVarTest {
-    private KubernetesEnvVar kubernetesEnvVar;
-
-    @BeforeClass
-    private void setup() {
-        this.kubernetesEnvVar = new KubernetesEnvVar();
-    }
 
     @Test
     public void shouldReturnContainerEnvFromEnvVariableArray() {
@@ -46,7 +40,7 @@ public class KubernetesEnvVarTest {
         };
 
         // When
-        List<EnvVar> env = kubernetesEnvVar.getEnvFrom(envVariables);
+        List<EnvVar> env = KubernetesEnvVar.getEnvFrom(envVariables);
 
         // Then
         List<String> keysAndValues = env.stream().map(k -> k.getName() + "=" + k.getValue()).collect(Collectors.toList());

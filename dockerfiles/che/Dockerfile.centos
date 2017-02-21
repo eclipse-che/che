@@ -8,17 +8,16 @@
 #   Dharmit Shah  - Initial implementation
 #   Mario Loriedo - Improvements
 #
-# To build it, run in the current folder after executing build.sh:
-#  `docker build -t registry.centos.org/eclipse/che-server -f Dockerfile.centos .`
+# To build it, in current folder:
+#  cp Dockerfile.centos Dockerfile
+#  ./build.sh
 #
 # To run it:
-#  docker run --net=host \
-#             --name che \
-#             -v /var/run/docker.sock:/var/run/docker.sock \
-#             -v /home/user/che/lib:/home/user/che/lib-copy \
-#             -v /home/user/che/workspaces:/home/user/che/workspaces \
-#             -v /home/user/che/storage:/home/user/che/storage \
-#             registry.centos.org/eclipse/che-server
+#  docker run -d -p 8080:8080 \
+#            --name che \
+#            -v /var/run/docker.sock:/var/run/docker.sock \
+#            -v ~/.che/workspaces:/data \
+#            eclipse/che-server:nightly
 #           
 FROM registry.centos.org/centos/centos:latest
 
@@ -39,6 +38,11 @@ RUN yum -y update && \
     echo "%root ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
     sed -i 's/Defaults    requiretty/#Defaults    requiretty/g' /etc/sudoers && \
     rm -rf /tmp/* /var/cache/yum
+
+# The following lines are needed to set the correct locale after `yum update`
+# c.f. https://github.com/CentOS/sig-cloud-instance-images/issues/71
+RUN localedef -i en_US -f UTF-8 C.UTF-8
+ENV LANG="C.UTF-8"
 
 EXPOSE 8000 8080
 COPY entrypoint.sh /entrypoint.sh

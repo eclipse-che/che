@@ -23,6 +23,7 @@ import java.util.Map;
 /**
  * @author Evgen Vidolob
  * @author Artem Zatsarynnyi
+ * @author <a href="mailto:ak@nuxeo.com">Arnaud Kervern</a>
  */
 public class SchemeImpl implements Scheme {
 
@@ -95,5 +96,10 @@ public class SchemeImpl implements Scheme {
     @Override
     public CharCodeWithModifiers getKeyBinding(@NotNull String actionId) {
         return actionId2CharCode.get(actionId);
+    }
+
+    @Override
+    public boolean contains(String actionId) {
+        return actionId2CharCode.containsKey(actionId);
     }
 }

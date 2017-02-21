@@ -130,6 +130,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
     private final long                                          cpuPeriod;
     private final long                                          cpuQuota;
     private final WindowsPathEscaper                            windowsPathEscaper;
+    private final String[]                                      dnsResolvers;
 
     @Inject
     public MachineProviderImpl(DockerConnectorProvider dockerProvider,
@@ -154,7 +155,8 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                @Named("che.docker.cpu_period") long cpuPeriod,
                                @Named("che.docker.cpu_quota") long cpuQuota,
                                WindowsPathEscaper windowsPathEscaper,
-                               @Named("che.docker.extra_hosts") Set<Set<String>> additionalHosts)
+                               @Named("che.docker.extra_hosts") Set<Set<String>> additionalHosts,
+                               @Nullable @Named("che.docker.dns_resolvers") String[] dnsResolvers)
             throws IOException {
         this.docker = dockerProvider.get();
         this.dockerCredentials = dockerCredentials;
@@ -179,6 +181,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
         this.cpuQuota = cpuQuota;
         this.windowsPathEscaper = windowsPathEscaper;
         this.pidsLimit = pidsLimit;
+        this.dnsResolvers = dnsResolvers;
 
         allMachinesSystemVolumes = removeEmptyAndNullValues(allMachinesSystemVolumes);
         devMachineSystemVolumes = removeEmptyAndNullValues(devMachineSystemVolumes);
@@ -548,7 +551,8 @@ public class MachineProviderImpl implements MachineInstanceProvider {
               .withPidsLimit(pidsLimit)
               .withExtraHosts(allMachinesExtraHosts)
               .withPrivileged(privilegedMode)
-              .withPublishAllPorts(true);
+              .withPublishAllPorts(true)
+              .withDns(dnsResolvers);
         // CPU limits
         config.getHostConfig()
               .withCpusetCpus(cpusetCpus)

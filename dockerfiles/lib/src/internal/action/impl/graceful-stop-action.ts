@@ -49,16 +49,9 @@ export class GracefulStopAction {
     run() : Promise<any> {
         // first, login
         return this.authData.login().then(() => {
-            return this.system.getState()
-                .then((state:org.eclipse.che.api.system.shared.dto.SystemStateDto) => {
-                    if (state.getStatus() != "RUNNING") {
-                        return Promise.reject("Status is not in RUNNING state so the graceful can't be called.");
-                    }
-                });
-        }).then(() => {
             return this.system.gracefulStop();
         }).then((state:org.eclipse.che.api.system.shared.dto.SystemStateDto) => {
-          Log.getLogger().info("Success: system is now in status '" + state.getStatus() + "'.");
+          Log.getLogger().info("Success: System state '" + state.getStatus() + "'.");
         });
     }
 

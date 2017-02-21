@@ -84,7 +84,6 @@ public class JavaCompletionProposal implements CompletionProposal, CompletionPro
         frame.setSize("100%", "100%");
         frame.getElement().getStyle().setBorderStyle(Style.BorderStyle.NONE);
         frame.getElement().setAttribute("sandbox", ""); // empty value, not null
-        frame.getElement().getStyle().setProperty("resize", "both");
         frame.setUrl(client.getProposalDocUrl(id, sessionId));
         callback.onSuccess(frame);
     }

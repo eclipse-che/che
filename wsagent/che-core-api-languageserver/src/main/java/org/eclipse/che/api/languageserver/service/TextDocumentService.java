@@ -12,6 +12,7 @@ package org.eclipse.che.api.languageserver.service;
 
 import io.typefox.lsapi.CompletionItem;
 import io.typefox.lsapi.CompletionList;
+import io.typefox.lsapi.DocumentHighlight;
 import io.typefox.lsapi.Hover;
 import io.typefox.lsapi.Location;
 import io.typefox.lsapi.SignatureHelp;
@@ -291,6 +292,19 @@ public class TextDocumentService {
         if (server != null) {
             server.getTextDocumentService().didSave(saveEvent);
         }
+    }
+
+    @POST
+    @Path("documentHighlight")
+    @Consumes(MediaType.APPLICATION_JSON)
+	public DocumentHighlight documentHighlight(TextDocumentPositionParamsDTO positionParams)
+			throws LanguageServerException, InterruptedException, ExecutionException {
+    	positionParams.getTextDocument().setUri(prefixURI(positionParams.getTextDocument().getUri()));
+    	LanguageServer server = getServer(positionParams.getTextDocument().getUri());
+    	if (server != null) {
+    		return server.getTextDocumentService().documentHighlight(positionParams).get();
+    	}
+    	return null;
     }
 
     private LanguageServer getServer(String uri) throws LanguageServerException {

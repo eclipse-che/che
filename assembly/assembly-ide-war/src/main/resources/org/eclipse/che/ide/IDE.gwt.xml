@@ -34,6 +34,7 @@
     <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
 
     <!-- Core module inherits                                       -->
+    <inherits name="org.eclipse.che.orion.CheOrion"/>
     <inherits name='org.eclipse.che.ide.Api'/>
     <inherits name='org.eclipse.che.api.core.model.Model'/>
     <inherits name="org.eclipse.che.ide.Core"/>
@@ -57,6 +58,7 @@
     <inherits name="org.eclipse.che.plugin.ssh.key.SshKey"/>
     <inherits name='org.eclipse.che.plugin.github.GitHub'/>
     <inherits name='org.eclipse.che.ide.editor.orion.OrionEditor'/>
+    <inherits name="org.eclipse.che.ide.terminal.Terminal"/>
     <inherits name="org.eclipse.che.ide.orion.OrionCompare"/>
     <inherits name='org.eclipse.che.env.local.LocalEnvironment'/>
     <inherits name='org.eclipse.che.ide.ext.plugins.PluginsDevelopment'/>

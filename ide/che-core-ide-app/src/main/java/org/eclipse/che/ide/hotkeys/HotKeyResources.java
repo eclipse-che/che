@@ -18,6 +18,7 @@ import com.google.gwt.resources.client.DataResource;
  * Resources for KeyBindings widget
  *
  * @author Alexander Andrienko
+ * @author <a href="mailto:ak@nuxeo.com">Arnaud Kervern</a>
  */
 public interface HotKeyResources extends ClientBundle {
 
@@ -40,6 +41,17 @@ public interface HotKeyResources extends ClientBundle {
         String categories();
 
         String description();
+
+        String isGlobal();
+
+        /** Returns the CSS class name for scheme selection text label in 'Key Bindings' form. */
+        String selectionLabel();
+
+        /** Returns the CSS class name for scheme selection list box in 'Key Bindings' form. */
+        String selectionListBox();
+
+        /** Returns the CSS class name for scheme selection panel in 'Key Bindings' form. */
+        String selectionPanel();
     }
 
     @DataResource.MimeType("image/svg+xml")

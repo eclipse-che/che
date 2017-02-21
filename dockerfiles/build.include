@@ -63,8 +63,6 @@ build() {
     printf "${RED}Failure when building docker image ${IMAGE_NAME}:${TAG}${NC}\n"
     exit 1
   fi
-
-
 }
 
 check_docker() {
@@ -83,10 +81,10 @@ docker_exec() {
   fi
 }
 
-has_docker_for_windows_client(){
-  GLOBAL_HOST_ARCH=$(docker version --format {{.Client}} | cut -d" " -f5)
+has_docker_for_windows_client() {
+  GLOBAL_HOST_ARCH=$(docker version --format {{.Client}})
 
-  if [ "${GLOBAL_HOST_ARCH}" = "windows" ]; then
+  if [[ "${GLOBAL_HOST_ARCH}" = *"windows"* ]]; then
     return 0
   else
     return 1

@@ -11,6 +11,7 @@
 import {AuthData} from "../../api/wsmaster/auth/auth-data";
 import {Log} from "../log/log";
 import {org} from "../../api/dto/che-dto";
+import {ErrorMessage} from "../error/error-message";
 /**
  * Implementation of a Request on the remote server
  * @author Florent Benoit
@@ -90,12 +91,12 @@ export class DefaultHttpJsonRequest implements HttpJsonRequest {
                         try {
                             var parsed = JSON.parse(data);
                             if (parsed.message) {
-                                reject('Call on rest url ' + this.options.path + ' returned invalid response code (' + res.statusCode + ') with error:' + parsed.message);
+                                reject(new ErrorMessage('Call on rest url ' + this.options.path + ' returned invalid response code (' + res.statusCode + ') with error:' + parsed.message, res.statusCode));
                             } else {
-                                reject('Call on rest url ' + this.options.path + ' returned invalid response code (' + res.statusCode + ') with error:' + data);
+                                reject(new ErrorMessage('Call on rest url ' + this.options.path + ' returned invalid response code (' + res.statusCode + ') with error:' + data, res.statusCode));
                             }
                         } catch (error) {
-                            reject('Call on rest url ' + this.options.path + ' returned invalid response code (' + res.statusCode + ') with error:' + data.toString());
+                            reject(new ErrorMessage('Call on rest url ' + this.options.path + ' returned invalid response code (' + res.statusCode + ') with error:' + data.toString(), res.statusCode));
                         }
 
                     }

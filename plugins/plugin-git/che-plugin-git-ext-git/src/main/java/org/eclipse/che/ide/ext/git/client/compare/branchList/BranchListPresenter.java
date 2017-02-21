@@ -55,16 +55,16 @@ import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.defineStatus
 public class BranchListPresenter implements BranchListView.ActionDelegate {
     public static final String BRANCH_LIST_COMMAND_NAME = "Git list of branches";
 
-    private final ComparePresenter         comparePresenter;
-    private final ChangedListPresenter     changedListPresenter;
-    private final GitOutputConsoleFactory  gitOutputConsoleFactory;
-    private final ProcessesPanelPresenter  consolesPanelPresenter;
-    private final BranchListView           view;
-    private final DialogFactory            dialogFactory;
-    private final GitServiceClient         service;
-    private final GitLocalizationConstant  locale;
-    private final AppContext               appContext;
-    private final NotificationManager      notificationManager;
+    private final ComparePresenter        comparePresenter;
+    private final ChangedListPresenter    changedListPresenter;
+    private final GitOutputConsoleFactory gitOutputConsoleFactory;
+    private final ProcessesPanelPresenter consolesPanelPresenter;
+    private final BranchListView          view;
+    private final DialogFactory           dialogFactory;
+    private final GitServiceClient        service;
+    private final GitLocalizationConstant locale;
+    private final AppContext              appContext;
+    private final NotificationManager     notificationManager;
 
     private Branch   selectedBranch;
     private Project  project;
@@ -141,9 +141,9 @@ public class BranchListPresenter implements BranchListView.ActionDelegate {
                                    @Override
                                    public void apply(Optional<File> file) throws OperationException {
                                        if (file.isPresent()) {
-                                           comparePresenter.show(file.get(),
-                                                                 defineStatus(changedFiles[0].substring(0, 1)),
-                                                                 selectedBranch.getName());
+                                           comparePresenter.showCompareWithLatest(file.get(),
+                                                                                  defineStatus(changedFiles[0].substring(0, 1)),
+                                                                                  selectedBranch.getName());
                                        }
                                    }
                                });
@@ -152,7 +152,7 @@ public class BranchListPresenter implements BranchListView.ActionDelegate {
                                for (String item : changedFiles) {
                                    items.put(item.substring(2, item.length()), defineStatus(item.substring(0, 1)));
                                }
-                               changedListPresenter.show(items, selectedBranch.getName(), project);
+                               changedListPresenter.show(items, selectedBranch.getName(), null, project);
                            }
                        }
                    }

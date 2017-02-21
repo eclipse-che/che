@@ -81,7 +81,7 @@ export class ProjectsConfig {
 
     // config routes
     register.app.config(function ($routeProvider) {
-      $routeProvider.accessWhen('/project/:namespace/:workspaceName/:projectName', {
+      $routeProvider.accessWhen('/project/:namespace*/:workspaceName/:projectName', {
           title: (params) => {return params.workspaceName + ' | ' + params.projectName},
           templateUrl: 'app/projects/project-details/project-details.html',
           controller: 'ProjectDetailsController',

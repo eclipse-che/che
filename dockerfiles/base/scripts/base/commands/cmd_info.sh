@@ -9,6 +9,29 @@
 #   Tyler Jewell - Initial Implementation
 #
 
+help_cmd_info() {
+  text "\n"
+  text "USAGE: ${CHE_IMAGE_FULLNAME} info [PARAMETERS]\n"
+  text "\n"
+  text "Status, information, and support diagnostic bundles for ${CHE_MINI_PRODUCT_NAME}\n"
+  text "\n"
+  text "PARAMETERS:\n"
+  text "  --all                             Prints info, runs networking tests, ad prepares diagnostic bundle\n"
+  text "  --bundle                          Prepares diagnostic bundle for ${CHE_MINI_PRODUCT_NAME} and Docker\n"
+  text "  --network                         Runs simulated network diagnostic to confirm network routing\n"
+  text "  --print                           Default - displays status and configuration of ${CHE_MINI_PRODUCT_NAME}\n"
+  text "\n"
+}
+
+
+pre_cmd_info() {
+  :
+}
+
+post_cmd_info() {
+  :
+}
+
 cmd_info() {
   debug $FUNCNAME
   if [ $# -eq 0 ]; then
@@ -43,6 +66,8 @@ prepare_bundle() {
   info "info" "Preparing diagnostic bundle..."
   docker run --net host ${BOOTSTRAP_IMAGE_ALPINE} ip a show >> "${CLI_DIR}/ip.output"
   docker run --net host ${BOOTSTRAP_IMAGE_ALPINE} route >> "${CLI_DIR}/route.output"
+  curl -s https://hub.docker.com/v2/repositories/${CHE_IMAGE_NAME}/tags/ >> "${CLI_DIR}/curlversion.output"
+  curl -I -k https://hub.docker.com >> "${CLI_DIR}/curldockerhub.output"
   df "${CHE_CONTAINER_ROOT}" >> "${CLI_DIR}/df.output"
   cmd_network >> "${CLI_DIR}/cli-network.output"
   print_info >> "${CLI_DIR}/cli-info.output"
@@ -50,6 +75,8 @@ prepare_bundle() {
   tar -cf "${CLI_DIR}"/${CHE_MINI_PRODUCT_NAME}-diagnostic-bundle.tar \
     "${CLI_DIR}/ip.output" \
     "${CLI_DIR}/route.output" \
+    "${CLI_DIR}/curlversion.output" \
+    "${CLI_DIR}/curldockerhub.output" \
     "${CLI_DIR}/df.output" \
     "${CLI_DIR}/cli.log" \
     "${CLI_DIR}/cli-network.output" \
@@ -64,6 +91,8 @@ prepare_bundle() {
                   ${BOOTSTRAP_IMAGE_ALPINE} \
                       sh -c "rm -rf /root${CHE_CONTAINER_ROOT}/ip.output \
                            ; rm -rf /root${CHE_CONTAINER_ROOT}/route.output \
+                           ; rm -rf /root${CHE_CONTAINER_ROOT}/curlversion.output \
+                           ; rm -rf /root${CHE_CONTAINER_ROOT}/curldockerhub.output \
                            ; rm -rf /root${CHE_CONTAINER_ROOT}/df.output \
                            ; rm -rf /root${CHE_CONTAINER_ROOT}/cli-info.output \
                            ; rm -rf /root${CHE_CONTAINER_ROOT}/cli-network.output" > /dev/null 2>&1 || true
@@ -132,12 +161,6 @@ print_info() {
     text " $SINGLE_IMAGE\n"
   done
 
-  # This seems like overkill for the output
-  #readarray STACK_IMAGE_LIST < /version/$CHE_VERSION/images-stacks
-  #for SINGLE_IMAGE in "${STACK_IMAGE_LIST[@]}"; do
-    #text " $SINGLE_IMAGE"
-  #done
-
   if ! is_initialized; then
     text "${CHE_ENVIRONMENT_FILE}: not initialized\n"
   else
@@ -148,4 +171,22 @@ print_info() {
       text " $SINGLE_CONFIGURATION\n"
     done
   fi
+}
+
+cmd_network() {
+  info ""
+  info "---------------------------------------"
+  info "--------   CONNECTIVITY TEST   --------"
+  info "---------------------------------------"
+
+  info "network" "${BOOTSTRAP_IMAGE_CHEIP}: ${CHE_HOST}"
+
+  start_test_server
+
+  info "network" "Browser => Workspace Agent (localhost): Connection $(test1 && echo "succeeded" || echo "failed")"
+  info "network" "Browser => Workspace Agent ($AGENT_EXTERNAL_IP): Connection $(test2 && echo "succeeded" || echo "failed")"
+  info "network" "Server  => Workspace Agent (External IP): Connection $(test3 && echo "succeeded" || echo "failed")"
+  info "network" "Server  => Workspace Agent (Internal IP): Connection $(test4 && echo "succeeded" || echo "failed")"
+
+  stop_test_server
 }

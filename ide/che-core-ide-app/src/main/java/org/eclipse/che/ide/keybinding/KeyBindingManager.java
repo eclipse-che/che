@@ -36,32 +36,41 @@ import org.eclipse.che.ide.util.input.SignalEvent;
 import org.eclipse.che.ide.util.input.SignalEventUtils;
 
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Implementation of the {@link KeyBindingAgent}.
  *
  * @author Evgen Vidolob
  * @author Dmitry Shnurenko
+ * @author <a href="mailto:ak@nuxeo.com">Arnaud Kervern</a>
  */
 public class KeyBindingManager implements KeyBindingAgent {
+
+    public static final String SCHEME_ECLIPSE_ID = "ide.ui.keyBinding.eclipse";
+    public static final String SCHEME_GLOBAL_ID  = "ide.ui.keyBinding.global";
 
     private final PresentationFactory          presentationFactory;
     private final Provider<PerspectiveManager> perspectiveManager;
 
-    private SchemeImpl    globalScheme;
-    private SchemeImpl    activeScheme;
-    private SchemeImpl    eclipseScheme;
+    private final Map<String, Scheme> schemes = new HashMap<>();
+
+    private String        activeScheme;
     private ActionManager actionManager;
 
     @Inject
     public KeyBindingManager(ActionManager actionManager, Provider<PerspectiveManager> perspectiveManager) {
         this.actionManager = actionManager;
         this.perspectiveManager = perspectiveManager;
-        globalScheme = new SchemeImpl("ide.ui.keyBinding.global", "Global");
-        eclipseScheme = new SchemeImpl("ide.ui.keyBinding.eclipse", "Eclipse Scheme");
+
+        addScheme(new SchemeImpl(SCHEME_GLOBAL_ID, "Global"));
+        addScheme(new SchemeImpl(SCHEME_ECLIPSE_ID, "Eclipse Scheme"));
+
         //TODO check user settings
-        activeScheme = eclipseScheme;
+        activeScheme = SCHEME_ECLIPSE_ID;
 
         presentationFactory = new PresentationFactory();
 
@@ -89,13 +98,13 @@ public class KeyBindingManager implements KeyBindingAgent {
                 int digest = CharCodeWithModifiers.computeKeyDigest(signalEvent);
                 preventDefaultBrowserAction((KeyboardEvent)event, digest);
 
-                List<String> actionIds = activeScheme.getActionIds(digest);
+                List<String> actionIds = getActive().getActionIds(digest);
 
                 if (!actionIds.isEmpty()) {
                     runActions(actionIds, event);
                 }
                 //else handle event in global scheme
-                else if (!(actionIds = globalScheme.getActionIds(digest)).isEmpty()) {
+                else if (!(actionIds = getGlobal().getActionIds(digest)).isEmpty()) {
                     runActions(actionIds, event);
                 }
 
@@ -121,8 +130,10 @@ public class KeyBindingManager implements KeyBindingAgent {
     /**
      * Finds and runs an action cancelling original key event
      *
-     * @param actionIds list containing action ids
-     * @param keyEvent original key event
+     * @param actionIds
+     *         list containing action ids
+     * @param keyEvent
+     *         original key event
      */
     private void runActions(List<String> actionIds, Event keyEvent) {
         for (String actionId : actionIds) {
@@ -140,36 +151,67 @@ public class KeyBindingManager implements KeyBindingAgent {
 
                 /** Perform the action */
                 action.actionPerformed(e);
-            }        
+            }
         }
     }
 
     /** {@inheritDoc} */
     @Override
     public Scheme getGlobal() {
-        return globalScheme;
+        return getScheme(SCHEME_GLOBAL_ID);
     }
 
     /** {@inheritDoc} */
     @Override
     public Scheme getEclipse() {
-        return eclipseScheme;
+        return getScheme(SCHEME_ECLIPSE_ID);
     }
 
+    /** {@inheritDoc} */
     @Override
     public Scheme getActive() {
-        return activeScheme;
+        return getScheme(activeScheme);
+    }
+
+    public void setActive(String scheme) {
+        if (schemes.containsKey(scheme)) {
+            activeScheme = scheme;
+        } else {
+            // Fallback on global scheme
+            activeScheme = SCHEME_GLOBAL_ID;
+        }
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void addScheme(Scheme scheme) {
+        schemes.put(scheme.getSchemeId(), scheme);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public List<Scheme> getSchemes() {
+        return new ArrayList<>(this.schemes.values());
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Scheme getScheme(String id) {
+        if (schemes.containsKey(id)) {
+            return schemes.get(id);
+        }
+        return null;
     }
 
     /** {@inheritDoc} */
     @Nullable
     @Override
     public CharCodeWithModifiers getKeyBinding(@NotNull String actionId) {
-        CharCodeWithModifiers keyBinding = activeScheme.getKeyBinding(actionId);
+        CharCodeWithModifiers keyBinding = getActive().getKeyBinding(actionId);
         if (keyBinding != null)
             return keyBinding;
         else {
-            return globalScheme.getKeyBinding(actionId);
+            return getGlobal().getKeyBinding(actionId);
         }
     }
 }

@@ -28,7 +28,9 @@ export class DockerfileParser {
   commentLineRE: RegExp;
   instructionRE: RegExp;
   envVariablesRE: RegExp;
-  quotesRE: RegExp;
+  quotesTestRE: RegExp;
+  quoteAtStartReplaceRE: RegExp;
+  quoteAtEndReplaceRE: RegExp;
   backslashSpaceRE: RegExp;
 
   constructor() {
@@ -43,7 +45,9 @@ export class DockerfileParser {
     //                     |            |          \- variable value
     //                     |            \-  variable name
     //                     \- start of line or spaces before variable name
-    this.quotesRE = /^["]|["]$/g;
+    this.quotesTestRE = /^(["']).+(\1)$/;
+    this.quoteAtStartReplaceRE = /^["']/g;
+    this.quoteAtEndReplaceRE = /["']$/g;
     this.backslashSpaceRE = /\\\s/g;
   }
 
@@ -116,14 +120,17 @@ export class DockerfileParser {
 
     switch (instruction) {
       case 'ENV':
-        if (argumentStr.indexOf('=') >= 0) {
+        let firstSpaceIndex = argumentStr.indexOf(' '),
+            firstEqualIndex = argumentStr.indexOf('=');
+        if (firstEqualIndex > -1 && firstEqualIndex < firstSpaceIndex) {
           // this argument string contains one or more environment variables
           let match;
           while (match = this.envVariablesRE.exec(argumentStr)) {
             let name: string  = match[1],
                 value: string = match[2];
-            if (this.quotesRE.test(value)) {
-              value = value.replace(this.quotesRE, '');
+            if (this.quotesTestRE.test(value)) {
+              value = value.replace(this.quoteAtStartReplaceRE, '');
+              value = value.replace(this.quoteAtEndReplaceRE, '');
             }
             if (this.backslashSpaceRE.test(value)) {
               value = value.replace(this.backslashSpaceRE, ' ');
@@ -136,7 +143,6 @@ export class DockerfileParser {
           }
         } else {
           // this argument string contains only one environment variable
-          let firstSpaceIndex = argumentStr.indexOf(' ');
           results.push({
             instruction: instruction,
             argument: [argumentStr.slice(0, firstSpaceIndex), argumentStr.slice(firstSpaceIndex + 1)]
