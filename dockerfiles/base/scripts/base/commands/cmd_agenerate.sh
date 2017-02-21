@@ -81,7 +81,7 @@ cmd_agenerate() {
                    -v \"${ARCHETYPE_MOUNT}\":/home/user/che-build \
                    -w /home/user/che-build \
                       ${UTILITY_IMAGE_DEV} \
-                          mvn archetype:generate \
+                          mvn -Dmaven.repo.local=/home/user/.m2/repository/ org.apache.maven.plugins:maven-archetype-plugin:2.4:generate \
                               -DarchetypeRepository=http://maven.codenvycorp.com/content/groups/public/ \
                               -DarchetypeGroupId=org.eclipse.che.archetype \
                               -DarchetypeArtifactId=$ARCHETYPE_ID \
