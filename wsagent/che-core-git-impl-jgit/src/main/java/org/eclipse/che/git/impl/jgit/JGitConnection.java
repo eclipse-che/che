@@ -277,21 +277,25 @@ class JGitConnection implements GitConnection {
         try {
             addCommand.call();
 
-            // to add deleted files in index it is required to perform git rm on them
-            Set<String> deletedFiles = getGit().status().call().getMissing();
-            if (!deletedFiles.isEmpty()) {
-                RmCommand rmCommand = getGit().rm();
-                if (filePatterns.contains(".")) {
-                    deletedFiles.forEach(rmCommand::addFilepattern);
-                } else {
-                    filePatterns.forEach(filePattern -> deletedFiles.stream()
-                                                                    .filter(deletedFile -> deletedFile.startsWith(filePattern))
-                                                                    .forEach(rmCommand::addFilepattern));
-                }
-                rmCommand.call();
-            }
+            addDeletedFilesToIndex(filePatterns);
         } catch (GitAPIException exception) {
             throw new GitException(exception.getMessage(), exception);
+        }
+    }
+
+    // to add deleted files in index it is required to perform git rm on them
+    private void addDeletedFilesToIndex(List<String> filePatterns) throws GitAPIException {
+        Set<String> deletedFiles = getGit().status().call().getMissing();
+        if (!deletedFiles.isEmpty()) {
+            RmCommand rmCommand = getGit().rm();
+            if (filePatterns.contains(".")) {
+                deletedFiles.forEach(rmCommand::addFilepattern);
+            } else {
+                filePatterns.forEach(filePattern -> deletedFiles.stream()
+                                                                .filter(deletedFile -> deletedFile.startsWith(filePattern))
+                                                                .forEach(rmCommand::addFilepattern));
+            }
+            rmCommand.call();
         }
     }
 
