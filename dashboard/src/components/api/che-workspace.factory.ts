@@ -18,7 +18,6 @@ import {CheEnvironmentRegistry} from './environment/che-environment-registry.fac
 import {CheWebsocket} from './che-websocket.factory';
 
 interface ICHELicenseResource<T> extends ng.resource.IResourceClass<T> {
-  getDetails: any;
   create: any;
   createWithNamespace: any;
   deleteWorkspace: any;
@@ -53,16 +52,19 @@ export class CheWorkspace {
   statusDefers: Object;
   workspaceSettings: any;
 
+  private $http: ng.IHttpService;
+
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($resource: ng.resource.IResourceService, $q: ng.IQService, cheWebsocket: CheWebsocket, lodash: any, cheEnvironmentRegistry: CheEnvironmentRegistry, $log: ng.ILogService) {
+  constructor($resource: ng.resource.IResourceService, $http: ng.IHttpService, $q: ng.IQService, cheWebsocket: CheWebsocket, lodash: any, cheEnvironmentRegistry: CheEnvironmentRegistry, $log: ng.ILogService) {
     this.workspaceStatuses = ['RUNNING', 'STOPPED', 'PAUSED', 'STARTING', 'STOPPING', 'ERROR'];
 
     // keep resource
     this.$q = $q;
     this.$resource = $resource;
+    this.$http = $http;
     this.lodash = lodash;
     this.cheWebsocket = cheWebsocket;
 
@@ -87,7 +89,6 @@ export class CheWorkspace {
 
     // remote call
     this.remoteWorkspaceAPI = <ICHELicenseResource<any>>this.$resource('/api/workspace', {}, {
-        getDetails: {method: 'GET', url: '/api/workspace/:workspaceKey'},
         // having 2 methods for creation to ensure namespace parameter won't be send at all if value is null or undefined
         create: {method: 'POST', url: '/api/workspace'},
         createWithNamespace: {method: 'POST', url: '/api/workspace?namespace=:namespace'},
@@ -252,9 +253,10 @@ export class CheWorkspace {
    */
   fetchWorkspaceDetails(workspaceKey: string): ng.IPromise<any> {
     let defer = this.$q.defer();
+    let promise: ng.IHttpPromise<any> = this.$http.get('/api/workspace/' + workspaceKey);
 
-    let promise = this.remoteWorkspaceAPI.getDetails({workspaceKey: workspaceKey}).$promise;
-    promise.then((data: che.IWorkspace) => {
+    promise.then((response: ng.IHttpPromiseCallbackArg<che.IWorkspace>) => {
+      let data = response.data;
       this.workspacesById.set(data.id, data);
       if (!data.temporary) {
         this.lodash.remove(this.workspaces, (workspace: che.IWorkspace) => {

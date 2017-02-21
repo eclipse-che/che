@@ -99,7 +99,7 @@ import org.eclipse.che.ide.editor.orion.client.jso.StatusMessageReporterOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.UiUtilsOverlay;
 import org.eclipse.che.ide.editor.preferences.editorproperties.EditorPropertiesManager;
 import org.eclipse.che.ide.editor.preferences.keymaps.KeyMapsPreferencePresenter;
-import org.eclipse.che.ide.requirejs.ModuleHolder;
+import org.eclipse.che.plugin.requirejs.ide.ModuleHolder;
 import org.eclipse.che.ide.util.browser.UserAgent;
 import org.eclipse.che.ide.util.loging.Log;
 

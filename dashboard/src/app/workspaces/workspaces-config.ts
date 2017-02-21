@@ -160,13 +160,6 @@ export class WorkspacesConfig {
     register.controller('ListAgentsController', ListAgentsController);
     register.directive('listAgents', ListAgents);
 
-    let locationProvider = {
-      title: (params: any) => { return params.workspaceName; },
-      templateUrl: 'app/workspaces/workspace-details/workspace-details.html',
-      controller: 'WorkspaceDetailsController',
-      controllerAs: 'workspaceDetailsController'
-    };
-
     // config routes
     register.app.config(function ($routeProvider) {
       $routeProvider.accessWhen('/workspaces', {
@@ -175,8 +168,12 @@ export class WorkspacesConfig {
         controller: 'ListWorkspacesCtrl',
         controllerAs: 'listWorkspacesCtrl'
       })
-      .accessWhen('/workspace/:namespace*/:workspaceName', locationProvider)
-      .accessWhen('/workspace/:namespace*/:workspaceName/:page', locationProvider)
+      .accessWhen('/workspace/:namespace*/:workspaceName', {
+        title: (params: any) => { return params.workspaceName; },
+        templateUrl: 'app/workspaces/workspace-details/workspace-details.html',
+        controller: 'WorkspaceDetailsController',
+        controllerAs: 'workspaceDetailsController'
+      })
       .accessWhen('/create-workspace', {
         title: 'New Workspace',
         templateUrl: 'app/workspaces/workspace-details/workspace-details.html',

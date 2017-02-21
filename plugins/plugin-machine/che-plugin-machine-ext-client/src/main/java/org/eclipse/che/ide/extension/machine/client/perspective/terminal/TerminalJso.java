@@ -24,12 +24,20 @@ class TerminalJso extends JavaScriptObject {
     protected TerminalJso() {
     }
 
-    public static native TerminalJso create(TerminalOptionsJso options) /*-{
-        return new $wnd.Terminal(options);
+    public static native TerminalJso create(JavaScriptObject termJSO, TerminalOptionsJso options) /*-{
+        return new termJSO(options);
     }-*/;
 
     public final native void open(Element element) /*-{
         this.open(element);
+    }-*/;
+
+    public final native Element getElement() /*-{
+        return this.element;
+    }-*/;
+
+    public final native TerminalGeometryJso proposeGeometry() /*-{
+        return this.proposeGeometry();
     }-*/;
 
     public final native void on(String event, Operation<String> operation) /*-{
@@ -47,10 +55,10 @@ class TerminalJso extends JavaScriptObject {
     }-*/;
 
     public final native void focus() /*-{
-        this.focus();
+        this.element.focus();
     }-*/;
 
     public final native void blur() /*-{
-        this.blur();
+        this.element.blur();
     }-*/;
 }

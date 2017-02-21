@@ -17,8 +17,8 @@
 ###
 ###################################################
 
-WHAT:     Creates a new IDE clickable action that prints server resposne as IDE notification popup.
-DOCS:     https://eclipse-che.readme.io/docs/developing-extensions#ide-extension-example
+WHAT:     Creates a new IDE clickable action that prints server response as IDE notification popup.
+DOCS:     https://www.eclipse.org/che/docs/plugins/introduction/index.html
 SOURCE:   http://github.com/che-samples/che-ide-extension.git   BRANCH: client-server
 PRE-REQS: Java 1.8, Maven, Git, and a clone of Che's assembly repo @ http://github.com/codenvy/che.
 

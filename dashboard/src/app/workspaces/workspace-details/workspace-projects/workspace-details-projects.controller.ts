@@ -68,18 +68,14 @@ export class WorkspaceDetailsProjectsCtrl {
     this.isAllSelected = false;
     this.isBulkChecked = false;
 
-    if (!this.cheWorkspace.getWorkspaceByName(this.namespace, this.workspaceName)) {
-      let promise = this.cheWorkspace.fetchWorkspaceDetails(this.workspaceKey);
-      promise.then(() => {
-        this.updateProjectsData();
-      }, (error: any) => {
-        if (error.status === 304) {
-          this.updateProjectsData();
-        }
-      });
-    } else {
+    let promise = this.cheWorkspace.fetchWorkspaceDetails(this.workspaceKey);
+    promise.then(() => {
       this.updateProjectsData();
-    }
+    }, (error: any) => {
+      if (error.status === 304) {
+        this.updateProjectsData();
+      }
+    });
   }
 
   updateProjectsData(): void {
@@ -135,7 +131,7 @@ export class WorkspaceDetailsProjectsCtrl {
     this.isNoSelected = true;
     this.isAllSelected = true;
 
-    this.projects.forEach((project) => {
+    this.projects.forEach((project: che.IProject) => {
       if (this.projectsSelectedStatus[project.name]) {
         this.isNoSelected = false;
       } else {
@@ -165,7 +161,7 @@ export class WorkspaceDetailsProjectsCtrl {
       return;
     }
 
-    projectsSelectedStatusKeys.forEach((key) => {
+    projectsSelectedStatusKeys.forEach((key: string) => {
       if (this.projectsSelectedStatus[key] === true) {
         checkedProjectsKeys.push(key);
       }
