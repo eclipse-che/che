@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.ui.dropdown;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -29,6 +30,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.google.gwt.user.client.ui.PopupPanel.AnimationType.ROLL_DOWN;
+import static org.eclipse.che.ide.util.StringUtils.endsWithIgnoreCase;
 
 /** Drop down list widget. */
 public class DropDownList extends Composite {
@@ -37,9 +39,11 @@ public class DropDownList extends Composite {
     private static final DropDownListResources RESOURCES = GWT.create(DropDownListResources.class);
 
     /** Maximum amount of items that should visible in drop down list without scrolling. */
-    private static final int MAX_VISIBLE_ITEMS  = 7;
+    private static final int MAX_VISIBLE_ITEMS        = 7;
     /** Amount of pixels reserved for displaying one item in the drop down list. */
-    private static final int ITEM_WIDGET_HEIGHT = 22;
+    private static final int ITEM_WIDGET_HEIGHT       = 22;
+    /** Minimum width of the dropdown panel. */
+    private static final int DROPDOWN_PANEL_MIN_WIDTH = 200;
 
     private static final int DEFAULT_WIDGET_WIDTH_PX = 200;
 
@@ -104,15 +108,38 @@ public class DropDownList extends Composite {
         setWidth(DEFAULT_WIDGET_WIDTH_PX + "px");
     }
 
+    /**
+     * Returns the given string width as double number.
+     *
+     * @param width
+     *         width with trailing CSS units (e.g. "10px", "1em")
+     * @return width as double
+     */
+    private static double asDoubleWidth(String width) {
+        double widthDouble = 0;
+
+        for (Style.Unit unit : Style.Unit.values()) {
+            if (endsWithIgnoreCase(width, unit.getType())) {
+                return Double.parseDouble(width.substring(0, width.length() - unit.getType().length()));
+            }
+        }
+
+        return widthDouble;
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p><b>Note:</b> width should be set in px in order to right calculating minimum width of the dropdown panel.
+     */
     @Override
     public void setWidth(String width) {
         super.setWidth(width);
-        dropDownPanel.setWidth(width);
+        dropDownPanel.setWidth(Math.max(asDoubleWidth(width), DROPDOWN_PANEL_MIN_WIDTH) + "px");
     }
 
     /** Adapt drop down panel's height depending on the amount of items. */
     private void adaptDropDownPanelHeight() {
-        final int visibleRowsCount = Math.min(MAX_VISIBLE_ITEMS, contentPanel.getWidgetCount());
+        final int visibleRowsCount = Math.min(MAX_VISIBLE_ITEMS, itemsWidgets.size());
         final int dropDownPanelHeight = ITEM_WIDGET_HEIGHT * visibleRowsCount + 6;
 
         itemsPanel.setHeight(dropDownPanelHeight + "px");
@@ -124,7 +151,7 @@ public class DropDownList extends Composite {
     }
 
     private void checkListEmptiness() {
-        if (contentPanel.getWidgetCount() == 0) {
+        if (itemsWidgets.isEmpty()) {
             setSelectedItem(null);
         }
     }
@@ -153,10 +180,6 @@ public class DropDownList extends Composite {
 
         selectedItem = item;
         selectedItemPanel.setWidget(headerWidget);
-
-        if (item != null && selectionHandler != null) {
-            selectionHandler.onItemSelected(item);
-        }
     }
 
     /**
@@ -177,6 +200,10 @@ public class DropDownList extends Composite {
         itemWidget.addDomHandler(event -> {
             setSelectedItem(item);
             dropDownPanel.hide();
+
+            if (selectionHandler != null) {
+                selectionHandler.onItemSelected(item);
+            }
         }, ClickEvent.getType());
 
         contentPanel.insert(itemWidget, 0);
