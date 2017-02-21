@@ -57,10 +57,12 @@ public class CommandToolbarViewImpl implements CommandToolbarView {
 
     private MenuPopupButton          runCommandsButton;
     private RunPopupItemDataProvider runPopupItemDataProvider;
-    private MenuPopupButton          debugCommandsButton;
-    private ActionDelegate           delegate;
-    private List<ContextualCommand>  commands;
-    private PopupItem                lastSelectedItem;
+
+    private MenuPopupButton debugCommandsButton;
+
+    private ActionDelegate          delegate;
+    private List<ContextualCommand> commands;
+    private PopupItem               lastSelectedItem;
 
     @Inject
     public CommandToolbarViewImpl(CommandResources resources, AppContext appContext) {
@@ -204,6 +206,7 @@ public class CommandToolbarViewImpl implements CommandToolbarView {
             if (popupItem instanceof CommandPopupItem) {
                 return appContext.getWorkspace().getRuntime().getMachines().size() > 1;
             }
+
             return false;
         }
 

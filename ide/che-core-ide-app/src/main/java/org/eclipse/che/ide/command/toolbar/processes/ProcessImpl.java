@@ -12,6 +12,8 @@ package org.eclipse.che.ide.command.toolbar.processes;
 
 import org.eclipse.che.api.core.model.machine.Machine;
 
+import java.util.Objects;
+
 /**
  *
  */
@@ -54,5 +56,24 @@ public class ProcessImpl implements Process {
     @Override
     public Machine getMachine() {
         return machine;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ProcessImpl process = (ProcessImpl)o;
+
+        return pid == process.pid &&
+               alive == process.alive &&
+               Objects.equals(commandName, process.commandName) &&
+               Objects.equals(commandLine, process.commandLine) &&
+               Objects.equals(machine, process.machine);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(commandName, commandLine, pid, alive, machine);
     }
 }

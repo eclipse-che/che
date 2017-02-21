@@ -43,6 +43,7 @@
     font-family: mainFontFamily;
     font-size: fontSize;
     color: selectCommandActionColor;
+    margin: 0 0 0 0;
 }
 
 .processWidgetNameLabel {
@@ -51,7 +52,7 @@
 
 .processWidgetPidLabel {
     float: right;
-    margin-right: 10px;
+    margin: 0 10px 0 0;
 }
 
 .processWidgetActionButton {
