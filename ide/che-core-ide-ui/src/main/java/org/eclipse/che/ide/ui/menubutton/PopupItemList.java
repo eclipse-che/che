@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.toolbar.button;
+package org.eclipse.che.ide.ui.menubutton;
 
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;

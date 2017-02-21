@@ -24,10 +24,12 @@ import org.eclipse.che.ide.FontAwesome;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.command.CommandResources;
-import org.eclipse.che.ide.command.toolbar.button.MenuPopupButton;
-import org.eclipse.che.ide.command.toolbar.button.PopupActionHandler;
-import org.eclipse.che.ide.command.toolbar.button.PopupItem;
-import org.eclipse.che.ide.command.toolbar.button.PopupItemDataProvider;
+import org.eclipse.che.ide.command.toolbar.button.CommandPopupItem;
+import org.eclipse.che.ide.command.toolbar.button.MachinePopupItem;
+import org.eclipse.che.ide.ui.menubutton.MenuPopupButton;
+import org.eclipse.che.ide.ui.menubutton.PopupActionHandler;
+import org.eclipse.che.ide.ui.menubutton.PopupItem;
+import org.eclipse.che.ide.ui.menubutton.PopupItemDataProvider;
 import org.eclipse.che.ide.util.Pair;
 import org.eclipse.che.ide.util.loging.Log;
 

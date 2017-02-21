@@ -8,48 +8,36 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.toolbar;
+package org.eclipse.che.ide.command.toolbar.button;
 
-import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.ide.api.command.ContextualCommand;
-import org.eclipse.che.ide.command.toolbar.button.PopupItem;
+import org.eclipse.che.ide.ui.menubutton.PopupItem;
 
 /**
- * Contains {@link ContextualCommand} and {@link Machine}
+ * Represent command group for {@link ContextualCommand}
  */
-public class MachinePopupItem implements PopupItem {
+public class CommandPopupItem implements PopupItem {
+
 
     private final ContextualCommand command;
-    private final Machine machine;
-    private final String name;
 
-    public MachinePopupItem(ContextualCommand command, Machine machine) {
+    public CommandPopupItem(ContextualCommand command) {
         this.command = command;
-        this.machine = machine;
-        this.name = machine.getConfig().getName();
-    }
-
-    public MachinePopupItem(MachinePopupItem item) {
-        this.command = item.command;
-        this.machine = item.machine;
-        this.name = command.getName() + " on " + machine.getConfig().getName();
     }
 
     @Override
     public String getName() {
-        return name;
+        return command.getName();
     }
 
     @Override
     public boolean isDisabled() {
-        return false;
+        return command.getApplicableContext().isProjectApplicable()
+               || command.getApplicableContext().isWorkspaceApplicable()
+               || command.getApplicableContext().isFileApplicable();
     }
 
     public ContextualCommand getCommand() {
         return command;
-    }
-
-    public Machine getMachine() {
-        return machine;
     }
 }

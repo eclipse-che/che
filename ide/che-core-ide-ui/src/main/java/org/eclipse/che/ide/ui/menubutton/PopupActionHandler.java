@@ -8,14 +8,17 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.toolbar.button;
+package org.eclipse.che.ide.ui.menubutton;
 
 /**
- *
+ * Handler for {@link MenuPopupButton}
  */
-public interface PopupItem {
+public interface PopupActionHandler {
 
-    String getName();
-
-    boolean isDisabled();
+    /**
+     * Called when item selected in menu popup button
+     *
+     * @param item the selected item
+     */
+    void onItemSelected(PopupItem item);
 }
