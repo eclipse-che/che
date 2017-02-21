@@ -25,6 +25,9 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.testing.shared.Failure;
 import org.eclipse.che.api.testing.shared.TestResult;
+import org.eclipse.che.api.testing.shared.dto.TestResultRootDto;
+import org.eclipse.che.api.testing.shared.dto.TestResultTraceDto;
+import org.eclipse.che.api.testing.shared.dto.TestResultTraceFrameDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
@@ -45,15 +48,19 @@ import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.testing.ide.view.navigation.TestClassNavigation;
 import org.eclipse.che.plugin.testing.ide.view.navigation.factory.TestResultNodeFactory;
+import org.eclipse.che.plugin.testing.ide.view.navigation.nodes.AbstractTestResultTreeNode;
 import org.eclipse.che.plugin.testing.ide.view.navigation.nodes.TestResultClassNode;
 import org.eclipse.che.plugin.testing.ide.view.navigation.nodes.TestResultGroupNode;
 import org.eclipse.che.plugin.testing.ide.view.navigation.nodes.TestResultMethodNode;
+import org.eclipse.che.plugin.testing.ide.view.navigation.nodes.TestResultRootNode;
+import org.eclipse.che.plugin.testing.ide.view.navigation.nodes.TestResultTraceFrameNode;
 
 import com.google.common.base.Optional;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Timer;
@@ -77,31 +84,37 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
     interface TestResultViewImplUiBinder extends UiBinder<Widget, TestResultViewImpl> {
     }
 
+    interface Styles extends CssResource {
+
+        String traceFrameMessage();
+
+    }
+
     private static final TestResultViewImplUiBinder UI_BINDER = GWT.create(TestResultViewImplUiBinder.class);
 
     private final AppContext appContext;
     private final EditorAgent editorAgent;
     private final EventBus eventBus;
     private final TestResultNodeFactory nodeFactory;
-    private TestResult lastTestResult;
     private Tree resultTree;
+    private Tree traceTree;
     private int lastWentLine = 0;
 
     @UiField(provided = true)
     SplitLayoutPanel splitLayoutPanel;
 
     @UiField
-    Label outputResult;
+    Styles style;
 
     @UiField
     FlowPanel navigationPanel;
 
+    @UiField
+    FlowPanel traceOutputPanel;
+
     @Inject
-    public TestResultViewImpl(PartStackUIResources resources, 
-                              EditorAgent editorAgent,
-                              AppContext appContext,
-                              EventBus eventBus,
-                              TestResultNodeFactory nodeFactory) {
+    public TestResultViewImpl(PartStackUIResources resources, EditorAgent editorAgent, AppContext appContext,
+            EventBus eventBus, TestResultNodeFactory nodeFactory) {
         super(resources);
         this.editorAgent = editorAgent;
         this.appContext = appContext;
@@ -109,6 +122,23 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
         this.nodeFactory = nodeFactory;
         splitLayoutPanel = new SplitLayoutPanel(1);
         setContentWidget(UI_BINDER.createAndBindUi(this));
+        resultTree = createTree();
+        resultTree.getSelectionModel().addSelectionHandler(new SelectionHandler<Node>() {
+            @Override
+            public void onSelection(SelectionEvent<Node> event) {
+                Node selectedNode = event.getSelectedItem();
+                if (selectedNode instanceof TestResultMethodNode) {
+                    fillOutputPanel(((TestResultMethodNode) selectedNode).getStackTrace());
+                }
+                if (selectedNode instanceof AbstractTestResultTreeNode) {
+                    fillOutputPanel((AbstractTestResultTreeNode) selectedNode);
+                }
+            }
+        });
+        navigationPanel.add(resultTree);
+    }
+
+    private Tree createTree() {
         NodeUniqueKeyProvider idProvider = new NodeUniqueKeyProvider() {
             @NotNull
             @Override
@@ -118,44 +148,47 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
         };
         NodeStorage nodeStorage = new NodeStorage(idProvider);
         NodeLoader nodeLoader = new NodeLoader(Collections.<NodeInterceptor> emptySet());
-        resultTree = new Tree(nodeStorage, nodeLoader);
-        resultTree.getSelectionModel().addSelectionHandler(new SelectionHandler<Node>() {
-            @Override
-            public void onSelection(SelectionEvent<Node> event) {
-                Node methodNode = event.getSelectedItem();
-                if (methodNode instanceof TestResultMethodNode) {
-                    outputResult.setText(((TestResultMethodNode) methodNode).getStackTrace());
-                }
-            }
-        });
-        resultTree.getElement().getStyle().setWidth(100, Style.Unit.PCT);
-        resultTree.getElement().getStyle().setHeight(100, Style.Unit.PCT);
-        navigationPanel.add(resultTree);
+        Tree tree = new Tree(nodeStorage, nodeLoader);
+        tree.getElement().getStyle().setWidth(100, Style.Unit.PCT);
+        tree.getElement().getStyle().setHeight(100, Style.Unit.PCT);
+        return tree;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected void focusView() {}
+    protected void focusView() {
+    }
 
     /**
      * {@inheritDoc}
      */
     @Override
+    @Deprecated
     public void showResults(TestResult result) {
-        this.lastTestResult = result;
         setTitle("Test Results (Framework: " + result.getTestFramework() + ")");
-        buildTree();
+        buildResultTree(result);
         focusView();
     }
 
-    private void buildTree() {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void showResults(TestResultRootDto result) {
+        setTitle("Test Results (Framework: " + result.getTestFrameworkName() + ")");
+        buildResultTree(result);
+        focusView();
+    }
+
+    @Deprecated
+    private void buildResultTree(TestResult result) {
         resultTree.getNodeStorage().clear();
-        outputResult.setText("");
-        TestResultGroupNode root = nodeFactory.getTestResultGroupNode(lastTestResult);
-        HashMap<String, List<Node>> classNodeHashMap = new HashMap<>();
-        for (Failure failure : lastTestResult.getFailures()) {
+        // outputResult.setText("");
+        TestResultGroupNode root = nodeFactory.getTestResultGroupNode(result);
+        Map<String, List<Node>> classNodeHashMap = new HashMap<>();
+        for (Failure failure : result.getFailures()) {
             if (!classNodeHashMap.containsKey(failure.getFailingClass())) {
                 List<Node> methodNodes = new ArrayList<>();
                 classNodeHashMap.put(failure.getFailingClass(), methodNodes);
@@ -174,7 +207,46 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
         resultTree.getNodeStorage().add(root);
     }
 
+    private void buildResultTree(TestResultRootDto result) {
+        resultTree.getNodeStorage().clear();
+        TestResultRootNode root = nodeFactory.createTestResultRootNode(result, result.getTestFrameworkName());
+        resultTree.getNodeStorage().add(root);
+    }
+
+    private void buildTraceTree(TestResultTraceDto trace) {
+        traceTree = createTree();
+        traceTree.getNodeStorage().clear();
+        List<Node> traceNodes = new ArrayList<>();
+        for (TestResultTraceFrameDto traceFrame : trace.getTraceFrames()) {
+            TestResultTraceFrameNode traceNode = nodeFactory.createTestResultTraceFrameNode(traceFrame);
+            traceNodes.add(traceNode);
+        }
+        traceTree.getNodeStorage().add(traceNodes);
+    }
+
+    @Deprecated
+    private void fillOutputPanel(String text) {
+        traceOutputPanel.clear();
+        Label traceMessageLabel = new Label(text);
+        traceMessageLabel.setStyleName(style.traceFrameMessage());
+        traceOutputPanel.add(traceMessageLabel);
+    }
+
+    private void fillOutputPanel(AbstractTestResultTreeNode node) {
+        traceOutputPanel.clear();
+        TestResultTraceDto testTrace = node.getTestTrace();
+        if (testTrace == null)
+            return;
+        Label traceMessageLabel = new Label(testTrace.getMessage());
+        traceMessageLabel.setStyleName(style.traceFrameMessage());
+        traceOutputPanel.add(traceMessageLabel);
+        buildTraceTree(testTrace);
+        traceTree.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
+        traceOutputPanel.add(traceTree);
+    }
+
     @Override
+    @Deprecated
     public void gotoClass(String packagePath, int line) {
         lastWentLine = line;
         final Project project = appContext.getRootProject();

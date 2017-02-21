@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.testing.server;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,8 @@ import javax.ws.rs.core.UriInfo;
 import org.eclipse.che.api.testing.server.framework.TestFrameworkRegistry;
 import org.eclipse.che.api.testing.server.framework.TestRunner;
 import org.eclipse.che.api.testing.shared.TestResult;
+import org.eclipse.che.api.testing.shared.dto.TestResultDto;
+import org.eclipse.che.api.testing.shared.dto.TestResultRootDto;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import io.swagger.annotations.Api;
@@ -64,7 +67,9 @@ public class TestingService {
      * @return the test result of test case
      * @throws Exception
      *             when the test runner failed to execute test cases.
+     * @deprecated Use "runtests" instead
      */
+    @Deprecated
     @GET
     @Path("run")
     @Produces(MediaType.APPLICATION_JSON)
@@ -76,12 +81,51 @@ public class TestingService {
         String absoluteProjectPath = ResourcesPlugin.getPathToWorkspace() + projectPath;
         queryParameters.put("absoluteProjectPath", absoluteProjectPath);
         String testFramework = queryParameters.get("testFramework");
+        getTestRunner(testFramework);
+        TestResult result = frameworkRegistry.getTestRunner(testFramework).execute(queryParameters);
+        return result;
+    }
+
+    @GET
+    @Path("runtests")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Execute Java tests and return result root entry", notes = "The GET parameters are passed to the test framework implementation.")
+    @ApiResponses({ @ApiResponse(code = 200, message = "OK"), @ApiResponse(code = 500, message = "Server error") })
+    public TestResultRootDto runTests(@Context UriInfo uriInfo) throws Exception {
+        Map<String, String> queryParameters = getMap(uriInfo.getQueryParameters());
+        String projectPath = queryParameters.get("projectPath");
+        String absoluteProjectPath = ResourcesPlugin.getPathToWorkspace() + projectPath;
+        queryParameters.put("absoluteProjectPath", absoluteProjectPath);
+        String testFramework = queryParameters.get("testFramework");
+        getTestRunner(testFramework);
+        TestResultRootDto result = frameworkRegistry.getTestRunner(testFramework).runTests(queryParameters);
+        return result;
+    }
+
+    @GET
+    @Path("gettestresults")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Execute Java tests and return result root entry", notes = "The GET parameters are passed to the test framework implementation.")
+    @ApiResponses({ @ApiResponse(code = 200, message = "OK"), @ApiResponse(code = 500, message = "Server error") })
+    public List<TestResultDto> getTestResults(@Context UriInfo uriInfo) throws Exception {
+        Map<String, String> queryParameters = getMap(uriInfo.getQueryParameters());
+        String testFramework = queryParameters.get("testFramework");
+        int i = 0;
+        String item;
+        List<String> testResultsPath = new ArrayList<>();
+        while ((item = queryParameters.get("path" + (i++))) != null) {
+            testResultsPath.add(item);
+        }
+        getTestRunner(testFramework);
+        List<TestResultDto> result = frameworkRegistry.getTestRunner(testFramework).getTestResults(testResultsPath);
+        return result;
+    }
+
+    private void getTestRunner(String testFramework) throws Exception {
         TestRunner runner = frameworkRegistry.getTestRunner(testFramework);
         if (runner == null) {
             throw new Exception("No test frameworks found: " + testFramework);
         }
-        TestResult result = frameworkRegistry.getTestRunner(testFramework).execute(queryParameters);
-        return result;
     }
 
     private Map<String, String> getMap(MultivaluedMap<String, String> queryParameters) {
@@ -101,4 +145,5 @@ public class TestingService {
         }
         return map;
     }
+
 }

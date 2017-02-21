@@ -29,6 +29,7 @@ import com.google.inject.assistedinject.Assisted;
  * Tree node for display the failing class.
  * @author Mirage Abeysekara
  */
+@Deprecated
 public class TestResultGroupNode extends AbstractTreeNode implements HasPresentation {
 
     int failureCount;

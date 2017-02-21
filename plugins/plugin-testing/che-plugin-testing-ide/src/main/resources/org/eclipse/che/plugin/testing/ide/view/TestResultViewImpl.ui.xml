@@ -13,38 +13,28 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
              xmlns:g="urn:import:com.google.gwt.user.client.ui">
-
-    <ui:style>
-        .outputLabel {
-            user-select: text;
-            -moz-user-select: text;
-            -webkit-user-select: text;
-            -ms-user-select: text;
-            overflow: scroll;
-            margin: 2px;
-            white-space: pre-wrap;
-        }
-
-        .outputBackground{
-            background-color: #1f1f1f;
-        }
+    <ui:style src="org/eclipse/che/ide/api/ui/style.css"
+              type="org.eclipse.che.plugin.testing.ide.view.TestResultViewImpl.Styles">
+        .traceFrameMessage {
+			font-family: mainFontFamily;
+            font-size: fontSize;
+            font-weight: normal;
+            line-height: normal;
+            margin-bottom: 10px;
+		}
     </ui:style>
-
     <g:SplitLayoutPanel width="100%" height="100%" ui:field="splitLayoutPanel">
         <g:west size="400">
-            <g:FlowPanel ui:field="navigationPanel">
-                <!--<ideui:Tree ui:field="processTree"/>-->
-                <!--<g:Tree ui:field="resultTree"/>-->
-            </g:FlowPanel>
+            <g:FlowPanel ui:field="navigationPanel"/>
         </g:west>
         <g:center>
-            <g:DockLayoutPanel addStyleNames="{style.outputBackground}">
+            <g:DockLayoutPanel>
                 <g:center size="100%">
-                    <g:Label width="100%" ui:field="outputResult"
-                             debugId="test-runner-output" addStyleNames="{style.outputLabel}"/>
+                    <g:ScrollPanel width="100%" height="100%">
+                        <g:FlowPanel width="100%" height="100%" ui:field="traceOutputPanel"/>
+                    </g:ScrollPanel>
                 </g:center>
             </g:DockLayoutPanel>
         </g:center>
     </g:SplitLayoutPanel>
-
 </ui:UiBinder>

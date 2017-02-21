@@ -56,5 +56,6 @@
         <module>plugin-zend-debugger</module>
         <module>plugin-testing</module>
         <module>plugin-testing-java</module>
+		<module>plugin-testing-php</module>
     </modules>
 </project>

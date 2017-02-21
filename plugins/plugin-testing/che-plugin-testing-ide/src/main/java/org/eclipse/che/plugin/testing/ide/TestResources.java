@@ -20,13 +20,31 @@ import com.google.gwt.resources.client.ClientBundle;
  * @author Mirage Abeysekara
  */
 public interface TestResources extends ClientBundle {
-
+    
     @Source("org/eclipse/che/plugin/testing/ide/svg/test.svg")
+    @Deprecated
     SVGResource testIcon();
 
     @Source("org/eclipse/che/plugin/testing/ide/svg/test_results_pass.svg")
+    @Deprecated
     SVGResource testResultsPass();
 
     @Source("org/eclipse/che/plugin/testing/ide/svg/test_results_fail.svg")
+    @Deprecated
     SVGResource testResultsFail();
+    
+    @Source("org/eclipse/che/plugin/testing/ide/svg/test_result_failure.svg")
+    SVGResource testResultFailureIcon();
+    
+    @Source("org/eclipse/che/plugin/testing/ide/svg/test_result_success.svg")
+    SVGResource testResultSuccessIcon();
+    
+    @Source("org/eclipse/che/plugin/testing/ide/svg/test_result_warning.svg")
+    SVGResource testResultWarningIcon();
+    
+    @Source("org/eclipse/che/plugin/testing/ide/svg/test_result_skipped.svg")
+    SVGResource testResultSkippedIcon();
+    
+    @Source("org/eclipse/che/plugin/testing/ide/svg/test_result_trace_frame.svg")
+    SVGResource testResultTraceFrameIcon();
 }
