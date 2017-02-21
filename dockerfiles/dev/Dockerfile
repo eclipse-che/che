@@ -68,3 +68,4 @@ ENV GOPATH=/home/user/gopath
 RUN echo "export PATH=$GOROOT/bin:$PATH" >> ~/.bashrc && \
     sudo chown -R user:user /opt
 WORKDIR /home/user
+ENV PATH $GOROOT/bin:$PATH
