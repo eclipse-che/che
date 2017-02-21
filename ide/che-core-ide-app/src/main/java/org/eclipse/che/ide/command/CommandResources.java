@@ -81,8 +81,6 @@ public interface CommandResources extends ClientBundle {
 
         String processesListLabel();
 
-        String processWidget();
-
         String processWidgetText();
 
         String processWidgetNameLabel();

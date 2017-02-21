@@ -36,6 +36,7 @@
     height: 22px;
     padding: 0 30px 0 10px;
     cursor: pointer;
+    line-height: 22px;
 }
 
 .listItem:hover {

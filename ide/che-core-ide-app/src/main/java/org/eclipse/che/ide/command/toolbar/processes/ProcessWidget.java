@@ -52,8 +52,6 @@ class ProcessWidget extends FlowPanel {
                   RerunProcessHandler rerunProcessHandler) {
         super();
 
-        addStyleName(RESOURCES.commandToolbarCss().processWidget());
-
         final Process process = item.getValue();
         final Machine targetMachine = process.getMachine();
         stopped = !process.isAlive();
