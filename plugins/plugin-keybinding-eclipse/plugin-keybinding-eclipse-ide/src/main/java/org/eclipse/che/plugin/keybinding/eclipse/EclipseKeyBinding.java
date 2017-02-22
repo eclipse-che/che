@@ -13,11 +13,13 @@ package org.eclipse.che.plugin.keybinding.eclipse;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.keybinding.KeyBuilder;
-import org.eclipse.che.ide.api.keybinding.Scheme;
 import org.eclipse.che.ide.util.browser.UserAgent;
+import org.eclipse.che.ide.util.input.CharCodeWithModifiers;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
 
 import javax.inject.Inject;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.eclipse.che.ide.core.StandardComponentInitializer.CLOSE_ACTIVE_EDITOR;
 import static org.eclipse.che.ide.core.StandardComponentInitializer.FORMAT;
@@ -51,76 +53,64 @@ import static org.eclipse.che.plugin.testing.junit.ide.JUnitTestAction.TEST_ACTI
 @Extension(title = "Key Binding Eclipse")
 public class EclipseKeyBinding {
 
-    private final Scheme scheme;
-
     @Inject
     public EclipseKeyBinding(KeyBindingAgent agent) {
-        scheme = agent.getEclipse();
-        registerStandardComponentKeys();
-        registerDebuggerKeys();
-        registerJavaKeys();
-        registerJUnitKeys();
-        registerGitKeys();
-    }
+        Map<String, CharCodeWithModifiers> keys = new HashMap<>();
 
-    protected void registerStandardComponentKeys() {
-        scheme.addKey(new KeyBuilder().action().charCode('R').build(), NAVIGATE_TO_FILE);
-        scheme.addKey(new KeyBuilder().control().charCode('h').build(), FULL_TEXT_SEARCH);
-        scheme.addKey(new KeyBuilder().action().charCode('G').build(), SHOW_REFERENCE);
-        scheme.addKey(new KeyBuilder().action().charCode('F').build(), FORMAT);
-        scheme.addKey(new KeyBuilder().charCode(KeyCodeMap.F2).build(), RENAME);
-        scheme.addKey(new KeyBuilder().control().charCode('p').build(), SIGNATURE_HELP);
+        // Standard Component Keys
+        keys.put(NAVIGATE_TO_FILE, new KeyBuilder().action().charCode('R').build());
+        keys.put(FULL_TEXT_SEARCH, new KeyBuilder().control().charCode('h').build());
+        keys.put(SHOW_REFERENCE, new KeyBuilder().action().charCode('G').build());
+        keys.put(FORMAT, new KeyBuilder().action().charCode('F').build());
+        keys.put(RENAME, new KeyBuilder().charCode(KeyCodeMap.F2).build());
+        keys.put(SIGNATURE_HELP, new KeyBuilder().control().charCode('p').build());
 
         if (UserAgent.isMac()) {
-            scheme.addKey(new KeyBuilder().action().charCode('w').build(), CLOSE_ACTIVE_EDITOR);
+            keys.put(CLOSE_ACTIVE_EDITOR, new KeyBuilder().action().charCode('w').build());
         } else {
-            scheme.addKey(new KeyBuilder().alt().charCode('w').build(), CLOSE_ACTIVE_EDITOR); // XXX
+            keys.put(CLOSE_ACTIVE_EDITOR, new KeyBuilder().alt().charCode('w').build()); // XXX
         }
-    }
 
-    protected void registerDebuggerKeys() {
-        // DebuggerExtension
-        scheme.addKey(new KeyBuilder().alt().shift().charCode(KeyCodeMap.F9).build(), EDIT_DEBUG_CONF_ID);
-        scheme.addKey(new KeyBuilder().action().charCode(KeyCodeMap.F11).build(), DEBUG_ID);
-        scheme.addKey(new KeyBuilder().action().charCode(KeyCodeMap.F2).build(), DISCONNECT_DEBUG_ID);
-        scheme.addKey(new KeyBuilder().charCode(KeyCodeMap.F5).build(), STEP_INTO_ID);
-        scheme.addKey(new KeyBuilder().charCode(KeyCodeMap.F6).build(), STEP_OVER_ID);
-        scheme.addKey(new KeyBuilder().charCode(KeyCodeMap.F7).build(), STEP_OUT_ID);
-        scheme.addKey(new KeyBuilder().charCode(KeyCodeMap.F8).build(), RESUME_EXECUTION_ID);
-        scheme.addKey(new KeyBuilder().action().charCode('D').build(), EVALUATE_EXPRESSION_ID);
-    }
+        // Debugger Extension Keys
+        keys.put(EDIT_DEBUG_CONF_ID, new KeyBuilder().alt().shift().charCode(KeyCodeMap.F9).build());
+        keys.put(DEBUG_ID, new KeyBuilder().action().charCode(KeyCodeMap.F11).build());
+        keys.put(DISCONNECT_DEBUG_ID, new KeyBuilder().action().charCode(KeyCodeMap.F2).build());
+        keys.put(STEP_INTO_ID, new KeyBuilder().charCode(KeyCodeMap.F5).build());
+        keys.put(STEP_OVER_ID, new KeyBuilder().charCode(KeyCodeMap.F6).build());
+        keys.put(STEP_OUT_ID, new KeyBuilder().charCode(KeyCodeMap.F7).build());
+        keys.put(RESUME_EXECUTION_ID, new KeyBuilder().charCode(KeyCodeMap.F8).build());
+        keys.put(EVALUATE_EXPRESSION_ID, new KeyBuilder().action().charCode('D').build());
 
-    protected void registerJavaKeys() {
-        // Java
-        scheme.addKey(new KeyBuilder().shift().charCode(KeyCodeMap.F2).build(), SHOW_QUICK_DOC);
-        scheme.addKey(new KeyBuilder().action().charCode('1').build(), QUICK_FIX);
-        scheme.addKey(new KeyBuilder().control().charCode('p').build(), PARAMETERS_INFO);
-        scheme.addKey(new KeyBuilder().action().charCode('o').build(), JAVA_CLASS_STRUCTURE);
-        scheme.addKey(new KeyBuilder().action().charCode('O').build(), ORGANIZE_IMPORTS);
-        scheme.addKey(new KeyBuilder().charCode(KeyCodeMap.F3).build(), OPEN_JAVA_DECLARATION);
+        // Java Keys
+        keys.put(SHOW_QUICK_DOC, new KeyBuilder().shift().charCode(KeyCodeMap.F2).build());
+        keys.put(QUICK_FIX, new KeyBuilder().action().charCode('1').build());
+        keys.put(PARAMETERS_INFO, new KeyBuilder().control().charCode('p').build());
+        keys.put(JAVA_CLASS_STRUCTURE, new KeyBuilder().action().charCode('o').build());
+        keys.put(ORGANIZE_IMPORTS, new KeyBuilder().action().charCode('O').build());
+        keys.put(OPEN_JAVA_DECLARATION, new KeyBuilder().charCode(KeyCodeMap.F3).build());
+        keys.put(JAVA_CUT_REFACTORING, new KeyBuilder().action().charCode('x').build());
+        keys.put(JAVA_FIND_USAGES, new KeyBuilder().control().alt().charCode('h').build());
         if (UserAgent.isMac()) {
-            scheme.addKey(new KeyBuilder().alt().action().charCode('r').build(), JAVA_RENAME_REFACTORING);
-            scheme.addKey(new KeyBuilder().alt().action().charCode('v').build(), JAVA_MOVE_REFACTORING);
+            keys.put(JAVA_RENAME_REFACTORING, new KeyBuilder().alt().action().charCode('r').build());
+            keys.put(JAVA_MOVE_REFACTORING, new KeyBuilder().alt().action().charCode('v').build());
         } else {
-            scheme.addKey(new KeyBuilder().alt().charCode('R').build(), JAVA_RENAME_REFACTORING);
-            scheme.addKey(new KeyBuilder().alt().charCode('V').build(), JAVA_MOVE_REFACTORING);
+            keys.put(JAVA_RENAME_REFACTORING, new KeyBuilder().alt().charCode('R').build());
+            keys.put(JAVA_MOVE_REFACTORING, new KeyBuilder().alt().charCode('V').build());
         }
-        scheme.addKey(new KeyBuilder().action().charCode('x').build(), JAVA_CUT_REFACTORING);
-        scheme.addKey(new KeyBuilder().control().alt().charCode('h').build(), JAVA_FIND_USAGES);
-    }
 
-    private void registerJUnitKeys() {
+        // JUnit Keys
         if (UserAgent.isMac()) {
-            scheme.addKey(new KeyBuilder().control().alt().charCode('z').build(), TEST_ACTION_RUN_ALL);
-            scheme.addKey(new KeyBuilder().control().shift().charCode('z').build(), TEST_ACTION_RUN_CLASS);
+            keys.put(TEST_ACTION_RUN_ALL, new KeyBuilder().control().alt().charCode('z').build());
+            keys.put(TEST_ACTION_RUN_CLASS, new KeyBuilder().control().shift().charCode('z').build());
         } else {
-            scheme.addKey(new KeyBuilder().action().alt().charCode('z').build(), TEST_ACTION_RUN_ALL);
-            scheme.addKey(new KeyBuilder().action().shift().charCode('z').build(), TEST_ACTION_RUN_CLASS);
+            keys.put(TEST_ACTION_RUN_ALL, new KeyBuilder().action().alt().charCode('z').build());
+            keys.put(TEST_ACTION_RUN_CLASS, new KeyBuilder().action().shift().charCode('z').build());
         }
-    }
 
-    protected void registerGitKeys() {
-        // Git
-        scheme.addKey(new KeyBuilder().action().alt().charCode('d').build(), GIT_COMPARE_WITH_LATEST);
+        // Git keys
+        keys.put(GIT_COMPARE_WITH_LATEST, new KeyBuilder().action().alt().charCode('d').build());
+
+        // Register keys
+        agent.getEclipse().addKeys(keys);
     }
 }
