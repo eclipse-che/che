@@ -129,6 +129,8 @@
                         <exclude>**/Lsp4j.gwt.xml</exclude>
                         <exclude>**/Either.java</exclude>
                         <exclude>**/EitherUtil.java</exclude>
+                        <exclude>**/JsonUtil.java</exclude>
+                        <exclude>**/JsonSerializable.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>
