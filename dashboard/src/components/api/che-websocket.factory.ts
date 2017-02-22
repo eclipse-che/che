@@ -326,6 +326,10 @@ export class MessageBus {
       }
     }
 
+    // handle case when we don't have channel but a raw message
+    if (!channelHeader && headers.length == 1 && headers[0].name === 'x-everrest-websocket-message-type') {
+      channelHeader = headers[0];
+    }
 
     if (channelHeader) {
       // message for a channel, look at current subscribers
