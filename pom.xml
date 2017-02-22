@@ -44,6 +44,7 @@
         <che.docs.version>5.6.0-SNAPSHOT</che.docs.version>
         <che.lib.version>5.6.0-SNAPSHOT</che.lib.version>
         <che.version>5.6.0-SNAPSHOT</che.version>
+        <lsp4j.version>0.2.0-SNAPSHOT</lsp4j.version>
         <specification.version>1.0-beta2</specification.version>
     </properties>
     <dependencyManagement>
@@ -1043,6 +1044,26 @@
                 <groupId>org.eclipse.che.sample</groupId>
                 <artifactId>che-sample-plugin-wizard-shared</artifactId>
                 <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.lsp4j</groupId>
+                <artifactId>org.eclipse.lsp4j</artifactId>
+                <version>${lsp4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.lsp4j</groupId>
+                <artifactId>org.eclipse.lsp4j.jsonrpc</artifactId>
+                <version>${lsp4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.xtext</groupId>
+                <artifactId>org.eclipse.xtext.xbase.lib</artifactId>
+                <version>2.10.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.xtext</groupId>
+                <artifactId>org.eclipse.xtext.xbase.lib.gwt</artifactId>
+                <version>2.10.0</version>
             </dependency>
             <dependency>
                 <groupId>org.postgresql</groupId>
