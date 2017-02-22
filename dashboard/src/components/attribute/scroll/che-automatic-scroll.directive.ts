@@ -44,7 +44,7 @@ export class CheAutoScroll {
             this.$timeout(() => {
                 element[0].scrollTop = element[0].scrollHeight;
             });
-        });
+        }, true);
     }
 
 }
