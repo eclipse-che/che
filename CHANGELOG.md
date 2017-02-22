@@ -1,5 +1,27 @@
 # Change Log
 
+## [5.3.1](https://github.com/eclipse/che/tree/5.3.1) (2017-02-21)
+[Full Changelog](https://github.com/eclipse/che/compare/5.3.0...5.3.1)
+
+**Pull requests merged:**
+The follow are changelogs for eclipse/che:
+- Remove readme.io references and replace with internal documentation link. [1794](https://github.com/eclipse/che/pull/1794)
+- Add option to unison to handle Windows FAT filesystems. [4182](https://github.com/eclipse/che/pull/4182)
+- Remove duplicated code from cli [4172](https://github.com/eclipse/che/pull/4172)
+- Add go to the `PATH` of `eclipse/che-dev` docker image [4169](https://github.com/eclipse/che/pull/4169)
+- Update references to hold documentation site [4166](https://github.com/eclipse/che/pull/4166)
+The follow are changelogs for eclipse/che-dockerfiles:
+- Remove readme.io references and replace with internal documentation link. [1794](https://github.com/eclipse/che-dockerfiles/pull/1794)
+- Add option to unison to handle Windows FAT filesystems. [4182](https://github.com/eclipse/che-dockerfiles/pull/4182)
+- Remove duplicated code from cli [4172](https://github.com/eclipse/che-dockerfiles/pull/4172)
+- Add go to the `PATH` of `eclipse/che-dev` docker image #### Release Notes N/A #### Docs PR N/A [4169](https://github.com/eclipse/che-dockerfiles/pull/4169)
+- Update references to hold documentation site [4166](https://github.com/eclipse/che-dockerfiles/pull/4166)
+- Remove readme.io references and replace with internal documentation link. [1794](https://github.com/eclipse/che-dockerfiles/pull/1794)
+- Add option to unison to handle Windows FAT filesystems. [4182](https://github.com/eclipse/che-dockerfiles/pull/4182)
+- Remove duplicated code from cli [4172](https://github.com/eclipse/che-dockerfiles/pull/4172)
+- Add go to the `PATH` of `eclipse/che-dev` docker image[4169](https://github.com/eclipse/che-dockerfiles/pull/4169)
+- Update references to hold documentation site [4166](https://github.com/eclipse/che-dockerfiles/pull/4166)
+
 ## [5.3.0](https://github.com/eclipse/che/tree/5.3.0) (2017-02-17)
 [Full Changelog](https://github.com/eclipse/che/compare/5.2.2...5.3.0)
 
