@@ -68,6 +68,13 @@ export class CheWebsocket {
     if (!this.bus) {
       // needs to initialize
       this.bus = new MessageBus(this.$websocket(this.wsBaseUrl), this.$interval);
+      this.bus.onClose(
+        () => {
+          // remove it from the cache so new calls will create a new instance
+          this.bus.closed = true;
+          this.bus = null;
+        }
+      )
     }
     return this.bus;
   }
@@ -81,6 +88,13 @@ export class CheWebsocket {
     if (!this.remoteBus) {
       // needs to initialize
       this.remoteBus = new MessageBus(this.$websocket(websocketURL), this.$interval);
+      this.remoteBus.onClose(
+        () => {
+          // remove it from the cache so new calls will create a new instance
+          this.remoteBus.closed = true;
+          this.remoteBus = null;
+        }
+      )
     }
     return this.remoteBus;
   }
