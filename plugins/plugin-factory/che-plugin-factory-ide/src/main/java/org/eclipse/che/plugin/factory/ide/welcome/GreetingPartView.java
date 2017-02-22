@@ -18,7 +18,7 @@ import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
  */
 public interface GreetingPartView extends View<GreetingPartView.ActionDelegate> {
 
-    public interface ActionDelegate extends BaseActionDelegate {
+    interface ActionDelegate extends BaseActionDelegate {
     }
 
     /**

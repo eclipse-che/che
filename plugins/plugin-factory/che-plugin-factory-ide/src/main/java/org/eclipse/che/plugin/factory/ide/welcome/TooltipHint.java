@@ -20,7 +20,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.UIObject;
@@ -51,11 +50,7 @@ public class TooltipHint extends UIObject {
         messageElement.setInnerHTML(SafeHtmlUtils.htmlEscape(text));
 
         DOM.sinkEvents((com.google.gwt.dom.client.Element)closeButton.cast(), Event.ONCLICK);
-        DOM.setEventListener((com.google.gwt.dom.client.Element)closeButton.cast(), new EventListener() {
-            public void onBrowserEvent(Event event) {
-                close();
-            }
-        });
+        DOM.setEventListener((com.google.gwt.dom.client.Element)closeButton.cast(), event -> close());
 
         getElement().getStyle().setProperty("opacity", "0");
         getElement().getStyle().setTop(top, Unit.PX);

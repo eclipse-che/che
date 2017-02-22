@@ -11,7 +11,6 @@
 package org.eclipse.che.plugin.factory.ide.utils;
 
 
-import com.google.gwt.core.client.JsArrayMixed;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 
@@ -20,8 +19,6 @@ import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.git.shared.GitCheckoutEvent;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
@@ -169,18 +166,12 @@ public class FactoryProjectImporter extends AbstractImporter {
         }
 
         Promises.all(promises.toArray(new Promise<?>[promises.size()]))
-                .then(new Operation<JsArrayMixed>() {
-                    @Override
-                    public void apply(JsArrayMixed arg) throws OperationException {
-                        callback.onSuccess(null);
-                    }
+                .then(arg -> {
+                    callback.onSuccess(null);
                 })
-                .catchError(new Operation<PromiseError>() {
-                    @Override
-                    public void apply(PromiseError promiseError) throws OperationException {
-                        // If it is unable to import any number of projects then factory import status will be success anyway
-                        callback.onSuccess(null);
-                    }
+                .catchError(promiseError -> {
+                    // If it is unable to import any number of projects then factory import status will be success anyway
+                    callback.onSuccess(null);
                 });
     }
 
@@ -330,12 +321,9 @@ public class FactoryProjectImporter extends AbstractImporter {
 
                         return Promises.resolve(null);
                     }
-                }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError caught) throws OperationException {
-                callback.onFailure(new Exception(caught.getMessage()));
-            }
-        });
+                }).catchError(caught -> {
+                    callback.onFailure(new Exception(caught.getMessage()));
+                });
     }
 
     private Promise<Project> recallSubversionImportWithCredentials(final Path path, final SourceStorage sourceStorage) {
@@ -348,11 +336,8 @@ public class FactoryProjectImporter extends AbstractImporter {
                                                   return doImport(path, sourceStorage);
                                               }
                                           })
-                                          .catchError(new Operation<PromiseError>() {
-                                              @Override
-                                              public void apply(PromiseError error) throws OperationException {
-                                                  callback.onFailure(error.getCause());
-                                              }
+                                          .catchError(error -> {
+                                              callback.onFailure(error.getCause());
                                           });
     }
 }

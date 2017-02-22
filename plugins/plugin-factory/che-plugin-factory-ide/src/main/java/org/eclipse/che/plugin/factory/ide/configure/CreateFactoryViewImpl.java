@@ -11,8 +11,6 @@
 package org.eclipse.che.plugin.factory.ide.configure;
 
 import com.google.common.base.Strings;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.regexp.shared.RegExp;
@@ -97,18 +95,9 @@ public class CreateFactoryViewImpl extends Window implements CreateFactoryView {
         launch.addStyleName(style.launchIcon());
         configure.addStyleName(style.configureIcon());
         createFactoryButton.setEnabled(false);
-        Button cancelButton = createButton(locale.createFactoryButtonClose(), "git-remotes-pull-cancel", new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                delegate.onCancelClicked();
-            }
-        });
-        createFactoryButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent clickEvent) {
-                delegate.onCreateClicked();
-            }
-        });
+        Button cancelButton =
+                createButton(locale.createFactoryButtonClose(), "git-remotes-pull-cancel", event -> delegate.onCancelClicked());
+        createFactoryButton.addClickHandler(clickEvent -> delegate.onCreateClicked());
         cancelButton.ensureDebugId("projectReadOnlyGitUrl-btnClose");
         addButtonToFooter(cancelButton);
         getWidget().getElement().getStyle().setPadding(0, Unit.PX);

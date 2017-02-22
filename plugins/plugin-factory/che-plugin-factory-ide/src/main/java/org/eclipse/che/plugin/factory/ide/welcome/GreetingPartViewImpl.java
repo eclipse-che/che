@@ -12,8 +12,6 @@ package org.eclipse.che.plugin.factory.ide.welcome;
 
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.LoadEvent;
-import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.user.client.ui.Frame;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -44,12 +42,7 @@ public class GreetingPartViewImpl extends BaseView<GreetingPartView.ActionDelega
 
         setContentWidget(frame);
 
-        frame.addLoadHandler(new LoadHandler() {
-            @Override
-            public void onLoad(LoadEvent event) {
-                frame.getElement().getStyle().setVisibility(Style.Visibility.VISIBLE);
-            }
-        });
+        frame.addLoadHandler(event -> frame.getElement().getStyle().setVisibility(Style.Visibility.VISIBLE));
 
         handleFrameEvents(frame.getElement());
     }

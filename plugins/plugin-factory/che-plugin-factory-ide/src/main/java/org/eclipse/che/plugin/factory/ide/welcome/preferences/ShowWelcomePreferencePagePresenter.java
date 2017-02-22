@@ -24,7 +24,7 @@ import org.eclipse.che.plugin.factory.ide.FactoryLocalizationConstant;
 @Singleton
 public class ShowWelcomePreferencePagePresenter extends AbstractPreferencePagePresenter implements ShowWelcomePreferencePageView.ActionDelegate {
 
-    public static final String SHOW_WELCOME_PREFERENCE_KEY = "plugin-hosted.welcome";
+    public static final String SHOW_WELCOME_PREFERENCE_KEY = "plugin-factory.welcome";
 
     private ShowWelcomePreferencePageView   view;
     private PreferencesManager              preferencesManager;

@@ -21,7 +21,6 @@ import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.plugin.factory.ide.accept.AcceptFactoryHandler;
 import org.eclipse.che.plugin.factory.ide.action.CreateFactoryAction;
 import org.eclipse.che.plugin.factory.ide.json.ImportFromConfigAction;
-import org.eclipse.che.plugin.factory.ide.welcome.GreetingPartPresenter;
 import org.eclipse.che.plugin.factory.ide.welcome.OpenWelcomePageAction;
 
 import static com.google.gwt.core.client.ScriptInjector.TOP_WINDOW;
@@ -41,7 +40,6 @@ public class FactoryExtension {
                             FactoryResources resources,
                             CreateFactoryAction configureFactoryAction,
                             ImportFromConfigAction importFromConfigAction,
-                            GreetingPartPresenter greetingPartPresenter,
                             OpenWelcomePageAction openWelcomePageAction) {
         acceptFactoryHandler.process();
 

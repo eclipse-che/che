@@ -104,12 +104,7 @@ public class CreateFactoryPresenter implements CreateFactoryView.ActionDelegate 
     }
 
     private Operation<PromiseError> logError() {
-        return new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError err) throws OperationException {
-                view.showFactoryNameError(locale.createFactoryFromCurrentWorkspaceFailed(), err.getMessage());
-            }
-        };
+        return err -> view.showFactoryNameError(locale.createFactoryFromCurrentWorkspaceFailed(), err.getMessage());
     }
 
     private boolean isValidFactoryName(String name) {

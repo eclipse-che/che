@@ -12,10 +12,6 @@ package org.eclipse.che.plugin.factory.ide.json;
 
 
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
@@ -35,7 +31,8 @@ import org.eclipse.che.plugin.factory.ide.FactoryLocalizationConstant;
  */
 public class ImportFromConfigViewImpl extends Window implements ImportFromConfigView {
 
-    private static final int MAX_FILE_SIZE = 3;//Mb
+    @SuppressWarnings("unused") // used in native js
+    private static final int MAX_FILE_SIZE_MB = 3;
 
     public interface ImportFromConfigViewBinder extends UiBinder<Widget, ImportFromConfigViewImpl> {
 
@@ -59,12 +56,10 @@ public class ImportFromConfigViewImpl extends Window implements ImportFromConfig
         this.setTitle(locale.importFromConfigurationTitle());
         setWidget(importFromConfigViewBinder.createAndBindUi(this));
 
-        Button btnCancel = createButton(locale.cancelButton(), "import-from-config-btn-cancel",
-                                        (ClickHandler)event -> delegate.onCancelClicked());
+        Button btnCancel = createButton(locale.cancelButton(), "import-from-config-btn-cancel", event -> delegate.onCancelClicked());
         addButtonToFooter(btnCancel);
 
-        buttonImport = createButton(locale.importButton(), "import-from-config-btn-import",
-                                    (ClickHandler)event -> delegate.onImportClicked());
+        buttonImport = createButton(locale.importButton(), "import-from-config-btn-import", event -> delegate.onImportClicked());
         addButtonToFooter(buttonImport);
     }
 
@@ -80,7 +75,7 @@ public class ImportFromConfigViewImpl extends Window implements ImportFromConfig
         fileUpload.ensureDebugId("import-from-config-ChooseFile");
         addHandler(fileUpload.getElement());
 
-        fileUpload.addChangeHandler((ChangeHandler)event -> buttonImport.setEnabled(fileUpload.getFilename() != null));
+        fileUpload.addChangeHandler(event -> buttonImport.setEnabled(fileUpload.getFilename() != null));
 
         uploadForm.add(fileUpload);
 
@@ -130,7 +125,7 @@ public class ImportFromConfigViewImpl extends Window implements ImportFromConfig
 
             var selectedFile = evt.target.files[0];
 
-            var max_size = @org.eclipse.che.plugin.factory.ide.json.ImportFromConfigViewImpl::MAX_FILE_SIZE;
+            var max_size = @org.eclipse.che.plugin.factory.ide.json.ImportFromConfigViewImpl::MAX_FILE_SIZE_MB;
 
             if (selectedFile.size > max_size * 100000) {
                 instance.@org.eclipse.che.plugin.factory.ide.json.ImportFromConfigViewImpl::resetUploadFileField()();
@@ -167,12 +162,7 @@ public class ImportFromConfigViewImpl extends Window implements ImportFromConfig
         fileUpload.ensureDebugId("import-from-config-ChooseFile");
         addHandler(fileUpload.getElement());
 
-        fileUpload.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                buttonImport.setEnabled(fileUpload.getFilename() != null);
-            }
-        });
+        fileUpload.addChangeHandler(event -> buttonImport.setEnabled(fileUpload.getFilename() != null));
         uploadForm.add(fileUpload);
     }
 
