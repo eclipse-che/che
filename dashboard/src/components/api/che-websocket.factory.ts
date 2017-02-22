@@ -18,11 +18,17 @@
  */
 export class CheWebsocket {
 
+  private bus : MessageBus;
+  private wsBaseUrl : string;
+  private remoteBus : MessageBus;
+  private $interval : ng.IIntervalService;
+  private $websocket : any;
+
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor ($websocket, $location, $interval, proxySettings, userDashboardConfig) {
+  constructor ($websocket, $location, $interval : ng.IIntervalService, proxySettings : string, userDashboardConfig) {
 
     this.$websocket = $websocket;
     this.$interval = $interval;
@@ -32,7 +38,7 @@ export class CheWebsocket {
 
     if (inDevMode) {
       // it handle then http and https
-        wsUrl = proxySettings.replace('http', 'ws') + '/api/ws';
+      wsUrl = proxySettings.replace('http', 'ws') + '/api/ws';
     } else {
 
       var wsProtocol;
@@ -49,13 +55,16 @@ export class CheWebsocket {
     this.remoteBus = null;
   }
 
+  get wsUrl(): string {
+    return this.wsBaseUrl;
+  }
 
   getExistingBus(datastream) {
     return new MessageBus(datastream, this.$interval);
   }
 
 
-  getBus() {
+  getBus() : MessageBus {
     if (!this.bus) {
       // needs to initialize
       this.bus = new MessageBus(this.$websocket(this.wsBaseUrl), this.$interval);
@@ -65,7 +74,7 @@ export class CheWebsocket {
 
 
   /**
-   * Gets a bus for a remote worksace, by providing the remote URL to this websocket
+   * Gets a bus for a remote workspace, by providing the remote URL to this websocket
    * @param websocketURL the remote host base WS url
    */
   getRemoteBus(websocketURL) {
@@ -81,8 +90,12 @@ export class CheWebsocket {
 
 class MessageBuilder {
 
-  constructor(method, path) {
-    this.TYPE = 'x-everrest-websocket-message-type';
+
+  private static TYPE : string = 'x-everrest-websocket-message-type';
+  private method : string;
+  private path : string;
+  private message : any;
+  constructor(method? : string, path? : string) {
     if (method) {
       this.method = method;
     } else {
@@ -106,14 +119,14 @@ class MessageBuilder {
   }
 
   subscribe(channel) {
-    var header = {name: this.TYPE, value: 'subscribe-channel'};
+    let header = {name: MessageBuilder.TYPE, value: 'subscribe-channel'};
     this.message.headers.push(header);
     this.message.body = JSON.stringify({channel: channel});
     return this;
   }
 
   unsubscribe(channel) {
-    var header = {name:this.TYPE, value: 'unsubscribe-channel'};
+    let header = {name:MessageBuilder.TYPE, value: 'unsubscribe-channel'};
     this.message.headers.push(header);
     this.message.body = JSON.stringify({channel: channel});
     return this;
@@ -125,7 +138,7 @@ class MessageBuilder {
    * @returns {MessageBuilder}
    */
   ping() {
-    var header = {name:this.TYPE, value: 'ping'};
+    let header = {name:MessageBuilder.TYPE, value: 'ping'};
     this.message.headers.push(header);
     return this;
   }
@@ -135,9 +148,9 @@ class MessageBuilder {
   }
 
   buildUUID() {
-    var time = new Date().getTime();
+    let time = new Date().getTime();
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (match) => {
-      var rem = (time + 16 * Math.random()) % 16 | 0; // jshint ignore:line
+      let rem = (time + 16 * Math.random()) % 16 | 0; // jshint ignore:line
       time = Math.floor(time / 16);
       return (match === 'x' ? rem : rem & 7 | 8).toString(16); // jshint ignore:line
     });
@@ -146,9 +159,17 @@ class MessageBuilder {
 
 }
 
-class MessageBus { // jshint ignore:line
+export class MessageBus {
 
-  constructor(datastream, $interval) {
+  closed : boolean;
+  datastream : any;
+  private $interval : ng.IIntervalService;
+  private heartbeatPeriod : number;
+  private subscribersByChannel : Map;
+  private keepAlive : ng.IPromise;
+
+
+  constructor(datastream, $interval : ng.IIntervalService) {
     this.datastream = datastream;
     this.$interval = $interval;
 
@@ -158,6 +179,10 @@ class MessageBus { // jshint ignore:line
 
     this.setKeepAlive();
     this.datastream.onMessage((message) => {this.handleMessage(message);});
+  }
+
+  public isClosed() : boolean {
+    return this.closed;
   }
 
   /**
@@ -216,11 +241,11 @@ class MessageBus { // jshint ignore:line
    */
   subscribe(channel, callback) {
     // already subscribed ?
-    var existingSubscribers = this.subscribersByChannel.get(channel);
+    let existingSubscribers = this.subscribersByChannel.get(channel);
     if (!existingSubscribers) {
       // register callback
 
-      var subscribers = [];
+      let subscribers = [];
       subscribers.push(callback);
       this.subscribersByChannel.set(channel, subscribers);
 
@@ -241,7 +266,7 @@ class MessageBus { // jshint ignore:line
    */
   unsubscribe(channel) {
     // already subscribed ?
-    var existingSubscribers = this.subscribersByChannel.get(channel);
+    let existingSubscribers = this.subscribersByChannel.get(channel);
     // unable to cancel if not existing channel
     if (!existingSubscribers) {
       return;
@@ -250,7 +275,7 @@ class MessageBus { // jshint ignore:line
     if (existingSubscribers > 1) {
       // only remove callback
       for(let i = 0; i < existingSubscribers.length; i++) {
-          delete existingSubscribers[i];
+        delete existingSubscribers[i];
       }
     } else {
       // only one element, remove and send server message
@@ -264,7 +289,7 @@ class MessageBus { // jshint ignore:line
 
 
   send(message) {
-    var stringified = JSON.stringify(message);
+    let stringified = JSON.stringify(message);
     this.datastream.send(stringified);
   }
 
@@ -272,25 +297,25 @@ class MessageBus { // jshint ignore:line
   handleMessage(message) {
     // handling the receive of a message
     // needs to parse it
-    var jsonMessage = JSON.parse(message.data);
+    let jsonMessage = JSON.parse(message.data);
 
     // get headers
-    var headers = jsonMessage.headers;
+    let headers = jsonMessage.headers;
 
-    var channelHeader;
+
+    let channelHeader;
     // found channel headers
     for(let i = 0; i < headers.length; i++) {
       let header = headers[i];
       if ('x-everrest-websocket-channel' === header.name) {
         channelHeader = header;
-        continue;
       }
     }
 
 
     if (channelHeader) {
       // message for a channel, look at current subscribers
-      var subscribers = this.subscribersByChannel.get(channelHeader.value);
+      let subscribers = this.subscribersByChannel.get(channelHeader.value);
       if (subscribers) {
         subscribers.forEach((subscriber) => {
           try {
@@ -302,7 +327,7 @@ class MessageBus { // jshint ignore:line
       }
     }
 
-    //Restart ping after received message
+    // Restart ping after received message
     this.restartPing();
   }
 
