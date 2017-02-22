@@ -19,9 +19,6 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentUser;
 import org.eclipse.che.ide.api.app.StartUpAction;
@@ -214,19 +211,13 @@ public class AppContextImpl implements AppContext,
         }
 
         resourceManager = resourceManagerFactory.newResourceManager(runtime.getDevMachine());
-        resourceManager.getWorkspaceProjects().then(new Operation<Project[]>() {
-            @Override
-            public void apply(Project[] projects) throws OperationException {
-                AppContextImpl.this.projects = projects;
-                java.util.Arrays.sort(AppContextImpl.this.projects, ResourcePathComparator.getInstance());
-                callback.onSuccess(resourceManager);
-                eventBus.fireEvent(new WorkspaceReadyEvent(projects));
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError error) throws OperationException {
-                callback.onFailure((Exception)error.getCause());
-            }
+        resourceManager.getWorkspaceProjects().then(projects -> {
+            AppContextImpl.this.projects = projects;
+            java.util.Arrays.sort(AppContextImpl.this.projects, ResourcePathComparator.getInstance());
+            callback.onSuccess(resourceManager);
+            eventBus.fireEvent(new WorkspaceReadyEvent(projects));
+        }).catchError(error -> {
+            callback.onFailure((Exception)error.getCause());
         });
     }
 
@@ -303,6 +294,19 @@ public class AppContextImpl implements AppContext,
                 if (projects[i].getLocation().equals(resource.getLocation())) {
                     projects[i] = (Project)resource;
                 }
+            }
+
+            if (currentResources != null) {
+                for (int i = 0; i < currentResources.length; i++) {
+                    if (currentResources[i].getLocation().equals(resource.getLocation())) {
+                        currentResources[i] = resource;
+                        break;
+                    }
+                }
+            }
+
+            if (currentResource != null && currentResource.getLocation().equals(resource.getLocation())) {
+                currentResource = resource;
             }
         }
     }
@@ -457,16 +461,13 @@ public class AppContextImpl implements AppContext,
 
     @Override
     public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
-        appStateManager.get().persistWorkspaceState(getWorkspaceId()).then(new Operation<Void>() {
-            @Override
-            public void apply(Void arg) throws OperationException {
-                for (Project project : projects) {
-                    eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(project, REMOVED)));
-                }
-
-                projects = NO_PROJECTS; //avoid NPE
-                resourceManager = null;
+        appStateManager.get().persistWorkspaceState(getWorkspaceId()).then(ignored -> {
+            for (Project project : projects) {
+                eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(project, REMOVED)));
             }
+
+            projects = NO_PROJECTS;
+            resourceManager = null;
         });
 
         //goto close all editors
