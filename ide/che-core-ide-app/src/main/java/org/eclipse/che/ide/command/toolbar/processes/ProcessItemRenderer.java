@@ -13,10 +13,10 @@ package org.eclipse.che.ide.command.toolbar.processes;
 import com.google.gwt.user.client.ui.Widget;
 
 import org.eclipse.che.ide.ui.dropdown.BaseListItem;
-import org.eclipse.che.ide.ui.dropdown.DropDownListItemRenderer;
+import org.eclipse.che.ide.ui.dropdown.DropdownListItemRenderer;
 
 /** Renders widgets for representing a {@link Process}. */
-class ProcessItemRenderer implements DropDownListItemRenderer {
+class ProcessItemRenderer implements DropdownListItemRenderer {
 
     private final BaseListItem<Process> item;
     private final StopProcessHandler    stopHandler;

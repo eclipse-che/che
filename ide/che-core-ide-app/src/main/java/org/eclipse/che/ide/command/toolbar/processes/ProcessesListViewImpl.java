@@ -18,18 +18,18 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.command.CommandResources;
 import org.eclipse.che.ide.ui.dropdown.BaseListItem;
-import org.eclipse.che.ide.ui.dropdown.DropDownList;
+import org.eclipse.che.ide.ui.dropdown.DropdownList;
 
 import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 
-/** Implementation of {@link ProcessesListView} that displays processes in a drop down list. */
+/** Implementation of {@link ProcessesListView} that displays processes in a dropdown list. */
 @Singleton
 public class ProcessesListViewImpl implements ProcessesListView {
 
     private final FlowPanel    rootPanel;
-    private final DropDownList dropDownList;
+    private final DropdownList dropdownList;
 
     private final Map<Process, BaseListItem<Process>> listItems;
     private final Map<Process, ProcessItemRenderer>   renderers;
@@ -47,10 +47,10 @@ public class ProcessesListViewImpl implements ProcessesListView {
         final InlineHTML emptyListWidget = new InlineHTML("<strong>Ready</strong> - start command");
         emptyListWidget.addStyleName(resources.commandToolbarCss().processWidgetText());
 
-        dropDownList = new DropDownList(emptyListWidget);
-        dropDownList.setWidth("400px");
-        dropDownList.setDropdownPanelWidth("400px");
-        dropDownList.setSelectionHandler(item -> {
+        dropdownList = new DropdownList(emptyListWidget);
+        dropdownList.setWidth("400px");
+        dropdownList.setDropdownPanelWidth("400px");
+        dropdownList.setSelectionHandler(item -> {
             for (Map.Entry<Process, BaseListItem<Process>> entry : listItems.entrySet()) {
                 if (item.equals(entry.getValue())) {
                     delegate.onProcessChosen(entry.getKey());
@@ -60,7 +60,7 @@ public class ProcessesListViewImpl implements ProcessesListView {
 
         rootPanel = new FlowPanel();
         rootPanel.add(label);
-        rootPanel.add(dropDownList);
+        rootPanel.add(dropdownList);
     }
 
     @Override
@@ -75,7 +75,7 @@ public class ProcessesListViewImpl implements ProcessesListView {
 
     @Override
     public void clearList() {
-        dropDownList.clear();
+        dropdownList.clear();
     }
 
     @Override
@@ -97,7 +97,7 @@ public class ProcessesListViewImpl implements ProcessesListView {
         listItems.put(process, listItem);
         renderers.put(process, renderer);
 
-        dropDownList.addItem(listItem, renderer);
+        dropdownList.addItem(listItem, renderer);
     }
 
     @Override
@@ -108,7 +108,7 @@ public class ProcessesListViewImpl implements ProcessesListView {
             listItems.remove(process);
             renderers.remove(process);
 
-            dropDownList.removeItem(listItem);
+            dropdownList.removeItem(listItem);
         }
     }
 }

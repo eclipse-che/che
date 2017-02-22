@@ -13,6 +13,7 @@ package org.eclipse.che.ide.command.toolbar;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 
 import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.mvp.View;
 
@@ -23,6 +24,8 @@ public interface CommandToolbarView extends View<CommandToolbarView.ActionDelega
 
     void setRunCommands(List<ContextualCommand> commands);
 
+    void setDebugCommands(List<ContextualCommand> commands);
+
     AcceptsOneWidget getProcessesListContainer();
 
     AcceptsOneWidget getPreviewUrlsListContainer();
@@ -30,6 +33,9 @@ public interface CommandToolbarView extends View<CommandToolbarView.ActionDelega
     interface ActionDelegate {
 
         /** Called when running a command is requested. */
-        void onCommandRun(ContextualCommand command, Machine machine);
+        void onCommandRun(ContextualCommand command, @Nullable Machine machine);
+
+        /** Called when debugging a command is requested. */
+        void onCommandDebug(ContextualCommand command, @Nullable Machine machine);
     }
 }

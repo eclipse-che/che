@@ -60,9 +60,9 @@
 }
 
 .popupItem {
-    height: 16px;
-    padding-left: 13px;
-    padding-right: 3px;
+    height: 20px;
+    line-height: 20px;
+    padding: 0 13px;
     cursor: default;
 }
 
@@ -73,7 +73,7 @@
 
 .arrow {
     float: right;
-    margin-left: 3px;
+    margin-left: 10px;
     color: #dddddd;
 }
 

@@ -15,83 +15,76 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
-import com.google.gwt.event.dom.client.MouseOverHandler;
-import com.google.gwt.event.logical.shared.CloseEvent;
-import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
+
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.FontAwesome;
 import org.eclipse.che.ide.util.Pair;
 
 import java.util.List;
 
-/**
- * Popup list for {@link MenuPopupButton}
- */
+/** Popup list for {@link MenuPopupButton}. */
 class PopupItemList extends PopupPanel {
 
-    private final PopupItemDataProvider dataProvider;
-    private final PopupActionHandler actionHandler;
+    private final PopupItemDataProvider     dataProvider;
+    private final PopupActionHandler        actionHandler;
     private final MenuPopupButton.Resources resources;
 
     private PopupItemList childList;
 
     private ItemWidget overItem;
 
-    private FlowPanel content;
-
-    public PopupItemList(List<PopupItem> children,
-                         PopupItemDataProvider dataProvider,
-                         PopupActionHandler actionHandler,
-                         MenuPopupButton.Resources resources,
-                         @Nullable String title) {
+    PopupItemList(List<PopupItem> children,
+                  PopupItemDataProvider dataProvider,
+                  PopupActionHandler actionHandler,
+                  MenuPopupButton.Resources resources,
+                  @Nullable String title) {
         super(true, false);
-        addStyleName(resources.css().popupPanel());
+
         this.dataProvider = dataProvider;
         this.actionHandler = actionHandler;
         this.resources = resources;
-        content = new FlowPanel();
-        add(content);
+
         setAnimationEnabled(true);
         setAnimationType(AnimationType.ROLL_DOWN);
+        addStyleName(resources.css().popupPanel());
+
+        final FlowPanel content = new FlowPanel();
+        add(content);
+
         if (title != null) {
             Label label = new Label(title);
             label.setStyleName(resources.css().label());
             content.add(label);
         }
-        for (PopupItem child : children) {
-            content.add(new ItemWidget(child));
-        }
 
-        addCloseHandler(new CloseHandler<PopupPanel>() {
-            @Override
-            public void onClose(CloseEvent<PopupPanel> event) {
-                if (childList != null && childList.isShowing()) {
-                    childList.hide(false);
-                }
+        children.forEach(child -> content.add(new ItemWidget(child)));
+
+        addCloseHandler(event -> {
+            if (childList != null && childList.isShowing()) {
+                childList.hide(false);
             }
         });
-
     }
-
 
     private class ItemWidget extends FlowPanel {
 
         private final PopupItem item;
 
-        private Element itemLabel;
-
-        public ItemWidget(final PopupItem item) {
+        ItemWidget(PopupItem item) {
             this.item = item;
-            itemLabel = Document.get().createDivElement();
+
+            addStyleName(resources.css().popupItem());
+
+            final Element itemLabel = Document.get().createDivElement();
             itemLabel.setInnerText(item.getName());
             itemLabel.getStyle().setFloat(Style.Float.LEFT);
+
             getElement().appendChild(itemLabel);
-            addStyleName(resources.css().popupItem());
+
             if (dataProvider.isGroup(item)) {
                 DivElement arrow = Document.get().createDivElement();
                 arrow.setInnerHTML(FontAwesome.PLAY);
@@ -99,34 +92,33 @@ class PopupItemList extends PopupPanel {
                 getElement().appendChild(arrow);
             }
 
-            this.addDomHandler(new MouseOverHandler() {
-                @Override
-                public void onMouseOver(MouseOverEvent event) {
-                    if (overItem != null) {
-                        overItem.removeStyleName(resources.css().popupItemOver());
-                    }
-                    overItem = ItemWidget.this;
-                    addStyleName(resources.css().popupItemOver());
-                    if (childList != null) {
-                        childList.hide();
-                    }
+            attachEventHandlers();
+        }
 
-                    if (dataProvider.isGroup(item)) {
-                        Pair<List<PopupItem>, String> children = dataProvider.getChildren(item);
-                        createChildPopup(children);
-                    }
+        private void attachEventHandlers() {
+            addDomHandler(event -> {
+                if (overItem != null) {
+                    overItem.removeStyleName(resources.css().popupItemOver());
+                }
+                overItem = ItemWidget.this;
+                addStyleName(resources.css().popupItemOver());
+                if (childList != null) {
+                    childList.hide();
+                }
+
+                if (dataProvider.isGroup(item)) {
+                    Pair<List<PopupItem>, String> children = dataProvider.getChildren(item);
+                    createChildPopup(children);
                 }
             }, MouseOverEvent.getType());
 
-            this.addDomHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    if (dataProvider.isGroup(item)) {
-                        return;
-                    }
-                    hide(true);
-                    actionHandler.onItemSelected(item);
+            addDomHandler(event -> {
+                if (dataProvider.isGroup(item)) {
+                    return;
                 }
+
+                hide(true);
+                actionHandler.onItemSelected(item);
             }, ClickEvent.getType());
         }
 
@@ -136,15 +128,11 @@ class PopupItemList extends PopupPanel {
             childList.show();
             childList.setAutoHideEnabled(false);
             childList.setAnimationEnabled(false);
-            childList.addCloseHandler(new CloseHandler<PopupPanel>() {
-                @Override
-                public void onClose(CloseEvent<PopupPanel> event) {
-                    if (event.isAutoClosed()) {
-                        hide();
-                    }
+            childList.addCloseHandler(event -> {
+                if (event.isAutoClosed()) {
+                    hide();
                 }
             });
         }
     }
-
 }

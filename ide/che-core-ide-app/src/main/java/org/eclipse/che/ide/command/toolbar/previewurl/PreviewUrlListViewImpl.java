@@ -15,19 +15,19 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.ui.dropdown.BaseListItem;
-import org.eclipse.che.ide.ui.dropdown.DropDownList;
+import org.eclipse.che.ide.ui.dropdown.DropdownList;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-/** Implementation of {@link PreviewUrlListView} that displays preview URLs in a drop down list. */
+/** Implementation of {@link PreviewUrlListView} that displays preview URLs in a dropdown list. */
 @Singleton
 public class PreviewUrlListViewImpl implements PreviewUrlListView {
 
     /** Mapping of URL to list item. */
     private final Map<String, BaseListItem<String>> listItems;
-    private final DropDownList                      dropDownList;
+    private final DropdownList                      dropdownList;
 
     private ActionDelegate delegate;
 
@@ -35,9 +35,9 @@ public class PreviewUrlListViewImpl implements PreviewUrlListView {
     public PreviewUrlListViewImpl() {
         listItems = new HashMap<>();
 
-        dropDownList = new DropDownList(PreviewUrlItemRenderer.HEADER_WIDGET);
-        dropDownList.setWidth("90px");
-        dropDownList.setSelectionHandler(item -> {
+        dropdownList = new DropdownList(PreviewUrlItemRenderer.HEADER_WIDGET);
+        dropdownList.setWidth("90px");
+        dropdownList.setSelectionHandler(item -> {
             for (Entry<String, BaseListItem<String>> entry : listItems.entrySet()) {
                 if (item.equals(entry.getValue())) {
                     delegate.onUrlChosen(entry.getKey());
@@ -54,7 +54,7 @@ public class PreviewUrlListViewImpl implements PreviewUrlListView {
 
     @Override
     public Widget asWidget() {
-        return dropDownList;
+        return dropdownList;
     }
 
     @Override
@@ -67,7 +67,7 @@ public class PreviewUrlListViewImpl implements PreviewUrlListView {
         final PreviewUrlItemRenderer renderer = new PreviewUrlItemRenderer(listItem);
 
         listItems.put(url, listItem);
-        dropDownList.addItem(listItem, renderer);
+        dropdownList.addItem(listItem, renderer);
     }
 
     @Override
@@ -75,13 +75,13 @@ public class PreviewUrlListViewImpl implements PreviewUrlListView {
         final BaseListItem<String> listItem = listItems.remove(url);
 
         if (listItem != null) {
-            dropDownList.removeItem(listItem);
+            dropdownList.removeItem(listItem);
         }
     }
 
     @Override
     public void clearList() {
         listItems.clear();
-        dropDownList.clear();
+        dropdownList.clear();
     }
 }

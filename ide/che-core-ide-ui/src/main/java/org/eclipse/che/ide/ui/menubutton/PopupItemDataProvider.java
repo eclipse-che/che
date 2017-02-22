@@ -13,7 +13,6 @@ package org.eclipse.che.ide.ui.menubutton;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.util.Pair;
 
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -34,7 +33,6 @@ public interface PopupItemDataProvider {
      *
      * @return
      */
-    @NotNull
     List<PopupItem> getItems();
 
     /**

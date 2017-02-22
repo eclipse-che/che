@@ -10,19 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ui.dropdown;
 
-import com.google.gwt.user.client.ui.Widget;
-
 /**
- * Renderer of the items for {@link DropDownList}.
- * <p><b>Important:</b> {@link #renderHeaderWidget()} and {@link #renderListWidget()} mustn't return the same instance.
+ * Marker interface for the list item.
  *
- * @see StringItemRenderer
+ * @see BaseListItem
  */
-public interface DropDownListItemRenderer {
-
-    /** Returns widget for representing the {@link DropDownListItem} in the list's header (chosen item). */
-    Widget renderHeaderWidget();
-
-    /** Returns widget for representing the {@link DropDownListItem} in the list. */
-    Widget renderListWidget();
+public interface DropdownListItem {
 }

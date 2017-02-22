@@ -31,7 +31,6 @@ import org.eclipse.che.ide.ui.menubutton.PopupActionHandler;
 import org.eclipse.che.ide.ui.menubutton.PopupItem;
 import org.eclipse.che.ide.ui.menubutton.PopupItemDataProvider;
 import org.eclipse.che.ide.util.Pair;
-import org.eclipse.che.ide.util.loging.Log;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -44,7 +43,8 @@ public class CommandToolbarViewImpl implements CommandToolbarView {
 
     private static final CommandToolbarViewImplUiBinder UI_BINDER = GWT.create(CommandToolbarViewImplUiBinder.class);
 
-    private final AppContext appContext;
+    private final CommandResources resources;
+    private final AppContext       appContext;
 
     @UiField
     FlowPanel   rootPanel;
@@ -58,85 +58,54 @@ public class CommandToolbarViewImpl implements CommandToolbarView {
     private MenuPopupButton          runCommandsButton;
     private RunPopupItemDataProvider runPopupItemDataProvider;
 
-    private MenuPopupButton debugCommandsButton;
+    private MenuPopupButton            debugCommandsButton;
+    private DebugPopupItemDataProvider debugPopupItemDataProvider;
 
     private ActionDelegate          delegate;
-    private List<ContextualCommand> commands;
+    private List<ContextualCommand> runCommands;
+    private List<ContextualCommand> debugCommands;
     private PopupItem               lastSelectedItem;
 
     @Inject
     public CommandToolbarViewImpl(CommandResources resources, AppContext appContext) {
+        this.resources = resources;
         this.appContext = appContext;
+
+        runCommands = new ArrayList<>();
+        debugCommands = new ArrayList<>();
 
         UI_BINDER.createAndBindUi(this);
 
-        setUpRunButton(resources);
-        setUpDebugButton(resources);
+        setUpRunButton();
+        setUpDebugButton();
     }
 
-    private void setUpRunButton(CommandResources resources) {
+    private void setUpRunButton() {
         runPopupItemDataProvider = new RunPopupItemDataProvider();
 
         final SafeHtmlBuilder playIcon = new SafeHtmlBuilder();
         playIcon.appendHtmlConstant(FontAwesome.PLAY);
 
-        runCommandsButton = new MenuPopupButton(playIcon.toSafeHtml(), runPopupItemDataProvider, new PopupActionHandler() {
-            @Override
-            public void onItemSelected(PopupItem item) {
-                if (item instanceof CommandPopupItem) {
-                    Log.error(CommandToolbarView.class, "Item " + item + " should be MachinePopupItem");
-                } else if (item instanceof MachinePopupItem) {
-                    MachinePopupItem machinePopupItem = (MachinePopupItem)item;
-                    delegate.onCommandRun(machinePopupItem.getCommand(), machinePopupItem.getMachine());
-                }
+        runCommandsButton = new MenuPopupButton(playIcon.toSafeHtml(),
+                                                runPopupItemDataProvider,
+                                                new MyPopupActionHandler());
 
-                lastSelectedItem = item;
-
-            }
-        });
+        runCommandsButton.setTitle("No command defined for Run. Configure it in commands panel.");
 
         runCommandsButton.asWidget().addStyleName(resources.commandToolbarCss().toolbarButton());
 
         buttonsPanel.add(runCommandsButton);
     }
 
-    private void setUpDebugButton(CommandResources resources) {
+    private void setUpDebugButton() {
+        debugPopupItemDataProvider = new DebugPopupItemDataProvider();
+
         final SafeHtmlBuilder debugIcon = new SafeHtmlBuilder();
         debugIcon.appendHtmlConstant(FontAwesome.BUG);
 
-        debugCommandsButton = new MenuPopupButton(debugIcon.toSafeHtml(), new PopupItemDataProvider() {
-            private ItemDataChangeHandler handler;
-
-            @Override
-            public PopupItem getDefaultItem() {
-                return null;
-            }
-
-            @Override
-            public List<PopupItem> getItems() {
-                return null;
-            }
-
-            @Override
-            public boolean isGroup(PopupItem popupItem) {
-                return false;
-            }
-
-            @Override
-            public Pair<List<PopupItem>, String> getChildren(PopupItem parent) {
-                return null;
-            }
-
-            @Override
-            public void setItemDataChangedHandler(ItemDataChangeHandler handler) {
-                this.handler = handler;
-            }
-        }, new PopupActionHandler() {
-            @Override
-            public void onItemSelected(PopupItem item) {
-
-            }
-        });
+        debugCommandsButton = new MenuPopupButton(debugIcon.toSafeHtml(),
+                                                  debugPopupItemDataProvider,
+                                                  new MyPopupActionHandler());
 
         debugCommandsButton.asWidget().addStyleName(resources.commandToolbarCss().toolbarButton());
         debugCommandsButton.asWidget().addStyleName(resources.commandToolbarCss().debugButton());
@@ -156,8 +125,46 @@ public class CommandToolbarViewImpl implements CommandToolbarView {
 
     @Override
     public void setRunCommands(List<ContextualCommand> commands) {
-        this.commands = commands;
+        runCommands.clear();
+        runCommands.addAll(commands);
+
         runPopupItemDataProvider.handler.onItemDataChanged();
+
+        updateRunButtonTooltip();
+    }
+
+    private void updateRunButtonTooltip() {
+        if (runCommands.isEmpty()) {
+            runCommandsButton.setTitle("No command defined for Run. Configure it in commands panel");
+        } else {
+            if (lastSelectedItem != null) {
+                runCommandsButton.setTitle(lastSelectedItem.getName());
+            } else {
+                runCommandsButton.setTitle("Execute command of 'Run' goal");
+            }
+        }
+    }
+
+    @Override
+    public void setDebugCommands(List<ContextualCommand> commands) {
+        debugCommands.clear();
+        debugCommands.addAll(commands);
+
+        debugPopupItemDataProvider.handler.onItemDataChanged();
+
+        updateDebugButtonTooltip();
+    }
+
+    private void updateDebugButtonTooltip() {
+        if (debugCommands.isEmpty()) {
+            debugCommandsButton.setTitle("No command defined for Debug. Configure it in commands panel");
+        } else {
+            if (lastSelectedItem != null) {
+                debugCommandsButton.setTitle(lastSelectedItem.getName());
+            } else {
+                debugCommandsButton.setTitle("Execute command of 'Debug' goal");
+            }
+        }
     }
 
     @Override
@@ -174,6 +181,7 @@ public class CommandToolbarViewImpl implements CommandToolbarView {
     }
 
     private class RunPopupItemDataProvider implements PopupItemDataProvider {
+
         private ItemDataChangeHandler handler;
 
         @Override
@@ -183,18 +191,77 @@ public class CommandToolbarViewImpl implements CommandToolbarView {
             }
 
             // TODO: return MachinePopupItem
-            return new CommandPopupItem(commands.iterator().next());
+            return new CommandPopupItem(runCommands.iterator().next());
         }
 
         @Override
         public List<PopupItem> getItems() {
-            List<PopupItem> result = new ArrayList<>(commands.size());
+            List<PopupItem> result = new ArrayList<>(runCommands.size());
 
             if (lastSelectedItem != null && lastSelectedItem instanceof MachinePopupItem) {
                 result.add(new MachinePopupItem((MachinePopupItem)lastSelectedItem));
             }
 
-            for (ContextualCommand command : commands) {
+            for (ContextualCommand command : runCommands) {
+                result.add(new CommandPopupItem(command));
+            }
+
+            return result;
+        }
+
+        @Override
+        public boolean isGroup(PopupItem popupItem) {
+            if (popupItem instanceof CommandPopupItem) {
+                return !appContext.getWorkspace().getRuntime().getMachines().isEmpty();
+            }
+
+            return false;
+        }
+
+        @Override
+        public Pair<List<PopupItem>, String> getChildren(PopupItem parent) {
+            List<PopupItem> result = new ArrayList<>();
+
+            if (parent instanceof CommandPopupItem) {
+                final ContextualCommand command = ((CommandPopupItem)parent).getCommand();
+
+                for (Machine machine : appContext.getWorkspace().getRuntime().getMachines()) {
+                    result.add(new MachinePopupItem(command, machine));
+                }
+            }
+
+            return Pair.of(result, null);
+        }
+
+        @Override
+        public void setItemDataChangedHandler(ItemDataChangeHandler handler) {
+            this.handler = handler;
+        }
+    }
+
+    private class DebugPopupItemDataProvider implements PopupItemDataProvider {
+
+        private ItemDataChangeHandler handler;
+
+        @Override
+        public PopupItem getDefaultItem() {
+            if (lastSelectedItem != null) {
+                return lastSelectedItem;
+            }
+
+            // TODO: return MachinePopupItem
+            return new CommandPopupItem(debugCommands.iterator().next());
+        }
+
+        @Override
+        public List<PopupItem> getItems() {
+            List<PopupItem> result = new ArrayList<>(debugCommands.size());
+
+            if (lastSelectedItem != null && lastSelectedItem instanceof MachinePopupItem) {
+                result.add(new MachinePopupItem((MachinePopupItem)lastSelectedItem));
+            }
+
+            for (ContextualCommand command : debugCommands) {
                 result.add(new CommandPopupItem(command));
             }
 
@@ -228,6 +295,24 @@ public class CommandToolbarViewImpl implements CommandToolbarView {
         @Override
         public void setItemDataChangedHandler(ItemDataChangeHandler handler) {
             this.handler = handler;
+        }
+    }
+
+    private class MyPopupActionHandler implements PopupActionHandler {
+
+        @Override
+        public void onItemSelected(PopupItem item) {
+            if (item instanceof CommandPopupItem) {
+                final ContextualCommand command = ((CommandPopupItem)item).getCommand();
+
+                delegate.onCommandRun(command, null);
+            } else if (item instanceof MachinePopupItem) {
+                final MachinePopupItem machinePopupItem = (MachinePopupItem)item;
+
+                delegate.onCommandRun(machinePopupItem.getCommand(), machinePopupItem.getMachine());
+            }
+
+            lastSelectedItem = item;
         }
     }
 }

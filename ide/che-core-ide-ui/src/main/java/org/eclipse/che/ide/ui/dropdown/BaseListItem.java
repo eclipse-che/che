@@ -11,12 +11,12 @@
 package org.eclipse.che.ide.ui.dropdown;
 
 /**
- * Base implementation of {@link DropDownListItem} which represents some value in a {@link DropDownList}.
+ * Base implementation of {@link DropdownListItem} which represents some value in a {@link DropdownList}.
  *
  * @param <T>
  *         type of the value that this item represents
  */
-public class BaseListItem<T> implements DropDownListItem {
+public class BaseListItem<T> implements DropdownListItem {
 
     private final T value;
 
@@ -24,7 +24,7 @@ public class BaseListItem<T> implements DropDownListItem {
      * Creates a new item that represents the given {@code value}.
      *
      * @param value
-     *         value to represent in a {@link DropDownList}.
+     *         value to represent in a {@link DropdownList}.
      */
     public BaseListItem(T value) {
         this.value = value;

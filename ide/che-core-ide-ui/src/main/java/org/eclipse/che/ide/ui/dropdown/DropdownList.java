@@ -29,25 +29,25 @@ import java.util.Map;
 
 import static com.google.gwt.user.client.ui.PopupPanel.AnimationType.ROLL_DOWN;
 
-/** Drop down list widget. */
-public class DropDownList extends Composite {
+/** Dropdown list widget. */
+public class DropdownList extends Composite {
 
-    private static final DropDownListUiBinder  UI_BINDER = GWT.create(DropDownListUiBinder.class);
-    private static final DropDownListResources RESOURCES = GWT.create(DropDownListResources.class);
+    private static final DropdownListUiBinder  UI_BINDER = GWT.create(DropdownListUiBinder.class);
+    private static final DropdownListResources RESOURCES = GWT.create(DropdownListResources.class);
 
-    /** Maximum amount of items that should visible in drop down list without scrolling. */
+    /** Maximum amount of items that should visible in dropdown list without scrolling. */
     private static final int MAX_VISIBLE_ITEMS  = 7;
-    /** Amount of pixels reserved for displaying one item in the drop down list. */
+    /** Amount of pixels reserved for displaying one item in the dropdown list. */
     private static final int ITEM_WIDGET_HEIGHT = 22;
 
     private static final int DEFAULT_WIDGET_WIDTH_PX = 200;
 
-    private final PopupPanel dropDownPopupPanel;
-    private final FlowPanel  dropDownContentPanel;
+    private final PopupPanel dropdownPopupPanel;
+    private final FlowPanel  dropdownContentPanel;
     private final Widget     emptyStateWidget;
 
-    private final Map<DropDownListItem, Widget>                   itemsWidgets;
-    private final Map<DropDownListItem, DropDownListItemRenderer> itemsRenderers;
+    private final Map<DropdownListItem, Widget>                   itemsWidgets;
+    private final Map<DropdownListItem, DropdownListItemRenderer> itemsRenderers;
 
     @UiField
     SimplePanel selectedItemPanel;
@@ -55,26 +55,26 @@ public class DropDownList extends Composite {
     SimplePanel dropButtonPanel;
 
     private SelectionHandler selectionHandler;
-    private DropDownListItem selectedItem;
+    private DropdownListItem selectedItem;
 
-    /** Creates new drop down widget. */
-    public DropDownList() {
+    /** Creates new dropdown widget. */
+    public DropdownList() {
         this(new Label("---"));
     }
 
     /**
-     * Creates new drop down widget.
+     * Creates new dropdown widget.
      * Uses the given {@code emptyStateText} for displaying an empty list's state.
      */
-    public DropDownList(String emptyStateText) {
+    public DropdownList(String emptyStateText) {
         this(new Label(emptyStateText));
     }
 
     /**
-     * Creates new drop down widget.
+     * Creates new dropdown widget.
      * Uses the given {@code emptyStateWidget} for displaying an empty list's state.
      */
-    public DropDownList(Widget emptyStateWidget) {
+    public DropdownList(Widget emptyStateWidget) {
         itemsWidgets = new HashMap<>();
         itemsRenderers = new HashMap<>();
 
@@ -83,16 +83,17 @@ public class DropDownList extends Composite {
         initWidget(UI_BINDER.createAndBindUi(this));
 
         dropButtonPanel.getElement().appendChild(RESOURCES.expansionImage().getSvg().getElement());
-        dropButtonPanel.addStyleName(RESOURCES.dropDownListCss().dropButton());
+        dropButtonPanel.addStyleName(RESOURCES.dropdownListCss().dropButton());
 
-        dropDownContentPanel = new FlowPanel();
+        dropdownContentPanel = new FlowPanel();
 
-        dropDownPopupPanel = new PopupPanel(true);
-        dropDownPopupPanel.removeStyleName("gwt-PopupPanel");
-        dropDownPopupPanel.addStyleName(RESOURCES.dropDownListCss().itemsPanel());
-        dropDownPopupPanel.setAnimationEnabled(true);
-        dropDownPopupPanel.setAnimationType(ROLL_DOWN);
-        dropDownPopupPanel.add(new ScrollPanel(dropDownContentPanel));
+        dropdownPopupPanel = new PopupPanel(true);
+        dropdownPopupPanel.removeStyleName("gwt-PopupPanel");
+        dropdownPopupPanel.addStyleName(RESOURCES.dropdownListCss().itemsPanel());
+        dropdownPopupPanel.setAnimationEnabled(true);
+        dropdownPopupPanel.addAutoHidePartner(getElement());
+        dropdownPopupPanel.setAnimationType(ROLL_DOWN);
+        dropdownPopupPanel.add(new ScrollPanel(dropdownContentPanel));
 
         attachEventHandlers();
         setSelectedItem(null);
@@ -120,21 +121,29 @@ public class DropDownList extends Composite {
      * @see #setWidth(String)
      */
     public void setDropdownPanelWidth(String width) {
-        dropDownPopupPanel.setWidth(width);
+        dropdownPopupPanel.setWidth(width);
     }
 
-    /** Adapts drop down panel's height depending on the amount of child items. */
+    /** Adapts dropdown panel's height depending on the amount of child items. */
     private void adaptDropDownPanelHeight() {
         final int visibleRowsCount = Math.min(MAX_VISIBLE_ITEMS, itemsWidgets.size());
-        final int dropDownPanelHeight = ITEM_WIDGET_HEIGHT * visibleRowsCount;
+        final int dropdownPanelHeight = ITEM_WIDGET_HEIGHT * visibleRowsCount;
 
-        dropDownPopupPanel.setHeight(dropDownPanelHeight + "px");
+        dropdownPopupPanel.setHeight(dropdownPanelHeight + "px");
     }
 
     private void attachEventHandlers() {
-        selectedItemPanel.addDomHandler(event -> dropDownPopupPanel.showRelativeTo(DropDownList.this), ClickEvent.getType());
-        emptyStateWidget.addDomHandler(event -> dropDownPopupPanel.showRelativeTo(DropDownList.this), ClickEvent.getType());
-        dropButtonPanel.addDomHandler(event -> dropDownPopupPanel.showRelativeTo(DropDownList.this), ClickEvent.getType());
+        selectedItemPanel.addDomHandler(event -> toggleListVisibility(), ClickEvent.getType());
+        emptyStateWidget.addDomHandler(event -> toggleListVisibility(), ClickEvent.getType());
+        dropButtonPanel.addDomHandler(event -> toggleListVisibility(), ClickEvent.getType());
+    }
+
+    private void toggleListVisibility() {
+        if (!dropdownPopupPanel.isShowing()) {
+            dropdownPopupPanel.showRelativeTo(this);
+        } else {
+            dropdownPopupPanel.hide();
+        }
     }
 
     private void checkListEmptiness() {
@@ -150,17 +159,17 @@ public class DropDownList extends Composite {
 
     /** Returns the currently selected item or {@code null} if none. */
     @Nullable
-    public DropDownListItem getSelectedItem() {
+    public DropdownListItem getSelectedItem() {
         return selectedItem;
     }
 
     /** Set the given item as currently selected. Sets empty state widget if {@code null} were provided. */
-    private void setSelectedItem(@Nullable DropDownListItem item) {
+    private void setSelectedItem(@Nullable DropdownListItem item) {
         final Widget headerWidget;
 
         if (item != null) {
             headerWidget = itemsRenderers.get(item).renderHeaderWidget();
-            headerWidget.addDomHandler(event -> dropDownPopupPanel.showRelativeTo(DropDownList.this), ClickEvent.getType());
+            headerWidget.addDomHandler(event -> toggleListVisibility(), ClickEvent.getType());
         } else {
             headerWidget = emptyStateWidget;
         }
@@ -177,23 +186,23 @@ public class DropDownList extends Composite {
      * @param renderer
      *         renderer provides widgets for representing the given {@code item} in the list
      */
-    public void addItem(DropDownListItem item, DropDownListItemRenderer renderer) {
+    public void addItem(DropdownListItem item, DropdownListItemRenderer renderer) {
         final Widget itemWidget = new SimplePanel(renderer.renderListWidget());
 
         itemsWidgets.put(item, itemWidget);
         itemsRenderers.put(item, renderer);
 
-        itemWidget.addStyleName(RESOURCES.dropDownListCss().listItem());
+        itemWidget.addStyleName(RESOURCES.dropdownListCss().listItem());
         itemWidget.addDomHandler(event -> {
             setSelectedItem(item);
-            dropDownPopupPanel.hide();
+            dropdownPopupPanel.hide();
 
             if (selectionHandler != null) {
                 selectionHandler.onItemSelected(item);
             }
         }, ClickEvent.getType());
 
-        dropDownContentPanel.insert(itemWidget, 0);
+        dropdownContentPanel.insert(itemWidget, 0);
         adaptDropDownPanelHeight();
         setSelectedItem(item);
     }
@@ -215,11 +224,11 @@ public class DropDownList extends Composite {
     }
 
     /** Remove item from the list. */
-    public void removeItem(DropDownListItem item) {
+    public void removeItem(DropdownListItem item) {
         final Widget widget = itemsWidgets.remove(item);
 
         if (widget != null) {
-            dropDownContentPanel.remove(widget);
+            dropdownContentPanel.remove(widget);
         }
 
         itemsRenderers.remove(item);
@@ -238,13 +247,13 @@ public class DropDownList extends Composite {
     public void clear() {
         itemsWidgets.clear();
         itemsRenderers.clear();
-        dropDownContentPanel.clear();
+        dropdownContentPanel.clear();
 
         adaptDropDownPanelHeight();
         checkListEmptiness();
     }
 
-    interface DropDownListUiBinder extends UiBinder<Widget, DropDownList> {
+    interface DropdownListUiBinder extends UiBinder<Widget, DropdownList> {
     }
 
     public interface SelectionHandler {
@@ -254,10 +263,10 @@ public class DropDownList extends Composite {
          * @param item
          *         currently selected item
          */
-        void onItemSelected(DropDownListItem item);
+        void onItemSelected(DropdownListItem item);
     }
 
     static {
-        RESOURCES.dropDownListCss().ensureInjected();
+        RESOURCES.dropdownListCss().ensureInjected();
     }
 }

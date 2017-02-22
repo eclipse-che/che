@@ -113,6 +113,7 @@ public class MenuPopupButton extends ButtonBase {
     }
 
     public interface Resources extends ClientBundle {
+
         @Source("expansionIcon.svg")
         SVGResource expansionImage();
 

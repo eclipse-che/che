@@ -13,12 +13,14 @@ package org.eclipse.che.ide.command.toolbar;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 
 import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.mvp.Presenter;
 import org.eclipse.che.ide.command.CommandUtils;
+import org.eclipse.che.ide.command.goal.DebugGoal;
 import org.eclipse.che.ide.command.goal.RunGoal;
 import org.eclipse.che.ide.command.toolbar.previewurl.PreviewUrlListPresenter;
 import org.eclipse.che.ide.command.toolbar.processes.ProcessesListPresenter;
@@ -42,6 +44,7 @@ public class CommandToolbarPresenter implements Presenter, CommandToolbarView.Ac
     private final CommandUtils              commandUtils;
     private final Provider<CommandExecutor> commandExecutor;
     private final RunGoal                   runGoal;
+    private final DebugGoal                 debugGoal;
     private final CommandToolbarView        view;
 
     @Inject
@@ -51,7 +54,8 @@ public class CommandToolbarPresenter implements Presenter, CommandToolbarView.Ac
                                    CommandManager commandManager,
                                    CommandUtils commandUtils,
                                    Provider<CommandExecutor> commandExecutor,
-                                   RunGoal runGoal) {
+                                   RunGoal runGoal,
+                                   DebugGoal debugGoal) {
         this.view = view;
         this.processesListPresenter = processesListPresenter;
         this.previewUrlListPresenter = previewUrlListPresenter;
@@ -59,11 +63,11 @@ public class CommandToolbarPresenter implements Presenter, CommandToolbarView.Ac
         this.commandUtils = commandUtils;
         this.commandExecutor = commandExecutor;
         this.runGoal = runGoal;
+        this.debugGoal = debugGoal;
 
         view.setDelegate(this);
 
         commandManager.addCommandLoadedListener(this::updateCommands);
-
         commandManager.addCommandChangedListener(new CommandManager.CommandChangedListener() {
             @Override
             public void onCommandAdded(ContextualCommand command) {
@@ -83,10 +87,12 @@ public class CommandToolbarPresenter implements Presenter, CommandToolbarView.Ac
     }
 
     private void updateCommands() {
-        final Map<CommandGoal, List<ContextualCommand>> commandsByGoal = commandUtils.groupCommandsByGoal(commandManager.getCommands());
-        final List<ContextualCommand> runCommands = commandsByGoal.get(runGoal);
+        final Map<CommandGoal, List<ContextualCommand>> commandsByGoals = commandUtils.groupCommandsByGoal(commandManager.getCommands());
+        final List<ContextualCommand> runCommands = commandsByGoals.get(runGoal);
+        final List<ContextualCommand> debugCommands = commandsByGoals.get(debugGoal);
 
         view.setRunCommands(runCommands != null ? runCommands : Collections.emptyList());
+        view.setDebugCommands(debugCommands != null ? debugCommands : Collections.emptyList());
     }
 
     @Override
@@ -98,7 +104,22 @@ public class CommandToolbarPresenter implements Presenter, CommandToolbarView.Ac
     }
 
     @Override
-    public void onCommandRun(ContextualCommand command, Machine machine) {
-        commandExecutor.get().executeCommand(command, machine);
+    public void onCommandRun(ContextualCommand command, @Nullable Machine machine) {
+        executeCommand(command, machine);
+    }
+
+    @Override
+    public void onCommandDebug(ContextualCommand command, @Nullable Machine machine) {
+        executeCommand(command, machine);
+    }
+
+    private void executeCommand(ContextualCommand command, @Nullable Machine machine) {
+        final CommandExecutor commandExecutor = this.commandExecutor.get();
+
+        if (machine == null) {
+            commandExecutor.executeCommand(command);
+        } else {
+            commandExecutor.executeCommand(command, machine);
+        }
     }
 }
