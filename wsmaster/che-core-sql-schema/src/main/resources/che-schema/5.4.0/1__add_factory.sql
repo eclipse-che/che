@@ -35,12 +35,13 @@ CREATE TABLE che_factory_action (
 
 -- Factory action properties ---------------------------------------------------
 CREATE TABLE che_factory_action_properties (
-    action_entity_id        BIGINT,
+    action_entity_id        BIGINT          NOT NULL,
     property_value          VARCHAR(255),
     property_key            VARCHAR(255)
 );
 -- constraints
 ALTER TABLE che_factory_action_properties ADD CONSTRAINT fk_che_f_action_props_action_entity_id FOREIGN KEY (action_entity_id) REFERENCES che_factory_action (entity_id);
+CREATE INDEX che_f_action_entity_id_fk ON che_factory_action_properties (action_entity_id);
 --------------------------------------------------------------------------------
 
 
@@ -157,7 +158,7 @@ CREATE TABLE che_factory_image (
     image_data   BYTEA,
     media_type   VARCHAR(255),
     name         VARCHAR(255),
-    factory_id   VARCHAR(255)
+    factory_id   VARCHAR(255)   NOT NULL
 );
 -- constraints
 ALTER TABLE che_factory_image ADD CONSTRAINT fk_che_factory_image_factory_id FOREIGN KEY (factory_id) REFERENCES che_factory (id);
