@@ -13,7 +13,9 @@ package org.eclipse.che.plugin.testing.junit.server;
 import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -45,6 +47,7 @@ import org.eclipse.che.plugin.testing.classpath.server.TestClasspathRegistry;
  * </pre>
  *
  * @author Mirage Abeysekara
+ * @author David Festal
  */
 public class JUnitTestRunner implements TestRunner {
 
@@ -148,6 +151,67 @@ public class JUnitTestRunner implements TestRunner {
         return false;
     }
 
+    private Object create4xTestListener(ClassLoader loader, Class<?> listenerClass, AbstractTestListener delegate) {
+    	return Proxy.newProxyInstance(loader, new Class<?>[] {listenerClass}, new InvocationHandler() {
+    		@Override
+			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+    			String methodName = method.getName();
+    			Object description = null;
+				Throwable throwable = null;
+				
+    			switch (methodName) {
+				case "testStarted":
+				case "testFinished":
+					description = args[0];
+					throwable = null;
+					break;
+				case "testFailure":
+				case "testAssumptionFailure":
+					description = args[0].getClass().getMethod("getDescription", new Class<?>[0]).invoke(args[0]);
+					throwable = (Throwable) args[0].getClass().getMethod("getException", new Class<?>[0]).invoke(args[0]);
+					break;
+				}
+
+    			if (description == null || throwable == null) {
+    				return null;
+    			}
+    			
+				String testKey = (String) description.getClass().getMethod("getDisplayName", new Class<?>[0]).invoke(args[0]);
+				String testName = testKey;
+    			
+    			switch (methodName) {
+				case "testStarted":
+					delegate.startTest(testKey, testName);
+					break;
+
+				case "testFinished":
+					delegate.endTest(testKey, testName);
+					break;
+				
+				case "testFailure":
+					delegate.addFailure(testKey, throwable);
+					break;
+				
+				case "testAssumptionFailure":
+					delegate.addError(testKey, (Throwable) args[1]);
+					break;
+
+				case "equals":
+					if (Proxy.isProxyClass(args[0].getClass())) {
+						return this.equals(Proxy.getInvocationHandler(args[0]));
+					} else {
+						return false;
+					}
+	
+				case "hasCode":
+					return this.hashCode();
+				}
+				
+    			return null;
+			}
+		});
+    }
+    
     private TestResult run4xTestClasses(Class<?>... classes) throws Exception {
         ClassLoader classLoader = projectClassLoader;
         Class<?> clsJUnitCore = Class.forName("org.junit.runner.JUnitCore", true, classLoader);
@@ -156,7 +220,22 @@ public class JUnitTestRunner implements TestRunner {
         Class<?> clsDescription = Class.forName("org.junit.runner.Description", true, classLoader);
         Class<?> clsThrowable = Class.forName("java.lang.Throwable", true, classLoader);
         Class<?> clsStackTraceElement = Class.forName("java.lang.StackTraceElement", true, classLoader);
-        Object result = clsJUnitCore.getMethod("runClasses", Class[].class).invoke(null, new Object[] { classes });
+        Class<?> clsTestRunner = Class.forName("org.junit.runner.notification.RunListener", true, classLoader);
+
+        Object result;
+        try(OutputTestListener outputListener = new OutputTestListener(this.getClass().getName()+".run4xTestClasses")) {
+        	Object testListener = create4xTestListener(classLoader, clsTestRunner, outputListener);
+        	try {
+            	clsJUnitCore.getMethod("addListener", clsTestRunner).invoke(testListener);
+                result = clsJUnitCore.getMethod("runClasses", Class[].class).invoke(null, new Object[] { classes });
+        	}
+            finally {
+            	if (testListener != null) {
+                	clsJUnitCore.getMethod("removeListener", clsTestRunner).invoke(testListener);
+            	}
+            }
+        }
+
         TestResult dtoResult = DtoFactory.getInstance().createDto(TestResult.class);
         boolean isSuccess = (Boolean) clsResult.getMethod("wasSuccessful").invoke(result);
         List<?> failures = (List<?>) clsResult.getMethod("getFailures").invoke(result);
@@ -230,6 +309,50 @@ public class JUnitTestRunner implements TestRunner {
         return superClass.isAssignableFrom(clazz);
     }
 
+    private Object create3xTestListener(ClassLoader loader, Class<?> listenerClass, AbstractTestListener delegate) {
+    	return Proxy.newProxyInstance(loader, new Class<?>[] {listenerClass}, new InvocationHandler() {
+    		@Override
+			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+				String testKey = args[0].getClass().toString();
+				String testName = args[0].getClass().getName();
+    			String methodName = method.getName();
+    			switch (methodName) {
+				case "startTest":
+					delegate.startTest(testKey, testName);
+					break;
+
+				case "endTest":
+					delegate.endTest(testKey, testName);
+					break;
+				
+				case "addError":
+					delegate.addError(testKey, (Throwable) args[1]);
+					break;
+				
+				case "addFailure":
+					delegate.addFailure(testKey, (Throwable) args[1]);
+					break;
+    			
+				case "equals":
+					if (Proxy.isProxyClass(args[0].getClass())) {
+						return this.equals(Proxy.getInvocationHandler(args[0]));
+					} else {
+						return false;
+					}
+
+				case "hasCode":
+					return this.hashCode();
+				}
+    			
+				return null;
+			}
+		});
+    }
+    
+    // TODO : Do the same thing on JUnit 4 tests
+    // Look into the fact that we might use the Java model to get the classpath (or better, the ClasspathService)
+    // Commit knowing that the tests are missing
+    // Test VertX
     private TestResult run3xTestClasses(Class<?>... classes) throws Exception {
         ClassLoader classLoader = projectClassLoader;
         Class<?> clsTestSuite = Class.forName("junit.framework.TestSuite", true, classLoader);
@@ -237,12 +360,28 @@ public class JUnitTestRunner implements TestRunner {
         Class<?> clsThrowable = Class.forName("java.lang.Throwable", true, classLoader);
         Class<?> clsStackTraceElement = Class.forName("java.lang.StackTraceElement", true, classLoader);
         Class<?> clsFailure = Class.forName("junit.framework.TestFailure", true, classLoader);
-        Object testSuite = clsTestSuite.newInstance();
-        Object testResult = clsTestResult.newInstance();
-        for (Class<?> testClass : classes) {
-            clsTestSuite.getMethod("addTestSuite", Class.class).invoke(testSuite, testClass);
+        Object testSuite = clsTestSuite.getConstructor().newInstance();
+        Object testResult = clsTestResult.getConstructor().newInstance();
+        Class<?> clsTestListener = Class.forName("junit.framework.TestListener", true, classLoader);
+
+        try(OutputTestListener outputListener = new OutputTestListener(this.getClass().getName()+".run3xTestClasses")) {
+            Object testListener = create3xTestListener(classLoader, clsTestListener, outputListener);
+        	clsTestResult.getMethod("addListener", clsTestListener).invoke(
+            		testResult, testListener);
+            try {
+                for (Class<?> testClass : classes) {
+                    clsTestSuite.getMethod("addTestSuite", Class.class).invoke(testSuite, testClass);
+                }
+                
+    			clsTestSuite.getMethod("run", clsTestResult).invoke(testSuite, testResult);
+            }
+            finally {
+            	if (testListener != null) {
+                	clsTestResult.getMethod("removeListener", clsTestListener).invoke(
+                    		testResult, testListener);
+            	}
+            }
         }
-        clsTestSuite.getMethod("run", clsTestResult).invoke(testSuite, testResult);
         TestResult dtoResult = DtoFactory.getInstance().createDto(TestResult.class);
         boolean isSuccess = (Boolean) clsTestResult.getMethod("wasSuccessful").invoke(testResult);
         Enumeration<?> failures = (Enumeration<?>) clsTestResult.getMethod("failures").invoke(testResult);
