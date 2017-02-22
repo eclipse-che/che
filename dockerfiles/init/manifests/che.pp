@@ -12,6 +12,7 @@ node default {
   $che_debug_suspend = getValue("CHE_DEBUG_SUSPEND","false")
   $docker_ip = getValue("CHE_DOCKER_IP","172.17.0.1")
   $docker_host = getValue("DOCKER_HOST","tcp://localhost:2375")
+  $che_user = getValue("CHE_USER","root")
 
   ###############################
   # oAuth configurations

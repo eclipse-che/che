@@ -40,5 +40,7 @@ public class OrionEditorGinModule extends AbstractGinModule {
         install(new GinFactoryModuleBuilder().build(ContentAssistWidgetFactory.class));
 
         GinMultibinder.newSetBinder(binder(), OrionPlugin.class).addBinding().to(JavaHighlightingOrionPlugin.class);
+
+        //GinMultibinder.newSetBinder(binder(), OrionPlugin.class).addBinding().to(LanguageServerHighlightingOrionPlugin.class);
     }
 }
