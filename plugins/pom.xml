@@ -58,5 +58,6 @@
         <module>plugin-testing-java</module>
         <module>plugin-terminal-ui</module>
         <module>plugin-requirejs</module>
+        <module>plugin-pullrequest-parent</module>
     </modules>
 </project>
