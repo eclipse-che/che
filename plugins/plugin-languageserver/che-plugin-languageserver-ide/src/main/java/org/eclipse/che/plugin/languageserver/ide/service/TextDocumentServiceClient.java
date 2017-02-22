@@ -10,10 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.service;
 
-import io.typefox.lsapi.CompletionItem;
+import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
+import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
+import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import java.util.List;
 
 import org.eclipse.che.api.languageserver.shared.lsapi.CompletionItemDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.CompletionListDTO;
@@ -22,6 +23,7 @@ import org.eclipse.che.api.languageserver.shared.lsapi.DidCloseTextDocumentParam
 import org.eclipse.che.api.languageserver.shared.lsapi.DidOpenTextDocumentParamsDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.DidSaveTextDocumentParamsDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.DocumentFormattingParamsDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.DocumentHighlightDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.DocumentOnTypeFormattingParamsDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.DocumentRangeFormattingParamsDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.DocumentSymbolParamsDTO;
@@ -52,11 +54,10 @@ import org.eclipse.che.ide.websocket.rest.SubscriptionHandler;
 import org.eclipse.che.plugin.languageserver.ide.editor.PublishDiagnosticsProcessor;
 import org.eclipse.che.plugin.languageserver.ide.editor.ShowMessageProcessor;
 
-import java.util.List;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
-import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
-import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
-import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
+import io.typefox.lsapi.CompletionItem;
 
 
 /**
@@ -291,6 +292,19 @@ public class TextDocumentServiceClient {
                            .header(CONTENT_TYPE, APPLICATION_JSON).data(((JsonSerializable)saveEvent).toJson()).send();
     }
 
+   
+    /**
+     * GWT client implementation of {@link io.typefox.lsapi.TextDocumentService#documentHighlight(io.typefox.lsapi.TextDocumentPositionParams position)}
+     *
+     * @param position
+     * @return a {@link Promise} of an array of {@link DocumentHighlightDTO} which will be computed by the language server.
+     */
+    public Promise<DocumentHighlightDTO> documentHighlight(TextDocumentPositionParamsDTO position) {
+        final String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/documentHighlight";
+        final Unmarshallable<DocumentHighlightDTO> unmarshaller = unmarshallerFactory.newUnmarshaller(DocumentHighlightDTO.class);
+        return asyncRequestFactory.createPostRequest(requestUrl, null).header(ACCEPT, APPLICATION_JSON)
+                           .header(CONTENT_TYPE, APPLICATION_JSON).data(((JsonSerializable)position).toJson()).send(unmarshaller);
+    }
     /**
      * Subscribes to websocket for 'textDocument/publishDiagnostics' notifications. 
      */
