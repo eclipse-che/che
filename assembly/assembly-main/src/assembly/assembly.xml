@@ -50,6 +50,15 @@
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>false</unpack>
             <outputDirectory>tomcat/webapps</outputDirectory>
+            <outputFileNameMapping>factory.war</outputFileNameMapping>
+            <includes>
+                <include>org.eclipse.che:assembly-factory-war</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <unpack>false</unpack>
+            <outputDirectory>tomcat/webapps</outputDirectory>
             <outputFileNameMapping>dashboard.war</outputFileNameMapping>
             <includes>
                 <include>org.eclipse.che.dashboard:che-dashboard-war</include>
