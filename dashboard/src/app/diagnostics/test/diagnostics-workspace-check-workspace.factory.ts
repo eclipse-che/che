@@ -12,6 +12,7 @@
 import {DiagnosticCallback} from '../diagnostic-callback';
 import {CheWorkspace} from '../../../components/api/che-workspace.factory';
 import {CheWebsocket, MessageBus} from '../../../components/api/che-websocket.factory';
+import {CheBranding} from '../../../components/branding/che-branding.factory';
 
 /**
  * Ability to tests a running workspace.
@@ -50,14 +51,21 @@ export class DiagnosticsRunningWorkspaceCheck {
   private cheWebsocket : CheWebsocket;
 
   /**
+   * Branding info.
+   */
+  private cheBranding : CheBranding;
+
+  /**
    * Default constructor
    * @ngInject for Dependency injection
    */
-  constructor ($q : ng.IQService, lodash : any, cheWebsocket : CheWebsocket, cheWorkspace: CheWorkspace, $resource : ng.resource.IResourceService, $location : ng.ILocationService) {
+  constructor ($q : ng.IQService, lodash : any, cheWebsocket : CheWebsocket, cheWorkspace: CheWorkspace,
+               $resource : ng.resource.IResourceService, $location : ng.ILocationService, cheBranding : CheBranding) {
     this.$q =$q;
     this.lodash = lodash;
     this.cheWorkspace = cheWorkspace;
     this.cheWebsocket = cheWebsocket;
+    this.cheBranding = cheBranding;
     this.$resource = $resource;
     this.$location = $location;
 
@@ -75,9 +83,13 @@ export class DiagnosticsRunningWorkspaceCheck {
     parser.href = wsAgentHRef;
     wsAgentHRef = parser.protocol + '//' + this.$location.host() + ':' + parser.port + parser.pathname;
 
-    let promise : ng.IPromise = this.callSCM(diagnosticCallback, wsAgentHRef);
+    let promise : ng.IPromise = this.callSCM(diagnosticCallback, wsAgentHRef, false);
     promise.then(() => {
-      diagnosticCallback.notifyHint('the host value in configuration file should use the hostname ' + this.$location.host() + ' instead of ' + parser.hostname);
+      let hint: string;
+      if (this.cheBranding.getName() === 'Eclipse Che') {
+        hint = 'CHE_DOCKER_IP_EXTERNAL property could be used or '
+      }
+      diagnosticCallback.notifyHint(this.cheBranding.getCLI().name + '_HOST value in `' + this.cheBranding.getCLI().configName + '`  file should use the hostname ' + this.$location.host() + ' instead of ' + parser.hostname);
     });
     return diagnosticCallback.getPromise();
   }
@@ -119,11 +131,10 @@ export class DiagnosticsRunningWorkspaceCheck {
    * @param diagnosticCallback
    * @returns {ng.IPromise}
    */
-  checkWsAgent(diagnosticCallback : DiagnosticCallback) : ng.IPromise {
+  checkWsAgent(diagnosticCallback : DiagnosticCallback, errorInsteadOfFailure : boolean) : ng.IPromise {
     let wsAgentHRef = this.getWsAgentURL(diagnosticCallback);
-
-    let promise = this.callSCM(diagnosticCallback, wsAgentHRef);
-    promise.catch(() => {
+    let promise = this.callSCM(diagnosticCallback, wsAgentHRef, errorInsteadOfFailure);
+    promise.catch((error) => {
       // try with browser host if different location
       let parser = document.createElement('a');
       parser.href = wsAgentHRef;
@@ -172,13 +183,13 @@ export class DiagnosticsRunningWorkspaceCheck {
       diagnosticCallback.subscribeChannel('pong', callback);
 
       // default fallback if no answer in 5 seconds
-      diagnosticCallback.delayError('No reply of websocket test after 5 seconds. Websocket is failing to connect to ' + wsAgentSocketWebLink.href, 5000);
+      diagnosticCallback.delayError('No reply of websocket test after 5 seconds. Websocket is failing to connect to ' + wsAgentSocketWebLink, 5000);
 
       // send the message
       diagnosticCallback.getMessageBus().ping();
 
     } catch (error : any) {
-      diagnosticCallback.error('Unable to connect with websocket to ' + wsAgentSocketWebLink.href + ': ' + error);
+      diagnosticCallback.error('Unable to connect with websocket to ' + wsAgentSocketWebLink + ': ' + error);
     }
     return diagnosticCallback.getPromise();
   }
@@ -189,10 +200,10 @@ export class DiagnosticsRunningWorkspaceCheck {
    * @param wsAgentHRef
    * @returns {Promise}
    */
-  callSCM(diagnosticCallback : DiagnosticCallback, wsAgentHRef : string) : ng.IPromise {
+  callSCM(diagnosticCallback : DiagnosticCallback, wsAgentHRef : string, errorInsteadOfFailure : boolean) : ng.IPromise {
     // connect to the workspace agent
     let resourceAPI : any = this.$resource(wsAgentHRef + '/', {}, {
-      getDetails: {method: 'OPTIONS'}
+      getDetails: {method: 'OPTIONS', timeout : 15000}
     }, {
       stripTrailingSlashes: false
     });
@@ -200,7 +211,16 @@ export class DiagnosticsRunningWorkspaceCheck {
     return resourceAPI.getDetails().$promise.then((data) => {
       diagnosticCallback.success(wsAgentHRef + '. Got SCM revision ' + angular.fromJson(data).scmRevision);
     }).catch((error) => {
-      diagnosticCallback.notifyFailure('Unable to perform call on ' + wsAgentHRef + ': Status ' + error.status + ', statusText:' + error.statusText + '/' + error.data);
+      let errorMessage : string = 'Unable to perform call on ' + wsAgentHRef + ': Status ' + error.status + ', statusText:' + error.statusText + '/' + error.data;
+      if (errorInsteadOfFailure) {
+        if (this.cheBranding.getName() === 'Eclipse Che') {
+          diagnosticCallback.error(errorMessage, 'Workspace Agent is running but browser is unable to connect to it. Please check CHE_HOST and CHE_DOCKER_IP_EXTERNAL in che.env and the firewall settings.');
+        } else {
+          diagnosticCallback.error(errorMessage, 'Workspace Agent is running but unable to connect. Please check HOST defined in the env file and the firewall settings.');
+        }
+      } else {
+        diagnosticCallback.notifyFailure(errorMessage);
+      }
       throw error;
     });
 

@@ -16,6 +16,7 @@ import {CheWebsocket} from '../../components/api/che-websocket.factory';
 import {DiagnosticsRunningWorkspaceCheck} from './test/diagnostics-workspace-check-workspace.factory';
 import {DiagnosticPart} from './diagnostic-part';
 import {DiagnosticPartState} from './diagnostic-part-state';
+import {CheBranding} from '../../components/branding/che-branding.factory';
 
 /**
  * @ngdoc controller
@@ -51,7 +52,7 @@ export class DiagnosticsController {
   private diagnosticsWorkspaceStartCheck : DiagnosticsWorkspaceStartCheck;
 
   /**
-   * Che Websocket library.
+   * Websocket library.
    */
   private cheWebsocket : CheWebsocket;
 
@@ -106,6 +107,16 @@ export class DiagnosticsController {
   private globalStatusText : string;
 
   /**
+   * Branding info.
+   */
+  private cheBranding : CheBranding;
+
+  /**
+   * Show/hide logs
+   */
+  private isLogDisplayed : boolean;
+
+  /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
@@ -113,6 +124,7 @@ export class DiagnosticsController {
               $timeout : ng.ITimeoutService,
               diagnosticsWebsocketWsMaster : DiagnosticsWebsocketWsMaster,
               cheWebsocket: CheWebsocket,
+              cheBranding : CheBranding,
               diagnosticsRunningWorkspaceCheck : DiagnosticsRunningWorkspaceCheck,
               diagnosticsWorkspaceStartCheck : DiagnosticsWorkspaceStartCheck) {
     this.$q = $q;
@@ -125,20 +137,22 @@ export class DiagnosticsController {
     this.parts = new Array<DiagnosticPart>();
     this.cheWebsocket = cheWebsocket;
     this.sharedMap = new Map<string, any>();
+    this.cheBranding = cheBranding;
+    this.isLogDisplayed = false;
     this.state = DiagnosticPartState.READY;
-    this.globalStatusText = 'Ready to start';
+    this.globalStatusText = 'Ready To Start';
 
     this.wsMasterPart = new DiagnosticPart();
     this.wsMasterPart.icon = 'fa fa-cube';
     this.wsMasterPart.title = 'Server Tests';
     this.wsMasterPart.state = DiagnosticPartState.READY;
-    this.wsMasterPart.subtitle = 'Connectivity checks on Workspace Master';
+    this.wsMasterPart.subtitle = 'Connectivity checks to the ' + this.cheBranding.getName() + ' server';
 
     this.wsAgentPart = new DiagnosticPart();
     this.wsAgentPart.icon = 'fa fa-cubes';
     this.wsAgentPart.title = 'Workspace Tests';
     this.wsAgentPart.state = DiagnosticPartState.READY;
-    this.wsAgentPart.subtitle = 'Connectivity checks on Workspace Agents';
+    this.wsAgentPart.subtitle = 'Connectivity checks to Dockerized workspaces';
   }
 
   /**
@@ -163,16 +177,45 @@ export class DiagnosticsController {
     this.checkWorkspaceMaster().then(() => {
       return this.checkWorkspaceAgent();
     }).then(() => {
-      return this.$q.all([this.checkWorkspaceCheck(), this.checkWebSocketWsAgent()]);
+      return this.waitAllCompleted([this.checkWorkspaceCheck(), this.checkWebSocketWsAgent()]);
     }).then(()=> {
-      this.globalStatusText = 'Successfully Tested';
+      this.globalStatusText = 'Completed Diagnostics';
       this.state = DiagnosticPartState.SUCCESS;
     }).catch(error => {
-      this.globalStatusText = 'Finished with error';
+      this.globalStatusText = 'Diagnostics Finished With Error';
       this.state = DiagnosticPartState.ERROR;
       }
     )
   }
+
+  /**
+   * Wait for all promises to be terminate and not stop at the first error
+   * @param promises an array of promises
+   * @returns {IPromise<T[]>}
+   */
+  waitAllCompleted(promises : Array<ng.IPromise>) : ng.IPromise {
+    var allCompletedDefered = this.$q.defer();
+    let finished : number = 0;
+    let toFinish : number = promises.length;
+    let error : boolean = false;
+    promises.forEach((promise) => {
+      promise.catch(() => {
+        error = true;
+      }).finally(() => {
+        finished++;
+        if (finished === toFinish) {
+          if (error) {
+            this.currentPart.state = DiagnosticPartState.ERROR;
+            allCompletedDefered.reject('error');
+          } else {
+            allCompletedDefered.resolve('success');
+          }
+        }
+      })
+    });
+    return allCompletedDefered.promise;
+  }
+
 
   /**
    * Build a new callback item
@@ -202,7 +245,7 @@ export class DiagnosticsController {
     this.currentPart = this.wsMasterPart;
 
     this.wsMasterPart.state = DiagnosticPartState.IN_PROGRESS;
-    let promiseWorkspaceMaster : ng.IPromise = this.diagnosticsWebsocketWsMaster.start(this.newItem('Test Websocket', this.wsMasterPart));
+    let promiseWorkspaceMaster : ng.IPromise = this.diagnosticsWebsocketWsMaster.start(this.newItem('Websockets', this.wsMasterPart));
     promiseWorkspaceMaster.then(() => {
       this.wsMasterPart.state = DiagnosticPartState.SUCCESS;
     }).catch(error => {
@@ -220,7 +263,7 @@ export class DiagnosticsController {
     this.currentPart = this.wsAgentPart;
 
     this.wsAgentPart.state = DiagnosticPartState.IN_PROGRESS;
-    let promiseWorkspaceAgent : ng.IPromise = this.diagnosticsWorkspaceStartCheck.start(this.newItem('Test Workspace creation', this.wsAgentPart));
+    let promiseWorkspaceAgent : ng.IPromise = this.diagnosticsWorkspaceStartCheck.start(this.newItem('Create Workspace', this.wsAgentPart));
     promiseWorkspaceAgent.then(() => {
       this.wsAgentPart.state = DiagnosticPartState.SUCCESS;
     }).catch(error => {
@@ -235,7 +278,7 @@ export class DiagnosticsController {
    * @returns {ng.IPromise}
    */
   public checkWorkspaceCheck() : ng.IPromise {
-    return this.diagnosticsRunningWorkspaceCheck.checkWsAgent(this.newItem('REST Call on Workspace Agent', this.wsAgentPart))
+    return this.diagnosticsRunningWorkspaceCheck.checkWsAgent(this.newItem('REST Call on Workspace Agent', this.wsAgentPart), true);
   }
 
   /**
@@ -243,7 +286,7 @@ export class DiagnosticsController {
    * @returns {ng.IPromise}
    */
   public checkWebSocketWsAgent() : ng.IPromise {
-    return this.diagnosticsRunningWorkspaceCheck.checkWebSocketWsAgent(this.newItem('Websocket on Workspace Agent', this.wsAgentPart))
+    return this.diagnosticsRunningWorkspaceCheck.checkWebSocketWsAgent(this.newItem('Websocket on Workspace Agent', this.wsAgentPart));
   }
 
   /**
@@ -292,6 +335,13 @@ export class DiagnosticsController {
    */
   public isError() : boolean {
     return DiagnosticPartState.ERROR === this.state;
+  }
+
+  /**
+   * Toggle log display.
+   */
+  public showLogs() : void {
+    this.isLogDisplayed = !this.isLogDisplayed;
   }
 
 }

@@ -12,6 +12,7 @@
 import {DiagnosticCallback} from '../diagnostic-callback';
 import {CheWorkspace} from '../../../components/api/che-workspace.factory';
 import {DiagnosticsRunningWorkspaceCheck} from './diagnostics-workspace-check-workspace.factory';
+import {CheBranding} from '../../../components/branding/che-branding.factory';
 
 /**
  * Test the start of a workspace
@@ -60,13 +61,19 @@ export class DiagnosticsWorkspaceStartCheck {
   private execAgentCallback : DiagnosticCallback;
 
   /**
+   * Branding info.
+   */
+  private cheBranding : CheBranding;
+
+  /**
    * Default constructor
    * @ngInject for Dependency injection
    */
-  constructor ($q : ng.IQService, lodash : any, cheWorkspace: CheWorkspace, diagnosticsRunningWorkspaceCheck : DiagnosticsRunningWorkspaceCheck) {
+  constructor ($q : ng.IQService, lodash : any, cheWorkspace: CheWorkspace, diagnosticsRunningWorkspaceCheck : DiagnosticsRunningWorkspaceCheck, cheBranding : CheBranding) {
     this.$q =$q;
     this.lodash = lodash;
     this.cheWorkspace = cheWorkspace;
+    this.cheBranding = cheBranding;
     this.diagnosticsRunningWorkspaceCheck = diagnosticsRunningWorkspaceCheck;
   }
 
@@ -166,10 +173,10 @@ export class DiagnosticsWorkspaceStartCheck {
    * @returns {ng.IPromise}
    */
   start(diagnosticCallback : DiagnosticCallback) : ng.IPromise {
-    this.workspaceCallback = diagnosticCallback.newCallback('Workspace state');
-    this.wsAgentCallback = diagnosticCallback.newCallback('Workspace Agent running state');
-    this.machineCallback = diagnosticCallback.newCallback('Workspace machine state');
-    this.execAgentCallback = diagnosticCallback.newCallback('Workspace Exec Agent state');
+    this.workspaceCallback = diagnosticCallback.newCallback('Workspace State');
+    this.wsAgentCallback = diagnosticCallback.newCallback('Workspace Agent State');
+    this.machineCallback = diagnosticCallback.newCallback('Workspace Runtime State');
+    this.execAgentCallback = diagnosticCallback.newCallback('Workspace Exec Agent State');
 
     let workspaceIsStarted : boolean = false;
     this.recreateDiagnosticWorkspace(diagnosticCallback).then((workspace : che.IWorkspace) => {
@@ -210,7 +217,7 @@ export class DiagnosticsWorkspaceStartCheck {
       if (statusChannel) {
         diagnosticCallback.subscribeChannel(statusChannel, (message: any) => {
           if (message.eventType === 'DESTROYED' && message.workspaceId === workspace.id) {
-            diagnosticCallback.error('Error while starting the workspace : Workspace has been destroyed', 'Workspace has not been able to start. Please check the log displayed in diagnostic tool.');
+            diagnosticCallback.error('Error while starting the workspace : Workspace has been destroyed', 'Please check the diagnostic logs.');
           }
           if (message.eventType === 'ERROR' && message.workspaceId === workspace.id) {
             diagnosticCallback.error('Error while starting the workspace : ' + JSON.stringify(message));
@@ -234,11 +241,17 @@ export class DiagnosticsWorkspaceStartCheck {
           // Server has been startup in the workspace agent and tries to reach workspace agent but is unable to do it
           // try with the browser ip
           diagnosticCallback.delayFunction(() => {
-            diagnosticCallback.notifyFailure('Network failure WS Master <--> WS Agent', 'The Workspace Agent has been started since few seconds but the state of the workspace is not yet in RUNNING state. It means that there is a failure to connect workspace master and workspace agent. Please check HOST value in .env file and firewall.');
+
+            let hint : string = 'The workspace agent has started in the workspace, but the ' + this.cheBranding.getName() + ' server cannot verify this. There is a failure for ' + this.cheBranding.getName() + ' server to connect to your workspace\'s agent. Either your firewall is blocking essential ports or you can change ';
+            if (this.cheBranding.getName() === 'Eclipse Che') {
+              hint += 'CHE_DOCKER_IP and DOCKER_HOST to values ';
+            }
+            hint += 'specific to your environment. See the `' + this.cheBranding.getCLI().configName + '` file for specifics.';
+            diagnosticCallback.notifyFailure('The workspace started, but ' + this.cheBranding.getName() + ' <--> Workspace connection not established', hint);
             this.cheWorkspace.fetchWorkspaceDetails(workspace.id).then(() => {
               diagnosticCallback.shared('workspace', this.cheWorkspace.getWorkspaceById(workspace.id));
               let newCallback : DiagnosticCallback = diagnosticCallback.newCallback('Test connection from browser to workspace agent by using Workspace Agent IP');
-              this.diagnosticsRunningWorkspaceCheck.checkWsAgent(newCallback);
+              this.diagnosticsRunningWorkspaceCheck.checkWsAgent(newCallback, false);
               let websocketCallback : DiagnosticCallback = diagnosticCallback.newCallback('Test connection from browser to workspace agent with websocket');
               this.diagnosticsRunningWorkspaceCheck.checkWebSocketWsAgent(websocketCallback);
             });
@@ -256,11 +269,11 @@ export class DiagnosticsWorkspaceStartCheck {
 
           // check if connected (always pull)
           if (content.indexOf('Client.Timeout exceeded while awaiting headers') > 0) {
-            diagnosticCallback.error('Network connection issue', 'Docker is trying to pull the image with auto pull mode. Try to disable the flag che.docker.always_pull_image (off) or enable Internet Connection from Docker node.');
+            diagnosticCallback.error('Network connection issue', 'Docker was unable to pull the right Docker image for the workspace. Either networking is not working from your Docker daemon or try disabling CHE_DOCKER_ALWAYSE__PULL__IMAGE in `che.env` to avoid pulling images over the network.');
           }
 
           if (content.indexOf('dial tcp: lookup') > 0 && content.indexOf('server misbehaving') > 0) {
-            diagnosticCallback.error('Network connection issue', 'Docker is trying to connect to registry but the connection is failing. Check DNS settings of docker daemon or network connectivity.');
+            diagnosticCallback.error('Network connection issue', 'Docker is trying to connect to a Docker registry but the connection is failing. Check Docker\'s DNS settings and network connectivity.');
           }
 
           if (content.indexOf('Exec-agent configuration') > 0) {

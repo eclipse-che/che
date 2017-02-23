@@ -81,6 +81,12 @@ export class DiagnosticCallback {
   private content: string;
 
   /**
+   * All items attached to this category.
+   */
+  private items : Array<DiagnosticItem>;
+
+
+  /**
    * Constructor.
    */
   constructor($q : ng.IQService, cheWebsocket : CheWebsocket, $timeout : ng.ITimeoutService, name: string, sharedMap : Map<string, any>, builder : any, diagnosticPart : DiagnosticPart) {
@@ -94,6 +100,7 @@ export class DiagnosticCallback {
     this.sharedMap = sharedMap;
     this.builder = builder;
     this.diagnosticPart = diagnosticPart;
+    this.items = new Array<DiagnosticItem>();
   }
 
   /**
@@ -131,6 +138,7 @@ export class DiagnosticCallback {
     diagnosticItem.state = state;
     diagnosticItem.content = this.content;
     this.diagnosticPart.addItem(diagnosticItem);
+    this.items.push(diagnosticItem);
     return diagnosticItem;
   }
 

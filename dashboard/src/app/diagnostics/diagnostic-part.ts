@@ -158,6 +158,25 @@ export class DiagnosticPart {
   }
 
   /**
+   * Convert state to friendly text.
+   * @returns {any}
+   */
+  public stateToText() : string {
+    switch (this.state) {
+      case DiagnosticPartState.READY :
+        return "READY (planned)";
+      case DiagnosticPartState.IN_PROGRESS :
+        return "IN PROGRESS";
+      case DiagnosticPartState.SUCCESS :
+        return "SUCCESS";
+      case DiagnosticPartState.FAILURE :
+        return "FAILURE";
+      case DiagnosticPartState.ERROR :
+        return "ERROR"
+    }
+  }
+
+  /**
    * Clear the values
    */
   clear() : void {

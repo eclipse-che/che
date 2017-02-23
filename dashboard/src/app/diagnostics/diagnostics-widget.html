@@ -17,9 +17,9 @@
     <div layout="row" flex class="diagnostics-toolbar">
       <div layout="row" flex layout-align="center center">
         <div layout="row" layout-align="center center" class="diagnostics-toolbar-progress">
-          <md-progress-circular ng-if="diagnosticsController.isInProgress()" md-theme="maincontent" class="md-accent md-hue-2" md-mode="indeterminate" md-diameter="150">
+          <md-progress-circular ng-if="diagnosticsController.isInProgress()" md-theme="maincontent-theme" class="md-accent md-hue-2" md-mode="indeterminate" md-diameter="150">
           </md-progress-circular>
-          <md-progress-circular ng-if="diagnosticsController.isReady()" md-theme="maincontent" class="md-hue-1" md-mode="determinate" md-diameter="75" value="100">
+          <md-progress-circular ng-if="diagnosticsController.isReady()" md-theme="maincontent-theme" class="md-hue-1" md-mode="determinate" md-diameter="75" value="100">
           </md-progress-circular>
           <md-progress-circular ng-if="diagnosticsController.isError()" md-theme="danger" class="md-accent md-hue-3" md-mode="determinate" md-diameter="75" value="100">
           </md-progress-circular>
@@ -39,11 +39,19 @@
       </div>
       <div layout="column" layout-align="center center">
 
-        <che-button-default che-button-title="Re run diagnostics"
-                            che-button-icon="fa fa-play-circle-o"
-                            ng-click="diagnosticsController.start()"
-                            ng-if="diagnosticsController.isSuccess() || diagnosticsController.isError()"></che-button-default>
-        <!--<che-button-default che-button-title="Download Logs"></che-button-default>-->
+        <div class="diagnostic-button" layout="row" layout-align="end center">
+          <che-button-default che-button-title="Re run diagnostics"
+                              che-button-icon="fa fa-play-circle-o"
+                              ng-click="diagnosticsController.start()"
+                              ng-if="diagnosticsController.isSuccess() || diagnosticsController.isError()"></che-button-default>
+          <div ng-if="diagnosticsController.isInProgress()">&nbsp;</div>
+        </div>
+        <div class="diagnostic-button" layout="row" layout-align="end center">
+          <che-button-default che-button-title="{{diagnosticsController.isLogDisplayed === false ? 'Show Logs' : 'Hide Logs'}}"
+                            che-button-icon="fa fa-file-text-o"
+                            ng-click="diagnosticsController.showLogs()"
+                            ng-if="!diagnosticsController.isReady()"></che-button-default>
+        </div>
       </div>
     </div>
 
@@ -61,9 +69,9 @@
                 <div class="diagnostic-part-percent">{{(part.getNumberOfEndedCallbacks() / part.getNumberOfCallbacks()) * 100 | number:0}}%</div>
               </div>
               <div>
-                <md-progress-linear ng-if="part.isInProgress()" md-theme="maincontent" class="diagnostic-part-progress md-accent md-hue-2" md-mode="determinate" value="{{(part.getNumberOfEndedCallbacks() / part.getNumberOfCallbacks()) * 100 | number:0}}">
+                <md-progress-linear ng-if="part.isInProgress()" md-theme="maincontent-theme" class="diagnostic-part-progress md-accent md-hue-2" md-mode="determinate" value="{{(part.getNumberOfEndedCallbacks() / part.getNumberOfCallbacks()) * 100 | number:0}}">
                 </md-progress-linear>
-                <md-progress-linear  ng-if="part.isReady()" md-theme="maincontent" class="diagnostic-part-progress md-hue-1" md-mode="determinate" value="100">
+                <md-progress-linear  ng-if="part.isReady()" md-theme="maincontent-theme" class="diagnostic-part-progress md-hue-1" md-mode="determinate" value="100">
                 </md-progress-linear>
                 <md-progress-linear ng-if="part.isError()" md-theme="danger" class="diagnostic-part-progress md-accent md-hue-3" md-mode="determinate" value="100">
                 </md-progress-linear>
@@ -139,5 +147,25 @@
         </div>
       </div>
     </div>
+
+    <div ng-if="diagnosticsController.parts && diagnosticsController.parts.length > 0 && diagnosticsController.isLogDisplayed === true">
+      <div class="diagnostic-log-title">Logs</div>
+      <div flex ng-repeat="part in diagnosticsController.parts" class="diagnostic-log-part" layout="column">
+        <div class="diagnostic-log-part-title" layout="row">{{part.title}} {{part.subtitle}} : {{part.stateToText()}}</div>
+        <div ng-repeat="callback in part.callbacks" class="diagnostic-log-callback" layout="column">
+          <div class="diagnostic-log-callback-title" layout="column">{{callback.name}}</div>
+          <div class="diagnostic-log-callback-content" layout="row">{{callback.content}}</div>
+          <div ng-repeat="item in callback.items" class="diagnostic-log-callback-item" layout="row">
+            <div layout="row">
+              <div>{{item.message}}</div>
+              <div>&nbsp;---&nbsp;{{item.stateToText()}}</div>
+            </div>
+            <div class="diagnostic-log-item-hint" layout="row">{{item.hint}}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
   </md-content>
 </div>

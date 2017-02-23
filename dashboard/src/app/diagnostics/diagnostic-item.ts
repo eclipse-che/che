@@ -89,4 +89,23 @@ export class DiagnosticItem {
     return DiagnosticCallbackState.HINT === this.state;
   }
 
+  /**
+   * Convert state to friendly text.
+   * @returns {any}
+   */
+  public stateToText() : string {
+    switch (this.state) {
+      case DiagnosticCallbackState.RUNNING :
+        return "STATE_RUNNING";
+      case DiagnosticCallbackState.HINT :
+        return "HINT";
+      case DiagnosticCallbackState.OK :
+        return "SUCCESS";
+      case DiagnosticCallbackState.FAILURE :
+        return "FAILURE";
+      case DiagnosticCallbackState.ERROR :
+        return "ERROR"
+    }
+  }
+
 }
