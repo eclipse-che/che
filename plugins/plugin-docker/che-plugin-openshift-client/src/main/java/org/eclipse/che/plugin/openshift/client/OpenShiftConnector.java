@@ -28,7 +28,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.docker.client.DockerApiVersionPathPrefixProvider;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
@@ -40,6 +39,7 @@ import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.json.ContainerListEntry;
+import org.eclipse.che.plugin.docker.client.json.Filters;
 import org.eclipse.che.plugin.docker.client.json.HostConfig;
 import org.eclipse.che.plugin.docker.client.json.ImageConfig;
 import org.eclipse.che.plugin.docker.client.json.ImageInfo;
@@ -66,6 +66,7 @@ import org.eclipse.che.plugin.docker.client.params.TagParams;
 import org.eclipse.che.plugin.docker.client.params.network.ConnectContainerToNetworkParams;
 import org.eclipse.che.plugin.docker.client.params.network.CreateNetworkParams;
 import org.eclipse.che.plugin.docker.client.params.network.DisconnectContainerFromNetworkParams;
+import org.eclipse.che.plugin.docker.client.params.network.GetNetworksParams;
 import org.eclipse.che.plugin.docker.client.params.network.InspectNetworkParams;
 import org.eclipse.che.plugin.openshift.client.exception.OpenShiftException;
 import org.eclipse.che.plugin.openshift.client.kubernetes.KubernetesContainer;
@@ -95,8 +96,6 @@ import io.fabric8.kubernetes.api.model.extensions.Deployment;
 import io.fabric8.kubernetes.api.model.extensions.DeploymentBuilder;
 import io.fabric8.kubernetes.api.model.extensions.ReplicaSet;
 import io.fabric8.kubernetes.api.model.extensions.ReplicaSetList;
-import io.fabric8.kubernetes.client.Config;
-import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.openshift.api.model.ImageStream;
 import io.fabric8.openshift.api.model.ImageStreamTag;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
@@ -138,8 +137,7 @@ public class OpenShiftConnector extends DockerConnector {
     private final int             openShiftLivenessProbeTimeout;
 
     @Inject
-    public OpenShiftConnector(ConfigBuilder configBuilder,
-                              DockerConnectorConfiguration connectorConfiguration,
+    public OpenShiftConnector(DockerConnectorConfiguration connectorConfiguration,
                               DockerConnectionFactory connectionFactory,
                               DockerRegistryAuthResolver authResolver,
                               DockerApiVersionPathPrefixProvider dockerApiVersionPathPrefixProvider,
@@ -425,6 +423,30 @@ public class OpenShiftConnector extends DockerConnector {
                             .withScope("local")
                             .withInternal(false)
                             .withEnableIPv6(false);
+    }
+
+    /**
+     * In OpenShift, there is only one network in the Docker sense, and it is similar
+     * to the default bridge network. Rather than implementing all of the filters
+     * available in the Docker API, we only implement {@code type=["custom"|"builtin"]}.
+     *
+     * <p> If type is "custom", null is returned. Otherwise, the default network is returned,
+     * and the result is effectively the same as {@link DockerConnector#inspectNetwork(String)}
+     * where the network is "bridge".
+     *
+     * @see DockerConnector#getNetworks()
+     */
+    @Override
+    public List<Network> getNetworks(GetNetworksParams params) throws IOException {
+        Filters filters = params.getFilters();
+        List<Network> networks = new ArrayList<>();
+
+        List<String> typeFilters = filters.getFilter("type");
+        if (typeFilters == null || !typeFilters.contains("custom")) {
+            Network network = inspectNetwork("openshift");
+            networks.add(network);
+        }
+        return networks;
     }
 
     /**
