@@ -22,7 +22,7 @@
     <packaging>pom</packaging>
     <name>Che Plugin :: Pull request :: Parent</name>
     <modules>
-        <module>plugin-pullrequest-shared</module>
-        <module>plugin-pullrequest-ide</module>
+        <module>che-plugin-pullrequest-shared</module>
+        <module>che-plugin-pullrequest-ide</module>
     </modules>
 </project>
