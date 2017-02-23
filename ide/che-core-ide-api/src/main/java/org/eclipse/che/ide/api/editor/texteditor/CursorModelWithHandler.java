@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.editor.texteditor;
 
-import org.eclipse.che.ide.api.editor.texteditor.CursorModel;
 import org.eclipse.che.ide.util.ListenerRegistrar.Remover;
 
 /**
