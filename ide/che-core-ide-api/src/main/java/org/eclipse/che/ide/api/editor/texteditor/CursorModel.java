@@ -22,12 +22,10 @@ public interface CursorModel {
      */
     void setCursorPosition(int offset);
 
-
     /**
      * Get cursor position
      *
      * @return the position of cursor.
      */
     Position getCursorPosition();
-
 }

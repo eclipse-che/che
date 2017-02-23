@@ -8,13 +8,13 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.editor.texteditor;
-
-import java.util.ArrayList;
-import java.util.List;
+package org.eclipse.che.ide.editor.orion.client;
 
 import org.eclipse.che.ide.api.editor.keymap.KeyBinding;
 import org.eclipse.che.ide.api.editor.texteditor.HasKeyBindings;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /** Hold {@link KeyBinding} until the editor is ready to accept them. */
 public class TemporaryKeyBindingsManager implements HasKeyBindings {
