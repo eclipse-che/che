@@ -36,13 +36,9 @@ public class OpenShiftConnectorTest {
     private static final String[] CONTAINER_ENV_VARIABLES = {"CHE_WORKSPACE_ID=abcd1234"};
     private static final String   CHE_DEFAULT_OPENSHIFT_PROJECT_NAME = "eclipse-che";
     private static final String   CHE_DEFAULT_OPENSHIFT_SERVICEACCOUNT = "cheserviceaccount";
-    private static final String   OPENSHIFT_API_ENDPOINT_MINISHIFT = "https://192.168.64.2:8443/";
-    private static final String   OPENSHIFT_DEFAULT_USER_NAME = "openshift-dev";
-    private static final String   OPENSHIFT_DEFAULT_USER_PASSWORD = "devel";
     private static final int      OPENSHIFT_LIVENESS_PROBE_DELAY = 300;
     private static final int      OPENSHIFT_LIVENESS_PROBE_TIMEOUT = 1;
-    private static final String   OPENSHIFT_DEFAULT_TOKEN = "91XMfu-FuNDkGjcIh6b0y1EtCvztGeSsSqRrWhBfyL8";
-
+    
     @Mock
     private DockerConnectorConfiguration       dockerConnectorConfiguration;
     @Mock
@@ -71,10 +67,6 @@ public class OpenShiftConnectorTest {
                 dockerConnectionFactory,
                 authManager,
                 dockerApiVersionPathPrefixProvider,
-                OPENSHIFT_API_ENDPOINT_MINISHIFT,
-                OPENSHIFT_DEFAULT_TOKEN,
-                OPENSHIFT_DEFAULT_USER_NAME,
-                OPENSHIFT_DEFAULT_USER_PASSWORD,
                 CHE_DEFAULT_OPENSHIFT_PROJECT_NAME,
                 CHE_DEFAULT_OPENSHIFT_SERVICEACCOUNT,
                 OPENSHIFT_LIVENESS_PROBE_DELAY,
@@ -84,55 +76,4 @@ public class OpenShiftConnectorTest {
         //Then
         assertEquals(workspaceID, expectedWorkspaceID);
     }
-
-    @Test
-    public void shouldUseTokenWhenProvided() {
-        // Given
-        ConfigBuilder configBuilder = spy(new ConfigBuilder());
-
-        // When
-        openShiftConnector = new OpenShiftConnector(configBuilder,
-                dockerConnectorConfiguration,
-                dockerConnectionFactory,
-                authManager,
-                dockerApiVersionPathPrefixProvider,
-                OPENSHIFT_API_ENDPOINT_MINISHIFT,
-                OPENSHIFT_DEFAULT_TOKEN,
-                OPENSHIFT_DEFAULT_USER_NAME,
-                OPENSHIFT_DEFAULT_USER_PASSWORD,
-                CHE_DEFAULT_OPENSHIFT_PROJECT_NAME,
-                CHE_DEFAULT_OPENSHIFT_SERVICEACCOUNT,
-                OPENSHIFT_LIVENESS_PROBE_DELAY,
-                OPENSHIFT_LIVENESS_PROBE_TIMEOUT);
-
-        // Then
-        verify(configBuilder,times(1)).withOauthToken(OPENSHIFT_DEFAULT_TOKEN);
-        verify(configBuilder,times(0)).withUsername(OPENSHIFT_DEFAULT_USER_NAME);
-    }
-
-    @Test
-    public void shouldUsePasswordWhenTokenIsNotProvided() {
-        // Given
-        ConfigBuilder configBuilder = spy(new ConfigBuilder());
-
-        // When
-        openShiftConnector = new OpenShiftConnector(configBuilder,
-                dockerConnectorConfiguration,
-                dockerConnectionFactory,
-                authManager,
-                dockerApiVersionPathPrefixProvider,
-                OPENSHIFT_API_ENDPOINT_MINISHIFT,
-                "",
-                OPENSHIFT_DEFAULT_USER_NAME,
-                OPENSHIFT_DEFAULT_USER_PASSWORD,
-                CHE_DEFAULT_OPENSHIFT_PROJECT_NAME,
-                CHE_DEFAULT_OPENSHIFT_SERVICEACCOUNT,
-                OPENSHIFT_LIVENESS_PROBE_DELAY,
-                OPENSHIFT_LIVENESS_PROBE_TIMEOUT);
-
-        // Then
-        verify(configBuilder,times(0)).withOauthToken(OPENSHIFT_DEFAULT_TOKEN);
-        verify(configBuilder,times(1)).withUsername(OPENSHIFT_DEFAULT_USER_NAME);
-    }
-
 }
