@@ -31,6 +31,11 @@ import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.core.rest.CheJsonProvider;
 import org.eclipse.che.api.core.rest.MessageBodyAdapter;
 import org.eclipse.che.api.core.rest.MessageBodyAdapterInterceptor;
+import org.eclipse.che.api.factory.server.FactoryAcceptValidator;
+import org.eclipse.che.api.factory.server.FactoryCreateValidator;
+import org.eclipse.che.api.factory.server.FactoryEditValidator;
+import org.eclipse.che.api.factory.server.FactoryService;
+import org.eclipse.che.api.factory.server.jpa.FactoryJpaModule;
 import org.eclipse.che.api.machine.shared.Constants;
 import org.eclipse.che.api.user.server.TokenValidator;
 import org.eclipse.che.api.workspace.server.WorkspaceConfigMessageBodyAdapter;
@@ -63,6 +68,13 @@ public class WsMasterModule extends AbstractModule {
         bind(SchemaInitializer.class).to(org.eclipse.che.core.db.schema.impl.flyway.FlywaySchemaInitializer.class);
         bind(org.eclipse.che.core.db.DBInitializer.class).asEagerSingleton();
         bind(PlaceholderReplacer.class).toProvider(org.eclipse.che.core.db.schema.impl.flyway.PlaceholderReplacerProvider.class);
+
+        //factory
+        bind(FactoryAcceptValidator.class).to(org.eclipse.che.api.factory.server.impl.FactoryAcceptValidatorImpl.class);
+        bind(FactoryCreateValidator.class).to(org.eclipse.che.api.factory.server.impl.FactoryCreateValidatorImpl.class);
+        bind(FactoryEditValidator.class).to(org.eclipse.che.api.factory.server.impl.FactoryEditValidatorImpl.class);
+        bind(FactoryService.class);
+        install(new FactoryJpaModule());
 
         install(new org.eclipse.che.plugin.docker.compose.ComposeModule());
 
