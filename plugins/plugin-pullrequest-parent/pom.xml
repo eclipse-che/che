@@ -23,5 +23,6 @@
     <name>Che Plugin :: Pull request :: Parent</name>
     <modules>
         <module>plugin-pullrequest-shared</module>
+        <module>plugin-pullrequest-ide</module>
     </modules>
 </project>
