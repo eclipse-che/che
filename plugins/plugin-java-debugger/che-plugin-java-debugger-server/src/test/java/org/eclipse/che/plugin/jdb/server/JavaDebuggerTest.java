@@ -288,7 +288,6 @@ public class JavaDebuggerTest {
         FileWatcherNotificationHandler fileWatcherNotificationHandler = new DefaultFileWatcherNotificationHandler(vfsProvider);
         FileTreeWatcher fileTreeWatcher = new FileTreeWatcher(root, new HashSet<>(), fileWatcherNotificationHandler);
         ProjectManager projectManager = new ProjectManager(vfsProvider,
-                                                           eventService,
                                                            projectTypeRegistry,
                                                            projectRegistry,
                                                            projectHandlerRegistry,

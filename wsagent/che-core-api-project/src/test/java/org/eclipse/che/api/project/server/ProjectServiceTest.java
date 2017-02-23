@@ -247,7 +247,7 @@ public class ProjectServiceTest {
         FileWatcherNotificationHandler fileWatcherNotificationHandler = new DefaultFileWatcherNotificationHandler(vfsProvider);
         FileTreeWatcher fileTreeWatcher = new FileTreeWatcher(root, new HashSet<>(), fileWatcherNotificationHandler);
 
-        pm = new ProjectManager(vfsProvider, new EventService(), ptRegistry, projectRegistry, phRegistry,
+        pm = new ProjectManager(vfsProvider, ptRegistry, projectRegistry, phRegistry,
                                 importerRegistry, fileWatcherNotificationHandler, fileTreeWatcher, workspaceHolder,
                                 fileWatcherManager);
         pm.initWatcher();

@@ -147,7 +147,7 @@ public abstract class BaseTest {
         fileTreeWatcher = new FileTreeWatcher(root, new HashSet<>(), fileWatcherNotificationHandler);
 
 
-        pm = new ProjectManager(vfsProvider, eventService, projectTypeRegistry, projectRegistry, projectHandlerRegistry,
+        pm = new ProjectManager(vfsProvider, projectTypeRegistry, projectRegistry, projectHandlerRegistry,
                                 importerRegistry, fileWatcherNotificationHandler, fileTreeWatcher,
                                 new TestWorkspaceHolder(new ArrayList<>()), mock(FileWatcherManager.class));
 

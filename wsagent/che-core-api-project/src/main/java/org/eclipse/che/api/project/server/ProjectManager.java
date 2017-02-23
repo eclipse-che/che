@@ -88,7 +88,6 @@ public class ProjectManager {
 
     @Inject
     public ProjectManager(VirtualFileSystemProvider vfsProvider,
-                          EventService eventService,
                           ProjectTypeRegistry projectTypeRegistry,
                           ProjectRegistry projectRegistry,
                           ProjectHandlerRegistry handlers,
@@ -114,7 +113,6 @@ public class ProjectManager {
                                                                           .setDaemon(true).build());
     }
 
-    @PostConstruct
     void initWatcher() throws IOException {
         FileWatcherNotificationListener defaultListener =
                 new FileWatcherNotificationListener(file -> !(file.getPath().toString().contains(".che")
@@ -432,8 +430,8 @@ public class ProjectManager {
 
         projectRegistry.fireInitHandlers(project);
 
-        // TODO move to register?
-        reindexProject(project);
+//         TODO move to register?
+//        reindexProject(project);
 
         return project;
     }
