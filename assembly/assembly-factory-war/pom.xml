@@ -20,7 +20,7 @@
     </parent>
     <artifactId>assembly-factory-war</artifactId>
     <packaging>war</packaging>
-    <name>Che IDE :: WAR    :: Factory</name>
+    <name>Che IDE ::Compiling Factory WAR</name>
     <dependencies>
         <dependency>
             <groupId>com.google.guava</groupId>
