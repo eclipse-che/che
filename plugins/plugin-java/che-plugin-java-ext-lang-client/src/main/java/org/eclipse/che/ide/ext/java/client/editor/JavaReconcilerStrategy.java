@@ -29,7 +29,6 @@ import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
 import org.eclipse.che.ide.ext.java.shared.dto.HighlightedPosition;
 import org.eclipse.che.ide.ext.java.shared.dto.Problem;
-import org.eclipse.che.ide.ext.java.shared.dto.ReconcileResult;
 import org.eclipse.che.ide.project.ResolvingProjectStateHolder;
 import org.eclipse.che.ide.project.ResolvingProjectStateHolder.ResolvingProjectState;
 import org.eclipse.che.ide.project.ResolvingProjectStateHolder.ResolvingProjectStateListener;
@@ -127,22 +126,19 @@ public class JavaReconcilerStrategy implements ReconcilingStrategy, ResolvingPro
 
             try {
                 client.reconcile(project.get().getLocation().toString(), JavaUtil.resolveFQN(getFile()),
-                                 new JavaReconcileClient.ReconcileCallback() {
-                                     @Override
-                                     public void onReconcile(ReconcileResult result) {
-                                         if (resolvingProjectStateHolder != null && resolvingProjectStateHolder.getState() == IN_PROGRESS) {
-                                             disableReconciler(localizationConstant.codeAssistErrorMessageResolvingProject());
-                                             return;
-                                         } else {
-                                             codeAssistProcessor.enableCodeAssistant();
-                                         }
-
-                                         if (result == null) {
-                                             return;
-                                         }
-                                         doReconcile(result.getProblems());
-                                         highlighter.reconcile(result.getHighlightedPositions());
+                                 result -> {
+                                     if (resolvingProjectStateHolder != null && resolvingProjectStateHolder.getState() == IN_PROGRESS) {
+                                         disableReconciler(localizationConstant.codeAssistErrorMessageResolvingProject());
+                                         return;
+                                     } else {
+                                         codeAssistProcessor.enableCodeAssistant();
                                      }
+
+                                     if (result == null) {
+                                         return;
+                                     }
+                                     doReconcile(result.getProblems());
+                                     highlighter.reconcile(result.getHighlightedPositions());
                                  });
             } catch (RuntimeException e) {
                 Log.info(getClass(), e.getMessage());

@@ -292,6 +292,9 @@ public class OrionEditorInit {
             StringBuilder machString = new StringBuilder(event.getText());
             int offset = event.getOffset();
             while (machString.length() < maxLen) {
+                if (offset < 0) { //in some cases offset become negative  
+                    return;
+                }
                 machString.insert(0, event.getDocument().getDocument().getContentRange(--offset, 1));
                 if (triggers.contains(machString.toString())) {
                     showCompletion(codeAssistant, true);
