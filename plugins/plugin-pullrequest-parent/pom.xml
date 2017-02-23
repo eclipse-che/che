@@ -24,5 +24,6 @@
     <modules>
         <module>che-plugin-pullrequest-shared</module>
         <module>che-plugin-pullrequest-ide</module>
+        <module>che-plugin-pullrequest-server</module>
     </modules>
 </project>
