@@ -12,25 +12,13 @@ package org.eclipse.che.ide.command.toolbar;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 
-import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.ide.api.command.CommandExecutor;
-import org.eclipse.che.ide.api.command.CommandGoal;
-import org.eclipse.che.ide.api.command.CommandManager;
-import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.mvp.Presenter;
-import org.eclipse.che.ide.command.CommandUtils;
-import org.eclipse.che.ide.command.goal.DebugGoal;
-import org.eclipse.che.ide.command.goal.RunGoal;
+import org.eclipse.che.ide.command.toolbar.commands.ExecuteCommandPresenter;
 import org.eclipse.che.ide.command.toolbar.previewurl.PreviewUrlListPresenter;
 import org.eclipse.che.ide.command.toolbar.processes.ProcessesListPresenter;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Presenter for run and debug buttons
@@ -38,88 +26,30 @@ import java.util.Map;
 @Singleton
 public class CommandToolbarPresenter implements Presenter, CommandToolbarView.ActionDelegate {
 
-    private final ProcessesListPresenter    processesListPresenter;
-    private final PreviewUrlListPresenter   previewUrlListPresenter;
-    private final CommandManager            commandManager;
-    private final CommandUtils              commandUtils;
-    private final Provider<CommandExecutor> commandExecutor;
-    private final RunGoal                   runGoal;
-    private final DebugGoal                 debugGoal;
-    private final CommandToolbarView        view;
+    private final ProcessesListPresenter  processesListPresenter;
+    private final PreviewUrlListPresenter previewUrlListPresenter;
+    private final ExecuteCommandPresenter executeCommandPresenter;
+    private final CommandToolbarView      view;
 
     @Inject
     public CommandToolbarPresenter(CommandToolbarView view,
                                    ProcessesListPresenter processesListPresenter,
                                    PreviewUrlListPresenter previewUrlListPresenter,
-                                   CommandManager commandManager,
-                                   CommandUtils commandUtils,
-                                   Provider<CommandExecutor> commandExecutor,
-                                   RunGoal runGoal,
-                                   DebugGoal debugGoal) {
+                                   ExecuteCommandPresenter executeCommandPresenter) {
         this.view = view;
         this.processesListPresenter = processesListPresenter;
         this.previewUrlListPresenter = previewUrlListPresenter;
-        this.commandManager = commandManager;
-        this.commandUtils = commandUtils;
-        this.commandExecutor = commandExecutor;
-        this.runGoal = runGoal;
-        this.debugGoal = debugGoal;
+        this.executeCommandPresenter = executeCommandPresenter;
 
         view.setDelegate(this);
-
-        commandManager.addCommandLoadedListener(this::updateCommands);
-        commandManager.addCommandChangedListener(new CommandManager.CommandChangedListener() {
-            @Override
-            public void onCommandAdded(ContextualCommand command) {
-                updateCommands();
-            }
-
-            @Override
-            public void onCommandUpdated(ContextualCommand previousCommand, ContextualCommand command) {
-                updateCommands();
-            }
-
-            @Override
-            public void onCommandRemoved(ContextualCommand command) {
-                updateCommands();
-            }
-        });
-    }
-
-    private void updateCommands() {
-        final Map<CommandGoal, List<ContextualCommand>> commandsByGoals = commandUtils.groupCommandsByGoal(commandManager.getCommands());
-        final List<ContextualCommand> runCommands = commandsByGoals.get(runGoal);
-        final List<ContextualCommand> debugCommands = commandsByGoals.get(debugGoal);
-
-        view.setRunCommands(runCommands != null ? runCommands : Collections.emptyList());
-        view.setDebugCommands(debugCommands != null ? debugCommands : Collections.emptyList());
     }
 
     @Override
     public void go(AcceptsOneWidget container) {
         container.setWidget(view);
 
+        executeCommandPresenter.go(view.getCommandsPanelContainer());
         processesListPresenter.go(view.getProcessesListContainer());
         previewUrlListPresenter.go(view.getPreviewUrlsListContainer());
-    }
-
-    @Override
-    public void onCommandRun(ContextualCommand command, @Nullable Machine machine) {
-        executeCommand(command, machine);
-    }
-
-    @Override
-    public void onCommandDebug(ContextualCommand command, @Nullable Machine machine) {
-        executeCommand(command, machine);
-    }
-
-    private void executeCommand(ContextualCommand command, @Nullable Machine machine) {
-        final CommandExecutor commandExecutor = this.commandExecutor.get();
-
-        if (machine == null) {
-            commandExecutor.executeCommand(command);
-        } else {
-            commandExecutor.executeCommand(command, machine);
-        }
     }
 }

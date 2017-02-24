@@ -8,16 +8,10 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-
 .toolbarButton {
     float: left;
     line-height: 20px;
     margin-left: 20px;
-}
-
-.debugButton i {
-    -webkit-transform: rotate(-270deg);
-    transform: rotate(-270deg);
 }
 
 .processesListLabel {

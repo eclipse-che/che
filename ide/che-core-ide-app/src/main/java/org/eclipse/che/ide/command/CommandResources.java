@@ -60,6 +60,7 @@ public interface CommandResources extends ClientBundle {
     ToolbarCSS commandToolbarCss();
 
     interface ExplorerCSS extends CssResource {
+
         String commandGoalNode();
 
         String commandNode();
@@ -76,8 +77,6 @@ public interface CommandResources extends ClientBundle {
     interface ToolbarCSS extends CssResource {
 
         String toolbarButton();
-
-        String debugButton();
 
         String processesListLabel();
 

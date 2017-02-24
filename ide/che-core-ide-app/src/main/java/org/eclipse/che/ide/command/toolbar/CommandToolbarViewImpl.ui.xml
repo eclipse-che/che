@@ -19,7 +19,7 @@
             margin-top: 5px;
         }
 
-        .buttonsPanel {
+        .commandsPanel {
             float: left;
             margin-left: 50px;
         }
@@ -36,7 +36,7 @@
     </ui:style>
 
     <g:FlowPanel ui:field="rootPanel" debugId="commandToolbar" styleName="{style.rootPanel}">
-        <g:FlowPanel ui:field="buttonsPanel" addStyleNames="{style.buttonsPanel}"/>
+        <g:SimplePanel ui:field="commandsPanel" addStyleNames="{style.commandsPanel}"/>
         <g:SimplePanel ui:field="processesListPanel" addStyleNames="{style.processesListPanel}"/>
         <g:SimplePanel ui:field="previewUrlListPanel" addStyleNames="{style.previewUrlListPanel}"/>
     </g:FlowPanel>

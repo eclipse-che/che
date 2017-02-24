@@ -55,6 +55,8 @@ import org.eclipse.che.ide.command.producer.CommandProducerActionFactory;
 import org.eclipse.che.ide.command.producer.CommandProducerActionManager;
 import org.eclipse.che.ide.command.toolbar.CommandToolbarView;
 import org.eclipse.che.ide.command.toolbar.CommandToolbarViewImpl;
+import org.eclipse.che.ide.command.toolbar.commands.ExecuteCommandView;
+import org.eclipse.che.ide.command.toolbar.commands.ExecuteCommandViewImpl;
 import org.eclipse.che.ide.command.toolbar.previewurl.PreviewUrlListView;
 import org.eclipse.che.ide.command.toolbar.previewurl.PreviewUrlListViewImpl;
 import org.eclipse.che.ide.command.toolbar.processes.ProcessesListView;
@@ -113,6 +115,7 @@ public class CommandApiModule extends AbstractGinModule {
 
         // toolbar
         bind(CommandToolbarView.class).to(CommandToolbarViewImpl.class).in(Singleton.class);
+        bind(ExecuteCommandView.class).to(ExecuteCommandViewImpl.class).in(Singleton.class);
         bind(ProcessesListView.class).to(ProcessesListViewImpl.class).in(Singleton.class);
         bind(PreviewUrlListView.class).to(PreviewUrlListViewImpl.class).in(Singleton.class);
     }

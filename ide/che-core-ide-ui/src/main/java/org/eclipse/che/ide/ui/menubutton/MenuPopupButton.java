@@ -31,9 +31,10 @@ public class MenuPopupButton extends ButtonBase {
 
     private static final Resources RESOURCES;
 
-    private final PopupItemDataProvider dataProvider;
-    private final PopupActionHandler    actionHandler;
-    private final Timer                 showMenuTimer;
+    protected final PopupItemDataProvider dataProvider;
+    protected final PopupActionHandler    actionHandler;
+
+    private final Timer showMenuTimer;
 
     private FlowPanel marker = new FlowPanel();
     private PopupItemList popupItemList;
