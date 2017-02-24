@@ -74,10 +74,7 @@ public class EditorGroupSynchronizationImpl implements EditorGroupSynchronizatio
 
     @Override
     public void removeEditor(EditorPartPresenter editor) {
-        if (editor.isDirty()) {
-            editor.doSave();
-        }
-
+        editor.doSave();
         HandlerRegistration handlerRegistration = synchronizedEditors.remove(editor);
         if (handlerRegistration != null) {
             handlerRegistration.removeHandler();
@@ -137,11 +134,6 @@ public class EditorGroupSynchronizationImpl implements EditorGroupSynchronizatio
 
         final VirtualFile virtualFile = groupLeaderEditor.getEditorInput().getFile();
         if (!event.getFilePath().equals(virtualFile.getLocation().toString())) {
-            return;
-        }
-
-        if (virtualFile instanceof File && ((File)virtualFile).getModificationStamp().equals(event.getModificationStamp())) {
-            //skip same content which we've got from the server
             return;
         }
 
