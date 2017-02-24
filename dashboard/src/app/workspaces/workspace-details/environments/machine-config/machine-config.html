@@ -22,6 +22,7 @@
       <i class="config-title-action-show fa"
          ng-class="{'fa-chevron-circle-down': workspaceMachineConfigController.machineIsOpened, 'fa-chevron-circle-right': !workspaceMachineConfigController.machineIsOpened}"></i>
       <div class="config-title">{{workspaceMachineConfigController.machineName}}</div>
+      <dev-machine-label ng-if="workspaceMachineConfigController.machineConfig.isDev"></dev-machine-label>
     </div>
     <div layout="row" layout-align="center center"
          class="config-title-action-edit"
@@ -30,11 +31,10 @@
       <i class="fa fa-pencil" aria-hidden="true"></i>
     </div>
     <div flex ng-click="workspaceMachineConfigController.machineIsOpened=!workspaceMachineConfigController.machineIsOpened">
-      <span class="che-list-actions">
-          <span ng-if="workspaceMachineConfigController.machineConfig.canDeleteMachine && !workspaceMachineConfigController.machineConfig.isDev"
-                ng-click="workspaceMachineConfigController.deleteMachine()">
-            <span class="fa fa-trash-o"></span>
-          </span>
+    </div>
+    <div class="che-list-actions">
+      <span class="config-title-action-delete" ng-click="workspaceMachineConfigController.deleteMachine($event)">
+        <span class="fa fa-trash-o"></span>
       </span>
     </div>
   </div>
@@ -107,8 +107,7 @@
     <!-- Delete -->
     <che-label-container class="config-delete-label"
                          che-label-name="Delete machine"
-                         che-label-description="Environment should contain at least one machine."
-                         ng-if="workspaceMachineConfigController.machineConfig.canDeleteMachine">
+                         che-label-description="Environment should contain at least one machine.">
       <che-button-danger che-button-title="Delete"
                          ng-disabled="workspaceMachineConfigController.machineConfig.isDev"
                          ng-click="workspaceMachineConfigController.deleteMachine()"></che-button-danger>

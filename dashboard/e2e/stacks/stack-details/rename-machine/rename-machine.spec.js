@@ -22,11 +22,13 @@ describe('Stack details >', () => {
       browser.setLocation('/stack/' + stackId);
 
       // get first machine config subsection
-      let machineElements = stackDetailsPageObject.getMachineElementByIndex(0);
-      expect(machineElements).toBeTruthy();
+      let machineConfigElement = stackDetailsPageObject.getMachineConfigByIndex(0);
+      expect(machineConfigElement).toBeTruthy();
+
+      let machineConfigParts = stackDetailsPageObject.splitMachineConfig(machineConfigElement);
 
       // click on pencil
-      machineElements.titleEditElement.click();
+      machineConfigParts.titleEditElement.click();
 
       // popup should be shown
       expect(stackDetailsPageObject.editMachineNamePopupElement.isDisplayed()).toBeTruthy();
@@ -46,7 +48,7 @@ describe('Stack details >', () => {
       // check if machine name is updated
       // note: title is in upper case
       let newNameRE = new RegExp(newName, 'i');
-      expect(machineElements.titleTextElement.getText()).toMatch(newNameRE);
+      expect(machineConfigParts.titleTextElement.getText()).toMatch(newNameRE);
 
       // check if stack can be saved
       expect(stackDetailsPageObject.toolbarSaveButtonElement.isEnabled()).toBeTruthy();
@@ -62,11 +64,13 @@ describe('Stack details >', () => {
       browser.setLocation('/stack/' + stackId);
 
       // get first machine config subsection
-      let machineElements = stackDetailsPageObject.getMachineElementByIndex(0);
-      expect(machineElements).toBeTruthy();
+      let machineConfigElement = stackDetailsPageObject.getMachineConfigByIndex(0);
+      expect(machineConfigElement).toBeTruthy();
+
+      let machineConfigParts = stackDetailsPageObject.splitMachineConfig(machineConfigElement);
 
       // click on pencil
-      machineElements.titleEditElement.click();
+      machineConfigParts.titleEditElement.click();
 
       // popup should be shown
       expect(stackDetailsPageObject.editMachineNamePopupElement.isDisplayed()).toBeTruthy();
@@ -91,11 +95,13 @@ describe('Stack details >', () => {
       browser.setLocation('/stack/' + stackId);
 
       // get first machine config subsection
-      let machineElements = stackDetailsPageObject.getMachineElementByIndex(0);
-      expect(machineElements).toBeTruthy();
+      let machineConfigElement = stackDetailsPageObject.getMachineConfigByIndex(0);
+      expect(machineConfigElement).toBeTruthy();
+
+      let machineConfigParts = stackDetailsPageObject.splitMachineConfig(machineConfigElement);
 
       // click on pencil
-      machineElements.titleEditElement.click();
+      machineConfigParts.titleEditElement.click();
 
       // popup should be shown
       expect(stackDetailsPageObject.editMachineNamePopupElement.isDisplayed()).toBeTruthy();
@@ -113,8 +119,8 @@ describe('Stack details >', () => {
       stackDetailsPageObject.updateMachineNameButtonElement.click();
 
       // look for machine with new name
-      let renamedMachineElements = stackDetailsPageObject.getMachineElementByName(newName);
-      expect(renamedMachineElements).toBeTruthy();
+      let renamedMachineConfigElement = stackDetailsPageObject.getMachineConfigByName(newName);
+      expect(renamedMachineConfigElement).toBeTruthy();
 
       // check if stack can be saved
       expect(stackDetailsPageObject.toolbarSaveButtonElement.isEnabled()).toBeTruthy();
@@ -130,11 +136,13 @@ describe('Stack details >', () => {
       browser.setLocation('/stack/' + stackId);
 
       // get first machine config subsection
-      let machineElements = stackDetailsPageObject.getMachineElementByIndex(0);
-      expect(machineElements).toBeTruthy();
+      let machineConfigElement = stackDetailsPageObject.getMachineConfigByIndex(0);
+      expect(machineConfigElement).toBeTruthy();
+
+      let machineConfigParts = stackDetailsPageObject.splitMachineConfig(machineConfigElement);
 
       // click on pencil
-      machineElements.titleEditElement.click();
+      machineConfigParts.titleEditElement.click();
 
       // popup should be shown
       expect(stackDetailsPageObject.editMachineNamePopupElement.isDisplayed()).toBeTruthy();
@@ -159,21 +167,25 @@ describe('Stack details >', () => {
       browser.setLocation('/stack/' + stackId);
 
       // get first machine config subsection
-      let firstMachineElements = stackDetailsPageObject.getMachineElementByIndex(0);
-      expect(firstMachineElements).toBeTruthy();
+      let firstMachineConfigElement = stackDetailsPageObject.getMachineConfigByIndex(0);
+      expect(firstMachineConfigElement).toBeTruthy();
+
+      let firstMachineConfigParts = stackDetailsPageObject.splitMachineConfig(firstMachineConfigElement);
 
       // get second machine config subsection
-      let secondMachineElements = stackDetailsPageObject.getMachineElementByIndex(1);
-      expect(secondMachineElements).toBeTruthy();
+      let secondMachineConfigElement = stackDetailsPageObject.getMachineConfigByIndex(1);
+      expect(secondMachineConfigElement).toBeTruthy();
+
+      let secondMachineConfigParts = stackDetailsPageObject.splitMachineConfig(secondMachineConfigElement);
 
       // start editing first machine name
-      firstMachineElements.titleEditElement.click();
+      firstMachineConfigParts.titleEditElement.click();
 
       // popup should be shown
       expect(stackDetailsPageObject.editMachineNamePopupElement.isDisplayed()).toBeTruthy();
 
       // get second machine name
-      secondMachineElements.titleTextElement.getText().then((secondMachineName) => {
+      secondMachineConfigParts.titleTextElement.getText().then((secondMachineName) => {
         // set same name to the first machine
         stackDetailsPageObject.editMachineNameInputElement.clear();
         stackDetailsPageObject.editMachineNameInputElement.sendKeys(secondMachineName);

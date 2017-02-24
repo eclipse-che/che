@@ -10,37 +10,34 @@ let StackDetails = function () {
 
   // runtime section
   this.runtimeSectionElement = $('workspace-environments');
-  this.runtimeMachineElements = this.runtimeSectionElement.$$('.workspace-machine-config');
+  this.runtimeMachineElements = this.runtimeSectionElement.all(by.repeater('machine in workspaceEnvironmentsController.machines'));
   this.runtimeRecipeLocationElement = this.runtimeSectionElement.$('.recipe-location');
   this.runtimeRecipeEditorElement = this.runtimeSectionElement.$('.recipe-editor');
-  this.runtimeRecipeShowButtonElement = this.runtimeSectionElement.$('[che-button-title="Show"]');
+  this.runtimeRecipeShowButtonElement = this.runtimeSectionElement.$('[che-button-title="Show"]').$('button');
 
   // machine subsection
-  let _getMachineElements = (elem) => {
-    if (!elem) {
-      return null;
-    }
+  this.getMachineConfigByName = (name) => {
+    return this.runtimeMachineElements.filter((elem, index) => {
+      return elem.element(by.cssContainingText('.config-title-row', name)).isPresent().then(isPresent => isPresent);
+    }).first();
+  };
+  this.getMachineConfigByIndex = (index) => {
+    return this.runtimeMachineElements.filter((elem, idx) => {
+      return idx === index;
+    }).first();
+  };
+  this.splitMachineConfig = (elem) => {
     return {
       titleTextElement: elem.$('.config-title'),
       titleOpenElement: elem.$('.config-title-action-show'),
       titleEditElement: elem.$('.config-title-action-edit'),
-      sourceRowElement: elem.$('.config-machine-source'),
-      sourceInputElement: utils.getVisibleInputElement(elem.$('.config-machine-source'))
+      titleDeleteElement: elem.$('.config-title-action-delete'),
+      // source
+      sourceFormElement: elem.$('.config-machine-source'),
+      sourceInputElement: utils.getVisibleInputElement(elem.$('.config-machine-source')),
+      // is dev
+      isDevSwitchElement: elem.$('.config-dev-machine-switch md-switch')
     };
-  };
-  this.getMachineElementByName = (name) => {
-    let machineConfigElement = this.runtimeMachineElements.filter((elem, index) => {
-      return elem.element(by.cssContainingText('.config-title-row', name)).isPresent().then(isPresent => isPresent)
-    }).get(0);
-    return _getMachineElements(machineConfigElement);
-  };
-  this.getMachineElementByIndex = (index) => {
-    let machineConfigElement = this.runtimeMachineElements.filter((elem, idx) => {
-      if (idx === index) {
-        return elem;
-      }
-    }).get(0);
-    return _getMachineElements(machineConfigElement);
   };
 
   // edit machine name popup
@@ -49,6 +46,13 @@ let StackDetails = function () {
   this.updateMachineNameButtonElement = $('[che-button-title="Update"]').$('button');
   this.closeMachineNameButtonElement = $('[che-button-title="Close"]').$('button');
 
+  // remove machine (not dev) popup
+  this.deleteNotDevMachinePopupElement = element(by.cssContainingText('.che-confirm-dialog-notification', 'Would you like to delete this machine?'));
+  this.deleteNotDevMachineDeleteButtonElement = this.deleteNotDevMachinePopupElement.$('[che-button-title="Delete"]').$('button');
+
+  // remove machine (dev) popup
+  this.deleteDevMachinePopupElement = $('.delete-dev-machine-dialog');
+  this.deleteDevMachineDeleteButtonElement = this.deleteDevMachinePopupElement.$('[che-button-title="Delete"]').$('button');
 };
 
 module.exports = new StackDetails();

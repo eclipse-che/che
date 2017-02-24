@@ -37,10 +37,6 @@ export abstract class EnvironmentManager {
 
   abstract setSource(machine: IEnvironmentManagerMachine, image: string): void;
 
-  canDeleteMachine(machine: IEnvironmentManagerMachine): boolean {
-    return false;
-  }
-
   canEditEnvVariables(machine: IEnvironmentManagerMachine): boolean {
     return false;
   }

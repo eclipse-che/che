@@ -117,12 +117,6 @@ describe('ComposeEnvironmentManager', () => {
       });
     }));
 
-    it('should be allowed delete machine', () => {
-      let canDeleteMachine = envManager.canDeleteMachine(testMachine);
-
-      expect(canDeleteMachine).toBe(true);
-    });
-
     it('should be allowed edit environment variables', () => {
       let canEditEnvVariables = envManager.canEditEnvVariables(testMachine);
 
@@ -200,18 +194,6 @@ describe('ComposeEnvironmentManager', () => {
 
       machines = envManager.getMachines(environment);
     }));
-
-    it('shouldn\'t be allowed edit environment variables', () => {
-      let canDeleteMachine = envManager.canDeleteMachine(machines[0]);
-
-      expect(canDeleteMachine).toBe(false);
-    });
-
-    it('shouldn\'t be allowed delete machine', () => {
-      let canEditEnvVariables = envManager.canDeleteMachine(machines[0]);
-
-      expect(canEditEnvVariables).toBe(false);
-    });
 
     it('shouldn\'t return any source', () => {
       let source = envManager.getSource(machines[0]);

@@ -54,7 +54,7 @@ export class WorkspaceEnvironmentsController {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($scope: ng.IScope, $timeout: ng.ITimeoutService, $mdDialog: ng.material.IDialogService, cheEnvironmentRegistry: CheEnvironmentRegistry) {
+  constructor(private $q: ng.IQService, $scope: ng.IScope, $timeout: ng.ITimeoutService, $mdDialog: ng.material.IDialogService, cheEnvironmentRegistry: CheEnvironmentRegistry) {
     this.$mdDialog = $mdDialog;
     this.cheEnvironmentRegistry = cheEnvironmentRegistry;
 
@@ -91,7 +91,7 @@ export class WorkspaceEnvironmentsController {
     this.recipe = this.environment.recipe;
     if (!this.recipe || !(this.recipe.content || this.recipe.location)) {
       this.machines = [];
-      delete this.devMachineName;
+      this.devMachineName = null;
       delete this.machinesViewStatus[this.environmentName];
       return;
     }
@@ -162,7 +162,7 @@ export class WorkspaceEnvironmentsController {
    */
   changeMachineDev(machineName: string): ng.IPromise<any> {
     if (!machineName) {
-      return;
+      return this.$q.reject('Machine name is not defined.');
     }
 
     // remove ws-agent from machine which is the dev machine now
@@ -175,6 +175,9 @@ export class WorkspaceEnvironmentsController {
     let machine = this.machines.find((machine: any) => {
       return machine.name === machineName;
     });
+    if (!machine) {
+      return this.$q.reject('Machine is not found.')
+    }
 
     // add ws-agent to current machine agents list
     this.environmentManager.setDev(machine, true);
@@ -185,6 +188,9 @@ export class WorkspaceEnvironmentsController {
 
     this.doUpdateEnvironments();
     this.init();
+    /*tslist: disable*/
+    return this.$q.resolve();
+    /*tslist: enable*/
   }
 
   /**

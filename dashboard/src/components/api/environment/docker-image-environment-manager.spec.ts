@@ -42,12 +42,6 @@ describe('DockerImageEnvironmentManager', () => {
     machines = envManager.getMachines(environment);
   }));
 
-  it('cannot delete machine', () => {
-    let canDeleteMachine = envManager.canDeleteMachine(machines[0]);
-
-    expect(canDeleteMachine).toBe(false);
-  });
-
   it('cannot edit environment variables', () => {
     let canEditEnvVariables = envManager.canEditEnvVariables(machines[0]);
 

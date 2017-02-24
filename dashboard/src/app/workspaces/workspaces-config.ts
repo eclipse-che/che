@@ -55,6 +55,8 @@ import {WorkspaceEnvironments} from './workspace-details/environments/environmen
 import {WorkspaceMachineConfigController} from './workspace-details/environments/machine-config/machine-config.controller';
 import {WorkspaceMachineConfig} from './workspace-details/environments/machine-config/machine-config.directive';
 import {EditMachineNameDialogController} from  './workspace-details/environments/machine-config/edit-machine-name-dialog/edit-machine-name-dialog.controller';
+import {DeleteDevMachineDialogController} from './workspace-details/environments/machine-config/delete-dev-machine-dialog/delete-dev-machine-dialog.controller';
+import {DevMachineLabel} from './workspace-details/environments/machine-config/dev-machine-label/dev-machine-label.directive';
 
 import {ListEnvVariablesController} from './workspace-details/environments/list-env-variables/list-env-variables.controller';
 import {ListEnvVariables} from './workspace-details/environments/list-env-variables/list-env-variables.directive';
@@ -143,6 +145,8 @@ export class WorkspacesConfig {
     register.controller('WorkspaceMachineConfigController', WorkspaceMachineConfigController);
     register.directive('workspaceMachineConfig', WorkspaceMachineConfig);
     register.controller('EditMachineNameDialogController', EditMachineNameDialogController);
+    register.controller('DeleteDevMachineDialogController', DeleteDevMachineDialogController);
+    register.directive('devMachineLabel', DevMachineLabel);
 
     register.controller('ListEnvVariablesController', ListEnvVariablesController);
     register.directive('listEnvVariables', ListEnvVariables);

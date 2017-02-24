@@ -10,6 +10,10 @@ let Utils = function() {
     }).get(0);
   };
 
+  this.getRadioButtonByLabel = (containerElement, label) => {
+    return containerElement.element(by.cssContainingText('md-radio-button', label));
+  };
+
   this.getRandomName = (name) => {
     return name + (('0000' + (Math.random() * Math.pow(36, 4) << 0).toString(36)).slice(-4));
   };

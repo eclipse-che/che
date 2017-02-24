@@ -44,12 +44,6 @@ describe('If recipe has content', () => {
 
   describe('DockerFileEnvironmentManager', () => {
 
-    it('cannot delete machine', () => {
-      let canDeleteMachine = envManager.canDeleteMachine(machines[0]);
-
-      expect(canDeleteMachine).toBe(false);
-    });
-
     it('can edit environment variables', () => {
       let canEditEnvVariables = envManager.canEditEnvVariables(machines[0]);
 
@@ -127,12 +121,6 @@ describe('If recipe has location', () => {
   }));
 
   describe('DockerFileEnvironmentManager', () => {
-
-    it('cannot delete machine', () => {
-      let canDeleteMachine = envManager.canDeleteMachine(machines[0]);
-
-      expect(canDeleteMachine).toBe(false);
-    });
 
     it('cannot edit environment variables', () => {
       let canEditEnvVariables = envManager.canEditEnvVariables(machines[0]);

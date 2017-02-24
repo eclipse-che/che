@@ -346,16 +346,6 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
   }
 
   /**
-   * Returns true if machine can be deleted.
-   *
-   * @param {IEnvironmentManagerMachine} machine
-   * @returns {boolean}
-   */
-  canDeleteMachine(machine: IEnvironmentManagerMachine): boolean {
-    return !!machine.recipe;
-  }
-
-  /**
    * Removes machine.
    *
    * @param {che.IWorkspaceEnvironment} environment

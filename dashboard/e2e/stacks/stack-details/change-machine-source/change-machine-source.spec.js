@@ -21,27 +21,29 @@ describe('Stack details >', () => {
       browser.setLocation('/stack/' + stackId);
 
       // get first machine config subsection
-      let machineElements = stackDetailsPageObject.getMachineElementByIndex(0);
-      expect(machineElements).toBeTruthy();
+      let machineConfigElement = stackDetailsPageObject.getMachineConfigByIndex(0);
+      expect(machineConfigElement.isDisplayed()).toBeTruthy();
+
+      let machineConfigParts = stackDetailsPageObject.splitMachineConfig(machineConfigElement);
 
       // unfold machine config subsection
-      machineElements.titleOpenElement.click();
+      machineConfigParts.titleOpenElement.click();
 
-      expect(machineElements.sourceRowElement.isDisplayed()).toBeTruthy();
+      expect(machineConfigParts.sourceFormElement.isDisplayed()).toBeTruthy();
 
       // get original machine's source
-      machineElements.sourceInputElement.getAttribute('value').then((origSource) => {
+      machineConfigParts.sourceInputElement.getAttribute('value').then((origSource) => {
 
         expect(stackDetailsPageObject.runtimeRecipeLocationElement.getText()).toEqual(origSource);
       });
 
       // set new source
       let newSource = 'codenvy/node';
-      machineElements.sourceInputElement.clear();
-      machineElements.sourceInputElement.sendKeys(newSource);
+      machineConfigParts.sourceInputElement.clear();
+      machineConfigParts.sourceInputElement.sendKeys(newSource);
 
       // check whether it is applied successfully
-      expect(machineElements.sourceInputElement.getAttribute('value')).toEqual(newSource);
+      expect(machineConfigParts.sourceInputElement.getAttribute('value')).toEqual(newSource);
       expect(stackDetailsPageObject.runtimeRecipeLocationElement.getText()).toEqual(newSource);
 
     });
@@ -56,16 +58,18 @@ describe('Stack details >', () => {
       browser.setLocation('/stack/' + stackId);
 
       // get first machine config subsection
-      let machineElements = stackDetailsPageObject.getMachineElementByIndex(0);
-      expect(machineElements).toBeTruthy();
+      let machineConfigElement = stackDetailsPageObject.getMachineConfigByIndex(0);
+      expect(machineConfigElement).toBeTruthy();
+
+      let machineConfigParts = stackDetailsPageObject.splitMachineConfig(machineConfigElement);
 
       // unfold machine config subsection
-      machineElements.titleOpenElement.click();
+      machineConfigParts.titleOpenElement.click();
 
-      expect(machineElements.sourceRowElement.isDisplayed()).toBeTruthy();
+      expect(machineConfigParts.sourceFormElement.isDisplayed()).toBeTruthy();
 
       // get original machine's source
-      machineElements.sourceInputElement.getAttribute('value').then((origSource) => {
+      machineConfigParts.sourceInputElement.getAttribute('value').then((origSource) => {
 
         // show machine's recipe
         stackDetailsPageObject.runtimeRecipeShowButtonElement.click();
@@ -75,11 +79,11 @@ describe('Stack details >', () => {
 
       // set new source
       let newSource = 'codenvy/node';
-      machineElements.sourceInputElement.clear();
-      machineElements.sourceInputElement.sendKeys(newSource);
+      machineConfigParts.sourceInputElement.clear();
+      machineConfigParts.sourceInputElement.sendKeys(newSource);
 
       // check whether it is applied successfully
-      expect(machineElements.sourceInputElement.getAttribute('value')).toEqual(newSource);
+      expect(machineConfigParts.sourceInputElement.getAttribute('value')).toEqual(newSource);
       expect(stackDetailsPageObject.runtimeRecipeEditorElement.getText()).toMatch(newSource);
 
     });
@@ -94,16 +98,18 @@ describe('Stack details >', () => {
       browser.setLocation('/stack/' + stackId);
 
       // get first machine config subsection
-      let machineElements = stackDetailsPageObject.getMachineElementByIndex(0);
-      expect(machineElements).toBeTruthy();
+      let machineConfigElement = stackDetailsPageObject.getMachineConfigByIndex(0);
+      expect(machineConfigElement).toBeTruthy();
+
+      let machineConfigParts = stackDetailsPageObject.splitMachineConfig(machineConfigElement);
 
       // unfold machine config subsection
-      machineElements.titleOpenElement.click();
+      machineConfigParts.titleOpenElement.click();
 
-      expect(machineElements.sourceRowElement.isDisplayed()).toBeTruthy();
+      expect(machineConfigParts.sourceFormElement.isDisplayed()).toBeTruthy();
 
       // get original machine's source
-      machineElements.sourceInputElement.getAttribute('value').then((origSource) => {
+      machineConfigParts.sourceInputElement.getAttribute('value').then((origSource) => {
 
         // show machine's recipe
         stackDetailsPageObject.runtimeRecipeShowButtonElement.click();
@@ -113,11 +119,11 @@ describe('Stack details >', () => {
 
       // set new source
       let newSource = 'codenvy/node';
-      machineElements.sourceInputElement.clear();
-      machineElements.sourceInputElement.sendKeys(newSource);
+      machineConfigParts.sourceInputElement.clear();
+      machineConfigParts.sourceInputElement.sendKeys(newSource);
 
       // check whether it is applied successfully
-      expect(machineElements.sourceInputElement.getAttribute('value')).toEqual(newSource);
+      expect(machineConfigParts.sourceInputElement.getAttribute('value')).toEqual(newSource);
       expect(stackDetailsPageObject.runtimeRecipeEditorElement.getText()).toMatch(newSource);
 
     });
