@@ -61,6 +61,10 @@
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-testing-classpath-server</artifactId>
         </dependency>
+		<dependency>
+		  <groupId>org.javassist</groupId>
+		  <artifactId>javassist</artifactId>
+		</dependency>
     </dependencies>
     <build>
     	<plugins>

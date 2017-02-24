@@ -8,7 +8,7 @@
  * Contributors:
  *   RedHat, Inc. - initial commit
  *******************************************************************************/
-package org.eclipse.che.plugin.testing.junit.server;
+package org.eclipse.che.plugin.testing.junit.server.listener;
 
 import java.util.HashMap;
 

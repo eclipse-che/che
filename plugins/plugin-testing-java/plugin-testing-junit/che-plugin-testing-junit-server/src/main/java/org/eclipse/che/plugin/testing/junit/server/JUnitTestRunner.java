@@ -13,12 +13,12 @@ package org.eclipse.che.plugin.testing.junit.server;
 import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
+import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +32,12 @@ import org.eclipse.che.api.testing.shared.TestResult;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.plugin.testing.classpath.server.TestClasspathProvider;
 import org.eclipse.che.plugin.testing.classpath.server.TestClasspathRegistry;
+import org.eclipse.che.plugin.testing.junit.server.listener.AbstractTestListener;
+import org.eclipse.che.plugin.testing.junit.server.listener.OutputTestListener;
+
+import javassist.util.proxy.MethodFilter;
+import javassist.util.proxy.MethodHandler;
+import javassist.util.proxy.ProxyFactory;
 
 /**
  * JUnit implementation for the test runner service.
@@ -77,32 +83,53 @@ public class JUnitTestRunner implements TestRunner {
         if (projectManager != null) {
             projectType = projectManager.getProject(projectPath).getType();
         }
+        
+        ClassLoader currentClassLoader = this.getClass().getClassLoader();
         TestClasspathProvider classpathProvider = classpathRegistry.getTestClasspathProvider(projectType);
-        projectClassLoader = classpathProvider.getClassLoader(projectAbsolutePath, updateClasspath);
-        TestResult testResult;
+        URLClassLoader providedClassLoader = (URLClassLoader) classpathProvider.getClassLoader(projectAbsolutePath, updateClasspath);
+        projectClassLoader = new URLClassLoader(providedClassLoader.getURLs(), null) {
+        	@Override
+        	protected Class<?> findClass(String name) throws ClassNotFoundException {
+        		if (name.startsWith("javassist.")) {
+        			return currentClassLoader.loadClass(name);
+        		}
+        		return super.findClass(name);
+        	}
+		};
+		
+		boolean isJUnit4Compatible = false;
+        boolean isJUnit3Compatible = false;
+        
         try {
             Class.forName(JUNIT4X_RUNNER_CLASS, true, projectClassLoader);
-            if (runClass) {
-                String fqn = testParameters.get("fqn");
-                testResult = run4x(fqn);
-            } else {
-                testResult = runAll4x(projectAbsolutePath);
-            }
-            return testResult;
+            isJUnit4Compatible = true;
         } catch (Exception ignored) {
         }
+
         try {
             Class.forName(JUNIT3X_RUNNER_CLASS, true, projectClassLoader);
-            if (runClass) {
-                String fqn = testParameters.get("fqn");
-                testResult = run3x(fqn);
-            } else {
-                testResult = runAll3x(projectAbsolutePath);
-            }
-            return testResult;
+            isJUnit3Compatible = true;
         } catch (Exception ignored) {
         }
-        return null;
+        
+        boolean useJUnitV3API = false;
+        if (!isJUnit4Compatible) {
+        	if (!isJUnit3Compatible) {
+        		throw new ClassNotFoundException("JUnit classes not found in the following project classpath: " + Arrays.asList(providedClassLoader.getURLs()));
+        	}
+        	else {
+        		useJUnitV3API = true;
+        	}
+        }
+        
+        TestResult testResult;
+        if (runClass) {
+            String fqn = testParameters.get("fqn");
+            testResult = useJUnitV3API ? run3x(fqn) : run4x(fqn);
+        } else {
+            testResult = useJUnitV3API ? runAll3x(projectAbsolutePath) : runAll4x(projectAbsolutePath);
+        }
+        return testResult;
     }
 
     /**
@@ -151,11 +178,28 @@ public class JUnitTestRunner implements TestRunner {
         return false;
     }
 
-    private Object create4xTestListener(ClassLoader loader, Class<?> listenerClass, AbstractTestListener delegate) {
-    	return Proxy.newProxyInstance(loader, new Class<?>[] {listenerClass}, new InvocationHandler() {
-    		@Override
-			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-    			String methodName = method.getName();
+    private Object create4xTestListener(ClassLoader loader, Class<?> listenerClass, AbstractTestListener delegate) throws Exception {
+        ProxyFactory f = new ProxyFactory();
+        f.setSuperclass(listenerClass);
+        f.setFilter(new MethodFilter() {
+    	    @Override
+        	public boolean isHandled(Method m) {
+    	        String methodName = m.getName();
+    	        switch (methodName) {
+	 			    case "testStarted":
+	 				case "testFinished":
+	 				case "testFailure":
+	 				case "testAssumptionFailure":
+	 					return true;
+    	        }
+    	        return false;
+    	    }
+    	});
+		Class<?> c = f.createClass();
+		MethodHandler mi = new MethodHandler() {
+    	    @Override
+			public Object invoke(Object self, Method m, Method method, Object[] args) throws Throwable {
+    			String methodName = m.getName();
     			Object description = null;
 				Throwable throwable = null;
 				
@@ -170,15 +214,12 @@ public class JUnitTestRunner implements TestRunner {
 					description = args[0].getClass().getMethod("getDescription", new Class<?>[0]).invoke(args[0]);
 					throwable = (Throwable) args[0].getClass().getMethod("getException", new Class<?>[0]).invoke(args[0]);
 					break;
+				default:
+					return null;
 				}
-
-    			if (description == null || throwable == null) {
-    				return null;
-    			}
     			
-				String testKey = (String) description.getClass().getMethod("getDisplayName", new Class<?>[0]).invoke(args[0]);
+				String testKey = (String) description.getClass().getMethod("getDisplayName", new Class<?>[0]).invoke(description);
 				String testName = testKey;
-    			
     			switch (methodName) {
 				case "testStarted":
 					delegate.startTest(testKey, testName);
@@ -193,23 +234,15 @@ public class JUnitTestRunner implements TestRunner {
 					break;
 				
 				case "testAssumptionFailure":
-					delegate.addError(testKey, (Throwable) args[1]);
+					delegate.addError(testKey, throwable);
 					break;
-
-				case "equals":
-					if (Proxy.isProxyClass(args[0].getClass())) {
-						return this.equals(Proxy.getInvocationHandler(args[0]));
-					} else {
-						return false;
-					}
-	
-				case "hasCode":
-					return this.hashCode();
-				}
-				
+    			}
     			return null;
 			}
-		});
+		};
+		Object listener = c.getConstructor().newInstance();
+		((javassist.util.proxy.Proxy)listener).setHandler(mi);    	
+		return listener;
     }
     
     private TestResult run4xTestClasses(Class<?>... classes) throws Exception {
@@ -221,18 +254,20 @@ public class JUnitTestRunner implements TestRunner {
         Class<?> clsThrowable = Class.forName("java.lang.Throwable", true, classLoader);
         Class<?> clsStackTraceElement = Class.forName("java.lang.StackTraceElement", true, classLoader);
         Class<?> clsTestRunner = Class.forName("org.junit.runner.notification.RunListener", true, classLoader);
+        Object jUnitCore = clsJUnitCore.getConstructor().newInstance();
 
         Object result;
         try(OutputTestListener outputListener = new OutputTestListener(this.getClass().getName()+".run4xTestClasses")) {
         	Object testListener = create4xTestListener(classLoader, clsTestRunner, outputListener);
+        	ClassLoader tccl = Thread.currentThread().getContextClassLoader();
         	try {
-            	clsJUnitCore.getMethod("addListener", clsTestRunner).invoke(testListener);
-                result = clsJUnitCore.getMethod("runClasses", Class[].class).invoke(null, new Object[] { classes });
+        		Thread.currentThread().setContextClassLoader(projectClassLoader);
+            	clsJUnitCore.getMethod("addListener", clsTestRunner).invoke(jUnitCore, testListener);
+                result = clsJUnitCore.getMethod("run", Class[].class).invoke(jUnitCore, new Object[] { classes });
         	}
             finally {
-            	if (testListener != null) {
-                	clsJUnitCore.getMethod("removeListener", clsTestRunner).invoke(testListener);
-            	}
+        		Thread.currentThread().setContextClassLoader(tccl);
+            	clsJUnitCore.getMethod("removeListener", clsTestRunner).invoke(jUnitCore, testListener);
             }
         }
 
@@ -309,10 +344,27 @@ public class JUnitTestRunner implements TestRunner {
         return superClass.isAssignableFrom(clazz);
     }
 
-    private Object create3xTestListener(ClassLoader loader, Class<?> listenerClass, AbstractTestListener delegate) {
-    	return Proxy.newProxyInstance(loader, new Class<?>[] {listenerClass}, new InvocationHandler() {
-    		@Override
-			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+    private Object create3xTestListener(ClassLoader loader, Class<?> listenerClass, AbstractTestListener delegate) throws Exception {
+        ProxyFactory f = new ProxyFactory();
+        f.setSuperclass(Object.class);
+        f.setInterfaces(new Class<?>[] { listenerClass });
+        f.setFilter(new MethodFilter() {
+        	@Override
+    	    public boolean isHandled(Method m) {
+    	        String methodName = m.getName();
+    	        switch (methodName) {
+	 			    case "startTest":
+	 				case "endTest":
+	 				case "addError":
+	 				case "addFailure":
+	 					return true;
+    	        }
+    	        return false;
+    	    }
+    	});
+		Class<?> c = f.createClass();
+		MethodHandler mi = new MethodHandler() {
+			public Object invoke(Object self, Method method, Method proceed, Object[] args) throws Throwable {
 				String testKey = args[0].getClass().toString();
 				String testName = args[0].getClass().getName();
     			String methodName = method.getName();
@@ -332,27 +384,15 @@ public class JUnitTestRunner implements TestRunner {
 				case "addFailure":
 					delegate.addFailure(testKey, (Throwable) args[1]);
 					break;
-    			
-				case "equals":
-					if (Proxy.isProxyClass(args[0].getClass())) {
-						return this.equals(Proxy.getInvocationHandler(args[0]));
-					} else {
-						return false;
-					}
-
-				case "hasCode":
-					return this.hashCode();
-				}
-    			
-				return null;
+    			}
+    			return null;
 			}
-		});
+		};
+		Object listener = c.getConstructor().newInstance();
+		((javassist.util.proxy.Proxy)listener).setHandler(mi);    	
+		return listener;
     }
     
-    // TODO : Do the same thing on JUnit 4 tests
-    // Look into the fact that we might use the Java model to get the classpath (or better, the ClasspathService)
-    // Commit knowing that the tests are missing
-    // Test VertX
     private TestResult run3xTestClasses(Class<?>... classes) throws Exception {
         ClassLoader classLoader = projectClassLoader;
         Class<?> clsTestSuite = Class.forName("junit.framework.TestSuite", true, classLoader);
@@ -366,20 +406,20 @@ public class JUnitTestRunner implements TestRunner {
 
         try(OutputTestListener outputListener = new OutputTestListener(this.getClass().getName()+".run3xTestClasses")) {
             Object testListener = create3xTestListener(classLoader, clsTestListener, outputListener);
-        	clsTestResult.getMethod("addListener", clsTestListener).invoke(
-            		testResult, testListener);
-            try {
+        	ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+        	try {
+        		Thread.currentThread().setContextClassLoader(projectClassLoader);
+             	clsTestResult.getMethod("addListener", clsTestListener).invoke(
+                 		testResult, testListener);        		
                 for (Class<?> testClass : classes) {
                     clsTestSuite.getMethod("addTestSuite", Class.class).invoke(testSuite, testClass);
                 }
-                
     			clsTestSuite.getMethod("run", clsTestResult).invoke(testSuite, testResult);
             }
             finally {
-            	if (testListener != null) {
-                	clsTestResult.getMethod("removeListener", clsTestListener).invoke(
-                    		testResult, testListener);
-            	}
+        		Thread.currentThread().setContextClassLoader(tccl);
+            	clsTestResult.getMethod("removeListener", clsTestListener).invoke(
+                		testResult, testListener);
             }
         }
         TestResult dtoResult = DtoFactory.getInstance().createDto(TestResult.class);

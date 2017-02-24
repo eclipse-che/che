@@ -21,10 +21,12 @@ import org.eclipse.che.dto.shared.DTO;
 public interface TestingOutput {
 
     enum LineType {
+        SESSION_START,
         DETAIL,
         SUCCESS,
         ERROR,
-        FAILURE
+        FAILURE,
+        SESSION_END,
     }
 
     /**

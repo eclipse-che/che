@@ -91,6 +91,8 @@ public class TestingHandler {
                     TestingOutput archetypeOutput = factory.createDtoFromJson(message, TestingOutput.class);
                     processesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), outputConsole);
                     switch (archetypeOutput.getState()) {
+                    	case SESSION_START:
+                    		outputConsole.clearOutputsButtonClicked();
                         case DETAIL:
                             outputConsole.printText(archetypeOutput.getOutput());
                             break;

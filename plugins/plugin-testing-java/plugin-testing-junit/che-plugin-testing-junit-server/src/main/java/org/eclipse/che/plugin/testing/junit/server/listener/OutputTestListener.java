@@ -8,7 +8,7 @@
  * Contributors:
  *   RedHat, Inc. - initial commit
  *******************************************************************************/
-package org.eclipse.che.plugin.testing.junit.server;
+package org.eclipse.che.plugin.testing.junit.server.listener;
 
 import static org.eclipse.che.api.testing.shared.Constants.TESTING_OUTPUT_CHANNEL_NAME;
 
@@ -20,7 +20,6 @@ import org.eclipse.che.api.core.util.WebsocketMessageConsumer;
 import org.eclipse.che.api.testing.server.handler.TestingOutputImpl;
 import org.eclipse.che.api.testing.shared.TestingOutput;
 import org.eclipse.che.dto.server.DtoFactory;
-import org.eclipse.che.plugin.testing.junit.server.AbstractTestListener.TestSummary;
 
 /**
  * Listener for the testing services to report their progress to the Che output view.
@@ -33,6 +32,7 @@ public class OutputTestListener extends AbstractTestListener implements AutoClos
 	
 	public OutputTestListener(String strackTraceRoot) {
 		this.stackTraceRoot = strackTraceRoot;
+		writeLine("Starting Test Session", TestingOutput.LineType.SESSION_START);
 	}
 
 	private void writeLine(String line, TestingOutput.LineType lineType) {
@@ -46,6 +46,7 @@ public class OutputTestListener extends AbstractTestListener implements AutoClos
 
 	@Override
 	public void close() throws Exception {
+		writeLine("Finished Test Session", TestingOutput.LineType.SESSION_END);
 		consumer.close();
 	}
 
