@@ -114,17 +114,7 @@ public class EditorGroupSynchronizationImplTest {
 
         editorGroupSynchronization.removeEditor(activeEditor);
 
-        verify(activeEditor, never()).doSave();
-        verify(handlerRegistration).removeHandler();
-    }
-
-    @Test
-    public void shouldRemoveEditorFromGroupAndSaveEditorIfDirty() {
-        when(activeEditor.isDirty()).thenReturn(true);
-        editorGroupSynchronization.addEditor(activeEditor);
-
-        editorGroupSynchronization.removeEditor(activeEditor);
-
+        //should save content before closing (autosave will not have time to do it)
         verify(activeEditor).doSave();
         verify(handlerRegistration).removeHandler();
     }
