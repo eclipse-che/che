@@ -31,32 +31,32 @@ import com.google.gwt.user.client.ui.SimpleCheckBox;
  */
 public class Switcher extends Composite implements HasValue<Boolean> {
 
-    private static final Resources resources = GWT.create(Resources.class);
+    private static final Resources RESOURCES = GWT.create(Resources.class);
 
     SimpleCheckBox checkbox;
 
     public Switcher() {
         FlowPanel mainPanel = new FlowPanel();
-        mainPanel.setStyleName(resources.switcherCSS().onoffswitch());
+        mainPanel.setStyleName(RESOURCES.switcherCSS().onoffswitch());
 
         final String elementId = DOM.createUniqueId();
 
         checkbox = new SimpleCheckBox();
         checkbox.getElement().setId(elementId);
         checkbox.setName("onoffswitch");
-        checkbox.setStyleName(resources.switcherCSS().onoffswitchCheckbox());
+        checkbox.setStyleName(RESOURCES.switcherCSS().onoffswitchCheckbox());
         mainPanel.add(checkbox);
 
         Element label = DOM.createLabel();
-        label.setClassName(resources.switcherCSS().onoffswitchLabel());
+        label.setClassName(RESOURCES.switcherCSS().onoffswitchLabel());
         label.setAttribute("for", elementId);
 
         Element inner = DOM.createDiv();
-        inner.setClassName(resources.switcherCSS().onoffswitchInner());
+        inner.setClassName(RESOURCES.switcherCSS().onoffswitchInner());
         label.appendChild(inner);
 
         Element sw = DOM.createDiv();
-        sw.setClassName(resources.switcherCSS().onoffswitchSwitch());
+        sw.setClassName(RESOURCES.switcherCSS().onoffswitchSwitch());
         label.appendChild(sw);
 
         mainPanel.getElement().appendChild(label);
@@ -106,7 +106,6 @@ public class Switcher extends Composite implements HasValue<Boolean> {
     }
 
     static {
-        resources.switcherCSS().ensureInjected();
+        RESOURCES.switcherCSS().ensureInjected();
     }
-
 }

@@ -10,11 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.command;
 
-import com.google.common.base.Optional;
-
 import org.eclipse.che.commons.annotation.Nullable;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Registry of predefined command goals.

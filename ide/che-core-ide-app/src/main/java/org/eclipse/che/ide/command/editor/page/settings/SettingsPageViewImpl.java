@@ -15,7 +15,6 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -40,16 +39,21 @@ import java.util.Set;
  */
 public class SettingsPageViewImpl extends Composite implements SettingsPageView {
 
-    private static final InfoPageViewImplUiBinder UI_BINDER = GWT.create(InfoPageViewImplUiBinder.class);
+    private static final SettingsPageViewImplUiBinder UI_BINDER = GWT.create(SettingsPageViewImplUiBinder.class);
+
+    // initial height of this view
+    private static final int VIEW_HEIGHT_INITIAL_PX          = 100;
+    // height of the 'Projects' table's header
+    private static final int PROJECTS_TABLE_HEADER_HEIGHT_PX = 20;
 
     @UiField
     SimpleLayoutPanel mainPanel;
 
     @UiField
-    CustomComboBox goal;
+    CustomComboBox goalComboBox;
 
     @UiField
-    CheckBox workspace;
+    CheckBox workspaceCheckBox;
 
     @UiField
     FlowPanel projectsSection;
@@ -63,26 +67,24 @@ public class SettingsPageViewImpl extends Composite implements SettingsPageView 
     public SettingsPageViewImpl() {
         initWidget(UI_BINDER.createAndBindUi(this));
 
+        setHeight(VIEW_HEIGHT_INITIAL_PX + "px");
         projectsSection.setVisible(false);
     }
 
     @Override
     public void setAvailableGoals(Set<CommandGoal> goals) {
-        goal.clear();
-
-        for (CommandGoal g : goals) {
-            goal.addItem(g.getId());
-        }
+        goalComboBox.clear();
+        goals.forEach(g -> goalComboBox.addItem(g.getId()));
     }
 
     @Override
     public void setGoal(String goalId) {
-        goal.setValue(goalId);
+        goalComboBox.setValue(goalId);
     }
 
     @Override
     public void setWorkspace(boolean value) {
-        workspace.setValue(value);
+        workspaceCheckBox.setValue(value);
     }
 
     @Override
@@ -90,32 +92,22 @@ public class SettingsPageViewImpl extends Composite implements SettingsPageView 
         projectsPanel.clear();
         projectsSection.setVisible(!projects.isEmpty());
 
-        for (final Map.Entry<Project, Boolean> entry : projects.entrySet()) {
-            final Project project = entry.getKey();
-            final ProjectSwitcher switcher = new ProjectSwitcher(project.getName());
+        projects.entrySet().forEach(entry -> addProjectSwitcherToPanel(entry.getKey(), entry.getValue()));
 
-            switcher.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-                @Override
-                public void onValueChange(ValueChangeEvent<Boolean> event) {
-                    delegate.onApplicableProjectChanged(project, event.getValue());
-                }
-            });
-
-            switcher.setValue(entry.getValue());
-
-            projectsPanel.add(switcher);
+        // set view's height depending on the amount project switchers
+        if (!projects.isEmpty()) {
+            Scheduler.get().scheduleDeferred(() -> setHeight(VIEW_HEIGHT_INITIAL_PX +
+                                                             PROJECTS_TABLE_HEADER_HEIGHT_PX +
+                                                             projectsSection.getOffsetHeight() + "px"));
         }
+    }
 
-        if (projects.size() > 0) {
-            Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-                @Override
-                public void execute() {
-                    // 100 is a initial height of the view
-                    // 20 is a height of the header of the 'Projects' table
-                    mainPanel.setHeight(100 + 20 + projectsSection.getOffsetHeight() + "px");
-                }
-            });
-        }
+    private void addProjectSwitcherToPanel(Project project, boolean applicable) {
+        final ProjectSwitcher switcher = new ProjectSwitcher(project.getName());
+        switcher.setValue(applicable);
+        switcher.addValueChangeHandler(event -> delegate.onApplicableProjectChanged(project, event.getValue()));
+
+        projectsPanel.add(switcher);
     }
 
     @Override
@@ -123,21 +115,21 @@ public class SettingsPageViewImpl extends Composite implements SettingsPageView 
         this.delegate = delegate;
     }
 
-    @UiHandler({"goal"})
+    @UiHandler({"goalComboBox"})
     void onGoalKeyUp(KeyUpEvent event) {
-        delegate.onGoalChanged(goal.getValue());
+        delegate.onGoalChanged(goalComboBox.getValue());
     }
 
-    @UiHandler({"goal"})
+    @UiHandler({"goalComboBox"})
     void onGoalChanged(ChangeEvent event) {
-        delegate.onGoalChanged(goal.getValue());
+        delegate.onGoalChanged(goalComboBox.getValue());
     }
 
-    @UiHandler({"workspace"})
+    @UiHandler({"workspaceCheckBox"})
     void onWorkspaceChanged(ValueChangeEvent<Boolean> event) {
         delegate.onWorkspaceChanged(event.getValue());
     }
 
-    interface InfoPageViewImplUiBinder extends UiBinder<Widget, SettingsPageViewImpl> {
+    interface SettingsPageViewImplUiBinder extends UiBinder<Widget, SettingsPageViewImpl> {
     }
 }

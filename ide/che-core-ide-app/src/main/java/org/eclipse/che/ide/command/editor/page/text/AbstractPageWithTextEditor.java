@@ -18,14 +18,10 @@ import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.editorconfig.TextEditorConfiguration;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
-import org.eclipse.che.ide.api.macro.Macro;
-import org.eclipse.che.ide.api.parts.PartPresenter;
-import org.eclipse.che.ide.api.parts.PropertyListener;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.command.editor.page.AbstractCommandEditorPage;
 import org.eclipse.che.ide.command.editor.page.CommandEditorPage;
 import org.eclipse.che.ide.macro.chooser.MacroChooser;
-import org.eclipse.che.ide.macro.chooser.MacroChooser.MacroChosenCallback;
 
 import static org.eclipse.che.ide.api.editor.EditorPartPresenter.PROP_DIRTY;
 import static org.eclipse.che.ide.api.editor.EditorPartPresenter.PROP_INPUT;
@@ -72,26 +68,23 @@ public abstract class AbstractPageWithTextEditor extends AbstractCommandEditorPa
         editor.initialize(editorConfiguration);
         editor.activate();
 
-        editor.addPropertyListener(new PropertyListener() {
-            @Override
-            public void propertyChanged(PartPresenter source, int propId) {
-                switch (propId) {
-                    case PROP_INPUT:
-                        editor.go(view.getEditorContainer());
+        editor.addPropertyListener((source, propId) -> {
+            switch (propId) {
+                case PROP_INPUT:
+                    editor.go(view.getEditorContainer());
 
-                        editor.getEditorWidget().setAnnotationRulerVisible(false);
-                        editor.getEditorWidget().setFoldingRulerVisible(false);
-                        editor.getEditorWidget().setZoomRulerVisible(false);
-                        editor.getEditorWidget().setOverviewRulerVisible(false);
+                    editor.getEditorWidget().setAnnotationRulerVisible(false);
+                    editor.getEditorWidget().setFoldingRulerVisible(false);
+                    editor.getEditorWidget().setZoomRulerVisible(false);
+                    editor.getEditorWidget().setOverviewRulerVisible(false);
 
-                        break;
-                    case PROP_DIRTY:
-                        updateCommandPropertyValue(editor.getDocument().getContents());
-                        notifyDirtyStateChanged();
+                    break;
+                case PROP_DIRTY:
+                    updateCommandPropertyValue(editor.getDocument().getContents());
+                    notifyDirtyStateChanged();
 
-                        break;
-                    default:
-                }
+                    break;
+                default:
             }
         });
     }
@@ -151,13 +144,9 @@ public abstract class AbstractPageWithTextEditor extends AbstractCommandEditorPa
 
     @Override
     public void onExploreMacros() {
-        macroChooser.show(new MacroChosenCallback() {
-            @Override
-            public void onMacroChosen(Macro macro) {
-                final Document document = editor.getDocument();
-
-                document.replace(document.getCursorOffset(), 0, macro.getName());
-            }
+        macroChooser.show(macro -> {
+            final Document document = editor.getDocument();
+            document.replace(document.getCursorOffset(), 0, macro.getName());
         });
     }
 }

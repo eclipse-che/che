@@ -22,7 +22,6 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.promises.client.Function;
-import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -249,18 +248,10 @@ public class CommandManagerImpl implements CommandManager,
 
     @Override
     public Promise<ContextualCommand> createCommand(ContextualCommand command) {
-        return doCreateCommand(command).then(new Operation<ContextualCommand>() {
-            @Override
-            public void apply(final ContextualCommand newCommand) throws OperationException {
-                // listeners should be notified after returning from #createCommand method
-                // so let's postpone notification
-                Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-                    @Override
-                    public void execute() {
-                        notifyCommandAdded(newCommand);
-                    }
-                });
-            }
+        return doCreateCommand(command).then(newCommand -> {
+            // listeners should be notified after returning from #createCommand method
+            // so let's postpone notification
+            Scheduler.get().scheduleDeferred(() -> notifyCommandAdded(newCommand));
         });
     }
 
@@ -281,13 +272,10 @@ public class CommandManagerImpl implements CommandManager,
 
         if (context.isWorkspaceApplicable()) {
             Promise<CommandImpl> p = workspaceCommandManagerDelegate.createCommand(newCommand).then(
-                    new Function<CommandImpl, CommandImpl>() {
-                        @Override
-                        public CommandImpl apply(CommandImpl arg) throws FunctionException {
-                            newCommand.getApplicableContext().setWorkspaceApplicable(true);
+                    (Function<CommandImpl, CommandImpl>)arg -> {
+                        newCommand.getApplicableContext().setWorkspaceApplicable(true);
 
-                            return newCommand;
-                        }
+                        return newCommand;
                     });
 
             commandPromises.push(p);
@@ -300,27 +288,22 @@ public class CommandManagerImpl implements CommandManager,
                 continue;
             }
 
-            Promise<CommandImpl> p = projectCommandManagerDelegate.createCommand(project, newCommand).then(
-                    new Function<CommandImpl, CommandImpl>() {
-                        @Override
-                        public CommandImpl apply(CommandImpl arg) throws FunctionException {
-                            newCommand.getApplicableContext().addProject(projectPath);
+            Promise<CommandImpl> p = projectCommandManagerDelegate.createCommand(project, newCommand)
+                                                                  .then((Function<CommandImpl, CommandImpl>)arg -> {
+                                                                      newCommand.getApplicableContext().addProject(projectPath);
 
-                            return newCommand;
-                        }
-                    });
+                                                                      return newCommand;
+                                                                  });
 
             commandPromises.push(p);
         }
 
-        return promiseProvider.all2(commandPromises).then(new Function<ArrayOf<?>, ContextualCommand>() {
-            @Override
-            public ContextualCommand apply(ArrayOf<?> ignore) throws FunctionException {
-                commands.put(newCommand.getName(), newCommand);
+        return promiseProvider.all2(commandPromises)
+                              .then((Function<ArrayOf<?>, ContextualCommand>)ignore -> {
+                                  commands.put(newCommand.getName(), newCommand);
 
-                return newCommand;
-            }
-        });
+                                  return newCommand;
+                              });
     }
 
     @Override
@@ -334,26 +317,14 @@ public class CommandManagerImpl implements CommandManager,
         // Use the simplest way to update command:
         // 1) remove existing command;
         // 2) create new one.
-        return doRemoveCommand(commandName).thenPromise(new Function<Void, Promise<ContextualCommand>>() {
-            @Override
-            public Promise<ContextualCommand> apply(Void arg) throws FunctionException {
-                return doCreateCommand(commandToUpdate).then(new Function<ContextualCommand, ContextualCommand>() {
-                    @Override
-                    public ContextualCommand apply(final ContextualCommand arg) throws FunctionException {
-                        // listeners should be notified after returning from #updateCommand method
-                        // so let's postpone notification
-                        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-                            @Override
-                            public void execute() {
-                                notifyCommandUpdated(existedCommand, arg);
-                            }
-                        });
+        return doRemoveCommand(commandName).thenPromise(arg -> doCreateCommand(commandToUpdate)
+                .then((Function<ContextualCommand, ContextualCommand>)arg1 -> {
+                    // listeners should be notified after returning from #updateCommand method
+                    // so let's postpone notification
+                    Scheduler.get().scheduleDeferred(() -> notifyCommandUpdated(existedCommand, arg1));
 
-                        return arg;
-                    }
-                });
-            }
-        });
+                    return arg1;
+                }));
     }
 
     @Override
@@ -364,18 +335,10 @@ public class CommandManagerImpl implements CommandManager,
             return promiseProvider.reject(new Exception("Command '" + commandName + "' does not exist."));
         }
 
-        return doRemoveCommand(commandName).then(new Operation<Void>() {
-            @Override
-            public void apply(Void arg) throws OperationException {
-                // listeners should be notified after returning from #removeCommand method
-                // so let's postpone notification
-                Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-                    @Override
-                    public void execute() {
-                        notifyCommandRemoved(command);
-                    }
-                });
-            }
+        return doRemoveCommand(commandName).then(arg -> {
+            // listeners should be notified after returning from #removeCommand method
+            // so let's postpone notification
+            Scheduler.get().scheduleDeferred(() -> notifyCommandRemoved(command));
         });
     }
 
@@ -392,14 +355,12 @@ public class CommandManagerImpl implements CommandManager,
         final ArrayOf<Promise<?>> commandPromises = Collections.arrayOf();
 
         if (context.isWorkspaceApplicable()) {
-            final Promise<Void> p = workspaceCommandManagerDelegate.removeCommand(commandName).then(new Function<Void, Void>() {
-                @Override
-                public Void apply(Void arg) throws FunctionException {
-                    command.getApplicableContext().setWorkspaceApplicable(false);
+            final Promise<Void> p = workspaceCommandManagerDelegate.removeCommand(commandName)
+                                                                   .then((Function<Void, Void>)arg -> {
+                                                                       command.getApplicableContext().setWorkspaceApplicable(false);
 
-                    return null;
-                }
-            });
+                                                                       return null;
+                                                                   });
 
             commandPromises.push(p);
         }
@@ -411,26 +372,22 @@ public class CommandManagerImpl implements CommandManager,
                 continue;
             }
 
-            final Promise<Void> p = projectCommandManagerDelegate.removeCommand(project, commandName).then(new Function<Void, Void>() {
-                @Override
-                public Void apply(Void arg) throws FunctionException {
-                    command.getApplicableContext().removeProject(projectPath);
+            final Promise<Void> p = projectCommandManagerDelegate.removeCommand(project, commandName)
+                                                                 .then((Function<Void, Void>)arg -> {
+                                                                     command.getApplicableContext().removeProject(projectPath);
 
-                    return null;
-                }
-            });
+                                                                     return null;
+                                                                 });
 
             commandPromises.push(p);
         }
 
-        return promiseProvider.all2(commandPromises).then(new Function<ArrayOf<?>, Void>() {
-            @Override
-            public Void apply(ArrayOf<?> arg) throws FunctionException {
-                commands.remove(command.getName());
+        return promiseProvider.all2(commandPromises)
+                              .then((Function<ArrayOf<?>, Void>)arg -> {
+                                  commands.remove(command.getName());
 
-                return null;
-            }
-        });
+                                  return null;
+                              });
     }
 
     @Nullable

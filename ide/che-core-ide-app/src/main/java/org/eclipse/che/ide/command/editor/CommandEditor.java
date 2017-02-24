@@ -25,7 +25,6 @@ import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandManager.CommandChangedListener;
 import org.eclipse.che.ide.api.command.ContextualCommand;
-import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.editor.AbstractEditorPresenter;
 import org.eclipse.che.ide.api.editor.EditorAgent;
@@ -148,13 +147,9 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
         for (CommandEditorPage page : pages) {
             page.edit(editedCommand);
 
-            page.setDirtyStateListener(new CommandEditorPage.DirtyStateListener() {
-                @Override
-                public void onDirtyStateChanged() {
-                    updateDirtyState(isDirtyPage());
-
-                    view.setSaveEnabled(isDirtyPage());
-                }
+            page.setDirtyStateListener(() -> {
+                updateDirtyState(isDirtyPage());
+                view.setSaveEnabled(isDirtyPage());
             });
         }
     }
@@ -222,36 +217,30 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
 
     @Override
     public void doSave(final AsyncCallback<EditorInput> callback) {
-        commandManager.updateCommand(commandNameInitial, editedCommand).then(new Operation<ContextualCommand>() {
-            @Override
-            public void apply(ContextualCommand arg) throws OperationException {
-                updateDirtyState(false);
+        commandManager.updateCommand(commandNameInitial, editedCommand).then(arg -> {
+            updateDirtyState(false);
 
-                // according to the CommandManager#updateCommand contract
-                // command's name after updating may differ from the proposed name
-                // in order to prevent name duplication
-                editedCommand.setName(arg.getName());
+            // according to the CommandManager#updateCommand contract
+            // command's name after updating may differ from the proposed name
+            // in order to prevent name duplication
+            editedCommand.setName(arg.getName());
 
-                if (!commandNameInitial.equals(editedCommand.getName())) {
-                    input.setFile(nodeFactory.newCommandFileNode(editedCommand));
-                }
-
-                initializePages();
-
-                callback.onSuccess(getEditorInput());
+            if (!commandNameInitial.equals(editedCommand.getName())) {
+                input.setFile(nodeFactory.newCommandFileNode(editedCommand));
             }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError arg) throws OperationException {
-                notificationManager.notify(messages.editorMessageUnableToSave(),
-                                           arg.getMessage(),
-                                           WARNING,
-                                           EMERGE_MODE);
 
-                callback.onFailure(arg.getCause());
+            initializePages();
 
-                throw new OperationException(arg.getMessage());
-            }
+            callback.onSuccess(getEditorInput());
+        }).catchError((Operation<PromiseError>)arg -> {
+            notificationManager.notify(messages.editorMessageUnableToSave(),
+                                       arg.getMessage(),
+                                       WARNING,
+                                       EMERGE_MODE);
+
+            callback.onFailure(arg.getCause());
+
+            throw new OperationException(arg.getMessage());
         });
     }
 
@@ -279,33 +268,19 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
                     coreMessages.yesButtonTitle(),
                     coreMessages.noButtonTitle(),
                     coreMessages.cancelButton(),
-                    new ConfirmCallback() {
+                    () -> doSave(new AsyncCallback<EditorInput>() {
                         @Override
-                        public void accepted() {
-                            doSave(new AsyncCallback<EditorInput>() {
-                                @Override
-                                public void onSuccess(EditorInput result) {
-                                    callback.onSuccess(null);
-                                }
-
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    callback.onFailure(null);
-                                }
-                            });
-                        }
-                    },
-                    new ConfirmCallback() {
-                        @Override
-                        public void accepted() {
+                        public void onSuccess(EditorInput result) {
                             callback.onSuccess(null);
                         }
-                    }, new ConfirmCallback() {
+
                         @Override
-                        public void accepted() {
+                        public void onFailure(Throwable caught) {
                             callback.onFailure(null);
                         }
-                    }).show();
+                    }),
+                    () -> callback.onSuccess(null),
+                    () -> callback.onFailure(null)).show();
         }
     }
 

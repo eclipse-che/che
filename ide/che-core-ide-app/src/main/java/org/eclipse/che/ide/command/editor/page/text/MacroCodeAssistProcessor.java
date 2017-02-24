@@ -24,8 +24,6 @@ import org.eclipse.che.ide.filters.Match;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -65,21 +63,23 @@ public class MacroCodeAssistProcessor implements CodeAssistProcessor {
         for (Macro macro : macros) {
             List<Match> matches = fuzzyMatches.fuzzyMatch(currentWord, macro.getName());
             if (matches != null) {
-                MacroCompletionProposal proposal = new MacroCompletionProposal(macro, matches, resources, lastCompletion.wordStartOffset, currentWord.length());
+                MacroCompletionProposal proposal = new MacroCompletionProposal(macro,
+                                                                               matches,
+                                                                               resources,
+                                                                               lastCompletion.wordStartOffset,
+                                                                               currentWord.length());
                 result.add(proposal);
             }
         }
-        Collections.sort(result, new Comparator<CompletionProposal>() {
-            @Override
-            public int compare(CompletionProposal o1, CompletionProposal o2) {
-                MacroCompletionProposal p1 = ((MacroCompletionProposal) o1);
-                MacroCompletionProposal p2 = ((MacroCompletionProposal) o2);
 
-                return p1.getMacro().getName().compareTo(p2.getMacro().getName());
-            }
+        result.sort((o1, o2) -> {
+            MacroCompletionProposal p1 = ((MacroCompletionProposal)o1);
+            MacroCompletionProposal p2 = ((MacroCompletionProposal)o2);
+
+            return p1.getMacro().getName().compareTo(p2.getMacro().getName());
         });
-        callback.proposalComputed(result);
 
+        callback.proposalComputed(result);
     }
 
     private String getCurrentWord(String text, int offset) {
@@ -114,10 +114,9 @@ public class MacroCodeAssistProcessor implements CodeAssistProcessor {
         int wordStartOffset;
         int offset;
 
-
-        public boolean isGoodFor(String currentWord, int offset) {
+        boolean isGoodFor(String currentWord, int offset) {
             return currentWord.startsWith(word) &&
-                    offset - this.offset == currentWord.length() - word.length();
+                   offset - this.offset == currentWord.length() - word.length();
         }
     }
 }

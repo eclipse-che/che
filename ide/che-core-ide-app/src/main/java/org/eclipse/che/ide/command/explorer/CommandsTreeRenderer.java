@@ -13,7 +13,6 @@ package org.eclipse.che.ide.command.explorer;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.EventListener;
 
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.command.CommandResources;
@@ -67,24 +66,18 @@ class CommandsTreeRenderer extends DefaultPresentationRenderer<Node> {
             nodeContainerElement.addClassName(resources.commandsExplorerCss().commandNode());
 
             final Element removeCommandButton = createButton(resources.removeCommand());
-            Event.setEventListener(removeCommandButton, new EventListener() {
-                @Override
-                public void onBrowserEvent(Event event) {
-                    if (ONCLICK == event.getTypeInt()) {
-                        event.stopPropagation();
-                        delegate.onCommandRemove(((CommandFileNode)node).getData());
-                    }
+            Event.setEventListener(removeCommandButton, event -> {
+                if (ONCLICK == event.getTypeInt()) {
+                    event.stopPropagation();
+                    delegate.onCommandRemove(((CommandFileNode)node).getData());
                 }
             });
 
             final Element duplicateCommandButton = createButton(resources.duplicateCommand());
-            Event.setEventListener(duplicateCommandButton, new EventListener() {
-                @Override
-                public void onBrowserEvent(Event event) {
-                    if (ONCLICK == event.getTypeInt()) {
-                        event.stopPropagation();
-                        delegate.onCommandDuplicate(((CommandFileNode)node).getData());
-                    }
+            Event.setEventListener(duplicateCommandButton, event -> {
+                if (ONCLICK == event.getTypeInt()) {
+                    event.stopPropagation();
+                    delegate.onCommandDuplicate(((CommandFileNode)node).getData());
                 }
             });
 
@@ -100,13 +93,10 @@ class CommandsTreeRenderer extends DefaultPresentationRenderer<Node> {
             nodeContainerElement.addClassName(resources.commandsExplorerCss().commandGoalNode());
 
             final Element addCommandButton = createButton(resources.addCommand());
-            Event.setEventListener(addCommandButton, new EventListener() {
-                @Override
-                public void onBrowserEvent(Event event) {
-                    if (ONCLICK == event.getTypeInt()) {
-                        event.stopPropagation();
-                        delegate.onCommandAdd(addCommandButton.getAbsoluteLeft(), addCommandButton.getAbsoluteTop());
-                    }
+            Event.setEventListener(addCommandButton, event -> {
+                if (ONCLICK == event.getTypeInt()) {
+                    event.stopPropagation();
+                    delegate.onCommandAdd(addCommandButton.getAbsoluteLeft(), addCommandButton.getAbsoluteTop());
                 }
             });
 

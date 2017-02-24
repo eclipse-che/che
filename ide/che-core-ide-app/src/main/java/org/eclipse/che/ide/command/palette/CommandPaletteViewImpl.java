@@ -103,12 +103,7 @@ public class CommandPaletteViewImpl extends Window implements CommandPaletteView
             List<ExecutableCommandNode> commandNodes = new ArrayList<>(entry.getValue().size());
 
             for (final ContextualCommand command : entry.getValue()) {
-                commandNodes.add(nodeFactory.newExecutableCommandNode(command, new ExecutableCommandNode.ActionDelegate() {
-                    @Override
-                    public void actionPerformed() {
-                        delegate.onCommandExecute(command);
-                    }
-                }));
+                commandNodes.add(nodeFactory.newExecutableCommandNode(command, () -> delegate.onCommandExecute(command)));
             }
 
             final CommandGoalNode commandGoalNode = nodeFactory.newCommandGoalNode(entry.getKey(), commandNodes);

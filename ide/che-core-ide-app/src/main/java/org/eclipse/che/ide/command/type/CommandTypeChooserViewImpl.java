@@ -11,15 +11,7 @@
 package org.eclipse.che.ide.command.type;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.DoubleClickEvent;
-import com.google.gwt.event.dom.client.DoubleClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.event.dom.client.KeyDownHandler;
-import com.google.gwt.event.dom.client.KeyPressEvent;
-import com.google.gwt.event.dom.client.KeyPressHandler;
-import com.google.gwt.event.logical.shared.CloseEvent;
-import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
@@ -32,6 +24,8 @@ import org.eclipse.che.ide.api.command.CommandType;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.google.gwt.user.client.ui.PopupPanel.AnimationType.ROLL_DOWN;
 
 /**
  * Implementation of {@link CommandTypeChooserView} which which pops up list of the command types.
@@ -67,22 +61,32 @@ public class CommandTypeChooserViewImpl extends PopupPanel implements CommandTyp
     private void initView() {
         setAutoHideEnabled(true);
         setAnimationEnabled(true);
-        setAnimationType(AnimationType.ROLL_DOWN);
+        setAnimationType(ROLL_DOWN);
     }
 
     private void addHandlers() {
-        addCloseHandler(new CloseHandler<PopupPanel>() {
-            @Override
-            public void onClose(CloseEvent<PopupPanel> event) {
-                if (event.isAutoClosed()) {
-                    delegate.onCanceled();
+        addCloseHandler(event -> {
+            if (event.isAutoClosed()) {
+                delegate.onCanceled();
+            }
+        });
+
+        typesList.addDoubleClickHandler(event -> {
+            final String selectedTypeId = typesList.getSelectedValue();
+
+            if (selectedTypeId != null) {
+                final CommandType selectedCommandType = commandTypesById.get(selectedTypeId);
+
+                if (selectedCommandType != null) {
+                    delegate.onSelected(selectedCommandType);
                 }
             }
         });
 
-        typesList.addDoubleClickHandler(new DoubleClickHandler() {
-            @Override
-            public void onDoubleClick(DoubleClickEvent event) {
+        typesList.addKeyPressHandler(event -> {
+            final int keyCode = event.getNativeEvent().getKeyCode();
+
+            if (KeyCodes.KEY_ENTER == keyCode || KeyCodes.KEY_MAC_ENTER == keyCode) {
                 final String selectedTypeId = typesList.getSelectedValue();
 
                 if (selectedTypeId != null) {
@@ -95,31 +99,9 @@ public class CommandTypeChooserViewImpl extends PopupPanel implements CommandTyp
             }
         });
 
-        typesList.addKeyPressHandler(new KeyPressHandler() {
-            @Override
-            public void onKeyPress(KeyPressEvent event) {
-                final int keyCode = event.getNativeEvent().getKeyCode();
-
-                if (KeyCodes.KEY_ENTER == keyCode || KeyCodes.KEY_MAC_ENTER == keyCode) {
-                    final String selectedTypeId = typesList.getSelectedValue();
-
-                    if (selectedTypeId != null) {
-                        final CommandType selectedCommandType = commandTypesById.get(selectedTypeId);
-
-                        if (selectedCommandType != null) {
-                            delegate.onSelected(selectedCommandType);
-                        }
-                    }
-                }
-            }
-        });
-
-        typesList.addKeyDownHandler(new KeyDownHandler() {
-            @Override
-            public void onKeyDown(KeyDownEvent event) {
-                if (KeyCodes.KEY_ESCAPE == event.getNativeKeyCode()) {
-                    hide(true);
-                }
+        typesList.addKeyDownHandler(event -> {
+            if (KeyCodes.KEY_ESCAPE == event.getNativeKeyCode()) {
+                hide(true);
             }
         });
     }

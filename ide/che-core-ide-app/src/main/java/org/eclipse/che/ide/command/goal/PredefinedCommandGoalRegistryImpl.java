@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.goal;
 
-import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
@@ -25,10 +24,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Collections.unmodifiableList;
+import static java.util.Optional.ofNullable;
 
 /**
  * Implementation of {@link PredefinedCommandGoalRegistry}.
@@ -43,8 +44,7 @@ public class PredefinedCommandGoalRegistryImpl implements PredefinedCommandGoalR
     private final Map<String, CommandGoal> commandGoals;
 
     @Inject
-    public PredefinedCommandGoalRegistryImpl(@Named("default") CommandGoal defaultCommandGoal,
-                                             GoalMessages messages) {
+    public PredefinedCommandGoalRegistryImpl(@Named("default") CommandGoal defaultCommandGoal, GoalMessages messages) {
         defaultGoal = defaultCommandGoal;
         this.messages = messages;
 
@@ -76,7 +76,7 @@ public class PredefinedCommandGoalRegistryImpl implements PredefinedCommandGoalR
 
     @Override
     public Optional<CommandGoal> getGoalById(String id) {
-        return Optional.fromNullable(commandGoals.get(id));
+        return ofNullable(commandGoals.get(id));
     }
 
     @Override
@@ -85,6 +85,6 @@ public class PredefinedCommandGoalRegistryImpl implements PredefinedCommandGoalR
             return getDefaultGoal();
         }
 
-        return getGoalById(id).or(new BaseCommandGoal(id));
+        return getGoalById(id).orElse(new BaseCommandGoal(id));
     }
 }

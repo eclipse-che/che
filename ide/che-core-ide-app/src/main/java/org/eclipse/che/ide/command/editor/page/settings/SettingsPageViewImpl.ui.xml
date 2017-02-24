@@ -39,19 +39,19 @@
         }
     </ui:style>
 
-    <g:SimpleLayoutPanel width="500px" height="100px" ui:field="mainPanel">
+    <g:SimpleLayoutPanel width="500px" ui:field="mainPanel">
         <g:FlowPanel>
             <g:FlowPanel addStyleNames="{style.section}">
                 <g:Label text="{messages.pageInfoGoalLabel}"/>
-                <che:CustomComboBox ui:field="goal" width="95%"/>
+                <che:CustomComboBox ui:field="goalComboBox" width="95%"/>
             </g:FlowPanel>
             <g:FlowPanel addStyleNames="{style.section}">
                 <g:Label text="{messages.pageInfoSectionContextLabel}"/>
                 <g:FlowPanel addStyleNames="{style.checkbox-panel}">
-                    <g:CheckBox ui:field="workspace" text="{messages.pageInfoWorkspaceLabel}"/>
+                    <g:CheckBox ui:field="workspaceCheckBox" text="{messages.pageInfoWorkspaceLabel}"/>
                 </g:FlowPanel>
             </g:FlowPanel>
-            <g:FlowPanel ui:field="projectsSection" addStyleNames="{style.section}">
+            <g:FlowPanel width="95%" ui:field="projectsSection" addStyleNames="{style.section}">
                 <g:Label text="{messages.pageInfoSectionProjectsLabel}"/>
                 <g:FlowPanel addStyleNames="{style.table-header}">
                     <g:Label text="{messages.pageInfoProjectsTableHeaderProjectLabel}" addStyleNames="{style.column-header}"/>

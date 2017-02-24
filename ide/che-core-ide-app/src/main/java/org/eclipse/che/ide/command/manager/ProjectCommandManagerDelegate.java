@@ -15,7 +15,6 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.promises.client.Function;
-import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.command.CommandImpl;
@@ -88,12 +87,7 @@ class ProjectCommandManagerDelegate {
 
         projectCommands.add(newCommand);
 
-        return updateProject(project, projectCommands).then(new Function<Void, CommandImpl>() {
-            @Override
-            public CommandImpl apply(Void arg) throws FunctionException {
-                return newCommand;
-            }
-        });
+        return updateProject(project, projectCommands).then((Function<Void, CommandImpl>)arg -> newCommand);
     }
 
     private Promise<Void> updateProject(Project project, List<CommandImpl> commands) {
@@ -112,12 +106,7 @@ class ProjectCommandManagerDelegate {
 
         attributes.put(COMMANDS_ATTRIBUTE_NAME, commandsList);
 
-        return project.update().withBody(config).send().then(new Function<Project, Void>() {
-            @Override
-            public Void apply(Project arg) throws FunctionException {
-                return null;
-            }
-        });
+        return project.update().withBody(config).send().then((Function<Project, Void>)arg -> null);
     }
 
     /**
@@ -143,12 +132,7 @@ class ProjectCommandManagerDelegate {
 
         commandsToUpdate.add(command);
 
-        return updateProject(project, new ArrayList<>(commandsToUpdate)).then(new Function<Void, CommandImpl>() {
-            @Override
-            public CommandImpl apply(Void arg) throws FunctionException {
-                return command;
-            }
-        });
+        return updateProject(project, new ArrayList<>(commandsToUpdate)).then((Function<Void, CommandImpl>)arg -> command);
     }
 
     /** Removes the command with the specified {@code commandName}. */

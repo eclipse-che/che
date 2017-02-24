@@ -15,8 +15,6 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.workspace.WorkspaceRuntime;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandManager;
@@ -25,10 +23,10 @@ import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.command.CommandUtils;
 import org.eclipse.che.ide.machine.chooser.MachineChooser;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 
+import static java.util.Collections.emptyList;
 import static org.eclipse.che.ide.util.StringUtils.containsIgnoreCase;
 
 /**
@@ -102,11 +100,8 @@ public class CommandPalettePresenter implements CommandPaletteView.ActionDelegat
             // should not happen, but let's play safe
             dialogFactory.createMessageDialog("", messages.messageNoMachine(), null).show();
         } else {
-            machineChooser.show().then(new Operation<Machine>() {
-                @Override
-                public void apply(Machine arg) throws OperationException {
-                    commandExecutor.executeCommand(command, arg);
-                }
+            machineChooser.show().then(arg -> {
+                commandExecutor.executeCommand(command, arg);
             });
         }
     }
@@ -118,6 +113,6 @@ public class CommandPalettePresenter implements CommandPaletteView.ActionDelegat
             return runtime.getMachines();
         }
 
-        return Collections.emptyList();
+        return emptyList();
     }
 }

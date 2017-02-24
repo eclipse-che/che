@@ -15,12 +15,20 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
     <ui:with field='messages' type='org.eclipse.che.ide.command.editor.EditorMessages'/>
+    <ui:style>
+        .link a, a:visited {
+            color: #4990E2;
+            font-size: 11px;
+        }
+    </ui:style>
     <g:DockLayoutPanel width="800px" ui:field="mainPanel">
         <g:center>
             <g:SimpleLayoutPanel ui:field="editorPanel"/>
         </g:center>
         <g:south size="20">
-            <g:Hyperlink ui:field="exploreMacrosLink" text="{messages.pageWithTextEditorExploreMacros}"/>
+            <g:Hyperlink ui:field="exploreMacrosLink"
+                         text="{messages.pageWithTextEditorExploreMacros}"
+                         addStyleNames="{style.link}"/>
         </g:south>
     </g:DockLayoutPanel>
 </ui:UiBinder>

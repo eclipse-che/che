@@ -73,12 +73,9 @@ public class CommandTypeChooser implements CommandTypeChooserView.ActionDelegate
 
         view.show(left, top);
 
-        return promiseProvider.create(Executor.create(new Executor.ExecutorBody<CommandType>() {
-            @Override
-            public void apply(ResolveFunction<CommandType> resolve, RejectFunction reject) {
-                resolveFunction = resolve;
-                rejectFunction = reject;
-            }
+        return promiseProvider.create(Executor.create((Executor.ExecutorBody<CommandType>)(resolve, reject) -> {
+            resolveFunction = resolve;
+            rejectFunction = reject;
         }));
     }
 

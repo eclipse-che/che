@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command;
 
-import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -29,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * A smattering of useful methods to work with commands.
@@ -63,14 +63,8 @@ public class CommandUtils {
             final String goalId = command.getGoal();
             final CommandGoal commandGoal = goalRegistry.getGoalForId(goalId);
 
-            List<ContextualCommand> commandsOfGoal = commandsByGoal.get(commandGoal);
-
-            if (commandsOfGoal == null) {
-                commandsOfGoal = new ArrayList<>();
-                commandsByGoal.put(commandGoal, commandsOfGoal);
-            }
-
-            commandsOfGoal.add(command);
+            commandsByGoal.computeIfAbsent(commandGoal, key -> new ArrayList<>())
+                          .add(command);
         }
 
         return commandsByGoal;

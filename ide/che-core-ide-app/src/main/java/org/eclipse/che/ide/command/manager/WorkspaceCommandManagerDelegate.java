@@ -16,7 +16,6 @@ import com.google.inject.Singleton;
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.promises.client.Function;
-import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -56,17 +55,14 @@ class WorkspaceCommandManagerDelegate {
      * @param workspaceId
      */
     Promise<List<CommandImpl>> getCommands(String workspaceId) {
-        return workspaceServiceClient.getCommands(workspaceId).then(new Function<List<CommandDto>, List<CommandImpl>>() {
-            @Override
-            public List<CommandImpl> apply(List<CommandDto> arg) throws FunctionException {
-                List<CommandImpl> commands = new ArrayList<>();
+        return workspaceServiceClient.getCommands(workspaceId).then((Function<List<CommandDto>, List<CommandImpl>>)arg -> {
+            List<CommandImpl> commands = new ArrayList<>();
 
-                for (Command command : arg) {
-                    commands.add(new CommandImpl(command));
-                }
-
-                return commands;
+            for (Command command : arg) {
+                commands.add(new CommandImpl(command));
             }
+
+            return commands;
         });
     }
 
@@ -82,12 +78,8 @@ class WorkspaceCommandManagerDelegate {
                                                 .withType(command.getType())
                                                 .withAttributes(command.getAttributes());
 
-        return workspaceServiceClient.addCommand(appContext.getWorkspaceId(), commandDto).then(new Function<WorkspaceDto, CommandImpl>() {
-            @Override
-            public CommandImpl apply(WorkspaceDto arg) throws FunctionException {
-                return command;
-            }
-        });
+        return workspaceServiceClient.addCommand(appContext.getWorkspaceId(), commandDto)
+                                     .then((Function<WorkspaceDto, CommandImpl>)arg -> command);
     }
 
     /**
@@ -103,21 +95,12 @@ class WorkspaceCommandManagerDelegate {
                                                 .withAttributes(command.getAttributes());
 
         return workspaceServiceClient.updateCommand(appContext.getWorkspaceId(), command.getName(), commandDto)
-                                     .then(new Function<WorkspaceDto, CommandImpl>() {
-                                         @Override
-                                         public CommandImpl apply(WorkspaceDto arg) throws FunctionException {
-                                             return command;
-                                         }
-                                     });
+                                     .then((Function<WorkspaceDto, CommandImpl>)arg -> command);
     }
 
     /** Removes the command with the specified {@code commandName}. */
     Promise<Void> removeCommand(String commandName) {
-        return workspaceServiceClient.deleteCommand(appContext.getWorkspaceId(), commandName).then(new Function<WorkspaceDto, Void>() {
-            @Override
-            public Void apply(WorkspaceDto arg) throws FunctionException {
-                return null;
-            }
-        });
+        return workspaceServiceClient.deleteCommand(appContext.getWorkspaceId(), commandName)
+                                     .then((Function<WorkspaceDto, Void>)arg -> null);
     }
 }

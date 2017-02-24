@@ -10,9 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.editor.page.settings;
 
-import com.google.common.base.Optional;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -38,6 +36,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -196,12 +195,7 @@ public class SettingsPage extends AbstractCommandEditorPage implements SettingsP
 
         if (resource.isProject()) {
             // defer refreshing the projects section since appContext#getProjects may return old data
-            Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-                @Override
-                public void execute() {
-                    refreshProjects();
-                }
-            });
+            Scheduler.get().scheduleDeferred(this::refreshProjects);
         }
     }
 }

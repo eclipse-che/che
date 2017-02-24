@@ -12,8 +12,6 @@ package org.eclipse.che.ide.command.explorer;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.event.logical.shared.SelectionEvent;
-import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
@@ -34,11 +32,11 @@ import org.eclipse.che.ide.ui.smartTree.NodeStorage;
 import org.eclipse.che.ide.ui.smartTree.Tree;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.ui.smartTree.SelectionModel.Mode.SINGLE;
 
 /**
@@ -78,19 +76,16 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
         tree.setPresentationRenderer(treeRenderer);
         tree.getSelectionModel().setSelectionMode(SINGLE);
 
-        tree.getSelectionModel().addSelectionHandler(new SelectionHandler<Node>() {
-            @Override
-            public void onSelection(SelectionEvent<Node> event) {
-                for (Node node : tree.getNodeStorage().getAll()) {
-                    final Element nodeContainerElement = tree.getNodeDescriptor(node).getNodeContainerElement();
+        tree.getSelectionModel().addSelectionHandler(event -> {
+            for (Node node : tree.getNodeStorage().getAll()) {
+                final Element nodeContainerElement = tree.getNodeDescriptor(node).getNodeContainerElement();
 
-                    if (nodeContainerElement != null) {
-                        nodeContainerElement.removeAttribute("selected");
-                    }
+                if (nodeContainerElement != null) {
+                    nodeContainerElement.removeAttribute("selected");
                 }
-
-                tree.getNodeDescriptor(event.getSelectedItem()).getNodeContainerElement().setAttribute("selected", "selected");
             }
+
+            tree.getNodeDescriptor(event.getSelectedItem()).getNodeContainerElement().setAttribute("selected", "selected");
         });
 
         setContentWidget(UI_BINDER.createAndBindUi(this));
@@ -141,7 +136,7 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
 
     @Override
     public void selectCommand(ContextualCommand command) {
-        tree.getSelectionModel().setSelection(Collections.<Node>singletonList(commandNodes.get(command)));
+        tree.getSelectionModel().setSelection(singletonList(commandNodes.get(command)));
     }
 
     interface CommandsExplorerViewImplUiBinder extends UiBinder<Widget, CommandsExplorerViewImpl> {

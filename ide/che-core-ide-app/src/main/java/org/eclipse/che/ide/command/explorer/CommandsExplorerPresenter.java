@@ -18,22 +18,17 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.DelayedTask;
 import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandManager.CommandChangedListener;
 import org.eclipse.che.ide.api.command.CommandManager.CommandLoadedListener;
-import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.command.ContextualCommand.ApplicableContext;
 import org.eclipse.che.ide.api.command.PredefinedCommandGoalRegistry;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.constraints.Constraints;
-import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
@@ -142,44 +137,30 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
         final ApplicableContext defaultApplicableContext = new ApplicableContext();
         defaultApplicableContext.setWorkspaceApplicable(true);
 
-        commandTypeChooser.show(left, top).then(new Operation<CommandType>() {
-            @Override
-            public void apply(CommandType selectedCommandType) throws OperationException {
-                final CommandGoal selectedGoal = view.getSelectedGoal();
+        commandTypeChooser.show(left, top).then(selectedCommandType -> {
+            final CommandGoal selectedGoal = view.getSelectedGoal();
 
-                if (selectedGoal != null) {
-                    commandManager.createCommand(selectedGoal.getId(),
-                                                 selectedCommandType.getId(),
-                                                 defaultApplicableContext)
-                                  .catchError(new Operation<PromiseError>() {
-                                      @Override
-                                      public void apply(PromiseError arg) throws OperationException {
-                                          notificationManager.notify(messages.explorerMessageUnableCreate(),
-                                                                     arg.getMessage(),
-                                                                     FAIL,
-                                                                     EMERGE_MODE);
-                                      }
-                                  });
-                }
+            if (selectedGoal != null) {
+                commandManager.createCommand(selectedGoal.getId(),
+                                             selectedCommandType.getId(),
+                                             defaultApplicableContext)
+                              .catchError(arg -> {
+                                  notificationManager.notify(messages.explorerMessageUnableCreate(),
+                                                             arg.getMessage(),
+                                                             FAIL,
+                                                             EMERGE_MODE);
+                              });
             }
         });
     }
 
     @Override
     public void onCommandDuplicate(ContextualCommand command) {
-        commandManager.createCommand(command).then(new Operation<ContextualCommand>() {
-            @Override
-            public void apply(ContextualCommand arg) throws OperationException {
-                view.selectCommand(arg);
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError arg) throws OperationException {
-                notificationManager.notify(messages.explorerMessageUnableDuplicate(),
-                                           arg.getMessage(),
-                                           FAIL,
-                                           EMERGE_MODE);
-            }
+        commandManager.createCommand(command).then(view::selectCommand).catchError(arg -> {
+            notificationManager.notify(messages.explorerMessageUnableDuplicate(),
+                                       arg.getMessage(),
+                                       FAIL,
+                                       EMERGE_MODE);
         });
     }
 
@@ -187,20 +168,12 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     public void onCommandRemove(final ContextualCommand command) {
         dialogFactory.createConfirmDialog(messages.explorerRemoveCommandConfirmationTitle(),
                                           messages.explorerRemoveCommandConfirmationMessage(command.getName()),
-                                          new ConfirmCallback() {
-                                              @Override
-                                              public void accepted() {
-                                                  commandManager.removeCommand(command.getName()).catchError(new Operation<PromiseError>() {
-                                                      @Override
-                                                      public void apply(PromiseError arg) throws OperationException {
-                                                          notificationManager.notify(messages.explorerMessageUnableRemove(),
-                                                                                     arg.getMessage(),
-                                                                                     FAIL,
-                                                                                     EMERGE_MODE);
-                                                      }
-                                                  });
-                                              }
-                                          }, null).show();
+                                          () -> commandManager.removeCommand(command.getName()).catchError(arg -> {
+                                              notificationManager.notify(messages.explorerMessageUnableRemove(),
+                                                                         arg.getMessage(),
+                                                                         FAIL,
+                                                                         EMERGE_MODE);
+                                          }), null).show();
     }
 
     @Override
@@ -290,7 +263,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
             // all predefined command goals must be shown in the view
             // so populate map by all registered command goals
             for (CommandGoal goal : goalRegistry.getAllGoals()) {
-                commandsByGoal.put(goal, new ArrayList<ContextualCommand>());
+                commandsByGoal.put(goal, new ArrayList<>());
             }
 
             commandsByGoal.putAll(commandUtils.groupCommandsByGoal(commandManager.getCommands()));

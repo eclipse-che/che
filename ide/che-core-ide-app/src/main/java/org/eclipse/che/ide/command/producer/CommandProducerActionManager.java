@@ -16,9 +16,6 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.api.machine.shared.dto.MachineDto;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
@@ -124,13 +121,10 @@ public class CommandProducerActionManager implements MachineStateEvent.Handler,
 
     @Override
     public void start(final Callback<Component, Exception> callback) {
-        machineServiceClient.getMachines(appContext.getWorkspaceId()).then(new Operation<List<MachineDto>>() {
-            @Override
-            public void apply(List<MachineDto> arg) throws OperationException {
-                machines.addAll(arg);
+        machineServiceClient.getMachines(appContext.getWorkspaceId()).then(arg -> {
+            machines.addAll(arg);
 
-                callback.onSuccess(CommandProducerActionManager.this);
-            }
+            callback.onSuccess(CommandProducerActionManager.this);
         });
     }
 
@@ -196,11 +190,7 @@ public class CommandProducerActionManager implements MachineStateEvent.Handler,
                 CommandProducerAction machineAction = commandProducerActionFactory.create(machine.getConfig().getName(),
                                                                                           commandProducer,
                                                                                           machine);
-                List<Action> actionList = actionsByMachines.get(machine);
-                if (actionList == null) {
-                    actionList = new ArrayList<>();
-                    actionsByMachines.put(machine, actionList);
-                }
+                final List<Action> actionList = actionsByMachines.computeIfAbsent(machine, key -> new ArrayList<>());
                 actionList.add(machineAction);
 
                 actionManager.registerAction(machine.getConfig().getName(), machineAction);
