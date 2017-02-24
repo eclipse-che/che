@@ -73,6 +73,8 @@
     <inherits name='org.eclipse.che.plugin.nodejs.NodeJs'/>
     <inherits name='org.eclipse.che.plugin.docker.client.dto.Dto'/>
     <inherits name='org.eclipse.che.plugin.languageserver.LanguageServer'/>
+    <inherits name='org.eclipse.che.plugin.pullrequest.PullRequest'/>
+    <inherits name='org.eclipse.che.plugin.pullrequest.GithubPullRequest'/>
 
     <inherits name='org.eclipse.che.api.core.Core'/>
     <inherits name='org.eclipse.che.api.core.model.Model'/>
@@ -90,8 +92,8 @@
 
     <inherits name="org.eclipse.che.plugin.svn.Subversion"/>
     <inherits name="org.eclipse.che.plugin.testing.TestingExtension"/>
-    <inherits name="org.eclipse.che.plugin.testing.junit.JUnit"/>
     <inherits name="org.eclipse.che.plugin.testing.testng.TestNG"/>
+    <inherits name="org.eclipse.che.plugin.testing.junit.JUnit"/>
 
     <stylesheet src="IDE.css"/>
 

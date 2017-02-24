@@ -195,7 +195,10 @@ public final class StepsChain {
 
         @Override
         public Boolean get() {
-            return firstNonNull(cachedResult, cachedResult = delegate.get());
+            if (cachedResult == null) {
+                cachedResult = delegate.get();
+            }
+            return cachedResult;
         }
     }
 

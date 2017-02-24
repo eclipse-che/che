@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.pullrequest.client.steps;
 
+import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.pullrequest.client.ContributeMessages;
 import org.eclipse.che.plugin.pullrequest.client.vcs.BranchUpToDateException;
 import org.eclipse.che.plugin.pullrequest.client.vcs.hosting.NoPullRequestException;
@@ -169,7 +170,7 @@ public class PushBranchStep implements SyntheticStep {
     }
 
     private void generateSSHAndPushBranch(final WorkflowExecutor executor, final Context context, String host) {
-        sshService.generatePair("git", host)
+        sshService.generatePair("vcs", host)
                   .then(new Operation<SshPairDto>() {
                       @Override
                       public void apply(SshPairDto arg) throws OperationException {
