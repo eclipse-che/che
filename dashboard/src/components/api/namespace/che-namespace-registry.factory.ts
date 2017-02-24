@@ -10,34 +10,70 @@
  */
 'use strict';
 
+export interface INamespace {
+  id: string;
+  label: string;
+  location: string;
+}
+
 /**
  * Registry for maintaining system namespaces.
  *
  * @author Ann Shumilova
  */
 export class CheNamespaceRegistry {
+  private $q: ng.IQService;
+  private fetchPromise: ng.IPromise<any>;
+  private namespaces : INamespace[];
 
-  namespaces : Array<any>;
-
-  constructor() {
+  /**
+   * Default constructor that is using resource
+   * @ngInject for Dependency injection
+   */
+  constructor($q: ng.IQService) {
+    this.$q = $q;
     this.namespaces = [];
+  }
+
+  /**
+   * Store promise that resolves after namespaces are added.
+   *
+   * @param {ng.IPromise<any>} fetchPromise
+   */
+  setFetchPromise(fetchPromise: ng.IPromise<any>): void {
+    this.fetchPromise = fetchPromise;
+  }
+
+  /**
+   * Returns promise.
+   *
+   * @return {ng.IPromise<any>}
+   */
+  fetchNamespaces(): ng.IPromise<any> {
+    if (!this.fetchPromise) {
+      let defer = this.$q.defer();
+      defer.resolve();
+      return defer.promise;
+    }
+
+    return this.fetchPromise;
   }
 
   /**
    * Adds the list of namespaces.
    *
-   * @param namespaces namespace to be added
+   * @param {INamespace[]} namespaces namespace to be added
    */
-  addNamespaces(namespaces : Array<any>) : void {
+  addNamespaces(namespaces : INamespace[]) : void {
     this.namespaces = this.namespaces.concat(namespaces);
   }
 
   /**
    * Returns the list of available namespaces.
    *
-   * @returns {Array<any>} namespaces
+   * @returns {INamespace[]} namespaces
    */
-  getNamespaces() : Array<any> {
+  getNamespaces() : INamespace[] {
     return this.namespaces;
   }
 }
