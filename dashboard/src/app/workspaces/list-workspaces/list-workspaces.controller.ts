@@ -51,7 +51,7 @@ export class ListWorkspacesCtrl {
 
   isExactMatch: boolean = false;
   namespaceFilter: {namespace: string};
-  namespaceLabels: INamespace[];
+  namespaceLabels: string[];
   onFilterChanged: Function;
 
   /**
@@ -356,7 +356,7 @@ export class ListWorkspacesCtrl {
    *
    * @returns {Array} array of namespaces
    */
-  getNamespaceLabelsList() {
+  getNamespaceLabelsList(): string[] {
     let namespaces = this.lodash.pluck(this.cheNamespaceRegistry.getNamespaces(), 'label');
     if (namespaces.length > 0) {
       return [this.ALL_NAMESPACES].concat(namespaces);
