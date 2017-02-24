@@ -168,7 +168,7 @@ public class WorkspaceManager {
         requireNonNull(attributes, "Required non-null attributes");
         WorkspaceImpl workspace = doCreateWorkspace(config,
                                                     accountManager.getByName(namespace),
-                                                    emptyMap(),
+                                                    attributes,
                                                     false);
         workspace.setStatus(WorkspaceStatus.STOPPED);
         return workspace;
