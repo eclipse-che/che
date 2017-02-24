@@ -27,6 +27,8 @@ import com.google.inject.Inject;
 import org.eclipse.che.ide.command.CommandResources;
 import org.eclipse.che.ide.ui.window.Window;
 
+import static com.google.gwt.dom.client.Style.Unit.PX;
+
 /**
  * Implementation of {@link CommandEditorView}.
  *
@@ -74,16 +76,20 @@ public class CommandEditorViewImpl extends Composite implements CommandEditorVie
             return;
         }
 
-        final DisclosurePanel panel = new DisclosurePanel(resources.iconExpanded(), resources.iconCollapsed(), title);
-        panel.setAnimationEnabled(true);
-        panel.setContent(page.asWidget());
+        final DisclosurePanel disclosurePanel = new DisclosurePanel(resources.iconExpanded(), resources.iconCollapsed(), title);
+        disclosurePanel.setAnimationEnabled(true);
+        disclosurePanel.setContent(page.asWidget());
+
+        disclosurePanel.getElement().getStyle().setMarginTop(8, PX);
+        disclosurePanel.getElement().getStyle().setMarginBottom(8, PX);
+        disclosurePanel.getHeader().getElement().getStyle().setMarginBottom(8, PX);
 
         // expand the 2`st and 3`rd panel only
         if (pagesPanel.getWidgetCount() == 1 || pagesPanel.getWidgetCount() == 2) {
-            panel.setOpen(true);
+            disclosurePanel.setOpen(true);
         }
 
-        pagesPanel.add(panel);
+        pagesPanel.add(disclosurePanel);
     }
 
     @Override
