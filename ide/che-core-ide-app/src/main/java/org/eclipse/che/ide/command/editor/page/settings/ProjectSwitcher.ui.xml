@@ -17,10 +17,8 @@
              xmlns:che='urn:import:org.eclipse.che.ide.ui.switcher'>
 
     <ui:style>
-        @eval tabsPanelBackground org.eclipse.che.ide.api.theme.Style.theme.tabsPanelBackground();
-
         .panel {
-            background-color: tabsPanelBackground;
+            background-color: #3D4650;
             padding: 5px 0 5px 0;
         }
 
