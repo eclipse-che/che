@@ -79,15 +79,11 @@ public class CommandEditorViewImpl extends Composite implements CommandEditorVie
         final DisclosurePanel disclosurePanel = new DisclosurePanel(resources.iconExpanded(), resources.iconCollapsed(), title);
         disclosurePanel.setAnimationEnabled(true);
         disclosurePanel.setContent(page.asWidget());
+        disclosurePanel.setOpen(true);
 
         disclosurePanel.getElement().getStyle().setMarginTop(8, PX);
         disclosurePanel.getElement().getStyle().setMarginBottom(8, PX);
         disclosurePanel.getHeader().getElement().getStyle().setMarginBottom(8, PX);
-
-        // expand the 2`st and 3`rd panel only
-        if (pagesPanel.getWidgetCount() == 1 || pagesPanel.getWidgetCount() == 2) {
-            disclosurePanel.setOpen(true);
-        }
 
         pagesPanel.add(disclosurePanel);
     }
