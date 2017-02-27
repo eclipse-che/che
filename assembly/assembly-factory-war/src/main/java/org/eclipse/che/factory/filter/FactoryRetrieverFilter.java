@@ -156,8 +156,6 @@ public class FactoryRetrieverFilter implements Filter {
 
         } catch (ApiException | IOException e) {
             throw new ServletException(e.getMessage(),e);
-        } finally {
-            filterChain.doFilter(req, resp);
         }
     }
 }
