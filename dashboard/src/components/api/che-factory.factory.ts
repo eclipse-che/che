@@ -77,7 +77,7 @@ export class CheFactory {
         return {factories: data};
       }
       this.pageInfo.currentPageNumber = this.pageInfo.currentPageNumber ? this.pageInfo.currentPageNumber : 1;
-      let link = '/api/factory/find?creator.userId=' + user.id + '&maxItems=' + this.itemsPerPage;
+      let link = '/api/factory/find?creator.userId=' + user + '&maxItems=' + this.itemsPerPage;
       links.set('first', link + '&skipCount=0');
       if (data && data.length > 0) {
         links.set('next', link + '&skipCount=' + this.pageInfo.currentPageNumber * this.itemsPerPage);
@@ -276,8 +276,8 @@ export class CheFactory {
     let deferred = this.$q.defer();
     let user = this.cheUser;
 
-    if (user) {
-      queryData.userId = user.id;
+//    if (user) {
+      queryData.userId = user;
       this.remoteFactoryFindAPI.getFactories(queryData).$promise.then((data) => {
         this._updateFactoriesDetails(data.factories).then((factoriesDetails) => {
           data.factories = factoriesDetails;//update factories
@@ -288,7 +288,7 @@ export class CheFactory {
       }, (error) => {
         deferred.reject(error);
       });
-    }
+//    }
     //else {
     //  this.codenvyUser.fetchUser().then((user) => {
     //    queryData.userId = user.id;

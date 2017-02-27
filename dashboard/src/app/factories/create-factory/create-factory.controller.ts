@@ -21,11 +21,10 @@ export class CreateFactoryCtrl {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($location, cheAPI, $log, codenvyAPI, cheNotification, $scope, $filter, lodash, $document) {
+  constructor($location, cheAPI, $log, cheNotification, $scope, $filter, lodash, $document) {
     this.$location = $location;
     this.cheAPI = cheAPI;
     this.$log = $log;
-    this.codenvyAPI = codenvyAPI;
     this.cheNotification = cheNotification;
     this.$filter = $filter;
     this.lodash = lodash;
@@ -48,10 +47,10 @@ export class CreateFactoryCtrl {
       if (!this.factoryObject) {
         //fetch it !
         let templateName = 'git';
-        let promise = this.codenvyAPI.getFactoryTemplate().fetchFactoryTemplate(templateName);
+        let promise = this.cheAPI.getFactoryTemplate().fetchFactoryTemplate(templateName);
 
         promise.then(() => {
-          let factoryContent = this.codenvyAPI.getFactoryTemplate().getFactoryTemplate(templateName);
+          let factoryContent = this.cheAPI.getFactoryTemplate().getFactoryTemplate(templateName);
           this.factoryObject = angular.fromJson(factoryContent);
           this.updateGitProjectLocation(newValue);
         });
@@ -109,7 +108,7 @@ export class CreateFactoryCtrl {
 
     this.isImporting = true;
 
-    let promise = this.codenvyAPI.getFactory().createFactoryByContent(factoryContent);
+    let promise = this.cheAPI.getFactory().createFactoryByContent(factoryContent);
 
     promise.then((factory) => {
       this.isImporting = false;

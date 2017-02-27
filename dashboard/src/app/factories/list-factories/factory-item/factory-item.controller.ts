@@ -22,7 +22,7 @@ export class FactoryItemCtrl {
    */
   constructor($location, cheFactory, cheEnvironmentRegistry, lodash) {
     this.$location = $location;
-    this.codenvyFactory = codenvyFactory;
+    this.cheFactory = cheFactory;
     this.cheEnvironmentRegistry = cheEnvironmentRegistry;
     this.lodash = lodash;
   }
@@ -32,7 +32,7 @@ export class FactoryItemCtrl {
    * @returns [string]
    */
   getFactoryLinks() {
-    return this.codenvyFactory.detectLinks(this.factory);
+    return this.cheFactory.detectLinks(this.factory);
   }
 
   /**
