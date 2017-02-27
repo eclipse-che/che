@@ -17,6 +17,9 @@
  */
 export class CheHttpBackend {
 
+  private   isAutoSnapshot: boolean = false;
+  private   isAutoRestore: boolean = false;
+
   /**
    * Constructor to use
    */
@@ -52,6 +55,13 @@ export class CheHttpBackend {
       this.addWorkspaceAgent(key, tmpWorkspace.runtime);
       this.httpBackend.when('GET', '/api/workspace/' + key).respond(tmpWorkspace);
     }
+
+    let workspacSettings = {
+      'che.workspace.auto_snapshot': this.isAutoSnapshot,
+      'che.workspace.auto_restore': this.isAutoRestore
+    };
+    this.httpBackend.when('GET', '/api/workspace/settings').respond(200, workspacSettings);
+
     this.httpBackend.when('OPTIONS', '/api/').respond({});
     this.httpBackend.when('GET', '/api/workspace/settings').respond({});
 
@@ -88,6 +98,22 @@ export class CheHttpBackend {
 
     this.httpBackend.when('POST', '/api/analytics/log/session-usage').respond();
 
+  }
+
+  /**
+   * Set workspace auto snapshot status
+   * @param isAutoSnapshot {boolean}
+   */
+  setWorkspaceAutoSnapshot(isAutoSnapshot: boolean) {
+    this.isAutoSnapshot = isAutoSnapshot;
+  }
+
+  /**
+   * Set workspace auto restore status
+   * @param isAutoRestore {boolean}
+   */
+  setWorkspaceAutoRestore(isAutoRestore: boolean) {
+    this.isAutoRestore = isAutoRestore;
   }
 
 

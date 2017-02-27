@@ -308,7 +308,7 @@ export class WorkspaceEnvironmentsController {
    */
   getLocationUrl(): string {
     let url: string = '';
-    if (this.environment && this.environment.recipe.location && /^https?:\/\//m.test(this.environment.recipe.location)) {
+    if (this.environment && this.environment.recipe.location && /^https?:\/\//i.test(this.environment.recipe.location)) {
       url = this.environment.recipe.location;
     }
     return url;
