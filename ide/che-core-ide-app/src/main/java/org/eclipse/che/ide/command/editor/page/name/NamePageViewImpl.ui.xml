@@ -16,44 +16,16 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
     <ui:with field='messages' type='org.eclipse.che.ide.command.editor.EditorMessages'/>
     <ui:style>
-        @eval blueIconColor org.eclipse.che.ide.api.theme.Style.theme.getBlueIconColor();
-        @eval greenIconColor org.eclipse.che.ide.api.theme.Style.theme.getSuccessEventColor();
-
         .section {
             margin-top: 15px;
             margin-left: 24px;
-        }
-
-        .button, .button:hover, .button:active {
-            border: none;
-            background: transparent;
-            min-width: 25px;
-            padding: 0;
-            vertical-align: top;
-        }
-
-        .button > svg {
-            width: 21px;
-            height: 21px;
-            margin: 1px;
-        }
-
-        .button > svg g,
-        .button > svg g g path {
-            fill: blueIconColor;
-        }
-
-        .button:hover > svg g,
-        .button:hover > svg g g path {
-            fill: greenIconColor;
         }
     </ui:style>
 
     <g:SimpleLayoutPanel width="535px" height="70px">
         <g:FlowPanel addStyleNames="{style.section}">
             <g:Label text="{messages.pageInfoNameLabel}"/>
-            <g:TextBox ui:field="commandName" width="92%"/>
-            <g:Button ui:field="testButton" addStyleNames="{style.button}" debugId="command-editor-button-test"/>
+            <g:TextBox ui:field="commandName" width="97%"/>
         </g:FlowPanel>
     </g:SimpleLayoutPanel>
 </ui:UiBinder>

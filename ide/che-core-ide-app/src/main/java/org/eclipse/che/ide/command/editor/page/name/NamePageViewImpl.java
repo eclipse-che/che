@@ -11,19 +11,16 @@
 package org.eclipse.che.ide.command.editor.page.name;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
 import org.eclipse.che.ide.command.CommandResources;
-import org.vectomatic.dom.svg.ui.SVGImage;
 
 /**
  * Implementation of {@link NamePageView}.
@@ -37,16 +34,11 @@ public class NamePageViewImpl extends Composite implements NamePageView {
     @UiField
     TextBox commandName;
 
-    @UiField
-    Button testButton;
-
     private ActionDelegate delegate;
 
     @Inject
     public NamePageViewImpl(CommandResources resources) {
         initWidget(UI_BINDER.createAndBindUi(this));
-
-        testButton.getElement().appendChild(new SVGImage(resources.execute()).getElement());
     }
 
     @Override
@@ -62,11 +54,6 @@ public class NamePageViewImpl extends Composite implements NamePageView {
     @UiHandler({"commandName"})
     void onNameChanged(KeyUpEvent event) {
         delegate.onNameChanged(commandName.getValue());
-    }
-
-    @UiHandler("testButton")
-    public void handleTestButton(ClickEvent clickEvent) {
-        delegate.onCommandTest();
     }
 
     interface NamePageViewImplUiBinder extends UiBinder<Widget, NamePageViewImpl> {

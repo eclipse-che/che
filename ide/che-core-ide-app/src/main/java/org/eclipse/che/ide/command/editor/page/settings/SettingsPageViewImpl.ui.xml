@@ -41,7 +41,7 @@
         <g:FlowPanel>
             <g:FlowPanel addStyleNames="{style.section}">
                 <g:Label text="{messages.pageInfoGoalLabel}"/>
-                <che:CustomComboBox ui:field="goalComboBox" width="95%"/>
+                <che:CustomComboBox ui:field="goalComboBox" width="100%"/>
             </g:FlowPanel>
             <g:FlowPanel addStyleNames="{style.section}">
                 <g:Label text="{messages.pageInfoSectionContextLabel}"/>
@@ -49,7 +49,7 @@
                     <g:CheckBox ui:field="workspaceCheckBox" text="{messages.pageInfoWorkspaceLabel}"/>
                 </g:FlowPanel>
             </g:FlowPanel>
-            <g:FlowPanel width="95%" ui:field="projectsSection" addStyleNames="{style.section}">
+            <g:FlowPanel width="100%" ui:field="projectsSection" addStyleNames="{style.section}">
                 <g:Label text="{messages.pageInfoSectionProjectsLabel}"/>
                 <g:FlowPanel addStyleNames="{style.table-header}">
                     <g:Label text="{messages.pageInfoProjectsTableHeaderProjectLabel}" addStyleNames="{style.column-header}"/>

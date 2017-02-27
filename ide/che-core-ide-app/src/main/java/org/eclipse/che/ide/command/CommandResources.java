@@ -41,9 +41,6 @@ public interface CommandResources extends ClientBundle {
     @Source("explorer/remove-command-button.svg")
     SVGResource removeCommand();
 
-    @Source("editor/execute.svg")
-    SVGResource execute();
-
     @Source("editor/iconCollapsed.png")
     ImageResource iconCollapsed();
 

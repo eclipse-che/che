@@ -13,7 +13,6 @@ package org.eclipse.che.ide.command.editor.page.name;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 
-import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.command.editor.EditorMessages;
 import org.eclipse.che.ide.command.editor.page.AbstractCommandEditorPage;
 import org.eclipse.che.ide.command.editor.page.CommandEditorPage;
@@ -25,18 +24,16 @@ import org.eclipse.che.ide.command.editor.page.CommandEditorPage;
  */
 public class NamePage extends AbstractCommandEditorPage implements NamePageView.ActionDelegate {
 
-    private final NamePageView    view;
-    private final CommandExecutor commandExecutor;
+    private final NamePageView view;
 
     /** Initial value of the command's name. */
     private String commandNameInitial;
 
     @Inject
-    public NamePage(NamePageView view, EditorMessages messages, CommandExecutor commandExecutor) {
+    public NamePage(NamePageView view, EditorMessages messages) {
         super(messages.pageInfoTitle());
 
         this.view = view;
-        this.commandExecutor = commandExecutor;
 
         view.setDelegate(this);
     }
@@ -67,10 +64,5 @@ public class NamePage extends AbstractCommandEditorPage implements NamePageView.
         editedCommand.setName(name);
 
         notifyDirtyStateChanged();
-    }
-
-    @Override
-    public void onCommandTest() {
-        commandExecutor.executeCommand(editedCommand);
     }
 }
