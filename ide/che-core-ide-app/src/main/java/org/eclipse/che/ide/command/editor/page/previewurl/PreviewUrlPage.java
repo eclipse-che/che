@@ -17,8 +17,8 @@ import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.command.editor.EditorMessages;
 import org.eclipse.che.ide.command.editor.page.CommandEditorPage;
 import org.eclipse.che.ide.command.editor.page.text.AbstractPageWithTextEditor;
-import org.eclipse.che.ide.command.editor.page.text.PageWithTextEditorView;
 import org.eclipse.che.ide.command.editor.page.text.MacroEditorConfiguration;
+import org.eclipse.che.ide.command.editor.page.text.PageWithTextEditorView;
 import org.eclipse.che.ide.macro.chooser.MacroChooser;
 
 import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_PREVIEW_URL_ATTRIBUTE_NAME;
@@ -55,10 +55,5 @@ public class PreviewUrlPage extends AbstractPageWithTextEditor {
     @Override
     protected void updateCommandPropertyValue(String content) {
         editedCommand.getAttributes().put(COMMAND_PREVIEW_URL_ATTRIBUTE_NAME, content);
-    }
-
-    @Override
-    protected int getHeight() {
-        return 100;
     }
 }
