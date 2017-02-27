@@ -13,6 +13,8 @@ package org.eclipse.che.ide.ui.dropdown;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
+import static com.google.gwt.dom.client.Style.Unit.PX;
+
 /** Renderer that uses {@link Label} widget for rendering text value in the {@link DropdownList}. */
 public class StringItemRenderer implements DropdownListItemRenderer {
 
@@ -38,6 +40,7 @@ public class StringItemRenderer implements DropdownListItemRenderer {
     public Widget renderListWidget() {
         if (listWidget == null) {
             listWidget = new Label(item.getValue());
+            listWidget.getElement().getStyle().setMarginBottom(0, PX);
         }
 
         return listWidget;
