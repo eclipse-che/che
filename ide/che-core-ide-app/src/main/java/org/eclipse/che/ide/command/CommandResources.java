@@ -13,7 +13,6 @@ package org.eclipse.che.ide.command;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.DataResource;
-import com.google.gwt.resources.client.ImageResource;
 
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -41,12 +40,6 @@ public interface CommandResources extends ClientBundle {
     @Source("explorer/remove-command-button.svg")
     SVGResource removeCommand();
 
-    @Source("editor/iconCollapsed.png")
-    ImageResource iconCollapsed();
-
-    @Source("editor/iconExpanded.png")
-    ImageResource iconExpanded();
-
     @Source({"explorer/styles.css", "org/eclipse/che/ide/api/ui/style.css"})
     ExplorerCSS commandsExplorerCss();
 
@@ -55,6 +48,9 @@ public interface CommandResources extends ClientBundle {
 
     @Source({"toolbar/processes/styles.css", "org/eclipse/che/ide/api/ui/style.css"})
     ToolbarCSS commandToolbarCss();
+
+    @Source({"editor/styles.css", "org/eclipse/che/ide/api/ui/style.css"})
+    EditorCSS editorCss();
 
     interface ExplorerCSS extends CssResource {
 
@@ -84,5 +80,12 @@ public interface CommandResources extends ClientBundle {
         String processWidgetPidLabel();
 
         String processWidgetActionButton();
+    }
+
+    interface EditorCSS extends CssResource {
+
+        String sectionLabel();
+
+        String section();
     }
 }

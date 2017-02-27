@@ -65,7 +65,7 @@ public class MachineChooser implements MachineChooserView.ActionDelegate {
             final List<? extends Machine> machines = runtime.getMachines();
 
             if (machines.size() == 1) {
-                return promiseProvider.resolve((Machine)machines.get(0));
+                return promiseProvider.resolve(machines.get(0));
             }
 
             view.setMachines(machines);
@@ -73,12 +73,9 @@ public class MachineChooser implements MachineChooserView.ActionDelegate {
 
         view.show();
 
-        return promiseProvider.create(Executor.create(new Executor.ExecutorBody<Machine>() {
-            @Override
-            public void apply(ResolveFunction<Machine> resolve, RejectFunction reject) {
-                resolveFunction = resolve;
-                rejectFunction = reject;
-            }
+        return promiseProvider.create(Executor.create((Executor.ExecutorBody<Machine>)(resolve, reject) -> {
+            resolveFunction = resolve;
+            rejectFunction = reject;
         }));
     }
 

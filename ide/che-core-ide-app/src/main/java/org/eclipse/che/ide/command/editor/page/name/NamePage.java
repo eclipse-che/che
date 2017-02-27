@@ -31,7 +31,7 @@ public class NamePage extends AbstractCommandEditorPage implements NamePageView.
 
     @Inject
     public NamePage(NamePageView view, EditorMessages messages) {
-        super(messages.pageInfoTitle());
+        super(messages.pageNameTitle());
 
         this.view = view;
 

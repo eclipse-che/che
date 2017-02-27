@@ -13,10 +13,8 @@ package org.eclipse.che.ide.macro.chooser;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.DoubleClickEvent;
-import com.google.gwt.event.dom.client.DoubleClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -39,7 +37,7 @@ import org.eclipse.che.ide.ui.window.Window;
  */
 public class MacroChooserViewImpl extends Window implements MacroChooserView {
 
-    private static final MacrosExplorerViewImplUiBinder UI_BINDER = GWT.create(MacrosExplorerViewImplUiBinder.class);
+    private static final MacroChooserViewImplUiBinder UI_BINDER = GWT.create(MacroChooserViewImplUiBinder.class);
 
     @UiField(provided = true)
     CellTable<Macro> macrosTable;
@@ -89,23 +87,17 @@ public class MacroChooserViewImpl extends Window implements MacroChooserView {
 
         macrosTable.setSelectionModel(selectionModel);
 
-        macrosTable.addDomHandler(new DoubleClickHandler() {
-            @Override
-            public void onDoubleClick(DoubleClickEvent event) {
-                if (selectionModel.getSelectedObject() != null) {
-                    delegate.onMacroChosen(selectionModel.getSelectedObject());
-                }
+        macrosTable.addDomHandler(event -> {
+            if (selectionModel.getSelectedObject() != null) {
+                delegate.onMacroChosen(selectionModel.getSelectedObject());
             }
         }, DoubleClickEvent.getType());
 
-        macrosTable.addDomHandler(new KeyUpHandler() {
-            @Override
-            public void onKeyUp(KeyUpEvent event) {
-                if (selectionModel.getSelectedObject() != null &&
-                    (KeyCodes.KEY_ENTER == event.getNativeKeyCode() || KeyCodes.KEY_MAC_ENTER == event.getNativeKeyCode())) {
+        macrosTable.addDomHandler(event -> {
+            if (selectionModel.getSelectedObject() != null &&
+                (KeyCodes.KEY_ENTER == event.getNativeKeyCode() || KeyCodes.KEY_MAC_ENTER == event.getNativeKeyCode())) {
 
-                    delegate.onMacroChosen(selectionModel.getSelectedObject());
-                }
+                delegate.onMacroChosen(selectionModel.getSelectedObject());
             }
         }, KeyUpEvent.getType());
     }
@@ -138,6 +130,6 @@ public class MacroChooserViewImpl extends Window implements MacroChooserView {
         delegate.onFilterChanged(filterField.getValue());
     }
 
-    interface MacrosExplorerViewImplUiBinder extends UiBinder<Widget, MacroChooserViewImpl> {
+    interface MacroChooserViewImplUiBinder extends UiBinder<Widget, MacroChooserViewImpl> {
     }
 }

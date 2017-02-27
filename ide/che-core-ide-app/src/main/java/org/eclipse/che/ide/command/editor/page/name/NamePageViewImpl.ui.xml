@@ -14,18 +14,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
-    <ui:with field='messages' type='org.eclipse.che.ide.command.editor.EditorMessages'/>
-    <ui:style>
-        .section {
-            margin-top: 15px;
-            margin-left: 24px;
-        }
-    </ui:style>
-
-    <g:SimpleLayoutPanel width="535px" height="70px">
-        <g:FlowPanel addStyleNames="{style.section}">
-            <g:Label text="{messages.pageInfoNameLabel}"/>
-            <g:TextBox ui:field="commandName" width="97%"/>
-        </g:FlowPanel>
-    </g:SimpleLayoutPanel>
+    <g:FlowPanel width="500px">
+        <g:TextBox ui:field="commandName" width="98%"/>
+    </g:FlowPanel>
 </ui:UiBinder>

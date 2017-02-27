@@ -40,20 +40,20 @@
     <g:SimpleLayoutPanel width="500px" ui:field="mainPanel">
         <g:FlowPanel>
             <g:FlowPanel addStyleNames="{style.section}">
-                <g:Label text="{messages.pageInfoGoalLabel}"/>
+                <g:Label text="{messages.pageSettingsGoalLabel}"/>
                 <che:CustomComboBox ui:field="goalComboBox" width="100%"/>
             </g:FlowPanel>
             <g:FlowPanel addStyleNames="{style.section}">
-                <g:Label text="{messages.pageInfoSectionContextLabel}"/>
+                <g:Label text="{messages.pageSettingsSectionContextLabel}"/>
                 <g:FlowPanel addStyleNames="{style.checkbox-panel}">
-                    <g:CheckBox ui:field="workspaceCheckBox" text="{messages.pageInfoWorkspaceLabel}"/>
+                    <g:CheckBox ui:field="workspaceCheckBox" text="{messages.pageSettingsWorkspaceLabel}"/>
                 </g:FlowPanel>
             </g:FlowPanel>
             <g:FlowPanel width="100%" ui:field="projectsSection" addStyleNames="{style.section}">
-                <g:Label text="{messages.pageInfoSectionProjectsLabel}"/>
+                <g:Label text="{messages.pageSettingsSectionProjectsLabel}"/>
                 <g:FlowPanel addStyleNames="{style.table-header}">
-                    <g:Label text="{messages.pageInfoProjectsTableHeaderProjectLabel}" addStyleNames="{style.column-header}"/>
-                    <g:Label text="{messages.pageInfoProjectsTableHeaderApplicableLabel}" addStyleNames="{style.column-header}"/>
+                    <g:Label text="{messages.pageSettingsProjectsTableHeaderProjectLabel}" addStyleNames="{style.column-header}"/>
+                    <g:Label text="{messages.pageSettingsProjectsTableHeaderApplicableLabel}" addStyleNames="{style.column-header}"/>
                 </g:FlowPanel>
                 <g:FlowPanel ui:field="projectsPanel"/>
             </g:FlowPanel>

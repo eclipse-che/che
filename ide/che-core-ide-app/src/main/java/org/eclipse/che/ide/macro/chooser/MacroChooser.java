@@ -18,10 +18,9 @@ import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.api.macro.MacroRegistry;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
+import static java.util.Comparator.comparing;
 import static org.eclipse.che.ide.util.StringUtils.containsIgnoreCase;
 
 /**
@@ -31,14 +30,6 @@ import static org.eclipse.che.ide.util.StringUtils.containsIgnoreCase;
  * @see #show(MacroChosenCallback)
  */
 public class MacroChooser implements MacroChooserView.ActionDelegate {
-
-    /** Comparator for ordering macros by its name. */
-    private static final Comparator<Macro> MACRO_COMPARATOR = new Comparator<Macro>() {
-        @Override
-        public int compare(Macro o1, Macro o2) {
-            return o1.getName().compareTo(o2.getName());
-        }
-    };
 
     private final MacroChooserView view;
     private final MacroRegistry    macroRegistry;
@@ -108,8 +99,7 @@ public class MacroChooser implements MacroChooserView.ActionDelegate {
     private void updateMacrosProvider(List<Macro> macrosList) {
         macrosProvider.getList().clear();
         macrosProvider.getList().addAll(macrosList);
-
-        Collections.sort(macrosProvider.getList(), MACRO_COMPARATOR);
+        macrosProvider.getList().sort(comparing(Macro::getName));
     }
 
     /** Callback to notify when some macro has been chosen. */

@@ -74,7 +74,7 @@ public class SettingsPage extends AbstractCommandEditorPage implements SettingsP
                         CommandManager commandManager,
                         EditorMessages messages,
                         EventBus eventBus) {
-        super(messages.pageInfoTitle());
+        super(messages.pageSettingsTitle());
 
         this.view = view;
         this.appContext = appContext;

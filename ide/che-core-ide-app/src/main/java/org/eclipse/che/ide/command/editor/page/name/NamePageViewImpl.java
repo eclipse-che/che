@@ -20,8 +20,6 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
-import org.eclipse.che.ide.command.CommandResources;
-
 /**
  * Implementation of {@link NamePageView}.
  *
@@ -37,7 +35,7 @@ public class NamePageViewImpl extends Composite implements NamePageView {
     private ActionDelegate delegate;
 
     @Inject
-    public NamePageViewImpl(CommandResources resources) {
+    public NamePageViewImpl() {
         initWidget(UI_BINDER.createAndBindUi(this));
     }
 

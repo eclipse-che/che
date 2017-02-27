@@ -17,17 +17,15 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
 import org.eclipse.che.ide.command.CommandResources;
 import org.eclipse.che.ide.ui.window.Window;
-
-import static com.google.gwt.dom.client.Style.Unit.PX;
 
 /**
  * Implementation of {@link CommandEditorView}.
@@ -39,8 +37,7 @@ public class CommandEditorViewImpl extends Composite implements CommandEditorVie
     private static final CommandEditorViewImplUiBinder UI_BINDER        = GWT.create(CommandEditorViewImplUiBinder.class);
     private static final Window.Resources              WINDOW_RESOURCES = GWT.create(Window.Resources.class);
 
-    @UiField
-    CommandResources resources;
+    private final CommandResources resources;
 
     @UiField
     Button testButton;
@@ -61,7 +58,8 @@ public class CommandEditorViewImpl extends Composite implements CommandEditorVie
     private ActionDelegate delegate;
 
     @Inject
-    public CommandEditorViewImpl() {
+    public CommandEditorViewImpl(CommandResources resources) {
+        this.resources = resources;
         initWidget(UI_BINDER.createAndBindUi(this));
 
         setSaveEnabled(false);
@@ -71,21 +69,12 @@ public class CommandEditorViewImpl extends Composite implements CommandEditorVie
 
     @Override
     public void addPage(IsWidget page, String title) {
-        if (pagesPanel.getWidgetCount() == 0) {
-            pagesPanel.add(page);
-            return;
-        }
+        final Label label = new Label(title);
+        label.addStyleName(resources.editorCss().sectionLabel());
+        page.asWidget().addStyleName(resources.editorCss().section());
 
-        final DisclosurePanel disclosurePanel = new DisclosurePanel(resources.iconExpanded(), resources.iconCollapsed(), title);
-        disclosurePanel.setAnimationEnabled(true);
-        disclosurePanel.setContent(page.asWidget());
-        disclosurePanel.setOpen(true);
-
-        disclosurePanel.getElement().getStyle().setMarginTop(8, PX);
-        disclosurePanel.getElement().getStyle().setMarginBottom(8, PX);
-        disclosurePanel.getHeader().getElement().getStyle().setMarginBottom(8, PX);
-
-        pagesPanel.add(disclosurePanel);
+        pagesPanel.add(label);
+        pagesPanel.add(page);
     }
 
     @Override

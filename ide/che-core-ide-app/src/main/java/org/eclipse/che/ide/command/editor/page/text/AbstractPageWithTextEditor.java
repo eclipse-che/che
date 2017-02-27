@@ -128,9 +128,9 @@ public abstract class AbstractPageWithTextEditor extends AbstractCommandEditorPa
      */
     protected abstract void updateCommandPropertyValue(String newValue);
 
-    /** Returns height of the page in pixels. Default height is 130 px. */
+    /** Returns height of the page in pixels. Default height is 150 px. */
     protected int getHeight() {
-        return 130;
+        return 150;
     }
 
     /**

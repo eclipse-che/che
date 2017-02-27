@@ -34,29 +34,29 @@ public interface EditorMessages extends Messages {
     @Key("button.cancel.text")
     String buttonCancelText();
 
-    @Key("page.settings.title")
-    String pageInfoTitle();
+    @Key("page.name.title")
+    String pageNameTitle();
 
-    @Key("page.settings.name.label")
-    String pageInfoNameLabel();
+    @Key("page.settings.title")
+    String pageSettingsTitle();
 
     @Key("page.settings.goal.label")
-    String pageInfoGoalLabel();
+    String pageSettingsGoalLabel();
 
     @Key("page.settings.section.context.label")
-    String pageInfoSectionContextLabel();
+    String pageSettingsSectionContextLabel();
 
     @Key("page.settings.workspace.label")
-    String pageInfoWorkspaceLabel();
+    String pageSettingsWorkspaceLabel();
 
     @Key("page.settings.section.projects.label")
-    String pageInfoSectionProjectsLabel();
+    String pageSettingsSectionProjectsLabel();
 
     @Key("page.settings.projects_table.header.project.label")
-    String pageInfoProjectsTableHeaderProjectLabel();
+    String pageSettingsProjectsTableHeaderProjectLabel();
 
     @Key("page.settings.projects_table.header.applicable.label")
-    String pageInfoProjectsTableHeaderApplicableLabel();
+    String pageSettingsProjectsTableHeaderApplicableLabel();
 
     @Key("page.with_text_editor.explore_macros")
     String pageWithTextEditorExploreMacros();

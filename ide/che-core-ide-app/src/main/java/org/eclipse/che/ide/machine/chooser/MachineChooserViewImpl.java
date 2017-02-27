@@ -11,15 +11,7 @@
 package org.eclipse.che.ide.machine.chooser;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.DoubleClickEvent;
-import com.google.gwt.event.dom.client.DoubleClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.event.dom.client.KeyDownHandler;
-import com.google.gwt.event.dom.client.KeyPressEvent;
-import com.google.gwt.event.dom.client.KeyPressHandler;
-import com.google.gwt.event.logical.shared.CloseEvent;
-import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
@@ -71,18 +63,28 @@ public class MachineChooserViewImpl extends PopupPanel implements MachineChooser
     }
 
     private void addHandlers() {
-        addCloseHandler(new CloseHandler<PopupPanel>() {
-            @Override
-            public void onClose(CloseEvent<PopupPanel> event) {
-                if (event.isAutoClosed()) {
-                    delegate.onCanceled();
+        addCloseHandler(event -> {
+            if (event.isAutoClosed()) {
+                delegate.onCanceled();
+            }
+        });
+
+        machinesList.addDoubleClickHandler(event -> {
+            final String selectedMachineId = machinesList.getSelectedValue();
+
+            if (selectedMachineId != null) {
+                final Machine selectedMachine = machinesById.get(selectedMachineId);
+
+                if (selectedMachine != null) {
+                    delegate.onMachineSelected(selectedMachine);
                 }
             }
         });
 
-        machinesList.addDoubleClickHandler(new DoubleClickHandler() {
-            @Override
-            public void onDoubleClick(DoubleClickEvent event) {
+        machinesList.addKeyPressHandler(event -> {
+            final int keyCode = event.getNativeEvent().getKeyCode();
+
+            if (KeyCodes.KEY_ENTER == keyCode || KeyCodes.KEY_MAC_ENTER == keyCode) {
                 final String selectedMachineId = machinesList.getSelectedValue();
 
                 if (selectedMachineId != null) {
@@ -95,31 +97,9 @@ public class MachineChooserViewImpl extends PopupPanel implements MachineChooser
             }
         });
 
-        machinesList.addKeyPressHandler(new KeyPressHandler() {
-            @Override
-            public void onKeyPress(KeyPressEvent event) {
-                final int keyCode = event.getNativeEvent().getKeyCode();
-
-                if (KeyCodes.KEY_ENTER == keyCode || KeyCodes.KEY_MAC_ENTER == keyCode) {
-                    final String selectedMachineId = machinesList.getSelectedValue();
-
-                    if (selectedMachineId != null) {
-                        final Machine selectedMachine = machinesById.get(selectedMachineId);
-
-                        if (selectedMachine != null) {
-                            delegate.onMachineSelected(selectedMachine);
-                        }
-                    }
-                }
-            }
-        });
-
-        machinesList.addKeyDownHandler(new KeyDownHandler() {
-            @Override
-            public void onKeyDown(KeyDownEvent event) {
-                if (KeyCodes.KEY_ESCAPE == event.getNativeKeyCode()) {
-                    hide(true);
-                }
+        machinesList.addKeyDownHandler(event -> {
+            if (KeyCodes.KEY_ESCAPE == event.getNativeKeyCode()) {
+                hide(true);
             }
         });
     }

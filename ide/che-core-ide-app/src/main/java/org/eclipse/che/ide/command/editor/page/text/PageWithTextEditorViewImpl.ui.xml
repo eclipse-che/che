@@ -16,12 +16,20 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
     <ui:with field='messages' type='org.eclipse.che.ide.command.editor.EditorMessages'/>
     <ui:style>
+        @eval textFieldBorderColor org.eclipse.che.ide.api.theme.Style.theme.toolButtonActiveBorder();
+
+        .main-panel {
+            width: literal("calc(100% - 40px)");
+            border: textFieldBorderColor;
+        }
+
         .link a, a:visited {
             color: #4990E2;
             font-size: 11px;
+            margin-left: 15px;
         }
     </ui:style>
-    <g:DockLayoutPanel width="800px" ui:field="mainPanel">
+    <g:DockLayoutPanel ui:field="mainPanel" addStyleNames="{style.main-panel}">
         <g:center>
             <g:SimpleLayoutPanel ui:field="editorPanel"/>
         </g:center>

@@ -15,7 +15,6 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
     <ui:with field='messages' type='org.eclipse.che.ide.command.editor.EditorMessages'/>
-    <ui:with field='resources' type='org.eclipse.che.ide.command.CommandResources'/>
     <ui:style>
         @eval partBackground org.eclipse.che.ide.api.theme.Style.theme.partBackground();
         @eval tabsPanelBackground org.eclipse.che.ide.api.theme.Style.theme.tabsPanelBackground();
