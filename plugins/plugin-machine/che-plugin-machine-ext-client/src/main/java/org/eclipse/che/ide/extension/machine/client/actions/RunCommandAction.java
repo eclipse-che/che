@@ -16,7 +16,6 @@ import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandExecutor;
-import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.util.loging.Log;
@@ -54,16 +53,14 @@ public class RunCommandAction extends Action {
             return;
         }
 
-        String name = event.getParameters().get(NAME_PARAM_ID);
+        final String name = event.getParameters().get(NAME_PARAM_ID);
         if (name == null) {
             Log.error(getClass(), localizationConstant.runCommandEmptyNameMessage());
             return;
         }
 
-        final CommandImpl command = commandManager.getCommand(name);
-        if (command != null) {
-            commandExecutor.executeCommand(command, appContext.getDevMachine().getDescriptor());
-        }
+        commandManager.getCommand(name)
+                      .ifPresent(command -> commandExecutor.executeCommand(command,
+                                                                           appContext.getDevMachine().getDescriptor()));
     }
-
 }

@@ -217,12 +217,13 @@ public class CommandEditorTest {
     }
 
     @Test
-    public void shouldCloseEditorWhenEditedCommandRemoved() throws Exception {
+    public void shouldCloseEditorAndRemoveListenerWhenEditedCommandRemoved() throws Exception {
         ContextualCommand removedCommand = mock(ContextualCommand.class);
         when(removedCommand.getName()).thenReturn(EDITED_COMMAND_NAME);
 
         editor.onCommandRemoved(removedCommand);
 
         verify(editorAgent).closeEditor(editor);
+        verify(commandManager).removeCommandChangedListener(editor);
     }
 }

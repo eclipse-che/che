@@ -20,7 +20,6 @@ import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessesResponseDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandManager;
-import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.machine.events.ProcessFinishedEvent;
 import org.eclipse.che.ide.api.machine.events.ProcessStartedEvent;
@@ -126,12 +125,16 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
      *         machine where process were run or currently running
      */
     private void addProcessToList(int pid, Machine machine) {
-        execAgentCommandManager.getProcess(machine.getId(), pid).then(arg -> {
-            final Process process = new ProcessImpl(arg.getName(), arg.getCommandLine(), arg.getPid(), arg.isAlive(), machine);
-            runningProcesses.put(process.getPid(), process);
-
-            view.addProcess(process);
-        });
+        execAgentCommandManager.getProcess(machine.getId(), pid)
+                               .then(arg -> {
+                                   final Process process = new ProcessImpl(arg.getName(),
+                                                                           arg.getCommandLine(),
+                                                                           arg.getPid(),
+                                                                           arg.isAlive(),
+                                                                           machine);
+                                   runningProcesses.put(process.getPid(), process);
+                                   view.addProcess(process);
+                               });
     }
 
     @Override
@@ -146,12 +149,11 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
 
     @Override
     public void onReRunProcess(Process process) {
-        final ContextualCommand command = commandManager.getCommand(process.getName());
-
-        if (command != null) {
-            view.removeProcess(process);
-            commandExecutorProvider.get().executeCommand(command, process.getMachine());
-        }
+        commandManager.getCommand(process.getName())
+                      .ifPresent(command -> {
+                          view.removeProcess(process);
+                          commandExecutorProvider.get().executeCommand(command, process.getMachine());
+                      });
     }
 
     @Override

@@ -27,6 +27,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.Collections;
+import java.util.Optional;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -63,7 +64,7 @@ public class RunCommandActionTest {
 
     @Before
     public void setUp() throws Exception {
-        when(commandManager.getCommand(anyString())).thenReturn(command);
+        when(commandManager.getCommand(anyString())).thenReturn(Optional.of(command));
     }
 
     @Test

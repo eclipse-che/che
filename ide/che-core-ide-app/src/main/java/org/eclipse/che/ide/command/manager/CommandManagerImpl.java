@@ -42,12 +42,12 @@ import org.eclipse.che.ide.api.selection.SelectionAgent;
 import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
 import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent.WorkspaceReadyHandler;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_GOAL_ATTRIBUTE_NAME;
@@ -152,37 +152,27 @@ public class CommandManagerImpl implements CommandManager,
 
     @Override
     public List<ContextualCommand> getCommands() {
-        List<ContextualCommand> list = new ArrayList<>(commands.size());
-
-        for (ContextualCommand command : commands.values()) {
-            list.add(new ContextualCommand(command));
-        }
-
-        return list;
+        return commands.values()
+                       .stream()
+                       .map(ContextualCommand::new)
+                       .collect(Collectors.toList());
     }
 
-    @Nullable
     @Override
-    public ContextualCommand getCommand(String name) {
-        for (ContextualCommand command : commands.values()) {
-            if (name.equals(command.getName())) {
-                return command;
-            }
-        }
-
-        return null;
+    public java.util.Optional<ContextualCommand> getCommand(String name) {
+        return commands.values()
+                       .stream()
+                       .filter(command -> name.equals(command.getName()))
+                       .findFirst();
     }
 
     @Override
     public List<ContextualCommand> getApplicableCommands() {
-        final List<ContextualCommand> list = new ArrayList<>();
-        for (ContextualCommand command : commands.values()) {
-            if (isCommandApplicable(command)) {
-                list.add(new ContextualCommand(command));
-            }
-        }
-
-        return list;
+        return commands.values()
+                       .stream()
+                       .filter(this::isCommandApplicable)
+                       .map(ContextualCommand::new)
+                       .collect(Collectors.toList());
     }
 
     @Override
@@ -422,27 +412,19 @@ public class CommandManagerImpl implements CommandManager,
     }
 
     private void notifyCommandsLoaded() {
-        for (CommandLoadedListener listener : commandLoadedListeners) {
-            listener.onCommandsLoaded();
-        }
+        commandLoadedListeners.forEach(CommandLoadedListener::onCommandsLoaded);
     }
 
     private void notifyCommandAdded(ContextualCommand command) {
-        for (CommandChangedListener listener : commandChangedListeners) {
-            listener.onCommandAdded(command);
-        }
+        commandChangedListeners.forEach(listener -> listener.onCommandAdded(command));
     }
 
     private void notifyCommandRemoved(ContextualCommand command) {
-        for (CommandChangedListener listener : commandChangedListeners) {
-            listener.onCommandRemoved(command);
-        }
+        commandChangedListeners.forEach(listener -> listener.onCommandRemoved(command));
     }
 
     private void notifyCommandUpdated(ContextualCommand prevCommand, ContextualCommand command) {
-        for (CommandChangedListener listener : commandChangedListeners) {
-            listener.onCommandUpdated(prevCommand, command);
-        }
+        commandChangedListeners.forEach(listener -> listener.onCommandUpdated(prevCommand, command));
     }
 
     /**

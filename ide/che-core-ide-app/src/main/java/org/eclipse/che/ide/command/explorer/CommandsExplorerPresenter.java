@@ -12,12 +12,16 @@ package org.eclipse.che.ide.command.explorer;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.DelayedTask;
 import org.eclipse.che.ide.api.command.CommandGoal;
@@ -30,11 +34,13 @@ import org.eclipse.che.ide.api.command.PredefinedCommandGoalRegistry;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.ide.command.CommandResources;
 import org.eclipse.che.ide.command.CommandUtils;
+import org.eclipse.che.ide.command.node.NodeFactory;
 import org.eclipse.che.ide.command.type.CommandTypeChooser;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -67,6 +73,8 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     private final ExplorerMessages     messages;
     private final RefreshViewTask      refreshViewTask;
     private final DialogFactory        dialogFactory;
+    private final NodeFactory          nodeFactory;
+    private final EditorAgent          editorAgent;
 
     @Inject
     public CommandsExplorerPresenter(CommandsExplorerView view,
@@ -77,7 +85,9 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
                                      CommandTypeChooser commandTypeChooser,
                                      ExplorerMessages messages,
                                      RefreshViewTask refreshViewTask,
-                                     DialogFactory dialogFactory) {
+                                     DialogFactory dialogFactory,
+                                     NodeFactory nodeFactory,
+                                     EditorAgent editorAgent) {
         this.view = view;
         this.resources = commandResources;
         this.workspaceAgent = workspaceAgent;
@@ -87,6 +97,8 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
         this.messages = messages;
         this.refreshViewTask = refreshViewTask;
         this.dialogFactory = dialogFactory;
+        this.nodeFactory = nodeFactory;
+        this.editorAgent = editorAgent;
 
         view.setDelegate(this);
     }
@@ -144,11 +156,12 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
                 commandManager.createCommand(selectedGoal.getId(),
                                              selectedCommandType.getId(),
                                              defaultApplicableContext)
-                              .catchError(arg -> {
+                              .catchError((Operation<PromiseError>)arg -> {
                                   notificationManager.notify(messages.explorerMessageUnableCreate(),
                                                              arg.getMessage(),
                                                              FAIL,
                                                              EMERGE_MODE);
+                                  throw new OperationException(arg.getMessage());
                               });
             }
         });
@@ -156,24 +169,28 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
 
     @Override
     public void onCommandDuplicate(ContextualCommand command) {
-        commandManager.createCommand(command).then(view::selectCommand).catchError(arg -> {
-            notificationManager.notify(messages.explorerMessageUnableDuplicate(),
-                                       arg.getMessage(),
-                                       FAIL,
-                                       EMERGE_MODE);
-        });
+        commandManager.createCommand(command)
+                      .then(view::selectCommand)
+                      .catchError((Operation<PromiseError>)arg -> {
+                          notificationManager.notify(messages.explorerMessageUnableDuplicate(),
+                                                     arg.getMessage(),
+                                                     FAIL,
+                                                     EMERGE_MODE);
+                          throw new OperationException(arg.getMessage());
+                      });
     }
 
     @Override
     public void onCommandRemove(final ContextualCommand command) {
         dialogFactory.createConfirmDialog(messages.explorerRemoveCommandConfirmationTitle(),
                                           messages.explorerRemoveCommandConfirmationMessage(command.getName()),
-                                          () -> commandManager.removeCommand(command.getName()).catchError(arg -> {
-                                              notificationManager.notify(messages.explorerMessageUnableRemove(),
-                                                                         arg.getMessage(),
-                                                                         FAIL,
-                                                                         EMERGE_MODE);
-                                          }), null).show();
+                                          () -> commandManager.removeCommand(command.getName())
+                                                              .catchError(arg -> {
+                                                                  notificationManager.notify(messages.explorerMessageUnableRemove(),
+                                                                                             arg.getMessage(),
+                                                                                             FAIL,
+                                                                                             EMERGE_MODE);
+                                                              }), null).show();
     }
 
     @Override
@@ -184,6 +201,8 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     @Override
     public void onCommandAdded(ContextualCommand command) {
         refreshViewAndSelectCommand(command);
+        // postpone opening command editor to avoid ConcurrentModificationException in CommandManagerImpl.notifyCommandAdded()
+        Scheduler.get().scheduleDeferred(() -> editorAgent.openEditor(nodeFactory.newCommandFileNode(command)));
     }
 
     @Override

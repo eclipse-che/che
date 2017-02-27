@@ -11,10 +11,10 @@
 package org.eclipse.che.ide.api.command;
 
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.command.ContextualCommand.ApplicableContext;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Facade for command management.
@@ -31,9 +31,8 @@ public interface CommandManager {
     /** Returns all commands. */
     List<ContextualCommand> getCommands();
 
-    /** Returns command by the specified name or {@code null} if none. */
-    @Nullable
-    ContextualCommand getCommand(String name);
+    /** Returns optional command by the specified name or {@link Optional#empty()} if none. */
+    Optional<ContextualCommand> getCommand(String name);
 
     /** Returns commands which are applicable to the current IDE context. */
     List<ContextualCommand> getApplicableCommands();
