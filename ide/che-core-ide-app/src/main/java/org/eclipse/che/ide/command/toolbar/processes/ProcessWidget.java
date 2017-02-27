@@ -79,7 +79,7 @@ class ProcessWidget extends FlowPanel {
         stopButton.addClickHandler(event -> stopProcessHandler.onStopProcess(process));
 
         final SafeHtmlBuilder safeHtmlBuilder2 = new SafeHtmlBuilder();
-        safeHtmlBuilder2.appendHtmlConstant(FontAwesome.PLAY);
+        safeHtmlBuilder2.appendHtmlConstant(FontAwesome.REPEAT);
         reRunButton = new ActionButton(safeHtmlBuilder2.toSafeHtml());
         reRunButton.addClickHandler(event -> rerunProcessHandler.onRerunProcess(process));
 
