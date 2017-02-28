@@ -12,6 +12,7 @@ package org.eclipse.che.account.spi.tck;
 
 import org.eclipse.che.account.spi.AccountDao;
 import org.eclipse.che.account.spi.AccountImpl;
+import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.test.tck.TckListener;
@@ -60,6 +61,52 @@ public class AccountDaoTest {
         accountRepo.removeAll();
     }
 
+    @Test(dependsOnMethods = "shouldGetAccountById")
+    public void shouldCreateAccount() throws Exception {
+        AccountImpl toCreate = new AccountImpl("account123", "test123", "test");
+
+        accountDao.create(toCreate);
+
+        assertEquals(toCreate, accountDao.getById(toCreate.getId()));
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void shouldThrowNpeOnCreatingNullAccount() throws Exception {
+        accountDao.create(null);
+    }
+
+    @Test(dependsOnMethods = "shouldGetAccountById")
+    public void shouldUpdateAccount() throws Exception {
+        AccountImpl account = accounts[0];
+        account.setName("newName");
+        account.setType("newType");
+
+        accountDao.update(account);
+
+        assertEquals(account, accountDao.getById(account.getId()));
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void shouldThrowNpeOnUpdatingNullAccount() throws Exception {
+        accountDao.update(null);
+    }
+
+    @Test(expectedExceptions = ConflictException.class)
+    public void shouldThrowConflictExceptionWhenUpdatingAccountWithExistingName() throws Exception {
+        AccountImpl account = accounts[0];
+        account.setName(accounts[1].getName());
+
+        accountDao.update(account);
+    }
+
+    @Test(expectedExceptions = NotFoundException.class)
+    public void shouldThrowNotFoundExceptionWhenUpdatingNonExistingAccount() throws Exception {
+        AccountImpl account = accounts[0];
+        account.setId("nonExisting");
+
+        accountDao.update(account);
+    }
+
     @Test
     public void shouldGetAccountById() throws Exception {
         final AccountImpl account = accounts[0];
@@ -89,12 +136,27 @@ public class AccountDaoTest {
     }
 
     @Test(expectedExceptions = NotFoundException.class)
-    public void shouldThrowNotFoundExceptionOnGettingNonExistingaccountByName() throws Exception {
+    public void shouldThrowNotFoundExceptionOnGettingNonExistingAccountByName() throws Exception {
         accountDao.getByName("non-existing-account");
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNpeOnGettingAccountByNullName() throws Exception {
         accountDao.getByName(null);
+    }
+
+    @Test(dependsOnMethods = "shouldThrowNotFoundExceptionOnGettingNonExistingAccountById",
+          expectedExceptions = NotFoundException.class)
+    public void shouldRemoveAccount() throws Exception {
+        String toRemove = accounts[0].getId();
+
+        accountDao.remove(toRemove);
+
+        accountDao.getById(toRemove);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void shouldThrowNpeOnRemovingAccountByNullId() throws Exception {
+        accountDao.remove(null);
     }
 }
