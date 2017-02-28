@@ -11,7 +11,6 @@
 package org.eclipse.che.ide.command.editor.page.settings;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -31,9 +30,6 @@ import java.util.Map;
 public class ProjectsPageViewImpl extends Composite implements ProjectsPageView {
 
     private static final ProjectsPageViewImplUiBinder UI_BINDER = GWT.create(ProjectsPageViewImplUiBinder.class);
-
-    // height of the 'Projects' table's header
-    private static final int PROJECTS_TABLE_HEADER_HEIGHT_PX = 20;
 
     @UiField
     FlowPanel mainPanel;
@@ -56,14 +52,6 @@ public class ProjectsPageViewImpl extends Composite implements ProjectsPageView 
         mainPanel.setVisible(!projects.isEmpty());
 
         projects.entrySet().forEach(entry -> addProjectSwitcherToPanel(entry.getKey(), entry.getValue()));
-
-        // set view's height depending on the amount project switchers
-        if (!projects.isEmpty()) {
-            Scheduler.get().scheduleDeferred(() -> setHeight(PROJECTS_TABLE_HEADER_HEIGHT_PX +
-                                                             mainPanel.getOffsetHeight() + "px"));
-        } else {
-            setHeight("0");
-        }
     }
 
     private void addProjectSwitcherToPanel(Project project, boolean applicable) {
