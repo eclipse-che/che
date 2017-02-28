@@ -50,7 +50,7 @@ public abstract class AbstractPageWithTextEditor extends AbstractCommandEditorPa
                                          MacroChooser macroChooser,
                                          String title,
                                          TextEditorConfiguration editorConfiguration) {
-        super(title);
+        super("");
 
         this.view = view;
         this.fileTypeRegistry = fileTypeRegistry;
@@ -59,6 +59,7 @@ public abstract class AbstractPageWithTextEditor extends AbstractCommandEditorPa
 
         view.setDelegate(this);
         view.setHeight(getHeight());
+        view.setEditorTitle(title);
 
         initializeEditor(editorBuilder);
     }

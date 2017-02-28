@@ -69,11 +69,13 @@ public class CommandEditorViewImpl extends Composite implements CommandEditorVie
 
     @Override
     public void addPage(IsWidget page, String title) {
-        final Label label = new Label(title);
-        label.addStyleName(resources.editorCss().sectionLabel());
-        page.asWidget().addStyleName(resources.editorCss().section());
+        if (!title.isEmpty()) {
+            Label label = new Label(title);
+            label.addStyleName(resources.editorCss().sectionLabel());
+            pagesPanel.add(label);
+        }
 
-        pagesPanel.add(label);
+        page.asWidget().addStyleName(resources.editorCss().section());
         pagesPanel.add(page);
     }
 

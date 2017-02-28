@@ -9,7 +9,7 @@
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
 .sectionLabel {
-    margin: 8px 0 8px 25px;
+    margin: 8px 0 8px 20px;
     color: mainFontColor;
     font-size: 11px;
     font-weight: bold;
@@ -17,5 +17,5 @@
 }
 
 .section {
-    margin: 8px 0 8px 35px;
+    margin: 8px 0 20px 20px;
 }

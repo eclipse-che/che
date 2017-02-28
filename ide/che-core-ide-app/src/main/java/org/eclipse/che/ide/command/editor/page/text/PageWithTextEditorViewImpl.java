@@ -18,6 +18,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
@@ -33,6 +34,9 @@ public class PageWithTextEditorViewImpl extends Composite implements PageWithTex
 
     @UiField
     DockLayoutPanel mainPanel;
+
+    @UiField
+    Label title;
 
     @UiField
     Hyperlink exploreMacrosLink;
@@ -61,6 +65,11 @@ public class PageWithTextEditorViewImpl extends Composite implements PageWithTex
     @Override
     public void setHeight(int height) {
         mainPanel.setHeight(height + "px");
+    }
+
+    @Override
+    public void setEditorTitle(String title) {
+        this.title.setText(title);
     }
 
     @UiHandler("exploreMacrosLink")

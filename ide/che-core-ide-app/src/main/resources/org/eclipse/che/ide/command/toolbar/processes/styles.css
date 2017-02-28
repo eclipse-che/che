@@ -18,9 +18,9 @@
 .processesListLabel {
     float: left;
     background-color: #1d1d1d;
-    border-left: solid 0.5px #898989;
-    border-top: solid 0.5px #898989;
-    border-bottom: solid 0.5px #898989;
+    border-left: solid 0.6px #454545;
+    border-top: solid 0.6px #454545;
+    border-bottom: solid 0.6px #454545;
     border-right: 0;
     font-family: mainFontFamily;
     font-size: 9px;

@@ -27,6 +27,9 @@ public interface PageWithTextEditorView extends View<PageWithTextEditorView.Acti
     /** Sets height of the view. */
     void setHeight(int height);
 
+    /** Sets title for the editor. */
+    void setEditorTitle(String title);
+
     /** The action delegate for this view. */
     interface ActionDelegate {
 

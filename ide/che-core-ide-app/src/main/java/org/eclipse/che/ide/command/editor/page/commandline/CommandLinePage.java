@@ -17,8 +17,8 @@ import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.command.editor.EditorMessages;
 import org.eclipse.che.ide.command.editor.page.CommandEditorPage;
 import org.eclipse.che.ide.command.editor.page.text.AbstractPageWithTextEditor;
-import org.eclipse.che.ide.command.editor.page.text.PageWithTextEditorView;
 import org.eclipse.che.ide.command.editor.page.text.MacroEditorConfiguration;
+import org.eclipse.che.ide.command.editor.page.text.PageWithTextEditorView;
 import org.eclipse.che.ide.macro.chooser.MacroChooser;
 
 /**
