@@ -28,10 +28,14 @@ import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.command.editor.CommandEditorView;
 import org.eclipse.che.ide.command.editor.CommandEditorViewImpl;
+import org.eclipse.che.ide.command.editor.page.context.ContextPageView;
+import org.eclipse.che.ide.command.editor.page.context.ContextPageViewImpl;
+import org.eclipse.che.ide.command.editor.page.goal.GoalPageView;
+import org.eclipse.che.ide.command.editor.page.goal.GoalPageViewImpl;
 import org.eclipse.che.ide.command.editor.page.name.NamePageView;
 import org.eclipse.che.ide.command.editor.page.name.NamePageViewImpl;
-import org.eclipse.che.ide.command.editor.page.settings.SettingsPageView;
-import org.eclipse.che.ide.command.editor.page.settings.SettingsPageViewImpl;
+import org.eclipse.che.ide.command.editor.page.settings.ProjectsPageView;
+import org.eclipse.che.ide.command.editor.page.settings.ProjectsPageViewImpl;
 import org.eclipse.che.ide.command.editor.page.text.PageWithTextEditorView;
 import org.eclipse.che.ide.command.editor.page.text.PageWithTextEditorViewImpl;
 import org.eclipse.che.ide.command.execute.ExecuteCommandActionFactory;
@@ -110,7 +114,9 @@ public class CommandApiModule extends AbstractGinModule {
         // command editor
         bind(CommandEditorView.class).to(CommandEditorViewImpl.class);
         bind(NamePageView.class).to(NamePageViewImpl.class);
-        bind(SettingsPageView.class).to(SettingsPageViewImpl.class);
+        bind(GoalPageView.class).to(GoalPageViewImpl.class);
+        bind(ContextPageView.class).to(ContextPageViewImpl.class);
+        bind(ProjectsPageView.class).to(ProjectsPageViewImpl.class);
         bind(PageWithTextEditorView.class).to(PageWithTextEditorViewImpl.class);
 
         // toolbar

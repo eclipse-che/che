@@ -37,32 +37,29 @@ public interface EditorMessages extends Messages {
     @Key("page.name.title")
     String pageNameTitle();
 
-    @Key("page.settings.title")
-    String pageSettingsTitle();
+    @Key("page.command_line.title")
+    String pageCommandLineTitle();
 
-    @Key("page.settings.goal.label")
-    String pageSettingsGoalLabel();
+    @Key("page.goal.title")
+    String pageGoalTitle();
 
-    @Key("page.settings.section.context.label")
-    String pageSettingsSectionContextLabel();
+    @Key("page.context.title")
+    String pageContextTitle();
 
-    @Key("page.settings.workspace.label")
-    String pageSettingsWorkspaceLabel();
+    @Key("page.context.workspace.label")
+    String pageContextWorkspaceLabel();
 
-    @Key("page.settings.section.projects.label")
-    String pageSettingsSectionProjectsLabel();
+    @Key("page.projects.title")
+    String pageProjectsTitle();
 
-    @Key("page.settings.projects_table.header.project.label")
-    String pageSettingsProjectsTableHeaderProjectLabel();
+    @Key("page.projects.table.header.project.label")
+    String pageProjectsTableHeaderProjectLabel();
 
-    @Key("page.settings.projects_table.header.applicable.label")
-    String pageSettingsProjectsTableHeaderApplicableLabel();
+    @Key("page.projects.table.header.applicable.label")
+    String pageProjectsTableHeaderApplicableLabel();
 
     @Key("page.with_text_editor.explore_macros")
     String pageWithTextEditorExploreMacros();
-
-    @Key("page.command_line.title")
-    String pageCommandLineTitle();
 
     @Key("page.preview_url.title")
     String pagePreviewUrlTitle();

@@ -29,9 +29,11 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.command.editor.page.CommandEditorPage.DirtyStateListener;
 import org.eclipse.che.ide.command.editor.page.commandline.CommandLinePage;
+import org.eclipse.che.ide.command.editor.page.context.ContextPage;
+import org.eclipse.che.ide.command.editor.page.goal.GoalPage;
 import org.eclipse.che.ide.command.editor.page.name.NamePage;
 import org.eclipse.che.ide.command.editor.page.previewurl.PreviewUrlPage;
-import org.eclipse.che.ide.command.editor.page.settings.SettingsPage;
+import org.eclipse.che.ide.command.editor.page.settings.ProjectsPage;
 import org.eclipse.che.ide.command.node.CommandFileNode;
 import org.eclipse.che.ide.command.node.NodeFactory;
 import org.junit.Before;
@@ -72,11 +74,15 @@ public class CommandEditorTest {
     @Mock
     private CommandManager           commandManager;
     @Mock
-    private SettingsPage             settingsPage;
-    @Mock
     private NamePage                 namePage;
     @Mock
     private CommandLinePage          commandLinePage;
+    @Mock
+    private GoalPage                 goalPage;
+    @Mock
+    private ContextPage              contextPage;
+    @Mock
+    private ProjectsPage             projectsPage;
     @Mock
     private PreviewUrlPage           previewUrlPage;
     @Mock
@@ -127,11 +133,17 @@ public class CommandEditorTest {
     public void shouldBeInitialized() throws Exception {
         verify(view).setDelegate(editor);
         verify(commandManager).addCommandChangedListener(editor);
-        verify(settingsPage).setDirtyStateListener(any(DirtyStateListener.class));
+
         verify(commandLinePage).setDirtyStateListener(any(DirtyStateListener.class));
+        verify(goalPage).setDirtyStateListener(any(DirtyStateListener.class));
+        verify(contextPage).setDirtyStateListener(any(DirtyStateListener.class));
+        verify(projectsPage).setDirtyStateListener(any(DirtyStateListener.class));
         verify(previewUrlPage).setDirtyStateListener(any(DirtyStateListener.class));
-        verify(settingsPage).edit(editor.editedCommand);
+
         verify(commandLinePage).edit(editor.editedCommand);
+        verify(goalPage).edit(editor.editedCommand);
+        verify(contextPage).edit(editor.editedCommand);
+        verify(projectsPage).edit(editor.editedCommand);
         verify(previewUrlPage).edit(editor.editedCommand);
     }
 

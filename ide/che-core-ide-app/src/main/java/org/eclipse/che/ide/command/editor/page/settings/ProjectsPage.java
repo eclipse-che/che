@@ -16,12 +16,7 @@ import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.command.BaseCommandGoal;
-import org.eclipse.che.ide.api.command.CommandGoal;
-import org.eclipse.che.ide.api.command.CommandManager;
-import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.command.ContextualCommand.ApplicableContext;
-import org.eclipse.che.ide.api.command.PredefinedCommandGoalRegistry;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
@@ -33,53 +28,34 @@ import org.eclipse.che.ide.command.editor.page.CommandEditorPage;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-
-import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
- * {@link CommandEditorPage} which allows to edit basic command's settings, e.g.:
- * <ul>
- * <li>goal;</li>
- * <li>applicable context.</li>
- * </ul>
+ * {@link CommandEditorPage} which allows to edit command's applicable projects.
  *
  * @author Artem Zatsarynnyi
  */
-public class SettingsPage extends AbstractCommandEditorPage implements SettingsPageView.ActionDelegate,
+public class ProjectsPage extends AbstractCommandEditorPage implements ProjectsPageView.ActionDelegate,
                                                                        ResourceChangedHandler {
 
-    private final SettingsPageView              view;
-    private final AppContext                    appContext;
-    private final PredefinedCommandGoalRegistry goalRegistry;
-    private final CommandManager                commandManager;
+    private final ProjectsPageView view;
+    private final AppContext       appContext;
 
     private final Map<Project, Boolean> projectsState;
 
-    /** Initial value of the command's goal. */
-    private String       goalInitial;
-    /** Initial value of the workspace flag. */
-    private boolean      workspaceInitial;
     /** Initial value of the applicable projects list. */
     private List<String> applicableProjectsInitial;
 
     @Inject
-    public SettingsPage(SettingsPageView view,
+    public ProjectsPage(ProjectsPageView view,
                         AppContext appContext,
-                        PredefinedCommandGoalRegistry predefinedCommandGoalRegistry,
-                        CommandManager commandManager,
                         EditorMessages messages,
                         EventBus eventBus) {
-        super(messages.pageSettingsTitle());
+        super(messages.pageProjectsTitle());
 
         this.view = view;
         this.appContext = appContext;
-        this.goalRegistry = predefinedCommandGoalRegistry;
-        this.commandManager = commandManager;
 
         eventBus.addHandler(ResourceChangedEvent.getType(), this);
 
@@ -95,21 +71,9 @@ public class SettingsPage extends AbstractCommandEditorPage implements SettingsP
 
     @Override
     protected void initialize() {
-        final String goalId = editedCommand.getGoal();
-        final CommandGoal commandGoal = goalRegistry.getGoalForId(goalId);
         final ApplicableContext context = editedCommand.getApplicableContext();
 
-        goalInitial = commandGoal.getId();
-        workspaceInitial = context.isWorkspaceApplicable();
         applicableProjectsInitial = new ArrayList<>(context.getApplicableProjects());
-
-        final Set<CommandGoal> goals = new HashSet<>();
-        goals.addAll(goalRegistry.getAllGoals());
-        goals.addAll(getCustomGoals());
-
-        view.setAvailableGoals(goals);
-        view.setGoal(commandGoal.getId());
-        view.setWorkspace(editedCommand.getApplicableContext().isWorkspaceApplicable());
 
         refreshProjects();
     }
@@ -135,26 +99,9 @@ public class SettingsPage extends AbstractCommandEditorPage implements SettingsP
             return false;
         }
 
-        final CommandGoal commandGoal = goalRegistry.getGoalForId(editedCommand.getGoal());
         final ApplicableContext applicableContext = editedCommand.getApplicableContext();
 
-        return !(goalInitial.equals(commandGoal.getId()) &&
-                 workspaceInitial == applicableContext.isWorkspaceApplicable() &&
-                 applicableProjectsInitial.equals(applicableContext.getApplicableProjects()));
-    }
-
-    @Override
-    public void onGoalChanged(String goalId) {
-        editedCommand.setGoal(goalId);
-
-        notifyDirtyStateChanged();
-    }
-
-    @Override
-    public void onWorkspaceChanged(boolean value) {
-        editedCommand.getApplicableContext().setWorkspaceApplicable(value);
-
-        notifyDirtyStateChanged();
+        return !(applicableProjectsInitial.equals(applicableContext.getApplicableProjects()));
     }
 
     @Override
@@ -170,22 +117,6 @@ public class SettingsPage extends AbstractCommandEditorPage implements SettingsP
         }
 
         notifyDirtyStateChanged();
-    }
-
-    /** Returns all custom (non-predefined) command goals. */
-    private Set<CommandGoal> getCustomGoals() {
-        final Set<CommandGoal> list = new HashSet<>();
-
-        for (ContextualCommand command : commandManager.getCommands()) {
-            final String goalId = command.getGoal();
-
-            final Optional<CommandGoal> goalOptional = goalRegistry.getGoalById(goalId);
-            if (!goalOptional.isPresent() && !isNullOrEmpty(goalId)) {
-                list.add(new BaseCommandGoal(goalId));
-            }
-        }
-
-        return list;
     }
 
     @Override

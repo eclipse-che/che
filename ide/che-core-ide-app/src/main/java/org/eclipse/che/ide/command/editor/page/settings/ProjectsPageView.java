@@ -10,42 +10,22 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.editor.page.settings;
 
-import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.resources.Project;
 
 import java.util.Map;
-import java.util.Set;
 
 /**
- * The view of {@link SettingsPage}.
+ * The view of {@link ProjectsPage}.
  *
  * @author Artem Zatsarynnyi
  */
-public interface SettingsPageView extends View<SettingsPageView.ActionDelegate> {
-
-    /** Set the list of goals which are available to set for command. */
-    void setAvailableGoals(Set<CommandGoal> goals);
-
-    /** Sets the command's goal value. */
-    void setGoal(String goalId);
-
-    void setWorkspace(boolean value);
+public interface ProjectsPageView extends View<ProjectsPageView.ActionDelegate> {
 
     void setProjects(Map<Project, Boolean> projects);
 
     /** The action delegate for this view. */
     interface ActionDelegate {
-
-        /**
-         * Called when command goal has been changed.
-         *
-         * @param goalId
-         *         new value of the command goal
-         */
-        void onGoalChanged(String goalId);
-
-        void onWorkspaceChanged(boolean value);
 
         void onApplicableProjectChanged(Project project, boolean value);
     }

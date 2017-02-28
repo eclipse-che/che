@@ -8,65 +8,40 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.editor.page.settings;
+package org.eclipse.che.ide.command.editor.page.context;
 
-import com.google.web.bindery.event.shared.EventBus;
-
-import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.command.CommandGoal;
-import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.command.ContextualCommand.ApplicableContext;
-import org.eclipse.che.ide.api.command.PredefinedCommandGoalRegistry;
-import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.command.editor.EditorMessages;
 import org.eclipse.che.ide.command.editor.page.CommandEditorPage.DirtyStateListener;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_GOAL_ATTRIBUTE_NAME;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * Tests for {@link SettingsPage}.
+ * Tests for {@link ContextPage}.
  *
  * @author Artem Zatsarynnyi
  */
 @RunWith(MockitoJUnitRunner.class)
-public class SettingsPageTest {
-
-    private static final String COMMAND_NAME    = "build";
-    private static final String COMMAND_GOAL_ID = "build";
+public class ContextPageTest {
 
     @Mock
-    private SettingsPageView              view;
+    private ContextPageView view;
     @Mock
-    private AppContext                    appContext;
-    @Mock
-    private PredefinedCommandGoalRegistry goalRegistry;
-    @Mock
-    private CommandManager                commandManager;
-    @Mock
-    private EditorMessages                messages;
-    @Mock
-    private EventBus                      eventBus;
+    private EditorMessages  messages;
 
     @InjectMocks
-    private SettingsPage page;
+    private ContextPage page;
 
     @Mock
     private DirtyStateListener dirtyStateListener;
@@ -77,19 +52,8 @@ public class SettingsPageTest {
 
     @Before
     public void setUp() throws Exception {
-        when(appContext.getProjects()).thenReturn(new Project[0]);
-
-        CommandGoal commandGoal = mock(CommandGoal.class);
-        when(commandGoal.getId()).thenReturn(COMMAND_GOAL_ID);
-        when(goalRegistry.getGoalForId(anyString())).thenReturn(commandGoal);
-
         when(editedCommandApplicableContext.isWorkspaceApplicable()).thenReturn(true);
-        when(editedCommand.getName()).thenReturn(COMMAND_NAME);
         when(editedCommand.getApplicableContext()).thenReturn(editedCommandApplicableContext);
-
-        Map<String, String> attributes = new HashMap<>();
-        attributes.put(COMMAND_GOAL_ATTRIBUTE_NAME, COMMAND_GOAL_ID);
-        when(editedCommand.getAttributes()).thenReturn(attributes);
 
         page.setDirtyStateListener(dirtyStateListener);
         page.edit(editedCommand);
@@ -102,9 +66,6 @@ public class SettingsPageTest {
 
     @Test
     public void shouldInitializeView() throws Exception {
-        verify(goalRegistry).getAllGoals();
-        verify(view).setAvailableGoals(Matchers.<CommandGoal>anySet());
-        verify(view).setGoal(eq(COMMAND_GOAL_ID));
         verify(view).setWorkspace(eq(true));
     }
 
@@ -114,22 +75,8 @@ public class SettingsPageTest {
     }
 
     @Test
-    public void shouldNotifyListenerWhenGoalChanged() throws Exception {
-        page.onGoalChanged("test");
-
-        verify(dirtyStateListener, times(2)).onDirtyStateChanged();
-    }
-
-    @Test
     public void shouldNotifyListenerWhenWorkspaceChanged() throws Exception {
         page.onWorkspaceChanged(true);
-
-        verify(dirtyStateListener, times(2)).onDirtyStateChanged();
-    }
-
-    @Test
-    public void shouldNotifyListenerWhenApplicableProjectChanged() throws Exception {
-        page.onApplicableProjectChanged(mock(Project.class), true);
 
         verify(dirtyStateListener, times(2)).onDirtyStateChanged();
     }
