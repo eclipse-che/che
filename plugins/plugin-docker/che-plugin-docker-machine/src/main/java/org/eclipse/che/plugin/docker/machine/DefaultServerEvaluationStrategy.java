@@ -13,6 +13,7 @@ package org.eclipse.che.plugin.docker.machine;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
+import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
@@ -60,7 +61,9 @@ public class DefaultServerEvaluationStrategy extends ServerEvaluationStrategy {
     }
 
     @Override
-    protected Map<String, String> getExternalAddressesAndPorts(ContainerInfo containerInfo, String internalHost) {
+    protected Map<String, String> getExternalAddressesAndPorts(ContainerInfo containerInfo,
+                                                               String internalHost,
+                                                               Map<String, ServerConfImpl> serverConfMap) {
         String externalAddress = externalAddressProperty != null ?
                                  externalAddressProperty :
                                  internalAddressProperty != null ?
