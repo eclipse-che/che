@@ -13,6 +13,7 @@ package org.eclipse.che.plugin.docker.machine;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
+import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
@@ -84,15 +85,20 @@ public class LocalDockerServerEvaluationStrategy extends ServerEvaluationStrateg
     }
 
     @Override
-    protected Map<String, String> getExternalAddressesAndPorts(ContainerInfo containerInfo, String internalHost) {
-        String externalAddressContainer = containerInfo.getNetworkSettings().getGateway();
-
-        String externalAddress = externalAddressProperty != null ?
-                                 externalAddressProperty :
-                                 !isNullOrEmpty(externalAddressContainer) ?
-                                 externalAddressContainer :
-                                 internalHost;
-
-        return getExposedPortsToAddressPorts(externalAddress, containerInfo.getNetworkSettings().getPorts());
+    protected Map<String, String> getExternalAddressesAndPorts(ContainerInfo containerInfo,
+                                                               String internalHost,
+                                                               Map<String, ServerConfImpl> serverConfMap) {
+        String cheExternalAddress = getCheExternalAddress(containerInfo, internalHost);
+        return getExposedPortsToAddressPorts(cheExternalAddress, containerInfo.getNetworkSettings().getPorts());
     }
+
+    protected String getCheExternalAddress(ContainerInfo containerInfo, String internalHost) {
+        String externalAddressContainer = containerInfo.getNetworkSettings().getGateway();
+        return externalAddressProperty != null ?
+                externalAddressProperty :
+                !isNullOrEmpty(externalAddressContainer) ?
+                        externalAddressContainer :
+                        internalHost;
+    }
+
 }

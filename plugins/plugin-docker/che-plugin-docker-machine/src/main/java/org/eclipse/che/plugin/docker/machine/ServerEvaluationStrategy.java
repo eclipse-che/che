@@ -61,10 +61,13 @@ public abstract class ServerEvaluationStrategy {
      * @param internalAddress
      *         address passed into {@code getServers}; used as fallback if address cannot be
      *         retrieved from containerInfo.
+     * @param serverConfMap
+     *         additional Map of {@link ServerConfImpl}.
      * @return a Map of port protocol (e.g. "4401/tcp") to address (e.g. "localhost:32317")
      */
     protected abstract Map<String, String> getExternalAddressesAndPorts(ContainerInfo containerInfo,
-                                                                        String internalAddress);
+                                                                        String internalAddress,
+                                                                        Map<String, ServerConfImpl> serverConfMap);
 
     /**
      * Constructs a map of {@link ServerImpl} from provided parameters, using selected strategy
@@ -100,7 +103,7 @@ public abstract class ServerEvaluationStrategy {
         }
 
         Map<String, String> internalAddressesAndPorts = getInternalAddressesAndPorts(containerInfo, internalHost);
-        Map<String, String> externalAddressesAndPorts = getExternalAddressesAndPorts(containerInfo, internalHost);
+        Map<String, String> externalAddressesAndPorts = getExternalAddressesAndPorts(containerInfo, internalHost, serverConfMap);
 
         Map<String, ServerImpl> servers = new LinkedHashMap<>();
 

@@ -376,7 +376,7 @@ public class ServerEvaluationStrategyTest {
         when(networkSettings.getPorts()).thenReturn(ports);
         Map<String, String> exposedPortsToAddressPorts =
                 strategy.getExposedPortsToAddressPorts(DEFAULT_HOSTNAME, ports);
-        when(strategy.getExternalAddressesAndPorts(containerInfo, DEFAULT_HOSTNAME))
+        when(strategy.getExternalAddressesAndPorts(containerInfo, DEFAULT_HOSTNAME, serverConfs))
                 .thenReturn(exposedPortsToAddressPorts);
         when(strategy.getInternalAddressesAndPorts(containerInfo, DEFAULT_HOSTNAME))
                 .thenReturn(exposedPortsToAddressPorts);
@@ -393,7 +393,8 @@ public class ServerEvaluationStrategyTest {
 
         @Override
         protected Map<String, String> getExternalAddressesAndPorts(ContainerInfo containerInfo,
-                                                                   String internalAddress) {
+                                                                   String internalAddress,
+                                                                   Map<String, ServerConfImpl> serverConfMap) {
             return null;
         }
     }

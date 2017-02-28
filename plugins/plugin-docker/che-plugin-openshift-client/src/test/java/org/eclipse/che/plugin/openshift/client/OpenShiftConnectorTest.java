@@ -34,6 +34,7 @@ public class OpenShiftConnectorTest {
     private static final String   CHE_DEFAULT_OPENSHIFT_SERVICEACCOUNT = "cheserviceaccount";
     private static final int      OPENSHIFT_LIVENESS_PROBE_DELAY = 300;
     private static final int      OPENSHIFT_LIVENESS_PROBE_TIMEOUT = 1;
+    private static final String   CHE_DEFAULT_SERVER_EXTERNAL_ADDRESS = "che.openshift.mini";
 
     @Mock
     private DockerConnectorConfiguration       dockerConnectorConfiguration;
@@ -62,6 +63,7 @@ public class OpenShiftConnectorTest {
                                                     dockerConnectionFactory,
                                                     authManager,
                                                     dockerApiVersionPathPrefixProvider,
+                                                    CHE_DEFAULT_SERVER_EXTERNAL_ADDRESS,
                                                     CHE_DEFAULT_OPENSHIFT_PROJECT_NAME,
                                                     CHE_DEFAULT_OPENSHIFT_SERVICEACCOUNT,
                                                     OPENSHIFT_LIVENESS_PROBE_DELAY,
