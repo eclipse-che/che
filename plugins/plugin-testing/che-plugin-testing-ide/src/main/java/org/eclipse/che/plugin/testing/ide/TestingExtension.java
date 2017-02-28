@@ -34,12 +34,12 @@ public class TestingExtension {
     @Inject
     public TestingExtension(ActionManager actionManager, 
                             TestLocalizationConstant localization,
-                            Set<TestAction> testActions) {
+                            Set<TestActionGroup> testActions) {
         DefaultActionGroup runMenu = (DefaultActionGroup) actionManager.getAction(GROUP_RUN);
         DefaultActionGroup testMainMenu = new DefaultActionGroup(localization.actionGroupMenuName(), true,
                 actionManager);
         actionManager.registerAction("TestingMainGroup", testMainMenu);
-        for (TestAction testAction : testActions) {
+        for (TestActionGroup testAction : testActions) {
             testAction.addMainMenuItems(testMainMenu);
             testMainMenu.addSeparator();
         }
@@ -49,7 +49,7 @@ public class TestingExtension {
         DefaultActionGroup testContextMenu = new DefaultActionGroup(localization.actionGroupMenuName(), true,
                 actionManager);
         actionManager.registerAction("TestingContextGroup", testContextMenu);
-        for (TestAction testAction : testActions) {
+        for (TestActionGroup testAction : testActions) {
             testAction.addContextMenuItems(testContextMenu);
             testContextMenu.addSeparator();
         }

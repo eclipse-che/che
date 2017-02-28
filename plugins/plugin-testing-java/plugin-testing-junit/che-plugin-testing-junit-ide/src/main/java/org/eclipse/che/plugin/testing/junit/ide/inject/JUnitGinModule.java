@@ -11,8 +11,8 @@
 package org.eclipse.che.plugin.testing.junit.ide.inject;
 
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
-import org.eclipse.che.plugin.testing.ide.TestAction;
-import org.eclipse.che.plugin.testing.junit.ide.JUnitTestAction;
+import org.eclipse.che.plugin.testing.ide.TestActionGroup;
+import org.eclipse.che.plugin.testing.junit.ide.JUnitTestActionGroup;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
@@ -25,6 +25,6 @@ import com.google.gwt.inject.client.multibindings.GinMultibinder;
 public class JUnitGinModule extends AbstractGinModule {
     @Override
     protected void configure() {
-        GinMultibinder.newSetBinder(binder(), TestAction.class).addBinding().to(JUnitTestAction.class);
+        GinMultibinder.newSetBinder(binder(), TestActionGroup.class).addBinding().to(JUnitTestActionGroup.class);
     }
 }

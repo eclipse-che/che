@@ -28,11 +28,13 @@ import java.util.concurrent.ThreadFactory;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.util.AbstractLineConsumer;
 import org.eclipse.che.api.core.util.CommandLine;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.ProcessUtil;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.VirtualFileEntry;
+import org.eclipse.che.api.testing.server.exceptions.TestFrameworkException;
 import org.eclipse.che.api.testing.shared.dto.TestResultDto;
 import org.eclipse.che.api.testing.shared.dto.TestResultRootDto;
 import org.eclipse.che.api.vfs.Path;
@@ -71,7 +73,7 @@ public class PHPUnitTestEngine {
         public void run() {
             try {
                 serverSocket = new ServerSocket(PRINTER_PORT, 1);
-                serverSocket.setSoTimeout(10000);
+                serverSocket.setSoTimeout(3000);
                 serverSocket.setReuseAddress(true);
                 // Release engine to perform tests
                 latchReady.countDown();
@@ -156,7 +158,11 @@ public class PHPUnitTestEngine {
         String projectPath = testParameters.get("projectPath");
         String projectAbsolutePath = testParameters.get("absoluteProjectPath");
         String testTarget = testParameters.get("testTarget");
-        Path testTargetAbsolutePath = Path.of(projectAbsolutePath).newPath(Path.of(testTarget).subPath(1));
+        Path testTargetAbsolutePath;
+        if (Path.of(testTarget).length() > 1)
+            testTargetAbsolutePath = Path.of(projectAbsolutePath).newPath(Path.of(testTarget).subPath(1));
+        else
+            testTargetAbsolutePath = Path.of(projectAbsolutePath);
         String testTargetWorkingDirectory = testTargetAbsolutePath.getParent().toString();
         String testTargetName = testTargetAbsolutePath.getName();
         // Get appropriate path to executable
@@ -181,14 +187,26 @@ public class PHPUnitTestEngine {
         }
         final CommandLine cmdRunTests = new CommandLine(phpUnitExecutable, "--include-path", printerDirAbsolutePath,
                 "--printer", phpPrinterName, testTargetName);
-        Process processBuildClassPath = new ProcessBuilder().redirectErrorStream(true)
-                .directory(new File(testTargetWorkingDirectory)).command(cmdRunTests.toShellCommand()).start();
-        ProcessUtil.process(processBuildClassPath, LineConsumer.DEV_NULL);
-        processBuildClassPath.waitFor();
+        ProcessBuilder pb = new ProcessBuilder().redirectErrorStream(true)
+                .directory(new File(testTargetWorkingDirectory)).command(cmdRunTests.toShellCommand());
+        pb.environment().put("ZEND_PHPUNIT_PORT", String.valueOf(PRINTER_PORT));
+        Process processRunPHPUnitTests = pb.start();
+        final StringBuilder stdErrOut = new StringBuilder();
+        ProcessUtil.process(processRunPHPUnitTests, new AbstractLineConsumer() {
+            @Override
+            public void writeLine(String line) throws IOException {
+                if (!line.isEmpty())
+                    stdErrOut.append("\t" + line + "\n");
+            }
+        });
+        int exitValue = processRunPHPUnitTests.waitFor();
         try {
             latchDone.await();
         } catch (InterruptedException e) {
             LOG.error(e.getMessage(), e);
+        }
+        if (exitValue != 0 && stdErrOut.length() > 0 && phpTestsRoot.getChildren() == null) {
+            throw new TestFrameworkException("PHPUnit Error:\n" + stdErrOut.toString());
         }
         return testResultsProvider.getTestResultsRoot(phpTestsRoot);
     }
@@ -255,10 +273,10 @@ public class PHPUnitTestEngine {
             Gson gson = new GsonBuilder().create();
             Map<String, ?> composerJsonMap = gson.fromJson(reader, LinkedTreeMap.class);
             Map<String, String> requireDev = (Map<String, String>) composerJsonMap.get("require-dev");
-            if (requireDev.get("phpunit/phpunit") != null)
+            if (requireDev != null && requireDev.get("phpunit/phpunit") != null)
                 return true;
             Map<String, String> require = (Map<String, String>) composerJsonMap.get("require");
-            if (require.get("phpunit/phpunit") != null)
+            if (require != null && require.get("phpunit/phpunit") != null)
                 return true;
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);

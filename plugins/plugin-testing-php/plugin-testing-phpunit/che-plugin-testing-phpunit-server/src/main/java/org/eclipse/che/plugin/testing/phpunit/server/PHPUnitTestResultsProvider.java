@@ -26,9 +26,9 @@ import org.eclipse.che.api.testing.shared.dto.TestResultRootDto;
 import org.eclipse.che.api.testing.shared.dto.TestResultTraceDto;
 import org.eclipse.che.api.testing.shared.dto.TestResultTraceFrameDto;
 import org.eclipse.che.dto.server.DtoFactory;
-import org.eclipse.che.plugin.testing.phpunit.server.model.AbstractPHPUnitTestEvent;
 import org.eclipse.che.plugin.testing.phpunit.server.model.AbstractPHPUnitTestResult;
 import org.eclipse.che.plugin.testing.phpunit.server.model.PHPUnitTestCase;
+import org.eclipse.che.plugin.testing.phpunit.server.model.PHPUnitTestException;
 import org.eclipse.che.plugin.testing.phpunit.server.model.PHPUnitTestRoot;
 import org.eclipse.che.plugin.testing.phpunit.server.model.PHPUnitTestSuite;
 import org.eclipse.che.plugin.testing.phpunit.server.model.PHPUnitTraceFrame;
@@ -55,6 +55,7 @@ class PHPUnitTestResultsProvider {
         testResultRootDto.setResultPath(Collections.singletonList("php-tests-root"));
         testResultRootDto.setName(getRootLabel(resultsRoot.getStatus()));
         testResultRootDto.setInfoText(getTimeString(resultsRoot.getTime()));
+        testResultRootDto.setEmpty(resultsRoot.getChildren() == null);
         // Add PHP related test result to cache
         testResultsCache.put(getKey(testResultRootDto.getResultPath()), resultsRoot);
         return testResultRootDto;
@@ -91,7 +92,7 @@ class PHPUnitTestResultsProvider {
                 phpTestResult instanceof PHPUnitTestSuite ? TestResultType.TEST_SUITE : TestResultType.TEST_CASE);
         SimpleLocationDto simpleLocationDto = DtoFactory.getInstance().createDto(SimpleLocationDto.class);
         simpleLocationDto.setResourcePath(phpTestResult.getFile());
-        simpleLocationDto.setLineNumber(phpTestResult.getLine());
+        simpleLocationDto.setLineNumber(phpTestResult.getLine() - 1);
         testResultDto.setTestLocation(simpleLocationDto);
         // Add PHP related test result to cache
         testResultsCache.put(getKey(testResultDto.getResultPath()), phpTestResult);
@@ -102,9 +103,9 @@ class PHPUnitTestResultsProvider {
         TestResultTraceDto testResultTraceDto = DtoFactory.getInstance().createDto(TestResultTraceDto.class);
         if (phpTestResult instanceof PHPUnitTestCase) {
             PHPUnitTestCase phpTestCase = (PHPUnitTestCase) phpTestResult;
-            AbstractPHPUnitTestEvent phpTestEvent = phpTestCase.getException();
+            PHPUnitTestException phpTestEvent = phpTestCase.getException();
             if (phpTestEvent != null) {
-                testResultTraceDto.setMessage(phpTestEvent.getMessage());
+                testResultTraceDto.setMessage(phpTestEvent.getExceptionClass() + ": " + phpTestEvent.getMessage());
                 List<TestResultTraceFrameDto> traceFrames = new ArrayList<>();
                 for (PHPUnitTraceFrame phpTraceFrame : phpTestEvent.getTrace()) {
                     TestResultTraceFrameDto testResultTraceFrameDto = DtoFactory.getInstance()
@@ -112,7 +113,7 @@ class PHPUnitTestResultsProvider {
                     testResultTraceFrameDto.setTraceFrame(phpTraceFrame.toString());
                     SimpleLocationDto simpleLocationDto = DtoFactory.getInstance().createDto(SimpleLocationDto.class);
                     simpleLocationDto.setResourcePath(phpTraceFrame.getFile());
-                    simpleLocationDto.setLineNumber(phpTraceFrame.getLine());
+                    simpleLocationDto.setLineNumber(phpTraceFrame.getLine() - 1);
                     testResultTraceFrameDto.setLocation(simpleLocationDto);
                     traceFrames.add(testResultTraceFrameDto);
                 }

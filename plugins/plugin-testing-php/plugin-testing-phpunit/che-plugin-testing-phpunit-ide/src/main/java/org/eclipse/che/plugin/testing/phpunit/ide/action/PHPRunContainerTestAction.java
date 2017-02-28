@@ -10,10 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.phpunit.ide.action;
 
-import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import java.util.Arrays;
@@ -22,24 +18,15 @@ import java.util.Map;
 
 import javax.validation.constraints.NotNull;
 
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.api.testing.shared.common.TestResultStatus;
-import org.eclipse.che.api.testing.shared.dto.TestResultRootDto;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.selection.SelectionAgent;
 import org.eclipse.che.ide.resources.tree.ContainerNode;
-import org.eclipse.che.plugin.testing.ide.TestServiceClient;
-import org.eclipse.che.plugin.testing.ide.view.TestResultPresenter;
+import org.eclipse.che.plugin.testing.ide.TestActionRunner;
 import org.eclipse.che.plugin.testing.phpunit.ide.PHPUnitTestLocalizationConstant;
 import org.eclipse.che.plugin.testing.phpunit.ide.PHPUnitTestResources;
 
@@ -52,29 +39,22 @@ import com.google.inject.Inject;
  */
 public class PHPRunContainerTestAction extends AbstractPerspectiveAction {
 
-    private final NotificationManager notificationManager;
-    private final TestResultPresenter presenter;
-    private final TestServiceClient service;
+    private final TestActionRunner runner;
     private final AppContext appContext;
     private final SelectionAgent selectionAgent;
 
     @Inject
-    public PHPRunContainerTestAction(PHPUnitTestResources resources, NotificationManager notificationManager,
-            AppContext appContext, TestResultPresenter presenter, TestServiceClient service,
+    public PHPRunContainerTestAction(TestActionRunner runner, PHPUnitTestResources resources, AppContext appContext,
             SelectionAgent selectionAgent, PHPUnitTestLocalizationConstant localization) {
         super(Arrays.asList(PROJECT_PERSPECTIVE_ID), localization.actionRunContainerTitle(),
                 localization.actionRunScriptDescription(), null, resources.testIcon());
-        this.notificationManager = notificationManager;
-        this.presenter = presenter;
-        this.service = service;
+        this.runner = runner;
         this.appContext = appContext;
         this.selectionAgent = selectionAgent;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        final StatusNotification notification = new StatusNotification("Running Tests...", PROGRESS, FLOAT_MODE);
-        notificationManager.notify(notification);
         final Selection<?> selection = selectionAgent.getSelection();
         final Object possibleNode = selection.getHeadElement();
         if (possibleNode instanceof ContainerNode) {
@@ -82,29 +62,7 @@ public class PHPRunContainerTestAction extends AbstractPerspectiveAction {
             final Project project = appContext.getRootProject();
             Map<String, String> parameters = new HashMap<>();
             parameters.put("testTarget", container.getLocation().toString());
-            Promise<TestResultRootDto> testResultPromise = service.runTests("PHPUnit", project.getPath(), parameters);
-            testResultPromise.then(new Operation<TestResultRootDto>() {
-                @Override
-                public void apply(TestResultRootDto result) throws OperationException {
-                    notification.setStatus(SUCCESS);
-                    if (result.getStatus() == TestResultStatus.SUCCESS) {
-                        notification.setTitle("Test runner executed successfully");
-                        notification.setContent("All tests are passed");
-                    } else {
-                        notification.setTitle("Test runner executed successfully with test failures.");
-                        notification.setContent("Some test(s) failed.\n");
-                    }
-                    presenter.handleResponse(result);
-                }
-            }).catchError(new Operation<PromiseError>() {
-                @Override
-                public void apply(PromiseError exception) throws OperationException {
-                    final String errorMessage = (exception.getMessage() != null) ? exception.getMessage()
-                            : "Failed to run test cases";
-                    notification.setContent(errorMessage);
-                    notification.setStatus(FAIL);
-                }
-            });
+            runner.run("PHPUnit", project.getPath(), parameters);
         }
     }
 

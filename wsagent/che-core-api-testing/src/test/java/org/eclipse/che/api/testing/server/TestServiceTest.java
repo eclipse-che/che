@@ -40,7 +40,7 @@ import com.jayway.restassured.response.Response;
  * @author Mirage Abeysekara
  */
 @Listeners(value = {EverrestJetty.class, MockitoTestNGListener.class})
-public class TestingServiceTest {
+public class TestServiceTest {
 
     private final String SERVICE_PATH = "/che/testing";
     private final String SERVICE_PATH_RUN_ACTION = SERVICE_PATH + "/run";
@@ -63,7 +63,7 @@ public class TestingServiceTest {
 
     private DtoFactory dto;
     @SuppressWarnings("unused") // not really...
-    private TestingService testingService;
+    private TestService testingService;
 
     @BeforeMethod
     public void setUp() throws Exception {
@@ -72,7 +72,7 @@ public class TestingServiceTest {
         when(projectRegistry.getProject(anyString())).thenReturn(registeredProject);
         when(frameworkRegistry.getTestRunner(TEST_FRAMEWORK_A)).thenReturn(testRunnerA);
         when(frameworkRegistry.getTestRunner(TEST_FRAMEWORK_B)).thenReturn(testRunnerB);
-        testingService = new TestingService(frameworkRegistry);
+        testingService = new TestService(frameworkRegistry);
     }
 
     // Asking for run a test from known framework.

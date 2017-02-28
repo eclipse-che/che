@@ -11,7 +11,7 @@
 package org.eclipse.che.plugin.testing.phpunit.ide;
 
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
-import org.eclipse.che.plugin.testing.ide.TestAction;
+import org.eclipse.che.plugin.testing.ide.TestActionGroup;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
@@ -25,6 +25,6 @@ import com.google.gwt.inject.client.multibindings.GinMultibinder;
 public class PHPUnitGinModule extends AbstractGinModule {
     @Override
     protected void configure() {
-        GinMultibinder.newSetBinder(binder(), TestAction.class).addBinding().to(PHPUnitTestAction.class);
+        GinMultibinder.newSetBinder(binder(), TestActionGroup.class).addBinding().to(PHPUnitTestActionGroup.class);
     }
 }

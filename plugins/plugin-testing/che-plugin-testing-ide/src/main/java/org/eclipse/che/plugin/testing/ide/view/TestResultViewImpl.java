@@ -96,8 +96,6 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
     private final EditorAgent editorAgent;
     private final EventBus eventBus;
     private final TestResultNodeFactory nodeFactory;
-    private Tree resultTree;
-    private Tree traceTree;
     private int lastWentLine = 0;
 
     @UiField(provided = true)
@@ -122,20 +120,6 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
         this.nodeFactory = nodeFactory;
         splitLayoutPanel = new SplitLayoutPanel(1);
         setContentWidget(UI_BINDER.createAndBindUi(this));
-        resultTree = createTree();
-        resultTree.getSelectionModel().addSelectionHandler(new SelectionHandler<Node>() {
-            @Override
-            public void onSelection(SelectionEvent<Node> event) {
-                Node selectedNode = event.getSelectedItem();
-                if (selectedNode instanceof TestResultMethodNode) {
-                    fillOutputPanel(((TestResultMethodNode) selectedNode).getStackTrace());
-                }
-                if (selectedNode instanceof AbstractTestResultTreeNode) {
-                    fillOutputPanel((AbstractTestResultTreeNode) selectedNode);
-                }
-            }
-        });
-        navigationPanel.add(resultTree);
     }
 
     private Tree createTree() {
@@ -168,7 +152,7 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
     @Deprecated
     public void showResults(TestResult result) {
         setTitle("Test Results (Framework: " + result.getTestFramework() + ")");
-        buildResultTree(result);
+        fillNavigationPanel(result);
         focusView();
     }
 
@@ -178,13 +162,23 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
     @Override
     public void showResults(TestResultRootDto result) {
         setTitle("Test Results (Framework: " + result.getTestFrameworkName() + ")");
-        buildResultTree(result);
+        fillNavigationPanel(result);
         focusView();
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void clear() {
+        setTitle("");
+        navigationPanel.clear();
+        traceOutputPanel.clear();
+    }
+
     @Deprecated
-    private void buildResultTree(TestResult result) {
-        resultTree.getNodeStorage().clear();
+    private void fillNavigationPanel(TestResult result) {
+        Tree resultTree = buildResultTree(result);
         // outputResult.setText("");
         TestResultGroupNode root = nodeFactory.getTestResultGroupNode(result);
         Map<String, List<Node>> classNodeHashMap = new HashMap<>();
@@ -205,23 +199,43 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
         }
         root.setChildren(classNodes);
         resultTree.getNodeStorage().add(root);
+        navigationPanel.add(resultTree);
     }
 
-    private void buildResultTree(TestResultRootDto result) {
-        resultTree.getNodeStorage().clear();
+    private void fillNavigationPanel(TestResultRootDto result) {
+        Tree resultTree = buildResultTree(result);
         TestResultRootNode root = nodeFactory.createTestResultRootNode(result, result.getTestFrameworkName());
         resultTree.getNodeStorage().add(root);
+        navigationPanel.add(resultTree);
     }
-
-    private void buildTraceTree(TestResultTraceDto trace) {
-        traceTree = createTree();
-        traceTree.getNodeStorage().clear();
-        List<Node> traceNodes = new ArrayList<>();
-        for (TestResultTraceFrameDto traceFrame : trace.getTraceFrames()) {
-            TestResultTraceFrameNode traceNode = nodeFactory.createTestResultTraceFrameNode(traceFrame);
-            traceNodes.add(traceNode);
-        }
-        traceTree.getNodeStorage().add(traceNodes);
+    
+    @Deprecated
+    private Tree buildResultTree(TestResult result) {
+        Tree resultTree = createTree();
+        resultTree.getSelectionModel().addSelectionHandler(new SelectionHandler<Node>() {
+            @Override
+            public void onSelection(SelectionEvent<Node> event) {
+                Node selectedNode = event.getSelectedItem();
+                if (selectedNode instanceof TestResultMethodNode) {
+                    fillOutputPanel(((TestResultMethodNode) selectedNode).getStackTrace());
+                }
+            }
+        });
+        return resultTree;
+    }
+    
+    private Tree buildResultTree(TestResultRootDto result) {
+        Tree resultTree = createTree();
+        resultTree.getSelectionModel().addSelectionHandler(new SelectionHandler<Node>() {
+            @Override
+            public void onSelection(SelectionEvent<Node> event) {
+                Node selectedNode = event.getSelectedItem();
+                if (selectedNode instanceof AbstractTestResultTreeNode) {
+                    fillOutputPanel((AbstractTestResultTreeNode) selectedNode);
+                }
+            }
+        });
+        return resultTree;
     }
 
     @Deprecated
@@ -240,9 +254,20 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
         Label traceMessageLabel = new Label(testTrace.getMessage());
         traceMessageLabel.setStyleName(style.traceFrameMessage());
         traceOutputPanel.add(traceMessageLabel);
-        buildTraceTree(testTrace);
+        Tree traceTree = buildTraceTree(testTrace);
         traceTree.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
         traceOutputPanel.add(traceTree);
+    }
+
+    private Tree buildTraceTree(TestResultTraceDto trace) {
+        Tree traceTree = createTree();
+        List<Node> traceNodes = new ArrayList<>();
+        for (TestResultTraceFrameDto traceFrame : trace.getTraceFrames()) {
+            TestResultTraceFrameNode traceNode = nodeFactory.createTestResultTraceFrameNode(traceFrame);
+            traceNodes.add(traceNode);
+        }
+        traceTree.getNodeStorage().add(traceNodes);
+        return traceTree;
     }
 
     @Override

@@ -95,4 +95,8 @@ public class TestResultPresenter extends BasePresenter implements TestResultView
         workspaceAgent.setActivePart(this);
         view.showResults(response);
     }
+    
+    public void clear() {
+        view.clear();
+    }
 }

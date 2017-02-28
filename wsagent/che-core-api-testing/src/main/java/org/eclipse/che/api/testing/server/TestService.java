@@ -24,12 +24,15 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 
+import org.eclipse.che.api.testing.server.exceptions.TestFrameworkException;
 import org.eclipse.che.api.testing.server.framework.TestFrameworkRegistry;
 import org.eclipse.che.api.testing.server.framework.TestRunner;
 import org.eclipse.che.api.testing.shared.TestResult;
 import org.eclipse.che.api.testing.shared.dto.TestResultDto;
 import org.eclipse.che.api.testing.shared.dto.TestResultRootDto;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -43,12 +46,13 @@ import io.swagger.annotations.ApiResponses;
  */
 @Api(value = "/che-testing")
 @Path("che/testing")
-public class TestingService {
+public class TestService {
 
+    public static final Logger LOG = LoggerFactory.getLogger(TestService.class);
     private final TestFrameworkRegistry frameworkRegistry;
 
     @Inject
-    public TestingService(TestFrameworkRegistry frameworkRegistry) {
+    public TestService(TestFrameworkRegistry frameworkRegistry) {
         this.frameworkRegistry = frameworkRegistry;
     }
 
@@ -98,7 +102,16 @@ public class TestingService {
         queryParameters.put("absoluteProjectPath", absoluteProjectPath);
         String testFramework = queryParameters.get("testFramework");
         getTestRunner(testFramework);
-        TestResultRootDto result = frameworkRegistry.getTestRunner(testFramework).runTests(queryParameters);
+        TestResultRootDto result;
+        try {
+            result = frameworkRegistry.getTestRunner(testFramework).runTests(queryParameters);
+        } catch (TestFrameworkException e) {
+            LOG.error(e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
+        }
         return result;
     }
 

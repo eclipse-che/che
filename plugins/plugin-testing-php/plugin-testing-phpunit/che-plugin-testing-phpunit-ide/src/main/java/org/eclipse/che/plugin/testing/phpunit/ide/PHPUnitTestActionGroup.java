@@ -14,7 +14,7 @@ import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
-import org.eclipse.che.plugin.testing.ide.TestAction;
+import org.eclipse.che.plugin.testing.ide.TestActionGroup;
 import org.eclipse.che.plugin.testing.phpunit.ide.action.PHPRunContainerTestAction;
 import org.eclipse.che.plugin.testing.phpunit.ide.action.PHPRunScriptTestAction;
 
@@ -25,13 +25,13 @@ import com.google.inject.Inject;
  * 
  * @author Bartlomiej Laczkowski
  */
-public class PHPUnitTestAction implements TestAction {
+public class PHPUnitTestActionGroup implements TestActionGroup {
 
     private final Action runScriptTestAction;
     private PHPRunContainerTestAction runContainerTestAction;
 
     @Inject
-    public PHPUnitTestAction(ActionManager actionManager, PHPRunScriptTestAction runScriptTestAction,
+    public PHPUnitTestActionGroup(ActionManager actionManager, PHPRunScriptTestAction runScriptTestAction,
             PHPRunContainerTestAction runAllTestAction, KeyBindingAgent keyBinding) {
         actionManager.registerAction("PHPRunScriptTestAction", runScriptTestAction);
         actionManager.registerAction("PHPRunAllTestAction", runAllTestAction);

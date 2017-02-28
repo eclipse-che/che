@@ -46,6 +46,11 @@ public interface TestResultView extends View<TestResultView.ActionDelegate> {
      *            test results which comes from the server
      */
     void showResults(TestResultRootDto result);
+    
+    /**
+     * Clears the result view.
+     */
+    void clear();
 
     interface ActionDelegate extends BaseActionDelegate {
     }

@@ -108,4 +108,20 @@ public interface TestResultRootDto {
      */
     void setResultPath(List<String> resultPath);
 
+    /**
+     * Returns <code>true</code> if this result root is empty (has no test
+     * results at all).
+     * 
+     * @return <code>true</code> if this result root is empty,
+     *         <code>false</code> otherwise
+     */
+    boolean isEmpty();
+
+    /**
+     * Sets whether this result root is empty (has no test results at all)
+     * 
+     * @param isEmpty
+     */
+    void setEmpty(boolean isEmpty);
+
 }

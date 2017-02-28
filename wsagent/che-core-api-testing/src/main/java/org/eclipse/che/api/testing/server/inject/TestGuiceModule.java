@@ -12,7 +12,7 @@ package org.eclipse.che.api.testing.server.inject;
 
 import static com.google.inject.multibindings.Multibinder.newSetBinder;
 
-import org.eclipse.che.api.testing.server.TestingService;
+import org.eclipse.che.api.testing.server.TestService;
 import org.eclipse.che.api.testing.server.framework.TestRunner;
 import org.eclipse.che.inject.DynaModule;
 
@@ -26,6 +26,6 @@ public class TestGuiceModule extends AbstractModule {
     @Override
     protected void configure() {
         newSetBinder(binder(), TestRunner.class);
-        bind(TestingService.class);
+        bind(TestService.class);
     }
 }
