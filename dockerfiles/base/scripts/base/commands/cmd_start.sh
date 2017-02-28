@@ -71,7 +71,9 @@ cmd_start() {
 
   # Always regenerate puppet configuration from environment variable source, whether changed or not.
   # If the current directory is not configured with an .env file, it will initialize
-  if ! skip_config; then
+  if skip_config; then
+    cmd_lifecycle config $FORCE_UPDATE --skip:config
+  else
     cmd_lifecycle config $FORCE_UPDATE
   fi
 
