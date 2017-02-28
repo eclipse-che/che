@@ -19,6 +19,7 @@
             display: inline-block;
             cursor: pointer;
             background-color: #33373b;
+            background-image: linear-gradient(to bottom, #444444, #343434 98%);
             border: solid 0.6px #898989;
         }
 
