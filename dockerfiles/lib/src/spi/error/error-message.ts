@@ -23,10 +23,7 @@ export class ErrorMessage {
         if (exitCode) {
             this.exitCode = exitCode;
         }
-        console.log("build error message with exit code", exitCode);
     }
-
-
 
     getExitCode() : number {
         return this.exitCode;

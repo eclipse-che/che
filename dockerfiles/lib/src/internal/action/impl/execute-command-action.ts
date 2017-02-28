@@ -16,10 +16,10 @@ import {AuthData} from "../../../api/wsmaster/auth/auth-data";
 import {Workspace} from "../../../api/wsmaster/workspace/workspace";
 import {ArgumentProcessor} from "../../../spi/decorator/argument-processor";
 import {Log} from "../../../spi/log/log";
-import {MachineServiceClientImpl} from "../../../api/wsmaster/machine/machine-service-client";
 import {UUID} from "../../../utils/uuid";
 import {CheFileStructWorkspaceCommand} from "../../dir/chefile-struct/che-file-struct";
 import {CheFileStructWorkspaceCommandImpl} from "../../dir/chefile-struct/che-file-struct";
+import {ExecAgentServiceClientImpl} from "../../../api/exec-agent/exec-agent-service-client";
 /**
  * This class is handling the removal of a user
  * @author Florent Benoit
@@ -68,16 +68,23 @@ export class ExecuteCommandAction {
                 // get dev machine
                 let machineId : string = workspaceDto.getRuntime().getDevMachine().getId();
 
+                // get terminal URI
+                let execAgentServer = workspaceDto.getRuntime().getDevMachine().getRuntime().getServers().get("4411/tcp");
+                let execAgentURI = execAgentServer.getUrl();
+                if (execAgentURI.includes("localhost")) {
+                    execAgentURI = execAgentServer.getProperties().getInternalUrl();
+                }
+
+                let execAgentAuthData = AuthData.parse(execAgentURI, this.authData.username, this.authData.password);
+                execAgentAuthData.token = this.authData.getToken();
+
                 // now, execute command
                 let uuid : string = UUID.build();
-                let channel : string = 'process:output:' + uuid;
-                let machineServiceClient : MachineServiceClientImpl = new MachineServiceClientImpl(this.workspace, this.authData);
+                let execAgentServiceClientImpl : ExecAgentServiceClientImpl = new ExecAgentServiceClientImpl(this.workspace, execAgentAuthData);
 
                 let workspaceCommand : CheFileStructWorkspaceCommand = new CheFileStructWorkspaceCommandImpl();
                 workspaceCommand.commandLine = this.args.join(" ");
-                return machineServiceClient.executeCommand(workspaceDto, machineId, workspaceCommand, channel);
-            }).then((machineProcessDto: org.eclipse.che.api.machine.shared.dto.MachineProcessDto) => {
-                // command executed
+                return execAgentServiceClientImpl.executeCommand(workspaceDto, machineId, workspaceCommand, uuid);
             });
         });
     }

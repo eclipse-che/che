@@ -846,7 +846,8 @@ public class JavaNavigation {
         IPackageFragmentRoot[] packageFragmentRoots = javaProject.getPackageFragmentRoots();
         List<PackageFragmentRoot> result = new ArrayList<>();
         for (IPackageFragmentRoot packageFragmentRoot : packageFragmentRoots) {
-            if (packageFragmentRoot.getKind() == IPackageFragmentRoot.K_SOURCE) {
+            if (packageFragmentRoot.getKind() == IPackageFragmentRoot.K_SOURCE &&
+                javaProject.getPath().isPrefixOf(packageFragmentRoot.getPath())) {
                 PackageFragmentRoot root = DtoFactory.newDto(PackageFragmentRoot.class);
                 root.setPath(packageFragmentRoot.getPath().toOSString());
                 root.setProjectPath(packageFragmentRoot.getJavaProject().getPath().toOSString());

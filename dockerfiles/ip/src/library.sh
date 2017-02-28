@@ -90,7 +90,7 @@ find_network_interface() {
     # native mode
     if test -z ${NETWORK_IF}; then
       for i in $(get_network_interfaces_list); do
-        if [ ${i:0:3} = eth ] || [ ${i:0:3} = ens ] || [ ${i:0:4} = wlan ] ;then
+        if [ ${i:0:3} = eth ] || [ ${i:0:3} = enp ] || [ ${i:0:3} = ens ] || [ ${i:0:4} = wlan ] ;then
             if has_ip_on_network_interface $i; then
               NETWORK_IF=$i
               break
