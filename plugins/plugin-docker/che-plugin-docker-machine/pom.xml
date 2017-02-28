@@ -161,6 +161,8 @@
                         <exclude>**/DefaultServerEvaluationStrategyTest.java</exclude>
                         <exclude>**/LocalDockerServerEvaluationStrategy.java</exclude>
                         <exclude>**/LocalDockerServerEvaluationStrategyTest.java</exclude>
+                        <exclude>**/LocalDockerSinglePortServerEvaluationStrategy.java</exclude>
+                        <exclude>**/LocalDockerSinglePortServerEvaluationStrategyTest.java</exclude>
                         <exclude>**/DockerInstanceRuntimeInfo.java</exclude>
                         <exclude>**/DockerInstanceRuntimeInfoTest.java</exclude>
                         <!-- End excluded files -->
