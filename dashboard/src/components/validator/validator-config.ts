@@ -15,6 +15,7 @@ import {UniqueProjectNameValidator} from './unique-project-name-validator.direct
 import {UniqueWorkspaceNameValidator} from './unique-workspace-name-validator.directive';
 import {CustomValidator} from './custom-validator.directive';
 import {UniqueStackNameValidator} from './unique-stack-name-validator.directive';
+import {CityNameValidator} from './city-name-validator.directive';
 
 
 export class ValidatorConfig {
@@ -22,6 +23,7 @@ export class ValidatorConfig {
   constructor(register) {
 
     register.directive('gitUrl', GitUrlValidator)
+      .directive('cityNameValidator', CityNameValidator)
       .directive('uniqueProjectName', UniqueProjectNameValidator)
       .directive('uniqueWorkspaceName', UniqueWorkspaceNameValidator)
       .directive('customValidator', CustomValidator)

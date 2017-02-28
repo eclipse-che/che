@@ -1,0 +1,119 @@
+/*
+ * Copyright (c) 2015-2017 Codenvy, S.A.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Codenvy, S.A. - initial API and implementation
+ */
+'use strict';
+
+/**
+ * Test for city-name-validator directive
+ *
+ * @author Oleksii Kurinnyi
+ */
+
+describe('city-name-validator', () => {
+  let $scope, form, $compile;
+
+  let validNames = [
+    'Toronto',
+    'St. Catharines',
+    'San Fransisco',
+    'Val-d\'Or',
+    'Presqu\'ile',
+    'Niagara on the Lake',
+    'Niagara-on-the-Lake',
+    'München',
+    'toronto',
+    'toRonTo',
+    'villes du Québec',
+    'Provence-Alpes-Côte d\'Azur',
+    'Île-de-France',
+    'Kópavogur',
+    'Garðabær',
+    'Sauðárkrókur',
+    'Þorlákshöfn'
+  ];
+  let invalidNames = [
+    'San ',
+    'St.',
+    'Val-',
+    'A----B',
+    '------',
+    '*******',
+    '&&',
+    '()',
+    '//',
+    '\\'
+  ];
+
+  /**
+   * Backend for handling http operations
+   */
+  let httpBackend;
+
+  beforeEach(angular.mock.module('userDashboard'));
+
+  beforeEach(inject((_$compile_, $rootScope, cheHttpBackend) => {
+    $scope = $rootScope;
+    $compile = _$compile_;
+
+    httpBackend = cheHttpBackend.getHttpBackend();
+    // avoid tracking requests from branding controller
+    httpBackend.whenGET(/.*/).respond(200, '');
+    httpBackend.when('OPTIONS', '/api/').respond({});
+  }));
+
+  validNames.forEach((validName) => {
+
+    (function shouldPass(validCityName) {
+      it(`"${validCityName}" should be OK`, () => {
+        $scope.model = {value: ''};
+
+        let element = angular.element(
+          '<form name="form">' +
+          '<input ng-model="model.value" name="value" city-name-validator />' +
+          '</form>'
+        );
+        $compile(element)($scope);
+
+        form = $scope.form;
+        form.value.$setViewValue(validCityName);
+
+        // check form (expect invalid)
+        expect(form.value.$invalid).toBe(false);
+        expect(form.value.$valid).toBe(true);
+      });
+    })(validName);
+
+  });
+
+  invalidNames.forEach((invalidName) => {
+
+    (function shouldFail(invalidName) {
+      it(`"${invalidName}" should fail`, () => {
+        $scope.model = {value: ''};
+
+        let element = angular.element(
+          '<form name="form">' +
+          '<input ng-model="model.value" name="value" city-name-validator />' +
+          '</form>'
+        );
+        $compile(element)($scope);
+
+        form = $scope.form;
+        form.value.$setViewValue(invalidName);
+
+        // check form (expect valid)
+        expect(form.value.$invalid).toBe(true);
+        expect(form.value.$valid).toBe(false);
+      });
+    })(invalidName);
+
+  });
+
+});

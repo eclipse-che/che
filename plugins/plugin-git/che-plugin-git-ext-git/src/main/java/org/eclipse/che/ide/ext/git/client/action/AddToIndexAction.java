@@ -13,10 +13,6 @@ package org.eclipse.che.ide.ext.git.client.action;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.git.shared.Status;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.git.GitServiceClient;
@@ -41,6 +37,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
  * @author Andrey Plotnikov
  * @author Vlad Zhukovskyi
  * @author Igor Vinokur
+ * @author Mykola Morhun
  **/
 @Singleton
 public class AddToIndexAction extends GitAction {
@@ -78,26 +75,20 @@ public class AddToIndexAction extends GitAction {
         final GitOutputConsole console = gitOutputConsoleFactory.create(constant.addToIndexCommandName());
         consolesPanelPresenter.addCommandOutput(devMachine.getId(), console);
         service.getStatus(devMachine, appContext.getRootProject().getLocation())
-               .then(new Operation<Status>() {
-                   @Override
-                   public void apply(Status status) throws OperationException {
-                       if (containsInSelected(status.getUntracked())) {
-                           presenter.showDialog();
-                       } else if (containsInSelected(status.getModified())) {
-                           addToIndex(console);
-                       } else {
-                           String message = resources.length > 1 ? constant.nothingAddToIndexMultiSelect() : constant.nothingAddToIndex();
-                           console.print(message);
-                           notificationManager.notify(message);
-                       }
+               .then(status -> {
+                   if (containsInSelected(status.getUntracked())) {
+                       presenter.showDialog();
+                   } else if (containsInSelected(status.getModified()) || containsInSelected(status.getMissing())) {
+                       addToIndex(console);
+                   } else {
+                       String message = resources.length > 1 ? constant.nothingAddToIndexMultiSelect() : constant.nothingAddToIndex();
+                       console.print(message);
+                       notificationManager.notify(message);
                    }
                })
-               .catchError(new Operation<PromiseError>() {
-                   @Override
-                   public void apply(PromiseError error) throws OperationException {
-                       console.printError(constant.statusFailed());
-                       notificationManager.notify(constant.statusFailed(), FAIL, FLOAT_MODE);
-                   }
+               .catchError(error -> {
+                   console.printError(constant.statusFailed());
+                   notificationManager.notify(constant.statusFailed(), FAIL, FLOAT_MODE);
                });
     }
 
@@ -109,27 +100,22 @@ public class AddToIndexAction extends GitAction {
             paths[i] = path.segmentCount() == 0 ? Path.EMPTY : path;
         }
         service.add(appContext.getDevMachine(), appContext.getRootProject().getLocation(), false, paths)
-               .then(new Operation<Void>() {
-                   @Override
-                   public void apply(Void arg) throws OperationException {
-                       console.print(constant.addSuccess());
-                       notificationManager.notify(constant.addSuccess());
-                   }
+               .then(voidArg -> {
+                   console.print(constant.addSuccess());
+                   notificationManager.notify(constant.addSuccess());
                })
-               .catchError(new Operation<PromiseError>() {
-                   @Override
-                   public void apply(PromiseError arg) throws OperationException {
-                       console.printError(constant.addFailed());
-                       notificationManager.notify(constant.addFailed(), FAIL, FLOAT_MODE);
-                   }
+               .catchError(error -> {
+                   console.printError(constant.addFailed());
+                   notificationManager.notify(constant.addFailed(), FAIL, FLOAT_MODE);
                });
     }
 
     private boolean containsInSelected(List<String> items) {
+        Resource[] appContextResources = appContext.getResources();
         for (String item : items) {
-            for (Resource selectedItem : appContext.getResources()) {
+            for (Resource selectedItem : appContextResources) {
                 String selectedItemPath = selectedItem.getLocation()
-                                                      .removeFirstSegments(appContext.getRootProject().getLocation().segmentCount())
+                                                      .removeFirstSegments(1) // remove project name from path
                                                       .toString();
                 if (item.startsWith(selectedItemPath)) {
                     return true;
