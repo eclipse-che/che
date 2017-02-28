@@ -294,7 +294,6 @@ public class FactoryDaoTest {
         pCfg1.setDescription("description1");
         pCfg1.getMixins().addAll(asList("mixin1", "mixin2"));
         pCfg1.setSource(source1);
-        pCfg1.getAttributes().putAll(ImmutableMap.of("key1", asList("v1", "v2"), "key2", asList("v1", "v2")));
 
         final ProjectConfigImpl pCfg2 = new ProjectConfigImpl();
         pCfg2.setPath("/path2");
@@ -303,7 +302,6 @@ public class FactoryDaoTest {
         pCfg2.setDescription("description2");
         pCfg2.getMixins().addAll(asList("mixin3", "mixin4"));
         pCfg2.setSource(source2);
-        pCfg2.getAttributes().putAll(ImmutableMap.of("key3", asList("v1", "v2"), "key4", asList("v1", "v2")));
 
         final List<ProjectConfigImpl> projects = new ArrayList<>(asList(pCfg1, pCfg2));
 
