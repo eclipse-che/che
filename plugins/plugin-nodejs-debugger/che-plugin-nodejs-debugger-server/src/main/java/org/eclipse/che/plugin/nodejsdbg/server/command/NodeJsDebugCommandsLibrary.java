@@ -24,7 +24,6 @@ import org.eclipse.che.plugin.nodejsdbg.server.parser.NodeJsOutputParser;
 import org.eclipse.che.plugin.nodejsdbg.server.parser.NodeJsOutputParser.NodeJsOutputRegExpParser;
 import org.eclipse.che.plugin.nodejsdbg.server.parser.NodeJsScriptsParser;
 import org.eclipse.che.plugin.nodejsdbg.server.parser.NodeJsScriptsParser.Scripts;
-import org.eclipse.che.plugin.nodejsdbg.server.parser.NodeJsStepParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,9 +65,9 @@ public class NodeJsDebugCommandsLibrary {
     /**
      * Execute {@code bt} command.
      */
-    public Location backtrace() throws NodeJsDebuggerException {
-        NodeJsDebugCommand<Location> nextCommand = createCommand("bt", NodeJsBackTraceParser.INSTANCE);
-        return doExecute(nextCommand);
+    public Void backtrace() throws NodeJsDebuggerException {
+        doExecute(createCommand("bt", NodeJsOutputParser.VOID));
+        return null;
     }
 
     /**
@@ -99,7 +98,7 @@ public class NodeJsDebugCommandsLibrary {
             String newTarget;
             String[] target = location.getTarget().split(":");
             if (target.length != 2) {
-                LOG.error(format("Illegal breakpoint location format %s", target));
+                LOG.error(format("Illegal breakpoint location format %s", target[0]));
                 continue;
             }
 
@@ -139,33 +138,33 @@ public class NodeJsDebugCommandsLibrary {
     /**
      * Execute {@code next} command.
      */
-    public Location next() throws NodeJsDebuggerException {
-        NodeJsDebugCommand<Location> nextCommand = createCommand("next", NodeJsStepParser.INSTANCE);
-        return doExecute(nextCommand);
+    public Void next() throws NodeJsDebuggerException {
+        doExecute(createCommand("next", NodeJsOutputParser.VOID));
+        return null;
     }
 
     /**
      * Execute {@code cont} command.
      */
-    public Location cont() throws NodeJsDebuggerException {
-        NodeJsDebugCommand<Location> nextCommand = createCommand("cont", NodeJsStepParser.INSTANCE);
-        return doExecute(nextCommand);
+    public Void cont() throws NodeJsDebuggerException {
+        doExecute(createCommand("cont", NodeJsOutputParser.VOID));
+        return null;
     }
 
     /**
      * Execute {@code step in} command.
      */
-    public Location stepIn() throws NodeJsDebuggerException {
-        NodeJsDebugCommand<Location> nextCommand = createCommand("step", NodeJsStepParser.INSTANCE);
-        return doExecute(nextCommand);
+    public Void stepIn() throws NodeJsDebuggerException {
+        doExecute(createCommand("step", NodeJsOutputParser.VOID));
+        return null;
     }
 
     /**
      * Execute {@code step out} command.
      */
-    public Location stepOut() throws NodeJsDebuggerException {
-        NodeJsDebugCommand<Location> nextCommand = createCommand("out", NodeJsStepParser.INSTANCE);
-        return doExecute(nextCommand);
+    public Void stepOut() throws NodeJsDebuggerException {
+        doExecute(createCommand("out", NodeJsOutputParser.VOID));
+        return null;
     }
 
     /**
@@ -243,6 +242,12 @@ public class NodeJsDebugCommandsLibrary {
         return doExecute(command);
     }
 
+    /**
+     * Executes {@link NodeJsDebugCommand} and waits result.
+     *
+     * @throws NodeJsDebuggerException
+     *      if execution failed
+     */
     private <V> V doExecute(NodeJsDebugCommand<V> command) throws NodeJsDebuggerException {
         process.addObserver(command);
         try {

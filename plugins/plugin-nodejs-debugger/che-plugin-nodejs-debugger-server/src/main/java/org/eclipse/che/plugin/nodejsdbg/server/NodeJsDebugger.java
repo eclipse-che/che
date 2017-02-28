@@ -34,6 +34,8 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.nodejsdbg.server.command.NodeJsDebugCommandsLibrary;
 import org.eclipse.che.plugin.nodejsdbg.server.exception.NodeJsDebuggerException;
 import org.eclipse.che.plugin.nodejsdbg.server.exception.NodeJsDebuggerTerminatedException;
+import org.eclipse.che.plugin.nodejsdbg.server.parser.NodeJsBackTraceParser;
+import org.eclipse.che.plugin.nodejsdbg.server.parser.NodeJsStepParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +48,7 @@ import java.util.List;
  *
  * @author Anatoliy Bazko
  */
-public class NodeJsDebugger implements Debugger {
+public class NodeJsDebugger implements Debugger, NodeJsProcessObserver {
     private static final Logger LOG = LoggerFactory.getLogger(NodeJsDebugger.class);
 
     private final Integer pid;
@@ -72,6 +74,7 @@ public class NodeJsDebugger implements Debugger {
         this.name = library.getName();
         this.version = library.getVersion();
         this.debuggerCallback = debuggerCallback;
+        this.nodeJsDebugProcess.addObserver(this);
     }
 
     public static NodeJsDebugger newInstance(@Nullable Integer pid,
@@ -167,7 +170,7 @@ public class NodeJsDebugger implements Debugger {
                 debuggerCallback.onEvent(new BreakpointActivatedEventImpl(breakpoint));
             }
 
-            debuggerCallback.onEvent(new SuspendEventImpl(library.backtrace()));
+            library.backtrace();
         } catch (NodeJsDebuggerTerminatedException e) {
             disconnect();
             throw e;
@@ -179,10 +182,9 @@ public class NodeJsDebugger implements Debugger {
     @Override
     public void stepOver(StepOverAction action) throws DebuggerException {
         try {
-            debuggerCallback.onEvent(new SuspendEventImpl(library.next()));
+            library.next();
         } catch (NodeJsDebuggerTerminatedException e) {
             disconnect();
-            throw e;
         } catch (NodeJsDebuggerException e) {
             throw new DebuggerException("Step over error. " + e.getMessage(), e);
         }
@@ -191,10 +193,9 @@ public class NodeJsDebugger implements Debugger {
     @Override
     public void stepInto(StepIntoAction action) throws DebuggerException {
         try {
-            debuggerCallback.onEvent(new SuspendEventImpl(library.stepIn()));
+            library.stepIn();
         } catch (NodeJsDebuggerTerminatedException e) {
             disconnect();
-            throw e;
         } catch (NodeJsDebuggerException e) {
             throw new DebuggerException("Step into error. " + e.getMessage(), e);
         }
@@ -203,10 +204,9 @@ public class NodeJsDebugger implements Debugger {
     @Override
     public void stepOut(StepOutAction action) throws DebuggerException {
         try {
-            debuggerCallback.onEvent(new SuspendEventImpl(library.stepOut()));
+            library.stepOut();
         } catch (NodeJsDebuggerTerminatedException e) {
             disconnect();
-            throw e;
         } catch (NodeJsDebuggerException e) {
             throw new DebuggerException("Step out error. " + e.getMessage(), e);
         }
@@ -215,10 +215,9 @@ public class NodeJsDebugger implements Debugger {
     @Override
     public void resume(ResumeAction action) throws DebuggerException {
         try {
-            debuggerCallback.onEvent(new SuspendEventImpl(library.cont()));
+            library.cont();
         } catch (NodeJsDebuggerTerminatedException e) {
             disconnect();
-            throw e;
         } catch (NodeJsDebuggerException e) {
             throw new DebuggerException("Resume error. " + e.getMessage(), e);
         }
@@ -272,5 +271,25 @@ public class NodeJsDebugger implements Debugger {
     @Override
     public StackFrameDump dumpStackFrame() throws DebuggerException {
         return new StackFrameDumpImpl(Collections.emptyList(), Collections.emptyList());
+    }
+
+    @Override
+    public boolean onOutputProduced(NodeJsOutput nodeJsOutput) throws NodeJsDebuggerException {
+        if (NodeJsStepParser.INSTANCE.match(nodeJsOutput)) {
+            SuspendEventImpl suspendEvent = new SuspendEventImpl(NodeJsStepParser.INSTANCE.parse(nodeJsOutput));
+            debuggerCallback.onEvent(suspendEvent);
+
+        } else if (NodeJsBackTraceParser.INSTANCE.match(nodeJsOutput)) {
+            SuspendEventImpl suspendEvent = new SuspendEventImpl(NodeJsBackTraceParser.INSTANCE.parse(nodeJsOutput));
+            debuggerCallback.onEvent(suspendEvent);
+
+        } else if (nodeJsOutput.getOutput().equals(OutputReader.DEBUG_TIMED_OUT_MSG)) {
+            disconnect();
+
+        } else {
+            return false;
+        }
+
+        return true;
     }
 }
