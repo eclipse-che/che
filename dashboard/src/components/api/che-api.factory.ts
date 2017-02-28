@@ -12,6 +12,8 @@ import {CheSsh} from './che-ssh.factory';
 'use strict';
 import {CheWorkspace} from './che-workspace.factory';
 import {CheProfile} from './che-profile.factory';
+import {CheFactory} from './che-factory.factory';
+import {CheFactoryTemplate} from './che-factory-template.factory';
 import {ChePreferences} from './che-preferences.factory';
 import {CheProjectTemplate} from './che-project-template.factory';
 import {CheWebsocket} from './che-websocket.factory';
@@ -37,6 +39,8 @@ export class CheAPI {
   private chePreferences: ChePreferences;
   private cheProjectTemplate: CheProjectTemplate;
   private cheWebsocket: CheWebsocket;
+  private cheFactory: CheFactory;
+  private cheFactoryTemplate: CheFactoryTemplate;
   private cheService: CheService;
   private cheAdminPlugins: CheAdminPlugins;
   private cheAdminService: CheAdminService;
@@ -51,9 +55,11 @@ export class CheAPI {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheWorkspace: CheWorkspace, cheProfile: CheProfile, chePreferences: ChePreferences, cheProjectTemplate: CheProjectTemplate, cheWebsocket: CheWebsocket, cheService: CheService, cheAdminPlugins: CheAdminPlugins, cheAdminService: CheAdminService, cheRecipe: CheRecipe, cheRecipeTemplate: CheRecipeTemplate, cheStack: CheStack, cheOAuthProvider: CheOAuthProvider, cheAgent: CheAgent, cheSsh: CheSsh) {
+  constructor(cheWorkspace: CheWorkspace, cheFactory: CheFactory, cheFactoryTemplate: CheFactoryTemplate, cheProfile: CheProfile, chePreferences: ChePreferences, cheProjectTemplate: CheProjectTemplate, cheWebsocket: CheWebsocket, cheService: CheService, cheAdminPlugins: CheAdminPlugins, cheAdminService: CheAdminService, cheRecipe: CheRecipe, cheRecipeTemplate: CheRecipeTemplate, cheStack: CheStack, cheOAuthProvider: CheOAuthProvider, cheAgent: CheAgent, cheSsh: CheSsh) {
     this.cheWorkspace = cheWorkspace;
     this.cheProfile = cheProfile;
+    this.cheFactory = cheFactory;
+    this.cheFactoryTemplate = cheFactoryTemplate;
     this.chePreferences = chePreferences;
     this.cheProjectTemplate = cheProjectTemplate;
     this.cheWebsocket = cheWebsocket;
@@ -180,6 +186,22 @@ export class CheAPI {
    */
   getSsh(): CheSsh {
     return this.cheSsh;
+  }
+
+  /**
+   * The Codenvy Factory API
+   * @returns {CheFactory|*}
+   */
+  getFactory() {
+    return this.cheFactory;
+  }
+
+  /**
+   * The Codenvy Factory Template API
+   * @returns {CheFactoryTemplate|*}
+   */
+  getFactoryTemplate() {
+    return this.cheFactoryTemplate;
   }
 
 }

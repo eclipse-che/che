@@ -12,6 +12,7 @@
 
 import {CheWorkspaceBuilder} from './che-workspace-builder';
 import {CheProjectReferenceBuilder} from './che-projectreference-builder';
+import {CheFactoryBuilder} from './che-factory-builder';
 import {CheProjectDetailsBuilder} from './che-projectdetails-builder';
 import {CheProjectTypeBuilder} from './che-projecttype-builder';
 import {CheProjectTemplateBuilder} from './che-projecttemplate-builder';
@@ -95,5 +96,13 @@ export class CheAPIBuilder {
    */
   getStackBuilder() {
     return new CheStackBuilder();
+  }
+  
+  /***
+   * The Codenvy Factory builder
+   * @returns {CheFactoryBuilder}
+   */
+  getFactoryBuilder() {
+    return new CheFactoryBuilder();
   }
 }

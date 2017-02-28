@@ -429,6 +429,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         final String terminalId = terminalNode.getId();
         terminals.put(terminalId, newTerminal);
         view.addProcessNode(terminalNode);
+        terminalWidget.asWidget().ensureDebugId(terminalName);
         view.addWidget(terminalId, terminalName, terminalNode.getTitleIcon(), terminalWidget, false);
         refreshStopButtonState(terminalId);
 

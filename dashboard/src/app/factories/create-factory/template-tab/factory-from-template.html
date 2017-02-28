@@ -1,0 +1,38 @@
+<!--
+
+    CODENVY CONFIDENTIAL
+    __________________
+
+     [2015] - [2016] Codenvy, S.A.
+     All Rights Reserved.
+
+    NOTICE:  All information contained herein is, and remains
+    the property of Codenvy S.A. and its suppliers,
+    if any.  The intellectual and technical concepts contained
+    herein are proprietary to Codenvy S.A.
+    and its suppliers and may be covered by U.S. and Foreign Patents,
+    patents in process, and are protected by trade secret or copyright law.
+    Dissemination of this information or reproduction of this material
+    is strictly forbidden unless prior written permission is obtained
+    from Codenvy S.A..
+
+-->
+<div class="factory-from-template" layout="row" flex layout-align="start center">
+  <che-label-container che-label-name="Select Template">
+    <div layout="column">
+      <che-toggle ng-model="factoryFromTemplateCtrl.templateName">
+        <che-toggle-button ng-click="factoryFromTemplateCtrl.getFactoryTemplate(factoryFromTemplateCtrl.templateName)"
+                           che-font-icon="material-design icon-ic_unfold_less_24px"
+                           che-title="minimal"></che-toggle-button>
+        <che-toggle-button ng-click="factoryFromTemplateCtrl.getFactoryTemplate(factoryFromTemplateCtrl.templateName)"
+                           che-font-icon="material-design icon-ic_unfold_more_24px"
+                           che-title="complete"></che-toggle-button>
+      </che-toggle>
+
+      <textarea ui-codemirror="factoryFromTemplateCtrl.editorOptions"
+                ng-model="factoryFromTemplateCtrl.factoryContent"
+                aria-label="Factory configuration editor">
+      </textarea>
+    </div>
+  </che-label-container>
+</div>

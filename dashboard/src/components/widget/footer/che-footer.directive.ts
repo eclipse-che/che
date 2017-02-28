@@ -93,6 +93,10 @@ export class CheFooter {
     if (supportHelpPath && supportHelpTitle) {
       template += '<a class=\"che-footer-button-blue che-footer-button\" ng-href=\"' + supportHelpPath + '\" target=\"_blank\">' + supportHelpTitle + '<a/>';
     }
+
+    // diagnostics
+    template += '<a class=\"che-footer-button-blue che-footer-button\" ng-href=\"#/diagnostic\">Diagnostics<a/>';
+
     template += '</div>';
     return template;
   }
