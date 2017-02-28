@@ -11,6 +11,7 @@
 'use strict';
 
 import {Register} from '../components/utils/register';
+import {FactoryConfig} from './factories/factories-config';
 
 import {ComponentsConfig} from '../components/components-config';
 
@@ -381,3 +382,4 @@ new WorkspacesConfig(instanceRegister);
 new DashboardConfig(instanceRegister);
 new StacksConfig(instanceRegister);
 new DocsConfig(instanceRegister);
+new FactoryConfig(instanceRegister);
