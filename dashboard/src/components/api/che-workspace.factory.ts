@@ -38,6 +38,7 @@ interface ICHELicenseResource<T> extends ng.resource.IResourceClass<T> {
  */
 export class CheWorkspace {
   $resource: ng.resource.IResourceService;
+  $http: ng.IHttpService;
   $q: ng.IQService;
   listeners: Array<any>;
   workspaceStatuses: Array<string>;
@@ -178,6 +179,20 @@ export class CheWorkspace {
     });
   }
 
+  /**
+   * Fetches workspaces by provided namespace.
+   *
+   * @param namespace namespace
+   */
+  fetchWorkspacesByNamespace(namespace: string): ng.IPromise<any> {
+    let promise = this.$http.get('/api/workspace/namespace/' + namespace);
+    let resultPromise = promise.then((response: any) => {
+      this.workspacesByNamespace.set(namespace, response.data);
+    });
+
+    return resultPromise;
+  }
+
   getWorkspacesByNamespace(namespace: string): Array<che.IWorkspace> {
     return this.workspacesByNamespace.get(namespace);
   }
@@ -203,7 +218,6 @@ export class CheWorkspace {
       let remoteWorkspaces = [];
       this.workspaces.length = 0;
       this.workspacesById.clear();
-      this.workspacesByNamespace.clear();
       // add workspace if not temporary
       data.forEach((workspace: che.IWorkspace) => {
 
@@ -211,12 +225,6 @@ export class CheWorkspace {
           remoteWorkspaces.push(workspace);
           this.workspaces.push(workspace);
           this.workspacesById.set(workspace.id, workspace);
-          let namespaceWorkspaces = this.workspacesByNamespace.get(workspace.namespace);
-          if (namespaceWorkspaces) {
-            namespaceWorkspaces.push(workspace);
-          } else {
-            this.workspacesByNamespace.set(workspace.namespace, [workspace]);
-          }
         }
         this.workspacesById.set(workspace.id, workspace);
         this.startUpdateWorkspaceStatus(workspace.id);

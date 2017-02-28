@@ -101,6 +101,13 @@
             </div>
           </che-label-container>
 
+          <!-- Other workspace details sections -->
+          <che-label-container ng-if="!workspaceDetailsController.isCreationFlow"
+                               ng-repeat="section in workspaceDetailsController.getSections()"
+                               che-label-name="{{section.title}}" che-label-description="{{section.description}}">
+            <div che-compile="section.content"></div>
+          </che-label-container>
+
           <!-- Export workspace -->
           <che-label-container che-label-name="Export workspace">
             <export-workspace workspace-id="{{workspaceDetailsController.workspaceId}}"
@@ -164,7 +171,7 @@
 
     <!-- Other tabs -->
     <md-tab ng-if="workspaceDetailsController.isCreationFlow === false"
-            ng-repeat="section in workspaceDetailsController.getSections()">
+            ng-repeat="section in workspaceDetailsController.getPages()">
       <md-tab-label>
         <md-icon md-font-icon="material-design {{section.icon}}" class="che-tab-label-icon"></md-icon>
         <span class="che-tab-label-title">{{section.title}}</span>

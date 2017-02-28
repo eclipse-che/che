@@ -116,8 +116,8 @@ initModule.run(['$rootScope', '$location', '$routeParams', 'routingRedirect', '$
     $rootScope.waitingLoaded = false;
     $rootScope.showIDE = false;
 
-    workspaceDetailsService.addSection('Projects', '<workspace-details-projects></workspace-details-projects>', 'icon-ic_inbox_24px');
-    workspaceDetailsService.addSection('SSH', '<workspace-details-ssh></workspace-details-ssh>', 'icon-ic_vpn_key_24px');
+    workspaceDetailsService.addPage('Projects', '<workspace-details-projects></workspace-details-projects>', 'icon-ic_inbox_24px');
+    workspaceDetailsService.addPage('SSH', '<workspace-details-ssh></workspace-details-ssh>', 'icon-ic_vpn_key_24px');
 
     // here only to create instances of these components
     cheIdeFetcher;
