@@ -177,9 +177,7 @@ export class WorkspaceDetailsController {
       };
       this.copyWorkspaceDetails = angular.copy(this.workspaceDetails);
       this.cheNamespaceRegistry.fetchNamespaces().then(() => {
-        if (this.getNamespaces().length) {
-          this.namespaceId = this.getNamespaces()[0].id;
-        }
+        this.namespaceId = this.$location.search().namespace || (this.getNamespaces().length ? this.getNamespaces()[0].id : undefined);
       });
     }
     this.newName = this.workspaceName;
@@ -305,7 +303,16 @@ export class WorkspaceDetailsController {
   }
 
   /**
-   * Returns workspace details sections (tabs, example - projects)
+   * Returns workspace details pages (tabs, example - projects)
+   *
+   * @returns {*}
+   */
+  getPages(): any {
+    return this.workspaceDetailsService.getPages();
+  }
+
+  /**
+   * Returns workspace details section.
    *
    * @returns {*}
    */
