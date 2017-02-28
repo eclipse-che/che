@@ -22,7 +22,7 @@ import {CheTypeCity} from './input-type/input-city.directive';
 
 export class AttributeConfig {
 
-  constructor(register) {
+  constructor(register: che.IRegisterService) {
 
     register.directive('focusable', CheFocusable);
 
