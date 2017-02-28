@@ -13,7 +13,7 @@
 export interface INamespace {
   id: string;
   label: string;
-  location: string;А
+  location: string;
 }
 
 /**
