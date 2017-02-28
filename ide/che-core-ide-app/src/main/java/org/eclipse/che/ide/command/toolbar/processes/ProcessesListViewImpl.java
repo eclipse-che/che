@@ -50,13 +50,10 @@ public class ProcessesListViewImpl implements ProcessesListView {
         dropdownList = new DropdownList(getEmptyListWidget());
         dropdownList.setWidth("400px");
         dropdownList.setDropdownPanelWidth("400px");
-        dropdownList.setSelectionHandler(item -> {
-            for (Map.Entry<Process, BaseListItem<Process>> entry : listItems.entrySet()) {
-                if (item.equals(entry.getValue())) {
-                    delegate.onProcessChosen(entry.getKey());
-                }
-            }
-        });
+        dropdownList.setSelectionHandler(item -> listItems.entrySet()
+                                                          .stream()
+                                                          .filter(entry -> item.equals(entry.getValue()))
+                                                          .forEach(entry -> delegate.onProcessChosen(entry.getKey())));
 
         rootPanel = new FlowPanel();
         rootPanel.add(label);
@@ -73,9 +70,9 @@ public class ProcessesListViewImpl implements ProcessesListView {
         machineNameLabel.addStyleName(resources.commandToolbarCss().processWidgetMachineNameLabel());
 
         final FlowPanel emptyListWidget = new FlowPanel();
+        emptyListWidget.addStyleName(resources.commandToolbarCss().processWidgetText());
         emptyListWidget.add(commandNameLabel);
         emptyListWidget.add(machineNameLabel);
-        emptyListWidget.addStyleName(resources.commandToolbarCss().processWidgetText());
 
         return emptyListWidget;
     }

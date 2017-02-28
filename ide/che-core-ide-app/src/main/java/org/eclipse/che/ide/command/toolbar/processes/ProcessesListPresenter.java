@@ -126,11 +126,11 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
      */
     private void addProcessToList(int pid, Machine machine) {
         execAgentCommandManager.getProcess(machine.getId(), pid)
-                               .then(arg -> {
-                                   final Process process = new ProcessImpl(arg.getName(),
-                                                                           arg.getCommandLine(),
-                                                                           arg.getPid(),
-                                                                           arg.isAlive(),
+                               .then(processDto -> {
+                                   final Process process = new ProcessImpl(processDto.getName(),
+                                                                           processDto.getCommandLine(),
+                                                                           processDto.getPid(),
+                                                                           processDto.isAlive(),
                                                                            machine);
                                    runningProcesses.put(process.getPid(), process);
                                    view.addProcess(process);
@@ -149,11 +149,10 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
 
     @Override
     public void onReRunProcess(Process process) {
-        commandManager.getCommand(process.getName())
-                      .ifPresent(command -> {
-                          view.removeProcess(process);
-                          commandExecutorProvider.get().executeCommand(command, process.getMachine());
-                      });
+        commandManager.getCommand(process.getName()).ifPresent(command -> {
+            view.removeProcess(process);
+            commandExecutorProvider.get().executeCommand(command, process.getMachine());
+        });
     }
 
     @Override
