@@ -56,11 +56,15 @@ class ProcessWidget extends FlowPanel {
         final Machine targetMachine = process.getMachine();
         stopped = !process.isAlive();
 
-        final String labelText = targetMachine.getConfig().getName() + ": <strong>" + process.getName() + "</strong>";
-        final Label nameLabel = new InlineHTML(labelText);
-        nameLabel.setTitle(process.getCommandLine());
-        nameLabel.addStyleName(RESOURCES.commandToolbarCss().processWidgetText());
-        nameLabel.addStyleName(RESOURCES.commandToolbarCss().processWidgetNameLabel());
+        final Label machineNameLabel = new InlineHTML(targetMachine.getConfig().getName() + ":&nbsp;");
+        machineNameLabel.setTitle(process.getCommandLine());
+        machineNameLabel.addStyleName(RESOURCES.commandToolbarCss().processWidgetText());
+        machineNameLabel.addStyleName(RESOURCES.commandToolbarCss().processWidgetMachineNameLabel());
+
+        final Label commandNameLabel = new InlineHTML(process.getName());
+        commandNameLabel.setTitle(process.getCommandLine());
+        commandNameLabel.addStyleName(RESOURCES.commandToolbarCss().processWidgetText());
+        commandNameLabel.addStyleName(RESOURCES.commandToolbarCss().processWidgetCommandNameLabel());
 
         durationLabel = new Label();
         durationLabel.addStyleName(RESOURCES.commandToolbarCss().processWidgetText());
@@ -85,7 +89,8 @@ class ProcessWidget extends FlowPanel {
 
         checkStopped();
 
-        add(nameLabel);
+        add(machineNameLabel);
+        add(commandNameLabel);
         add(stopButton);
         add(reRunButton);
         add(durationLabel);

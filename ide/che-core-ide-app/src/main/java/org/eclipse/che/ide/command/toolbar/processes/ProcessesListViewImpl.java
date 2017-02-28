@@ -33,21 +33,21 @@ public class ProcessesListViewImpl implements ProcessesListView {
 
     private final Map<Process, BaseListItem<Process>> listItems;
     private final Map<Process, ProcessItemRenderer>   renderers;
+    private final CommandResources                    resources;
 
     private ActionDelegate delegate;
 
     @Inject
     public ProcessesListViewImpl(CommandResources resources) {
+        this.resources = resources;
+
         listItems = new HashMap<>();
         renderers = new HashMap<>();
 
         final Label label = new Label("EXEC");
         label.addStyleName(resources.commandToolbarCss().processesListLabel());
 
-        final InlineHTML emptyListWidget = new InlineHTML("<strong>Ready</strong> - start command");
-        emptyListWidget.addStyleName(resources.commandToolbarCss().processWidgetText());
-
-        dropdownList = new DropdownList(emptyListWidget);
+        dropdownList = new DropdownList(getEmptyListWidget());
         dropdownList.setWidth("400px");
         dropdownList.setDropdownPanelWidth("400px");
         dropdownList.setSelectionHandler(item -> {
@@ -61,6 +61,23 @@ public class ProcessesListViewImpl implements ProcessesListView {
         rootPanel = new FlowPanel();
         rootPanel.add(label);
         rootPanel.add(dropdownList);
+    }
+
+    private Widget getEmptyListWidget() {
+        final Label commandNameLabel = new InlineHTML("Ready");
+        commandNameLabel.addStyleName(resources.commandToolbarCss().processWidgetText());
+        commandNameLabel.addStyleName(resources.commandToolbarCss().processWidgetCommandNameLabel());
+
+        final Label machineNameLabel = new InlineHTML("&nbsp; - start command");
+        machineNameLabel.addStyleName(resources.commandToolbarCss().processWidgetText());
+        machineNameLabel.addStyleName(resources.commandToolbarCss().processWidgetMachineNameLabel());
+
+        final FlowPanel emptyListWidget = new FlowPanel();
+        emptyListWidget.add(commandNameLabel);
+        emptyListWidget.add(machineNameLabel);
+        emptyListWidget.addStyleName(resources.commandToolbarCss().processWidgetText());
+
+        return emptyListWidget;
     }
 
     @Override

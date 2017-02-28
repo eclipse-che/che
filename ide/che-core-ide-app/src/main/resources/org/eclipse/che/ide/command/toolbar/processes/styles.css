@@ -42,8 +42,15 @@
     margin: 0 0 0 0;
 }
 
-.processWidgetNameLabel {
+.processWidgetMachineNameLabel {
     float: left;
+    color: #a3a3a3;
+}
+
+.processWidgetCommandNameLabel {
+    float: left;
+    color: #e3e3e3;
+    font-weight: bold;
 }
 
 .processWidgetPidLabel {

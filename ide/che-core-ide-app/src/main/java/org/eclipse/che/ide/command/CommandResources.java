@@ -75,7 +75,9 @@ public interface CommandResources extends ClientBundle {
 
         String processWidgetText();
 
-        String processWidgetNameLabel();
+        String processWidgetMachineNameLabel();
+
+        String processWidgetCommandNameLabel();
 
         String processWidgetPidLabel();
 
