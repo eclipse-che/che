@@ -84,12 +84,12 @@ public class CommandApiModule extends AbstractGinModule {
 
         // predefined goals
         GinMultibinder<CommandGoal> goalBinder = GinMultibinder.newSetBinder(binder(), CommandGoal.class);
-        goalBinder.addBinding().to(CommonGoal.class);
-        goalBinder.addBinding().to(TestGoal.class);
         goalBinder.addBinding().to(BuildGoal.class);
+        goalBinder.addBinding().to(TestGoal.class);
         goalBinder.addBinding().to(RunGoal.class);
-        goalBinder.addBinding().to(DeployGoal.class);
         goalBinder.addBinding().to(DebugGoal.class);
+        goalBinder.addBinding().to(DeployGoal.class);
+        goalBinder.addBinding().to(CommonGoal.class);
 
         bind(CommandTypeRegistry.class).to(CommandTypeRegistryImpl.class).in(Singleton.class);
         bind(PredefinedCommandGoalRegistry.class).to(PredefinedCommandGoalRegistryImpl.class).in(Singleton.class);
