@@ -43,6 +43,8 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 
+import static org.eclipse.che.plugin.nodejsdbg.server.OutputReader.DEBUG_TIMED_OUT_MSG;
+
 /**
  * Server side NodeJs debugger.
  *
@@ -283,7 +285,7 @@ public class NodeJsDebugger implements Debugger, NodeJsProcessObserver {
             SuspendEventImpl suspendEvent = new SuspendEventImpl(NodeJsBackTraceParser.INSTANCE.parse(nodeJsOutput));
             debuggerCallback.onEvent(suspendEvent);
 
-        } else if (nodeJsOutput.getOutput().equals(OutputReader.DEBUG_TIMED_OUT_MSG)) {
+        } else if (DEBUG_TIMED_OUT_MSG.equals(nodeJsOutput.getOutput())) {
             disconnect();
 
         } else {

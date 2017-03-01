@@ -19,6 +19,8 @@ import java.nio.charset.StandardCharsets;
 
 /**
  * Continuously reads process output and store in the {@code #outputs}.
+ *
+ * @author Anatolii Bazko
  */
 public class OutputReader implements Runnable {
     public static final String CONNECTIVITY_TEST_NEEDED_MSG = "_CONNECTIVITY_TEST_NEEDED_";

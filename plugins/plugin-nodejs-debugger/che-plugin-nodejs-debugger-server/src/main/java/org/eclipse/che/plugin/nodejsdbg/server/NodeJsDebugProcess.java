@@ -86,12 +86,19 @@ public class NodeJsDebugProcess implements NodeJsProcessObservable {
      * Stops nodejs process.
      */
     public void stop() {
+        boolean interrupted = false;
         observers.clear();
 
         try {
             send("quit");
         } catch (NodeJsDebuggerException e) {
-            LOG.warn(e.getMessage());
+            LOG.warn("Failed to execute 'quit' command. " + e.getMessage());
+        }
+
+        try {
+            processWriter.close();
+        } catch (IOException ignored) {
+            // ignore
         }
 
         executor.shutdown();
@@ -99,30 +106,30 @@ public class NodeJsDebugProcess implements NodeJsProcessObservable {
             if (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
                 executor.shutdownNow();
                 if (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
-                    LOG.warn("Unable to terminate main pool.");
+                    LOG.error("Unable to terminate pool of NodeJs debugger tasks.");
                 }
             }
         } catch (InterruptedException e) {
+            interrupted = true;
             if (!executor.isShutdown()) {
-                LOG.warn("Unable to terminate main pool.");
+                LOG.error("Unable to terminate pool of NodeJs debugger tasks.");
             }
         }
 
         process.destroy();
         try {
             if (!process.waitFor(10, TimeUnit.SECONDS)) {
-                LOG.error("Unable to terminate NodeJs.");
+                LOG.error("Unable to terminate NodeJs process.");
             }
         } catch (InterruptedException e) {
+            interrupted = true;
             if (!process.isAlive()) {
-                LOG.error("Unable to terminate NodeJs.");
+                LOG.error("Unable to terminate NodeJs process.");
             }
         }
 
-        try {
-            processWriter.close();
-        } catch (IOException e) {
-            LOG.warn("Failed to close NodeJs process output stream", e);
+        if (interrupted) {
+            Thread.currentThread().interrupt();
         }
     }
 
@@ -132,7 +139,7 @@ public class NodeJsDebugProcess implements NodeJsProcessObservable {
     public synchronized void send(String command) throws NodeJsDebuggerException {
         LOG.debug("Execute: {}", command);
         if (!process.isAlive()) {
-            throw new NodeJsDebuggerTerminatedException("NodeJs process is terminated.");
+            throw new NodeJsDebuggerTerminatedException("NodeJs process has been terminated.");
         }
         try {
             processWriter.write(command);
