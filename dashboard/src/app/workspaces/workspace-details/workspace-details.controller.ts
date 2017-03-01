@@ -348,7 +348,7 @@ export class WorkspaceDetailsController {
    * Callback when environment has been changed.
    */
   updateWorkspaceConfigEnvironment(): void {
-    delete this.workspaceImportedRecipe;
+    this.workspaceImportedRecipe = null;
     this.switchEditMode();
   }
 

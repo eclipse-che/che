@@ -20,7 +20,7 @@ const WS_AGENT_NAME: string = 'org.eclipse.che.ws-agent';
 const TERMINAL_AGENT_NAME: string = 'org.eclipse.che.terminal';
 const SSH_AGENT_NAME: string = 'org.eclipse.che.ssh';
 
-export class EnvironmentManager {
+export abstract class EnvironmentManager {
   $log: ng.ILogService;
 
   constructor($log: ng.ILogService) {
@@ -31,13 +31,11 @@ export class EnvironmentManager {
     return '';
   }
 
-  canRenameMachine(machine: IEnvironmentManagerMachine): boolean {
-    return false;
-  }
+  abstract getSource(machine: IEnvironmentManagerMachine): {[sourceType: string]: string};
 
-  canDeleteMachine(machine: IEnvironmentManagerMachine): boolean {
-    return false;
-  }
+  abstract setEnvVariables(machine: IEnvironmentManagerMachine, envVariables: any): void;
+
+  abstract setSource(machine: IEnvironmentManagerMachine, image: string): void;
 
   canEditEnvVariables(machine: IEnvironmentManagerMachine): boolean {
     return false;
@@ -76,11 +74,14 @@ export class EnvironmentManager {
    * @param {che.IWorkspaceEnvironment} environment
    * @param {string} oldName
    * @param {string} newName
-   *
-   * @return {che.IWorkspaceEnvironment}
+   * @returns {che.IWorkspaceEnvironment} new environment
    */
   renameMachine(environment: che.IWorkspaceEnvironment, oldName: string, newName: string): che.IWorkspaceEnvironment {
-    this.$log.error('EnvironmentManager: cannot rename machine.');
+
+    // update environment config
+    environment.machines[newName] = environment.machines[oldName];
+    delete environment.machines[oldName];
+
     return environment;
   }
 

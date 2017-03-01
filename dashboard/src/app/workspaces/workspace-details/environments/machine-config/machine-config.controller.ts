@@ -10,6 +10,12 @@
  */
 'use strict';
 import {ConfirmDialogService} from '../../../../../components/service/confirm-dialog/confirm-dialog.service';
+import {EnvironmentManager} from '../../../../../components/api/environment/environment-manager';
+import {IEnvironmentManagerMachine} from '../../../../../components/api/environment/environment-manager-machine';
+
+export interface IMachinesListItem extends che.IWorkspaceRuntimeMachine {
+  name: string;
+}
 
 /**
  * @ngdoc controller
@@ -25,20 +31,22 @@ export class WorkspaceMachineConfigController {
 
   timeoutPromise;
 
-  environmentManager;
-  machine;
-  machineConfig;
-  machinesList: any[];
+  environmentManager: EnvironmentManager;
+  machine: IEnvironmentManagerMachine;
+  machineConfig: any;
+  machinesList: IMachinesListItem[];
   machineName: string;
   newDev: boolean;
   newRam: number;
 
-  machineDevOnChange;
-  machineConfigOnChange;
-  machineNameOnChange;
-  machineOnDelete;
+  machineDevOnChange: Function;
+  machineConfigOnChange: Function;
+  machineNameOnChange: Function;
+  machineOnDelete: Function;
+  machineSourceOnChange: Function;
 
   private confirmDialogService: ConfirmDialogService;
+  private newImage: string;
 
   /**
    * Default constructor that is using resource injection
@@ -76,14 +84,14 @@ export class WorkspaceMachineConfigController {
       servers: this.environmentManager.getServers(this.machine),
       agents: this.environmentManager.getAgents(this.machine),
       canEditEnvVariables: this.environmentManager.canEditEnvVariables(this.machine),
-      envVariables: this.environmentManager.getEnvVariables(this.machine),
-      canRenameMachine: this.environmentManager.canRenameMachine(this.machine),
-      canDeleteMachine: this.environmentManager.canDeleteMachine(this.machine)
+      envVariables: this.environmentManager.getEnvVariables(this.machine)
     };
 
     this.newDev = this.machineConfig.isDev;
 
     this.newRam = this.machineConfig.memoryLimitBytes;
+
+    this.newImage = this.machineConfig.source && this.machineConfig.source.image ? this.machineConfig.source.image : null;
   }
 
   /**
@@ -95,6 +103,14 @@ export class WorkspaceMachineConfigController {
     }
 
     this.machineDevOnChange({name: this.machineName});
+  }
+
+  /**
+   * For specified machine it adds ws-agent to agents list.
+   * @param machineName
+   */
+  enableDevByName(machineName: string): ng.IPromise<any> {
+    return this.machineDevOnChange({name: machineName});
   }
 
   /**
@@ -156,7 +172,9 @@ export class WorkspaceMachineConfigController {
    * @param $event {MouseEvent}
    */
   showEditDialog($event: MouseEvent): void {
-    let machinesNames = Object.keys(this.machinesList);
+    let machineNames = this.machinesList.map((machine: IMachinesListItem) => {
+      return machine.name;
+    });
 
     this.$mdDialog.show({
       targetEvent: $event,
@@ -166,7 +184,7 @@ export class WorkspaceMachineConfigController {
       clickOutsideToClose: true,
       locals: {
         name: this.machineName,
-        machinesNames: machinesNames,
+        machineNames: machineNames,
         callbackController: this
       },
       templateUrl: 'app/workspaces/workspace-details/environments/machine-config/edit-machine-name-dialog/edit-machine-name-dialog.html'
@@ -193,8 +211,14 @@ export class WorkspaceMachineConfigController {
   /**
    * Deletes machine
    */
-  deleteMachine(): void {
-    let promise = this.confirmDialogService.showConfirmDialog('Remove machine', 'Would you like to delete this machine?', 'Delete');
+  deleteMachine($event: MouseEvent): void {
+    let promise;
+    if (!this.machineConfig.isDev) {
+      promise = this.confirmDialogService.showConfirmDialog('Remove machine', 'Would you like to delete this machine?', 'Delete');
+    } else {
+      promise = this.showDeleteDevMachineDialog($event);
+    }
+
     promise.then(() => {
       this.machineOnDelete({
         name: this.machineName
@@ -202,4 +226,37 @@ export class WorkspaceMachineConfigController {
       this.init();
     });
   }
+
+  /**
+   * Shows confirmation popup before machine to delete
+   *
+   * @param {MouseEvent} $event
+   * @returns {ng.IPromise<any>}
+   */
+  // todo
+  showDeleteDevMachineDialog($event: MouseEvent): ng.IPromise<any> {
+    return this.$mdDialog.show({
+      targetEvent: $event,
+      controller: 'DeleteDevMachineDialogController',
+      controllerAs: 'deleteDevMachineDialogController',
+      bindToController: true,
+      clickOutsideToClose: true,
+      locals: {
+        machinesList: this.machinesList,
+        machine: this.machine,
+        callbackController: this
+      },
+      templateUrl: 'app/workspaces/workspace-details/environments/machine-config/delete-dev-machine-dialog/delete-dev-machine-dialog.html'
+    });
+  }
+
+
+  /**
+   * Change machine's source image
+   */
+  changeSource(): void {
+    this.environmentManager.setSource(this.machine, this.newImage);
+    this.doUpdateConfig();
+  }
+
 }

@@ -197,6 +197,9 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
           } else {
             delete recipe.services[machineName].environment;
           }
+          if (machine.recipe.image) {
+            recipe.services[machineName].image = machine.recipe.image;
+          }
         });
 
         try {
@@ -226,6 +229,19 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
     } else if (machine.recipe.build) {
       return machine.recipe.build;
     }
+  }
+
+  /**
+   * Updates machine's image
+   *
+   * @param {IEnvironmentManagerMachine} machine
+   * @param {String} image
+   */
+  setSource(machine: IEnvironmentManagerMachine, image: string) {
+    if (!machine.recipe) {
+      return;
+    }
+    machine.recipe.image = image;
   }
 
   /**
@@ -268,16 +284,6 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
     } else {
       delete machine.recipe.environment;
     }
-  }
-
-  /**
-   * Returns true if machine can be renamed.
-   *
-   * @param {IEnvironmentManagerMachine} machine
-   * @returns {boolean}
-   */
-  canRenameMachine(machine: IEnvironmentManagerMachine): boolean {
-    return !!machine.recipe;
   }
 
   /**
@@ -337,16 +343,6 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
     }
 
     return environment;
-  }
-
-  /**
-   * Returns true if machine can be deleted.
-   *
-   * @param {IEnvironmentManagerMachine} machine
-   * @returns {boolean}
-   */
-  canDeleteMachine(machine: IEnvironmentManagerMachine): boolean {
-    return !!machine.recipe;
   }
 
   /**
