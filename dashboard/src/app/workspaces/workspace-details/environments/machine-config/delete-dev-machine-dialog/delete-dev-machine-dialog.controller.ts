@@ -14,9 +14,13 @@ import {IMachinesListItem, WorkspaceMachineConfigController} from '../machine-co
 /**
  * This class is handling the controller for deleting machines dialog.
  *
- * @author Ann Shumilova
+ * @author Oleksii Kurinnyi
  */
 export class DeleteDevMachineDialogController {
+  /**
+   * Material design Dialog service.
+   */
+  private $mdDialog: ng.material.IDialogService;
   /**
    * Parent controller.
    */
@@ -40,7 +44,7 @@ export class DeleteDevMachineDialogController {
    */
   private isProcessing: boolean = false;
   /**
-   * Machine name which will be configured ad dev-machine
+   * Machine name which will be configured as dev-machine
    */
   private newDevMachine: string;
 
@@ -48,7 +52,8 @@ export class DeleteDevMachineDialogController {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor(private $mdDialog: ng.material.IDialogService) {
+  constructor($mdDialog: ng.material.IDialogService) {
+    this.$mdDialog = $mdDialog;
     if (this.machinesList.length === 1) {
       this.message = 'You can\'t delete it without having other machines configured.';
     } else {

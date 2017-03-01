@@ -22,9 +22,13 @@ describe('List stacks >', () => {
       let listItemElement = listStacksPageObject.getListItemElementByName('testStack2');
 
       expect(listItemElement).toBeTruthy();
+      expect(listItemElement.isDisplayed()).toBeTruthy();
 
       // click on title redirects to details page
-      listItemElement.title.click();
+      let listItemElementCells = listStacksPageObject.splitStackItemByCell(listItemElement);
+      expect(listItemElementCells.title.isDisplayed()).toBeTruthy();
+      listItemElementCells.title.click();
+
       expect(browser.getCurrentUrl()).toMatch('stack/testStackId2');
 
     });

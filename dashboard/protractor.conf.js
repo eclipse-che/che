@@ -46,10 +46,6 @@ exports.config = {
   // protractor is called.
   specs: [paths.e2e + '/**/*.js'],
 
-  suites: {
-    debug: ['./**/list-stack.spec.js']
-  },
-
   // Options to be passed to Jasmine-node.
   jasmineNodeOpts: {
     showColors: true,
@@ -57,20 +53,20 @@ exports.config = {
   },
 
   // Setup the report before any tests start
-  beforeLaunch: function() {
-    return new Promise(function(resolve){
+  beforeLaunch: function () {
+    return new Promise(function (resolve) {
       reporter.beforeLaunch(resolve);
     });
   },
 
   // Assign the test reporter to each running instance
-  onPrepare: function() {
+  onPrepare: function () {
     jasmine.getEnv().addReporter(reporter);
   },
 
   // Close the report after all tests finish
-  afterLaunch: function(exitCode) {
-    return new Promise(function(resolve){
+  afterLaunch: function (exitCode) {
+    return new Promise(function (resolve) {
       reporter.afterLaunch(resolve.bind(this, exitCode));
     });
   }

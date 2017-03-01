@@ -18,29 +18,26 @@ import {WorkspaceMachineConfigController} from '../machine-config.controller';
  * @author Oleksii Kurinnyi
  */
 export class EditMachineNameDialogController {
+  private $mdDialog: ng.material.IDialogService;
   private name: string;
   private origName: string;
-  private machinesNames: string[];
+  private machineNames: string[];
+  private machineNamesLowercase: string[];
   private callbackController: WorkspaceMachineConfigController;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(private $mdDialog: ng.material.IDialogService) {
+  constructor($mdDialog: ng.material.IDialogService) {
     this.$mdDialog = $mdDialog;
 
     this.origName = this.name;
+    this.machineNamesLowercase = this.machineNames.map((name: string) => name.toLowerCase());
   }
 
   isUnique(name: string): boolean {
-    if (name === this.origName) {
-      return true;
-    }
-    let nameRE = new RegExp('^' + name + '$', 'i');
-    return this.machinesNames.some((_name: string) => {
-      return nameRE.test(_name);
-    }) === false;
+    return this.machineNamesLowercase.indexOf(name.toLowerCase()) < 0;
   }
 
   /**

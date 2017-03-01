@@ -172,7 +172,7 @@ export class WorkspaceMachineConfigController {
    * @param $event {MouseEvent}
    */
   showEditDialog($event: MouseEvent): void {
-    let machinesNames = this.machinesList.map((machine: IMachinesListItem) => {
+    let machineNames = this.machinesList.map((machine: IMachinesListItem) => {
       return machine.name;
     });
 
@@ -184,7 +184,7 @@ export class WorkspaceMachineConfigController {
       clickOutsideToClose: true,
       locals: {
         name: this.machineName,
-        machinesNames: machinesNames,
+        machineNames: machineNames,
         callbackController: this
       },
       templateUrl: 'app/workspaces/workspace-details/environments/machine-config/edit-machine-name-dialog/edit-machine-name-dialog.html'

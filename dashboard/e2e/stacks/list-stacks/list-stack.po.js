@@ -10,10 +10,7 @@ let ListStacks = function() {
 
   // stacks list
   this.listItemElements = this.listElement.$$('.che-list-item');
-  let _splitStackItemByCell = (elem) => {
-    if (!elem) {
-      return null;
-    }
+  this.splitStackItemByCell = (elem) => {
     return {
       title: elem.$('.stack-item-name'),
       description: elem.$('.stack-item-description'),
@@ -22,10 +19,9 @@ let ListStacks = function() {
     };
   };
   this.getListItemElementByName = (name) => {
-    let stackRowElement =  this.listItemElements.filter((elem, index) => {
+    return this.listItemElements.filter((elem, index) => {
       return elem.element(by.cssContainingText('.stack-item-name', name)).isPresent().then(isPresent => isPresent);
-    }).get(0);
-    return _splitStackItemByCell(stackRowElement);
+    }).first();
   };
 };
 
