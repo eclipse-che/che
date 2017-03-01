@@ -162,7 +162,7 @@ export class AdminPluginsCtrl {
 
   dropzoneAcceptURL(url) {
 
-    if (!url.startsWith('upload:') && !url.startsWith('http://eclipse.org/che/?install')) {
+    if (!url.startsWith('upload:') && !url.startsWith('https://eclipse.org/che/?install')) {
       let deferred = this.$q.defer();
       deferred.reject({data: {message:'The plugin URL is invalid'}});
       return deferred.promise;

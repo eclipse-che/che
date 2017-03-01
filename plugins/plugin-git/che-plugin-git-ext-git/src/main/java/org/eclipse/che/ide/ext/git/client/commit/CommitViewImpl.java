@@ -226,7 +226,9 @@ public class CommitViewImpl extends Window implements CommitView {
     public void onMessageChanged(KeyUpEvent event) {
         //Add new line when Enter key is pressed
         if (event.getNativeKeyCode() == KEY_ENTER) {
-            message.setText(message.getText() + "\n");
+            int cursorPos = message.getCursorPos();
+            message.setText(new StringBuilder(message.getText()).insert(cursorPos, "\n").toString());
+            message.setCursorPos(cursorPos + 2);
         }
 
         delegate.onValueChanged();

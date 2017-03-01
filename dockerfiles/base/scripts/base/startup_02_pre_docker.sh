@@ -171,22 +171,6 @@ is_trace() {
   fi
 }
 
-skip_preflight() {
-  if [ "${CHE_SKIP_PREFLIGHT}" = "true" ]; then
-    return 0
-  else
-    return 1
-  fi
-}
-
-skip_postflight() {
-  if [ "${CHE_SKIP_POSTFLIGHT}" = "true" ]; then
-    return 0
-  else
-    return 1
-  fi
-}
-
 skip_nightly() {
   if [ "${CHE_SKIP_NIGHTLY}" = "true" ]; then
     return 0

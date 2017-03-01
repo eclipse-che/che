@@ -590,9 +590,16 @@ export class WorkspaceDetailsController {
   }
 
   stopWorkspace(): void {
-    let promise = this.cheWorkspace.stopWorkspace(this.workspaceId, this.getAutoSnapshot());
+    let createSnapshot: boolean;
+    if (this.getWorkspaceStatus() === 'STARTING') {
+      createSnapshot = false;
+    } else {
+      createSnapshot = this.getAutoSnapshot();
+    }
+    let promise = this.cheWorkspace.stopWorkspace(this.workspaceId, createSnapshot);
 
-    promise.then(() => {}, (error: any) => {
+    promise.then(() => {
+    }, (error: any) => {
       this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Stop workspace failed.');
       this.$log.error(error);
     });

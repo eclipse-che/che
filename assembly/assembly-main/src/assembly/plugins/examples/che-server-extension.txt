@@ -18,10 +18,10 @@
 ###################################################
 
 DOCS:     https://www.eclipse.org/che/docs/plugins/introduction/index.html
-SOURCE:   http://github.com/che-samples/che-server-extension.git
+SOURCE:   https://github.com/che-samples/che-server-extension.git
 PRE-REQS: Java 1.8, Maven, Git, and a clone of Che's assembly repo @ http://github.com/codenvy/che.
 
-STEPS:    1. git clone http://github.com/che-samples/che-server-extension
+STEPS:    1. git clone https://github.com/che-samples/che-server-extension
           2. cd che-server-extension
           3. mvn clean install
           4. Add new extension as dependency to /che/assembly-wsagent-war/pom.xml

@@ -19,10 +19,10 @@
 
 WHAT:     Creates a new IDE clickable action that prints "It's My Action!" as an event in the event console.
 DOCS:     https://www.eclipse.org/che/docs/plugins/introduction/index.html
-SOURCE:   http://github.com/che-samples/che-ide-extension.git
+SOURCE:   https://github.com/che-samples/che-ide-extension.git
 PRE-REQS: Java 1.8, Maven, Git, and a clone of Che's assembly repo @ http://github.com/codenvy/che.
 
-STEPS:    1. git clone http://github.com/che-samples/che-ide-extension
+STEPS:    1. git clone https://github.com/che-samples/che-ide-extension
           2. cd che-ide-extension
           3. mvn clean install
           4. Add new extension as dependency to /che/assembly-ide-war/pom.xml

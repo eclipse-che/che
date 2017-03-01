@@ -159,16 +159,6 @@ class IdeSvc {
       this.listeningChannels.push(statusChannel);
       // for now, display log of status channel in case of errors
       bus.subscribe(statusChannel, (message: any) => {
-        if (message.eventType === 'DESTROYED' && message.workspaceId === data.id && !(this.$rootScope as any).showIDE) {
-          // need to show the error
-          this.$mdDialog.show(
-            this.$mdDialog.alert()
-              .title('Unable to start the workspace runtime')
-              .content('Your workspace runtime is no longer available. It was either destroyed or ran out of memory.')
-              .ariaLabel('Workspace start')
-              .ok('OK')
-          );
-        }
         if (message.eventType === 'ERROR' && message.workspaceId === data.id) {
           let errorMessage = 'Error when trying to start the workspace';
           if (message.error) {
