@@ -161,6 +161,14 @@ public class WorkspaceManagerTest {
     }
 
     @Test
+    public void shouldBeAbleToCreateWorkspaceWithAttributes() throws Exception {
+        WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), NAMESPACE, singletonMap("testKey", "testValue"));
+
+        assertEquals(workspace.getAttributes().get("testKey"), "testValue");
+        assertEquals(workspace.getStatus(), STOPPED);
+    }
+
+    @Test
     public void getsWorkspaceByIdWithoutRuntime() throws Exception {
         WorkspaceImpl workspace = createAndMockWorkspace();
 

@@ -75,6 +75,14 @@ export class CheBranding {
             this.helpTitle = this.$rootScope.branding.helpTitle;
             this.supportEmail = this.$rootScope.branding.supportEmail;
             this.oauthDocs = this.$rootScope.branding.oauthDocs;
+            if (!this.$rootScope.branding.cli) {
+              this.cli = {
+                configName : this.name + 'env file',
+                name : 'PRODUCT_'
+              }
+            } else {
+              this.cli = this.$rootScope.branding.cli;
+            }
             this.deferred.resolve(this.$rootScope.branding);
         });
 
@@ -111,5 +119,10 @@ export class CheBranding {
     getProductSupportEmail() {
         return this.supportEmail;
     }
+
+    getCLI() {
+        return this.cli;
+    }
+
 }
 

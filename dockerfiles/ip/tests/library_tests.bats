@@ -60,6 +60,10 @@ check_ip_result() {
   check_ip_result "ubuntu-native"
 }
 
+@test "Get ip based on ip a show interface (fedora/native)" {
+  check_ip_result "fedora-native"
+}
+
 @test "Get ip based on ip a show interface (fedora/multiple-ips)" {
   check_ip_result "fedora-multiple-ips"
 }

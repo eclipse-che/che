@@ -19,7 +19,7 @@
         </md-button>
       </md-list-item>
       <md-list-item flex class="navbar-subsection-item"
-                    ng-repeat="workspace in navbarRecentWorkspacesController.getRecentWorkspaces()"
+                    ng-repeat="workspace in navbarRecentWorkspacesController.getRecentWorkspaces() | limitTo: navbarRecentWorkspacesController.maxItemsNumber"
                     ng-class="{'recent-workspaces-last-opened': navbarRecentWorkspacesController.isOpen(workspace.id)}">
         <navbar-dropdown-menu flex
                               navbar-dropdown-items="navbarRecentWorkspacesController.getDropdownItems(workspace.id)"

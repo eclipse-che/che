@@ -10,6 +10,11 @@
  */
 'use strict';
 
+export interface IWorkspaceAttributes {
+  created: number;
+  updated?: number;
+  [propName: string]: string | number;
+}
 
 /**
  * This class is providing a builder for Workspace
@@ -20,6 +25,7 @@ export class CheWorkspaceBuilder {
 
   constructor() {
     this.workspace = {
+      name: 'test',
       temporary: false,
       config: {
         projects: []
@@ -28,27 +34,32 @@ export class CheWorkspaceBuilder {
 
   }
 
-  withName(name: string) {
+  withName(name: string): CheWorkspaceBuilder {
     this.workspace.config.name = name;
     return this;
   }
 
-  withId(id: string) {
+  withId(id: string): CheWorkspaceBuilder {
     this.workspace.id = id;
     return this;
   }
 
-  withTemporary(temporary: boolean) {
+  withAttributes(attributes: IWorkspaceAttributes): CheWorkspaceBuilder {
+    this.workspace.attributes = attributes;
+    return this;
+  }
+
+  withTemporary(temporary: boolean): CheWorkspaceBuilder {
     this.workspace.temporary = temporary;
     return this;
   }
 
-  withRuntime(runtime: any) {
+  withRuntime(runtime: any): CheWorkspaceBuilder {
     this.workspace.runtime = runtime;
     return this;
   }
 
-  build() {
+  build(): che.IWorkspace {
     return this.workspace;
   }
 

@@ -190,6 +190,7 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 /**
  * @author Andrey Parfonov
  * @author Igor Vinokur
+ * @author Mykola Morhun
  */
 class JGitConnection implements GitConnection {
     private static final String REBASE_OPERATION_SKIP     = "SKIP";
@@ -275,8 +276,26 @@ class JGitConnection implements GitConnection {
 
         try {
             addCommand.call();
+
+            addDeletedFilesToIndex(filePatterns);
         } catch (GitAPIException exception) {
             throw new GitException(exception.getMessage(), exception);
+        }
+    }
+
+    /** To add deleted files in index it is required to perform git rm on them */
+    private void addDeletedFilesToIndex(List<String> filePatterns) throws GitAPIException {
+        Set<String> deletedFiles = getGit().status().call().getMissing();
+        if (!deletedFiles.isEmpty()) {
+            RmCommand rmCommand = getGit().rm();
+            if (filePatterns.contains(".")) {
+                deletedFiles.forEach(rmCommand::addFilepattern);
+            } else {
+                filePatterns.forEach(filePattern -> deletedFiles.stream()
+                                                                .filter(deletedFile -> deletedFile.startsWith(filePattern))
+                                                                .forEach(rmCommand::addFilepattern));
+            }
+            rmCommand.call();
         }
     }
 

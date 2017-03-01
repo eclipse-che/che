@@ -94,11 +94,10 @@
     </che-show-area>
   </che-label-container>
   <!-- OR Location -->
-  <che-label-container che-label-name="Recipe Location"
-                       ng-if="workspaceEnvironmentsController.recipeType !== 'dockerimage' && workspaceEnvironmentsController.environment.recipe.location">
+  <che-label-container che-label-name="Recipe Location" ng-if="workspaceEnvironmentsController.environment.recipe.location">
     <che-text-info che-text="workspaceEnvironmentsController.environment.recipe.location"
-                   che-href="workspaceEnvironmentsController.environment.recipe.location"
-                   che-copy-clipboard="true"
+                   che-href="workspaceEnvironmentsController.getLocationUrl()"
+                   che-copy-clipboard="workspaceEnvironmentsController.getLocationUrl().length > 0"
                    class="recipe-location"></che-text-info>
   </che-label-container>
   <che-button-default class="add-machine-button"

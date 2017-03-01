@@ -12,6 +12,7 @@ package org.eclipse.che.ide.extension.machine.client.processes.panel;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
 
@@ -144,6 +145,8 @@ public class ProcessesPanelPresenterTest {
     private Promise<List<MachineProcessDto>> processesPromise;
     @Mock
     private Promise<List<GetProcessesResponseDto>> promise;
+    @Mock
+    private Widget                                 widget;
 
     @Captor
     private ArgumentCaptor<AcceptsOneWidget>                   acceptsOneWidgetCaptor;
@@ -339,6 +342,7 @@ public class ProcessesPanelPresenterTest {
         when(terminalFactory.create(machine, presenter)).thenReturn(terminal);
         IsWidget terminalWidget = mock(IsWidget.class);
         when(terminal.getView()).thenReturn(terminalWidget);
+        when(terminalWidget.asWidget()).thenReturn(widget);
 
         presenter.addCommandOutput(MACHINE_ID, outputConsole);
         presenter.onAddTerminal(MACHINE_ID, presenter);
@@ -408,6 +412,7 @@ public class ProcessesPanelPresenterTest {
         when(terminalFactory.create(machine, presenter)).thenReturn(terminal);
         IsWidget terminalWidget = mock(IsWidget.class);
         when(terminal.getView()).thenReturn(terminalWidget);
+        when(terminalWidget.asWidget()).thenReturn(widget);
 
         presenter.onAddTerminal(MACHINE_ID, presenter);
 
