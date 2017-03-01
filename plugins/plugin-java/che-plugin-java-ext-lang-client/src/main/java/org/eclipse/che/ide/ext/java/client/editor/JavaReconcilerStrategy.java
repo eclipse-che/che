@@ -78,7 +78,7 @@ public class JavaReconcilerStrategy implements ReconcilingStrategy, ResolvingPro
         reconcileTimer = new Timer() {
             @Override
             public void run() {
-               //nothing todo
+               parse();
             }
         };
 
@@ -110,10 +110,8 @@ public class JavaReconcilerStrategy implements ReconcilingStrategy, ResolvingPro
 
     @Override
     public void reconcile(final DirtyRegion dirtyRegion, final Region subRegion) {
-        if (!reconcileTimer.isRunning()) {
-            parse();
-            reconcileTimer.schedule(1_000);
-        }
+        reconcileTimer.cancel();
+        reconcileTimer.schedule(1_000);
     }
 
     void parse() {
@@ -151,10 +149,8 @@ public class JavaReconcilerStrategy implements ReconcilingStrategy, ResolvingPro
 
     @Override
     public void reconcile(final Region partition) {
-        if (!reconcileTimer.isRunning()) {
-            parse();
-            reconcileTimer.schedule(1_000);
-        }
+        reconcileTimer.cancel();
+        reconcileTimer.schedule(1_000);
     }
 
     public VirtualFile getFile() {
