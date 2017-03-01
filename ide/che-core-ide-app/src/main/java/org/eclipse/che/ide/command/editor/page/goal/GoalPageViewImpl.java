@@ -17,7 +17,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
@@ -34,9 +33,6 @@ import java.util.Set;
 public class GoalPageViewImpl extends Composite implements GoalPageView {
 
     private static final GoalPageViewImplUiBinder UI_BINDER = GWT.create(GoalPageViewImplUiBinder.class);
-
-    @UiField
-    SimpleLayoutPanel mainPanel;
 
     @UiField
     CustomComboBox goalComboBox;

@@ -10,18 +10,19 @@
  *******************************************************************************/
 package org.eclipse.che.ide.menu;
 
+import elemental.html.DivElement;
+
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionGroup;
@@ -37,6 +38,7 @@ import org.eclipse.che.ide.command.toolbar.CommandToolbarPresenter;
 import org.eclipse.che.ide.ui.toolbar.CloseMenuHandler;
 import org.eclipse.che.ide.ui.toolbar.MenuLockLayer;
 import org.eclipse.che.ide.ui.toolbar.PresentationFactory;
+import org.eclipse.che.ide.util.dom.Elements;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -59,7 +61,7 @@ public class MainMenuViewImpl extends Composite implements MainMenuView, CloseMe
 
     private final PresentationFactory presentationFactory = new PresentationFactory();
     /** Working table, cells of which are contains element of Menu. */
-    private final MenuBarTable                table               = new MenuBarTable();
+    private final MenuBarTable        table               = new MenuBarTable();
 
     private final FlowPanel rightPanel = new FlowPanel();
 
@@ -75,8 +77,8 @@ public class MainMenuViewImpl extends Composite implements MainMenuView, CloseMe
     /** Store selected Menu Bar item. */
     private MenuBarItem selectedMenuBarItem;
 
-    private List<Action> leftVisibleActions  = new ArrayList<>();
-    private List<Action> menuVisibleActions  = new ArrayList<>();
+    private List<Action> leftVisibleActions = new ArrayList<>();
+    private List<Action> menuVisibleActions = new ArrayList<>();
     private ActionManager   actionManager;
     private KeyBindingAgent keyBindingAgent;
 
@@ -94,21 +96,25 @@ public class MainMenuViewImpl extends Composite implements MainMenuView, CloseMe
 
         initWidget(rootPanel);
         disableTextSelection(rootPanel.getElement(), true);
+
         rootPanel.setStyleName(resources.menuCss().menuBar());
+
         leftPanel.addStyleName(resources.menuCss().leftPanel());
-        rootPanel.add(leftPanel);
+
         table.setStyleName(resources.menuCss().menuBarTable());
         table.setCellPadding(0);
         table.setCellSpacing(0);
-        rootPanel.add(table);
+
+        final DivElement triangleSeparator = Elements.createDivElement(resources.menuCss().triangleSeparator());
+
         rightPanel.addStyleName(resources.menuCss().rightPanel());
+
+        rootPanel.add(leftPanel);
+        rootPanel.add(table);
+        rootPanel.getElement().appendChild((Element)triangleSeparator);
         rootPanel.add(rightPanel);
-        toolbarPresenter.go(new AcceptsOneWidget() {
-            @Override
-            public void setWidget(IsWidget w) {
-                rightPanel.add(w);
-            }
-        });
+
+        toolbarPresenter.go(rightPanel::add);
     }
 
     @Override
@@ -258,6 +264,19 @@ public class MainMenuViewImpl extends Composite implements MainMenuView, CloseMe
         }
     }
 
+    private static class SeparatorItem extends Composite {
+        public SeparatorItem(String styleName) {
+            final FlowPanel widget = new FlowPanel();
+            widget.addStyleName(styleName);
+            Element separator = widget.getElement();
+            for (int i = 0; i < 6; i++) {
+                separator.appendChild(DOM.createDiv());
+            }
+
+            initWidget(widget);
+        }
+    }
+
     /**
      * This is visual component.
      * Uses for handling mouse events on MenuBar.
@@ -309,19 +328,6 @@ public class MainMenuViewImpl extends Composite implements MainMenuView, CloseMe
                     break;
             }
 
-        }
-    }
-
-    private static class SeparatorItem extends Composite {
-        public SeparatorItem(String styleName) {
-            final FlowPanel widget = new FlowPanel();
-            widget.addStyleName(styleName);
-            Element separator = widget.getElement();
-            for (int i = 0; i < 6; i++) {
-                separator.appendChild(DOM.createDiv());
-            }
-
-            initWidget(widget);
         }
     }
 }

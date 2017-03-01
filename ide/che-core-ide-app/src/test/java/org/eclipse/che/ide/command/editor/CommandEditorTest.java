@@ -33,7 +33,7 @@ import org.eclipse.che.ide.command.editor.page.context.ContextPage;
 import org.eclipse.che.ide.command.editor.page.goal.GoalPage;
 import org.eclipse.che.ide.command.editor.page.name.NamePage;
 import org.eclipse.che.ide.command.editor.page.previewurl.PreviewUrlPage;
-import org.eclipse.che.ide.command.editor.page.settings.ProjectsPage;
+import org.eclipse.che.ide.command.editor.page.project.ProjectsPage;
 import org.eclipse.che.ide.command.node.CommandFileNode;
 import org.eclipse.che.ide.command.node.NodeFactory;
 import org.junit.Before;

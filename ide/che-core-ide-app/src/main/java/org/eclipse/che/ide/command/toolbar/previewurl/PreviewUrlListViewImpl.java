@@ -36,7 +36,7 @@ public class PreviewUrlListViewImpl implements PreviewUrlListView {
         listItems = new HashMap<>();
 
         dropdownList = new DropdownList(PreviewUrlItemRenderer.HEADER_WIDGET);
-        dropdownList.setWidth("90px");
+        dropdownList.setWidth("80px");
         dropdownList.setSelectionHandler(item -> {
             for (Entry<String, BaseListItem<String>> entry : listItems.entrySet()) {
                 if (item.equals(entry.getValue())) {

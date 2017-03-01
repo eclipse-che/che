@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.editor.page.settings;
+package org.eclipse.che.ide.command.editor.page.project;
 
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.resources.Project;

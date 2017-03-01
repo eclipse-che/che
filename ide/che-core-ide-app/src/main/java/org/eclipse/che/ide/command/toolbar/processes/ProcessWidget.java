@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.toolbar.processes;
 
+import elemental.dom.Element;
+
 import com.google.gwt.core.client.Duration;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
@@ -21,14 +23,16 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Label;
 
-import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.ide.FontAwesome;
 import org.eclipse.che.ide.command.CommandResources;
 import org.eclipse.che.ide.command.toolbar.processes.ProcessItemRenderer.RerunProcessHandler;
 import org.eclipse.che.ide.command.toolbar.processes.ProcessItemRenderer.StopProcessHandler;
+import org.eclipse.che.ide.ui.Tooltip;
 import org.eclipse.che.ide.ui.dropdown.BaseListItem;
 
 import static com.google.gwt.dom.client.Style.Float.RIGHT;
+import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
+import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
 
 /**
  * Widget for representing a {@link Process}.
@@ -53,18 +57,7 @@ class ProcessWidget extends FlowPanel {
         super();
 
         final Process process = item.getValue();
-        final Machine targetMachine = process.getMachine();
         stopped = !process.isAlive();
-
-        final Label machineNameLabel = new InlineHTML(targetMachine.getConfig().getName() + ":&nbsp;");
-        machineNameLabel.setTitle(process.getCommandLine());
-        machineNameLabel.addStyleName(RESOURCES.commandToolbarCss().processWidgetText());
-        machineNameLabel.addStyleName(RESOURCES.commandToolbarCss().processWidgetMachineNameLabel());
-
-        final Label commandNameLabel = new InlineHTML(process.getName());
-        commandNameLabel.setTitle(process.getCommandLine());
-        commandNameLabel.addStyleName(RESOURCES.commandToolbarCss().processWidgetText());
-        commandNameLabel.addStyleName(RESOURCES.commandToolbarCss().processWidgetCommandNameLabel());
 
         durationLabel = new Label();
         durationLabel.addStyleName(RESOURCES.commandToolbarCss().processWidgetText());
@@ -77,26 +70,58 @@ class ProcessWidget extends FlowPanel {
         pidLabel.addStyleName(RESOURCES.commandToolbarCss().processWidgetText());
         pidLabel.addStyleName(RESOURCES.commandToolbarCss().processWidgetPidLabel());
 
-        final SafeHtmlBuilder safeHtmlBuilder1 = new SafeHtmlBuilder();
-        safeHtmlBuilder1.appendHtmlConstant(FontAwesome.STOP);
-        stopButton = new ActionButton(safeHtmlBuilder1.toSafeHtml());
-        stopButton.setTitle("Stop");
-        stopButton.addClickHandler(event -> stopProcessHandler.onStopProcess(process));
-
-        final SafeHtmlBuilder safeHtmlBuilder2 = new SafeHtmlBuilder();
-        safeHtmlBuilder2.appendHtmlConstant(FontAwesome.REPEAT);
-        reRunButton = new ActionButton(safeHtmlBuilder2.toSafeHtml());
-        reRunButton.setTitle("Re-run");
-        reRunButton.addClickHandler(event -> rerunProcessHandler.onRerunProcess(process));
-
-        checkStopped();
-
-        add(machineNameLabel);
-        add(commandNameLabel);
-        add(stopButton);
-        add(reRunButton);
+        add(createMachineNameLabel(process));
+        add(createCommandNameLabel(process));
+        add(stopButton = createStopButton(process, stopProcessHandler));
+        add(reRunButton = createRerunButton(process, rerunProcessHandler));
         add(durationLabel);
         add(pidLabel);
+
+        checkStopped();
+    }
+
+    private Label createMachineNameLabel(Process process) {
+        final Label machineNameLabel = new InlineHTML(process.getMachine().getConfig().getName() + ":&nbsp;");
+        machineNameLabel.addStyleName(RESOURCES.commandToolbarCss().processWidgetText());
+        machineNameLabel.addStyleName(RESOURCES.commandToolbarCss().processWidgetMachineNameLabel());
+
+        Tooltip.create((Element)machineNameLabel.getElement(), BOTTOM, MIDDLE, process.getCommandLine());
+
+        return machineNameLabel;
+    }
+
+    private Label createCommandNameLabel(Process process) {
+        final Label commandNameLabel = new InlineHTML(process.getName());
+        commandNameLabel.addStyleName(RESOURCES.commandToolbarCss().processWidgetText());
+        commandNameLabel.addStyleName(RESOURCES.commandToolbarCss().processWidgetCommandNameLabel());
+
+        Tooltip.create((Element)commandNameLabel.getElement(), BOTTOM, MIDDLE, process.getCommandLine());
+
+        return commandNameLabel;
+    }
+
+    private ActionButton createStopButton(Process process, StopProcessHandler handler) {
+        final SafeHtmlBuilder safeHtmlBuilder = new SafeHtmlBuilder();
+        safeHtmlBuilder.appendHtmlConstant(FontAwesome.STOP);
+
+        final ActionButton button = new ActionButton(safeHtmlBuilder.toSafeHtml());
+        button.addClickHandler(event -> handler.onStopProcess(process));
+
+        Tooltip.create((Element)button.getElement(), BOTTOM, MIDDLE, "Stop");
+
+        return button;
+    }
+
+    private ActionButton createRerunButton(Process process, RerunProcessHandler handler) {
+        final SafeHtmlBuilder safeHtmlBuilder = new SafeHtmlBuilder();
+        safeHtmlBuilder.appendHtmlConstant(FontAwesome.REPEAT);
+
+        final ActionButton button = new ActionButton(safeHtmlBuilder.toSafeHtml());
+        button.addClickHandler(event -> handler.onRerunProcess(process));
+
+        Tooltip.create((Element)button.getElement(), BOTTOM, MIDDLE, "Re-run");
+
+        return button;
     }
 
     /** Toggle widget's state for displaying running or stopped process. */

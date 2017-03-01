@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.editor.page.settings;
+package org.eclipse.che.ide.command.editor.page.project;
 
 import com.google.web.bindery.event.shared.EventBus;
 

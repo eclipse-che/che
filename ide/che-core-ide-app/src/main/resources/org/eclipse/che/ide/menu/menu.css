@@ -11,10 +11,7 @@
 .menuBarTable {
     float: left;
     border: 0;
-}
-
-.menuBar {
-    display: inline-flex;
+    background-color: mainMenuBkgColor;
 }
 
 .menuBar,
@@ -22,7 +19,7 @@
 .menuBarItemOver,
 .menuBarItemSelected,
 .menuBarItemDisabled {
-    height: 33px;
+    height: 34px;
     box-sizing: border-box;
 }
 
@@ -40,8 +37,9 @@
 }
 
 .menuBar {
+    display: inline-flex;
     width: 100%;
-    background-color: mainMenuBkgColor;
+    background-color: black;
     color: mainMenuFontColor;
 }
 
@@ -68,10 +66,18 @@
     float: left;
     height: inherit;
     white-space: nowrap;
+    background-color: mainMenuBkgColor;
 }
 
 .leftPanel .customComponent {
     float: left;
+}
+
+.triangleSeparator {
+    width: 0;
+    height: 0;
+    border-bottom: 34px solid mainMenuBkgColor;
+    border-right: 25px solid transparent;
 }
 
 .rightPanel {
@@ -97,4 +103,8 @@
     border-bottom: 1px solid #000000;
     margin-bottom: 2px;
     box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.23);
+}
+
+.statusPanel {
+    background-color: mainMenuBkgColor;
 }

@@ -13,10 +13,6 @@
 -->
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-             xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:che='urn:import:org.eclipse.che.ide.ui.listbox'>
-    <ui:with field='messages' type='org.eclipse.che.ide.command.editor.EditorMessages'/>
-    <g:SimpleLayoutPanel width="500px" height="25px" ui:field="mainPanel">
-        <che:CustomComboBox ui:field="goalComboBox" width="100%"/>
-    </g:SimpleLayoutPanel>
+    <che:CustomComboBox ui:field="goalComboBox" width="500px"/>
 </ui:UiBinder>

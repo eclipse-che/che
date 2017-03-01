@@ -44,7 +44,7 @@
     </ui:style>
 
     <g:DockLayoutPanel unit="PX" width="100%" height="100%" debugId="ideMainDockPanel" ui:field="ideMainDockPanel">
-        <g:north size="33">
+        <g:north size="34">
             <g:DockLayoutPanel ui:field="topMenuLayoutPanel">
                 <g:center>
                     <g:SimplePanel width="100%" ui:field="menuPanel" debugId="mainMenuPanel"/>
@@ -63,7 +63,7 @@
         <g:south size="18">
             <g:SimplePanel width="100%" ui:field="statusPanel" addStyleNames="{style.statusPanel}" debugId="statusPanel"/>
         </g:south>
-        <g:south size="41"> <!-- the valid size is 41, was 22 -->
+        <g:south size="41">
             <g:SimplePanel width="100%" ui:field="actionsPanel" addStyleNames="{style.actionsPanel}" debugId="actionPanel"/>
         </g:south>
     </g:DockLayoutPanel>
