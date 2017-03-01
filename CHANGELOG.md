@@ -1,5 +1,42 @@
 # Change Log
 
+## [5.4.0](https://github.com/eclipse/che/tree/5.4.0) (2017-04-01)
+[Full Changelog](https://github.com/eclipse/che/compare/5.3.1...5.4.0)
+
+**Pull requests merged:**
+The follow are changelogs for eclipse/che:
+- Use HTTPS instead of HTTP in web links for documentation and internal URLs. [4276](https://github.com/eclipse/che/pull/4276)
+- Added fetch workspaces by namespace, read state of application notifications, section injection in workspace details. [4262](https://github.com/eclipse/che/pull/4262)
+- [UD] added custom filter which will be used for "Get more RAM" widget on billing page.[4261](https://github.com/eclipse/che/pull/4261)
+- chefile: Switch from WSMaster Machine API to Workspace Exec Agent [4253](https://github.com/eclipse/che/pull/4253)
+- Add on dashboard possibility to stop workspace while it is being started. [4246](https://github.com/eclipse/che/pull/4246)
+- Fix building the tree for packages in Move Refactoring window [4245](https://github.com/eclipse/che/pull/4245)
+- [cli] Add `--skip:config` option to start, restart, and config commands [4244](https://github.com/eclipse/che/pull/4244)
+- Enable to bootstrap Che on OpenShift without mounting the Docker Socket [4241](https://github.com/eclipse/che/pull/4241)
+- UD add directives for custom input types for numbers and city names and UD add city name validation directive[4233](https://github.com/eclipse/che/pull/4233)
+- Added new utility methods for handling pagination of objects. [4232](https://github.com/eclipse/che/pull/4232)
+- Fix issue where it was lose track of running workspace in OpenShift. [4230](https://github.com/eclipse/che/pull/4230)
+- Replace getNetworks() docker API call when running on OpenShift. [4219](https://github.com/eclipse/che/pull/4219)
+- Bugfix: workspace attributes were ignored, when creating workspace. [4215](https://github.com/eclipse/che/pull/4215)
+- Removed deprecated classes in the texteditor package. [4213](https://github.com/eclipse/che/pull/4213)
+- Add search algorithm for host ip with fedora enp* network interfaces [4210](https://github.com/eclipse/che/pull/4210)
+- OpenShift connector uses filesystem tokens to authenticate with OpenShift API server [4209](https://github.com/eclipse/che/pull/4209)
+- Add a diagnostic page to the dashboard that can check workspace requirements. [4207](https://github.com/eclipse/che/pull/4207)
+- Doesn't perform DeleteResourceAction into partStack which doesn't support resource selection. [4199](https://github.com/eclipse/che/pull/4199)
+- Update currently selected resource in case if the last one was updated programmatically from the code [4194](https://github.com/eclipse/che/pull/4194)
+- Fixed rendering of some stack icons on the Dashboard.[4193](https://github.com/eclipse/che/pull/4193)
+- Fixed bug in`Git`->`Add To Index` menu command that was not adding deleted files to index. [4187](https://github.com/eclipse/che/pull/4187)
+- [cli] Simplify execution of initialization methods [4175](https://github.com/eclipse/che/pull/4175)
+- Upgrade Orion editor to latest version [4165](https://github.com/eclipse/che/pull/4165)
+- Use HTTPS instead of HTTP in web links for documentation and internal URLs. [4086](https://github.com/eclipse/che/pull/4086)
+- Trigger file saving operation on editor closing only when file has changes [4077](https://github.com/eclipse/che/pull/4077)
+- Add `--user uid:gid` and `-e CHE_USER=uid:gid` option to CLI to override user identity of Che container [4050](https://github.com/eclipse/che/pull/4050)
+- Internal refactoring: move account out of user entity [3823](https://github.com/eclipse/che/pull/3823)
+
+The follow are changelogs for eclipse/che-dockerfiles:
+- Added php-xml and php-mbstring packages to get tutorial to work https://eclipse.org/che/docs/tutorials/php/index.html .  [66](https://github.com/eclipse/che-dockerfiles/pull/66)
+
+
 ## [5.3.1](https://github.com/eclipse/che/tree/5.3.1) (2017-02-21)
 [Full Changelog](https://github.com/eclipse/che/compare/5.3.0...5.3.1)
 
