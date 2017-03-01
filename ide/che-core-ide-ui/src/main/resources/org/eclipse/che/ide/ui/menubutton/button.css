@@ -9,6 +9,8 @@
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
 .button {
+    width: 32px;
+    height: 22px;
     background-color: #33373b;
     border: solid 0.6px #454545;
     font-size: 17px;

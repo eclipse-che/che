@@ -11,7 +11,7 @@
 .toolbarButton {
     float: left;
     line-height: 20px;
-    margin-left: 20px;
+    margin-left: 15px;
     background-image: linear-gradient(to bottom, #444444, #343434 98%);
 }
 

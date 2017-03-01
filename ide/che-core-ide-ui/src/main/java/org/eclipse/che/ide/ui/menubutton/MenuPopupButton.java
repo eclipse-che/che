@@ -54,9 +54,7 @@ public class MenuPopupButton extends ButtonBase {
             }
         };
 
-        setSize("32px", "22px");
         addStyleName(RESOURCES.css().button());
-
         attachEventHandlers();
 
         dataProvider.setItemDataChangedHandler(this::updateButton);

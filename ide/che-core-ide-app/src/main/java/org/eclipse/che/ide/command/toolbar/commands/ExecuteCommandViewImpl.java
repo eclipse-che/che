@@ -29,7 +29,6 @@ import org.eclipse.che.ide.command.toolbar.commands.button.CommandsButton;
 import org.eclipse.che.ide.command.toolbar.commands.button.CommandsDataProvider;
 import org.eclipse.che.ide.command.toolbar.commands.button.MachinePopupItem;
 import org.eclipse.che.ide.ui.menubutton.MenuPopupButton;
-import org.eclipse.che.ide.ui.menubutton.PopupActionHandler;
 import org.eclipse.che.ide.ui.menubutton.PopupItem;
 import org.eclipse.che.ide.ui.menubutton.PopupItemDataProvider;
 
@@ -68,6 +67,7 @@ public class ExecuteCommandViewImpl implements ExecuteCommandView {
         this.appContext = appContext;
         this.runGoal = runGoal;
         this.debugGoal = debugGoal;
+
         commands = new HashMap<>();
         buttonsCache = new HashMap<>();
         buttonsPanel = new FlowPanel();
@@ -137,21 +137,18 @@ public class ExecuteCommandViewImpl implements ExecuteCommandView {
     private CommandsButton createButton(CommandGoal goal) {
         final CommandsDataProvider dataProvider = new CommandsDataProvider(appContext);
 
-        final CommandsButton button = new CommandsButton(goal, getIconForGoal(goal), dataProvider, new PopupActionHandler() {
-            @Override
-            public void onItemSelected(PopupItem item) {
-                if (item instanceof CommandPopupItem) {
-                    final ContextualCommand command = ((CommandPopupItem)item).getCommand();
+        final CommandsButton button = new CommandsButton(goal, getIconForGoal(goal), dataProvider, item -> {
+            if (item instanceof CommandPopupItem) {
+                final ContextualCommand command = ((CommandPopupItem)item).getCommand();
 
-                    delegate.onCommandExecute(command, null);
-                } else if (item instanceof MachinePopupItem) {
-                    final MachinePopupItem machinePopupItem = (MachinePopupItem)item;
+                delegate.onCommandExecute(command, null);
+            } else if (item instanceof MachinePopupItem) {
+                final MachinePopupItem machinePopupItem = (MachinePopupItem)item;
 
-                    delegate.onCommandExecute(machinePopupItem.getCommand(), machinePopupItem.getMachine());
-                }
-
-                dataProvider.setDefaultItem(item);
+                delegate.onCommandExecute(machinePopupItem.getCommand(), machinePopupItem.getMachine());
             }
+
+            dataProvider.setDefaultItem(item);
         });
 
         button.addStyleName(resources.commandToolbarCss().toolbarButton());
