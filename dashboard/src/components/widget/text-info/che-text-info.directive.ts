@@ -31,7 +31,7 @@ export class CheTextInfo {
       textValue: '=cheText',
       hrefValue: '=cheHref',
       labelName: '@cheLabelName',
-      copyClipboard: '@cheCopyClipboard'
+      copyClipboard: '=cheCopyClipboard'
     };
 
   }

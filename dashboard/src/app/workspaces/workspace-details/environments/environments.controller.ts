@@ -283,7 +283,7 @@ export class WorkspaceEnvironmentsController {
 
   /**
    * Show dialog to add a new machine to config
-   * @param $event
+   * @param $event {MouseEvent}
    */
   showAddMachineDialog($event: MouseEvent): void {
     this.$mdDialog.show({
@@ -299,6 +299,19 @@ export class WorkspaceEnvironmentsController {
       },
       templateUrl: 'app/workspaces/workspace-details/environments/add-machine-dialog/add-machine-dialog.html'
     });
+  }
+
+  /**
+   * Gets location URL
+   *
+   * @returns {string}
+   */
+  getLocationUrl(): string {
+    let url: string = '';
+    if (this.environment && this.environment.recipe.location && /^https?:\/\//i.test(this.environment.recipe.location)) {
+      url = this.environment.recipe.location;
+    }
+    return url;
   }
 
   /**
