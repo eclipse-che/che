@@ -122,14 +122,20 @@ public class JUnitTestRunner implements TestRunner {
         	}
         }
         
-        TestResult testResult;
-        if (runClass) {
-            String fqn = testParameters.get("fqn");
-            testResult = useJUnitV3API ? run3x(fqn) : run4x(fqn);
-        } else {
-            testResult = useJUnitV3API ? runAll3x(projectAbsolutePath) : runAll4x(projectAbsolutePath);
+        String currentWorkingDir = System.getProperty("user.dir");
+        try {
+            System.setProperty("user.dir", projectAbsolutePath);
+            TestResult testResult;
+            if (runClass) {
+                String fqn = testParameters.get("fqn");
+                testResult = useJUnitV3API ? run3x(fqn) : run4x(fqn);
+            } else {
+                testResult = useJUnitV3API ? runAll3x(projectAbsolutePath) : runAll4x(projectAbsolutePath);
+            }
+            return testResult;
+        } finally {
+            System.setProperty("user.dir", currentWorkingDir);
         }
-        return testResult;
     }
 
     /**
