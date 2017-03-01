@@ -226,5 +226,4 @@ public class JavaUtils {
     private static IStatus validatePackageName(String name) {
         return JAVA_PACKAGE_FQN_PATTERN.test(name) ? OK_STATUS : new Status(ERROR, "unknown", null, null);
     }
-
 }
