@@ -3,6 +3,7 @@
 ## [5.4.0](https://github.com/eclipse/che/tree/5.4.0) (2017-04-01)
 [Full Changelog](https://github.com/eclipse/che/compare/5.3.1...5.4.0)
 
+**Pull requests merged:**
 The follow are changelogs for eclipse/che:
 - Use HTTPS instead of HTTP in web links for documentation and internal URLs. [4276](https://github.com/eclipse/che/pull/4276)
 - Added fetch workspaces by namespace, read state of application notifications, section injection in workspace details. [4262](https://github.com/eclipse/che/pull/4262)
