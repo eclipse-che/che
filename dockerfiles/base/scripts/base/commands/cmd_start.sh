@@ -19,12 +19,41 @@ help_cmd_start() {
   text "  --force                           Uses 'docker rmi' and 'docker pull' to forcibly retrieve latest images\n"
   text "  --no-force                        Updates images if matching tag not found in local cache\n"
   text "  --pull                            Uses 'docker pull' to check for new remote versions of images\n"
+  text "  --skip:config                     Skip re-generation of config files placed into /instance\n"
   text "  --skip:preflight                  Skip preflight checks\n"
+  text "  --skip:postflight                 Skip postflight checks\n"
   text "\n"  
 }
 
 pre_cmd_start() {
-  :
+  CHE_SKIP_CONFIG=false
+  CHE_SKIP_PREFLIGHT=false
+  CHE_SKIP_POSTFLIGHT=false
+  FORCE_UPDATE="--no-force"
+
+  while [ $# -gt 0 ]; do
+    case $1 in
+      --skip:config)
+        CHE_SKIP_CONFIG=true
+        shift ;;
+      --skip:preflight)
+        CHE_SKIP_PREFLIGHT=true
+        shift ;;
+      --skip:postflight)
+        CHE_SKIP_POSTFLIGHT=true
+        shift ;;
+      --force)
+        FORCE_UPDATE="--force"
+        shift ;;
+      --no-force)
+        FORCE_UPDATE="--no-force"
+        shift ;;
+      --pull)
+        FORCE_UPDATE="--pull"
+        shift ;;
+      *) error "Unknown parameter: $1" return 2 ;;
+    esac
+  done
 }
 
 post_cmd_start() {
@@ -40,12 +69,13 @@ cmd_start() {
     return 1
   fi
 
-  # To protect users from accidentally updating their ${CHE_FORMAL_PRODUCT_NAME} servers when they didn't mean
-  # to, which can happen if CHE_VERSION=latest
-  FORCE_UPDATE=${1:-"--no-force"}
   # Always regenerate puppet configuration from environment variable source, whether changed or not.
   # If the current directory is not configured with an .env file, it will initialize
-  cmd_lifecycle config $FORCE_UPDATE
+  if skip_config; then
+    cmd_lifecycle config $FORCE_UPDATE --skip:config
+  else
+    cmd_lifecycle config $FORCE_UPDATE
+  fi
 
   # Preflight checks
   #   a) Check for open ports
@@ -254,4 +284,28 @@ check_containers_are_running() {
       fi
     done <<< "${CONTAINER_ID_MATCHING_SERVICE_NAMES}"
   done <<< "${LIST_OF_COMPOSE_CONTAINERS}"
+}
+
+skip_config() {
+  if [ "${CHE_SKIP_CONFIG}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+skip_preflight() {
+  if [ "${CHE_SKIP_PREFLIGHT}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+skip_postflight() {
+  if [ "${CHE_SKIP_POSTFLIGHT}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
 }
