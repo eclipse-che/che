@@ -10,9 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.toolbar.previewurl;
 
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
+import org.eclipse.che.ide.FontAwesome;
 import org.eclipse.che.ide.ui.dropdown.BaseListItem;
 import org.eclipse.che.ide.ui.dropdown.StringItemRenderer;
 
@@ -32,8 +34,12 @@ class PreviewUrlItemRenderer extends StringItemRenderer {
 
     private static class HeaderWidget extends Label {
         HeaderWidget() {
-            super("Preview");
-            getElement().getStyle().setColor("#6ba507");
+            super();
+
+            final SafeHtmlBuilder safeHtmlBuilder = new SafeHtmlBuilder();
+            safeHtmlBuilder.appendHtmlConstant(FontAwesome.BULLSEYE);
+            getElement().setInnerSafeHtml(safeHtmlBuilder.toSafeHtml());
+            getElement().getStyle().setColor("#4eabff");
         }
     }
 }

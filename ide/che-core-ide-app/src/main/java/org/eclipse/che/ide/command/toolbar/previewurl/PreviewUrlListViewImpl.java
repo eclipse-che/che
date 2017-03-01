@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import static org.eclipse.che.ide.command.toolbar.previewurl.PreviewUrlItemRenderer.HEADER_WIDGET;
+
 /** Implementation of {@link PreviewUrlListView} that displays preview URLs in a dropdown list. */
 @Singleton
 public class PreviewUrlListViewImpl implements PreviewUrlListView {
@@ -35,8 +37,8 @@ public class PreviewUrlListViewImpl implements PreviewUrlListView {
     public PreviewUrlListViewImpl() {
         listItems = new HashMap<>();
 
-        dropdownList = new DropdownList(PreviewUrlItemRenderer.HEADER_WIDGET);
-        dropdownList.setWidth("80px");
+        dropdownList = new DropdownList(HEADER_WIDGET);
+        dropdownList.setWidth("55px");
         dropdownList.setSelectionHandler(item -> {
             for (Entry<String, BaseListItem<String>> entry : listItems.entrySet()) {
                 if (item.equals(entry.getValue())) {
