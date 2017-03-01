@@ -112,24 +112,24 @@ public class CommandManagerImpl implements CommandManager,
         // get all commands related to the workspace
         workspaceCommandManagerDelegate.getCommands(appContext.getWorkspaceId()).then(new Operation<List<CommandImpl>>() {
             @Override
-            public void apply(List<CommandImpl> arg) throws OperationException {
-                for (CommandImpl workspaceCommand : arg) {
+            public void apply(List<CommandImpl> commands) throws OperationException {
+                for (CommandImpl workspaceCommand : commands) {
                     final ApplicableContext context = new ApplicableContext();
                     context.setWorkspaceApplicable(true);
 
-                    commands.put(workspaceCommand.getName(), new ContextualCommand(workspaceCommand, context));
+                    CommandManagerImpl.this.commands.put(workspaceCommand.getName(), new ContextualCommand(workspaceCommand, context));
                 }
 
                 // get all commands related to the projects
                 for (Project project : appContext.getProjects()) {
                     for (CommandImpl projectCommand : projectCommandManagerDelegate.getCommands(project)) {
-                        final ContextualCommand existedCommand = commands.get(projectCommand.getName());
+                        final ContextualCommand existedCommand = CommandManagerImpl.this.commands.get(projectCommand.getName());
 
                         if (existedCommand == null) {
                             final ApplicableContext context = new ApplicableContext();
                             context.addProject(project.getPath());
 
-                            commands.put(projectCommand.getName(), new ContextualCommand(projectCommand, context));
+                            CommandManagerImpl.this.commands.put(projectCommand.getName(), new ContextualCommand(projectCommand, context));
                         } else {
                             if (projectCommand.equals(existedCommand)) {
                                 existedCommand.getApplicableContext().addProject(project.getPath());
@@ -307,14 +307,15 @@ public class CommandManagerImpl implements CommandManager,
         // Use the simplest way to update command:
         // 1) remove existing command;
         // 2) create new one.
-        return doRemoveCommand(commandName).thenPromise(arg -> doCreateCommand(commandToUpdate)
-                .then((Function<ContextualCommand, ContextualCommand>)arg1 -> {
-                    // listeners should be notified after returning from #updateCommand method
-                    // so let's postpone notification
-                    Scheduler.get().scheduleDeferred(() -> notifyCommandUpdated(existedCommand, arg1));
+        return doRemoveCommand(commandName)
+                .thenPromise(aVoid -> doCreateCommand(commandToUpdate)
+                        .then((Function<ContextualCommand, ContextualCommand>)updatedCommand -> {
+                            // listeners should be notified after returning from #updateCommand method
+                            // so let's postpone notification
+                            Scheduler.get().scheduleDeferred(() -> notifyCommandUpdated(existedCommand, updatedCommand));
 
-                    return arg1;
-                }));
+                            return updatedCommand;
+                        }));
     }
 
     @Override
@@ -325,7 +326,7 @@ public class CommandManagerImpl implements CommandManager,
             return promiseProvider.reject(new Exception("Command '" + commandName + "' does not exist."));
         }
 
-        return doRemoveCommand(commandName).then(arg -> {
+        return doRemoveCommand(commandName).then(aVoid -> {
             // listeners should be notified after returning from #removeCommand method
             // so let's postpone notification
             Scheduler.get().scheduleDeferred(() -> notifyCommandRemoved(command));
@@ -346,7 +347,7 @@ public class CommandManagerImpl implements CommandManager,
 
         if (context.isWorkspaceApplicable()) {
             final Promise<Void> p = workspaceCommandManagerDelegate.removeCommand(commandName)
-                                                                   .then((Function<Void, Void>)arg -> {
+                                                                   .then((Function<Void, Void>)aVoid -> {
                                                                        command.getApplicableContext().setWorkspaceApplicable(false);
 
                                                                        return null;
@@ -363,7 +364,7 @@ public class CommandManagerImpl implements CommandManager,
             }
 
             final Promise<Void> p = projectCommandManagerDelegate.removeCommand(project, commandName)
-                                                                 .then((Function<Void, Void>)arg -> {
+                                                                 .then((Function<Void, Void>)aVoid -> {
                                                                      command.getApplicableContext().removeProject(projectPath);
 
                                                                      return null;

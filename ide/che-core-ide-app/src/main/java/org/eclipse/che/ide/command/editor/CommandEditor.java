@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.command.editor;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -317,7 +318,7 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
     public void onCommandRemoved(ContextualCommand command) {
         if (command.getName().equals(editedCommand.getName())) {
             editorAgent.closeEditor(this);
-            commandManager.removeCommandChangedListener(this);
+            Scheduler.get().scheduleDeferred(() -> commandManager.removeCommandChangedListener(this));
         }
     }
 }
