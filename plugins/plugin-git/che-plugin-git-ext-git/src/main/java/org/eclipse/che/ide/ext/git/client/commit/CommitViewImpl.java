@@ -32,6 +32,8 @@ import com.google.inject.Singleton;
 
 import javax.validation.constraints.NotNull;
 
+import static com.google.gwt.event.dom.client.KeyCodes.KEY_ENTER;
+
 /**
  * The implementation of {@link CommitView}.
  *
@@ -222,6 +224,11 @@ public class CommitViewImpl extends Window implements CommitView {
 
     @UiHandler("message")
     public void onMessageChanged(KeyUpEvent event) {
+        //Add new line when Enter key is pressed
+        if (event.getNativeKeyCode() == KEY_ENTER) {
+            message.setText(message.getText() + "\n");
+        }
+
         delegate.onValueChanged();
     }
 
