@@ -11,8 +11,10 @@
 
 package org.eclipse.che.plugin.openshift.client;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,6 +34,7 @@ import org.eclipse.che.plugin.docker.client.DockerApiVersionPathPrefixProvider;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
 import org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver;
+import org.eclipse.che.plugin.docker.client.LogMessage;
 import org.eclipse.che.plugin.docker.client.MessageProcessor;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
 import org.eclipse.che.plugin.docker.client.connection.DockerConnectionFactory;
@@ -54,6 +57,7 @@ import org.eclipse.che.plugin.docker.client.json.network.IpamConfig;
 import org.eclipse.che.plugin.docker.client.json.network.Network;
 import org.eclipse.che.plugin.docker.client.params.CommitParams;
 import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
+import org.eclipse.che.plugin.docker.client.params.GetContainerLogsParams;
 import org.eclipse.che.plugin.docker.client.params.GetEventsParams;
 import org.eclipse.che.plugin.docker.client.params.GetResourceParams;
 import org.eclipse.che.plugin.docker.client.params.KillContainerParams;
@@ -103,6 +107,9 @@ import io.fabric8.kubernetes.api.model.VolumeMount;
 import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
 import io.fabric8.kubernetes.api.model.extensions.Deployment;
 import io.fabric8.kubernetes.api.model.extensions.DeploymentBuilder;
+import io.fabric8.kubernetes.client.KubernetesClientException;
+import io.fabric8.kubernetes.client.Watcher;
+import io.fabric8.kubernetes.client.dsl.LogWatch;
 import io.fabric8.openshift.api.model.ImageStream;
 import io.fabric8.openshift.api.model.ImageStreamTag;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
@@ -625,6 +632,49 @@ public class OpenShiftConnector extends DockerConnector {
 
     @Override
     public void getEvents(final GetEventsParams params, MessageProcessor<Event> messageProcessor) {}
+
+    @Override
+    public void getContainerLogs(final GetContainerLogsParams params, MessageProcessor<LogMessage> containerLogsProcessor)
+            throws IOException {
+        String container = params.getContainer(); // container ID
+        Pod pod = getChePodByContainerId(container);
+        if (pod != null) {
+            String podName = pod.getMetadata().getName();
+            boolean[] ret = new boolean[1];
+            ret[0] = false;
+            try (LogWatch watchLog = openShiftClient.pods().inNamespace(openShiftCheProjectName).withName(podName)
+                    .watchLog()) {
+                Watcher<Pod> watcher = new Watcher<Pod>() {
+
+                    @Override
+                    public void eventReceived(Action action, Pod resource) {
+                        if (action == Action.DELETED) {
+                            ret[0] = true;
+                        }
+                    }
+
+                    @Override
+                    public void onClose(KubernetesClientException cause) {
+                        ret[0] = true;
+                    }
+
+                };
+                openShiftClient.pods().inNamespace(openShiftCheProjectName).withName(podName).watch(watcher);
+                Thread.sleep(5000);
+                InputStream is = watchLog.getOutput();
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(is));
+                while (!ret[0]) {
+                    String line = bufferedReader.readLine();
+                    containerLogsProcessor.process(new LogMessage(LogMessage.Type.DOCKER, line));
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            } catch (IOException e) {
+                // The kubernetes client throws an exception (Pipe not connected) when pod doesn't contain any logs.
+                // We can ignore it.
+            }
+        }
+    }
 
     /**
      * Gets the ImageStreamTag corresponding to a given tag name (i.e. without the repository)
