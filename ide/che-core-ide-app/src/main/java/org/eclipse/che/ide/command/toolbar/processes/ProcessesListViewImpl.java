@@ -48,8 +48,8 @@ public class ProcessesListViewImpl implements ProcessesListView {
         label.addStyleName(resources.commandToolbarCss().processesListLabel());
 
         dropdownList = new DropdownList(getEmptyListWidget());
-        dropdownList.setWidth("400px");
-        dropdownList.setDropdownPanelWidth("400px");
+        dropdownList.setWidth("100%");
+        dropdownList.syncWidths();
         dropdownList.setSelectionHandler(item -> listItems.entrySet()
                                                           .stream()
                                                           .filter(entry -> item.equals(entry.getValue()))

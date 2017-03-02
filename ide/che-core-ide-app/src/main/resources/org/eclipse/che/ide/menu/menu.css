@@ -81,6 +81,7 @@
 }
 
 .rightPanel {
+    width: 100%;
     float: left;
     height: inherit;
     white-space: nowrap;

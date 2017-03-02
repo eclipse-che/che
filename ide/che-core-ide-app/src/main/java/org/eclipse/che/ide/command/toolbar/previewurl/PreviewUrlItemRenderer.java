@@ -10,13 +10,19 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.toolbar.previewurl;
 
+import elemental.dom.Element;
+
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
 import org.eclipse.che.ide.FontAwesome;
+import org.eclipse.che.ide.ui.Tooltip;
 import org.eclipse.che.ide.ui.dropdown.BaseListItem;
 import org.eclipse.che.ide.ui.dropdown.StringItemRenderer;
+
+import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
+import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
 
 /** {@link StringItemRenderer} which always returns the same header widget. */
 class PreviewUrlItemRenderer extends StringItemRenderer {
@@ -40,6 +46,8 @@ class PreviewUrlItemRenderer extends StringItemRenderer {
             safeHtmlBuilder.appendHtmlConstant(FontAwesome.BULLSEYE);
             getElement().setInnerSafeHtml(safeHtmlBuilder.toSafeHtml());
             getElement().getStyle().setColor("#4eabff");
+
+            Tooltip.create((Element)getElement(), BOTTOM, MIDDLE, "Preview URL");
         }
     }
 }

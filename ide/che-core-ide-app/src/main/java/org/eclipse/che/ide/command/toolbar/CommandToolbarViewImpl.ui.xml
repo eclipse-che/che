@@ -15,23 +15,23 @@
 
     <ui:style>
         .rootPanel {
-            width: 800px;
             margin-top: 5px;
         }
 
         .commandsPanel {
             float: left;
-            margin-left: 20px;
         }
 
         .processesListPanel {
+            width: literal("calc(100% - 250px)");
             float: left;
-            margin-left: 50px;
+            margin-left: 15px;
         }
 
         .previewUrlListPanel {
-            float: left;
+            float: right;
             margin-left: 15px;
+            margin-right: 15px;
         }
     </ui:style>
 

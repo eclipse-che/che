@@ -14,6 +14,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -56,6 +57,9 @@ public class DropdownList extends Composite {
 
     private SelectionHandler selectionHandler;
     private DropdownListItem selectedItem;
+
+    /** Stores true if dropdown panels's width should be always synchronized with the list header's width. */
+    private boolean widthsSynced;
 
     /** Creates new dropdown widget. */
     public DropdownList() {
@@ -115,6 +119,7 @@ public class DropdownList extends Composite {
 
     /**
      * Sets the dropdown panels's width.
+     * If it's not set explicitly then it will be calculated depending on the children width.
      *
      * @param width
      *         the dropdown panels's new width, in CSS units (e.g. "10px", "1em")
@@ -122,6 +127,12 @@ public class DropdownList extends Composite {
      */
     public void setDropdownPanelWidth(String width) {
         dropdownPopupPanel.setWidth(width);
+    }
+
+    /** Set the dropdown panels's width should be always synchronized with the list header's width. */
+    public void syncWidths() {
+        widthsSynced = true;
+        Window.addResizeHandler(event -> setDropdownPanelWidth(getElement().getClientWidth() + "px"));
     }
 
     /** Adapts dropdown panel's height depending on the amount of child items. */
@@ -141,6 +152,10 @@ public class DropdownList extends Composite {
     private void toggleListVisibility() {
         if (!dropdownPopupPanel.isShowing()) {
             dropdownPopupPanel.showRelativeTo(this);
+
+            if (widthsSynced) {
+                setDropdownPanelWidth(getElement().getClientWidth() + "px");
+            }
         } else {
             dropdownPopupPanel.hide();
         }
