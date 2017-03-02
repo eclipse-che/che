@@ -216,7 +216,7 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
                                               .then(new Function<Map<String, String>, Map<String, String>>() {
                                                   @Override
                                                   public Map<String, String> apply(Map<String, String> settings) throws FunctionException {
-                                                      if (Boolean.parseBoolean(settings.get(CHE_WORKSPACE_AUTO_START))) {
+                                                      if (Boolean.parseBoolean(settings.getOrDefault(CHE_WORKSPACE_AUTO_START, "true"))) {
                                                           if (checkForShapshots) {
                                                               checkWorkspaceForSnapshots(workspace);
                                                           } else {
