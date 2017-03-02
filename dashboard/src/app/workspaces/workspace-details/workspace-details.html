@@ -4,7 +4,7 @@
              che-breadcrumb-href="#/workspaces">
   <che-button-default ng-if="workspaceDetailsController.editMode === false"
                       che-button-title="Open"
-                      href="#/ide/{{workspaceDetailsController.namespace}}/{{workspaceDetailsController.workspaceName}}"></che-button-default>
+                      href="#/ide/{{workspaceDetailsController.namespaceId}}/{{workspaceDetailsController.workspaceName}}"></che-button-default>
   <workspace-edit-mode-toolbar-button ng-if="workspaceDetailsController.editMode"
                                       workspace-edit-mode-message="{{workspaceDetailsController.isSaveButtonDisabled() ? '' : 'Changes will be applied and workspace restarted'}}"
                                       workspace-edit-mode-show-message="workspaceDetailsController.showApplyMessage"
@@ -62,14 +62,20 @@
             </div>
           </che-label-container>
           <!-- Namespace -->
-          <che-label-container che-label-name="Team" ng-if="workspaceDetailsController.getNamespaces().length > 0">
-            <che-toggle ng-if="workspaceDetailsController.isCreationFlow" ng-model="workspaceDetailsController.workspaceNamespace" layout="row">
+          <che-label-container che-label-name="Team"
+                               ng-if="workspaceDetailsController.getNamespaces().length > 0">
+            <che-toggle ng-if="workspaceDetailsController.isCreationFlow"
+                        ng-model="workspaceDetailsController.namespaceId"
+                        layout="row">
               <che-toggle-button ng-repeat="namespace in workspaceDetailsController.getNamespaces()"
-                                 che-title="{{namespace.label}}" che-value="{{namespace.id}}" class="namespace-button">
+                                 che-title="{{namespace.label}}"
+                                 che-value="{{namespace.id}}"
+                                 class="namespace-button">
               </che-toggle-button>
             </che-toggle>
             <che-button-default ng-if="!workspaceDetailsController.isCreationFlow"
-                                che-button-title="{{workspaceDetailsController.namespace}}"></che-button-default>
+                                che-button-title="{{workspaceDetailsController.getNamespaceLabel(workspaceDetailsController.namespaceId)}}"
+                                ng-click="workspaceDetailsController.namespaceOnClick(workspaceDetailsController.namespaceId)"></che-button-default>
           </che-label-container>
 
           <!-- Status -->
@@ -82,17 +88,26 @@
               </div>
               <div layout="row" class="workspace-details-action-buttons">
                 <div>
-                  <che-button-default ng-disabled="(workspaceDetailsController.isCreationFlow || workspaceDetailsController.getWorkspaceStatus() === 'STARTING')"
-                                      ng-show="(workspaceDetailsController.getWorkspaceStatus() !== 'RUNNING' && workspaceDetailsController.getWorkspaceStatus() !== 'STOPPING' && workspaceDetailsController.getWorkspaceStatus() !== 'SNAPSHOTTING')"
+                  <che-button-default ng-disabled="(workspaceDetailsController.isCreationFlow)"
+                                      ng-show="(workspaceDetailsController.getWorkspaceStatus() !== 'RUNNING' && workspaceDetailsController.getWorkspaceStatus() !== 'STOPPING' && workspaceDetailsController.getWorkspaceStatus() !== 'SNAPSHOTTING') && workspaceDetailsController.getWorkspaceStatus() !== 'STARTING'"
                                       che-button-title="Run" name="runButton"
                                       ng-click="workspaceDetailsController.runWorkspace()"></che-button-default>
-                  <che-button-default ng-disabled="(workspaceDetailsController.isCreationFlow || workspaceDetailsController.getWorkspaceStatus() === 'STOPPING' || workspaceDetailsController.getWorkspaceStatus() === 'SNAPSHOTTING')"
-                                      ng-show="(workspaceDetailsController.getWorkspaceStatus() === 'RUNNING' || workspaceDetailsController.getWorkspaceStatus() === 'STOPPING' || workspaceDetailsController.getWorkspaceStatus() === 'SNAPSHOTTING')"
-                                      che-button-title="{{workspaceDetailsController.getAutoSnapshot() ? 'Stop' : 'Stop without snapshot'}}" name="stopButton"
-                                      ng-click="workspaceDetailsController.stopWorkspace()"></che-button-default>
+                  <che-button-default
+                    ng-disabled="(workspaceDetailsController.isCreationFlow || workspaceDetailsController.getWorkspaceStatus() === 'STOPPING' || workspaceDetailsController.getWorkspaceStatus() === 'SNAPSHOTTING')"
+                    ng-show="(workspaceDetailsController.getWorkspaceStatus() === 'RUNNING' || workspaceDetailsController.getWorkspaceStatus() === 'STOPPING' || workspaceDetailsController.getWorkspaceStatus() === 'SNAPSHOTTING') || workspaceDetailsController.getWorkspaceStatus() === 'STARTING'"
+                    che-button-title="{{workspaceDetailsController.getAutoSnapshot() || workspaceDetailsController.getWorkspaceStatus() === 'STARTING' ? 'Stop' : 'Stop without snapshot'}}"
+                    name="stopButton"
+                    ng-click="workspaceDetailsController.stopWorkspace()"></che-button-default>
                 </div>
               </div>
             </div>
+          </che-label-container>
+
+          <!-- Other workspace details sections -->
+          <che-label-container ng-if="!workspaceDetailsController.isCreationFlow"
+                               ng-repeat="section in workspaceDetailsController.getSections()"
+                               che-label-name="{{section.title}}" che-label-description="{{section.description}}">
+            <div che-compile="section.content"></div>
           </che-label-container>
 
           <!-- Export workspace -->
@@ -158,7 +173,7 @@
 
     <!-- Other tabs -->
     <md-tab ng-if="workspaceDetailsController.isCreationFlow === false"
-            ng-repeat="section in workspaceDetailsController.getSections()">
+            ng-repeat="section in workspaceDetailsController.getPages()">
       <md-tab-label>
         <md-icon md-font-icon="material-design {{section.icon}}" class="che-tab-label-icon"></md-icon>
         <span class="che-tab-label-title">{{section.title}}</span>

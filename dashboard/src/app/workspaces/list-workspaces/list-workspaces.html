@@ -23,7 +23,7 @@
                      che-add-button-href="#/create-workspace"
                      che-delete-button-title="Delete"
                      che-on-delete="listWorkspacesCtrl.deleteSelectedWorkspaces()"
-                     che-filter-values="listWorkspacesCtrl.namespaces"
+                     che-filter-values="listWorkspacesCtrl.namespaceLabels"
                      che-on-filter-changed="listWorkspacesCtrl.onFilterChanged"
                      che-hide-delete="listWorkspacesCtrl.isNoSelected"
                      che-hide-header="(listWorkspacesCtrl.userWorkspaces | filter:listWorkspacesCtrl.workspaceFilter | filter:listWorkspacesCtrl.namespaceFilter:listWorkspacesCtrl.isExactMatch).length === 0">

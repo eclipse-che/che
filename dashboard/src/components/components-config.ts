@@ -13,6 +13,7 @@
 // components
 import {ApiConfig} from './api/che-api-config';
 import {AttributeConfig} from './attribute/attribute-config';
+import {FilterConfig} from './filter/filter-config';
 import {CheBrandingConfig} from './branding/che-branding-config';
 import {CodeMirrorConstant} from './codemirror/codemirror';
 import {GitHubService} from './github/github-service';
@@ -32,6 +33,7 @@ export class ComponentsConfig {
   constructor(register) {
     new ApiConfig(register);
     new AttributeConfig(register);
+    new FilterConfig(register);
     new CheBrandingConfig(register);
     new CodeMirrorConstant(register);
     new GitHubService(register);

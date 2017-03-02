@@ -76,6 +76,14 @@ export class NavbarRecentWorkspacesController {
   }
 
   /**
+   * Returns the MAX_RECENT_WORKSPACES_ITEMS constant
+   * @returns {number}
+   */
+  get maxItemsNumber(): number {
+    return MAX_RECENT_WORKSPACES_ITEMS;
+  }
+
+  /**
    * Retrieves workspace settings.
    */
   fetchWorkspaceSettings(): void {
@@ -84,10 +92,6 @@ export class NavbarRecentWorkspacesController {
     } else {
       this.cheWorkspace.fetchWorkspaceSettings().then(() => {
         this.prepareDropdownItemsTemplate();
-      }, (error: any) => {
-        if (error.status === 304) {
-          this.prepareDropdownItemsTemplate();
-        }
       });
     }
   }
@@ -171,13 +175,10 @@ export class NavbarRecentWorkspacesController {
     if (recentWorkspaces.length > MAX_RECENT_WORKSPACES_ITEMS) {
       let pos: number = veryRecentWorkspace ? recentWorkspaces.indexOf(veryRecentWorkspace) : -1;
       if (veryRecentWorkspace && pos >= MAX_RECENT_WORKSPACES_ITEMS) {
-        recentWorkspaces.splice(MAX_RECENT_WORKSPACES_ITEMS - 1, recentWorkspaces.length , veryRecentWorkspace);
-      } else {
-        recentWorkspaces.splice(0, MAX_RECENT_WORKSPACES_ITEMS);
+        recentWorkspaces[MAX_RECENT_WORKSPACES_ITEMS - 1] = veryRecentWorkspace;
       }
     }
-
-    this.recentWorkspaces = recentWorkspaces;
+    this.recentWorkspaces = recentWorkspaces.slice(0, MAX_RECENT_WORKSPACES_ITEMS);
   }
 
   /**
@@ -272,6 +273,7 @@ export class NavbarRecentWorkspacesController {
    */
   stopRecentWorkspace(workspaceId: string, createSnapshot: boolean): void {
     this.cheWorkspace.stopWorkspace(workspaceId, createSnapshot).then(() => {
+      angular.noop();
     }, (error: any) => {
       this.$log.error(error);
     });

@@ -30,24 +30,25 @@
          layout-align-xs="start start"
          class="che-list-item-details">
       <div flex-gt-xs="20"
-           class="che-list-item-name"
+           class="che-list-item-name stack-item-name"
            ng-click="stackItemController.redirectToStackDetails();">
         <span class="che-xs-header noselect" hide-gt-xs>Name</span>
         <span class="che-hover">{{stackItemController.stack.name}}</span>
       </div>
       <div flex-gt-xs="35"
-           class="che-list-item-name"
+           class="che-list-item-name stack-item-description"
            ng-click="stackItemController.redirectToStackDetails();">
         <span class="che-xs-header noselect" hide-gt-xs>Description</span>
         <span class="che-hover che-list-item-secondary">{{stackItemController.stack.description}}</span>
       </div>
       <div flex-gt-xs="30"
-           class="che-list-item-name"
+           class="che-list-item-name stack-item-components"
            ng-click="stackItemController.redirectToStackDetails();">
         <span class="che-xs-header noselect" hide-gt-xs>Components</span>
         <span class="che-hover che-list-item-secondary">{{stackItemController.getComponents(stackItemController.stack)}}</span>
       </div>
-      <div flex-gt-xs="15">
+      <div flex-gt-xs="15"
+           class="stack-item-actions">
         <span class="che-xs-header noselect" hide-gt-xs>Actions</span>
         <span class="che-list-actions">
           <a tooltip="Delete Stack" ng-disabled="stackItemController.stack.creator !== stackItemController.userId"

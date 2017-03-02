@@ -96,7 +96,6 @@ import org.eclipse.che.ide.api.editor.texteditor.HandlesTextOperations;
 import org.eclipse.che.ide.api.editor.texteditor.HandlesUndoRedo;
 import org.eclipse.che.ide.api.editor.texteditor.HasKeyBindings;
 import org.eclipse.che.ide.api.editor.texteditor.HasReadOnlyProperty;
-import org.eclipse.che.ide.api.editor.texteditor.TemporaryKeyBindingsManager;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditorOperations;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditorPartView;

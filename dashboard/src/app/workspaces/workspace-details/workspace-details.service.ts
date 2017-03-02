@@ -10,11 +10,17 @@
  */
 'use strict';
 
-interface ISection {
+interface IPage {
   title: string;
   content: string;
   icon: string;
   index: number;
+}
+
+interface ISection {
+ title: string;
+ description: string;
+ content: string;
 }
 
 /**
@@ -23,40 +29,68 @@ interface ISection {
  * @author Ann Shumilova
  */
 export class WorkspaceDetailsService {
+  pages: IPage[];
   sections: ISection[];
 
-    /**
-     * Default constructor that is using resource
-     * @ngInject for Dependency injection
-     */
-    constructor () {
-      this.sections = [];
-    }
+  /**
+   * Default constructor that is using resource
+   * @ngInject for Dependency injection
+   */
+  constructor () {
+    this.pages = [];
+    this.sections = [];
+  }
 
   /**
-   * Add new section to the workspace details.
+   * Add new page(tab) to the workspace details.
    *
-   * @param title section title
-   * @param content section html content
-   * @param icon section icon
-   * @param index optional section index (order)
+   * @param title page title
+   * @param content page html content
+   * @param icon page icon
+   * @param index optional page index (order)
    */
-    addSection(title: string, content: string, icon: string, index: number): void {
-      let section: ISection = {
-        title: title,
-        content: content,
-        icon: icon,
-        index: index || this.sections.length
-      };
-      this.sections.push(section);
-    }
+  addPage(title: string, content: string, icon: string, index: number): void {
+    let page: IPage = {
+      title: title,
+      content: content,
+      icon: icon,
+      index: index || this.pages.length
+    };
+    this.pages.push(page);
+  }
 
   /**
-   * Returns workspace details sections.
+   * Adds new section in workspace details.
    *
-   * @returns {Array} array of sections
+   * @param title title of the section
+   * @param description description of teh section (optional)
+   * @param content html content of the section
    */
-    getSections(): ISection[] {
-      return this.sections;
+  addSection(title: string, description: string, content: string): void {
+    let section: ISection = {
+      title: title,
+      description: description,
+      content: content
     }
+
+    this.sections.push(section);
+  }
+
+  /**
+   * Returns workspace details pages(tabs).
+   *
+   * @returns {Array} array of pages(tabs)
+   */
+  getPages(): IPage[] {
+    return this.pages;
+  }
+
+  /**
+   * Returns the array of workspace details sections.
+   *
+   * @returns {ISection[]} list of sections
+   */
+  getSections(): ISection[] {
+    return this.sections;
+  }
 }

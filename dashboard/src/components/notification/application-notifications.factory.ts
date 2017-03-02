@@ -17,14 +17,13 @@
  * @author Ann Shumilova
  */
 export class ApplicationNotifications {
+  private notifications: Array<any>;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor ($http) {
-    this.$http = $http;
-
+  constructor () {
     this.notifications = [];
   }
 
@@ -34,7 +33,7 @@ export class ApplicationNotifications {
    *
    * @returns {*} the list of application notifications
    */
-  getNotifications() {
+  getNotifications(): Array<any> {
     return this.notifications;
   }
 
@@ -43,7 +42,7 @@ export class ApplicationNotifications {
    *
    * @param notification notification yo be added
    */
-  addNotification(notification) {
+  addNotification(notification: any): void {
     this.notifications.push(notification);
   }
 
@@ -52,10 +51,11 @@ export class ApplicationNotifications {
    *
    * @param title notification's title
    * @param content notification's content
+   * @param removeOnRead if <code>true</code> - should be removed after has been shown to user
    * @returns {{notification}} notification
    */
-  addErrorNotification(title, content) {
-    return this._addNotification('error', title, content);
+  addErrorNotification(title: string, content: string, removeOnRead = true): any {
+    return this._addNotification('error', title, content, removeOnRead);
   }
 
   /**
@@ -63,10 +63,11 @@ export class ApplicationNotifications {
    *
    * @param title notification's title
    * @param content notification's content
+   * @param removeOnRead if <code>true</code> - should be removed after has been shown to user
    * @returns {{notification}} notification
    */
-  addWarningNotification(title, content) {
-    return this._addNotification('warning', title, content);
+  addWarningNotification(title: string, content: string, removeOnRead = true): any {
+    return this._addNotification('warning', title, content, removeOnRead);
   }
 
   /**
@@ -74,10 +75,11 @@ export class ApplicationNotifications {
    *
    * @param title notification's title
    * @param content notification's content
+   * @param removeOnRead if <code>true</code> - should be removed after has been shown to user
    * @returns {{notification}} notification
    */
-  addInfoNotification(title, content) {
-    return this._addNotification('info', title, content);
+  addInfoNotification(title: string, content: string, removeOnRead = true): any {
+    return this._addNotification('info', title, content, removeOnRead);
   }
 
   /**
@@ -86,14 +88,17 @@ export class ApplicationNotifications {
    * @param type notification type (error, info, warning)
    * @param title notification title
    * @param content notification content
-   * @returns {{}}
+   * @param removeOnRead if <code>true</code> - should be removed after has been shown to user
+   * @returns {{}} added notification
    * @private
    */
-  _addNotification(type, title, content) {
-    let notification = {};
-    notification.title = title;
-    notification.content = content;
-    notification.type = type;
+  _addNotification(type: string, title: string, content: string, removeOnRead: boolean): any {
+    let notification = {
+      title: title,
+      content: content,
+      type: type,
+      removeOnRead: removeOnRead
+    };
     this.notifications.push(notification);
     return notification;
   }
@@ -103,7 +108,7 @@ export class ApplicationNotifications {
    *
    * @param notification notification to be removed
    */
-  removeNotification(notification) {
+  removeNotification(notification: any): void {
     let index = this.notifications.indexOf(notification);
     if (index >= 0) {
       this.notifications.splice(index, 1);

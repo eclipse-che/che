@@ -10,17 +10,34 @@
  */
 'use strict';
 
-
 /**
  * This class is providing helper methods for simulating a fake HTTP backend simulating
  * @author Florent Benoit
  */
 export class CheHttpBackend {
+  private httpBackend: ng.IHttpBackendService;
+  private projectsPerWorkspace: Map<string, any>;
+  private workspaces: Map<string, any>;
+  private profilesMap: any;
+  private projectDetailsMap: Map<string, any>;
+  private remoteGitUrlArraysMap: Map<string, any>;
+  private localGitUrlsMap: Map<string, any>;
+  private remoteSvnUrlsMap: Map<string, any>;
+  private projectTypesWorkspaces: Map<string, any>;
+  private workspaceAgentMap: Map<string, any>;
+  private stacks: che.IStack[];
+  private defaultProfile: any;
+  private defaultProfilePrefs: any;
+  private defaultBranding: any;
+  private defaultPreferences: any;
+
+  private   isAutoSnapshot: boolean = false;
+  private   isAutoRestore: boolean = false;
 
   /**
    * Constructor to use
    */
-  constructor($httpBackend, cheAPIBuilder) {
+  constructor(private $httpBackend, private cheAPIBuilder) {
     this.httpBackend = $httpBackend;
     this.projectsPerWorkspace = new Map();
     this.workspaces = new Map();
@@ -44,14 +61,21 @@ export class CheHttpBackend {
    */
   setup() {
     // add the remote call
-    var workspaceReturn = [];
-    var workspaceKeys = this.workspaces.keys();
+    let workspaceReturn = [];
+    let workspaceKeys = this.workspaces.keys();
     for (let key of workspaceKeys) {
-      var tmpWorkspace = this.workspaces.get(key);
+      let tmpWorkspace = this.workspaces.get(key);
       workspaceReturn.push(tmpWorkspace);
       this.addWorkspaceAgent(key, tmpWorkspace.runtime);
       this.httpBackend.when('GET', '/api/workspace/' + key).respond(tmpWorkspace);
     }
+
+    let workspacSettings = {
+      'che.workspace.auto_snapshot': this.isAutoSnapshot,
+      'che.workspace.auto_restore': this.isAutoRestore
+    };
+    this.httpBackend.when('GET', '/api/workspace/settings').respond(200, workspacSettings);
+
     this.httpBackend.when('OPTIONS', '/api/').respond({});
     this.httpBackend.when('GET', '/api/workspace/settings').respond({});
 
@@ -59,24 +83,24 @@ export class CheHttpBackend {
 
     this.httpBackend.when('GET', '/api/stack?maxItems=50').respond(this.stacks);
 
-    var projectTypeKeys = this.projectTypesWorkspaces.keys();
+    let projectTypeKeys = this.projectTypesWorkspaces.keys();
     for (let key of projectTypeKeys) {
       this.httpBackend.when('GET', this.workspaceAgentMap.get(key) + '/project-type').respond(this.projectTypesWorkspaces.get(key));
     }
 
     //profiles
     this.httpBackend.when('GET', '/api/profile').respond(this.defaultProfile);
-    var profileKeys = this.profilesMap.keys();
+    let profileKeys = this.profilesMap.keys();
     for (let key of profileKeys) {
       this.httpBackend.when('GET', '/api/profile/' + key).respond(this.profilesMap.get(key));
     }
 
     //preferences
     this.httpBackend.when('GET', '/api/preferences').respond(this.defaultPreferences);
-    this.httpBackend.when('DELETE', '/api/preferences').respond();
+    this.httpBackend.when('DELETE', '/api/preferences').respond(200, {});
 
     /// project details
-    var projectDetailsKeys = this.projectDetailsMap.keys();
+    let projectDetailsKeys = this.projectDetailsMap.keys();
     for (let projectKey of projectDetailsKeys) {
       let workspaceKey = projectKey.split('/')[0];
       let projectId = projectKey.split('/')[1];
@@ -86,8 +110,24 @@ export class CheHttpBackend {
     // branding
     this.httpBackend.when('GET', 'assets/branding/product.json').respond(this.defaultBranding);
 
-    this.httpBackend.when('POST', '/api/analytics/log/session-usage').respond();
+    this.httpBackend.when('POST', '/api/analytics/log/session-usage').respond(200, {});
 
+  }
+
+  /**
+   * Set workspace auto snapshot status
+   * @param isAutoSnapshot {boolean}
+   */
+  setWorkspaceAutoSnapshot(isAutoSnapshot: boolean) {
+    this.isAutoSnapshot = isAutoSnapshot;
+  }
+
+  /**
+   * Set workspace auto restore status
+   * @param isAutoRestore {boolean}
+   */
+  setWorkspaceAutoRestore(isAutoRestore: boolean) {
+    this.isAutoRestore = isAutoRestore;
   }
 
 
@@ -128,13 +168,13 @@ export class CheHttpBackend {
       throw 'no workspace id set';
     }
 
-    var workspaceFound = this.workspaces.get(workspace.id);
+    let workspaceFound = this.workspaces.get(workspace.id);
     if (!workspaceFound) {
       this.workspaces.set(workspace.id, workspace);
       workspaceFound = workspace;
     }
 
-    var existingProjects = workspaceFound.config.projects;
+    let existingProjects = workspaceFound.config.projects;
     if (!existingProjects) {
       workspaceFound.config.projects = [];
     }
@@ -340,7 +380,7 @@ export class CheHttpBackend {
    * @param projectPath
    */
   getRemoteSvnUrl(workspaceId, projectPath) {
-    var svnInfo = {};
+    let svnInfo: {items: any[]} = {};
     svnInfo.items = [{uRL: this.remoteSvnUrlsMap.get(workspaceId + projectPath)}];
 
     this.httpBackend.when('POST', this.workspaceAgentMap.get(workspaceId) + '/svn/info?workspaceId='+workspaceId).respond(svnInfo);

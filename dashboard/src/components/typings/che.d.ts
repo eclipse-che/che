@@ -103,7 +103,7 @@ declare namespace _che {
   export interface IRecipe {
     content?: string;
     location?: string;
-    contentType: string;
+    contentType?: string;
     type: string;
   }
 
@@ -224,5 +224,11 @@ declare namespace _che {
     links?: Array<any>;
     userId: string;
     $promise?: any;
+  }
+
+  export interface INamespace {
+    id: string;
+    label: string;
+    location: string;
   }
 }

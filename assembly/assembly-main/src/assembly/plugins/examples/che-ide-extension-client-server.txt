@@ -19,10 +19,10 @@
 
 WHAT:     Creates a new IDE clickable action that prints server response as IDE notification popup.
 DOCS:     https://www.eclipse.org/che/docs/plugins/introduction/index.html
-SOURCE:   http://github.com/che-samples/che-ide-extension.git   BRANCH: client-server
+SOURCE:   https://github.com/che-samples/che-ide-extension.git   BRANCH: client-server
 PRE-REQS: Java 1.8, Maven, Git, and a clone of Che's assembly repo @ http://github.com/codenvy/che.
 
-STEPS:    1. git clone http://github.com/che-samples/che-ide-extension
+STEPS:    1. git clone https://github.com/che-samples/che-ide-extension
           2. cd che-ide-extension
           3. git checkout client-server
           4. mvn clean install

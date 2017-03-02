@@ -18,6 +18,8 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorInput;
+import org.eclipse.che.ide.api.editor.position.PositionConverter;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Project;
@@ -31,10 +33,8 @@ import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
 import org.eclipse.che.ide.ext.java.shared.JarEntry;
 import org.eclipse.che.ide.ext.java.shared.dto.ImplementationsDescriptorDTO;
 import org.eclipse.che.ide.ext.java.shared.dto.model.Type;
-import org.eclipse.che.ide.ui.popup.PopupResources;
-import org.eclipse.che.ide.api.editor.position.PositionConverter;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.ui.popup.PopupResources;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -79,7 +79,7 @@ public class OpenImplementationPresenterTest {
     //other mocks
 
     @Mock
-    private TextEditorPresenter          editorPartPresenter;
+    private TextEditor                   editor;
     @Mock
     private EditorInput                  editorInput;
     @Mock
@@ -138,7 +138,7 @@ public class OpenImplementationPresenterTest {
 
     @Test
     public void testShouldDisplayOneImplementationIsRealFile() throws Exception {
-        when(editorPartPresenter.getEditorInput()).thenReturn(editorInput);
+        when(editor.getEditorInput()).thenReturn(editorInput);
         when(editorInput.getFile()).thenReturn(file);
         when(file.getRelatedProject()).thenReturn(Optional.of(relatedProject));
         when(file.getParentWithMarker(eq(SourceFolderMarker.ID))).thenReturn(Optional.of(srcFolder));
@@ -148,7 +148,7 @@ public class OpenImplementationPresenterTest {
         when(file.getExtension()).thenReturn("java");
         when(file.getName()).thenReturn("file.java");
         when(relatedProject.getLocation()).thenReturn(Path.valueOf("/a"));
-        when(editorPartPresenter.getCursorOffset()).thenReturn(123);
+        when(editor.getCursorOffset()).thenReturn(123);
         when(implementationsPromise.then(any(Operation.class))).thenReturn(implementationsPromise);
         when(javaNavigationService.getImplementations(eq(Path.valueOf("/a")), eq("c.d.file"), eq(123))).thenReturn(implementationsPromise);
 
@@ -162,7 +162,7 @@ public class OpenImplementationPresenterTest {
         when(workspaceRoot.getFile(anyString())).thenReturn(realFilePromise);
         when(realFilePromise.then(any(Operation.class))).thenReturn(realFilePromise);
 
-        presenter.show(editorPartPresenter);
+        presenter.show(editor);
         verify(implementationsPromise).then(implementationsOperation.capture());
         implementationsOperation.getValue().apply(implementationDescriptor);
 
@@ -174,7 +174,7 @@ public class OpenImplementationPresenterTest {
 
     @Test
     public void testShouldDisplayNoImplementations() throws Exception {
-        when(editorPartPresenter.getEditorInput()).thenReturn(editorInput);
+        when(editor.getEditorInput()).thenReturn(editorInput);
         when(editorInput.getFile()).thenReturn(file);
         when(file.getRelatedProject()).thenReturn(Optional.of(relatedProject));
         when(file.getParentWithMarker(eq(SourceFolderMarker.ID))).thenReturn(Optional.of(srcFolder));
@@ -184,7 +184,7 @@ public class OpenImplementationPresenterTest {
         when(file.getExtension()).thenReturn("java");
         when(file.getName()).thenReturn("file.java");
         when(relatedProject.getLocation()).thenReturn(Path.valueOf("/a"));
-        when(editorPartPresenter.getCursorOffset()).thenReturn(123);
+        when(editor.getCursorOffset()).thenReturn(123);
         when(implementationsPromise.then(any(Operation.class))).thenReturn(implementationsPromise);
         when(javaNavigationService.getImplementations(eq(Path.valueOf("/a")), eq("c.d.file"), eq(123))).thenReturn(implementationsPromise);
 
@@ -194,10 +194,10 @@ public class OpenImplementationPresenterTest {
         when(type1.getFlags()).thenReturn(-1);
 
         when(dtoFactory.createDto(eq(Type.class))).thenReturn(type1);
-        when(editorPartPresenter.getPositionConverter()).thenReturn(positionConverter);
+        when(editor.getPositionConverter()).thenReturn(positionConverter);
         when(positionConverter.offsetToPixel(anyInt())).thenReturn(new PositionConverter.PixelCoordinates(1, 1));
 
-        presenter.show(editorPartPresenter);
+        presenter.show(editor);
         verify(implementationsPromise).then(implementationsOperation.capture());
         implementationsOperation.getValue().apply(implementationDescriptor);
 
