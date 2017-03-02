@@ -32,10 +32,9 @@ import org.eclipse.che.ide.api.factory.FactoryServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
-import org.eclipse.che.ide.collections.Jso;
-import org.eclipse.che.ide.collections.js.JsoArray;
 import org.eclipse.che.ide.context.AppContextImpl;
-import org.eclipse.che.ide.context.BrowserQueryFieldRenderer;
+import org.eclipse.che.ide.context.BrowserAddress;
+import org.eclipse.che.ide.context.QueryParameters;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
@@ -60,8 +59,9 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
 @Singleton
 public class FactoryWorkspaceComponent extends WorkspaceComponent {
 
-    private final FactoryServiceClient           factoryServiceClient;
-    private       String                         workspaceId;
+    private final QueryParameters      queryParameters;
+    private final FactoryServiceClient factoryServiceClient;
+    private       String               workspaceId;
 
     @Inject
     public FactoryWorkspaceComponent(WorkspaceServiceClient workspaceServiceClient,
@@ -74,12 +74,13 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent {
                                      AppContext appContext,
                                      NotificationManager notificationManager,
                                      MessageBusProvider messageBusProvider,
-                                     BrowserQueryFieldRenderer browserQueryFieldRenderer,
+                                     BrowserAddress browserAddress,
                                      DialogFactory dialogFactory,
                                      PreferencesManager preferencesManager,
                                      DtoFactory dtoFactory,
                                      WorkspaceEventsHandler workspaceEventsHandler,
-                                     LoaderPresenter loader) {
+                                     LoaderPresenter loader,
+                                     QueryParameters queryParameters) {
         super(workspaceServiceClient,
               createWorkspacePresenter,
               startWorkspacePresenter,
@@ -89,31 +90,29 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent {
               appContext,
               notificationManager,
               messageBusProvider,
-              browserQueryFieldRenderer,
+              browserAddress,
               dialogFactory,
               preferencesManager,
               dtoFactory,
               workspaceEventsHandler,
               loader);
         this.factoryServiceClient = factoryServiceClient;
+        this.queryParameters = queryParameters;
     }
 
     @Override
     public void start(final Callback<Component, Exception> callback) {
         this.callback = callback;
-        Jso factoryParams = browserQueryFieldRenderer.getParameters();
-        JsoArray<String> keys = factoryParams.getKeys();
         Map<String, String> factoryParameters = new HashMap<>();
-        // check all factory parameters
-        for (String key : keys.toList()) {
+        for (Map.Entry<String, String> queryParam : queryParameters.getAll().entrySet()) {
+            String key = queryParam.getKey();
             if (key.startsWith("factory-")) {
-                String value = factoryParams.getStringField(key);
-                factoryParameters.put(key.substring("factory-".length()), value);
+                factoryParameters.put(key.substring("factory-".length()), queryParam.getValue());
             }
         }
 
         // get workspace ID to use dedicated workspace for this factory
-        this.workspaceId = browserQueryFieldRenderer.getParameterFromURLByName("workspaceId");
+        this.workspaceId = queryParameters.getByName("workspaceId");
 
         Promise<FactoryDto> factoryPromise;
         // now search if it's a factory based on id or from parameters
@@ -126,7 +125,7 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent {
         Promise<Void> promise = factoryPromise.then(new Function<FactoryDto, Void>() {
             @Override
             public Void apply(final FactoryDto factory) throws FunctionException {
-                
+
                 if (appContext instanceof AppContextImpl) {
                     ((AppContextImpl)appContext).setFactory(factory);
                 }

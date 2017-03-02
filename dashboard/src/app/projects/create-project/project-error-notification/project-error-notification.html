@@ -1,0 +1,8 @@
+<che-popup title="{{projectErrorNotificationController.title}}" on-close="projectErrorNotificationController.hide()">
+  <div class="ssh-key-notification">
+    <div>{{projectErrorNotificationController.content}}</div>
+    <che-button-notice che-button-title="Close"
+                       ng-click="projectErrorNotificationController.hide()">
+    </che-button-notice>
+  </div>
+</che-popup>

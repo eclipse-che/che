@@ -17,9 +17,12 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorInput;
-import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.api.editor.document.Document;
+import org.eclipse.che.ide.api.editor.text.LinearRange;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Project;
@@ -30,9 +33,6 @@ import org.eclipse.che.ide.ext.java.shared.dto.Region;
 import org.eclipse.che.ide.ext.java.shared.dto.model.CompilationUnit;
 import org.eclipse.che.ide.ext.java.shared.dto.model.Member;
 import org.eclipse.che.ide.resource.Path;
-import org.eclipse.che.ide.api.editor.document.Document;
-import org.eclipse.che.ide.api.editor.text.LinearRange;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.ui.loaders.request.MessageLoader;
 import org.junit.Before;
@@ -70,29 +70,29 @@ public class FileStructurePresenterTest {
     private LoaderFactory         loaderFactory;
 
     @Mock
-    private TextEditorPresenter      editorPartPresenter;
+    private TextEditor               editor;
     @Mock
     private EditorInput              editorInput;
     @Mock
-    private File                        file;
+    private File                     file;
     @Mock
-    private Project                     relatedProject;
+    private Project                  relatedProject;
     @Mock
-    private Container                   srcFolder;
+    private Container                srcFolder;
     @Mock
-    private Promise<CompilationUnit>    promise;
+    private Promise<CompilationUnit> promise;
     @Mock
     private Promise<Node>            nodePromise;
     @Mock
     private CompilationUnit          compilationUnit;
     @Mock
-    private Member                      member;
+    private Member                   member;
     @Mock
-    private Node                        node;
+    private Node                     node;
     @Mock
-    private Region                      region;
+    private Region                   region;
     @Mock
-    private Document                    document;
+    private Document                 document;
 
     @Captor
     private ArgumentCaptor<Operation<CompilationUnit>>     operationSuccessCapture;
@@ -110,10 +110,10 @@ public class FileStructurePresenterTest {
 
     @Before
     public void setUp() throws Exception {
-        when(editorPartPresenter.getEditorInput()).thenReturn(editorInput);
-        when(editorPartPresenter.getDocument()).thenReturn(document);
+        when(editor.getEditorInput()).thenReturn(editorInput);
+        when(editor.getDocument()).thenReturn(document);
         when(editorInput.getFile()).thenReturn(file);
-        when(editorPartPresenter.getCursorOffset()).thenReturn(0);
+        when(editor.getCursorOffset()).thenReturn(0);
         when(file.getRelatedProject()).thenReturn(Optional.of(relatedProject));
         when(file.getParentWithMarker(eq(SourceFolderMarker.ID))).thenReturn(Optional.of(srcFolder));
         when(file.getName()).thenReturn("A.java");
@@ -137,7 +137,7 @@ public class FileStructurePresenterTest {
 
     @Test
     public void fileStructureShouldBeShow() throws Exception {
-        presenter.show(editorPartPresenter);
+        presenter.show(editor);
 
         verify(loader).show();
         verify(view).setTitle("A.java");
@@ -152,7 +152,7 @@ public class FileStructurePresenterTest {
     @Test
     public void loaderShouldBeHideIfSomethingIsWrong() throws Exception {
         PromiseError promiseError = Mockito.mock(PromiseError.class);
-        presenter.show(editorPartPresenter);
+        presenter.show(editor);
 
         verify(promise).catchError(operationErrorCapture.capture());
         operationErrorCapture.getValue().apply(promiseError);
@@ -167,7 +167,7 @@ public class FileStructurePresenterTest {
         when(member.isBinary()).thenReturn(true);
         when(nodePromise.then(Matchers.<Operation<Node>>anyObject())).thenReturn(nodePromise);
 
-        presenter.show(editorPartPresenter);
+        presenter.show(editor);
     }
 
     @Test
@@ -175,17 +175,17 @@ public class FileStructurePresenterTest {
         when(member.isBinary()).thenReturn(false);
         when(nodePromise.then(Matchers.<Function<Node, Node>>anyObject())).thenReturn(nodePromise);
 
-        presenter.show(editorPartPresenter);
+        presenter.show(editor);
     }
 
     @Test
     public void cursorShouldBeReturnedInPreviousPositionAfterDialogClosingByEscapeButton() {
-        presenter.show(editorPartPresenter);
+        presenter.show(editor);
 
         presenter.onEscapeClicked();
 
-        verify(editorPartPresenter).setFocus();
-        verify(editorPartPresenter).getDocument();
+        verify(editor).setFocus();
+        verify(editor).getDocument();
         verify(document).setSelectedRange(Matchers.<LinearRange>anyObject(), eq(true));
     }
 }

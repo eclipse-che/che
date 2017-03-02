@@ -5,8 +5,19 @@
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
 
-IMAGE_NAME="eclipse/che-cli"
-. $(cd "$(dirname "$0")"; pwd)/../build.include
+# Primary name of the docker image
+IMAGE_NAME="eclipse/che"
+
+# Define space separated list of aliases for the docker image
+IMAGE_ALIASES="eclipse/che-cli"
+
+base_dir=$(cd "$(dirname "$0")"; pwd)
+. "${base_dir}"/../build.include
 
 init "$@"
 build
+
+
+if [ $(skip_tests "$@") = false ]; then
+  sh "${base_dir}"/test.sh $TAG
+fi

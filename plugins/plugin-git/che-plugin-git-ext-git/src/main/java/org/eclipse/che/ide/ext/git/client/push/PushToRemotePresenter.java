@@ -342,8 +342,10 @@ public class PushToRemotePresenter implements PushToRemoteView.ActionDelegate {
     void handleError(@NotNull Throwable throwable, StatusNotification notification, GitOutputConsole console) {
         notification.setStatus(FAIL);
         if (throwable instanceof UnauthorizedException) {
-            console.printError(constant.messagesNotAuthorized());
-            notification.setTitle(constant.messagesNotAuthorized());
+            console.printError(constant.messagesNotAuthorizedTitle());
+            console.print(constant.messagesNotAuthorizedContent());
+            notification.setTitle(constant.messagesNotAuthorizedTitle());
+            notification.setContent(constant.messagesNotAuthorizedContent());
             return;
         }
 

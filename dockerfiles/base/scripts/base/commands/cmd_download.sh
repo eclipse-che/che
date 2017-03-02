@@ -9,10 +9,30 @@
 #   Tyler Jewell - Initial Implementation
 #
 
+help_cmd_download() {
+  text "\n"
+  text "USAGE: ${CHE_IMAGE_FULLNAME} download [PARAMETERS]\n"
+  text "\n"
+  text "Downloads Docker images required to execute ${CHE_MINI_PRODUCT_NAME}\n"
+  text "\n"
+  text "PARAMETERS:\n"
+  text "  --force                           Uses 'docker rmi' and 'docker pull' to forcibly retrieve latest images\n"
+  text "  --no-force                        Updates images if matching tag not found in local cache\n"
+  text "  --pull                            Uses 'docker pull' to check for new remote versions of images\n"
+  text "\n"
+}
+
+pre_cmd_download() {
+  :
+}
+
+post_cmd_download() {
+  :
+}
+
+
 cmd_download() {
   FORCE_UPDATE=${1:-"--no-force"}
-
-  get_image_manifest $CHE_VERSION
 
   IFS=$'\n'
   for SINGLE_IMAGE in $IMAGE_LIST; do
@@ -25,3 +45,4 @@ cmd_download() {
     fi
   done
 }
+

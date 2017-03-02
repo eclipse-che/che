@@ -127,7 +127,7 @@ import static org.eclipse.che.commons.lang.IoUtil.readAndCloseQuietly;
 public class DockerConnector {
     private static final Logger LOG  = LoggerFactory.getLogger(DockerConnector.class);
     // Docker uses uppercase in first letter in names of json objects, e.g. {"Id":"123"} instead of {"id":"123"}
-    private static final Gson   GSON = new GsonBuilder().disableHtmlEscaping()
+    protected static final Gson GSON = new GsonBuilder().disableHtmlEscaping()
                                                         .setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
                                                         .create();
 
@@ -775,6 +775,9 @@ public class DockerConnector {
             addQueryParamIfNotNull(connection, "dockerfile", params.getDockerfile());
             addQueryParamIfNotNull(connection, "nocache", params.isNoCache());
             addQueryParamIfNotNull(connection, "q", params.isQuiet());
+            addQueryParamIfNotNull(connection, "cpusetcpus", params.getCpusetCpus());
+            addQueryParamIfNotNull(connection, "cpuperiod", params.getCpuPeriod());
+            addQueryParamIfNotNull(connection, "cpuquota", params.getCpuQuota());
             if (params.getTag() == null) {
                 addQueryParamIfNotNull(connection, "t", repository);
             } else {
@@ -826,6 +829,7 @@ public class DockerConnector {
                     throw new DockerException(e.getCause().getLocalizedMessage(), 500);
                 }
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 throw new DockerException("Docker image build was interrupted", 500);
             }
         }
@@ -952,6 +956,7 @@ public class DockerConnector {
                 // unwrap exception thrown by task with .getCause()
                 throw new DockerException("Docker image pushing failed. Cause: " + e.getCause().getLocalizedMessage(), 500);
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 throw new DockerException("Docker image pushing was interrupted", 500);
             }
         }
@@ -1048,6 +1053,7 @@ public class DockerConnector {
                 // unwrap exception thrown by task with .getCause()
                 throw new DockerException(e.getCause().getLocalizedMessage(), 500);
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 throw new DockerException("Docker image pulling was interrupted", 500);
             }
         }

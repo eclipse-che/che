@@ -9,6 +9,8 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {CheNotification} from '../../../../components/notification/che-notification.factory';
+import {CheWorkspace} from '../../../../components/api/che-workspace.factory';
 
 /**
  * @ngdoc controller
@@ -17,21 +19,25 @@
  * @author Oleksii Orel
  */
 export class WorkspaceStatusController {
+  cheNotification: CheNotification;
+  cheWorkspace: CheWorkspace;
+
+  isLoading: boolean;
+  workspace: che.IWorkspace;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheWorkspace, cheNotification) {
-    this.cheWorkspace = cheWorkspace;
+  constructor(cheNotification: CheNotification, cheWorkspace: CheWorkspace) {
     this.cheNotification = cheNotification;
+    this.cheWorkspace = cheWorkspace;
 
     this.isLoading = false;
   }
 
-
-  startWorkspace() {
-    if (this.isLoading || !this.workspace || !this.workspace.config || this.workspace.status !== 'STOPPED') {
+  startWorkspace(): void {
+    if (this.isLoading || !this.workspace || !this.workspace.config || !(this.workspace.status === 'STOPPED' || this.workspace.status === 'ERROR')) {
       return;
     }
 
@@ -40,13 +46,13 @@ export class WorkspaceStatusController {
 
     promise.then(() => {
       this.isLoading = false;
-    }, (error) => {
+    }, (error: any) => {
       this.isLoading = false;
       this.cheNotification.showError(error.data.message ? error.data.message : 'Run workspace error.');
     });
   }
 
-  stopWorkspace() {
+  stopWorkspace(): void {
     if (this.isLoading || !this.workspace || this.workspace.status !== 'RUNNING') {
       return;
     }
@@ -56,7 +62,7 @@ export class WorkspaceStatusController {
 
     promise.then(() => {
       this.isLoading = false;
-    }, (error) => {
+    }, (error: any) => {
       this.isLoading = false;
       this.cheNotification.showError(error.data.message ? error.data.message : 'Stop workspace error.');
     });

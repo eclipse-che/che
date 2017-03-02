@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.resources.tree;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
@@ -23,6 +24,7 @@ import java.util.List;
 /**
  * @author Vlad Zhukovskiy
  */
+@Singleton
 public class SkipHiddenNodesInterceptor implements NodeInterceptor {
 
     private final PromiseProvider promises;

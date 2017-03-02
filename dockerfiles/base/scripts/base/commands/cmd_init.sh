@@ -9,10 +9,33 @@
 #   Tyler Jewell - Initial Implementation
 #
 
+help_cmd_init() {
+  text "\n"
+  text "USAGE: ${CHE_IMAGE_FULLNAME} init [PARAMETERS]\n"
+  text "\n"
+  text "Initializes a directory with a new ${CHE_MINI_PRODUCT_NAME} installation\n"
+  text "\n"
+  text "PARAMETERS:\n"
+  text "  --accept-license                  If license acceptance required, auto accepts during installation\n"
+  text "  --force                           Uses 'docker rmi' and 'docker pull' to forcibly retrieve latest images\n"
+  text "  --no-force                        Updates images if matching tag not found in local cache\n"
+  text "  --pull                            Uses 'docker pull' to check for new remote versions of images\n"
+  text "  --reinit                          Reinitialize an existing installation overwriting defaults\n"
+  text "\n"
+}
+
+pre_cmd_init() {
+  :
+}
+
+post_cmd_init() {
+  :
+}
+
 cmd_init() {
 
   # set an initial value for the flag
-  if is_nightly && ! is_fast; then 
+  if is_nightly && ! is_fast && ! skip_pull; then 
     FORCE_UPDATE="--pull"
   else
     FORCE_UPDATE="--no-force"
@@ -50,11 +73,7 @@ cmd_init() {
     warning "($CHE_MINI_PRODUCT_NAME init): 'nightly' installations cannot be upgraded to non-nightly versions"
   fi
 
-  cmd_download $FORCE_UPDATE
-
-  if [ -z ${IMAGE_INIT+x} ]; then
-    get_image_manifest $CHE_VERSION
-  fi
+  cmd_lifecycle download $FORCE_UPDATE
 
   if require_license; then
     if [[ "${AUTO_ACCEPT_LICENSE}" = "false" ]]; then
@@ -93,7 +112,7 @@ cmd_init() {
       INIT_RUN_PARAMETERS+=" -v \"${CHE_HOST_DEVELOPMENT_REPO}/dockerfiles/init/manifests/${CHE_MINI_PRODUCT_NAME}.env\":/etc/puppet/manifests/${CHE_MINI_PRODUCT_NAME}.env"
     fi
   fi
-  GENERATE_INIT_COMMAND="docker_run -v ${CHE_HOST_CONFIG}:/copy ${INIT_RUN_PARAMETERS} $IMAGE_INIT"
+  GENERATE_INIT_COMMAND="docker_run -v \"${CHE_HOST_CONFIG}\":/copy ${INIT_RUN_PARAMETERS} $IMAGE_INIT"
   log $GENERATE_INIT_COMMAND
   eval $GENERATE_INIT_COMMAND
 
@@ -109,7 +128,9 @@ cmd_init() {
     info "init" "  ${CHE_PRODUCT_NAME}_CONFIG=${CHE_HOST_CONFIG}"
     info "init" "  ${CHE_PRODUCT_NAME}_INSTANCE=${CHE_HOST_INSTANCE}"
     if local_repo; then
-      info "init" "  ${CHE_PRODUCT_NAME}_DEVELOPMENT_REPO=${CHE_HOST_DEVELOPMENT_REPO}"
+      info "init" "  ${CHE_PRODUCT_NAME}_REPO=${CHE_HOST_DEVELOPMENT_REPO}"
+    fi
+    if local_repo || local_assembly; then
       info "init" "  ${CHE_PRODUCT_NAME}_ASSEMBLY=${CHE_ASSEMBLY}"
     fi
   fi
@@ -122,11 +143,6 @@ cmd_init_reinit_pre_action() {
   
   # One time only, set the value of CHE_HOST within the environment file.
   sed -i'.bak' "s|#${CHE_PRODUCT_NAME}_HOST=.*|${CHE_PRODUCT_NAME}_HOST=${CHE_HOST}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
-
-  # For testing purposes only
-  #HTTP_PROXY=8.8.8.8
-  #HTTPS_PROXY=http://4.4.4.4:9090
-  #NO_PROXY="locahost, *.local, swarm-mode"
 
   if [[ ! ${HTTP_PROXY} = "" ]]; then
     sed -i'.bak' "s|#${CHE_PRODUCT_NAME}_HTTP_PROXY=.*|${CHE_PRODUCT_NAME}_HTTP_PROXY=${HTTP_PROXY}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"

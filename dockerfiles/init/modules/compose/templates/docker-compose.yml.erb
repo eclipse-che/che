@@ -19,10 +19,20 @@ che:
 <% if scope.lookupvar('che::che_dev_env') == 'on' -%>
     - '<%= scope.lookupvar('che::che_assembly') -%>:/assembly'
 <% end -%>
+<% if scope.lookupvar('che::che_user') != 'root' -%>
+    - '/etc/group:/etc/group:ro'
+    - '/etc/passwd:/etc/passwd:ro'
+<% end -%>
   ports:
     - '<%= scope.lookupvar('che::che_port') -%>:<%= scope.lookupvar('che::che_port') -%>'
 <% if scope.lookupvar('che::che_env') == 'development' -%>
     - '<%= scope.lookupvar('che::che_debug_port') -%>:<%= scope.lookupvar('che::che_debug_port') -%>'
 <% end -%>
   restart: always
-  container_name: che
+  container_name: <%= ENV["CHE_CONTAINER_NAME"] %>
+<% if scope.lookupvar('che::che_user') != 'root' -%>
+  user: <%= scope.lookupvar('che::che_user') -%>
+<% end -%>
+<% if ! @dns_resolvers.empty? -%>
+<%= "  dns:" + "\n" + @dns_resolvers.split(",").map { |val| "    - #{val}" }.join("\n") %>
+<% end -%>

@@ -14,6 +14,12 @@ import {CheProject} from './che-project';
 import {CheGit} from './che-git';
 import {CheSvn} from './che-svn';
 import {CheProjectType} from './che-project-type';
+import {CheTypeResolver} from './project/che-type-resolver';
+import {CheWebsocket} from './che-websocket.factory';
+
+interface IWorkspaceAgentData {
+  path: string;
+}
 
 /**
  * This class is handling the call to wsagent API.
@@ -21,10 +27,19 @@ import {CheProjectType} from './che-project-type';
  */
 export class CheWorkspaceAgent {
 
+  private $resource: ng.resource.IResourceService;
+  private git: CheGit;
+  private svn: CheSvn;
+  private project: CheProject;
+  private projectType: CheProjectType;
+  private workspaceAgentData: IWorkspaceAgentData;
+  private typeResolver: CheTypeResolver;
+
+
   /**
    * Default constructor that is using resource
    */
-  constructor($resource, $q, cheWebsocket, workspaceAgentData) {
+  constructor($resource: ng.resource.IResourceService, $q: ng.IQService, cheWebsocket: CheWebsocket, workspaceAgentData: IWorkspaceAgentData) {
     this.$resource = $resource;
     this.workspaceAgentData = workspaceAgentData;
 
@@ -32,6 +47,7 @@ export class CheWorkspaceAgent {
     this.git = new CheGit($resource, this.workspaceAgentData.path);
     this.svn = new CheSvn($resource, this.workspaceAgentData.path);
     this.projectType = new CheProjectType($resource, $q, this.workspaceAgentData.path);
+    this.typeResolver = new CheTypeResolver($q, this.project, this.projectType);
   }
 
   getProject() {
@@ -44,6 +60,10 @@ export class CheWorkspaceAgent {
 
   getProjectType() {
     return this.projectType;
+  }
+
+  getProjectTypeResolver() {
+    return this.typeResolver;
   }
 
   getSvn() {

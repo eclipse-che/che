@@ -36,7 +36,7 @@ import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
-import org.eclipse.che.ide.context.BrowserQueryFieldRenderer;
+import org.eclipse.che.ide.context.BrowserAddress;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
@@ -49,6 +49,7 @@ import org.eclipse.che.ide.workspace.start.StartWorkspacePresenter;
 import java.util.List;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
+import static org.eclipse.che.ide.ui.loaders.LoaderPresenter.Phase.CREATING_WORKSPACE_SNAPSHOT;
 import static org.eclipse.che.ide.ui.loaders.LoaderPresenter.Phase.STARTING_WORKSPACE_RUNTIME;
 
 /**
@@ -58,17 +59,17 @@ import static org.eclipse.che.ide.ui.loaders.LoaderPresenter.Phase.STARTING_WORK
  */
 public abstract class WorkspaceComponent implements Component, WsAgentStateHandler, WorkspaceStoppedEvent.Handler {
 
-    protected final WorkspaceServiceClient    workspaceServiceClient;
-    protected final CoreLocalizationConstant  locale;
-    protected final CreateWorkspacePresenter  createWorkspacePresenter;
-    protected final DtoUnmarshallerFactory    dtoUnmarshallerFactory;
-    protected final AppContext                appContext;
-    protected final BrowserQueryFieldRenderer browserQueryFieldRenderer;
-    protected final DialogFactory             dialogFactory;
-    protected final PreferencesManager        preferencesManager;
-    protected final DtoFactory                dtoFactory;
-    protected final NotificationManager       notificationManager;
-    protected final StartWorkspacePresenter   startWorkspacePresenter;
+    protected final WorkspaceServiceClient   workspaceServiceClient;
+    protected final CoreLocalizationConstant locale;
+    protected final CreateWorkspacePresenter createWorkspacePresenter;
+    protected final DtoUnmarshallerFactory   dtoUnmarshallerFactory;
+    protected final AppContext               appContext;
+    protected final BrowserAddress           browserAddress;
+    protected final DialogFactory            dialogFactory;
+    protected final PreferencesManager       preferencesManager;
+    protected final DtoFactory               dtoFactory;
+    protected final NotificationManager      notificationManager;
+    protected final StartWorkspacePresenter  startWorkspacePresenter;
 
     private final EventBus                 eventBus;
     private final MessageBusProvider       messageBusProvider;
@@ -88,7 +89,7 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
                               AppContext appContext,
                               NotificationManager notificationManager,
                               MessageBusProvider messageBusProvider,
-                              BrowserQueryFieldRenderer browserQueryFieldRenderer,
+                              BrowserAddress browserAddress,
                               DialogFactory dialogFactory,
                               PreferencesManager preferencesManager,
                               DtoFactory dtoFactory,
@@ -103,7 +104,7 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
         this.appContext = appContext;
         this.notificationManager = notificationManager;
         this.messageBusProvider = messageBusProvider;
-        this.browserQueryFieldRenderer = browserQueryFieldRenderer;
+        this.browserAddress = browserAddress;
         this.dialogFactory = dialogFactory;
         this.preferencesManager = preferencesManager;
         this.dtoFactory = dtoFactory;
@@ -148,7 +149,7 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
         }
 
         if (workspace != null) {
-            browserQueryFieldRenderer.setQueryField(workspace.getNamespace(), workspace.getConfig().getName(), "");
+            browserAddress.setAddress(workspace.getNamespace(), workspace.getConfig().getName());
         }
     }
 
@@ -184,6 +185,9 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
 
                 final WorkspaceStatus workspaceStatus = workspace.getStatus();
                 switch (workspaceStatus) {
+                    case SNAPSHOTTING:
+                        loader.show(CREATING_WORKSPACE_SNAPSHOT);
+                        break;
                     case STARTING:
                         eventBus.fireEvent(new WorkspaceStartingEvent(workspace));
                         break;

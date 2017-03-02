@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>5.1.0-SNAPSHOT</version>
+        <version>5.4.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>che-plugin-docker-parent</artifactId>
@@ -26,6 +26,7 @@
         <module>che-plugin-docker-client</module>
         <module>che-plugin-docker-machine</module>
         <module>che-plugin-docker-compose</module>
+        <module>che-plugin-openshift-client</module>
     </modules>
     <properties>
         <dto-generator-out-directory>${project.build.directory}/generated-sources/dto/</dto-generator-out-directory>

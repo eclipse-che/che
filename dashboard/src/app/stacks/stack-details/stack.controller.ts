@@ -14,6 +14,7 @@ import {CheNotification} from '../../../components/notification/che-notification
 import {CheUIElementsInjectorService} from '../../../components/injector/che-ui-elements-injector.service';
 import {CheWorkspace} from '../../../components/api/che-workspace.factory';
 import {ImportStackService} from './import-stack.service';
+import {ConfirmDialogService} from '../../../components/service/confirm-dialog/confirm-dialog.service';
 
 const STACK_TEST_POPUP_ID: string = 'stackTestPopup';
 
@@ -57,11 +58,13 @@ export class StackController {
   editorOptions: any;
   machinesViewStatus: any;
 
+  private confirmDialogService: ConfirmDialogService;
+
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($q: ng.IQService, $timeout: ng.ITimeoutService, $route: ng.route.IRoute, $location: ng.ILocationService, $log: ng.ILogService, $filter: ng.IFilterService, cheStack: CheStack, cheWorkspace: CheWorkspace, $mdDialog: ng.material.IDialogService, cheNotification: CheNotification, $document: ng.IDocumentService, cheUIElementsInjectorService: CheUIElementsInjectorService, $scope: ng.IScope, $window: ng.IWindowService, importStackService: ImportStackService) {
+  constructor($q: ng.IQService, $timeout: ng.ITimeoutService, $route: ng.route.IRoute, $location: ng.ILocationService, $log: ng.ILogService, $filter: ng.IFilterService, cheStack: CheStack, cheWorkspace: CheWorkspace, $mdDialog: ng.material.IDialogService, cheNotification: CheNotification, $document: ng.IDocumentService, cheUIElementsInjectorService: CheUIElementsInjectorService, $scope: ng.IScope, $window: ng.IWindowService, importStackService: ImportStackService, confirmDialogService: ConfirmDialogService) {
     this.$q = $q;
     this.$timeout = $timeout;
     this.$location = $location;
@@ -76,13 +79,14 @@ export class StackController {
     this.$document = $document;
     this.cheUIElementsInjectorService = cheUIElementsInjectorService;
     this.importStackService = importStackService;
+    this.confirmDialogService = confirmDialogService;
 
     this.editorOptions = {
       lineWrapping: true,
       lineNumbers: false,
       matchBrackets: true,
       mode: 'application/json',
-      onLoad: (editor: {refresh: Function}) => {
+      onLoad: (editor: { refresh: Function }) => {
         $timeout(() => {
           editor.refresh();
         }, 1000);
@@ -119,7 +123,7 @@ export class StackController {
       this.updateData();
     }
 
-    $window.addEventListener('message', (event: {data: string}) => {
+    $window.addEventListener('message', (event: { data: string }) => {
       if (!this.showIDE && 'show-ide' === event.data) {
         this.showIDE = true;
         this.$scope.$digest();
@@ -228,7 +232,6 @@ export class StackController {
     if (this.stackTags.indexOf(tag) > -1) {
       return null;
     }
-
     return tag;
   }
 
@@ -399,31 +402,20 @@ export class StackController {
    * @param index{number} - the index of the array of commands
    * @param deferred{ng.IDeferred<any>}
    */
-  updateProjects(workspaceId: string, projects: Array<any>, index: number, deferred: ng.IDeferred<any>): void {
+  updateProjects(workspaceId: string, projects: Array<che.IProject>, index: number, deferred: ng.IDeferred<any>): void {
     if (index < projects.length) {
-      let project = angular.copy(projects[index]);
-      let projectService = this.cheWorkspace.getWorkspaceAgent(workspaceId).getProject();
-      projectService.updateProject(project.name, project).then(() => {
-        let resolvePromise = projectService.fetchResolve(project.name);
-        resolvePromise.then(() => {
-          this.updateProjects(workspaceId, projects, ++index, deferred);
-        }, (error: any) => {
-          deferred.reject(error);
-        });
-        if (project.commands && project.commands.length > 0) {
-          let deferredAddCommand = this.$q.defer();
-          this.addCommands(workspaceId, project.name, project.commands, 0, deferredAddCommand);
-          deferredAddCommand.promise.then(() => {
+      let project = projects[index];
+      let projectTypeResolverService = this.cheWorkspace.getWorkspaceAgent(workspaceId).getProjectTypeResolver();
+
+        let deferredAddCommand = this.$q.defer();
+        this.addCommands(workspaceId, project.name, project.commands, 0, deferredAddCommand);
+        deferredAddCommand.promise.finally(() => {
+          projectTypeResolverService.resolveProjectType(project).then(() => {
             this.updateProjects(workspaceId, projects, ++index, deferred);
           }, (error: any) => {
             deferred.reject(error);
           });
-        } else {
-          this.updateProjects(workspaceId, projects, ++index, deferred);
-        }
-      }, (error: any) => {
-        deferred.reject(error);
-      });
+        });
     } else {
       deferred.resolve();
     }
@@ -433,13 +425,14 @@ export class StackController {
    * Add projects.
    * @param workspaceId{string} - the ID of the workspace to use for adding projects
    * @param projects{Array<che.IProject>} - the adding projects
+   * @param deferred{ng.IDeferred<any>}
    *
    * @returns {ng.IPromise<any>}
    */
-  addProjects(workspaceId: string, projects: Array<che.IProject>): ng.IPromise<any> {
-    let deferred = this.$q.defer();
+  addProjects(workspaceId: string, projects: Array<che.IProject>, deferred: ng.IDeferred<any>): void {
     if (projects && projects.length) {
-      this.cheWorkspace.getWorkspaceAgent(workspaceId).getProject().createProjects(projects).then(() => {
+      let workspaceAgent = this.cheWorkspace.getWorkspaceAgent(workspaceId);
+      workspaceAgent.getProject().createProjects(projects).then(() => {
         this.updateProjects(workspaceId, projects, 0, deferred);
       }, (error: any) => {
         deferred.reject(error);
@@ -447,8 +440,6 @@ export class StackController {
     } else {
       deferred.resolve();
     }
-
-    return deferred.promise;
   }
 
   /**
@@ -467,22 +458,9 @@ export class StackController {
         if (projects && projects.length) {
           this.cheWorkspace.fetchWorkspaceDetails(workspace.id).then(() => {
             this.showIDE = false;
-            this.addProjects(workspace.id, projects).then(() => {
-              deferred.resolve();
-            }, (error: any) => {
-              deferred.reject(error);
-            });
+            this.addProjects(workspace.id, projects, deferred);
           }, (error: any) => {
-            if (error.status === 304) {
-              this.showIDE = false;
-              this.addProjects(workspace.id, projects).then(() => {
-                deferred.resolve();
-              }, (error: any) => {
-                deferred.reject(error);
-              });
-            } else {
-              this.$log.error(error);
-            }
+            deferred.reject(error);
           });
         }
       }, (error: any) => {
@@ -511,6 +489,7 @@ export class StackController {
       deferred.promise.then(() => {
         this.cheUIElementsInjectorService.injectAdditionalElement(bodyEl, testPopupEl, this.$scope);
       }, (error: any) => {
+        this.showIDE = true;
         this.$log.error(error);
       });
     }, (error: any) => {
@@ -524,7 +503,7 @@ export class StackController {
    */
   closeStackTestPopup(): void {
     if (this.tmpWorkspaceId) {
-      this.cheWorkspace.stopWorkspace(this.tmpWorkspaceId);
+      this.cheWorkspace.stopWorkspace(this.tmpWorkspaceId, false);
       this.tmpWorkspaceId = '';
     }
     this.cheUIElementsInjectorService.deleteElementById(STACK_TEST_POPUP_ID);
@@ -534,16 +513,9 @@ export class StackController {
    * Deletes current stack if user confirms.
    */
   deleteStack(): void {
-    let confirmTitle = 'Would you like to delete ' + this.stack.name + '?';
+    let content = 'Would you like to delete \'' + this.stack.name + '\'?';
 
-    let confirm = this.$mdDialog.confirm()
-      .title(confirmTitle)
-      .ariaLabel('Remove stack')
-      .ok('Delete!')
-      .cancel('Cancel')
-      .clickOutsideToClose(true);
-
-    this.$mdDialog.show(confirm).then(() => {
+    this.confirmDialogService.showConfirmDialog('Remove stack', content, 'Delete').then(() => {
       this.loading = true;
       this.cheStack.deleteStack(this.stack.id).then(() => {
         this.cheNotification.showInfo('Stack <b>' + this.stack.name + '</b> has been successfully removed.');

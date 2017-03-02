@@ -13,7 +13,6 @@ package org.eclipse.che.plugin.docker.machine;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
@@ -36,6 +35,7 @@ import org.eclipse.che.commons.lang.Size;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
+import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
 import org.eclipse.che.plugin.docker.client.ProgressLineFormatterImpl;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
 import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredentialsProvider;
@@ -45,6 +45,7 @@ import org.eclipse.che.plugin.docker.client.exception.NetworkNotFoundException;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.HostConfig;
 import org.eclipse.che.plugin.docker.client.json.PortBinding;
+import org.eclipse.che.plugin.docker.client.json.Volume;
 import org.eclipse.che.plugin.docker.client.json.container.NetworkingConfig;
 import org.eclipse.che.plugin.docker.client.json.network.ConnectContainer;
 import org.eclipse.che.plugin.docker.client.json.network.EndpointConfig;
@@ -129,9 +130,10 @@ public class MachineProviderImpl implements MachineInstanceProvider {
     private final long                                          cpuPeriod;
     private final long                                          cpuQuota;
     private final WindowsPathEscaper                            windowsPathEscaper;
+    private final String[]                                      dnsResolvers;
 
     @Inject
-    public MachineProviderImpl(DockerConnector docker,
+    public MachineProviderImpl(DockerConnectorProvider dockerProvider,
                                UserSpecificDockerRegistryCredentialsProvider dockerCredentials,
                                DockerMachineFactory dockerMachineFactory,
                                DockerInstanceStopDetector dockerInstanceStopDetector,
@@ -153,9 +155,10 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                @Named("che.docker.cpu_period") long cpuPeriod,
                                @Named("che.docker.cpu_quota") long cpuQuota,
                                WindowsPathEscaper windowsPathEscaper,
-                               @Named("che.docker.extra_hosts") Set<Set<String>> additionalHosts)
+                               @Named("che.docker.extra_hosts") Set<Set<String>> additionalHosts,
+                               @Nullable @Named("che.docker.dns_resolvers") String[] dnsResolvers)
             throws IOException {
-        this.docker = docker;
+        this.docker = dockerProvider.get();
         this.dockerCredentials = dockerCredentials;
         this.dockerMachineFactory = dockerMachineFactory;
         this.dockerInstanceStopDetector = dockerInstanceStopDetector;
@@ -178,6 +181,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
         this.cpuQuota = cpuQuota;
         this.windowsPathEscaper = windowsPathEscaper;
         this.pidsLimit = pidsLimit;
+        this.dnsResolvers = dnsResolvers;
 
         allMachinesSystemVolumes = removeEmptyAndNullValues(allMachinesSystemVolumes);
         devMachineSystemVolumes = removeEmptyAndNullValues(devMachineSystemVolumes);
@@ -471,8 +475,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                 docker.removeImage(RemoveImageParams.create(fullNameOfPulledImage).withForce(false));
             }
         } catch (IOException e) {
-            LOG.error(e.getLocalizedMessage(), e);
-            throw new MachineException("Can't create machine from image. Cause: " + e.getLocalizedMessage());
+            throw new MachineException("Can't create machine from image. Cause: " + e.getLocalizedMessage(), e);
         }
     }
 
@@ -497,15 +500,13 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                                                                                     endpointConfig));
 
         HostConfig hostConfig = new HostConfig();
-        hostConfig.withBinds(toArrayIfNotNull(service.getVolumes()))
-                  .withMemorySwap(machineMemorySwap)
+        hostConfig.withMemorySwap(machineMemorySwap)
                   .withMemory(service.getMemLimit())
                   .withNetworkMode(networkName)
                   .withLinks(toArrayIfNotNull(service.getLinks()))
                   .withPortBindings(service.getPorts()
                                            .stream()
-                                           .collect(toMap(Function.identity(),
-                                                          value -> new PortBinding[0])))
+                                           .collect(toMap(Function.identity(), value -> new PortBinding[0])))
                   .withVolumesFrom(toArrayIfNotNull(service.getVolumesFrom()));
 
         ContainerConfig config = new ContainerConfig();
@@ -525,6 +526,19 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                               .map(entry -> entry.getKey() + "=" + entry.getValue())
                               .toArray(String[]::new));
 
+        List<String> bindMountVolumes = new ArrayList<>();
+        Map<String, Volume> nonBindMountVolumes = new HashMap<>();
+        for (String volume : service.getVolumes()) {
+            // If volume contains colon then it is bind volume, otherwise - non bind-mount volume.
+            if (volume.contains(":")) {
+                bindMountVolumes.add(volume);
+            } else {
+                nonBindMountVolumes.put(volume, new Volume());
+            }
+        }
+        hostConfig.setBinds(bindMountVolumes.toArray(new String[bindMountVolumes.size()]));
+        config.setVolumes(nonBindMountVolumes);
+
         addStaticDockerConfiguration(config);
 
         return docker.createContainer(CreateContainerParams.create(config)
@@ -537,7 +551,8 @@ public class MachineProviderImpl implements MachineInstanceProvider {
               .withPidsLimit(pidsLimit)
               .withExtraHosts(allMachinesExtraHosts)
               .withPrivileged(privilegedMode)
-              .withPublishAllPorts(true);
+              .withPublishAllPorts(true)
+              .withDns(dnsResolvers);
         // CPU limits
         config.getHostConfig()
               .withCpusetCpus(cpusetCpus)

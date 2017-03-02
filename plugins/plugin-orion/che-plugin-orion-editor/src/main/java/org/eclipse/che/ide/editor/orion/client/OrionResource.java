@@ -22,4 +22,12 @@ public interface OrionResource extends ClientBundle {
 
     @Source({"orion-codenvy-theme.css", "org/eclipse/che/ide/api/ui/style.css"})
     CssResource editorStyle();
+
+    @Source({"incremental-find-container.css", "org/eclipse/che/ide/api/ui/style.css"})
+    IncrementalFindResources getIncrementalFindStyle();
+
+    interface IncrementalFindResources extends CssResource {
+        String incrementalFindContainer();
+        String incrementalFindError();
+    }
 }

@@ -235,8 +235,11 @@ public interface GitLocalizationConstant extends Messages {
     @Key("messages.delete_success")
     String deleteGitRepositorySuccess();
 
-    @Key("messages.notAuthorized")
-    String messagesNotAuthorized();
+    @Key("messages.notAuthorizedTitle")
+    String messagesNotAuthorizedTitle();
+
+    @Key("messages.notAuthorizedContent")
+    String messagesNotAuthorizedContent();
 
     @Key("messages.compare_save.title")
     String compareSaveTitle();

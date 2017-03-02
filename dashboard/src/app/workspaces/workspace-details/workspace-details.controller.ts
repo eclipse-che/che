@@ -14,7 +14,8 @@ import {CheNotification} from '../../../components/notification/che-notification
 import {CheWorkspace} from '../../../components/api/che-workspace.factory';
 import IdeSvc from '../../ide/ide.service';
 import {WorkspaceDetailsService} from './workspace-details.service';
-import {CheNamespaceRegistry} from '../../../components/api/namespace/che-namespace-registry.factory';
+import {CheNamespaceRegistry, INamespace} from '../../../components/api/namespace/che-namespace-registry.factory';
+import {ConfirmDialogService} from '../../../components/service/confirm-dialog/confirm-dialog.service';
 
 /**
  * @ngdoc controller
@@ -46,7 +47,7 @@ export class WorkspaceDetailsController {
   isCreationFlow: boolean = true;
   selectedTabIndex: number;
 
-  namespace: string = '';
+  namespaceId: string = '';
   workspaceId: string = '';
   workspaceName: string = '';
   newName: string = '';
@@ -58,17 +59,14 @@ export class WorkspaceDetailsController {
   invalidWorkspace: string = '';
   editMode: boolean = false;
   showApplyMessage: boolean = false;
-  workspaceNamespace: string = undefined;
-  workspaceImportedRecipe: {
-    type: string,
-    content: string,
-    location: string
-  };
+  workspaceImportedRecipe: che.IRecipe;
 
   usedNamesList: any = [];
 
   forms: Map<number, any> = new Map();
   tab: Object = Tab;
+
+  private confirmDialogService: ConfirmDialogService;
 
   /**
    * Default constructor that is using resource injection
@@ -77,7 +75,8 @@ export class WorkspaceDetailsController {
   constructor($location: ng.ILocationService, $log: ng.ILogService, $mdDialog: ng.material.IDialogService, $q: ng.IQService,
               $route: ng.route.IRouteService, $rootScope: ng.IRootScopeService, $scope: ng.IScope, $timeout: ng.ITimeoutService,
               cheEnvironmentRegistry: CheEnvironmentRegistry, cheNotification: CheNotification, cheWorkspace: CheWorkspace,
-              ideSvc: IdeSvc, workspaceDetailsService: WorkspaceDetailsService, cheNamespaceRegistry: CheNamespaceRegistry) {
+              ideSvc: IdeSvc, workspaceDetailsService: WorkspaceDetailsService, cheNamespaceRegistry: CheNamespaceRegistry,
+              confirmDialogService: ConfirmDialogService) {
     this.$log = $log;
     this.$location = $location;
     this.$mdDialog = $mdDialog;
@@ -92,6 +91,7 @@ export class WorkspaceDetailsController {
     this.cheNamespaceRegistry = cheNamespaceRegistry;
     this.ideSvc = ideSvc;
     this.workspaceDetailsService = workspaceDetailsService;
+    this.confirmDialogService = confirmDialogService;
 
     cheWorkspace.fetchWorkspaces().then(() => {
       let workspaces: any[] = cheWorkspace.getWorkspaces();
@@ -111,7 +111,7 @@ export class WorkspaceDetailsController {
       }
       if (newStatus === 'RUNNING' || newStatus === 'STOPPED') {
         this.cheWorkspace.fetchWorkspaceDetails(this.workspaceId).then(() => {
-          this.workspaceDetails = this.cheWorkspace.getWorkspaceByName(this.namespace, this.workspaceName);
+          this.workspaceDetails = this.cheWorkspace.getWorkspaceByName(this.namespaceId, this.workspaceName);
           this.updateWorkspaceData();
         });
       }
@@ -123,21 +123,20 @@ export class WorkspaceDetailsController {
     let routeParams = this.$route.current.params;
     if (routeParams && routeParams.namespace && routeParams.workspaceName) {
       this.isCreationFlow = false;
-      this.namespace = routeParams.namespace;
+      this.namespaceId = routeParams.namespace;
       this.workspaceName = routeParams.workspaceName;
 
       this.fetchWorkspaceDetails().then(() => {
-        this.workspaceDetails = this.cheWorkspace.getWorkspaceByName(this.namespace, this.workspaceName);
+        this.workspaceDetails = this.cheWorkspace.getWorkspaceByName(this.namespaceId, this.workspaceName);
         this.updateWorkspaceData();
       }).finally(() => {
         this.loading = false;
       });
 
       // search the selected page
-      let page = this.$route.current.params.page;
-      if (!page) {
-        this.$location.path('/workspace/' + this.namespace + '/' + this.workspaceName);
-      } else {
+      let page = this.$location.search().page;
+
+      if (page) {
         let selectedTabIndex = Tab.Settings;
         switch (page) {
           case 'info' || 'Settings':
@@ -156,7 +155,7 @@ export class WorkspaceDetailsController {
             selectedTabIndex = 4;
             break;
           default:
-            this.$location.path('/workspace/' + this.namespace + '/' + this.workspaceName);
+            this.$location.path('/workspace/' + this.namespaceId + '/' + this.workspaceName);
             break;
         }
         this.$timeout(() => {
@@ -166,7 +165,6 @@ export class WorkspaceDetailsController {
     } else {
       this.isCreationFlow = true;
       this.editMode = true;
-      this.namespace = '';
       this.workspaceName = this.generateWorkspaceName();
       this.workspaceDetails = {
         config: {
@@ -178,8 +176,20 @@ export class WorkspaceDetailsController {
         }
       };
       this.copyWorkspaceDetails = angular.copy(this.workspaceDetails);
+      this.cheNamespaceRegistry.fetchNamespaces().then(() => {
+        this.namespaceId = this.$location.search().namespace || (this.getNamespaces().length ? this.getNamespaces()[0].id : undefined);
+      });
     }
     this.newName = this.workspaceName;
+  }
+
+  /**
+   * Returns the value of workspace auto-snapshot property.
+   *
+   * @returns {boolean} workspace auto-snapshot property value
+   */
+  getAutoSnapshot(): boolean {
+    return this.cheWorkspace.getAutoSnapshotSettings();
   }
 
   /**
@@ -190,10 +200,10 @@ export class WorkspaceDetailsController {
   fetchWorkspaceDetails(): ng.IPromise<any> {
     let defer = this.$q.defer();
 
-    if (this.cheWorkspace.getWorkspaceByName(this.namespace, this.workspaceName)) {
+    if (this.cheWorkspace.getWorkspaceByName(this.namespaceId, this.workspaceName)) {
       defer.resolve();
     } else {
-      this.cheWorkspace.fetchWorkspaceDetails(this.namespace + ':' + this.workspaceName).then(() => {
+      this.cheWorkspace.fetchWorkspaceDetails(this.namespaceId + '/' + this.workspaceName).then(() => {
         defer.resolve();
       }, (error: any) => {
         if (error.status === 304) {
@@ -218,19 +228,7 @@ export class WorkspaceDetailsController {
     angular.copy(this.workspaceDetails, this.copyWorkspaceDetails);
 
     this.workspaceId = this.workspaceDetails.id;
-    this.newName = this.workspaceDetails.config.name;
-  }
-
-  /**
-   * Returns true if name of workspace is changed.
-   *
-   * @returns {boolean}
-   */
-  isNameChanged(): boolean {
-    if (this.newName && this.workspaceDetails && this.workspaceDetails.config) {
-      return this.workspaceDetails.config.name !== this.newName;
-    }
-    return false;
+    this.newName = (this.workspaceDetails.config && this.workspaceDetails.config.name) ? this.workspaceDetails.config.name : '';
   }
 
   /**
@@ -239,11 +237,10 @@ export class WorkspaceDetailsController {
    * @param form {any}
    */
   updateName(form: any): void {
-    if (form.$invalid) {
-      return;
+    if (this.copyWorkspaceDetails && this.copyWorkspaceDetails.config) {
+      this.copyWorkspaceDetails.config.name = this.newName;
     }
 
-    this.copyWorkspaceDetails.config.name = this.newName;
     this.switchEditMode();
   }
 
@@ -265,14 +262,57 @@ export class WorkspaceDetailsController {
   /**
    * Returns the list of available namespaces.
    *
-   * @returns {Array} array of namespaces
+   * @returns {INamespace[]} array of namespaces
    */
-  getNamespaces(): Array<string> {
+  getNamespaces(): INamespace[] {
     return this.cheNamespaceRegistry.getNamespaces();
   }
 
   /**
-   * Returns workspace details sections (tabs, example - projects)
+   * Returns namespace by its ID
+   *
+   * @param {string} namespaceId
+   * @return {INamespace|{}}
+   */
+  getNamespace(namespaceId: string): INamespace {
+    return this.getNamespaces().find((namespace: any) => {
+      return namespace.id === namespaceId;
+    });
+  }
+
+  /**
+   * Returns namespace's label
+   *
+   * @param {string} namespaceId
+   * @return {string}
+   */
+  getNamespaceLabel(namespaceId: string): string {
+    let namespace = this.getNamespace(namespaceId);
+    return namespace.label;
+  }
+
+  /**
+   * Callback when Team button is clicked in Edit mode.
+   * Redirects to billing details or team details.
+   *
+   * @param {string} namespaceId
+   */
+  namespaceOnClick(namespaceId: string): void {
+    let namespace = this.getNamespace(namespaceId);
+    this.$location.path(namespace.location);
+  }
+
+  /**
+   * Returns workspace details pages (tabs, example - projects)
+   *
+   * @returns {*}
+   */
+  getPages(): any {
+    return this.workspaceDetailsService.getPages();
+  }
+
+  /**
+   * Returns workspace details section.
    *
    * @returns {*}
    */
@@ -283,9 +323,11 @@ export class WorkspaceDetailsController {
   /**
    * Callback when workspace config has been changed in editor.
    *
-   * @param config {object} workspace config
+   * @param config {che.IWorkspaceConfig} workspace config
    */
-  updateWorkspaceConfigImport(config: any): void {
+  updateWorkspaceConfigImport(config: che.IWorkspaceConfig): void {
+    this.switchEditMode();
+
     if (!config) {
       return;
     }
@@ -294,17 +336,19 @@ export class WorkspaceDetailsController {
       this.newName = config.name;
     }
 
+    if (!config.environments[config.defaultEnv]) {
+      return;
+    }
+
     this.copyWorkspaceDetails.config = config;
     this.workspaceImportedRecipe = config.environments[config.defaultEnv].recipe;
-
-    this.switchEditMode();
   }
 
   /**
    * Callback when environment has been changed.
    */
   updateWorkspaceConfigEnvironment(): void {
-    delete this.workspaceImportedRecipe;
+    this.workspaceImportedRecipe = null;
     this.switchEditMode();
   }
 
@@ -393,10 +437,10 @@ export class WorkspaceDetailsController {
     let promise = this.cheWorkspace.updateWorkspace(this.workspaceId, this.copyWorkspaceDetails);
     promise.then((data: any) => {
       this.workspaceName = data.config.name;
-      this.workspaceDetails = this.cheWorkspace.getWorkspaceByName(this.namespace, this.workspaceName);
+      this.workspaceDetails = this.cheWorkspace.getWorkspaceByName(this.namespaceId, this.workspaceName);
       this.updateWorkspaceData();
       this.cheNotification.showInfo('Workspace updated.');
-      return this.$location.path('/workspace/' + this.namespace + '/' + this.workspaceName);
+      return this.$location.path('/workspace/' + this.namespaceId + '/' + this.workspaceName);
     }, (error: any) => {
       this.loading = false;
       this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Update workspace failed.');
@@ -430,7 +474,7 @@ export class WorkspaceDetailsController {
    */
   createWorkspace(): void {
     let attributes = this.stackId ? {stackId: this.stackId} : {};
-    let creationPromise = this.cheWorkspace.createWorkspaceFromConfig(this.workspaceNamespace, this.copyWorkspaceDetails.config, attributes);
+    let creationPromise = this.cheWorkspace.createWorkspaceFromConfig(this.namespaceId, this.copyWorkspaceDetails.config, attributes);
     this.redirectAfterSubmitWorkspace(creationPromise);
   }
 
@@ -488,16 +532,10 @@ export class WorkspaceDetailsController {
 
   // perform workspace deletion.
   deleteWorkspace(event: MouseEvent): void {
-    let confirm = this.$mdDialog.confirm()
-      .title('Would you like to delete workspace \'' + this.workspaceDetails.config.name + '\'?')
-      .ariaLabel('Delete workspace')
-      .ok('Delete it!')
-      .cancel('Cancel')
-      .clickOutsideToClose(true)
-      .targetEvent(event);
-    this.$mdDialog.show(confirm).then(() => {
+    let content = 'Would you like to delete workspace \'' + this.workspaceDetails.config.name + '\'?';
+    this.confirmDialogService.showConfirmDialog('Delete workspace', content, 'Delete').then(() => {
       if (this.getWorkspaceStatus() === 'RUNNING') {
-        this.cheWorkspace.stopWorkspace(this.workspaceId);
+        this.cheWorkspace.stopWorkspace(this.workspaceId, false);
       }
 
       this.cheWorkspace.fetchStatusChange(this.workspaceId, 'STOPPED').then(() => {
@@ -552,9 +590,16 @@ export class WorkspaceDetailsController {
   }
 
   stopWorkspace(): void {
-    let promise = this.cheWorkspace.stopWorkspace(this.workspaceId);
+    let createSnapshot: boolean;
+    if (this.getWorkspaceStatus() === 'STARTING') {
+      createSnapshot = false;
+    } else {
+      createSnapshot = this.getAutoSnapshot();
+    }
+    let promise = this.cheWorkspace.stopWorkspace(this.workspaceId, createSnapshot);
 
-    promise.then(() => {}, (error: any) => {
+    promise.then(() => {
+    }, (error: any) => {
       this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Stop workspace failed.');
       this.$log.error(error);
     });

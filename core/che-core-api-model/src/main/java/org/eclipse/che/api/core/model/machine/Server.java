@@ -28,8 +28,6 @@ public interface Server {
      * External address of the server in form <b>hostname:port</b>.
      * <p>
      * This address is used by the browser to communicate with the server.
-     * <b>hostname</b> can be configured using property machine.docker.local_node_host.external
-     * or environment variable CHE_DOCKER_MACHINE_HOST_EXTERNAL.
      * <b>port</b> is the external port and cannot be configured.
      * If not explicitly configured that address is set using {@link ServerProperties#getInternalAddress()}
      */

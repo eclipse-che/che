@@ -12,8 +12,6 @@
 import {org} from "../../api/dto/che-dto"
 import {CheFileStructWorkspace} from './chefile-struct/che-file-struct';
 import {CheFileStruct} from './chefile-struct/che-file-struct';
-import {CheFileServerTypeStruct} from "./chefile-struct/che-file-struct";
-import {resolve} from "url";
 import {Websocket} from "../../spi/websocket/websocket";
 import {AuthData} from "../../api/wsmaster/auth/auth-data";
 import {Workspace} from "../../api/wsmaster/workspace/workspace";
@@ -29,7 +27,6 @@ import {DefaultHttpJsonRequest} from "../../spi/http/default-http-json-request";
 import {HttpJsonRequest} from "../../spi/http/default-http-json-request";
 import {HttpJsonResponse} from "../../spi/http/default-http-json-request";
 import {UUID} from "../../utils/uuid";
-import {MachineServiceClientImpl} from "../../api/wsmaster/machine/machine-service-client";
 import {CheFileStructWorkspaceCommand} from "./chefile-struct/che-file-struct";
 import {CheFileStructWorkspaceCommandImpl} from "./chefile-struct/che-file-struct";
 import {CheFileStructWorkspaceLoadingAction} from "./chefile-struct/che-file-struct";
@@ -38,6 +35,8 @@ import {Parameter} from "../../spi/decorator/parameter";
 import {ProductName} from "../../utils/product-name";
 import {SSHGenerator} from "../../spi/docker/ssh-generator";
 import {CheFileStructWorkspaceProject} from "./chefile-struct/che-file-struct";
+import {StringUtils} from "../../utils/string-utils";
+import {ExecAgentServiceClientImpl} from "../../api/exec-agent/exec-agent-service-client";
 
 /**
  * Entrypoint for the Chefile handling in a directory.
@@ -72,6 +71,7 @@ export class CheDir {
   cheFile : any;
   dotCheFolder : any;
   workspacesFolder : any;
+  cliFolder : any;
   dotCheIdFile : any;
   dotCheSshPrivateKeyFile : any;
   dotCheSshPublicKeyFile : any;
@@ -105,6 +105,7 @@ export class CheDir {
     this.dotCheSshPrivateKeyFile = this.path.resolve(this.dotCheFolder, 'ssh-key.private');
     this.dotCheSshPublicKeyFile = this.path.resolve(this.dotCheFolder, 'ssh-key.public');
     this.workspacesFolder = this.path.resolve(this.dotCheFolder, 'workspaces');
+    this.cliFolder = this.path.resolve(this.dotCheFolder, 'cli');
 
     this.initDefault();
 
@@ -113,11 +114,7 @@ export class CheDir {
     this.authData = new AuthData();
 
     // che launcher image name
-    if (process.env.CHE_LAUNCHER_IMAGE_NAME) {
-      this.cheLauncherImageName = process.env.CHE_LAUNCHER_IMAGE_NAME
-    } else {
-      this.cheLauncherImageName = 'eclipse/che-launcher';
-    }
+    this.cheLauncherImageName = 'eclipse/che';
   }
 
 
@@ -150,8 +147,8 @@ export class CheDir {
       Log.getLogger().debug('Env variable', key, process.env[key]);
     });*/
 
-    if (process.env.CHE_HOST_IP) {
-      this.chefileStruct.server.properties['CHE_HOST_IP'] = process.env.CHE_HOST_IP;
+    if (process.env.CHE_HOST) {
+      this.chefileStruct.server.properties['CHE_HOST'] = process.env.CHE_HOST;
     }
 
 
@@ -209,10 +206,13 @@ export class CheDir {
     }
 
     // load the chefile script if defined
-    var script_code = this.fs.readFileSync(this.cheFile).toString();
+    var script_code : string = this.fs.readFileSync(this.cheFile).toString();
 
     // strip the lines that are beginning with # as it may be comments
-    script_code = script_code.replace(/#[^\n]*/g, '');
+    script_code = StringUtils.removeSharpComments(script_code);
+
+    // replace multiline content for workspace by raw strings
+    script_code  = StringUtils.keepWorkspaceRawStrings(script_code);
 
     // create sandboxed object
     var sandbox = { "che": this.chefileStruct,  "workspace": this.chefileStructWorkspace, "console": console};
@@ -332,6 +332,9 @@ export class CheDir {
 
     // work on a copy
     let che : CheFileStruct =  JSON.parse(JSON.stringify(this.chefileStruct));
+
+    // Do not write default server values
+    delete che.server;
 
     // make flat the che object
     let flatChe = this.flatJson('che', che);
@@ -716,10 +719,18 @@ setupSSHKeys(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto
     // get dev machine
     let machineId : string = workspaceDto.getRuntime().getDevMachine().getId();
 
-    let machineServiceClient:MachineServiceClientImpl = new MachineServiceClientImpl(this.workspace, this.authData);
+
+    let execAgentServer = workspaceDto.getRuntime().getDevMachine().getRuntime().getServers().get("4411/tcp");
+    let execAgentURI = execAgentServer.getUrl();
+    if (execAgentURI.includes("localhost")) {
+      execAgentURI = execAgentServer.getProperties().getInternalUrl();
+    }
+    let execAgentAuthData = AuthData.parse(execAgentURI, this.authData.username, this.authData.password);
+    execAgentAuthData.token = this.authData.getToken();
+
+    let execAgentServiceClient:ExecAgentServiceClientImpl = new ExecAgentServiceClientImpl(this.workspace, execAgentAuthData);
 
     let uuid:string = UUID.build();
-    let channel:string = 'process:output:' + uuid;
 
     let customCommand:CheFileStructWorkspaceCommand = new CheFileStructWorkspaceCommandImpl();
     customCommand.commandLine = '(mkdir $HOME/.ssh || true) && echo "' + publicKey + '">> $HOME/.ssh/authorized_keys';
@@ -727,7 +738,7 @@ setupSSHKeys(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto
     customCommand.type = 'custom';
     
    // store in workspace the public key
-   return machineServiceClient.executeCommand(workspaceDto, machineId, customCommand, channel, false);
+   return execAgentServiceClient.executeCommand(workspaceDto, machineId, customCommand, uuid, false);
  
 }
 
@@ -834,7 +845,16 @@ setupSSHKeys(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto
 
     let promises : Array<Promise<any>> = new Array<Promise<any>>();
     let workspaceCommands : Array<any> = workspaceDto.getConfig().getCommands();
-    let machineServiceClient:MachineServiceClientImpl = new MachineServiceClientImpl(this.workspace, this.authData);
+
+    // get terminal URI
+    let execAgentServer = workspaceDto.getRuntime().getDevMachine().getRuntime().getServers().get("4411/tcp");
+    let execAgentURI = execAgentServer.getUrl();
+    if (execAgentURI.includes("localhost")) {
+      execAgentURI = execAgentServer.getProperties().getInternalUrl();
+    }
+    let execAgentAuthData = AuthData.parse(execAgentURI, this.authData.username, this.authData.password);
+    execAgentAuthData.token = this.authData.getToken();
+    let execAgentServiceClientImpl:ExecAgentServiceClientImpl = new ExecAgentServiceClientImpl(this.workspace, execAgentAuthData);
 
     if (this.chefileStructWorkspace.postload.actions && this.chefileStructWorkspace.postload.actions.length > 0) {
       Log.getLogger().info(this.i18n.get("executeCommandsFromCurrentWorkspace.executing"));
@@ -842,7 +862,6 @@ setupSSHKeys(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto
 
     this.chefileStructWorkspace.postload.actions.forEach((postLoadingCommand: CheFileStructWorkspaceLoadingAction) => {
       let uuid:string = UUID.build();
-      let channel:string = 'process:output:' + uuid;
 
       if (postLoadingCommand.command) {
         workspaceCommands.forEach((workspaceCommand) => {
@@ -853,7 +872,7 @@ setupSSHKeys(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto
             customCommand.type = workspaceCommand.type;
             customCommand.attributes = workspaceCommand.attributes;
             Log.getLogger().debug('Executing post-loading workspace command \'' + postLoadingCommand.command + '\'.');
-            promises.push(machineServiceClient.executeCommand(workspaceDto, machineId, customCommand, channel, false));
+            promises.push(execAgentServiceClientImpl.executeCommand(workspaceDto, machineId, customCommand, uuid, false));
           }
         });
       } else if (postLoadingCommand.script) {
@@ -861,7 +880,7 @@ setupSSHKeys(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto
         customCommand.commandLine = postLoadingCommand.script;
         customCommand.name = 'custom postloading command';
         Log.getLogger().debug('Executing post-loading script \'' + postLoadingCommand.script + '\'.');
-        promises.push(machineServiceClient.executeCommand(workspaceDto, machineId, customCommand, channel, false));
+        promises.push(execAgentServiceClientImpl.executeCommand(workspaceDto, machineId, customCommand, uuid, false));
       }
 
 
@@ -943,10 +962,10 @@ setupSSHKeys(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto
       // continue with own properties
       commandLine +=
           ' -v /var/run/docker.sock:/var/run/docker.sock' +
+          ' -v ' + this.cliFolder + ':/data' +
           ' -e CHE_PORT=' + this.chefileStruct.server.port +
           ' -e CHE_DATA=' + this.workspacesFolder +
-          ' -e CHE_SERVER_CONTAINER_NAME=' + this.getCheServerContainerName() +
-          ' ' + this.cheLauncherImageName + ':' + containerVersion + ' start';
+          ' ' + this.cheLauncherImageName + ':' + containerVersion + ' start --fast';
 
       Log.getLogger().debug('Executing command line', commandLine);
 
@@ -994,9 +1013,8 @@ setupSSHKeys(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto
 
       var commandLine: string = 'docker run --rm' +
           ' -v /var/run/docker.sock:/var/run/docker.sock' +
+          ' -v ' + this.cliFolder + ':/data' +
           ' -e CHE_PORT=' + this.chefileStruct.server.port +
-          ' -e CHE_DATA=' + this.workspacesFolder +
-          ' -e CHE_SERVER_CONTAINER_NAME=' + this.getCheServerContainerName() +
           ' ' + this.cheLauncherImageName + ':' + containerVersion + ' stop';
 
       Log.getLogger().debug('Executing command line', commandLine);

@@ -9,20 +9,41 @@
 #   Tyler Jewell - Initial Implementation
 #
 
-cmd_sync() {
-  debug $FUNCNAME
+help_cmd_sync() {
+  text "\n"
+  text "USAGE: ${CHE_IMAGE_FULLNAME} sync WORKSPACE [PARAMETERS]\n"
+  text "\n"
+  text "Synchronizes a ${CHE_MINI_PRODUCT_NAME} workspace to a local path mounted to ':/sync'\n"
+  text "\n"
+  text "WORKSPACE:             Accepts workspace name, ID, or namespace:ws-name\n"
+  text "                       List all workspaces with 'action list-workspaces'\n"
+  text "\n"
+  text "PARAMETERS:\n"
+  text "  --url                Location of ${CHE_MINI_PRODUCT_NAME}\n"
+  text "  --user               User name of ${CHE_MINI_PRODUCT_NAME} if accessing authenticated system\n"
+  text "  --password           Password of ${CHE_MINI_PRODUCT_NAME} if accessing authenticated system\n"
+  text "  --unison-verbose     Verbose output of unison sync\n"
+}
 
+pre_cmd_sync() {
+  # Not loaded as part of the init process to save on download time
+  load_utilities_images_if_not_done
+}
+
+post_cmd_sync() {
+  :
+}
+
+cmd_sync() {
   if [[ "${SYNC_MOUNT}" = "not set" ]]; then
     info "Welcome to $CHE_FORMAL_PRODUCT_NAME!"
     info ""
     info "We could not detect a location to do the sync."
     info "Volume mount a local directory to ':/sync'."
     info ""
-    info "  docker run .... -v <YOUR_LOCAL_SYNC_PATH>:/sync ...."
+    info "  docker run ... -v <YOUR_LOCAL_SYNC_PATH>:/sync ..."
     return 2;
   fi
-
-  update_image_if_not_found ${UTILITY_IMAGE_CHEMOUNT}
 
   # Determine the mount path to do the mount
   info "mount" "Starting sync process to ${SYNC_MOUNT}"
@@ -36,5 +57,4 @@ cmd_sync() {
 
   # Docker doesn't seem to normally clean up this container
   docker rm -f che-mount
-
 }

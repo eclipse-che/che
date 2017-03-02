@@ -43,6 +43,16 @@ Usage on Mac or Windows:
  COMMAND_EXTRA_ARGS=
 }
 
+is_verbose() {
+  for i in "$@" ; do
+    if [ $i = "--unison-verbose" ]; then
+      echo "true"
+      exit 0
+    fi
+  done
+  echo "false"
+}
+
 parse_command_line () {
   if [ $# -eq 0 ]; then
     usage
@@ -51,7 +61,9 @@ parse_command_line () {
 
   # See if profile document was provided
   mkdir -p $HOME/.unison
-  cp -rf /profile/default.prf $HOME/.unison/default.prf
+  if [ -f /profile/default.prf ]; then
+    cp -rf /profile/default.prf $HOME/.unison/default.prf
+  fi
 
   WORKSPACE_NAME=$1
   shift
@@ -123,7 +135,22 @@ if [ $status -ne 0 ]; then
 fi
 info "INFO: (che mount): Successfully mounted ${SSH_USER}@${SSH_IP}:/projects (${SSH_PORT})"
 info "INFO: (che mount): Initial sync...Please wait."
-unison /mntssh /mnthost -batch -fat -silent -auto -prefer=newer -log=false > /dev/null 2>&1
+
+local UNISON_ARGS="";
+if [ $(is_verbose "$@") = true ]; then
+  UNISON_ARGS="-batch -fat -auto -prefer=newer"
+  info "using verbose mode"
+else
+  UNISON_ARGS="-silent -fat -auto -prefer=newer -log=false > /dev/null 2>&1"
+fi
+
+UNISON_COMMAND="unison /mntssh /mnthost ${UNISON_ARGS}"
+if [ $(is_verbose "$@") = true ]; then
+  debug "Using command ${UNISON_COMMAND}"
+fi
+
+eval "${UNISON_COMMAND}"
+
 status=$?
 if [ $status -ne 0 ]; then
     error "ERROR: Fatal error occurred ($status)"
@@ -133,5 +160,17 @@ info "INFO: (che mount): Background sync continues every ${UNISON_REPEAT_DELAY_I
 info "INFO: (che mount): This terminal will block while the synchronization continues."
 info "INFO: (che mount): To stop, issue a SIGTERM or SIGINT, usually CTRL-C."
 
+if [ $(is_verbose "$@") = true ]; then
+  info "Background sync unison verbose mode"
+  UNISON_ARGS="-batch -retry 10 -fat -copyonconflict -auto -prefer=newer -repeat=${UNISON_REPEAT_DELAY_IN_SEC}"
+else
+  UNISON_ARGS="-batch -retry 10 -fat -silent -copyonconflict -auto -prefer=newer -repeat=${UNISON_REPEAT_DELAY_IN_SEC} -log=false > /dev/null 2>&1"
+fi
+
+UNISON_COMMAND="unison /mntssh /mnthost ${UNISON_ARGS}"
+if [ $(is_verbose "$@") = true ]; then
+  debug "Using command ${UNISON_COMMAND}"
+fi
+
 # run application
-unison /mntssh /mnthost -batch -retry 10 -fat -silent -copyonconflict -auto -prefer=newer -repeat=${UNISON_REPEAT_DELAY_IN_SEC} -log=false > /dev/null 2>&1
+eval "${UNISON_COMMAND}"

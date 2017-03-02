@@ -10,6 +10,7 @@
  */
 
 import {MessageBus} from './messagebus';
+import {JsonRpcBus} from "./json-rpc-bus";
 
 /**
  * This class is handling the websocket handling by providing a {@link MessageBus} object
@@ -53,6 +54,19 @@ export class Websocket {
             return this.messageBus;
         });
 
+    }
+
+    /**
+     * Gets a MessageBus object for a remote workspace, by providing the remote URL to this websocket
+     * @param websocketURL the remote host base WS url
+     */
+    getJsonRpcBus(websocketURL) : Promise<JsonRpcBus> {
+        var webSocketClient: any = new this.wsClient();
+        var remoteWebsocketUrl: string = websocketURL;
+        let promise : Promise<JsonRpcBus> = new Promise<JsonRpcBus>((resolve, reject) => {
+            return new JsonRpcBus(webSocketClient, remoteWebsocketUrl, this, resolve, reject);
+        });
+        return promise;
     }
 
 }

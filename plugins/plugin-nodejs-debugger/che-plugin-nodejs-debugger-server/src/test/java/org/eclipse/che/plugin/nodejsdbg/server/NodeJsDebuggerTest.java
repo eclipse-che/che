@@ -13,22 +13,27 @@ package org.eclipse.che.plugin.nodejsdbg.server;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
 import org.eclipse.che.api.debug.shared.model.event.BreakpointActivatedEvent;
+import org.eclipse.che.api.debug.shared.model.event.DebuggerEvent;
+import org.eclipse.che.api.debug.shared.model.event.DisconnectEvent;
 import org.eclipse.che.api.debug.shared.model.event.SuspendEvent;
 import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
+import org.eclipse.che.api.debug.shared.model.impl.action.ResumeActionImpl;
 import org.eclipse.che.api.debug.shared.model.impl.action.StepIntoActionImpl;
 import org.eclipse.che.api.debug.shared.model.impl.action.StepOutActionImpl;
 import org.eclipse.che.api.debug.shared.model.impl.action.StepOverActionImpl;
 import org.eclipse.che.api.debugger.server.Debugger;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.List;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -46,6 +51,11 @@ public class NodeJsDebuggerTest {
 
         callback = mock(Debugger.DebuggerCallback.class);
         debugger = NodeJsDebugger.newInstance(null, null, file, callback);
+    }
+
+    @AfterMethod
+    public void tearDown() throws Exception {
+        debugger.disconnect();
     }
 
     @Test
@@ -98,25 +108,51 @@ public class NodeJsDebuggerTest {
     }
 
     @Test
-    public void testSteps() throws Exception {
+    public void testOver() throws Exception {
         debugger.stepOver(new StepOverActionImpl());
 
         ArgumentCaptor<SuspendEvent> suspendEventCaptor = ArgumentCaptor.forClass(SuspendEvent.class);
-        verify(callback, atLeastOnce()).onEvent(suspendEventCaptor.capture());
+        verify(callback, timeout(1000)).onEvent(suspendEventCaptor.capture());
+        SuspendEvent suspendEvent = suspendEventCaptor.getValue();
+        assertEquals(suspendEvent.getLocation().getLineNumber(), 2);
+        assertTrue(suspendEvent.getLocation().getTarget().endsWith("app.js"));
+    }
+
+    @Test
+    public void testIntoAndOut() throws Exception {
+        ArgumentCaptor<SuspendEvent> suspendEventCaptor = ArgumentCaptor.forClass(SuspendEvent.class);
+
+        debugger.stepInto(new StepIntoActionImpl());
+
+        verify(callback).onEvent(suspendEventCaptor.capture());
         SuspendEvent suspendEvent = suspendEventCaptor.getValue();
         assertEquals(suspendEvent.getLocation().getLineNumber(), 2);
         assertTrue(suspendEvent.getLocation().getTarget().endsWith("app.js"));
 
+        Mockito.reset(callback);
         debugger.stepInto(new StepIntoActionImpl());
-        verify(callback, atLeastOnce()).onEvent(suspendEventCaptor.capture());
+
+        verify(callback, timeout(1000)).onEvent(suspendEventCaptor.capture());
         suspendEvent = suspendEventCaptor.getValue();
         assertEquals(suspendEvent.getLocation().getLineNumber(), 5);
         assertTrue(suspendEvent.getLocation().getTarget().endsWith("app.js"));
 
+        Mockito.reset(callback);
         debugger.stepOut(new StepOutActionImpl());
-        verify(callback, atLeastOnce()).onEvent(suspendEventCaptor.capture());
+
+        verify(callback, timeout(1000)).onEvent(suspendEventCaptor.capture());
         suspendEvent = suspendEventCaptor.getValue();
         assertEquals(suspendEvent.getLocation().getLineNumber(), 9);
         assertTrue(suspendEvent.getLocation().getTarget().endsWith("app.js"));
+    }
+
+    @Test
+    public void testResume() throws Exception {
+        debugger.resume(new ResumeActionImpl());
+
+        ArgumentCaptor<DebuggerEvent> eventCaptor = ArgumentCaptor.forClass(DebuggerEvent.class);
+        verify(callback, timeout(5000)).onEvent(eventCaptor.capture());
+        assertTrue(eventCaptor.getValue() != null);
+        assertTrue(eventCaptor.getValue() instanceof DisconnectEvent);
     }
 }

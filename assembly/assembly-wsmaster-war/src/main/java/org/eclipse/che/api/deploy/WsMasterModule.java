@@ -14,7 +14,20 @@ import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
+import org.eclipse.che.api.agent.ExecAgent;
+import org.eclipse.che.api.agent.ExecAgentLauncher;
+import org.eclipse.che.api.agent.LSCSharpAgent;
+import org.eclipse.che.api.agent.LSJsonAgent;
+import org.eclipse.che.api.agent.LSPhpAgent;
+import org.eclipse.che.api.agent.LSPythonAgent;
+import org.eclipse.che.api.agent.LSTypeScriptAgent;
+import org.eclipse.che.api.agent.SshAgent;
+import org.eclipse.che.api.agent.SshAgentLauncher;
+import org.eclipse.che.api.agent.UnisonAgent;
+import org.eclipse.che.api.agent.WsAgent;
+import org.eclipse.che.api.agent.WsAgentLauncher;
 import org.eclipse.che.api.agent.server.launcher.AgentLauncher;
+import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.core.rest.CheJsonProvider;
 import org.eclipse.che.api.core.rest.MessageBodyAdapter;
 import org.eclipse.che.api.core.rest.MessageBodyAdapterInterceptor;
@@ -56,7 +69,6 @@ public class WsMasterModule extends AbstractModule {
         bind(org.eclipse.che.api.user.server.CheUserCreator.class);
 
         bind(TokenValidator.class).to(org.eclipse.che.api.local.DummyTokenValidator.class);
-        bind(org.eclipse.che.api.local.LocalDataMigrator.class).asEagerSingleton();
 
         bind(org.eclipse.che.api.core.rest.ApiInfoService.class);
         bind(org.eclipse.che.api.project.server.template.ProjectTemplateDescriptionLoader.class).asEagerSingleton();
@@ -76,6 +88,7 @@ public class WsMasterModule extends AbstractModule {
         bind(org.eclipse.che.plugin.docker.machine.ext.DockerMachineTerminalChecker.class);
         bind(org.eclipse.che.everrest.EverrestDownloadFileResponseFilter.class);
         bind(org.eclipse.che.everrest.ETagResponseFilter.class);
+        bind(org.eclipse.che.api.agent.server.AgentRegistryService.class);
 
         bind(org.eclipse.che.security.oauth.OAuthAuthenticatorProvider.class)
                 .to(org.eclipse.che.security.oauth.OAuthAuthenticatorProviderImpl.class);
@@ -85,9 +98,10 @@ public class WsMasterModule extends AbstractModule {
 
         bind(org.eclipse.che.api.core.notification.WSocketEventBusServer.class);
         // additional ports for development of extensions
-        Multibinder<org.eclipse.che.api.core.model.machine.ServerConf> machineServers = Multibinder.newSetBinder(binder(),
-                                                                                   org.eclipse.che.api.core.model.machine.ServerConf.class,
-                                                                                   Names.named("machine.docker.dev_machine.machine_servers"));
+        Multibinder<org.eclipse.che.api.core.model.machine.ServerConf> machineServers
+                = Multibinder.newSetBinder(binder(),
+                                           org.eclipse.che.api.core.model.machine.ServerConf.class,
+                                           Names.named("machine.docker.dev_machine.machine_servers"));
         machineServers.addBinding().toInstance(
                 new org.eclipse.che.api.machine.server.model.impl.ServerConfImpl(Constants.WSAGENT_DEBUG_REFERENCE, "4403/tcp", "http",
                                                                                  null));
@@ -100,6 +114,28 @@ public class WsMasterModule extends AbstractModule {
                    .addBinding()
                    .toInstance("predefined-recipes.json");
 
+        bind(org.eclipse.che.api.workspace.server.WorkspaceValidator.class)
+                .to(org.eclipse.che.api.workspace.server.DefaultWorkspaceValidator.class);
+
+        bind(org.eclipse.che.api.workspace.server.event.MachineStateListener.class).asEagerSingleton();
+
+        // agents
+        bind(org.eclipse.che.api.agent.server.AgentRegistry.class).to(org.eclipse.che.api.agent.server.impl.AgentRegistryImpl.class);
+        Multibinder<Agent> agents = Multibinder.newSetBinder(binder(), Agent.class);
+        agents.addBinding().to(SshAgent.class);
+        agents.addBinding().to(UnisonAgent.class);
+        agents.addBinding().to(ExecAgent.class);
+        agents.addBinding().to(WsAgent.class);
+        agents.addBinding().to(LSPhpAgent.class);
+        agents.addBinding().to(LSPythonAgent.class);
+        agents.addBinding().to(LSJsonAgent.class);
+        agents.addBinding().to(LSCSharpAgent.class);
+        agents.addBinding().to(LSTypeScriptAgent.class);
+
+        Multibinder<AgentLauncher> launchers = Multibinder.newSetBinder(binder(), AgentLauncher.class);
+        launchers.addBinding().to(WsAgentLauncher.class);
+        launchers.addBinding().to(ExecAgentLauncher.class);
+        launchers.addBinding().to(SshAgentLauncher.class);
 
         bindConstant().annotatedWith(Names.named("machine.ws_agent.run_command"))
                       .to("export JPDA_ADDRESS=\"4403\" && ~/che/ws-agent/bin/catalina.sh jpda run");
@@ -109,18 +145,6 @@ public class WsMasterModule extends AbstractModule {
                           "-cmd ${SHELL_INTERPRETER} " +
                           "-static $HOME/che/terminal/ " +
                           "-logs-dir $HOME/che/exec-agent/logs");
-        bind(org.eclipse.che.api.workspace.server.WorkspaceValidator.class)
-                .to(org.eclipse.che.api.workspace.server.DefaultWorkspaceValidator.class);
-
-        bind(org.eclipse.che.api.workspace.server.event.MachineStateListener.class).asEagerSingleton();
-
-        bind(org.eclipse.che.api.agent.server.AgentRegistry.class)
-                .to(org.eclipse.che.api.agent.server.impl.LocalAgentRegistryImpl.class);
-
-        Multibinder<AgentLauncher> agentLaunchers = Multibinder.newSetBinder(binder(), AgentLauncher.class);
-        agentLaunchers.addBinding().to(org.eclipse.che.api.workspace.server.launcher.WsAgentLauncherImpl.class);
-        agentLaunchers.addBinding().to(org.eclipse.che.api.workspace.server.launcher.TerminalAgentLauncherImpl.class);
-        agentLaunchers.addBinding().to(org.eclipse.che.api.workspace.server.launcher.SshAgentLauncherImpl.class);
 
         bind(org.eclipse.che.api.deploy.WsMasterAnalyticsAddresser.class);
 
@@ -135,7 +159,6 @@ public class WsMasterModule extends AbstractModule {
         install(new org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule());
         install(new org.eclipse.che.plugin.docker.machine.local.LocalDockerModule());
         install(new org.eclipse.che.api.machine.server.MachineModule());
-        install(new org.eclipse.che.api.agent.server.AgentModule());
         install(new org.eclipse.che.plugin.docker.machine.ext.DockerExtServerModule());
         install(new org.eclipse.che.swagger.deploy.DocsModule());
         install(new org.eclipse.che.plugin.machine.ssh.SshMachineModule());
@@ -154,5 +177,11 @@ public class WsMasterModule extends AbstractModule {
                 .to(org.eclipse.che.plugin.docker.machine.cleaner.LocalWorkspaceFilesCleaner.class);
         bind(org.eclipse.che.api.environment.server.InfrastructureProvisioner.class)
                 .to(org.eclipse.che.plugin.docker.machine.local.LocalCheInfrastructureProvisioner.class);
+
+        // system components
+        bind(org.eclipse.che.api.system.server.SystemService.class);
+        bind(org.eclipse.che.api.system.server.SystemEventsWebsocketBroadcaster.class).asEagerSingleton();
+
+        install(new org.eclipse.che.plugin.docker.machine.dns.DnsResolversModule());
     }
 }

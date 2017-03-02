@@ -13,7 +13,6 @@ package org.eclipse.che.ide.editor.orion.client.inject;
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
-import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 
 import org.eclipse.che.ide.api.editor.defaulteditor.EditorBuilder;
@@ -23,23 +22,25 @@ import org.eclipse.che.ide.editor.orion.client.ContentAssistWidgetFactory;
 import org.eclipse.che.ide.editor.orion.client.OrionEditorBuilder;
 import org.eclipse.che.ide.editor.orion.client.OrionEditorWidget;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionCodeEditWidgetOverlay;
-import org.eclipse.che.ide.requirejs.ModuleHolder;
+import org.eclipse.che.ide.editor.orion.client.jso.OrionEditorOptionsOverlay;
 
 @ExtensionGinModule
 public class OrionEditorGinModule extends AbstractGinModule {
 
     @Override
     protected void configure() {
-        bind(ModuleHolder.class).in(Singleton.class);
 
         bind(EditorBuilder.class).to(OrionEditorBuilder.class);
 
         install(new GinFactoryModuleBuilder().build(new TypeLiteral<EditorWidgetFactory<OrionEditorWidget>>() {}));
 
         bind(OrionCodeEditWidgetOverlay.class).toProvider(OrionCodeEditWidgetProvider.class);
+        bind(OrionEditorOptionsOverlay.class).toProvider(OrionEditorOptionsOverlayProvider.class);
 
         install(new GinFactoryModuleBuilder().build(ContentAssistWidgetFactory.class));
 
         GinMultibinder.newSetBinder(binder(), OrionPlugin.class).addBinding().to(JavaHighlightingOrionPlugin.class);
+
+        //GinMultibinder.newSetBinder(binder(), OrionPlugin.class).addBinding().to(LanguageServerHighlightingOrionPlugin.class);
     }
 }

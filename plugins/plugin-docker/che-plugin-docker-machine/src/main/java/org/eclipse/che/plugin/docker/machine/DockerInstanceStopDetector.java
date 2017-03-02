@@ -19,6 +19,7 @@ import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.api.machine.server.event.InstanceStateEvent;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
+import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
 import org.eclipse.che.plugin.docker.client.MessageProcessor;
 import org.eclipse.che.plugin.docker.client.json.Event;
 import org.eclipse.che.plugin.docker.client.json.Filters;
@@ -66,9 +67,9 @@ public class DockerInstanceStopDetector {
     private long lastProcessedEventDate = 0;
 
     @Inject
-    public DockerInstanceStopDetector(EventService eventService, DockerConnector dockerConnector) {
+    public DockerInstanceStopDetector(EventService eventService, DockerConnectorProvider dockerConnectorProvider) {
         this.eventService = eventService;
-        this.dockerConnector = dockerConnector;
+        this.dockerConnector = dockerConnectorProvider.get();
         this.instances = new ConcurrentHashMap<>();
         this.containersOomTimestamps = CacheBuilder.newBuilder()
                                                    .expireAfterWrite(10, TimeUnit.SECONDS)

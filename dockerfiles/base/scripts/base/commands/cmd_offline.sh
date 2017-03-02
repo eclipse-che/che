@@ -9,18 +9,37 @@
 #   Tyler Jewell - Initial Implementation
 #
 
+help_cmd_offline() {
+  text "\n"
+  text "USAGE: ${CHE_IMAGE_FULLNAME} offline [PARAMETERS]\n"
+  text "\n"
+  text "Downloads and saves Docker images required to run ${CHE_MINI_PRODUCT_NAME} offline. Add the 
+'--offline' global parameter command to execute ${CHE_MINI_PRODUCT_NAME} in offline mode. You can optionally 
+download stack images used to start workspaces. Stack images are heavy and often larger than 1GB. You 
+can save them all or selectively choose stacks.\n"
+  text "\n"
+  text "PARAMETERS:\n"
+  text "  --all-stacks                      Saves all stack images\n"
+  text "  --list                            Lists all images that will be downloaded and saved\n"
+  text "  --image:<name>                    Downloads specific stack image\n"
+  text "  --no-stacks                       Do not save any stack images\n"
+  text "\n"
+}
+
+
+pre_cmd_offline() {
+  :
+}
+
+post_cmd_offline() {
+  :
+}
+
 cmd_offline() {
-  info "offline" "Grabbing image manifest for version '$CHE_VERSION'"
-  if ! has_version_registry $CHE_VERSION; then
-    version_error $CHE_VERSION
-    return 1;
-  fi
-
-  # Read in core system images
-  IMAGE_LIST=$(cat "$CHE_MANIFEST_DIR"/$CHE_VERSION/images)
-
   # Read in optional stack images
   readarray -t STACK_IMAGE_LIST < /version/$CHE_VERSION/images-stacks
+  readarray -t BOOTSTRAP_IMAGE_LIST < ${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}/images/images-bootstrap
+  readarray -t UTILITY_IMAGE_LIST < ${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}/images/images-utilities
 
   # List all images to be saved
   if [[ $# -gt 0 ]] && [[ $1 = "--list" ]]; then
@@ -28,14 +47,26 @@ cmd_offline() {
     info "offline" "Listing images to save for offline usage"
     info ""
     info "offline" "Always:"
-    info "offline" "  CLI:   ${CHE_IMAGE_FULLNAME}"
+    info "offline" "  CLI:        ${CHE_IMAGE_FULLNAME}"
+
+    IFS=$'\n'
+    for SINGLE_IMAGE in $BOOTSTRAP_IMAGE_LIST; do
+      IMAGE_NAME=$(echo $SINGLE_IMAGE | cut -d'=' -f2)
+      info "offline" "  BOOTSTRAP:  ${IMAGE_NAME}"
+    done
 
     IFS=$'\n'
     for SINGLE_IMAGE in $IMAGE_LIST; do
       IMAGE_NAME=$(echo $SINGLE_IMAGE | cut -d'=' -f2)
-      info "offline" "  CORE:  ${IMAGE_NAME}"
+      info "offline" "  SYSTEM:     ${IMAGE_NAME}"
     done
     
+    IFS=$'\n'
+    for SINGLE_IMAGE in $UTILITY_IMAGE_LIST; do
+      IMAGE_NAME=$(echo $SINGLE_IMAGE | cut -d'=' -f2)
+      info "offline" "  UTILITY:    ${IMAGE_NAME}"
+    done
+
     info ""
     info "offline" "Optional: (repeat --image:<name> for stack, --all-stacks, or --no-stacks)"
     for STACK in $(seq 0 $((${#STACK_IMAGE_LIST[@]}-1)))
@@ -47,24 +78,28 @@ cmd_offline() {
   fi
 
   # Make sure the images have been pulled and are in your local Docker registry
-  cmd_download
+  cmd_lifecycle download
 
   mkdir -p $CHE_CONTAINER_OFFLINE_FOLDER
 
   info "offline" "Saving ${CHE_MINI_PRODUCT_NAME} cli image..."
   save_image ${CHE_IMAGE_FULLNAME}
 
-  info "offline" "Saving utility images..."
-  download_and_save_image "${UTILITY_IMAGE_CHEIP}"
-  download_and_save_image "${UTILITY_IMAGE_ALPINE}"
-  download_and_save_image "${UTILITY_IMAGE_CHEACTION}"
-  download_and_save_image "${UTILITY_IMAGE_CHEDIR}"
-  download_and_save_image "${UTILITY_IMAGE_CHETEST}"
-  download_and_save_image "${UTILITY_IMAGE_CHEMOUNT}"
+  info "offline" "Saving ${CHE_MINI_PRODUCT_NAME} bootstrap images..."
+  IFS=$'\n'
+  for SINGLE_IMAGE in ${BOOTSTRAP_IMAGE_LIST}; do
+    IMAGE_NAME=$(echo $SINGLE_IMAGE | cut -d'=' -f2)
+    save_image $IMAGE_NAME
+  done
 
   info "offline" "Saving ${CHE_MINI_PRODUCT_NAME} system images..."
-  IFS=$'\n'
   for SINGLE_IMAGE in $IMAGE_LIST; do
+    IMAGE_NAME=$(echo $SINGLE_IMAGE | cut -d'=' -f2)
+    save_image $IMAGE_NAME
+  done
+
+  info "offline" "Saving utility images..."
+  for SINGLE_IMAGE in ${UTILITY_IMAGE_LIST}; do
     IMAGE_NAME=$(echo $SINGLE_IMAGE | cut -d'=' -f2)
     save_image $IMAGE_NAME
   done
@@ -81,7 +116,7 @@ cmd_offline() {
         break
         shift ;;
       --no-stacks)
-        info "offline" "  --no-stacks indicated...skipping"
+        info "offline" "--no-stacks indicated...skipping"
         break
         shift ;;
       --image:*|-i:*)

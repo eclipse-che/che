@@ -28,8 +28,8 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionTextThemeOverlay;
 import org.eclipse.che.ide.editor.orion.client.signature.SignatureHelpResources;
-import org.eclipse.che.ide.requirejs.RequireJsLoader;
-import org.eclipse.che.ide.requirejs.RequirejsErrorHandler.RequireError;
+import org.eclipse.che.plugin.requirejs.ide.RequireJsLoader;
+import org.eclipse.che.plugin.requirejs.ide.RequirejsErrorHandler.RequireError;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.ui.loaders.request.MessageLoader;
 import org.eclipse.che.ide.util.loging.Log;
@@ -84,7 +84,7 @@ public class OrionEditorExtension {
     private void injectOrion(final AsyncCallback<Void> callback) {
         loader.setMessage(waitEditorMessage);
         final String[] scripts = new String[]{
-                "built-codeEdit-12.0/code_edit/built-codeEdit-amd",
+                "built-codeEdit/code_edit/built-codeEdit-amd",
                 "orion/CheContentAssistMode"
         };
 
@@ -114,7 +114,7 @@ public class OrionEditorExtension {
             }
         }, scripts, new String[0]);
 
-        injectCssLink(GWT.getModuleBaseForStaticFiles() + "built-codeEdit-12.0/code_edit/built-codeEdit.css");
+        injectCssLink(GWT.getModuleBaseForStaticFiles() + "built-codeEdit/code_edit/built-codeEdit.css");
     }
 
     private static void injectCssLink(final String url) {
@@ -163,6 +163,7 @@ public class OrionEditorExtension {
     private void defineDefaultTheme() {
         // The codenvy theme uses both an orion css file and a CssResource
         orionResource.editorStyle().ensureInjected();
+        orionResource.getIncrementalFindStyle().ensureInjected();
         OrionTextThemeOverlay.setDefaultTheme("orionCodenvy", "orion-codenvy-theme.css");
     }
 

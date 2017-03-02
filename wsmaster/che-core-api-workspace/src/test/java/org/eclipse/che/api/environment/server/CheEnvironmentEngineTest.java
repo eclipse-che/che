@@ -15,19 +15,23 @@ import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.agent.shared.model.AgentKey;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.MachineLogMessage;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.ExtendedMachine;
 import org.eclipse.che.api.core.model.workspace.ServerConf2;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.MessageConsumer;
 import org.eclipse.che.api.environment.server.exception.EnvironmentNotRunningException;
+import org.eclipse.che.api.environment.server.exception.EnvironmentStartInterruptedException;
 import org.eclipse.che.api.environment.server.model.CheServiceBuildContextImpl;
 import org.eclipse.che.api.environment.server.model.CheServiceImpl;
 import org.eclipse.che.api.environment.server.model.CheServicesEnvironmentImpl;
 import org.eclipse.che.api.machine.server.MachineInstanceProviders;
+import org.eclipse.che.api.machine.server.event.InstanceStateEvent;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
@@ -41,6 +45,7 @@ import org.eclipse.che.api.machine.server.spi.InstanceProvider;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.machine.server.util.RecipeDownloader;
 import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
+import org.eclipse.che.api.workspace.server.WorkspaceSharedPool;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentRecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ExtendedMachineImpl;
@@ -49,6 +54,7 @@ import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.Size;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -65,6 +71,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
@@ -86,8 +93,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 /**
  * @author Alexander Garagatyi
@@ -105,23 +114,30 @@ public class CheEnvironmentEngineTest {
     @Mock
     private MachineInstanceProvider            machineProvider;
     @Mock
-    private MachineInstanceProviders machineInstanceProviders;
+    private MachineInstanceProviders           machineInstanceProviders;
     @Mock
-    private EventService             eventService;
+    private EventService                       eventService;
     @Mock
-    private SnapshotDao              snapshotDao;
+    private SnapshotDao                        snapshotDao;
     @Mock
-    private RecipeDownloader         recipeDownloader;
+    private RecipeDownloader                   recipeDownloader;
     @Mock
-    InfrastructureProvisioner          infrastructureProvisioner;
+    private InfrastructureProvisioner          infrastructureProvisioner;
     @Mock
-    private ContainerNameGenerator   containerNameGenerator;
+    private ContainerNameGenerator             containerNameGenerator;
     @Mock
-    private AgentRegistry            agentRegistry;
+    private AgentRegistry                      agentRegistry;
     @Mock
-    private Agent                    agent;
+    private Agent                              agent;
     @Mock
-    private EnvironmentParser        environmentParser;
+    private EnvironmentParser                  environmentParser;
+    @Mock
+    private MachineStartedHandler              startedHandler;
+    @Mock
+    private WorkspaceSharedPool                sharedPool;
+
+    @Captor
+    ArgumentCaptor<EventSubscriber<InstanceStateEvent>> eventServiceSubscriberCaptor;
 
     private CheEnvironmentEngine engine;
 
@@ -129,7 +145,7 @@ public class CheEnvironmentEngineTest {
     public void setUp() throws Exception {
         engine = spy(new CheEnvironmentEngine(snapshotDao,
                                               machineInstanceProviders,
-                                              "/tmp",
+                                              System.getProperty("java.io.tmpdir"),
                                               DEFAULT_MACHINE_MEM_LIMIT_MB,
                                               eventService,
                                               environmentParser,
@@ -139,7 +155,8 @@ public class CheEnvironmentEngineTest {
                                               API_ENDPOINT,
                                               recipeDownloader,
                                               containerNameGenerator,
-                                              agentRegistry));
+                                              agentRegistry,
+                                              sharedPool));
 
         when(machineInstanceProviders.getProvider("docker")).thenReturn(instanceProvider);
         when(instanceProvider.getRecipeTypes()).thenReturn(Collections.singleton("dockerfile"));
@@ -241,10 +258,76 @@ public class CheEnvironmentEngineTest {
                                                envName,
                                                env,
                                                false,
-                                               messageConsumer);
+                                               messageConsumer,
+                                               startedHandler);
 
         // then
         assertEquals(machines, expectedMachines);
+        for (Instance expectedMachine : expectedMachines) {
+            verify(startedHandler).started(eq(expectedMachine), any(ExtendedMachine.class));
+        }
+    }
+
+    @Test
+    public void stopsTheEnvironmentWhileStartOfMachineIsInterrupted() throws Exception {
+        // given
+        EnvironmentImpl env = createEnv();
+        String envName = "env-1";
+        String workspaceId = "wsId";
+
+        int[] counter = new int[] {env.getMachines().size()};
+        ArrayList<Instance> created = new ArrayList<>();
+        when(machineProvider.startService(anyString(),
+                                          eq(workspaceId),
+                                          eq(envName),
+                                          anyString(),
+                                          anyBoolean(),
+                                          anyString(),
+                                          any(CheServiceImpl.class),
+                                          any(LineConsumer.class)))
+                .thenAnswer(invocationOnMock -> {
+                    // interrupt when the last machine from environment is started
+                    if (--counter[0] == 0) {
+                        Thread.currentThread().interrupt();
+                        throw new ServerException("interrupted!");
+                    }
+                    Object[] arguments = invocationOnMock.getArguments();
+                    NoOpMachineInstance instance = spy(new NoOpMachineInstance(createMachine(workspaceId,
+                                                                                             envName,
+                                                                                             (CheServiceImpl)arguments[6],
+                                                                                             (String)arguments[3],
+                                                                                             (boolean)arguments[4])));
+                    created.add(instance);
+                    return instance;
+                });
+        when(environmentParser.parse(env)).thenReturn(createCheServicesEnv());
+
+        // when, then
+        try {
+            engine.start(workspaceId,
+                         envName,
+                         env,
+                         false,
+                         messageConsumer,
+                         startedHandler);
+            fail("environment must not be running");
+        } catch (EnvironmentStartInterruptedException x) {
+            assertEquals(x.getMessage(), format("Start of environment '%s' in workspace '%s' is interrupted",
+                                                envName, workspaceId));
+        }
+
+        // environment must not be running
+        try {
+            engine.getMachines(workspaceId);
+            fail("environment must not be running");
+        } catch (EnvironmentNotRunningException x) {
+            assertEquals(x.getMessage(), format("Environment with ID '%s' is not found", workspaceId));
+        }
+
+        // all the machines expect of the last one must be destroyed
+        for (Instance instance : created) {
+            verify(instance).destroy();
+        }
     }
 
     @Test
@@ -471,10 +554,10 @@ public class CheEnvironmentEngineTest {
 
         // when
         List<Instance> machines = engine.start(workspaceId,
-                     envName,
-                     env,
-                     true,
-                     messageConsumer);
+                                               envName,
+                                               env,
+                                               true,
+                                               messageConsumer);
 
         // then
         assertEquals(machines, expectedMachines);
@@ -715,7 +798,7 @@ public class CheEnvironmentEngineTest {
         engine.startMachine(workspaceId, config, agents);
 
         // then
-        verify(infrastructureProvisioner).provision(any(ExtendedMachine.class), any(CheServiceImpl.class));
+        verify(infrastructureProvisioner).provision(any(ExtendedMachineImpl.class), any(CheServiceImpl.class));
     }
 
     @Test
@@ -759,7 +842,7 @@ public class CheEnvironmentEngineTest {
     }
 
     @Test
-    public void shouldDestroyMachinesOnEnvStop() throws Exception {
+    public void shouldBeAbleToStopEnv() throws Exception {
         // given
         List<Instance> instances = startEnv();
         Instance instance = instances.get(0);
@@ -771,6 +854,7 @@ public class CheEnvironmentEngineTest {
         for (Instance instance1 : instances) {
             verify(instance1).destroy();
         }
+        verify(machineProvider).destroyNetwork(anyString());
     }
 
     @Test(expectedExceptions = EnvironmentNotRunningException.class,
@@ -795,6 +879,25 @@ public class CheEnvironmentEngineTest {
         for (Instance instance1 : instances) {
             inOrder.verify(instance1).destroy();
         }
+    }
+
+    @Test
+    public void stopOfEnvironmentShouldDestroyNetworkWhenNoMachineExists() throws Exception {
+        // given
+        List<Instance> instances = startEnv();
+        String workspaceId = instances.get(0).getWorkspaceId();
+        for (Instance instance : instances) {
+            engine.removeMachineFromEnvironment(instance.getWorkspaceId(), instance.getId());
+        }
+
+        // when
+        engine.stop(workspaceId);
+
+        // then
+        for (Instance instance : instances) {
+            verify(instance, never()).destroy();
+        }
+        verify(machineProvider).destroyNetwork(anyString());
     }
 
     @Test
@@ -1110,6 +1213,78 @@ public class CheEnvironmentEngineTest {
         // then
         assertEquals(serviceToNormalizeLinks.getLinks().size(), 1);
         assertEquals(serviceToNormalizeLinks.getLinks().get(0), containerNameToLink + ':' + AliasToServiceToLink);
+    }
+
+    @Test
+    public void shouldDestroyAndRemoveMachineFromEnvironmentIfEventAboutItsDeath() throws Exception {
+        // given
+        List<Instance> instances = startEnv();
+        Instance instance = instances.get(0);
+        String machineId = instance.getId();
+        String workspaceId = instance.getWorkspaceId();
+
+        when(instance.getLogger()).thenReturn(LineConsumer.DEV_NULL);
+        engine.init();
+        verify(eventService).subscribe(eventServiceSubscriberCaptor.capture());
+        EventSubscriber<InstanceStateEvent> subscriber = eventServiceSubscriberCaptor.getValue();
+        ArgumentCaptor<Runnable> runnableArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
+
+        // when
+        subscriber.onEvent(new InstanceStateEvent(machineId, workspaceId, InstanceStateEvent.Type.DIE));
+        // catch event actor
+        verify(sharedPool).execute(runnableArgumentCaptor.capture());
+        Runnable eventActor = runnableArgumentCaptor.getValue();
+        // run event actor to verify its behavior
+        eventActor.run();
+
+        // then
+        for (Instance instance1 : instances) {
+            // other machines are not destroyed
+            if (instance1.equals(instance)) {
+                verify(instance1).destroy();
+            } else {
+                verify(instance1, never()).destroy();
+            }
+        }
+        for (Instance instance1 : engine.getMachines(workspaceId)) {
+            assertNotEquals(instance1.getId(), machineId);
+        }
+    }
+
+    @Test
+    public void shouldDestroyAndRemoveMachineFromEnvironmentIfEventAboutItsOOM() throws Exception {
+        // given
+        List<Instance> instances = startEnv();
+        Instance instance = instances.get(0);
+        String machineId = instance.getId();
+        String workspaceId = instance.getWorkspaceId();
+
+        when(instance.getLogger()).thenReturn(LineConsumer.DEV_NULL);
+        engine.init();
+        verify(eventService).subscribe(eventServiceSubscriberCaptor.capture());
+        EventSubscriber<InstanceStateEvent> subscriber = eventServiceSubscriberCaptor.getValue();
+        ArgumentCaptor<Runnable> runnableArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
+
+        // when
+        subscriber.onEvent(new InstanceStateEvent(machineId, workspaceId, InstanceStateEvent.Type.OOM));
+        // catch event actor
+        verify(sharedPool).execute(runnableArgumentCaptor.capture());
+        Runnable eventActor = runnableArgumentCaptor.getValue();
+        // run event actor to verify its behavior
+        eventActor.run();
+
+        // then
+        for (Instance instance1 : instances) {
+            // other machines are not destroyed
+            if (instance1.equals(instance)) {
+                verify(instance1).destroy();
+            } else {
+                verify(instance1, never()).destroy();
+            }
+        }
+        for (Instance instance1 : engine.getMachines(workspaceId)) {
+            assertNotEquals(instance1.getId(), machineId);
+        }
     }
 
     private List<Instance> startEnv() throws Exception {
