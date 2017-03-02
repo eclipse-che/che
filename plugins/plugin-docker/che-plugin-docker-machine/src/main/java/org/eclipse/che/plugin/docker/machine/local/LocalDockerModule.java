@@ -17,7 +17,6 @@ import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
-import org.eclipse.che.api.environment.server.MachineService;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceProcess;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
@@ -42,9 +41,7 @@ public class LocalDockerModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        bind(MachineService.class);
-
-        install(new FactoryModuleBuilder()
+         install(new FactoryModuleBuilder()
                         .implement(Instance.class, DockerInstance.class)
                         .implement(InstanceProcess.class, DockerProcess.class)
                         .implement(DockerNode.class, LocalDockerNode.class)
