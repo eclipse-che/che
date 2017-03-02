@@ -9,6 +9,7 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {WorkspaceMachineConfigController} from '../machine-config.controller';
 
 /**
  * @ngdoc controller
@@ -17,30 +18,39 @@
  * @author Oleksii Kurinnyi
  */
 export class EditMachineNameDialogController {
+  private $mdDialog: ng.material.IDialogService;
+  private name: string;
+  private origName: string;
+  private machineNames: string[];
+  private machineNamesLowercase: string[];
+  private callbackController: WorkspaceMachineConfigController;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($mdDialog) {
+  constructor($mdDialog: ng.material.IDialogService) {
     this.$mdDialog = $mdDialog;
+
+    this.origName = this.name;
+    this.machineNamesLowercase = this.machineNames.map((name: string) => name.toLowerCase());
   }
 
-  isUnique(name) {
-    return this.machinesNames.indexOf(name) < 0;
+  isUnique(name: string): boolean {
+    return this.machineNamesLowercase.indexOf(name.toLowerCase()) < 0;
   }
 
   /**
    * It will hide the dialog box.
    */
-  hide() {
+  hide(): void {
     this.$mdDialog.hide();
   }
 
   /**
    * Update machine name
    */
-  updateMachineName() {
+  updateMachineName(): void {
     this.callbackController.updateMachineName(this.name);
     this.hide();
   }

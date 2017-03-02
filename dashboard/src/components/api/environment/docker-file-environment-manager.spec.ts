@@ -44,18 +44,6 @@ describe('If recipe has content', () => {
 
   describe('DockerFileEnvironmentManager', () => {
 
-    it('cannot rename machine', () => {
-      let canRenameMachine = envManager.canRenameMachine(machines[0]);
-
-      expect(canRenameMachine).toBe(false);
-    });
-
-    it('cannot delete machine', () => {
-      let canDeleteMachine = envManager.canDeleteMachine(machines[0]);
-
-      expect(canDeleteMachine).toBe(false);
-    });
-
     it('can edit environment variables', () => {
       let canEditEnvVariables = envManager.canEditEnvVariables(machines[0]);
 
@@ -89,6 +77,21 @@ describe('If recipe has content', () => {
       expect(isDev).toBe(true);
     });
 
+    it('should update environment\'s recipe via machine\'s source', () => {
+      let oldMachines = envManager.getMachines(environment),
+          oldSource = envManager.getSource(oldMachines[0]),
+          source = 'eclipse/node';
+
+      envManager.setSource(oldMachines[0], source);
+      let newEnvironment = envManager.getEnvironment(environment, oldMachines),
+          newMachines = envManager.getMachines(newEnvironment),
+          newSource = envManager.getSource(newMachines[0]);
+
+      expect(newSource.image).toEqual(source);
+
+      expect(newSource.image).not.toEqual(oldSource);
+    });
+
   });
 
 });
@@ -118,18 +121,6 @@ describe('If recipe has location', () => {
   }));
 
   describe('DockerFileEnvironmentManager', () => {
-
-    it('cannot rename machine', () => {
-      let canRenameMachine = envManager.canRenameMachine(machines[0]);
-
-      expect(canRenameMachine).toBe(false);
-    });
-
-    it('cannot delete machine', () => {
-      let canDeleteMachine = envManager.canDeleteMachine(machines[0]);
-
-      expect(canDeleteMachine).toBe(false);
-    });
 
     it('cannot edit environment variables', () => {
       let canEditEnvVariables = envManager.canEditEnvVariables(machines[0]);
