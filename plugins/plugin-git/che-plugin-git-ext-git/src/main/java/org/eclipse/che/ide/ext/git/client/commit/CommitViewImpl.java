@@ -71,7 +71,7 @@ public class CommitViewImpl extends Window implements CommitView {
     /**
      * The commit message input field.
      */
-    @UiField
+    @UiField(provided = true)
     TextArea message;
     Button btnCommit;
     Button btnCancel;
@@ -91,6 +91,7 @@ public class CommitViewImpl extends Window implements CommitView {
     protected CommitViewImpl(GitResources res, GitLocalizationConstant locale) {
         this.res = res;
         this.locale = locale;
+        this.message = new org.eclipse.che.ide.ui.TextArea();
         this.ensureDebugId("git-commit-window");
 
         Widget widget = ourUiBinder.createAndBindUi(this);
@@ -224,13 +225,6 @@ public class CommitViewImpl extends Window implements CommitView {
 
     @UiHandler("message")
     public void onMessageChanged(KeyUpEvent event) {
-        //Add new line when Enter key is pressed
-        if (event.getNativeKeyCode() == KEY_ENTER) {
-            int cursorPos = message.getCursorPos();
-            message.setText(new StringBuilder(message.getText()).insert(cursorPos, "\n").toString());
-            message.setCursorPos(cursorPos + 2);
-        }
-
         delegate.onValueChanged();
     }
 
