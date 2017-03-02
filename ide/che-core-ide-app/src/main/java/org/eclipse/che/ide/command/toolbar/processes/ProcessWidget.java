@@ -64,7 +64,9 @@ class ProcessWidget extends FlowPanel {
         durationLabel.addStyleName(RESOURCES.commandToolbarCss().processWidgetPidLabel());
 
         updateDurationTimer = new UpdateDurationTimer();
-        updateDurationTimer.scheduleRepeating(1000);
+        if (!stopped) {
+            updateDurationTimer.scheduleRepeating(1000);
+        }
 
         pidLabel = new Label('#' + Integer.toString(process.getPid()));
         pidLabel.addStyleName(RESOURCES.commandToolbarCss().processWidgetText());
@@ -154,12 +156,17 @@ class ProcessWidget extends FlowPanel {
 
         @Override
         public void run() {
+            durationLabel.setText(getElapsedTime());
+        }
+
+        /** Returns the time (mm:ss) that have elapsed since this timer was created. */
+        private String getElapsedTime() {
             final int elapsedSec = duration.elapsedMillis() / 1000;
             final int minutesPart = elapsedSec / 60;
             final int secondsPart = elapsedSec - minutesPart * 60;
 
-            durationLabel.setText((minutesPart < 10 ? "0" + minutesPart : minutesPart) + ":" +
-                                  (secondsPart < 10 ? "0" + secondsPart : secondsPart));
+            return (minutesPart < 10 ? "0" + minutesPart : minutesPart) + ":" +
+                   (secondsPart < 10 ? "0" + secondsPart : secondsPart);
         }
 
         @Override
