@@ -585,6 +585,10 @@ class JGitConnection implements GitConnection {
             changed.addAll(status.getModified());
             changed.addAll(status.getMissing());
 
+            List<String> specifiedStaged = specified.stream()
+                                                    .filter(path -> staged.stream().anyMatch(s -> s.startsWith(path)))
+                                                    .collect(Collectors.toList());
+
             List<String> specifiedChanged = specified.stream()
                                                      .filter(path -> changed.stream().anyMatch(c -> c.startsWith(path)))
                                                      .collect(Collectors.toList());
@@ -594,7 +598,7 @@ class JGitConnection implements GitConnection {
                 // Check that there are staged changes present for commit, or any changes if 'isAll' is enabled
                 if (status.isClean()) {
                     throw new GitException("Nothing to commit, working directory clean");
-                } else if (!params.isAll() && (specified.isEmpty() ? staged.isEmpty() : specifiedChanged.isEmpty())) {
+                } else if (!params.isAll() && (specified.isEmpty() ? staged.isEmpty() : specifiedStaged.isEmpty())) {
                     throw new GitException("No changes added to commit");
                 }
             } else {
