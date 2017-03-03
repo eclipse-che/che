@@ -18,74 +18,83 @@ import java.util.HashMap;
  * @author David Festal
  */
 public abstract class AbstractTestListener {
-	static public class TestSummary {
-		private int errors;
-		private int failures;
+    static public class TestSummary {
+        private int errors;
+        private int failures;
 
-		public TestSummary() {
-			this.errors = 0;
-			this.failures = 0;
-		}
-		public void addError() {
-			errors ++;
-		}
-		public void addFailure() {
-			failures ++;
-		}
-		public int getErrors() {
-			return errors;
-		}
-		public int getFailures() {
-			return failures;
-		}
-		public boolean succeeded() {
-			return failures == 0 && errors == 0;
-		}
-		
-		@Override
-		public String toString() {
-			return new StringBuilder()
-					.append(failures)
-					.append(" failures and ")
-					.append(errors)
-					.append(" errors")
-					.toString();
-		}
-	}
-	
-	HashMap<String, AbstractTestListener.TestSummary> runningTests = new HashMap<>();
-	
-	public synchronized void startTest(String testKey, String testName) {
-		runningTests.put(testKey, null);
-		startedTest(testKey, testName);
-	}
-	
-	public synchronized void endTest(String testKey, String testName) {
-		AbstractTestListener.TestSummary summary = runningTests.remove(testKey);
-		endedTest(testKey, testName, summary);
-	}
+        public TestSummary() {
+            this.errors = 0;
+            this.failures = 0;
+        }
 
-	protected abstract void startedTest(String testKey, String testName);
-	protected abstract void endedTest(String testKey, String testName, AbstractTestListener.TestSummary summary);
-	protected abstract void addedFailure(String testKey, Throwable throwable);
-	protected abstract void addedError(String testKey, Throwable throwable);
+        public void addError() {
+            errors++;
+        }
 
-	private synchronized AbstractTestListener.TestSummary getOrCreateTestSummary(String testKey) {
-		AbstractTestListener.TestSummary summary = runningTests.get(testKey);
-		if (summary == null) {
-			summary = new TestSummary();
-			runningTests.put(testKey, summary);
-		}
-		return summary;
-	}
-	
-	public void addFailure(String testKey, Throwable throwable) {
-		getOrCreateTestSummary(testKey).addFailure();
-		addedFailure(testKey, throwable);
-	}
+        public void addFailure() {
+            failures++;
+        }
 
-	public void addError(String testKey, Throwable throwable) {
-		getOrCreateTestSummary(testKey).addError();
-		addedError(testKey, throwable);
-	}
+        public int getErrors() {
+            return errors;
+        }
+
+        public int getFailures() {
+            return failures;
+        }
+
+        public boolean succeeded() {
+            return failures == 0 && errors == 0;
+        }
+
+        @Override
+        public String toString() {
+            return new StringBuilder()
+                                      .append(failures)
+                                      .append(" failures and ")
+                                      .append(errors)
+                                      .append(" errors")
+                                      .toString();
+        }
+    }
+
+    HashMap<String, AbstractTestListener.TestSummary> runningTests = new HashMap<>();
+
+    public synchronized void startTest(String testKey, String testName) {
+        runningTests.put(testKey, null);
+        startedTest(testKey, testName);
+    }
+
+    public synchronized void endTest(String testKey, String testName) {
+        AbstractTestListener.TestSummary summary = runningTests.remove(testKey);
+        endedTest(testKey, testName, summary);
+    }
+
+    protected abstract void startedTest(String testKey, String testName);
+
+    protected abstract void endedTest(String testKey, String testName, AbstractTestListener.TestSummary summary);
+
+    protected abstract void addedFailure(String testKey, Throwable throwable);
+
+    protected abstract void addedError(String testKey, Throwable throwable);
+
+    private synchronized AbstractTestListener.TestSummary getOrCreateTestSummary(String testKey) {
+        AbstractTestListener.TestSummary summary = runningTests.get(testKey);
+        if (summary == null) {
+            summary = new TestSummary();
+            runningTests.put(testKey, summary);
+        }
+        return summary;
+    }
+
+    public void addFailure(String testKey, Throwable throwable) {
+        getOrCreateTestSummary(testKey).addFailure();
+        addedFailure(testKey, throwable);
+    }
+
+    public void addError(String testKey, Throwable throwable) {
+        getOrCreateTestSummary(testKey).addError();
+        addedError(testKey, throwable);
+    }
 }
+

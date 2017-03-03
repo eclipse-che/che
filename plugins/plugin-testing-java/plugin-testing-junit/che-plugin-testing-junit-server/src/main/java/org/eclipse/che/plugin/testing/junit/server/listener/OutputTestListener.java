@@ -27,77 +27,76 @@ import org.eclipse.che.dto.server.DtoFactory;
  * @author David Festal
  */
 public class OutputTestListener extends AbstractTestListener implements AutoCloseable {
-	private WebsocketMessageConsumer<TestingOutput> consumer = new WebsocketMessageConsumer<>(TESTING_OUTPUT_CHANNEL_NAME) ;
-	private String stackTraceRoot;
-	
-	public OutputTestListener(String strackTraceRoot) {
-		this.stackTraceRoot = strackTraceRoot;
-		writeLine("Starting Test Session", TestingOutput.LineType.SESSION_START);
-	}
+    private WebsocketMessageConsumer<TestingOutput> consumer = new WebsocketMessageConsumer<>(TESTING_OUTPUT_CHANNEL_NAME);
+    private String                                  stackTraceRoot;
 
-	private void writeLine(String line, TestingOutput.LineType lineType) {
-		try {
-			consumer.consume(DtoFactory.cloneDto(new TestingOutputImpl(line, lineType)));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+    public OutputTestListener(String strackTraceRoot) {
+        this.stackTraceRoot = strackTraceRoot;
+        writeLine("Starting Test Session", TestingOutput.LineType.SESSION_START);
+    }
 
-	@Override
-	public void close() throws Exception {
-		writeLine("Finished Test Session", TestingOutput.LineType.SESSION_END);
-		consumer.close();
-	}
+    private void writeLine(String line, TestingOutput.LineType lineType) {
+        try {
+            consumer.consume(DtoFactory.cloneDto(new TestingOutputImpl(line, lineType)));
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
 
-	@Override
-	protected void startedTest(String testKey, String testName) {
-		writeLine("[Starting Test] " + testName, TestingOutput.LineType.DETAIL);
-	}
+    @Override
+    public void close() throws Exception {
+        writeLine("Finished Test Session", TestingOutput.LineType.SESSION_END);
+        consumer.close();
+    }
 
-	@Override
-	protected void endedTest(String testKey, String testName, TestSummary summary) {
-		TestingOutput.LineType lineType;
-		String detailText;
-		if (summary == null || summary.succeeded()) {
-			lineType = TestingOutput.LineType.SUCCESS;
-			detailText = "successfully";
-		} else {
-			detailText = "with " + summary;
-			if (summary.getErrors() > 0) {
-				lineType = TestingOutput.LineType.ERROR;
-			} else {
-				lineType = TestingOutput.LineType.FAILURE;
-			}
-		}
-		writeLine("[Finished Test] " + testName + " " + detailText, lineType);
-		
-	}
+    @Override
+    protected void startedTest(String testKey, String testName) {
+        writeLine("[Starting Test] " + testName, TestingOutput.LineType.DETAIL);
+    }
 
-	private void addProblem(String testKey, Throwable throwable, boolean isError) {
-		StringWriter sw = new StringWriter();
-		TestingOutput.LineType lineType = isError ? 
-						TestingOutput.LineType.ERROR 
-						: TestingOutput.LineType.FAILURE;
-		try (PrintWriter w = new PrintWriter(sw)) {
-			throwable.printStackTrace(w);
-		}
-		writeLine("  ["+ lineType.name() +"]", lineType);
-		for(String line : sw.getBuffer().toString().split("\\n")) {
-			if (line.contains(stackTraceRoot)) {
-				break;
-			}
-			writeLine("    " + line , TestingOutput.LineType.DETAIL);
-		}
-	}
-	
-	@Override
-	protected void addedFailure(String testKey, Throwable throwable) {
-		addProblem(testKey, throwable, false);
-	}
+    @Override
+    protected void endedTest(String testKey, String testName, TestSummary summary) {
+        TestingOutput.LineType lineType;
+        String detailText;
+        if (summary == null || summary.succeeded()) {
+            lineType = TestingOutput.LineType.SUCCESS;
+            detailText = "successfully";
+        } else {
+            detailText = "with " + summary;
+            if (summary.getErrors() > 0) {
+                lineType = TestingOutput.LineType.ERROR;
+            } else {
+                lineType = TestingOutput.LineType.FAILURE;
+            }
+        }
+        writeLine("[Finished Test] " + testName + " " + detailText, lineType);
 
-	@Override
-	protected void addedError(String testKey, Throwable throwable) {
-		addProblem(testKey, throwable, true);
-	}
+    }
+
+    private void addProblem(String testKey, Throwable throwable, boolean isError) {
+        StringWriter sw = new StringWriter();
+        TestingOutput.LineType lineType = isError ? TestingOutput.LineType.ERROR
+            : TestingOutput.LineType.FAILURE;
+        try (PrintWriter w = new PrintWriter(sw)) {
+            throwable.printStackTrace(w);
+        }
+        writeLine("  [" + lineType.name() + "]", lineType);
+        for (String line : sw.getBuffer().toString().split("\\n")) {
+            if (line.contains(stackTraceRoot)) {
+                break;
+            }
+            writeLine("    " + line, TestingOutput.LineType.DETAIL);
+        }
+    }
+
+    @Override
+    protected void addedFailure(String testKey, Throwable throwable) {
+        addProblem(testKey, throwable, false);
+    }
+
+    @Override
+    protected void addedError(String testKey, Throwable throwable) {
+        addProblem(testKey, throwable, true);
+    }
 }
