@@ -65,6 +65,11 @@
             <groupId>org.javassist</groupId>
             <artifactId>javassist</artifactId>
         </dependency>
+        <dependency>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+          <version>1.7.6</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
