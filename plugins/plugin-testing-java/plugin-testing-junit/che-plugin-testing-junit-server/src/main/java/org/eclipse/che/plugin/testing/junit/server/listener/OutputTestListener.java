@@ -20,6 +20,8 @@ import org.eclipse.che.api.core.util.WebsocketMessageConsumer;
 import org.eclipse.che.api.testing.server.handler.TestingOutputImpl;
 import org.eclipse.che.api.testing.shared.TestingOutput;
 import org.eclipse.che.dto.server.DtoFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Listener for the testing services to report their progress to the Che output view.
@@ -27,6 +29,8 @@ import org.eclipse.che.dto.server.DtoFactory;
  * @author David Festal
  */
 public class OutputTestListener extends AbstractTestListener implements AutoCloseable {
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractTestListener.class);
+
     private WebsocketMessageConsumer<TestingOutput> consumer = new WebsocketMessageConsumer<>(TESTING_OUTPUT_CHANNEL_NAME);
     private String                                  stackTraceRoot;
 
@@ -39,8 +43,7 @@ public class OutputTestListener extends AbstractTestListener implements AutoClos
         try {
             consumer.consume(DtoFactory.cloneDto(new TestingOutputImpl(line, lineType)));
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.error("An exception occured while trying to send a 'TestingOutput' object through web sockets on the following channel: " + TESTING_OUTPUT_CHANNEL_NAME, e);
         }
     }
 
