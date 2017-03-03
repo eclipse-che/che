@@ -47,7 +47,7 @@ class PreviewUrlItemRenderer extends StringItemRenderer {
             getElement().setInnerSafeHtml(safeHtmlBuilder.toSafeHtml());
             getElement().getStyle().setColor("#4eabff");
 
-            Tooltip.create((Element)getElement(), BOTTOM, MIDDLE, "Preview URL");
+            Tooltip.create((Element)getElement(), BOTTOM, MIDDLE, "Previews");
         }
     }
 }
