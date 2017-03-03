@@ -20,7 +20,7 @@ public class Exec {
     private final String[] command;
     private final String   id;
 
-    Exec(String[] command, String id) {
+    public Exec(String[] command, String id) {
         this.command = command;
         this.id = id;
     }
