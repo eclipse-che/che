@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.ui;
 
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.user.client.ui.TextArea;
 
 import org.eclipse.che.ide.ui.smartTree.KeyboardNavigationHandler;
 
@@ -19,8 +20,8 @@ import org.eclipse.che.ide.ui.smartTree.KeyboardNavigationHandler;
  *
  * @author Igor Vinokur
  */
-public class TextArea extends com.google.gwt.user.client.ui.TextArea {
-    public TextArea() {
+public class ShiftableTextArea extends TextArea {
+    public ShiftableTextArea() {
         super();
 
         new KeyboardNavigationHandler(this) {

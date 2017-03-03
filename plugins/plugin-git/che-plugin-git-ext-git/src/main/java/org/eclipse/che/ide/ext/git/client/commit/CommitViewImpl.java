@@ -12,6 +12,7 @@ package org.eclipse.che.ide.ext.git.client.commit;
 
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitResources;
+import org.eclipse.che.ide.ui.ShiftableTextArea;
 import org.eclipse.che.ide.ui.window.Window;
 
 import com.google.gwt.core.client.GWT;
@@ -31,8 +32,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import javax.validation.constraints.NotNull;
-
-import static com.google.gwt.event.dom.client.KeyCodes.KEY_ENTER;
 
 /**
  * The implementation of {@link CommitView}.
@@ -91,7 +90,7 @@ public class CommitViewImpl extends Window implements CommitView {
     protected CommitViewImpl(GitResources res, GitLocalizationConstant locale) {
         this.res = res;
         this.locale = locale;
-        this.message = new org.eclipse.che.ide.ui.TextArea();
+        this.message = new ShiftableTextArea();
         this.ensureDebugId("git-commit-window");
 
         Widget widget = ourUiBinder.createAndBindUi(this);
