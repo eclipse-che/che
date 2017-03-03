@@ -33,10 +33,10 @@ import com.google.inject.Inject;
 public class RunAllTestAction extends JavaEditorAction
                               implements RunTestActionDelegate.Source {
 
-    private final NotificationManager notificationManager;
-    private TestResultPresenter       presenter;
-    private final TestServiceClient   service;
-    private RunTestActionDelegate     delegate;
+    private final NotificationManager   notificationManager;
+    private final TestResultPresenter   presenter;
+    private final TestServiceClient     service;
+    private final RunTestActionDelegate delegate;
 
     @Inject
     public RunAllTestAction(JUnitTestResources resources,

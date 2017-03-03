@@ -41,12 +41,12 @@ import com.google.inject.Inject;
 public class RunClassContextTestAction extends AbstractPerspectiveAction
                                        implements RunTestActionDelegate.Source {
 
-    private final NotificationManager notificationManager;
-    private final TestResultPresenter presenter;
-    private final TestServiceClient   service;
-    private final AppContext          appContext;
-    private final SelectionAgent      selectionAgent;
-    private RunTestActionDelegate     delegate;
+    private final NotificationManager   notificationManager;
+    private final TestResultPresenter   presenter;
+    private final TestServiceClient     service;
+    private final AppContext            appContext;
+    private final SelectionAgent        selectionAgent;
+    private final RunTestActionDelegate delegate;
 
     @Inject
     public RunClassContextTestAction(JUnitTestResources resources,

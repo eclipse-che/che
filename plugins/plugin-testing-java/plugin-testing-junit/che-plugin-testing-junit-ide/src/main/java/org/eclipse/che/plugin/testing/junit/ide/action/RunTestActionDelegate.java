@@ -35,7 +35,7 @@ import org.eclipse.che.plugin.testing.ide.view.TestResultPresenter;
  * @author David Festal
  */
 public class RunTestActionDelegate {
-    Source source;
+    private final Source source;
 
     public interface Source {
         NotificationManager getNotificationManager();
@@ -47,8 +47,7 @@ public class RunTestActionDelegate {
         TestResultPresenter getPresenter();
     }
 
-    public RunTestActionDelegate(
-                                 Source source) {
+    public RunTestActionDelegate(Source source) {
         this.source = source;
     }
 
