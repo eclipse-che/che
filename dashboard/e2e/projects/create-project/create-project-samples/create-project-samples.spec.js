@@ -33,7 +33,6 @@ describe('create workspace with project', () => {
 
       // step 2. there is list of templates
       expect(createProjectPageObject.samplesListElement.isDisplayed()).toBeTruthy();
-      expect(createProjectPageObject.samplesListItemElements.count()).toEqual(1);
 
       // step 3. check if first item in list is selected
       let firstListItemElement = createProjectPageObject.getSamplesListItemElementByIndex(0);
@@ -53,7 +52,6 @@ describe('create workspace with project', () => {
 
       // step 2. there is list of templates
       expect(createProjectPageObject.samplesListElement.isDisplayed()).toBeTruthy();
-      expect(createProjectPageObject.samplesListItemElements.count()).toEqual(1);
 
       // step 3. check if first item in list is selected
       let firstListItemElement2 = createProjectPageObject.getSamplesListItemElementByIndex(0);
