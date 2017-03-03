@@ -29,9 +29,12 @@ import org.slf4j.LoggerFactory;
  * @author David Festal
  */
 public class OutputTestListener extends AbstractTestListener implements AutoCloseable {
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractTestListener.class);
+    private static final Logger                     LOG                 = LoggerFactory.getLogger(AbstractTestListener.class);
+    private static final String                     consumeErrorMessage = "An exception occured while trying to send a 'TestingOutput' "
+                                                                          + "object through web sockets on the following channel: "
+                                                                          + TESTING_OUTPUT_CHANNEL_NAME;
 
-    private WebsocketMessageConsumer<TestingOutput> consumer = new WebsocketMessageConsumer<>(TESTING_OUTPUT_CHANNEL_NAME);
+    private WebsocketMessageConsumer<TestingOutput> consumer            = new WebsocketMessageConsumer<>(TESTING_OUTPUT_CHANNEL_NAME);
     private String                                  stackTraceRoot;
 
     public OutputTestListener(String strackTraceRoot) {
@@ -43,7 +46,7 @@ public class OutputTestListener extends AbstractTestListener implements AutoClos
         try {
             consumer.consume(DtoFactory.cloneDto(new TestingOutputImpl(line, lineType)));
         } catch (IOException e) {
-            LOG.error("An exception occured while trying to send a 'TestingOutput' object through web sockets on the following channel: " + TESTING_OUTPUT_CHANNEL_NAME, e);
+            LOG.error(consumeErrorMessage, e);
         }
     }
 
