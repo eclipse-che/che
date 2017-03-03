@@ -15,6 +15,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -23,6 +24,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -30,10 +34,13 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.docker.client.DockerApiVersionPathPrefixProvider;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
 import org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver;
+import org.eclipse.che.plugin.docker.client.Exec;
 import org.eclipse.che.plugin.docker.client.LogMessage;
 import org.eclipse.che.plugin.docker.client.MessageProcessor;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
@@ -58,6 +65,7 @@ import org.eclipse.che.plugin.docker.client.json.network.Network;
 import org.eclipse.che.plugin.docker.client.params.CommitParams;
 import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
 import org.eclipse.che.plugin.docker.client.params.GetContainerLogsParams;
+import org.eclipse.che.plugin.docker.client.params.CreateExecParams;
 import org.eclipse.che.plugin.docker.client.params.GetEventsParams;
 import org.eclipse.che.plugin.docker.client.params.GetResourceParams;
 import org.eclipse.che.plugin.docker.client.params.KillContainerParams;
@@ -66,6 +74,7 @@ import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveNetworkParams;
 import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
+import org.eclipse.che.plugin.docker.client.params.StartExecParams;
 import org.eclipse.che.plugin.docker.client.params.StopContainerParams;
 import org.eclipse.che.plugin.docker.client.params.InspectImageParams;
 import org.eclipse.che.plugin.docker.client.params.PullParams;
@@ -78,7 +87,9 @@ import org.eclipse.che.plugin.docker.client.params.network.InspectNetworkParams;
 import org.eclipse.che.plugin.openshift.client.exception.OpenShiftException;
 import org.eclipse.che.plugin.openshift.client.kubernetes.KubernetesContainer;
 import org.eclipse.che.plugin.openshift.client.kubernetes.KubernetesEnvVar;
+import org.eclipse.che.plugin.openshift.client.kubernetes.KubernetesExecHolder;
 import org.eclipse.che.plugin.openshift.client.kubernetes.KubernetesLabelConverter;
+import org.eclipse.che.plugin.openshift.client.kubernetes.KubernetesOutputAdapter;
 import org.eclipse.che.plugin.openshift.client.kubernetes.KubernetesService;
 import org.eclipse.che.plugin.openshift.client.kubernetes.KubernetesStringUtils;
 import org.slf4j.Logger;
@@ -110,6 +121,8 @@ import io.fabric8.kubernetes.api.model.extensions.DeploymentBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.LogWatch;
+import io.fabric8.kubernetes.client.utils.InputStreamPumper;
+import io.fabric8.kubernetes.client.dsl.ExecWatch;
 import io.fabric8.openshift.api.model.ImageStream;
 import io.fabric8.openshift.api.model.ImageStreamTag;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
@@ -147,6 +160,8 @@ public class OpenShiftConnector extends DockerConnector {
     private static final Long UID_ROOT                                   = Long.valueOf(0);
     private static final Long UID_USER                                   = Long.valueOf(1000);
 
+    private Map<String, KubernetesExecHolder> execMap = new HashMap<>();
+
     private final OpenShiftClient openShiftClient;
     private final String          openShiftCheProjectName;
     private final String          openShiftCheServiceAccount;
@@ -167,7 +182,7 @@ public class OpenShiftConnector extends DockerConnector {
                               @Named("che.openshift.liveness.probe.delay") int openShiftLivenessProbeDelay,
                               @Named("che.openshift.liveness.probe.timeout") int openShiftLivenessProbeTimeout,
                               @Named("che.openshift.workspaces.pvc.name") String workspacesPersistentVolumeClaim,
-                              @Named("che.openshift.workspaces.pvc.quantity") String workspacesPvcQuantity, 
+                              @Named("che.openshift.workspaces.pvc.quantity") String workspacesPvcQuantity,
                               @Named("che.workspace.storage") String cheWorkspaceStorage,
                               @Named("che.workspace.projects.storage") String cheWorkspaceProjectsStorage) {
 
@@ -676,6 +691,63 @@ public class OpenShiftConnector extends DockerConnector {
         }
     }
 
+    @Override
+    public Exec createExec(final CreateExecParams params) throws IOException {
+        String[] command = params.getCmd();
+        String containerId = params.getContainer();
+
+        Pod pod = getChePodByContainerId(containerId);
+        String podName = pod.getMetadata().getName();
+
+        String execId = KubernetesStringUtils.generateWorkspaceID();
+        KubernetesExecHolder execHolder = new KubernetesExecHolder().withCommand(command)
+                                                                    .withPod(podName);
+        execMap.put(execId, execHolder);
+
+        return new Exec(command, execId);
+    }
+
+    @Override
+    public void startExec(final StartExecParams params,
+                          @Nullable MessageProcessor<LogMessage> execOutputProcessor) throws IOException {
+        String execId = params.getExecId();
+
+        KubernetesExecHolder exec = execMap.get(execId);
+
+        String podName = exec.getPod();
+        String[] command = exec.getCommand();
+        for (int i = 0; i < command.length; i++) {
+            command[i] = URLEncoder.encode(command[i], "UTF-8");
+        }
+
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        try (ExecWatch watch = openShiftClient.pods()
+                                              .inNamespace(openShiftCheProjectName)
+                                              .withName(podName)
+                                              .redirectingOutput()
+                                              .redirectingError()
+                                              .exec(command);
+             InputStreamPumper outputPump = new InputStreamPumper(watch.getOutput(),
+                                                                  new KubernetesOutputAdapter(LogMessage.Type.STDOUT,
+                                                                                              execOutputProcessor));
+             InputStreamPumper errorPump  = new InputStreamPumper(watch.getError(),
+                                                                  new KubernetesOutputAdapter(LogMessage.Type.STDERR,
+                                                                                              execOutputProcessor))
+        ) {
+            Future<?> outFuture = executor.submit(outputPump);
+            Future<?> errFuture = executor.submit(errorPump);
+            // Short-term worksaround; the Futures above seem to never finish.
+            Thread.sleep(2500);
+        } catch (KubernetesClientException e) {
+            throw new OpenShiftException(e.getMessage());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } finally {
+            execMap.remove(execId);
+            executor.shutdown();
+        }
+    }
+
     /**
      * Gets the ImageStreamTag corresponding to a given tag name (i.e. without the repository)
      * @param imageStreamTagName the tag name to search for
@@ -764,7 +836,7 @@ public class OpenShiftConnector extends DockerConnector {
         }
 
         if (items.size() > 1) {
-            LOG.error("There are {} pod with label {}={} (just one was expeced)", items.size(), CHE_CONTAINER_IDENTIFIER_LABEL_KEY, containerId );
+            LOG.error("There are {} pod with label {}={} (just one was expected)", items.size(), CHE_CONTAINER_IDENTIFIER_LABEL_KEY, containerId );
             throw new IOException("There are " + items.size() + " pod with label " + CHE_CONTAINER_IDENTIFIER_LABEL_KEY + "=" + containerId + " (just one was expeced)");
         }
 
