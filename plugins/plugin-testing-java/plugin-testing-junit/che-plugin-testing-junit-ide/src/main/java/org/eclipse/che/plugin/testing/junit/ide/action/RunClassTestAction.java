@@ -30,18 +30,17 @@ import org.eclipse.che.plugin.testing.junit.ide.JUnitTestResources;
 import com.google.inject.Inject;
 
 /**
- *
  * @author Mirage Abeysekara
  * @author David Festal
  */
 public class RunClassTestAction extends JavaEditorAction
-implements RunTestActionDelegate.Source {
+                                implements RunTestActionDelegate.Source {
 
     private final NotificationManager notificationManager;
-    private final EditorAgent editorAgent;
+    private final EditorAgent         editorAgent;
     private final TestResultPresenter presenter;
-    private final TestServiceClient service;
-    private RunTestActionDelegate delegate;
+    private final TestServiceClient   service;
+    private RunTestActionDelegate     delegate;
 
     @Inject
     public RunClassTestAction(JUnitTestResources resources,
@@ -52,7 +51,7 @@ implements RunTestActionDelegate.Source {
                               TestServiceClient service,
                               JUnitTestLocalizationConstant localization) {
         super(localization.actionRunClassTitle(), localization.actionRunClassDescription(), resources.testIcon(),
-                editorAgent, fileTypeRegistry);
+              editorAgent, fileTypeRegistry);
         this.notificationManager = notificationManager;
         this.editorAgent = editorAgent;
         this.presenter = presenter;
@@ -78,23 +77,23 @@ implements RunTestActionDelegate.Source {
         e.getPresentation().setVisible(true);
     }
 
-	@Override
-	public NotificationManager getNotificationManager() {
-		return notificationManager;
-	}
+    @Override
+    public NotificationManager getNotificationManager() {
+        return notificationManager;
+    }
 
-	@Override
-	public AppContext getAppContext() {
-		return appContext;
-	}
+    @Override
+    public AppContext getAppContext() {
+        return appContext;
+    }
 
-	@Override
-	public TestServiceClient getService() {
-		return service;
-	}
+    @Override
+    public TestServiceClient getService() {
+        return service;
+    }
 
-	@Override
-	public TestResultPresenter getPresenter() {
-		return presenter;
-	}
+    @Override
+    public TestResultPresenter getPresenter() {
+        return presenter;
+    }
 }

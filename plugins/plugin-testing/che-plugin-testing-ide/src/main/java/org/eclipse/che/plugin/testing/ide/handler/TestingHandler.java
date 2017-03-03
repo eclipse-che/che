@@ -48,11 +48,11 @@ public class TestingHandler {
 
     @Inject
     public TestingHandler(EventBus eventBus,
-                                 DtoFactory factory,
-                                 WsAgentStateController wsAgentStateController,
-                                 ProcessesPanelPresenter processesPanelPresenter,
-                                 CommandConsoleFactory commandConsoleFactory,
-                                 AppContext appContext) {
+                          DtoFactory factory,
+                          WsAgentStateController wsAgentStateController,
+                          ProcessesPanelPresenter processesPanelPresenter,
+                          CommandConsoleFactory commandConsoleFactory,
+                          AppContext appContext) {
         this.eventBus = eventBus;
         this.factory = factory;
         this.processesPanelPresenter = processesPanelPresenter;
@@ -80,9 +80,8 @@ public class TestingHandler {
         });
     }
 
-    private void handleTestingOutput(final MessageBus messageBus)  {
-        final DefaultOutputConsole outputConsole = (DefaultOutputConsole) commandConsoleFactory.create("Tests");
-
+    private void handleTestingOutput(final MessageBus messageBus) {
+        final DefaultOutputConsole outputConsole = (DefaultOutputConsole)commandConsoleFactory.create("Tests");
         try {
             messageBus.subscribe(TESTING_OUTPUT_CHANNEL_NAME, new MessageHandler() {
                 @Override
@@ -90,9 +89,9 @@ public class TestingHandler {
                     Log.info(getClass(), message);
                     TestingOutput archetypeOutput = factory.createDtoFromJson(message, TestingOutput.class);
                     switch (archetypeOutput.getState()) {
-                    	case SESSION_START:
+                        case SESSION_START:
                             processesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), outputConsole);
-                    		outputConsole.clearOutputsButtonClicked();
+                            outputConsole.clearOutputsButtonClicked();
                         case DETAIL:
                             outputConsole.printText(archetypeOutput.getOutput());
                             break;
@@ -100,10 +99,10 @@ public class TestingHandler {
                             outputConsole.printText(archetypeOutput.getOutput(), "green");
                             break;
                         case ERROR:
-                            outputConsole.printText(archetypeOutput.getOutput(),"red");
+                            outputConsole.printText(archetypeOutput.getOutput(), "red");
                             break;
                         case FAILURE:
-                            outputConsole.printText(archetypeOutput.getOutput(),"darkred");
+                            outputConsole.printText(archetypeOutput.getOutput(), "darkred");
                             break;
                         default:
                             break;

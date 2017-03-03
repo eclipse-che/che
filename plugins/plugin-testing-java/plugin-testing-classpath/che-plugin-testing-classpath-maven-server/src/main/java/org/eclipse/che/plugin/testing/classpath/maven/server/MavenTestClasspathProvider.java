@@ -35,17 +35,16 @@ import com.google.inject.Inject;
  *
  * @author Mirage Abeysekara
  * @author David Festal
- * 
  */
 public class MavenTestClasspathProvider implements TestClasspathProvider {
-	private ClasspathService classpathService;
-	
-	@Inject
-	public MavenTestClasspathProvider(ClasspathService classpathService) {
-		this.classpathService = classpathService;
-	}
-	
-	/**
+    private ClasspathService classpathService;
+
+    @Inject
+    public MavenTestClasspathProvider(ClasspathService classpathService) {
+        this.classpathService = classpathService;
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -66,55 +65,54 @@ public class MavenTestClasspathProvider implements TestClasspathProvider {
     }
 
     private Stream<ClasspathEntryDto> toResolvedClassPath(Stream<ClasspathEntryDto> rawClasspath) {
-    	return rawClasspath.flatMap(dto -> {
-    		if (dto.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
-    			return toResolvedClassPath(dto.getExpandedEntries().stream());
-    		} else {
-    			return Stream.of(dto);
-    		}
-    	});
+        return rawClasspath.flatMap(dto -> {
+            if (dto.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+                return toResolvedClassPath(dto.getExpandedEntries().stream());
+            } else {
+                return Stream.of(dto);
+            }
+        });
     }
-    
+
     private Stream<URL> getProjectClasspath(String projectPath) throws JavaModelException {
-    	String relativeProject = projectPath.substring(ResourcesPlugin.getPathToWorkspace().length());
-		IContainer root = ResourcesPlugin.getWorkspace().getRoot();
-    	return toResolvedClassPath(classpathService.getClasspath(relativeProject).stream())
-		.map(dto -> {
-			try {
-				String dtoPath = dto.getPath();
-			    IResource res = root.findMember(new Path(dtoPath));
-			    File path;
-			    switch(dto.getEntryKind()) {
-			    case IClasspathEntry.CPE_LIBRARY:
-				    if (res == null) {
-				        path = new File(dtoPath);
-				    } else {
-				    	path = new File(root.getLocation().toFile(), dtoPath);
-				    }
-			        break;
-			    case IClasspathEntry.CPE_SOURCE:
-			    	IPath projectRelativePath = new Path(dtoPath).removeFirstSegments(1);
-			    	String projectRelativePathStr = projectRelativePath.toString();
-			    	switch(projectRelativePathStr) {
-			    	case "src/main/java":
-			    		path = Paths.get(projectPath, "target", "classes").toFile();
-			    		break;
-			    	case "src/test/java":
-			    		path = Paths.get(projectPath, "target", "test-classes").toFile();
-			    		break;
-			    	default:
-				    	path = new File(root.getLocation().toFile(), dtoPath);
-			    	}
-				    break;
-				default:
-			        path = new File(dtoPath);
-			    }
-				return path.toURI().toURL();
-			} catch (MalformedURLException e) {
-				return null;
-			}
-		})
-		.filter(url -> url != null)
-		.distinct();
+        String relativeProject = projectPath.substring(ResourcesPlugin.getPathToWorkspace().length());
+        IContainer root = ResourcesPlugin.getWorkspace().getRoot();
+        Stream<ClasspathEntryDto> rawClasspath = classpathService.getClasspath(relativeProject).stream();
+        Stream<ClasspathEntryDto> resolvedClasspath = toResolvedClassPath(rawClasspath);
+        return resolvedClasspath.map(dto -> {
+            try {
+                String dtoPath = dto.getPath();
+                IResource res = root.findMember(new Path(dtoPath));
+                File path;
+                switch (dto.getEntryKind()) {
+                    case IClasspathEntry.CPE_LIBRARY:
+                        if (res == null) {
+                            path = new File(dtoPath);
+                        } else {
+                            path = new File(root.getLocation().toFile(), dtoPath);
+                        }
+                        break;
+                    case IClasspathEntry.CPE_SOURCE:
+                        IPath projectRelativePath = new Path(dtoPath).removeFirstSegments(1);
+                        String projectRelativePathStr = projectRelativePath.toString();
+                        switch (projectRelativePathStr) {
+                            case "src/main/java":
+                                path = Paths.get(projectPath, "target", "classes").toFile();
+                                break;
+                            case "src/test/java":
+                                path = Paths.get(projectPath, "target", "test-classes").toFile();
+                                break;
+                            default:
+                                path = new File(root.getLocation().toFile(), dtoPath);
+                        }
+                        break;
+                    default:
+                        path = new File(dtoPath);
+                }
+                return path.toURI().toURL();
+            } catch (MalformedURLException e) {
+                return null;
+            }
+        }).filter(url -> url != null).distinct();
     }
 }

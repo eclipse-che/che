@@ -27,17 +27,16 @@ import org.eclipse.che.plugin.testing.junit.ide.JUnitTestResources;
 import com.google.inject.Inject;
 
 /**
- *
  * @author Mirage Abeysekara
  * @author David Festal
  */
 public class RunAllTestAction extends JavaEditorAction
-	implements RunTestActionDelegate.Source {
+                              implements RunTestActionDelegate.Source {
 
     private final NotificationManager notificationManager;
-    private TestResultPresenter presenter;
-    private final TestServiceClient service;
-    private RunTestActionDelegate delegate;
+    private TestResultPresenter       presenter;
+    private final TestServiceClient   service;
+    private RunTestActionDelegate     delegate;
 
     @Inject
     public RunAllTestAction(JUnitTestResources resources,
@@ -48,7 +47,7 @@ public class RunAllTestAction extends JavaEditorAction
                             TestServiceClient service,
                             JUnitTestLocalizationConstant localization) {
         super(localization.actionRunAllTitle(), localization.actionRunAllDescription(), resources.testAllIcon(),
-                editorAgent, fileTypeRegistry);
+              editorAgent, fileTypeRegistry);
         this.notificationManager = notificationManager;
         this.editorAgent = editorAgent;
         this.presenter = presenter;
@@ -61,24 +60,24 @@ public class RunAllTestAction extends JavaEditorAction
         Map<String, String> parameters = new HashMap<>();
         delegate.doRunTests(e, parameters);
     }
-    
-	@Override
-	public NotificationManager getNotificationManager() {
-		return notificationManager;
-	}
 
-	@Override
-	public AppContext getAppContext() {
-		return appContext;
-	}
+    @Override
+    public NotificationManager getNotificationManager() {
+        return notificationManager;
+    }
 
-	@Override
-	public TestServiceClient getService() {
-		return service;
-	}
+    @Override
+    public AppContext getAppContext() {
+        return appContext;
+    }
 
-	@Override
-	public TestResultPresenter getPresenter() {
-		return presenter;
-	}
+    @Override
+    public TestServiceClient getService() {
+        return service;
+    }
+
+    @Override
+    public TestResultPresenter getPresenter() {
+        return presenter;
+    }
 }

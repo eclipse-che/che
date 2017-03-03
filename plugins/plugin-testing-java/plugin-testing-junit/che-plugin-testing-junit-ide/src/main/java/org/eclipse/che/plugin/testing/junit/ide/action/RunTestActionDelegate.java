@@ -31,25 +31,27 @@ import org.eclipse.che.plugin.testing.ide.TestServiceClient;
 import org.eclipse.che.plugin.testing.ide.view.TestResultPresenter;
 
 /**
- *
  * @author Mirage Abeysekara
  * @author David Festal
  */
 public class RunTestActionDelegate {
     Source source;
-	
+
     public interface Source {
         NotificationManager getNotificationManager();
+
         AppContext getAppContext();
+
         TestServiceClient getService();
+
         TestResultPresenter getPresenter();
     }
-    
+
     public RunTestActionDelegate(
-    		Source source) {
+                                 Source source) {
         this.source = source;
     }
-    
+
     public void doRunTests(ActionEvent e, Map<String, String> parameters) {
         final StatusNotification notification = new StatusNotification("Running Tests...", PROGRESS, FLOAT_MODE);
         source.getNotificationManager().notify(notification);
@@ -73,7 +75,7 @@ public class RunTestActionDelegate {
             @Override
             public void apply(PromiseError exception) throws OperationException {
                 final String errorMessage = (exception.getMessage() != null) ? exception.getMessage()
-                        : "Failed to run test cases";
+                    : "Failed to run test cases";
                 notification.setContent(errorMessage);
                 notification.setStatus(FAIL);
             }

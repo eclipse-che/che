@@ -35,19 +35,18 @@ import org.eclipse.che.plugin.testing.junit.ide.JUnitTestResources;
 import com.google.inject.Inject;
 
 /**
- *
  * @author Mirage Abeysekara
  * @author David Festal
  */
 public class RunClassContextTestAction extends AbstractPerspectiveAction
-	implements RunTestActionDelegate.Source {
+                                       implements RunTestActionDelegate.Source {
 
     private final NotificationManager notificationManager;
     private final TestResultPresenter presenter;
-    private final TestServiceClient service;
-    private final AppContext appContext;
-    private final SelectionAgent selectionAgent;
-    private RunTestActionDelegate delegate;
+    private final TestServiceClient   service;
+    private final AppContext          appContext;
+    private final SelectionAgent      selectionAgent;
+    private RunTestActionDelegate     delegate;
 
     @Inject
     public RunClassContextTestAction(JUnitTestResources resources,
@@ -58,7 +57,7 @@ public class RunClassContextTestAction extends AbstractPerspectiveAction
                                      SelectionAgent selectionAgent,
                                      JUnitTestLocalizationConstant localization) {
         super(Arrays.asList(PROJECT_PERSPECTIVE_ID), localization.actionRunClassContextTitle(),
-                localization.actionRunClassContextDescription(), null, resources.testIcon());
+              localization.actionRunClassContextDescription(), null, resources.testIcon());
         this.notificationManager = notificationManager;
         this.presenter = presenter;
         this.service = service;
@@ -69,10 +68,10 @@ public class RunClassContextTestAction extends AbstractPerspectiveAction
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        final Selection<?> selection = selectionAgent.getSelection();
+        final Selection< ? > selection = selectionAgent.getSelection();
         final Object possibleNode = selection.getHeadElement();
         if (possibleNode instanceof FileNode) {
-            VirtualFile file = ((FileNode) possibleNode).getData();
+            VirtualFile file = ((FileNode)possibleNode).getData();
             String fqn = JavaUtil.resolveFQN(file);
             Map<String, String> parameters = new HashMap<>();
             parameters.put("fqn", fqn);
@@ -88,7 +87,7 @@ public class RunClassContextTestAction extends AbstractPerspectiveAction
             e.getPresentation().setEnabled(false);
             return;
         }
-        final Selection<?> selection = selectionAgent.getSelection();
+        final Selection< ? > selection = selectionAgent.getSelection();
         if (selection == null || selection.isEmpty()) {
             e.getPresentation().setEnabled(false);
             return;
@@ -99,27 +98,27 @@ public class RunClassContextTestAction extends AbstractPerspectiveAction
         }
         final Object possibleNode = selection.getHeadElement();
         boolean enable = possibleNode instanceof FileNode
-                && "java".equals(((FileNode) possibleNode).getData().getExtension());
+                         && "java".equals(((FileNode)possibleNode).getData().getExtension());
         e.getPresentation().setEnabled(enable);
     }
 
-	@Override
-	public NotificationManager getNotificationManager() {
-		return notificationManager;
-	}
+    @Override
+    public NotificationManager getNotificationManager() {
+        return notificationManager;
+    }
 
-	@Override
-	public AppContext getAppContext() {
-		return appContext;
-	}
+    @Override
+    public AppContext getAppContext() {
+        return appContext;
+    }
 
-	@Override
-	public TestServiceClient getService() {
-		return service;
-	}
+    @Override
+    public TestServiceClient getService() {
+        return service;
+    }
 
-	@Override
-	public TestResultPresenter getPresenter() {
-		return presenter;
-	}
+    @Override
+    public TestResultPresenter getPresenter() {
+        return presenter;
+    }
 }
