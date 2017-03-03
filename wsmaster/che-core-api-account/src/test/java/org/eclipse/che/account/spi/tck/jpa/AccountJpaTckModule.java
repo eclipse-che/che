@@ -23,6 +23,7 @@ import org.eclipse.che.commons.test.tck.TckResourcesCleaner;
 import org.eclipse.che.commons.test.tck.repository.JpaTckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.eclipse.che.core.db.DBInitializer;
+import org.eclipse.che.core.db.h2.jpa.eclipselink.H2ExceptionHandler;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.core.db.schema.impl.flyway.FlywaySchemaInitializer;
 import org.h2.Driver;
@@ -38,6 +39,7 @@ public class AccountJpaTckModule extends TckModule {
         install(new PersistTestModuleBuilder().setDriver(Driver.class)
                                               .runningOn(server)
                                               .addEntityClass(AccountImpl.class)
+                                              .setExceptionHandler(H2ExceptionHandler.class)
                                               .build());
         bind(DBInitializer.class).asEagerSingleton();
         bind(SchemaInitializer.class).toInstance(new FlywaySchemaInitializer(server.getDataSource(), "che-schema"));
