@@ -10,10 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.user.server.model.impl;
 
-import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.model.user.User;
 
-import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -23,7 +21,6 @@ import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -41,12 +38,12 @@ import java.util.Objects;
                 @NamedQuery(name = "User.getByAliasAndPassword",
                             query = "SELECT u " +
                                     "FROM Usr u " +
-                                    "WHERE :alias = u.account.name OR" +
+                                    "WHERE :alias = u.name OR" +
                                     "      :alias = u.email"),
                 @NamedQuery(name = "User.getByAlias",
                             query = "SELECT u FROM Usr u WHERE :alias MEMBER OF u.aliases"),
                 @NamedQuery(name = "User.getByName",
-                            query = "SELECT u FROM Usr u WHERE u.account.name = :name"),
+                            query = "SELECT u FROM Usr u WHERE u.name = :name"),
                 @NamedQuery(name = "User.getByEmail",
                             query = "SELECT u FROM Usr u WHERE u.email = :email"),
                 @NamedQuery(name = "User.getAll",
@@ -58,18 +55,15 @@ import java.util.Objects;
 )
 @Table(name = "usr")
 public class UserImpl implements User {
-    public static final String PERSONAL_ACCOUNT = "personal";
-
     @Id
     @Column(name = "id")
     private String id;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(nullable = false, name = "account_id")
-    private AccountImpl account;
-
     @Column(nullable = false, name = "email")
     private String email;
+
+    @Column(nullable = false, name = "name")
+    private String name;
 
     @Column(name = "password")
     private String password;
@@ -82,13 +76,11 @@ public class UserImpl implements User {
     private List<String> aliases;
 
     public UserImpl() {
-        this.account = new AccountImpl();
-        account.setType(PERSONAL_ACCOUNT);
     }
 
     public UserImpl(String id, String email, String name) {
-        this.account = new AccountImpl(id, name, PERSONAL_ACCOUNT);
         this.id = id;
+        this.name = name;
         this.email = email;
     }
 
@@ -119,9 +111,6 @@ public class UserImpl implements User {
 
     public void setId(String id) {
         this.id = id;
-        if (account != null) {
-            account.setId(id);
-        }
     }
 
     @Override
@@ -135,16 +124,11 @@ public class UserImpl implements User {
 
     @Override
     public String getName() {
-        if (account != null) {
-            return account.getName();
-        }
-        return null;
+        return name;
     }
 
     public void setName(String name) {
-        if (account != null) {
-            account.setName(name);
-        }
+        this.name = name;
     }
 
     @Override
@@ -168,14 +152,6 @@ public class UserImpl implements User {
         this.aliases = aliases;
     }
 
-    public AccountImpl getAccount() {
-        return account;
-    }
-
-    public void setAccount(AccountImpl account) {
-        this.account = account;
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -187,7 +163,7 @@ public class UserImpl implements User {
         final UserImpl that = (UserImpl)obj;
         return Objects.equals(id, that.id)
                && Objects.equals(email, that.email)
-               && Objects.equals(getName(), that.getName())
+               && Objects.equals(name, that.name)
                && Objects.equals(password, that.password)
                && getAliases().equals(that.getAliases());
     }
@@ -197,7 +173,7 @@ public class UserImpl implements User {
         int hash = 7;
         hash = 31 * hash + Objects.hashCode(id);
         hash = 31 * hash + Objects.hashCode(email);
-        hash = 31 * hash + Objects.hashCode(getName());
+        hash = 31 * hash + Objects.hashCode(name);
         hash = 31 * hash + Objects.hashCode(password);
         hash = 31 * hash + getAliases().hashCode();
         return hash;
@@ -208,7 +184,7 @@ public class UserImpl implements User {
         return "UserImpl{" +
                "id='" + id + '\'' +
                ", email='" + email + '\'' +
-               ", name='" + getName() + '\'' +
+               ", name='" + name + '\'' +
                ", password='" + password + '\'' +
                ", aliases=" + aliases +
                '}';

@@ -88,17 +88,26 @@
               </div>
               <div layout="row" class="workspace-details-action-buttons">
                 <div>
-                  <che-button-default ng-disabled="(workspaceDetailsController.isCreationFlow || workspaceDetailsController.getWorkspaceStatus() === 'STARTING')"
-                                      ng-show="(workspaceDetailsController.getWorkspaceStatus() !== 'RUNNING' && workspaceDetailsController.getWorkspaceStatus() !== 'STOPPING' && workspaceDetailsController.getWorkspaceStatus() !== 'SNAPSHOTTING')"
+                  <che-button-default ng-disabled="(workspaceDetailsController.isCreationFlow)"
+                                      ng-show="(workspaceDetailsController.getWorkspaceStatus() !== 'RUNNING' && workspaceDetailsController.getWorkspaceStatus() !== 'STOPPING' && workspaceDetailsController.getWorkspaceStatus() !== 'SNAPSHOTTING') && workspaceDetailsController.getWorkspaceStatus() !== 'STARTING'"
                                       che-button-title="Run" name="runButton"
                                       ng-click="workspaceDetailsController.runWorkspace()"></che-button-default>
-                  <che-button-default ng-disabled="(workspaceDetailsController.isCreationFlow || workspaceDetailsController.getWorkspaceStatus() === 'STOPPING' || workspaceDetailsController.getWorkspaceStatus() === 'SNAPSHOTTING')"
-                                      ng-show="(workspaceDetailsController.getWorkspaceStatus() === 'RUNNING' || workspaceDetailsController.getWorkspaceStatus() === 'STOPPING' || workspaceDetailsController.getWorkspaceStatus() === 'SNAPSHOTTING')"
-                                      che-button-title="{{workspaceDetailsController.getAutoSnapshot() ? 'Stop' : 'Stop without snapshot'}}" name="stopButton"
-                                      ng-click="workspaceDetailsController.stopWorkspace()"></che-button-default>
+                  <che-button-default
+                    ng-disabled="(workspaceDetailsController.isCreationFlow || workspaceDetailsController.getWorkspaceStatus() === 'STOPPING' || workspaceDetailsController.getWorkspaceStatus() === 'SNAPSHOTTING')"
+                    ng-show="(workspaceDetailsController.getWorkspaceStatus() === 'RUNNING' || workspaceDetailsController.getWorkspaceStatus() === 'STOPPING' || workspaceDetailsController.getWorkspaceStatus() === 'SNAPSHOTTING') || workspaceDetailsController.getWorkspaceStatus() === 'STARTING'"
+                    che-button-title="{{workspaceDetailsController.getAutoSnapshot() || workspaceDetailsController.getWorkspaceStatus() === 'STARTING' ? 'Stop' : 'Stop without snapshot'}}"
+                    name="stopButton"
+                    ng-click="workspaceDetailsController.stopWorkspace()"></che-button-default>
                 </div>
               </div>
             </div>
+          </che-label-container>
+
+          <!-- Other workspace details sections -->
+          <che-label-container ng-if="!workspaceDetailsController.isCreationFlow"
+                               ng-repeat="section in workspaceDetailsController.getSections()"
+                               che-label-name="{{section.title}}" che-label-description="{{section.description}}">
+            <div che-compile="section.content"></div>
           </che-label-container>
 
           <!-- Export workspace -->
@@ -164,7 +173,7 @@
 
     <!-- Other tabs -->
     <md-tab ng-if="workspaceDetailsController.isCreationFlow === false"
-            ng-repeat="section in workspaceDetailsController.getSections()">
+            ng-repeat="section in workspaceDetailsController.getPages()">
       <md-tab-label>
         <md-icon md-font-icon="material-design {{section.icon}}" class="che-tab-label-icon"></md-icon>
         <span class="che-tab-label-title">{{section.title}}</span>

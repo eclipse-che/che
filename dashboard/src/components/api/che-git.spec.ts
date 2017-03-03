@@ -63,7 +63,7 @@ describe('CheGit', function () {
       var agentUrl = 'localhost:3232/wsagent/ext';
       var workspaceId = 'workspace123test';
       var projectPath = '/testProject';
-      var localUrl = 'http://eclipse.org/che/git/f1/' + workspaceId + projectPath;
+      var localUrl = 'https://eclipse.org/che/git/f1/' + workspaceId + projectPath;
       var runtime =  {'links': [{'href': agentUrl, 'rel': 'wsagent'}]};
       var workspace1 = apiBuilder.getWorkspaceBuilder().withId(workspaceId).withRuntime(runtime).build();
 

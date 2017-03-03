@@ -22,14 +22,34 @@ before execution. If you have mounted a local repository or assembly, the ${CHE_
 images will use those binaries instead of their embedded ones.\n"
   text "\n"
   text "PARAMETERS:\n"
+  text "  --force                           Uses 'docker rmi' and 'docker pull' to forcibly retrieve latest images\n"
   text "  --no-force                        Updates images if matching tag not found in local cache\n"
   text "  --pull                            Uses 'docker pull' to check for new remote versions of images\n"
-  text "  --force                           Uses 'docker rmi' and 'docker pull' to forcibly retrieve latest images\n"
+  text "  --skip:config                     Skip re-generation of config files placed into /instance\n"
   text "\n"
 }
 
 pre_cmd_config() {
-  :
+  CHE_SKIP_CONFIG=false
+  FORCE_UPDATE="--no-force"
+
+  while [ $# -gt 0 ]; do
+    case $1 in
+      --skip:config)
+        CHE_SKIP_CONFIG=true
+        shift ;;
+      --force)
+        FORCE_UPDATE="--force"
+        shift ;;
+      --no-force)
+        FORCE_UPDATE="--no-force"
+        shift ;;
+      --pull)
+        FORCE_UPDATE="--pull"
+        shift ;;
+      *) error "Unknown parameter: $1" return 2 ;;
+    esac
+  done
 }
 
 post_cmd_config() {
@@ -39,7 +59,6 @@ post_cmd_config() {
 cmd_config() {
   # If the system is not initialized, initalize it.
   # If the system is already initialized, but a user wants to update images, then re-download.
-  FORCE_UPDATE=${1:-"--no-force"}
   if ! is_initialized; then
     cmd_lifecycle init $FORCE_UPDATE
   elif [[ "${FORCE_UPDATE}" == "--pull" ]] || \
@@ -62,7 +81,9 @@ cmd_config() {
   info "config" "Generating $CHE_MINI_PRODUCT_NAME configuration..."
 
   # Run the docker configurator
-  generate_configuration_with_puppet
+  if ! skip_config; then
+    generate_configuration_with_puppet
+  fi
 
   # Replace certain environment file lines with their container counterparts
   info "config" "Customizing docker-compose for running in a container"

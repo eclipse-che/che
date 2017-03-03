@@ -17,7 +17,7 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.editor.annotation.AnnotationModel;
 import org.eclipse.che.ide.api.editor.document.Document;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Project;
@@ -61,7 +61,7 @@ public class JavaReconcilerStrategyTest {
     @Mock
     private EventBus                            eventBus;
     @Mock
-    private TextEditorPresenter<?>              editor;
+    private TextEditor                          editor;
     @Mock
     private JavaCodeAssistProcessor             codeAssistProcessor;
     @Mock

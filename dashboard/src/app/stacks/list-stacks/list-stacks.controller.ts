@@ -93,8 +93,9 @@ export class ListStacksController {
       (error: any) => {
         if (error.status === 304) {
           this.stacks = this.cheStack.getStacks();
+        } else {
+          this.state = 'error';
         }
-        this.state = 'error';
         this.loading = false;
       });
   }

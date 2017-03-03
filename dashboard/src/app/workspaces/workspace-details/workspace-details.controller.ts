@@ -177,9 +177,7 @@ export class WorkspaceDetailsController {
       };
       this.copyWorkspaceDetails = angular.copy(this.workspaceDetails);
       this.cheNamespaceRegistry.fetchNamespaces().then(() => {
-        if (this.getNamespaces().length) {
-          this.namespaceId = this.getNamespaces()[0].id;
-        }
+        this.namespaceId = this.$location.search().namespace || (this.getNamespaces().length ? this.getNamespaces()[0].id : undefined);
       });
     }
     this.newName = this.workspaceName;
@@ -305,7 +303,16 @@ export class WorkspaceDetailsController {
   }
 
   /**
-   * Returns workspace details sections (tabs, example - projects)
+   * Returns workspace details pages (tabs, example - projects)
+   *
+   * @returns {*}
+   */
+  getPages(): any {
+    return this.workspaceDetailsService.getPages();
+  }
+
+  /**
+   * Returns workspace details section.
    *
    * @returns {*}
    */
@@ -341,7 +348,7 @@ export class WorkspaceDetailsController {
    * Callback when environment has been changed.
    */
   updateWorkspaceConfigEnvironment(): void {
-    delete this.workspaceImportedRecipe;
+    this.workspaceImportedRecipe = null;
     this.switchEditMode();
   }
 
@@ -583,9 +590,16 @@ export class WorkspaceDetailsController {
   }
 
   stopWorkspace(): void {
-    let promise = this.cheWorkspace.stopWorkspace(this.workspaceId, this.getAutoSnapshot());
+    let createSnapshot: boolean;
+    if (this.getWorkspaceStatus() === 'STARTING') {
+      createSnapshot = false;
+    } else {
+      createSnapshot = this.getAutoSnapshot();
+    }
+    let promise = this.cheWorkspace.stopWorkspace(this.workspaceId, createSnapshot);
 
-    promise.then(() => {}, (error: any) => {
+    promise.then(() => {
+    }, (error: any) => {
       this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Stop workspace failed.');
       this.$log.error(error);
     });

@@ -26,7 +26,7 @@
                    ng-model="importStackController.recipeScript"
                    ng-change="importStackController.updateImportedStack()"></ui-codemirror>
     <div class="errors-container">
-      <span ng-repeat="error in importStackController.environmentValidation.errors | orderBy:'':'reverse'">
+      <span ng-repeat="error in importStackController.recipeValidation.errors | orderBy:'':'reverse'">
         {{error}}
       </span>
     </div>
@@ -34,7 +34,7 @@
                        ng-click="importStackController.cancel()">
     </che-button-notice>
     <che-button-primary che-button-title="Ok"
-                        ng-disabled="!importStackController.environmentValidation.isValid"
+                        ng-disabled="!importStackController.recipeValidation.isValid"
                         ng-click="importStackController.onImport()">
     </che-button-primary>
   </div>

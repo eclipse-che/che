@@ -28,6 +28,7 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
@@ -39,6 +40,7 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.editor.annotation.AnnotationModel;
 import org.eclipse.che.ide.api.editor.annotation.AnnotationModelEvent;
+import org.eclipse.che.ide.api.editor.codeassist.AdditionalInfoCallback;
 import org.eclipse.che.ide.api.editor.codeassist.CompletionProposal;
 import org.eclipse.che.ide.api.editor.codeassist.CompletionReadyCallback;
 import org.eclipse.che.ide.api.editor.codeassist.CompletionsSource;
@@ -61,7 +63,6 @@ import org.eclipse.che.ide.api.editor.text.Region;
 import org.eclipse.che.ide.api.editor.text.RegionImpl;
 import org.eclipse.che.ide.api.editor.text.TextRange;
 import org.eclipse.che.ide.api.editor.text.annotation.Annotation;
-import org.eclipse.che.ide.api.editor.texteditor.CompositeEditorWidget;
 import org.eclipse.che.ide.api.editor.texteditor.ContentInitializedHandler;
 import org.eclipse.che.ide.api.editor.texteditor.EditorWidget;
 import org.eclipse.che.ide.api.editor.texteditor.HandlesUndoRedo;
@@ -76,12 +77,11 @@ import org.eclipse.che.ide.editor.orion.client.events.HasScrollHandlers;
 import org.eclipse.che.ide.editor.orion.client.events.ScrollEvent;
 import org.eclipse.che.ide.editor.orion.client.events.ScrollHandler;
 import org.eclipse.che.ide.editor.orion.client.incremental.find.IncrementalFindReportStatusObserver;
-import org.eclipse.che.ide.status.message.StatusMessageReporter;
-import org.eclipse.che.ide.editor.orion.client.jso.OrionEditorOptionsOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionAnnotationModelOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionAnnotationOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionCodeEditWidgetOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionContentAssistOverlay;
+import org.eclipse.che.ide.editor.orion.client.jso.OrionEditorOptionsOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionEditorOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionEditorViewOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionEventTargetOverlay;
@@ -99,9 +99,10 @@ import org.eclipse.che.ide.editor.orion.client.jso.StatusMessageReporterOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.UiUtilsOverlay;
 import org.eclipse.che.ide.editor.preferences.editorproperties.EditorPropertiesManager;
 import org.eclipse.che.ide.editor.preferences.keymaps.KeyMapsPreferencePresenter;
-import org.eclipse.che.plugin.requirejs.ide.ModuleHolder;
+import org.eclipse.che.ide.status.message.StatusMessageReporter;
 import org.eclipse.che.ide.util.browser.UserAgent;
 import org.eclipse.che.ide.util.loging.Log;
+import org.eclipse.che.plugin.requirejs.ide.ModuleHolder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -116,10 +117,11 @@ import static org.eclipse.che.ide.editor.orion.client.KeyMode.VI;
  *
  * @author "Mickaël Leduque"
  */
-public class OrionEditorWidget extends CompositeEditorWidget implements HasChangeHandlers,
-                                                                        HasCursorActivityHandlers,
-                                                                        HasScrollHandlers,
-                                                                        HasGutter {
+public class OrionEditorWidget extends Composite implements EditorWidget,
+                                                            HasChangeHandlers,
+                                                            HasCursorActivityHandlers,
+                                                            HasScrollHandlers,
+                                                            HasGutter {
 
     /** The UI binder instance. */
     private static final OrionEditorWidgetUiBinder UIBINDER = GWT.create(OrionEditorWidgetUiBinder.class);
@@ -133,7 +135,7 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
     private final JavaScriptObject           uiUtilsOverlay;
     private final ContentAssistWidgetFactory contentAssistWidgetFactory;
     private final DialogFactory              dialogFactory;
-    private final PreferencesManager preferencesManager;
+    private final PreferencesManager         preferencesManager;
 
     @UiField
     SimplePanel        panel;
@@ -152,9 +154,9 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
     private OrionKeyModeOverlay     cheContentAssistMode;
     private EditorPropertiesManager editorPropertiesManager;
 
-    private Keymap                          keymap;
-    private ContentAssistWidget             assistWidget;
-    private Gutter                          gutter;
+    private Keymap              keymap;
+    private ContentAssistWidget assistWidget;
+    private Gutter              gutter;
 
     private boolean changeHandlerAdded      = false;
     private boolean focusHandlerAdded       = false;
@@ -203,7 +205,7 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
         OrionEditorOptionsOverlay editorOptions = initEditorOptions(editorOptionsProvider.get(), statusMessageReporter);
 
         orionCodeEditWidgetProvider.get().createEditorView(panel.getElement(), editorOptions)
-                                         .then(new EditorViewCreatedOperation(widgetInitializedCallback));
+                                   .then(new EditorViewCreatedOperation(widgetInitializedCallback));
 
         incrementalFindObserver.setEditorWidget(this);
         statusMessageReporter.registerObserver(incrementalFindObserver);
@@ -538,11 +540,11 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
         boolean modifier3 = keyBinding.isAlt();
         boolean modifier4 = UserAgent.isMac() ? keyBinding.isControl() : false;
         if (keyBinding.isCharacterBinding()) {
-			strokeOverlay = OrionKeyStrokeOverlay.create(keyBinding.getCharacter(), modifier1, modifier2, modifier3,
-					modifier4, type, keyBindingModule);
+            strokeOverlay = OrionKeyStrokeOverlay.create(keyBinding.getCharacter(), modifier1, modifier2, modifier3,
+                                                         modifier4, type, keyBindingModule);
         } else {
-			strokeOverlay = OrionKeyStrokeOverlay.create(keyBinding.getKeyCodeNumber(), modifier1, modifier2, modifier3,
-					modifier4, type, keyBindingModule);
+            strokeOverlay = OrionKeyStrokeOverlay.create(keyBinding.getKeyCodeNumber(), modifier1, modifier2, modifier3,
+                                                         modifier4, type, keyBindingModule);
         }
         String actionId = "che-action-" + keyBinding.getAction().toString();
         editorOverlay.getTextView().setKeyBinding(strokeOverlay, actionId);
@@ -656,6 +658,11 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
     }
 
     @Override
+    public void showCompletionProposals(final CompletionsSource completionsSource, final AdditionalInfoCallback additionalInfoCallback) {
+        showCompletionProposals(completionsSource);
+    }
+
+    @Override
     public void refresh() {
         this.editorOverlay.getTextView().redraw();
     }
@@ -692,7 +699,7 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
     }
 
     private String getSeverity(String type, OrionAnnotationSeverityProvider provider) {
-        if(provider != null ){
+        if (provider != null) {
             return provider.getSeverity(type);
         } else {
             return "error";
@@ -806,19 +813,19 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
 
     /**
      * Registers global prompt function to be accessible directly from JavaScript.
-     *
+     * <p/>
      * Function promptIDE(title, text, defaultValue, callback)
-     *      title        Dialog title
-     *      text         The text to display in the dialog box
-     *      defaultValue The default value
-     *      callback     function(value)
-     *                      clicking "OK" will return input value
-     *                      clicking "Cancel" will return null
+     * title        Dialog title
+     * text         The text to display in the dialog box
+     * defaultValue The default value
+     * callback     function(value)
+     * clicking "OK" will return input value
+     * clicking "Cancel" will return null
      */
     private native void registerPromptFunction() /*-{
         if (!$wnd["promptIDE"]) {
             var instance = this;
-            $wnd["promptIDE"] = function(title, text, defaultValue, callback) {
+            $wnd["promptIDE"] = function (title, text, defaultValue, callback) {
                 instance.@org.eclipse.che.ide.editor.orion.client.OrionEditorWidget::askLineNumber(*)(title, text, defaultValue, callback);
             };
         }
@@ -840,8 +847,7 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
             var callback = this.@org.eclipse.che.ide.editor.orion.client.OrionEditorWidget.InputCallback::callback;
             callback(value);
         }-*/;
-
-    };
+    }
 
     private void askLineNumber(String title, String text, String defaultValue, final JavaScriptObject callback) {
         if (defaultValue == null) {
@@ -854,5 +860,4 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
 
         dialogFactory.createInputDialog(title, text, defaultValue, 0, defaultValue.length(), new InputCallback(callback), null).show();
     }
-
 }

@@ -9,6 +9,7 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {CheHttpBackend} from '../api/test/che-http-backend';
 
 /**
  * Test for city-name-validator directive
@@ -58,7 +59,7 @@ describe('city-name-validator', () => {
 
   beforeEach(angular.mock.module('userDashboard'));
 
-  beforeEach(inject((_$compile_, $rootScope, cheHttpBackend) => {
+  beforeEach(inject((_$compile_: ng.ICompileService, $rootScope: ng.IRootScopeService, cheHttpBackend: CheHttpBackend) => {
     $scope = $rootScope;
     $compile = _$compile_;
 
@@ -68,9 +69,9 @@ describe('city-name-validator', () => {
     httpBackend.when('OPTIONS', '/api/').respond({});
   }));
 
-  validNames.forEach((validName) => {
+  validNames.forEach((validName: string) => {
 
-    (function shouldPass(validCityName) {
+    (function shouldPass(validCityName: string) {
       it(`"${validCityName}" should be OK`, () => {
         $scope.model = {value: ''};
 
@@ -92,9 +93,9 @@ describe('city-name-validator', () => {
 
   });
 
-  invalidNames.forEach((invalidName) => {
+  invalidNames.forEach((invalidName: string) => {
 
-    (function shouldFail(invalidName) {
+    (function shouldFail(invalidName: string) {
       it(`"${invalidName}" should fail`, () => {
         $scope.model = {value: ''};
 
