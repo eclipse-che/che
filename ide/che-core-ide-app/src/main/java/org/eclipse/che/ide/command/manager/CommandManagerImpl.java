@@ -13,7 +13,6 @@ package org.eclipse.che.ide.command.manager;
 import elemental.util.ArrayOf;
 import elemental.util.Collections;
 
-import com.google.common.base.Optional;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.Scheduler;
 import com.google.inject.Inject;
@@ -201,16 +200,10 @@ public class CommandManagerImpl implements CommandManager,
         }
 
         final Resource currentResource = appContext.getResource();
-
         if (currentResource != null) {
-            final Optional<Project> currentProjectOptional = currentResource.getRelatedProject();
-
-            if (currentProjectOptional.isPresent()) {
-                final Project currentProject = currentProjectOptional.get();
-
-                if (applicableProjects.contains(currentProject.getPath())) {
-                    return true;
-                }
+            final Project currentProject = currentResource.getProject();
+            if (currentProject != null) {
+                return applicableProjects.contains(currentProject.getPath());
             }
         }
 
