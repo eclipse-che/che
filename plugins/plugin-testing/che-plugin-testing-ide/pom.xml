@@ -72,10 +72,10 @@
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-java-ext-lang-client</artifactId>
         </dependency>
-		<dependency>
-		  <groupId>org.eclipse.che.plugin</groupId>
-		  <artifactId>che-plugin-machine-ext-client</artifactId>
-		</dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-machine-ext-client</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-maven-shared</artifactId>
@@ -121,15 +121,15 @@
             </resource>
         </resources>
         <plugins>
-		    <plugin>
-		      <groupId>com.mycila</groupId>
-		      <artifactId>license-maven-plugin</artifactId>
-		      <configuration>
-		        <excludes>
-		          <exclude>**/**/TestingHandler.java</exclude>
-		        </excludes>
-		      </configuration>
-		    </plugin>
+            <plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>**/**/TestingHandler.java</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
