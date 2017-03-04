@@ -11,7 +11,7 @@
 .button {
     width: 32px;
     height: 22px;
-    background-color: #33373b;
+    background-image: linear-gradient(to bottom, #444444, #343434 98%);
     border: solid 0.6px #454545;
     font-size: 17px;
     font-weight: normal;
@@ -19,16 +19,17 @@
     font-stretch: normal;
     color: #4eabff;
     text-align: center;
-    transition: background-color 0.5s;
-}
-
-.mouseOver {
-    background-color: #353E50;
-    transition: background-color 0.5s;
+    transition: background-image 0.5s;
+    cursor: pointer;
 }
 
 .button:focus {
     outline: none;
+}
+
+.button:hover {
+    background-image: linear-gradient(to bottom, #444444, #343434 98%);
+    transition: background-image 0.5s;
 }
 
 .popupPanel {

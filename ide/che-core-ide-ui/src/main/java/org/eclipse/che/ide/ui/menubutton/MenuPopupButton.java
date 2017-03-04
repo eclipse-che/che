@@ -15,7 +15,6 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseOutEvent;
-import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
@@ -61,12 +60,7 @@ public class MenuPopupButton extends ButtonBase {
     }
 
     private void attachEventHandlers() {
-        addDomHandler(event -> addStyleName(RESOURCES.css().mouseOver()), MouseOverEvent.getType());
-
-        addDomHandler(event -> {
-            removeStyleName(RESOURCES.css().mouseOver());
-            showMenuTimer.cancel();
-        }, MouseOutEvent.getType());
+        addDomHandler(event -> showMenuTimer.cancel(), MouseOutEvent.getType());
 
         addDomHandler(event -> {
             if (event.getNativeButton() == NativeEvent.BUTTON_LEFT) {
@@ -123,8 +117,6 @@ public class MenuPopupButton extends ButtonBase {
     public interface Css extends CssResource {
 
         String button();
-
-        String mouseOver();
 
         String popupPanel();
 

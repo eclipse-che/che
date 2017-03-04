@@ -86,12 +86,13 @@ public class JavaCommandType implements CommandType {
 
     @Override
     public String getCommandLineTemplate() {
+
         return "cd " + currentProjectPathMacro.getName() +
-               " && javac -classpath " + classpathMacro.getName() +
+               "\njavac -classpath " + classpathMacro.getName() +
                " -sourcepath " + sourcepathMacro.getName() +
                " -d " + outputDirMacro.getName() +
                " src/Main.java" +
-               " && java -classpath " + classpathMacro.getName() + outputDirMacro.getName() +
+               "\njava -classpath " + classpathMacro.getName() + outputDirMacro.getName() +
                " Main";
     }
 
