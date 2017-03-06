@@ -36,6 +36,7 @@ import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.dialogs.MessageDialog;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
+import org.eclipse.che.ide.api.machine.MachineManager;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
@@ -109,6 +110,8 @@ public class WorkspaceEventsHandlerTest {
     @Mock
     private DtoUnmarshallerFactory              dtoUnmarshallerFactory;
     @Mock
+    private Provider<MachineManager>            machineManagerProvider;
+    @Mock
     private MessageLoader                       snapshotLoader;
     @Mock
     private Provider<DefaultWorkspaceComponent> wsComponentProvider;
@@ -171,6 +174,7 @@ public class WorkspaceEventsHandlerTest {
                                                             dtoUnmarshallerFactory,
                                                             notificationManager,
                                                             messageBusProvider,
+                                                            machineManagerProvider,
                                                             snapshotCreator,
                                                             workspaceServiceClient,
                                                             startWorkspaceNotification,
@@ -249,6 +253,7 @@ public class WorkspaceEventsHandlerTest {
 
         verify(workspaceServiceClient).getWorkspace(WORKSPACE_ID);
         verify(workspaceComponent).setCurrentWorkspace(workspace);
+        verify(machineManagerProvider).get();
 
         verify(loader).show(eq(LoaderPresenter.Phase.STARTING_WORKSPACE_RUNTIME));
 

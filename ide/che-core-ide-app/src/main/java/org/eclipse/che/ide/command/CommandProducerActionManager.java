@@ -16,6 +16,9 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.api.machine.shared.dto.MachineDto;
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
@@ -25,7 +28,7 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandProducer;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.constraints.Constraints;
-import org.eclipse.che.ide.api.machine.ActiveRuntime;
+import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.machine.events.MachineStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
@@ -58,6 +61,7 @@ public class CommandProducerActionManager implements MachineStateEvent.Handler, 
     private final ActionManager                actionManager;
     private final CommandProducerActionFactory commandProducerActionFactory;
     private final AppContext                   appContext;
+    private final MachineServiceClient         machineServiceClient;
     private final Resources                    resources;
 
     private final List<Machine>                            machines;
@@ -73,10 +77,12 @@ public class CommandProducerActionManager implements MachineStateEvent.Handler, 
                                         ActionManager actionManager,
                                         CommandProducerActionFactory commandProducerActionFactory,
                                         AppContext appContext,
+                                        MachineServiceClient machineServiceClient,
                                         Resources resources) {
         this.actionManager = actionManager;
         this.commandProducerActionFactory = commandProducerActionFactory;
         this.appContext = appContext;
+        this.machineServiceClient = machineServiceClient;
         this.resources = resources;
 
         machines = new ArrayList<>();
@@ -113,12 +119,14 @@ public class CommandProducerActionManager implements MachineStateEvent.Handler, 
 
     @Override
     public void start(final Callback<Component, Exception> callback) {
-        ActiveRuntime activeRuntime = appContext.getActiveRuntime();
-        if (activeRuntime != null) {
-            machines.addAll(activeRuntime.getMachines());
-        }
+        machineServiceClient.getMachines(appContext.getWorkspaceId()).then(new Operation<List<MachineDto>>() {
+            @Override
+            public void apply(List<MachineDto> arg) throws OperationException {
+                machines.addAll(arg);
 
-        callback.onSuccess(this);
+                callback.onSuccess(CommandProducerActionManager.this);
+            }
+        });
     }
 
     @Override

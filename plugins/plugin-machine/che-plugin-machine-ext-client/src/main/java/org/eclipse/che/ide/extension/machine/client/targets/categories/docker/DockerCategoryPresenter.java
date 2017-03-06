@@ -12,13 +12,29 @@ package org.eclipse.che.ide.extension.machine.client.targets.categories.docker;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
+import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.ide.api.dialogs.CancelCallback;
+import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.machine.MachineEntity;
+import org.eclipse.che.ide.api.machine.MachineServiceClient;
+import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
+import org.eclipse.che.ide.api.machine.events.MachineStateEvent;
 import org.eclipse.che.ide.extension.machine.client.targets.CategoryPage;
 import org.eclipse.che.ide.extension.machine.client.targets.Target;
 import org.eclipse.che.ide.extension.machine.client.targets.TargetManager;
 import org.eclipse.che.ide.extension.machine.client.targets.TargetsTreeManager;
+
+import static org.eclipse.che.api.core.model.machine.MachineStatus.RUNNING;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
+import static org.eclipse.che.ide.api.machine.events.MachineStateEvent.MachineAction.DESTROYED;
 
 /**
  * Docker type page presenter.
@@ -27,16 +43,29 @@ import org.eclipse.che.ide.extension.machine.client.targets.TargetsTreeManager;
  */
 public class DockerCategoryPresenter implements CategoryPage, TargetManager, DockerView.ActionDelegate {
     private final DockerView                  dockerView;
+    private final DialogFactory               dialogFactory;
+    private final NotificationManager         notificationManager;
     private final MachineLocalizationConstant machineLocale;
+    private final MachineServiceClient        machineService;
+    private final EventBus                    eventBus;
 
     private DockerMachineTarget selectedTarget;
     private TargetsTreeManager  targetsTreeManager;
 
     @Inject
     public DockerCategoryPresenter(DockerView dockerView,
-                                   MachineLocalizationConstant machineLocale) {
+                                   DialogFactory dialogFactory,
+                                   NotificationManager notificationManager,
+                                   MachineLocalizationConstant machineLocale,
+                                   MachineServiceClient machineService,
+                                   EventBus eventBus) {
         this.dockerView = dockerView;
+        this.dialogFactory = dialogFactory;
+        this.notificationManager = notificationManager;
         this.machineLocale = machineLocale;
+        this.machineService = machineService;
+        this.eventBus = eventBus;
+
         dockerView.setDelegate(this);
     }
 
@@ -64,6 +93,13 @@ public class DockerCategoryPresenter implements CategoryPage, TargetManager, Doc
         return this.targetsTreeManager != null ? this.targetsTreeManager.getMachineByName(machineName) : null;
     }
 
+    private void updateTargets(String preselectTargetName) {
+        if (this.targetsTreeManager == null) {
+            return;
+        }
+        this.targetsTreeManager.updateTargets(preselectTargetName);
+    }
+
     @Override
     public boolean onRestoreTargetFields(DockerMachineTarget target) {
         if (target == null) {
@@ -86,10 +122,44 @@ public class DockerCategoryPresenter implements CategoryPage, TargetManager, Doc
 
     @Override
     public void onDeleteClicked(final Target target) {
-        //unsupported operation
+        dialogFactory.createConfirmDialog(machineLocale.targetsViewDeleteConfirmTitle(),
+                                          machineLocale.targetsViewDeleteConfirm(target.getName()),
+                                          new ConfirmCallback() {
+                                              @Override
+                                              public void accepted() {
+                                                  destroyTargetMachine(target);
+                                              }
+                                          }, new CancelCallback() {
+                    @Override
+                    public void cancelled() {
+                        updateTargets(null);
+                    }
+                }).show();
     }
 
+    private void destroyTargetMachine(final Target target) {
+        final MachineEntity machine = this.getMachineByName(target.getName());
 
+        if (machine == null || machine.getStatus() != RUNNING) {
+            return;
+        }
+
+        machineService.destroyMachine(machine.getWorkspaceId(),
+                                      machine.getId()).then(new Operation<Void>() {
+            @Override
+            public void apply(Void arg) throws OperationException {
+                eventBus.fireEvent(new MachineStateEvent(machine, DESTROYED));
+                notificationManager.notify(machineLocale.targetsViewDisconnectSuccess(target.getName()), SUCCESS, FLOAT_MODE);
+                updateTargets(null);
+            }
+        }).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError arg) throws OperationException {
+                notificationManager.notify(machineLocale.targetsViewDisconnectError(target.getName()), FAIL, FLOAT_MODE);
+                updateTargets(target.getName());
+            }
+        });
+    }
 
     @Override
     public void setCurrentSelection(Target selectedTarget) {

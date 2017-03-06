@@ -39,6 +39,7 @@ import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
+import org.eclipse.che.ide.api.machine.MachineManager;
 import org.eclipse.che.ide.api.machine.OutputMessageUnmarshaller;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -90,6 +91,7 @@ public class WorkspaceEventsHandler {
     private final NotificationManager                 notificationManager;
     private final DialogFactory                       dialogFactory;
     private final DtoUnmarshallerFactory              dtoUnmarshallerFactory;
+    private final Provider<MachineManager>            machineManagerProvider;
     private final Provider<DefaultWorkspaceComponent> wsComponentProvider;
     private final AsyncRequestFactory                 asyncRequestFactory;
     private final WorkspaceSnapshotCreator            snapshotCreator;
@@ -124,6 +126,7 @@ public class WorkspaceEventsHandler {
                            final DtoUnmarshallerFactory dtoUnmarshallerFactory,
                            final NotificationManager notificationManager,
                            final MessageBusProvider messageBusProvider,
+                           final Provider<MachineManager> machineManagerProvider,
                            final WorkspaceSnapshotCreator snapshotCreator,
                            final WorkspaceServiceClient workspaceServiceClient,
                            final StartWorkspaceNotification startWorkspaceNotification,
@@ -138,6 +141,7 @@ public class WorkspaceEventsHandler {
         this.notificationManager = notificationManager;
         this.dialogFactory = dialogFactory;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
+        this.machineManagerProvider = machineManagerProvider;
         this.workspaceServiceClient = workspaceServiceClient;
         this.startWorkspaceNotification = startWorkspaceNotification;
         this.wsComponentProvider = wsComponentProvider;
@@ -187,6 +191,7 @@ public class WorkspaceEventsHandler {
                         }
 
                         workspaceComponent.setCurrentWorkspace(workspace);
+                        machineManagerProvider.get();
 
                 		loader.show(LoaderPresenter.Phase.STARTING_WORKSPACE_RUNTIME);
                         eventBus.fireEvent(new WorkspaceStartingEvent(workspace));

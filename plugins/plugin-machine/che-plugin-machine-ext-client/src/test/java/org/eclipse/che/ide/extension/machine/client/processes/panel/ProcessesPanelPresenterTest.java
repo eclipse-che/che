@@ -34,6 +34,7 @@ import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.machine.MachineEntity;
+import org.eclipse.che.ide.api.machine.MachineManager;
 import org.eclipse.che.ide.api.machine.events.MachineStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
@@ -124,6 +125,8 @@ public class ProcessesPanelPresenterTest {
     private WorkspaceDto                  workspace;
     @Mock
     private OutputConsole                 outputConsole;
+    @Mock
+    private MachineManager                machineManager;
     @Mock
     private EntityFactory                 entityFactory;
     @Mock
