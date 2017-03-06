@@ -220,9 +220,11 @@ public class MavenWorkspace {
             Element sources = configuration.getChild("sources");
             if (sources != null) {
                 for (Object element : sources.getChildren()) {
-                    String path = ((Element)element).getTextTrim();
-                    IPath projectLocation = project.getProject().getLocation();
-                    String sourceFolder = path.substring(projectLocation.toOSString().length() + 1);
+                    final String path = ((Element)element).getTextTrim();
+                    final IPath projectLocation = project.getProject().getLocation();
+                    final String projectPath = projectLocation.toOSString();
+                    final String sourceFolder = path.contains(projectPath) ? path.substring(projectPath.length() + 1) : path;
+
                     helper.addSourceEntry(project.getProject().getFullPath().append(sourceFolder));
                     if (!attributes.contains(sourceFolder)) {
                         attributes.add(sourceFolder);
