@@ -5,8 +5,11 @@
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
 
-base_dir=$(cd "$(dirname "$0")"; pwd)
-. "${base_dir}"/../build.include
+# See: https://sipb.mit.edu/doc/safe-shell/
+set -e
+set -u
 
-init --name:dev "$@"
-build
+./bats/build.sh "$@"
+./che/build.sh "$@"
+./init/build.sh "$@"
+./cli/build.sh "$@"

@@ -5,9 +5,9 @@
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
 
-IMAGE_NAME="eclipse/che-server"
 base_dir=$(cd "$(dirname "$0")"; pwd)
 . "${base_dir}"/../build.include
+
 
 # grab assembly
 DIR=$(cd "$(dirname "$0")"; pwd)
@@ -27,5 +27,5 @@ fi
 echo "Linking assembly ${BUILD_ASSEMBLY_ZIP} --> ${LOCAL_ASSEMBLY_ZIP}"
 ln "${BUILD_ASSEMBLY_ZIP}" "${LOCAL_ASSEMBLY_ZIP}"
 
-init "$@"
+init --name:server "$@" 
 build

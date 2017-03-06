@@ -5,19 +5,24 @@
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
 
-# Primary name of the docker image
-IMAGE_NAME="eclipse/che"
-
 # Define space separated list of aliases for the docker image
 IMAGE_ALIASES="eclipse/che-cli"
 
 base_dir=$(cd "$(dirname "$0")"; pwd)
 . "${base_dir}"/../build.include
 
-init "$@"
+init --name:cli "$@"
+
+if [[ ! -f "version/$TAG/images" ]]; then
+	mkdir -p version/$TAG
+fi
+
+echo "IMAGE_INIT=$ORGANIZATION/$PREFIX-init:$TAG" > version/$TAG/images
+echo "IMAGE_CHE=$ORGANIZATION/$PREFIX-server:$TAG" >> version/$TAG/images
+echo "IMAGE_COMPOSE=docker/compose:1.8.1" >> version/$TAG/images
+
 build
 
-
-if [ $(skip_tests "$@") = false ]; then
-  sh "${base_dir}"/test.sh $TAG
+if ! skip_tests; then
+  sh "${base_dir}"/test.sh "$@"
 fi
