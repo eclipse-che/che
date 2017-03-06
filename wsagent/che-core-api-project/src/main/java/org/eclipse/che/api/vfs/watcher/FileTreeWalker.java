@@ -61,7 +61,7 @@ public class FileTreeWalker {
     private final Map<Path, Long> files       = new HashMap<>();
     private final Map<Path, Long> directories = new HashMap<>();
 
-    @Inject
+    @Inject(optional=true)
     public FileTreeWalker(@Named("che.user.workspaces.storage") File root,
 
                           @Named("che.fs.directory.update") Set<Consumer<Path>> directoryUpdateConsumers,
@@ -96,13 +96,13 @@ public class FileTreeWalker {
         int initialDelay = 0;
         int period = 10;
 
-        LOG.error("STARTING WALKER");
+        LOG.debug("Starting file tree walker");
         launcher.scheduleAtFixedRate(this::walk, initialDelay, period, SECONDS);
     }
 
     @PreDestroy
     public void stop() {
-        LOG.error("STOPPING WALKER");
+        LOG.error("Stopping file tree walker");
 
         try {
             launcher.shutdown();
@@ -111,9 +111,9 @@ public class FileTreeWalker {
         }
     }
 
-    private void walk() {
+    void walk() {
         try {
-            LOG.error("WALKING STARTED");
+            LOG.debug("Tree walk started");
 
             Set<Path> deletedFiles = files.keySet().stream().filter(it -> !exists(it)).collect(toSet());
             fileDeleteConsumers.forEach(deletedFiles::forEach);
@@ -150,7 +150,7 @@ public class FileTreeWalker {
                     return CONTINUE;
                 }
             });
-            LOG.error("WALKING FINISHED");
+            LOG.debug("Tree walk finished");
         } catch (Exception e) {
             LOG.error("Error while walking file tree", e);
         }

@@ -16,6 +16,8 @@ import org.eclipse.che.api.vfs.VirtualFileSystem;
 import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
 import org.eclipse.che.api.vfs.search.Searcher;
 import org.eclipse.che.api.vfs.search.SearcherProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -26,8 +28,10 @@ import java.util.function.Consumer;
 
 @Singleton
 public class IndexedFileUpdateConsumer implements Consumer<Path> {
+    private static final Logger LOG = LoggerFactory.getLogger(IndexedFileDeleteConsumer.class);
+
     private File                      root;
-    private   VirtualFileSystemProvider vfsProvider;
+    private VirtualFileSystemProvider vfsProvider;
 
     @Inject
     public IndexedFileUpdateConsumer(@Named("che.user.workspaces.storage") File root, VirtualFileSystemProvider vfsProvider) {
@@ -46,7 +50,7 @@ public class IndexedFileUpdateConsumer implements Consumer<Path> {
             VirtualFile child = virtualFileSystem.getRoot().getChild(vfsPath);
             searcher.update(child);
         } catch (ServerException e) {
-            e.printStackTrace();
+            LOG.error("Issue happened during updating modified file in index", e);
         }
     }
 }

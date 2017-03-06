@@ -16,6 +16,8 @@ import org.eclipse.che.api.vfs.VirtualFileSystem;
 import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
 import org.eclipse.che.api.vfs.search.Searcher;
 import org.eclipse.che.api.vfs.search.SearcherProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -26,6 +28,8 @@ import java.util.function.Consumer;
 
 @Singleton
 public class IndexedFileCreateConsumer implements Consumer<Path> {
+    private static final Logger LOG = LoggerFactory.getLogger(IndexedFileCreateConsumer.class);
+
     private File                      root;
     private VirtualFileSystemProvider vfsProvider;
 
@@ -46,7 +50,7 @@ public class IndexedFileCreateConsumer implements Consumer<Path> {
             VirtualFile child = virtualFileSystem.getRoot().getChild(vfsPath);
             searcher.add(child);
         } catch (ServerException e) {
-            e.printStackTrace();
+            LOG.error("Issue happened during adding created file to index", e);
         }
     }
 }

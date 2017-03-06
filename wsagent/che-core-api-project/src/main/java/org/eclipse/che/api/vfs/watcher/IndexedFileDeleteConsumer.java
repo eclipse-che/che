@@ -11,11 +11,12 @@
 package org.eclipse.che.api.vfs.watcher;
 
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.vfs.VirtualFile;
 import org.eclipse.che.api.vfs.VirtualFileSystem;
 import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
 import org.eclipse.che.api.vfs.search.Searcher;
 import org.eclipse.che.api.vfs.search.SearcherProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -26,8 +27,10 @@ import java.util.function.Consumer;
 
 @Singleton
 public class IndexedFileDeleteConsumer implements Consumer<Path> {
+    private static final Logger LOG = LoggerFactory.getLogger(IndexedFileDeleteConsumer.class);
+
     private File                      root;
-    private   VirtualFileSystemProvider vfsProvider;
+    private VirtualFileSystemProvider vfsProvider;
 
     @Inject
     public IndexedFileDeleteConsumer(@Named("che.user.workspaces.storage") File root, VirtualFileSystemProvider vfsProvider) {
@@ -42,9 +45,9 @@ public class IndexedFileDeleteConsumer implements Consumer<Path> {
             SearcherProvider searcherProvider = virtualFileSystem.getSearcherProvider();
             Searcher searcher = searcherProvider.getSearcher(virtualFileSystem);
             Path innerPath = root.toPath().relativize(path);
-            searcher.delete("/"+innerPath.toString(), true);
+            searcher.delete("/" + innerPath.toString(), true);
         } catch (ServerException e) {
-            e.printStackTrace();
+            LOG.error("Issue happened during removing deleted file from index", e);
         }
     }
 }

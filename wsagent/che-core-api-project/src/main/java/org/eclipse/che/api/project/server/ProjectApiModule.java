@@ -39,6 +39,7 @@ import org.eclipse.che.api.vfs.search.MediaTypeFilter;
 import org.eclipse.che.api.vfs.search.SearcherProvider;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
 import org.eclipse.che.api.vfs.watcher.FileTreeWalker;
+import org.eclipse.che.api.vfs.watcher.FileWatcherByPathMatcher;
 import org.eclipse.che.api.vfs.watcher.IndexedFileCreateConsumer;
 import org.eclipse.che.api.vfs.watcher.IndexedFileDeleteConsumer;
 import org.eclipse.che.api.vfs.watcher.IndexedFileUpdateConsumer;
@@ -127,6 +128,11 @@ public class ProjectApiModule extends AbstractModule {
         fileCreateConsumers.addBinding().to(IndexedFileCreateConsumer.class);
         fileUpdateConsumers.addBinding().to(IndexedFileUpdateConsumer.class);
         fileDeleteConsumers.addBinding().to(IndexedFileDeleteConsumer.class);
+
+        fileCreateConsumers.addBinding().to(FileWatcherByPathMatcher.class);
+        fileDeleteConsumers.addBinding().to(FileWatcherByPathMatcher.class);
+        directoryCreateConsumers.addBinding().to(FileWatcherByPathMatcher.class);
+        directoryDeleteConsumers.addBinding().to(FileWatcherByPathMatcher.class);
     }
 
     private void configureVfsFilters(Multibinder<PathMatcher> excludeMatcher) {
