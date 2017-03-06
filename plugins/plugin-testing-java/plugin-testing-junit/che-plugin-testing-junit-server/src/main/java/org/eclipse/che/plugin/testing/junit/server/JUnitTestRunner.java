@@ -86,7 +86,7 @@ public class JUnitTestRunner implements TestRunner {
 
         ClassLoader currentClassLoader = this.getClass().getClassLoader();
         TestClasspathProvider classpathProvider = classpathRegistry.getTestClasspathProvider(projectType);
-        URLClassLoader providedClassLoader = (URLClassLoader)classpathProvider.getClassLoader(projectAbsolutePath, updateClasspath);
+        URLClassLoader providedClassLoader = (URLClassLoader)classpathProvider.getClassLoader(projectAbsolutePath, projectPath, updateClasspath);
         projectClassLoader = new URLClassLoader(providedClassLoader.getURLs(), null) {
             @Override
             protected Class< ? > findClass(String name) throws ClassNotFoundException {

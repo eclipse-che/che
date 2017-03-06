@@ -48,11 +48,11 @@ public class MavenTestClasspathProvider implements TestClasspathProvider {
      * {@inheritDoc}
      */
     @Override
-    public ClassLoader getClassLoader(String projectPath, boolean updateClasspath) throws Exception {
+    public ClassLoader getClassLoader(String projectAbsolutePath, String projectRelativePath, boolean updateClasspath) throws Exception {
         try {
-            return new URLClassLoader(getProjectClasspath(projectPath).toArray(URL[]::new), null);
+            return new URLClassLoader(getProjectClasspath(projectAbsolutePath, projectRelativePath), null);
         } catch (JavaModelException e) {
-            throw new Exception("Failed to build the classpath for testing project: " + projectPath, e);
+            throw new Exception("Failed to build the classpath for testing project: " + projectRelativePath, e);
         }
     }
 
@@ -74,10 +74,13 @@ public class MavenTestClasspathProvider implements TestClasspathProvider {
         });
     }
 
-    private Stream<URL> getProjectClasspath(String projectPath) throws JavaModelException {
-        String relativeProject = projectPath.substring(ResourcesPlugin.getPathToWorkspace().length());
-        IContainer root = ResourcesPlugin.getWorkspace().getRoot();
-        Stream<ClasspathEntryDto> rawClasspath = classpathService.getClasspath(relativeProject).stream();
+    private IContainer getWorkspaceRoot() {
+        return ResourcesPlugin.getWorkspace().getRoot();
+    }
+    
+    public URL[] getProjectClasspath(String projectAbsolutePath, String projectRelativePath) throws JavaModelException {
+        IContainer root = getWorkspaceRoot();
+        Stream<ClasspathEntryDto> rawClasspath = classpathService.getClasspath(projectRelativePath).stream();
         Stream<ClasspathEntryDto> resolvedClasspath = toResolvedClassPath(rawClasspath);
         return resolvedClasspath.map(dto -> {
             try {
@@ -93,14 +96,14 @@ public class MavenTestClasspathProvider implements TestClasspathProvider {
                         }
                         break;
                     case IClasspathEntry.CPE_SOURCE:
-                        IPath projectRelativePath = new Path(dtoPath).removeFirstSegments(1);
-                        String projectRelativePathStr = projectRelativePath.toString();
-                        switch (projectRelativePathStr) {
+                        IPath relativePathFromProjectRoot = new Path(dtoPath).removeFirstSegments(1);
+                        String relativePathFromProjectRootStr = relativePathFromProjectRoot.toString();
+                        switch (relativePathFromProjectRootStr) {
                             case "src/main/java":
-                                path = Paths.get(projectPath, "target", "classes").toFile();
+                                path = Paths.get(projectAbsolutePath, "target", "classes").toFile();
                                 break;
                             case "src/test/java":
-                                path = Paths.get(projectPath, "target", "test-classes").toFile();
+                                path = Paths.get(projectAbsolutePath, "target", "test-classes").toFile();
                                 break;
                             default:
                                 path = new File(root.getLocation().toFile(), dtoPath);
@@ -113,6 +116,6 @@ public class MavenTestClasspathProvider implements TestClasspathProvider {
             } catch (MalformedURLException e) {
                 return null;
             }
-        }).filter(url -> url != null).distinct();
+        }).filter(url -> url != null).distinct().toArray(URL[]::new);
     }
 }
