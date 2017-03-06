@@ -113,7 +113,7 @@ public class GitHubKeyUploader implements SshKeyUploader {
         LOG.debug("Upload key response code: {}", responseCode);
 
         if (responseCode != HttpURLConnection.HTTP_CREATED) {
-            throw new IOException(String.format("%d: Failed to upload public key to http://github.com/", responseCode));
+            throw new IOException(String.format("%d: Failed to upload public key to https://github.com/", responseCode));
         }
     }
 

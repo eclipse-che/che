@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.account.spi;
 
+import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 
@@ -19,6 +20,36 @@ import org.eclipse.che.api.core.ServerException;
  * @author Sergii Leschenko
  */
 public interface AccountDao {
+    /**
+     * Creates account.
+     *
+     * @param account
+     *         account to create
+     * @throws NullPointerException
+     *         when {@code account} is null
+     * @throws ConflictException
+     *         when account with such name or id already exists
+     * @throws ServerException
+     *         when any other error occurs during account creating
+     */
+    void create(AccountImpl account) throws ConflictException, ServerException;
+
+    /**
+     * Updates account by replacing an existing entity with a new one.
+     *
+     * @param account
+     *         account to update
+     * @throws NullPointerException
+     *         when {@code account} is null
+     * @throws NotFoundException
+     *         when account with id {@code account.getId()} doesn't exist
+     * @throws ConflictException
+     *         when name updated with a value which is not unique
+     * @throws ServerException
+     *         when any other error occurs
+     */
+    void update(AccountImpl account) throws NotFoundException, ConflictException, ServerException;
+
     /**
      * Gets account by identifier.
      *
@@ -48,4 +79,16 @@ public interface AccountDao {
      *         when any other error occurs during account fetching
      */
     AccountImpl getByName(String name) throws ServerException, NotFoundException;
+
+    /**
+     * Removes account by specified {@code id}
+     *
+     * @param id
+     *         account identifier
+     * @throws NullPointerException
+     *         when {@code id} is null
+     * @throws ServerException
+     *         when any other error occurs
+     */
+    void remove(String id) throws ServerException;
 }

@@ -38,6 +38,7 @@ interface ICHELicenseResource<T> extends ng.resource.IResourceClass<T> {
  */
 export class CheWorkspace {
   $resource: ng.resource.IResourceService;
+  $http: ng.IHttpService;
   $q: ng.IQService;
   listeners: Array<any>;
   workspaceStatuses: Array<string>;
@@ -178,6 +179,20 @@ export class CheWorkspace {
     });
   }
 
+  /**
+   * Fetches workspaces by provided namespace.
+   *
+   * @param namespace namespace
+   */
+  fetchWorkspacesByNamespace(namespace: string): ng.IPromise<any> {
+    let promise = this.$http.get('/api/workspace/namespace/' + namespace);
+    let resultPromise = promise.then((response: any) => {
+      this.workspacesByNamespace.set(namespace, response.data);
+    });
+
+    return resultPromise;
+  }
+
   getWorkspacesByNamespace(namespace: string): Array<che.IWorkspace> {
     return this.workspacesByNamespace.get(namespace);
   }
@@ -203,7 +218,6 @@ export class CheWorkspace {
       let remoteWorkspaces = [];
       this.workspaces.length = 0;
       this.workspacesById.clear();
-      this.workspacesByNamespace.clear();
       // add workspace if not temporary
       data.forEach((workspace: che.IWorkspace) => {
 
@@ -211,12 +225,6 @@ export class CheWorkspace {
           remoteWorkspaces.push(workspace);
           this.workspaces.push(workspace);
           this.workspacesById.set(workspace.id, workspace);
-          let namespaceWorkspaces = this.workspacesByNamespace.get(workspace.namespace);
-          if (namespaceWorkspaces) {
-            namespaceWorkspaces.push(workspace);
-          } else {
-            this.workspacesByNamespace.set(workspace.namespace, [workspace]);
-          }
         }
         this.workspacesById.set(workspace.id, workspace);
         this.startUpdateWorkspaceStatus(workspace.id);
@@ -439,7 +447,10 @@ export class CheWorkspace {
    */
   stopWorkspace(workspaceId: string, createSnapshot: boolean): ng.IPromise<any> {
     createSnapshot = createSnapshot === undefined ? this.getAutoSnapshotSettings() : createSnapshot;
-    return this.remoteWorkspaceAPI.stopWorkspace({workspaceId: workspaceId, createSnapshot: createSnapshot}, {}).$promise;
+    return this.remoteWorkspaceAPI.stopWorkspace({
+      workspaceId: workspaceId,
+      createSnapshot: createSnapshot
+    }, {}).$promise;
   }
 
   /**
@@ -450,7 +461,6 @@ export class CheWorkspace {
    */
   updateWorkspace(workspaceId: string, data: che.IWorkspace): ng.IPromise<any> {
     let defer = this.$q.defer();
-
     let promise = this.remoteWorkspaceAPI.updateWorkspace({workspaceId: workspaceId}, data).$promise;
     promise.then((data: che.IWorkspace) => {
       this.workspacesById.set(data.id, data);
@@ -601,13 +611,17 @@ export class CheWorkspace {
    *
    * @returns {IPromise<TResult>}
    */
-  fetchWorkspaceSettings(): ng.IPromise {
+  fetchWorkspaceSettings(): ng.IPromise<any> {
     let promise = this.remoteWorkspaceAPI.getSettings().$promise;
-    let resultPromise = promise.then((settings: any) => {
+    return promise.then((settings: any) => {
       this.workspaceSettings = settings;
+      return this.workspaceSettings;
+    }, (error: any) => {
+      if (error.status === 304) {
+        return this.workspaceSettings;
+      }
+      return this.$q.reject(error);
     });
-
-    return resultPromise;
   }
 
   /**

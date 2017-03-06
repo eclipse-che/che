@@ -10,13 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.search.node;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
-import org.eclipse.che.api.promises.client.callback.PromiseHelper;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ext.java.client.util.Flags;
@@ -32,6 +29,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import static org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper.createFromAsyncRequest;
 
 /**
  * Represents java method
@@ -64,19 +64,20 @@ public class MethodNode extends AbstractPresentationNode {
 
     @Override
     protected Promise<List<Node>> getChildrenImpl() {
-        return PromiseHelper.newPromise(new AsyncPromiseHelper.RequestCall<List<Node>>() {
-            @Override
-            public void makeCall(AsyncCallback<List<Node>> callback) {
-                List<Node> children = new ArrayList<>();
-                if (matches.containsKey(method.getHandleIdentifier())) {
-                    for (Match match : matches.get(method.getHandleIdentifier())) {
-                        children.add(nodeFactory.create(match, compilationUnit, classFile));
-                    }
-                }
+        return createFromAsyncRequest(callback -> {
+            final List<Node> children = new ArrayList<>();
+            final String handleIdentifier = method.getHandleIdentifier();
 
-                Collections.sort(children, new NodeComparator());
-                callback.onSuccess(children);
+            if (matches.containsKey(handleIdentifier)) {
+                final List<Node> nodes = matches.get(handleIdentifier)
+                                                .stream()
+                                                .map(match -> nodeFactory.create(match, compilationUnit, classFile))
+                                                .collect(Collectors.toList());
+                children.addAll(nodes);
             }
+
+            Collections.sort(children, new NodeComparator());
+            callback.onSuccess(children);
         });
     }
 

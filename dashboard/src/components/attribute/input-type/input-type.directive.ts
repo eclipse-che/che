@@ -20,6 +20,10 @@ export abstract class CheInputType {
   link($scope: ng.IScope, $element: ng.IAugmentedJQuery, attrs: {cheInputType: string, [prop: string]: string}): void {
 
     $element.on('keydown', (event: KeyboardEvent) => {
+      // escape, enter, tab
+      if (event.keyCode === 27 || event.keyCode === 13 || event.keyCode === 9) {
+        return true;
+      }
       // delete, backspace
       if (event.keyCode === 46 || event.keyCode === 8) {
         return true;
