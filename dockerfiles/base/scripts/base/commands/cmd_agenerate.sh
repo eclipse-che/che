@@ -39,27 +39,32 @@ cmd_agenerate() {
     fi
 
     PS3="Please enter your choice: "
-    options=("che-agent-archetype                 - Assembly with sample agent" \
-             "che-plugin-ide-menu-archetype       - Assembly with IDE extension to customize menu" \
-             "che-plugin-ide-wizard-archetype     - Assembly with custom C project type extension" \
-             "codenvy-plugin-ide-wizard-archetype - Assembly with Codenvy packaging")
+    options=("agent-archetype                - Assembly with sample agent" \
+             "plugin-menu-archetype          - Assembly with IDE extension to customize menu" \
+             "plugin-wizard-archetype        - Assembly with custom C project type extension" \
+             "plugin-serverservice-archetype - Assembly with simple IDE extesion and a server service" \
+             "plugin-embedjs-archetype       - Assembly with simple IDE extesion for using native javascript in widgets")
     select opt in "${options[@]}"
     do
       case $opt in
-        "che-agent-archetype                 - Assembly with sample agent")
-          ARCHETYPE_ID="che-agent-archetype"
+        "agent-archetype                - Assembly with sample agent")
+          ARCHETYPE_ID="agent-archetype"
           break
           ;;
-        "che-plugin-ide-menu-archetype       - Assembly with IDE extension to customize menu")
-          ARCHETYPE_ID="che-plugin-ide-menu-archetype"
+        "plugin-menu-archetype          - Assembly with IDE extension to customize menu")
+          ARCHETYPE_ID="plugin-menu-archetype"
           break
           ;;
-        "che-plugin-ide-wizard-archetype     - Assembly with custom C project type extension")
-          ARCHETYPE_ID="che-plugin-ide-wizard-archetype"
+        "plugin-wizard-archetype        - Assembly with custom C project type extension")
+          ARCHETYPE_ID="plugin-wizard-archetype"
           break
           ;;
-        "codenvy-plugin-ide-wizard-archetype - Assembly with Codenvy packaging")
-          ARCHETYPE_ID="codenvy-plugin-ide-wizard-archetype"
+        "plugin-serverservice-archetype - Assembly with simple IDE extesion and a server service")
+          ARCHETYPE_ID="plugin-serverservice-archetype"
+          break
+          ;;
+        "plugin-embedjs-archetype       - Assembly with simple IDE extesion for using native javascript in widgets")
+          ARCHETYPE_ID="plugin-embedjs-archetype"
           break
           ;;
         *) echo invalid option;;
