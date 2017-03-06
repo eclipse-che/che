@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 
 import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.command.CommandGoal;
@@ -169,6 +170,7 @@ public class CommandsExplorerPresenterTest {
         when(commandManager.createCommand(anyString(),
                                           anyString(),
                                           any(ContextualCommand.ApplicableContext.class))).thenReturn(commandPromise);
+        when(commandPromise.then(any(Operation.class))).thenReturn(commandPromise);
         when(commandPromise.catchError(any(Operation.class))).thenReturn(commandPromise);
 
         // when
@@ -186,7 +188,7 @@ public class CommandsExplorerPresenterTest {
                                              any(ContextualCommand.ApplicableContext.class));
     }
 
-    @Test
+    @Test(expected = OperationException.class)
     public void shouldShowNotificationWhenFailedToCreateCommand() throws Exception {
         // given
         CommandType selectedCommandType = mock(CommandType.class);
@@ -204,6 +206,7 @@ public class CommandsExplorerPresenterTest {
         when(commandManager.createCommand(anyString(),
                                           anyString(),
                                           any(ContextualCommand.ApplicableContext.class))).thenReturn(commandPromise);
+        when(commandPromise.then(any(Operation.class))).thenReturn(commandPromise);
         when(commandPromise.catchError(any(Operation.class))).thenReturn(commandPromise);
 
         // when
@@ -235,12 +238,9 @@ public class CommandsExplorerPresenterTest {
         presenter.onCommandDuplicate(command);
 
         verify(commandManager).createCommand(command);
-        verify(commandPromise).then(commandOperationCaptor.capture());
-        commandOperationCaptor.getValue().apply(command);
-        verify(view).selectCommand(command);
     }
 
-    @Test
+    @Test(expected = OperationException.class)
     public void shouldShowNotificationWhenFailedToDuplicateCommand() throws Exception {
         ContextualCommand command = mock(ContextualCommand.class);
         when(commandManager.createCommand(any(ContextualCommand.class))).thenReturn(commandPromise);
@@ -333,7 +333,7 @@ public class CommandsExplorerPresenterTest {
 
         presenter.onCommandAdded(command);
 
-        verify(refreshViewTask).delayAndSelectCommand(command);
+        verify(refreshViewTask).delayAndSelectCommand(isNull(ContextualCommand.class));
     }
 
     @Test

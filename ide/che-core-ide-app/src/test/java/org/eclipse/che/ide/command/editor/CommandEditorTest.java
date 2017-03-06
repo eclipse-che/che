@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.command.editor;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.google.gwtmockito.GwtMockitoTestRunner;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -43,7 +44,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.WARNING;
@@ -60,7 +60,7 @@ import static org.mockito.Mockito.when;
  *
  * @author Artem Zatsarynnyi
  */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(GwtMockitoTestRunner.class)
 public class CommandEditorTest {
 
     private static final String EDITED_COMMAND_NAME = "build";
@@ -229,13 +229,12 @@ public class CommandEditorTest {
     }
 
     @Test
-    public void shouldCloseEditorAndRemoveListenerWhenEditedCommandRemoved() throws Exception {
+    public void shouldCloseEditorWhenEditedCommandRemoved() throws Exception {
         ContextualCommand removedCommand = mock(ContextualCommand.class);
         when(removedCommand.getName()).thenReturn(EDITED_COMMAND_NAME);
 
         editor.onCommandRemoved(removedCommand);
 
         verify(editorAgent).closeEditor(editor);
-        verify(commandManager).removeCommandChangedListener(editor);
     }
 }
