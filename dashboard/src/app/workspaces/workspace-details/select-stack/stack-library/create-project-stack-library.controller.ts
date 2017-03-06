@@ -108,6 +108,10 @@ export class CreateProjectStackLibraryController {
   getTooltip(stack) {
     // get components and add data from the components
     let text = '';
+    if (!stack || !stack.components) {
+      return text;
+    }
+
     stack.components.forEach((component) => {
       text += component.name + ':' + component.version + '   ';
     });

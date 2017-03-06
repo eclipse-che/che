@@ -130,7 +130,7 @@ public class FactoryServiceTest {
     private static final String USER_EMAIL              = "email";
     private static final String WORKSPACE_NAME          = "workspace";
     private static final String PROJECT_SOURCE_TYPE     = "git";
-    private static final String PROJECT_SOURCE_LOCATION = "http://github.com/codenvy/platform-api.git";
+    private static final String PROJECT_SOURCE_LOCATION = "https://github.com/codenvy/platform-api.git";
     private static final String FACTORY_IMAGE_MIME_TYPE = "image/jpeg";
     private static final String IMAGE_NAME              = "image12";
 
@@ -450,7 +450,7 @@ public class FactoryServiceTest {
     @Test
     public void shouldBeAbleToUpdateFactory() throws Exception {
         final Factory existed = createFactory();
-        final Factory update = createFactoryWithStorage(null, "git", "http://github.com/codenvy/platform-api1.git");
+        final Factory update = createFactoryWithStorage(null, "git", "https://github.com/codenvy/platform-api1.git");
         when(factoryManager.getById(FACTORY_ID)).thenReturn(existed);
         when(factoryManager.updateFactory(any())).thenReturn(update);
 
@@ -472,7 +472,7 @@ public class FactoryServiceTest {
     public void shouldThrowNotFoundExceptionWhenUpdatingNonExistingFactory() throws Exception {
         final Factory factory = createFactoryWithStorage(FACTORY_NAME,
                                                          "git",
-                                                         "http://github.com/codenvy/platform-api.git");
+                                                         "https://github.com/codenvy/platform-api.git");
         doThrow(new NotFoundException(format("Factory with id %s is not found.", FACTORY_ID))).when(factoryManager)
                                                                                               .getById(anyString());
 

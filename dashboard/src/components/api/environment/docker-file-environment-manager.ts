@@ -34,6 +34,7 @@ import {IEnvironmentManagerMachine} from './environment-manager-machine';
  */
 
 const ENV_INSTRUCTION: string = 'ENV';
+const FROM_INSTRUCTION: string = 'FROM';
 
 export class DockerFileEnvironmentManager extends EnvironmentManager {
   parser: DockerfileParser;
@@ -154,6 +155,32 @@ export class DockerFileEnvironmentManager extends EnvironmentManager {
     });
 
     return {image: from.argument};
+  }
+
+  /**
+   * Updates machine's image
+   *
+   * @param {IEnvironmentManagerMachine} machine
+   * @param {String} image
+   */
+  setSource(machine: IEnvironmentManagerMachine, image: string) {
+    if (!machine.recipe) {
+      return;
+    }
+
+    // new recipe without 'FROM' instruction
+    let newRecipe = machine.recipe.filter((line: any) => {
+      return line.instruction !== FROM_INSTRUCTION;
+    });
+
+    // update recipe with new source
+    let from = {
+      instruction: FROM_INSTRUCTION,
+      argument: image
+    };
+    newRecipe.splice(0, 0, from);
+
+    machine.recipe = newRecipe;
   }
 
   /**
