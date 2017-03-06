@@ -42,7 +42,7 @@
       {
         "name": "build and deploy",
         "type": "mvn",
-        "commandLine": "mvn -f ${current.project.path} clean install -DskipTests && cp ${current.project.path}/target/*.war $TOMCAT_HOME/webapps/ROOT.war && $TOMCAT_HOME/bin/catalina.sh run 2>&1",
+        "commandLine": "mvn -f ${current.project.path} clean install -DskipTests \n cp ${current.project.path}/target/*.war $TOMCAT_HOME/webapps/ROOT.war \n $TOMCAT_HOME/bin/catalina.sh run 2>&1",
         "attributes": {
           "previewUrl": "http://${server.port.8080}",
           "goal": "Run"
@@ -51,7 +51,7 @@
       {
         "name": "debug",
         "type": "mvn",
-        "commandLine": "mvn -f ${current.project.path} clean install -DskipTests && cp ${current.project.path}/target/*.war $TOMCAT_HOME/webapps/ROOT.war && $TOMCAT_HOME/bin/catalina.sh jpda run 2>&1",
+        "commandLine": "mvn -f ${current.project.path} clean install -DskipTests \n cp ${current.project.path}/target/*.war $TOMCAT_HOME/webapps/ROOT.war \n $TOMCAT_HOME/bin/catalina.sh jpda run 2>&1",
         "attributes": {
           "previewUrl": "http://${server.port.8080}",
           "goal": "Debug"
@@ -133,7 +133,7 @@
       {
         "name": "build and run",
         "type": "custom",
-        "commandLine": "cd ${current.project.path} && gcc -o Hello Hello.c && ./Hello",
+        "commandLine": "cd ${current.project.path} \n gcc -o Hello Hello.c \n ./Hello",
         "attributes": {
           "previewUrl": "",
           "goal": "Run"
@@ -242,7 +242,7 @@
       {
         "name": "run",
         "type": "custom",
-        "commandLine": "cd ${current.project.path} && go get -d && go run main.go",
+        "commandLine": "cd ${current.project.path} \n go get -d \n go run main.go",
         "attributes": {
           "previewUrl": "http://${server.port.8080}",
           "goal": "Run"
@@ -278,7 +278,7 @@
       {
         "name": "run",
         "type": "custom",
-        "commandLine": "cd ${current.project.path} && go get -d && go run main.go",
+        "commandLine": "cd ${current.project.path} \n go get -d \n go run main.go",
         "attributes": {
           "previewUrl": "",
           "goal": "Run"
@@ -323,7 +323,7 @@
       {
         "name": "run",
         "type": "custom",
-        "commandLine": "cd ${current.project.path} && mvn exec:java -Dexec.mainClass='org.eclipse.che.wordcount.WordCount'",
+        "commandLine": "cd ${current.project.path} \n mvn exec:java -Dexec.mainClass='org.eclipse.che.wordcount.WordCount'",
         "attributes": {
           "previewUrl": "",
           "goal": "Run"
@@ -359,7 +359,7 @@
       {
         "name": "run",
         "type": "custom",
-        "commandLine": "cd ${current.project.path} && python main.py",
+        "commandLine": "cd ${current.project.path} \n python main.py",
         "attributes": {
           "previewUrl": "",
           "goal": "Run"
@@ -395,7 +395,7 @@
       {
         "name": "run",
         "type": "custom",
-        "commandLine": "cd ${current.project.path} && sudo virtualenv /env && sudo pip install -r requirements.txt && python main.py",
+        "commandLine": "cd ${current.project.path} \n sudo virtualenv /env \n sudo pip install -r requirements.txt \n python main.py",
         "attributes": {
           "previewUrl": "http://${server.port.8080}",
           "goal": "Run"
@@ -431,7 +431,7 @@
       {
         "name": "run",
         "type": "custom",
-        "commandLine": "cd ${GAE} && ./dev_appserver.py 2>&1 --skip_sdk_update_check true --host=0.0.0.0 --admin_host=0.0.0.0 ${current.project.path}",
+        "commandLine": "cd ${GAE} \n ./dev_appserver.py 2>&1 --skip_sdk_update_check true --host=0.0.0.0 --admin_host=0.0.0.0 ${current.project.path}",
         "attributes": {
           "previewUrl": "http://${server.port.8080}",
           "goal": "Run"
@@ -467,7 +467,7 @@
       {
         "name": "install dependencies",
         "type": "custom",
-        "commandLine": "cd ${current.project.path} && bundle install",
+        "commandLine": "cd ${current.project.path} \n bundle install",
         "attributes": {
           "previewUrl": "",
           "goal": "Build"
@@ -476,7 +476,7 @@
       {
         "name": "run",
         "type": "custom",
-        "commandLine": "cd ${current.project.path} && rails server -b 0.0.0.0",
+        "commandLine": "cd ${current.project.path} \n rails server -b 0.0.0.0",
         "attributes": {
           "previewUrl": "http://${server.port.3000}",
           "goal": "Run"
@@ -513,7 +513,7 @@
       {
         "name": "run",
         "type": "custom",
-        "commandLine": "cd ${current.project.path} && ruby main.rb",
+        "commandLine": "cd ${current.project.path} \n ruby main.rb",
         "attributes": {
           "previewUrl": "",
           "goal": "Run"
@@ -551,7 +551,7 @@
       {
         "name": "run",
         "type": "custom",
-        "commandLine": "cd ${current.project.path} && node app/app.js",
+        "commandLine": "cd ${current.project.path} \n node app/app.js",
         "attributes": {
           "previewUrl": "http://${server.port.3000}",
           "goal": "Run"
@@ -587,7 +587,7 @@
       {
         "name": "install dependencies",
         "type": "custom",
-        "commandLine": "cd ${current.project.path} && npm install --no-bin-links && bower install",
+        "commandLine": "cd ${current.project.path} \n npm install --no-bin-links \n bower install",
         "attributes": {
           "previewUrl": "",
           "goal": "Build"
@@ -596,7 +596,7 @@
       {
         "name": "run",
         "type": "custom",
-        "commandLine": "cd ${current.project.path} && grunt server",
+        "commandLine": "cd ${current.project.path} \n grunt server",
         "attributes": {
           "previewUrl": "http://${server.port.8003}",
           "goal": "Run"
@@ -635,7 +635,7 @@
       {
         "name": "build",
         "type": "mvn",
-        "commandLine": "mvn -f ${current.project.path} clean install && cp ${current.project.path}/target/*.war $TOMCAT_HOME/webapps/ROOT.war",
+        "commandLine": "mvn -f ${current.project.path} clean install \n cp ${current.project.path}/target/*.war $TOMCAT_HOME/webapps/ROOT.war",
         "attributes": {
           "previewUrl": "",
           "goal": "Build"
@@ -662,7 +662,7 @@
       {
         "name": "build and run",
         "type": "mvn",
-        "commandLine": "mvn -f ${current.project.path} clean install && cp ${current.project.path}/target/*.war $TOMCAT_HOME/webapps/ROOT.war && $TOMCAT_HOME/bin/catalina.sh run 2>&1",
+        "commandLine": "mvn -f ${current.project.path} clean install \n cp ${current.project.path}/target/*.war $TOMCAT_HOME/webapps/ROOT.war \n $TOMCAT_HOME/bin/catalina.sh run 2>&1",
         "attributes": {
           "previewUrl": "http://${server.port.8080}",
           "goal": "Run"
@@ -671,7 +671,7 @@
       {
         "name": "debug",
         "type": "mvn",
-        "commandLine": "mvn -f ${current.project.path} clean install && cp ${current.project.path}/target/*.war $TOMCAT_HOME/webapps/ROOT.war && $TOMCAT_HOME/bin/catalina.sh jpda run 2>&1",
+        "commandLine": "mvn -f ${current.project.path} clean install \n cp ${current.project.path}/target/*.war $TOMCAT_HOME/webapps/ROOT.war \n $TOMCAT_HOME/bin/catalina.sh jpda run 2>&1",
         "attributes": {
           "previewUrl": "http://${server.port.8080}",
           "goal": "Debug"
@@ -709,7 +709,7 @@
       {
         "name": "build and run",
         "type": "custom",
-        "commandLine": "cd ${current.project.path} && make && ./a.out",
+        "commandLine": "cd ${current.project.path} \n make \n ./a.out",
         "attributes": {
           "previewUrl": "",
           "goal": "Run"
@@ -746,7 +746,7 @@
       {
         "name": "install dependencies",
         "type": "custom",
-        "commandLine": "cd ${current.project.path} && npm install && bower install",
+        "commandLine": "cd ${current.project.path} \n npm install \n bower install",
         "attributes": {
           "previewUrl": "",
           "goal": "Build"
@@ -755,7 +755,7 @@
       {
         "name": "run",
         "type": "custom",
-        "commandLine": "cd ${current.project.path} && grunt serve",
+        "commandLine": "cd ${current.project.path} \n grunt serve",
         "attributes": {
           "previewUrl": "http://${server.port.9000}",
           "goal": "Run"
@@ -791,7 +791,7 @@
       {
         "name": "start apache",
         "type": "custom",
-        "commandLine": "sudo service apache2 start && sudo tail -f /var/log/apache2/access.log -f /var/log/apache2/error.log",
+        "commandLine": "sudo service apache2 start \n sudo tail -f /var/log/apache2/access.log -f /var/log/apache2/error.log",
         "attributes": {
           "previewUrl": "http://${server.port.80}/${current.project.relpath}",
           "goal": "Run"
@@ -846,7 +846,7 @@
       {
         "name": "run",
         "type": "custom",
-        "commandLine": "cd ${GAE} && ./dev_appserver.py 2>&1 --php_executable_path=/usr/bin/php5-cgi --skip_sdk_update_check true --host=0.0.0.0 --admin_host=0.0.0.0 ${current.project.path}",
+        "commandLine": "cd ${GAE} \n ./dev_appserver.py 2>&1 --php_executable_path=/usr/bin/php5-cgi --skip_sdk_update_check true --host=0.0.0.0 --admin_host=0.0.0.0 ${current.project.path}",
         "attributes": {
           "previewUrl": "http://${server.port.8080}",
           "goal": "Run"
@@ -891,7 +891,7 @@
       {
         "name": "run",
         "type": "mvn",
-        "commandLine": "mvn -f ${current.project.path} clean install && java -jar ${current.project.path}/target/*.jar",
+        "commandLine": "mvn -f ${current.project.path} clean install \n java -jar ${current.project.path}/target/*.jar",
         "attributes": {
           "previewUrl": "",
           "goal": "Run"
@@ -928,7 +928,7 @@
       {
         "name": "update dependencies",
         "type": "custom",
-        "commandLine": "cd ${current.project.path} && dotnet restore",
+        "commandLine": "cd ${current.project.path} \n dotnet restore",
         "attributes": {
           "previewUrl": "",
           "goal": "Build"
@@ -937,7 +937,7 @@
       {
         "name": "run",
         "type": "custom",
-        "commandLine": "cd ${current.project.path} && dotnet run",
+        "commandLine": "cd ${current.project.path} \n dotnet run",
         "attributes": {
           "previewUrl": "http://${server.port.5000}",
           "goal": "Run"
@@ -973,7 +973,7 @@
       {
         "name": "build",
         "type": "mvn",
-        "commandLine": "mvn -f ${current.project.path} clean install && cp ${current.project.path}/target/*.war $TOMEE_HOME/webapps/ROOT.war",
+        "commandLine": "mvn -f ${current.project.path} clean install \n cp ${current.project.path}/target/*.war $TOMEE_HOME/webapps/ROOT.war",
         "attributes": {
           "previewUrl": "",
           "goal": "Build"
@@ -1000,7 +1000,7 @@
       {
         "name": "build and run",
         "type": "mvn",
-        "commandLine": "mvn -f ${current.project.path} clean install && cp ${current.project.path}/target/*.war $TOMEE_HOME/webapps/ROOT.war && $TOMEE_HOME/bin/catalina.sh run 2>&1",
+        "commandLine": "mvn -f ${current.project.path} clean install \n cp ${current.project.path}/target/*.war $TOMEE_HOME/webapps/ROOT.war \n $TOMEE_HOME/bin/catalina.sh run 2>&1",
         "attributes": {
           "previewUrl": "http://${server.port.8080}",
           "goal": "Run"
@@ -1009,7 +1009,7 @@
       {
         "name": "debug",
         "type": "mvn",
-        "commandLine": "mvn -f ${current.project.path} clean install && cp ${current.project.path}/target/*.war $TOMEE_HOME/webapps/ROOT.war && $TOMEE_HOME/bin/catalina.sh jpda run 2>&1",
+        "commandLine": "mvn -f ${current.project.path} clean install \n cp ${current.project.path}/target/*.war $TOMEE_HOME/webapps/ROOT.war \n $TOMEE_HOME/bin/catalina.sh jpda run 2>&1",
         "attributes": {
           "previewUrl": "http://${server.port.8080}",
           "goal": "Debug"
@@ -1047,7 +1047,7 @@
       {
         "name": "1. Create and run project",
         "type": "custom",
-        "commandLine": "print-help && cd ${current.project.path} && npm install express@4.13.4 && express -f . && cp -rn /bitnami/mongodb/conf ${current.project.path} && npm install mongodb@2.1.18 --save && npm install && counter=0; until nc -z localhost 27017; do counter=$((counter+1)); if [ $counter == 10 ]; then echo \"Error: Couldn't connect to MongoDB.\"; exit 1; fi; echo \"Trying to connect to MongoDB at localhost. Attempt $counter.\"; sleep 5; done; echo \"Connected to MongoDB database. Starting application server.\" && npm start",
+        "commandLine": "print-help \n cd ${current.project.path} \n npm install express@4.13.4 \n express -f . \n cp -rn /bitnami/mongodb/conf ${current.project.path} \n npm install mongodb@2.1.18 --save \n npm install \n counter=0; until nc -z localhost 27017; do counter=$((counter+1)); if [ $counter == 10 ]; then echo \"Error: Couldn't connect to MongoDB.\"; exit 1; fi; echo \"Trying to connect to MongoDB at localhost. Attempt $counter.\"; sleep 5; done; echo \"Connected to MongoDB database. Starting application server.\" \n npm start",
         "attributes": {
           "previewUrl": "http://${server.port.3000}",
           "goal": "Run"
@@ -1056,7 +1056,7 @@
       {
         "name": "2. Stop",
         "type": "custom",
-        "commandLine": "print-help && cd ${current.project.path} && pkill -u bitnami node && echo \"Web server stopped.\"",
+        "commandLine": "print-help \n cd ${current.project.path} \n pkill -u bitnami node \n echo \"Web server stopped.\"",
         "attributes": {
           "previewUrl": "",
           "goal": "Run"
@@ -1065,7 +1065,7 @@
       {
         "name": "3. Run",
         "type": "custom",
-        "commandLine": "print-help && cd ${current.project.path} && npm start",
+        "commandLine": "print-help \n cd ${current.project.path} \n npm start",
         "attributes": {
           "previewUrl": "http://${server.port.3000}",
           "goal": "Run"
@@ -1103,7 +1103,7 @@
       {
         "name": "1. Create project",
         "type": "custom",
-        "commandLine": "print-help && mkdir ${current.project.path}/app_template && cd ${current.project.path}/app_template && swift-package init --type executable 2>&1 | grep -v \"no version information available\"; swift build 2>&1 | grep -v \"no version information available\"; echo \"Project built successfully.\"",
+        "commandLine": "print-help \n mkdir ${current.project.path}/app_template \n cd ${current.project.path}/app_template \n swift-package init --type executable 2>&1 | grep -v \"no version information available\"; swift build 2>&1 | grep -v \"no version information available\"; echo \"Project built successfully.\"",
         "attributes": {
           "previewUrl": "",
           "goal": "Run"
@@ -1112,7 +1112,7 @@
       {
         "name": "2. Run",
         "type": "custom",
-        "commandLine": "print-help && cd ${current.project.path}/app_template && swift build 2>&1 | grep -v \"no version information available\"; ./.build/debug/app_template",
+        "commandLine": "print-help \n cd ${current.project.path}/app_template \n swift build 2>&1 | grep -v \"no version information available\"; ./.build/debug/app_template",
         "attributes": {
           "previewUrl": "",
           "goal": "Run"
@@ -1150,7 +1150,7 @@
       {
         "name": "1. Create and run project",
         "type": "custom",
-        "commandLine": "print-help && sudo HOME=/root /opt/bitnami/nami/bin/nami start mariadb && cp -a /tmp/laravel-sample/. ${current.project.path} && cd ${current.project.path} && composer update && php artisan migrate && php artisan serve --host=0.0.0.0 --port=3000",
+        "commandLine": "print-help \n sudo HOME=/root /opt/bitnami/nami/bin/nami start mariadb \n cp -a /tmp/laravel-sample/. ${current.project.path} \n cd ${current.project.path} \n composer update \n php artisan migrate \n php artisan serve --host=0.0.0.0 --port=3000",
         "attributes": {
           "previewUrl": "http://${server.port.3000}/",
           "goal": "Run"
@@ -1159,7 +1159,7 @@
       {
         "name": "2. Stop",
         "type": "custom",
-        "commandLine": "print-help && cd ${current.project.path} && pkill -u bitnami php && echo \"Web server stopped.\"",
+        "commandLine": "print-help \n cd ${current.project.path} \n pkill -u bitnami php \n echo \"Web server stopped.\"",
         "attributes": {
           "previewUrl": "",
           "goal": "Run"
@@ -1168,7 +1168,7 @@
       {
         "name": "3. Run",
         "type": "custom",
-        "commandLine": "print-help && cd ${current.project.path} && php artisan serve --host=0.0.0.0 --port=3000",
+        "commandLine": "print-help \n cd ${current.project.path} \n php artisan serve --host=0.0.0.0 --port=3000",
         "attributes": {
           "previewUrl": "http://${server.port.3000}/",
           "goal": "Run"
@@ -1206,7 +1206,7 @@
       {
         "name": "1. Create and run project",
         "type": "custom",
-        "commandLine": "print-help && sudo HOME=/root /opt/bitnami/nami/bin/nami start mariadb && cd ${current.project.path} && mv README.md README-CHE.md && rails new . --skip-bundle --database mysql && sed -Ei 's/\\s*#\\s*gem(.*)therubyracer/gem\\1therubyracer/' Gemfile && bundle install && bundle exec rails db:create && bundle exec rails db:migrate && bundle exec rails server -b 0.0.0.0 -p 3000",
+        "commandLine": "print-help \n sudo HOME=/root /opt/bitnami/nami/bin/nami start mariadb \n cd ${current.project.path} \n mv README.md README-CHE.md \n rails new . --skip-bundle --database mysql \n sed -Ei 's/\\s*#\\s*gem(.*)therubyracer/gem\\1therubyracer/' Gemfile \n bundle install \n bundle exec rails db:create \n bundle exec rails db:migrate \n bundle exec rails server -b 0.0.0.0 -p 3000",
         "attributes": {
           "previewUrl": "http://${server.port.3000}/",
           "goal": "Run"
@@ -1215,7 +1215,7 @@
       {
         "name": "2. Run",
         "type": "custom",
-        "commandLine": "print-help && cd ${current.project.path} && bundle exec rails server -b 0.0.0.0 -p 3000",
+        "commandLine": "print-help \n cd ${current.project.path} \n bundle exec rails server -b 0.0.0.0 -p 3000",
         "attributes": {
           "previewUrl": "http://${server.port.3000}/",
           "goal": "Run"
@@ -1253,7 +1253,7 @@
       {
         "name": "1. Create and run project",
         "type": "custom",
-        "commandLine": "print-help && sudo HOME=/root /opt/bitnami/nami/bin/nami execute codeigniter createProject --force $(basename ${current.project.path}) | grep -v undefined && php -S 0.0.0.0:8000 -t ${current.project.path}",
+        "commandLine": "print-help \n sudo HOME=/root /opt/bitnami/nami/bin/nami execute codeigniter createProject --force $(basename ${current.project.path}) | grep -v undefined \n php -S 0.0.0.0:8000 -t ${current.project.path}",
         "attributes": {
            "previewUrl": "http://${server.port.8000}/",
            "goal": "Run"
@@ -1262,7 +1262,7 @@
       {
         "name": "2. Run",
         "type": "custom",
-        "commandLine": "print-help && php -S 0.0.0.0:8000 -t ${current.project.path}",
+        "commandLine": "print-help \n php -S 0.0.0.0:8000 -t ${current.project.path}",
         "attributes": {
            "previewUrl": "http://${server.port.8000}/",
            "goal": "Run"
@@ -1300,7 +1300,7 @@
       {
         "name": "1. Create and run project",
         "type": "custom",
-        "commandLine": "print-help && sudo HOME=/root nami execute symfony createProject --force $(basename ${current.project.path}) | grep -v undefined && ln -fs ${current.project.path}/web/app.php ${current.project.path}/web/index.php && php -S 0.0.0.0:8000 -t ${current.project.path}/web",
+        "commandLine": "print-help \n sudo HOME=/root nami execute symfony createProject --force $(basename ${current.project.path}) | grep -v undefined \n ln -fs ${current.project.path}/web/app.php ${current.project.path}/web/index.php \n php -S 0.0.0.0:8000 -t ${current.project.path}/web",
         "attributes": {
            "previewUrl": "http://${server.port.8000}/",
            "goal": "Run"
@@ -1309,7 +1309,7 @@
       {
         "name": "2. Run",
         "type": "custom",
-        "commandLine": "print-help && php -S 0.0.0.0:8000 -t ${current.project.path}/web",
+        "commandLine": "print-help \n php -S 0.0.0.0:8000 -t ${current.project.path}/web",
         "attributes": {
            "previewUrl": "http://${server.port.8000}/",
            "goal": "Run"
@@ -1347,7 +1347,7 @@
       {
         "name": "1. Create and run project",
         "type": "custom",
-        "commandLine": "print-help && sudo HOME=/root /opt/bitnami/nami/bin/nami execute activator createProject --force $(basename ${current.project.path}) play-java | grep -v undefined && cd ${current.project.path} && /opt/bitnami/activator/bin/activator -Dsbt.log.noformat=true -Doffline=true -Dhttp.host=0.0.0.0 -Dhttp.port=9000 ~run",
+        "commandLine": "print-help \n sudo HOME=/root /opt/bitnami/nami/bin/nami execute activator createProject --force $(basename ${current.project.path}) play-java | grep -v undefined \n cd ${current.project.path} \n /opt/bitnami/activator/bin/activator -Dsbt.log.noformat=true -Doffline=true -Dhttp.host=0.0.0.0 -Dhttp.port=9000 ~run",
         "attributes": {
            "previewUrl": "http://${server.port.9000}/",
            "goal": "Run"
@@ -1356,7 +1356,7 @@
       {
         "name": "2. Stop",
         "type": "custom",
-        "commandLine": "print-help && cd ${current.project.path} && pkill -u bitnami -n java && echo \"Web server stopped.\"",
+        "commandLine": "print-help \n cd ${current.project.path} \n pkill -u bitnami -n java \n echo \"Web server stopped.\"",
         "attributes": {
           "previewUrl": "",
           "goal": "Run"
@@ -1365,7 +1365,7 @@
       {
         "name": "3. Run",
         "type": "custom",
-        "commandLine": "print-help && cd ${current.project.path} && /opt/bitnami/activator/bin/activator -Doffline=true -Dhttp.host=0.0.0.0 -Dhttp.port=9000 -Dsbt.log.noformat=true ~run",
+        "commandLine": "print-help \n cd ${current.project.path} \n /opt/bitnami/activator/bin/activator -Doffline=true -Dhttp.host=0.0.0.0 -Dhttp.port=9000 -Dsbt.log.noformat=true ~run",
         "attributes": {
            "previewUrl": "http://${server.port.9000}/",
            "goal": "Run"
@@ -1401,7 +1401,7 @@
       {
         "name": "configure",
         "type": "custom",
-        "commandLine": "chmod 777 ${current.project.path}/data; echo \"<VirtualHost *:80>\n    DocumentRoot ${current.project.path}/public\n    SetEnv APPLICATION_ENV 'development'\n    <Directory ${current.project.path}/public>\n        DirectoryIndex index.php\n        AllowOverride All\n        Require all granted\n    </Directory>\n</VirtualHost>\" | sudo tee /etc/apache2/sites-available/000-default.conf; cp /usr/local/zend/etc/php.ini /tmp/update-php.ini && grep -q 'extension=pcntl.so' /tmp/update-php.ini || echo \"\nextension=pcntl.so\" | sudo tee -a /tmp/update-php.ini && php -c /tmp/update-php.ini ${current.project.path}/bin/update.php && rm /tmp/update-php.ini",
+        "commandLine": "chmod 777 ${current.project.path}/data; echo \"<VirtualHost *:80>\n    DocumentRoot ${current.project.path}/public\n    SetEnv APPLICATION_ENV 'development'\n    <Directory ${current.project.path}/public>\n        DirectoryIndex index.php\n        AllowOverride All\n        Require all granted\n    </Directory>\n</VirtualHost>\" | sudo tee /etc/apache2/sites-available/000-default.conf; cp /usr/local/zend/etc/php.ini /tmp/update-php.ini \n grep -q 'extension=pcntl.so' /tmp/update-php.ini || echo \"\nextension=pcntl.so\" | sudo tee -a /tmp/update-php.ini \n php -c /tmp/update-php.ini ${current.project.path}/bin/update.php \n rm /tmp/update-php.ini",
         "attributes": {
           "previewUrl": "",
           "goal": "Common"
@@ -1410,7 +1410,7 @@
       {
         "name": "update images",
         "type": "custom",
-        "commandLine": "cp /usr/local/zend/etc/php.ini /tmp/update-php.ini && grep -q 'extension=pcntl.so' /tmp/update-php.ini || echo \"\nextension=pcntl.so\" | sudo tee -a /tmp/update-php.ini && php -c /tmp/update-php.ini ${current.project.path}/bin/update.php && rm /tmp/update-php.ini",
+        "commandLine": "cp /usr/local/zend/etc/php.ini /tmp/update-php.ini \n grep -q 'extension=pcntl.so' /tmp/update-php.ini || echo \"\nextension=pcntl.so\" | sudo tee -a /tmp/update-php.ini \n php -c /tmp/update-php.ini ${current.project.path}/bin/update.php \n rm /tmp/update-php.ini",
         "attributes": {
           "previewUrl": "",
           "goal": "Common"
