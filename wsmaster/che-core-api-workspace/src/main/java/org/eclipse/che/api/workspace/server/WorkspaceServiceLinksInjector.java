@@ -13,12 +13,14 @@ package org.eclipse.che.api.workspace.server;
 import org.eclipse.che.api.core.rest.ServiceContext;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.core.rest.shared.dto.LinkParameter;
+import org.eclipse.che.api.environment.server.MachineLinksInjector;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.ServerDto;
 import org.eclipse.che.api.machine.shared.dto.SnapshotDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceRuntimeDto;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
@@ -60,6 +62,14 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
  */
 @Singleton
 public class WorkspaceServiceLinksInjector {
+
+    private final MachineLinksInjector machineLinksInjector;
+
+    @Inject
+    public WorkspaceServiceLinksInjector(MachineLinksInjector machineLinksInjector) {
+                this.machineLinksInjector = machineLinksInjector;
+    }
+
 
     public WorkspaceDto injectLinks(WorkspaceDto workspace, ServiceContext serviceContext) {
         final UriBuilder uriBuilder = serviceContext.getServiceUriBuilder();
@@ -176,6 +186,8 @@ public class WorkspaceServiceLinksInjector {
                                              .toString(),
                                    LINK_REL_STOP_WORKSPACE));
 
+            runtime.getMachines().forEach(machine -> injectMachineLinks(machine, serviceContext));
+
             final MachineDto devMachine = runtime.getDevMachine();
             if (devMachine != null) {
                 final Collection<ServerDto> servers = devMachine.getRuntime()
@@ -232,4 +244,9 @@ public class WorkspaceServiceLinksInjector {
             }
         }
     }
+
+    protected MachineDto injectMachineLinks(MachineDto machine, ServiceContext serviceContext) {
+        return machineLinksInjector.injectLinks(machine, serviceContext);
+    }
+        
 }
