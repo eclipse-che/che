@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.ssh.server;
+package org.eclipse.che.plugin.ssh.key;
 
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.BadRequestException;
@@ -40,8 +40,7 @@ public class HttpSshServiceClient implements SshServiceClient {
     @Inject
     public HttpSshServiceClient(@Named("che.api") String apiUrl,
                                 HttpJsonRequestFactory requestFactory) {
-        this.sshUrl = UriBuilder.fromUri(apiUrl)
-                                .path(SshService.class)
+        this.sshUrl = UriBuilder.fromUri(apiUrl + "/ssh")
                                 .build()
                                 .toString();
         this.requestFactory = requestFactory;
@@ -50,8 +49,7 @@ public class HttpSshServiceClient implements SshServiceClient {
     @Override
     public SshPairDto generatePair(GenerateSshPairRequest request) throws ServerException {
         try {
-            final String url = UriBuilder.fromUri(sshUrl)
-                                         .path(SshService.class, "generatePair")
+            final String url = UriBuilder.fromUri(sshUrl + "/generatePair")
                                          .build()
                                          .toString();
             return requestFactory.fromUrl(url)
@@ -67,8 +65,7 @@ public class HttpSshServiceClient implements SshServiceClient {
     @Override
     public void createPair(SshPairDto sshPair) throws ServerException {
         try {
-            final String url = UriBuilder.fromUri(sshUrl)
-                                         .path(SshService.class, "createPair")
+            final String url = UriBuilder.fromUri(sshUrl + "/createPair")
                                          .build()
                                          .toString();
             requestFactory.fromUrl(url)
@@ -84,8 +81,7 @@ public class HttpSshServiceClient implements SshServiceClient {
     @Override
     public SshPairDto getPair(String service, String name) throws ServerException, NotFoundException {
         try {
-            final String url = UriBuilder.fromUri(sshUrl)
-                                         .path(SshService.class, "getPair")
+            final String url = UriBuilder.fromUri(sshUrl + "/getPair")
                                          .build(service)
                                          .toString();
 
@@ -102,8 +98,7 @@ public class HttpSshServiceClient implements SshServiceClient {
     @Override
     public void removePair(String service, String name) throws ServerException, NotFoundException {
         try {
-            final String url = UriBuilder.fromUri(sshUrl)
-                                         .path(SshService.class, "removePair")
+            final String url = UriBuilder.fromUri(sshUrl + "/removePair")
                                          .build(service)
                                          .toString();
 
