@@ -431,7 +431,6 @@ init_check_mounts() {
   if ! is_fast; then 
     check_host_volume_mount
   fi
-return 2
 
   DEFAULT_CHE_CONFIG="${DATA_MOUNT}"
   DEFAULT_CHE_INSTANCE="${DATA_MOUNT}"/instance
