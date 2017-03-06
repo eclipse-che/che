@@ -14,5 +14,10 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:che='urn:import:org.eclipse.che.ide.ui.listbox'>
-    <che:CustomComboBox ui:field="goalComboBox" width="500px"/>
+    <ui:style>
+        .combo-box {
+            display: block;
+        }
+    </ui:style>
+    <che:CustomComboBox ui:field="goalComboBox" width="500px" addStyleNames="{style.combo-box}"/>
 </ui:UiBinder>
