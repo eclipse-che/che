@@ -73,8 +73,8 @@ public class OrionEditorInit {
     private final TextEditorConfiguration configuration;
     private final CodeAssistantFactory codeAssistantFactory;
     private final OrionEditorPresenter textEditor;
-    private EditorPropertiesManager editorPropertiesManager;
     private final QuickAssistAssistant quickAssist;
+    private EditorPropertiesManager editorPropertiesManager;
 
     /**
      * The quick assist assistant.
@@ -205,7 +205,7 @@ public class OrionEditorInit {
                 CodeAssistProcessor processor = processors.get(key);
                 codeAssistant.setCodeAssistantProcessor(key, processor);
                 if (processor.getTriggerCharacters() != null) {
-                        triggerCharacters.addAll(processor.getTriggerCharacters());
+                    triggerCharacters.addAll(processor.getTriggerCharacters());
                 }
             }
             handleTriggerCharacters(triggerCharacters, documentHandle, codeAssistant);
@@ -256,7 +256,7 @@ public class OrionEditorInit {
      * Add listener for document changes to auto invoke auto completion on trigger character
      */
     private void handleTriggerCharacters(final Set<String> triggerCharacters, DocumentHandle documentHandle, final CodeAssistant codeAssistant) {
-        if(triggerCharacters.size() != 0) {
+        if (triggerCharacters.size() != 0) {
             int len = 0;
             for (String triggerCharacter : triggerCharacters) {
                 if (len < triggerCharacter.length()) {
@@ -282,11 +282,11 @@ public class OrionEditorInit {
         }
     }
 
-    private void handleDocumentChange(DocumentChangeEvent event, Set<String> triggers, CodeAssistant codeAssistant, int maxLen){
+    private void handleDocumentChange(DocumentChangeEvent event, Set<String> triggers, CodeAssistant codeAssistant, int maxLen) {
         //skip paste test fragments
         if (event.getText().length() == 1) {
-            if (triggers.contains(event.getText())) {
-                showCompletion(codeAssistant, true);
+            if (triggers.contains(event.getText()) && !textEditor.getEditorWidget().isCompletionProposalsShowing()) {
+                showCompletion(codeAssistant, false);
             }
 
             StringBuilder machString = new StringBuilder(event.getText());
@@ -296,8 +296,8 @@ public class OrionEditorInit {
                     return;
                 }
                 machString.insert(0, event.getDocument().getDocument().getContentRange(--offset, 1));
-                if (triggers.contains(machString.toString())) {
-                    showCompletion(codeAssistant, true);
+                if (triggers.contains(machString.toString()) && !textEditor.getEditorWidget().isCompletionProposalsShowing()) {
+                    showCompletion(codeAssistant, false);
                     return;
                 }
             }
@@ -325,12 +325,7 @@ public class OrionEditorInit {
                     // cursor must be computed here again so it's original value is not baked in
                     // the SMI instance closure - important for completion update when typing
                     final int cursor = textEditor.getCursorOffset();
-                    codeAssistant.computeCompletionProposals(cursor, triggered, new CodeAssistCallback() {
-                        @Override
-                        public void proposalComputed(final List<CompletionProposal> proposals) {
-                            callback.onCompletionReady(proposals);
-                        }
-                    });
+                    codeAssistant.computeCompletionProposals(cursor, triggered, proposals -> callback.onCompletionReady(proposals, triggered));
                 }
             });
         } else {
