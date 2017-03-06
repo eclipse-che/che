@@ -39,7 +39,7 @@ cmd_upgrade() {
     fi
     ARGS+="$var "
   done
-  
+
   # If we got here, this means:
   #   image version > configured & installed version
   #   configured version = installed version
