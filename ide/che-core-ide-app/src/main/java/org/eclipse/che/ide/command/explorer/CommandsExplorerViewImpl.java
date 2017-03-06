@@ -134,6 +134,22 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
         return null;
     }
 
+    @Nullable
+    @Override
+    public ContextualCommand getSelectedCommand() {
+        final List<Node> selectedNodes = tree.getSelectionModel().getSelectedNodes();
+
+        if (!selectedNodes.isEmpty()) {
+            final Node selectedNode = selectedNodes.get(0);
+
+            if (selectedNode instanceof CommandFileNode) {
+                return ((CommandFileNode)selectedNode).getData();
+            }
+        }
+
+        return null;
+    }
+
     @Override
     public void selectCommand(ContextualCommand command) {
         tree.getSelectionModel().setSelection(singletonList(commandNodes.get(command)));

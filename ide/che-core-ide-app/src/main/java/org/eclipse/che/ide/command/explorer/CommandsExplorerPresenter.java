@@ -12,7 +12,6 @@ package org.eclipse.che.ide.command.explorer;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.gwt.core.client.Callback;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -156,6 +155,10 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
                 commandManager.createCommand(selectedGoal.getId(),
                                              selectedCommandType.getId(),
                                              defaultApplicableContext)
+                              .then(command -> {
+                                  refreshViewAndSelectCommand(command);
+                                  editorAgent.openEditor(nodeFactory.newCommandFileNode(command));
+                              })
                               .catchError((Operation<PromiseError>)arg -> {
                                   notificationManager.notify(messages.explorerMessageUnableCreate(),
                                                              arg.getMessage(),
@@ -170,7 +173,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     @Override
     public void onCommandDuplicate(ContextualCommand command) {
         commandManager.createCommand(command)
-                      .then(view::selectCommand)
+                      .then(this::refreshViewAndSelectCommand)
                       .catchError((Operation<PromiseError>)arg -> {
                           notificationManager.notify(messages.explorerMessageUnableDuplicate(),
                                                      arg.getMessage(),
@@ -200,9 +203,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
 
     @Override
     public void onCommandAdded(ContextualCommand command) {
-        refreshViewAndSelectCommand(command);
-        // postpone opening command editor to avoid ConcurrentModificationException in CommandManagerImpl.notifyCommandAdded()
-        Scheduler.get().scheduleDeferred(() -> editorAgent.openEditor(nodeFactory.newCommandFileNode(command)));
+        refreshView();
     }
 
     @Override
@@ -215,8 +216,9 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
         refreshView();
     }
 
+    /** Refresh view and preserve current selection. */
     private void refreshView() {
-        refreshViewTask.delayAndSelectCommand(null);
+        refreshViewAndSelectCommand(null);
     }
 
     private void refreshViewAndSelectCommand(ContextualCommand command) {
@@ -234,7 +236,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     @VisibleForTesting
     static class RefreshViewTask extends DelayedTask {
 
-        // delay determined experimentally
+        // 300 milliseconds should be enough to fully refreshing the tree
         private static final int DELAY_MILLIS = 300;
 
         private final CommandsExplorerView          view;
@@ -242,7 +244,7 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
         private final CommandManager                commandManager;
         private final CommandUtils                  commandUtils;
 
-        private ContextualCommand command;
+        private ContextualCommand commandToSelect;
 
         @Inject
         public RefreshViewTask(CommandsExplorerView view,
@@ -259,35 +261,37 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
         public void onExecute() {
             refreshView();
 
-            if (command != null) {
+            if (commandToSelect != null) {
                 // wait some time while tree in the view will be fully refreshed
                 new Timer() {
                     @Override
                     public void run() {
-                        view.selectCommand(command);
+                        view.selectCommand(commandToSelect);
                     }
                 }.schedule(DELAY_MILLIS);
             }
         }
 
         void delayAndSelectCommand(@Nullable ContextualCommand command) {
-            this.command = command;
+            if (command != null) {
+                commandToSelect = command;
+            }
 
             delay(DELAY_MILLIS);
         }
 
         private void refreshView() {
-            final Map<CommandGoal, List<ContextualCommand>> commandsByGoal = new HashMap<>();
+            final Map<CommandGoal, List<ContextualCommand>> commandsByGoals = new HashMap<>();
 
-            // all predefined command goals must be shown in the view
-            // so populate map by all registered command goals
+            // all predefined commandToSelect goals must be shown in the view
+            // so populate map by all registered commandToSelect goals
             for (CommandGoal goal : goalRegistry.getAllGoals()) {
-                commandsByGoal.put(goal, new ArrayList<>());
+                commandsByGoals.put(goal, new ArrayList<>());
             }
 
-            commandsByGoal.putAll(commandUtils.groupCommandsByGoal(commandManager.getCommands()));
+            commandsByGoals.putAll(commandUtils.groupCommandsByGoal(commandManager.getCommands()));
 
-            view.setCommands(commandsByGoal);
+            view.setCommands(commandsByGoals);
         }
     }
 }

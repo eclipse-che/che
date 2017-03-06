@@ -38,6 +38,10 @@ public interface CommandsExplorerView extends View<CommandsExplorerView.ActionDe
     @Nullable
     CommandGoal getSelectedGoal();
 
+    /** Returns the currently selected command or {@code null} if none. */
+    @Nullable
+    ContextualCommand getSelectedCommand();
+
     /** Select the given {@code command}. */
     void selectCommand(ContextualCommand command);
 

@@ -231,10 +231,12 @@ public class CommandManagerImpl implements CommandManager,
 
     @Override
     public Promise<ContextualCommand> createCommand(ContextualCommand command) {
-        return doCreateCommand(command).then(newCommand -> {
+        return doCreateCommand(command).then((Function<ContextualCommand, ContextualCommand>)newCommand -> {
+            // postpone the notification because
             // listeners should be notified after returning from #createCommand method
-            // so let's postpone notification
             Scheduler.get().scheduleDeferred(() -> notifyCommandAdded(newCommand));
+
+            return newCommand;
         });
     }
 
