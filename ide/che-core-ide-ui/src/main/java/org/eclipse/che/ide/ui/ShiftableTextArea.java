@@ -23,7 +23,10 @@ import org.eclipse.che.ide.ui.smartTree.KeyboardNavigationHandler;
 public class ShiftableTextArea extends TextArea {
     public ShiftableTextArea() {
         super();
+        initializeEnterKeyHandler();
+    }
 
+    private void initializeEnterKeyHandler() {
         new KeyboardNavigationHandler(this) {
             @Override
             public void onEnter(NativeEvent evt) {
