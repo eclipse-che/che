@@ -17,15 +17,30 @@ init() {
   BLUE='\033[1;34m'
   GREEN='\033[0;32m'
   RED='\033[0;31m'
+  BROWN='\033[0;33m'
+  PURPLE='\033[0;35m'
   NC='\033[0m'
+  BOLD='\033[1m'
+  UNDERLINE='\033[4m'
 
   ORGANIZATION="eclipse"
   PREFIX="che"
   TAG="nightly"
   SKIP_TESTS=false
   NAME="che"
+  ARGS=""
+  OPTIONS=""
 
   while [ $# -gt 0 ]; do
+    case $1 in
+      --*)
+        OPTIONS="${OPTIONS} ${1}"
+        ;;
+      *)
+        ARGS="${ARGS} ${1}"
+        ;;
+    esac
+
     case $1 in
       --tag:*)
         TAG="${1#*:}"
@@ -40,20 +55,25 @@ init() {
         NAME="${1#*:}"
         shift ;;
       --skip-tests)
-        SKIP_TEST=true
+        SKIP_TESTS=true
         shift ;;
-      *) error "Unknown parameter: $1" return 2 ;;
+      --*)
+        printf "${RED}Unknown parameter: $1${NC}\n"; exit 2 ;;
+      *)
+       shift;;
     esac
   done
 
   IMAGE_NAME="$ORGANIZATION/$PREFIX-$NAME:$TAG"
-  echo $IMAGE_NAME
 }
 
 build() {
   DIR=$(cd "$(dirname "$0")"; pwd)
-  echo "Building Docker Image ${IMAGE_NAME} from $DIR directory with tag $TAG"
-  cd "${DIR}" && docker build -t ${IMAGE_NAME} .
+  printf "${BOLD}Building Docker Image ${IMAGE_NAME} from $DIR directory with tag $TAG${NC}\n"
+  # Replace macros in Dockerfiles
+  cat ${DIR}/Dockerfile | sed s/\$\{BUILD_ORGANIZATION\}/${ORGANIZATION}/ | sed s/\$\{BUILD_PREFIX\}/${PREFIX}/ | sed s/\$\{BUILD_TAG\}/${TAG}/ > ${DIR}/.Dockerfile
+  cd "${DIR}" && docker build -f ${DIR}/.Dockerfile -t ${IMAGE_NAME} .
+  rm ${DIR}/.Dockerfile
   if [ $? -eq 0 ]; then
     printf "Build of ${BLUE}${IMAGE_NAME} ${GREEN}[OK]${NC}\n"
     if [ ! -z "${IMAGE_ALIASES}" ]; then
