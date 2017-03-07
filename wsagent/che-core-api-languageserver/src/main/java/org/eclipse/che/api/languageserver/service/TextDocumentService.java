@@ -10,23 +10,21 @@
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.service;
 
-import io.typefox.lsapi.CompletionItem;
-import io.typefox.lsapi.CompletionList;
-import io.typefox.lsapi.DocumentHighlight;
-import io.typefox.lsapi.Hover;
-import io.typefox.lsapi.Location;
-import io.typefox.lsapi.SignatureHelp;
-import io.typefox.lsapi.SymbolInformation;
-import io.typefox.lsapi.TextEdit;
-import io.typefox.lsapi.impl.LocationImpl;
-import io.typefox.lsapi.services.LanguageServer;
+import static java.util.Collections.emptyList;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistryImpl;
+import org.eclipse.che.api.languageserver.shared.lsapi.CodeActionParamsDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.CompletionItemDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.DidChangeTextDocumentParamsDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.DidCloseTextDocumentParamsDTO;
@@ -39,15 +37,20 @@ import org.eclipse.che.api.languageserver.shared.lsapi.DocumentSymbolParamsDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.ReferenceParamsDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentPositionParamsDTO;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
-import static java.util.Collections.emptyList;
+import io.typefox.lsapi.Command;
+import io.typefox.lsapi.CompletionItem;
+import io.typefox.lsapi.CompletionList;
+import io.typefox.lsapi.DocumentHighlight;
+import io.typefox.lsapi.Hover;
+import io.typefox.lsapi.Location;
+import io.typefox.lsapi.SignatureHelp;
+import io.typefox.lsapi.SymbolInformation;
+import io.typefox.lsapi.TextEdit;
+import io.typefox.lsapi.impl.LocationImpl;
+import io.typefox.lsapi.services.LanguageServer;
 
 /**
  * REST API for the textDocument/* services defined in https://github.com/Microsoft/vscode-languageserver-protocol
@@ -178,7 +181,7 @@ public class TextDocumentService {
     public Hover hover(TextDocumentPositionParamsDTO positionParams)
             throws LanguageServerException, ExecutionException, InterruptedException {
         positionParams.getTextDocument().setUri(prefixURI(positionParams.getTextDocument().getUri()));
-        positionParams.setUri(prefixURI(positionParams.getUri()));
+        positionParams.setUri(positionParams.getTextDocument().getUri());
         LanguageServer server = getServer(positionParams.getTextDocument().getUri());
         if (server != null) {
             return server.getTextDocumentService().hover(positionParams).get();
@@ -297,6 +300,7 @@ public class TextDocumentService {
     @POST
     @Path("documentHighlight")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
 	public DocumentHighlight documentHighlight(TextDocumentPositionParamsDTO positionParams)
 			throws LanguageServerException, InterruptedException, ExecutionException {
     	positionParams.getTextDocument().setUri(prefixURI(positionParams.getTextDocument().getUri()));
@@ -306,6 +310,21 @@ public class TextDocumentService {
     	}
     	return null;
     }
+    
+    @POST
+    @Path("codeAction")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+	public List<? extends Command> codeAction(CodeActionParamsDTO params)
+					throws LanguageServerException, InterruptedException, ExecutionException {
+    	params.getTextDocument().setUri(prefixURI(params.getTextDocument().getUri()));
+    	LanguageServer server = getServer(params.getTextDocument().getUri());
+    	if (server != null) {
+    		return server.getTextDocumentService().codeAction(params).get();
+    	}
+    	return null;
+    }
+
 
     private LanguageServer getServer(String uri) throws LanguageServerException {
         return languageServerRegistry.findServer(uri);

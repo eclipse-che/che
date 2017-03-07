@@ -22,9 +22,13 @@ import org.eclipse.che.ide.api.editor.editorconfig.DefaultTextEditorConfiguratio
 import org.eclipse.che.ide.api.editor.formatter.ContentFormatter;
 import org.eclipse.che.ide.api.editor.partition.DocumentPartitioner;
 import org.eclipse.che.ide.api.editor.partition.DocumentPositionMap;
+import org.eclipse.che.ide.api.editor.quickfix.QuickAssistProcessor;
 import org.eclipse.che.ide.api.editor.reconciler.Reconciler;
 import org.eclipse.che.ide.api.editor.reconciler.ReconcilerWithAutoSave;
 import org.eclipse.che.ide.api.editor.signature.SignatureHelpProvider;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
+import org.eclipse.che.plugin.languageserver.ide.editor.quickassist.LanguageServerQuickAssistProcessor;
+import org.eclipse.che.plugin.languageserver.ide.editor.quickassist.LanguageServerQuickAssistProcessorFactory;
 import org.eclipse.che.plugin.languageserver.ide.editor.signature.LanguageServerSignatureHelpFactory;
 
 import java.util.HashMap;
@@ -44,8 +48,12 @@ public class LanguageServerEditorConfiguration extends DefaultTextEditorConfigur
     private final SignatureHelpProvider                    signatureHelpProvider;
     private       LanguageServerFormatter                  formatter;
 
+	private final LanguageServerQuickAssistProcessor quickAssistProcessor;
+
     @Inject
-    public LanguageServerEditorConfiguration(LanguageServerCodeassistProcessorFactory codeAssistProcessor,
+    public LanguageServerEditorConfiguration(@Assisted TextEditor editor,
+    										 LanguageServerCodeassistProcessorFactory codeAssistProcessor,
+    										 LanguageServerQuickAssistProcessorFactory quickAssistProcessorFactory,
                                              Provider<DocumentPositionMap> docPositionMapProvider,
                                              LanguageServerAnnotationModelFactory annotationModelFactory,
                                              LanguageServerReconcileStrategyFactory reconcileStrategyProviderFactory,
@@ -53,13 +61,16 @@ public class LanguageServerEditorConfiguration extends DefaultTextEditorConfigur
                                              LanguageServerSignatureHelpFactory signatureHelpFactory,
                                              @Assisted ServerCapabilities serverCapabilities) {
         codeAssistProcessorFactory = codeAssistProcessor;
+        quickAssistProcessor = quickAssistProcessorFactory.create(editor);
         if ((serverCapabilities.isDocumentFormattingProvider() != null && serverCapabilities.isDocumentFormattingProvider()) ||
             (serverCapabilities.isDocumentRangeFormattingProvider() != null && serverCapabilities.isDocumentRangeFormattingProvider()) ||
             serverCapabilities.getDocumentOnTypeFormattingProvider() != null) {
             this.formatter = formatterFactory.create(serverCapabilities);
         }
         this.serverCapabilities = serverCapabilities;
-        this.annotationModel = annotationModelFactory.get(docPositionMapProvider.get());
+        DocumentPositionMap documentPositionMap = docPositionMapProvider.get();
+        documentPositionMap.addPositionCategory(DocumentPositionMap.Categories.DEFAULT_CATEGORY);
+		this.annotationModel = annotationModelFactory.get(documentPositionMap);
 
         this.reconciler = new ReconcilerWithAutoSave(DocumentPartitioner.DEFAULT_CONTENT_TYPE, getPartitioner());
         reconciler.addReconcilingStrategy(DocumentPartitioner.DEFAULT_CONTENT_TYPE, reconcileStrategyProviderFactory.build(serverCapabilities));
@@ -79,6 +90,14 @@ public class LanguageServerEditorConfiguration extends DefaultTextEditorConfigur
         }
 
         return null;
+    }
+    
+    @Override
+    public QuickAssistProcessor getQuickAssistProcessor() {
+    	if (serverCapabilities.isCodeActionProvider()) {
+    		return quickAssistProcessor;
+    	}
+    	return null;
     }
 
     @Override
