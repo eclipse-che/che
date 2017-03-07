@@ -128,6 +128,7 @@
                         <exclude>**/org/eclipse/che/plugin/languageserver/ide/editor/codeassist/LatestCompletionResult.java</exclude>
                         <exclude>**/org/eclipse/che/plugin/languageserver/ide/editor/quickassist/ApplyTextEditAction.java</exclude>
                        	<exclude>**/org/eclipse/che/plugin/languageserver/ide/editor/quickassist/LanguageServerQuickAssistProcessor.java</exclude>
+                       	<exclude>**/org/eclipse/che/plugin/languageserver/ide/editor/quickassist/LanguageServerQuickAssistProcessorFactory.java</exclude>
                        	<exclude>**/org/eclipse/che/plugin/languageserver/ide/editor/quickassist/QuickassistActionEvent.java</exclude>
                     </excludes>
                 </configuration>
