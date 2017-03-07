@@ -67,9 +67,8 @@ public class WorkspaceServiceLinksInjector {
 
     @Inject
     public WorkspaceServiceLinksInjector(MachineLinksInjector machineLinksInjector) {
-                this.machineLinksInjector = machineLinksInjector;
+        this.machineLinksInjector = machineLinksInjector;
     }
-
 
     public WorkspaceDto injectLinks(WorkspaceDto workspace, ServiceContext serviceContext) {
         final UriBuilder uriBuilder = serviceContext.getServiceUriBuilder();
@@ -248,5 +247,4 @@ public class WorkspaceServiceLinksInjector {
     protected MachineDto injectMachineLinks(MachineDto machine, ServiceContext serviceContext) {
         return machineLinksInjector.injectLinks(machine, serviceContext);
     }
-        
 }
