@@ -921,7 +921,6 @@ public class OpenShiftConnector extends DockerConnector {
                                     .withImagePullPolicy(OPENSHIFT_IMAGE_PULL_POLICY_IFNOTPRESENT)
                                     .withNewSecurityContext()
                                         .withRunAsUser(UID)
-                                        .withPrivileged(true)
                                     .endSecurityContext()
                                     .withLivenessProbe(getLivenessProbeFrom(exposedPorts))
                                     .withVolumeMounts(getVolumeMountsFrom(volumes, workspaceID))
