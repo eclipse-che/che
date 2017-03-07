@@ -61,7 +61,7 @@ public class FileTreeWalker {
     private final Map<Path, Long> files       = new HashMap<>();
     private final Map<Path, Long> directories = new HashMap<>();
 
-    @Inject(optional=true)
+    @Inject
     public FileTreeWalker(@Named("che.user.workspaces.storage") File root,
 
                           @Named("che.fs.directory.update") Set<Consumer<Path>> directoryUpdateConsumers,
