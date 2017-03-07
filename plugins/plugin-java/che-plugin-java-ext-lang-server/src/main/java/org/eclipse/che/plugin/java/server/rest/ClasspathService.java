@@ -10,6 +10,17 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.java.server.rest;
 
+import static java.util.Collections.emptyList;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -19,35 +30,24 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JavaModel;
 import org.eclipse.jdt.internal.core.JavaModelManager;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import java.util.ArrayList;
-import java.util.List;
-
-import static java.util.Collections.emptyList;
-
 /**
  * Service for getting information about classpath.
  *
  * @author Valeriy Svydenko
  */
 @Path("java/classpath/")
-public class ClasspathService {
+public class ClasspathService implements ClasspathServiceInterface {
 
     private static final JavaModel model = JavaModelManager.getJavaModelManager().getJavaModel();
 
     /**
      * Returns information about classpath.
      *
-     * @param projectPath
-     *         path to the current project
+     * @param projectPath path to the current project
      * @return list of classpath entries
-     * @throws JavaModelException
-     *         when JavaModel has a failure
+     * @throws JavaModelException when JavaModel has a failure
      */
+    @Override
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public List<ClasspathEntryDto> getClasspath(@QueryParam("projectpath") String projectPath) throws JavaModelException {

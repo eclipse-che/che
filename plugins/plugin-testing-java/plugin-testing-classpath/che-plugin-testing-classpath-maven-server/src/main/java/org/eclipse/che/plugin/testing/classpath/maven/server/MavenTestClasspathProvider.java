@@ -18,10 +18,10 @@ import java.nio.file.Paths;
 import java.util.stream.Stream;
 
 import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
-import org.eclipse.che.plugin.java.server.rest.ClasspathService;
+import org.eclipse.che.plugin.java.server.rest.ClasspathServiceInterface;
 import org.eclipse.che.plugin.testing.classpath.server.TestClasspathProvider;
-import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -37,10 +37,10 @@ import com.google.inject.Inject;
  * @author David Festal
  */
 public class MavenTestClasspathProvider implements TestClasspathProvider {
-    private ClasspathService classpathService;
+    private ClasspathServiceInterface classpathService;
 
     @Inject
-    public MavenTestClasspathProvider(ClasspathService classpathService) {
+    public MavenTestClasspathProvider(ClasspathServiceInterface classpathService) {
         this.classpathService = classpathService;
     }
 
@@ -50,7 +50,7 @@ public class MavenTestClasspathProvider implements TestClasspathProvider {
     @Override
     public ClassLoader getClassLoader(String projectAbsolutePath, String projectRelativePath, boolean updateClasspath) throws Exception {
         try {
-            return new URLClassLoader(getProjectClasspath(projectAbsolutePath, projectRelativePath), null);
+            return new URLClassLoader(getProjectClasspath(projectAbsolutePath, projectRelativePath, getWorkspaceRoot()), null);
         } catch (JavaModelException e) {
             throw new Exception("Failed to build the classpath for testing project: " + projectRelativePath, e);
         }
@@ -74,12 +74,11 @@ public class MavenTestClasspathProvider implements TestClasspathProvider {
         });
     }
 
-    private IContainer getWorkspaceRoot() {
+    private IWorkspaceRoot getWorkspaceRoot() {
         return ResourcesPlugin.getWorkspace().getRoot();
     }
     
-    public URL[] getProjectClasspath(String projectAbsolutePath, String projectRelativePath) throws JavaModelException {
-        IContainer root = getWorkspaceRoot();
+    public URL[] getProjectClasspath(String projectAbsolutePath, String projectRelativePath, IWorkspaceRoot root) throws JavaModelException {
         Stream<ClasspathEntryDto> rawClasspath = classpathService.getClasspath(projectRelativePath).stream();
         Stream<ClasspathEntryDto> resolvedClasspath = toResolvedClassPath(rawClasspath);
         return resolvedClasspath.map(dto -> {
@@ -92,7 +91,7 @@ public class MavenTestClasspathProvider implements TestClasspathProvider {
                         if (res == null) {
                             path = new File(dtoPath);
                         } else {
-                            path = new File(root.getLocation().toFile(), dtoPath);
+                            path = res.getLocation().toFile();
                         }
                         break;
                     case IClasspathEntry.CPE_SOURCE:
@@ -106,7 +105,7 @@ public class MavenTestClasspathProvider implements TestClasspathProvider {
                                 path = Paths.get(projectAbsolutePath, "target", "test-classes").toFile();
                                 break;
                             default:
-                                path = new File(root.getLocation().toFile(), dtoPath);
+                                path = Paths.get(projectAbsolutePath, "target", "classes").toFile();
                         }
                         break;
                     default:
