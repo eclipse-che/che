@@ -54,7 +54,6 @@ import org.eclipse.che.ide.actions.common.RestorePartAction;
 import org.eclipse.che.ide.actions.find.FindActionAction;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
-import org.eclipse.che.ide.api.action.IdeActions;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.editor.EditorRegistry;
 import org.eclipse.che.ide.api.editor.texteditor.EditorResources;
@@ -106,7 +105,40 @@ import static org.eclipse.che.ide.actions.EditorActions.PIN_TAB;
 import static org.eclipse.che.ide.actions.EditorActions.REOPEN_CLOSED;
 import static org.eclipse.che.ide.actions.EditorActions.SPLIT_HORIZONTALLY;
 import static org.eclipse.che.ide.actions.EditorActions.SPLIT_VERTICALLY;
+import static org.eclipse.che.ide.api.action.IdeActions.CLOSE_ACTIVE_EDITOR;
+import static org.eclipse.che.ide.api.action.IdeActions.COPY;
+import static org.eclipse.che.ide.api.action.IdeActions.CREATE_PROJECT;
+import static org.eclipse.che.ide.api.action.IdeActions.CUT;
+import static org.eclipse.che.ide.api.action.IdeActions.DELETE_ITEM;
+import static org.eclipse.che.ide.api.action.IdeActions.FIND_ACTION;
+import static org.eclipse.che.ide.api.action.IdeActions.FORMAT;
+import static org.eclipse.che.ide.api.action.IdeActions.FULL_TEXT_SEARCH;
+import static org.eclipse.che.ide.api.action.IdeActions.GROUP_ASSISTANT;
+import static org.eclipse.che.ide.api.action.IdeActions.GROUP_CENTER_TOOLBAR;
+import static org.eclipse.che.ide.api.action.IdeActions.GROUP_EDIT;
+import static org.eclipse.che.ide.api.action.IdeActions.GROUP_EDITOR_CONTEXT_MENU;
+import static org.eclipse.che.ide.api.action.IdeActions.GROUP_EDITOR_TAB_CONTEXT_MENU;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_FILE_NEW;
+import static org.eclipse.che.ide.api.action.IdeActions.GROUP_HELP;
+import static org.eclipse.che.ide.api.action.IdeActions.GROUP_MAIN_CONTEXT_MENU;
+import static org.eclipse.che.ide.api.action.IdeActions.GROUP_MAIN_TOOLBAR;
+import static org.eclipse.che.ide.api.action.IdeActions.GROUP_PART_MENU;
+import static org.eclipse.che.ide.api.action.IdeActions.GROUP_PROFILE;
+import static org.eclipse.che.ide.api.action.IdeActions.GROUP_PROJECT;
+import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RECENT_FILES;
+import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RIGHT_MAIN_MENU;
+import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RIGHT_TOOLBAR;
+import static org.eclipse.che.ide.api.action.IdeActions.GROUP_WORKSPACE;
+import static org.eclipse.che.ide.api.action.IdeActions.IMPORT_PROJECT;
+import static org.eclipse.che.ide.api.action.IdeActions.NAVIGATE_TO_FILE;
+import static org.eclipse.che.ide.api.action.IdeActions.NEW_FILE;
+import static org.eclipse.che.ide.api.action.IdeActions.OPEN_RECENT_FILES;
+import static org.eclipse.che.ide.api.action.IdeActions.PASTE;
+import static org.eclipse.che.ide.api.action.IdeActions.RENAME;
+import static org.eclipse.che.ide.api.action.IdeActions.SHOW_REFERENCE;
+import static org.eclipse.che.ide.api.action.IdeActions.SIGNATURE_HELP;
+import static org.eclipse.che.ide.api.action.IdeActions.SWITCH_LEFT_TAB;
+import static org.eclipse.che.ide.api.action.IdeActions.SWITCH_RIGHT_TAB;
 import static org.eclipse.che.ide.api.constraints.Constraints.FIRST;
 import static org.eclipse.che.ide.api.constraints.Constraints.LAST;
 import static org.eclipse.che.ide.part.editor.recent.RecentFileStore.RECENT_GROUP_ID;
@@ -120,25 +152,6 @@ import static org.eclipse.che.ide.projecttype.BlankProjectWizardRegistrar.BLANK_
  */
 @Singleton
 public class StandardComponentInitializer {
-
-    public static final String NAVIGATE_TO_FILE    = "navigateToFile";
-    public static final String FULL_TEXT_SEARCH    = "fullTextSearch";
-    public static final String FIND_ACTION         = "findActionAction";
-    public static final String FORMAT              = "format";
-    public static final String COPY                = "copy";
-    public static final String CUT                 = "cut";
-    public static final String PASTE               = "paste";
-    public static final String SWITCH_LEFT_TAB     = "switchLeftTab";
-    public static final String SWITCH_RIGHT_TAB    = "switchRightTab";
-    public static final String OPEN_RECENT_FILES   = "openRecentFiles";
-    public static final String DELETE_ITEM         = "deleteItem";
-    public static final String NEW_FILE            = "newFile";
-    public static final String CREATE_PROJECT      = "createProject";
-    public static final String IMPORT_PROJECT      = "importProject";
-    public static final String CLOSE_ACTIVE_EDITOR = "closeActiveEditor";
-    public static final String SIGNATURE_HELP      = "signatureHelp";
-    public static final String RENAME              = "renameResource";
-    public static final String SHOW_REFERENCE      = "showReference";
 
     public interface ParserResource extends ClientBundle {
         @Source("org/eclipse/che/ide/blank.svg")
@@ -454,7 +467,7 @@ public class StandardComponentInitializer {
         editorRegistry.registerDefaultEditor(jpgFile, imageViewerProvider);
 
         // Workspace (New Menu)
-        DefaultActionGroup workspaceGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_WORKSPACE);
+        DefaultActionGroup workspaceGroup = (DefaultActionGroup)actionManager.getAction(GROUP_WORKSPACE);
 
         actionManager.registerAction(IMPORT_PROJECT, importProjectAction);
         workspaceGroup.add(importProjectAction);
@@ -468,7 +481,7 @@ public class StandardComponentInitializer {
         workspaceGroup.addSeparator();
 
         // Project (New Menu)
-        DefaultActionGroup projectGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_PROJECT);
+        DefaultActionGroup projectGroup = (DefaultActionGroup)actionManager.getAction(GROUP_PROJECT);
 
         DefaultActionGroup newGroup = new DefaultActionGroup("New", true, actionManager);
         newGroup.getTemplatePresentation().setDescription("Create...");
@@ -511,9 +524,9 @@ public class StandardComponentInitializer {
         projectGroup.add(projectConfigurationAction);
 
         // Edit (New Menu)
-        DefaultActionGroup editGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_EDIT);
+        DefaultActionGroup editGroup = (DefaultActionGroup)actionManager.getAction(GROUP_EDIT);
         DefaultActionGroup recentGroup = new DefaultActionGroup(RECENT_GROUP_ID, true, actionManager);
-        actionManager.registerAction(IdeActions.GROUP_RECENT_FILES, recentGroup);
+        actionManager.registerAction(GROUP_RECENT_FILES, recentGroup);
         actionManager.registerAction("clearRecentList", clearRecentFilesAction);
         recentGroup.addSeparator();
         recentGroup.add(clearRecentFilesAction, LAST);
@@ -561,7 +574,7 @@ public class StandardComponentInitializer {
         editGroup.add(revealResourceAction);
 
         // Assistant (New Menu)
-        DefaultActionGroup assistantGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_ASSISTANT);
+        DefaultActionGroup assistantGroup = (DefaultActionGroup)actionManager.getAction(GROUP_ASSISTANT);
 
         actionManager.registerAction(FIND_ACTION, findActionAction);
         assistantGroup.add(findActionAction);
@@ -588,13 +601,13 @@ public class StandardComponentInitializer {
         saveGroup.add(saveAllAction);
 
         //Compose Profile menu
-        DefaultActionGroup profileGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_PROFILE);
+        DefaultActionGroup profileGroup = (DefaultActionGroup)actionManager.getAction(GROUP_PROFILE);
         actionManager.registerAction("showPreferences", showPreferencesAction);
 
         profileGroup.add(showPreferencesAction);
 
         // Compose Help menu
-        DefaultActionGroup helpGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_HELP);
+        DefaultActionGroup helpGroup = (DefaultActionGroup)actionManager.getAction(GROUP_HELP);
         helpGroup.addSeparator();
 
         // Compose main context menu
@@ -620,18 +633,18 @@ public class StandardComponentInitializer {
         resourceOperation.add(convertFolderToProjectAction);
         resourceOperation.addSeparator();
 
-        DefaultActionGroup mainContextMenuGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_MAIN_CONTEXT_MENU);
+        DefaultActionGroup mainContextMenuGroup = (DefaultActionGroup)actionManager.getAction(GROUP_MAIN_CONTEXT_MENU);
         mainContextMenuGroup.add(newGroup, Constraints.FIRST);
         mainContextMenuGroup.addSeparator();
         mainContextMenuGroup.add(resourceOperation);
 
-        DefaultActionGroup partMenuGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_PART_MENU);
+        DefaultActionGroup partMenuGroup = (DefaultActionGroup)actionManager.getAction(GROUP_PART_MENU);
         partMenuGroup.add(maximizePartAction);
         partMenuGroup.add(minimizePartAction);
         partMenuGroup.add(restorePartAction);
 
         actionManager.registerAction("expandEditor", expandEditorAction);
-        DefaultActionGroup rightMenuGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_RIGHT_MAIN_MENU);
+        DefaultActionGroup rightMenuGroup = (DefaultActionGroup)actionManager.getAction(GROUP_RIGHT_MAIN_MENU);
         rightMenuGroup.add(expandEditorAction, FIRST);
 
         // Compose main toolbar
@@ -653,20 +666,20 @@ public class StandardComponentInitializer {
         changeResourceGroup.add(pasteResourceAction);
         changeResourceGroup.add(deleteResourceAction);
 
-        DefaultActionGroup mainToolbarGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_MAIN_TOOLBAR);
+        DefaultActionGroup mainToolbarGroup = (DefaultActionGroup)actionManager.getAction(GROUP_MAIN_TOOLBAR);
         mainToolbarGroup.add(newGroup);
         mainToolbarGroup.add(changeResourceGroup);
         toolbarPresenter.bindMainGroup(mainToolbarGroup);
 
-        DefaultActionGroup centerToolbarGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_CENTER_TOOLBAR);
+        DefaultActionGroup centerToolbarGroup = (DefaultActionGroup)actionManager.getAction(GROUP_CENTER_TOOLBAR);
         toolbarPresenter.bindCenterGroup(centerToolbarGroup);
 
-        DefaultActionGroup rightToolbarGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_RIGHT_TOOLBAR);
+        DefaultActionGroup rightToolbarGroup = (DefaultActionGroup)actionManager.getAction(GROUP_RIGHT_TOOLBAR);
         toolbarPresenter.bindRightGroup(rightToolbarGroup);
 
         //Editor context menu group
         DefaultActionGroup editorTabContextMenu =
-                (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_EDITOR_TAB_CONTEXT_MENU);
+                (DefaultActionGroup)actionManager.getAction(GROUP_EDITOR_TAB_CONTEXT_MENU);
         editorTabContextMenu.add(closeAction);
         actionManager.registerAction(CLOSE, closeAction);
         editorTabContextMenu.add(closeAllAction);
@@ -688,7 +701,7 @@ public class StandardComponentInitializer {
         actionManager.registerAction(SIGNATURE_HELP, signatureHelpAction);
 
         DefaultActionGroup editorContextMenuGroup = new DefaultActionGroup(actionManager);
-        actionManager.registerAction(IdeActions.GROUP_EDITOR_CONTEXT_MENU, editorContextMenuGroup);
+        actionManager.registerAction(GROUP_EDITOR_CONTEXT_MENU, editorContextMenuGroup);
 
         editorContextMenuGroup.add(undoAction);
         editorContextMenuGroup.add(redoAction);
