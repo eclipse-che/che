@@ -17,6 +17,8 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.machine.shared.dto.SnapshotDto;
+import org.eclipse.che.api.promises.client.Function;
+import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
@@ -47,10 +49,13 @@ import org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter;
 import org.eclipse.che.ide.workspace.start.StartWorkspacePresenter;
 
 import java.util.List;
+import java.util.Map;
 
+import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_AUTO_START;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.ui.loaders.LoaderPresenter.Phase.CREATING_WORKSPACE_SNAPSHOT;
 import static org.eclipse.che.ide.ui.loaders.LoaderPresenter.Phase.STARTING_WORKSPACE_RUNTIME;
+import static org.eclipse.che.ide.ui.loaders.LoaderPresenter.Phase.WORKSPACE_STOPPED;
 
 /**
  * @author Evgen Vidolob
@@ -201,11 +206,23 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
                         });
                         break;
                     default:
-                        if (checkForShapshots) {
-                            checkWorkspaceForSnapshots(workspace);
-                        } else {
-                            startWorkspaceById(workspace.getId(), workspace.getConfig().getDefaultEnv(), restoreFromSnapshot);
-                        }
+                        workspaceServiceClient.getSettings() //
+                                              .then(new Function<Map<String, String>, Map<String, String>>() {
+                                                  @Override
+                                                  public Map<String, String> apply(Map<String, String> settings) throws FunctionException {
+                                                      if (Boolean.parseBoolean(settings.getOrDefault(CHE_WORKSPACE_AUTO_START, "true"))) {
+                                                          if (checkForShapshots) {
+                                                              checkWorkspaceForSnapshots(workspace);
+                                                          } else {
+                                                              startWorkspaceById(workspace.getId(), workspace.getConfig().getDefaultEnv(),
+                                                                                 restoreFromSnapshot);
+                                                          }
+                                                      } else {
+                                                          loader.show(WORKSPACE_STOPPED);
+                                                      }
+                                                      return settings;
+                                                  }
+                                              });
                 }
             }
         });
