@@ -56,7 +56,7 @@ public class RunTestActionDelegate {
         source.getNotificationManager().notify(notification);
         final Project project = source.getAppContext().getRootProject();
         parameters.put("updateClasspath", "true");
-        Promise<TestResult> testResultPromise = source.getService().getTestResult(project.getPath(), "junit", parameters);
+        Promise<TestResult> testResultPromise = source.getService().getTestResult(project.getPath(), "junit", parameters, notification);
         testResultPromise.then(new Operation<TestResult>() {
             @Override
             public void apply(TestResult result) throws OperationException {
