@@ -30,14 +30,14 @@ post_cmd_upgrade() {
 cmd_upgrade() {
   CHE_IMAGE_VERSION=$(get_image_version)
   DO_BACKUP="true"
+  ARGS=""
 
-  while [ $# -gt 0 ]; do
-    case $1 in
-      --skip-backup)
-        DO_BACKUP="false"
-        shift ;;
-      *) error "Unknown parameter: $1; did you mean --skip-backup?" ; return 2 ;;
-    esac
+  for var in $@; do
+    if [[ "$var" == *"--skip-backup"* ]]; then
+              DO_BACKUP="false"
+              continue
+    fi
+    ARGS+="$var "
   done
 
   # If we got here, this means:
@@ -73,5 +73,5 @@ cmd_upgrade() {
   info "upgrade" "Reinitializing the system with your configuration..."
   cmd_lifecycle init --accept-license --reinit
 
-  cmd_lifecycle start
+  cmd_lifecycle start ${ARGS}
 }

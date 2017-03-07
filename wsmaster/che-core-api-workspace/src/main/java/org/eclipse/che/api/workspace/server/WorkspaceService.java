@@ -70,6 +70,9 @@ import static java.util.stream.Collectors.toList;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
+import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_AUTO_RESTORE;
+import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_AUTO_SNAPSHOT;
+import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_AUTO_START;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_CREATE_WORKSPACE;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_BY_NAMESPACE;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_WORKSPACES;
@@ -84,8 +87,6 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 @Api(value = "/workspace", description = "Workspace REST API")
 @Path("/workspace")
 public class WorkspaceService extends Service {
-    private static final String CHE_WORKSPACE_AUTO_SNAPSHOT= "che.workspace.auto_snapshot";
-    private static final String CHE_WORKSPACE_AUTO_RESTORE= "che.workspace.auto_restore";
 
     private final WorkspaceManager              workspaceManager;
     private final WorkspaceValidator            validator;
@@ -94,6 +95,7 @@ public class WorkspaceService extends Service {
     private final String                        apiEndpoint;
     private final boolean                       cheWorkspaceAutoSnapshot;
     private final boolean                       cheWorkspaceAutoRestore;
+    private final boolean                       cheWorkspaceAutoStart;
     @Context
     private SecurityContext securityContext;
 
@@ -104,7 +106,8 @@ public class WorkspaceService extends Service {
                             WsAgentHealthChecker agentHealthChecker,
                             WorkspaceServiceLinksInjector workspaceServiceLinksInjector,
                             @Named(CHE_WORKSPACE_AUTO_SNAPSHOT) boolean cheWorkspaceAutoSnapshot,
-                            @Named(CHE_WORKSPACE_AUTO_RESTORE) boolean cheWorkspaceAutoRestore) {
+                            @Named(CHE_WORKSPACE_AUTO_RESTORE) boolean cheWorkspaceAutoRestore,
+                            @Named(CHE_WORKSPACE_AUTO_START) boolean cheWorkspaceAutoStart) {
         this.apiEndpoint = apiEndpoint;
         this.workspaceManager = workspaceManager;
         this.validator = validator;
@@ -112,6 +115,7 @@ public class WorkspaceService extends Service {
         this.linksInjector = workspaceServiceLinksInjector;
         this.cheWorkspaceAutoSnapshot = cheWorkspaceAutoSnapshot;
         this.cheWorkspaceAutoRestore = cheWorkspaceAutoRestore;
+        this.cheWorkspaceAutoStart = cheWorkspaceAutoStart;
     }
 
     @POST
@@ -719,8 +723,9 @@ public class WorkspaceService extends Service {
     @ApiOperation(value = "Get workspace server configuration values")
     @ApiResponses({@ApiResponse(code = 200, message = "The response contains server settings")})
     public Map<String, String> getSettings() {
-        return ImmutableMap.of(CHE_WORKSPACE_AUTO_SNAPSHOT, Boolean.toString(cheWorkspaceAutoSnapshot),
-                               CHE_WORKSPACE_AUTO_RESTORE, Boolean.toString(cheWorkspaceAutoRestore));
+        return ImmutableMap.of(CHE_WORKSPACE_AUTO_SNAPSHOT, Boolean.toString(cheWorkspaceAutoSnapshot), //
+                               CHE_WORKSPACE_AUTO_RESTORE, Boolean.toString(cheWorkspaceAutoRestore), //
+                               CHE_WORKSPACE_AUTO_START, Boolean.toString(cheWorkspaceAutoStart));
     }
 
     private static Map<String, String> parseAttrs(List<String> attributes) throws BadRequestException {
