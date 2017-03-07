@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-svn-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>5.4.0-SNAPSHOT</version>
+        <version>5.5.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-svn-ext-ide</artifactId>
     <packaging>jar</packaging>
@@ -96,11 +96,6 @@
         <dependency>
             <groupId>com.google.gwt</groupId>
             <artifactId>gwt-dev</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.googlecode.gwt-test-utils</groupId>
-            <artifactId>gwt-test-utils</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

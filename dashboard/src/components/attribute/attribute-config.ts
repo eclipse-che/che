@@ -17,10 +17,12 @@ import {CheReloadHref} from './reload-href/che-reload-href.directive';
 import {CheFormatOutput} from './format-output/che-format-output.directive';
 import {CheOnLongTouch} from './touch/che-on-long-touch.directive';
 import {CheOnRightClick} from './click/che-on-right-click.directive';
+import {CheTypeNumber} from './input-type/input-number.directive';
+import {CheTypeCity} from './input-type/input-city.directive';
 
 export class AttributeConfig {
 
-  constructor(register) {
+  constructor(register: che.IRegisterService) {
 
     register.directive('focusable', CheFocusable);
 
@@ -35,5 +37,8 @@ export class AttributeConfig {
     register.directive('cheOnLongTouch', CheOnLongTouch);
 
     register.directive('cheOnRightClick', CheOnRightClick);
+
+    register.directive('cheTypeNumber', CheTypeNumber);
+    register.directive('cheTypeCity', CheTypeCity);
   }
 }

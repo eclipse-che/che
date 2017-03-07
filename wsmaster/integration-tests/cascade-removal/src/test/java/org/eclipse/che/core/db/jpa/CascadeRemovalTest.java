@@ -20,6 +20,8 @@ import com.google.inject.persist.jpa.JpaPersistModule;
 import org.eclipse.che.account.api.AccountManager;
 import org.eclipse.che.account.api.AccountModule;
 import org.eclipse.che.account.event.BeforeAccountRemovedEvent;
+import org.eclipse.che.account.spi.AccountDao;
+import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -67,6 +69,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 import static org.eclipse.che.commons.test.db.H2TestHelper.inMemoryDefault;
+import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createAccount;
 import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createPreferences;
 import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createProfile;
 import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createSnapshot;
@@ -91,6 +94,7 @@ public class CascadeRemovalTest {
 
     private Injector      injector;
     private EventService  eventService;
+    private AccountDao    accountDao;
     private PreferenceDao preferenceDao;
     private UserDao       userDao;
     private ProfileDao    profileDao;
@@ -98,8 +102,9 @@ public class CascadeRemovalTest {
     private SnapshotDao   snapshotDao;
     private SshDao        sshDao;
 
-    /** User is a root of dependency tree. */
-    private UserImpl user;
+    /** Account and User are a root of dependency tree. */
+    private AccountImpl account;
+    private UserImpl    user;
 
     /** Profile depends on user. */
     private ProfileImpl profile;
@@ -148,6 +153,7 @@ public class CascadeRemovalTest {
         });
 
         eventService = injector.getInstance(EventService.class);
+        accountDao = injector.getInstance(AccountDao.class);
         userDao = injector.getInstance(UserDao.class);
         preferenceDao = injector.getInstance(PreferenceDao.class);
         profileDao = injector.getInstance(ProfileDao.class);
@@ -162,10 +168,11 @@ public class CascadeRemovalTest {
     }
 
     @Test
-    public void shouldDeleteAllTheEntitiesWhenUserIsDeleted() throws Exception {
+    public void shouldDeleteAllTheEntitiesWhenUserAndAccountIsDeleted() throws Exception {
         createTestData();
 
         // Remove the user, all entries must be removed along with the user
+        accountDao.remove(account.getId());
         userDao.remove(user.getId());
 
         // Check all the entities are removed
@@ -173,13 +180,13 @@ public class CascadeRemovalTest {
         assertNull(notFoundToNull(() -> profileDao.getById(user.getId())));
         assertTrue(preferenceDao.getPreferences(user.getId()).isEmpty());
         assertTrue(sshDao.get(user.getId()).isEmpty());
-        assertTrue(workspaceDao.getByNamespace(user.getId()).isEmpty());
+        assertTrue(workspaceDao.getByNamespace(user.getName()).isEmpty());
         assertTrue(snapshotDao.findSnapshots(workspace1.getId()).isEmpty());
         assertTrue(snapshotDao.findSnapshots(workspace2.getId()).isEmpty());
     }
 
-    @Test(dataProvider = "beforeRemoveRollbackActions")
-    public void shouldRollbackTransactionWhenFailedToRemoveAnyOfEntries(
+    @Test(dataProvider = "beforeUserRemoveRollbackActions")
+    public void shouldRollbackTransactionWhenFailedToRemoveAnyOfEntriesDuringUserRemoving(
             Class<CascadeEventSubscriber<CascadeEvent>> subscriberClass,
             Class<CascadeEvent> eventClass) throws Exception {
         createTestData();
@@ -197,32 +204,58 @@ public class CascadeRemovalTest {
         assertNotNull(profileDao.getById(user.getId()));
         assertFalse(preferenceDao.getPreferences(user.getId()).isEmpty());
         assertFalse(sshDao.get(user.getId()).isEmpty());
+        wipeTestData();
+    }
+
+    @DataProvider(name = "beforeUserRemoveRollbackActions")
+    public Object[][] beforeUserRemoveActions() {
+        return new Class[][] {
+                {RemovePreferencesBeforeUserRemovedEventSubscriber.class, BeforeUserRemovedEvent.class},
+                {RemoveProfileBeforeUserRemovedEventSubscriber.class, BeforeUserRemovedEvent.class},
+                {RemoveSshKeysBeforeUserRemovedEventSubscriber.class, BeforeUserRemovedEvent.class},
+                };
+    }
+
+    @Test(dataProvider = "beforeAccountRemoveRollbackActions")
+    public void shouldRollbackTransactionWhenFailedToRemoveAnyOfEntriesDuringAccountRemoving(
+            Class<CascadeEventSubscriber<CascadeEvent>> subscriberClass,
+            Class<CascadeEvent> eventClass) throws Exception {
+        createTestData();
+        eventService.unsubscribe(injector.getInstance(subscriberClass), eventClass);
+
+        // Remove the user, all entries must be rolled back after fail
+        try {
+            accountDao.remove(account.getId());
+            fail("AccountDao#remove had to throw exception");
+        } catch (Exception ignored) {
+        }
+
+        // Check all the data rolled back
         assertFalse(workspaceDao.getByNamespace(user.getName()).isEmpty());
         assertFalse(snapshotDao.findSnapshots(workspace1.getId()).isEmpty());
         assertFalse(snapshotDao.findSnapshots(workspace2.getId()).isEmpty());
         wipeTestData();
     }
 
-    @DataProvider(name = "beforeRemoveRollbackActions")
-    public Object[][] beforeRemoveActions() {
+    @DataProvider(name = "beforeAccountRemoveRollbackActions")
+    public Object[][] beforeAccountRemoveActions() {
         return new Class[][] {
-                {RemovePreferencesBeforeUserRemovedEventSubscriber.class, BeforeUserRemovedEvent.class},
-                {RemoveProfileBeforeUserRemovedEventSubscriber.class, BeforeUserRemovedEvent.class},
                 {RemoveWorkspaceBeforeAccountRemovedEventSubscriber.class, BeforeAccountRemovedEvent.class},
                 {RemoveSnapshotsBeforeWorkspaceRemovedEventSubscriber.class, BeforeWorkspaceRemovedEvent.class},
-                {RemoveSshKeysBeforeUserRemovedEventSubscriber.class, BeforeUserRemovedEvent.class},
                 };
     }
 
     private void createTestData() throws ConflictException, ServerException {
+        accountDao.create(account = createAccount("bobby"));
+
         userDao.create(user = createUser("bobby"));
 
         profileDao.create(profile = createProfile(user.getId()));
 
         preferenceDao.setPreferences(user.getId(), preferences = createPreferences());
 
-        workspaceDao.create(workspace1 = createWorkspace("workspace1", user.getAccount()));
-        workspaceDao.create(workspace2 = createWorkspace("workspace2", user.getAccount()));
+        workspaceDao.create(workspace1 = createWorkspace("workspace1", account));
+        workspaceDao.create(workspace2 = createWorkspace("workspace2", account));
 
         sshDao.create(sshPair1 = createSshPair(user.getId(), "service", "name1"));
         sshDao.create(sshPair2 = createSshPair(user.getId(), "service", "name2"));
@@ -250,6 +283,8 @@ public class CascadeRemovalTest {
         profileDao.remove(user.getId());
 
         userDao.remove(user.getId());
+
+        accountDao.remove(account.getId());
     }
 
     private static <T> T notFoundToNull(Callable<T> action) throws Exception {

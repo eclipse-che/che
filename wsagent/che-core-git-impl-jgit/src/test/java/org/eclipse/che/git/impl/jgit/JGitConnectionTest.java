@@ -13,31 +13,40 @@ package org.eclipse.che.git.impl.jgit;
 
 import org.eclipse.che.api.git.CredentialsLoader;
 import org.eclipse.che.api.git.GitUserResolver;
+import org.eclipse.che.api.git.exception.GitException;
+import org.eclipse.che.api.git.params.CommitParams;
+import org.eclipse.che.api.git.shared.GitUser;
+import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.plugin.ssh.key.script.SshKeyProvider;
 import org.eclipse.jgit.api.TransportCommand;
 import org.eclipse.jgit.api.TransportConfigCallback;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.RepositoryState;
 import org.eclipse.jgit.transport.SshTransport;
 import org.eclipse.jgit.transport.Transport;
 import org.eclipse.jgit.transport.TransportHttp;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.lang.reflect.Field;
 
+import static java.util.Collections.singletonList;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
@@ -48,7 +57,7 @@ import static org.testng.Assert.assertEquals;
  *
  * @author Igor Vinokur
  */
-@Listeners(value = {MockitoTestNGListener.class})
+@Listeners(value = MockitoTestNGListener.class)
 public class JGitConnectionTest {
 
     @Mock
@@ -61,8 +70,24 @@ public class JGitConnectionTest {
     private GitUserResolver   gitUserResolver;
     @Mock
     private TransportCommand  transportCommand;
-    @InjectMocks
-    private JGitConnection    jGitConnection;
+    @Mock
+    private GitUserResolver   userResolver;
+
+    private JGitConnection jGitConnection;
+
+    @BeforeMethod
+    public void setup() {
+        jGitConnection = spy(new JGitConnection(repository, credentialsLoader, sshKeyProvider, userResolver));
+
+        RepositoryState repositoryState = mock(RepositoryState.class);
+        GitUser gitUser = mock(GitUser.class);
+        when(repositoryState.canAmend()).thenReturn(true);
+        when(repositoryState.canCommit()).thenReturn(true);
+        when(repository.getRepositoryState()).thenReturn(repositoryState);
+        when(gitUser.getName()).thenReturn("username");
+        when(gitUser.getEmail()).thenReturn("email");
+        when(userResolver.getUser()).thenReturn(gitUser);
+    }
 
     @DataProvider(name = "gitUrlsWithCredentialsProvider")
     private static Object[][] gitUrlsWithCredentials() {
@@ -180,5 +205,32 @@ public class JGitConnectionTest {
         String branchName = jGitConnection.getCurrentBranch();
 
         assertEquals(branchName, branchTest);
+    }
+
+    /** Test for workaround related to  https://bugs.eclipse.org/bugs/show_bug.cgi?id=510685.*/
+    @Test(expectedExceptions = GitException.class,
+          expectedExceptionsMessageRegExp = "Changes are present but not changed path was specified for commit.")
+    public void testCommitNotChangedSpecifiedPathsWithAmendWhenOtherStagedChangesArePresent() throws Exception {
+        //given
+        Status status = mock(Status.class);
+        when(status.getChanged()).thenReturn(singletonList("ChangedNotSpecified"));
+        doReturn(status).when(jGitConnection).status(anyObject());
+
+        //when
+        jGitConnection.commit(CommitParams.create("message").withFiles(singletonList("NotChangedSpecified")).withAmend(true));
+    }
+
+    /** Test for workaround related to  https://bugs.eclipse.org/bugs/show_bug.cgi?id=510685.*/
+    @Test(expectedExceptions = GitException.class,
+          expectedExceptionsMessageRegExp = "Changes are present but not changed path was specified for commit.")
+    public void testCommitNotChangedSpecifiedPathsWithAmendAndWithAllWhenOtherUnstagedChangesArePresent()
+            throws Exception {
+        //given
+        Status status = mock(Status.class);
+        when(status.getModified()).thenReturn(singletonList("ChangedNotSpecified"));
+        doReturn(status).when(jGitConnection).status(anyObject());
+
+        //when
+        jGitConnection.commit(CommitParams.create("message").withFiles(singletonList("NotChangedSpecified")).withAmend(true).withAll(true));
     }
 }

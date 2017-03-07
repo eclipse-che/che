@@ -13,7 +13,9 @@ import {CheEnvironmentRegistry} from '../../../../components/api/environment/che
 import {ImportStackService} from '../../stack-details/import-stack.service';
 import {CheStack} from '../../../../components/api/che-stack.factory';
 import {StackValidationService} from '../../stack-details/stack-validation.service';
+import {IEnvironmentManagerMachine} from '../../../../components/api/environment/environment-manager-machine';
 
+const DEFAULT_WORKSPACE_RAM: number = 2 * Math.pow(1024, 3);
 
 /**
  * @ngdoc controller
@@ -32,7 +34,7 @@ export class ImportStackController {
   private recipeFormat: string;
   private COMPOSE: string = 'compose';
   private DOCKERFILE: string = 'dockerfile';
-  private environmentValidation: che.IValidation;
+  private recipeValidation: che.IValidation;
   private editorOptions: che.IEditorOptions = {
     lineNumbers: true,
     lineWrapping: true,
@@ -53,7 +55,7 @@ export class ImportStackController {
     this.cheEnvironmentRegistry = cheEnvironmentRegistry;
 
     // set default values
-    this.environmentValidation = {isValid: false, errors: []};
+    this.recipeValidation = {isValid: false, errors: []};
     this.recipeFormat = this.DOCKERFILE;
     this.updateType();
   }
@@ -114,10 +116,19 @@ export class ImportStackController {
     if (machines.length === 1) {
       environmentManager.setDev(machines[0], true);
     }
+
+    // check each machine for RAM to be set
+    machines.forEach((machine: IEnvironmentManagerMachine) => {
+      let memoryLimit = environmentManager.getMemoryLimit(machine);
+      if (!memoryLimit || memoryLimit === -1) {
+        environmentManager.setMemoryLimit(machine, DEFAULT_WORKSPACE_RAM);
+      }
+    });
+
     let environment = environmentManager.getEnvironment(defaultEnv, machines);
-    // check environment correctness
-    this.environmentValidation = this.stackValidationService.getEnvironmentValidation(environment);
-    if (!this.environmentValidation.isValid) {
+    // check recipe correctness
+    this.recipeValidation = this.stackValidationService.getRecipeValidation(environment.recipe);
+    if (!this.recipeValidation.isValid) {
       return;
     }
     environments[stack.workspaceConfig.defaultEnv] = environment;

@@ -66,7 +66,7 @@ export class DefaultHttpJsonRequest implements HttpJsonRequest {
 
 
     request() : Promise<DefaultHttpJsonResponse> {
-
+        Log.getLogger().debug('Request on ', this.options.hostname + ' with port ', this.options.port);
         return new Promise<DefaultHttpJsonResponse>( (resolve, reject) => {
             var req = this.http.request(this.options,  (res) => {
 

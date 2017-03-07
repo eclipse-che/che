@@ -73,8 +73,6 @@ init_global_vars() {
   FAST_BOOT=false
   CHE_DEBUG=false
   CHE_OFFLINE=false
-  CHE_SKIP_PREFLIGHT=false
-  CHE_SKIP_POSTFLIGHT=false
   CHE_SKIP_NIGHTLY=false
   CHE_SKIP_NETWORK=false
   CHE_SKIP_PULL=false
@@ -209,14 +207,6 @@ init_usage_check() {
     set -x
   fi
 
-  if [[ "$@" == *"--skip:preflight"* ]]; then
-    CHE_SKIP_PREFLIGHT=true
-  fi
-
-  if [[ "$@" == *"--skip:postflight"* ]]; then
-    CHE_SKIP_POSTFLIGHT=true
-  fi
-
   if [[ "$@" == *"--skip:nightly"* ]]; then
     CHE_SKIP_NIGHTLY=true
   fi
@@ -329,8 +319,6 @@ start() {
   set -- "${@/\-\-debug/}"
   set -- "${@/\-\-offline/}"
   set -- "${@/\-\-trace/}"
-  set -- "${@/\-\-skip\:preflight/}"
-  set -- "${@/\-\-skip\:postflight/}"
   set -- "${@/\-\-skip\:nightly/}"
   set -- "${@/\-\-skip\:network/}"
   set -- "${@/\-\-skip\:pull/}"

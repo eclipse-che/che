@@ -10,34 +10,29 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.editor.events.doc;
 
-import org.eclipse.che.commons.annotation.Nullable;
+import com.google.web.bindery.event.shared.EventBus;
+import com.google.web.bindery.event.shared.HandlerRegistration;
 
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.editor.document.DocumentHandle;
 import org.eclipse.che.ide.api.editor.events.DocumentReadyEvent;
 import org.eclipse.che.ide.api.editor.events.DocumentReadyHandler;
-import org.eclipse.che.ide.api.editor.texteditor.EditorHandle;
-
-import com.google.web.bindery.event.shared.EventBus;
-import com.google.web.bindery.event.shared.HandlerRegistration;
 
 /**
  * Wrapper around components that need to wait for documents to be ready.
  */
 public class DocReadyWrapper<T> {
 
-    private final EditorHandle        editorHandle;
     private       DocReadyInit<T>     docReadyInit;
     private final T                   wrapped;
     private       HandlerRegistration docReadyRegistration;
     private       DocumentHandle      documentHandle;
 
-    public DocReadyWrapper(final EventBus generalEventBus, final EditorHandle editor, final T wrapped) {
-        this(generalEventBus, editor, null, wrapped);
+    public DocReadyWrapper(final EventBus generalEventBus, final T wrapped) {
+        this(generalEventBus, null, wrapped);
     }
 
-    public DocReadyWrapper(final EventBus generalEventBus, final EditorHandle editor,
-                           @Nullable final DocReadyInit<T> init, final T wrapped) {
-        this.editorHandle = editor;
+    public DocReadyWrapper(final EventBus generalEventBus, @Nullable final DocReadyInit<T> init, final T wrapped) {
         this.docReadyInit = init;
         this.wrapped = wrapped;
         this.docReadyRegistration = generalEventBus.addHandler(DocumentReadyEvent.TYPE,
@@ -48,15 +43,7 @@ public class DocReadyWrapper<T> {
                                                                        if (event == null) {
                                                                            return;
                                                                        }
-                                                                       if (event.getEditorHandle() == null) {
-                                                                           return;
-                                                                       }
-                                                                       EditorHandle eventHandle = event.getEditorHandle();
-                                                                       EditorHandle constantHandle = editorHandle;
-                                                                       boolean equal = eventHandle.equals(constantHandle);
-                                                                       if (!equal) {
-                                                                           return;
-                                                                       }
+
                                                                        // stop listening DocReady events
                                                                        if (docReadyRegistration != null) {
                                                                            docReadyRegistration.removeHandler();

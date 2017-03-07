@@ -12,6 +12,8 @@ package org.eclipse.che.account.api;
 
 import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.account.spi.AccountDao;
+import org.eclipse.che.account.spi.AccountImpl;
+import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 
@@ -33,6 +35,42 @@ public class AccountManager {
     @Inject
     public AccountManager(AccountDao accountDao) {
         this.accountDao = accountDao;
+    }
+
+    /**
+     * Creates account.
+     *
+     * @param account
+     *         account to create
+     * @throws NullPointerException
+     *         when {@code account} is null
+     * @throws ConflictException
+     *         when account with such name or id already exists
+     * @throws ServerException
+     *         when any other error occurs during account creating
+     */
+    public void create(Account account) throws ConflictException, ServerException {
+        requireNonNull(account, "Required non-null account");
+        accountDao.create(new AccountImpl(account));
+    }
+
+    /**
+     * Updates account by replacing an existing account entity with a new one.
+     *
+     * @param account
+     *         account to update
+     * @throws NullPointerException
+     *         when {@code account} is null
+     * @throws NotFoundException
+     *         when account with id {@code account.getId()} is not found
+     * @throws ConflictException
+     *         when account's new name is not unique
+     * @throws ServerException
+     *         when any other error occurs
+     */
+    public void update(Account account) throws NotFoundException, ConflictException, ServerException {
+        requireNonNull(account, "Required non-null account");
+        accountDao.update(new AccountImpl(account));
     }
 
     /**
@@ -69,5 +107,20 @@ public class AccountManager {
     public Account getByName(String name) throws NotFoundException, ServerException {
         requireNonNull(name, "Required non-null account name");
         return accountDao.getByName(name);
+    }
+
+    /**
+     * Removes account by specified {@code id}
+     *
+     * @param id
+     *         account identifier
+     * @throws NullPointerException
+     *         when {@code id} is null
+     * @throws ServerException
+     *         when any other error occurs
+     */
+    public void remove(String id) throws ServerException {
+        requireNonNull(id, "Required non-null account id");
+        accountDao.remove(id);
     }
 }

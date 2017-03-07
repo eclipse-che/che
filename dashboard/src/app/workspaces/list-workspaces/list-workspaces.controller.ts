@@ -12,7 +12,7 @@
 import {CheAPI} from '../../../components/api/che-api.factory';
 import {CheNotification} from '../../../components/notification/che-notification.factory';
 import {CheWorkspace} from '../../../components/api/che-workspace.factory';
-import {CheNamespaceRegistry} from '../../../components/api/namespace/che-namespace-registry.factory';
+import {CheNamespaceRegistry, INamespace} from '../../../components/api/namespace/che-namespace-registry.factory';
 import {ConfirmDialogService} from '../../../components/service/confirm-dialog/confirm-dialog.service';
 
 /**
@@ -32,8 +32,6 @@ export class ListWorkspacesCtrl {
 
   state: string;
   isInfoLoading: boolean;
-  isExactMatch: boolean;
-  namespaceFilter: any;
   workspaceFilter: any;
   userWorkspaces: che.IWorkspace[];
 
@@ -50,6 +48,11 @@ export class ListWorkspacesCtrl {
   cheNamespaceRegistry: CheNamespaceRegistry;
   private confirmDialogService: ConfirmDialogService;
   private ALL_NAMESPACES: string = 'All Teams';
+
+  isExactMatch: boolean = false;
+  namespaceFilter: {namespace: string};
+  namespaceLabels: string[];
+  onFilterChanged: Function;
 
   /**
    * Default constructor that is using resource
@@ -87,12 +90,21 @@ export class ListWorkspacesCtrl {
     this.isNoSelected = true;
     $rootScope.showIDE = false;
 
-    this.namespaces = this.getNamespaces();
+    this.cheNamespaceRegistry.fetchNamespaces().then(() => {
+      this.namespaceLabels = this.getNamespaceLabelsList();
+    });
 
-    this.onFilterChanged = (value :  string) => {
-      this.namespaceFilter.namespace = (value === this.ALL_NAMESPACES) ? '' : value;
-      this.isExactMatch = (value === this.ALL_NAMESPACES) ? false : true;
-    };
+    this.onFilterChanged = (label :  string) => {
+      if (label === this.ALL_NAMESPACES) {
+        this.namespaceFilter.namespace = '';
+      } else {
+        let namespace = this.cheNamespaceRegistry.getNamespaces().find((namespace: INamespace) => {
+          return namespace.label === label;
+        });
+        this.namespaceFilter.namespace = namespace.id;
+      }
+      this.isExactMatch = (label === this.ALL_NAMESPACES) ? false : true;
+    }
   }
 
   /**
@@ -340,12 +352,12 @@ export class ListWorkspacesCtrl {
   }
 
   /**
-   * Returns the list of available namespaces.
+   * Returns the list of labels of available namespaces.
    *
    * @returns {Array} array of namespaces
    */
-  getNamespaces() {
-    let namespaces = this.lodash.pluck(this.cheNamespaceRegistry.getNamespaces(), 'id');
+  getNamespaceLabelsList(): string[] {
+    let namespaces = this.lodash.pluck(this.cheNamespaceRegistry.getNamespaces(), 'label');
     if (namespaces.length > 0) {
       return [this.ALL_NAMESPACES].concat(namespaces);
     }

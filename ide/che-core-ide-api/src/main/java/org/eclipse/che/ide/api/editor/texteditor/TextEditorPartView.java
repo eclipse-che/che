@@ -18,8 +18,6 @@ import org.eclipse.che.ide.api.editor.EditorWithErrors;
 import org.eclipse.che.ide.api.editor.codeassist.CompletionsSource;
 import org.eclipse.che.ide.api.editor.keymap.Keymap;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
-import org.eclipse.che.ide.api.editor.texteditor.EditorWidget;
-import org.eclipse.che.ide.api.editor.texteditor.HasNotificationPanel;
 
 /**
  * View interface for the text editors components.

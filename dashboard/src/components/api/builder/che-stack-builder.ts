@@ -16,18 +16,21 @@
  * @author Ann Shumilova
  */
 export class CheStackBuilder {
+  stack: che.IStack;
 
   /**
    * Default constructor.
    */
   constructor() {
-    this.stack = {};
-    this.stack.source = {};
-    this.stack.source.origin = '';
-    this.stack.source.type = ''
-    this.stack.components = [];
-    this.stack.tags = [];
-    this.stack.workspaceConfig = {};
+    this.stack = <che.IStack>{
+      source: {
+        origin: '',
+        type: '',
+      },
+      components: [],
+      tags: [],
+      workspaceConfig: {}
+    };
   }
 
   /**

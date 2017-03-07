@@ -19,8 +19,10 @@ help_cmd_restart() {
   text "  --force                           Uses 'docker rmi' and 'docker pull' to forcibly retrieve latest images\n"
   text "  --no-force                        Updates images if matching tag not found in local cache\n"
   text "  --pull                            Uses 'docker pull' to check for new remote versions of images\n"
+  text "  --skip:config                     Skip re-generation of config files placed into /instance\n"
   text "  --skip:graceful                   Do not wait for confirmation that workspaces have stopped\n"
   text "  --skip:preflight                  Skip preflight checks\n"
+  text "  --skip:postflight                 Skip postflight checks\n"
   text "\n"
 }
 

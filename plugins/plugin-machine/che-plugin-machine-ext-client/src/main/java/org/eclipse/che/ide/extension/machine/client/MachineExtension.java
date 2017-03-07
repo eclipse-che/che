@@ -27,7 +27,6 @@ import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.action.IdeActions;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.api.icon.Icon;
 import org.eclipse.che.ide.api.icon.IconRegistry;
@@ -53,19 +52,16 @@ import org.eclipse.che.ide.extension.machine.client.processes.actions.CloseConso
 import org.eclipse.che.ide.extension.machine.client.processes.actions.ReRunProcessAction;
 import org.eclipse.che.ide.extension.machine.client.processes.actions.StopProcessAction;
 import org.eclipse.che.ide.extension.machine.client.targets.EditTargetsAction;
-import org.eclipse.che.plugin.requirejs.ide.RequireJsLoader;
 import org.eclipse.che.ide.terminal.client.TerminalResources;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
+import org.eclipse.che.plugin.requirejs.ide.RequireJsLoader;
 
 import javax.inject.Named;
 
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_CENTER_TOOLBAR;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_CONSOLES_TREE_CONTEXT_MENU;
-import static org.eclipse.che.ide.api.action.IdeActions.GROUP_MAIN_MENU;
-import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RIGHT_TOOLBAR;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RUN;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_WORKSPACE;
-import static org.eclipse.che.ide.api.constraints.Anchor.AFTER;
 import static org.eclipse.che.ide.api.constraints.Constraints.FIRST;
 
 /**
