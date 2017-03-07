@@ -115,8 +115,11 @@ elif echo ${LINUX_TYPE} | grep -qi "CentOS"; then
 
 else
     >&2 echo "Unrecognized Linux Type"
-    >&2 cat $FILE
-    exit 1
+    command -v sshd >/dev/null 2>&1 || {
+        >&2 cat $FILE;
+        exit 1;
+    }
+    ${SUDO} sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
 fi
 
 command -v pidof >/dev/null 2>&1 && {
