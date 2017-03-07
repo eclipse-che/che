@@ -26,7 +26,7 @@ if [ -f /etc/centos-release ]; then
 fi
 
 ###############################
-### Install Needed packaged ###
+### Install Needed packages ###
 ###############################
 
 # Red Hat Enterprise Linux 7 
