@@ -13,13 +13,13 @@ base_dir=$(cd "$(dirname "$0")"; pwd)
 
 init --name:cli "$@"
 
-if [[ ! -f "version/$TAG/images" ]]; then
-	mkdir -p version/$TAG
+if [[ ! -f "${base_dir}/version/$TAG/images" ]]; then
+	mkdir -p ${base_dir}/version/$TAG
 fi
 
-echo "IMAGE_INIT=$ORGANIZATION/$PREFIX-init:$TAG" > version/$TAG/images
-echo "IMAGE_CHE=$ORGANIZATION/$PREFIX-server:$TAG" >> version/$TAG/images
-echo "IMAGE_COMPOSE=docker/compose:1.8.1" >> version/$TAG/images
+echo "IMAGE_INIT=$ORGANIZATION/$PREFIX-init:$TAG" > ${base_dir}/version/$TAG/images
+echo "IMAGE_CHE=$ORGANIZATION/$PREFIX-server:$TAG" >> ${base_dir}/version/$TAG/images
+echo "IMAGE_COMPOSE=docker/compose:1.8.1" >> ${base_dir}/version/$TAG/images
 
 build
 
