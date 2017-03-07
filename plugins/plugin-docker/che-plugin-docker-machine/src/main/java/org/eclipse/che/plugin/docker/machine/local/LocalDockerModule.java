@@ -41,6 +41,7 @@ public class LocalDockerModule extends AbstractModule {
 
     @Override
     protected void configure() {
+
         install(new FactoryModuleBuilder()
                         .implement(Instance.class, DockerInstance.class)
                         .implement(InstanceProcess.class, DockerProcess.class)
