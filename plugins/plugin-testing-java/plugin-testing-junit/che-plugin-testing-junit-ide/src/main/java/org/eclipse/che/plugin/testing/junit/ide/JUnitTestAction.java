@@ -30,6 +30,9 @@ import com.google.inject.Inject;
  */
 public class JUnitTestAction implements TestAction {
 
+    public static final String TEST_ACTION_RUN_ALL           = "TestActionRunAll";
+    public static final String TEST_ACTION_RUN_CLASS         = "TestActionRunClass";
+    public static final String TEST_ACTION_RUN_CLASS_CONTEXT = "TestActionRunClassContext";
     private final Action runClassTestAction;
     private final Action runAllTestAction;
     private final Action runClassContextTestAction;
@@ -40,15 +43,17 @@ public class JUnitTestAction implements TestAction {
                            RunAllTestAction runAllTestAction, 
                            RunClassContextTestAction runClassContextTestAction,
                            KeyBindingAgent keyBinding) {
-        actionManager.registerAction("TestActionRunClass", runClassTestAction);
-        actionManager.registerAction("TestActionRunAll", runAllTestAction);
-        actionManager.registerAction("TestActionRunClassContext", runClassContextTestAction);
+
+        actionManager.registerAction(TEST_ACTION_RUN_CLASS, runClassTestAction);
+        actionManager.registerAction(TEST_ACTION_RUN_ALL, runAllTestAction);
+        actionManager.registerAction(TEST_ACTION_RUN_CLASS_CONTEXT, runClassContextTestAction);
+
         if (UserAgent.isMac()) {
-            keyBinding.getGlobal().addKey(new KeyBuilder().control().alt().charCode('z').build(), "TestActionRunAll");
-            keyBinding.getGlobal().addKey(new KeyBuilder().control().shift().charCode('z').build(), "TestActionRunClass");
+            keyBinding.getGlobal().addKey(new KeyBuilder().control().alt().charCode('z').build(), TEST_ACTION_RUN_ALL);
+            keyBinding.getGlobal().addKey(new KeyBuilder().control().shift().charCode('z').build(), TEST_ACTION_RUN_CLASS);
         } else {
-            keyBinding.getGlobal().addKey(new KeyBuilder().action().alt().charCode('z').build(), "TestActionRunAll");
-            keyBinding.getGlobal().addKey(new KeyBuilder().action().shift().charCode('z').build(), "TestActionRunClass");
+            keyBinding.getGlobal().addKey(new KeyBuilder().action().alt().charCode('z').build(), TEST_ACTION_RUN_ALL);
+            keyBinding.getGlobal().addKey(new KeyBuilder().action().shift().charCode('z').build(), TEST_ACTION_RUN_CLASS);
         }
 
         this.runAllTestAction = runAllTestAction;

@@ -62,6 +62,7 @@
     <inherits name="org.eclipse.che.ide.orion.OrionCompare"/>
     <inherits name='org.eclipse.che.env.local.LocalEnvironment'/>
     <inherits name='org.eclipse.che.ide.ext.plugins.PluginsDevelopment'/>
+    <inherits name='org.eclipse.che.plugin.keybinding.eclipse.EclipseKeyBinding'/>
 
     <inherits name='org.eclipse.che.plugin.product.info.ProductInfo'/>
     <inherits name='org.eclipse.che.plugin.cpp.Cpp'/>
