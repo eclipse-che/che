@@ -126,6 +126,9 @@
                 <configuration>
                     <excludes>
                         <exclude>**/org/eclipse/che/plugin/languageserver/ide/editor/codeassist/LatestCompletionResult.java</exclude>
+                        <exclude>**/org/eclipse/che/plugin/languageserver/ide/editor/quickassist/ApplyTextEditAction.java</exclude>
+                       	<exclude>**/org/eclipse/che/plugin/languageserver/ide/editor/quickassist/LanguageServerQuickAssistProcessor.java</exclude>
+                       	<exclude>**/org/eclipse/che/plugin/languageserver/ide/editor/quickassist/QuickassistActionEvent.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>
@@ -162,26 +165,14 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>pre-compile</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
+             <plugin>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-dto-maven-plugin</artifactId>
                 <version>${project.version}</version>
                 <executions>
                     <execution>
                         <id>generate-client-dto</id>
-                        <phase>process-sources</phase>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>generate</goal>
                         </goals>
@@ -194,7 +185,7 @@
                             <impl>client</impl>
                         </configuration>
                     </execution>
-                </executions>
+                </executions> 
                 <dependencies>
                     <dependency>
                         <groupId>${project.groupId}</groupId>
