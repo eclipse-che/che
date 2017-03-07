@@ -23,7 +23,7 @@ cli_parse () {
     rmi|upgrade|version|ssh|sync|action|test|compile|dir|help)
     ;;
   *)
-    error "You passed an unknown command."
+    error "You passed an unknown command: $1"
     usage
     return 2
     ;;

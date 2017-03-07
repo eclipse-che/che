@@ -31,12 +31,14 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
-import org.eclipse.che.api.promises.client.callback.PromiseHelper;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.ui.loaders.request.MessageLoader;
 
+import static org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper.createFromAsyncRequest;
+
 /**
  * Widget for compering (diff) for two files.
+ *
  * @author Evgen Vidolob
  * @author Igor Vinokur
  */
@@ -75,24 +77,16 @@ public class CompareWidget extends Composite {
                 });
             }
         };
-        framePromise = PromiseHelper.newPromise(call);
-        framePromise.then(new Operation<Window>() {
-            @Override
-            public void apply(Window arg) throws OperationException {
-                sendThemeId(arg, themeId);
-            }
+        framePromise = createFromAsyncRequest(call);
+        framePromise.then(arg -> {
+            sendThemeId(arg, themeId);
         });
-        framePromise.then(new Operation<Window>() {
-            @Override
-            public void apply(final Window arg) throws OperationException {
-                arg.getDocument().addEventListener("onThemeLoaded", new EventListener() {
-                    @Override
-                    public void handleEvent(Event evt) {
-                        sendConfig(arg, compareConfig);
-                        loader.hide();
-                    }
-                }, false);
-            }
+        framePromise.then(arg -> {
+            final EventListener eventListener = evt -> {
+                sendConfig(arg, compareConfig);
+                loader.hide();
+            };
+            arg.getDocument().addEventListener("onThemeLoaded", eventListener, false);
         });
     }
 

@@ -6,7 +6,8 @@
   "properties": {},
   "servers": {
     "ssh": {
-      "port": "22/tcp"
+      "port": "22/tcp",
+      "protocol" : "ssh"
     }
   }
 }
