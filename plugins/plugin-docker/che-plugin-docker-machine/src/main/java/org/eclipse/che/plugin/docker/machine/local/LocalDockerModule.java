@@ -82,14 +82,12 @@ public class LocalDockerModule extends AbstractModule {
         devMachineVolumes.addBinding().toProvider(org.eclipse.che.plugin.docker.machine.ext.provider.ExtraVolumeProvider.class);
 
         Multibinder<Set<String>> networks = Multibinder.newSetBinder(binder(),
-                                                                     new TypeLiteral<Set<String>>() {
-                                                                     },
+                                                                     new TypeLiteral<Set<String>>() {},
                                                                      Names.named("machine.docker.networks"));
         networks.addBinding().toProvider(org.eclipse.che.plugin.docker.machine.CheInContainerNetworkProvider.class);
 
         Multibinder<Set<String>> extraHosts = Multibinder.newSetBinder(binder(),
-                                                                       new TypeLiteral<Set<String>>() {
-                                                                       },
+                                                                       new TypeLiteral<Set<String>>() {},
                                                                        Names.named("che.docker.extra_hosts"))
                                                          .permitDuplicates();
         extraHosts.addBinding()
