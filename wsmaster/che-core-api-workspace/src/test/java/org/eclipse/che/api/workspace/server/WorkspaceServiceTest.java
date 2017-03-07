@@ -27,8 +27,8 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
+import org.eclipse.che.api.environment.server.MachineLinksInjector;
 import org.eclipse.che.api.environment.server.MachineProcessManager;
-import org.eclipse.che.api.environment.server.MachineServiceLinksInjector;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
@@ -151,7 +151,7 @@ public class WorkspaceServiceTest {
                                        wsManager,
                                        validator,
                                        wsAgentHealthChecker,
-                                       new WorkspaceServiceLinksInjector(new MachineServiceLinksInjector()),
+                                       new WorkspaceServiceLinksInjector(new MachineLinksInjector()),
                                        true,
                                        false);
     }
