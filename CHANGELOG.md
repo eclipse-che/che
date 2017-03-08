@@ -1,13 +1,13 @@
 # Change Log
 
-## [5.4.1](https://github.com/eclipse/che/tree/5.4.1) (2017-04-06)
+## [5.4.1](https://github.com/eclipse/che/tree/5.4.1) (2017-03-06)
 [Full Changelog](https://github.com/eclipse/che/compare/5.4.0...5.4.1)
 
 **Pull requests merged:**
 The follow are changelogs for eclipse/che:
 - Improved package name validator in create package dialog window [4271](https://github.com/eclipse/che/pull/4271)
 
-## [5.4.0](https://github.com/eclipse/che/tree/5.4.0) (2017-04-01)
+## [5.4.0](https://github.com/eclipse/che/tree/5.4.0) (2017-03-01)
 [Full Changelog](https://github.com/eclipse/che/compare/5.3.1...5.4.0)
 
 **Pull requests merged:**
