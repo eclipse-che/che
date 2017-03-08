@@ -56,6 +56,7 @@ public class EditorInitializePromiseHolder {
     private final String              waitEditorMessage;
 
     private boolean initFailedWarnedOnce = false;
+    private boolean cssLinkInjected      = false;
 
     @Inject
     public EditorInitializePromiseHolder(final NotificationManager notificationManager,
@@ -117,11 +118,16 @@ public class EditorInitializePromiseHolder {
         injectCssLink(GWT.getModuleBaseForStaticFiles() + "built-codeEdit/code_edit/built-codeEdit.css");
     }
 
-    private static void injectCssLink(final String url) {
-        final LinkElement link = Document.get().createLinkElement();
-        link.setRel("stylesheet");
-        link.setHref(url);
-        Document.get().getHead().appendChild(link);
+    private void injectCssLink(final String url) {
+        // Avoid injecting built-codeEdit.css more than once as it may override
+        // orion-codenvy-theme.css
+        if (!cssLinkInjected) {
+            final LinkElement link = Document.get().createLinkElement();
+            link.setRel("stylesheet");
+            link.setHref(url);
+            Document.get().getHead().appendChild(link);
+            cssLinkInjected = true;
+        }
     }
 
     private void requireOrion(final AsyncCallback<Void> callback) {
