@@ -34,7 +34,7 @@ build_directory() {
   shift
   # Calling build.sh
   if [ -e ${directory}/build.sh ] ; then
-    ${directory}build.sh "$@"
+    ${directory}build.sh ${OPTIONS} ${ARGS}
   else
     printf "${RED}No build.sh in directory ${directory}${NC}\n"
     exit 2
@@ -45,7 +45,7 @@ build_all() {
   # loop on all directories and call build.sh script if present
   for directory in */ ; do
     if [ -e ${directory}/build.sh ] ; then
-      build_directory ${directory} ${OPTIONS}
+      build_directory ${directory}
     else
       printf "${RED}skipping ${directory} as there is no build.sh script${NC}\n"
     fi
