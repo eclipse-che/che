@@ -129,5 +129,4 @@ public interface JsonImpl {
 	 *         this interface
 	 */
 	void writeImports(PrintWriter out);
-
 }

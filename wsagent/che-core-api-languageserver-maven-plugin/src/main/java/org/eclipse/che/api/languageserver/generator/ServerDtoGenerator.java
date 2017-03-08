@@ -55,7 +55,6 @@ public class ServerDtoGenerator extends DtoGenerator {
 		out.println(indent+INDENT+"}");
 		out.println();
 	}
-
 	
 	@Override
 	public void generate(File targetFolder, String targetName, String targetPackage, String[] sourcePackages, String[] classes)
@@ -72,6 +71,4 @@ public class ServerDtoGenerator extends DtoGenerator {
 	public static void main(String[] args) throws IOException {
 		new ServerDtoGenerator().generate(new File(args[0]), "Dtos", args[1], args[2].split(","), new String[]{});
 	}
-
-
 }
