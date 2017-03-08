@@ -232,8 +232,9 @@
                          che-label-description="Select a code template to create a new project in the workspace.">
       <md-radio-group ng-model="createProjectCtrl.templatesChoice">
         <md-radio-button value="templates-samples">Ready-to-run project samples</md-radio-button>
-        <create-project-samples
-                ng-if="createProjectCtrl.templatesChoice === 'templates-samples'"></create-project-samples>
+        <create-project-samples current-stack-tags="createProjectCtrl.currentStackTags"
+                                project-sample-on-select="createProjectCtrl.projectSampleOnSelect(template)"
+                                ng-if="createProjectCtrl.templatesChoice === 'templates-samples'"></create-project-samples>
         <md-radio-button ng-if="createProjectCtrl.enableWizardProject"
                          ng-click="createProjectCtrl.selectWizardProject()"
                          value="templates-wizard">Wizard-driven templates

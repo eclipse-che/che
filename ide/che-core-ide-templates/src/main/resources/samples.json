@@ -1009,13 +1009,7 @@
         }
       },
       {
-        "name": "2. Stop",
-        "type": "custom",
-        "commandLine": "print-help && cd ${current.project.path} && pkill -u bitnami node && echo \"Web server stopped.\"",
-        "attributes": {}
-      },
-      {
-        "name": "3. Run",
+        "name": "2. Run",
         "type": "custom",
         "commandLine": "print-help && cd ${current.project.path} && npm start",
         "attributes": {
@@ -1095,21 +1089,15 @@
       {
         "name": "1. Create and run project",
         "type": "custom",
-        "commandLine": "print-help && sudo HOME=/root /opt/bitnami/nami/bin/nami start mariadb && cp -a /tmp/laravel-sample/. ${current.project.path} && cd ${current.project.path} && composer update && php artisan migrate && php artisan serve --host=0.0.0.0 --port=3000",
+        "commandLine": "print-help && sudo HOME=/root /opt/bitnami/nami/bin/nami start mariadb && cp -an /tmp/laravel-sample/. ${current.project.path} && cd ${current.project.path} && composer update && php artisan migrate && php artisan serve --host=0.0.0.0 --port=3000",
         "attributes": {
           "previewUrl": "http://${server.port.3000}/"
         }
       },
       {
-        "name": "2. Stop",
+        "name": "2. Run",
         "type": "custom",
-        "commandLine": "print-help && cd ${current.project.path} && pkill -u bitnami php && echo \"Web server stopped.\"",
-        "attributes": {}
-      },
-      {
-        "name": "3. Run",
-        "type": "custom",
-        "commandLine": "print-help && cd ${current.project.path} && php artisan serve --host=0.0.0.0 --port=3000",
+        "commandLine": "print-help && sudo HOME=/root /opt/bitnami/nami/bin/nami start mariadb && cd ${current.project.path} && php artisan serve --host=0.0.0.0 --port=3000",
         "attributes": {
           "previewUrl": "http://${server.port.3000}/"
         }
@@ -1287,13 +1275,7 @@
         }
       },
       {
-        "name": "2. Stop",
-        "type": "custom",
-        "commandLine": "print-help && cd ${current.project.path} && pkill -u bitnami -n java && echo \"Web server stopped.\"",
-        "attributes": {}
-      },
-      {
-        "name": "3. Run",
+        "name": "2. Run",
         "type": "custom",
         "commandLine": "print-help && cd ${current.project.path} && /opt/bitnami/activator/bin/activator -Doffline=true -Dhttp.host=0.0.0.0 -Dhttp.port=9000 -Dsbt.log.noformat=true ~run",
         "attributes": {

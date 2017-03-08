@@ -428,7 +428,9 @@ init_check_mounts() {
   fi
 
   # Verify that we can write to the host file system from the container
-  check_host_volume_mount
+  if ! is_fast; then 
+    check_host_volume_mount
+  fi
 
   DEFAULT_CHE_CONFIG="${DATA_MOUNT}"
   DEFAULT_CHE_INSTANCE="${DATA_MOUNT}"/instance
@@ -642,20 +644,37 @@ check_host_volume_mount() {
     warning "Boot2docker detected - ensure :/data is mounted to %userprofile%"
   fi
 
-  if file_system_writable "${CHE_CONTAINER_ROOT}/test"; then 
-    delete_file_system_test "${CHE_CONTAINER_ROOT}/test"
-  else 
-    error "Unable to write files to your host"
+  add_file_system_test "${CHE_CONTAINER_ROOT}/test"
+
+  if ! file_system_writable "${CHE_CONTAINER_ROOT}/test" ||
+     ! file_system_executable "${CHE_CONTAINER_ROOT}/test"; then 
+    error "Unable to write or execute files on your host."
     error "Have you enabled Docker to allow mounting host directories?"
-    error "Did you give our CLI rights to create files on your host?"
+    error "Did you give our CLI rights to create + exec files on your host?"
+    delete_file_system_test "${CHE_CONTAINER_ROOT}/test"
     return 2;
   fi
+
+  delete_file_system_test "${CHE_CONTAINER_ROOT}/test"
+}
+
+add_file_system_test() {
+  echo '#!/bin/sh' > "${1}"
+  echo 'echo hi' >> "${1}"
+  chmod +x "${1}" > /dev/null
 }
 
 file_system_writable() {
-  echo 'test' > "${1}" 
-
   if [[ -f "${1}" ]]; then
+    return 0
+  else 
+    return 1
+  fi
+}
+
+file_system_executable() {
+  EXEC_OUTPUT=$(bash "${1}")
+  if [ $EXEC_OUTPUT = "hi" ]; then
     return 0
   else 
     return 1
@@ -667,7 +686,6 @@ delete_file_system_test() {
 }
 
 is_boot2docker() {
-#  debug $FUNCNAME
   if uname -r | grep -q 'boot2docker'; then
     return 0
   else

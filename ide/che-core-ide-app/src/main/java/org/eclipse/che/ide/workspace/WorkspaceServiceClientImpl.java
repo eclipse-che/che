@@ -28,11 +28,13 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
+import org.eclipse.che.ide.rest.StringMapUnmarshaller;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Map;
 
 import static com.google.gwt.http.client.RequestBuilder.PUT;
 import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
@@ -266,5 +268,13 @@ public class WorkspaceServiceClientImpl implements WorkspaceServiceClient {
         return asyncRequestFactory.createGetRequest(baseHttpUrl + '/' + workspaceId + "/check")
                                   .header(ACCEPT, APPLICATION_JSON)
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(WsAgentHealthStateDto.class));
+    }
+
+    @Override
+    public Promise<Map<String, String>> getSettings() {
+        return asyncRequestFactory.createGetRequest(baseHttpUrl + "/settings") //
+                                  .header(ACCEPT, APPLICATION_JSON) //
+                                  .header(CONTENT_TYPE, APPLICATION_JSON) //
+                                  .send(new StringMapUnmarshaller());
     }
 }

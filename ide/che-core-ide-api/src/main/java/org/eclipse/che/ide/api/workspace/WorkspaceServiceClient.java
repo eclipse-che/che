@@ -22,6 +22,7 @@ import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.WsAgentHealthStateDto;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * GWT Client for Workspace Service.
@@ -293,5 +294,11 @@ public interface WorkspaceServiceClient {
      * @see WorkspaceService#checkAgentHealth(String)
      */
     Promise<WsAgentHealthStateDto> getWsAgentState(String workspaceId);
+
+    /**
+     * Get workspace related server configuration values defined in che.properties
+     * @see WorkspaceService#getSettings()
+     */
+    Promise<Map<String, String>> getSettings();
 
 }
