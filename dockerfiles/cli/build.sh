@@ -14,12 +14,10 @@ base_dir=$(cd "$(dirname "$0")"; pwd)
 init --name:cli "$@"
 
 if [[ ! -f "${base_dir}/version/$TAG/images" ]]; then
-	mkdir -p ${base_dir}/version/$TAG
+	mkdir -p ${base_dir}/version/$TAG/
 fi
 
-echo "IMAGE_INIT=$ORGANIZATION/$PREFIX-init:$TAG" > ${base_dir}/version/$TAG/images
-echo "IMAGE_CHE=$ORGANIZATION/$PREFIX-server:$TAG" >> ${base_dir}/version/$TAG/images
-echo "IMAGE_COMPOSE=docker/compose:1.8.1" >> ${base_dir}/version/$TAG/images
+cat ${base_dir}/images.template | sed s/\$\{BUILD_ORGANIZATION\}/${ORGANIZATION}/ | sed s/\$\{BUILD_PREFIX\}/${PREFIX}/ | sed s/\$\{BUILD_TAG\}/${TAG}/ > ${base_dir}/version/$TAG/images
 
 build
 
