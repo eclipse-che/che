@@ -258,7 +258,7 @@ compare_versions() {
   local VERSION_LIST_JSON=$(curl -s https://hub.docker.com/v2/repositories/${CHE_IMAGE_NAME}/tags/)
   local NUMBER_OF_VERSIONS=$(echo $VERSION_LIST_JSON | jq '.count')
 
-  if [[ "${NUMBER_OF_VERSIONS}" = "" ]]; then
+  if [[ "${NUMBER_OF_VERSIONS}" = "" ]] || [[ "${NUMBER_OF_VERSIONS}" = "null" ]]; then
     error "Unable to retrieve version list from public Docker Hub."
     error "Diagnose with 'docker run -it appropriate/curl -s https://hub.docker.com/v2/repositories/${CHE_IMAGE_NAME}/tags/'."
     error "Use '--skip:network' to ignore this check."
