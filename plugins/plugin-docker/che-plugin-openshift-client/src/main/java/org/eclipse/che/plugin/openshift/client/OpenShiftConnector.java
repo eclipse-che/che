@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -36,8 +37,8 @@ import javax.inject.Singleton;
 
 import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.api.model.RouteList;
+
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.inject.StringArrayConverter;
 import org.eclipse.che.plugin.docker.client.DockerApiVersionPathPrefixProvider;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
@@ -172,7 +173,7 @@ public class OpenShiftConnector extends DockerConnector {
     private final String          workspacesPvcQuantity;
     private final String          cheWorkspaceStorage;
     private final String          cheWorkspaceProjectsStorage;
-	private final String          cheServerExternalAddress;
+    private final String          cheServerExternalAddress;
 
     @Inject
     public OpenShiftConnector(DockerConnectorConfiguration connectorConfiguration,
@@ -650,7 +651,35 @@ public class OpenShiftConnector extends DockerConnector {
     }
 
     @Override
-    public void getEvents(final GetEventsParams params, MessageProcessor<Event> messageProcessor) {}
+    public void getEvents(final GetEventsParams params, MessageProcessor<Event> messageProcessor) {
+        CountDownLatch waitForClose = new CountDownLatch(1);
+        Watcher<io.fabric8.kubernetes.api.model.Event> eventWatcher =
+                new Watcher<io.fabric8.kubernetes.api.model.Event>() {
+            @Override
+            public void eventReceived(Action action, io.fabric8.kubernetes.api.model.Event event) {
+                // Do nothing;
+            }
+
+            @Override
+            public void onClose(KubernetesClientException e) {
+                if (e == null) {
+                    LOG.error("Eventwatch Closed");
+                } else {
+                    LOG.error("Eventwatch Closed" + e.getMessage());
+                }
+                waitForClose.countDown();
+            }
+        };
+        openShiftClient.events()
+                       .inNamespace(openShiftCheProjectName)
+                       .watch(eventWatcher);
+        try {
+            waitForClose.await();
+        } catch (InterruptedException e) {
+            LOG.error("Thread interrupted while waiting for eventWatcher.");
+            Thread.currentThread().interrupt();
+        }
+    }
 
     @Override
     public void getContainerLogs(final GetContainerLogsParams params, MessageProcessor<LogMessage> containerLogsProcessor)
