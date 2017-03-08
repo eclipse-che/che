@@ -226,7 +226,6 @@ public abstract class DtoGenerator {
 		out.println(indent  + "}");
 	}
 
-
 	private void writeToJson(String indent, PrintWriter out, Class<? extends Object> clazz) {
 		out.println(indent + String.format("public %1$s toJsonElement() {", json.element()));
 		out.println(indent + INDENT + String.format("%1$s result = new %1$s();", json.object()));
@@ -248,7 +247,6 @@ public abstract class DtoGenerator {
 		return m.getName().startsWith("set") && m.getName().length() > 3
 				&& Character.isUpperCase(m.getName().charAt(3)) && getter != null && getter.getReturnType() == m.getParameterTypes()[0];
 	}
-	
 
 	private static Method getterFor(Class<?> receiverClass, Method m) {
 		if (m.getParameterTypes().length != 1) {
@@ -296,5 +294,4 @@ public abstract class DtoGenerator {
 	private String dtoProviderName(Class<? extends Object> clazz) {
 		return clazz.getSimpleName() + "DtoProvider";
 	}
-
 }

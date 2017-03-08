@@ -50,7 +50,6 @@ public abstract class ConversionGenerator {
 		return null;
 	}
 
-
 	private Type getUpperBound(Type type) {
 		if (type instanceof WildcardType) {
 			return ((WildcardType) type).getUpperBounds()[0];
@@ -94,6 +93,4 @@ public abstract class ConversionGenerator {
 		name.setCharAt(0, Character.toLowerCase(name.charAt(0)));
 		return name.toString();
 	}
-
-
 }
