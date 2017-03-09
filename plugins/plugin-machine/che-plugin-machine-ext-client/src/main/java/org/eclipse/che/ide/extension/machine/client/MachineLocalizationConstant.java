@@ -34,29 +34,11 @@ public interface MachineLocalizationConstant extends Messages {
     @Key("control.devMachine.category")
     String devMachineCategory();
 
-    @Key("control.selectCommand.text")
-    String selectCommandControlTitle();
-
-    @Key("control.selectCommand.description")
-    String selectCommandControlDescription();
-
-    @Key("control.runSelectedCommand.text")
-    String executeSelectedCommandControlTitle();
-
-    @Key("control.runSelectedCommand.description")
-    String executeSelectedCommandControlDescription();
-
     @Key("control.runCommand.empty.params")
     String runCommandEmptyParamsMessage();
 
     @Key("control.runCommand.empty.name")
     String runCommandEmptyNameMessage();
-
-    @Key("control.editCommands.text")
-    String editCommandsControlTitle();
-
-    @Key("control.editCommands.description")
-    String editCommandsControlDescription();
 
     @Key("control.editTargets")
     String editTargets();
@@ -188,38 +170,6 @@ public interface MachineLocalizationConstant extends Messages {
 
     @Key("view.createMachine.findByTags")
     String viewCreateMachineFindByTags();
-
-
-    /* EditCommandsView */
-    @Key("view.editCommands.placeholder")
-    String editCommandsViewPlaceholder();
-
-    @Key("view.editCommands.title")
-    String editCommandsViewTitle();
-
-    @Key("view.editCommands.hint")
-    String editCommandsViewHint();
-
-    @Key("view.editCommands.name.text")
-    String editCommandsViewNameText();
-
-    @Key("view.editCommands.remove.title")
-    String editCommandsViewRemoveTitle();
-
-    @Key("view.editCommands.remove.confirmation")
-    String editCommandsRemoveConfirmation(String commandName);
-
-    @Key("view.editCommands.execute.message")
-    String editCommandsExecuteMessage();
-
-    @Key("view.editCommands.saveChanges.title")
-    String editCommandsSaveChangesTitle();
-
-    @Key("view.editCommands.saveChanges.text")
-    String editCommandsSaveChangesConfirmation(String commandName);
-
-    @Key("view.editCommands.saveChanges.discard")
-    String editCommandsSaveChangesDiscard();
 
     /* Targets view */
     @Key("view.targets.category.ssh")

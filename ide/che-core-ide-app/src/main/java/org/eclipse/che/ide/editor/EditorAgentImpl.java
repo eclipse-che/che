@@ -10,16 +10,18 @@
  *******************************************************************************/
 package org.eclipse.che.ide.editor;
 
+import elemental.json.Json;
+import elemental.json.JsonArray;
+import elemental.json.JsonObject;
+import elemental.util.ArrayOf;
+
 import com.google.common.base.Optional;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
-import elemental.json.Json;
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
-import elemental.util.ArrayOf;
+
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -47,7 +49,6 @@ import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
 import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.event.FileEvent;
-import org.eclipse.che.ide.api.event.FileEvent.FileEventHandler;
 import org.eclipse.che.ide.api.event.SelectionChangedEvent;
 import org.eclipse.che.ide.api.event.SelectionChangedHandler;
 import org.eclipse.che.ide.api.event.WindowActionEvent;
@@ -91,7 +92,6 @@ import static org.eclipse.che.ide.api.parts.PartStackType.EDITING;
 @Singleton
 public class EditorAgentImpl implements EditorAgent,
                                         EditorPartCloseHandler,
-                                        FileEventHandler,
                                         ActivePartChangedHandler,
                                         SelectionChangedHandler,
                                         WindowActionHandler,
@@ -140,24 +140,12 @@ public class EditorAgentImpl implements EditorAgent,
 
         eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
         eventBus.addHandler(SelectionChangedEvent.TYPE, this);
-        eventBus.addHandler(FileEvent.TYPE, this);
         eventBus.addHandler(WindowActionEvent.TYPE, this);
     }
 
     @Override
     public void onClose(EditorPartPresenter editor) {
         closeEditor(editor);
-    }
-
-    @Override
-    public void onFileOperation(FileEvent event) {
-        switch (event.getOperationType()) {
-            case OPEN:
-                openEditor(event.getFile());
-                break;
-            case CLOSE:
-                closeEditor(event.getEditorTab());
-        }
     }
 
     @Override
@@ -200,7 +188,31 @@ public class EditorAgentImpl implements EditorAgent,
         doOpen(file, new OpenEditorCallbackImpl(), constraints);
     }
 
-    private void closeEditor(EditorTab tab) {
+    @Override
+    public void closeEditor(final EditorPartPresenter editor) {
+        if (editor == null) {
+            return;
+        }
+
+        final EditorPartStack editorPartStack = editorMultiPartStack.getPartStackByPart(editor);
+        if (editorPartStack == null) {
+            return;
+        }
+
+        editor.onClosing(new AsyncCallback<Void>() {
+            @Override
+            public void onSuccess(Void result) {
+                EditorTab editorTab = editorPartStack.getTabByPart(editor);
+                doCloseEditor(editorTab);
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+            }
+        });
+    }
+
+    private void doCloseEditor(EditorTab tab) {
         checkArgument(tab != null, "Null editor tab occurred");
 
         EditorPartPresenter editor = tab.getRelativeEditorPart();
@@ -220,23 +232,8 @@ public class EditorAgentImpl implements EditorAgent,
         if (activeEditor != null && activeEditor == editor) {
             activeEditor = null;
         }
-    }
 
-    @Override
-    public void closeEditor(EditorPartPresenter editor) {
-        if (editor == null) {
-            return;
-        }
-
-        EditorPartStack editorPartStack = editorMultiPartStack.getPartStackByPart(editor);
-        if (editorPartStack == null) {
-            return;
-        }
-
-        EditorTab editorTab = editorPartStack.getTabByPart(editor);
-        //we have the handlers for the closing file event in different places of the project
-        //so we need to notify them about it (we can't just pass doClose() method)
-        eventBus.fireEvent(FileEvent.createCloseFileEvent(editorTab));
+        eventBus.fireEvent(FileEvent.createFileClosedEvent(tab));
     }
 
     @Override
@@ -302,6 +299,7 @@ public class EditorAgentImpl implements EditorAgent,
                         editorContentSynchronizerProvider.get().trackEditor(editor);
                     }
                     callback.onEditorOpened(editor);
+                    eventBus.fireEvent(FileEvent.createFileOpenedEvent(file));
                     eventBus.fireEvent(new EditorOpenedEvent(file, editor));
                 }
             }

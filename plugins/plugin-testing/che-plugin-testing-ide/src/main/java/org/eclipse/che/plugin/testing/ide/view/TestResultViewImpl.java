@@ -19,6 +19,20 @@ import java.util.List;
 import java.util.Map;
 
 import javax.validation.constraints.NotNull;
+import com.google.common.base.Optional;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.SplitLayoutPanel;
+import com.google.gwt.user.client.ui.Widget;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -33,7 +47,6 @@ import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
-import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.ide.api.resources.File;
@@ -81,7 +94,6 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
 
     private final AppContext appContext;
     private final EditorAgent editorAgent;
-    private final EventBus eventBus;
     private final TestResultNodeFactory nodeFactory;
     private TestResult lastTestResult;
     private Tree resultTree;
@@ -97,15 +109,13 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
     FlowPanel navigationPanel;
 
     @Inject
-    public TestResultViewImpl(PartStackUIResources resources, 
+    public TestResultViewImpl(PartStackUIResources resources,
                               EditorAgent editorAgent,
                               AppContext appContext,
-                              EventBus eventBus,
                               TestResultNodeFactory nodeFactory) {
         super(resources);
         this.editorAgent = editorAgent;
         this.appContext = appContext;
-        this.eventBus = eventBus;
         this.nodeFactory = nodeFactory;
         splitLayoutPanel = new SplitLayoutPanel(1);
         setContentWidget(UI_BINDER.createAndBindUi(this));
@@ -183,7 +193,8 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
             @Override
             public void apply(Optional<File> file) throws OperationException {
                 if (file.isPresent()) {
-                    eventBus.fireEvent(FileEvent.createOpenFileEvent(file.get()));
+
+                    editorAgent.openEditor(file.get());
                     Timer t = new Timer() {
                         @Override
                         public void run() {

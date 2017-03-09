@@ -109,13 +109,15 @@ public class ProjectTypes {
             // detect duplicated attributes
             for (Attribute attr : mixin.getAttributes()) {
                 final String attrName = attr.getName();
-                if (attributeDefs.containsKey(attrName)) {
+                final Attribute attribute = attributeDefs.get(attrName);
+                if (attribute != null && !attribute.getProjectType().equals(attr.getProjectType())) {
                     this.problems.add(new Problem(13,
                                                   format("Attribute name conflict. Duplicated attributes detected for %s. " +
                                                          "Attribute %s declared in %s already declared in %s. Skipped.",
-                                                         projectPath, attrName, mixin.getId(), attributeDefs.get(attrName).getProjectType())));
+                                                         projectPath, attrName, mixin.getId(), attribute.getProjectType())));
                     continue;
                 }
+
                 attributeDefs.put(attrName, attr);
             }
 
@@ -188,11 +190,15 @@ public class ProjectTypes {
                 mixins.put(pt.getId(), pt);
                 for (Attribute attr : pt.getAttributes()) {
                     final String attrName = attr.getName();
-                    if (attributeDefs.containsKey(attrName)) {
+                    final Attribute attribute = attributeDefs.get(attr.getName());
+                    // If attr from mixin is going to be added but we already have some attribute with the same name,
+                    // check whether it's the same attribute that comes from the common parent PT, e.g. from Base PT.
+                    if (attribute != null && !attribute.getProjectType().equals(attr.getProjectType())) {
                         problems.add(new Problem(13,
                                                  format("Attribute name conflict. Duplicated attributes detected for %s. " +
                                                         "Attribute %s declared in %s already declared in %s. Skipped.",
-                                                        projectPath, attrName, pt.getId(), attributeDefs.get(attrName).getProjectType())));
+                                                        projectPath, attrName, pt.getId(), attribute.getProjectType())));
+                        continue;
                     }
 
                     attributeDefs.put(attrName, attr);

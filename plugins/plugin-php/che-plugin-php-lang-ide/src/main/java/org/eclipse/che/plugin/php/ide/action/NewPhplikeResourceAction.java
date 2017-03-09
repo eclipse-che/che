@@ -10,11 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.php.ide.action;
 
+import com.google.inject.Provider;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.newresource.AbstractNewResourceAction;
 import org.vectomatic.dom.svg.ui.SVGResource;
@@ -46,8 +48,9 @@ public abstract class NewPhplikeResourceAction extends AbstractNewResourceAction
                                     CoreLocalizationConstant coreLocalizationConstant,
                                     EventBus eventBus,
                                     AppContext appContext,
-                                    NotificationManager notificationManager) {
-        super(title, description, svgIcon, dialogFactory, coreLocalizationConstant, eventBus, appContext, notificationManager);
+                                    NotificationManager notificationManager,
+                                    Provider<EditorAgent> editorAgentProvider) {
+        super(title, description, svgIcon, dialogFactory, coreLocalizationConstant, eventBus, appContext, notificationManager, editorAgentProvider);
         this.appContext = appContext;
     }
 }

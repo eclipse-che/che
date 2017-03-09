@@ -31,6 +31,7 @@ import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
 import org.eclipse.che.api.project.server.importer.ProjectImporter;
 import org.eclipse.che.api.project.server.importer.ProjectImporterRegistry;
 import org.eclipse.che.api.project.server.type.AttributeValue;
+import org.eclipse.che.api.project.server.type.Constant;
 import org.eclipse.che.api.project.server.type.ProjectTypeConstraintException;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
@@ -324,7 +325,9 @@ public class ProjectServiceTest {
 
         Map<String, List<String>> attr = new HashMap<>();
         for (Attribute attribute : myProjectType.getAttributes()) {
-            attr.put(attribute.getName(), attribute.getValue().getList());
+            if (attribute instanceof Constant) {
+                attr.put(attribute.getName(), attribute.getValue().getList());
+            }
         }
         when(testProjectConfigMock.getAttributes()).thenReturn(attr);
 

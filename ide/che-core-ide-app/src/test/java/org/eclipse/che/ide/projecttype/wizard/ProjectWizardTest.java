@@ -19,8 +19,8 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
+import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode;
 import org.eclipse.che.ide.api.resources.Container;
@@ -38,7 +38,6 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.Collections;
-import java.util.Map;
 
 import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode.CREATE;
 import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode.IMPORT;
@@ -77,9 +76,9 @@ public class ProjectWizardTest {
     @Mock
     private CommandDto                   command;
     @Mock
-    private Promise<CommandImpl>         createCommandPromise;
+    private Promise<ContextualCommand>   createCommandPromise;
     @Mock
-    private CommandImpl                  createdCommand;
+    private ContextualCommand            createdCommand;
     @Mock
     private Promise<Optional<Container>> optionalContainerPromise;
     @Mock
@@ -95,7 +94,7 @@ public class ProjectWizardTest {
     @Captor
     private ArgumentCaptor<Operation<Project>>             completeOperationCaptor;
     @Captor
-    private ArgumentCaptor<Operation<CommandImpl>>         completeAddCommandsOperationCaptor;
+    private ArgumentCaptor<Operation<ContextualCommand>>         completeAddCommandsOperationCaptor;
     @Captor
     private ArgumentCaptor<Operation<PromiseError>>        failedOperationCaptor;
     @Captor
@@ -187,7 +186,7 @@ public class ProjectWizardTest {
         when(promiseError.getCause()).thenReturn(exception);
         when(dataObject.getCommands()).thenReturn(Collections.singletonList(command));
         when(command.getCommandLine()).thenReturn("echo 'Hello'");
-        when(commandManager.create(any(String.class), any(String.class), any(String.class), any(Map.class))).thenReturn(createCommandPromise);
+        when(commandManager.createCommand(any(ContextualCommand.class))).thenReturn(createCommandPromise);
         when(createCommandPromise.then(any(Operation.class))).thenReturn(createCommandPromise);
         when(createCommandPromise.catchError(any(Operation.class))).thenReturn(createCommandPromise);
 
