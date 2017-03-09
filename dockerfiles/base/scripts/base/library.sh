@@ -265,13 +265,13 @@ generate_random_string() {
 start_test_server() {
   export AGENT_INTERNAL_PORT=80
   export AGENT_EXTERNAL_PORT=32768
-  export AGENT_CONTAINER_NAME="fakeagent-"$(generate_random_string 10)
+  export AGENT_CONTAINER_NAME="fakeagent-$CHE_PORT"
 
   # Start mini httpd server to run simulated tests
   docker run -d -p $AGENT_EXTERNAL_PORT:$AGENT_INTERNAL_PORT --name $AGENT_CONTAINER_NAME \
              ${BOOTSTRAP_IMAGE_ALPINE} httpd -f -p $AGENT_INTERNAL_PORT -h /etc/ >> "${LOGS}"
 
-  export AGENT_INTERNAL_IP=$(docker inspect --format='{{.NetworkSettings.IPAddress}}' fakeagent)
+  export AGENT_INTERNAL_IP=$(docker inspect --format='{{.NetworkSettings.IPAddress}}' $AGENT_CONTAINER_NAME)
   export AGENT_EXTERNAL_IP=$CHE_HOST
 }
 
