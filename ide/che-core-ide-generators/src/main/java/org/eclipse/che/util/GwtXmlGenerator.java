@@ -220,7 +220,7 @@ public class GwtXmlGenerator {
                  DEFAULT_STYLE_SHEET,
                  DEFAULT_LOGGING);
         }
-        
+
         public Set<String> getGwtXmlModules() {
             return gwtXmlModules;
         }
@@ -229,7 +229,7 @@ public class GwtXmlGenerator {
          * @return set of gwt modules where '/' replaced with '.' and removed 'gwt.xml' from end.
          * used to insert as inherits in gwt.xml
          */
-        public Set<String> getGwtModules() {
+        public Set<String> getInherits() {
             return gwtXmlModules
                     .stream()
                     .map(gwtModule -> gwtModule.replace("/", ".").substring(0, gwtModule.length() - 8))

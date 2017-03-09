@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module rename-to='_app'>
-$config.gwtModules: { module |     <inherits name="$module$"/>
+$config.inherits: { module |     <inherits name="$module$"/>
 }$
     <stylesheet src="$config.stylesheet$"/>
     <entry-point class="$config.entryPoint$"/>
