@@ -259,18 +259,19 @@ docker_compose() {
 start_test_server() {
   export AGENT_INTERNAL_PORT=80
   export AGENT_EXTERNAL_PORT=32768
+  export AGENT_CONTAINER_NAME="fakeagent-$CHE_PORT"
 
   # Start mini httpd server to run simulated tests
-  docker run -d -p $AGENT_EXTERNAL_PORT:$AGENT_INTERNAL_PORT --name fakeagent \
+  docker run -d -p $AGENT_EXTERNAL_PORT:$AGENT_INTERNAL_PORT --name $AGENT_CONTAINER_NAME \
              ${BOOTSTRAP_IMAGE_ALPINE} httpd -f -p $AGENT_INTERNAL_PORT -h /etc/ >> "${LOGS}"
 
-  export AGENT_INTERNAL_IP=$(docker inspect --format='{{.NetworkSettings.IPAddress}}' fakeagent)
+  export AGENT_INTERNAL_IP=$(docker inspect --format='{{.NetworkSettings.IPAddress}}' $AGENT_CONTAINER_NAME)
   export AGENT_EXTERNAL_IP=$CHE_HOST
 }
 
 stop_test_server() {
   # Remove httpd server
-  docker rm -f fakeagent >> "${LOGS}"  
+  docker rm -f $AGENT_CONTAINER_NAME >> "${LOGS}"  
 }
 
 test1() {
@@ -298,12 +299,11 @@ test2() {
 }
 
 test3() {
-   HTTP_CODE=$(docker_run --name fakeserver \
-                                --entrypoint=curl \
-                                $(eval "echo \${IMAGE_${CHE_PRODUCT_NAME}}") \
-                                  -I ${AGENT_EXTERNAL_IP}:${AGENT_EXTERNAL_PORT}/alpine-release \
-                                  -s -o "${LOGS}" \
-                                  --write-out '%{http_code}')
+   HTTP_CODE=$(docker_run --entrypoint=curl \
+                          $(eval "echo \${IMAGE_${CHE_PRODUCT_NAME}}") \
+                            -I ${AGENT_EXTERNAL_IP}:${AGENT_EXTERNAL_PORT}/alpine-release \
+                            -s -o "${LOGS}" \
+                            --write-out '%{http_code}')
 
   if check_http_code $HTTP_CODE; then
     return 0
@@ -313,12 +313,11 @@ test3() {
 }
 
 test4() {
-  HTTP_CODE=$(docker_run --name fakeserver \
-                                --entrypoint=curl \
-                                $(eval "echo \${IMAGE_${CHE_PRODUCT_NAME}}") \
-                                  -I ${AGENT_INTERNAL_IP}:${AGENT_INTERNAL_PORT}/alpine-release \
-                                  -s -o "${LOGS}" \
-                                  --write-out '%{http_code}')  
+  HTTP_CODE=$(docker_run --entrypoint=curl \
+                         $(eval "echo \${IMAGE_${CHE_PRODUCT_NAME}}") \
+                           -I ${AGENT_INTERNAL_IP}:${AGENT_INTERNAL_PORT}/alpine-release \
+                           -s -o "${LOGS}" \
+                           --write-out '%{http_code}')  
 
   if check_http_code $HTTP_CODE; then
     return 0
