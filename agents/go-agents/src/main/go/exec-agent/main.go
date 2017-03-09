@@ -228,15 +228,10 @@ func main() {
 	if authEnabled {
 		cache := auth.NewCache(time.Minute*time.Duration(tokensExpirationTimeoutInMinutes), time.Minute*5)
 
-		handler = auth.Handler{
-			Delegate:    handler,
-			APIEndpoint: apiEndpoint,
-			Cache:       cache,
-			UnauthorizedHandler: http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-				dropChannelsWithExpiredToken(req.URL.Query().Get("token"))
-				http.Error(w, "Unauthorized", http.StatusUnauthorized)
-			}),
-		}
+		handler = auth.NewCachingHandler(handler, apiEndpoint, func(w http.ResponseWriter, req *http.Request, err error) {
+			dropChannelsWithExpiredToken(req.URL.Query().Get("token"))
+			http.Error(w, err.Error(), http.StatusUnauthorized)
+		}, cache)
 	}
 
 	// cut base path on requests, if it is configured
