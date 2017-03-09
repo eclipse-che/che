@@ -14,13 +14,9 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
-import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
-import org.eclipse.che.api.core.jsonrpc.BuildingRequestTransmitter;
-import org.eclipse.che.api.core.jsonrpc.JsonRpcFactory;
-import org.eclipse.che.api.core.jsonrpc.RequestHandlerConfigurator;
 import org.eclipse.che.api.project.server.handlers.CreateBaseProjectTypeHandler;
 import org.eclipse.che.api.project.server.handlers.ProjectHandler;
 import org.eclipse.che.api.project.server.importer.ProjectImporter;
@@ -44,13 +40,11 @@ import org.eclipse.che.api.vfs.watcher.IndexedFileCreateConsumer;
 import org.eclipse.che.api.vfs.watcher.IndexedFileDeleteConsumer;
 import org.eclipse.che.api.vfs.watcher.IndexedFileUpdateConsumer;
 
-import javax.inject.Named;
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.WatchService;
-import java.util.Set;
 import java.util.function.Consumer;
 
 import static com.google.inject.multibindings.Multibinder.newSetBinder;
