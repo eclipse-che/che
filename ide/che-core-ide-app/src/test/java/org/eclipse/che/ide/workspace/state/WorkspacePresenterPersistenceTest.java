@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.workspace.state;
 
+import com.google.inject.Provider;
 import elemental.json.Json;
 import elemental.json.JsonObject;
 
@@ -57,6 +58,10 @@ public class WorkspacePresenterPersistenceTest {
     private PartPresenter             part1;
 
     private WorkspacePresenter presenter;
+
+    @Mock
+    private Provider<PerspectiveManager>    perspectiveManagerProvider;
+
     private PerspectiveManager perspectiveManager;
 
     @Before
@@ -65,8 +70,11 @@ public class WorkspacePresenterPersistenceTest {
         map.put("perspective1", perspective1);
         map.put("perspective2", perspective2);
         perspectiveManager = new PerspectiveManager(map, "perspective1");
+
+        when(perspectiveManagerProvider.get()).thenReturn(perspectiveManager);
+
         presenter = new WorkspacePresenter(workspaceView,
-                                           perspectiveManager,
+                                           perspectiveManagerProvider,
                                            mainMenuPresenter,
                                            statusPanelGroupPresenter,
                                            toolbarPresenter,
