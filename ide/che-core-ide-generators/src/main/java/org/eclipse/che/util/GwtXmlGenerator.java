@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import static java.lang.Boolean.parseBoolean;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.eclipse.che.util.IgnoreUnExistedResourcesReflectionConfigurationBuilder.getConfigurationBuilder;
 
@@ -45,9 +46,10 @@ public class GwtXmlGenerator {
     public static final String TEMPLATE_NAME =
             "/".concat(GwtXmlGenerator.class.getPackage().getName().replace(".", "/")).concat("/gwt.xml.template");
 
-    public static final String DEFAULT_GWT_XML_PATH    = "org/eclipse/che/ide/IDE.gwt.xml";
-    public static final String DEFAULT_GWT_ETNRY_POINT = "org.eclipse.che.ide.client.IDE";
-    public static final String DEFAULT_STYLE_SHEET     = "IDE.css";
+    public static final String  DEFAULT_GWT_XML_PATH    = "org/eclipse/che/ide/IDE.gwt.xml";
+    public static final String  DEFAULT_GWT_ETNRY_POINT = "org.eclipse.che.ide.client.IDE";
+    public static final String  DEFAULT_STYLE_SHEET     = "IDE.css";
+    public static final Boolean DEFAULT_LOGGING         = false;
 
     private final GwtXmlGeneratorConfig config;
 
@@ -123,7 +125,8 @@ public class GwtXmlGenerator {
                                               getSingleValueOrDefault(parsedArgs, "gwtFileName", DEFAULT_GWT_XML_PATH),
                                               getSingleValueOrDefault(parsedArgs, "entryPoint", DEFAULT_GWT_ETNRY_POINT),
                                               getSingleValueOrDefault(parsedArgs, "styleSheet", DEFAULT_STYLE_SHEET),
-                                              Boolean.parseBoolean(getSingleValueOrDefault(parsedArgs, "loggingEnabled", "false"))
+                                              parseBoolean(
+                                                      getSingleValueOrDefault(parsedArgs, "loggingEnabled", DEFAULT_LOGGING.toString()))
                     );
             GwtXmlGenerator gwtXmlGenerator = new GwtXmlGenerator(gwtXmlGeneratorConfig);
             gwtXmlGenerator.generateGwtXml();
@@ -210,7 +213,12 @@ public class GwtXmlGenerator {
 
         public GwtXmlGeneratorConfig(Set<String> gwtXmlModules,
                                      File generationRoot) {
-            this(gwtXmlModules, generationRoot, DEFAULT_GWT_XML_PATH, DEFAULT_GWT_ETNRY_POINT, DEFAULT_STYLE_SHEET, false);
+            this(gwtXmlModules,
+                 generationRoot,
+                 DEFAULT_GWT_XML_PATH,
+                 DEFAULT_GWT_ETNRY_POINT,
+                 DEFAULT_STYLE_SHEET,
+                 DEFAULT_LOGGING);
         }
 
         public Set<String> getGwtXmlModules() {
