@@ -11,8 +11,10 @@
 package org.eclipse.che.ide.part.explorer.project;
 
 import com.google.common.collect.Sets;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
@@ -108,13 +110,15 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
 
     @Inject
     public ProjectExplorerPresenter(final ProjectExplorerView view,
-                                    EventBus eventBus,
-                                    CoreLocalizationConstant locale,
-                                    Resources resources,
+                                    final EventBus eventBus,
+                                    final CoreLocalizationConstant locale,
+                                    final Resources resources,
                                     final ResourceNode.NodeFactory nodeFactory,
                                     final SettingsProvider settingsProvider,
                                     final AppContext appContext,
-                                    final WorkspaceAgent workspaceAgent, RequestTransmitter requestTransmitter, DtoFactory dtoFactory) {
+                                    final Provider<WorkspaceAgent> workspaceAgentProvider,
+                                    final RequestTransmitter requestTransmitter,
+                                    final DtoFactory dtoFactory) {
         this.view = view;
         this.eventBus = eventBus;
         this.nodeFactory = nodeFactory;
@@ -170,15 +174,20 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
 
         registerNative();
 
-        final PartStack partStack = checkNotNull(workspaceAgent.getPartStack(PartStackType.NAVIGATION),
-                                                 "Navigation part stack should not be a null");
-        partStack.addPart(this);
-        partStack.setActivePart(this);
-
         // when ide has already initialized, then we force set focus to the current part
         eventBus.addHandler(ExtensionsInitializedEvent.getType(), new ExtensionsInitializedHandler() {
             @Override
             public void onExtensionsInitialized(ExtensionsInitializedEvent event) {
+                partStack.setActivePart(ProjectExplorerPresenter.this);
+            }
+        });
+
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                final PartStack partStack = checkNotNull(workspaceAgentProvider.get().getPartStack(PartStackType.NAVIGATION),
+                        "Navigation part stack should not be a null");
+                partStack.addPart(ProjectExplorerPresenter.this);
                 partStack.setActivePart(ProjectExplorerPresenter.this);
             }
         });
