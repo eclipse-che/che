@@ -34,6 +34,7 @@ import static org.eclipse.che.util.IgnoreUnExistedResourcesReflectionConfigurati
 
 /**
  * Generates uber IDE.gwt.xml from part found in class path.
+ *
  * @author Sergii Kabashniuk
  */
 public class GwtXmlGenerator {
@@ -69,6 +70,7 @@ public class GwtXmlGenerator {
 
     /**
      * Get the template for typescript
+     *
      * @return the String Template
      */
     protected ST getTemplate() {
@@ -82,9 +84,17 @@ public class GwtXmlGenerator {
     }
 
     /**
-     * Entry point. --rootDir is the optional parameter.
+     * Generated consolidated gwt.xml based on exists XX.gwt.xml in class path
      *
      * @param args
+     *         possible arguments
+     *         --rootDir - directory where gwt.xml file will be generated, default "."
+     *         --gwtFileName - Name of the generated file in rootDir, default "org/eclipse/che/ide/IDE.gwt.xml"
+     *         --entryPoint - gwt xml entry point, default "org.eclipse.che.ide.client.IDE"
+     *         --styleSheet - gwt xml stylesheet, default "IDE.css"
+     *         --loggingEnabled - Enable or disable gwt logging, default "false"
+     *         --includePackages - Include only specific packages where *.gwt.xml can be found, default "No value. Means all packages"
+     *         --excludePackages - Exclude packages from *.gwt.xml scanning	, default "com.google", "elemental","java.util","java.lang"
      */
     public static void main(String[] args) {
 
@@ -147,7 +157,6 @@ public class GwtXmlGenerator {
         /**
          * Searches XXX.gwt.xml files in class path
          *
-
          * @return - set of XXX.gwt.xml files found in class path
          */
         public Set<String> getGwtModulesFromClassPath() {
