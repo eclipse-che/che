@@ -34,6 +34,7 @@ import {CheEnvironmentRegistry} from './environment/che-environment-registry.fac
 import {CheAgent} from './che-agent.factory';
 import {CheSsh} from './che-ssh.factory';
 import {CheNamespaceRegistry} from './namespace/che-namespace-registry.factory';
+import {CheUser} from './che-user.factory';
 
 export class ApiConfig {
 
@@ -61,5 +62,6 @@ export class ApiConfig {
     register.factory('cheAgent', CheAgent);
     register.factory('cheSsh', CheSsh);
     register.factory('cheNamespaceRegistry', CheNamespaceRegistry);
+    register.factory('cheUser', CheUser);
   }
 }

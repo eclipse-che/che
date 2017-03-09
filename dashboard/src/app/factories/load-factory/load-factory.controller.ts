@@ -47,12 +47,12 @@ export class LoadFactoryCtrl {
   }
 
   hideMenuAndFooter() {
-    angular.element('#codenvynavmenu').hide();
+    angular.element('#chenavmenu').hide();
     angular.element(document.querySelectorAll('.che-footer')).hide();
   }
 
   restoreMenuAndFooter() {
-    angular.element('#codenvynavmenu').show();
+    angular.element('#chenavmenu').show();
     angular.element(document.querySelectorAll('.che-footer')).show();
   }
 
@@ -447,7 +447,7 @@ export class LoadFactoryCtrl {
     this.$location.path(this.getIDELink()).search('ideParams', ideParams);
 
     // restore elements
-    angular.element('#codenvynavmenu').show();
+    angular.element('#chenavmenu').show();
     angular.element(document.querySelectorAll('.che-footer')).show();
 
   }

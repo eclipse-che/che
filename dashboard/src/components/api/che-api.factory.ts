@@ -25,6 +25,7 @@ import {CheRecipeTemplate} from './che-recipe-template.factory';
 import {CheStack} from './che-stack.factory';
 import {CheOAuthProvider} from './che-o-auth-provider.factory';
 import {CheAgent} from './che-agent.factory';
+import {CheUser} from './che-user.factory';
 
 
 /**
@@ -50,12 +51,16 @@ export class CheAPI {
   private cheOAuthProvider: CheOAuthProvider;
   private cheAgent: CheAgent;
   private cheSsh: CheSsh;
+  private cheUser: CheUser;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheWorkspace: CheWorkspace, cheFactory: CheFactory, cheFactoryTemplate: CheFactoryTemplate, cheProfile: CheProfile, chePreferences: ChePreferences, cheProjectTemplate: CheProjectTemplate, cheWebsocket: CheWebsocket, cheService: CheService, cheAdminPlugins: CheAdminPlugins, cheAdminService: CheAdminService, cheRecipe: CheRecipe, cheRecipeTemplate: CheRecipeTemplate, cheStack: CheStack, cheOAuthProvider: CheOAuthProvider, cheAgent: CheAgent, cheSsh: CheSsh) {
+  constructor(cheWorkspace: CheWorkspace, cheFactory: CheFactory, cheFactoryTemplate: CheFactoryTemplate, cheProfile: CheProfile,
+              chePreferences: ChePreferences, cheProjectTemplate: CheProjectTemplate, cheWebsocket: CheWebsocket, cheService: CheService,
+              cheAdminPlugins: CheAdminPlugins, cheAdminService: CheAdminService, cheRecipe: CheRecipe, cheRecipeTemplate: CheRecipeTemplate,
+              cheStack: CheStack, cheOAuthProvider: CheOAuthProvider, cheAgent: CheAgent, cheSsh: CheSsh, cheUser: CheUser) {
     this.cheWorkspace = cheWorkspace;
     this.cheProfile = cheProfile;
     this.cheFactory = cheFactory;
@@ -72,6 +77,7 @@ export class CheAPI {
     this.cheOAuthProvider = cheOAuthProvider;
     this.cheAgent = cheAgent;
     this.cheSsh = cheSsh;
+    this.cheUser = cheUser;
   }
 
 
@@ -135,7 +141,7 @@ export class CheAPI {
    * The Che Admin Services API
    * @returns {CheAdminService}
    */
-  getAdminService() {
+  getAdminService(): CheAdminService {
     return this.cheAdminService;
   }
 
@@ -189,19 +195,27 @@ export class CheAPI {
   }
 
   /**
-   * The Codenvy Factory API
+   * The Che Factory API
    * @returns {CheFactory|*}
    */
-  getFactory() {
+  getFactory(): CheFactory {
     return this.cheFactory;
   }
 
   /**
-   * The Codenvy Factory Template API
+   * The Che Factory Template API
    * @returns {CheFactoryTemplate|*}
    */
-  getFactoryTemplate() {
+  getFactoryTemplate(): CheFactoryTemplate {
     return this.cheFactoryTemplate;
   }
 
+  /**
+   * The Che use API.
+   *
+   * @returns {CheUser}
+   */
+  getUser(): CheUser {
+    return this.cheUser;
+  }
 }

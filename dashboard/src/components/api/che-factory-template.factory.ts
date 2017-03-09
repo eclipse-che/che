@@ -17,11 +17,16 @@
  */
 export class CheFactoryTemplate {
 
+  private $resource: ng.resource.IResourceService;
+  private $q: ng.IQService;
+  private factoryTemplatesByName: Map<string, any>;
+  private remoteFactoryTemplateAPI: ng.resource.IResourceClass<any>;
+
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($resource, $q) {
+  constructor($resource: ng.resource.IResourceService, $q: ng.IQService) {
     // keep resource
     this.$resource = $resource;
     this.$q = $q;
@@ -39,7 +44,7 @@ export class CheFactoryTemplate {
    * @param templateName the template name
    * @returns {*} the promise
    */
-  fetchFactoryTemplate(templateName) {
+  fetchFactoryTemplate(templateName: string): ng.IPromise<any> {
     var deferred = this.$q.defer();
 
     let templateFileName = templateName + '.json';
@@ -66,8 +71,7 @@ export class CheFactoryTemplate {
    * @param templateName the template name
    * @returns factory template content
    */
-  getFactoryTemplate(templateName) {
+  getFactoryTemplate(templateName: string): any {
     return this.factoryTemplatesByName.get(templateName);
   }
-
 }

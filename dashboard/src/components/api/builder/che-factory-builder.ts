@@ -17,6 +17,8 @@
  */
 export class CheFactoryBuilder {
 
+  private factory: che.IFactory;
+
   /**
    * Default constructor.
    */
@@ -82,5 +84,4 @@ export class CheFactoryBuilder {
   build() {
     return this.factory;
   }
-
 }

@@ -32,14 +32,14 @@ describe('CheFactory', () => {
   let httpBackend;
 
   /**
-   * Codenvy backend
+   * Che backend
    */
-  let codenvyBackend;
+  let cheBackend;
 
   /**
    *  setup module
    */
-  beforeEach(angular.mock.module('cheDashboard'));
+  beforeEach(angular.mock.module('userDashboard'));
 
   /**
    * Inject factory and http backend
@@ -48,7 +48,7 @@ describe('CheFactory', () => {
 
     factory = cheFactory;
     apiBuilder = cheAPIBuilder;
-    codenvyBackend = cheHttpBackend;
+    cheBackend = cheHttpBackend;
     httpBackend = cheHttpBackend.getHttpBackend();
   }));
 
@@ -76,16 +76,16 @@ describe('CheFactory', () => {
 
       // providing requests
       // add test objects on Http backend
-      codenvyBackend.setDefaultUser(testUser);
-      codenvyBackend.addUserFactory(testFactory1);
-      codenvyBackend.addUserFactory(testFactory2);
-      codenvyBackend.addUserFactory(testFactory3);
-      codenvyBackend.addUserFactory(testFactory4);
-      codenvyBackend.setPageMaxItem(maxItem);
-      codenvyBackend.setPageSkipCount(skipCount);
+      cheBackend.setDefaultUser(testUser);
+      cheBackend.addUserFactory(testFactory1);
+      cheBackend.addUserFactory(testFactory2);
+      cheBackend.addUserFactory(testFactory3);
+      cheBackend.addUserFactory(testFactory4);
+      cheBackend.setPageMaxItem(maxItem);
+      cheBackend.setPageSkipCount(skipCount);
 
       // setup backend for factories
-      codenvyBackend.factoriesBackendSetup();
+      cheBackend.factoriesBackendSetup();
 
       // fetch factory
       factory.fetchFactories(maxItem, skipCount);
@@ -131,10 +131,10 @@ describe('CheFactory', () => {
 
       // providing request
       // add test factory on Http backend
-      codenvyBackend.addUserFactory(testFactory);
+      cheBackend.addUserFactory(testFactory);
 
       // setup backend
-      codenvyBackend.factoriesBackendSetup();
+      cheBackend.factoriesBackendSetup();
 
       // fetch factory
       factory.fetchFactoryById(testFactory.id);
@@ -164,10 +164,10 @@ describe('CheFactory', () => {
 
       // providing request
       // add test factory on Http backend
-      codenvyBackend.addUserFactory(testFactory);
+      cheBackend.addUserFactory(testFactory);
 
       // setup backend
-      codenvyBackend.factoriesBackendSetup();
+      cheBackend.factoriesBackendSetup();
 
       // delete factory
       factory.deleteFactoryById(testFactory.id);
@@ -199,7 +199,7 @@ describe('CheFactory', () => {
         '\<' + test_link_2 + '\>' + '; rel="' + test_rel_2 + '",' +
         '\<' + test_link_3 + '\>' + '; rel="' + test_rel_3 + '"';
 
-      codenvyBackend.factoriesBackendSetup();
+      cheBackend.factoriesBackendSetup();
 
       // gets page
       let pageObject = factory._getPageFromResponse(factories, headersLink);
@@ -222,7 +222,7 @@ describe('CheFactory', () => {
       let maxItems = 5;
       let test_link = '/api/factory/find?creator.userId=testUserId&skipCount=' + skipCount + '&maxItems=' + maxItems;
 
-      codenvyBackend.factoriesBackendSetup();
+      cheBackend.factoriesBackendSetup();
 
       // gets page
       let pageParams = factory._getPageParamByLink(test_link);
