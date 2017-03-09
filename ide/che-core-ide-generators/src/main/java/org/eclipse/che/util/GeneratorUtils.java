@@ -90,7 +90,6 @@ public class GeneratorUtils {
                 String argName = arg.substring(2, index);
                 parsedArgs.computeIfAbsent(argName, k -> new HashSet<>())
                           .add(arg.substring(index + 1));
-
             }
         }
         return parsedArgs;
