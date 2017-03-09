@@ -28,6 +28,10 @@ let Utils = function() {
     return name + (('0000' + (Math.random() * Math.pow(36, 4) << 0).toString(36)).slice(-4));
   };
 
+  this.scrollToBottom = (elem) => {
+    return browser.executeScript('return angular.element(arguments[0]).scrollTop(angular.element(arguments[0])[0].scrollHeight)', elem);
+  }
+
 };
 
 module.exports = new Utils();

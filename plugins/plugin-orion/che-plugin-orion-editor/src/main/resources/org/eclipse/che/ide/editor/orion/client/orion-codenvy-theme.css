@@ -156,7 +156,7 @@
     padding-left: 10px;
     padding-right: 10px;
     padding-top: 5px;
-    padding-bottom: 7px;
+    padding-bottom: 7px !important;
 
     border: 1px solid completionPopupBorderColor;
     box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.5);

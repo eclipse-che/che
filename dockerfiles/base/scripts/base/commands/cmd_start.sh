@@ -16,6 +16,7 @@ help_cmd_start() {
   text "Starts ${CHE_MINI_PRODUCT_NAME} and verifies its operation\n"
   text "\n"
   text "PARAMETERS:\n"
+  text "  --follow                          Displays server logs to console and blocks until user interrupts\n"
   text "  --force                           Uses 'docker rmi' and 'docker pull' to forcibly retrieve latest images\n"
   text "  --no-force                        Updates images if matching tag not found in local cache\n"
   text "  --pull                            Uses 'docker pull' to check for new remote versions of images\n"
@@ -29,6 +30,7 @@ pre_cmd_start() {
   CHE_SKIP_CONFIG=false
   CHE_SKIP_PREFLIGHT=false
   CHE_SKIP_POSTFLIGHT=false
+  CHE_FOLLOW_LOGS=false
   FORCE_UPDATE="--no-force"
 
   while [ $# -gt 0 ]; do
@@ -41,6 +43,9 @@ pre_cmd_start() {
         shift ;;
       --skip:postflight)
         CHE_SKIP_POSTFLIGHT=true
+        shift ;;
+      --follow)
+        CHE_FOLLOW_LOGS=true
         shift ;;
       --force)
         FORCE_UPDATE="--force"
@@ -226,8 +231,14 @@ wait_until_booted() {
 
   # CHE-3546 - if in development mode, then display the che server logs to STDOUT
   #            automatically kill the streaming of the log output when the server is booted
-  if debug_server; then
-    docker logs -f ${CHE_CONTAINER_NAME} &
+  if debug_server || follow_logs; then
+    DOCKER_LOGS_COMMAND="docker logs -f ${CHE_CONTAINER_NAME}"
+
+    if debug_server; then 
+      DOCKER_LOGS_COMMAND+=" &"
+    fi
+
+    eval $DOCKER_LOGS_COMMAND
     LOG_PID=$!
   else
     info "start" "Server logs at \"docker logs -f ${CHE_CONTAINER_NAME}\""
@@ -304,6 +315,14 @@ skip_preflight() {
 
 skip_postflight() {
   if [ "${CHE_SKIP_POSTFLIGHT}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+follow_logs() {
+  if [ "${CHE_FOLLOW_LOGS}" = "true" ]; then
     return 0
   else
     return 1
