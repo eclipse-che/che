@@ -127,6 +127,11 @@
                 <configuration>
                     <excludes>
                         <exclude>**/**/TestingHandler.java</exclude>
+                        <exclude>**/**/ExecutorPromiseMocker.java</exclude>
+                        <exclude>**/**/PromiseMocker.java</exclude>
+                        <exclude>**/**/FunctionAnswer.java</exclude>
+                        <exclude>**/**/MockitoPrinter.java</exclude>
+                        <exclude>**/**/TestServiceClientTest.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>
