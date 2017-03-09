@@ -384,7 +384,7 @@ init_check_interactive() {
 }
 
 # Add check to see if --user uid:gid passed in.
-check_user() {
+init_check_user() {
   DOCKER_CHE_USER=$(docker inspect --format='{{.Config.User}}' $(get_this_container_id))
   if [[ "${DOCKER_CHE_USER}" != "" ]]; then
     CHE_USER=$DOCKER_CHE_USER

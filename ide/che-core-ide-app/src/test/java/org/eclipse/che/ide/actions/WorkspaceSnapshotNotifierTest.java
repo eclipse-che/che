@@ -40,15 +40,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * Tests for {@link WorkspaceSnapshotCreator}.
+ * Tests for {@link WorkspaceSnapshotNotifier}.
  *
  * @author Yevhenii Voevodin
  */
 @RunWith(GwtMockitoTestRunner.class)
-public class WorkspaceSnapshotCreatorTest {
-
-    @Mock(answer = Answers.RETURNS_MOCKS)
-    private WorkspaceServiceClient workspaceService;
+public class WorkspaceSnapshotNotifierTest {
 
     @Mock
     private NotificationManager notificationManager;
@@ -72,7 +69,7 @@ public class WorkspaceSnapshotCreatorTest {
     private ArgumentCaptor<Operation<PromiseError>> errorCaptor;
 
     @InjectMocks
-    private WorkspaceSnapshotCreator snapshotCreator;
+    private WorkspaceSnapshotNotifier snapshotCreator;
 
     @Before
     public void setup () throws Exception {
@@ -83,7 +80,7 @@ public class WorkspaceSnapshotCreatorTest {
 
     @Test
     public void shouldShowNotificationWhenCreatingSnapshot() {
-        snapshotCreator.createSnapshot("workspace123");
+        snapshotCreator.creationStarted();
 
         verify(notificationManager).notify(anyString(), eq(StatusNotification.Status.PROGRESS), eq(FLOAT_MODE));
     }
@@ -92,7 +89,7 @@ public class WorkspaceSnapshotCreatorTest {
     public void shouldChangeNotificationAfterCreationError() {
         when(locale.createSnapshotFailed()).thenReturn("Error");
 
-        snapshotCreator.createSnapshot("workspace123");
+        snapshotCreator.creationStarted();
 
         snapshotCreator.creationError("Error");
 
@@ -103,30 +100,11 @@ public class WorkspaceSnapshotCreatorTest {
     @Test
     public void shouldChangeNotificationAfterSuccessfullyCreated() {
         when(locale.createSnapshotSuccess()).thenReturn("Snapshot successfully created");
-        snapshotCreator.createSnapshot("workspace123");
+        snapshotCreator.creationStarted();
 
         snapshotCreator.successfullyCreated();
 
         verify(notification).setStatus(StatusNotification.Status.SUCCESS);
         verify(notification).setTitle("Snapshot successfully created");
-    }
-
-    @Test
-    public void shouldChangeNotificationIfErrorCaughtWhileCreatingSnapshot() throws OperationException {
-        when(workspaceService.createSnapshot(anyString())).thenReturn(createSnapshotPromise);
-        snapshotCreator.createSnapshot("workspace123");
-
-        verify(createSnapshotPromise).catchError(errorCaptor.capture());
-        errorCaptor.getValue().apply(promiseError);
-
-        verify(notification).setTitle(promiseError.getMessage());
-        verify(notification).setStatus(StatusNotification.Status.FAIL);
-    }
-
-    @Test
-    public void shouldBeInProgressAfterCreatingSnapshot() {
-        snapshotCreator.createSnapshot("workspace123");
-
-        assertTrue(snapshotCreator.isInProgress());
     }
 }

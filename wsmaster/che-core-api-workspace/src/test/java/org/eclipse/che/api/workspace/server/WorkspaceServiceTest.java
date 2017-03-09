@@ -153,7 +153,8 @@ public class WorkspaceServiceTest {
                                        wsAgentHealthChecker,
                                        new WorkspaceServiceLinksInjector(new MachineLinksInjector()),
                                        true,
-                                       false);
+                                       false,
+                                       true);
     }
 
     @Test
@@ -988,8 +989,9 @@ public class WorkspaceServiceTest {
         assertEquals(response.getStatusCode(), 200);
         final Map<String, String> settings = new Gson().fromJson(response.print(),
                                                                  new TypeToken<Map<String, String>>() {}.getType());
-        assertEquals(settings, ImmutableMap.of("che.workspace.auto_snapshot", "true",
-                                               "che.workspace.auto_restore", "false"));
+        assertEquals(settings, ImmutableMap.of("che.workspace.auto_snapshot", "true", //
+                                               "che.workspace.auto_restore", "false", //
+                                               "che.workspace.auto_start", "true"));
     }
 
     private static String unwrapError(Response response) {

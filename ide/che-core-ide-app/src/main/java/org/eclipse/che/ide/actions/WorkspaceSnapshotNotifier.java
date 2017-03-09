@@ -13,10 +13,6 @@ package org.eclipse.che.ide.actions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
@@ -27,28 +23,33 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PRO
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 
 /**
- * Creates snapshot of the workspace using {@link WorkspaceServiceClient}.
- *
- * <p>This component is for managing notifications which are related to creating snapshot process.
+ * Shows notifications about workspace snapshotting progress.
+ * Each call to {@link #creationStarted()} must be eventually followed by
+ * either call to {@link #creationError(String)} or {@link #successfullyCreated()}.
  *
  * @author Yevhenii Voevodin
  */
 @Singleton
-public class WorkspaceSnapshotCreator {
+public class WorkspaceSnapshotNotifier {
 
-    private final WorkspaceServiceClient   workspaceService;
     private final NotificationManager      notificationManager;
     private final CoreLocalizationConstant locale;
 
     private StatusNotification notification;
 
     @Inject
-    public WorkspaceSnapshotCreator(WorkspaceServiceClient workspaceService,
-                                    NotificationManager notificationManager,
-                                    CoreLocalizationConstant locale) {
-        this.workspaceService = workspaceService;
+    public WorkspaceSnapshotNotifier(NotificationManager notificationManager, CoreLocalizationConstant locale) {
         this.notificationManager = notificationManager;
         this.locale = locale;
+    }
+
+    /**
+     * Starts showing snapshotting notification.
+     * The notification is shown until either {@link #creationError(String)}
+     * or {@link #successfullyCreated()} is called.
+     */
+    public void creationStarted() {
+        notification = notificationManager.notify(locale.createSnapshotProgress(), PROGRESS, FLOAT_MODE);
     }
 
     /**
@@ -70,29 +71,5 @@ public class WorkspaceSnapshotCreator {
             notification.setStatus(SUCCESS);
             notification.setTitle(locale.createSnapshotSuccess());
         }
-    }
-
-    /**
-     * Returns true if workspace creation process is not done, otherwise when it is done - returns false
-     */
-    public boolean isInProgress() {
-        return notification != null && notification.getStatus() == PROGRESS;
-    }
-
-    /**
-     * Creates snapshot from workspace with given id and shows appropriate notification.
-     *
-     * @param workspaceId
-     *         id of the workspace to create snapshot from.
-     */
-    public void createSnapshot(String workspaceId) {
-        notification = notificationManager.notify(locale.createSnapshotProgress(), PROGRESS, FLOAT_MODE);
-        workspaceService.createSnapshot(workspaceId)
-                        .catchError(new Operation<PromiseError>() {
-                            @Override
-                            public void apply(PromiseError error) throws OperationException {
-                                creationError(error.getMessage());
-                            }
-                        });
     }
 }

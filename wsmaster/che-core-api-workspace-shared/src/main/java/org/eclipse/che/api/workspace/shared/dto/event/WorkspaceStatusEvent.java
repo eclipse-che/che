@@ -32,10 +32,7 @@ public interface WorkspaceStatusEvent {
 
     /**
      * Returns the type of this event.
-     *
-     * @deprecated use #getStatus() instead
      */
-    @Deprecated
     EventType getEventType();
 
     void setEventType(EventType eventType);
