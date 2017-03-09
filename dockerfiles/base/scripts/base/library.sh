@@ -256,12 +256,6 @@ docker_compose() {
   fi
 }
 
-# Return srandom character alphanumeric string (upper and lower case) of length $1
-generate_random_string() {
-  NEW_UUID=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w $1 | head -n 1)
-  echo $NEW_UUID
-}
-
 start_test_server() {
   export AGENT_INTERNAL_PORT=80
   export AGENT_EXTERNAL_PORT=32768
