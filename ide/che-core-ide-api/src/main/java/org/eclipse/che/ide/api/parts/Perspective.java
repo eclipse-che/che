@@ -28,14 +28,12 @@ public interface Perspective extends StateComponent {
 
 
     /**
-     * Some Unique id will used for set/switch current perspective in workbench layout
-     * @return
+     * Some unique id will used to set/switch current perspective in workbench layout logic
      */
     String getPerspectiveId();
 
     /**
-     * human readable name of perspective will be use in UI element for switching perspective
-     * @return
+     * Human readable name of perspective will be used in UI element for switching perspective
      */
     String getPerspectiveName();
 
