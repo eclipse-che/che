@@ -69,7 +69,7 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
     private final WorkspaceServiceClient workspaceServiceClient;
     private final LoaderPresenter        loader;
     //not used now added it for future if it we will have possibility check that service available for client call
-    private final List<RestServiceInfo>  availableServices;
+    private final List<RestServiceInfo>  availableServices; //TODO do we really need this variable?
     private       DevMachine             devMachine;
     private       MessageBus             messageBus;
     private       WsAgentState           state;
@@ -137,14 +137,11 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
     }
 
     public Promise<MessageBus> getMessageBus() {
-        return AsyncPromiseHelper.createFromAsyncRequest(new AsyncPromiseHelper.RequestCall<MessageBus>() {
-            @Override
-            public void makeCall(AsyncCallback<MessageBus> callback) {
-                if (messageBus != null) {
-                    callback.onSuccess(messageBus);
-                } else {
-                    WsAgentStateController.this.messageBusCallbacks.add(callback);
-                }
+        return AsyncPromiseHelper.createFromAsyncRequest(callback -> {
+            if (messageBus != null) {
+                callback.onSuccess(messageBus);
+            } else {
+                WsAgentStateController.this.messageBusCallbacks.add(callback);
             }
         });
     }
@@ -176,11 +173,8 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
 
                 checkWsConnection();
             }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError arg) throws OperationException {
-                checkWsAgentHealth();
-            }
+        }).catchError(ignored -> {
+            checkWsAgentHealth();
         });
     }
 
@@ -204,8 +198,10 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
     private void checkStateOfWsAgent(WsAgentHealthStateDto agentHealthStateDto) {
         final int statusCode = agentHealthStateDto.getCode();
         final String infoWindowTitle = "Workspace Agent Not Responding";
-        final ConfirmCallback stopCallback = new StopCallback(false);
-        final ConfirmCallback stopAndReloadCallback = new StopCallback(true);
+        final boolean reloadPage = true;
+        final boolean createSnapshot = true;
+        final ConfirmCallback stopCallback = new StopCallback(!reloadPage, createSnapshot);
+        final ConfirmCallback stopAndReloadCallback = new StopCallback(reloadPage, !createSnapshot);
 
         if (statusCode == 200) {
             dialogFactory.createChoiceDialog(infoWindowTitle,
@@ -227,20 +223,19 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
 
     private class StopCallback implements ConfirmCallback {
 
-        private final boolean reload;
+        private final boolean reloadPage;
+        private final boolean createSnapshot;
 
-        public StopCallback(boolean reload) {
-            this.reload = reload;
+        private StopCallback(boolean reloadPage, boolean createSnapshot) {
+            this.reloadPage = reloadPage;
+            this.createSnapshot = createSnapshot;
         }
 
         @Override
         public void accepted() {
-            workspaceServiceClient.stop(devMachine.getWorkspaceId()).then(new Operation<Void>() {
-                @Override
-                public void apply(Void arg) throws OperationException {
-                    if (reload) {
-                        BrowserUtils.reloadPage(false);
-                    }
+            workspaceServiceClient.stop(devMachine.getWorkspaceId(), createSnapshot).then(ignored -> {
+                if (reloadPage) {
+                    BrowserUtils.reloadPage(false);
                 }
             });
         }
@@ -260,12 +255,9 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
     }
 
     private void checkWsAgentHealth() {
-        workspaceServiceClient.getWsAgentState(devMachine.getWorkspace()).then(new Operation<WsAgentHealthStateDto>() {
-            @Override
-            public void apply(WsAgentHealthStateDto arg) throws OperationException {
-                if (RUNNING.equals(arg.getWorkspaceStatus())) {
-                    checkStateOfWsAgent(arg);
-                }
+        workspaceServiceClient.getWsAgentState(devMachine.getWorkspace()).then(agentHealthState -> {
+            if (RUNNING.equals(agentHealthState.getWorkspaceStatus())) {
+                checkStateOfWsAgent(agentHealthState);
             }
         }).catchError(new Operation<PromiseError>() {
             @Override
