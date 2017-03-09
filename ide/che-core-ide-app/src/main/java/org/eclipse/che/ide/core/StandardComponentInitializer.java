@@ -52,6 +52,8 @@ import org.eclipse.che.ide.actions.common.MaximizePartAction;
 import org.eclipse.che.ide.actions.common.MinimizePartAction;
 import org.eclipse.che.ide.actions.common.RestorePartAction;
 import org.eclipse.che.ide.actions.find.FindActionAction;
+import org.eclipse.che.ide.api.action.Action;
+import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.action.IdeActions;
@@ -64,6 +66,8 @@ import org.eclipse.che.ide.api.icon.Icon;
 import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.keybinding.KeyBuilder;
+import org.eclipse.che.ide.api.parts.Perspective;
+import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.connection.WsConnectionListener;
 import org.eclipse.che.ide.imageviewer.ImageViewerProvider;
 import org.eclipse.che.ide.macro.ServerHostNameMacro;
@@ -98,6 +102,8 @@ import org.eclipse.che.ide.util.input.KeyCodeMap;
 import org.eclipse.che.ide.xml.NewXmlFileAction;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
+import java.util.Map;
+
 import static org.eclipse.che.ide.actions.EditorActions.CLOSE;
 import static org.eclipse.che.ide.actions.EditorActions.CLOSE_ALL;
 import static org.eclipse.che.ide.actions.EditorActions.CLOSE_ALL_EXCEPT_PINNED;
@@ -107,6 +113,7 @@ import static org.eclipse.che.ide.actions.EditorActions.REOPEN_CLOSED;
 import static org.eclipse.che.ide.actions.EditorActions.SPLIT_HORIZONTALLY;
 import static org.eclipse.che.ide.actions.EditorActions.SPLIT_VERTICALLY;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_FILE_NEW;
+import static org.eclipse.che.ide.api.action.IdeActions.GROUP_MAIN_MENU;
 import static org.eclipse.che.ide.api.constraints.Constraints.FIRST;
 import static org.eclipse.che.ide.api.constraints.Constraints.LAST;
 import static org.eclipse.che.ide.part.editor.recent.RecentFileStore.RECENT_GROUP_ID;
@@ -321,6 +328,9 @@ public class StandardComponentInitializer {
 
     @Inject
     private RestorePartAction restorePartAction;
+
+    @Inject
+    private PerspectiveManager perspectiveManager;
 
     @Inject
     @Named("XMLFileType")
@@ -704,6 +714,28 @@ public class StandardComponentInitializer {
             keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode('w').build(), "closeActiveEditor");
             keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('p').build(), "signatureHelp");
         }
+
+
+        final Map<String, Perspective> perspectives = perspectiveManager.getPerspectives();
+        if (perspectives.size() > 1) { //if registered perspectives will be more then 2 Main Menu -> Window
+                                       // will appears and contains all of them as sub-menu
+            final DefaultActionGroup windowMenu = new DefaultActionGroup("Window", true, actionManager);
+            actionManager.registerAction("Window", windowMenu);
+            final DefaultActionGroup mainMenu = (DefaultActionGroup)actionManager.getAction(GROUP_MAIN_MENU);
+            mainMenu.add(windowMenu);
+            for(Perspective perspective : perspectives.values()) {
+                final Action action = new Action(perspective.getPerspectiveName()) {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        perspectiveManager.setPerspectiveId(perspective.getPerspectiveId());
+                    }
+            };
+            actionManager.registerAction(perspective.getPerspectiveId(), action);
+            windowMenu.add(action);
+        }
+
     }
+
+}
 
 }
