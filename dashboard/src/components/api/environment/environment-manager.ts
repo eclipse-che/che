@@ -163,24 +163,26 @@ export abstract class EnvironmentManager {
   }
 
   getServers(machine: IEnvironmentManagerMachine): {[serverName: string]: IEnvironmentManagerMachineServer} {
-    if (!machine.servers) {
+    let servers = angular.copy(machine.servers);
+
+    if (!servers) {
       return {};
     }
 
-    Object.keys(machine.servers).forEach((serverName: string) => {
-      machine.servers[serverName].userScope = true;
+    Object.keys(servers).forEach((serverName: string) => {
+      servers[serverName].userScope = true;
     });
 
     if (!machine.runtime) {
-      return machine.servers;
+      return servers;
     }
 
     Object.keys(machine.runtime.servers).forEach((runtimeServerName: string) => {
       let runtimeServer: che.IWorkspaceRuntimeMachineServer = machine.runtime.servers[runtimeServerName],
           runtimeServerReference = runtimeServer.ref;
 
-      if (machine.servers[runtimeServerReference]) {
-        machine.servers[runtimeServerReference].runtime = runtimeServer;
+      if (servers[runtimeServerReference]) {
+        servers[runtimeServerReference].runtime = runtimeServer;
       } else {
         let port;
         if (runtimeServer.port) {
@@ -188,7 +190,7 @@ export abstract class EnvironmentManager {
         } else {
           [port, ] = runtimeServerName.split('/');
         }
-        machine.servers[runtimeServerReference] = {
+        servers[runtimeServerReference] = {
           userScope: false,
           port: port,
           protocol: runtimeServer.protocol,
@@ -197,7 +199,7 @@ export abstract class EnvironmentManager {
       }
     });
 
-    return machine.servers;
+    return servers;
   }
 
   setServers(machine: IEnvironmentManagerMachine, _servers: {[serverRef: string]: IEnvironmentManagerMachineServer}): void {
