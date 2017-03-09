@@ -12,7 +12,6 @@ package org.eclipse.che.ide.workspace;
 
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.Scheduler;
-import com.google.inject.Provider;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.workspace.Workspace;
@@ -28,7 +27,6 @@ import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.dialogs.CancelCallback;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.ide.api.machine.MachineManager;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -74,7 +72,6 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
     protected final StartWorkspacePresenter  startWorkspacePresenter;
 
     private final EventBus                 eventBus;
-    private final Provider<MachineManager> machineManagerProvider;
     private final MessageBusProvider       messageBusProvider;
     private final WorkspaceEventsHandler   workspaceEventsHandler;
     private final LoaderPresenter          loader;
@@ -90,7 +87,6 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
                               DtoUnmarshallerFactory dtoUnmarshallerFactory,
                               EventBus eventBus,
                               AppContext appContext,
-                              Provider<MachineManager> machineManagerProvider,
                               NotificationManager notificationManager,
                               MessageBusProvider messageBusProvider,
                               BrowserAddress browserAddress,
@@ -106,7 +102,6 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.eventBus = eventBus;
         this.appContext = appContext;
-        this.machineManagerProvider = machineManagerProvider;
         this.notificationManager = notificationManager;
         this.messageBusProvider = messageBusProvider;
         this.browserAddress = browserAddress;
@@ -202,7 +197,6 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
                             public void execute() {
                                 loader.setSuccess(STARTING_WORKSPACE_RUNTIME);
                                 eventBus.fireEvent(new WorkspaceStartedEvent(workspace));
-                                machineManagerProvider.get();//start instance of machine manager
                             }
                         });
                         break;
