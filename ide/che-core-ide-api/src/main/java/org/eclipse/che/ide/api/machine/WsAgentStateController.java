@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.machine;
 
-import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
@@ -30,8 +27,6 @@ import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
-import org.eclipse.che.ide.rest.RestServiceInfo;
-import org.eclipse.che.ide.rest.StringUnmarshaller;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 import org.eclipse.che.ide.util.browser.BrowserUtils;
 import org.eclipse.che.ide.util.loging.Log;
@@ -42,7 +37,6 @@ import org.eclipse.che.ide.websocket.events.ConnectionErrorHandler;
 import org.eclipse.che.ide.websocket.events.ConnectionOpenedHandler;
 import org.eclipse.che.ide.websocket.events.WebSocketClosedEvent;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -68,8 +62,6 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
     private final AsyncRequestFactory    asyncRequestFactory;
     private final WorkspaceServiceClient workspaceServiceClient;
     private final LoaderPresenter        loader;
-    //not used now added it for future if it we will have possibility check that service available for client call
-    private final List<RestServiceInfo>  availableServices; //TODO do we really need this variable?
     private       DevMachine             devMachine;
     private       MessageBus             messageBus;
     private       WsAgentState           state;
@@ -89,7 +81,6 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
         this.messageBusProvider = messageBusProvider;
         this.asyncRequestFactory = asyncRequestFactory;
         this.dialogFactory = dialogFactory;
-        this.availableServices = new ArrayList<>();
     }
 
     public void initialize(DevMachine devMachine) {
@@ -152,27 +143,8 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
     private void checkHttpConnection() {
         //here we add trailing slash because {@link org.eclipse.che.api.core.rest.ApiInfoService} mapped in this way
         String url = devMachine.getWsAgentBaseUrl() + '/';
-        asyncRequestFactory.createGetRequest(url).send(new StringUnmarshaller()).then(new Operation<String>() {
-            @Override
-            public void apply(String result) throws OperationException {
-                try {
-                    JSONObject object = JSONParser.parseStrict(result).isObject();
-                    if (object.containsKey("rootResources")) {
-                        JSONArray rootResources = object.get("rootResources").isArray();
-                        for (int i = 0; i < rootResources.size(); i++) {
-                            JSONObject rootResource = rootResources.get(i).isObject();
-                            String regex = rootResource.get("regex").isString().stringValue();
-                            String fqn = rootResource.get("fqn").isString().stringValue();
-                            String path = rootResource.get("path").isString().stringValue();
-                            availableServices.add(new RestServiceInfo(fqn, regex, path));
-                        }
-                    }
-                } catch (Exception exception) {
-                    Log.warn(getClass(), "Parse root resources failed.");
-                }
-
-                checkWsConnection();
-            }
+        asyncRequestFactory.createGetRequest(url).send().then(ignored -> {
+            checkWsConnection();
         }).catchError(ignored -> {
             checkWsAgentHealth();
         });
