@@ -12,12 +12,10 @@ package org.eclipse.che.api.vfs.watcher;
 
 import com.google.inject.Inject;
 
-import org.eclipse.che.commons.schedule.executor.ThreadPullLauncher;
+import org.eclipse.che.commons.schedule.ScheduleRate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.File;
@@ -36,9 +34,12 @@ import static java.nio.file.FileVisitResult.CONTINUE;
 import static java.nio.file.FileVisitResult.SKIP_SUBTREE;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.walkFileTree;
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.Collectors.toSet;
 
+/**
+ * Walks a file system tree, register addition, update and removal of file system items.
+ * On events runs corresponding consumers that can be registered in DI configuration modules.
+ */
 @Singleton
 public class FileTreeWalker {
     private static final Logger LOG = LoggerFactory.getLogger(FileTreeWalker.class);
@@ -55,8 +56,6 @@ public class FileTreeWalker {
     private final Set<Consumer<Path>> fileDeleteConsumers;
     private final Set<PathMatcher>    fileExcludes;
 
-    private final ThreadPullLauncher launcher;
-
     private final Map<Path, Long> files       = new HashMap<>();
     private final Map<Path, Long> directories = new HashMap<>();
 
@@ -71,9 +70,7 @@ public class FileTreeWalker {
                           @Named("che.fs.file.update") Set<Consumer<Path>> fileUpdateConsumers,
                           @Named("che.fs.file.create") Set<Consumer<Path>> fileCreateConsumers,
                           @Named("che.fs.file.delete") Set<Consumer<Path>> fileDeleteConsumers,
-                          @Named("che.fs.file.excludes") Set<PathMatcher> fileExcludes,
-
-                          ThreadPullLauncher launcher) {
+                          @Named("che.fs.file.excludes") Set<PathMatcher> fileExcludes) {
         this.root = root;
 
         this.directoryUpdateConsumers = directoryUpdateConsumers;
@@ -86,30 +83,9 @@ public class FileTreeWalker {
 
         this.directoryExcludes = directoryExcludes;
         this.fileExcludes = fileExcludes;
-
-        this.launcher = launcher;
     }
 
-    @PostConstruct
-    public void start() {
-        int initialDelay = 0;
-        int period = 10;
-
-        LOG.debug("Starting file tree walker");
-        launcher.scheduleAtFixedRate(this::walk, initialDelay, period, SECONDS);
-    }
-
-    @PreDestroy
-    public void stop() {
-        LOG.error("Stopping file tree walker");
-
-        try {
-            launcher.shutdown();
-        } catch (InterruptedException e) {
-            LOG.error("Can't properly stop thread pull launcher: ", e);
-        }
-    }
-
+    @ScheduleRate(period = 10)
     void walk() {
         try {
             LOG.debug("Tree walk started");

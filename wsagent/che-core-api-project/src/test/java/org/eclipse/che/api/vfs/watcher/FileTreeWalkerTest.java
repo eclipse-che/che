@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.vfs.watcher;
 
-import org.apache.commons.io.FileUtils;
-import org.eclipse.che.commons.schedule.executor.ThreadPullLauncher;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -54,13 +52,12 @@ public class FileTreeWalkerTest {
     Set<Consumer<Path>> directoryUpdateConsumers = new HashSet<>();
     Set<Consumer<Path>> directoryDeleteConsumers = new HashSet<>();
     Set<PathMatcher>    directoryExcludes        = new HashSet<>();
+
     Set<Consumer<Path>> fileCreateConsumers      = new HashSet<>();
     Set<Consumer<Path>> fileUpdateConsumers      = new HashSet<>();
     Set<Consumer<Path>> fileDeleteConsumers      = new HashSet<>();
     Set<PathMatcher>    fileExcludes             = new HashSet<>();
 
-    @Mock
-    ThreadPullLauncher launcher;
     @Mock
     Consumer<Path>     fileCreatedConsumerMock;
     @Mock
@@ -85,8 +82,7 @@ public class FileTreeWalkerTest {
                                             fileUpdateConsumers,
                                             fileCreateConsumers,
                                             fileDeleteConsumers,
-                                            fileExcludes,
-                                            launcher);
+                                            fileExcludes);
     }
 
     @After

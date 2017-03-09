@@ -48,7 +48,9 @@ public class IndexedFileUpdateConsumer implements Consumer<Path> {
             Path innerPath = root.toPath().relativize(path);
             org.eclipse.che.api.vfs.Path vfsPath = org.eclipse.che.api.vfs.Path.of(innerPath.toString());
             VirtualFile child = virtualFileSystem.getRoot().getChild(vfsPath);
-            searcher.update(child);
+            if (child != null) {
+                searcher.update(child);
+            }
         } catch (ServerException e) {
             LOG.error("Issue happened during updating modified file in index", e);
         }

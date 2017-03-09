@@ -48,7 +48,9 @@ public class IndexedFileCreateConsumer implements Consumer<Path> {
             Path innerPath = root.toPath().relativize(path);
             org.eclipse.che.api.vfs.Path vfsPath = org.eclipse.che.api.vfs.Path.of(innerPath.toString());
             VirtualFile child = virtualFileSystem.getRoot().getChild(vfsPath);
-            searcher.add(child);
+            if (child != null) {
+                searcher.add(child);
+            }
         } catch (ServerException e) {
             LOG.error("Issue happened during adding created file to index", e);
         }
