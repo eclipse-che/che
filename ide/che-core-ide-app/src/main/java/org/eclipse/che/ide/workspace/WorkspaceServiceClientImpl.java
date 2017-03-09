@@ -142,10 +142,13 @@ public class WorkspaceServiceClientImpl implements WorkspaceServiceClient {
     }
 
     @Override
-    public Promise<WorkspaceDto> startById(@NotNull final String id, final String envName, final boolean restore) {
-        String url = baseHttpUrl + "/" + id + "/runtime?restore=" + restore;
+    public Promise<WorkspaceDto> startById(@NotNull final String id, final String envName, final Boolean restore) {
+        String url = baseHttpUrl + "/" + id + "/runtime";
+        if (restore != null) {
+            url += "?restore=" + restore;
+        }
         if (envName != null) {
-            url += "&environment=" + envName;
+            url += (url.contains("?") ? '&' : '?') + "environment=" + envName;
         }
         return asyncRequestFactory.createPostRequest(url, null)
                                   .header(ACCEPT, APPLICATION_JSON)

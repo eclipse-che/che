@@ -124,9 +124,8 @@ public interface WorkspaceServiceClient {
      *         if <code>false</code> workspace will not be restored from snapshot
      *         even if auto-restore is enabled and snapshot exists
      * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
-     * @see WorkspaceService#startById(String, String, Boolean, String)
      */
-    Promise<WorkspaceDto> startById(String id, String envName, boolean restore);
+    Promise<WorkspaceDto> startById(String id, String envName, Boolean restore);
 
     /**
      * Stops running workspace.
@@ -273,6 +272,7 @@ public interface WorkspaceServiceClient {
      * @return a promise that will provide a list of {@link SnapshotDto}s, or rejects with an error
      * @see WorkspaceService#getSnapshot(String)
      */
+    @Deprecated
     Promise<List<SnapshotDto>> getSnapshot(String workspaceId);
 
     /**
@@ -283,6 +283,7 @@ public interface WorkspaceServiceClient {
      * @return a promise that will resolve when the snapshot has been created, or rejects with an error
      * @see WorkspaceService#createSnapshot(String)
      */
+    @Deprecated
     Promise<Void> createSnapshot(String workspaceId);
 
     /**
