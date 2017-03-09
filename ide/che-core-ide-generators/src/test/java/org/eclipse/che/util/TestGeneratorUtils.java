@@ -10,15 +10,23 @@
  *******************************************************************************/
 package org.eclipse.che.util;
 
-import org.junit.Test;
 
+import org.testng.annotations.Test;
+
+import java.io.File;
 import java.io.IOException;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
-/** @author <a href="mailto:nzamosenchuk@exoplatform.com">Nikolay Zamosenchuk</a> */
+
+/**
+ * @author Nikolay Zamosenchuk
+ * @author Sergii Kabashniuk
+ *  */
 public class TestGeneratorUtils {
 
     /** Should match package name */
@@ -27,10 +35,10 @@ public class TestGeneratorUtils {
         String packageString = "package org.eclipse.che.ide.util;" + "import junit.framework.Assert;";
         Matcher matcher = GeneratorUtils.PACKAGE_PATTERN.matcher(packageString);
         assertTrue(matcher.matches());
-        assertEquals(1, matcher.groupCount());
+        assertEquals(matcher.groupCount(), 1);
         String group = matcher.group(1);
 
-        assertEquals("org.eclipse.che.ide.util", group);
+        assertEquals(group, "org.eclipse.che.ide.util");
     }
 
     /**
@@ -41,6 +49,90 @@ public class TestGeneratorUtils {
     @Test
     public void shouldExtractPackage() throws IOException {
         String packageString = "package org.eclipse.che.ide.util;" + "import junit.framework.Assert;";
-        assertEquals("org.eclipse.che.ide.util", GeneratorUtils.getClassFQN("dummy", packageString));
+        assertEquals(GeneratorUtils.getClassFQN("dummy", packageString), "org.eclipse.che.ide.util");
+    }
+
+    @Test
+    public void shouldParseRootDir() {
+        //given
+        String[] args = new String[]{"--rootDir=/tmp/dir"};
+        //when
+        File actual = GeneratorUtils.getRootFolder(args);
+        //then
+        assertEquals(actual.getAbsolutePath(), "/tmp/dir");
+    }
+
+
+    @Test
+    public void shouldReturnCurrentDirIfNotSet() {
+        //given
+        String[] args = new String[]{};
+        //when
+        File actual = GeneratorUtils.getRootFolder(args);
+        //then
+        assertEquals(actual.getPath(), ".");
+    }
+
+    @Test
+    public void shouldReturnCurrentPathIfTooManyArguments() {
+        //given
+        String[] args = new String[]{"--rootDir=/tmp/dir", "--par2=val2"};
+        //when
+        File actual = GeneratorUtils.getRootFolder(args);
+        //then
+        assertEquals(actual.getPath(), ".");
+    }
+
+
+    @Test
+    public void shouldBeAbleToParseSingleArgument() {
+        //given
+        String[] args = new String[]{"--rootDir=/tmp/dir"};
+        //when
+        Map<String, Set<String>> actual = GeneratorUtils.parseArgs(args);
+        //then
+        assertEquals(actual.size(), 1);
+        Set<String> values = actual.get("rootDir");
+        assertEquals(values.size(), 1);
+        assertEquals(values.iterator().next(), "/tmp/dir");
+    }
+
+    @Test
+    public void shouldBeAbleToParseTwoArgument() {
+        //given
+        String[] args = new String[]{"--rootDir=/tmp/dir", "--par2=val2"};
+        //when
+        Map<String, Set<String>> actual = GeneratorUtils.parseArgs(args);
+        //then
+        assertEquals(actual.size(), 2);
+        Set<String> values = actual.get("rootDir");
+        assertEquals(values.size(), 1);
+        assertEquals(values.iterator().next(), "/tmp/dir");
+    }
+
+    @Test
+    public void shouldBeAbleToParseEmptyArgument() {
+        //given
+        String[] args = new String[]{};
+        //when
+        Map<String, Set<String>> actual = GeneratorUtils.parseArgs(args);
+        //then
+        assertEquals(actual.size(), 0);
+
+    }
+
+    @Test
+    public void shouldBeAbleToParseMultipleVales() {
+        //given
+        String[] args = new String[]{"--rootDir=/tmp/dir", "--rootDir=/tmp/dir2", "--par2=val2"};
+        //when
+        Map<String, Set<String>> actual = GeneratorUtils.parseArgs(args);
+        //then
+        assertEquals(actual.size(), 2);
+        Set<String> values = actual.get("rootDir");
+        assertEquals(values.size(), 2);
+        assertTrue(values.contains("/tmp/dir"));
+        assertTrue(values.contains("/tmp/dir2"));
+
     }
 }

@@ -10,13 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.util;
 
-import org.junit.Test;
+
+import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 
-import static org.junit.Assert.assertEquals;
+import static org.testng.Assert.assertEquals;
+
 
 /** @author <a href="mailto:nzamosenchuk@exoplatform.com">Nikolay Zamosenchuk</a> */
 public class TestExtensionManagerGenerator {
@@ -56,8 +58,7 @@ public class TestExtensionManagerGenerator {
     protected void matchExtensions(List<String> strings, boolean expected) {
         for (String matchingString : strings) {
             Matcher matcher = ExtensionManagerGenerator.EXT_PATTERN.matcher(matchingString);
-            assertEquals(String.format("Line '%s' should" + (expected ? "" : " not") + " match", matchingString),
-                         expected, matcher.matches());
+            assertEquals(matcher.matches(),expected);
         }
     }
 

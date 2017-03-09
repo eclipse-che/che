@@ -97,7 +97,7 @@ public class BootstrapController {
 
     @Inject
     private void startComponents(Map<String, Provider<Component>> components) {
-        startComponents(components.values().iterator());
+        startComponents(components.entrySet().iterator());
     }
 
     @Inject
@@ -132,23 +132,37 @@ public class BootstrapController {
         });
     }
 
-    private void startComponents(final Iterator<Provider<Component>> componentProviderIterator) {
-        if (componentProviderIterator.hasNext()) {
-            Provider<Component> componentProvider = componentProviderIterator.next();
+    private void startComponents(final Iterator<Map.Entry<String,  Provider<Component>>> componentIterator) {
+        if (componentIterator.hasNext()) {
+            Map.Entry<String,  Provider<Component>> entry = componentIterator.next();
+            final String componentName = entry.getKey();
 
-            final Component component = componentProvider.get();
-            component.start(new Callback<Component, Exception>() {
-                @Override
-                public void onSuccess(Component result) {
-                    startComponents(componentProviderIterator);
-                }
+            try {
+                Provider<Component> componentProvider = entry.getValue();
 
-                @Override
-                public void onFailure(Exception reason) {
-                    Log.error(component.getClass(), reason);
-                    initializationFailed(reason.getMessage());
-                }
-            });
+                final Component component = componentProvider.get();
+                component.start(new Callback<Component, Exception>() {
+                    @Override
+                    public void onSuccess(Component result) {
+                        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+                            @Override
+                            public void execute() {
+                                startComponents(componentIterator);
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onFailure(Exception reason) {
+                        Log.error(getClass(), "Unable to start " + componentName, reason);
+                        initializationFailed(reason.getMessage());
+                    }
+                });
+            } catch (Exception e) {
+                Log.error(getClass(), "Unable to start " + componentName, e);
+                initializationFailed(e.getMessage());
+            }
+
         } else {
             startExtensionsAndDisplayUI();
         }

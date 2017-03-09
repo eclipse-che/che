@@ -39,13 +39,13 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che</groupId>
-            <artifactId>exec-agent</artifactId>
+            <artifactId>go-agents</artifactId>
             <type>tar.gz</type>
             <classifier>linux_amd64</classifier>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che</groupId>
-            <artifactId>exec-agent</artifactId>
+            <artifactId>go-agents</artifactId>
             <type>tar.gz</type>
             <classifier>linux_arm7</classifier>
         </dependency>

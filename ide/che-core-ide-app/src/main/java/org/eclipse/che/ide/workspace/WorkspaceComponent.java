@@ -16,7 +16,6 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
-import org.eclipse.che.api.machine.shared.dto.SnapshotDto;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Operation;
@@ -26,8 +25,6 @@ import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.component.Component;
-import org.eclipse.che.ide.api.dialogs.CancelCallback;
-import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
@@ -48,7 +45,6 @@ import org.eclipse.che.ide.websocket.events.ConnectionOpenedHandler;
 import org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter;
 import org.eclipse.che.ide.workspace.start.StartWorkspacePresenter;
 
-import java.util.List;
 import java.util.Map;
 
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_AUTO_START;
@@ -165,13 +161,11 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
      *         workspace to listen
      * @param callback
      *         callback
-     * @param checkForShapshots
-     *         whether is needed checking workspace for snapshots
      * @param restoreFromSnapshot
      *         restore or not the workspace from snapshot
      */
     public void handleWorkspaceEvents(final WorkspaceDto workspace, final Callback<Component, Exception> callback,
-                                      final boolean checkForShapshots, final boolean restoreFromSnapshot) {
+                                      final Boolean restoreFromSnapshot) {
         this.callback = callback;
         if (messageBus != null) {
             messageBus.cancelReconnection();
@@ -211,12 +205,7 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
                                                   @Override
                                                   public Map<String, String> apply(Map<String, String> settings) throws FunctionException {
                                                       if (Boolean.parseBoolean(settings.getOrDefault(CHE_WORKSPACE_AUTO_START, "true"))) {
-                                                          if (checkForShapshots) {
-                                                              checkWorkspaceForSnapshots(workspace);
-                                                          } else {
-                                                              startWorkspaceById(workspace.getId(), workspace.getConfig().getDefaultEnv(),
-                                                                                 restoreFromSnapshot);
-                                                          }
+                                                          startWorkspaceById(workspace.getId(), workspace.getConfig().getDefaultEnv(), restoreFromSnapshot);
                                                       } else {
                                                           loader.show(WORKSPACE_STOPPED);
                                                       }
@@ -235,17 +224,15 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
      *         workspace ID to start
      * @param callback
      *         callback
-     * @param checkForShapshots
-     *         whether is needed checking workspace for snapshots
      * @param restoreFromSnapshot
      *         restore or not the workspace from snapshot
      */
     public void startWorkspace(final String workspaceID, final Callback<Component, Exception> callback,
-                               final boolean checkForShapshots, final boolean restoreFromSnapshot) {
+                               final Boolean restoreFromSnapshot) {
         workspaceServiceClient.getWorkspace(workspaceID).then(new Operation<WorkspaceDto>() {
             @Override
             public void apply(WorkspaceDto workspace) throws OperationException {
-                handleWorkspaceEvents(workspace, callback, checkForShapshots, restoreFromSnapshot);
+                handleWorkspaceEvents(workspace, callback, restoreFromSnapshot);
             }
         });
     }
@@ -259,26 +246,7 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
      *         callback to be executed
      */
     public void startWorkspace(final Workspace workspace, final Callback<Component, Exception> callback) {
-        startWorkspace(workspace.getId(), callback, true, false);
-    }
-
-    /**
-     * Checks workspace for snapshots and asks the uses for an action.
-     *
-     * @param workspace
-     *         workspace
-     */
-    private void checkWorkspaceForSnapshots(final Workspace workspace) {
-        workspaceServiceClient.getSnapshot(workspace.getId()).then(new Operation<List<SnapshotDto>>() {
-            @Override
-            public void apply(List<SnapshotDto> snapshots) throws OperationException {
-                if (snapshots.isEmpty()) {
-                    startWorkspaceById(workspace.getId(), workspace.getConfig().getDefaultEnv(), false);
-                } else {
-                    showRecoverWorkspaceConfirmDialog(workspace);
-                }
-            }
-        });
+        startWorkspace(workspace.getId(), callback, null);
     }
 
     /**
@@ -287,30 +255,6 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
     private native void notifyShowIDE() /*-{
         $wnd.parent.postMessage("show-ide", "*");
     }-*/;
-
-    /**
-     * Shows workspace recovering confirm dialog.
-     */
-    private void showRecoverWorkspaceConfirmDialog(final Workspace workspace) {
-        dialogFactory.createConfirmDialog(locale.workspaceRecoveringDialogTitle(),
-                                          locale.workspaceRecoveringDialogText(),
-                                          locale.yesButtonTitle(),
-                                          locale.noButtonTitle(),
-                                          new ConfirmCallback() {
-                                              @Override
-                                              public void accepted() {
-                                                  startWorkspaceById(workspace.getId(), workspace.getConfig().getDefaultEnv(), true);
-                                              }
-                                          },
-                                          new CancelCallback() {
-                                              @Override
-                                              public void cancelled() {
-                                                  startWorkspaceById(workspace.getId(), workspace.getConfig().getDefaultEnv(), false);
-                                              }
-                                          }).show();
-
-        notifyShowIDE();
-    }
 
     /**
      * Starts specified workspace if it's {@link WorkspaceStatus} different of {@code RUNNING}
@@ -326,7 +270,7 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
 
     abstract void tryStartWorkspace();
 
-    private void startWorkspaceById(String workspaceId, String defaultEnvironment, boolean restoreFromSnapshot) {
+    private void startWorkspaceById(String workspaceId, String defaultEnvironment, Boolean restoreFromSnapshot) {
         loader.show(STARTING_WORKSPACE_RUNTIME);
         workspaceServiceClient.startById(workspaceId, defaultEnvironment, restoreFromSnapshot).catchError(new Operation<PromiseError>() {
             @Override
