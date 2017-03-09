@@ -31,16 +31,16 @@ export class CheUser {
   private remoteUserAPI: IUsersResource<any>;
   private logoutAPI: ng.resource.IResourceClass<any>;
 
-  private useridMap: Map<string, any>;
-  private userAliasMap: Map<string, any>;
-  private userNameMap: Map<string, any>;
-  private usersMap: Map<string, any>;
+  private useridMap: Map<string, che.IUser>;
+  private userAliasMap: Map<string, che.IUser>;
+  private userNameMap: Map<string, che.IUser>;
+  private usersMap: Map<string, che.IUser>;
   private userPagesMap: Map<number, any>;
   private pageInfo: any;
   /**
    * Current user.
    */
-  private user: any;
+  private user: che.IUser;
 
   /**
    * Default constructor that is using resource
@@ -68,7 +68,7 @@ export class CheUser {
         url: '/api/admin/user?maxItems=:maxItems&skipCount=:skipCount',
         isArray: false,
         responseType: 'json',
-        transformResponse: (data, headersGetter) => {
+        transformResponse: (data: any, headersGetter: any) => {
           return this._getPageFromResponse(data, headersGetter('link'));
         }
       },
@@ -107,10 +107,15 @@ export class CheUser {
    * @returns {*}
    */
   createUser(name: string, email: string, password: string): ng.IPromise<any> {
-    let data = {
+    let data: {
+      password: string;
+      name: string;
+      email?: string;
+    };
+
+    data = {
       password: password,
-      name: name,
-      email: null
+      name: name
     };
 
     if (email) {
@@ -120,7 +125,7 @@ export class CheUser {
     let promise = this.remoteUserAPI.createUser(data).$promise;
 
     // check if was OK or not
-    promise.then((user) => {
+    promise.then((user: che.IUser) => {
       //update users map
       this.usersMap.set(user.id, user);//add user
 
@@ -173,7 +178,7 @@ export class CheUser {
     if (!pageData.users) {
       return;
     }
-    pageData.users.forEach((user) => {
+    pageData.users.forEach((user: che.IUser) => {
       this.usersMap.set(user.id, user);//add user
     });
   }
@@ -183,7 +188,7 @@ export class CheUser {
     if (!users) {
       return;
     }
-    users.forEach((user) => {
+    users.forEach((user: che.IUser) => {
       this.usersMap.set(user.id, user);//add user
     });
   }
@@ -197,7 +202,7 @@ export class CheUser {
     }
     let firstPageLink = data.links.get('first');
     if (firstPageLink) {
-      let firstPageData = {link: firstPageLink};
+      let firstPageData: { users?: Array<any>; link?: string; } = {link: firstPageLink};
       if (this.pageInfo.currentPageNumber === 1) {
         firstPageData.users = data.users;
       }
@@ -210,7 +215,7 @@ export class CheUser {
       let pageParam = this._getPageParamByLink(lastPageLink);
       this.pageInfo.countOfPages = pageParam.skipCount / pageParam.maxItems + 1;
       this.pageInfo.count = pageParam.skipCount;
-      let lastPageData = {link: lastPageLink};
+      let lastPageData: { users?: Array<any>; link?: string; } = {link: lastPageLink};
       if (this.pageInfo.currentPageNumber === this.pageInfo.countOfPages) {
         lastPageData.users = data.users;
       }
@@ -368,7 +373,7 @@ export class CheUser {
   fetchUser(): ng.IPromise<any> {
     let promise = this.remoteUserAPI.get().$promise;
     // check if if was OK or not
-    promise.then((user) => {
+    promise.then((user: che.IUser) => {
       this.user = user;
       });
 
@@ -377,7 +382,7 @@ export class CheUser {
 
   fetchUserId(userId: string): ng.IPromise<any> {
     let promise = this.remoteUserAPI.findByID({userId: userId}).$promise;
-    let parsedResultPromise = promise.then((user) => {
+    let parsedResultPromise = promise.then((user: che.IUser) => {
       this.useridMap.set(userId, user);
     });
 
@@ -390,7 +395,7 @@ export class CheUser {
 
   fetchUserByAlias(alias: string): ng.IPromise<any> {
     let promise = this.remoteUserAPI.findByAlias({alias: alias}).$promise;
-    let parsedResultPromise = promise.then((user: any) => {
+    let parsedResultPromise = promise.then((user: che.IUser) => {
       this.useridMap.set(user.id, user);
       this.userAliasMap.set(alias, user);
     });
@@ -404,8 +409,14 @@ export class CheUser {
 
   fetchUserByName(name: string): ng.IPromise<any> {
     let promise = this.remoteUserAPI.findByName({name: name}).$promise;
-    let resultPromise = promise.then((user: any) => {
+    let resultPromise = promise.then((user: che.IUser) => {
       this.userNameMap.set(name, user);
+      return user;
+    }, (error: any) => {
+      if (error.status === 304) {
+        return this.userNameMap.get(name);
+      }
+      return this.$q.reject(error);
     });
 
     return resultPromise;
