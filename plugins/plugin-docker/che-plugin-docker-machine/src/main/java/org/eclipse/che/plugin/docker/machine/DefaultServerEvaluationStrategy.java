@@ -60,7 +60,8 @@ public class DefaultServerEvaluationStrategy extends ServerEvaluationStrategy {
     }
 
     @Override
-    protected Map<String, String> getExternalAddressesAndPorts(ContainerInfo containerInfo, String internalHost) {
+    protected Map<String, String> getExternalAddressesAndPorts(ContainerInfo containerInfo,
+                                                               String internalHost) {
         String externalAddress = externalAddressProperty != null ?
                                  externalAddressProperty :
                                  internalAddressProperty != null ?
