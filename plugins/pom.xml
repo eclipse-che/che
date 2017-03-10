@@ -52,6 +52,7 @@
         <module>plugin-ssh-machine</module>
         <module>plugin-ssh-key</module>
         <module>plugin-languageserver</module>
+        <module>plugin-urlfactory</module>
         <module>plugin-json</module>
         <module>plugin-composer</module>
         <module>plugin-zend-debugger</module>
