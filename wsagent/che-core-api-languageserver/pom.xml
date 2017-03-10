@@ -135,13 +135,14 @@
             </testResource>
         </testResources>
         <plugins>
-        	<plugin>
+            <plugin>
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
                 <configuration>
                     <excludes>
                         <exclude>**/EitherUtil.java</exclude>
                         <exclude>**/JsonUtil.java</exclude>
+                        <exclude>**/DtoConversionTest.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>
