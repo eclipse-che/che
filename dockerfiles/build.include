@@ -6,61 +6,92 @@
 # http://www.eclipse.org/legal/epl-v10.html
 
 skip_tests() {
-  for i in "$@" ; do
-    if [ $i = "--skip-tests" ]; then
-      echo "true"
-      exit 0
-    fi
-  done
-  echo "false"
-}
-
-get_tag() {
-  for i in "$@" ; do
-    if [ $i != "--skip-tests" ]; then
-      echo $i
-      exit 0
-    fi
-  done
+  if [ $SKIP_TESTS = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
 }
 
 init() {
   BLUE='\033[1;34m'
   GREEN='\033[0;32m'
   RED='\033[0;31m'
+  BROWN='\033[0;33m'
+  PURPLE='\033[0;35m'
   NC='\033[0m'
-  
-  tmp=$(get_tag "$@")
-  if [ ! -z "$tmp" ]; then
-    TAG=$tmp
-  else 
-    TAG="nightly"
-    echo "No tag provided, using nightly as default"
-  fi
+  BOLD='\033[1m'
+  UNDERLINE='\033[4m'
+
+  ORGANIZATION="eclipse"
+  PREFIX="che"
+  TAG="nightly"
+  SKIP_TESTS=false
+  NAME="che"
+  ARGS=""
+  OPTIONS=""
+
+  while [ $# -gt 0 ]; do
+    case $1 in
+      --*)
+        OPTIONS="${OPTIONS} ${1}"
+        ;;
+      *)
+        ARGS="${ARGS} ${1}"
+        ;;
+    esac
+
+    case $1 in
+      --tag:*)
+        TAG="${1#*:}"
+        shift ;;
+      --organization:*)
+        ORGANIZATION="${1#*:}"
+        shift ;;
+      --prefix:*)
+        PREFIX="${1#*:}"
+        shift ;;
+      --name:*)
+        NAME="${1#*:}"
+        shift ;;
+      --skip-tests)
+        SKIP_TESTS=true
+        shift ;;
+      --*)
+        printf "${RED}Unknown parameter: $1${NC}\n"; exit 2 ;;
+      *)
+       shift;;
+    esac
+  done
+
+  IMAGE_NAME="$ORGANIZATION/$PREFIX-$NAME:$TAG"
 }
 
 build() {
   DIR=$(cd "$(dirname "$0")"; pwd)
-  echo "Building Docker Image ${IMAGE_NAME} from $DIR directory with tag $TAG"
-  cd "${DIR}" && docker build -t ${IMAGE_NAME}:${TAG} .
+  printf "${BOLD}Building Docker Image ${IMAGE_NAME} from $DIR directory with tag $TAG${NC}\n"
+  # Replace macros in Dockerfiles
+  cat ${DIR}/Dockerfile | sed s/\$\{BUILD_ORGANIZATION\}/${ORGANIZATION}/ | sed s/\$\{BUILD_PREFIX\}/${PREFIX}/ | sed s/\$\{BUILD_TAG\}/${TAG}/ > ${DIR}/.Dockerfile
+  cd "${DIR}" && docker build -f ${DIR}/.Dockerfile -t ${IMAGE_NAME} .
+  rm ${DIR}/.Dockerfile
   if [ $? -eq 0 ]; then
-    printf "Build of ${BLUE}${IMAGE_NAME}:${TAG} ${GREEN}[OK]${NC}\n"
+    printf "Build of ${BLUE}${IMAGE_NAME} ${GREEN}[OK]${NC}\n"
     if [ ! -z "${IMAGE_ALIASES}" ]; then
       for TMP_IMAGE_NAME in ${IMAGE_ALIASES}
       do
-        docker tag ${IMAGE_NAME}:${TAG} ${TMP_IMAGE_NAME}:${TAG}
+        docker tag ${IMAGE_NAME} ${TMP_IMAGE_NAME}:${TAG}
         if [ $? -eq 0 ]; then
           printf "  /alias ${BLUE}${TMP_IMAGE_NAME}:${TAG}${NC} ${GREEN}[OK]${NC}\n"
         else
-          printf "${RED}Failure when building docker image ${IMAGE_NAME}:${TAG}${NC}\n"
+          printf "${RED}Failure when building docker image ${IMAGE_NAME}${NC}\n"
           exit 1
         fi
 
       done
     fi
-    printf "${GREEN}Script run successfully: ${BLUE}${IMAGE_NAME}:${TAG}${NC}\n"
+    printf "${GREEN}Script run successfully: ${BLUE}${IMAGE_NAME}${NC}\n"
   else
-    printf "${RED}Failure when building docker image ${IMAGE_NAME}:${TAG}${NC}\n"
+    printf "${RED}Failure when building docker image ${IMAGE_NAME}${NC}\n"
     exit 1
   fi
 }

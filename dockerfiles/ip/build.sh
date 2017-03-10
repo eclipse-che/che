@@ -5,13 +5,12 @@
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
 
-IMAGE_NAME="eclipse/che-ip"
 base_dir=$(cd "$(dirname "$0")"; pwd)
 . "${base_dir}"/../build.include
 
-init "$@"
+init --name:ip "$@"
 build
 
-if [ $(skip_tests "$@") = false ]; then
-  sh "${base_dir}"/test.sh $TAG
+if ! skip_tests; then
+  sh "${base_dir}"/test.sh "$@"
 fi
