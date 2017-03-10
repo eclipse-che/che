@@ -206,6 +206,23 @@ public class CommandManagerImpl implements CommandManager,
 
     @Override
     public Promise<ContextualCommand> createCommand(String goalId, String commandTypeId, ApplicableContext applicableContext) {
+        return createCommand(goalId, commandTypeId, null, applicableContext);
+    }
+
+    @Override
+    public Promise<ContextualCommand> createCommand(String goalId,
+                                                    String commandTypeId,
+                                                    String commandName,
+                                                    ApplicableContext applicableContext) {
+        return createCommand(goalId, commandTypeId, null, null, applicableContext);
+    }
+
+    @Override
+    public Promise<ContextualCommand> createCommand(String goalId,
+                                                    String commandTypeId,
+                                                    String commandName,
+                                                    String commandLine,
+                                                    ApplicableContext applicableContext) {
         final CommandType commandType = commandTypeRegistry.getCommandTypeById(commandTypeId);
 
         if (commandType == null) {
@@ -216,8 +233,8 @@ public class CommandManagerImpl implements CommandManager,
         attributes.put(COMMAND_PREVIEW_URL_ATTRIBUTE_NAME, commandType.getPreviewUrlTemplate());
         attributes.put(COMMAND_GOAL_ATTRIBUTE_NAME, goalId);
 
-        return createCommand(new ContextualCommand(getUniqueCommandName(commandTypeId, null),
-                                                   commandType.getCommandLineTemplate(),
+        return createCommand(new ContextualCommand(getUniqueCommandName(commandTypeId, commandName),
+                                                   commandLine != null ? commandLine : commandType.getCommandLineTemplate(),
                                                    commandTypeId,
                                                    attributes,
                                                    applicableContext));

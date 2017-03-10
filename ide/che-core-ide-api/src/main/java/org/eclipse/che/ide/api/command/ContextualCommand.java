@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
 
 /**
@@ -57,6 +58,15 @@ public class ContextualCommand extends CommandImpl {
              command.getType(),
              new HashMap<>(command.getAttributes()),
              new ApplicableContext(command.getApplicableContext()));
+    }
+
+    /** Creates new {@link ContextualCommand} based on the provided data. */
+    public ContextualCommand(String name,
+                             String commandLine,
+                             String typeId) {
+        super(name, commandLine, typeId);
+
+        this.context = new ApplicableContext(true, emptyList());
     }
 
     /** Creates new {@link ContextualCommand} based on the provided data. */
