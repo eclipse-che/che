@@ -88,7 +88,6 @@ public class ProjectManager {
 
     @Inject
     public ProjectManager(VirtualFileSystemProvider vfsProvider,
-                          EventService eventService,
                           ProjectTypeRegistry projectTypeRegistry,
                           ProjectRegistry projectRegistry,
                           ProjectHandlerRegistry handlers,
@@ -114,7 +113,6 @@ public class ProjectManager {
                                                                           .setDaemon(true).build());
     }
 
-    @PostConstruct
     void initWatcher() throws IOException {
         FileWatcherNotificationListener defaultListener =
                 new FileWatcherNotificationListener(file -> !(file.getPath().toString().contains(".che")
@@ -432,9 +430,6 @@ public class ProjectManager {
 
         projectRegistry.fireInitHandlers(project);
 
-        // TODO move to register?
-        reindexProject(project);
-
         return project;
     }
 
@@ -750,31 +745,5 @@ public class ProjectManager {
         }
 
         return (FileEntry)entry;
-    }
-
-    /**
-     * Some importers don't use virtual file system API and changes are not indexed.
-     * Force searcher to reindex project to fix such issues.
-     *
-     * @param project
-     *
-     * @throws ServerException
-     */
-    private void reindexProject(final RegisteredProject project) throws ServerException {
-        final VirtualFile file = project.getBaseFolder().getVirtualFile();
-        executor.execute(() -> {
-            try {
-                final Searcher searcher;
-                try {
-                    searcher = getSearcher();
-                } catch (NotFoundException e) {
-                    LOG.warn(e.getLocalizedMessage());
-                    return;
-                }
-                searcher.add(file);
-            } catch (Exception e) {
-                LOG.warn(format("Project: %s", project.getPath()), e.getMessage());
-            }
-        });
     }
 }
