@@ -138,6 +138,17 @@ public interface WorkspaceServiceClient {
     Promise<Void> stop(String wsId);
 
     /**
+     * Stops currently run runtime with ability to create snapshot.
+     *
+     * @param wsId
+     *         workspace ID
+     * @param createSnapshot
+     *         create snapshot during the stop operation
+     * @return a promise that will resolve when the workspace has been stopped, or rejects with an error
+     */
+    Promise<Void> stop(String wsId, boolean createSnapshot);
+
+    /**
      * Get all commands from the specified workspace.
      *
      * @param wsId

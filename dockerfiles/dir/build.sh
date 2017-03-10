@@ -5,9 +5,8 @@
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
 
-IMAGE_NAME="eclipse/che-dir"
 base_dir=$(cd "$(dirname "$0")"; pwd)
 . "${base_dir}"/../build.include
 
-init "$@"
+init --name:dir "$@"
 build

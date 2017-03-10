@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.machine;
 
-import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
@@ -30,8 +27,6 @@ import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
-import org.eclipse.che.ide.rest.RestServiceInfo;
-import org.eclipse.che.ide.rest.StringUnmarshaller;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 import org.eclipse.che.ide.util.browser.BrowserUtils;
 import org.eclipse.che.ide.util.loging.Log;
@@ -42,7 +37,6 @@ import org.eclipse.che.ide.websocket.events.ConnectionErrorHandler;
 import org.eclipse.che.ide.websocket.events.ConnectionOpenedHandler;
 import org.eclipse.che.ide.websocket.events.WebSocketClosedEvent;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -68,8 +62,6 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
     private final AsyncRequestFactory    asyncRequestFactory;
     private final WorkspaceServiceClient workspaceServiceClient;
     private final LoaderPresenter        loader;
-    //not used now added it for future if it we will have possibility check that service available for client call
-    private final List<RestServiceInfo>  availableServices;
     private       DevMachine             devMachine;
     private       MessageBus             messageBus;
     private       WsAgentState           state;
@@ -89,7 +81,6 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
         this.messageBusProvider = messageBusProvider;
         this.asyncRequestFactory = asyncRequestFactory;
         this.dialogFactory = dialogFactory;
-        this.availableServices = new ArrayList<>();
     }
 
     public void initialize(DevMachine devMachine) {
@@ -137,14 +128,11 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
     }
 
     public Promise<MessageBus> getMessageBus() {
-        return AsyncPromiseHelper.createFromAsyncRequest(new AsyncPromiseHelper.RequestCall<MessageBus>() {
-            @Override
-            public void makeCall(AsyncCallback<MessageBus> callback) {
-                if (messageBus != null) {
-                    callback.onSuccess(messageBus);
-                } else {
-                    WsAgentStateController.this.messageBusCallbacks.add(callback);
-                }
+        return AsyncPromiseHelper.createFromAsyncRequest(callback -> {
+            if (messageBus != null) {
+                callback.onSuccess(messageBus);
+            } else {
+                WsAgentStateController.this.messageBusCallbacks.add(callback);
             }
         });
     }
@@ -155,32 +143,10 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
     private void checkHttpConnection() {
         //here we add trailing slash because {@link org.eclipse.che.api.core.rest.ApiInfoService} mapped in this way
         String url = devMachine.getWsAgentBaseUrl() + '/';
-        asyncRequestFactory.createGetRequest(url).send(new StringUnmarshaller()).then(new Operation<String>() {
-            @Override
-            public void apply(String result) throws OperationException {
-                try {
-                    JSONObject object = JSONParser.parseStrict(result).isObject();
-                    if (object.containsKey("rootResources")) {
-                        JSONArray rootResources = object.get("rootResources").isArray();
-                        for (int i = 0; i < rootResources.size(); i++) {
-                            JSONObject rootResource = rootResources.get(i).isObject();
-                            String regex = rootResource.get("regex").isString().stringValue();
-                            String fqn = rootResource.get("fqn").isString().stringValue();
-                            String path = rootResource.get("path").isString().stringValue();
-                            availableServices.add(new RestServiceInfo(fqn, regex, path));
-                        }
-                    }
-                } catch (Exception exception) {
-                    Log.warn(getClass(), "Parse root resources failed.");
-                }
-
-                checkWsConnection();
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError arg) throws OperationException {
-                checkWsAgentHealth();
-            }
+        asyncRequestFactory.createGetRequest(url).send().then(ignored -> {
+            checkWsConnection();
+        }).catchError(ignored -> {
+            checkWsAgentHealth();
         });
     }
 
@@ -204,8 +170,10 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
     private void checkStateOfWsAgent(WsAgentHealthStateDto agentHealthStateDto) {
         final int statusCode = agentHealthStateDto.getCode();
         final String infoWindowTitle = "Workspace Agent Not Responding";
-        final ConfirmCallback stopCallback = new StopCallback(false);
-        final ConfirmCallback stopAndReloadCallback = new StopCallback(true);
+        final boolean reloadPage = true;
+        final boolean createSnapshot = true;
+        final ConfirmCallback stopCallback = new StopCallback(!reloadPage, createSnapshot);
+        final ConfirmCallback stopAndReloadCallback = new StopCallback(reloadPage, !createSnapshot);
 
         if (statusCode == 200) {
             dialogFactory.createChoiceDialog(infoWindowTitle,
@@ -227,20 +195,19 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
 
     private class StopCallback implements ConfirmCallback {
 
-        private final boolean reload;
+        private final boolean reloadPage;
+        private final boolean createSnapshot;
 
-        public StopCallback(boolean reload) {
-            this.reload = reload;
+        private StopCallback(boolean reloadPage, boolean createSnapshot) {
+            this.reloadPage = reloadPage;
+            this.createSnapshot = createSnapshot;
         }
 
         @Override
         public void accepted() {
-            workspaceServiceClient.stop(devMachine.getWorkspaceId()).then(new Operation<Void>() {
-                @Override
-                public void apply(Void arg) throws OperationException {
-                    if (reload) {
-                        BrowserUtils.reloadPage(false);
-                    }
+            workspaceServiceClient.stop(devMachine.getWorkspaceId(), createSnapshot).then(ignored -> {
+                if (reloadPage) {
+                    BrowserUtils.reloadPage(false);
                 }
             });
         }
@@ -260,12 +227,9 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
     }
 
     private void checkWsAgentHealth() {
-        workspaceServiceClient.getWsAgentState(devMachine.getWorkspace()).then(new Operation<WsAgentHealthStateDto>() {
-            @Override
-            public void apply(WsAgentHealthStateDto arg) throws OperationException {
-                if (RUNNING.equals(arg.getWorkspaceStatus())) {
-                    checkStateOfWsAgent(arg);
-                }
+        workspaceServiceClient.getWsAgentState(devMachine.getWorkspace()).then(agentHealthState -> {
+            if (RUNNING.equals(agentHealthState.getWorkspaceStatus())) {
+                checkStateOfWsAgent(agentHealthState);
             }
         }).catchError(new Operation<PromiseError>() {
             @Override
