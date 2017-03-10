@@ -74,6 +74,10 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-machine-ext-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-maven-shared</artifactId>
         </dependency>
         <dependency>
@@ -117,6 +121,20 @@
             </resource>
         </resources>
         <plugins>
+            <plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>**/**/TestingHandler.java</exclude>
+                        <exclude>**/**/ExecutorPromiseMocker.java</exclude>
+                        <exclude>**/**/PromiseMocker.java</exclude>
+                        <exclude>**/**/FunctionAnswer.java</exclude>
+                        <exclude>**/**/MockitoPrinter.java</exclude>
+                        <exclude>**/**/TestServiceClientTest.java</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
