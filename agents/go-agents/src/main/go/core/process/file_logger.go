@@ -43,7 +43,7 @@ func NewLogger(filename string) (*FileLogger, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
+	defer closeFile(file)
 
 	return fl, nil
 }
@@ -87,10 +87,16 @@ func (fl *FileLogger) doFlush() {
 	if err != nil {
 		log.Printf("Couldn't open file '%s' for flushing the buffer. %s \n", fl.filename, err.Error())
 	} else {
-		defer f.Close()
+		defer closeFile(f)
 		_, err = fl.buffer.WriteTo(f)
 		if err != nil {
 			log.Printf("Error appears on flushing data to file '%s'. %s \n", fl.filename, err.Error())
 		}
+	}
+}
+
+func closeFile(file *os.File) {
+	if err := file.Close(); err != nil {
+		log.Printf("Can't close file %s. Error: %s", file.Name(), err)
 	}
 }

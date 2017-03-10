@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.openshift.client.kubernetes;
 
-import static org.testng.Assert.assertTrue;
+import io.fabric8.kubernetes.api.model.ServicePort;
+
+import org.eclipse.che.plugin.docker.client.json.ExposedPort;
+import org.testng.annotations.Test;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,11 +22,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.eclipse.che.plugin.docker.client.json.ExposedPort;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
-import io.fabric8.kubernetes.api.model.ServicePort;
+import static org.testng.Assert.assertTrue;
 
 public class KubernetesServiceTest {
 
@@ -72,6 +71,7 @@ public class KubernetesServiceTest {
         exposedPorts.put("4401/tcp",null);
         exposedPorts.put("4403/tcp",null);
         exposedPorts.put("4411/tcp",null);
+        exposedPorts.put("4412/tcp",null);
         exposedPorts.put("8080/tcp",null);
         exposedPorts.put("8888/tcp",null);
         exposedPorts.put("9876/tcp",null);
@@ -81,6 +81,7 @@ public class KubernetesServiceTest {
         expectedPortNames.add("wsagent");
         expectedPortNames.add("wsagent-pda");
         expectedPortNames.add("terminal");
+        expectedPortNames.add("exec-agent");
         expectedPortNames.add("tomcat");
         expectedPortNames.add("tomcat-jpda");
         expectedPortNames.add("codeserver");

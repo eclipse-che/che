@@ -14,6 +14,7 @@ package exec_test
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"testing"
 
@@ -22,7 +23,7 @@ import (
 
 func TestLogsDistributorCreatesSubdirectories(t *testing.T) {
 	baseDir := os.TempDir() + string(os.PathSeparator) + randomName(10)
-	defer os.RemoveAll(baseDir)
+	defer removeAll(baseDir)
 
 	distributor := exec.DefaultLogsDistributor{
 		MaxDirsCount: 4,
@@ -42,7 +43,7 @@ func TestLogsDistributorCreatesSubdirectories(t *testing.T) {
 
 func TestLogsDistribution(t *testing.T) {
 	baseDir := os.TempDir() + string(os.PathSeparator) + randomName(10)
-	defer os.RemoveAll(baseDir)
+	defer removeAll(baseDir)
 
 	distributor := exec.DefaultLogsDistributor{
 		MaxDirsCount: 4,
@@ -69,5 +70,11 @@ func TestLogsDistribution(t *testing.T) {
 		if len(fi) != 4 {
 			t.Fatalf("Expected directory '%s' to contain 4 files", dir)
 		}
+	}
+}
+
+func removeAll(path string) {
+	if err := os.RemoveAll(path); err != nil {
+		log.Printf("Can't remove folder %s. Error: %s", path, err)
 	}
 }

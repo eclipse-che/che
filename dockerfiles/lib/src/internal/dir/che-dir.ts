@@ -720,7 +720,7 @@ setupSSHKeys(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto
     let machineId : string = workspaceDto.getRuntime().getDevMachine().getId();
 
 
-    let execAgentServer = workspaceDto.getRuntime().getDevMachine().getRuntime().getServers().get("4411/tcp");
+    let execAgentServer = workspaceDto.getRuntime().getDevMachine().getRuntime().getServers().get("4412/tcp");
     let execAgentURI = execAgentServer.getUrl();
     if (execAgentURI.includes("localhost")) {
       execAgentURI = execAgentServer.getProperties().getInternalUrl();
@@ -846,7 +846,7 @@ setupSSHKeys(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto
     let promises : Array<Promise<any>> = new Array<Promise<any>>();
     let workspaceCommands : Array<any> = workspaceDto.getConfig().getCommands();
 
-    // get terminal URI
+    // get exec-agent URI
     let execAgentServer = workspaceDto.getRuntime().getDevMachine().getRuntime().getServers().get("4411/tcp");
     let execAgentURI = execAgentServer.getUrl();
     if (execAgentURI.includes("localhost")) {
