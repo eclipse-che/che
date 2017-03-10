@@ -23,6 +23,7 @@
     <name>Che IDE :: Compiling GWT Application</name>
     <properties>
         <generated.sources.directory>${project.build.directory}/generated-sources/gen</generated.sources.directory>
+        <gwt.log.enable>false</gwt.log.enable>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <dependencies>
@@ -33,6 +34,14 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava-gwt</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-servlet</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-user</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.gwt.inject</groupId>
@@ -287,19 +296,9 @@
             <artifactId>plugin-terminal-ui</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.google.gwt</groupId>
-            <artifactId>gwt-user</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.google.gwt</groupId>
-            <artifactId>gwt-servlet</artifactId>
-            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.hamcrest</groupId>
@@ -346,6 +345,20 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <executions>
+                    <execution>
+                        <id>gwt-xml</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>org.eclipse.che.util.GwtXmlGenerator</mainClass>
+                            <arguments>
+                                <argument>--rootDir=${generated.sources.directory}</argument>
+                                <argument>--loggingEnabled=${gwt.log.enable}</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
                     <execution>
                         <id>extManager-client</id>
                         <phase>generate-sources</phase>

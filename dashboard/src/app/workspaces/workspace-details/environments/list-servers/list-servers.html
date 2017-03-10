@@ -10,7 +10,7 @@
       Codenvy, S.A. - initial API and implementation
 
 -->
-<div class="list-ports"
+<div class="list-servers"
      layout="column">
 
   <div ng-if="listServersController.serversList.length > 0">
@@ -45,7 +45,7 @@
           <che-list-header-column flex="15"
                                   che-column-title="Protocol"></che-list-header-column>
           <che-list-header-column flex="50"
-                                  che-column-title="Runtime URL"></che-list-header-column>
+                                  che-column-title="Runtime"></che-list-header-column>
           <che-list-header-column flex="10"
                                   che-column-title="Action"></che-list-header-column>
         </div>
@@ -60,7 +60,7 @@
              layout-align="start stretch"
              class="server-item-row">
           <div layout="row"
-               layout-align="start center"
+               layout-align="start start"
                class="che-checkbox-area">
             <che-list-item-checked ng-model="listServersController.serversSelectedStatus[server.reference]"
                                    che-aria-label-checkbox="Port {{server.reference}}"
@@ -69,12 +69,11 @@
           </div>
           <div flex
                layout-xs="column" layout-gt-xs="row"
-               layout-align-gt-xs="start center"
-               layout-align-xs="start start"
+               layout-align="start start"
                class="che-list-item-details">
             <div flex="15"
                  class="che-list-item-name">
-              <span class="che-hover">{{server.reference}}</span>
+              <span class="che-hover">{{server.reference | lowercase}}</span>
             </div>
             <div flex="10"
                  class="che-list-item-name">
@@ -86,9 +85,19 @@
             </div>
             <div flex="50"
                  class="che-list-item-name">
-              <span class="che-hover" ng-if="server.runtime">
-                <a href="{{server.runtime.url}}" target="_blank">{{server.runtime.url}}</a>
-              </span>
+              <div ng-if="server.runtime"
+                   class="che-hover list-servers-item-runtime">
+                <div ng-if="server.runtime.address"
+                     class="list-servers-item-runtime-address">
+                  <div class="title">Address:</div>
+                  <div>{{server.runtime.address}}</div>
+                </div>
+                <div ng-if="server.runtime.url"
+                     class="list-servers-item-runtime-url">
+                  <div class="title">URL:</div>
+                  <div><a href="{{server.runtime.url}}" target="_blank">{{server.runtime.url}}</a></div>
+                </div>
+              </div>
             </div>
             <div flex="10">
               <div class="che-list-actions"

@@ -109,7 +109,6 @@ export class CreateProjectController {
 
     this.resetCreateProgress();
 
-    // jSON used for import data
     this.importProjectData = this.getDefaultProjectJson();
 
     this.enableWizardProject = true;
@@ -186,7 +185,7 @@ export class CreateProjectController {
     this.jsonConfig = {};
     this.jsonConfig.content = '{}';
     try {
-      this.jsonConfig.content = $filter('json')(angular.fromJson(this.importProjectData), 2);
+      this.jsonConfig.content = $filter('json')(this.importProjectData);
     } catch (e) {
       // ignore the error
     }
@@ -530,7 +529,7 @@ export class CreateProjectController {
     startWorkspacePromise.then(() => {
       // update list of workspaces
       // for new workspace to show in recent workspaces
-      this.cheAPI.cheWorkspace.fetchWorkspaces();
+      this.cheAPI.getWorkspace().fetchWorkspaces();
     }, (error: any) => {
       let errorMessage;
 
@@ -668,7 +667,7 @@ export class CreateProjectController {
    * @param projectData project data to process
    * @returns {Array|any} array of projects
    */
-  processMultiproject(projectData) {
+  processMultiproject(projectData: che.IImportProject): che.IProjectTemplate[] {
     let currentPath = '/' + projectData.project.name;
 
     let projects = projectData.projects || [];
@@ -769,7 +768,7 @@ export class CreateProjectController {
         if (runtime) {
           let envVar = runtime.envVariables;
           if (envVar) {
-            let cheProjectsRoot = envVar['CHE_PROJECTS_ROOT'];
+            let cheProjectsRoot = envVar.CHE_PROJECTS_ROOT;
             if (cheProjectsRoot) {
               // replace current project path by the full path of the project
               let projectPath = cheProjectsRoot + '/' + projectName;
@@ -1002,7 +1001,9 @@ export class CreateProjectController {
    * @returns {string}
    */
   generateRandomStr(): string {
+    /* tslint:disable */
     return (('0000' + (Math.random() * Math.pow(36, 4) << 0).toString(36)).slice(-4));
+    /* tslint:enable */
   }
 
   isImporting(): boolean {
@@ -1339,6 +1340,32 @@ export class CreateProjectController {
       environmentManager.setDev(machines[0], true);
     }
     workspace.environments[workspace.defaultEnv] = environmentManager.getEnvironment(environment, machines);
+  }
+
+  /**
+   * Callback which is called when sample project is selected.
+   *
+   * @param {che.IProjectTemplate} template template to import
+   */
+  projectSampleOnSelect(template: che.IProjectTemplate): void {
+    // update source details
+    this.importProjectData.source.type = template.source.type;
+    this.importProjectData.source.location = template.source.location;
+    this.importProjectData.source.parameters = template.source.parameters;
+    // update name, type, description
+    this.setProjectDescription(template.description);
+    this.importProjectData.project.type = template.projectType;
+    this.importProjectData.project.commands = template.commands;
+    this.importProjectData.project.attributes = template.attributes;
+    this.importProjectData.project.options = template.options;
+    this.importProjectData.projects = template.projects;
+
+    let name: string = template.displayName;
+    // strip space
+    name = name.replace(/\s/g, '_');
+    // strip dot
+    name = name.replace(/\./g, '_');
+    this.setProjectName(name);
   }
 
 }

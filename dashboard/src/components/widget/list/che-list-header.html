@@ -28,9 +28,13 @@
                          ng-if="filterValues && filterValues.length > 0 && !hideFilter"
                          che-on-change="onFilterChanged" class="che-list-filter"></che-filter-selector>
     <che-button-primary class="che-list-delete-button"
-                        ng-show="deleteButtonTitle && !hideDelete"
+                        ng-if="deleteButtonTitle && !hideDelete"
                         che-button-title="{{deleteButtonTitle}}"
-                        ng-click="onDelete()"></che-button-primary>
+                        ng-click="onDelete()"
+                        ng-disabled="deleteButtonDisable === true"></che-button-primary>
+    <span ng-if="deleteButtonDisableMessage && !hideDelete && deleteButtonDisable" class="delete-button-disable-message">
+      {{deleteButtonDisableMessage}}
+    </span>
   </div>
   <md-item class="noselect">
     <md-item-content>

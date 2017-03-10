@@ -17,6 +17,8 @@
                    che-add-button-title="Add Project"
                    che-add-button-href="#/create-project?workspaceId={{workspaceDetailsProjectsCtrl.workspaceId}}"
                    che-delete-button-title="Delete"
+                   che-delete-button-disable="workspaceDetailsController.getWorkspaceStatus() !== 'RUNNING'"
+                   che-delete-button-disable-message="Workspace must be started to delete project(s)."
                    che-on-delete="workspaceDetailsProjectsCtrl.deleteSelectedProjects()"
                    che-hide-delete="workspaceDetailsProjectsCtrl.isNoSelected"
                    che-hide-header="(workspaceDetailsProjectsCtrl.projects | filter:workspaceDetailsProjectsCtrl.projectFilter).length === 0">

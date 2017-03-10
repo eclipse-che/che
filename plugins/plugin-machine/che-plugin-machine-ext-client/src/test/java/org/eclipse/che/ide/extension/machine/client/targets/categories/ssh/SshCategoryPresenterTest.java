@@ -13,7 +13,6 @@ package org.eclipse.che.ide.extension.machine.client.targets.categories.ssh;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.machine.shared.dto.recipe.RecipeDescriptor;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -21,7 +20,6 @@ import org.eclipse.che.ide.api.dialogs.CancelCallback;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.ConfirmDialog;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.machine.RecipeServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
@@ -39,8 +37,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.never;
@@ -67,8 +63,6 @@ public class SshCategoryPresenterTest {
     private WorkspaceServiceClient      workspaceServiceClient;
     @Mock
     private AppContext                  appContext;
-    @Mock
-    private MachineServiceClient        machineService;
     @Mock
     private EventBus                    eventBus;
     @Mock
@@ -114,45 +108,10 @@ public class SshCategoryPresenterTest {
                                                               machineLocale,
                                                               workspaceServiceClient,
                                                               appContext,
-                                                              machineService,
                                                               eventBus);
         arbitraryCategoryPresenter.setTargetsTreeManager(targetsTreeManager);
         arbitraryCategoryPresenter.setCurrentSelection(target);
     }
-
-
-    @Test
-    public void testOnDeleteTarget() throws Exception {
-        final String deletingTargetName = "deletingTargetName";
-        final String recipeId = "deletingTargetRecipeId";
-        final String deleteProposal = "Are you sure you want to delete target " + deletingTargetName + " ?";
-        final String deleteSuccessMessage = "Target recipe " + deletingTargetName + " successfully deleted";
-        final SshMachineTarget target = Mockito.mock(SshMachineTarget.class);
-        final RecipeDescriptor recipe = Mockito.mock(RecipeDescriptor.class);
-        when(target.getName()).thenReturn(deletingTargetName);
-        when(target.getRecipe()).thenReturn(recipe);
-        when(recipe.getId()).thenReturn(recipeId);
-        when(recipeServiceClient.removeRecipe(recipeId)).thenReturn(promise);
-        when(machineLocale.targetsViewDeleteConfirm(deletingTargetName)).thenReturn(deleteProposal);
-        when(machineLocale.targetsRecipeDeleteSuccess(deletingTargetName)).thenReturn(deleteSuccessMessage);
-
-        arbitraryCategoryPresenter.onDeleteClicked(target);
-
-        verify(dialogFactory).createConfirmDialog(anyString(), eq(deleteProposal), confirmCaptor.capture(),
-                                                  Matchers.<CancelCallback>anyObject());
-
-        confirmCaptor.getValue().accepted();
-
-        verify(recipeServiceClient).removeRecipe(recipeId);
-        verify(promise).then(operationSuccessCapture.capture());
-
-        operationSuccessCapture.getValue().apply(null);
-
-        verify(notificationManager).notify(eq(deleteSuccessMessage), eq(SUCCESS), eq(FLOAT_MODE));
-        verify(target).isConnected();
-        verify(targetsTreeManager).updateTargets(null);
-    }
-
 
     @Test
     public void testOnCancelClicked() throws Exception {

@@ -25,7 +25,7 @@
     <packaging>pom</packaging>
     <name>Che Agents Parent</name>
     <modules>
-        <module>exec</module>
+        <module>go-agents</module>
         <module>ssh</module>
         <module>unison</module>
         <module>che-core-api-agent-shared</module>

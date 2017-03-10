@@ -15,7 +15,6 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Stage;
 import com.google.inject.name.Names;
-import com.google.inject.persist.jpa.JpaPersistModule;
 
 import org.eclipse.che.account.api.AccountManager;
 import org.eclipse.che.account.api.AccountModule;
@@ -27,7 +26,10 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.machine.server.jpa.MachineJpaModule;
+import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
+import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
+import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.ssh.server.jpa.JpaSshDao.RemoveSshKeysBeforeUserRemovedEventSubscriber;
 import org.eclipse.che.api.ssh.server.jpa.SshJpaModule;
@@ -36,6 +38,7 @@ import org.eclipse.che.api.ssh.server.spi.SshDao;
 import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
 import org.eclipse.che.api.user.server.jpa.JpaPreferenceDao.RemovePreferencesBeforeUserRemovedEventSubscriber;
 import org.eclipse.che.api.user.server.jpa.JpaProfileDao.RemoveProfileBeforeUserRemovedEventSubscriber;
+import org.eclipse.che.api.user.server.jpa.PreferenceEntity;
 import org.eclipse.che.api.user.server.jpa.UserJpaModule;
 import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
@@ -49,14 +52,26 @@ import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
 import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao.RemoveSnapshotsBeforeWorkspaceRemovedEventSubscriber;
 import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao.RemoveWorkspaceBeforeAccountRemovedEventSubscriber;
 import org.eclipse.che.api.workspace.server.jpa.WorkspaceJpaModule;
+import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.EnvironmentRecipeImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ExtendedMachineImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ServerConf2Impl;
+import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
+import org.eclipse.che.commons.test.db.H2DBTestServer;
+import org.eclipse.che.commons.test.db.PersistTestModuleBuilder;
 import org.eclipse.che.core.db.DBInitializer;
 import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 import org.eclipse.che.core.db.cascade.event.CascadeEvent;
+import org.eclipse.che.core.db.h2.jpa.eclipselink.H2ExceptionHandler;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.core.db.schema.impl.flyway.FlywaySchemaInitializer;
 import org.eclipse.che.inject.lifecycle.InitModule;
+import org.h2.Driver;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -126,15 +141,39 @@ public class CascadeRemovalTest {
     private SnapshotImpl snapshot3;
     private SnapshotImpl snapshot4;
 
+    private H2DBTestServer server;
+
     @BeforeMethod
     public void setUp() throws Exception {
+        server = H2DBTestServer.startDefault();
         injector = Guice.createInjector(Stage.PRODUCTION, new AbstractModule() {
             @Override
             protected void configure() {
+                install(new PersistTestModuleBuilder().setDriver(Driver.class)
+                                                      .runningOn(server)
+                                                      .addEntityClasses(AccountImpl.class,
+                                                                        UserImpl.class,
+                                                                        ProfileImpl.class,
+                                                                        PreferenceEntity.class,
+                                                                        WorkspaceImpl.class,
+                                                                        WorkspaceConfigImpl.class,
+                                                                        ProjectConfigImpl.class,
+                                                                        EnvironmentImpl.class,
+                                                                        EnvironmentRecipeImpl.class,
+                                                                        ExtendedMachineImpl.class,
+                                                                        SourceStorageImpl.class,
+                                                                        ServerConf2Impl.class,
+                                                                        StackImpl.class,
+                                                                        CommandImpl.class,
+                                                                        SnapshotImpl.class,
+                                                                        RecipeImpl.class,
+                                                                        SshPairImpl.class)
+                                                      .addEntityClass("org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl$Attribute")
+                                                      .setExceptionHandler(H2ExceptionHandler.class)
+                                                      .build());
                 bind(EventService.class).in(Singleton.class);
                 install(new InitModule(PostConstruct.class));
-                install(new JpaPersistModule("test"));
-                bind(SchemaInitializer.class).toInstance(new FlywaySchemaInitializer(inMemoryDefault(), "che-schema"));
+                bind(SchemaInitializer.class).toInstance(new FlywaySchemaInitializer(server.getDataSource(), "che-schema"));
                 bind(DBInitializer.class).asEagerSingleton();
                 install(new UserJpaModule());
                 install(new AccountModule());
@@ -165,6 +204,7 @@ public class CascadeRemovalTest {
     @AfterMethod
     public void cleanup() {
         injector.getInstance(EntityManagerFactory.class).close();
+        server.shutdown();
     }
 
     @Test

@@ -32,12 +32,10 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceRuntimeDto;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.dialogs.CancelCallback;
-import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.machine.MachineEntity;
-import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.machine.RecipeServiceClient;
+import org.eclipse.che.ide.api.machine.events.MachineStateEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
@@ -45,7 +43,6 @@ import org.eclipse.che.ide.api.workspace.event.MachineStatusChangedEvent;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
-import org.eclipse.che.ide.api.machine.events.MachineStateEvent;
 import org.eclipse.che.ide.extension.machine.client.targets.CategoryPage;
 import org.eclipse.che.ide.extension.machine.client.targets.Target;
 import org.eclipse.che.ide.extension.machine.client.targets.TargetManager;
@@ -55,11 +52,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.eclipse.che.api.core.model.machine.MachineStatus.RUNNING;
+import static org.eclipse.che.ide.api.machine.events.MachineStateEvent.MachineAction.DESTROYED;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
-import static org.eclipse.che.ide.api.machine.events.MachineStateEvent.MachineAction.DESTROYED;
 
 /**
  * SSH type page presenter.
@@ -77,7 +73,6 @@ public class SshCategoryPresenter implements CategoryPage, TargetManager, SshVie
     private final NotificationManager         notificationManager;
     private final MachineLocalizationConstant machineLocale;
     private final AppContext                  appContext;
-    private final MachineServiceClient        machineService;
     private final EventBus                    eventBus;
     private final WorkspaceServiceClient      workspaceServiceClient;
 
@@ -100,7 +95,6 @@ public class SshCategoryPresenter implements CategoryPage, TargetManager, SshVie
                                 MachineLocalizationConstant machineLocale,
                                 WorkspaceServiceClient workspaceServiceClient,
                                 AppContext appContext,
-                                MachineServiceClient machineService,
                                 EventBus eventBus) {
         this.sshView = sshView;
         this.recipeServiceClient = recipeServiceClient;
@@ -111,7 +105,6 @@ public class SshCategoryPresenter implements CategoryPage, TargetManager, SshVie
         this.workspaceServiceClient = workspaceServiceClient;
         this.machineLocale = machineLocale;
         this.appContext = appContext;
-        this.machineService = machineService;
         this.eventBus = eventBus;
 
         sshView.setDelegate(this);
@@ -471,40 +464,14 @@ public class SshCategoryPresenter implements CategoryPage, TargetManager, SshVie
             return;
         }
         sshView.setConnectButtonText(null);
-
-        machineService.destroyMachine(machine.getWorkspaceId(),
-                                      machine.getId()).then(new Operation<Void>() {
-            @Override
-            public void apply(Void arg) throws OperationException {
-                eventBus.fireEvent(new MachineStateEvent(machine, DESTROYED));
-
-                notificationManager.notify(machineLocale.targetsViewDisconnectSuccess(selectedTarget.getName()), SUCCESS, FLOAT_MODE);
-                updateTargets(null);
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError arg) throws OperationException {
-                notificationManager.notify(machineLocale.targetsViewDisconnectError(selectedTarget.getName()), FAIL, FLOAT_MODE);
-                updateTargets(null);
-            }
-        });
+        eventBus.fireEvent(new MachineStateEvent(machine, DESTROYED));
+        notificationManager.notify(machineLocale.targetsViewDisconnectSuccess(selectedTarget.getName()), SUCCESS, FLOAT_MODE);
+        updateTargets(null);
     }
 
     @Override
     public void onDeleteClicked(final Target target) {
-        dialogFactory.createConfirmDialog(machineLocale.targetsViewDeleteConfirmTitle(),
-                machineLocale.targetsViewDeleteConfirm(target.getName()),
-                new ConfirmCallback() {
-                    @Override
-                    public void accepted() {
-                        deleteTarget(target);
-                    }
-                }, new CancelCallback() {
-                    @Override
-                    public void cancelled() {
-                        updateTargets(null);
-                    }
-                }).show();
+        //unsupported operation
     }
 
     private void deleteTarget(final Target target) {
@@ -519,22 +486,6 @@ public class SshCategoryPresenter implements CategoryPage, TargetManager, SshVie
             disconnect(machine);
             return;
         }
-
-        machineService.destroyMachine(machine.getWorkspaceId(),
-                                      machine.getId()).then(new Operation<Void>() {
-            @Override
-            public void apply(Void arg) throws OperationException {
-                eventBus.fireEvent(new MachineStateEvent(machine, DESTROYED));
-                notificationManager.notify(machineLocale.targetsViewDisconnectSuccess(target.getName()), SUCCESS, FLOAT_MODE);
-                deleteTargetRecipe(target);
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError arg) throws OperationException {
-                notificationManager.notify(machineLocale.targetsViewDisconnectError(target.getName()), FAIL, FLOAT_MODE);
-                updateTargets(target.getName());
-            }
-        });
     }
 
     /**

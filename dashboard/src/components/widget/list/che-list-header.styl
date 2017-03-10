@@ -18,11 +18,16 @@
   .che-list-add-button,
   .che-list-import-button
     float left
-    display inline-flex
+    display inline-block
 
   .che-list-delete-button
     float right
-    display inline-flex
+    display inline-block
+
+  .delete-button-disable-message
+    color $label-info-color !important
+    float right
+    border none
 
   .che-list-search
     line-height 33px
@@ -31,7 +36,8 @@
 .che-list-search,
 .che-list-add-button > *,
 .che-list-import-button > *,
-.che-list-delete-button > *
+.che-list-delete-button > *,
+.delete-button-disable-message
   display inline
   box-sizing content-box
   min-width 34px
@@ -41,6 +47,9 @@
   margin-bottom 0
   border 1px solid $list-header-blue-color
   che-border-radius(2px)
+
+  &.che-button
+    display inline-block
 
 .che-list-add-button > *,
 .che-list-import-button > *

@@ -12,11 +12,11 @@
 -->
 <md-content flex class="projects-create-project-samples">
   <che-list class="projects-create-project-samples-list">
-    <div ng-repeat="template in filteredTemplates = (createProjectSamplesController.templates | sampleTagFilter:createProjectCtrl.currentStackTags | orderBy:['projectType', 'displayName'])">
+    <div ng-repeat="template in filteredTemplates = (createProjectSamplesController.getFilteredTemplates() | orderBy:['projectType', 'displayName'])">
       <che-list-item flex>
         <div layout-gt-sm="row" flex layout-align="start center">
-          <div ng-init="$first && createProjectSamplesController.initItem(template, createProjectCtrl)"
-               ng-click="createProjectSamplesController.selectTemplate(template, createProjectCtrl)"
+          <div ng-init="$first && createProjectSamplesController.initItem(template)"
+               ng-click="createProjectSamplesController.selectTemplate(template)"
                class="projects-create-project-samples-list-item"
                ng-class="{'projects-create-project-samples-list-item-active' : template.name === createProjectSamplesController.selectedTemplateName}"
                data-template-name="{{template.name}}"
@@ -30,4 +30,5 @@
     <div ng-show="!createProjectSamplesController.getItemsSize(filteredTemplates)">
       No matching sample.
     </div>
+  </che-list>
 </md-content>
