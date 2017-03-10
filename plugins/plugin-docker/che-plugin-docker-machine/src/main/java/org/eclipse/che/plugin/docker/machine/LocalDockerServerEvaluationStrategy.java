@@ -84,15 +84,19 @@ public class LocalDockerServerEvaluationStrategy extends ServerEvaluationStrateg
     }
 
     @Override
-    protected Map<String, String> getExternalAddressesAndPorts(ContainerInfo containerInfo, String internalHost) {
-        String externalAddressContainer = containerInfo.getNetworkSettings().getGateway();
-
-        String externalAddress = externalAddressProperty != null ?
-                                 externalAddressProperty :
-                                 !isNullOrEmpty(externalAddressContainer) ?
-                                 externalAddressContainer :
-                                 internalHost;
-
-        return getExposedPortsToAddressPorts(externalAddress, containerInfo.getNetworkSettings().getPorts());
+    protected Map<String, String> getExternalAddressesAndPorts(ContainerInfo containerInfo,
+                                                               String internalHost) {
+        String cheExternalAddress = getCheExternalAddress(containerInfo, internalHost);
+        return getExposedPortsToAddressPorts(cheExternalAddress, containerInfo.getNetworkSettings().getPorts());
     }
+
+    protected String getCheExternalAddress(ContainerInfo containerInfo, String internalHost) {
+        String externalAddressContainer = containerInfo.getNetworkSettings().getGateway();
+        return externalAddressProperty != null ?
+                externalAddressProperty :
+                !isNullOrEmpty(externalAddressContainer) ?
+                        externalAddressContainer :
+                        internalHost;
+    }
+
 }

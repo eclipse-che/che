@@ -39,6 +39,8 @@ public class OpenShiftConnectorTest {
     private static final String   OPENSHIFT_DEFAULT_WORKSPACE_QUANTITY = "10Gi";
     private static final String   OPENSHIFT_DEFAULT_WORKSPACE_STORAGE = "/data/workspaces";
     private static final String   OPENSHIFT_DEFAULT_WORKSPACE_PROJECTS_STORAGE = "/projects";
+	private static final String   CHE_DEFAULT_SERVER_EXTERNAL_ADDRESS = "che.openshift.mini";
+	
     @Mock
     private DockerConnectorConfiguration       dockerConnectorConfiguration;
     @Mock
@@ -66,6 +68,7 @@ public class OpenShiftConnectorTest {
                                                     dockerConnectionFactory,
                                                     authManager,
                                                     dockerApiVersionPathPrefixProvider,
+                                                    CHE_DEFAULT_SERVER_EXTERNAL_ADDRESS,
                                                     CHE_DEFAULT_OPENSHIFT_PROJECT_NAME,
                                                     CHE_DEFAULT_OPENSHIFT_SERVICEACCOUNT,
                                                     OPENSHIFT_LIVENESS_PROBE_DELAY,

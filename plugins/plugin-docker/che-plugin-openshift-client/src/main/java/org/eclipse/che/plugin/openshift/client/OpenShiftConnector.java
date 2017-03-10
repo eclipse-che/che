@@ -34,8 +34,10 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-
+import io.fabric8.openshift.api.model.Route;
+import io.fabric8.openshift.api.model.RouteList;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.inject.StringArrayConverter;
 import org.eclipse.che.plugin.docker.client.DockerApiVersionPathPrefixProvider;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
@@ -147,7 +149,6 @@ public class OpenShiftConnector extends DockerConnector {
     private static final int CHE_WORKSPACE_AGENT_PORT                    = 4401;
     private static final int CHE_TERMINAL_AGENT_PORT                     = 4411;
     private static final String DOCKER_PROTOCOL_PORT_DELIMITER           = "/";
-    private static final String OPENSHIFT_SERVICE_TYPE_NODE_PORT         = "NodePort";
     private static final int OPENSHIFT_WAIT_POD_DELAY                    = 1000;
     private static final int OPENSHIFT_WAIT_POD_TIMEOUT                  = 240;
     private static final int OPENSHIFT_IMAGESTREAM_WAIT_DELAY            = 2000;
@@ -171,12 +172,14 @@ public class OpenShiftConnector extends DockerConnector {
     private final String          workspacesPvcQuantity;
     private final String          cheWorkspaceStorage;
     private final String          cheWorkspaceProjectsStorage;
+	private final String          cheServerExternalAddress;
 
     @Inject
     public OpenShiftConnector(DockerConnectorConfiguration connectorConfiguration,
                               DockerConnectionFactory connectionFactory,
                               DockerRegistryAuthResolver authResolver,
                               DockerApiVersionPathPrefixProvider dockerApiVersionPathPrefixProvider,
+                              @Named("che.docker.ip.external") String cheServerExternalAddress,
                               @Named("che.openshift.project") String openShiftCheProjectName,
                               @Named("che.openshift.serviceaccountname") String openShiftCheServiceAccount,
                               @Named("che.openshift.liveness.probe.delay") int openShiftLivenessProbeDelay,
@@ -187,6 +190,7 @@ public class OpenShiftConnector extends DockerConnector {
                               @Named("che.workspace.projects.storage") String cheWorkspaceProjectsStorage) {
 
         super(connectorConfiguration, connectionFactory, authResolver, dockerApiVersionPathPrefixProvider);
+        this.cheServerExternalAddress = cheServerExternalAddress;
         this.openShiftCheProjectName = openShiftCheProjectName;
         this.openShiftCheServiceAccount = openShiftCheServiceAccount;
         this.openShiftLivenessProbeDelay = openShiftLivenessProbeDelay;
@@ -821,6 +825,23 @@ public class OpenShiftConnector extends DockerConnector {
         return deployment;
     }
 
+    private List<Route> getRoutesByLabel(String labelKey, String labelValue) throws IOException {
+        RouteList routeList = openShiftClient
+                .routes()
+                .inNamespace(this.openShiftCheProjectName)
+                .withLabel(labelKey, labelValue)
+                .list();
+
+        List<Route> items = routeList.getItems();
+
+        if (items.isEmpty()) {
+            LOG.warn("No Route with label {}={} could be found", labelKey, labelValue);
+            throw new IOException("No Route with label " + labelKey + "=" + labelValue + " could be found");
+        }
+
+        return items;
+    }
+
     private Pod getChePodByContainerId(String containerId) throws IOException {
         PodList pods = openShiftClient.pods()
                                     .inNamespace(this.openShiftCheProjectName)
@@ -877,7 +898,9 @@ public class OpenShiftConnector extends DockerConnector {
                                         Set<String> exposedPorts,
                                         Map<String, String> additionalLabels) {
 
-        Map<String, String> selector = Collections.singletonMap(OPENSHIFT_DEPLOYMENT_LABEL, CHE_OPENSHIFT_RESOURCES_PREFIX + workspaceID);
+        String serviceName = CHE_OPENSHIFT_RESOURCES_PREFIX + workspaceID;
+
+        Map<String, String> selector = Collections.singletonMap(OPENSHIFT_DEPLOYMENT_LABEL, serviceName);
         List<ServicePort> ports = KubernetesService.getServicePortsFrom(exposedPorts);
 
         Service service = openShiftClient
@@ -885,17 +908,52 @@ public class OpenShiftConnector extends DockerConnector {
                 .inNamespace(this.openShiftCheProjectName)
                 .createNew()
                 .withNewMetadata()
-                    .withName(CHE_OPENSHIFT_RESOURCES_PREFIX + workspaceID)
-                    .withAnnotations(KubernetesLabelConverter.labelsToNames(additionalLabels))
+                .withName(serviceName)
+                .withAnnotations(KubernetesLabelConverter.labelsToNames(additionalLabels))
                 .endMetadata()
                 .withNewSpec()
-                    .withType(OPENSHIFT_SERVICE_TYPE_NODE_PORT)
-                    .withSelector(selector)
-                    .withPorts(ports)
+                .withSelector(selector)
+                .withPorts(ports)
                 .endSpec()
                 .done();
 
         LOG.info("OpenShift service {} created", service.getMetadata().getName());
+
+        for (ServicePort port : ports) {
+            createOpenShiftRoute(serviceName, port.getName(), workspaceID);
+        }
+    }
+
+    private void createOpenShiftRoute(String serviceName,
+                                      String serverRef,
+                                      String workspaceName) {
+
+        String routeName = CHE_OPENSHIFT_RESOURCES_PREFIX + workspaceName + "." + serverRef;
+        String serviceHost = serverRef + "." + workspaceName + "." + this.cheServerExternalAddress;
+
+        Route route = openShiftClient
+                .routes()
+                .inNamespace(this.openShiftCheProjectName)
+                .createNew()
+                .withNewMetadata()
+                .withName(routeName)
+                .addToLabels(OPENSHIFT_DEPLOYMENT_LABEL,serviceName)
+                .endMetadata()
+                .withNewSpec()
+                .withHost(serviceHost)
+                .withNewTo()
+                    .withKind("Service")
+                    .withName(serviceName)
+                .endTo()
+                .withNewPort()
+                    .withNewTargetPort()
+                        .withStrVal(serverRef)
+                    .endTargetPort()
+                .endPort()
+                .endSpec()
+                .done();
+
+        LOG.info("OpenShift route {} created", route.getMetadata().getName());
     }
 
     private String createOpenShiftDeployment(String workspaceID,
@@ -921,7 +979,7 @@ public class OpenShiftConnector extends DockerConnector {
                                     .withImagePullPolicy(OPENSHIFT_IMAGE_PULL_POLICY_IFNOTPRESENT)
                                     .withNewSecurityContext()
                                         .withRunAsUser(UID)
-                                        .withPrivileged(true)
+                                        .withPrivileged(false)
                                     .endSecurityContext()
                                     .withLivenessProbe(getLivenessProbeFrom(exposedPorts))
                                     .withVolumeMounts(getVolumeMountsFrom(volumes, workspaceID))
@@ -1085,6 +1143,14 @@ public class OpenShiftConnector extends DockerConnector {
 
         Deployment deployment = getDeploymentByName(deploymentName);
         Service service = getCheServiceBySelector(OPENSHIFT_DEPLOYMENT_LABEL, deploymentName);
+        List<Route> routes = getRoutesByLabel(OPENSHIFT_DEPLOYMENT_LABEL, deploymentName);
+
+        if (routes != null) {
+            for (Route route: routes) {
+                LOG.info("Removing OpenShift Route {}", route.getMetadata().getName());
+                openShiftClient.resource(route).delete();
+            }
+        }
 
         if (service != null) {
             LOG.info("Removing OpenShift Service {}", service.getMetadata().getName());
