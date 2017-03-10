@@ -77,3 +77,7 @@ a{
 
     color: #333333;
 }
+
+.global-zeroclipboard-container {
+    visibility: hidden;
+}
