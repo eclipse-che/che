@@ -10,12 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.event;
 
-import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.ide.api.parts.EditorTab;
-import org.eclipse.che.ide.api.resources.VirtualFile;
-
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
+
+import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.api.editor.EditorAgent;
+import org.eclipse.che.ide.api.editor.EditorPartPresenter;
+import org.eclipse.che.ide.api.parts.EditorTab;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 
 import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.CLOSE;
 import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.OPEN;
@@ -29,11 +31,6 @@ import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.SAVE;
  * @author Roman Nikitenko
  */
 public class FileEvent extends GwtEvent<FileEvent.FileEventHandler> {
-
-    /** Handles OpenFileEvent */
-    public interface FileEventHandler extends EventHandler {
-        void onFileOperation(FileEvent event);
-    }
 
     public static Type<FileEventHandler> TYPE = new Type<>();
     private VirtualFile   file;
@@ -73,6 +70,12 @@ public class FileEvent extends GwtEvent<FileEvent.FileEventHandler> {
         return new FileEvent(file, OPEN);
     }
 
+    /** @deprecated use {@link EditorAgent#openEditor(org.eclipse.che.ide.api.resources.VirtualFile)} */
+    @Deprecated
+    public static FileEvent createOpenFileEvent(VirtualFile file) {
+        return new FileEvent(file, OPEN);
+    }
+
     /**
      * Creates a event for {@code FileOperation.CLOSE}.
      * Note: the pane which contains this {@code tab} will be closed when the pane doesn't contains editors anymore.
@@ -84,10 +87,21 @@ public class FileEvent extends GwtEvent<FileEvent.FileEventHandler> {
         return new FileEvent(tab, CLOSE);
     }
 
+    /** @deprecated use {@link EditorAgent#closeEditor(EditorPartPresenter)} */
+    @Deprecated
+    public static FileEvent createCloseFileEvent(EditorTab tab) {
+        return new FileEvent(tab, CLOSE);
+    }
+
     /**
      * Creates a event for {@code FileOperation.SAVE}.
      */
     public static FileEvent createFileSavedEvent(VirtualFile file) {
+        return new FileEvent(file, SAVE);
+    }
+
+    @Deprecated
+    public static FileEvent createSaveFileEvent(VirtualFile file) {
         return new FileEvent(file, SAVE);
     }
 
@@ -119,5 +133,10 @@ public class FileEvent extends GwtEvent<FileEvent.FileEventHandler> {
 
     public enum FileOperation {
         OPEN, SAVE, CLOSE
+    }
+
+    /** Handles OpenFileEvent */
+    public interface FileEventHandler extends EventHandler {
+        void onFileOperation(FileEvent event);
     }
 }
