@@ -10,8 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.generator;
 
-import static org.eclipse.che.api.languageserver.generator.DtoGenerator.INDENT;
-import static org.eclipse.che.api.languageserver.generator.DtoGenerator.dtoName;
+import org.eclipse.lsp4j.jsonrpc.messages.Either;
 
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
@@ -21,7 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.lsp4j.jsonrpc.messages.Either;;
+import static org.eclipse.che.api.languageserver.generator.DtoGenerator.INDENT;
+import static org.eclipse.che.api.languageserver.generator.DtoGenerator.dtoName;;
 
 /**
  * This class generates property conversions from regular lsp4j classes to dto classes.
@@ -35,6 +35,17 @@ public class ToDtoGenerator extends ConversionGenerator {
 
 	public ToDtoGenerator(Set<Class<? extends Object>> classes) {
 		this.classes = classes;
+	}
+	
+	public static void generateMakeDto(String indent, PrintWriter out, Set<Class<? extends Object>> classes) {
+	    out.println(indent+"public static final Object makeDto(Object obj) {");
+	    for (Class<? extends Object> clazz : classes) {
+	        out.println(indent+INDENT+String.format("if (obj instanceof %1$s) {", clazz.getName()));
+            out.println(indent+INDENT+INDENT+String.format("return new %1$s((%2$s)obj);", dtoName(clazz), clazz.getName()));
+	        out.println(indent+INDENT+"}");
+        }
+        out.println(indent+INDENT+"return obj;");
+        out.println(indent+"}");
 	}
 
 	public void generateToDto(String indent, PrintWriter out, Class<?> receiverClass, Method m, String objectName) {
@@ -117,7 +128,7 @@ public class ToDtoGenerator extends ConversionGenerator {
 		if (isDtoClass(t)) {
 			return String.format("new %1$s(%2$s)", dtoName(t), value);
 		} else {
-			return value;
+			return String.format("(%1$s)makeDto(%2$s);", t.getName(), value);
 		}
 	}
 

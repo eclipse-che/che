@@ -10,6 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.generator;
 
+import com.google.common.base.Predicate;
+import org.reflections.Reflections;
+import org.reflections.scanners.SubTypesScanner;
+import org.reflections.util.ClasspathHelper;
+import org.reflections.util.ConfigurationBuilder;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -18,13 +24,6 @@ import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import org.reflections.Reflections;
-import org.reflections.scanners.SubTypesScanner;
-import org.reflections.util.ClasspathHelper;
-import org.reflections.util.ConfigurationBuilder;
-
-import com.google.common.base.Predicate;
 
 /**
  * DtoGenerator generates che-style DTO's for lsp4j protocol classes.
@@ -138,6 +137,9 @@ public abstract class DtoGenerator {
 						clazz.getSimpleName(), dtoProviderName(clazz)));
 			}
 			out.println(INDENT + "}");
+		      
+			ToDtoGenerator.generateMakeDto(INDENT, out, allTypes);
+			
 			out.println("}");
 			out.flush();
 		}
@@ -206,8 +208,8 @@ public abstract class DtoGenerator {
 		out.println(indent + INDENT + INDENT + "return result;");
 
 		out.println(indent + INDENT + "}");
-
-		out.println(indent + "}");
+        
+ 		out.println(indent + "}");
 	}
 
 	protected void writeEnvSpecificToJson(String indent, PrintWriter out) {
