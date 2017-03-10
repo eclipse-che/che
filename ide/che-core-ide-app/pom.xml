@@ -18,7 +18,6 @@
         <groupId>org.eclipse.che.core</groupId>
         <version>5.5.0-SNAPSHOT</version>
     </parent>
-    <groupId>org.eclipse.che.core</groupId>
     <artifactId>che-core-ide-app</artifactId>
     <packaging>jar</packaging>
     <name>Che Core :: IDE :: App</name>
