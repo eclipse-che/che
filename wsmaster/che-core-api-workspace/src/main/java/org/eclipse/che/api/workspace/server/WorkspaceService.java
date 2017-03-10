@@ -386,6 +386,7 @@ public class WorkspaceService extends Service {
                                                       "The operation is not allowed for the user"),
                    @ApiResponse(code = 409, message = "Any conflict occurs during the snapshot creation"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
+    @Deprecated
     public void createSnapshot(@ApiParam("The workspace id") @PathParam("id") String workspaceId) throws BadRequestException,
                                                                                                          ForbiddenException,
                                                                                                          NotFoundException,
@@ -406,6 +407,7 @@ public class WorkspaceService extends Service {
                                                       "The snapshot doesn't exist for the workspace"),
                    @ApiResponse(code = 403, message = "The user is not workspace owner"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
+    @Deprecated
     public List<SnapshotDto> getSnapshot(@ApiParam("The id of the workspace") @PathParam("id") String workspaceId)
             throws ServerException,
                    BadRequestException,

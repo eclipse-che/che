@@ -18,6 +18,7 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
+import org.eclipse.che.api.core.model.workspace.ExtendedMachine;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
@@ -48,6 +49,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -57,6 +59,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Arrays.asList;
@@ -67,6 +70,7 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPING;
 import static org.eclipse.che.api.workspace.server.WorkspaceManager.CREATED_ATTRIBUTE_NAME;
+import static org.eclipse.che.api.workspace.server.WorkspaceManager.SNAPSHOTTED_AT_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.server.WorkspaceManager.UPDATED_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.AUTO_CREATE_SNAPSHOT;
 import static org.eclipse.che.api.workspace.shared.Constants.AUTO_RESTORE_FROM_SNAPSHOT;
@@ -233,7 +237,6 @@ public class WorkspaceManagerTest {
         WorkspaceImpl result = workspaceManager.getWorkspace(":" + workspace.getConfig().getName());
         assertEquals(result, workspace);
     }
-
 
 
     @Test
@@ -658,22 +661,7 @@ public class WorkspaceManagerTest {
                                                 sharedPool);
         WorkspaceImpl workspace = createAndMockWorkspace();
         mockStart(workspace);
-
-        SnapshotImpl.SnapshotBuilder snapshotBuilder = SnapshotImpl.builder()
-                                                                   .generateId()
-                                                                   .setEnvName("env")
-                                                                   .setDev(true)
-                                                                   .setMachineName("machine1")
-                                                                   .setWorkspaceId(workspace.getId())
-                                                                   .setType("docker")
-                                                                   .setMachineSource(new MachineSourceImpl("image"));
-        SnapshotImpl snapshot1 = snapshotBuilder.build();
-        SnapshotImpl snapshot2 = snapshotBuilder.generateId()
-                                                .setDev(false)
-                                                .setMachineName("machine2")
-                                                .build();
-        when(snapshotDao.findSnapshots(workspace.getId()))
-                .thenReturn(asList(snapshot1, snapshot2));
+        mockSnapshots(workspace, 12345L);
 
         workspaceManager.startWorkspace(workspace.getId(), workspace.getConfig().getDefaultEnv(), null);
 
@@ -915,6 +903,76 @@ public class WorkspaceManagerTest {
         assertEquals(workspaceManager.getRunningWorkspacesIds(), ids);
     }
 
+    @Test
+    public void snapshottedAtAttributeIncludedToWorkspaceWhenGettingByKey() throws Exception {
+        WorkspaceImpl workspace = createAndMockWorkspace();
+        mockSnapshots(workspace, 12345);
+
+        WorkspaceImpl result = workspaceManager.getWorkspace(workspace.getId());
+
+        assertEquals(result.getAttributes().get(SNAPSHOTTED_AT_ATTRIBUTE_NAME), "12345");
+    }
+
+    @Test
+    public void snapshottedAtAttributeIncludedToWorkspaceWhenGettingByNamespaceAndName() throws Exception {
+        WorkspaceImpl workspace = createAndMockWorkspace();
+        mockSnapshots(workspace, 12345);
+
+        WorkspaceImpl result = workspaceManager.getWorkspace(workspace.getConfig().getName(), workspace.getNamespace());
+
+        assertEquals(result.getAttributes().get(SNAPSHOTTED_AT_ATTRIBUTE_NAME), "12345");
+    }
+
+    @Test
+    public void snapshottedAtAttributeIncludedToWorkspaceWhenGettingByUserId() throws Exception {
+        WorkspaceImpl workspace = createAndMockWorkspace();
+        mockSnapshots(workspace, 12345);
+
+        List<WorkspaceImpl> workspaces = workspaceManager.getWorkspaces(USER_ID, false);
+
+        assertEquals(workspaces.get(0).getAttributes().get(SNAPSHOTTED_AT_ATTRIBUTE_NAME), "12345");
+    }
+
+    @Test
+    public void snapshottedAtAttributeIncludedToWorkspaceWhenGettingByNamespace() throws Exception {
+        WorkspaceImpl workspace = createAndMockWorkspace();
+        mockSnapshots(workspace, 12345);
+
+        List<WorkspaceImpl> workspaces = workspaceManager.getByNamespace(workspace.getNamespace(), false);
+
+        assertEquals(workspaces.get(0).getAttributes().get(SNAPSHOTTED_AT_ATTRIBUTE_NAME), "12345");
+    }
+
+    @Test
+    public void snapshottedAtAttributeIncludedToWorkspaceWhenStartingById() throws Exception {
+        WorkspaceImpl workspace = createAndMockWorkspace();
+        mockSnapshots(workspace, 12345);
+        mockStart(workspace);
+
+        Workspace result = workspaceManager.startWorkspace(workspace.getId(), workspace.getConfig().getDefaultEnv(), false);
+
+        assertEquals(result.getAttributes().get(SNAPSHOTTED_AT_ATTRIBUTE_NAME), "12345");
+    }
+
+    private List<SnapshotImpl> mockSnapshots(Workspace workspace, long creation) throws SnapshotException {
+        SnapshotImpl.SnapshotBuilder snapshotBuilder = SnapshotImpl.builder()
+                                                                   .generateId()
+                                                                   .setCreationDate(creation)
+                                                                   .setEnvName(workspace.getConfig().getDefaultEnv())
+                                                                   .setWorkspaceId(workspace.getId())
+                                                                   .setType("docker")
+                                                                   .setMachineSource(new MachineSourceImpl("image"));
+
+        SnapshotImpl snapshot1 = snapshotBuilder.build();
+        SnapshotImpl snapshot2 = snapshotBuilder.generateId()
+                                                .setDev(false)
+                                                .setMachineName("machine2")
+                                                .build();
+        List<SnapshotImpl> snapshots = asList(snapshot1, snapshot2);
+        when(snapshotDao.findSnapshots(workspace.getId())).thenReturn(snapshots);
+        return snapshots;
+    }
+
     private void captureRunAsyncCallsAndRunSynchronously() {
         verify(sharedPool, atLeastOnce()).runAsync(taskCaptor.capture());
         for (Runnable runnable : taskCaptor.getAllValues()) {
@@ -962,6 +1020,7 @@ public class WorkspaceManagerTest {
         when(workspaceDao.get(workspace.getConfig().getName(), NAMESPACE)).thenReturn(workspace);
         when(workspaceDao.getByNamespace(workspace.getNamespace())).thenReturn(singletonList(workspace));
         when(workspaceDao.getByNamespace(NAMESPACE)).thenReturn(singletonList(workspace));
+        when(workspaceDao.getWorkspaces(USER_ID)).thenReturn(singletonList(workspace));
         return workspace;
     }
 

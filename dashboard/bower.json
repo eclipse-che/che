@@ -9,6 +9,7 @@
   "dependencies": {
     "angular": "1.4.8",
     "angular-animate": "1.4.8",
+    "angular-aria": "1.4.8",
     "angular-bootstrap": "0.13.0",
     "angular-charts": "0.2.6",
     "angular-cookies": "1.4.8",

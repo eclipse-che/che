@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.workspace;
 
+import com.google.inject.Provider;
 import elemental.json.Json;
 import elemental.json.JsonObject;
 
@@ -49,18 +50,18 @@ import java.util.Map;
 public class WorkspacePresenter implements Presenter, WorkspaceView.ActionDelegate, WorkspaceAgent, PerspectiveTypeListener,
                                            StateComponent {
 
-    private final WorkspaceView             view;
-    private final String                    defaultPerspectiveId;
-    private final MainMenuPresenter         mainMenu;
-    private final StatusPanelGroupPresenter bottomMenu;
-    private final ToolbarPresenter          toolbarPresenter;
-    private final PerspectiveManager        perspectiveManager;
+    private final WorkspaceView                 view;
+    private final String                        defaultPerspectiveId;
+    private final MainMenuPresenter             mainMenu;
+    private final StatusPanelGroupPresenter     bottomMenu;
+    private final ToolbarPresenter              toolbarPresenter;
+    private final Provider<PerspectiveManager>  perspectiveManagerProvider;
 
-    private Perspective activePerspective;
+    private Perspective                         activePerspective;
 
     @Inject
     public WorkspacePresenter(WorkspaceView view,
-                              PerspectiveManager perspectiveManager,
+                              Provider<PerspectiveManager> perspectiveManagerProvider,
                               MainMenuPresenter mainMenu,
                               StatusPanelGroupPresenter bottomMenu,
                               @MainToolbar ToolbarPresenter toolbarPresenter,
@@ -73,8 +74,8 @@ public class WorkspacePresenter implements Presenter, WorkspaceView.ActionDelega
         this.mainMenu = mainMenu;
         this.bottomMenu = bottomMenu;
 
-        this.perspectiveManager = perspectiveManager;
-        this.perspectiveManager.addListener(this);
+        this.perspectiveManagerProvider = perspectiveManagerProvider;
+        perspectiveManagerProvider.get().addListener(this);
 
         onPerspectiveChanged();
     }
@@ -92,10 +93,10 @@ public class WorkspacePresenter implements Presenter, WorkspaceView.ActionDelega
     /** {@inheritDoc} */
     @Override
     public void onPerspectiveChanged() {
-        activePerspective = perspectiveManager.getActivePerspective();
+        activePerspective = perspectiveManagerProvider.get().getActivePerspective();
 
         if (activePerspective == null) {
-            throw new IllegalStateException("Current perspective isn't defined " + perspectiveManager.getPerspectiveId());
+            throw new IllegalStateException("Current perspective isn't defined " + perspectiveManagerProvider.get().getPerspectiveId());
         }
 
         activePerspective.go(view.getPerspectivePanel());
@@ -151,7 +152,7 @@ public class WorkspacePresenter implements Presenter, WorkspaceView.ActionDelega
         JsonObject state = Json.createObject();
         JsonObject perspectivesJs = Json.createObject();
         state.put("perspectives", perspectivesJs);
-        Map<String, Perspective> perspectives = perspectiveManager.getPerspectives();
+        Map<String, Perspective> perspectives = perspectiveManagerProvider.get().getPerspectives();
         for (Map.Entry<String, Perspective> entry : perspectives.entrySet()) {
             //store only default perspective
             if (entry.getKey().equals(defaultPerspectiveId)) {
@@ -165,7 +166,7 @@ public class WorkspacePresenter implements Presenter, WorkspaceView.ActionDelega
     public void loadState(JsonObject state) {
         if (state.hasKey("perspectives")) {
             JsonObject perspectives = state.getObject("perspectives");
-            Map<String, Perspective> perspectiveMap = perspectiveManager.getPerspectives();
+            Map<String, Perspective> perspectiveMap = perspectiveManagerProvider.get().getPerspectives();
             for (String key : perspectives.keys()) {
                 if (perspectiveMap.containsKey(key)) {
                     perspectiveMap.get(key).loadState(perspectives.getObject(key));

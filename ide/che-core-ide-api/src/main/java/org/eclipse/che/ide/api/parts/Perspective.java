@@ -26,6 +26,17 @@ import javax.validation.constraints.NotNull;
  */
 public interface Perspective extends StateComponent {
 
+
+    /**
+     * Some unique id will used to set/switch current perspective in workbench layout logic
+     */
+    String getPerspectiveId();
+
+    /**
+     * Human readable name of perspective will be used in UI element for switching perspective
+     */
+    String getPerspectiveName();
+
     /** Maximizes central part stack */
     void maximizeCentralPartStack();
 

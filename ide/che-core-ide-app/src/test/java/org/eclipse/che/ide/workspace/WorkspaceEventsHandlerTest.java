@@ -30,7 +30,7 @@ import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceRuntimeDto;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.actions.WorkspaceSnapshotCreator;
+import org.eclipse.che.ide.actions.WorkspaceSnapshotNotifier;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
@@ -61,7 +61,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Matchers;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -113,7 +112,7 @@ public class WorkspaceEventsHandlerTest {
     @Mock
     private Provider<DefaultWorkspaceComponent> wsComponentProvider;
     @Mock
-    private WorkspaceSnapshotCreator            snapshotCreator;
+    private WorkspaceSnapshotNotifier           snapshotCreator;
     @Mock
     private WorkspaceServiceClient              workspaceServiceClient;
     @Mock
