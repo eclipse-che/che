@@ -156,7 +156,7 @@ public abstract class ServerEvaluationStrategy {
      * @return {@code ServerConfImpl}, obtained from {@code serverConfMap} if possible,
      * or from {@code labels} if there is no entry in {@code serverConfMap}.
      */
-    private ServerConfImpl getServerConfImpl(String portProtocol,
+    protected ServerConfImpl getServerConfImpl(String portProtocol,
                                              Map<String, String> labels,
                                              Map<String, ServerConfImpl> serverConfMap) {
         // Label can be specified without protocol -- e.g. 4401 refers to 4401/tcp
