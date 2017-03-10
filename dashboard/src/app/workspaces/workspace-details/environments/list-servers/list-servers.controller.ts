@@ -60,7 +60,7 @@ export class ListServersController {
   buildServersList(): void {
     this.serversList = this.lodash.map(this.servers, (server: IEnvironmentManagerMachineServer, reference: string) => {
       let serverItem: IServerListItem = angular.extend({}, {reference: reference}, server);
-      serverItem.protocol = serverItem.protocol ? serverItem.protocol : 'http';
+      serverItem.protocol = serverItem.protocol ? serverItem.protocol : '-';
       return serverItem;
     });
   }
