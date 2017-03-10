@@ -514,7 +514,7 @@ class JGitConnection implements GitConnection {
                 }
             });
 
-            executeRemoteCommand(remoteUri, cloneCommand, params.getUsername(), params.getPassword());
+            ((Git)executeRemoteCommand(remoteUri, cloneCommand, params.getUsername(), params.getPassword())).close();
 
             StoredConfig repositoryConfig = getRepository().getConfig();
             GitUser gitUser = getUser();
