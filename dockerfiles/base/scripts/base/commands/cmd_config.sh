@@ -201,3 +201,11 @@ config_directory_is_empty() {
     return 0
   fi
 }
+
+skip_config() {
+  if [ "${CHE_SKIP_CONFIG}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
