@@ -19,10 +19,6 @@
     <ui:style>
         @eval textFieldBorderColor org.eclipse.che.ide.api.theme.Style.theme.toolButtonActiveBorder();
 
-        .main-panel {
-            width: literal("calc(100% - 40px)");
-        }
-
         .editor {
             border: textFieldBorderColor;
         }
@@ -39,7 +35,7 @@
             font-size: 11px;
         }
     </ui:style>
-    <g:DockLayoutPanel ui:field="mainPanel" addStyleNames="{style.main-panel}">
+    <g:DockLayoutPanel ui:field="mainPanel" width="700px">
         <g:north size="30">
             <g:FlowPanel>
                 <g:Label ui:field="title" addStyleNames="{resources.editorCss.sectionLabel} {style.title}"/>

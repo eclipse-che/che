@@ -14,7 +14,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
-    <g:FlowPanel width="500px">
+    <g:FlowPanel width="700px">
         <g:TextBox ui:field="commandName" width="98%"/>
     </g:FlowPanel>
 </ui:UiBinder>
