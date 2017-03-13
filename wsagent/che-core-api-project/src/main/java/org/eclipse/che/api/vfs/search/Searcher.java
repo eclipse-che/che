@@ -14,6 +14,9 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.vfs.VirtualFile;
 import org.eclipse.che.api.vfs.VirtualFileFilter;
 
+/**
+ * @deprecated VFS components are now considered deprecated and will be replaced by standard JDK routines.
+ */
 @Deprecated
 public interface Searcher {
     /**
