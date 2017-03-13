@@ -50,4 +50,22 @@ public interface IdeActions {
     String GROUP_LEFT_STATUS_PANEL              = "leftStatusPanelGroup";
     String GROUP_RIGHT_STATUS_PANEL             = "rightStatusPanelGroup";
 
+    String NAVIGATE_TO_FILE                     = "navigateToFile";
+    String FULL_TEXT_SEARCH                     = "fullTextSearch";
+    String FIND_ACTION                          = "findActionAction";
+    String FORMAT                               = "format";
+    String COPY                                 = "copy";
+    String CUT                                  = "cut";
+    String PASTE                                = "paste";
+    String SWITCH_LEFT_TAB                      = "switchLeftTab";
+    String SWITCH_RIGHT_TAB                     = "switchRightTab";
+    String OPEN_RECENT_FILES                    = "openRecentFiles";
+    String DELETE_ITEM                          = "deleteItem";
+    String NEW_FILE                             = "newFile";
+    String CREATE_PROJECT                       = "createProject";
+    String IMPORT_PROJECT                       = "importProject";
+    String CLOSE_ACTIVE_EDITOR                  = "closeActiveEditor";
+    String SIGNATURE_HELP                       = "signatureHelp";
+    String RENAME                               = "renameResource";
+    String SHOW_REFERENCE                       = "showReference";
 }

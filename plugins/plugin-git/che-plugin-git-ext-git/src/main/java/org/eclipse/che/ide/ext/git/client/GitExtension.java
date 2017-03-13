@@ -56,6 +56,7 @@ public class GitExtension {
     public static final String REPOSITORY_GROUP_MAIN_MENU = "GitRepositoryGroup";
     public static final String COMMAND_GROUP_MAIN_MENU    = "GitCommandGroup";
     public static final String HISTORY_GROUP_MAIN_MENU    = "GitHistoryGroup";
+    public static final String GIT_COMPARE_WITH_LATEST    = "gitCompareWithLatest";
 
     @Inject
     public GitExtension(GitResources resources,
@@ -173,6 +174,6 @@ public class GitExtension {
         editorContextMenuGroup.addSeparator();
         editorContextMenuGroup.add(gitContextMenuGroup);
 
-        keyBinding.getGlobal().addKey(new KeyBuilder().action().alt().charCode('d').build(), "gitCompareWithLatest");
+        keyBinding.getGlobal().addKey(new KeyBuilder().action().alt().charCode('d').build(), GIT_COMPARE_WITH_LATEST);
     }
 }

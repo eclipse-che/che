@@ -45,6 +45,13 @@ cmd_version() {
     local VERSION_LIST_JSON=$(curl -s https://hub.docker.com/v2/repositories/${CHE_IMAGE_NAME}/tags/)
     local NUMBER_OF_VERSIONS=$(echo $VERSION_LIST_JSON | jq '.count')
 
+    if [[ "${NUMBER_OF_VERSIONS}" = "" ]] || [[ "${NUMBER_OF_VERSIONS}" = "null" ]]; then
+      warning "Unable to retrieve version list from public Docker Hub for image named ${CHE_IMAGE_NAME}."
+      warning "Diagnose with 'docker run -it appropriate/curl -s https://hub.docker.com/v2/repositories/${CHE_IMAGE_NAME}/tags/'."
+      warning "Use '--offline' to ignore this."
+      return 2
+    fi
+
     DISPLAY_LIMIT=10
     if [ $DISPLAY_LIMIT -gt $NUMBER_OF_VERSIONS ]; then 
       DISPLAY_LIMIT=$NUMBER_OF_VERSIONS
