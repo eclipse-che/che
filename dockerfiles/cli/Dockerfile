@@ -9,7 +9,7 @@
 #
 # use:
 #    docker run -v $(pwd):/che eclipse/che-cli [command]
-FROM eclipse/che-base:nightly
+FROM ${BUILD_ORGANIZATION}/${BUILD_PREFIX}-base:${BUILD_TAG}
 
 COPY scripts /scripts/
 COPY version /version/

@@ -5,7 +5,6 @@
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
 
-IMAGE_NAME="eclipse/che-lib"
 base_dir=$(cd "$(dirname "$0")"; pwd)
 . "${base_dir}"/../build.include
 
@@ -52,15 +51,15 @@ native_build() {
   ./node_modules/typescript/bin/tsc --project .
 }
 
-init "$@"
+init --name:lib "$@"
 generate_dto
 
 DIR=$(cd "$(dirname "$0")"; pwd)
-echo "Building Docker Image ${IMAGE_NAME} from $DIR directory with tag $TAG"
-cd "${DIR}" && docker build -t ${IMAGE_NAME}:${TAG} .
+echo "Building Docker Image ${IMAGE_NAME} from $DIR directory"
+cd "${DIR}" && docker build -t ${IMAGE_NAME} .
 if [ $? -eq 0 ]; then
-  printf "${GREEN}Script run successfully: ${BLUE}${IMAGE_NAME}:${TAG}${NC}\n"
+  printf "${GREEN}Script run successfully: ${BLUE}${IMAGE_NAME}${NC}\n"
 else
-  printf "${RED}Failure when building docker image ${IMAGE_NAME}:${TAG}${NC}\n"
+  printf "${RED}Failure when building docker image ${IMAGE_NAME}${NC}\n"
   exit 1
 fi

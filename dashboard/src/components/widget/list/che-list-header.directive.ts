@@ -43,13 +43,15 @@ export class CheListHeader {
       importButtonTitle: '@?cheImportButtonTitle',
       onImport: '&?cheOnImport',
       deleteButtonTitle: '@?cheDeleteButtonTitle',
+      deleteButtonDisable: '=?cheDeleteButtonDisable',
+      deleteButtonDisableMessage: '@?cheDeleteButtonDisableMessage',
       onDelete: '&?cheOnDelete',
       filterValues: '=?cheFilterValues',
       onFilterChanged: '=?cheOnFilterChanged',
       hideAdd: '=?cheHideAdd',
       hideDelete: '=?cheHideDelete',
       hideSearch: '=?cheHideSearch',
-      hideHeader:'=?cheHideHeader',
+      hideHeader: '=?cheHideHeader',
       hideFilter: '=?cheHideFilter'
     };
 

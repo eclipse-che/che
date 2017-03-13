@@ -30,13 +30,12 @@ import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceRuntimeDto;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.actions.WorkspaceSnapshotCreator;
+import org.eclipse.che.ide.actions.WorkspaceSnapshotNotifier;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.dialogs.MessageDialog;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
-import org.eclipse.che.ide.api.machine.MachineManager;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
@@ -62,7 +61,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Matchers;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -110,13 +108,11 @@ public class WorkspaceEventsHandlerTest {
     @Mock
     private DtoUnmarshallerFactory              dtoUnmarshallerFactory;
     @Mock
-    private Provider<MachineManager>            machineManagerProvider;
-    @Mock
     private MessageLoader                       snapshotLoader;
     @Mock
     private Provider<DefaultWorkspaceComponent> wsComponentProvider;
     @Mock
-    private WorkspaceSnapshotCreator            snapshotCreator;
+    private WorkspaceSnapshotNotifier           snapshotCreator;
     @Mock
     private WorkspaceServiceClient              workspaceServiceClient;
     @Mock
@@ -174,7 +170,6 @@ public class WorkspaceEventsHandlerTest {
                                                             dtoUnmarshallerFactory,
                                                             notificationManager,
                                                             messageBusProvider,
-                                                            machineManagerProvider,
                                                             snapshotCreator,
                                                             workspaceServiceClient,
                                                             startWorkspaceNotification,
@@ -253,7 +248,6 @@ public class WorkspaceEventsHandlerTest {
 
         verify(workspaceServiceClient).getWorkspace(WORKSPACE_ID);
         verify(workspaceComponent).setCurrentWorkspace(workspace);
-        verify(machineManagerProvider).get();
 
         verify(loader).show(eq(LoaderPresenter.Phase.STARTING_WORKSPACE_RUNTIME));
 

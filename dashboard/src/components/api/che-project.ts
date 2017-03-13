@@ -99,10 +99,10 @@ export class CheProject {
 
   /**
    * Create a batch of projects.
-   * @param projects{Array<che.IProject>} the list of projects to be created
+   * @param projects{Array<che.IProjectTemplate>} the list of projects to be created
    * @returns {ng.IPromise<any>}
    */
-  createProjects(projects: Array<che.IProject>): ng.IPromise<any> {
+  createProjects(projects: Array<che.IProjectTemplate>): ng.IPromise<any> {
     let promise = this.remoteProjectsAPI.batchCreate(projects).$promise;
     return promise;
   }
