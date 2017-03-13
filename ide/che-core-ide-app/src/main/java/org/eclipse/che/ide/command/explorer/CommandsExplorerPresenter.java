@@ -106,7 +106,6 @@ public class CommandsExplorerPresenter extends BasePresenter implements Commands
     @Override
     public void start(Callback<Component, Exception> callback) {
         workspaceAgent.openPart(this, NAVIGATION, Constraints.LAST);
-        workspaceAgent.setActivePart(this);
 
         commandManager.addCommandLoadedListener(this);
         commandManager.addCommandChangedListener(this);
