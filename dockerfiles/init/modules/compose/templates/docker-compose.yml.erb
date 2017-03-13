@@ -24,6 +24,8 @@ che:
     - '/etc/passwd:/etc/passwd:ro'
 <% end -%>
   ports:
+    - '32001:32001'
+    - '32101:32101'
     - '<%= scope.lookupvar('che::che_port') -%>:<%= scope.lookupvar('che::che_port') -%>'
 <% if scope.lookupvar('che::che_env') == 'development' -%>
     - '<%= scope.lookupvar('che::che_debug_port') -%>:<%= scope.lookupvar('che::che_debug_port') -%>'
@@ -33,6 +35,6 @@ che:
 <% if scope.lookupvar('che::che_user') != 'root' -%>
   user: <%= scope.lookupvar('che::che_user') -%>
 <% end -%>
-<% if ! @dns_resolvers.empty? -%>
-<%= "  dns:" + "\n" + @dns_resolvers.split(",").map { |val| "    - #{val}" }.join("\n") %>
+<% if ! @che_dns_resolvers.empty? -%>
+<%= "  dns:" + "\n" + @che_dns_resolvers.split(",").map { |val| "    - #{val}" }.join("\n") %>
 <% end -%>
