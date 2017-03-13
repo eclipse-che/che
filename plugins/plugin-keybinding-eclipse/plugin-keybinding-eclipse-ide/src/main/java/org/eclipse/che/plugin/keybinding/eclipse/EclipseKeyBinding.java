@@ -13,6 +13,7 @@ package org.eclipse.che.plugin.keybinding.eclipse;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.keybinding.KeyBuilder;
+import org.eclipse.che.ide.keybinding.KeyBindingManager;
 import org.eclipse.che.ide.util.browser.UserAgent;
 import org.eclipse.che.ide.util.input.CharCodeWithModifiers;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
@@ -39,6 +40,7 @@ import static org.eclipse.che.ide.ext.java.client.JavaExtension.ORGANIZE_IMPORTS
 import static org.eclipse.che.ide.ext.java.client.JavaExtension.PARAMETERS_INFO;
 import static org.eclipse.che.ide.ext.java.client.JavaExtension.QUICK_FIX;
 import static org.eclipse.che.ide.ext.java.client.JavaExtension.SHOW_QUICK_DOC;
+import static org.eclipse.che.ide.keybinding.KeyBindingManager.SCHEME_ECLIPSE_ID;
 import static org.eclipse.che.plugin.debugger.ide.DebuggerExtension.DEBUG_ID;
 import static org.eclipse.che.plugin.debugger.ide.DebuggerExtension.DISCONNECT_DEBUG_ID;
 import static org.eclipse.che.plugin.debugger.ide.DebuggerExtension.EDIT_DEBUG_CONF_ID;
@@ -111,6 +113,6 @@ public class EclipseKeyBinding {
         keys.put(GIT_COMPARE_WITH_LATEST, new KeyBuilder().action().alt().charCode('d').build());
 
         // Register keys
-        agent.getEclipse().addKeys(keys);
+        agent.getScheme(SCHEME_ECLIPSE_ID).addKeys(keys);
     }
 }
