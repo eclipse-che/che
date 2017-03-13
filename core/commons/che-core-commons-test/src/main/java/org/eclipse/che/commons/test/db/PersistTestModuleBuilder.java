@@ -10,17 +10,18 @@
  *******************************************************************************/
 package org.eclipse.che.commons.test.db;
 
+import com.google.common.io.Resources;
 import com.google.inject.AbstractModule;
 import com.google.inject.Module;
 import com.google.inject.persist.jpa.JpaPersistModule;
 
-import org.eclipse.che.commons.xml.NewElement;
-import org.eclipse.che.commons.xml.XMLTree;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.eclipse.persistence.exceptions.ExceptionHandler;
+import org.stringtemplate.v4.ST;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -29,7 +30,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static org.eclipse.che.commons.xml.NewElement.createElement;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Helps to build persistence.xml for test purposes.
@@ -67,6 +68,8 @@ import static org.eclipse.che.commons.xml.NewElement.createElement;
  * @author Yevhenii Voevodin
  */
 public class PersistTestModuleBuilder {
+
+    private static final String PERSISTENCE_XML_TEMPLATE_RESOURCE_PATH = "org/eclipse/che/commons/test/db/persistence.xml.template";
 
     private final Map<String, String> properties   = new LinkedHashMap<>();
     private final Set<String>         entityFqnSet = new LinkedHashSet<>();
@@ -178,6 +181,29 @@ public class PersistTestModuleBuilder {
     }
 
     /**
+     * Creates or overrides META-INF/persistence.xml.
+     */
+    public Path savePersistenceXml() throws IOException, URISyntaxException {
+        Path persistenceXmlPath = getOrCreateMetaInf().resolve("persistence.xml");
+        URL url = Thread.currentThread().getContextClassLoader().getResource(PERSISTENCE_XML_TEMPLATE_RESOURCE_PATH);
+        if (url == null) {
+            throw new IOException("Resource '" + PERSISTENCE_XML_TEMPLATE_RESOURCE_PATH + "' doesn't exist");
+        }
+        ST st = new ST(Resources.toString(url, UTF_8), '$', '$');
+        if (persistenceUnit != null) {
+            st.add("unit", persistenceUnit);
+        }
+        if (!entityFqnSet.isEmpty()) {
+            st.add("entity_classes", entityFqnSet);
+        }
+        if (!properties.isEmpty()) {
+            st.add("properties", properties);
+        }
+        Files.write(persistenceXmlPath, st.render().getBytes(UTF_8));
+        return persistenceXmlPath;
+    }
+
+    /**
      * Creates persistence.xml and builds module for testing.
      */
     public Module build() {
@@ -187,14 +213,12 @@ public class PersistTestModuleBuilder {
     private class PersistTestModule extends AbstractModule {
         @Override
         protected void configure() {
-            JpaPersistModule persistModule = new JpaPersistModule(persistenceUnit);
             try {
-                Path persistenceXmlPath = getOrCreateMetaInf().resolve("persistence.xml");
-                createPersistenceXmlTree().writeTo(persistenceXmlPath);
+                savePersistenceXml();
             } catch (Exception x) {
                 throw new RuntimeException(x.getMessage());
             }
-            install(persistModule);
+            install(new JpaPersistModule(persistenceUnit));
         }
     }
 
@@ -203,45 +227,8 @@ public class PersistTestModuleBuilder {
         Path metaInf = root.resolve("META-INF");
         if (!Files.exists(metaInf)) {
             Files.createDirectory(metaInf);
+            Files.createDirectory(metaInf);
         }
         return metaInf;
-    }
-
-    private XMLTree createPersistenceXmlTree() {
-        NewElement unit = persistenceUnit(persistenceUnit, "RESOURCE_LOCAL");
-
-        for (String entityClassFqn : entityFqnSet) {
-            unit.appendChild(createElement("class", entityClassFqn));
-        }
-
-        if (!properties.isEmpty()) {
-            NewElement propsEl = createElement("properties");
-            for (Map.Entry<String, String> entry : properties.entrySet()) {
-                NewElement propertyEl = createElement("property");
-                propertyEl.setAttribute("name", entry.getKey());
-                propertyEl.setAttribute("value", entry.getValue());
-                propsEl.appendChild(propertyEl);
-            }
-            unit.appendChild(propsEl);
-        }
-
-        XMLTree tree = XMLTree.from(persistenceXmlInitialContent());
-        tree.getRoot().appendChild(unit);
-        return tree;
-    }
-
-    private NewElement persistenceUnit(String name, String transactionType) {
-        NewElement unit = createElement("persistence-unit");
-        unit.setAttribute("name", name);
-        unit.setAttribute("transaction-type", transactionType);
-        unit.appendChild(createElement("provider", "org.eclipse.persistence.jpa.PersistenceProvider"));
-        return unit;
-    }
-
-    private String persistenceXmlInitialContent() {
-        return "<persistence xmlns=\"http://java.sun.com/xml/ns/persistence\"\n" +
-               "             xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
-               "             xsi:schemaLocation=\"http://java.sun.com/xml/ns/persistence persistence_1_0.xsd\" version=\"1.0\">\n" +
-               "</persistence>\n";
     }
 }
