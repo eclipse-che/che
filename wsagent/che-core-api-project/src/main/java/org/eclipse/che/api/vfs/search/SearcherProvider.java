@@ -18,6 +18,7 @@ import org.eclipse.che.api.vfs.VirtualFileSystem;
  *
  * @author andrew00x
  */
+@Deprecated
 public interface SearcherProvider {
     /**
      * Get Searcher for specified VirtualFileSystem.

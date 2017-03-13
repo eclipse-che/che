@@ -19,6 +19,7 @@ import java.io.IOException;
  *
  * @author andrew00x
  */
+@Deprecated
 public interface DataSerializer<T> {
     /**
      * Writes <code>value</code> to <code>output</code>.

@@ -19,6 +19,7 @@ import org.eclipse.che.api.vfs.search.SearcherProvider;
  *
  * @author andrew00x
  */
+@Deprecated
 public interface VirtualFileSystem {
     /**
      * Get root folder of virtual file system. Any files in higher level than root are not accessible through virtual file system API.

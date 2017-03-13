@@ -18,6 +18,7 @@ import org.eclipse.che.api.core.ServerException;
  *
  * @author andrew00x
  */
+@Deprecated
 public interface VirtualFileVisitor {
     /**
      * This method is called when the VirtualFileVisitor is passed to the {@link VirtualFile#accept(VirtualFileVisitor) accept} method of a

@@ -12,6 +12,7 @@ package org.eclipse.che.api.vfs;
 
 import org.eclipse.che.api.core.ServerException;
 
+@Deprecated
 public interface VirtualFileSystemProvider {
     /**
      * Get VirtualFileSystem.

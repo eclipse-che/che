@@ -15,6 +15,7 @@ package org.eclipse.che.api.vfs;
  *
  * @author andrew00x
  */
+@Deprecated
 public interface VirtualFileFilter {
     /** Tests whether specified file should be included in result. */
     boolean accept(VirtualFile file);

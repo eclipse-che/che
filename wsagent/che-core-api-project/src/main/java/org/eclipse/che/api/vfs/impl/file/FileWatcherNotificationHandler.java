@@ -14,6 +14,7 @@ import org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType;
 
 import java.io.File;
 
+@Deprecated
 public interface FileWatcherNotificationHandler {
     void handleFileWatcherEvent(FileWatcherEventType eventType, File watchRoot, String subPath, boolean isDir);
 

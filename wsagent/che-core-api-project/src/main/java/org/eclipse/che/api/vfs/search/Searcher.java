@@ -14,6 +14,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.vfs.VirtualFile;
 import org.eclipse.che.api.vfs.VirtualFileFilter;
 
+@Deprecated
 public interface Searcher {
     /**
      * Return paths of matched items on virtual filesystem.

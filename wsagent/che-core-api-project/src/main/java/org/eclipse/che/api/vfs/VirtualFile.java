@@ -26,6 +26,7 @@ import java.util.Map;
  *
  * @author andrew00x
  */
+@Deprecated
 public interface VirtualFile extends Comparable<VirtualFile> {
     /**
      * Gets name.
