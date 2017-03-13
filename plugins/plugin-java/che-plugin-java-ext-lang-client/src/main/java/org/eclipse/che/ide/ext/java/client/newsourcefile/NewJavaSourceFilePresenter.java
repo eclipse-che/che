@@ -18,6 +18,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.resources.reveal.RevealResourceEvent;
@@ -46,11 +47,13 @@ public class NewJavaSourceFilePresenter implements NewJavaSourceFileView.ActionD
 
     private final NewJavaSourceFileView    view;
     private final List<JavaSourceFileType> sourceFileTypes;
-    private final EventBus                 eventBus;
+    private final JavaLocalizationConstant locale;
+    private final EventBus eventBus;
     private       Container                parent;
 
     @Inject
-    public NewJavaSourceFilePresenter(NewJavaSourceFileView view, EventBus eventBus) {
+    public NewJavaSourceFilePresenter(NewJavaSourceFileView view, JavaLocalizationConstant locale, EventBus eventBus) {
+        this.locale = locale;
         this.eventBus = eventBus;
         sourceFileTypes = Arrays.asList(CLASS, INTERFACE, ENUM, ANNOTATION);
         this.view = view;
@@ -73,7 +76,7 @@ public class NewJavaSourceFilePresenter implements NewJavaSourceFileView.ActionD
         try {
             final String fileNameWithExtension = getFileNameWithExtension(view.getName());
             if (!fileNameWithExtension.trim().isEmpty()) {
-                checkCompilationUnitName(fileNameWithExtension);
+                checkCompilationUnitName(view.getName());
             }
             final String packageName = getPackageFragment(view.getName());
             if (!packageName.trim().isEmpty()) {
@@ -81,7 +84,7 @@ public class NewJavaSourceFilePresenter implements NewJavaSourceFileView.ActionD
             }
             view.hideErrorHint();
         } catch (IllegalStateException e) {
-            view.showErrorHint(e.getMessage());
+            view.showErrorHint(locale.actionNewClassNameIsInvalid());
         }
     }
 
