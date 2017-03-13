@@ -7,7 +7,7 @@ class che {
     mode    => "644",
   }
 
-  # creating oauth.properties
+  # creating che.properties
   file { "/opt/che/config/che.properties":
     ensure  => "present",
     content => template("che/che.properties.erb"),
