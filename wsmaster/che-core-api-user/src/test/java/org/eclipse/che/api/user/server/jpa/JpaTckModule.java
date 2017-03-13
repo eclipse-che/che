@@ -44,8 +44,7 @@ public class JpaTckModule extends TckModule {
 
     @Override
     protected void configure() {
-        H2DBTestServer server = new H2DBTestServer();
-        server.start();
+        H2DBTestServer server = H2DBTestServer.startDefault();
         install(new PersistTestModuleBuilder().setDriver(Driver.class)
                                               .runningOn(server)
                                               .addEntityClasses(UserImpl.class,

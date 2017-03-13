@@ -100,21 +100,21 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
-                <artifactId>exec-agent</artifactId>
+                <artifactId>go-agents</artifactId>
                 <version>${project.version}</version>
                 <type>tar.gz</type>
                 <classifier>linux_amd64</classifier>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
-                <artifactId>exec-agent</artifactId>
+                <artifactId>go-agents</artifactId>
                 <version>${project.version}</version>
                 <type>tar.gz</type>
                 <classifier>linux_arm7</classifier>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
-                <artifactId>exec-agent</artifactId>
+                <artifactId>go-agents</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -701,6 +701,11 @@
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-json-server</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-keybinding-eclipse-ide</artifactId>
                 <version>${che.version}</version>
             </dependency>
             <dependency>

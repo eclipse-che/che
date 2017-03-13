@@ -65,6 +65,13 @@ public class SchemeImpl implements Scheme {
         actionId2CharCode.put(actionId, key);
     }
 
+    @Override
+    public void addKeys(Map<String, CharCodeWithModifiers> keys) {
+        for (Map.Entry<String, CharCodeWithModifiers> entry : keys.entrySet()) {
+            addKey(entry.getValue(), entry.getKey());
+        }
+    }
+
     /** {@inheritDoc} */
     @Override
     public void removeKey(@NotNull CharCodeWithModifiers key, @NotNull String actionId) {

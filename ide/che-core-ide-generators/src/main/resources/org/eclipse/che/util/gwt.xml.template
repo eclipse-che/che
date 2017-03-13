@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module rename-to='_app'>
+$config.inherits: { module |     <inherits name="$module$"/>
+}$
+    <stylesheet src="$config.stylesheet$"/>
+    <entry-point class="$config.entryPoint$"/>
+$if(config.loggingEnabled)$
+    <inherits name="com.google.gwt.logging.Logging"/>
+    <!-- Disable logging to the server -->
+    <set-property name="gwt.logging.simpleRemoteHandler" value="DISABLED" />
+    <!-- Enable logging to the browser's console in SuperDev mode -->
+    <set-property name="gwt.logging.developmentModeHandler" value="ENABLED" />
+    <set-property name="gwt.logging.consoleHandler" value="ENABLED"/>
+$endif$
+</module>
