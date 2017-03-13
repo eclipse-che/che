@@ -10,12 +10,10 @@
 #
 
 # Name of the image to use to run the tests
-IMAGE_NAME="eclipse/che-bats"
-
 BASE_DIR=$(cd "$(dirname "$0")"/..; pwd)
 . $BASE_DIR/build.include
 
-init "$@"
+init --name:bats "$@"
 
 echo "Launching unit tests of $BASE_DIR/ip with docker image ${IMAGE_NAME}:${TAG}"
 
@@ -30,4 +28,4 @@ else
 fi
 
 set -x
-docker run --rm ${DOCKER_RUN_OPTIONS} -v /var/run/docker.sock:/var/run/docker.sock -v $BASE_DIR/ip:/ip $IMAGE_NAME:${TAG} bats ${BATS_OPTIONS} /ip/tests/library_tests.bats
+docker run --rm ${DOCKER_RUN_OPTIONS} -v /var/run/docker.sock:/var/run/docker.sock -v $BASE_DIR/ip:/ip $IMAGE_NAME bats ${BATS_OPTIONS} /ip/tests/library_tests.bats

@@ -25,6 +25,7 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.environment.server.exception.EnvironmentException;
+import org.eclipse.che.api.machine.server.exception.SnapshotException;
 import org.eclipse.che.api.machine.server.exception.SourceNotFoundException;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
@@ -78,6 +79,9 @@ public class WorkspaceManager {
     public static final String CREATED_ATTRIBUTE_NAME = "created";
     /** This attribute describes time when workspace was last updated or started/stopped/recovered. */
     public static final String UPDATED_ATTRIBUTE_NAME = "updated";
+
+    /** Describes time when workspace was snapshotted. */
+    public static final String SNAPSHOTTED_AT_ATTRIBUTE_NAME = "snapshotted_at";
 
     private final WorkspaceDao        workspaceDao;
     private final SnapshotDao         snapshotDao;
@@ -201,6 +205,7 @@ public class WorkspaceManager {
         requireNonNull(key, "Required non-null workspace key");
         WorkspaceImpl workspace = getByKey(key);
         runtimes.injectRuntime(workspace);
+        addExtraAttributes(workspace);
         return workspace;
     }
 
@@ -225,6 +230,7 @@ public class WorkspaceManager {
         requireNonNull(namespace, "Required non-null workspace owner");
         WorkspaceImpl workspace = workspaceDao.get(name, namespace);
         runtimes.injectRuntime(workspace);
+        addExtraAttributes(workspace);
         return workspace;
     }
 
@@ -265,11 +271,7 @@ public class WorkspaceManager {
     public List<WorkspaceImpl> getWorkspaces(String user, boolean includeRuntimes) throws ServerException {
         requireNonNull(user, "Required non-null user id");
         final List<WorkspaceImpl> workspaces = workspaceDao.getWorkspaces(user);
-        if (includeRuntimes) {
-            injectRuntimes(workspaces);
-        } else {
-            injectStatuses(workspaces);
-        }
+        injectRuntimeAndAttributes(workspaces, !includeRuntimes);
         return workspaces;
     }
 
@@ -310,11 +312,7 @@ public class WorkspaceManager {
     public List<WorkspaceImpl> getByNamespace(String namespace, boolean includeRuntimes) throws ServerException {
         requireNonNull(namespace, "Required non-null namespace");
         final List<WorkspaceImpl> workspaces = workspaceDao.getByNamespace(namespace);
-        if (includeRuntimes) {
-            injectRuntimes(workspaces);
-        } else {
-            injectStatuses(workspaces);
-        }
+        injectRuntimeAndAttributes(workspaces, !includeRuntimes);
         return workspaces;
     }
 
@@ -416,6 +414,7 @@ public class WorkspaceManager {
         final boolean autoRestore = restoreAttr == null ? defaultAutoRestore : parseBoolean(restoreAttr);
         startAsync(workspace, envName, firstNonNull(restore, autoRestore) && !getSnapshot(workspaceId).isEmpty());
         runtimes.injectRuntime(workspace);
+        addExtraAttributes(workspace);
         return workspace;
     }
 
@@ -924,16 +923,27 @@ public class WorkspaceManager {
         return workspaceDao.get(wsName, namespace);
     }
 
-
-    private void injectRuntimes(List<? extends WorkspaceImpl> workspaces) {
-        for (WorkspaceImpl workspace : workspaces) {
-            runtimes.injectRuntime(workspace);
+    /** Adds runtime data (whole or status only) and extra attributes to each of the given workspaces. */
+    private void injectRuntimeAndAttributes(List<WorkspaceImpl> workspaces, boolean statusOnly) throws SnapshotException {
+        if (statusOnly) {
+            for (WorkspaceImpl workspace : workspaces) {
+                workspace.setStatus(runtimes.getStatus(workspace.getId()));
+                addExtraAttributes(workspace);
+            }
+        } else {
+            for (WorkspaceImpl workspace : workspaces) {
+                runtimes.injectRuntime(workspace);
+                addExtraAttributes(workspace);
+            }
         }
     }
 
-    private void injectStatuses(List<? extends WorkspaceImpl> workspaces) {
-        for (WorkspaceImpl workspace : workspaces) {
-            workspace.setStatus(runtimes.getStatus(workspace.getId()));
+    /** Adds attributes that are not originally stored in workspace but should be published. */
+    private void addExtraAttributes(WorkspaceImpl workspace) throws SnapshotException {
+        // snapshotted_at
+        List<SnapshotImpl> snapshots = snapshotDao.findSnapshots(workspace.getId());
+        if (!snapshots.isEmpty()) {
+            workspace.getAttributes().put(SNAPSHOTTED_AT_ATTRIBUTE_NAME, Long.toString(snapshots.get(0).getCreationDate()));
         }
     }
 }

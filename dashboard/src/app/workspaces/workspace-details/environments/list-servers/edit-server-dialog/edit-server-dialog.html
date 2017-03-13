@@ -56,8 +56,10 @@
                    ng-model="editServerDialogController.protocol"
                    type="type"
                    aria-label="Server protocol"
-                   ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
-          <div ng-message="pattern">The reference should not contain special characters like space, dollar, etc.</div>
+                   ng-pattern="/^[A-Za-z0-9_\-\.]+$/"
+                   required>
+          <div ng-message="required">A protocol is required.</div>
+          <div ng-message="pattern">The protocol should not contain special characters like space, dollar, etc.</div>
         </che-input>
       </div>
     </che-label-container>

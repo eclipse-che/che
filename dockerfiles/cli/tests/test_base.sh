@@ -8,7 +8,7 @@
 # Contributors:
 #   Marian Labuda - Initial Implementation
 
-export CLI_IMAGE="eclipse/che-cli:"$CLI_IMAGE_TAG
+#export CLI_IMAGE=$IMAGE_NAME
 source /dockerfiles/base/scripts/base/*.sh
 export SCRIPTS_DIR="${BATS_BASE_DIR}"/base/scripts/base
 export TESTS_DIR="${BATS_BASE_DIR}"/cli/tests

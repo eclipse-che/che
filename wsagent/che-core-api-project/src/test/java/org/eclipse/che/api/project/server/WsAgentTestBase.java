@@ -119,7 +119,7 @@ public class WsAgentTestBase {
         TestWorkspaceHolder wsHolder = new  TestWorkspaceHolder();
 
 
-        pm = new ProjectManager(vfsProvider, eventService, projectTypeRegistry, projectRegistry, projectHandlerRegistry,
+        pm = new ProjectManager(vfsProvider, projectTypeRegistry, projectRegistry, projectHandlerRegistry,
                                 importerRegistry, fileWatcherNotificationHandler, fileTreeWatcher, wsHolder, fileWatcherManager);
         pm.initWatcher();
     }

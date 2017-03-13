@@ -15,7 +15,6 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.DebugConfiguration;
 import org.eclipse.che.ide.api.debug.DebugConfigurationPage;
-import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.machine.RecipeServiceClient;
 import org.eclipse.che.ide.extension.machine.client.command.macros.CurrentProjectPathMacro;
 import org.junit.Before;
@@ -55,8 +54,6 @@ public class NodeJsDebuggerConfigurationPagePresenterTest {
     private AppContext                          appContext;
     @Mock
     private RecipeServiceClient                 recipeServiceClient;
-    @Mock
-    private MachineServiceClient                machineServiceClient;
 
     @InjectMocks
     private NodeJsDebuggerConfigurationPagePresenter pagePresenter;

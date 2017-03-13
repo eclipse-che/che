@@ -158,17 +158,20 @@ declare namespace _che {
     url: string;
   }
 
-  export interface IProject {
+  export interface IProjectSource {
+    location: string;
+    parameters?: {
+      [paramName: string]: string
+    };
+    type?: string;
+  }
+
+  export interface IProjectTemplate {
     name: string;
     displayName?: string;
     description: string;
-    source: {
-      location: string;
-      parameters?: {
-        [paramName: string]: string
-      };
-      type?: string;
-    };
+    source?: IProjectSource;
+    path?: string;
     commands?: Array<any>;
     projectType?: string;
     type?: string;
@@ -177,6 +180,11 @@ declare namespace _che {
     options?: Array<any>;
     workspaceId?: string;
     workspaceName?: string;
+    projects?: IProject[];
+  }
+
+  export interface IProject {
+    source: IProjectSource;
   }
 
   export interface IWorkspaceProjects {
@@ -184,22 +192,9 @@ declare namespace _che {
   }
 
   export interface IImportProject {
-    source: {
-      type?: string;
-      location: string;
-      parameters?: {
-        [paramName: string]: string
-      };
-    };
-    project: {
-      name: string;
-      path?: string;
-      type?: string;
-      description: string;
-      commands?: Array<any>;
-      attributes?: any;
-      options?: Array<any>;
-    };
+    source: IProjectSource;
+    project?: IProjectTemplate;
+    projects?: IProjectTemplate[];
   }
 
   export interface IEditorOptions {

@@ -22,6 +22,7 @@ import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.WsAgentHealthStateDto;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * GWT Client for Workspace Service.
@@ -123,9 +124,8 @@ public interface WorkspaceServiceClient {
      *         if <code>false</code> workspace will not be restored from snapshot
      *         even if auto-restore is enabled and snapshot exists
      * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
-     * @see WorkspaceService#startById(String, String, Boolean, String)
      */
-    Promise<WorkspaceDto> startById(String id, String envName, boolean restore);
+    Promise<WorkspaceDto> startById(String id, String envName, Boolean restore);
 
     /**
      * Stops running workspace.
@@ -136,6 +136,17 @@ public interface WorkspaceServiceClient {
      * @see WorkspaceService#stop(String, Boolean)
      */
     Promise<Void> stop(String wsId);
+
+    /**
+     * Stops currently run runtime with ability to create snapshot.
+     *
+     * @param wsId
+     *         workspace ID
+     * @param createSnapshot
+     *         create snapshot during the stop operation
+     * @return a promise that will resolve when the workspace has been stopped, or rejects with an error
+     */
+    Promise<Void> stop(String wsId, boolean createSnapshot);
 
     /**
      * Get all commands from the specified workspace.
@@ -272,6 +283,7 @@ public interface WorkspaceServiceClient {
      * @return a promise that will provide a list of {@link SnapshotDto}s, or rejects with an error
      * @see WorkspaceService#getSnapshot(String)
      */
+    @Deprecated
     Promise<List<SnapshotDto>> getSnapshot(String workspaceId);
 
     /**
@@ -282,6 +294,7 @@ public interface WorkspaceServiceClient {
      * @return a promise that will resolve when the snapshot has been created, or rejects with an error
      * @see WorkspaceService#createSnapshot(String)
      */
+    @Deprecated
     Promise<Void> createSnapshot(String workspaceId);
 
     /**
@@ -293,5 +306,11 @@ public interface WorkspaceServiceClient {
      * @see WorkspaceService#checkAgentHealth(String)
      */
     Promise<WsAgentHealthStateDto> getWsAgentState(String workspaceId);
+
+    /**
+     * Get workspace related server configuration values defined in che.properties
+     * @see WorkspaceService#getSettings()
+     */
+    Promise<Map<String, String>> getSettings();
 
 }

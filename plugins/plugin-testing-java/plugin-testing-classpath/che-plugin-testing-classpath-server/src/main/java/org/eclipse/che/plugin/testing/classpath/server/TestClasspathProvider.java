@@ -22,8 +22,10 @@ public interface TestClasspathProvider {
     /**
      * Returns the project class loader for executing test cases.
      *
-     * @param projectPath
-     *            absolute path for the project location.
+     * @param projectAbsolutePath
+     *            absolute path for the project location on the disk.
+     * @param projectRelativePath
+     *            path for the project relative to the workspace.
      * @param updateClasspath
      *            calculate the classpath if true. otherwise return existing
      *            class loader.
@@ -31,7 +33,7 @@ public interface TestClasspathProvider {
      * @throws Exception
      *             when classloader creation failed.
      */
-    ClassLoader getClassLoader(String projectPath, boolean updateClasspath) throws Exception;
+    ClassLoader getClassLoader(String projectAbsolutePath, String projectRelativePath, boolean updateClasspath) throws Exception;
 
     /**
      * String representation of the project type.
