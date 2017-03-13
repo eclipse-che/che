@@ -108,7 +108,6 @@ public class CommandsExplorerPresenterTest {
         presenter.start(callback);
 
         verify(workspaceAgent).openPart(presenter, PartStackType.NAVIGATION, Constraints.LAST);
-        verify(workspaceAgent).setActivePart(presenter);
         verify(commandManager).addCommandChangedListener(presenter);
         verify(commandManager).addCommandLoadedListener(presenter);
         verify(callback).onSuccess(presenter);
