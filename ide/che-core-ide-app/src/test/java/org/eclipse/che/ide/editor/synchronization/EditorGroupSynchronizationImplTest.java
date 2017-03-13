@@ -110,6 +110,8 @@ public class EditorGroupSynchronizationImplTest {
 
     @Test
     public void shouldRemoveEditorFromGroup() {
+        when(activeEditor.isDirty()).thenReturn(true);
+
         editorGroupSynchronization.addEditor(activeEditor);
 
         editorGroupSynchronization.removeEditor(activeEditor);
