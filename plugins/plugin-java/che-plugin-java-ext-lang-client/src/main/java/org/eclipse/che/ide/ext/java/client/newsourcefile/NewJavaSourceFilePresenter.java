@@ -15,12 +15,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.resources.Container;
-import org.eclipse.che.ide.api.resources.File;
-import org.eclipse.che.ide.api.resources.Folder;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
 import org.eclipse.che.ide.resource.Path;
@@ -98,7 +94,7 @@ public class NewJavaSourceFilePresenter implements NewJavaSourceFileView.ActionD
         if (!packageFragment.isEmpty() && !isValidPackageName(packageFragment)) {
             return;
         }
-        if (isValidCompilationUnitName(fileNameWithExtension)) {
+        if (isValidCompilationUnitName(fileNameWithoutExtension)) {
             view.close();
 
             switch (view.getSelectedType()) {
@@ -188,25 +184,16 @@ public class NewJavaSourceFilePresenter implements NewJavaSourceFileView.ActionD
 
     private void createSourceFile(final String nameWithoutExtension, String packageFragment, final String content) {
         if (!isNullOrEmpty(packageFragment)) {
-            parent.newFolder(packageFragment.replace('.', '/')).then(new Operation<Folder>() {
-                @Override
-                public void apply(Folder pkg) throws OperationException {
-                    pkg.newFile(nameWithoutExtension + ".java", content).then(new Operation<File>() {
-                        @Override
-                        public void apply(File file) throws OperationException {
-                            eventBus.fireEvent(FileEvent.createOpenFileEvent(file));
-                            eventBus.fireEvent(new RevealResourceEvent(file));
-                        }
-                    });
-                }
-            });
-        } else {
-            parent.newFile(nameWithoutExtension + ".java", content).then(new Operation<File>() {
-                @Override
-                public void apply(File file) throws OperationException {
+            parent.newFolder(packageFragment.replace('.', '/')).then(pkg -> {
+                pkg.newFile(nameWithoutExtension + ".java", content).then(file -> {
                     eventBus.fireEvent(FileEvent.createOpenFileEvent(file));
                     eventBus.fireEvent(new RevealResourceEvent(file));
-                }
+                });
+            });
+        } else {
+            parent.newFile(nameWithoutExtension + ".java", content).then(file -> {
+                eventBus.fireEvent(FileEvent.createOpenFileEvent(file));
+                eventBus.fireEvent(new RevealResourceEvent(file));
             });
         }
     }
