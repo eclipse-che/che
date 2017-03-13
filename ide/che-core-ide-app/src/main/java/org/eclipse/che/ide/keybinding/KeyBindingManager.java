@@ -70,7 +70,7 @@ public class KeyBindingManager implements KeyBindingAgent {
         addScheme(new SchemeImpl(SCHEME_ECLIPSE_ID, "Eclipse Scheme"));
 
         //TODO check user settings
-        activeScheme = SCHEME_ECLIPSE_ID;
+        activeScheme = SCHEME_GLOBAL_ID;
 
         presentationFactory = new PresentationFactory();
 
