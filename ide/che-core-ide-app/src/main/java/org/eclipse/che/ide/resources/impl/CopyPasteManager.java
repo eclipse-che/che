@@ -37,6 +37,7 @@ import org.eclipse.che.ide.api.resources.modification.ClipboardManager;
 import org.eclipse.che.ide.api.resources.modification.CutResourceMarker;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.resources.reveal.RevealResourceEvent;
+import org.eclipse.che.ide.util.loging.Log;
 
 import static java.util.Arrays.copyOf;
 import static org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper.createFromAsyncRequest;
@@ -99,16 +100,16 @@ class CopyPasteManager implements ResourceChangedHandler {
     }
 
     protected void paste(Path destination) {
-        final Promise<Void> promise = promises.resolve(null);
+        if (resources == null || resources.length == 0) {
+            Log.debug(getClass(), "Resources to process was not found");
+            return;
+        }
 
-        pasteSuccessively(promise, resources, 0, destination).then(new Operation<Void>() {
-            @Override
-            public void apply(Void ignored) throws OperationException {
-                final Path lastCopiedResource = destination.append(resources[resources.length - 1].getName());
+        final Resource[] resourcesToProcess = copyOf(resources, resources.length);
+        final Path lastCopiedResource = destination.append(resourcesToProcess[resourcesToProcess.length - 1].getName());
 
-                eventBus.fireEvent(new RevealResourceEvent(lastCopiedResource));
-                resources = new Resource[0];
-            }
+        pasteSuccessively(promises.resolve(null), resourcesToProcess, 0, destination).then(ignored -> {
+            eventBus.fireEvent(new RevealResourceEvent(lastCopiedResource));
         });
     }
 
