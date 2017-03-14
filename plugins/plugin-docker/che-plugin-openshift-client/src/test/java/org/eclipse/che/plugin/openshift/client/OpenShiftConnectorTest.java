@@ -31,10 +31,8 @@ import org.testng.annotations.Test;
 public class OpenShiftConnectorTest {
     private static final String[] CONTAINER_ENV_VARIABLES = {"CHE_WORKSPACE_ID=abcd1234"};
     private static final String   CHE_DEFAULT_OPENSHIFT_PROJECT_NAME = "eclipse-che";
-    private static final String   CHE_DEFAULT_OPENSHIFT_SERVICEACCOUNT = "cheserviceaccount";
     private static final int      OPENSHIFT_LIVENESS_PROBE_DELAY = 300;
     private static final int      OPENSHIFT_LIVENESS_PROBE_TIMEOUT = 1;
-    private static final String   OPENSHIFT_DEFAULT_TOKEN = "91XMfu-FuNDkGjcIh6b0y1EtCvztGeSsSqRrWhBfyL8";
     private static final String   OPENSHIFT_DEFAULT_WORKSPACE_PERSISTENT_VOLUME_CLAIM = "che_claim_data";
     private static final String   OPENSHIFT_DEFAULT_WORKSPACE_QUANTITY = "10Gi";
     private static final String   OPENSHIFT_DEFAULT_WORKSPACE_STORAGE = "/data/workspaces";
@@ -70,7 +68,6 @@ public class OpenShiftConnectorTest {
                                                     dockerApiVersionPathPrefixProvider,
                                                     CHE_DEFAULT_SERVER_EXTERNAL_ADDRESS,
                                                     CHE_DEFAULT_OPENSHIFT_PROJECT_NAME,
-                                                    CHE_DEFAULT_OPENSHIFT_SERVICEACCOUNT,
                                                     OPENSHIFT_LIVENESS_PROBE_DELAY,
                                                     OPENSHIFT_LIVENESS_PROBE_TIMEOUT,
                                                     OPENSHIFT_DEFAULT_WORKSPACE_PERSISTENT_VOLUME_CLAIM,
