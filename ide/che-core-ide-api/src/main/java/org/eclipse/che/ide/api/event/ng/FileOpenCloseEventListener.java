@@ -51,9 +51,9 @@ public class FileOpenCloseEventListener {
 
                 switch (event.getOperationType()) {
                     case OPEN: {
-                        if (editorAgent.getOpenedEditor(path) == null) {                // if we haven't any editor for given path yet
-                            Log.info(getClass(), "Subscribe file for event handling");  // we subscribe for event handling otherwise we
-                                                                                        // do nothing
+                        if (editorAgent.getOpenedEditor(path) == null) {                 // if we haven't any editor for given path yet
+                            Log.debug(getClass(), "Subscribe file for event handling");  // we subscribe for event handling otherwise we
+                                                                                         // do nothing
                             processFileOpen(path);
                         }
 
