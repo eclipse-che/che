@@ -10,14 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ui.menubutton;
 
-/** Selection handler for {@link MenuPopupButton}. */
-public interface SelectionHandler {
+/** Action handler for {@link MenuPopupButton}. */
+public interface ActionHandler {
 
     /**
-     * Called when item has been selected in {@link MenuPopupButton}.
+     * Called when action (mouse click) on the {@code item}has been performed.
      *
      * @param item
-     *         the selected item
+     *         the item on which action has been performed
      */
-    void onItemSelected(PopupItem item);
+    void onAction(PopupItem item);
 }

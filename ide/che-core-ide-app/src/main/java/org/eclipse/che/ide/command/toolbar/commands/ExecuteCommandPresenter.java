@@ -18,12 +18,14 @@ import com.google.inject.Singleton;
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.command.CommandExecutor;
+import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.mvp.Presenter;
 import org.eclipse.che.ide.command.CommandUtils;
+import org.eclipse.che.ide.command.toolbar.CommandCreationGuide;
 
-/** Presenter drives UI for executing commands. */
+/** Presenter drives UI of the toolbar for executing commands. */
 @Singleton
 public class ExecuteCommandPresenter implements Presenter, ExecuteCommandView.ActionDelegate {
 
@@ -31,16 +33,19 @@ public class ExecuteCommandPresenter implements Presenter, ExecuteCommandView.Ac
     private final CommandManager            commandManager;
     private final CommandUtils              commandUtils;
     private final Provider<CommandExecutor> commandExecutorProvider;
+    private final CommandCreationGuide      commandCreationGuide;
 
     @Inject
     public ExecuteCommandPresenter(ExecuteCommandView view,
                                    CommandManager commandManager,
                                    CommandUtils commandUtils,
-                                   Provider<CommandExecutor> commandExecutorProvider) {
+                                   Provider<CommandExecutor> commandExecutorProvider,
+                                   CommandCreationGuide commandCreationGuide) {
         this.view = view;
         this.commandManager = commandManager;
         this.commandUtils = commandUtils;
         this.commandExecutorProvider = commandExecutorProvider;
+        this.commandCreationGuide = commandCreationGuide;
 
         view.setDelegate(this);
 
@@ -81,5 +86,10 @@ public class ExecuteCommandPresenter implements Presenter, ExecuteCommandView.Ac
         } else {
             commandExecutor.executeCommand(command, machine);
         }
+    }
+
+    @Override
+    public void onGuide(CommandGoal goal) {
+        commandCreationGuide.guide(goal);
     }
 }

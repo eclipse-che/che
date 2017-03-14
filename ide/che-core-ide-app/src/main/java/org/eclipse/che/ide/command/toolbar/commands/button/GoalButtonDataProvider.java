@@ -14,8 +14,8 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.machine.MachineEntity;
-import org.eclipse.che.ide.ui.menubutton.PopupItem;
 import org.eclipse.che.ide.ui.menubutton.MenuPopupItemDataProvider;
+import org.eclipse.che.ide.ui.menubutton.PopupItem;
 import org.eclipse.che.ide.util.Pair;
 
 import java.util.ArrayList;
@@ -23,17 +23,19 @@ import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 
-/** Provides items for {@link CommandsButton}. */
-public class CommandsDataProvider implements MenuPopupItemDataProvider {
+/** Provides items for {@link GoalButton}. */
+public class GoalButtonDataProvider implements MenuPopupItemDataProvider {
 
     private final List<ContextualCommand> commands;
     private final AppContext              appContext;
+    private final PopupItemFactory        popupItemFactory;
 
     private ItemDataChangeHandler handler;
     private PopupItem             defaultItem;
 
-    public CommandsDataProvider(AppContext appContext) {
+    public GoalButtonDataProvider(AppContext appContext, PopupItemFactory popupItemFactory) {
         this.appContext = appContext;
+        this.popupItemFactory = popupItemFactory;
         this.commands = new ArrayList<>();
     }
 
@@ -56,11 +58,15 @@ public class CommandsDataProvider implements MenuPopupItemDataProvider {
         List<PopupItem> items = new ArrayList<>(commands.size());
 
         if (defaultItem != null && defaultItem instanceof MachinePopupItem) {
-            items.add(new MachinePopupItem((MachinePopupItem)defaultItem));
+            items.add(popupItemFactory.newMachinePopupItem((MachinePopupItem)defaultItem));
         }
 
         for (ContextualCommand command : commands) {
-            items.add(new CommandPopupItem(command));
+            items.add(popupItemFactory.newCommandPopupItem(command));
+        }
+
+        if (items.isEmpty()) {
+            items.add(popupItemFactory.newHintPopupItem());
         }
 
         return items;
@@ -84,7 +90,7 @@ public class CommandsDataProvider implements MenuPopupItemDataProvider {
             List<MachineEntity> machines = appContext.getActiveRuntime().getMachines();
 
             items.addAll(machines.stream()
-                                 .map(machine -> new MachinePopupItem(command, machine))
+                                 .map(machine -> popupItemFactory.newMachinePopupItem(command, machine))
                                  .collect(toList()));
         }
 
@@ -101,5 +107,11 @@ public class CommandsDataProvider implements MenuPopupItemDataProvider {
         this.commands.addAll(commands);
 
         handler.onItemDataChanged();
+    }
+
+    /** Checks whether the {@link GuidePopupItem} is the only item. */
+    public boolean hasGuideOnly() {
+        List<PopupItem> items = getItems();
+        return items.isEmpty() || (items.size() == 1 && items.get(0) instanceof GuidePopupItem);
     }
 }

@@ -95,6 +95,11 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
     }
 
     @Override
+    protected void focusView() {
+        tree.setFocus(true);
+    }
+
+    @Override
     public void setCommands(Map<CommandGoal, List<ContextualCommand>> commands) {
         treeRenderer.setDelegate(delegate);
 

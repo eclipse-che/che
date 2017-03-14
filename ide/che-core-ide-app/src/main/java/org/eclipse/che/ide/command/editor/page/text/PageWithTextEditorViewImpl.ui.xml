@@ -35,7 +35,7 @@
             font-size: 11px;
         }
     </ui:style>
-    <g:DockLayoutPanel ui:field="mainPanel" width="700px">
+    <g:DockLayoutPanel ui:field="mainPanel" width="100%">
         <g:north size="30">
             <g:FlowPanel>
                 <g:Label ui:field="title" addStyleNames="{resources.editorCss.sectionLabel} {style.title}"/>

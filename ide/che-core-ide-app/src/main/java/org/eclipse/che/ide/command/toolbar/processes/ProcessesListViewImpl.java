@@ -11,7 +11,6 @@
 package org.eclipse.che.ide.command.toolbar.processes;
 
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Singleton;
@@ -33,21 +32,18 @@ public class ProcessesListViewImpl implements ProcessesListView {
 
     private final Map<Process, BaseListItem<Process>> listItems;
     private final Map<Process, ProcessItemRenderer>   renderers;
-    private final CommandResources                    resources;
 
     private ActionDelegate delegate;
 
     @Inject
-    public ProcessesListViewImpl(CommandResources resources) {
-        this.resources = resources;
-
+    public ProcessesListViewImpl(CommandResources resources, EmptyListWidget emptyListWidget) {
         listItems = new HashMap<>();
         renderers = new HashMap<>();
 
         final Label label = new Label("EXEC");
         label.addStyleName(resources.commandToolbarCss().processesListLabel());
 
-        dropdownList = new DropdownList(getEmptyListWidget());
+        dropdownList = new DropdownList(emptyListWidget);
         dropdownList.setWidth("100%");
         dropdownList.syncWidths();
         dropdownList.setSelectionHandler(item -> listItems.entrySet()
@@ -58,23 +54,6 @@ public class ProcessesListViewImpl implements ProcessesListView {
         rootPanel = new FlowPanel();
         rootPanel.add(label);
         rootPanel.add(dropdownList);
-    }
-
-    private Widget getEmptyListWidget() {
-        final Label commandNameLabel = new InlineHTML("Ready");
-        commandNameLabel.addStyleName(resources.commandToolbarCss().processWidgetText());
-        commandNameLabel.addStyleName(resources.commandToolbarCss().processWidgetCommandNameLabel());
-
-        final Label machineNameLabel = new InlineHTML("&nbsp; - start command");
-        machineNameLabel.addStyleName(resources.commandToolbarCss().processWidgetText());
-        machineNameLabel.addStyleName(resources.commandToolbarCss().processWidgetMachineNameLabel());
-
-        final FlowPanel emptyListWidget = new FlowPanel();
-        emptyListWidget.addStyleName(resources.commandToolbarCss().processWidgetText());
-        emptyListWidget.add(commandNameLabel);
-        emptyListWidget.add(machineNameLabel);
-
-        return emptyListWidget;
     }
 
     @Override

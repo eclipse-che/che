@@ -27,7 +27,10 @@ public interface ExecuteCommandView extends View<ExecuteCommandView.ActionDelega
 
     interface ActionDelegate {
 
-        /** Called when running a command is requested. */
+        /** Called when command execution is requested. */
         void onCommandExecute(ContextualCommand command, @Nullable Machine machine);
+
+        /** Called when guide of commands creation is requested. */
+        void onGuide(CommandGoal goal);
     }
 }

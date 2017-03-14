@@ -25,24 +25,25 @@ import com.google.gwt.user.client.ui.FlowPanel;
 
 import org.vectomatic.dom.svg.ui.SVGResource;
 
+import java.util.Optional;
+
 /** Button with popup menu opened by long click. */
 public class MenuPopupButton extends ButtonBase {
 
     private static final Resources RESOURCES;
 
     protected final MenuPopupItemDataProvider dataProvider;
-    protected final SelectionHandler          actionHandler;
+    private final   Timer                     showMenuTimer;
 
-    private final Timer showMenuTimer;
+    private ActionHandler actionHandler;
 
     private FlowPanel marker = new FlowPanel();
     private PopupItemList popupItemList;
 
-    public MenuPopupButton(SafeHtml content, MenuPopupItemDataProvider dataProvider, SelectionHandler actionHandler) {
+    public MenuPopupButton(SafeHtml content, MenuPopupItemDataProvider dataProvider) {
         super(Document.get().createDivElement());
 
         this.dataProvider = dataProvider;
-        this.actionHandler = actionHandler;
 
         getElement().setInnerSafeHtml(content);
 
@@ -80,11 +81,19 @@ public class MenuPopupButton extends ButtonBase {
             final PopupItem defaultItem = dataProvider.getDefaultItem();
 
             if (defaultItem != null) {
-                actionHandler.onItemSelected(defaultItem);
+                getActionHandler().ifPresent(actionHandler -> actionHandler.onAction(defaultItem));
             } else {
                 showMenu();
             }
         });
+    }
+
+    public Optional<ActionHandler> getActionHandler() {
+        return Optional.ofNullable(actionHandler);
+    }
+
+    public void setActionHandler(ActionHandler actionHandler) {
+        this.actionHandler = actionHandler;
     }
 
     /** Shows or hides 'Open Menu' button. */
@@ -100,7 +109,8 @@ public class MenuPopupButton extends ButtonBase {
     }
 
     private void showMenu() {
-        popupItemList = new PopupItemList(dataProvider.getItems(), dataProvider, actionHandler, RESOURCES, null);
+        popupItemList = new PopupItemList(dataProvider.getItems(), dataProvider, RESOURCES, null);
+        getActionHandler().ifPresent(actionHandler -> popupItemList.setActionHandler(actionHandler));
         popupItemList.setPopupPosition(getAbsoluteLeft(), getAbsoluteTop() + getOffsetHeight());
         popupItemList.show();
     }

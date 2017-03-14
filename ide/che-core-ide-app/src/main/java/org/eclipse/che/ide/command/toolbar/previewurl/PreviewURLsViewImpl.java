@@ -23,9 +23,9 @@ import java.util.Map.Entry;
 
 import static org.eclipse.che.ide.command.toolbar.previewurl.PreviewUrlItemRenderer.HEADER_WIDGET;
 
-/** Implementation of {@link PreviewUrlListView} that displays preview URLs in a dropdown list. */
+/** Implementation of {@link PreviewURLsView} that displays preview URLs in a dropdown list. */
 @Singleton
-public class PreviewUrlListViewImpl implements PreviewUrlListView {
+public class PreviewURLsViewImpl implements PreviewURLsView {
 
     /** Mapping of URL to list item. */
     private final Map<String, BaseListItem<String>> listItems;
@@ -34,7 +34,7 @@ public class PreviewUrlListViewImpl implements PreviewUrlListView {
     private ActionDelegate delegate;
 
     @Inject
-    public PreviewUrlListViewImpl() {
+    public PreviewURLsViewImpl() {
         listItems = new HashMap<>();
 
         dropdownList = new DropdownList(HEADER_WIDGET);
@@ -82,7 +82,7 @@ public class PreviewUrlListViewImpl implements PreviewUrlListView {
     }
 
     @Override
-    public void clearList() {
+    public void removeAll() {
         listItems.clear();
         dropdownList.clear();
     }

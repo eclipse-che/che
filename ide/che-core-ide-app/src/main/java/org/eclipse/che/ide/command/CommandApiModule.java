@@ -20,10 +20,10 @@ import com.google.inject.name.Named;
 
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.command.CommandGoal;
+import org.eclipse.che.ide.api.command.CommandGoalRegistry;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
-import org.eclipse.che.ide.api.command.CommandGoalRegistry;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.command.editor.CommandEditorView;
@@ -45,10 +45,10 @@ import org.eclipse.che.ide.command.explorer.CommandsExplorerPresenter;
 import org.eclipse.che.ide.command.explorer.CommandsExplorerView;
 import org.eclipse.che.ide.command.explorer.CommandsExplorerViewImpl;
 import org.eclipse.che.ide.command.goal.BuildGoal;
+import org.eclipse.che.ide.command.goal.CommandGoalRegistryImpl;
 import org.eclipse.che.ide.command.goal.CommonGoal;
 import org.eclipse.che.ide.command.goal.DebugGoal;
 import org.eclipse.che.ide.command.goal.DeployGoal;
-import org.eclipse.che.ide.command.goal.CommandGoalRegistryImpl;
 import org.eclipse.che.ide.command.goal.RunGoal;
 import org.eclipse.che.ide.command.goal.TestGoal;
 import org.eclipse.che.ide.command.manager.CommandManagerImpl;
@@ -61,8 +61,9 @@ import org.eclipse.che.ide.command.toolbar.CommandToolbarView;
 import org.eclipse.che.ide.command.toolbar.CommandToolbarViewImpl;
 import org.eclipse.che.ide.command.toolbar.commands.ExecuteCommandView;
 import org.eclipse.che.ide.command.toolbar.commands.ExecuteCommandViewImpl;
-import org.eclipse.che.ide.command.toolbar.previewurl.PreviewUrlListView;
-import org.eclipse.che.ide.command.toolbar.previewurl.PreviewUrlListViewImpl;
+import org.eclipse.che.ide.command.toolbar.commands.button.PopupItemFactory;
+import org.eclipse.che.ide.command.toolbar.previewurl.PreviewURLsView;
+import org.eclipse.che.ide.command.toolbar.previewurl.PreviewURLsViewImpl;
 import org.eclipse.che.ide.command.toolbar.processes.ProcessesListView;
 import org.eclipse.che.ide.command.toolbar.processes.ProcessesListViewImpl;
 import org.eclipse.che.ide.command.type.CommandTypeChooserView;
@@ -96,6 +97,7 @@ public class CommandApiModule extends AbstractGinModule {
 
         bind(CommandManager.class).to(CommandManagerImpl.class).in(Singleton.class);
 
+        // start-up components
         GinMapBinder<String, Component> componentBinder = GinMapBinder.newMapBinder(binder(), String.class, Component.class);
         componentBinder.addBinding("CommandManagerImpl").to(CommandManagerImpl.class);
         componentBinder.addBinding("CommandsExplorerPresenter").to(CommandsExplorerPresenter.class);
@@ -123,7 +125,9 @@ public class CommandApiModule extends AbstractGinModule {
         bind(CommandToolbarView.class).to(CommandToolbarViewImpl.class).in(Singleton.class);
         bind(ExecuteCommandView.class).to(ExecuteCommandViewImpl.class).in(Singleton.class);
         bind(ProcessesListView.class).to(ProcessesListViewImpl.class).in(Singleton.class);
-        bind(PreviewUrlListView.class).to(PreviewUrlListViewImpl.class).in(Singleton.class);
+        bind(PreviewURLsView.class).to(PreviewURLsViewImpl.class).in(Singleton.class);
+
+        install(new GinFactoryModuleBuilder().build(PopupItemFactory.class));
     }
 
     @Provides

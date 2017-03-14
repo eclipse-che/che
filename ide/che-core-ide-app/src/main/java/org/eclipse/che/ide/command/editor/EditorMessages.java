@@ -26,7 +26,7 @@ public interface EditorMessages extends Messages {
     String editorMessageUnableToSave();
 
     @Key("button.test.text")
-    String buttonTestText();
+    String buttonRunText();
 
     @Key("button.save.text")
     String buttonSaveText();

@@ -12,17 +12,17 @@ package org.eclipse.che.ide.command.toolbar.previewurl;
 
 import org.eclipse.che.ide.api.mvp.View;
 
-/** View for preview URLs list. */
-public interface PreviewUrlListView extends View<PreviewUrlListView.ActionDelegate> {
+/** View for displaying preview URLs. */
+public interface PreviewURLsView extends View<PreviewURLsView.ActionDelegate> {
 
-    /** Add preview URL to the list. */
+    /** Add preview URL to the view. */
     void addUrl(String url);
 
-    /** Remove preview URL from the list. */
+    /** Remove preview URL from the view. */
     void removeUrl(String url);
 
-    /** Clear preview URLs list. */
-    void clearList();
+    /** Remove all preview URLs from the view. */
+    void removeAll();
 
     interface ActionDelegate {
 

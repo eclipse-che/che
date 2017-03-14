@@ -22,7 +22,6 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandManager.CommandChangedListener;
 import org.eclipse.che.ide.api.command.ContextualCommand;
@@ -71,7 +70,6 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
     private final CoreLocalizationConstant coreMessages;
     private final EditorMessages           messages;
     private final NodeFactory              nodeFactory;
-    private final CommandExecutor          commandExecutor;
 
     private final List<CommandEditorPage> pages;
 
@@ -97,8 +95,7 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
                          EditorAgent editorAgent,
                          CoreLocalizationConstant coreMessages,
                          EditorMessages messages,
-                         NodeFactory nodeFactory,
-                         CommandExecutor commandExecutor) {
+                         NodeFactory nodeFactory) {
         this.view = view;
         this.workspaceAgent = workspaceAgent;
         this.iconRegistry = iconRegistry;
@@ -109,7 +106,6 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
         this.coreMessages = coreMessages;
         this.messages = messages;
         this.nodeFactory = nodeFactory;
-        this.commandExecutor = commandExecutor;
 
         view.setDelegate(this);
 
@@ -289,11 +285,6 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
                     () -> callback.onSuccess(null),
                     () -> callback.onFailure(null)).show();
         }
-    }
-
-    @Override
-    public void onCommandTest() {
-        commandExecutor.executeCommand(editedCommand);
     }
 
     @Override

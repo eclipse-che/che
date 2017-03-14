@@ -18,7 +18,6 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.command.ContextualCommand.ApplicableContext;
@@ -97,8 +96,6 @@ public class CommandEditorTest {
     private EditorMessages           editorMessages;
     @Mock
     private NodeFactory              nodeFactory;
-    @Mock
-    private CommandExecutor          commandExecutor;
 
     @InjectMocks
     private CommandEditor editor;
@@ -202,13 +199,6 @@ public class CommandEditorTest {
         editor.close(true);
 
         verify(workspaceAgent).removePart(editor);
-    }
-
-    @Test
-    public void shouldExecuteCommandWhenTestingRequested() throws Exception {
-        editor.onCommandTest();
-
-        verify(commandExecutor).executeCommand(editor.editedCommand);
     }
 
     @Test

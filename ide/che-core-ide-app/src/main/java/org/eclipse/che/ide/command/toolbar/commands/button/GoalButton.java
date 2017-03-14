@@ -15,40 +15,56 @@ import elemental.dom.Element;
 import com.google.gwt.safehtml.shared.SafeHtml;
 
 import org.eclipse.che.ide.api.command.CommandGoal;
+import org.eclipse.che.ide.command.toolbar.ToolbarMessages;
 import org.eclipse.che.ide.ui.Tooltip;
 import org.eclipse.che.ide.ui.menubutton.MenuPopupButton;
-import org.eclipse.che.ide.ui.menubutton.SelectionHandler;
 import org.eclipse.che.ide.ui.menubutton.MenuPopupItemDataProvider;
+import org.eclipse.che.ide.ui.menubutton.PopupItem;
 
 import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
 import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
 
 /** {@link MenuPopupButton} for displaying commands belong to the same {@link CommandGoal}. */
-public class CommandsButton extends MenuPopupButton {
+public class GoalButton extends MenuPopupButton {
 
-    private final CommandGoal goal;
+    private final CommandGoal     goal;
+    private final ToolbarMessages messages;
 
     private Tooltip tooltip;
     private String  tooltipText;
 
-    public CommandsButton(CommandGoal goal,
-                          SafeHtml icon,
-                          MenuPopupItemDataProvider dataProvider,
-                          SelectionHandler actionHandler) {
-        super(icon, dataProvider, actionHandler);
+    GoalButton(CommandGoal goal,
+               SafeHtml icon,
+               MenuPopupItemDataProvider dataProvider,
+               ToolbarMessages messages) {
+        super(icon, dataProvider);
 
         this.goal = goal;
+        this.messages = messages;
     }
 
-    public MenuPopupItemDataProvider getPopupItemDataProvider() {
-        return dataProvider;
+    public GoalButtonDataProvider getPopupItemDataProvider() {
+        return (GoalButtonDataProvider)dataProvider;
     }
 
     public CommandGoal getGoal() {
         return goal;
     }
 
-    public void setTooltip(String newTooltipText) {
+    /** Updates button's tooltip depending on it's state (what child elements it contains). */
+    public void updateTooltip() {
+        final PopupItem defaultItem = dataProvider.getDefaultItem();
+
+        if (defaultItem != null) {
+            setTooltip(messages.goalButtonTooltipExecutePrompt(defaultItem.getName()));
+        } else if (getPopupItemDataProvider().hasGuideOnly()) {
+            setTooltip(messages.goalButtonTooltipNoCommand(goal.getId()));
+        } else {
+            setTooltip(messages.goalButtonTooltipChooseCommand(goal.getId()));
+        }
+    }
+
+    private void setTooltip(String newTooltipText) {
         if (newTooltipText.equals(tooltipText)) {
             return;
         }

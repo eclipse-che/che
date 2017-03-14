@@ -25,27 +25,26 @@ import org.eclipse.che.ide.FontAwesome;
 import org.eclipse.che.ide.util.Pair;
 
 import java.util.List;
+import java.util.Optional;
 
 /** Popup list for {@link MenuPopupButton}. */
 class PopupItemList extends PopupPanel {
 
     private final MenuPopupItemDataProvider dataProvider;
-    private final SelectionHandler          actionHandler;
     private final MenuPopupButton.Resources resources;
 
+    private ActionHandler actionHandler;
     private PopupItemList childList;
 
     private ItemWidget overItem;
 
     PopupItemList(List<PopupItem> children,
                   MenuPopupItemDataProvider dataProvider,
-                  SelectionHandler actionHandler,
                   MenuPopupButton.Resources resources,
                   @Nullable String title) {
         super(true, false);
 
         this.dataProvider = dataProvider;
-        this.actionHandler = actionHandler;
         this.resources = resources;
 
         setAnimationEnabled(true);
@@ -68,6 +67,14 @@ class PopupItemList extends PopupPanel {
                 childList.hide(false);
             }
         });
+    }
+
+    Optional<ActionHandler> getActionHandler() {
+        return Optional.ofNullable(actionHandler);
+    }
+
+    void setActionHandler(ActionHandler actionHandler) {
+        this.actionHandler = actionHandler;
     }
 
     private class ItemWidget extends FlowPanel {
@@ -118,12 +125,14 @@ class PopupItemList extends PopupPanel {
                 }
 
                 hide(true);
-                actionHandler.onItemSelected(item);
+
+                getActionHandler().ifPresent(actionHandler -> actionHandler.onAction(item));
             }, ClickEvent.getType());
         }
 
         private void createChildPopup(Pair<List<PopupItem>, String> children) {
-            childList = new PopupItemList(children.first, dataProvider, actionHandler, resources, "Execute on:");
+            childList = new PopupItemList(children.first, dataProvider, resources, "Execute on:");
+            getActionHandler().ifPresent(actionHandler -> childList.setActionHandler(actionHandler));
             childList.setPopupPosition(getAbsoluteLeft() + getOffsetWidth(), getAbsoluteTop());
             childList.show();
             childList.setAutoHideEnabled(false);

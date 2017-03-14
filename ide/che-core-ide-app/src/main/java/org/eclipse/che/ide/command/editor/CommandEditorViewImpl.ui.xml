@@ -18,10 +18,6 @@
     <ui:style>
         @eval partBackground org.eclipse.che.ide.api.theme.Style.theme.partBackground();
         @eval tabsPanelBackground org.eclipse.che.ide.api.theme.Style.theme.tabsPanelBackground();
-        @eval toolbarActionGroupShadowColor org.eclipse.che.ide.api.theme.Style.getToolbarActionGroupShadowColor();
-        @eval toolbarActionGroupBackgroundColor org.eclipse.che.ide.api.theme.Style.getToolbarActionGroupBackgroundColor();
-        @eval toolbarActionGroupBorderColor org.eclipse.che.ide.api.theme.Style.getToolbarActionGroupBorderColor();
-        @eval toolbarActionGroupShadowColor org.eclipse.che.ide.api.theme.Style.getToolbarActionGroupShadowColor();
 
         .mainPanel {
             background-color: partBackground;
@@ -38,25 +34,16 @@
             margin: 5px 0 0 10px;
             font-weight: bold;
         }
-
-        .button-test, .button-test:hover {
-            float: left;
-            background: #51b200;
-        }
     </ui:style>
 
     <g:DockLayoutPanel addStyleNames="{style.mainPanel}">
         <g:center>
             <g:ScrollPanel ui:field="scrollPanel">
-                <g:FlowPanel ui:field="pagesPanel"/>
+                <g:FlowPanel width="700px" ui:field="pagesPanel"/>
             </g:ScrollPanel>
         </g:center>
         <g:south size="44">
             <g:FlowPanel addStyleNames="{style.header}">
-                <g:Button ui:field="testButton"
-                          text="{messages.buttonTestText}"
-                          addStyleNames="{style.button} {style.button-test}"
-                          debugId="command-editor-button-test"/>
                 <g:Button ui:field="cancelButton"
                           text="{messages.buttonCancelText}"
                           addStyleNames="{style.button}"

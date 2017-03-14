@@ -11,10 +11,12 @@
 package org.eclipse.che.ide.command.editor.page.name;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -31,6 +33,9 @@ public class NamePageViewImpl extends Composite implements NamePageView {
 
     @UiField
     TextBox commandName;
+
+    @UiField
+    Button runButton;
 
     private ActionDelegate delegate;
 
@@ -52,6 +57,11 @@ public class NamePageViewImpl extends Composite implements NamePageView {
     @UiHandler({"commandName"})
     void onNameChanged(KeyUpEvent event) {
         delegate.onNameChanged(commandName.getValue());
+    }
+
+    @UiHandler("runButton")
+    public void handleRunButton(ClickEvent clickEvent) {
+        delegate.onCommandRun();
     }
 
     interface NamePageViewImplUiBinder extends UiBinder<Widget, NamePageViewImpl> {

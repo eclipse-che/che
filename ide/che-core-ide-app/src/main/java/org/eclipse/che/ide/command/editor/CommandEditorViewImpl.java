@@ -40,9 +40,6 @@ public class CommandEditorViewImpl extends Composite implements CommandEditorVie
     private final CommandResources resources;
 
     @UiField
-    Button testButton;
-
-    @UiField
     Button cancelButton;
 
     @UiField
@@ -82,11 +79,6 @@ public class CommandEditorViewImpl extends Composite implements CommandEditorVie
     @Override
     public void setSaveEnabled(boolean enable) {
         saveButton.setEnabled(enable);
-    }
-
-    @UiHandler("testButton")
-    public void handleTestButton(ClickEvent clickEvent) {
-        delegate.onCommandTest();
     }
 
     @UiHandler("cancelButton")

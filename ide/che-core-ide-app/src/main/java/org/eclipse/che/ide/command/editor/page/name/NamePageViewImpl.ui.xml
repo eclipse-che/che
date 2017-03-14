@@ -14,7 +14,25 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
-    <g:FlowPanel width="700px">
-        <g:TextBox ui:field="commandName" width="98%"/>
+    <ui:with field='messages' type='org.eclipse.che.ide.command.editor.EditorMessages'/>
+    <ui:style>
+        .button {
+            float: right;
+            margin-top: 1px;
+            font-weight: bold;
+            background: #51b200;
+        }
+
+        .button:hover {
+            background: #51b200;
+        }
+    </ui:style>
+
+    <g:FlowPanel width="100%">
+        <g:Button ui:field="runButton"
+                  text="{messages.buttonRunText}"
+                  addStyleNames="{style.button}"
+                  debugId="command-editor-button-run"/>
+        <g:TextBox ui:field="commandName" width="88%"/>
     </g:FlowPanel>
 </ui:UiBinder>

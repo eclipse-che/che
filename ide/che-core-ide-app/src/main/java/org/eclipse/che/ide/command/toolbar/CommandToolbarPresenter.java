@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 
 import org.eclipse.che.ide.api.mvp.Presenter;
 import org.eclipse.che.ide.command.toolbar.commands.ExecuteCommandPresenter;
-import org.eclipse.che.ide.command.toolbar.previewurl.PreviewUrlListPresenter;
+import org.eclipse.che.ide.command.toolbar.previewurl.PreviewURLsPresenter;
 import org.eclipse.che.ide.command.toolbar.processes.ProcessesListPresenter;
 
 import javax.inject.Inject;
@@ -25,18 +25,18 @@ import javax.inject.Singleton;
 public class CommandToolbarPresenter implements Presenter, CommandToolbarView.ActionDelegate {
 
     private final ProcessesListPresenter  processesListPresenter;
-    private final PreviewUrlListPresenter previewUrlListPresenter;
+    private final PreviewURLsPresenter    previewURLsPresenter;
     private final ExecuteCommandPresenter executeCommandPresenter;
     private final CommandToolbarView      view;
 
     @Inject
     public CommandToolbarPresenter(CommandToolbarView view,
                                    ProcessesListPresenter processesListPresenter,
-                                   PreviewUrlListPresenter previewUrlListPresenter,
+                                   PreviewURLsPresenter previewURLsPresenter,
                                    ExecuteCommandPresenter executeCommandPresenter) {
         this.view = view;
         this.processesListPresenter = processesListPresenter;
-        this.previewUrlListPresenter = previewUrlListPresenter;
+        this.previewURLsPresenter = previewURLsPresenter;
         this.executeCommandPresenter = executeCommandPresenter;
 
         view.setDelegate(this);
@@ -48,6 +48,6 @@ public class CommandToolbarPresenter implements Presenter, CommandToolbarView.Ac
 
         executeCommandPresenter.go(view.getCommandsPanelContainer());
         processesListPresenter.go(view.getProcessesListContainer());
-        previewUrlListPresenter.go(view.getPreviewUrlsListContainer());
+        previewURLsPresenter.go(view.getPreviewUrlsListContainer());
     }
 }

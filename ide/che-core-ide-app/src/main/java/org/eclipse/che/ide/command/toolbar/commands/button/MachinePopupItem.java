@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.toolbar.commands.button;
 
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
+
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.ui.menubutton.PopupItem;
@@ -21,13 +24,15 @@ public class MachinePopupItem implements PopupItem {
     private final Machine           machine;
     private final String            name;
 
-    public MachinePopupItem(ContextualCommand command, Machine machine) {
+    @AssistedInject
+    public MachinePopupItem(@Assisted ContextualCommand command, @Assisted Machine machine) {
         this.command = command;
         this.machine = machine;
         this.name = machine.getConfig().getName();
     }
 
-    public MachinePopupItem(MachinePopupItem item) {
+    @AssistedInject
+    public MachinePopupItem(@Assisted MachinePopupItem item) {
         this.command = item.command;
         this.machine = item.machine;
         this.name = command.getName() + " on " + machine.getConfig().getName();

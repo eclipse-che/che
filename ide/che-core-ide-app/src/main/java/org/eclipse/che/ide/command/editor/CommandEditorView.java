@@ -42,9 +42,6 @@ public interface CommandEditorView extends View<CommandEditorView.ActionDelegate
     /** The action delegate for this view. */
     interface ActionDelegate {
 
-        /** Called when testing command is requested. */
-        void onCommandTest();
-
         /** Called when reverting command changes is requested. */
         void onCommandCancel();
 

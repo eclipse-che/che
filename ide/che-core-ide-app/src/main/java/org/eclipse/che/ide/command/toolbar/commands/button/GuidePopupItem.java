@@ -11,32 +11,27 @@
 package org.eclipse.che.ide.command.toolbar.commands.button;
 
 import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
 
-import org.eclipse.che.ide.api.command.ContextualCommand;
+import org.eclipse.che.ide.command.toolbar.ToolbarMessages;
 import org.eclipse.che.ide.ui.menubutton.PopupItem;
 
-/** A {@link PopupItem} represents {@link ContextualCommand}. */
-public class CommandPopupItem implements PopupItem {
+/** A {@link PopupItem} represents a hint which guides the user into the flow of creating a command. */
+public class GuidePopupItem implements PopupItem {
 
-    private final ContextualCommand command;
+    private final ToolbarMessages messages;
 
     @Inject
-    public CommandPopupItem(@Assisted ContextualCommand command) {
-        this.command = command;
+    public GuidePopupItem(ToolbarMessages messages) {
+        this.messages = messages;
     }
 
     @Override
     public String getName() {
-        return command.getName();
+        return messages.guideItemLabel();
     }
 
     @Override
     public boolean isDisabled() {
-        return command.getApplicableContext().isWorkspaceApplicable();
-    }
-
-    public ContextualCommand getCommand() {
-        return command;
+        return false;
     }
 }

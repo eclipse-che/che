@@ -39,11 +39,11 @@ import java.util.Optional;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_PREVIEW_URL_ATTRIBUTE_NAME;
 
-/** Drives the UI for displaying list of preview URLs of running processes. */
+/** Drives the UI for displaying preview URLs of the running processes. */
 @Singleton
-public class PreviewUrlListPresenter implements Presenter, PreviewUrlListView.ActionDelegate {
+public class PreviewURLsPresenter implements Presenter, PreviewURLsView.ActionDelegate {
 
-    private final PreviewUrlListView       view;
+    private final PreviewURLsView          view;
     private final ExecAgentCommandManager  execAgentCmdManager;
     private final CommandManager           commandManager;
     private final AppContext               appContext;
@@ -51,13 +51,13 @@ public class PreviewUrlListPresenter implements Presenter, PreviewUrlListView.Ac
     private final PromiseProvider          promiseProvider;
 
     @Inject
-    public PreviewUrlListPresenter(PreviewUrlListView view,
-                                   ExecAgentCommandManager execAgentCommandManager,
-                                   CommandManager commandManager,
-                                   AppContext appContext,
-                                   EventBus eventBus,
-                                   Provider<MacroProcessor> macroProcessorProvider,
-                                   PromiseProvider promiseProvider) {
+    public PreviewURLsPresenter(PreviewURLsView view,
+                                ExecAgentCommandManager execAgentCommandManager,
+                                CommandManager commandManager,
+                                AppContext appContext,
+                                EventBus eventBus,
+                                Provider<MacroProcessor> macroProcessorProvider,
+                                PromiseProvider promiseProvider) {
         this.view = view;
         this.execAgentCmdManager = execAgentCommandManager;
         this.commandManager = commandManager;
@@ -75,7 +75,7 @@ public class PreviewUrlListPresenter implements Presenter, PreviewUrlListView.Ac
 
             @Override
             public void onWsAgentStopped(WsAgentStateEvent event) {
-                view.clearList();
+                view.removeAll();
             }
         });
 
@@ -85,7 +85,7 @@ public class PreviewUrlListPresenter implements Presenter, PreviewUrlListView.Ac
 
     /** Updates view with preview URLs of all running processes. */
     private void updateView() {
-        view.clearList();
+        view.removeAll();
 
         final WorkspaceRuntime runtime = appContext.getActiveRuntime();
 
@@ -106,8 +106,8 @@ public class PreviewUrlListPresenter implements Presenter, PreviewUrlListView.Ac
      */
     private Promise<String> getPreviewUrl(int pid, Machine machine) {
         return execAgentCmdManager.getProcess(machine.getId(), pid)
-                                  .then((Function<GetProcessResponseDto, String>)arg -> {
-                                      final Optional<ContextualCommand> commandOptional = commandManager.getCommand(arg.getName());
+                                  .then((Function<GetProcessResponseDto, String>)process -> {
+                                      final Optional<ContextualCommand> commandOptional = commandManager.getCommand(process.getName());
 
                                       return commandOptional.map(command -> command.getAttributes().get(COMMAND_PREVIEW_URL_ATTRIBUTE_NAME))
                                                             .orElse(null);
