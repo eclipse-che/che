@@ -29,7 +29,6 @@ public interface SshServiceClient {
      * @return instance of generated ssh pair
      * @throws ServerException
      *         when some error occurred while generating or saving ssh pair
-     * @see {@link org.eclipse.che.api.ssh.server.SshService#generatePair(GenerateSshPairRequest)}
      */
     SshPairDto generatePair(GenerateSshPairRequest request) throws ServerException;
 
@@ -40,7 +39,6 @@ public interface SshServiceClient {
      *         ssh pair to create
      * @throws ServerException
      *         when some error occurred while creating ssh pair
-     * @see {@link org.eclipse.che.api.ssh.server.SshService#createPair(SshPairDto)}
      */
     void createPair(SshPairDto sshPair) throws ServerException;
 
@@ -56,7 +54,6 @@ public interface SshServiceClient {
      *         when ssh pair is not found
      * @throws ServerException
      *         when any other error occurs during ssh pair fetching
-     * @see {@link org.eclipse.che.api.ssh.server.SshService#getPair(String, String)}}
      */
     SshPairDto getPair(String service, String name) throws ServerException, NotFoundException;
 
@@ -71,7 +68,6 @@ public interface SshServiceClient {
      *         when ssh pair is not found
      * @throws ServerException
      *         when any other error occurs during ssh pair removing
-     * @see {@link org.eclipse.che.api.ssh.server.SshService#removePair(String, String)}
      */
     void removePair(String service, String name) throws ServerException, NotFoundException;
 }
