@@ -99,7 +99,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "eclipse/ubuntu_jdk8"
+      "origin": "rhche/ubuntu_jdk8"
     },
     "workspaceConfig": {
       "environments": {
@@ -107,7 +107,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent"
               ],
               "servers": {},
               "attributes" : {
@@ -116,7 +116,7 @@
             }
           },
           "recipe": {
-            "location": "eclipse/ubuntu_jdk8",
+            "location": "rhche/ubuntu_jdk8",
             "type": "dockerimage"
           }
         }
@@ -2091,7 +2091,7 @@
     }],
     "source": {
         "type": "image",
-        "origin": "registry.centos.org/che-stacks/vertx"
+        "origin": "rhche/vertx"
     },
     "workspaceConfig": {
         "environments": {
@@ -2100,8 +2100,7 @@
                     "dev-machine": {
                         "agents": [
                             "org.eclipse.che.terminal",
-                            "org.eclipse.che.ws-agent",
-                            "org.eclipse.che.ssh"
+                            "org.eclipse.che.ws-agent"
                         ],
                         "servers": {},
                         "attributes": {
@@ -2110,7 +2109,7 @@
                     }
                 },
                 "recipe": {
-                    "location": "registry.centos.org/che-stacks/vertx",
+                    "location": "rhche/vertx",
                     "type": "dockerimage"
                 }
             }

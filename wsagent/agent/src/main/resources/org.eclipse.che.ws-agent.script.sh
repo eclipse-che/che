@@ -13,7 +13,8 @@ unset PACKAGES
 unset SUDO
 command -v tar >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" tar"; }
 command -v curl >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" curl"; }
-test "$(id -u)" = 0 || SUDO="sudo -E"
+test "$(id -u)" = 0 || test -f ${HOME}/is_arbitrary_user || SUDO="sudo -E"
+
 
 LOCAL_AGENT_BINARIES_URI="/mnt/che/ws-agent.tar.gz"
 DOWNLOAD_AGENT_BINARIES_URI='${WORKSPACE_MASTER_URI}/agent-binaries/ws-agent.tar.gz'
@@ -34,9 +35,11 @@ fi
 MACHINE_TYPE=$(uname -m)
 
 mkdir -p ${CHE_DIR}
-${SUDO} mkdir -p /projects
-${SUDO} sh -c "chown -R $(id -u -n) /projects"
 
+if [ ! -f ${HOME}/is_arbitrary_user ]; then
+    ${SUDO} mkdir -p /projects
+    ${SUDO} sh -c "chown -R $(id -u -n) /projects"
+fi
 
 INSTALL_JDK=false
 command -v ${JAVA_HOME}/bin/java >/dev/null 2>&1 || {

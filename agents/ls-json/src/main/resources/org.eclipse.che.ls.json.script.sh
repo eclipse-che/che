@@ -13,7 +13,7 @@ unset PACKAGES
 unset SUDO
 command -v tar >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" tar"; }
 command -v curl >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" curl"; }
-test "$(id -u)" = 0 || SUDO="sudo -E"
+test "$(id -u)" = 0 || test -f ${HOME}/is_arbitrary_user || SUDO="sudo -E"
 
 AGENT_BINARIES_URI=https://codenvy.com/update/repository/public/download/org.eclipse.che.ls.json.binaries
 CHE_DIR=$HOME/che

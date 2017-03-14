@@ -13,7 +13,7 @@ unset PACKAGES
 unset SUDO
 command -v tar >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" tar"; }
 command -v curl >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" curl"; }
-test "$(id -u)" = 0 || SUDO="sudo -E"
+test "$(id -u)" = 0 || test -f ${HOME}/is_arbitrary_user || SUDO="sudo -E"
 
 CHE_DIR=$HOME/che
 LOCAL_AGENT_BINARIES_URI='/mnt/che/terminal/websocket-terminal-${PREFIX}.tar.gz'
