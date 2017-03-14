@@ -50,7 +50,6 @@
         <class>org.eclipse.che.api.factory.server.model.impl.IdeImpl</class>
         <class>org.eclipse.che.api.factory.server.FactoryImage</class>
 
-
         <class>org.eclipse.che.api.ssh.server.model.impl.SshPairImpl</class>
 
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
