@@ -127,15 +127,15 @@ public class JavaUtils {
                                                               "|" + WHILE + ")";
     private static final String IDENTIFIER_FIRST_SYMBOL     = "[a-zA-Z_]+";
     private static final String IDENTIFIER_NOT_FIRST_SYMBOL = "(?:\\d*[a-zA-Z_]*)";
-    private static final String JAVA_IDENTIFIER          = "(^" +
+    private static final String JAVA_IDENTIFIER             = "(^" +
                                                               "(?:" + IDENTIFIER_FIRST_SYMBOL + IDENTIFIER_NOT_FIRST_SYMBOL + "*)" +
                                                               "(?:" + "\\." + IDENTIFIER_FIRST_SYMBOL + IDENTIFIER_NOT_FIRST_SYMBOL + "*)" +
                                                               "*$)";
-    public static final  RegExp JAVA_PACKAGE_FQN_PATTERN = RegExp.compile(RESERVED_WORDS + JAVA_IDENTIFIER);
-    public static final  RegExp JAVA_CLASS_NAME_PATTERN  = RegExp.compile(RESERVED_WORDS +
-                                                                          "(^" +
-                                                                          "(?:" + IDENTIFIER_FIRST_SYMBOL + IDENTIFIER_NOT_FIRST_SYMBOL +
-                                                                          "*)*$)");
+    public static final  RegExp JAVA_PACKAGE_FQN_PATTERN    = RegExp.compile(RESERVED_WORDS + JAVA_IDENTIFIER);
+    public static final  RegExp JAVA_CLASS_NAME_PATTERN     = RegExp.compile(RESERVED_WORDS +
+                                                                             "(^" +
+                                                                             "(?:" + IDENTIFIER_FIRST_SYMBOL + IDENTIFIER_NOT_FIRST_SYMBOL +
+                                                                             "*)*$)");
 
     private JavaUtils() {
     }
