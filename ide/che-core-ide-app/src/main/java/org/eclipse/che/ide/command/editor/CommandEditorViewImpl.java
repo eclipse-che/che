@@ -81,7 +81,7 @@ public class CommandEditorViewImpl extends Composite implements CommandEditorVie
             public void run() {
                 scrollPanel.scrollToTop();
             }
-        }.schedule(500);
+        }.schedule(1000);
     }
 
     @Override
