@@ -23,7 +23,7 @@ if [ ${CURL_INSTALLED} = false ] && [ ${WGET_INSTALLED} = false ]; then
   CURL_INSTALLED=true
 fi
 
-test "$(id -u)" = 0 || SUDO="sudo -E"
+test "$(id -u)" = 0 || test -f ${HOME}/is_arbitrary_user || SUDO="sudo -E"
 
 LOCAL_AGENT_BINARIES_URI="/mnt/che/ws-agent.tar.gz"
 DOWNLOAD_AGENT_BINARIES_URI='${WORKSPACE_MASTER_URI}/agent-binaries/ws-agent.tar.gz'
@@ -44,10 +44,12 @@ fi
 MACHINE_TYPE=$(uname -m)
 
 mkdir -p ${CHE_DIR}
-${SUDO} mkdir -p /projects
-${SUDO} sh -c "chown -R $(id -u -n) /projects"
-${SUDO} chmod 755 /projects
 
+if [ ! -f ${HOME}/is_arbitrary_user ]; then
+    ${SUDO} mkdir -p /projects
+    ${SUDO} sh -c "chown -R $(id -u -n) /projects"
+    ${SUDO} chmod 755 /projects
+fi
 
 INSTALL_JDK=false
 command -v ${JAVA_HOME}/bin/java >/dev/null 2>&1 || {
