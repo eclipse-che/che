@@ -566,10 +566,16 @@ export class LoadFactoryController {
 
     var ideParams = [];
     if (this.routeParams) {
-      // add every factory parameter by prefix
-      Object.keys(this.routeParams).forEach((key) => {
-        ideParams.push('factory-' + key + ':' + this.$window.encodeURIComponent(this.routeParams[key]));
-      });
+      if (this.routeParams['id'] || (this.routeParams['name'] && this.routeParams['user'])) {
+        ideParams.push('factory-id:' + this.factory.id);
+      } else {
+        // add every factory parameter by prefix
+        Object.keys(this.routeParams).forEach((key) => {
+          ideParams.push('factory-' + key + ':' + this.$window.encodeURIComponent(this.routeParams[key]));
+        });
+      }
+
+
       // add factory mode
       ideParams.push('factory:' + 'true');
     }
