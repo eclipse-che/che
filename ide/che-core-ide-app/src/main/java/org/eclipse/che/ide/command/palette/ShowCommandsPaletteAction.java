@@ -22,12 +22,12 @@ import org.eclipse.che.ide.api.action.ActionEvent;
  * @author Artem Zatsarynnyi
  */
 @Singleton
-public class ShowCommandPaletteAction extends Action {
+public class ShowCommandsPaletteAction extends Action {
 
     private final CommandsPalettePresenter presenter;
 
     @Inject
-    public ShowCommandPaletteAction(PaletteMessages messages, CommandsPalettePresenter presenter) {
+    public ShowCommandsPaletteAction(PaletteMessages messages, CommandsPalettePresenter presenter) {
         super(messages.actionShowPaletteTitle(),
               messages.actionShowPaletteDescription(),
               null,

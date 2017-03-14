@@ -112,12 +112,12 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
         commandManager.addCommandChangedListener(this);
 
         pages = new LinkedList<>();
-        pages.add(namePage);
-        pages.add(commandLinePage);
-        pages.add(goalPage);
-        pages.add(contextPage);
-        pages.add(projectsPage);
         pages.add(previewUrlPage);
+        pages.add(projectsPage);
+        pages.add(contextPage);
+        pages.add(goalPage);
+        pages.add(commandLinePage);
+        pages.add(namePage);
     }
 
     @Override
@@ -135,9 +135,7 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
 
             initializePages();
 
-            for (CommandEditorPage page : pages) {
-                view.addPage(page.getView(), page.getTitle());
-            }
+            pages.forEach(page -> view.addPage(page.getView(), page.getTitle()));
         } else {
             callback.onInitializationFailed();
         }
@@ -147,14 +145,13 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
     private void initializePages() {
         commandNameInitial = editedCommand.getName();
 
-        for (CommandEditorPage page : pages) {
+        pages.forEach(page -> {
             page.edit(editedCommand);
-
             page.setDirtyStateListener(() -> {
                 updateDirtyState(isDirtyPage());
                 view.setSaveEnabled(isDirtyPage());
             });
-        }
+        });
     }
 
     /** Checks whether any page is dirty. */

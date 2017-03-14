@@ -82,10 +82,9 @@ public class ProjectsPage extends AbstractCommandEditorPage implements ProjectsP
     private void refreshProjects() {
         projectsState.clear();
 
-        final ApplicableContext context = editedCommand.getApplicableContext();
-
         for (Project project : appContext.getProjects()) {
-            final boolean applicable = context.getApplicableProjects().contains(project.getPath());
+            ApplicableContext context = editedCommand.getApplicableContext();
+            boolean applicable = context.getApplicableProjects().contains(project.getPath());
 
             projectsState.put(project, applicable);
         }
@@ -99,21 +98,21 @@ public class ProjectsPage extends AbstractCommandEditorPage implements ProjectsP
             return false;
         }
 
-        final ApplicableContext applicableContext = editedCommand.getApplicableContext();
+        ApplicableContext context = editedCommand.getApplicableContext();
 
-        return !(applicableProjectsInitial.equals(applicableContext.getApplicableProjects()));
+        return !(applicableProjectsInitial.equals(context.getApplicableProjects()));
     }
 
     @Override
     public void onApplicableProjectChanged(Project project, boolean value) {
         projectsState.put(project, value);
 
-        final ApplicableContext applicableContext = editedCommand.getApplicableContext();
+        final ApplicableContext context = editedCommand.getApplicableContext();
 
         if (value) {
-            applicableContext.addProject(project.getPath());
+            context.addProject(project.getPath());
         } else {
-            applicableContext.removeProject(project.getPath());
+            context.removeProject(project.getPath());
         }
 
         notifyDirtyStateChanged();

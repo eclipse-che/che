@@ -21,12 +21,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 /**
- * Tests for {@link ShowCommandPaletteAction}.
+ * Tests for {@link ShowCommandsPaletteAction}.
  *
  * @author Artem Zatsarynnyi
  */
 @RunWith(MockitoJUnitRunner.class)
-public class ShowCommandPaletteActionTest {
+public class ShowCommandsPaletteActionTest {
 
     @Mock
     private PaletteMessages          messages;
@@ -34,7 +34,7 @@ public class ShowCommandPaletteActionTest {
     private CommandsPalettePresenter presenter;
 
     @InjectMocks
-    private ShowCommandPaletteAction action;
+    private ShowCommandsPaletteAction action;
 
     @Test
     public void shouldInitializeAction() {

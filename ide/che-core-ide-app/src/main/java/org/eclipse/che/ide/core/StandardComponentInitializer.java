@@ -69,7 +69,7 @@ import org.eclipse.che.ide.api.keybinding.KeyBuilder;
 import org.eclipse.che.ide.api.parts.Perspective;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.command.editor.CommandEditorProvider;
-import org.eclipse.che.ide.command.palette.ShowCommandPaletteAction;
+import org.eclipse.che.ide.command.palette.ShowCommandsPaletteAction;
 import org.eclipse.che.ide.connection.WsConnectionListener;
 import org.eclipse.che.ide.imageviewer.ImageViewerProvider;
 import org.eclipse.che.ide.macro.ServerHostNameMacro;
@@ -163,141 +163,143 @@ public class StandardComponentInitializer {
     public static final String SIGNATURE_HELP      = "signatureHelp";
     public static final String RENAME              = "renameResource";
     public static final String SHOW_REFERENCE      = "showReference";
+
     @Inject
-    private EditorRegistry editorRegistry;
+    private EditorRegistry               editorRegistry;
     @Inject
-    private FileTypeRegistry fileTypeRegistry;
+    private FileTypeRegistry             fileTypeRegistry;
     @Inject
-    private Resources resources;
+    private Resources                    resources;
     @Inject
-    private KeyBindingAgent keyBinding;
+    private KeyBindingAgent              keyBinding;
     @Inject
-    private ActionManager actionManager;
+    private ActionManager                actionManager;
     @Inject
-    private SaveAction saveAction;
+    private SaveAction                   saveAction;
     @Inject
-    private SaveAllAction saveAllAction;
+    private SaveAllAction                saveAllAction;
     @Inject
-    private ShowPreferencesAction showPreferencesAction;
+    private ShowPreferencesAction        showPreferencesAction;
     @Inject
-    private FindActionAction findActionAction;
+    private FindActionAction             findActionAction;
     @Inject
-    private NavigateToFileAction navigateToFileAction;
+    private NavigateToFileAction         navigateToFileAction;
     @Inject
     @MainToolbar
-    private ToolbarPresenter toolbarPresenter;
+    private ToolbarPresenter             toolbarPresenter;
     @Inject
-    private CutResourceAction cutResourceAction;
+    private CutResourceAction            cutResourceAction;
     @Inject
-    private CopyResourceAction copyResourceAction;
+    private CopyResourceAction           copyResourceAction;
     @Inject
-    private PasteResourceAction pasteResourceAction;
+    private PasteResourceAction          pasteResourceAction;
     @Inject
-    private DeleteResourceAction deleteResourceAction;
+    private DeleteResourceAction         deleteResourceAction;
     @Inject
-    private RenameItemAction renameItemAction;
+    private RenameItemAction             renameItemAction;
     @Inject
-    private CollapseAllAction collapseAllAction;
+    private CollapseAllAction            collapseAllAction;
     @Inject
-    private SplitVerticallyAction splitVerticallyAction;
+    private SplitVerticallyAction        splitVerticallyAction;
     @Inject
-    private SplitHorizontallyAction splitHorizontallyAction;
+    private SplitHorizontallyAction      splitHorizontallyAction;
     @Inject
-    private CloseAction closeAction;
+    private CloseAction                  closeAction;
     @Inject
-    private CloseAllAction closeAllAction;
+    private CloseAllAction               closeAllAction;
     @Inject
-    private CloseOtherAction closeOtherAction;
+    private CloseOtherAction             closeOtherAction;
     @Inject
-    private CloseAllExceptPinnedAction closeAllExceptPinnedAction;
+    private CloseAllExceptPinnedAction   closeAllExceptPinnedAction;
     @Inject
-    private ReopenClosedFileAction reopenClosedFileAction;
+    private ReopenClosedFileAction       reopenClosedFileAction;
     @Inject
-    private PinEditorTabAction pinEditorTabAction;
+    private PinEditorTabAction           pinEditorTabAction;
     @Inject
-    private GoIntoAction goIntoAction;
+    private GoIntoAction                 goIntoAction;
     @Inject
-    private EditFileAction editFileAction;
+    private EditFileAction               editFileAction;
     @Inject
-    private OpenFileAction openFileAction;
+    private OpenFileAction               openFileAction;
     @Inject
-    private ShowHiddenFilesAction showHiddenFilesAction;
+    private ShowHiddenFilesAction        showHiddenFilesAction;
     @Inject
-    private FormatterAction formatterAction;
+    private FormatterAction              formatterAction;
     @Inject
-    private UndoAction undoAction;
+    private UndoAction                   undoAction;
     @Inject
-    private RedoAction redoAction;
+    private RedoAction                   redoAction;
     @Inject
-    private UploadFileAction uploadFileAction;
+    private UploadFileAction             uploadFileAction;
     @Inject
-    private UploadFolderAction uploadFolderAction;
+    private UploadFolderAction           uploadFolderAction;
     @Inject
-    private DownloadProjectAction downloadProjectAction;
+    private DownloadProjectAction        downloadProjectAction;
     @Inject
-    private DownloadWsAction downloadWsAction;
+    private DownloadWsAction             downloadWsAction;
     @Inject
-    private DownloadResourceAction downloadResourceAction;
+    private DownloadResourceAction       downloadResourceAction;
     @Inject
-    private ImportProjectAction importProjectAction;
+    private ImportProjectAction          importProjectAction;
     @Inject
-    private CreateProjectAction createProjectAction;
+    private CreateProjectAction          createProjectAction;
     @Inject
     private ConvertFolderToProjectAction convertFolderToProjectAction;
     @Inject
-    private FullTextSearchAction fullTextSearchAction;
+    private FullTextSearchAction         fullTextSearchAction;
     @Inject
-    private NewFolderAction newFolderAction;
+    private NewFolderAction              newFolderAction;
     @Inject
-    private NewFileAction newFileAction;
+    private NewFileAction                newFileAction;
     @Inject
-    private NewXmlFileAction newXmlFileAction;
+    private NewXmlFileAction             newXmlFileAction;
     @Inject
-    private ImageViewerProvider imageViewerProvider;
+    private ImageViewerProvider          imageViewerProvider;
     @Inject
-    private ProjectConfigurationAction projectConfigurationAction;
+    private ProjectConfigurationAction   projectConfigurationAction;
     @Inject
-    private ExpandEditorAction expandEditorAction;
+    private ExpandEditorAction           expandEditorAction;
     @Inject
-    private CompleteAction completeAction;
+    private CompleteAction               completeAction;
     @Inject
-    private SwitchPreviousEditorAction switchPreviousEditorAction;
+    private SwitchPreviousEditorAction   switchPreviousEditorAction;
     @Inject
-    private SwitchNextEditorAction switchNextEditorAction;
+    private SwitchNextEditorAction       switchNextEditorAction;
     @Inject
-    private HotKeysListAction hotKeysListAction;
+    private HotKeysListAction            hotKeysListAction;
     @Inject
-    private OpenRecentFilesAction openRecentFilesAction;
+    private OpenRecentFilesAction        openRecentFilesAction;
     @Inject
-    private ClearRecentListAction clearRecentFilesAction;
+    private ClearRecentListAction        clearRecentFilesAction;
     @Inject
-    private CloseActiveEditorAction closeActiveEditorAction;
+    private CloseActiveEditorAction      closeActiveEditorAction;
     @Inject
-    private ShowCommandPaletteAction showCommandPaletteAction;
+    private ShowCommandsPaletteAction    showCommandsPaletteAction;
     @Inject
-    private MessageLoaderResources messageLoaderResources;
+    private MessageLoaderResources       messageLoaderResources;
     @Inject
-    private EditorResources editorResources;
+    private EditorResources              editorResources;
     @Inject
-    private PopupResources popupResources;
+    private PopupResources               popupResources;
     @Inject
-    private ShowReferenceAction showReferenceAction;
+    private ShowReferenceAction          showReferenceAction;
     @Inject
-    private RevealResourceAction revealResourceAction;
+    private RevealResourceAction         revealResourceAction;
     @Inject
-    private RefreshPathAction refreshPathAction;
+    private RefreshPathAction            refreshPathAction;
     @Inject
-    private LinkWithEditorAction linkWithEditorAction;
+    private LinkWithEditorAction         linkWithEditorAction;
     @Inject
-    private SignatureHelpAction signatureHelpAction;
+    private SignatureHelpAction          signatureHelpAction;
     @Inject
-    private MaximizePartAction maximizePartAction;
+    private MaximizePartAction           maximizePartAction;
     @Inject
-    private MinimizePartAction minimizePartAction;
+    private MinimizePartAction           minimizePartAction;
     @Inject
-    private RestorePartAction restorePartAction;
+    private RestorePartAction            restorePartAction;
     @Inject
-    private PerspectiveManager perspectiveManager;
+    private PerspectiveManager           perspectiveManager;
+
     @Inject
     @Named("XMLFileType")
     private FileType xmlFile;
@@ -334,24 +336,25 @@ public class StandardComponentInitializer {
     @Inject
     @Named("JPGFileType")
     private FileType jpgFile;
+
     @Inject
     private CommandEditorProvider commandEditorProvider;
     @Inject
     @Named("CommandFileType")
-    private FileType commandFileType;
+    private FileType              commandFileType;
     @Inject
-    private WsConnectionListener wsConnectionListener;
+    private WsConnectionListener  wsConnectionListener;
     @Inject
-    private TreeResourceRevealer treeResourceRevealer; //just to work with it
+    private TreeResourceRevealer  treeResourceRevealer; //just to work with it
     // do not remove the injections below
     @Inject
-    private ServerMacro serverMacro;
+    private ServerMacro           serverMacro;
     @Inject
-    private ServerProtocolMacro serverProtocolMacro;
+    private ServerProtocolMacro   serverProtocolMacro;
     @Inject
-    private ServerHostNameMacro serverHostNameMacro;
+    private ServerHostNameMacro   serverHostNameMacro;
     @Inject
-    private ServerPortMacro serverPortMacro;
+    private ServerPortMacro       serverPortMacro;
 
     /** Instantiates {@link StandardComponentInitializer} an creates standard content. */
     @Inject
@@ -634,9 +637,9 @@ public class StandardComponentInitializer {
         editorTabContextMenu.add(splitVerticallyAction);
         actionManager.registerAction(SIGNATURE_HELP, signatureHelpAction);
 
-        actionManager.registerAction("showCommandsPalette", showCommandPaletteAction);
+        actionManager.registerAction("showCommandsPalette", showCommandsPaletteAction);
         DefaultActionGroup runGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_RUN);
-        runGroup.add(showCommandPaletteAction);
+        runGroup.add(showCommandsPaletteAction);
 
         DefaultActionGroup editorContextMenuGroup = new DefaultActionGroup(actionManager);
         actionManager.registerAction(GROUP_EDITOR_CONTEXT_MENU, editorContextMenuGroup);

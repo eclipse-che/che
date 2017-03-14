@@ -22,7 +22,7 @@ import org.eclipse.che.ide.api.mvp.View;
 public interface CommandEditorView extends View<CommandEditorView.ActionDelegate> {
 
     /**
-     * Add page for editing command.
+     * Add page to the view. New page will be added to the top.
      *
      * @param page
      *         page to add

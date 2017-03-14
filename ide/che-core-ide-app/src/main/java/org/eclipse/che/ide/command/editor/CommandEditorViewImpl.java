@@ -15,6 +15,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -57,23 +58,30 @@ public class CommandEditorViewImpl extends Composite implements CommandEditorVie
     @Inject
     public CommandEditorViewImpl(CommandResources resources) {
         this.resources = resources;
+
         initWidget(UI_BINDER.createAndBindUi(this));
-
         setSaveEnabled(false);
-
         saveButton.addStyleName(WINDOW_RESOURCES.windowCss().primaryButton());
     }
 
     @Override
     public void addPage(IsWidget page, String title) {
+        page.asWidget().addStyleName(resources.editorCss().section());
+        pagesPanel.insert(page, 0);
+
         if (!title.isEmpty()) {
             Label label = new Label(title);
             label.addStyleName(resources.editorCss().sectionLabel());
-            pagesPanel.add(label);
+            pagesPanel.insert(label, 0);
         }
 
-        page.asWidget().addStyleName(resources.editorCss().section());
-        pagesPanel.add(page);
+        // editor must be scrolled to the top immediately after opening
+        new Timer() {
+            @Override
+            public void run() {
+                scrollPanel.scrollToTop();
+            }
+        }.schedule(500);
     }
 
     @Override
