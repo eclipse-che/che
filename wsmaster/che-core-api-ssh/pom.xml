@@ -167,9 +167,6 @@
             <resource>
                 <directory>src/main/resources</directory>
             </resource>
-            <resource>
-                <directory>${project.build.directory}/generated-sources/dto/</directory>
-            </resource>
         </resources>
         <plugins>
             <!-- Create the test jar -->
