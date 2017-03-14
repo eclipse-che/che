@@ -227,7 +227,6 @@ public class PersistTestModuleBuilder {
         Path metaInf = root.resolve("META-INF");
         if (!Files.exists(metaInf)) {
             Files.createDirectory(metaInf);
-            Files.createDirectory(metaInf);
         }
         return metaInf;
     }
