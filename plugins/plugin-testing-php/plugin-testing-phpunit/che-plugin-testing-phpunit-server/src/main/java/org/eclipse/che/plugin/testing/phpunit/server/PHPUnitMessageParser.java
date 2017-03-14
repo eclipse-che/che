@@ -47,6 +47,7 @@ public class PHPUnitMessageParser {
     public static final String PROPERTY_TARGET = "target";
     public static final String PROPERTY_TRACE = "trace";
     public static final String STATUS_ERROR = "error";
+    public static final String STATUS_WARNING = "warning";
     public static final String STATUS_FAIL = "fail";
     public static final String STATUS_INCOMPLETE = "incomplete";
     public static final String STATUS_PASS = "pass";

@@ -26,8 +26,9 @@ public abstract class AbstractPHPUnitTestResult extends AbstractPHPUnitElement {
     public static final int STATUS_PASS = 1;
     public static final int STATUS_SKIP = 2;
     public static final int STATUS_INCOMPLETE = 3;
-    public static final int STATUS_FAIL = 4;
-    public static final int STATUS_ERROR = 5;
+    public static final int STATUS_WARNING = 4;
+    public static final int STATUS_FAIL = 5;
+    public static final int STATUS_ERROR = 6;
 
     protected String name = "";
     protected int status = 0;

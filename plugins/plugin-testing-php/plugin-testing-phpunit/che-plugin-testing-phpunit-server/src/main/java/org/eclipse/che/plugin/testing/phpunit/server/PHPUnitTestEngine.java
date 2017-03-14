@@ -27,6 +27,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.util.AbstractLineConsumer;
 import org.eclipse.che.api.core.util.CommandLine;
@@ -81,7 +82,6 @@ public class PHPUnitTestEngine {
                 handleReport(socket);
             } catch (final IOException e) {
                 Thread.currentThread().interrupt();
-                LOG.error(e.getMessage(), e);
             } finally {
                 shutdown();
             }
@@ -157,14 +157,9 @@ public class PHPUnitTestEngine {
     public TestResultRootDto executeTests(Map<String, String> testParameters) throws Exception {
         String projectPath = testParameters.get("projectPath");
         String projectAbsolutePath = testParameters.get("absoluteProjectPath");
-        String testTarget = testParameters.get("testTarget");
-        Path testTargetAbsolutePath;
-        if (Path.of(testTarget).length() > 1)
-            testTargetAbsolutePath = Path.of(projectAbsolutePath).newPath(Path.of(testTarget).subPath(1));
-        else
-            testTargetAbsolutePath = Path.of(projectAbsolutePath);
-        String testTargetWorkingDirectory = testTargetAbsolutePath.getParent().toString();
-        String testTargetName = testTargetAbsolutePath.getName();
+        String testTargetRelativePath = testParameters.get("testTarget");
+        File testTargetFile = getTestTargetFile(testTargetRelativePath, projectAbsolutePath);
+        File testTargetWorkingDirectory = testTargetFile.isDirectory() ? testTargetFile : testTargetFile.getParentFile();
         // Get appropriate path to executable
         String phpUnitExecutable = PHPUNIT_GLOBAL;
         if (hasComposerRunner(projectPath)) {
@@ -186,9 +181,10 @@ public class PHPUnitTestEngine {
             LOG.error(e.getMessage(), e);
         }
         final CommandLine cmdRunTests = new CommandLine(phpUnitExecutable, "--include-path", printerDirAbsolutePath,
-                "--printer", phpPrinterName, testTargetName);
+                "--printer", phpPrinterName, getTestTarget(testTargetFile));
         ProcessBuilder pb = new ProcessBuilder().redirectErrorStream(true)
-                .directory(new File(testTargetWorkingDirectory)).command(cmdRunTests.toShellCommand());
+                .directory(testTargetWorkingDirectory)
+                .command(cmdRunTests.toShellCommand());
         pb.environment().put("ZEND_PHPUNIT_PORT", String.valueOf(PRINTER_PORT));
         Process processRunPHPUnitTests = pb.start();
         final StringBuilder stdErrOut = new StringBuilder();
@@ -196,7 +192,7 @@ public class PHPUnitTestEngine {
             @Override
             public void writeLine(String line) throws IOException {
                 if (!line.isEmpty())
-                    stdErrOut.append("\t" + line + "\n");
+                    stdErrOut.append(line + "\n");
             }
         });
         int exitValue = processRunPHPUnitTests.waitFor();
@@ -221,14 +217,14 @@ public class PHPUnitTestEngine {
         return testResultsProvider.getTestResults(testResultsPath);
     }
 
-    private String getPrinterName(String phpUnitExecutable, String testTargetWorkingDirectory) {
+    private String getPrinterName(String phpUnitExecutable, File testTargetWorkingDirectory) {
         final CommandLine cmdRunTests = new CommandLine(phpUnitExecutable, "--atleast-version", "6");
-        Process processBuildClassPath;
+        Process processVersionCheck;
         try {
-            processBuildClassPath = new ProcessBuilder().redirectErrorStream(true)
-                    .directory(new File(testTargetWorkingDirectory)).command(cmdRunTests.toShellCommand()).start();
-            ProcessUtil.process(processBuildClassPath, LineConsumer.DEV_NULL);
-            int code = processBuildClassPath.waitFor();
+            processVersionCheck = new ProcessBuilder().redirectErrorStream(true)
+                    .directory(testTargetWorkingDirectory).command(cmdRunTests.toShellCommand()).start();
+            ProcessUtil.process(processVersionCheck, LineConsumer.DEV_NULL);
+            int code = processVersionCheck.waitFor();
             if (code == 0)
                 return PRINTER_NAME_V6X;
         } catch (Exception e) {
@@ -257,6 +253,22 @@ public class PHPUnitTestEngine {
         }
         return tmpPrinterFile;
     }
+    
+    private File getTestTargetFile(String testTargetRelativePath, String projectAbsolutePath) {
+        if (Path.of(testTargetRelativePath).length() > 1)
+            return new File(Path.of(projectAbsolutePath).newPath(Path.of(testTargetRelativePath).subPath(1)).toString());
+        return new File(Path.of(projectAbsolutePath).toString());
+    }
+
+    private String getTestTarget(File testTargetFile) {
+        if (testTargetFile.isDirectory()) {
+            if ((new File(testTargetFile, "phpunit.xml").exists() || new File(testTargetFile, "phpunit.xml.dist").exists())) {
+                return "";
+            }
+            return testTargetFile.getAbsolutePath();
+        }
+        return FilenameUtils.removeExtension(testTargetFile.getAbsolutePath());
+    }
 
     @SuppressWarnings("unchecked")
     private boolean hasComposerRunner(String projectPath) {
@@ -283,5 +295,5 @@ public class PHPUnitTestEngine {
         }
         return false;
     }
-
+    
 }

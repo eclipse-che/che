@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.ide.view.navigation.nodes;
 
+import static org.eclipse.che.ide.api.theme.Style.getEditorInfoTextColor;
+
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.che.api.testing.shared.common.TestResultStatus;
@@ -33,6 +35,8 @@ public abstract class AbstractTestResultTreeNode extends AbstractTreeNode implem
     protected final TestServiceClient testServiceClient;
     protected final String frameworkName;
     private NodePresentation nodePresentation;
+    
+    private static final String TEXT_INFO_CSS = "color: " + getEditorInfoTextColor() + "; font-size: 11px";
 
     public AbstractTestResultTreeNode(TestServiceClient testServiceClient, TestResultNodeFactory nodeFactory,
             TestResources testResources, String frameworkName) {
@@ -86,8 +90,10 @@ public abstract class AbstractTestResultTreeNode extends AbstractTreeNode implem
         }
         }
         presentation.setPresentableText(getName());
-        if (infoText != null)
+        if (infoText != null) {
             presentation.setInfoText(infoText);
+            presentation.setInfoTextCss(TEXT_INFO_CSS);
+        }
     }
 
     @Override

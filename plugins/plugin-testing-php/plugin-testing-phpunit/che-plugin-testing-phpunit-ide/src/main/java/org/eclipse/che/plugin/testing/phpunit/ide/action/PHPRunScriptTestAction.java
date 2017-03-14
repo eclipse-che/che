@@ -44,8 +44,8 @@ public class PHPRunScriptTestAction extends AbstractPerspectiveAction {
     private final SelectionAgent selectionAgent;
 
     @Inject
-    public PHPRunScriptTestAction(TestActionRunner runner, PHPUnitTestResources resources, AppContext appContext, SelectionAgent selectionAgent,
-            PHPUnitTestLocalizationConstant localization) {
+    public PHPRunScriptTestAction(TestActionRunner runner, PHPUnitTestResources resources, AppContext appContext,
+            SelectionAgent selectionAgent, PHPUnitTestLocalizationConstant localization) {
         super(Arrays.asList(PROJECT_PERSPECTIVE_ID), localization.actionRunScriptTitle(),
                 localization.actionRunScriptDescription(), null, resources.testIcon());
         this.runner = runner;
@@ -84,7 +84,8 @@ public class PHPRunScriptTestAction extends AbstractPerspectiveAction {
         }
         final Object possibleNode = selection.getHeadElement();
         boolean enable = possibleNode instanceof FileNode
-                && ((FileNode) possibleNode).getData().getExtension().equals("php");
+                && (((FileNode) possibleNode).getData().getExtension().equals("php")
+                        || ((FileNode) possibleNode).getData().getExtension().equals("phtml"));
         e.getPresentation().setEnabled(enable);
         e.getPresentation().setVisible(enable);
     }

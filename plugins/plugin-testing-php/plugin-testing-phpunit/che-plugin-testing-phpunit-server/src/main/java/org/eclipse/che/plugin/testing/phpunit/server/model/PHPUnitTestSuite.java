@@ -24,7 +24,7 @@ import org.eclipse.che.plugin.testing.phpunit.server.PHPUnitMessageParser;
 public class PHPUnitTestSuite extends AbstractPHPUnitTestResult {
 
     protected class StatusCount {
-        public int[] counts = { 0, 0, 0, 0, 0, 0 }; // STATUS_STARTED,
+        public int[] counts = { 0, 0, 0, 0, 0, 0, 0 }; // STATUS_STARTED,
                                                     // STATUS_PASS,
                                                     // STATUS_SKIP,
                                                     // STATUS_INCOMPLETE,
@@ -76,7 +76,7 @@ public class PHPUnitTestSuite extends AbstractPHPUnitTestResult {
      */
     public void addChild(final AbstractPHPUnitTestResult test, boolean finished) {
         if (children == null) {
-            children = new LinkedHashSet<AbstractPHPUnitTestResult>();
+            children = new LinkedHashSet<>();
         }
         children.add(test);
         if (test instanceof PHPUnitTestCase && finished) {

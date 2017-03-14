@@ -139,6 +139,9 @@ class PHPUnitTestResultsProvider {
         case AbstractPHPUnitTestResult.STATUS_PASS: {
             return TestResultStatus.SUCCESS;
         }
+        case AbstractPHPUnitTestResult.STATUS_WARNING: {
+            return TestResultStatus.WARNING;
+        }
         case AbstractPHPUnitTestResult.STATUS_FAIL: {
             return TestResultStatus.FAILURE;
         }

@@ -53,6 +53,8 @@ public class PHPUnitTestCase extends AbstractPHPUnitTestResult {
             status = STATUS_SKIP;
         else if (sStatus.equals(PHPUnitMessageParser.STATUS_INCOMPLETE))
             status = STATUS_INCOMPLETE;
+        else if (sStatus.equals(PHPUnitMessageParser.STATUS_WARNING))
+            status = STATUS_WARNING;
         else if (sStatus.equals(PHPUnitMessageParser.STATUS_FAIL))
             status = STATUS_FAIL;
         else if (sStatus.equals(PHPUnitMessageParser.STATUS_ERROR))

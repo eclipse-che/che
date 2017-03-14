@@ -17,6 +17,7 @@ import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.plugin.testing.ide.TestActionGroup;
 import org.eclipse.che.plugin.testing.phpunit.ide.action.PHPRunContainerTestAction;
 import org.eclipse.che.plugin.testing.phpunit.ide.action.PHPRunScriptTestAction;
+import org.eclipse.che.plugin.testing.phpunit.ide.action.PHPRunScriptTestEditorAction;
 
 import com.google.inject.Inject;
 
@@ -28,20 +29,24 @@ import com.google.inject.Inject;
 public class PHPUnitTestActionGroup implements TestActionGroup {
 
     private final Action runScriptTestAction;
-    private PHPRunContainerTestAction runContainerTestAction;
+    private final Action runScriptTestEditorAction;
+    private final Action runContainerTestAction;
 
     @Inject
     public PHPUnitTestActionGroup(ActionManager actionManager, PHPRunScriptTestAction runScriptTestAction,
-            PHPRunContainerTestAction runAllTestAction, KeyBindingAgent keyBinding) {
+            PHPRunScriptTestEditorAction runScriptTestEditorAction, PHPRunContainerTestAction runContainerTestAction,
+            KeyBindingAgent keyBinding) {
         actionManager.registerAction("PHPRunScriptTestAction", runScriptTestAction);
-        actionManager.registerAction("PHPRunAllTestAction", runAllTestAction);
+        actionManager.registerAction("PHPRunScriptTestEditorAction", runScriptTestEditorAction);
+        actionManager.registerAction("PHPRunContainerTestAction", runContainerTestAction);
         this.runScriptTestAction = runScriptTestAction;
-        this.runContainerTestAction = runAllTestAction;
+        this.runScriptTestEditorAction = runScriptTestEditorAction;
+        this.runContainerTestAction = runContainerTestAction;
     }
 
     @Override
     public void addMainMenuItems(DefaultActionGroup testMainMenu) {
-        testMainMenu.add(runScriptTestAction);
+        testMainMenu.add(runScriptTestEditorAction);
         testMainMenu.add(runContainerTestAction);
     }
 

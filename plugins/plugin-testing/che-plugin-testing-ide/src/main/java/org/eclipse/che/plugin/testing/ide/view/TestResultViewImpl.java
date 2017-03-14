@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.ide.view;
 
+import static org.eclipse.che.ide.ui.smartTree.SelectionModel.Mode.SINGLE;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.DEFAULT_TEST_SOURCE_FOLDER;
 
 import java.util.ArrayList;
@@ -57,13 +58,14 @@ import org.eclipse.che.plugin.testing.ide.view.navigation.nodes.TestResultTraceF
 
 import com.google.common.base.Optional;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Style;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
@@ -86,7 +88,9 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
 
     interface Styles extends CssResource {
 
-        String traceFrameMessage();
+        String traceOutputMessage();
+        
+        String traceOutputStack();
 
     }
 
@@ -105,7 +109,7 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
     Styles style;
 
     @UiField
-    FlowPanel navigationPanel;
+    DockLayoutPanel navigationPanel;
 
     @UiField
     FlowPanel traceOutputPanel;
@@ -133,16 +137,8 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
         NodeStorage nodeStorage = new NodeStorage(idProvider);
         NodeLoader nodeLoader = new NodeLoader(Collections.<NodeInterceptor> emptySet());
         Tree tree = new Tree(nodeStorage, nodeLoader);
-        tree.getElement().getStyle().setWidth(100, Style.Unit.PCT);
-        tree.getElement().getStyle().setHeight(100, Style.Unit.PCT);
+        tree.getSelectionModel().setSelectionMode(SINGLE);
         return tree;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void focusView() {
     }
 
     /**
@@ -242,7 +238,7 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
     private void fillOutputPanel(String text) {
         traceOutputPanel.clear();
         Label traceMessageLabel = new Label(text);
-        traceMessageLabel.setStyleName(style.traceFrameMessage());
+        traceMessageLabel.setStyleName(style.traceOutputMessage());
         traceOutputPanel.add(traceMessageLabel);
     }
 
@@ -251,12 +247,15 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
         TestResultTraceDto testTrace = node.getTestTrace();
         if (testTrace == null)
             return;
-        Label traceMessageLabel = new Label(testTrace.getMessage());
-        traceMessageLabel.setStyleName(style.traceFrameMessage());
-        traceOutputPanel.add(traceMessageLabel);
+        Label traceOutputMessage = new Label(testTrace.getMessage());
+        traceOutputMessage.setStyleName(style.traceOutputMessage());
+        traceOutputMessage.setWordWrap(true);
+        traceOutputPanel.add(traceOutputMessage);
         Tree traceTree = buildTraceTree(testTrace);
-        traceTree.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
-        traceOutputPanel.add(traceTree);
+        DockLayoutPanel traceOutputStack = new DockLayoutPanel(Unit.PX);
+        traceOutputStack.setStyleName(style.traceOutputStack());
+        traceOutputStack.add(traceTree);
+        traceOutputPanel.add(traceOutputStack);
     }
 
     private Tree buildTraceTree(TestResultTraceDto trace) {

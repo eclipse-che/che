@@ -15,26 +15,24 @@
              xmlns:g="urn:import:com.google.gwt.user.client.ui">
     <ui:style src="org/eclipse/che/ide/api/ui/style.css"
               type="org.eclipse.che.plugin.testing.ide.view.TestResultViewImpl.Styles">
-        .traceFrameMessage {
+        .traceOutputMessage {
 			font-family: mainFontFamily;
             font-size: fontSize;
             font-weight: normal;
             line-height: normal;
-            margin-bottom: 10px;
+            padding-bottom: 5px;
 		}
+        .traceOutputStack {
+            height: 100%;
+            width: 100%;
+        }
     </ui:style>
     <g:SplitLayoutPanel width="100%" height="100%" ui:field="splitLayoutPanel">
         <g:west size="400">
-            <g:FlowPanel ui:field="navigationPanel"/>
+            <g:DockLayoutPanel unit="PX" width="100%" height="100%" ui:field="navigationPanel"/>
         </g:west>
         <g:center>
-            <g:DockLayoutPanel>
-                <g:center size="100%">
-                    <g:ScrollPanel width="100%" height="100%">
-                        <g:FlowPanel width="100%" height="100%" ui:field="traceOutputPanel"/>
-                    </g:ScrollPanel>
-                </g:center>
-            </g:DockLayoutPanel>
+            <g:FlowPanel width="100%" height="100%" ui:field="traceOutputPanel"/>
         </g:center>
     </g:SplitLayoutPanel>
 </ui:UiBinder>
