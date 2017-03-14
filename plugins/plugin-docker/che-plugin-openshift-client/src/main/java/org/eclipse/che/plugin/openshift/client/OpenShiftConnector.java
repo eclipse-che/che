@@ -165,7 +165,6 @@ public class OpenShiftConnector extends DockerConnector {
 
     private final OpenShiftClient openShiftClient;
     private final String          openShiftCheProjectName;
-    private final String          openShiftCheServiceAccount;
     private final int             openShiftLivenessProbeDelay;
     private final int             openShiftLivenessProbeTimeout;
     private final String          workspacesPersistentVolumeClaim;
@@ -181,7 +180,6 @@ public class OpenShiftConnector extends DockerConnector {
                               DockerApiVersionPathPrefixProvider dockerApiVersionPathPrefixProvider,
                               @Named("che.docker.ip.external") String cheServerExternalAddress,
                               @Named("che.openshift.project") String openShiftCheProjectName,
-                              @Named("che.openshift.serviceaccountname") String openShiftCheServiceAccount,
                               @Named("che.openshift.liveness.probe.delay") int openShiftLivenessProbeDelay,
                               @Named("che.openshift.liveness.probe.timeout") int openShiftLivenessProbeTimeout,
                               @Named("che.openshift.workspaces.pvc.name") String workspacesPersistentVolumeClaim,
@@ -192,7 +190,6 @@ public class OpenShiftConnector extends DockerConnector {
         super(connectorConfiguration, connectionFactory, authResolver, dockerApiVersionPathPrefixProvider);
         this.cheServerExternalAddress = cheServerExternalAddress;
         this.openShiftCheProjectName = openShiftCheProjectName;
-        this.openShiftCheServiceAccount = openShiftCheServiceAccount;
         this.openShiftLivenessProbeDelay = openShiftLivenessProbeDelay;
         this.openShiftLivenessProbeTimeout = openShiftLivenessProbeTimeout;
         this.workspacesPersistentVolumeClaim = workspacesPersistentVolumeClaim;
@@ -978,7 +975,6 @@ public class OpenShiftConnector extends DockerConnector {
                                     .withPorts(KubernetesContainer.getContainerPortsFrom(exposedPorts))
                                     .withImagePullPolicy(OPENSHIFT_IMAGE_PULL_POLICY_IFNOTPRESENT)
                                     .withNewSecurityContext()
-                                        .withRunAsUser(UID)
                                         .withPrivileged(false)
                                     .endSecurityContext()
                                     .withLivenessProbe(getLivenessProbeFrom(exposedPorts))
@@ -988,7 +984,6 @@ public class OpenShiftConnector extends DockerConnector {
         PodSpec podSpec = new PodSpecBuilder()
                                  .withContainers(container)
                                  .withVolumes(getVolumesFrom(volumes, workspaceID))
-                                 .withServiceAccountName(this.openShiftCheServiceAccount)
                                  .build();
 
         Deployment deployment = new DeploymentBuilder()
@@ -1198,7 +1193,7 @@ public class OpenShiftConnector extends DockerConnector {
                     VolumeMount vm = new VolumeMountBuilder()
                             .withMountPath(mountPath)
                             .withName(workspacesPersistentVolumeClaim)
-                            .withSubPath(subPath)
+//                            .withSubPath(subPath)
                             .build();
                         vms.add(vm);
                 }
@@ -1251,7 +1246,7 @@ public class OpenShiftConnector extends DockerConnector {
 
     private PersistentVolumeClaim getClaimCheWorkspace() {
         PersistentVolumeClaimList pvcList = openShiftClient.persistentVolumeClaims().inNamespace(openShiftCheProjectName).list();
-        for(PersistentVolumeClaim pvc:pvcList.getItems()) {
+        for(PersistentVolumeClaim pvc: pvcList.getItems()) {
             if (workspacesPersistentVolumeClaim.equals(pvc.getMetadata().getName())) {
                 return pvc;
             }
@@ -1265,7 +1260,7 @@ public class OpenShiftConnector extends DockerConnector {
                 .withAnnotations(annotations)
             .endMetadata()
             .withNewSpec()
-                .withAccessModes("ReadWriteMany")
+                .withAccessModes("ReadWriteOnce")
                 .withNewResources()
                     .withRequests(requests)
                 .endResources()
