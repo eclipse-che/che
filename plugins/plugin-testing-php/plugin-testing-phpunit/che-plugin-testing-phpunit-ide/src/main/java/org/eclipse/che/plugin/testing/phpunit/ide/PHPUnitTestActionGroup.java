@@ -14,7 +14,7 @@ import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
-import org.eclipse.che.plugin.testing.ide.TestActionGroup;
+import org.eclipse.che.plugin.testing.ide.TestAction;
 import org.eclipse.che.plugin.testing.phpunit.ide.action.PHPRunContainerTestAction;
 import org.eclipse.che.plugin.testing.phpunit.ide.action.PHPRunScriptTestAction;
 import org.eclipse.che.plugin.testing.phpunit.ide.action.PHPRunScriptTestEditorAction;
@@ -26,7 +26,7 @@ import com.google.inject.Inject;
  * 
  * @author Bartlomiej Laczkowski
  */
-public class PHPUnitTestActionGroup implements TestActionGroup {
+public class PHPUnitTestActionGroup implements TestAction {
 
     private final Action runScriptTestAction;
     private final Action runScriptTestEditorAction;

@@ -81,7 +81,7 @@ public class TestNGRunner implements TestRunner {
             projectType = projectManager.getProject(projectPath).getType();
         }
         TestClasspathProvider classpathProvider = classpathRegistry.getTestClasspathProvider(projectType);
-        projectClassLoader = classpathProvider.getClassLoader(projectAbsolutePath, updateClasspath);
+        projectClassLoader = classpathProvider.getClassLoader(projectAbsolutePath, projectPath, updateClasspath);
         TestResult testResult;
         if (runClass) {
             String fqn = testParameters.get("fqn");

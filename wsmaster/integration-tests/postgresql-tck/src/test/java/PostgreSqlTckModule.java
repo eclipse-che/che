@@ -8,9 +8,9 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
+
 import com.google.inject.TypeLiteral;
 import com.google.inject.persist.Transactional;
-import com.google.inject.persist.jpa.JpaPersistModule;
 
 import org.eclipse.che.account.spi.AccountDao;
 import org.eclipse.che.account.spi.AccountImpl;
@@ -18,6 +18,7 @@ import org.eclipse.che.account.spi.jpa.JpaAccountDao;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.machine.server.jpa.JpaRecipeDao;
 import org.eclipse.che.api.machine.server.jpa.JpaSnapshotDao;
+import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.machine.server.spi.RecipeDao;
@@ -36,12 +37,19 @@ import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.api.workspace.server.jpa.JpaStackDao;
 import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao;
+import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.EnvironmentRecipeImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ExtendedMachineImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ServerConf2Impl;
+import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.spi.StackDao;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.commons.lang.Pair;
+import org.eclipse.che.commons.test.db.PersistTestModuleBuilder;
 import org.eclipse.che.commons.test.tck.JpaCleaner;
 import org.eclipse.che.commons.test.tck.TckModule;
 import org.eclipse.che.commons.test.tck.TckResourcesCleaner;
@@ -49,10 +57,12 @@ import org.eclipse.che.commons.test.tck.repository.JpaTckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepositoryException;
 import org.eclipse.che.core.db.DBInitializer;
+import org.eclipse.che.core.db.postgresql.jpa.eclipselink.PostgreSqlExceptionHandler;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.core.db.schema.impl.flyway.FlywaySchemaInitializer;
 import org.eclipse.che.security.PasswordEncryptor;
 import org.eclipse.che.security.SHA512PasswordEncryptor;
+import org.postgresql.Driver;
 import org.postgresql.ds.PGSimpleDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,21 +70,13 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
-import javax.persistence.spi.PersistenceUnitTransactionType;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
-import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_DRIVER;
-import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_PASSWORD;
-import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_URL;
-import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_USER;
-import static org.eclipse.persistence.config.PersistenceUnitProperties.TRANSACTION_TYPE;
 
 /**
  * Module for running TCKs based on PostgreSQL.
@@ -94,15 +96,30 @@ public class PostgreSqlTckModule extends TckModule {
         waitConnectionIsEstablished(dbUrl, dbUser, dbPassword);
 
         // jpa
-        final Map<String, String> properties = new HashMap<>();
-        properties.put(TRANSACTION_TYPE, PersistenceUnitTransactionType.RESOURCE_LOCAL.name());
-        properties.put(JDBC_URL, dbUrl);
-        properties.put(JDBC_USER, dbUser);
-        properties.put(JDBC_PASSWORD, dbPassword);
-        properties.put(JDBC_DRIVER, System.getProperty("jdbc.driver"));
-        final JpaPersistModule persistenceModule = new JpaPersistModule("test");
-        persistenceModule.properties(properties);
-        install(persistenceModule);
+        install(new PersistTestModuleBuilder().setDriver(Driver.class)
+                                              .setUrl(dbUrl)
+                                              .setUser(dbUser)
+                                              .setPassword(dbPassword)
+                                              .setExceptionHandler(PostgreSqlExceptionHandler.class)
+                                              .addEntityClasses(AccountImpl.class,
+                                                                UserImpl.class,
+                                                                ProfileImpl.class,
+                                                                PreferenceEntity.class,
+                                                                WorkspaceImpl.class,
+                                                                WorkspaceConfigImpl.class,
+                                                                ProjectConfigImpl.class,
+                                                                EnvironmentImpl.class,
+                                                                EnvironmentRecipeImpl.class,
+                                                                ExtendedMachineImpl.class,
+                                                                SourceStorageImpl.class,
+                                                                ServerConf2Impl.class,
+                                                                StackImpl.class,
+                                                                CommandImpl.class,
+                                                                SnapshotImpl.class,
+                                                                RecipeImpl.class,
+                                                                SshPairImpl.class)
+                                              .addEntityClass("org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl$Attribute")
+                                              .build());
         bind(TckResourcesCleaner.class).to(JpaCleaner.class);
 
         // db initialization

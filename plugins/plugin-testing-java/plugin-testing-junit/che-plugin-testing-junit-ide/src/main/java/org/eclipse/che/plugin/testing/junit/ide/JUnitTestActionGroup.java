@@ -16,7 +16,7 @@ import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.keybinding.KeyBuilder;
 import org.eclipse.che.ide.util.browser.UserAgent;
-import org.eclipse.che.plugin.testing.ide.TestActionGroup;
+import org.eclipse.che.plugin.testing.ide.TestAction;
 import org.eclipse.che.plugin.testing.junit.ide.action.RunAllTestAction;
 import org.eclipse.che.plugin.testing.junit.ide.action.RunClassContextTestAction;
 import org.eclipse.che.plugin.testing.junit.ide.action.RunClassTestAction;
@@ -28,7 +28,7 @@ import com.google.inject.Inject;
  *
  * @author Mirage Abeysekara
  */
-public class JUnitTestActionGroup implements TestActionGroup {
+public class JUnitTestActionGroup implements TestAction {
 
     private final Action runClassTestAction;
     private final Action runAllTestAction;

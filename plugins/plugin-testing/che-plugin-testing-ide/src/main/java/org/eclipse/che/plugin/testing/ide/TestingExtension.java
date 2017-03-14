@@ -18,6 +18,7 @@ import java.util.Set;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.extension.Extension;
+import org.eclipse.che.plugin.testing.ide.handler.TestingHandler;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -34,12 +35,13 @@ public class TestingExtension {
     @Inject
     public TestingExtension(ActionManager actionManager, 
                             TestLocalizationConstant localization,
-                            Set<TestActionGroup> testActions) {
+                            Set<TestAction> testActions,
+                            TestingHandler testingHandler) {
         DefaultActionGroup runMenu = (DefaultActionGroup) actionManager.getAction(GROUP_RUN);
         DefaultActionGroup testMainMenu = new DefaultActionGroup(localization.actionGroupMenuName(), true,
                 actionManager);
         actionManager.registerAction("TestingMainGroup", testMainMenu);
-        for (TestActionGroup testAction : testActions) {
+        for (TestAction testAction : testActions) {
             testAction.addMainMenuItems(testMainMenu);
             testMainMenu.addSeparator();
         }
@@ -49,7 +51,7 @@ public class TestingExtension {
         DefaultActionGroup testContextMenu = new DefaultActionGroup(localization.actionGroupMenuName(), true,
                 actionManager);
         actionManager.registerAction("TestingContextGroup", testContextMenu);
-        for (TestActionGroup testAction : testActions) {
+        for (TestAction testAction : testActions) {
             testAction.addContextMenuItems(testContextMenu);
             testContextMenu.addSeparator();
         }

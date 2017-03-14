@@ -18,7 +18,7 @@ source /dockerfiles/cli/tests/test_base.sh
   mkdir -p "${tmp_path}"
 
   #WHEN
-  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE init --skip:nightly
+  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE init --skip:nightly --skip:pull
 
   #THEN
   [[ -d "${container_tmp_path}"/docs ]]
@@ -27,7 +27,7 @@ source /dockerfiles/cli/tests/test_base.sh
   [[ -e "${container_tmp_path}"/cli.log ]]
 
   #WHEN
-  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE destroy --quiet --skip:nightly
+  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE destroy --quiet --skip:nightly --skip:pull
   
   #THEN
   [[ ! -d "${container_tmp_path}"/docs ]]
@@ -44,7 +44,7 @@ source /dockerfiles/cli/tests/test_base.sh
   container_tmp_path="${CONTAINER_TESTRUN_DIR}"/init-destroy2
  
   #WHEN  
-  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE init --skip:nightly 1>/dev/null
+  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE init --skip:nightly --skip:pull 1>/dev/null
 
   #THEN
   [[ -e "${container_tmp_path}" ]]
@@ -54,7 +54,7 @@ source /dockerfiles/cli/tests/test_base.sh
   [[ -e "${container_tmp_path}"/cli.log ]]
 
   #WHEN
-  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE destroy --skip:nightly --quiet 1>/dev/null
+  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE destroy --skip:nightly --skip:pull --quiet 1>/dev/null
   
   #THEN
   [[ ! -d "${container_tmp_path}"/docs ]]
@@ -73,7 +73,7 @@ source /dockerfiles/cli/tests/test_base.sh
   mkdir -p "${tmp_path}"
 
   #WHEN
-  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE init --skip:nightly 1>/dev/null
+  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE init --skip:nightly --skip:pull 1>/dev/null
   remove_named_container $CLI_CONTAINER
 
   #THEN
@@ -83,7 +83,7 @@ source /dockerfiles/cli/tests/test_base.sh
   [[ -e "${container_tmp_path}"/cli.log ]]
 
   #WHEN
-  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE destroy --skip:nightly --quiet --cli 1>/dev/null
+  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE destroy --skip:nightly --skip:pull --quiet --cli 1>/dev/null
   
   #THEN
   [[ ! -d "${container_tmp_path}"/docs ]]
@@ -101,7 +101,7 @@ source /dockerfiles/cli/tests/test_base.sh
   container_tmp_path="${CONTAINER_TESTRUN_DIR}"/init-destroy4
 
   #WHEN
-  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE init --skip:nightly 1>/dev/null
+  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE init --skip:nightly --skip:pull 1>/dev/null
 
   #THEN
   [[ -d "${container_tmp_path}" ]]
@@ -111,7 +111,7 @@ source /dockerfiles/cli/tests/test_base.sh
   [[ -e "${container_tmp_path}"/cli.log ]]
 
   #WHEN
-  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE destroy --skip:nightly --quiet --cli 1>/dev/null
+  docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock -v "${tmp_path}":/data $CLI_IMAGE destroy --skip:nightly --skip:pull --quiet --cli 1>/dev/null
   
   #THEN
   [[ ! -d "${container_tmp_path}"/docs ]]

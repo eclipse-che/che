@@ -16,7 +16,7 @@ import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.keybinding.KeyBuilder;
 import org.eclipse.che.ide.util.browser.UserAgent;
-import org.eclipse.che.plugin.testing.ide.TestActionGroup;
+import org.eclipse.che.plugin.testing.ide.TestAction;
 import org.eclipse.che.plugin.testing.testng.ide.action.RunAllTestAction;
 import org.eclipse.che.plugin.testing.testng.ide.action.RunClassContextTestAction;
 import org.eclipse.che.plugin.testing.testng.ide.action.RunClassTestAction;
@@ -29,7 +29,7 @@ import com.google.inject.Inject;
  *
  * @author Mirage Abeysekara
  */
-public class TestNGTestActionGroup implements TestActionGroup {
+public class TestNGTestActionGroup implements TestAction {
 
     private final Action runClassTestAction;
     private final Action runAllTestAction;

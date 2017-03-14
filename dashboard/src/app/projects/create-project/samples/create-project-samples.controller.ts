@@ -40,6 +40,11 @@ export class CreateProjectSamplesController {
    */
   getFilteredTemplates(): che.IProjectTemplate[] {
     let stackTags = !this.currentStackTags ? [] : this.currentStackTags.map((tag: string) => tag.toLowerCase());
+
+    if (!stackTags.length) {
+      return this.templates;
+    }
+
     return this.templates.filter((template: che.IProjectTemplate) => {
       let templateTags = template.tags.map((tag: string) => tag.toLowerCase());
       return stackTags.some((tag: string) => templateTags.indexOf(tag) > -1);

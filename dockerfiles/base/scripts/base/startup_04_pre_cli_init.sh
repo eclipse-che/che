@@ -126,8 +126,11 @@ verify_version() {
   # Only check for newer versions if not: skip network, offline, nightly.
   if ! is_offline && ! is_nightly && ! is_fast && ! skip_network; then
     NEWER=$(compare_versions $CHE_IMAGE_VERSION)
-
-    if [[ "${NEWER}" != "" ]]; then
+    if [[ "${NEWER}" == "null" ]]; then
+      warning "Unable to retrieve version list from public Docker Hub for image named ${CHE_IMAGE_NAME}."
+      warning "Diagnose with 'docker run -it appropriate/curl -s https://hub.docker.com/v2/repositories/${CHE_IMAGE_NAME}/tags/'."
+      warning "Use '--skip:network' to ignore this check."
+    elif [[ "${NEWER}" != "" ]]; then
       warning "Newer version '$NEWER' available"
     fi
   fi
@@ -258,11 +261,9 @@ compare_versions() {
   local VERSION_LIST_JSON=$(curl -s https://hub.docker.com/v2/repositories/${CHE_IMAGE_NAME}/tags/)
   local NUMBER_OF_VERSIONS=$(echo $VERSION_LIST_JSON | jq '.count')
 
-  if [[ "${NUMBER_OF_VERSIONS}" = "" ]]; then
-    error "Unable to retrieve version list from public Docker Hub."
-    error "Diagnose with 'docker run -it appropriate/curl -s https://hub.docker.com/v2/repositories/${CHE_IMAGE_NAME}/tags/'."
-    error "Use '--skip:network' to ignore this check."
-    return 2
+  if [[ "${NUMBER_OF_VERSIONS}" = "" ]] || [[ "${NUMBER_OF_VERSIONS}" = "null" ]]; then
+    echo "null"
+    return
   fi
 
   DISPLAY_LIMIT=10

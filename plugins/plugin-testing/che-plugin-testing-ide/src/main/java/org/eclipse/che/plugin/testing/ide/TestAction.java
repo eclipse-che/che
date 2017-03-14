@@ -19,7 +19,7 @@ import org.eclipse.che.ide.api.action.DefaultActionGroup;
  *
  * @author Mirage Abeysekara
  */
-public interface TestActionGroup {
+public interface TestAction {
 
     /**
      * This method get called when the extension is loading and adding the menu
