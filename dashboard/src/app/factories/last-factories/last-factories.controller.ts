@@ -46,7 +46,7 @@ export class LastFactoriesController {
    * Update factories array
    */
   updateFactories() {
-    this.factories = cheAPI.getFactory().getPageFactories();
+    this.factories = this.cheAPI.getFactory().getPageFactories();
   }
 
   getFactories() {

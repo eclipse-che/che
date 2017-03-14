@@ -19,6 +19,7 @@ interface IFactoriesResource<T> extends ng.resource.IResourceClass<T> {
   getFactoryParameters: any;
   createFactoryByContent: any;
   getFactories: any;
+  getFactoryByName: any;
 }
 
 
@@ -36,6 +37,7 @@ export class CheFactory {
   private remoteFactoryAPI: IFactoriesResource<any>;
 
   private factoriesById: Map<string, che.IFactory>;
+  private factoriesByName: Map<string, che.IFactory>;
   private parametersFactories: Map<string, che.IFactory>;
   private factoryContentsByWorkspaceId: Map<string, any>;
   private pageFactories: Array<che.IFactory>;
@@ -55,7 +57,10 @@ export class CheFactory {
 
     this.lodash = lodash;
 
-    this.factoriesById = new Map();// factories details by id
+    // factories details by id
+    this.factoriesById = new Map();
+    // factories details by key: userID:factoryName
+    this.factoriesByName = new Map();
     this.parametersFactories = new Map();
     this.factoryContentsByWorkspaceId = new Map();
 
@@ -83,6 +88,11 @@ export class CheFactory {
         transformResponse: (data, headersGetter) => {
           return this._getPageFromResponse(data, headersGetter('link'));
         }
+      },
+      getFactoryByName: {
+        method: 'GET',
+        url: '/api/factory/find?creator.userId=:userId&name=:factoryName',
+        isArray: true
       }
     });
   }
@@ -439,6 +449,32 @@ export class CheFactory {
     }, (error: any) => {
       if (error.status === 304) {
         deferred.resolve(this.factoriesById.get(factoryId));
+      } else {
+        deferred.reject(error);
+      }
+    });
+
+    return deferred.promise;
+  }
+
+  /**
+   * Fetches factory by the user's id and factory's name.
+   *
+   * @param factoryName name of the factory to be fetched.
+   * @param userId user id
+   * @returns {IPromise<T>}
+   */
+  fetchFactoryByName(factoryName: string, userId: string): ng.IPromise<any> {
+    let deferred = this.$q.defer();
+    let key = userId + ':' + factoryName;
+    let promise = this.remoteFactoryAPI.getFactoryByName({factoryName: factoryName, userId: userId}).$promise;
+    promise.then((factories: Array<che.IFactory>) => {
+      let factory = factories.length ? factories[0] : null;
+      this.factoriesByName.set(key, factory);
+      deferred.resolve(factory);
+    }, (error: any) => {
+      if (error.status === 304) {
+        deferred.resolve(this.factoriesByName.get(key));
       } else {
         deferred.reject(error);
       }

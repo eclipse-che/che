@@ -17,7 +17,7 @@ import {LastFactoriesConfig} from './last-factories/last-factories-config';
 import {ListFactoriesCtrl} from './list-factories/list-factories.controller';
 import {FactoryItemCtrl} from './list-factories/factory-item/factory-item.controller';
 import {CheFactoryItem} from './list-factories/factory-item/factory-item.directive';
-import {LoadFactoryCtrl} from './load-factory/load-factory.controller';
+import {LoadFactoryController} from './load-factory/load-factory.controller';
 import {LoadFactoryService} from './load-factory/load-factory.service';
 
 export class FactoryConfig {
@@ -28,7 +28,7 @@ export class FactoryConfig {
     register.controller('FactoryItemCtrl', FactoryItemCtrl);
     register.directive('cdvyFactoryItem', CheFactoryItem);
 
-    register.controller('LoadFactoryCtrl', LoadFactoryCtrl);
+    register.controller('LoadFactoryController', LoadFactoryController);
     register.service('loadFactoryService', LoadFactoryService);
 
     // config routes
@@ -42,14 +42,14 @@ export class FactoryConfig {
         .accessWhen('/load-factory', {
           title: 'Load Factory',
           templateUrl: 'app/factories/load-factory/load-factory.html',
-          controller: 'LoadFactoryCtrl',
-          controllerAs: 'loadFactoryCtrl'
+          controller: 'LoadFactoryController',
+          controllerAs: 'loadFactoryController'
         })
       .accessWhen('/load-factory/:id', {
         title: 'Load Factory',
         templateUrl: 'app/factories/load-factory/load-factory.html',
-        controller: 'LoadFactoryCtrl',
-        controllerAs: 'loadFactoryCtrl'
+        controller: 'LoadFactoryController',
+        controllerAs: 'loadFactoryController'
       });
 
     });

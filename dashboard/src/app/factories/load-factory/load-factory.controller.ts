@@ -9,18 +9,45 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {CheAPI} from '../../../components/api/che-api.factory';
+import {LoadFactoryService} from './load-factory.service';
+import {CheNotification} from '../../../components/notification/che-notification.factory';
+import {RouteHistory} from '../../../components/routing/route-history.service';
 
 /**
  * This class is handling the controller for the factory loading.
  * @author Ann Shumilova
  */
-export class LoadFactoryCtrl {
+export class LoadFactoryController {
+
+  private cheAPI: CheAPI;
+  private $websocket: ng.websocket.IWebSocketProvider;
+  private $timeout: ng.ITimeoutService;
+  private $mdDialog: ng.material.IDialogService;
+  private loadFactoryService: LoadFactoryService;
+  private lodash: _.LoDashStatic;
+  private cheNotification: CheNotification;
+  private $location: ng.ILocationService;
+  private routeHistory: RouteHistory;
+  private $window: ng.IWindowService;
+  private routeParams: any;
+
+  private workspaces: Array<che.IWorkspace>;
+  private workspace: che.IWorkspace;
+  private projectsToImport: number;
+
+  private websocketReconnect: number;
+
+  private factory: che.IFactory;
+
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheAPI, $websocket, $route, $timeout, $mdDialog, loadFactoryService, lodash, cheNotification, $location, routeHistory, $window) {
+  constructor(cheAPI: CheAPI, $websocket: ng.websocket.IWebSocketProvider, $route: ng.route.IRouteService, $timeout: ng.ITimeoutService,
+              $mdDialog: ng.material.IDialogService, loadFactoryService: LoadFactoryService, lodash: _.LoDashStatic, cheNotification: CheNotification,
+              $location: ng.ILocationService, routeHistory: RouteHistory, $window: ng.IWindowService) {
     this.cheAPI = cheAPI;
     this.$websocket = $websocket;
     this.$timeout = $timeout;
@@ -46,33 +73,44 @@ export class LoadFactoryCtrl {
     this.getFactoryData();
   }
 
-  hideMenuAndFooter() {
-    angular.element('#chenavmenu').hide();
+  /**
+   * Hides menu and footer to maximize view.
+   */
+  hideMenuAndFooter(): void {
+    angular.element(document.querySelectorAll('[id*=navmenu]')).hide();
     angular.element(document.querySelectorAll('.che-footer')).hide();
   }
 
-  restoreMenuAndFooter() {
-    angular.element('#chenavmenu').show();
+  /**
+   * Restores the menu and footer.
+   */
+  restoreMenuAndFooter(): void {
+    angular.element(document.querySelectorAll('[id*=navmenu]')).show();
     angular.element(document.querySelectorAll('.che-footer')).show();
   }
 
   /**
-   * Retrieve factory data.
+   * Retrieves factory data.
    */
-  getFactoryData() {
-    var promise;
+  getFactoryData(): void {
+    let promise;
     if (this.routeParams.id) {
       this.factory = this.cheAPI.getFactory().getFactoryById(this.routeParams.id);
       promise = this.cheAPI.getFactory().fetchFactoryById(this.routeParams.id);
     } else if (this.routeParams) {
-      promise = this.cheAPI.getFactory().fetchParameterFactory(this.routeParams);
+      promise = this.processFactoryParameters(this.routeParams);
     } else {
       this.getLoadingSteps()[this.getCurrentProgressStep()].hasError = true;
       this.getLoadingSteps()[this.getCurrentProgressStep()].logs = 'Required parameters for loading factory are not there.';
     }
     if (promise) {
-      promise.then((factory) => {
+      promise.then((factory: che.IFactory) => {
         this.factory = factory;
+
+        //Check factory polices:
+        if (!this.checkPolicies(this.factory)) {
+          return;
+        }
 
         //Check factory contains workspace config:
         if (!this.factory.workspace) {
@@ -81,13 +119,79 @@ export class LoadFactoryCtrl {
         } else {
           this.fetchWorkspaces();
         }
-      }, (error) => {
+      }, (error: any) => {
         this.handleError(error);
       });
     }
   }
 
-  handleError(error) {
+  /**
+   * Processes factory parameters.
+   *
+   * @param parameters
+   * @returns {any}
+   */
+  processFactoryParameters(parameters: any): ng.IPromise<any> {
+    //User name and factory name should be handled differently:
+    if (parameters['name'] || parameters['user']) {
+      if (Object.keys(parameters).length == 2) {
+        return this.processUser(parameters['user'], parameters['name']);
+      } else {
+        let paramName = parameters['user'] ? 'Factory name' : 'User name';
+        this.getLoadingSteps()[this.getCurrentProgressStep()].logs = 'Invalid factory URL. ' + paramName + ' is missed or misspelled.';
+        this.getLoadingSteps()[this.getCurrentProgressStep()].hasError = true;
+        return null;
+      }
+    }
+
+    return this.cheAPI.getFactory().fetchParameterFactory(parameters);
+  }
+
+  /**
+   * Processes factory's user. Checks user with such name exists.
+   *
+   * @param name user name
+   * @param factoryName
+   * @returns {IPromise<IHttpPromiseCallbackArg<any>>}
+   */
+  processUser(name: string, factoryName: string): ng.IPromise<any> {
+    return this.cheAPI.getUser().fetchUserByName(name).then((user: che.IUser) => {
+      return this.cheAPI.getFactory().fetchFactoryByName(factoryName, user.id);
+    }, (error: any) => {
+      this.getLoadingSteps()[this.getCurrentProgressStep()].logs = 'Invalid factory URL. User with name ' + name + ' does not exist.';
+      this.getLoadingSteps()[this.getCurrentProgressStep()].hasError = true;
+      return null;
+    });
+  }
+
+  /**
+   * Checks factory's policies.
+   *
+   * @param factory factory to be checked
+   * @returns {boolean} <code>true</code> if factory policies validation has passed
+   */
+  checkPolicies(factory: che.IFactory): boolean {
+    if (!factory.policies || !factory.policies.referer) {
+      return true;
+    }
+    //Process referrer:
+    let factoryReferrer  = factory.policies.referer;
+    let referrer = document.referrer;
+    if (referrer && (referrer.indexOf(factoryReferrer) >= 0)) {
+      return true;
+    } else {
+      this.getLoadingSteps()[this.getCurrentProgressStep()].logs = 'Factory referrer policy does not match the current one.';
+      this.getLoadingSteps()[this.getCurrentProgressStep()].hasError = true;
+      return false;
+    }
+  }
+
+  /**
+   * Handles pointed error - prints it on the proper screen.
+   *
+   * @param error error to be handled
+   */
+  handleError(error: any): void {
     if (error.data.message) {
       this.getLoadingSteps()[this.getCurrentProgressStep()].logs = error.data.message;
       this.cheNotification.showError(error.data.message);
@@ -98,18 +202,18 @@ export class LoadFactoryCtrl {
   /**
    * Detect workspace to start: create new one or get created one.
    */
-  getWorkspaceToStart() {
+  getWorkspaceToStart(): void {
     let createPolicy = (this.factory.policies) ? this.factory.policies.create : 'perClick';
     var workspace = null;
     switch (createPolicy) {
       case 'perUser' :
-        workspace = this.lodash.find(this.workspaces, (w) => {
+        workspace = this.lodash.find(this.workspaces, (w: che.IWorkspace) => {
           return this.factory.id === w.attributes.factoryId;
         });
         break;
       case 'perAccount' :
         //TODO when account is ready
-        workspace = this.lodash.find(this.workspaces, (w) => {
+        workspace = this.lodash.find(this.workspaces, (w: che.IWorkspace) => {
           return this.factory.workspace.name === w.config.name;
         });
         break;
@@ -124,7 +228,10 @@ export class LoadFactoryCtrl {
     }
   }
 
-  fetchWorkspaces() {
+  /**
+   * Fetches workspaces.
+   */
+  fetchWorkspaces(): any {
     this.loadFactoryService.goToNextStep();
 
     let promise = this.cheAPI.getWorkspace().fetchWorkspaces();
@@ -140,7 +247,7 @@ export class LoadFactoryCtrl {
   /**
    * Create workspace from factory config.
    */
-  createWorkspace() {
+  createWorkspace(): any {
     let config = this.factory.workspace;
     //set factory attribute:
     let attrs = {factoryId: this.factory.id};
@@ -148,11 +255,11 @@ export class LoadFactoryCtrl {
 
     //TODO: fix account when ready:
     let creationPromise = this.cheAPI.getWorkspace().createWorkspaceFromConfig(null, config, attrs);
-    creationPromise.then((data) => {
+    creationPromise.then((data: any) => {
       this.$timeout(() => {
         this.startWorkspace(data);
       }, 1000);
-    }, (error) => {
+    }, (error: any) => {
       this.handleError(error);
     });
   }
@@ -160,9 +267,12 @@ export class LoadFactoryCtrl {
   /**
    * Get workspace name by detecting the existing names
    * and generate new name if necessary.
+   *
+   * @param name workspace name
+   * @returns {string} generated name
    */
-  getWorkspaceName(name) {
-    if (this.workspaces.size === 0) {
+  getWorkspaceName(name: string): string {
+    if (this.workspaces.length === 0) {
       return name;
     }
     let existingNames = this.lodash.pluck(this.workspaces, 'config.name');
@@ -180,9 +290,11 @@ export class LoadFactoryCtrl {
   }
 
   /**
-   * Start workspace.
+   * Checks workspace status and starts it if necessary,
+   *
+   * @param workspace workspace to process
    */
-  startWorkspace(workspace) {
+  startWorkspace(workspace: che.IWorkspace): void {
     this.workspace = workspace;
     var bus = this.cheAPI.getWebsocket().getBus();
 
@@ -199,7 +311,12 @@ export class LoadFactoryCtrl {
     }, 2000);
   }
 
-  doStartWorkspace(workspace) {
+  /**
+   * Performs workspace start.
+   *
+   * @param workspace
+   */
+  doStartWorkspace(workspace: che.IWorkspace): void {
     let startWorkspacePromise = this.cheAPI.getWorkspace().startWorkspace(workspace.id, workspace.config.defaultEnv);
     this.loadFactoryService.goToNextStep();
 
@@ -228,13 +345,13 @@ export class LoadFactoryCtrl {
     });
   }
 
-  subscribeOnEvents(data, bus) {
+  subscribeOnEvents(data: any, bus: any): void {
     // get channels
-    let statusLink = this.lodash.find(data.links, (link) => {
+    let statusLink = this.lodash.find(data.links, (link: any) => {
       return link.rel === 'environment.status_channel';
     });
 
-    let outputLink = this.lodash.find(data.links, (link) => {
+    let outputLink = this.lodash.find(data.links, (link: any) => {
       return link.rel === 'environment.output_channel';
     });
 
@@ -244,7 +361,7 @@ export class LoadFactoryCtrl {
     let statusChannel = statusLink ? statusLink.parameters[0].defaultValue : null;
     let outputChannel = outputLink ? outputLink.parameters[0].defaultValue : null;
 
-    bus.subscribe(outputChannel, (message) => {
+    bus.subscribe(outputChannel, (message: any) => {
       message = this.getDisplayMachineLog(message);
       if (this.getLoadingSteps()[this.getCurrentProgressStep()].logs.length > 0) {
         this.getLoadingSteps()[this.getCurrentProgressStep()].logs = this.getLoadingSteps()[this.getCurrentProgressStep()].logs + '\n' + message;
@@ -254,7 +371,7 @@ export class LoadFactoryCtrl {
     });
 
     // for now, display log of status channel in case of errors
-    bus.subscribe(statusChannel, (message) => {
+    bus.subscribe(statusChannel, (message: any) => {
       if (message.eventType === 'DESTROYED' && message.workspaceId === data.id) {
         this.getLoadingSteps()[this.getCurrentProgressStep()].hasError = true;
 
@@ -282,7 +399,7 @@ export class LoadFactoryCtrl {
     });
 
     // subscribe to workspace events
-    bus.subscribe('workspace:' + workspaceId, (message) => {
+    bus.subscribe('workspace:' + workspaceId, (message: any) => {
 
       if (message.eventType === 'ERROR' && message.workspaceId === workspaceId) {
         // need to show the error
@@ -301,7 +418,7 @@ export class LoadFactoryCtrl {
       }
     });
 
-    bus.subscribe(agentChannel, (message) => {
+    bus.subscribe(agentChannel, (message: any) => {
       let agentStep = 3;
       if (this.loadFactoryService.getCurrentProgressStep() < agentStep) {
         this.loadFactoryService.setCurrentProgressStep(agentStep);
@@ -322,7 +439,7 @@ export class LoadFactoryCtrl {
    * @param log origin log content
    * @returns {*} parsed log
    */
-  getDisplayMachineLog(log) {
+  getDisplayMachineLog(log: any): string {
     log = angular.fromJson(log);
     if (angular.isObject(log)) {
       return '[' + log.machineName + '] ' + log.content;
@@ -331,7 +448,12 @@ export class LoadFactoryCtrl {
     }
   }
 
-  importProjects(bus) {
+  /**
+   * Performs importing projects.
+   *
+   * @param bus
+   */
+  importProjects(bus: any): void {
     let promise = this.cheAPI.getWorkspace().fetchWorkspaceDetails(this.workspace.id);
     promise.then(() => {
       let projects = this.cheAPI.getWorkspace().getWorkspacesById().get(this.workspace.id).config.projects;
@@ -347,12 +469,15 @@ export class LoadFactoryCtrl {
   }
 
   /**
-   * Detect projects to import by their existence on file system.
+   * Detects the projects to be imported.
+   *
+   * @param projects projects list
+   * @param bus
    */
-  detectProjectsToImport(projects, bus) {
+  detectProjectsToImport(projects: Array<che.IProject>, bus: any): void {
     this.projectsToImport = 0;
 
-    projects.forEach((project) => {
+    projects.forEach((project: che.IProject) => {
       if (!this.isProjectOnFileSystem(project)) {
         this.projectsToImport++;
         this.importProject(this.workspace.id, project, bus);
@@ -367,7 +492,7 @@ export class LoadFactoryCtrl {
   /**
    * Project is on file system if there is no errors except code=9.
    */
-  isProjectOnFileSystem(project) {
+  isProjectOnFileSystem(project: che.IProject): boolean {
     let problems = project.problems;
     if (!problems || problems.length === 0) {
       return true;
@@ -383,15 +508,19 @@ export class LoadFactoryCtrl {
   }
 
   /**
-   * Perform import project
+   * Performs project import to pointed workspace.
+   *
+   * @param workspaceId workspace id, where project should be imported to
+   * @param project project to be imported
+   * @param bus
    */
-  importProject(workspaceId, project, bus) {
+  importProject(workspaceId: string, project: che.IProject, bus: any): void {
     var promise;
     // websocket channel
     var channel = 'importProject:output';
 
     // on import
-    bus.subscribe(channel, (message) => {
+    bus.subscribe(channel, (message: any) => {
       this.getLoadingSteps()[this.getCurrentProgressStep()].logs = message.line;
     });
 
@@ -400,7 +529,7 @@ export class LoadFactoryCtrl {
 
     // needs to update configuration of the project
     let updatePromise = promise.then(() => {
-      projectService.updateProject(project.name, project).$promise;
+      projectService.updateProject(project.name, project);
     }, (error) => {
       this.handleError(error);
     });
@@ -426,7 +555,10 @@ export class LoadFactoryCtrl {
     });
   }
 
-  finish() {
+  /**
+   * Performs operations at the end of accepting factory.
+   */
+  finish(): void {
     this.loadFactoryService.setCurrentProgressStep(4);
 
     // people should go back to the dashboard after factory is initialized
@@ -447,52 +579,93 @@ export class LoadFactoryCtrl {
     this.$location.path(this.getIDELink()).search('ideParams', ideParams);
 
     // restore elements
-    angular.element('#chenavmenu').show();
-    angular.element(document.querySelectorAll('.che-footer')).show();
-
+    this.restoreMenuAndFooter();
   }
 
-  getWorkspace() {
+  /**
+   * Returns workspace name.
+   *
+   * @returns {string}
+   */
+  getWorkspace(): string {
     return this.workspace.config.name;
   }
 
-  getStepText(stepNumber) {
+  /**
+   * Returns the text(logs) of pointed step.
+   *
+   * @param stepNumber number of step
+   * @returns {string} step's text
+   */
+  getStepText(stepNumber: number): string {
     return this.loadFactoryService.getStepText(stepNumber);
   }
 
-  getLoadingSteps() {
+  /**
+   * Returns loading steps of the factory.
+   *
+   * @returns {any}
+   */
+  getLoadingSteps(): any {
     return this.loadFactoryService.getFactoryLoadingSteps();
   }
 
-  getCurrentProgressStep() {
+  /**
+   * Returns the current step, which is in progress.
+   *
+   * @returns {any} the info of current step, which is in progress
+   */
+  getCurrentProgressStep(): any {
     return this.loadFactoryService.getCurrentProgressStep();
   }
 
-  isLoadFactoryInProgress() {
+  /**
+   * Returns the loading factory in progress state.
+   *
+   * @returns {boolean}
+   */
+  isLoadFactoryInProgress(): boolean {
     return this.loadFactoryService.isLoadFactoryInProgress();
   }
 
-  setLoadFactoryInProgress() {
+  /**
+   * Set the loading factory process in progress.
+   */
+  setLoadFactoryInProgress(): void {
     this.loadFactoryService.setLoadFactoryInProgress(true);
   }
 
-  resetLoadFactoryInProgress() {
+  /**
+   * Reset the loading factory process.
+   */
+  resetLoadFactoryInProgress(): void {
     this.restoreMenuAndFooter();
     let newLocation = this.isResourceProblem() ? '/workspaces' : '/factories';
     this.$location.path(newLocation);
     this.loadFactoryService.resetLoadProgress();
   }
 
+  /**
+   * Returns IDE link.
+   *
+   * @returns {string} IDE application link
+   */
   getIDELink() {
     return '/ide/' + this.workspace.namespace + '/' + this.workspace.config.name;
   }
 
-  backToDashboard() {
+  /**
+   * Performs navigation back to dashboard.
+   */
+  backToDashboard(): void {
     this.restoreMenuAndFooter();
     this.$location.path('/');
   }
 
-  downloadLogs() {
+  /**
+   * Performs downloading of the logs.
+   */
+  downloadLogs(): void {
     let logs = '';
     this.getLoadingSteps().forEach((step) => {
       logs += step.logs + '\n';
@@ -500,7 +673,12 @@ export class LoadFactoryCtrl {
     window.open('data:text/csv,' + encodeURIComponent(logs));
   }
 
-  isResourceProblem() {
+  /**
+   * Returns whether there was problem with resources.
+   *
+   * @returns {any|boolean}
+   */
+  isResourceProblem(): boolean {
     let currentCreationStep = this.getLoadingSteps()[this.getCurrentProgressStep()];
     return currentCreationStep.hasError && currentCreationStep.logs.includes('You can stop other workspaces');
   }

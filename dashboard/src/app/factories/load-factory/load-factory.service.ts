@@ -15,19 +15,16 @@
  * @author Ann Shumilova
  */
 export class LoadFactoryService {
+  private loadFactoryInProgress: boolean;
+  private currentProgressStep: number;
+  private loadingSteps: Array<any>;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor ($timeout, $compile) {
-    this.$timeout = $timeout;
-    this.$compile = $compile;
-    this.init = false;
-
-
+  constructor () {
     this.loadFactoryInProgress = false;
-
     this.currentProgressStep = 0;
 
 
@@ -38,12 +35,15 @@ export class LoadFactoryService {
       {text: 'Starting workspace agent', inProgressText: 'Agents provide RESTful services like intellisense and SSH', logs: '', hasError: false},
       {text: 'Open IDE', inProgressText: '', logs: '', hasError: false}
     ];
-
-    this.popupVisible = false;
-    this.initPopup = false;
   }
 
-  getStepText(stepNumber) {
+  /**
+   * Get the text of the pointed step depending on it's state.
+   *
+   * @param stepNumber number of the step.
+   * @returns {string} steps's text
+   */
+  getStepText(stepNumber: number): string {
     let entry = this.loadingSteps[stepNumber];
     if (this.currentProgressStep >= stepNumber) {
       return entry.inProgressText;
@@ -52,23 +52,44 @@ export class LoadFactoryService {
     }
   }
 
-  getFactoryLoadingSteps() {
+  /**
+   * Returns the information of the factory's loading steps.
+   *
+   * @returns {Array<any>} loading steps of the factory
+   */
+  getFactoryLoadingSteps(): Array<any> {
     return this.loadingSteps;
   }
 
-  setCurrentProgressStep(currentProgressStep) {
+  /**
+   * Sets the number of the step, which has to be in progress.
+   *
+   * @param currentProgressStep step number
+   */
+  setCurrentProgressStep(currentProgressStep: number): void {
     this.currentProgressStep = currentProgressStep;
   }
 
-  goToNextStep() {
+  /**
+   * Proceeds the flow to the next step.
+   */
+  goToNextStep(): void {
     this.currentProgressStep++;
   }
 
-  getCurrentProgressStep() {
+  /**
+   * Returns the number of the current step.
+   *
+   * @returns {number} current step's number
+   */
+  getCurrentProgressStep(): number {
     return this.currentProgressStep;
   }
 
-  resetLoadProgress() {
+  /**
+   * Reset the loading progress.
+   */
+  resetLoadProgress(): void {
     this.loadingSteps.forEach((step) => {
       step.logs = '';
     step.hasError = false;
@@ -78,11 +99,21 @@ export class LoadFactoryService {
   this.loadFactoryInProgress = false;
   }
 
-  isLoadFactoryInProgress() {
+  /**
+   *  Returns the in-progress state of the whole factory loading flow.
+   *
+   * @returns {boolean}
+   */
+  isLoadFactoryInProgress(): boolean {
     return this.loadFactoryInProgress;
   }
 
-  setLoadFactoryInProgress(value) {
+  /**
+   * Sets the in-progress state of the whole factory loading flow.
+   *
+   * @param value
+   */
+  setLoadFactoryInProgress(value: boolean): void {
     this.loadFactoryInProgress = value;
   }
 }
