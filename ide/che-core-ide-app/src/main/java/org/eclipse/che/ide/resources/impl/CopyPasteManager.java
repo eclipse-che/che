@@ -104,6 +104,9 @@ class CopyPasteManager implements ResourceChangedHandler {
         pasteSuccessively(promise, resources, 0, destination).then(new Operation<Void>() {
             @Override
             public void apply(Void ignored) throws OperationException {
+                final Path lastCopiedResource = destination.append(resources[resources.length - 1].getName());
+
+                eventBus.fireEvent(new RevealResourceEvent(lastCopiedResource));
                 resources = new Resource[0];
             }
         });
@@ -141,7 +144,6 @@ class CopyPasteManager implements ResourceChangedHandler {
         return resource.move(destination).thenPromise(new Function<Resource, Promise<Void>>() {
             @Override
             public Promise<Void> apply(Resource resource) throws FunctionException {
-                eventBus.fireEvent(new RevealResourceEvent(resource));
                 return promises.resolve(null);
             }
         }).catchErrorPromise(new Function<PromiseError, Promise<Void>>() {
@@ -245,7 +247,6 @@ class CopyPasteManager implements ResourceChangedHandler {
         return resource.copy(destination).thenPromise(new Function<Resource, Promise<Void>>() {
             @Override
             public Promise<Void> apply(Resource resource) throws FunctionException {
-                eventBus.fireEvent(new RevealResourceEvent(resource));
                 return promises.resolve(null);
             }
         }).catchErrorPromise(new Function<PromiseError, Promise<Void>>() {
