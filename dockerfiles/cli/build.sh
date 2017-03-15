@@ -5,13 +5,13 @@
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
 
-# Define space separated list of aliases for the docker image
-IMAGE_ALIASES="eclipse/che-cli"
-
 base_dir=$(cd "$(dirname "$0")"; pwd)
 . "${base_dir}"/../build.include
 
 init --name:cli "$@"
+
+# Define space separated list of aliases for the docker image
+IMAGE_ALIASES="${ORGANIZATION}/${PREFIX}"
 
 if [[ ! -f "${base_dir}/version/$TAG/images" ]]; then
 	mkdir -p ${base_dir}/version/$TAG/
