@@ -348,25 +348,30 @@ public final class ResourceManager {
                     @Override
                     public Promise<Folder> apply(final ItemReference reference) throws FunctionException {
 
-                        return getRemoteResources(parent, path.segmentCount(), true)
-                                .then(new Function<Resource[], Folder>() {
-                                    @Override
-                                    public Folder apply(Resource[] resources) throws FunctionException {
+                        final Resource createdFolder = newResourceFrom(reference);
+                        eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(createdFolder, ADDED | DERIVED)));
 
-                                        final Path referencePath = Path.valueOf(reference.getPath());
+                        return promises.resolve(createdFolder.asFolder());
 
-                                        for (Resource descendant : resources) {
-                                            if (descendant.getLocation().equals(referencePath)) {
-                                                eventBus.fireEvent(
-                                                        new ResourceChangedEvent(new ResourceDeltaImpl(descendant, ADDED | DERIVED)));
-
-                                                return (Folder)descendant;
-                                            }
-                                        }
-
-                                        throw new IllegalArgumentException("Failed to locate created folder");
-                                    }
-                                });
+//                        return getRemoteResources(parent, path.segmentCount(), true)
+//                                .then(new Function<Resource[], Folder>() {
+//                                    @Override
+//                                    public Folder apply(Resource[] resources) throws FunctionException {
+//
+//                                        final Path referencePath = Path.valueOf(reference.getPath());
+//
+//                                        for (Resource descendant : resources) {
+//                                            if (descendant.getLocation().equals(referencePath)) {
+//                                                eventBus.fireEvent(
+//                                                        new ResourceChangedEvent(new ResourceDeltaImpl(descendant, ADDED | DERIVED)));
+//
+//                                                return (Folder)descendant;
+//                                            }
+//                                        }
+//
+//                                        throw new IllegalArgumentException("Failed to locate created folder");
+//                                    }
+//                                });
                     }
                 });
             }
@@ -386,25 +391,30 @@ public final class ResourceManager {
                     @Override
                     public Promise<File> apply(final ItemReference reference) throws FunctionException {
 
-                        return getRemoteResources(parent, DEPTH_ONE, true)
-                                .then(new Function<Resource[], File>() {
-                                    @Override
-                                    public File apply(Resource[] resources) throws FunctionException {
+                        final Resource createdFile = newResourceFrom(reference);
+                        eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(createdFile, ADDED | DERIVED)));
 
-                                        final Path referencePath = Path.valueOf(reference.getPath());
+                        return promises.resolve(createdFile.asFile());
 
-                                        for (Resource descendant : resources) {
-                                            if (descendant.getLocation().equals(referencePath)) {
-                                                eventBus.fireEvent(
-                                                        new ResourceChangedEvent(new ResourceDeltaImpl(descendant, ADDED | DERIVED)));
-
-                                                return (File)descendant;
-                                            }
-                                        }
-
-                                        throw new IllegalArgumentException("Failed to locate created file");
-                                    }
-                                });
+//                        return getRemoteResources(parent, DEPTH_ONE, true)
+//                                .then(new Function<Resource[], File>() {
+//                                    @Override
+//                                    public File apply(Resource[] resources) throws FunctionException {
+//
+//                                        final Path referencePath = Path.valueOf(reference.getPath());
+//
+//                                        for (Resource descendant : resources) {
+//                                            if (descendant.getLocation().equals(referencePath)) {
+//                                                eventBus.fireEvent(
+//                                                        new ResourceChangedEvent(new ResourceDeltaImpl(descendant, ADDED | DERIVED)));
+//
+//                                                return (File)descendant;
+//                                            }
+//                                        }
+//
+//                                        throw new IllegalArgumentException("Failed to locate created file");
+//                                    }
+//                                });
                     }
                 });
             }
@@ -559,6 +569,8 @@ public final class ResourceManager {
                 }
 
                 eventBus.fireEvent(newFileTrackingSuspendEvent());
+
+                store.dispose(source.getLocation(), !source.isFile()); //TODO: need to be tested
 
                 return ps.move(source.getLocation(), destination.parent(), destination.lastSegment(), force)
                          .thenPromise(new Function<Void, Promise<Resource>>() {
