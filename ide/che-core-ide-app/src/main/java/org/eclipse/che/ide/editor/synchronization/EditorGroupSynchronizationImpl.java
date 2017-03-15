@@ -74,7 +74,10 @@ public class EditorGroupSynchronizationImpl implements EditorGroupSynchronizatio
 
     @Override
     public void removeEditor(EditorPartPresenter editor) {
-        editor.doSave();
+        if (editor.isDirty()) {
+            editor.doSave();
+        }
+
         HandlerRegistration handlerRegistration = synchronizedEditors.remove(editor);
         if (handlerRegistration != null) {
             handlerRegistration.removeHandler();
