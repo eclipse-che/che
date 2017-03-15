@@ -11,19 +11,23 @@
  *******************************************************************************/
 package org.eclipse.che.git.impl.jgit;
 
+import org.eclipse.che.api.core.util.LineConsumerFactory;
 import org.eclipse.che.api.git.CredentialsLoader;
 import org.eclipse.che.api.git.GitUserResolver;
 import org.eclipse.che.api.git.exception.GitException;
+import org.eclipse.che.api.git.params.CloneParams;
 import org.eclipse.che.api.git.params.CommitParams;
 import org.eclipse.che.api.git.shared.GitUser;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.plugin.ssh.key.script.SshKeyProvider;
+import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.TransportCommand;
 import org.eclipse.jgit.api.TransportConfigCallback;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.RepositoryState;
+import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.transport.SshTransport;
 import org.eclipse.jgit.transport.Transport;
 import org.eclipse.jgit.transport.TransportHttp;
@@ -36,6 +40,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import java.io.File;
 import java.lang.reflect.Field;
 
 import static java.util.Collections.singletonList;
@@ -232,5 +237,23 @@ public class JGitConnectionTest {
 
         //when
         jGitConnection.commit(CommitParams.create("message").withFiles(singletonList("NotChangedSpecified")).withAmend(true).withAll(true));
+    }
+
+    @Test
+    public void shouldCloseCloneCommand() throws Exception {
+        //given
+        File fileMock = mock(File.class);
+        Git cloneCommand = mock(Git.class);
+        jGitConnection.setOutputLineConsumerFactory(mock(LineConsumerFactory.class));
+        when(repository.getWorkTree()).thenReturn(fileMock);
+        when(repository.getDirectory()).thenReturn(fileMock);
+        when(repository.getConfig()).thenReturn(mock(StoredConfig.class));
+        doReturn(cloneCommand).when(jGitConnection).executeRemoteCommand(anyString(), anyObject(), anyString(), anyString());
+
+        //when
+        jGitConnection.clone(CloneParams.create("url").withWorkingDir("fakePath"));
+
+        //then
+        verify(cloneCommand).close();
     }
 }
