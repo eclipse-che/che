@@ -26,6 +26,7 @@ import org.eclipse.che.api.project.shared.dto.TreeElement;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.api.workspace.shared.dto.NewProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
@@ -63,6 +64,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Optional.absent;
+import static com.google.common.base.Optional.fromNullable;
 import static com.google.common.base.Optional.of;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -874,40 +876,68 @@ public final class ResourceManager {
 
     private Promise<Optional<Resource>> findResource(final Path absolutePath, boolean quiet) {
 
-        //search resource in local cache
-        final Optional<Resource> optionalCachedResource = store.getResource(absolutePath);
-        if (optionalCachedResource.isPresent()) {
-            return promises.resolve(optionalCachedResource);
-        }
+        return ps.getItem(absolutePath).then((Function<ItemReference, Optional<Resource>>)itemReference -> {
+            final Resource resource = newResourceFrom(itemReference);
 
-        //request from server
-        final Path projectPath = Path.valueOf(absolutePath.segment(0)).makeAbsolute();
-        final Optional<Resource> optProject = store.getResource(projectPath);
-        final boolean isPresent = optProject.isPresent();
+            store.dispose(absolutePath, false);
+            store.register(resource);
 
-        checkState(isPresent || quiet, "Resource with path '" + projectPath + "' doesn't exists");
+            if (resource.getResourceType() == PROJECT) {
+                final Optional<ProjectConfigDto> optionalConfig = findProjectConfigDto(resource.getLocation());
 
-        if (!isPresent) {
-            return promises.resolve(Optional.<Resource>absent());
-        }
+                if (optionalConfig.isPresent()) {
+                    final Optional<ProblemProjectMarker> optionalMarker = getProblemMarker(optionalConfig.get());
 
-        final Resource project = optProject.get();
-        checkState(project.getResourceType() == PROJECT, "Resource with path '" + projectPath + "' isn't a project");
-
-        final int seekDepth = absolutePath.segmentCount() - 1;
-
-        return getRemoteResources((Container)project, seekDepth, true).then(new Function<Resource[], Optional<Resource>>() {
-            @Override
-            public Optional<Resource> apply(Resource[] resources) throws FunctionException {
-                for (Resource resource : resources) {
-                    if (absolutePath.equals(resource.getLocation())) {
-                        return of(resource);
+                    if (optionalMarker.isPresent()) {
+                        resource.addMarker(optionalMarker.get());
                     }
                 }
-
-                return absent();
             }
+
+            return fromNullable(resource);
+        }).catchError(arg -> {
+
+            if (!quiet) {
+                throw new IllegalStateException(arg.getCause());
+            }
+
+            return Optional.absent();
         });
+
+//        //search resource in local cache
+//        final Optional<Resource> optionalCachedResource = store.getResource(absolutePath);
+//        if (optionalCachedResource.isPresent()) {
+//            return promises.resolve(optionalCachedResource);
+//        }
+//
+//        //request from server
+//        final Path projectPath = Path.valueOf(absolutePath.segment(0)).makeAbsolute();
+//        final Optional<Resource> optProject = store.getResource(projectPath);
+//        final boolean isPresent = optProject.isPresent();
+//
+//        checkState(isPresent || quiet, "Resource with path '" + projectPath + "' doesn't exists");
+//
+//        if (!isPresent) {
+//            return promises.resolve(Optional.<Resource>absent());
+//        }
+//
+//        final Resource project = optProject.get();
+//        checkState(project.getResourceType() == PROJECT, "Resource with path '" + projectPath + "' isn't a project");
+//
+//        final int seekDepth = absolutePath.segmentCount() - 1;
+//
+//        return getRemoteResources((Container)project, seekDepth, true).then(new Function<Resource[], Optional<Resource>>() {
+//            @Override
+//            public Optional<Resource> apply(Resource[] resources) throws FunctionException {
+//                for (Resource resource : resources) {
+//                    if (absolutePath.equals(resource.getLocation())) {
+//                        return of(resource);
+//                    }
+//                }
+//
+//                return absent();
+//            }
+//        });
     }
 
     private boolean isResourceOpened(final Resource resource) {
