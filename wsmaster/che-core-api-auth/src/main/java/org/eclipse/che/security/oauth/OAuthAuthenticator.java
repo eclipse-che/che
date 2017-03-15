@@ -16,6 +16,7 @@ import com.google.api.client.auth.oauth2.AuthorizationCodeResponseUrl;
 import com.google.api.client.auth.oauth2.BearerToken;
 import com.google.api.client.auth.oauth2.ClientParametersAuthentication;
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.auth.oauth2.StoredCredential;
 import com.google.api.client.auth.oauth2.TokenResponse;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -318,5 +319,10 @@ public abstract class OAuthAuthenticator {
      */
     public boolean isConfigured() {
         return flow != null;
+    }
+
+    public void setToken(String userId, OAuthToken token) throws IOException {
+        Credential credential = new Credential(BearerToken.authorizationHeaderAccessMethod()).setAccessToken(token.getToken());
+        flow.getCredentialDataStore().set(userId, new StoredCredential(credential));
     }
 }
