@@ -43,7 +43,8 @@ cmd_agenerate() {
              "plugin-menu-archetype          - Assembly with IDE extension to customize menu" \
              "plugin-wizard-archetype        - Assembly with custom C project type extension" \
              "plugin-serverservice-archetype - Assembly with simple IDE extesion and a server service" \
-             "plugin-embedjs-archetype       - Assembly with simple IDE extesion for using native javascript in widgets")
+             "plugin-embedjs-archetype       - Assembly with simple IDE extesion for using native javascript in widgets" \
+             "plugin-json-archetype          - Assembly with sample JSON project type, editor codeassistant, and workspace services")
     select opt in "${options[@]}"
     do
       case $opt in
@@ -65,6 +66,10 @@ cmd_agenerate() {
           ;;
         "plugin-embedjs-archetype       - Assembly with simple IDE extesion for using native javascript in widgets")
           ARCHETYPE_ID="plugin-embedjs-archetype"
+          break
+          ;;
+        "plugin-json-archetype          - Assembly with sample JSON project type, editor codeassistant, and workspace services")
+          ARCHETYPE_ID="plugin-json-archetype"
           break
           ;;
         *) echo invalid option;;
