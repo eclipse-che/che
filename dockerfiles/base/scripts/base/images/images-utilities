@@ -1,4 +1,4 @@
-UTILITY_IMAGE_CHEACTION=eclipse/che-action:nightly
-UTILITY_IMAGE_CHEDIR=eclipse/che-dir:nightly
-UTILITY_IMAGE_CHETEST=eclipse/che-test:nightly
-UTILITY_IMAGE_CHEMOUNT=eclipse/che-mount:nightly
+UTILITY_IMAGE_CHEACTION=eclipse/che-action:5.5.0
+UTILITY_IMAGE_CHEDIR=eclipse/che-dir:5.5.0
+UTILITY_IMAGE_CHETEST=eclipse/che-test:5.5.0
+UTILITY_IMAGE_CHEMOUNT=eclipse/che-mount:5.5.0
