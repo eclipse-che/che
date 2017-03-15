@@ -208,7 +208,6 @@ public class OAuthAuthenticationService {
 
     @POST
     @Path("token")
-    @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public void setToken(@Required @QueryParam("oauth_provider") String oauthProvider, //
                          OAuthToken token) throws ServerException {
