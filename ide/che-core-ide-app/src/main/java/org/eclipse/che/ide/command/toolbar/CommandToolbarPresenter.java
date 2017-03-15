@@ -10,36 +10,52 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.toolbar;
 
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 
+import org.eclipse.che.ide.FontAwesome;
 import org.eclipse.che.ide.api.mvp.Presenter;
 import org.eclipse.che.ide.command.toolbar.commands.ExecuteCommandPresenter;
 import org.eclipse.che.ide.command.toolbar.previewurl.PreviewURLsPresenter;
 import org.eclipse.che.ide.command.toolbar.processes.ProcessesListPresenter;
+import org.eclipse.che.ide.ui.menubutton.MenuPopupButton;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-/** Presenter for commands toolbar. */
+/** Presenter for command toolbar. */
 @Singleton
 public class CommandToolbarPresenter implements Presenter, CommandToolbarView.ActionDelegate {
 
     private final ProcessesListPresenter  processesListPresenter;
     private final PreviewURLsPresenter    previewURLsPresenter;
     private final ExecuteCommandPresenter executeCommandPresenter;
+    private final ToolbarButtonsFactory   toolbarButtonsFactory;
     private final CommandToolbarView      view;
+    private       MenuPopupButton         openCommandsPaletteButton;
 
     @Inject
     public CommandToolbarPresenter(CommandToolbarView view,
                                    ProcessesListPresenter processesListPresenter,
                                    PreviewURLsPresenter previewURLsPresenter,
-                                   ExecuteCommandPresenter executeCommandPresenter) {
+                                   ExecuteCommandPresenter executeCommandPresenter,
+                                   ToolbarButtonsFactory toolbarButtonsFactory) {
         this.view = view;
         this.processesListPresenter = processesListPresenter;
         this.previewURLsPresenter = previewURLsPresenter;
         this.executeCommandPresenter = executeCommandPresenter;
+        this.toolbarButtonsFactory = toolbarButtonsFactory;
+
+        initButtons();
 
         view.setDelegate(this);
+    }
+
+    private void initButtons() {
+        final SafeHtmlBuilder safeHtmlBuilder = new SafeHtmlBuilder();
+        safeHtmlBuilder.appendHtmlConstant(FontAwesome.LIST);
+
+        openCommandsPaletteButton = toolbarButtonsFactory.createOpenPaletteButton(safeHtmlBuilder.toSafeHtml());
     }
 
     @Override
@@ -49,5 +65,7 @@ public class CommandToolbarPresenter implements Presenter, CommandToolbarView.Ac
         executeCommandPresenter.go(view.getCommandsPanelContainer());
         processesListPresenter.go(view.getProcessesListContainer());
         previewURLsPresenter.go(view.getPreviewUrlsListContainer());
+
+        view.addButton(openCommandsPaletteButton);
     }
 }

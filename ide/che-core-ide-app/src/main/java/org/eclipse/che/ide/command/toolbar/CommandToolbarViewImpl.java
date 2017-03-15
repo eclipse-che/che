@@ -18,6 +18,8 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
+import org.eclipse.che.ide.ui.menubutton.MenuPopupButton;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -33,6 +35,8 @@ public class CommandToolbarViewImpl implements CommandToolbarView {
     SimplePanel commandsPanel;
     @UiField
     SimplePanel processesListPanel;
+    @UiField
+    SimplePanel buttonsPanel;
     @UiField
     SimplePanel previewUrlListPanel;
 
@@ -66,6 +70,11 @@ public class CommandToolbarViewImpl implements CommandToolbarView {
     @Override
     public AcceptsOneWidget getPreviewUrlsListContainer() {
         return previewUrlListPanel;
+    }
+
+    @Override
+    public void addButton(MenuPopupButton button) {
+        buttonsPanel.add(button);
     }
 
     interface CommandToolbarViewImplUiBinder extends UiBinder<Widget, CommandToolbarViewImpl> {

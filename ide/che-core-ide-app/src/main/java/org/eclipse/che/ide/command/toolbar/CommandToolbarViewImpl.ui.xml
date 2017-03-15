@@ -23,9 +23,13 @@
         }
 
         .processesListPanel {
-            width: literal("calc(100% - 235px)");
+            width: literal("calc(100% - 285px)");
             float: left;
             margin-left: 15px;
+        }
+
+        .buttonsPanel {
+            float: right;
         }
 
         .previewUrlListPanel {
@@ -39,5 +43,6 @@
         <g:SimplePanel ui:field="commandsPanel" addStyleNames="{style.commandsPanel}"/>
         <g:SimplePanel ui:field="processesListPanel" addStyleNames="{style.processesListPanel}"/>
         <g:SimplePanel ui:field="previewUrlListPanel" addStyleNames="{style.previewUrlListPanel}"/>
+        <g:SimplePanel ui:field="buttonsPanel" addStyleNames="{style.buttonsPanel}"/>
     </g:FlowPanel>
 </ui:UiBinder>

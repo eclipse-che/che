@@ -171,4 +171,9 @@ public class FontAwesome {
      * http://fontawesome.io/icon/bullseye/
      */
     public static final String BULLSEYE = "<i class=\"fa fa-bullseye\"></i>";
+
+    /**
+     * http://fontawesome.io/icon/list/
+     */
+    public static final String LIST = "<i class=\"fa fa-list\"></i>";
 }

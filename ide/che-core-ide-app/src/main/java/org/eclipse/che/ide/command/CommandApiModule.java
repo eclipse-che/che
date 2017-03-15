@@ -59,6 +59,7 @@ import org.eclipse.che.ide.command.producer.CommandProducerActionFactory;
 import org.eclipse.che.ide.command.producer.CommandProducerActionManager;
 import org.eclipse.che.ide.command.toolbar.CommandToolbarView;
 import org.eclipse.che.ide.command.toolbar.CommandToolbarViewImpl;
+import org.eclipse.che.ide.command.toolbar.ToolbarButtonsFactory;
 import org.eclipse.che.ide.command.toolbar.commands.ExecuteCommandView;
 import org.eclipse.che.ide.command.toolbar.commands.ExecuteCommandViewImpl;
 import org.eclipse.che.ide.command.toolbar.commands.button.PopupItemFactory;
@@ -127,6 +128,7 @@ public class CommandApiModule extends AbstractGinModule {
         bind(ProcessesListView.class).to(ProcessesListViewImpl.class).in(Singleton.class);
         bind(PreviewURLsView.class).to(PreviewURLsViewImpl.class).in(Singleton.class);
 
+        install(new GinFactoryModuleBuilder().build(ToolbarButtonsFactory.class));
         install(new GinFactoryModuleBuilder().build(PopupItemFactory.class));
     }
 
