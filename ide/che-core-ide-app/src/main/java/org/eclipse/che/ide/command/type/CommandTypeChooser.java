@@ -24,6 +24,8 @@ import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 
 import java.util.List;
 
+import static java.util.Comparator.comparing;
+
 /**
  * Provides a simple mechanism for the user to choose a {@link CommandType}.
  *
@@ -68,6 +70,8 @@ public class CommandTypeChooser implements CommandTypeChooserView.ActionDelegate
         if (commandTypes.size() == 1) {
             return promiseProvider.resolve(commandTypes.get(0));
         }
+
+        commandTypes.sort(comparing(CommandType::getDisplayName));
 
         view.setCommandTypes(commandTypes);
 

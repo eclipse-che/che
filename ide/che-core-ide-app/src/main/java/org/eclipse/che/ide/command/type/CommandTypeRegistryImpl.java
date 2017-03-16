@@ -25,8 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static java.util.Collections.unmodifiableList;
-
 /**
  * Implementation of {@link CommandTypeRegistry}.
  *
@@ -66,6 +64,6 @@ public class CommandTypeRegistryImpl implements CommandTypeRegistry {
 
     @Override
     public List<CommandType> getCommandTypes() {
-        return unmodifiableList(new ArrayList<>(commandTypes.values()));
+        return new ArrayList<>(commandTypes.values());
     }
 }
