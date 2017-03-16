@@ -15,8 +15,8 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:che='urn:import:org.eclipse.che.ide.ui'>
-
     <ui:with field='res' type='org.eclipse.che.ide.Resources'/>
+    <ui:with field='messages' type='org.eclipse.che.ide.command.palette.PaletteMessages'/>
 
     <ui:style>
         @eval partBackground org.eclipse.che.ide.api.theme.Style.theme.partBackground();
@@ -29,6 +29,10 @@
             margin-top: 7px;
             min-width: 99%;
         }
+
+        .hint-label {
+            margin: 7px auto;
+        }
     </ui:style>
 
     <g:DockLayoutPanel unit="PX" width="300px" height="300px">
@@ -38,5 +42,11 @@
         <g:center>
             <che:smartTree.Tree ui:field="tree" addStyleNames="{style.tree}"/>
         </g:center>
+        <g:south size="50">
+            <g:FlowPanel>
+                <g:Label width="190px" text="{messages.viewHintText}" addStyleNames="{style.hint-label}"/>
+                <g:Label width="230px" ui:field="hintLabel" addStyleNames="{style.hint-label}"/>
+            </g:FlowPanel>
+        </g:south>
     </g:DockLayoutPanel>
 </ui:UiBinder>

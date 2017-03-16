@@ -18,6 +18,7 @@ import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.editorconfig.TextEditorConfiguration;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
+import org.eclipse.che.ide.api.resources.SyntheticFile;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.command.editor.page.AbstractCommandEditorPage;
 import org.eclipse.che.ide.command.editor.page.CommandEditorPage;
@@ -104,7 +105,7 @@ public abstract class AbstractPageWithTextEditor extends AbstractCommandEditorPa
 
     /** Sets editor's content. */
     private void setContent(String content) {
-        final VirtualFile file = new VirtualFileImpl(editedCommand.getName() + getType(), content);
+        VirtualFile file = new SyntheticFile(editedCommand.getName() + getType(), content);
 
         editor.init(new EditorInputImpl(fileTypeRegistry.getFileTypeByFile(file), file), new OpenEditorCallbackImpl());
     }

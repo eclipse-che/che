@@ -10,16 +10,22 @@
  *******************************************************************************/
 package org.eclipse.che.ide.command.palette;
 
+import elemental.html.DivElement;
+import elemental.html.SpanElement;
+
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.ide.FontAwesome;
 import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.command.ContextualCommand;
 import org.eclipse.che.ide.api.data.tree.Node;
@@ -34,17 +40,17 @@ import org.eclipse.che.ide.ui.window.Window;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import static com.google.gwt.event.dom.client.KeyCodes.KEY_DOWN;
 import static com.google.gwt.event.dom.client.KeyCodes.KEY_ENTER;
 import static com.google.gwt.event.dom.client.KeyCodes.KEY_UP;
 import static org.eclipse.che.ide.ui.smartTree.SelectionModel.Mode.SINGLE;
+import static org.eclipse.che.ide.util.dom.Elements.createDivElement;
+import static org.eclipse.che.ide.util.dom.Elements.createSpanElement;
+import static org.eclipse.che.ide.util.dom.Elements.createTextNode;
 
-/**
- * Implementation of {@link CommandsPaletteView}.
- *
- * @author Artem Zatsarynnyi
- */
+/** Implementation of {@link CommandsPaletteView}. */
 @Singleton
 public class CommandsPaletteViewImpl extends Window implements CommandsPaletteView {
 
@@ -58,6 +64,9 @@ public class CommandsPaletteViewImpl extends Window implements CommandsPaletteVi
     @UiField(provided = true)
     Tree tree;
 
+    @UiField
+    Label hintLabel;
+
     private ActionDelegate delegate;
 
     @Inject
@@ -68,13 +77,46 @@ public class CommandsPaletteViewImpl extends Window implements CommandsPaletteVi
         tree.getSelectionModel().setSelectionMode(SINGLE);
 
         setWidget(UI_BINDER.createAndBindUi(this));
-
         setTitle(messages.viewTitle());
 
         filterField.getElement().setAttribute("placeholder", messages.filterPlaceholder());
-
-        // hide footer
+        initHintLabel();
         getFooter().removeFromParent();
+    }
+
+    private void initHintLabel() {
+        final SpanElement upKeyLabel = createKeyLabel();
+        upKeyLabel.setInnerHTML(FontAwesome.ARROW_UP);
+
+        final SpanElement downKeyLabel = createKeyLabel();
+        downKeyLabel.setInnerHTML(FontAwesome.ARROW_DOWN);
+
+        final SpanElement enterKeyLabel = createKeyLabel();
+        enterKeyLabel.getStyle().setPadding("0px 1px 1px 4px");
+        enterKeyLabel.setInnerText(" Enter ");
+
+        final DivElement hintElement = createDivElement();
+        hintElement.appendChild(upKeyLabel);
+        hintElement.appendChild(downKeyLabel);
+        hintElement.appendChild(createTextNode(" to select and "));
+        hintElement.appendChild(enterKeyLabel);
+        hintElement.appendChild(createTextNode(" to execute"));
+
+        hintLabel.getElement().appendChild((Element)hintElement);
+    }
+
+    /** Creates an html element for displaying keyboard key. */
+    private SpanElement createKeyLabel() {
+        SpanElement element = createSpanElement();
+
+        element.getStyle().setFontWeight("bold");
+        element.getStyle().setPadding("0 4px 1px 4px");
+        element.getStyle().setMargin("0 3px");
+        element.getStyle().setBorderWidth("1px");
+        element.getStyle().setBorderStyle("solid");
+        element.getStyle().setProperty("border-radius", "3px");
+
+        return element;
     }
 
     @Override
@@ -99,7 +141,7 @@ public class CommandsPaletteViewImpl extends Window implements CommandsPaletteVi
     private void renderCommands(Map<CommandGoal, List<ContextualCommand>> commands) {
         tree.getNodeStorage().clear();
 
-        for (Map.Entry<CommandGoal, List<ContextualCommand>> entry : commands.entrySet()) {
+        for (Entry<CommandGoal, List<ContextualCommand>> entry : commands.entrySet()) {
             List<ExecutableCommandNode> commandNodes = new ArrayList<>(entry.getValue().size());
 
             for (final ContextualCommand command : entry.getValue()) {

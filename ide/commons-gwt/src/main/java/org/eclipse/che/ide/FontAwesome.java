@@ -176,4 +176,14 @@ public class FontAwesome {
      * http://fontawesome.io/icon/list/
      */
     public static final String LIST = "<i class=\"fa fa-list\"></i>";
+
+    /**
+     * http://fontawesome.io/icon/arrow-up/
+     */
+    public static final String ARROW_UP = "<i class=\"fa fa-arrow-up\"></i>";
+
+    /**
+     * http://fontawesome.io/icon/arrow-down/
+     */
+    public static final String ARROW_DOWN = "<i class=\"fa fa-arrow-down\"></i>";
 }

@@ -31,6 +31,9 @@ public interface PaletteMessages extends Messages {
     @Key("view.filter.placeholder")
     String filterPlaceholder();
 
+    @Key("view.hint.text")
+    String viewHintText();
+
     @Key("message.no_machine")
     String messageNoMachine();
 }
