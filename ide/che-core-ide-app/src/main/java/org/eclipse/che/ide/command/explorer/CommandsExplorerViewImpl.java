@@ -71,6 +71,7 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
         setTitle(messages.viewTitle());
 
         tree = new Tree(new NodeStorage(), new NodeLoader());
+        tree.ensureDebugId("commands-explorer");
 
         treeRenderer = new CommandsTreeRenderer(tree.getTreeStyles(), resources, delegate);
 
