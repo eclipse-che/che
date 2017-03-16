@@ -11,6 +11,8 @@
 package org.eclipse.che.ide.command.toolbar;
 
 import elemental.dom.Element;
+import elemental.html.DivElement;
+import elemental.html.SpanElement;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -29,6 +31,7 @@ import org.eclipse.che.ide.ui.menubutton.MenuPopupButton;
 import org.eclipse.che.ide.ui.menubutton.MenuPopupItemDataProvider;
 import org.eclipse.che.ide.ui.menubutton.PopupItem;
 import org.eclipse.che.ide.util.Pair;
+import org.eclipse.che.ide.util.dom.Elements;
 import org.eclipse.che.ide.util.input.CharCodeWithModifiers;
 import org.eclipse.che.ide.util.input.KeyMapUtil;
 
@@ -83,22 +86,28 @@ class OpenCommandsPaletteButton extends MenuPopupButton {
 
         // Postpone tooltip creation to avoid cyclic dependency with showCommandsPaletteAction.
         // Provider doesn't help in this case because showCommandsPaletteAction called in the constructor.
-        Scheduler.get().scheduleDeferred(() -> Tooltip.create((Element)getElement(),
-                                                              BOTTOM,
-                                                              MIDDLE,
-                                                              messages.actionShowPaletteTitle() + " " +
-                                                              getHotKey(showCommandsPaletteActionProvider.get())));
+        Scheduler.get().scheduleDeferred(() -> {
+            final DivElement divElement = Elements.createDivElement();
+            divElement.setInnerText(messages.actionShowPaletteTitle());
+            divElement.appendChild(getHotKey(showCommandsPaletteActionProvider.get()));
+
+            Tooltip.create((Element)OpenCommandsPaletteButton.this.getElement(), BOTTOM, MIDDLE, divElement);
+        });
     }
 
-    private String getHotKey(Action action) {
+    private SpanElement getHotKey(Action action) {
+        final SpanElement spanElement = Elements.createSpanElement();
+        spanElement.getStyle().setMarginLeft("5px");
+        spanElement.getStyle().setColor("#aaaaaa");
+
         final String actionId = actionManagerProvider.get().getId(action);
         final CharCodeWithModifiers keyBinding = keyBindingAgentProvider.get().getKeyBinding(actionId);
         final String hotKey = KeyMapUtil.getShortcutText(keyBinding);
 
-        if (hotKey == null) {
-            return "";
-        } else {
-            return "[" + hotKey + "]";
+        if (hotKey != null) {
+            spanElement.setInnerText("[" + hotKey + "]");
         }
+
+        return spanElement;
     }
 }
