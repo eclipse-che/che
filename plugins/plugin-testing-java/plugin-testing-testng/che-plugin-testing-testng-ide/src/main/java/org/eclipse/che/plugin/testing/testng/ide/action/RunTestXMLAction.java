@@ -39,14 +39,13 @@ import org.eclipse.che.plugin.testing.testng.ide.TestNGResources;
 import com.google.inject.Inject;
 
 /**
- *
  * @author Mirage Abeysekara
  */
 public class RunTestXMLAction extends JavaEditorAction {
 
     private final NotificationManager notificationManager;
-    private TestResultPresenter presenter;
-    private final TestServiceClient service;
+    private TestResultPresenter       presenter;
+    private final TestServiceClient   service;
 
     @Inject
     public RunTestXMLAction(TestNGResources resources,
@@ -57,7 +56,7 @@ public class RunTestXMLAction extends JavaEditorAction {
                             TestServiceClient service,
                             TestNGLocalizationConstant localization) {
         super(localization.actionRunXMLTitle(), localization.actionRunXMLDescription(), resources.testAllIcon(),
-                editorAgent, fileTypeRegistry);
+              editorAgent, fileTypeRegistry);
         this.notificationManager = notificationManager;
         this.editorAgent = editorAgent;
         this.presenter = presenter;
@@ -72,8 +71,8 @@ public class RunTestXMLAction extends JavaEditorAction {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("updateClasspath", "true");
         parameters.put("testngXML",
-                project.getPath() + "/" + MavenAttributes.DEFAULT_TEST_RESOURCES_FOLDER + "/testng.xml");
-        Promise<TestResult> testResultPromise = service.getTestResult(project.getPath(), "testng", parameters);
+                       project.getPath() + "/" + MavenAttributes.DEFAULT_TEST_RESOURCES_FOLDER + "/testng.xml");
+        Promise<TestResult> testResultPromise = service.getTestResult(project.getPath(), "testng", parameters, notification);
         testResultPromise.then(new Operation<TestResult>() {
             @Override
             public void apply(TestResult result) throws OperationException {
@@ -91,7 +90,7 @@ public class RunTestXMLAction extends JavaEditorAction {
             @Override
             public void apply(PromiseError exception) throws OperationException {
                 final String errorMessage = (exception.getMessage() != null) ? exception.getMessage()
-                        : "Failed to run test cases";
+                    : "Failed to run test cases";
                 notification.setContent(errorMessage);
                 notification.setStatus(FAIL);
             }

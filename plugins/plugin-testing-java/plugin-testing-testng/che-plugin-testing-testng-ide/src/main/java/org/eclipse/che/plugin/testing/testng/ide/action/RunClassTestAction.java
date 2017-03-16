@@ -41,15 +41,14 @@ import org.eclipse.che.plugin.testing.testng.ide.TestNGResources;
 import com.google.inject.Inject;
 
 /**
- *
  * @author Mirage Abeysekara
  */
 public class RunClassTestAction extends JavaEditorAction {
 
     private final NotificationManager notificationManager;
-    private final EditorAgent editorAgent;
+    private final EditorAgent         editorAgent;
     private final TestResultPresenter presenter;
-    private final TestServiceClient service;
+    private final TestServiceClient   service;
 
     @Inject
     public RunClassTestAction(TestNGResources resources,
@@ -60,7 +59,7 @@ public class RunClassTestAction extends JavaEditorAction {
                               TestServiceClient service,
                               TestNGLocalizationConstant localization) {
         super(localization.actionRunClassTitle(), localization.actionRunClassDescription(), resources.testIcon(),
-                editorAgent, fileTypeRegistry);
+              editorAgent, fileTypeRegistry);
         this.notificationManager = notificationManager;
         this.editorAgent = editorAgent;
         this.presenter = presenter;
@@ -79,7 +78,7 @@ public class RunClassTestAction extends JavaEditorAction {
         parameters.put("fqn", fqn);
         parameters.put("runClass", "true");
         parameters.put("updateClasspath", "true");
-        Promise<TestResult> testResultPromise = service.getTestResult(project.getPath(), "testng", parameters);
+        Promise<TestResult> testResultPromise = service.getTestResult(project.getPath(), "testng", parameters, notification);
         testResultPromise.then(new Operation<TestResult>() {
             @Override
             public void apply(TestResult result) throws OperationException {
@@ -97,7 +96,7 @@ public class RunClassTestAction extends JavaEditorAction {
             @Override
             public void apply(PromiseError exception) throws OperationException {
                 final String errorMessage = (exception.getMessage() != null) ? exception.getMessage()
-                        : "Failed to run test cases";
+                    : "Failed to run test cases";
                 notification.setContent(errorMessage);
                 notification.setStatus(FAIL);
             }

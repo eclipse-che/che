@@ -18,6 +18,7 @@ import com.google.gwt.resources.client.ClientBundle;
  * Resources for test extension.
  *
  * @author Mirage Abeysekara
+ * 
  */
 public interface TestResources extends ClientBundle {
 
@@ -29,4 +30,16 @@ public interface TestResources extends ClientBundle {
 
     @Source("org/eclipse/che/plugin/testing/ide/svg/test_results_fail.svg")
     SVGResource testResultsFail();
+
+    @Source("org/eclipse/che/plugin/testing/ide/svg/test_method_fail.svg")
+    SVGResource testMethodFail();
+
+    @Source("org/eclipse/che/plugin/testing/ide/svg/test_class_fail.svg")
+    SVGResource testClassFail();
+
+    @Source("org/eclipse/che/plugin/testing/ide/svg/show_all_tests_icon.svg")
+    SVGResource showAllTestsButtonIcon();
+
+    @Source("org/eclipse/che/plugin/testing/ide/svg/show_failures_only_icon.svg")
+    SVGResource showFailuresOnlyButtonIcon();
 }

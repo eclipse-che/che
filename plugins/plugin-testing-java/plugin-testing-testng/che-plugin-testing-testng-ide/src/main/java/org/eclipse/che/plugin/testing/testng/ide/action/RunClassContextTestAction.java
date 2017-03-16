@@ -92,7 +92,7 @@ public class RunClassContextTestAction extends AbstractPerspectiveAction {
             parameters.put("fqn", fqn);
             parameters.put("runClass", "true");
             parameters.put("updateClasspath", "true");
-            Promise<TestResult> testResultPromise = service.getTestResult(project.getPath(), "testng", parameters);
+            Promise<TestResult> testResultPromise = service.getTestResult(project.getPath(), "testng", parameters, notification);
             testResultPromise.then(new Operation<TestResult>() {
                 @Override
                 public void apply(TestResult result) throws OperationException {

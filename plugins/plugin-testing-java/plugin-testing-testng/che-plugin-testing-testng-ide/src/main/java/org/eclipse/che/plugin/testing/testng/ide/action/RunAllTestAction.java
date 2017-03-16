@@ -38,14 +38,13 @@ import org.eclipse.che.plugin.testing.testng.ide.TestNGResources;
 import com.google.inject.Inject;
 
 /**
- *
  * @author Mirage Abeysekara
  */
 public class RunAllTestAction extends JavaEditorAction {
 
     private final NotificationManager notificationManager;
-    private TestResultPresenter presenter;
-    private final TestServiceClient service;
+    private TestResultPresenter       presenter;
+    private final TestServiceClient   service;
 
     @Inject
     public RunAllTestAction(TestNGResources resources,
@@ -56,7 +55,7 @@ public class RunAllTestAction extends JavaEditorAction {
                             TestServiceClient service,
                             TestNGLocalizationConstant localization) {
         super(localization.actionRunAllTitle(), localization.actionRunAllDescription(), resources.testAllIcon(),
-                editorAgent, fileTypeRegistry);
+              editorAgent, fileTypeRegistry);
         this.notificationManager = notificationManager;
         this.presenter = presenter;
         this.service = service;
@@ -69,7 +68,7 @@ public class RunAllTestAction extends JavaEditorAction {
         final Project project = appContext.getRootProject();
         Map<String, String> parameters = new HashMap<>();
         parameters.put("updateClasspath", "true");
-        Promise<TestResult> testResultPromise = service.getTestResult(project.getPath(), "testng", parameters);
+        Promise<TestResult> testResultPromise = service.getTestResult(project.getPath(), "testng", parameters, notification);
         testResultPromise.then(new Operation<TestResult>() {
             @Override
             public void apply(TestResult result) throws OperationException {
@@ -87,7 +86,7 @@ public class RunAllTestAction extends JavaEditorAction {
             @Override
             public void apply(PromiseError exception) throws OperationException {
                 final String errorMessage = (exception.getMessage() != null) ? exception.getMessage()
-                        : "Failed to run test cases";
+                    : "Failed to run test cases";
                 notification.setContent(errorMessage);
                 notification.setStatus(FAIL);
             }
