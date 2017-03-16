@@ -14,8 +14,8 @@ import elemental.dom.Element;
 import elemental.html.DivElement;
 import elemental.html.SpanElement;
 
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.user.client.Timer;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
@@ -84,15 +84,18 @@ class OpenCommandsPaletteButton extends MenuPopupButton {
 
         addClickHandler(event -> commandsPalettePresenterProvider.get().showDialog());
 
-        // Postpone tooltip creation to avoid cyclic dependency with showCommandsPaletteAction.
-        // Provider doesn't help in this case because showCommandsPaletteAction called in the constructor.
-        Scheduler.get().scheduleDeferred(() -> {
-            final DivElement divElement = Elements.createDivElement();
-            divElement.setInnerText(messages.actionShowPaletteTitle());
-            divElement.appendChild(getHotKey(showCommandsPaletteActionProvider.get()));
+        // We need to get action's shortcut but action may not be registered yet.
+        // So postpone tooltip creation and wait 1 sec. while action will be registered.
+        new Timer() {
+            @Override
+            public void run() {
+                final DivElement divElement = Elements.createDivElement();
+                divElement.setInnerText(messages.actionShowPaletteTitle());
+                divElement.appendChild(getHotKey(showCommandsPaletteActionProvider.get()));
 
-            Tooltip.create((Element)OpenCommandsPaletteButton.this.getElement(), BOTTOM, MIDDLE, divElement);
-        });
+                Tooltip.create((Element)OpenCommandsPaletteButton.this.getElement(), BOTTOM, MIDDLE, divElement);
+            }
+        }.schedule(1000);
     }
 
     private SpanElement getHotKey(Action action) {
