@@ -32,7 +32,7 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.command.CommandResources;
-import org.eclipse.che.ide.command.type.CommandTypeChooser;
+import org.eclipse.che.ide.command.type.chooser.CommandTypeChooser;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;

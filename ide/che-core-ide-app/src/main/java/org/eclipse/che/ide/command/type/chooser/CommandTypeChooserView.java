@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.command.type;
+package org.eclipse.che.ide.command.type.chooser;
 
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.mvp.View;

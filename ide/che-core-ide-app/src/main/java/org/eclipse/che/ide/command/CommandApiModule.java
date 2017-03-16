@@ -67,8 +67,8 @@ import org.eclipse.che.ide.command.toolbar.previewurl.PreviewURLsView;
 import org.eclipse.che.ide.command.toolbar.previewurl.PreviewURLsViewImpl;
 import org.eclipse.che.ide.command.toolbar.processes.ProcessesListView;
 import org.eclipse.che.ide.command.toolbar.processes.ProcessesListViewImpl;
-import org.eclipse.che.ide.command.type.CommandTypeChooserView;
-import org.eclipse.che.ide.command.type.CommandTypeChooserViewImpl;
+import org.eclipse.che.ide.command.type.chooser.CommandTypeChooserView;
+import org.eclipse.che.ide.command.type.chooser.CommandTypeChooserViewImpl;
 import org.eclipse.che.ide.command.type.CommandTypeRegistryImpl;
 
 import static org.eclipse.che.ide.command.node.CommandFileNode.FILE_TYPE_EXT;

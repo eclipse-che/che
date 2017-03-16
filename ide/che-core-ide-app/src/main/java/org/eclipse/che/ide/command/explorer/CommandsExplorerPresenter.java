@@ -41,7 +41,7 @@ import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.ide.command.CommandResources;
 import org.eclipse.che.ide.command.CommandUtils;
 import org.eclipse.che.ide.command.node.NodeFactory;
-import org.eclipse.che.ide.command.type.CommandTypeChooser;
+import org.eclipse.che.ide.command.type.chooser.CommandTypeChooser;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import java.util.ArrayList;
