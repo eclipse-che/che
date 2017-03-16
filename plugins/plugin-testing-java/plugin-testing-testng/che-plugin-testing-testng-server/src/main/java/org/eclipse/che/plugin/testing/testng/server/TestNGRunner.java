@@ -111,6 +111,7 @@ public class TestNGRunner implements TestRunner {
                 testResult = runTestXML(projectAbsolutePath, ResourcesPlugin.getPathToWorkspace() + xmlPath);
             }
         }
+        testResult.setProjectPath(projectPath);
         return testResult;
     }
 

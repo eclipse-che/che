@@ -37,6 +37,7 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.testing.shared.TestCase;
 import org.eclipse.che.api.testing.shared.TestResult;
@@ -51,7 +52,11 @@ import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.ide.api.resources.File;
-import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.ext.java.client.navigation.service.JavaNavigationService;
+import org.eclipse.che.ide.ext.java.shared.dto.Region;
+import org.eclipse.che.ide.ext.java.shared.dto.model.CompilationUnit;
+import org.eclipse.che.ide.ext.java.shared.dto.model.Method;
+import org.eclipse.che.ide.ext.java.shared.dto.model.Type;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage;
 import org.eclipse.che.ide.ui.smartTree.NodeUniqueKeyProvider;
@@ -78,7 +83,7 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
 
     private static final TestResultViewImplUiBinder UI_BINDER        = GWT.create(TestResultViewImplUiBinder.class);
 
-
+    private final JavaNavigationService             javaNavigationService;
     private final AppContext                        appContext;
     private final EditorAgent                       editorAgent;
     private final TestResultNodeFactory             nodeFactory;
@@ -99,10 +104,12 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
     @Inject
     public TestResultViewImpl(TestResources testResources,
                               PartStackUIResources resources,
+                              JavaNavigationService javaNavigationService,
                               EditorAgent editorAgent,
                               AppContext appContext,
                               TestResultNodeFactory nodeFactory) {
         super(resources);
+        this.javaNavigationService = javaNavigationService;
         this.editorAgent = editorAgent;
         this.appContext = appContext;
         this.nodeFactory = nodeFactory;
@@ -186,25 +193,58 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
     }
 
     @Override
-    public void gotoClass(String packagePath, int line) {
-        lastWentLine = line;
-        final Project project = appContext.getRootProject();
-        String testSrcPath = project.getPath() + "/" + DEFAULT_TEST_SOURCE_FOLDER;
-        appContext.getWorkspaceRoot().getFile(testSrcPath + packagePath).then(new Operation<Optional<File>>() {
-            @Override
-            public void apply(Optional<File> file) throws OperationException {
-                if (file.isPresent()) {
+    public void gotoClass(final String packagePath, String className, String methodName, int line) {
+        if (lastTestResult == null) {
+            return;
+        }
+        String projectPath = lastTestResult.getProjectPath();
+        if (projectPath == null) {
+            return;
+        }
 
-                    editorAgent.openEditor(file.get());
+        lastWentLine = line;
+        String testSrcPath = projectPath + "/" + DEFAULT_TEST_SOURCE_FOLDER;
+        appContext.getWorkspaceRoot().getFile(testSrcPath + "/" + packagePath).then(new Operation<Optional<File>>() {
+            @Override
+            public void apply(Optional<File> maybeFile) throws OperationException {
+                if (maybeFile.isPresent()) {
+                    File file = maybeFile.get();
+                    editorAgent.openEditor(file);
                     Timer t = new Timer() {
                         @Override
                         public void run() {
                             EditorPartPresenter editorPart = editorAgent.getActiveEditor();
-                            Document doc = ((TextEditor)editorPart).getDocument();
-                            doc.setCursorPosition(new TextPosition(lastWentLine - 1, 0));
+                            final Document doc = ((TextEditor)editorPart).getDocument();
+                            if (line == -1 &&
+                                className != null &&
+                                methodName != null) {
+                                Promise<CompilationUnit> cuPromise =
+                                                                   javaNavigationService.getCompilationUnit(file.getProject().getLocation(),
+                                                                                                            className, true);
+                                cuPromise.then(new Operation<CompilationUnit>() {
+                                    @Override
+                                    public void apply(CompilationUnit cu) throws OperationException {
+                                        for (Type type : cu.getTypes()) {
+                                            if (type.isPrimary()) {
+                                                for (Method m : type.getMethods()) {
+                                                    if (methodName.equals(m.getElementName())) {
+                                                        Region methodRegion = m.getFileRegion();
+                                                        if (methodRegion != null) {
+                                                            lastWentLine = doc.getLineAtOffset(methodRegion.getOffset());
+                                                            doc.setCursorPosition(new TextPosition(lastWentLine - 1, 0));
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                });
+                            } else {
+                                doc.setCursorPosition(new TextPosition(lastWentLine - 1, 0));
+                            }
                         }
                     };
-                    t.schedule(500);
+                    t.schedule(1000);
                 }
             }
         }).catchError(new Operation<PromiseError>() {

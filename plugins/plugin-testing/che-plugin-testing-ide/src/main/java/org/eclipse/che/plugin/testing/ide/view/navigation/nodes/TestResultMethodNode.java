@@ -95,7 +95,8 @@ public class TestResultMethodNode extends AbstractTreeNode implements HasAction,
     public void actionPerformed() {
         if (getParent() instanceof TestResultClassNode) {
             String packagePath = ((TestResultClassNode)getParent()).getClassName().replace(".", "/") + ".java";
-            navigationHandler.gotoClass(packagePath, lineNumber);
+            String className = ((TestResultClassNode)getParent()).getClassName();
+            navigationHandler.gotoClass(packagePath, className, methodName, lineNumber);
         }
     }
 

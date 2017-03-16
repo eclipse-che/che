@@ -134,6 +134,7 @@ public class JUnitTestRunner implements TestRunner {
             } else {
                 testResult = useJUnitV3API ? runAll3x(projectAbsolutePath) : runAll4x(projectAbsolutePath);
             }
+            testResult.setProjectPath(projectPath);
             return testResult;
         } finally {
             System.setProperty("user.dir", currentWorkingDir);
@@ -408,6 +409,7 @@ public class JUnitTestRunner implements TestRunner {
         });
         Class< ? > c = f.createClass();
         MethodHandler mi = new MethodHandler() {
+            @Override
             public Object invoke(Object self, Method method, Method proceed, Object[] args) throws Throwable {
                 Object testCaseObject = args[0];
                 allRunTests.add(testCaseObject);

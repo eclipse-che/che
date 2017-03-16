@@ -23,6 +23,20 @@ import org.eclipse.che.dto.shared.DTO;
 public interface TestResult {
 
     /**
+     * Returns the path of the project containing the test cases.
+     * 
+     * @return the framework name
+     */
+    String getProjectPath();
+
+    /**
+     * Sets the path of the project containing the test cases.
+     * 
+     * @param projectPath
+     */
+    void setProjectPath(String projectPath);
+
+    /**
      * Returns the framework name used for executing the test cases.
      * 
      * @return the framework name
