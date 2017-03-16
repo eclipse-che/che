@@ -54,8 +54,9 @@ public class FileWatcherByPathMatcher implements Consumer<Path> {
     @Override
     public void accept(Path path) {
         if (!exists(path)) {
-            Set<Integer> operationIds = pathWatchRegistrations.remove(path);
-            operationIds.forEach(watcher::unwatch);
+            if (pathWatchRegistrations.containsKey(path)) {
+                pathWatchRegistrations.remove(path).forEach(watcher::unwatch);
+            }
             paths.values().forEach(it -> it.remove(path));
             paths.entrySet().removeIf(it -> it.getValue().isEmpty());
         }
