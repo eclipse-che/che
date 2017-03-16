@@ -84,11 +84,11 @@ public class ServerProtocolMacroTest {
 
     @Test
     public void getMacros() throws Exception {
-        final Set<Macro> providers = provider.getMacros(devMachine);
+        final Set<Macro> macros = provider.getMacros(devMachine);
 
-        assertEquals(providers.size(), 2);
+        assertEquals(macros.size(), 2);
 
-        final Iterator<Macro> iterator = providers.iterator();
+        final Iterator<Macro> iterator = macros.iterator();
 
         final Macro provider1 = iterator.next();
 

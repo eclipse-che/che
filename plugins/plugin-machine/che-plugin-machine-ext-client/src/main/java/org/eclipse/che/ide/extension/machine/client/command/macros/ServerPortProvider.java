@@ -38,16 +38,16 @@ public class ServerPortProvider implements WsAgentStateHandler {
 
     public static final String KEY_TEMPLATE = "${server.port.%}";
 
-    private final MacroRegistry commandPropertyRegistry;
+    private final MacroRegistry macroRegistry;
     private final AppContext    appContext;
 
-    private Set<Macro> providers;
+    private Set<Macro> macros;
 
     @Inject
     public ServerPortProvider(EventBus eventBus,
-                              MacroRegistry commandPropertyRegistry,
+                              MacroRegistry macroRegistry,
                               AppContext appContext) {
-        this.commandPropertyRegistry = commandPropertyRegistry;
+        this.macroRegistry = macroRegistry;
         this.appContext = appContext;
 
         eventBus.addHandler(WsAgentStateEvent.TYPE, this);
@@ -58,25 +58,25 @@ public class ServerPortProvider implements WsAgentStateHandler {
     private void registerProviders() {
         Machine devMachine = appContext.getDevMachine();
         if (devMachine != null) {
-            providers = getProviders(devMachine);
-            commandPropertyRegistry.register(providers);
+            macros = getProviders(devMachine);
+            macroRegistry.register(macros);
         }
     }
 
     private Set<Macro> getProviders(Machine machine) {
-        Set<Macro> providers = Sets.newHashSet();
+        Set<Macro> macros = Sets.newHashSet();
         for (Map.Entry<String, ? extends Server> entry : machine.getRuntime().getServers().entrySet()) {
-            providers.add(new AddressMacro(entry.getKey(),
+            macros.add(new AddressMacro(entry.getKey(),
                                            entry.getValue().getAddress(),
                                            entry.getKey()));
 
             if (entry.getKey().endsWith("/tcp")) {
-                providers.add(new AddressMacro(entry.getKey().substring(0, entry.getKey().length() - 4),
+                macros.add(new AddressMacro(entry.getKey().substring(0, entry.getKey().length() - 4),
                                                entry.getValue().getAddress(), entry.getKey()));
             }
         }
 
-        return providers;
+        return macros;
     }
 
     @Override
@@ -86,11 +86,11 @@ public class ServerPortProvider implements WsAgentStateHandler {
 
     @Override
     public void onWsAgentStopped(WsAgentStateEvent event) {
-        for (Macro provider : providers) {
-            commandPropertyRegistry.unregister(provider);
+        for (Macro provider : macros) {
+            macroRegistry.unregister(provider);
         }
 
-        providers.clear();
+        macros.clear();
     }
 
     private class AddressMacro implements Macro {

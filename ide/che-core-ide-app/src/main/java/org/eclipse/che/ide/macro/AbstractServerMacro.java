@@ -25,7 +25,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Base macro provider which belongs to the current server configuration. Provides easy access to the developer machine
+ * Base macro which belongs to the current server configuration. Provides easy access to the developer machine
  * to allow fetch necessary information to use in custom commands, preview urls, etc.
  *
  * @author Vlad Zhukovskyi
@@ -40,13 +40,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Beta
 public abstract class AbstractServerMacro implements WsAgentStateHandler {
 
-    private final MacroRegistry providerRegistry;
+    private final MacroRegistry macroRegistry;
     private final AppContext    appContext;
 
-    public AbstractServerMacro(MacroRegistry providerRegistry,
+    public AbstractServerMacro(MacroRegistry macroRegistry,
                                EventBus eventBus,
                                AppContext appContext) {
-        this.providerRegistry = providerRegistry;
+        this.macroRegistry = macroRegistry;
         this.appContext = appContext;
 
         eventBus.addHandler(WsAgentStateEvent.TYPE, this);
@@ -65,14 +65,14 @@ public abstract class AbstractServerMacro implements WsAgentStateHandler {
             return;
         }
 
-        final Set<Macro> providers = getMacros(devMachine);
-        checkNotNull(providers);
+        final Set<Macro> macros = getMacros(devMachine);
+        checkNotNull(macros);
 
-        if (providers.isEmpty()) {
+        if (macros.isEmpty()) {
             return;
         }
 
-        providerRegistry.register(providers);
+        macroRegistry.register(macros);
     }
 
     /**
@@ -89,7 +89,7 @@ public abstract class AbstractServerMacro implements WsAgentStateHandler {
         }
 
         for (Macro provider : getMacros(devMachine)) {
-            providerRegistry.unregister(provider);
+            macroRegistry.unregister(provider);
         }
     }
 

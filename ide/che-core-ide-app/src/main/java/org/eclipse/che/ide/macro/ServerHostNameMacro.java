@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Provider which is responsible for the retrieving the hostname (reference) of the registered server.
+ * Macro which is responsible for the retrieving the hostname (reference) of the registered server.
  * <p>
  * Macro provided: <code>${server.[port].hostname}</code>
  *
@@ -44,16 +44,16 @@ public class ServerHostNameMacro extends AbstractServerMacro {
     public static final String KEY = "${server.%.hostname}";
 
     @Inject
-    public ServerHostNameMacro(MacroRegistry providerRegistry,
+    public ServerHostNameMacro(MacroRegistry macroRegistry,
                                EventBus eventBus,
                                AppContext appContext) {
-        super(providerRegistry, eventBus, appContext);
+        super(macroRegistry, eventBus, appContext);
     }
 
     /** {@inheritDoc} */
     @Override
     public Set<Macro> getMacros(DevMachine devMachine) {
-        final Set<Macro> providers = Sets.newHashSet();
+        final Set<Macro> macros = Sets.newHashSet();
 
         for (Map.Entry<String, ? extends Server> entry : devMachine.getDescriptor().getRuntime().getServers().entrySet()) {
 
@@ -65,7 +65,7 @@ public class ServerHostNameMacro extends AbstractServerMacro {
                                           entry.getValue().getRef(),
                                           "Returns hostname of a server registered by name");
 
-            providers.add(macro);
+            macros.add(macro);
 
             // register port without "/tcp" suffix
             if (entry.getKey().endsWith("/tcp")) {
@@ -75,10 +75,10 @@ public class ServerHostNameMacro extends AbstractServerMacro {
                                                    entry.getValue().getRef(),
                                                    "Returns hostname of a server registered by name");
 
-                providers.add(shortMacro);
+                macros.add(shortMacro);
             }
         }
 
-        return providers;
+        return macros;
     }
 }
