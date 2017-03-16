@@ -35,6 +35,7 @@ import org.eclipse.che.ide.api.macro.MacroProcessor;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.command.goal.TestGoal;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.extension.machine.client.command.CommandManagerImpl;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandConsoleFactory;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandOutputConsole;
 import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
@@ -109,6 +110,7 @@ public class TestServiceClient {
 
     public Promise<CommandImpl> getOrCreateTestCompileCommand() {
         List<CommandImpl> commands = commandManager.getCommands();
+        
         for (CommandImpl command : commands) {
             if (command.getName() != null && command.getName().startsWith("test-compile") && "mvn".equals(command.getType())) {
                 return promiseProvider.resolve(command);
@@ -169,8 +171,12 @@ public class TestServiceClient {
                     macroProcessor.expandMacros(command.getCommandLine()).then(new Operation<String>() {
                         @Override
                         public void apply(String expandedCommandLine) throws OperationException {
+                            Map<String, String> attributes = new HashMap<>();
+                            attributes.putAll(command.getAttributes());
+                            attributes.remove(CommandManagerImpl.PREVIEW_URL_ATTR);
+                            
                             CommandImpl expandedCommand = new CommandImpl(command.getName(), expandedCommandLine,
-                                                                          command.getType(), command.getAttributes());
+                                                                          command.getType(), attributes);
 
                             final CommandOutputConsole console = commandConsoleFactory.create(expandedCommand, machine);
                             final String machineId = machine.getId();
