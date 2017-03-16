@@ -42,7 +42,7 @@ import static org.eclipse.che.ide.api.resources.Project.ProblemProjectMarker.PRO
  * Project problem with code 10 means that project exist in workspace but it is absent on file system.
  */
 @Singleton
-public class SelectionAnalyzer implements SelectionChangedHandler {
+public class ProjectConfigSynchronized implements SelectionChangedHandler {
     private final AppContext               appContext;
     private final DialogFactory            dialogFactory;
     private final CoreLocalizationConstant locale;
@@ -50,12 +50,12 @@ public class SelectionAnalyzer implements SelectionChangedHandler {
     private final ChangeLocationWidget     changeLocationWidget;
 
     @Inject
-    public SelectionAnalyzer(EventBus eventBus,
-                             AppContext appContext,
-                             DialogFactory dialogFactory,
-                             CoreLocalizationConstant locale,
-                             NotificationManager notificationManager,
-                             ChangeLocationWidget changeLocationWidget) {
+    public ProjectConfigSynchronized(EventBus eventBus,
+                                     AppContext appContext,
+                                     DialogFactory dialogFactory,
+                                     CoreLocalizationConstant locale,
+                                     NotificationManager notificationManager,
+                                     ChangeLocationWidget changeLocationWidget) {
         this.appContext = appContext;
         this.dialogFactory = dialogFactory;
         this.locale = locale;

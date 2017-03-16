@@ -51,7 +51,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(GwtMockitoTestRunner.class)
-public class SelectionAnalyzerTest {
+public class ProjectConfigSynchronizedTest {
     private final static String PROJECT_NAME         = "project name";
     private final static String PROJECT_LOCATION     = "/project/location";
     private final static String SYNCH_DIALOG_TITLE   = "Synchronize dialog title";
@@ -73,7 +73,7 @@ public class SelectionAnalyzerTest {
     private ChangeLocationWidget     changeLocationWidget;
 
     @InjectMocks
-    private SelectionAnalyzer selectionAnalyzer;
+    private ProjectConfigSynchronized projectConfigSynchronized;
 
     @Mock
     private Project                      rootProject;
@@ -138,14 +138,14 @@ public class SelectionAnalyzerTest {
 
     @Test
     public void shouldSubscribeOnSelectionChangedEvent() throws Exception {
-        verify(eventBus).addHandler(SelectionChangedEvent.TYPE, selectionAnalyzer);
+        verify(eventBus).addHandler(SelectionChangedEvent.TYPE, projectConfigSynchronized);
     }
 
     @Test
     public void dialogIsNotShownIfRootProjectIsNull() throws Exception {
         when(appContext.getRootProject()).thenReturn(null);
 
-        selectionAnalyzer.onSelectionChanged(null);
+        projectConfigSynchronized.onSelectionChanged(null);
 
         verify(confirmDialog, never()).show();
     }
@@ -154,7 +154,7 @@ public class SelectionAnalyzerTest {
     public void dialogIsNotShownIfProjectHasNotMarkers() throws Exception {
         when(problemMarker.isPresent()).thenReturn(false);
 
-        selectionAnalyzer.onSelectionChanged(null);
+        projectConfigSynchronized.onSelectionChanged(null);
 
         verify(confirmDialog, never()).show();
     }
@@ -163,14 +163,14 @@ public class SelectionAnalyzerTest {
     public void dialogIsNotShownIfNoProjectProblem() throws Exception {
         problems.clear();
 
-        selectionAnalyzer.onSelectionChanged(null);
+        projectConfigSynchronized.onSelectionChanged(null);
 
         verify(confirmDialog, never()).show();
     }
 
     @Test
     public void dialogShouldBeShow() throws Exception {
-        selectionAnalyzer.onSelectionChanged(null);
+        projectConfigSynchronized.onSelectionChanged(null);
 
         verify(confirmDialog).show();
     }
@@ -183,7 +183,7 @@ public class SelectionAnalyzerTest {
         when(deleteProjectPromise.then(Matchers.<Operation<Void>>any())).thenReturn(deleteProjectPromise);
         when(locale.projectRemoved(PROJECT_NAME)).thenReturn(projectRemoved);
 
-        selectionAnalyzer.onSelectionChanged(null);
+        projectConfigSynchronized.onSelectionChanged(null);
 
         verify(dialogFactory).createConfirmDialog(eq(SYNCH_DIALOG_TITLE),
                                                   eq(SYNCH_DIALOG_CONTENT),
@@ -203,7 +203,7 @@ public class SelectionAnalyzerTest {
 
     @Test
     public void importButtonIsClicked() throws Exception {
-        selectionAnalyzer.onSelectionChanged(null);
+        projectConfigSynchronized.onSelectionChanged(null);
 
         verify(dialogFactory).createConfirmDialog(eq(SYNCH_DIALOG_TITLE),
                                                   eq(SYNCH_DIALOG_CONTENT),
@@ -230,7 +230,7 @@ public class SelectionAnalyzerTest {
                                                anyObject(),
                                                anyObject())).thenReturn(changeConfirmDialog);
 
-        selectionAnalyzer.onSelectionChanged(null);
+        projectConfigSynchronized.onSelectionChanged(null);
 
         verify(dialogFactory).createConfirmDialog(eq(SYNCH_DIALOG_TITLE),
                                                   eq(SYNCH_DIALOG_CONTENT),
