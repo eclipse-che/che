@@ -16,6 +16,7 @@ import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.api.ssh.server.SshService;
 import org.eclipse.che.api.ssh.shared.dto.GenerateSshPairRequest;
 import org.eclipse.che.api.ssh.shared.dto.SshPairDto;
+import org.eclipse.che.commons.test.mockito.answer.SelfReturningAnswer;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -23,7 +24,6 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import static javax.ws.rs.core.UriBuilder.fromUri;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -45,20 +45,15 @@ public class HttpSshServiceClientTest {
     @Mock
     private HttpJsonRequestFactory requestFactory;
     @Mock
-    private HttpJsonRequest        jsonRequest;
-    @Mock
     private HttpJsonResponse       jsonResponse;
 
+    private HttpJsonRequest      jsonRequest;
     private HttpSshServiceClient client;
 
     @BeforeMethod
     public void setup() throws Exception {
-        when(jsonRequest.usePostMethod()).thenReturn(jsonRequest);
-        when(jsonRequest.useGetMethod()).thenReturn(jsonRequest);
-        when(jsonRequest.useDeleteMethod()).thenReturn(jsonRequest);
-        when(jsonRequest.addQueryParam(anyString(), anyString())).thenReturn(jsonRequest);
+        jsonRequest = mock(HttpJsonRequest.class, new SelfReturningAnswer());
         when(jsonRequest.request()).thenReturn(jsonResponse);
-        when(jsonRequest.setBody(any(GenerateSshPairRequest.class))).thenReturn(jsonRequest);
         when(requestFactory.fromUrl(anyString())).thenReturn(jsonRequest);
 
         client = new HttpSshServiceClient(API_URL, requestFactory);
@@ -74,11 +69,11 @@ public class HttpSshServiceClientTest {
 
         //then
         String url = fromUri(SSH_SERVICE_URL).path(SshService.class, "generatePair").build().toString();
-        verify(requestFactory).fromUrl(url);
+        verify(requestFactory).fromUrl(eq(url));
         verify(jsonRequest).usePostMethod();
-        verify(jsonRequest).setBody(sshPairRequest);
+        verify(jsonRequest).setBody(eq(sshPairRequest));
         verify(jsonRequest).request();
-        verify(jsonResponse).asDto(any());
+        verify(jsonResponse).asDto(eq(SshPairDto.class));
     }
 
     @Test
@@ -91,11 +86,11 @@ public class HttpSshServiceClientTest {
 
         //then
         String url = fromUri(SSH_SERVICE_URL).path(SshService.class.getMethod("createPair", SshPairDto.class)).build().toString();
-        verify(requestFactory).fromUrl(url);
+        verify(requestFactory).fromUrl(eq(url));
         verify(jsonRequest).usePostMethod();
-        verify(jsonRequest).setBody(sshPairDto);
+        verify(jsonRequest).setBody(eq(sshPairDto));
         verify(jsonRequest).request();
-        verify(jsonResponse).asDto(any());
+        verify(jsonResponse).asDto(eq(SshPairDto.class));
     }
 
     @Test
@@ -105,11 +100,11 @@ public class HttpSshServiceClientTest {
 
         //then
         String url = fromUri(SSH_SERVICE_URL).path(SshService.class, "getPair").build(SSH_KEY_SERVICE).toString();
-        verify(requestFactory).fromUrl(url);
+        verify(requestFactory).fromUrl(eq(url));
         verify(jsonRequest).useGetMethod();
         verify(jsonRequest).addQueryParam(eq("name"), eq(SSH_KEY_NAME));
         verify(jsonRequest).request();
-        verify(jsonResponse).asDto(any());
+        verify(jsonResponse).asDto(eq(SshPairDto.class));
     }
 
     @Test
@@ -119,7 +114,7 @@ public class HttpSshServiceClientTest {
 
         //then
         String url = fromUri(SSH_SERVICE_URL).path(SshService.class, "removePair").build(SSH_KEY_SERVICE).toString();
-        verify(requestFactory).fromUrl(url);
+        verify(requestFactory).fromUrl(eq(url));
         verify(jsonRequest).useDeleteMethod();
         verify(jsonRequest).addQueryParam(eq("name"), eq(SSH_KEY_NAME));
         verify(jsonRequest).request();
