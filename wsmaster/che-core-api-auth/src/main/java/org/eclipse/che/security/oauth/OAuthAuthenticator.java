@@ -322,7 +322,8 @@ public abstract class OAuthAuthenticator {
     }
 
     public void setToken(String userId, OAuthToken token) throws IOException {
-        Credential credential = new Credential(BearerToken.authorizationHeaderAccessMethod()).setAccessToken(token.getToken());
-        flow.getCredentialDataStore().set(userId, new StoredCredential(credential));
+        flow.createAndStoreCredential(new TokenResponse().setAccessToken(token.getToken()) //
+                                                         .setScope(token.getScope()), //
+                                      userId);
     }
 }
