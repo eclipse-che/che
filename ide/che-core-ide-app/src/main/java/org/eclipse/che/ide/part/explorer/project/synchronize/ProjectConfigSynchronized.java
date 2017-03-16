@@ -32,6 +32,7 @@ import org.eclipse.che.ide.util.loging.Log;
 import java.util.Map;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static org.eclipse.che.api.core.ErrorCodes.NO_PROJECT_ON_FILE_SYSTEM;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 import static org.eclipse.che.ide.api.resources.Project.ProblemProjectMarker.PROBLEM_PROJECT;
@@ -81,7 +82,7 @@ public class ProjectConfigSynchronized implements SelectionChangedHandler {
         final Map<Integer, String> problems = problemProjectMarker.getProblems();
 
         //If no project folder on file system
-        final String noProjectFolderProblem = problems.get(10);
+        final String noProjectFolderProblem = problems.get(NO_PROJECT_ON_FILE_SYSTEM);
         if (!isNullOrEmpty(noProjectFolderProblem)) {
             showImportDialog(project);
         }
