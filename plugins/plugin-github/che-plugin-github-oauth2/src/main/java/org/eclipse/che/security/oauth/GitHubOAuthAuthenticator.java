@@ -39,7 +39,7 @@ public class GitHubOAuthAuthenticator extends OAuthAuthenticator {
                                     @Nullable @Named("che.oauth.github.redirecturis") String[] redirectUris, //
                                     @Nullable @Named("che.oauth.github.authuri") String authUri, //
                                     @Nullable @Named("che.oauth.github.tokenuri") String tokenUri, //
-                                    @Nullable @Named("che.oauth.github.forceactivation") Boolean forceActivation) throws IOException {
+                                    @Named("che.oauth.github.forceactivation") boolean forceActivation) throws IOException {
         if (!isNullOrEmpty(clientId) //
             && !isNullOrEmpty(clientSecret) //
             && !isNullOrEmpty(authUri) //
@@ -50,9 +50,12 @@ public class GitHubOAuthAuthenticator extends OAuthAuthenticator {
             return;
         }
 
-        if (forceActivation != null && forceActivation) {
+        if (forceActivation && //
+            !isNullOrEmpty(authUri) && //
+            !isNullOrEmpty(tokenUri) && //
+            redirectUris != null && redirectUris.length != 0) {
+
             configure("NULL", "NULL", redirectUris, authUri, tokenUri, new MemoryDataStoreFactory());
-            return;
         }
     }
 
