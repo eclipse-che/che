@@ -41,8 +41,9 @@ import static org.mockito.Mockito.when;
 
 /**
  * Tests for {@link LocalGitUserResolver}
+ *
+ * @author  Max Shaposhnik
  */
-
 
 @Listeners(MockitoTestNGListener.class)
 public class LocalGitUserResolverTest {
@@ -64,9 +65,7 @@ public class LocalGitUserResolverTest {
         jsonRequest = mock(HttpJsonRequest.class, new SelfReturningAnswer());
         when(jsonRequest.request()).thenReturn(jsonResponse);
         when(requestFactory.fromUrl(anyString())).thenReturn(jsonRequest);
-
         resolver = new LocalGitUserResolver(API_URL, requestFactory);
-
     }
 
     @Test
