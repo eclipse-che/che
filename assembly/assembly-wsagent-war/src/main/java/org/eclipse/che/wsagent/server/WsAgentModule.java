@@ -58,8 +58,6 @@ public class WsAgentModule extends AbstractModule {
     protected void configure() {
         bind(ApiInfoService.class);
 
-        bind(PreferenceDao.class).to(org.eclipse.che.RemotePreferenceDao.class);
-
         bind(OAuthTokenProvider.class).to(RemoteOAuthTokenProvider.class);
         bind(SshServiceClient.class).to(HttpSshServiceClient.class);
 
