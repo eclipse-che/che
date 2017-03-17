@@ -286,9 +286,13 @@ export class WorkspaceDetailsController {
    * @param {string} namespaceId
    * @return {string}
    */
-  getNamespaceLabel(namespaceId: string): string {
+  getTeamButtonLabel(namespaceId: string): string {
     let namespace = this.getNamespace(namespaceId);
-    return namespace.label;
+    if (namespace) {
+      return namespace.label;
+    } else {
+      return namespaceId;
+    }
   }
 
   /**
