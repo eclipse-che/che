@@ -22,7 +22,6 @@ import org.eclipse.che.api.core.model.project.NewProjectConfig;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.core.model.project.type.ProjectType;
-import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.util.LineConsumerFactory;
 import org.eclipse.che.api.project.server.RegisteredProject.Problem;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
@@ -49,7 +48,6 @@ import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -65,6 +63,7 @@ import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
+import static org.eclipse.che.api.core.ErrorCodes.NOT_UPDATED_PROJECT;
 
 /**
  * Facade for all project related operations.
@@ -340,7 +339,9 @@ public class ProjectManager {
                         registeredProject = updateProject(projectConfig);
                     } catch (Exception e) {
                         registeredProject = projectRegistry.putProject(projectConfig, asFolder(pathToProject), true, false);
-                        registeredProject.getProblems().add(new Problem(14, "The project is not updated, caused by " + e.getLocalizedMessage()));
+                        final Problem problem = new Problem(NOT_UPDATED_PROJECT,
+                                                            "The project is not updated, caused by " + e.getLocalizedMessage());
+                        registeredProject.getProblems().add(problem);
                     }
                 } else {
                     registeredProject = projectRegistry.putProject(projectConfig, null, true, false);
