@@ -170,6 +170,8 @@ public class OpenShiftConnector extends DockerConnector {
     private final String          cheWorkspaceStorage;
     private final String          cheWorkspaceProjectsStorage;
     private final String          cheServerExternalAddress;
+    private final String          cheWorkspaceCpuLimit;
+    private final String          cheWorkspaceMemory;
 
     @Inject
     public OpenShiftConnector(DockerConnectorConfiguration connectorConfiguration,
@@ -183,7 +185,10 @@ public class OpenShiftConnector extends DockerConnector {
                               @Named("che.openshift.workspaces.pvc.name") String workspacesPersistentVolumeClaim,
                               @Named("che.openshift.workspaces.pvc.quantity") String workspacesPvcQuantity,
                               @Named("che.workspace.storage") String cheWorkspaceStorage,
-                              @Named("che.workspace.projects.storage") String cheWorkspaceProjectsStorage) {
+                              @Named("che.workspace.projects.storage") String cheWorkspaceProjectsStorage,
+                              @Named("che.openshift.workspace.cpu.limit") String cheWorkspaceCpuLimit,
+                              @Nullable @Named("che.openshift.workspace.memory.override") String cheWorkspaceMemory) {
+
 
         super(connectorConfiguration, connectionFactory, authResolver, dockerApiVersionPathPrefixProvider);
         this.cheServerExternalAddress = cheServerExternalAddress;
@@ -194,6 +199,8 @@ public class OpenShiftConnector extends DockerConnector {
         this.workspacesPvcQuantity = workspacesPvcQuantity;
         this.cheWorkspaceStorage = cheWorkspaceStorage;
         this.cheWorkspaceProjectsStorage = cheWorkspaceProjectsStorage;
+        this.cheWorkspaceCpuLimit = cheWorkspaceCpuLimit;
+        this.cheWorkspaceMemory = cheWorkspaceMemory;
 
         this.openShiftClient = new DefaultOpenShiftClient();
     }
@@ -252,6 +259,21 @@ public class OpenShiftConnector extends DockerConnector {
         String[] volumes = createContainerParams.getContainerConfig().getHostConfig().getBinds();
 
         Map<String, String> additionalLabels = createContainerParams.getContainerConfig().getLabels();
+
+        String memoryLimit;
+        if (!isNullOrEmpty(cheWorkspaceMemory)) {
+            LOG.info("Che property 'che.openshift.workspace.memory.override' "
+                   + "used to override workspace memory limit to {}.", cheWorkspaceMemory);
+            memoryLimit = cheWorkspaceMemory;
+        } else {
+            long memoryLimitBytes = createContainerParams.getContainerConfig().getHostConfig().getMemory();
+            memoryLimit = Long.toString(memoryLimitBytes / 1048576) + "Mi";
+            LOG.info("Creating workspace pod with memory limit of {}.", memoryLimit);
+        }
+        Map<String, Quantity> resourceLimits = new HashMap<>();
+        resourceLimits.put("memory", new Quantity(memoryLimit));
+        resourceLimits.put("cpu", new Quantity(cheWorkspaceCpuLimit));
+
         String containerID;
         try {
             createOpenShiftService(workspaceID, exposedPorts, additionalLabels);
@@ -260,16 +282,18 @@ public class OpenShiftConnector extends DockerConnector {
                                                               containerName,
                                                               exposedPorts,
                                                               envVariables,
-                                                              volumes);
+                                                              volumes,
+                                                              resourceLimits);
 
             containerID = waitAndRetrieveContainerID(deploymentName);
             if (containerID == null) {
                 throw new OpenShiftException("Failed to get the ID of the container running in the OpenShift pod");
             }
-        } catch (IOException e) {
+        } catch (IOException | KubernetesClientException e) {
             // Make sure we clean up deployment and service in case of an error -- otherwise Che can end up
             // in an inconsistent state.
             LOG.info("Error while creating Pod, removing deployment");
+            LOG.info(e.getMessage());
             String deploymentName = CHE_OPENSHIFT_RESOURCES_PREFIX + workspaceID;
             cleanUpWorkspaceResources(deploymentName);
             openShiftClient.resource(imageStreamTag).delete();
@@ -990,7 +1014,8 @@ public class OpenShiftConnector extends DockerConnector {
                                              String sanitizedContainerName,
                                              Set<String> exposedPorts,
                                              String[] envVariables,
-                                             String[] volumes) {
+                                             String[] volumes,
+                                             Map<String, Quantity> resourceLimits) {
 
         String deploymentName = CHE_OPENSHIFT_RESOURCES_PREFIX + workspaceID;
         LOG.info("Creating OpenShift deployment {}", deploymentName);
@@ -1018,7 +1043,8 @@ public class OpenShiftConnector extends DockerConnector {
                                                                       deploymentName,
                                                                       selector,
                                                                       command,
-                                                                      false);
+                                                                      false,
+                                                                      resourceLimits);
 
             try {
                 waitAndRetrieveContainerID(deploymentName);
@@ -1043,7 +1069,8 @@ public class OpenShiftConnector extends DockerConnector {
                                                        deploymentName,
                                                        selector,
                                                        null,
-                                                       true);
+                                                       true,
+                                                       resourceLimits);
         LOG.info("OpenShift deployment {} created", deploymentName);
         return deployment.getMetadata().getName();
     }
@@ -1079,7 +1106,8 @@ public class OpenShiftConnector extends DockerConnector {
                                                          Map<String,
                                                          String> selector,
                                                          String[] command,
-                                                         boolean withSubpath) {
+                                                         boolean withSubpath,
+                                                         Map<String, Quantity> resourceLimits) {
 
         Container container = new ContainerBuilder()
                                     .withName(sanitizedContainerName)
@@ -1093,6 +1121,9 @@ public class OpenShiftConnector extends DockerConnector {
                                     .withLivenessProbe(getLivenessProbeFrom(exposedPorts))
                                     .withCommand(command)
                                     .withVolumeMounts(getVolumeMountsFrom(volumes, workspaceID, withSubpath))
+                                    .withNewResources()
+                                        .withLimits(resourceLimits)
+                                    .endResources()
                                     .build();
 
         PodSpec podSpec = new PodSpecBuilder()
@@ -1196,7 +1227,6 @@ public class OpenShiftConnector extends DockerConnector {
         // HostConfig
         HostConfig hostConfig = new HostConfig();
         hostConfig.setBinds(new String[0]);
-        hostConfig.setMemory(imageInfo.getConfig().getMemory());
 
         // Env vars
         List<String> imageEnv = Arrays.asList(imageContainerConfig.getEnv());
