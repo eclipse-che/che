@@ -41,7 +41,8 @@
                 <g:Label ui:field="title" addStyleNames="{resources.editorCss.sectionLabel} {style.title}"/>
                 <g:Hyperlink ui:field="exploreMacrosLink"
                              text="{messages.pageWithTextEditorMacros}"
-                             addStyleNames="{style.link}"/>
+                             addStyleNames="{style.link}"
+                             debugId="link-explore_macros"/>
             </g:FlowPanel>
         </g:north>
         <g:center>

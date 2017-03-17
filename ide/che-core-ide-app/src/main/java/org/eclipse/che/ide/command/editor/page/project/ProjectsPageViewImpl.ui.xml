@@ -34,7 +34,7 @@
         }
     </ui:style>
 
-    <g:FlowPanel width="100%" ui:field="mainPanel" addStyleNames="{style.table}">
+    <g:FlowPanel width="100%" ui:field="mainPanel" addStyleNames="{style.table}" debugId="command_editor-projects">
         <g:FlowPanel addStyleNames="{style.table-header}">
             <g:Label text="{messages.pageProjectsTableHeaderProjectLabel}" addStyleNames="{style.column-header}"/>
             <g:Label text="{messages.pageProjectsTableHeaderApplicableLabel}" addStyleNames="{style.column-header}"/>

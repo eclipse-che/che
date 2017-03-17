@@ -88,6 +88,8 @@ public class GoalButtonFactory {
 
         button.addStyleName(resources.commandToolbarCss().toolbarButton());
 
+        button.ensureDebugId("command_toolbar-button_" + goal.getId());
+
         return button;
     }
 

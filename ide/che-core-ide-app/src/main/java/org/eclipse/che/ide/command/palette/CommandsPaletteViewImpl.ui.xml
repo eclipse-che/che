@@ -35,9 +35,12 @@
         }
     </ui:style>
 
-    <g:DockLayoutPanel unit="PX" width="300px" height="300px">
+    <g:DockLayoutPanel unit="PX" width="300px" height="300px" debugId="commands_palette">
         <g:north size="25">
-            <g:TextBox width="87%" ui:field="filterField" addStyleNames="{res.commandsPaletteCss.filterField}"/>
+            <g:TextBox width="87%"
+                       ui:field="filterField"
+                       addStyleNames="{res.commandsPaletteCss.filterField}"
+                       debugId="commands_palette-filter"/>
         </g:north>
         <g:center>
             <che:smartTree.Tree ui:field="tree" addStyleNames="{style.tree}"/>

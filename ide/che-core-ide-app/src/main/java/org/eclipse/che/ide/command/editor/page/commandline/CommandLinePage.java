@@ -41,6 +41,8 @@ public class CommandLinePage extends AbstractPageWithTextEditor {
               macroChooser,
               messages.pageCommandLineTitle(),
               editorConfiguration);
+
+        view.asWidget().getElement().setId("command_editor-command_line");
     }
 
     @Override

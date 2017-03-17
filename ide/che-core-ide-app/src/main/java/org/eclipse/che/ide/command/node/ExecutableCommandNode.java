@@ -20,8 +20,6 @@ import org.eclipse.che.ide.command.CommandUtils;
 /**
  * Extension of {@link AbstractCommandNode} that can execute
  * a command when performing an action is requested.
- *
- * @author Artem Zatsarynnyi
  */
 public class ExecutableCommandNode extends AbstractCommandNode implements HasAction {
 

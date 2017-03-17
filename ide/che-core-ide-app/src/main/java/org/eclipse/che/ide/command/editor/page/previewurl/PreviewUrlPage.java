@@ -43,6 +43,8 @@ public class PreviewUrlPage extends AbstractPageWithTextEditor {
               macroChooser,
               messages.pagePreviewUrlTitle(),
               editorConfiguration);
+
+        view.asWidget().getElement().setId("command_editor-preview_url");
     }
 
     @Override

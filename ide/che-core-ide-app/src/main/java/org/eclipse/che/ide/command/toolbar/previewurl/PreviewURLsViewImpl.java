@@ -39,6 +39,7 @@ public class PreviewURLsViewImpl implements PreviewURLsView {
 
         dropdownList = new DropdownList(HEADER_WIDGET);
         dropdownList.setWidth("43px");
+        dropdownList.ensureDebugId("dropdown-preview_url");
         dropdownList.setSelectionHandler(item -> {
             for (Entry<String, BaseListItem<String>> entry : listItems.entrySet()) {
                 if (item.equals(entry.getValue())) {

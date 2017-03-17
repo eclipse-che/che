@@ -96,6 +96,8 @@ class OpenCommandsPaletteButton extends MenuPopupButton {
                 Tooltip.create((Element)OpenCommandsPaletteButton.this.getElement(), BOTTOM, MIDDLE, divElement);
             }
         }.schedule(1000);
+
+        ensureDebugId("button-open_command_palette");
     }
 
     private SpanElement getHotKey(Action action) {

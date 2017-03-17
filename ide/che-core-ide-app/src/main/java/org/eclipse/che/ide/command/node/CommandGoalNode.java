@@ -25,11 +25,7 @@ import org.vectomatic.dom.svg.ui.SVGResource;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Tree node that represents {@link CommandGoal}.
- *
- * @author Artem Zatsarynnyi
- */
+/** Tree node that represents {@link CommandGoal}. */
 public class CommandGoalNode extends SyntheticNode<CommandGoal> {
 
     private final List<? extends AbstractCommandNode> commands;

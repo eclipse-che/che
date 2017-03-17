@@ -15,11 +15,7 @@ import org.eclipse.che.ide.api.command.CommandImpl;
 
 import java.util.List;
 
-/**
- * Factory for different command tree nodes.
- *
- * @author Artem Zatsarynnyi
- */
+/** Factory for different command tree nodes. */
 public interface NodeFactory {
 
     CommandGoalNode newCommandGoalNode(CommandGoal data, List<? extends AbstractCommandNode> commands);

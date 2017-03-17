@@ -22,11 +22,7 @@ import org.eclipse.che.ide.command.CommandUtils;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
 
-/**
- * Extension of {@link AbstractCommandNode} that also acts as a {@link VirtualFile} for using it in editor.
- *
- * @author Artem Zatsarynnyi
- */
+/** Extension of {@link AbstractCommandNode} that also acts as a {@link VirtualFile} for using it in editor. */
 public class CommandFileNode extends AbstractCommandNode implements HasAction, VirtualFile {
 
     /** Extension for the file type that represents a command. */

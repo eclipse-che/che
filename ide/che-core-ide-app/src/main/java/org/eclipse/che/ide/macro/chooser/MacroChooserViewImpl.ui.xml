@@ -18,7 +18,7 @@
 
     <ui:with field='res' type='org.eclipse.che.ide.Resources'/>
 
-    <g:DockLayoutPanel unit="PX" width="600px" height="400px">
+    <g:DockLayoutPanel unit="PX" width="600px" height="400px" debugId="macro_chooser">
         <g:north size="30">
             <g:FlowPanel>
                 <g:TextBox ui:field="filterField" addStyleNames="{res.commandsPaletteCss.filterField}"/>
@@ -26,7 +26,7 @@
         </g:north>
         <g:center>
             <g:ScrollPanel width="99%" height="99%">
-                <c:CellTable width="100%" height="100%" ui:field="macrosTable" focus="false" debugId="macros-explorer-table"/>
+                <c:CellTable width="100%" height="100%" ui:field="macrosTable" focus="false" debugId="macros-chooser-table"/>
             </g:ScrollPanel>
         </g:center>
     </g:DockLayoutPanel>

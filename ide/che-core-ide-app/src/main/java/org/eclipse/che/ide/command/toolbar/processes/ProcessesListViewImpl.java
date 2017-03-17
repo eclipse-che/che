@@ -45,6 +45,7 @@ public class ProcessesListViewImpl implements ProcessesListView {
 
         dropdownList = new DropdownList(emptyListWidget);
         dropdownList.setWidth("100%");
+        dropdownList.ensureDebugId("dropdown-processes");
         dropdownList.syncWidths();
         dropdownList.setSelectionHandler(item -> listItems.entrySet()
                                                           .stream()

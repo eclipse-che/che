@@ -63,15 +63,23 @@ class CommandsTreeRenderer extends DefaultPresentationRenderer<Node> {
         final Element nodeContainerElement = element.getFirstChildElement();
 
         if (node instanceof CommandFileNode) {
-            renderCommandGoalNode((CommandFileNode)node, nodeContainerElement);
+            CommandFileNode commandNode = (CommandFileNode)node;
+
+            nodeContainerElement.setId("command_" + commandNode.getDisplayName());
+
+            renderCommandNode(commandNode, nodeContainerElement);
         } else if (node instanceof CommandGoalNode) {
+            CommandGoalNode goalNode = (CommandGoalNode)node;
+
+            nodeContainerElement.setId("goal_" + goalNode.getName());
+
             renderCommandGoalNode(nodeContainerElement);
         }
 
         return element;
     }
 
-    private void renderCommandGoalNode(CommandFileNode node, Element nodeContainerElement) {
+    private void renderCommandNode(CommandFileNode node, Element nodeContainerElement) {
         nodeContainerElement.addClassName(resources.commandsExplorerCss().commandNode());
 
         final Element removeCommandButton = createButton(resources.removeCommand());
@@ -96,6 +104,9 @@ class CommandsTreeRenderer extends DefaultPresentationRenderer<Node> {
         buttonsPanel.appendChild(duplicateCommandButton);
 
         nodeContainerElement.appendChild(buttonsPanel);
+
+        removeCommandButton.setId("commands_tree-button-remove");
+        duplicateCommandButton.setId("commands_tree-button-duplicate");
     }
 
     private void renderCommandGoalNode(Element nodeContainerElement) {
@@ -111,6 +122,8 @@ class CommandsTreeRenderer extends DefaultPresentationRenderer<Node> {
         });
 
         nodeContainerElement.appendChild(addCommandButton);
+
+        addCommandButton.setId("commands_tree-button-add");
     }
 
     private Element createButton(SVGResource icon) {

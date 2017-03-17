@@ -117,6 +117,8 @@ class ProcessWidget extends FlowPanel {
 
         Tooltip.create((Element)button.getElement(), BOTTOM, MIDDLE, "Stop");
 
+        button.ensureDebugId("dropdown-processes-stop");
+
         return button;
     }
 
@@ -128,6 +130,8 @@ class ProcessWidget extends FlowPanel {
         button.addClickHandler(event -> handler.onRerunProcess(process));
 
         Tooltip.create((Element)button.getElement(), BOTTOM, MIDDLE, "Re-run");
+
+        button.ensureDebugId("dropdown-processes-rerun");
 
         return button;
     }
