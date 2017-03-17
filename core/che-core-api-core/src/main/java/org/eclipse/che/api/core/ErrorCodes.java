@@ -28,4 +28,10 @@ public class ErrorCodes {
     public static final int FAILED_CHECKOUT                    = 32063;
     public static final int FAILED_CHECKOUT_WITH_START_POINT   = 32064;
     public static final int INIT_COMMIT_WAS_NOT_PERFORMED      = 32082;
+
+    public static final int NO_PROJECT_ON_FILE_SYSTEM      = 10;
+    public static final int NO_PROJECT_CONFIGURED_IN_WS    = 11;
+    public static final int PROJECT_TYPE_IS_NOT_REGISTERED = 12;
+    public static final int ATTRIBUTE_NAME_PROBLEM         = 13;
+    public static final int NOT_UPDATED_PROJECT            = 14;
 }

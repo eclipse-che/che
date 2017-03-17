@@ -47,8 +47,6 @@ public class GitModule extends AbstractModule {
         bind(TagListWriter.class);
         bind(GitWebSocketMessenger.class);
 
-        //bind(GitConnectionFactory.class).to(NativeGitConnectionFactory.class);
-
         bind(GitCheckoutDetector.class).asEagerSingleton();
     }
 }

@@ -91,6 +91,7 @@ import org.eclipse.che.ide.part.editor.actions.SwitchPreviousEditorAction;
 import org.eclipse.che.ide.part.editor.recent.ClearRecentListAction;
 import org.eclipse.che.ide.part.editor.recent.OpenRecentFilesAction;
 import org.eclipse.che.ide.part.explorer.project.TreeResourceRevealer;
+import org.eclipse.che.ide.part.explorer.project.synchronize.ProjectConfigSynchronized;
 import org.eclipse.che.ide.resources.action.CopyResourceAction;
 import org.eclipse.che.ide.resources.action.CutResourceAction;
 import org.eclipse.che.ide.resources.action.PasteResourceAction;
@@ -343,7 +344,9 @@ public class StandardComponentInitializer {
     @Named("CommandFileType")
     private FileType              commandFileType;
     @Inject
-    private WsConnectionListener  wsConnectionListener;
+    private WsConnectionListener wsConnectionListener;
+    @Inject
+    private ProjectConfigSynchronized projectConfigSynchronized;
     @Inject
     private TreeResourceRevealer  treeResourceRevealer; //just to work with it
     // do not remove the injections below
