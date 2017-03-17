@@ -10,15 +10,21 @@
  *******************************************************************************/
 package org.eclipse.che.api.git;
 
+import org.eclipse.che.api.core.BadRequestException;
+import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.ForbiddenException;
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.UnauthorizedException;
+import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.git.shared.GitUser;
-import org.eclipse.che.api.user.server.spi.PreferenceDao;
-import org.eclipse.che.commons.env.EnvironmentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
+import java.io.IOException;
 import java.util.Map;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -34,11 +40,13 @@ public class LocalGitUserResolver implements GitUserResolver {
 
     private static final Logger LOG = LoggerFactory.getLogger(LocalGitUserResolver.class);
 
-    private final PreferenceDao preferenceDao;
+    private final String                 preferencessUrl;
+    private final HttpJsonRequestFactory requestFactory;
 
     @Inject
-    public LocalGitUserResolver(PreferenceDao preferenceDao) {
-        this.preferenceDao = preferenceDao;
+    public LocalGitUserResolver(@Named("che.api") String apiUrl, HttpJsonRequestFactory requestFactory) {
+        this.preferencessUrl = apiUrl + "/preferences";
+        this.requestFactory = requestFactory;
     }
 
     @Override
@@ -46,11 +54,15 @@ public class LocalGitUserResolver implements GitUserResolver {
         String name = null;
         String email = null;
         try {
-            Map<String, String> preferences = preferenceDao.getPreferences(EnvironmentContext.getCurrent().getSubject().getUserId(),
-                                                                           "git.committer.\\w+");
+            Map<String, String> preferences = requestFactory.fromUrl(preferencessUrl)
+                                                            .useGetMethod()
+                                                            .addQueryParam("filter", "git.committer.\\w+")
+                                                            .request()
+                                                            .asProperties();
             name = preferences.get("git.committer.name");
             email = preferences.get("git.committer.email");
-        } catch (ServerException e) {
+        } catch (ServerException | IOException |
+                 ForbiddenException | BadRequestException | ConflictException | NotFoundException | UnauthorizedException e) {
             LOG.error(e.getLocalizedMessage(), e);
         }
         GitUser gitUser = newDto(GitUser.class);
