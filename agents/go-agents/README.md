@@ -11,7 +11,7 @@ Requirements
 
 Docs
 ---
-- jsonrpc2.0 based [Webscoket API](docs/ws_api.md)
+- jsonrpc2.0 based [Websocket API](docs/ws_api.md)
 - jsonrpc2.0 based [Events](docs/events.md)
 - [REST API](docs/rest_api.md)
 
